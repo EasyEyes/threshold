@@ -10,6 +10,10 @@ const { Scheduler } = util;
 const { abs, sin, cos, PI: pi, sqrt } = Math;
 const { round } = util;
 
+let frameDur, fileClock, filterClock, thisLoopNumber, trialClock, key_resp
+let flanker1, flanker2, target, globalClock, routineTimer, frameN, continueRoutine
+let fileComponents, blockCount, blocks, currentLoop
+let t
 
 // store info about the experiment session:
 let expName = 'crowding';  // from the Builder filename that created this script
@@ -351,7 +355,7 @@ function trialRoutineBegin(snapshot) {
     // update component parameters for each repeat
     
     
-    import {choice} from 'random';
+    // import {choice} from 'random';
     var heightPx, levelLeft, levelRight, listXY, pos1XYDeg, pos1XYPx, pos2XYDeg, pos2XYPx, pos3XYDeg, pos3XYPx, spacingDeg, spacingPx;
     spacingDeg = (Math.pow(10, level) - 0.15);
     if ((orientation === "radial")) {
