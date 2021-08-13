@@ -4,6 +4,9 @@ conditions/
 crowding*.py
 .DS_Store
 
+~$EasyEyesGlossary.xlsx
+experiment_t.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

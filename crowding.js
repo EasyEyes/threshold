@@ -10,10 +10,6 @@ const { Scheduler } = util;
 const { abs, sin, cos, PI: pi, sqrt } = Math;
 const { round } = util;
 
-let frameDur, fileClock, filterClock, thisLoopNumber, trialClock, key_resp
-let flanker1, flanker2, target, globalClock, routineTimer, frameN, continueRoutine
-let fileComponents, blockCount, blocks, currentLoop
-let t
 
 // store info about the experiment session:
 let expName = 'crowding';  // from the Builder filename that created this script
@@ -245,7 +241,7 @@ function trialsLoopBegin(trialsLoopScheduler, snapshot) {
       psychoJS: psychoJS,
       name: 'trials',
       varName: 'trialsVal',
-      nTrials: trialsDesired,
+      nTrials: conditionTrials,
       conditions: trialsConditions,
       method: TrialHandler.Method.FULLRANDOM
     });
@@ -355,7 +351,7 @@ function trialRoutineBegin(snapshot) {
     // update component parameters for each repeat
     
     
-    // import {choice} from 'random';
+    import {choice} from 'random';
     var heightPx, levelLeft, levelRight, listXY, pos1XYDeg, pos1XYPx, pos2XYDeg, pos2XYPx, pos3XYDeg, pos3XYPx, spacingDeg, spacingPx;
     spacingDeg = (Math.pow(10, level) - 0.15);
     if ((orientation === "radial")) {
@@ -390,16 +386,16 @@ function trialRoutineBegin(snapshot) {
     key_resp.rt = undefined;
     _key_resp_allKeys = [];
     flanker1.setPos(pos1XYPx);
-    flanker1.setText(firstflanker);
-    flanker1.setFont(newFont);
+    flanker1.setText(firstFlanker);
+    flanker1.setFont(targetFont);
     flanker1.setHeight(heightPx);
     target.setPos(pos2XYPx);
-    target.setText(targetstim);
-    target.setFont(newFont);
+    target.setText(targetStim);
+    target.setFont(targetFont);
     target.setHeight(heightPx);
     flanker2.setPos(pos3XYPx);
-    flanker2.setText(secondflanker);
-    flanker2.setFont(newFont);
+    flanker2.setText(secondFlanker);
+    flanker2.setFont(targetFont);
     flanker2.setHeight(heightPx);
     // keep track of which components have finished
     trialComponents = [];
@@ -436,13 +432,13 @@ function trialRoutineEachFrame() {
     }
 
     if (key_resp.status === PsychoJS.Status.STARTED) {
-      let theseKeys = key_resp.getKeys({keyList: ['d', 'h', 'k', 'n', 'o', 'r', 'v', 'z', 's'], waitRelease: false});
+      let theseKeys = key_resp.getKeys({keyList: ['a', 'c', 'e', 'n', 'o', 'r', 's', 'u', 'v', 'x', 'z'], waitRelease: false});
       _key_resp_allKeys = _key_resp_allKeys.concat(theseKeys);
       if (_key_resp_allKeys.length > 0) {
         key_resp.keys = _key_resp_allKeys[_key_resp_allKeys.length - 1].name;  // just the last key pressed
         key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
         // was this correct?
-        if (key_resp.keys == targetstim.lower()) {
+        if (key_resp.keys == correctAns) {
             key_resp.corr = 1;
         } else {
             key_resp.corr = 0;
@@ -462,7 +458,7 @@ function trialRoutineEachFrame() {
       flanker1.setAutoDraw(true);
     }
 
-    frameRemains = 0.5 + durationS - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
+    frameRemains = 0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
     if (flanker1.status === PsychoJS.Status.STARTED && t >= frameRemains) {
       flanker1.setAutoDraw(false);
     }
@@ -476,7 +472,7 @@ function trialRoutineEachFrame() {
       target.setAutoDraw(true);
     }
 
-    frameRemains = 0.5 + durationS - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
+    frameRemains = 0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
     if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
       target.setAutoDraw(false);
     }
@@ -490,7 +486,7 @@ function trialRoutineEachFrame() {
       flanker2.setAutoDraw(true);
     }
 
-    frameRemains = 0.5 + durationS - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
+    frameRemains = 0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
     if (flanker2.status === PsychoJS.Status.STARTED && t >= frameRemains) {
       flanker2.setAutoDraw(false);
     }
@@ -530,7 +526,7 @@ function trialRoutineEnd() {
     }
     // was no response the correct answer?!
     if (key_resp.keys === undefined) {
-      if (['None','none',undefined].includes(targetstim.lower())) {
+      if (['None','none',undefined].includes(correctAns)) {
          key_resp.corr = 1;  // correct non-response
       } else {
          key_resp.corr = 0;  // failed to respond (incorrectly)
