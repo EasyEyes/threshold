@@ -91,3 +91,5 @@ x   thresholdProbability
 x   viewingDistanceDesiredCm
     wirelessKeyboardNeededYes
 ```
+
+`x` means working.
