@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-import { core, data, sound, util, visual } from './lib/psychojs-2021.3.0.js';
+import { core, data, sound, util, visual } from './lib/psychojs-2021.3.0.js'
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
