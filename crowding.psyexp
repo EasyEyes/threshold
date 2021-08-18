@@ -61,7 +61,7 @@
         <Param name="Begin Experiment" updates="constant" val="&amp;#10;" valType="extendedCode"/>
         <Param name="Begin JS Experiment" updates="constant" val="" valType="extendedCode"/>
         <Param name="Begin JS Routine" updates="constant" val="&amp;#10;" valType="extendedCode"/>
-        <Param name="Begin Routine" updates="constant" val="windowWidthCm = 60&amp;#10;windowWidthPx = win.size[0]&amp;#10;pxPerCm = windowWidthPx / windowWidthCm&amp;#10;viewingDistanceDesiredCm = condition['viewingDistanceDesiredCm']&amp;#10;fixationXYPx = [0, 0]&amp;#10;&amp;#10;block = condition['blockOrder']&amp;#10;&amp;#10;spacingDirection = condition['spacingDirection']&amp;#10;targetFont = condition['targetFont']&amp;#10;&amp;#10;targetAlphabet = list(condition['targetAlphabet'])&amp;#10;validAns = [x.lower() for x in targetAlphabet]&amp;#10;&amp;#10;conditionTrials = condition['conditionTrials']&amp;#10;targetDurationSec = condition['targetDurationSec']&amp;#10;&amp;#10;fixationSizeNow = 30 if condition['fixationYes'] else 0&amp;#10;targetMinimumPix = condition['targetMinimumPix']&amp;#10;spacingOverSizeRatio = condition['spacingOverSizeRatio']&amp;#10;&amp;#10;targetEccentricityXDeg = condition['targetEccentricityXDeg']&amp;#10;targetEccentricityYDeg = condition['targetEccentricityYDeg']&amp;#10;targetEccentricityXYDeg = [targetEccentricityXDeg, targetEccentricityYDeg]&amp;#10;&amp;#10;trackGazeYes = condition['trackGazeYes']&amp;#10;trackHeadYes = condition['trackHeadYes']&amp;#10;wirelessKeyboardNeededYes = condition['wirelessKeyboardNeededYes']&amp;#10;" valType="extendedCode"/>
+        <Param name="Begin Routine" updates="constant" val="windowWidthCm = 60&amp;#10;windowWidthPx = win.size[0]&amp;#10;pxPerCm = windowWidthPx / windowWidthCm&amp;#10;viewingDistanceDesiredCm = condition['viewingDistanceDesiredCm']&amp;#10;fixationXYPx = [0, 0]&amp;#10;&amp;#10;block = condition['blockOrder']&amp;#10;&amp;#10;spacingDirection = condition['spacingDirection']&amp;#10;targetFont = condition['targetFont']&amp;#10;&amp;#10;targetAlphabet = list(condition['targetAlphabet'])&amp;#10;validAns = [x.lower() for x in targetAlphabet]&amp;#10;&amp;#10;conditionTrials = condition['conditionTrials']&amp;#10;targetDurationSec = condition['targetDurationSec']&amp;#10;&amp;#10;fixationSizeNow = 30 if condition['markTheFixationYes'] else 0&amp;#10;targetMinimumPix = condition['targetMinimumPix']&amp;#10;spacingOverSizeRatio = condition['spacingOverSizeRatio']&amp;#10;&amp;#10;targetEccentricityXDeg = condition['targetEccentricityXDeg']&amp;#10;targetEccentricityYDeg = condition['targetEccentricityYDeg']&amp;#10;targetEccentricityXYDeg = [targetEccentricityXDeg, targetEccentricityYDeg]&amp;#10;&amp;#10;trackGazeYes = condition['trackGazeYes']&amp;#10;trackHeadYes = condition['trackHeadYes']&amp;#10;wirelessKeyboardNeededYes = condition['wirelessKeyboardNeededYes']&amp;#10;" valType="extendedCode"/>
         <Param name="Code Type" updates="None" val="Py" valType="str"/>
         <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
         <Param name="Each JS Frame" updates="constant" val="" valType="extendedCode"/>
@@ -259,36 +259,16 @@
         <Param name="name" updates="None" val="begin" valType="code"/>
       </CodeComponent>
     </Routine>
-    <Routine name="file">
-      <CodeComponent name="preprocess">
-        <Param name="Before Experiment" updates="constant" val="# https://stackoverflow.com/a/58267676/11069914&amp;#10;import pandas as pd&amp;#10;import numpy as np&amp;#10;from csv import reader, writer &amp;#10;&amp;#10;# Transpose&amp;#10;&amp;#10;with open('experiment.csv', encoding='utf-8') as f, open('experiment_t.csv', 'w', encoding='utf-8') as fw: &amp;#10;    writer(fw, delimiter=',').writerows(zip(*reader(f, delimiter=',')))&amp;#10;&amp;#10;# Make output directory&amp;#10;&amp;#10;if not os.path.exists('./conditions'):&amp;#10;    os.makedirs('./conditions')&amp;#10;&amp;#10;df = pd.read_csv('experiment_t.csv')&amp;#10;print('*********************************')&amp;#10;&amp;#10;# Check parameter spelling&amp;#10;# TODO&amp;#10;&amp;#10;# Translate researcher configuration to PsychoPy default&amp;#10;df_keys = df.keys()&amp;#10;&amp;#10;df.rename(columns={&amp;#10;    'conditionName': 'label',&amp;#10;    'thresholdGuess': 'startVal',&amp;#10;    'thresholdBeta': 'beta',&amp;#10;    'thresholdDelta': 'delta',&amp;#10;    'thresholdProbability': 'pThreshold'&amp;#10;}, inplace=True)&amp;#10;if 'thresholdGuessLogSd' in df_keys:&amp;#10;    # Special case&amp;#10;    df['startValSd'] = np.log(df['thresholdGuessLogSd'])&amp;#10;&amp;#10;# Export separate files&amp;#10;&amp;#10;dataBlockRange = df['blockOrder'].unique()&amp;#10;dataBlockRange = dataBlockRange.tolist()&amp;#10;&amp;#10;for i, value in enumerate(dataBlockRange):&amp;#10;    df[df['blockOrder'] == value].to_csv('./conditions/block_' + str(value) + '.csv', index = False)&amp;#10;    &amp;#10;blockCount = len(dataBlockRange)&amp;#10;" valType="extendedCode"/>
-        <Param name="Before JS Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin JS Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin JS Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Code Type" updates="None" val="Py" valType="str"/>
-        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Each JS Frame" updates="constant" val="" valType="extendedCode"/>
-        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="End JS Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="End JS Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="disabled" updates="None" val="False" valType="bool"/>
-        <Param name="name" updates="None" val="preprocess" valType="code"/>
-      </CodeComponent>
-    </Routine>
   </Routines>
   <Flow>
-    <Routine name="file"/>
     <LoopInitiator loopType="TrialHandler" name="blocks">
       <Param name="Selected rows" updates="None" val="" valType="str"/>
-      <Param name="conditions" updates="None" val="None" valType="str"/>
-      <Param name="conditionsFile" updates="None" val="" valType="file"/>
+      <Param name="conditions" updates="None" val="[OrderedDict([('block', 0)]), OrderedDict([('block', 1)])]" valType="str"/>
+      <Param name="conditionsFile" updates="None" val="conditions/blockCount.csv" valType="file"/>
       <Param name="endPoints" updates="None" val="[0, 1]" valType="num"/>
       <Param name="isTrials" updates="None" val="True" valType="bool"/>
       <Param name="loopType" updates="None" val="sequential" valType="str"/>
-      <Param name="nReps" updates="None" val="blockCount" valType="num"/>
+      <Param name="nReps" updates="None" val="1" valType="num"/>
       <Param name="name" updates="None" val="blocks" valType="code"/>
       <Param name="random seed" updates="None" val="" valType="code"/>
     </LoopInitiator>
