@@ -34,4 +34,4 @@ thresholdProbability,0.7,0.7,0.7,0.7
 trackGazeYes,TRUE,TRUE,TRUE,TRUE
 trackHeadYes,TRUE,TRUE,TRUE,TRUE
 viewingDistanceDesiredCm,40,40,40,40
-,,,,
+wirelessKeyboardNeededYes,FALSE,FALSE,FALSE,FALSE

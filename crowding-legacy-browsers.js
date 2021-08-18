@@ -33,9 +33,6 @@ psychoJS.scheduleCondition(function() { return (psychoJS.gui.dialogComponent.but
 // flowScheduler gets run if the participants presses OK
 flowScheduler.add(updateInfo); // add timeStamp
 flowScheduler.add(experimentInit);
-flowScheduler.add(fileRoutineBegin());
-flowScheduler.add(fileRoutineEachFrame());
-flowScheduler.add(fileRoutineEnd());
 const blocksLoopScheduler = new Scheduler(psychoJS);
 flowScheduler.add(blocksLoopBegin(blocksLoopScheduler));
 flowScheduler.add(blocksLoopScheduler);
@@ -49,6 +46,7 @@ psychoJS.start({
   expName: expName,
   expInfo: expInfo,
   resources: [
+    {'name': 'conditions/blockCount.csv', 'path': 'conditions/blockCount.csv'}
   ]
 });
 
@@ -74,8 +72,6 @@ async function updateInfo() {
 }
 
 async function experimentInit() {
-  // Initialize components for Routine "file"
-  fileClock = new util.Clock();
   // Initialize components for Routine "filter"
   filterClock = new util.Clock();
   thisLoopNumber = 0;
@@ -124,75 +120,6 @@ async function experimentInit() {
   return Scheduler.Event.NEXT;
 }
 
-function fileRoutineBegin(snapshot) {
-  return async function () {
-    TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-    
-    //------Prepare to start Routine 'file'-------
-    t = 0;
-    fileClock.reset(); // clock
-    frameN = -1;
-    continueRoutine = true; // until we're told otherwise
-    // update component parameters for each repeat
-    // keep track of which components have finished
-    fileComponents = [];
-    
-    fileComponents.forEach( function(thisComponent) {
-      if ('status' in thisComponent)
-        thisComponent.status = PsychoJS.Status.NOT_STARTED;
-       });
-    return Scheduler.Event.NEXT;
-  }
-}
-
-function fileRoutineEachFrame() {
-  return async function () {
-    //------Loop for each frame of Routine 'file'-------
-    // get current time
-    t = fileClock.getTime();
-    frameN = frameN + 1;// number of completed frames (so 0 is the first frame)
-    // update/draw components on each frame
-    // check for quit (typically the Esc key)
-    if (psychoJS.experiment.experimentEnded || psychoJS.eventManager.getKeys({keyList:['escape']}).length > 0) {
-      return quitPsychoJS('The [Escape] key was pressed. Goodbye!', false);
-    }
-    
-    // check if the Routine should terminate
-    if (!continueRoutine) {  // a component has requested a forced-end of Routine
-      return Scheduler.Event.NEXT;
-    }
-    
-    continueRoutine = false;  // reverts to True if at least one component still running
-    fileComponents.forEach( function(thisComponent) {
-      if ('status' in thisComponent && thisComponent.status !== PsychoJS.Status.FINISHED) {
-        continueRoutine = true;
-      }
-    });
-    
-    // refresh the screen if continuing
-    if (continueRoutine) {
-      return Scheduler.Event.FLIP_REPEAT;
-    } else {
-      return Scheduler.Event.NEXT;
-    }
-  };
-}
-
-function fileRoutineEnd() {
-  return async function () {
-    //------Ending Routine 'file'-------
-    fileComponents.forEach( function(thisComponent) {
-      if (typeof thisComponent.setAutoDraw === 'function') {
-        thisComponent.setAutoDraw(false);
-      }
-    });
-    // the Routine "file" was not non-slip safe, so reset the non-slip timer
-    routineTimer.reset();
-    
-    return Scheduler.Event.NEXT;
-  };
-}
-
 function blocksLoopBegin(blocksLoopScheduler, snapshot) {
   return async function() {
     TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
@@ -200,9 +127,9 @@ function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     // set up handler to look after randomisation of conditions etc
     blocks = new TrialHandler({
       psychoJS: psychoJS,
-      nReps: blockCount, method: TrialHandler.Method.SEQUENTIAL,
+      nReps: 1, method: TrialHandler.Method.SEQUENTIAL,
       extraInfo: expInfo, originPath: undefined,
-      trialList: undefined,
+      trialList: 'conditions/blockCount.csv',
       seed: undefined, name: 'blocks'
     });
     psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
@@ -582,8 +509,6 @@ async function quitPsychoJS(message, isCompleted) {
   if (psychoJS.experiment.isEntryEmpty()) {
     psychoJS.experiment.nextEntry();
   }
-  
-  
   
   
   
