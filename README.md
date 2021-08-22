@@ -2,22 +2,25 @@
 
 A PsychoPy (soon PsychoJS) implementation of crowding threshold measurement experiment.
 
-![Process](./media/process.png)
-
 ## Example CSV File
 
 ```
+about,Effect of font on crowding.,Effect of font on crowding.,Effect of font on crowding.,Effect of font on crowding.
+aboutDateCreated,8/1/21,8/1/21,8/1/21,8/1/21
+aboutDateModified,8/15/21,8/15/21,8/15/21,8/15/21
+author,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli
+authorEmail,dp3@nyu.edu,dp3@nyu.edu,dp3@nyu.edu,dp3@nyu.edu
 blockOrder,1,1,2,2
 conditionName,crowding,crowding,crowding,crowding
 conditionTrials,40,40,40,40
-fixationStrokeLengthDeg,1,1,1,1
-fixationStrokeThicknessDeg,0.03,0.03,0.03,0.03
-fixationYes,TRUE,TRUE,TRUE,TRUE
+markingFixationStrokeLengthDeg,1,1,1,1
+markingFixationStrokeThicknessDeg,0.03,0.03,0.03,0.03
+markTheFixationYes,TRUE,TRUE,TRUE,TRUE
 showAlphabetWhere,bottom,bottom,bottom,bottom
-showCounterWhere,bottomRight,bottomRight,bottomRight,none
-showInstructionsWhere,topLeft,topLeft,topLeft,none
+showCounterWhere,bottomRight,bottomRight,bottomRight,bottomRight
+showInstructionsWhere,topLeft,topLeft,topLeft,topLeft
 simulateParticipantYes,FALSE,FALSE,FALSE,FALSE
-simulationModel,blind,blind,blind,ideal
+simulationModel,blind,blind,blind,blind
 spacingDirection,radial,radial,radial,radial
 spacingOverSizeRatio,1.4,1.4,1.4,1.4
 targetAlphabet,DHKNORSVZ,DHKNORSVZ,acenorsuvxz,acenorsuvxz
@@ -56,6 +59,8 @@ A **CSV file** named `experiment.csv` must be placed at the same directory as th
 - [ ] Check parameter spelling and give fatal error when detect any.
 
 Working parameters:
+
+(Needs to be updated!)
 
 ```
 x   blockOrder
