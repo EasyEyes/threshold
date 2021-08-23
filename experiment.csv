@@ -4,8 +4,8 @@ aboutDateModified,8/15/21,8/15/21,8/15/21,8/15/21
 author,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli
 authorEmail,dp3@nyu.edu,dp3@nyu.edu,dp3@nyu.edu,dp3@nyu.edu
 blockOrder,1,1,2,2
-conditionName,crowding,crowding,crowding,crowding
-conditionTrials,4,4,4,4
+conditionName,right,left,right,left
+conditionTrials,40,40,40,40
 markingFixationStrokeLengthDeg,1,1,1,1
 markingFixationStrokeThicknessDeg,0.03,0.03,0.03,0.03
 markTheFixationYes,TRUE,TRUE,TRUE,TRUE

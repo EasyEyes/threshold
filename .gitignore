@@ -3,9 +3,12 @@ conditions/
 *_lastrun.py
 crowding*.py
 .DS_Store
+.vscode
 
-~$EasyEyesGlossary.xlsx
+*~$EasyEyesGlossary.xlsx
+*~$EasyEyesManual.xlsx
 experiment_t.csv
+t_experiment.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
