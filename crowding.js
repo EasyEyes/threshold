@@ -43,7 +43,6 @@ const loadBlockFiles = (count, callback) => {
   Papa.parse(`conditions/block_${count}.csv`, {
     download: true,
     complete: function (results) {
-      console.log(results);
       blockFiles[count] = results.data;
       loadBlockFiles(count - 1, callback);
     },
