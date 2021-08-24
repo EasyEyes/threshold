@@ -537,7 +537,10 @@ const experiment = (blockCount) => {
 
       // TODO Based on display size
       // Set maximum level to fully display all text
-      level = Math.min(level, 10);
+      level = Math.min(level, 1);
+      // TODO set QUEST
+      // !
+      // !
 
       //------Prepare to start Routine 'trial'-------
       t = 0;
