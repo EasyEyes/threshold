@@ -22,6 +22,8 @@ let correctAns;
 let expName = "crowding"; // from the Builder filename that created this script
 let expInfo = { participant: "", session: "001" };
 
+const rc = RemoteCalibrator;
+
 ////
 // blockCount is just a file telling the program how many blocks in total
 Papa.parse("conditions/blockCount.csv", {
@@ -29,7 +31,37 @@ Papa.parse("conditions/blockCount.csv", {
   complete: function (results) {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
-      experiment(blockCount);
+      // ! RC
+      rc.init();
+      rc.panel(
+        [
+          {
+            name: "screenSize",
+          },
+          {
+            name: "trackDistance",
+            options: {
+              nearPoint: false,
+              showVideo: false,
+            },
+          },
+          {
+            name: "trackGaze",
+            options: {
+              showGazer: false,
+              showVideo: false,
+              calibrationCount: 1,
+            },
+          },
+        ],
+        "body",
+        {},
+        () => {
+          rc.removePanel();
+          // ! Start actual experiment
+          experiment(blockCount);
+        }
+      );
     });
   },
 });
@@ -105,6 +137,8 @@ const experiment = (blockCount) => {
 
   // quit if user presses Cancel in dialog box:
   dialogCancelScheduler.add(quitPsychoJS, "", false);
+
+  expInfo["participant"] = rc.id.value;
 
   psychoJS.start({
     expName: expName,
