@@ -22,6 +22,8 @@ let correctAns;
 let expName = "crowding"; // from the Builder filename that created this script
 let expInfo = { participant: "", session: "001" };
 
+const rc = RemoteCalibrator;
+
 ////
 // blockCount is just a file telling the program how many blocks in total
 Papa.parse("conditions/blockCount.csv", {
@@ -93,6 +95,7 @@ const experiment = (blockCount) => {
 
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(updateInfo); // add timeStamp
+  flowScheduler.add(calibrate); // ! RC
   flowScheduler.add(experimentInit);
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
@@ -134,6 +137,44 @@ const experiment = (blockCount) => {
     util.addInfoFromUrl(expInfo);
 
     return Scheduler.Event.NEXT;
+  }
+
+  // ! RC
+  async function calibrate() {
+    rc.init({
+      id: `${expInfo["participant"]}_${expInfo["session"]}`,
+    });
+    return rc
+      .panel(
+        [
+          {
+            name: "screenSize",
+          },
+          {
+            name: "trackDistance",
+            options: {
+              nearPoint: false,
+              showVideo: false,
+            },
+          },
+          {
+            name: "trackGaze",
+            options: {
+              showVideo: false,
+              calibrationCount: 1,
+            },
+          },
+        ],
+        "body",
+        {},
+        () => {
+          rc.removePanel();
+        },
+        Scheduler.Event.NEXT
+      )
+      .then((resolveOnFinish) => {
+        return resolveOnFinish;
+      });
   }
 
   var fileClock;
