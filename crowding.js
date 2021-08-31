@@ -31,7 +31,37 @@ Papa.parse("conditions/blockCount.csv", {
   complete: function (results) {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
-      experiment(blockCount);
+      // ! RC
+      rc.init();
+      rc.panel(
+        [
+          {
+            name: "screenSize",
+          },
+          {
+            name: "trackDistance",
+            options: {
+              nearPoint: false,
+              showVideo: false,
+            },
+          },
+          {
+            name: "trackGaze",
+            options: {
+              showGazer: false,
+              showVideo: false,
+              calibrationCount: 1,
+            },
+          },
+        ],
+        "body",
+        {},
+        () => {
+          rc.removePanel();
+          // ! Start actual experiment
+          experiment(blockCount);
+        }
+      );
     });
   },
 });
@@ -95,7 +125,6 @@ const experiment = (blockCount) => {
 
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(updateInfo); // add timeStamp
-  flowScheduler.add(calibrate); // ! RC
   flowScheduler.add(experimentInit);
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
@@ -108,6 +137,8 @@ const experiment = (blockCount) => {
 
   // quit if user presses Cancel in dialog box:
   dialogCancelScheduler.add(quitPsychoJS, "", false);
+
+  expInfo["participant"] = rc.id.value;
 
   psychoJS.start({
     expName: expName,
@@ -137,44 +168,6 @@ const experiment = (blockCount) => {
     util.addInfoFromUrl(expInfo);
 
     return Scheduler.Event.NEXT;
-  }
-
-  // ! RC
-  async function calibrate() {
-    rc.init({
-      id: `${expInfo["participant"]}_${expInfo["session"]}`,
-    });
-    return rc
-      .panel(
-        [
-          {
-            name: "screenSize",
-          },
-          {
-            name: "trackDistance",
-            options: {
-              nearPoint: false,
-              showVideo: false,
-            },
-          },
-          {
-            name: "trackGaze",
-            options: {
-              showVideo: false,
-              calibrationCount: 1,
-            },
-          },
-        ],
-        "body",
-        {},
-        () => {
-          rc.removePanel();
-        },
-        Scheduler.Event.NEXT
-      )
-      .then((resolveOnFinish) => {
-        return resolveOnFinish;
-      });
   }
 
   var fileClock;
