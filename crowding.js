@@ -70,7 +70,7 @@ const experiment = (blockCount) => {
   psychoJS.openWindow({
     fullscr: true,
     color: new util.Color([0, 0, 0]),
-    units: "height",
+    units: "height",  // TODO change to pix
     waitBlanking: true,
   });
   // schedule the experiment:
@@ -141,6 +141,7 @@ const experiment = (blockCount) => {
   var thisLoopNumber;
   var thisConditionsFile;
   var trialClock;
+  var targetBoundingPoly;
   var key_resp;
   var fixation; ////
   var flanker1;
@@ -158,6 +159,17 @@ const experiment = (blockCount) => {
 
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
+
+    targetBoundingPoly = new visual.Rect ({
+      win: psychoJS.window, name: 'targetBoundingPoly', units : 'pix', 
+      width: [1.0, 1.0][0], height: [1.0, 1.0][1],
+      ori: 0.0, pos: [0, 0],
+      lineWidth: 1.0, lineColor: new util.Color('pink'),
+      // fillColor: new util.Color('pink'),
+      fillColor: undefined,
+      opacity: undefined, depth: -10, interpolate: true,
+    });
+
     key_resp = new core.Keyboard({
       psychoJS: psychoJS,
       clock: new util.Clock(),
@@ -169,7 +181,7 @@ const experiment = (blockCount) => {
       name: "fixation",
       text: "+",
       font: "Open Sans",
-      units: "height",
+      units: "height", // TODO change to pix
       pos: [0, 0],
       height: 0.1,
       wrapWidth: undefined,
@@ -564,6 +576,7 @@ const experiment = (blockCount) => {
 
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
+      console.log("DEBUG targetDurationSec: ", targetDurationSec);
 
       fixationSizeNow = condition["markTheFixationYes"] === "TRUE" ? 30 : 0;
       targetMinimumPix = condition["targetMinimumPix"];
@@ -686,6 +699,7 @@ const experiment = (blockCount) => {
       // keep track of which components have finished
       trialComponents = [];
       trialComponents.push(key_resp);
+      trialComponents.push(targetBoundingPoly);
       trialComponents.push(fixation);
       trialComponents.push(flanker1);
       trialComponents.push(target);
@@ -706,6 +720,21 @@ const experiment = (blockCount) => {
       t = trialClock.getTime();
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
       // update/draw components on each frame
+
+      // *targetBoundingPoly* updates
+      if (t >= 0.0 && targetBoundingPoly.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        targetBoundingPoly.tStart = t;  // (not accounting for frame time here)
+        targetBoundingPoly.frameNStart = frameN;  // exact frame index
+        
+        targetBoundingPoly.setAutoDraw(true);
+      }
+
+      if (targetBoundingPoly.status === PsychoJS.Status.STARTED){ // only update if being drawn
+        const tightBoundingBox = target.getBoundingBox(true);
+        targetBoundingPoly.setPos([tightBoundingBox.left, tightBoundingBox.top]);
+        targetBoundingPoly.setSize([tightBoundingBox.width, tightBoundingBox.height]);
+      }
 
       // *key_resp* updates
       if (t >= 0.5 && key_resp.status === PsychoJS.Status.NOT_STARTED) {
