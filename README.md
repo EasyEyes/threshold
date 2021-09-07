@@ -1,4 +1,4 @@
-# crowding
+# EasyEyes Threshold
 
 A PsychoJS-based experiment generator for the measuring various psychometric thresholds, eg crowding.
 
