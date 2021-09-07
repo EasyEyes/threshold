@@ -139,3 +139,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Internal. Legacy scripts to be translated
+/reference
+
+# Store fonts that you want to use locally
+/fonts

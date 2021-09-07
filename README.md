@@ -3,38 +3,64 @@
 A PsychoPy (soon PsychoJS) implementation of crowding threshold measurement experiment.
 
 ## Installation Instructions
+
 1. Clone this repository.
+
 You will need a copy of the files locally to work with. 
 Running `git clone https://github.com/EasyEyes/crowding.git` in a 
 terminal window should do the trick.
+
+
 2. Run `preprocessor.py` on your experiment's csv file.
+
 Assume we have a csv configuration file for our experiment called `myExperiment.csv`,
 which we've placed in the same directory as `preprocessor.py` and `crowding.js`.
 From a shell open in the same directory, run `python preprocessor.py myExperiment.csv`.
 If successful, this will create a `/conditions` directory, which contains
 the properly formatted csv files needed (*ie* by `crowding.js`) to create your experiment. 
    * If you don't have python available on your computer, [install it](https://www.python.org/downloads/).
-3. Open `index.html` to run the experiment\*.
+
+
+3. Run `index.html` to run the experiment\*.
+
 `index.html` is the entrypoint to the actually experiment.
 From here the necessary [psychojs modules](https://github.com/psychopy/psychojs), 
 the EasyEyes crowding experiment (*ie* crowding.js), 
 and the parameters specific to your experiment 
 (*ie* the files in `/conditions` you just produced by running `preprocessor.py`)
 
-Unfortunately, [CORS](https://web.dev/cross-origin-resource-sharing/) makes 
-the instruction "open `index.html`" more complicated than just double-clicking the file.
+In this case, "run index.html" means "host index.html from a server, and visit the page from a web-browser". 
+While you could just double-click `index.html` to open it, this will result in experiment-breaking
+errors.
+In short, browsers only trusts resources drawn from a single source. This mechanism is a vital safety feature, but in this case means that if we try to run our experiment’s index.html file by double clicking on it, the browser will prevent the experiment from loading the resources it needs as it treats other files on our computer as separate sources. 
+To get around this, we can either start our own local server instance, 
+or use a hosting service like Pavlovia.
+
 For testing your experiment while developing it, use the first solution below;
 when your experiment is tested and ready to be run by participants, use the second.
 
-    1. Start a server for testing locally.
-    From a shell open in the same directory as `crowding.js` and `index.html`, simply run
-    ```sh
-    python3 -m http.server
-    ```
-    to start a local server for development, then open the experiment by visiting
-    [http://127.0.0.1:8080/](http://127.0.0.1:8080/) from a browser.
+    A. Start a server for testing locally.
 
-    2.  Deploy your experiment by uploading to an experiment hosting service.
+    We need to [start up a local server](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server). 
+    In essence, this is a program running on 
+    our computer which properly sends all the required files for our experiment
+    to the web-browser when we run the experiment. 
+
+    From a shell open in the same directory as `crowding.js` and `index.html`, simply run
+    `python3 -m http.server`.
+    This is a quick, one-line way to start a server instance in the current 
+    directory, which is built-in to python. 
+    (Note: Other servers, such as with [Node.js](https://stackoverflow.com/questions/6084360/using-node-js-as-a-simple-web-server) or [PHP](https://stackoverflow.com/questions/1678010/php-server-on-local-machine), would also work for this purpose, though we recommend
+    using the Python server, as Python is already a dependency of the preprocessor.)
+
+    We can then open the experiment by visiting
+    the URL which the program provides, eg
+    [http://0.0.0.0:8000/](http://0.0.0.0:8000/), 
+    from a web-browser on the same computer.
+
+
+    B.  Deploy your experiment by uploading to an experiment hosting service.
+
     Once your experiment is ready for participants, it should be hosted online.
     We recommend doing this safely and quickly by using a hosting service, 
     such as [Pavlovia](https://pavlovia.org). In the case of Pavlovia, 
@@ -43,7 +69,9 @@ when your experiment is tested and ready to be run by participants, use the seco
     
     Alternatively, you can manage your own server, running a program such as [JATOS](jatos.org),
     to host your experiment online.
-4. Edit `crowding.js` to extend functionality
+
+
+4. Developers: Edit `crowding.js` to extend functionality
 Interested developers can expand upon the currently supported parameters by directly
 editing the `crowding.js` or `preprocessor.py` files.
 If you have a contribution that you think would be valuable for other EasyEyes Crowding users, consider 
@@ -93,6 +121,29 @@ wirelessKeyboardNeededYes,FALSE,FALSE,FALSE,FALSE
 ```
 
 A **CSV file** named `experiment.csv` must be placed at the same directory as the PsychoPy file. The program will take care of the rest. We use a transposed CSV as the input file so that it's easier to read and edit. The program is designed to handle this transposed style and will help you transpose back for PsychoPy to use.
+
+## Using custom fonts
+[Some fonts](https://www.w3schools.com/cssref/css_websafe_fonts.asp) are natively supported by web-browsers; 
+these can be used in an experiment without
+having to include any addition font files with your experiment.
+
+To use other fonts, such as one you created or purchased from a third-party, start 
+by creating a /fonts folder in your local copy of this repo. Inside this folder you 
+can include any .woff font files that you would like to make accessible to to your
+study.
+Within your experiment csv file, simply use the same string for the targetFont 
+parameter as the name of the corresponding .woff file. 
+For example, given Pelli-EyeChart.woff in your /fonts folder, use 
+"Pelli-EyeChart" as the value for targetFont. 
+During the development process, open the javascript console in your browser to 
+monitor any failures to load assets like font files.
+
+By default, PsychoJS also supports using finding fonts from [Google Fonts](https://fonts.google.com). Searching Google Fonts for a font of the requested name will therefore be the 
+fallback behavior of an experiment, if a `targetFont` parameter does not correspond to
+a default web font, or a `.woff` file your `./fonts` directory.
+
+Most importantly, 
+**always test your experiment, and verify for yourself that stimuli are being presented correctly**.
 
 🚨 Things worth noting:
 

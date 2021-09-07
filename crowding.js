@@ -22,7 +22,11 @@ let correctAns;
 let expName = "crowding"; // from the Builder filename that created this script
 let expInfo = { participant: "", session: "001" };
 
+// For development purposes, toggle RC off for testing speed
+const useRC = false;
 const rc = RemoteCalibrator;
+
+const fontsRequired = new Set;
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -31,37 +35,40 @@ Papa.parse("conditions/blockCount.csv", {
   complete: function (results) {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
-      // ! RC
-      rc.init();
-      rc.panel(
-        [
-          {
-            name: "screenSize",
-          },
-          {
-            name: "trackDistance",
-            options: {
-              nearPoint: false,
-              showVideo: false,
+      if (useRC) {
+        rc.init();
+        rc.panel(
+          [
+            {
+              name: "screenSize",
             },
-          },
-          {
-            name: "trackGaze",
-            options: {
-              showGazer: false,
-              showVideo: false,
-              calibrationCount: 1,
+            {
+              name: "trackDistance",
+              options: {
+                nearPoint: false,
+                showVideo: false,
+              },
             },
-          },
-        ],
-        "body",
-        {},
-        () => {
-          rc.removePanel();
-          // ! Start actual experiment
-          experiment(blockCount);
-        }
-      );
+            {
+              name: "trackGaze",
+              options: {
+                showGazer: false,
+                showVideo: false,
+                calibrationCount: 1,
+              },
+            },
+          ],
+          "body",
+          {},
+          () => {
+            rc.removePanel();
+            // ! Start actual experiment
+            experiment(blockCount);
+          }
+        );
+      } else { // NO RC
+        experiment(blockCount) 
+      }
     });
   },
 });
@@ -74,8 +81,34 @@ const loadBlockFiles = (count, callback) => {
   }
   Papa.parse(`conditions/block_${count}.csv`, {
     download: true,
+    header: true,
+    skipEmptyLines: true,
+    dynamicTyping: true,
     complete: function (results) {
       blockFiles[count] = results.data;
+      console.log("Block " + count + ": ", results.data);
+
+      Object.values(results.data).forEach(row => {
+        let fontFamily = row['targetFont'];
+        let fontTestString = "12px " + fontFamily;
+        let fontPath = "fonts/"+fontFamily+".woff";
+        console.log("fontTestString: ", fontTestString);
+
+        let response = fetch(fontPath)
+        .then(response => {
+          if (response.ok) {
+            fontsRequired.add(row['targetFont']);
+          } else {
+            console.log("Does the browser consider this font supported?", document.fonts.check(fontTestString));
+            console.log("Uh oh, unable to find the font file for: "
+                        + fontFamily + "\n"
+                        + "If this font is already supported by the browser then it should display correctly. " + "\n"
+                        + "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " + "\n"
+                        + "Please verifiy for yourself that " + fontFamily + " is being correctly represented in your experiment.");
+          }
+        });
+      });
+
       loadBlockFiles(count - 1, callback);
     },
   });
@@ -91,6 +124,10 @@ const experiment = (blockCount) => {
       path: `conditions/block_${i}.csv`,
     });
   }
+  console.log("fontsRequired: ", fontsRequired);
+
+  fontsRequired.forEach(fontFamily => { 
+    _resources.push({ name: fontFamily, path: fontPath, })});
 
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
@@ -138,8 +175,9 @@ const experiment = (blockCount) => {
   // quit if user presses Cancel in dialog box:
   dialogCancelScheduler.add(quitPsychoJS, "", false);
 
-  expInfo["participant"] = rc.id.value;
+  if (useRC) { expInfo["participant"] = rc.id.value; }
 
+  console.log("_resources: ", _resources);
   psychoJS.start({
     expName: expName,
     expInfo: expInfo,
@@ -175,7 +213,7 @@ const experiment = (blockCount) => {
   var thisLoopNumber;
   var thisConditionsFile;
   var trialClock;
-  var targetBoundingPoly;
+  // var targetBoundingPoly; // Target Bounding Box
   var key_resp;
   var fixation; ////
   var flanker1;
@@ -194,15 +232,16 @@ const experiment = (blockCount) => {
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
 
-    targetBoundingPoly = new visual.Rect ({
-      win: psychoJS.window, name: 'targetBoundingPoly', units : 'pix', 
-      width: [1.0, 1.0][0], height: [1.0, 1.0][1],
-      ori: 0.0, pos: [0, 0],
-      lineWidth: 1.0, lineColor: new util.Color('pink'),
-      // fillColor: new util.Color('pink'),
-      fillColor: undefined,
-      opacity: undefined, depth: -10, interpolate: true,
-    });
+    // Target Bounding Box
+    // targetBoundingPoly = new visual.Rect ({
+    //   win: psychoJS.window, name: 'targetBoundingPoly', units : 'pix', 
+    //   width: [1.0, 1.0][0], height: [1.0, 1.0][1],
+    //   ori: 0.0, pos: [0, 0],
+    //   lineWidth: 1.0, lineColor: new util.Color('pink'),
+    //   // fillColor: new util.Color('pink'),
+    //   fillColor: undefined,
+    //   opacity: undefined, depth: -10, interpolate: true,
+    // });
 
     key_resp = new core.Keyboard({
       psychoJS: psychoJS,
@@ -460,12 +499,22 @@ const experiment = (blockCount) => {
 
       const possibleTrials = [];
       const thisBlockFileData = blockFiles[thisLoopNumber];
-      const trialConfigIndex = thisBlockFileData[0].indexOf("conditionTrials");
-      for (let i = 1; i < thisBlockFileData.length; i++) {
-        if (thisBlockFileData[i].length > 1) {
-          possibleTrials.push(parseInt(thisBlockFileData[i][trialConfigIndex]));
+      console.log("thisBlockFileData: ", thisBlockFileData);
+
+      for (let rowKey in thisBlockFileData) {
+        let rowIndex = parseInt(rowKey);
+        if (Object.keys(thisBlockFileData[rowIndex]).length > 1) {
+          console.log("condition trials this row of block: ", parseInt(thisBlockFileData[rowIndex]["conditionTrials"]));
+          possibleTrials.push(parseInt(thisBlockFileData[rowIndex]["conditionTrials"]));
         }
       }
+      console.log("possibleTrials: ", possibleTrials);
+      // const trialConfigIndex = thisBlockFileData[0].indexOf("conditionTrials");
+      // for (let i = 1; i < thisBlockFileData.length; i++) {
+      //   if (thisBlockFileData[i].length > 1) {
+      //     possibleTrials.push(parseInt(thisBlockFileData[i][trialConfigIndex]));
+      //   }
+      // }
 
       // TODO Remove this constraint to allow different # of trials for each condition
       if (!possibleTrials.every((a) => a === possibleTrials[0]))
@@ -578,6 +627,7 @@ const experiment = (blockCount) => {
           condition = c;
         }
       }
+      console.log("condition: ", condition);
 
       let level = currentLoop._currentStaircase.getQuestValue();
 
@@ -605,12 +655,11 @@ const experiment = (blockCount) => {
       spacingDirection = condition["spacingDirection"];
       targetFont = condition["targetFont"].toLowerCase();
 
-      targetAlphabet = condition["targetAlphabet"].split("");
-      validAns = condition["targetAlphabet"].toLowerCase().split("");
+      targetAlphabet = String(condition["targetAlphabet"]).split("");
+      validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
 
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
-      console.log("DEBUG targetDurationSec: ", targetDurationSec);
 
       fixationSizeNow = condition["markTheFixationYes"] === "TRUE" ? 30 : 0;
       targetMinimumPix = condition["targetMinimumPix"];
@@ -733,7 +782,7 @@ const experiment = (blockCount) => {
       // keep track of which components have finished
       trialComponents = [];
       trialComponents.push(key_resp);
-      trialComponents.push(targetBoundingPoly);
+      // trialComponents.push(targetBoundingPoly); // Target Bounding Box
       trialComponents.push(fixation);
       trialComponents.push(flanker1);
       trialComponents.push(target);
@@ -755,20 +804,21 @@ const experiment = (blockCount) => {
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
       // update/draw components on each frame
 
-      // *targetBoundingPoly* updates
-      if (t >= 0.0 && targetBoundingPoly.status === PsychoJS.Status.NOT_STARTED) {
-        // keep track of start time/frame for later
-        targetBoundingPoly.tStart = t;  // (not accounting for frame time here)
-        targetBoundingPoly.frameNStart = frameN;  // exact frame index
+      // Target Bounding Box
+      // // *targetBoundingPoly* updates
+      // if (t >= 0.0 && targetBoundingPoly.status === PsychoJS.Status.NOT_STARTED) {
+      //   // keep track of start time/frame for later
+      //   targetBoundingPoly.tStart = t;  // (not accounting for frame time here)
+      //   targetBoundingPoly.frameNStart = frameN;  // exact frame index
         
-        targetBoundingPoly.setAutoDraw(true);
-      }
+      //   targetBoundingPoly.setAutoDraw(true);
+      // }
 
-      if (targetBoundingPoly.status === PsychoJS.Status.STARTED){ // only update if being drawn
-        const tightBoundingBox = target.getBoundingBox(true);
-        targetBoundingPoly.setPos([tightBoundingBox.left, tightBoundingBox.top]);
-        targetBoundingPoly.setSize([tightBoundingBox.width, tightBoundingBox.height]);
-      }
+      // if (targetBoundingPoly.status === PsychoJS.Status.STARTED){ // only update if being drawn
+      //   const tightBoundingBox = target.getBoundingBox(true);
+      //   targetBoundingPoly.setPos([tightBoundingBox.left, tightBoundingBox.top]);
+      //   targetBoundingPoly.setSize([tightBoundingBox.width, tightBoundingBox.height]);
+      // }
 
       // *key_resp* updates
       if (t >= 0.5 && key_resp.status === PsychoJS.Status.NOT_STARTED) {
@@ -989,3 +1039,45 @@ const experiment = (blockCount) => {
     return Scheduler.Event.QUIT;
   }
 };
+
+/* 
+  Utilities
+*/
+
+/**
+ * Translation of MATLAB function of the same name
+ * by Prof Denis Pelli, XYPixOfXYDeg.m
+ * @param {Array} xyDeg List of {x,y} pairs, representing points x degrees right, and y degrees up, of fixation
+ * @param {Object} displayOptions Parameters about the stimulus presentation
+ * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
+ * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
+ * @param {Object} displayOptions.nearPointXYDeg Near-point on screen, in degrees relative to fixation(?)
+ * @param {Number} displayOptions.nearPointXYDeg.x Degrees along x-axis of near-point from fixation
+ * @param {Number} displayOptions.nearPointXYDeg.y Degrees along y-axis of near-point from fixation
+ * @param {Object} displayOptions.nearPointXYPix Near-point on screen, in pixels relative to origin(?)
+ * @param {Number} displayOptions.nearPointXYPix.x Pixels along x-axis of near-point from origin
+ * @param {Number} displayOptions.nearPointXYPix.y Pixels along y-axis of near-point from origin
+ */
+function XYPixOfXYDeg(xyDeg, displayOptions) {
+  if (xyDeg.length == 0){ return } // Return if no points to transform
+  // TODO verify displayOptions has the correct parameters
+  const xyPix = [];
+  xyDeg.forEach((position) => {
+    position.x = position.x - displayOptions.nearPointXYDeg.x;
+    position.y = position.y - displayOptions.nearPointXYDeg.y;
+    const rDeg = Math.sqrt(position.x**2 + position.y**2);
+    const rRadians = rDeg*(Math.PI/180);
+    const rPix = displayOptions.pixPerCm * displayOptions.viewingDistanceCm * Math.tan(rRadians);
+    const pixelPosition = {x:undefined, y:undefined};
+    if (rDeg > 0) {
+      pixelPosition.x = position.x * rPix / rDeg;
+      pixelPosition.y = position.y * rPix / rDeg;
+    } else {
+
+    }
+    pixelPosition.x = pixelPosition.x + displayOptions.nearPointXYPix.x;
+    pixelPosition.y = pixelPosition.y + displayOptions.nearPointXYPix.x;
+    xyPix.push(pixelPosition);
+  });
+  return xyPix;
+}
