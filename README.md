@@ -50,7 +50,9 @@ when your experiment is tested and ready to be run by participants, use the seco
     `python3 -m http.server`.
     This is a quick, one-line way to start a server instance in the current 
     directory, which is built-in to python. 
-    (Note: Other servers, such as with [Node.js](https://stackoverflow.com/questions/6084360/using-node-js-as-a-simple-web-server) or [PHP](https://stackoverflow.com/questions/1678010/php-server-on-local-machine), would also work for this purpose, though we recommend
+    (Note: Other servers, such as with [Node.js](https://stackoverflow.com/questions/6084360/using-node-js-as-a-simple-web-server) 
+    or [PHP](https://stackoverflow.com/questions/1678010/php-server-on-local-machine), 
+    would also work for this purpose, though we recommend
     using the Python server, as Python is already a dependency of the preprocessor.)
 
     We can then open the experiment by visiting
@@ -59,7 +61,7 @@ when your experiment is tested and ready to be run by participants, use the seco
     from a web-browser on the same computer.
 
 
-    - B.  Deploy your experiment by uploading to an experiment hosting service.
+  - B.  Deploy your experiment by uploading to an experiment hosting service.
 
     Once your experiment is ready for participants, it should be hosted online.
     We recommend doing this safely and quickly by using a hosting service, 
