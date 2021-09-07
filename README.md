@@ -1,6 +1,6 @@
 # crowding
 
-A PsychoPy (soon PsychoJS) implementation of crowding threshold measurement experiment.
+A PsychoJS-based experiment generator for the measuring various psychometric thresholds, eg crowding.
 
 ## Installation Instructions
 
