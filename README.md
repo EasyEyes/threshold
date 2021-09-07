@@ -39,7 +39,7 @@ or use a hosting service like Pavlovia.
 For testing your experiment while developing it, use the first solution below;
 when your experiment is tested and ready to be run by participants, use the second.
 
-    A. Start a server for testing locally.
+  - A. Start a server for testing locally.
 
     We need to [start up a local server](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server). 
     In essence, this is a program running on 
@@ -59,7 +59,7 @@ when your experiment is tested and ready to be run by participants, use the seco
     from a web-browser on the same computer.
 
 
-    B.  Deploy your experiment by uploading to an experiment hosting service.
+    - B.  Deploy your experiment by uploading to an experiment hosting service.
 
     Once your experiment is ready for participants, it should be hosted online.
     We recommend doing this safely and quickly by using a hosting service, 
