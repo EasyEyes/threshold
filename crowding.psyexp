@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" ?>
-<PsychoPy2experiment encoding="utf-8" version="2021.2.1">
+<PsychoPy2experiment encoding="utf-8" version="2021.3.1">
   <Settings>
     <Param name="Audio latency priority" updates="None" val="use prefs" valType="str"/>
     <Param name="Audio lib" updates="None" val="use prefs" valType="str"/>
@@ -40,7 +40,7 @@
     <Param name="elTrackEyes" updates="None" val="RIGHT_EYE" valType="str"/>
     <Param name="elTrackingMode" updates="None" val="PUPIL_CR_TRACKING" valType="str"/>
     <Param name="expName" updates="None" val="crowding" valType="str"/>
-    <Param name="exportHTML" updates="None" val="on Sync" valType="str"/>
+    <Param name="exportHTML" updates="None" val="manually" valType="str"/>
     <Param name="eyetracker" updates="None" val="None" valType="str"/>
     <Param name="gpAddress" updates="None" val="127.0.0.1" valType="str"/>
     <Param name="gpPort" updates="None" val="4242" valType="num"/>
@@ -58,11 +58,11 @@
       <CodeComponent name="definitions">
         <Param name="Before Experiment" updates="constant" val="" valType="extendedCode"/>
         <Param name="Before JS Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin Experiment" updates="constant" val="trialsDesired = 5&amp;#10;" valType="extendedCode"/>
-        <Param name="Begin JS Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin JS Routine" updates="constant" val="&amp;#10;" valType="extendedCode"/>
-        <Param name="Begin Routine" updates="constant" val="windowWidthCm = 60&amp;#10;windowWidthPx = 1920&amp;#10;pxPerCm = windowWidthPx / windowWidthCm&amp;#10;viewingDistanceCm = 50&amp;#10;fixationXYPx = [0, 0]&amp;#10;&amp;#10;block = condition['block']&amp;#10;&amp;#10;orientation = condition['direction']&amp;#10;newFont = condition['font']&amp;#10;trialsDesired = condition['trialsDesired']&amp;#10;&amp;#10;eccentricityXDeg = condition['eccentricityXDeg']&amp;#10;eccentricityYDeg = condition['eccentricityYDeg']&amp;#10;eccentricityXYDeg = [eccentricityXDeg, eccentricityYDeg]&amp;#10;" valType="extendedCode"/>
-        <Param name="Code Type" updates="None" val="Py" valType="str"/>
+        <Param name="Begin Experiment" updates="constant" val="&amp;#10;" valType="extendedCode"/>
+        <Param name="Begin JS Experiment" updates="constant" val="let windowWidthCm&amp;#10;let windowWidthPx&amp;#10;let pxPerCm&amp;#10;let viewingDistanceDesiredCm&amp;#10;let fixationXYPx&amp;#10;&amp;#10;let block&amp;#10;&amp;#10;let spacingDirection&amp;#10;let targetFont&amp;#10;&amp;#10;let targetAlphabet&amp;#10;let validAns&amp;#10;&amp;#10;let conditionTrials&amp;#10;let targetDurationSec&amp;#10;&amp;#10;let fixationSizeNow&amp;#10;let targetMinimumPix&amp;#10;let spacingOverSizeRatio&amp;#10;&amp;#10;let targetEccentricityXDeg&amp;#10;let targetEccentricityYDeg&amp;#10;let targetEccentricityXYDeg&amp;#10;&amp;#10;let trackGazeYes&amp;#10;let trackHeadYes&amp;#10;let wirelessKeyboardNeededYes" valType="extendedCode"/>
+        <Param name="Begin JS Routine" updates="constant" val="windowWidthCm = 50&amp;#10;windowWidthPx = window.size[0]&amp;#10;pxPerCm = windowWidthPx / windowWidthCm&amp;#10;viewingDistanceDesiredCm = condition['viewingDistanceDesiredCm']&amp;#10;fixationXYPx = [0, 0]&amp;#10;&amp;#10;block = condition['blockOrder']&amp;#10;&amp;#10;spacingDirection = condition['spacingDirection']&amp;#10;targetFont = condition['targetFont']&amp;#10;&amp;#10;targetAlphabet = condition['targetAlphabet'].split('')&amp;#10;validAns = condition['targetAlphabet'].toLowerCase().split('')&amp;#10;&amp;#10;conditionTrials = condition['conditionTrials']&amp;#10;targetDurationSec = condition['targetDurationSec']&amp;#10;&amp;#10;fixationSizeNow = condition['markTheFixationYes'] === 'TRUE' ? 30 : 0&amp;#10;targetMinimumPix = condition['targetMinimumPix']&amp;#10;spacingOverSizeRatio = condition['spacingOverSizeRatio']&amp;#10;&amp;#10;targetEccentricityXDeg = condition['targetEccentricityXDeg']&amp;#10;targetEccentricityYDeg = condition['targetEccentricityYDeg']&amp;#10;targetEccentricityXYDeg = [targetEccentricityXDeg, targetEccentricityYDeg]&amp;#10;&amp;#10;trackGazeYes = condition['trackGazeYes'] === 'TRUE'&amp;#10;trackHeadYes = condition['trackHeadYes'] === 'TRUE'&amp;#10;wirelessKeyboardNeededYes = condition['wirelessKeyboardNeededYes'] == 'TRUE'&amp;#10;" valType="extendedCode"/>
+        <Param name="Begin Routine" updates="constant" val="windowWidthCm = 50&amp;#10;windowWidthPx = win.size[0]&amp;#10;pxPerCm = windowWidthPx / windowWidthCm&amp;#10;viewingDistanceDesiredCm = condition['viewingDistanceDesiredCm']&amp;#10;fixationXYPx = [0, 0]&amp;#10;&amp;#10;block = condition['blockOrder']&amp;#10;&amp;#10;spacingDirection = condition['spacingDirection']&amp;#10;targetFont = condition['targetFont']&amp;#10;&amp;#10;targetAlphabet = list(condition['targetAlphabet'])&amp;#10;validAns = [x.lower() for x in targetAlphabet]&amp;#10;&amp;#10;conditionTrials = condition['conditionTrials']&amp;#10;targetDurationSec = condition['targetDurationSec']&amp;#10;&amp;#10;fixationSizeNow = 30 if condition['markTheFixationYes'] == 'TRUE' else 0&amp;#10;targetMinimumPix = condition['targetMinimumPix']&amp;#10;spacingOverSizeRatio = condition['spacingOverSizeRatio']&amp;#10;&amp;#10;targetEccentricityXDeg = condition['targetEccentricityXDeg']&amp;#10;targetEccentricityYDeg = condition['targetEccentricityYDeg']&amp;#10;targetEccentricityXYDeg = [targetEccentricityXDeg, targetEccentricityYDeg]&amp;#10;&amp;#10;trackGazeYes = condition['trackGazeYes'] == 'TRUE'&amp;#10;trackHeadYes = condition['trackHeadYes'] == 'TRUE'&amp;#10;wirelessKeyboardNeededYes = condition['wirelessKeyboardNeededYes'] == 'TRUE'&amp;#10;" valType="extendedCode"/>
+        <Param name="Code Type" updates="None" val="Both" valType="str"/>
         <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
         <Param name="Each JS Frame" updates="constant" val="" valType="extendedCode"/>
         <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
@@ -90,9 +90,9 @@
         <Param name="Before JS Experiment" updates="constant" val="" valType="extendedCode"/>
         <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
         <Param name="Begin JS Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin JS Routine" updates="constant" val="import {choice} from 'random';&amp;#10;var heightPx, levelLeft, levelRight, listXY, pos1XYDeg, pos1XYPx, pos2XYDeg, pos2XYPx, pos3XYDeg, pos3XYPx, spacingDeg, spacingPx;&amp;#10;spacingDeg = (Math.pow(10, level) - 0.15);&amp;#10;if ((orientation === &quot;radial&quot;)) {&amp;#10;    if ((eccentricityXDeg &lt; 0)) {&amp;#10;        pos1XYDeg = np.subtract(eccentricityXYDeg, [spacingDeg, 0]);&amp;#10;        pos2XYDeg = eccentricityXYDeg;&amp;#10;        pos3XYDeg = np.add(eccentricityXYDeg, [spacingDeg, 0]);&amp;#10;        levelLeft = level;&amp;#10;    } else {&amp;#10;        if ((eccentricityXDeg &gt; 0)) {&amp;#10;            pos1XYDeg = np.subtract(eccentricityXYDeg, [spacingDeg, 0]);&amp;#10;            pos2XYDeg = eccentricityXYDeg;&amp;#10;            pos3XYDeg = np.add(eccentricityXYDeg, [spacingDeg, 0]);&amp;#10;            levelRight = level;&amp;#10;        }&amp;#10;    }&amp;#10;}&amp;#10;pos1XYPx = [0, 0];&amp;#10;pos2XYPx = [0, 0];&amp;#10;pos3XYPx = [0, 0];&amp;#10;listXY = [0, 1];&amp;#10;for (var i, _pj_c = 0, _pj_a = listXY, _pj_b = _pj_a.length; (_pj_c &lt; _pj_b); _pj_c += 1) {&amp;#10;    i = _pj_a[_pj_c];&amp;#10;    pos1XYPx[i] = ((((viewingDistanceCm * 2) * np.tan((((0.5 * pos1XYDeg[i]) * np.pi) / 180))) * pxPerCm) + fixationXYPx[i]);&amp;#10;    pos2XYPx[i] = ((((viewingDistanceCm * 2) * np.tan((((0.5 * pos2XYDeg[i]) * np.pi) / 180))) * pxPerCm) + fixationXYPx[i]);&amp;#10;    pos3XYPx[i] = ((((viewingDistanceCm * 2) * np.tan((((0.5 * pos3XYDeg[i]) * np.pi) / 180))) * pxPerCm) + fixationXYPx[i]);&amp;#10;}&amp;#10;spacingPx = (pos2XYPx[0] - pos1XYPx[0]);&amp;#10;heightPx = (spacingPx / 1.4);&amp;#10;" valType="extendedCode"/>
-        <Param name="Begin Routine" updates="constant" val="from random import choice&amp;#10;&amp;#10;# set random letter&amp;#10;alphabet = ['D', 'H', 'K', 'O', 'N', 'R', 'S', 'V', 'Z']&amp;#10;firstflanker = choice(alphabet)&amp;#10;targetstim = choice(alphabet)&amp;#10;secondflanker = choice(alphabet)&amp;#10;correctAns = targetstim&amp;#10;&amp;#10;# Define shift per trial&amp;#10;spacingDeg = 10**level - 0.15&amp;#10;&amp;#10;# Crowding changes per trial&amp;#10;# radial&amp;#10;if orientation == 'radial':&amp;#10;    if eccentricityXDeg &lt; 0:&amp;#10;        pos1XYDeg = np.subtract(eccentricityXYDeg, [spacingDeg, 0])&amp;#10;        pos2XYDeg = eccentricityXYDeg&amp;#10;        pos3XYDeg = np.add(eccentricityXYDeg, [spacingDeg, 0])&amp;#10;        levelLeft = level&amp;#10;    elif eccentricityXDeg &gt; 0:&amp;#10;        pos1XYDeg = np.subtract(eccentricityXYDeg, [spacingDeg, 0])&amp;#10;        pos2XYDeg = eccentricityXYDeg&amp;#10;        pos3XYDeg = np.add(eccentricityXYDeg, [spacingDeg, 0])&amp;#10;        levelRight = level&amp;#10;&amp;#10;# tangential&amp;#10;if orientation == 'tangential':&amp;#10;    if eccentricityXDeg &lt; 0:&amp;#10;        pos1XYDeg = np.subtract(eccentricityXYDeg, [0, spacingDeg])&amp;#10;        pos2XYDeg = eccentricityXYDeg&amp;#10;        pos3XYDeg = np.add(eccentricityXYDeg, [0, spacingDeg])&amp;#10;        levelLeft = level&amp;#10;    elif eccentricityXDeg &gt; 0:&amp;#10;        pos1XYDeg = np.subtract(eccentricityXYDeg, [0, spacingDeg])&amp;#10;        pos2XYDeg = eccentricityXYDeg&amp;#10;        pos3XYDeg = np.add(eccentricityXYDeg, [0, spacingDeg])&amp;#10;        levelRight = level&amp;#10;&amp;#10;# convert deg to pixels&amp;#10;pos1XYPx = [0, 0]&amp;#10;pos2XYPx = [0, 0]&amp;#10;pos3XYPx = [0, 0]&amp;#10;listXY = [0, 1]&amp;#10;for i in listXY:&amp;#10;    pos1XYPx[i] = viewingDistanceCm*2 * \&amp;#10;        np.tan(0.5*pos1XYDeg[i]*np.pi/180)*pxPerCm + fixationXYPx[i]&amp;#10;    pos2XYPx[i] = viewingDistanceCm*2 * \&amp;#10;        np.tan(0.5*pos2XYDeg[i]*np.pi/180)*pxPerCm + fixationXYPx[i]&amp;#10;    pos3XYPx[i] = viewingDistanceCm*2 * \&amp;#10;        np.tan(0.5*pos3XYDeg[i]*np.pi/180)*pxPerCm + fixationXYPx[i]&amp;#10;&amp;#10;# Adjust height&amp;#10;spacingPx = pos2XYPx[0] - pos1XYPx[0]&amp;#10;spacingPxTangential = pos2XYPx[1] - pos1XYPx[1]&amp;#10;if orientation == 'radial':&amp;#10;    heightPx = spacingPx/1.4&amp;#10;if orientation == 'tangential':&amp;#10;    heightPx = spacingPxTangential/1.4&amp;#10;" valType="extendedCode"/>
-        <Param name="Code Type" updates="None" val="Py" valType="str"/>
+        <Param name="Begin JS Routine" updates="constant" val="var alphabet = targetAlphabet&amp;#10;var firstFlanker = alphabet[Math.floor(Math.random() * alphabet.length)]&amp;#10;var targetStim = alphabet[Math.floor(Math.random() * alphabet.length)]&amp;#10;var secondFlanker = alphabet[Math.floor(Math.random() * alphabet.length)]&amp;#10;var correctAns = targetStim.toLowerCase()&amp;#10;&amp;#10;var heightPx, levelLeft, levelRight, listXY&amp;#10;var pos1XYDeg, pos1XYPx, pos2XYDeg, pos2XYPx, pos3XYDeg, pos3XYPx&amp;#10;var spacingDeg, spacingPx&amp;#10;&amp;#10;spacingDeg = (Math.pow(10, level) - 0.15);&amp;#10;&amp;#10;if (spacingDirection === &quot;radial&quot;) {&amp;#10;    pos1XYDeg = [targetEccentricityXYDeg[0] - spacingDeg, targetEccentricityXYDeg[1]]&amp;#10;    pos2XYDeg = targetEccentricityXYDeg;&amp;#10;    pos3XYDeg = [targetEccentricityXYDeg[0] + spacingDeg, targetEccentricityXYDeg[1]]&amp;#10;    if (targetEccentricityXYDeg &lt; 0) {&amp;#10;        levelLeft = level;&amp;#10;    } else {&amp;#10;        levelRight = level;&amp;#10;    }&amp;#10;} else if (spacingDirection == 'tangential') {&amp;#10;    pos1XYDeg = [targetEccentricityXYDeg[0], targetEccentricityXYDeg[1] - spacingDeg]&amp;#10;    pos2XYDeg = targetEccentricityXYDeg;&amp;#10;    pos3XYDeg = [targetEccentricityXYDeg[0], targetEccentricityXYDeg[1] + spacingDeg]&amp;#10;    if (targetEccentricityYDeg &lt; 0) {&amp;#10;        levelLeft = level&amp;#10;    } else {&amp;#10;        levelRight = level&amp;#10;    }&amp;#10;}&amp;#10;&amp;#10;pos1XYPx = [0, 0];&amp;#10;pos2XYPx = [0, 0];&amp;#10;pos3XYPx = [0, 0];&amp;#10;listXY = [0, 1];&amp;#10;&amp;#10;for (let i in listXY) {&amp;#10;    pos1XYPx[i] = viewingDistanceDesiredCm * 2 * Math.tan(0.5 * pos1XYDeg[i] * Math.PI / 180) * pxPerCm + fixationXYPx[i]&amp;#10;    pos2XYPx[i] = viewingDistanceDesiredCm * 2 * Math.tan(0.5 * pos2XYDeg[i] * Math.PI / 180) * pxPerCm + fixationXYPx[i]&amp;#10;    pos3XYPx[i] = viewingDistanceDesiredCm * 2 * Math.tan(0.5 * pos3XYDeg[i] * Math.PI / 180) * pxPerCm + fixationXYPx[i]&amp;#10;}&amp;#10;&amp;#10;if (spacingDirection === 'radial') {&amp;#10;    spacingPx = pos2XYPx[0] - pos1XYPx[0]&amp;#10;} else if (spacingDirection === 'tangential') {&amp;#10;    spacingPx = pos2XYPx[1] - pos1XYPx[1]&amp;#10;}&amp;#10;&amp;#10;heightPx = Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)&amp;#10;" valType="extendedCode"/>
+        <Param name="Begin Routine" updates="constant" val="from random import choice&amp;#10;&amp;#10;# set random letter&amp;#10;alphabet = targetAlphabet&amp;#10;firstFlanker = choice(alphabet)&amp;#10;targetStim = choice(alphabet)&amp;#10;secondFlanker = choice(alphabet)&amp;#10;correctAns = targetStim.lower()&amp;#10;&amp;#10;# Define shift per trial&amp;#10;# ???&amp;#10;spacingDeg = 10**level - 0.15&amp;#10;&amp;#10;# Crowding changes per trial&amp;#10;# radial&amp;#10;if spacingDirection == 'radial':&amp;#10;    if targetEccentricityXDeg &lt; 0:&amp;#10;        pos1XYDeg = np.subtract(targetEccentricityXYDeg, [spacingDeg, 0])&amp;#10;        pos2XYDeg = targetEccentricityXYDeg&amp;#10;        pos3XYDeg = np.add(targetEccentricityXYDeg, [spacingDeg, 0])&amp;#10;        levelLeft = level&amp;#10;    elif targetEccentricityXDeg &gt; 0:&amp;#10;        pos1XYDeg = np.subtract(targetEccentricityXYDeg, [spacingDeg, 0])&amp;#10;        pos2XYDeg = targetEccentricityXYDeg&amp;#10;        pos3XYDeg = np.add(targetEccentricityXYDeg, [spacingDeg, 0])&amp;#10;        levelRight = level&amp;#10;&amp;#10;# tangential&amp;#10;if spacingDirection == 'tangential':&amp;#10;    if targetEccentricityYDeg &lt; 0:&amp;#10;        pos1XYDeg = np.subtract(targetEccentricityXYDeg, [0, spacingDeg])&amp;#10;        pos2XYDeg = targetEccentricityXYDeg&amp;#10;        pos3XYDeg = np.add(targetEccentricityXYDeg, [0, spacingDeg])&amp;#10;        levelLeft = level&amp;#10;    elif targetEccentricityYDeg &gt; 0:&amp;#10;        pos1XYDeg = np.subtract(targetEccentricityXYDeg, [0, spacingDeg])&amp;#10;        pos2XYDeg = targetEccentricityXYDeg&amp;#10;        pos3XYDeg = np.add(targetEccentricityXYDeg, [0, spacingDeg])&amp;#10;        levelRight = level&amp;#10;&amp;#10;# convert deg to pixels&amp;#10;pos1XYPx = [0, 0]&amp;#10;pos2XYPx = [0, 0]&amp;#10;pos3XYPx = [0, 0]&amp;#10;listXY = [0, 1]&amp;#10;for i in listXY:&amp;#10;    pos1XYPx[i] = viewingDistanceDesiredCm * 2 * \&amp;#10;        np.tan(0.5*pos1XYDeg[i] * np.pi/180) * pxPerCm + fixationXYPx[i]&amp;#10;    pos2XYPx[i] = viewingDistanceDesiredCm * 2 * \&amp;#10;        np.tan(0.5*pos2XYDeg[i] * np.pi/180) * pxPerCm + fixationXYPx[i]&amp;#10;    pos3XYPx[i] = viewingDistanceDesiredCm * 2 * \&amp;#10;        np.tan(0.5*pos3XYDeg[i] * np.pi/180) * pxPerCm + fixationXYPx[i]&amp;#10;&amp;#10;# Adjust height&amp;#10;if spacingDirection == 'radial':&amp;#10;    spacingPx = pos2XYPx[0] - pos1XYPx[0]&amp;#10;elif spacingDirection == 'tangential':&amp;#10;    spacingPx = pos2XYPx[1] - pos1XYPx[1]&amp;#10;    &amp;#10;heightPx = max(spacingPx / spacingOverSizeRatio, targetMinimumPix)&amp;#10;" valType="extendedCode"/>
+        <Param name="Code Type" updates="None" val="Both" valType="str"/>
         <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
         <Param name="Each JS Frame" updates="constant" val="" valType="extendedCode"/>
         <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
@@ -109,19 +109,19 @@
         <Param name="Begin JS Experiment" updates="constant" val="" valType="extendedCode"/>
         <Param name="Begin JS Routine" updates="constant" val="" valType="extendedCode"/>
         <Param name="Begin Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Code Type" updates="None" val="Py" valType="str"/>
+        <Param name="Code Type" updates="None" val="Both" valType="str"/>
         <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
         <Param name="Each JS Frame" updates="constant" val="" valType="extendedCode"/>
-        <Param name="End Experiment" updates="constant" val="print('log threshold right is: ', levelLeft)&amp;#10;print('threshold spacing right is: ', 10**levelLeft - 0.15, ' deg')&amp;#10;print('log threshold right is: ', levelRight)&amp;#10;print('threshold spacing right is: ', 10**levelRight - 0.15, ' deg')&amp;#10;&amp;#10;" valType="extendedCode"/>
-        <Param name="End JS Experiment" updates="constant" val="" valType="extendedCode"/>
+        <Param name="End Experiment" updates="constant" val="print('Log threshold right is: ', levelLeft)&amp;#10;print('Threshold spacing right is: ', 10**levelLeft - 0.15, ' deg')&amp;#10;print('Log threshold right is: ', levelRight)&amp;#10;print('Threshold spacing right is: ', 10**levelRight - 0.15, ' deg')&amp;#10;" valType="extendedCode"/>
+        <Param name="End JS Experiment" updates="constant" val="console.log('Log threshold right is: ', levelLeft)&amp;#10;console.log('Threshold spacing right is: ', Math.pow(10, levelLeft) - 0.15, ' deg')&amp;#10;console.log('Log threshold right is: ', levelRight)&amp;#10;console.log('Threshold spacing right is: ', Math.pow(10, levelRight) - 0.15, ' deg')&amp;#10;" valType="extendedCode"/>
         <Param name="End JS Routine" updates="constant" val="" valType="extendedCode"/>
         <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
         <Param name="disabled" updates="None" val="False" valType="bool"/>
         <Param name="name" updates="None" val="end" valType="code"/>
       </CodeComponent>
       <KeyboardComponent name="key_resp">
-        <Param name="allowedKeys" updates="constant" val="'d','h','k','n','o','r','v','z','s'" valType="list"/>
-        <Param name="correctAns" updates="constant" val="$targetstim.lower()" valType="str"/>
+        <Param name="allowedKeys" updates="set every repeat" val="['a', 'c', 'e', 'n', 'o', 'r', 's', 'u', 'v', 'x', 'z']" valType="list"/>
+        <Param name="correctAns" updates="constant" val="$correctAns" valType="str"/>
         <Param name="disabled" updates="None" val="False" valType="bool"/>
         <Param name="discard previous" updates="constant" val="True" valType="bool"/>
         <Param name="durationEstim" updates="None" val="" valType="num"/>
@@ -153,7 +153,7 @@
         <Param name="pos" updates="constant" val="(0, 0)" valType="list"/>
         <Param name="saveStartStop" updates="None" val="True" valType="bool"/>
         <Param name="sf" updates="constant" val="none" valType="num"/>
-        <Param name="size" updates="constant" val="30" valType="list"/>
+        <Param name="size" updates="set every repeat" val="fixationSizeNow" valType="list"/>
         <Param name="startEstim" updates="None" val="" valType="num"/>
         <Param name="startType" updates="None" val="time (s)" valType="str"/>
         <Param name="startVal" updates="None" val="0" valType="num"/>
@@ -171,7 +171,7 @@
         <Param name="disabled" updates="None" val="False" valType="bool"/>
         <Param name="durationEstim" updates="None" val="" valType="num"/>
         <Param name="flip" updates="constant" val="None" valType="str"/>
-        <Param name="font" updates="set every repeat" val="$newFont" valType="str"/>
+        <Param name="font" updates="set every repeat" val="$targetFont" valType="str"/>
         <Param name="languageStyle" updates="None" val="LTR" valType="str"/>
         <Param name="letterHeight" updates="set every repeat" val="heightPx" valType="num"/>
         <Param name="name" updates="None" val="flanker1" valType="code"/>
@@ -183,9 +183,9 @@
         <Param name="startType" updates="None" val="time (s)" valType="str"/>
         <Param name="startVal" updates="None" val="0.5" valType="num"/>
         <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
-        <Param name="stopVal" updates="constant" val="durationS" valType="num"/>
+        <Param name="stopVal" updates="constant" val="targetDurationSec" valType="num"/>
         <Param name="syncScreenRefresh" updates="None" val="True" valType="bool"/>
-        <Param name="text" updates="set every repeat" val="$firstflanker" valType="str"/>
+        <Param name="text" updates="set every repeat" val="$firstFlanker" valType="str"/>
         <Param name="units" updates="None" val="from exp settings" valType="str"/>
         <Param name="wrapWidth" updates="constant" val="" valType="num"/>
       </TextComponent>
@@ -196,7 +196,7 @@
         <Param name="disabled" updates="None" val="False" valType="bool"/>
         <Param name="durationEstim" updates="None" val="" valType="num"/>
         <Param name="flip" updates="constant" val="None" valType="str"/>
-        <Param name="font" updates="set every repeat" val="$newFont" valType="str"/>
+        <Param name="font" updates="set every repeat" val="$targetFont" valType="str"/>
         <Param name="languageStyle" updates="None" val="LTR" valType="str"/>
         <Param name="letterHeight" updates="set every repeat" val="heightPx" valType="num"/>
         <Param name="name" updates="None" val="target" valType="code"/>
@@ -208,9 +208,9 @@
         <Param name="startType" updates="None" val="time (s)" valType="str"/>
         <Param name="startVal" updates="None" val="0.5" valType="num"/>
         <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
-        <Param name="stopVal" updates="constant" val="durationS" valType="num"/>
+        <Param name="stopVal" updates="constant" val="targetDurationSec" valType="num"/>
         <Param name="syncScreenRefresh" updates="None" val="True" valType="bool"/>
-        <Param name="text" updates="set every repeat" val="$targetstim" valType="str"/>
+        <Param name="text" updates="set every repeat" val="$targetStim" valType="str"/>
         <Param name="units" updates="None" val="from exp settings" valType="str"/>
         <Param name="wrapWidth" updates="constant" val="" valType="num"/>
       </TextComponent>
@@ -221,7 +221,7 @@
         <Param name="disabled" updates="None" val="False" valType="bool"/>
         <Param name="durationEstim" updates="None" val="" valType="num"/>
         <Param name="flip" updates="constant" val="None" valType="str"/>
-        <Param name="font" updates="set every repeat" val="$newFont" valType="str"/>
+        <Param name="font" updates="set every repeat" val="$targetFont" valType="str"/>
         <Param name="languageStyle" updates="None" val="LTR" valType="str"/>
         <Param name="letterHeight" updates="set every repeat" val="heightPx" valType="num"/>
         <Param name="name" updates="None" val="flanker2" valType="code"/>
@@ -233,9 +233,9 @@
         <Param name="startType" updates="None" val="time (s)" valType="str"/>
         <Param name="startVal" updates="None" val="0.5" valType="num"/>
         <Param name="stopType" updates="None" val="duration (s)" valType="str"/>
-        <Param name="stopVal" updates="constant" val="durationS" valType="num"/>
+        <Param name="stopVal" updates="constant" val="targetDurationSec" valType="num"/>
         <Param name="syncScreenRefresh" updates="None" val="True" valType="bool"/>
-        <Param name="text" updates="set every repeat" val="$secondflanker" valType="str"/>
+        <Param name="text" updates="set every repeat" val="$secondFlanker" valType="str"/>
         <Param name="units" updates="None" val="pix" valType="str"/>
         <Param name="wrapWidth" updates="constant" val="" valType="num"/>
       </TextComponent>
@@ -245,10 +245,10 @@
         <Param name="Before Experiment" updates="constant" val="" valType="extendedCode"/>
         <Param name="Before JS Experiment" updates="constant" val="" valType="extendedCode"/>
         <Param name="Begin Experiment" updates="constant" val="thisLoopNumber = 0&amp;#10;thisConditionsFile = './conditions/block_1.csv'&amp;#10;" valType="extendedCode"/>
-        <Param name="Begin JS Experiment" updates="constant" val="thisLoopNumber = 0;&amp;#10;" valType="extendedCode"/>
-        <Param name="Begin JS Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin Routine" updates="constant" val="thisLoopNumber += 1&amp;#10;thisConditionsFile = './conditions/block_{}.csv'.format(thisLoopNumber)&amp;#10;&amp;#10;print('=== New Block {} ==='.format(thisLoopNumber))&amp;#10;" valType="extendedCode"/>
-        <Param name="Code Type" updates="None" val="Py" valType="str"/>
+        <Param name="Begin JS Experiment" updates="constant" val="thisLoopNumber = 0&amp;#10;thisConditionsFile = './conditions/block_1.csv'&amp;#10;" valType="extendedCode"/>
+        <Param name="Begin JS Routine" updates="constant" val="thisLoopNumber += 1&amp;#10;thisConditionsFile = `conditions/block_${thisLoopNumber}.csv`&amp;#10;&amp;#10;//if len(np.unique(this_df['conditionTrials'])) &gt; 1:&amp;#10;//    raise ValueError('conditionTrials for each condition in the same block must match.')&amp;#10;&amp;#10;conditionTrials = 4&amp;#10;" valType="extendedCode"/>
+        <Param name="Begin Routine" updates="constant" val="import pandas as pd&amp;#10;import numpy as np&amp;#10;&amp;#10;thisLoopNumber += 1&amp;#10;thisConditionsFile = './conditions/block_{}.csv'.format(thisLoopNumber)&amp;#10;&amp;#10;this_df = pd.read_csv(thisConditionsFile)&amp;#10;&amp;#10;# TODO To be removed&amp;#10;if len(np.unique(this_df['conditionTrials'])) &gt; 1:&amp;#10;    raise ValueError('conditionTrials for each condition in the same block must match.')&amp;#10;&amp;#10;conditionTrials = this_df['conditionTrials'][0]&amp;#10;&amp;#10;#print('=== New Block {} ==='.format(thisLoopNumber))&amp;#10;" valType="extendedCode"/>
+        <Param name="Code Type" updates="None" val="Both" valType="str"/>
         <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
         <Param name="Each JS Frame" updates="constant" val="" valType="extendedCode"/>
         <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
@@ -259,36 +259,16 @@
         <Param name="name" updates="None" val="begin" valType="code"/>
       </CodeComponent>
     </Routine>
-    <Routine name="file">
-      <CodeComponent name="preprocess">
-        <Param name="Before Experiment" updates="constant" val="# https://stackoverflow.com/a/58267676/11069914&amp;#10;import pandas as pd&amp;#10;&amp;#10;if not os.path.exists('./conditions'):&amp;#10;    os.makedirs('./conditions')&amp;#10;&amp;#10;csv_data = pd.read_csv('stairDefinitions.csv')&amp;#10;&amp;#10;dataBlockRange = csv_data['block'].unique()&amp;#10;dataBlockRange = dataBlockRange.tolist()&amp;#10;&amp;#10;for i, value in enumerate(dataBlockRange):&amp;#10;    csv_data[csv_data['block'] == value].to_csv('./conditions/block_' + str(value) + '.csv', index = False)&amp;#10;    &amp;#10;blockCount = len(dataBlockRange)&amp;#10;" valType="extendedCode"/>
-        <Param name="Before JS Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin JS Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin JS Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Begin Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Code Type" updates="None" val="Py" valType="str"/>
-        <Param name="Each Frame" updates="constant" val="" valType="extendedCode"/>
-        <Param name="Each JS Frame" updates="constant" val="" valType="extendedCode"/>
-        <Param name="End Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="End JS Experiment" updates="constant" val="" valType="extendedCode"/>
-        <Param name="End JS Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="End Routine" updates="constant" val="" valType="extendedCode"/>
-        <Param name="disabled" updates="None" val="False" valType="bool"/>
-        <Param name="name" updates="None" val="preprocess" valType="code"/>
-      </CodeComponent>
-    </Routine>
   </Routines>
   <Flow>
-    <Routine name="file"/>
     <LoopInitiator loopType="TrialHandler" name="blocks">
       <Param name="Selected rows" updates="None" val="" valType="str"/>
-      <Param name="conditions" updates="None" val="None" valType="str"/>
-      <Param name="conditionsFile" updates="None" val="" valType="file"/>
+      <Param name="conditions" updates="None" val="[OrderedDict([('block', 0)]), OrderedDict([('block', 1)])]" valType="str"/>
+      <Param name="conditionsFile" updates="None" val="conditions/blockCount.csv" valType="file"/>
       <Param name="endPoints" updates="None" val="[0, 1]" valType="num"/>
       <Param name="isTrials" updates="None" val="True" valType="bool"/>
       <Param name="loopType" updates="None" val="sequential" valType="str"/>
-      <Param name="nReps" updates="None" val="blockCount" valType="num"/>
+      <Param name="nReps" updates="None" val="1" valType="num"/>
       <Param name="name" updates="None" val="blocks" valType="code"/>
       <Param name="random seed" updates="None" val="" valType="code"/>
     </LoopInitiator>
@@ -299,7 +279,7 @@
       <Param name="endPoints" updates="None" val="[0, 1]" valType="num"/>
       <Param name="isTrials" updates="None" val="True" valType="bool"/>
       <Param name="loopType" updates="None" val="interleaved staircases" valType="str"/>
-      <Param name="nReps" updates="None" val="trialsDesired" valType="num"/>
+      <Param name="nReps" updates="None" val="conditionTrials" valType="num"/>
       <Param name="name" updates="None" val="trials" valType="code"/>
       <Param name="stairType" updates="None" val="QUEST" valType="str"/>
       <Param name="switchMethod" updates="None" val="fullRandom" valType="str"/>
