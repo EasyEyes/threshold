@@ -589,7 +589,7 @@ const experiment = (blockCount) => {
 
   var windowWidthCm;
   var windowWidthPx;
-  var pxPerCm;
+  var pixPerCm;
   var viewingDistanceDesiredCm;
   var fixationXYPx;
   var block;
@@ -646,7 +646,7 @@ const experiment = (blockCount) => {
       // update component parameters for each repeat
       windowWidthCm = 25; // TODO Use RemoteCalibrator
       windowWidthPx = screen.width;
-      pxPerCm = windowWidthPx / windowWidthCm;
+      pixPerCm = windowWidthPx / windowWidthCm;
       viewingDistanceDesiredCm = condition["viewingDistanceDesiredCm"];
       fixationXYPx = [0, 0];
 
@@ -724,31 +724,13 @@ const experiment = (blockCount) => {
         }
       }
 
-      pos1XYPx = [0, 0];
-      pos2XYPx = [0, 0];
-      pos3XYPx = [0, 0];
-      listXY = [0, 1];
-
-      for (let i in listXY) {
-        pos1XYPx[i] =
-          viewingDistanceDesiredCm *
-            2 *
-            Math.tan((0.5 * pos1XYDeg[i] * Math.PI) / 180) *
-            pxPerCm +
-          fixationXYPx[i];
-        pos2XYPx[i] =
-          viewingDistanceDesiredCm *
-            2 *
-            Math.tan((0.5 * pos2XYDeg[i] * Math.PI) / 180) *
-            pxPerCm +
-          fixationXYPx[i];
-        pos3XYPx[i] =
-          viewingDistanceDesiredCm *
-            2 *
-            Math.tan((0.5 * pos3XYDeg[i] * Math.PI) / 180) *
-            pxPerCm +
-          fixationXYPx[i];
-      }
+      // TODO use actual nearPoint; currently totally ignoring fixation???
+      const nearPointXYDeg = {x:0, y:0}; // TEMP 
+      const nearPointXYPix = {x:0, y:0}; // TEMP 
+      [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg( [pos1XYDeg, pos2XYDeg, pos3XYDeg], 
+        { pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceDesiredCm, 
+          nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}
+      );
 
       if (spacingDirection === "radial") {
         spacingPx = pos2XYPx[0] - pos1XYPx[0];
@@ -1047,7 +1029,7 @@ const experiment = (blockCount) => {
 /**
  * Translation of MATLAB function of the same name
  * by Prof Denis Pelli, XYPixOfXYDeg.m
- * @param {Array} xyDeg List of {x,y} pairs, representing points x degrees right, and y degrees up, of fixation
+ * @param {Array} xyDeg List of [x,y] pairs, representing points x degrees right, and y degrees up, of fixation
  * @param {Object} displayOptions Parameters about the stimulus presentation
  * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
  * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
@@ -1057,27 +1039,99 @@ const experiment = (blockCount) => {
  * @param {Object} displayOptions.nearPointXYPix Near-point on screen, in pixels relative to origin(?)
  * @param {Number} displayOptions.nearPointXYPix.x Pixels along x-axis of near-point from origin
  * @param {Number} displayOptions.nearPointXYPix.y Pixels along y-axis of near-point from origin
+ * @returns {Number[][]} Array of length=2 arrays of numbers, representing the same points in Pixel space
  */
 function XYPixOfXYDeg(xyDeg, displayOptions) {
   if (xyDeg.length == 0){ return } // Return if no points to transform
   // TODO verify displayOptions has the correct parameters
   const xyPix = [];
   xyDeg.forEach((position) => {
-    position.x = position.x - displayOptions.nearPointXYDeg.x;
-    position.y = position.y - displayOptions.nearPointXYDeg.y;
-    const rDeg = Math.sqrt(position.x**2 + position.y**2);
+    position[0] = position[0] - displayOptions.nearPointXYDeg.x;
+    position[1] = position[1] - displayOptions.nearPointXYDeg.y;
+    const rDeg = Math.sqrt(position[0]**2 + position[1]**2);
     const rRadians = rDeg*(Math.PI/180);
     const rPix = displayOptions.pixPerCm * displayOptions.viewingDistanceCm * Math.tan(rRadians);
-    const pixelPosition = {x:undefined, y:undefined};
+    let pixelPosition = [];
     if (rDeg > 0) {
-      pixelPosition.x = position.x * rPix / rDeg;
-      pixelPosition.y = position.y * rPix / rDeg;
+      pixelPosition = [  
+        position[0] * rPix / rDeg,
+        position[1] * rPix / rDeg];
     } else {
-
+      pixelPosition = [0, 0];
     }
-    pixelPosition.x = pixelPosition.x + displayOptions.nearPointXYPix.x;
-    pixelPosition.y = pixelPosition.y + displayOptions.nearPointXYPix.x;
+    pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
+    pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.x;
     xyPix.push(pixelPosition);
   });
   return xyPix;
 }
+
+/**
+ * WIP Not ready for use
+ * @param {*} level 
+ * @param {*} screenDimensions 
+ * @param {*} spacingDirection 
+ * @param {*} targetEccentricityXYDeg 
+ * @param {*} targetEccentricityXDeg 
+ * @param {*} targetEccentricityYDeg 
+ * @returns 
+ */
+const getBoundedSpacing = (level, screenDimensions, spacingDirection, targetEccentricityXYDeg, targetEccentricityXDeg, targetEccentricityYDeg) => {
+  if (!(screenDimensions.hasOwnProperty("width") && screenDimensions.hasOwnProperty("height"))) {
+    console.error("Uh oh! Please specify the `width` and `height` in `screenDimensions`.");
+    return;
+  }
+
+  spacingDeg = Math.pow(10, level);
+
+  if (spacingDirection === "radial") { // WRONG radial doesn't mean "horizontal"
+    pos1XYDeg = [
+      targetEccentricityXYDeg[0] - spacingDeg,
+      targetEccentricityXYDeg[1],
+    ];
+    pos2XYDeg = targetEccentricityXYDeg;
+    pos3XYDeg = [
+      targetEccentricityXYDeg[0] + spacingDeg,
+      targetEccentricityXYDeg[1],
+    ];
+    if (targetEccentricityXDeg < 0) {
+      levelLeft = level;
+    } else {
+      levelRight = level;
+    }
+  } else if (spacingDirection == "tangential") {  // WRONG tangential doesn't mean "vertical"
+    pos1XYDeg = [
+      targetEccentricityXYDeg[0],
+      targetEccentricityXYDeg[1] - spacingDeg,
+    ];
+    pos2XYDeg = targetEccentricityXYDeg;
+    pos3XYDeg = [
+      targetEccentricityXYDeg[0],
+      targetEccentricityXYDeg[1] + spacingDeg,
+    ];
+    if (targetEccentricityYDeg < 0) {
+      levelLeft = level;
+    } else {
+      levelRight = level;
+    }
+  }
+
+  // TODO use actual nearPoint; currently totally ignoring fixation???
+  const nearPointXYDeg = {x:0, y:0}; // TEMP 
+  const nearPointXYPix = {x:0, y:0}; // TEMP 
+  [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg( [pos1XYDeg, pos2XYDeg, pos3XYDeg], 
+    { pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceDesiredCm, 
+      nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}
+  );
+  let [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg( [pos1XYDeg, pos2XYDeg, pos3XYDeg], 
+    { pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceCm, 
+      nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}
+  );
+
+  // WRONG radial does not mean "horizontal"; tangential does not mean "vertical"
+  if (spacingDirection === "radial") {
+    spacingPx = pos2XYPx[0] - pos1XYPx[0];
+  } else if (spacingDirection === "tangential") {
+    spacingPx = pos2XYPx[1] - pos1XYPx[1];
+  }
+};
