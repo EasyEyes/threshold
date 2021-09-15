@@ -26,7 +26,7 @@ let expInfo = { participant: "", session: "001" };
 const useRC = false;
 const rc = RemoteCalibrator;
 
-const fontsRequired = new Set;
+const fontsRequired = new Set();
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -66,8 +66,9 @@ Papa.parse("conditions/blockCount.csv", {
             experiment(blockCount);
           }
         );
-      } else { // NO RC
-        experiment(blockCount) 
+      } else {
+        // NO RC
+        experiment(blockCount);
       }
     });
   },
@@ -88,23 +89,32 @@ const loadBlockFiles = (count, callback) => {
       blockFiles[count] = results.data;
       console.log("Block " + count + ": ", results.data);
 
-      Object.values(results.data).forEach(row => {
-        let fontFamily = row['targetFont'];
+      Object.values(results.data).forEach((row) => {
+        let fontFamily = row["targetFont"];
         let fontTestString = "12px " + fontFamily;
-        let fontPath = "fonts/"+fontFamily+".woff";
+        let fontPath = "fonts/" + fontFamily + ".woff";
         console.log("fontTestString: ", fontTestString);
 
-        let response = fetch(fontPath)
-        .then(response => {
+        let response = fetch(fontPath).then((response) => {
           if (response.ok) {
-            fontsRequired.add(row['targetFont']);
+            fontsRequired.add(row["targetFont"]);
           } else {
-            console.log("Does the browser consider this font supported?", document.fonts.check(fontTestString));
-            console.log("Uh oh, unable to find the font file for: "
-                        + fontFamily + "\n"
-                        + "If this font is already supported by the browser then it should display correctly. " + "\n"
-                        + "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " + "\n"
-                        + "Please verifiy for yourself that " + fontFamily + " is being correctly represented in your experiment.");
+            console.log(
+              "Does the browser consider this font supported?",
+              document.fonts.check(fontTestString)
+            );
+            console.log(
+              "Uh oh, unable to find the font file for: " +
+                fontFamily +
+                "\n" +
+                "If this font is already supported by the browser then it should display correctly. " +
+                "\n" +
+                "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
+                "\n" +
+                "Please verifiy for yourself that " +
+                fontFamily +
+                " is being correctly represented in your experiment."
+            );
           }
         });
       });
@@ -126,8 +136,9 @@ const experiment = (blockCount) => {
   }
   console.log("fontsRequired: ", fontsRequired);
 
-  fontsRequired.forEach(fontFamily => { 
-    _resources.push({ name: fontFamily, path: fontPath, })});
+  fontsRequired.forEach((fontFamily) => {
+    _resources.push({ name: fontFamily, path: fontPath });
+  });
 
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
@@ -139,7 +150,7 @@ const experiment = (blockCount) => {
   psychoJS.openWindow({
     fullscr: true,
     color: new util.Color([0, 0, 0]),
-    units: "height",  // TODO change to pix
+    units: "height", // TODO change to pix
     waitBlanking: true,
   });
   // schedule the experiment:
@@ -175,7 +186,9 @@ const experiment = (blockCount) => {
   // quit if user presses Cancel in dialog box:
   dialogCancelScheduler.add(quitPsychoJS, "", false);
 
-  if (useRC) { expInfo["participant"] = rc.id.value; }
+  if (useRC) {
+    expInfo["participant"] = rc.id.value;
+  }
 
   console.log("_resources: ", _resources);
   psychoJS.start({
@@ -234,7 +247,7 @@ const experiment = (blockCount) => {
 
     // Target Bounding Box
     // targetBoundingPoly = new visual.Rect ({
-    //   win: psychoJS.window, name: 'targetBoundingPoly', units : 'pix', 
+    //   win: psychoJS.window, name: 'targetBoundingPoly', units : 'pix',
     //   width: [1.0, 1.0][0], height: [1.0, 1.0][1],
     //   ori: 0.0, pos: [0, 0],
     //   lineWidth: 1.0, lineColor: new util.Color('pink'),
@@ -504,8 +517,13 @@ const experiment = (blockCount) => {
       for (let rowKey in thisBlockFileData) {
         let rowIndex = parseInt(rowKey);
         if (Object.keys(thisBlockFileData[rowIndex]).length > 1) {
-          console.log("condition trials this row of block: ", parseInt(thisBlockFileData[rowIndex]["conditionTrials"]));
-          possibleTrials.push(parseInt(thisBlockFileData[rowIndex]["conditionTrials"]));
+          console.log(
+            "condition trials this row of block: ",
+            parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
+          );
+          possibleTrials.push(
+            parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
+          );
         }
       }
       console.log("possibleTrials: ", possibleTrials);
@@ -725,11 +743,16 @@ const experiment = (blockCount) => {
       }
 
       // TODO use actual nearPoint; currently totally ignoring fixation???
-      const nearPointXYDeg = {x:0, y:0}; // TEMP 
-      const nearPointXYPix = {x:0, y:0}; // TEMP 
-      [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg( [pos1XYDeg, pos2XYDeg, pos3XYDeg], 
-        { pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceDesiredCm, 
-          nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}
+      const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
+      const nearPointXYPix = { x: 0, y: 0 }; // TEMP
+      [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg(
+        [pos1XYDeg, pos2XYDeg, pos3XYDeg],
+        {
+          pixPerCm: pixPerCm,
+          viewingDistanceCm: viewingDistanceDesiredCm,
+          nearPointXYDeg: nearPointXYDeg,
+          nearPointXYPix: nearPointXYPix,
+        }
       );
 
       if (spacingDirection === "radial") {
@@ -792,7 +815,7 @@ const experiment = (blockCount) => {
       //   // keep track of start time/frame for later
       //   targetBoundingPoly.tStart = t;  // (not accounting for frame time here)
       //   targetBoundingPoly.frameNStart = frameN;  // exact frame index
-        
+
       //   targetBoundingPoly.setAutoDraw(true);
       // }
 
@@ -1042,20 +1065,26 @@ const experiment = (blockCount) => {
  * @returns {Number[][]} Array of length=2 arrays of numbers, representing the same points in Pixel space
  */
 function XYPixOfXYDeg(xyDeg, displayOptions) {
-  if (xyDeg.length == 0){ return } // Return if no points to transform
+  if (xyDeg.length == 0) {
+    return;
+  } // Return if no points to transform
   // TODO verify displayOptions has the correct parameters
   const xyPix = [];
   xyDeg.forEach((position) => {
     position[0] = position[0] - displayOptions.nearPointXYDeg.x;
     position[1] = position[1] - displayOptions.nearPointXYDeg.y;
-    const rDeg = Math.sqrt(position[0]**2 + position[1]**2);
-    const rRadians = rDeg*(Math.PI/180);
-    const rPix = displayOptions.pixPerCm * displayOptions.viewingDistanceCm * Math.tan(rRadians);
+    const rDeg = Math.sqrt(position[0] ** 2 + position[1] ** 2);
+    const rRadians = rDeg * (Math.PI / 180);
+    const rPix =
+      displayOptions.pixPerCm *
+      displayOptions.viewingDistanceCm *
+      Math.tan(rRadians);
     let pixelPosition = [];
     if (rDeg > 0) {
-      pixelPosition = [  
-        position[0] * rPix / rDeg,
-        position[1] * rPix / rDeg];
+      pixelPosition = [
+        (position[0] * rPix) / rDeg,
+        (position[1] * rPix) / rDeg,
+      ];
     } else {
       pixelPosition = [0, 0];
     }
@@ -1068,23 +1097,38 @@ function XYPixOfXYDeg(xyDeg, displayOptions) {
 
 /**
  * WIP Not ready for use
- * @param {*} level 
- * @param {*} screenDimensions 
- * @param {*} spacingDirection 
- * @param {*} targetEccentricityXYDeg 
- * @param {*} targetEccentricityXDeg 
- * @param {*} targetEccentricityYDeg 
- * @returns 
+ * @param {*} level
+ * @param {*} screenDimensions
+ * @param {*} spacingDirection
+ * @param {*} targetEccentricityXYDeg
+ * @param {*} targetEccentricityXDeg
+ * @param {*} targetEccentricityYDeg
+ * @returns
  */
-const getBoundedSpacing = (level, screenDimensions, spacingDirection, targetEccentricityXYDeg, targetEccentricityXDeg, targetEccentricityYDeg) => {
-  if (!(screenDimensions.hasOwnProperty("width") && screenDimensions.hasOwnProperty("height"))) {
-    console.error("Uh oh! Please specify the `width` and `height` in `screenDimensions`.");
+const getBoundedSpacing = (
+  level,
+  screenDimensions,
+  spacingDirection,
+  targetEccentricityXYDeg,
+  targetEccentricityXDeg,
+  targetEccentricityYDeg
+) => {
+  if (
+    !(
+      screenDimensions.hasOwnProperty("width") &&
+      screenDimensions.hasOwnProperty("height")
+    )
+  ) {
+    console.error(
+      "Uh oh! Please specify the `width` and `height` in `screenDimensions`."
+    );
     return;
   }
 
   spacingDeg = Math.pow(10, level);
 
-  if (spacingDirection === "radial") { // WRONG radial doesn't mean "horizontal"
+  if (spacingDirection === "radial") {
+    // WRONG radial doesn't mean "horizontal"
     pos1XYDeg = [
       targetEccentricityXYDeg[0] - spacingDeg,
       targetEccentricityXYDeg[1],
@@ -1099,7 +1143,8 @@ const getBoundedSpacing = (level, screenDimensions, spacingDirection, targetEcce
     } else {
       levelRight = level;
     }
-  } else if (spacingDirection == "tangential") {  // WRONG tangential doesn't mean "vertical"
+  } else if (spacingDirection == "tangential") {
+    // WRONG tangential doesn't mean "vertical"
     pos1XYDeg = [
       targetEccentricityXYDeg[0],
       targetEccentricityXYDeg[1] - spacingDeg,
@@ -1117,15 +1162,25 @@ const getBoundedSpacing = (level, screenDimensions, spacingDirection, targetEcce
   }
 
   // TODO use actual nearPoint; currently totally ignoring fixation???
-  const nearPointXYDeg = {x:0, y:0}; // TEMP 
-  const nearPointXYPix = {x:0, y:0}; // TEMP 
-  [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg( [pos1XYDeg, pos2XYDeg, pos3XYDeg], 
-    { pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceDesiredCm, 
-      nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}
+  const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
+  const nearPointXYPix = { x: 0, y: 0 }; // TEMP
+  [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg(
+    [pos1XYDeg, pos2XYDeg, pos3XYDeg],
+    {
+      pixPerCm: pixPerCm,
+      viewingDistanceCm: viewingDistanceDesiredCm,
+      nearPointXYDeg: nearPointXYDeg,
+      nearPointXYPix: nearPointXYPix,
+    }
   );
-  let [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg( [pos1XYDeg, pos2XYDeg, pos3XYDeg], 
-    { pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceCm, 
-      nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}
+  let [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg(
+    [pos1XYDeg, pos2XYDeg, pos3XYDeg],
+    {
+      pixPerCm: pixPerCm,
+      viewingDistanceCm: viewingDistanceCm,
+      nearPointXYDeg: nearPointXYDeg,
+      nearPointXYPix: nearPointXYPix,
+    }
   );
 
   // WRONG radial does not mean "horizontal"; tangential does not mean "vertical"
