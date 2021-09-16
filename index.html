@@ -12,8 +12,17 @@
     <!-- Remote Calibrator -->
     <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.2.1/lib/RemoteCalibrator.min.js"></script>
     <link rel="stylesheet" href="./lib/psychojs-2021.3.0.css" />
+    <link rel="stylesheet" href="./lib/custom.css" />
   </head>
   <body>
+    <audio id="correctAudio">
+      <source src="./media/correct.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <audio id="wrongAudio">
+      <source src="./media/wrong.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
     <div id="root"></div>
     <!-- external libraries -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
