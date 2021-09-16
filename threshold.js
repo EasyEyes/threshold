@@ -28,8 +28,18 @@ const rc = RemoteCalibrator;
 
 const fontsRequired = new Set();
 
-var correctAudio = document.getElementById('correctAudio');
-var wrongAudio = document.getElementById('wrongAudio');
+var correctAudio = document.getElementById("correctAudio");
+var wrongAudio = document.getElementById("wrongAudio");
+
+function resolveNotAllowedAudio(a) {
+  if (a) {
+    a.catch((e) => {
+      if (e.name === "NotAllowedError" || e.name === "NotSupportedError") {
+        console.log("Audio play failed.");
+      }
+    });
+  }
+}
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -858,10 +868,10 @@ const experiment = (blockCount) => {
           // was this correct?
           if (key_resp.keys == correctAns) {
             // Play sound
-            correctAudio.play()
+            resolveNotAllowedAudio(correctAudio.play());
             key_resp.corr = 1;
           } else {
-            wrongAudio.play()
+            resolveNotAllowedAudio(wrongAudio.play());
             key_resp.corr = 0;
           }
           // a response ends the routine
@@ -966,10 +976,10 @@ const experiment = (blockCount) => {
       // was no response the correct answer?!
       if (key_resp.keys === undefined) {
         if (["None", "none", undefined].includes(correctAns)) {
-          correctAudio.play()
+          resolveNotAllowedAudio(correctAudio.play());
           key_resp.corr = 1; // correct non-response
         } else {
-          wrongAudio.play()
+          resolveNotAllowedAudio(wrongAudio.play());
           key_resp.corr = 0; // failed to respond (incorrectly)
         }
       }
