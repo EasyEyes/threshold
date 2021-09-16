@@ -1,22 +1,22 @@
 # EasyEyes Threshold
 
-A PsychoJS-based experiment generator for the measuring various psychometric thresholds, eg crowding.
+A PsychoJS-based experiment generator for the measuring various psychometric thresholds, e.g., crowding.
 
 ## Installation Instructions
 
 1. Clone this repository.
 
 You will need a copy of the files locally to work with.
-Running `git clone https://github.com/EasyEyes/crowding.git` in a
+Running `git clone https://github.com/EasyEyes/threshold.git` in a
 terminal window should do the trick.
 
 2. Run `preprocessor.py` on your experiment's csv file.
 
 Assume we have a csv configuration file for our experiment called `myExperiment.csv`,
-which we've placed in the same directory as `preprocessor.py` and `crowding.js`.
+which we've placed in the same directory as `preprocessor.py` and `threshold.js`.
 From a shell open in the same directory, run `python preprocessor.py myExperiment.csv`.
 If successful, this will create a `/conditions` directory, which contains
-the properly formatted csv files needed (_ie_ by `crowding.js`) to create your experiment.
+the properly formatted csv files needed (_ie_ by `threshold.js`) to create your experiment.
 
 - If you don't have python available on your computer, [install it](https://www.python.org/downloads/).
 
@@ -24,7 +24,7 @@ the properly formatted csv files needed (_ie_ by `crowding.js`) to create your e
 
 `index.html` is the entrypoint to the actually experiment.
 From here the necessary [psychojs modules](https://github.com/psychopy/psychojs),
-the EasyEyes crowding experiment (_ie_ crowding.js),
+the EasyEyes Threshold experiment (_ie_ threshold.js),
 and the parameters specific to your experiment
 (_ie_ the files in `/conditions` you just produced by running `preprocessor.py`)
 
@@ -45,7 +45,7 @@ when your experiment is tested and ready to be run by participants, use the seco
   our computer which properly sends all the required files for our experiment
   to the web-browser when we run the experiment.
 
-  From a shell open in the same directory as `crowding.js` and `index.html`, simply run
+  From a shell open in the same directory as `threshold.js` and `index.html`, simply run
   `python3 -m http.server`.
   This is a quick, one-line way to start a server instance in the current
   directory, which is built-in to python.
@@ -70,9 +70,9 @@ when your experiment is tested and ready to be run by participants, use the seco
   Alternatively, you can manage your own server, running a program such as [JATOS](jatos.org),
   to host your experiment online.
 
-4. Developers: Edit `crowding.js` to extend functionality
+4. Developers: Edit `threshold.js` to extend functionality
    Interested developers can expand upon the currently supported parameters by directly
-   editing the `crowding.js` or `preprocessor.py` files.
+   editing the `threshold.js` or `preprocessor.py` files.
    If you have a contribution that you think would be valuable for other EasyEyes Crowding users, consider
    [creating a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
    to share your work.
