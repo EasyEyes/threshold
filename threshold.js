@@ -19,14 +19,27 @@ var levelLeft, levelRight;
 let correctAns;
 
 // store info about the experiment session:
-let expName = "crowding"; // from the Builder filename that created this script
+let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: "", session: "001" };
 
 // For development purposes, toggle RC off for testing speed
 const useRC = false;
 const rc = RemoteCalibrator;
 
-const fontsRequired = new Set;
+const fontsRequired = new Set();
+
+var correctAudio = document.getElementById("correctAudio");
+var wrongAudio = document.getElementById("wrongAudio");
+
+function resolveNotAllowedAudio(a) {
+  if (a) {
+    a.catch((e) => {
+      if (e.name === "NotAllowedError" || e.name === "NotSupportedError") {
+        console.log("Audio play failed.");
+      }
+    });
+  }
+}
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -66,8 +79,9 @@ Papa.parse("conditions/blockCount.csv", {
             experiment(blockCount);
           }
         );
-      } else { // NO RC
-        experiment(blockCount) 
+      } else {
+        // NO RC
+        experiment(blockCount);
       }
     });
   },
@@ -88,23 +102,32 @@ const loadBlockFiles = (count, callback) => {
       blockFiles[count] = results.data;
       console.log("Block " + count + ": ", results.data);
 
-      Object.values(results.data).forEach(row => {
-        let fontFamily = row['targetFont'];
+      Object.values(results.data).forEach((row) => {
+        let fontFamily = row["targetFont"];
         let fontTestString = "12px " + fontFamily;
-        let fontPath = "fonts/"+fontFamily+".woff";
+        let fontPath = "fonts/" + fontFamily + ".woff";
         console.log("fontTestString: ", fontTestString);
 
-        let response = fetch(fontPath)
-        .then(response => {
+        let response = fetch(fontPath).then((response) => {
           if (response.ok) {
-            fontsRequired.add(row['targetFont']);
+            fontsRequired.add(row["targetFont"]);
           } else {
-            console.log("Does the browser consider this font supported?", document.fonts.check(fontTestString));
-            console.log("Uh oh, unable to find the font file for: "
-                        + fontFamily + "\n"
-                        + "If this font is already supported by the browser then it should display correctly. " + "\n"
-                        + "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " + "\n"
-                        + "Please verifiy for yourself that " + fontFamily + " is being correctly represented in your experiment.");
+            console.log(
+              "Does the browser consider this font supported?",
+              document.fonts.check(fontTestString)
+            );
+            console.log(
+              "Uh oh, unable to find the font file for: " +
+                fontFamily +
+                "\n" +
+                "If this font is already supported by the browser then it should display correctly. " +
+                "\n" +
+                "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
+                "\n" +
+                "Please verifiy for yourself that " +
+                fontFamily +
+                " is being correctly represented in your experiment."
+            );
           }
         });
       });
@@ -126,8 +149,9 @@ const experiment = (blockCount) => {
   }
   console.log("fontsRequired: ", fontsRequired);
 
-  fontsRequired.forEach(fontFamily => { 
-    _resources.push({ name: fontFamily, path: fontPath, })});
+  fontsRequired.forEach((fontFamily) => {
+    _resources.push({ name: fontFamily, path: fontPath });
+  });
 
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
@@ -139,7 +163,7 @@ const experiment = (blockCount) => {
   psychoJS.openWindow({
     fullscr: true,
     color: new util.Color([0, 0, 0]),
-    units: "height",  // TODO change to pix
+    units: "height", // TODO change to pix
     waitBlanking: true,
   });
   // schedule the experiment:
@@ -175,7 +199,9 @@ const experiment = (blockCount) => {
   // quit if user presses Cancel in dialog box:
   dialogCancelScheduler.add(quitPsychoJS, "", false);
 
-  if (useRC) { expInfo["participant"] = rc.id.value; }
+  if (useRC) {
+    expInfo["participant"] = rc.id.value;
+  }
 
   console.log("_resources: ", _resources);
   psychoJS.start({
@@ -234,7 +260,7 @@ const experiment = (blockCount) => {
 
     // Target Bounding Box
     // targetBoundingPoly = new visual.Rect ({
-    //   win: psychoJS.window, name: 'targetBoundingPoly', units : 'pix', 
+    //   win: psychoJS.window, name: 'targetBoundingPoly', units : 'pix',
     //   width: [1.0, 1.0][0], height: [1.0, 1.0][1],
     //   ori: 0.0, pos: [0, 0],
     //   lineWidth: 1.0, lineColor: new util.Color('pink'),
@@ -504,8 +530,13 @@ const experiment = (blockCount) => {
       for (let rowKey in thisBlockFileData) {
         let rowIndex = parseInt(rowKey);
         if (Object.keys(thisBlockFileData[rowIndex]).length > 1) {
-          console.log("condition trials this row of block: ", parseInt(thisBlockFileData[rowIndex]["conditionTrials"]));
-          possibleTrials.push(parseInt(thisBlockFileData[rowIndex]["conditionTrials"]));
+          console.log(
+            "condition trials this row of block: ",
+            parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
+          );
+          possibleTrials.push(
+            parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
+          );
         }
       }
       console.log("possibleTrials: ", possibleTrials);
@@ -725,11 +756,16 @@ const experiment = (blockCount) => {
       }
 
       // TODO use actual nearPoint; currently totally ignoring fixation???
-      const nearPointXYDeg = {x:0, y:0}; // TEMP 
-      const nearPointXYPix = {x:0, y:0}; // TEMP 
-      [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg( [pos1XYDeg, pos2XYDeg, pos3XYDeg], 
-        { pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceDesiredCm, 
-          nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}
+      const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
+      const nearPointXYPix = { x: 0, y: 0 }; // TEMP
+      [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg(
+        [pos1XYDeg, pos2XYDeg, pos3XYDeg],
+        {
+          pixPerCm: pixPerCm,
+          viewingDistanceCm: viewingDistanceDesiredCm,
+          nearPointXYDeg: nearPointXYDeg,
+          nearPointXYPix: nearPointXYPix,
+        }
       );
 
       if (spacingDirection === "radial") {
@@ -792,7 +828,7 @@ const experiment = (blockCount) => {
       //   // keep track of start time/frame for later
       //   targetBoundingPoly.tStart = t;  // (not accounting for frame time here)
       //   targetBoundingPoly.frameNStart = frameN;  // exact frame index
-        
+
       //   targetBoundingPoly.setAutoDraw(true);
       // }
 
@@ -831,8 +867,11 @@ const experiment = (blockCount) => {
           key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
           // was this correct?
           if (key_resp.keys == correctAns) {
+            // Play sound
+            resolveNotAllowedAudio(correctAudio.play());
             key_resp.corr = 1;
           } else {
+            resolveNotAllowedAudio(wrongAudio.play());
             key_resp.corr = 0;
           }
           // a response ends the routine
@@ -937,8 +976,10 @@ const experiment = (blockCount) => {
       // was no response the correct answer?!
       if (key_resp.keys === undefined) {
         if (["None", "none", undefined].includes(correctAns)) {
+          resolveNotAllowedAudio(correctAudio.play());
           key_resp.corr = 1; // correct non-response
         } else {
+          resolveNotAllowedAudio(wrongAudio.play());
           key_resp.corr = 0; // failed to respond (incorrectly)
         }
       }
@@ -1056,7 +1097,9 @@ function degreesToPixels(degrees, displayOptions){
  * @returns {Number[][]} Array of length=2 arrays of numbers, representing the same points in Pixel space
  */
 function XYPixOfXYDeg(xyDeg, displayOptions) {
-  if (xyDeg.length == 0){ return } // Return if no points to transform
+  if (xyDeg.length == 0) {
+    return;
+  } // Return if no points to transform
   // TODO verify displayOptions has the correct parameters
   const xyPix = [];
   xyDeg.forEach((position) => {
@@ -1066,9 +1109,10 @@ function XYPixOfXYDeg(xyDeg, displayOptions) {
     const rPix = degreesToPixels(rDeg, displayOptions);
     let pixelPosition = [];
     if (rDeg > 0) {
-      pixelPosition = [  
-        position[0] * rPix / rDeg,
-        position[1] * rPix / rDeg];
+      pixelPosition = [
+        (position[0] * rPix) / rDeg,
+        (position[1] * rPix) / rDeg,
+      ];
     } else {
       pixelPosition = [0, 0];
     }

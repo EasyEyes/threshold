@@ -9,7 +9,9 @@ if len(sys.argv) > 1:
 
 # Transpose
 # https://stackoverflow.com/a/58267676/11069914
-with open(fileName, encoding='utf-8') as f, open('t_' + fileName, 'w', encoding='utf-8') as fw:
+with open(fileName, encoding='utf-8') as f, open('t_' + fileName,
+                                                 'w',
+                                                 encoding='utf-8') as fw:
     writer(fw, delimiter=',').writerows(zip(*reader(f, delimiter=',')))
 
 # Make output directory
@@ -30,12 +32,13 @@ df.rename(columns={
     'thresholdBeta': 'beta',
     'thresholdDelta': 'delta',
     'thresholdProbability': 'pThreshold'
-}, inplace=True)
+},
+          inplace=True)
 
 if 'thresholdGuessLogSd' in df_keys:
     # Special case
     # df['startValSd'] = np.log(df['thresholdGuessLogSd'])
-    df['startValSd'] = df['thresholdGuessLogSd'] # ?
+    df['startValSd'] = df['thresholdGuessLogSd']  # ?
     df['startVal'] = np.log10(df['thresholdGuess'])
 
 # Export separate files
@@ -47,8 +50,9 @@ blockCounts = {'block': []}
 
 for i, value in enumerate(dataBlockRange):
     blockCounts['block'].append(i)
-    df[df['blockOrder'] == value].to_csv(
-        './conditions/block_' + str(value) + '.csv', index=False)
+    df[df['blockOrder'] == value].to_csv('./conditions/block_' + str(value) +
+                                         '.csv',
+                                         index=False)
 
 df_blockCount = pd.DataFrame(data=blockCounts)
 df_blockCount.to_csv('./conditions/blockCount.csv', index=False)
