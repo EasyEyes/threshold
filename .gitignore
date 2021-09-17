@@ -145,3 +145,5 @@ dmypy.json
 
 # Store fonts that you want to use locally
 /fonts
+
+scratch.js

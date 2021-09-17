@@ -1027,6 +1027,20 @@ const experiment = (blockCount) => {
 */
 
 /**
+ * Convert a number of visual degrees to pixels VERIFY
+ * @param {Number} degrees Scalar, in degrees
+ * @param {Object} displayOptions Parameters about the stimulus presentation
+ * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
+ * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
+ * @returns {Number}
+ */
+function degreesToPixels(degrees, displayOptions){
+    const radians = degrees*(Math.PI/180);
+    const pixels = displayOptions.pixPerCm * displayOptions.viewingDistanceCm * Math.tan(radians);
+    return pixels;
+}
+
+/**
  * Translation of MATLAB function of the same name
  * by Prof Denis Pelli, XYPixOfXYDeg.m
  * @param {Array} xyDeg List of [x,y] pairs, representing points x degrees right, and y degrees up, of fixation
@@ -1049,8 +1063,7 @@ function XYPixOfXYDeg(xyDeg, displayOptions) {
     position[0] = position[0] - displayOptions.nearPointXYDeg.x;
     position[1] = position[1] - displayOptions.nearPointXYDeg.y;
     const rDeg = Math.sqrt(position[0]**2 + position[1]**2);
-    const rRadians = rDeg*(Math.PI/180);
-    const rPix = displayOptions.pixPerCm * displayOptions.viewingDistanceCm * Math.tan(rRadians);
+    const rPix = degreesToPixels(rDeg, displayOptions);
     let pixelPosition = [];
     if (rDeg > 0) {
       pixelPosition = [  
@@ -1067,71 +1080,131 @@ function XYPixOfXYDeg(xyDeg, displayOptions) {
 }
 
 /**
- * WIP Not ready for use
- * @param {*} level 
- * @param {*} screenDimensions 
- * @param {*} spacingDirection 
- * @param {*} targetEccentricityXYDeg 
- * @param {*} targetEccentricityXDeg 
- * @param {*} targetEccentricityYDeg 
+ * Given a spacing value (in pixels), estimate a (non-tight) bounding box
+ * @param {Number} spacing Spacing which will be used to place flanker
+ * @param {Number} spacingOverSizeRatio Specified ratio of distance between flanker&target to letter height
+ * @param {Number} minimumHeight Smallest allowable letter height for flanker
+ * @param {String} font Font-family in which the stimuli will be presented
  * @returns 
  */
-const getBoundedSpacing = (level, screenDimensions, spacingDirection, targetEccentricityXYDeg, targetEccentricityXDeg, targetEccentricityYDeg) => {
-  if (!(screenDimensions.hasOwnProperty("width") && screenDimensions.hasOwnProperty("height"))) {
-    console.error("Uh oh! Please specify the `width` and `height` in `screenDimensions`.");
-    return;
+function boundingBoxFromSpacing(spacing, spacingOverSizeRatio, minimumHeight, font) {
+  const height = Math.max(spacing/spacingOverSizeRatio, minimumHeight);
+  const testTextStim = new visual.TextStim({
+      win: psychoJS.window,
+      name: "testTextStim",
+      text: "H", // TEMP
+      font: font,
+      units: "pix", // ASSUMES that parameters are in pixel units
+      pos: [0,0],
+      height: height,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -7.0,
+  });
+  return testTextStim.boundingBox;
+}
+
+/**
+ * Calculate the (2D) coordinates of two tangential flankers, linearly symmetrical around a target at targetPosition
+ * @todo Add parameter/support for log-symmetric spacing
+ * @param {Number[]} targetPosition [x,y] position of the target
+ * @param {Number[]} fixationPosition [x,y] position of the fixation point
+ * @param {Number} spacing How far the flankers are to be from the target (in the same units as the target & fixation positions)
+ * @returns {Number[][]} Array containing two Arrays which represent the positions of Flanker 1 and Flanker 2
+ */
+function tangentialFlankerPositions(targetPosition, fixationPosition, spacing) {
+  let x, i; // Variables for anonymous fn's
+  // Vector representing the line between target and fixation
+  const v = [fixationPosition[0]-targetPosition[0], fixationPosition[1]-targetPosition[1]];
+  // Get the vector perpendicular to v
+  const p = [v[1], -v[0]] // SEE https://gamedev.stackexchange.com/questions/70075/how-can-i-find-the-perpendicular-to-a-2d-vector
+
+  // Find the point that is `spacing` far from `targetPosition` along p
+  // SEE https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
+  /// Find the length of `p`
+  const llpll = Math.sqrt(
+    p.map(x => x**2).reduce((previous, current) => previous + current));
+  /// Normalize `p` 
+  const u = p.map(x => x/llpll);
+  /// Find our two new points, `spacing` distance away from targetPosition along line `p`
+  const flankerPositions = [
+    targetPosition.map((x, i) => x+(spacing*u[i])),
+    targetPosition.map((x, i) => x-(spacing*u[i])),
+  ];
+  return flankerPositions;
+}
+
+/**
+ * Calculate the (2D) coordinates of two radial flankers, linearly symmetrical around a target at targetPosition
+ * @todo Add parameter/support for log-symmetric spacing
+ * @param {Number[]} targetPosition [x,y] position of the target
+ * @param {Number[]} fixationPosition [x,y] position of the fixation point
+ * @param {Number} spacing How far the flankers are to be from the target (in the same units as the target & fixation positions)
+ * @returns {Number[][]} Array containing two Arrays, which represent the positions of Flanker 1 and Flanker 2
+ */
+function radialFlankerPositions(targetPosition, fixationPosition, spacing) {
+  // SEE https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
+
+  // Vector representing the line between target and fixation
+  const v = [fixationPosition[0]-targetPosition[0], fixationPosition[1]-targetPosition[1]];
+  /// Find the length of v
+  const llvll = Math.sqrt(
+    v.map(x => x**2).reduce((previous, current) => previous + current));
+  /// Normalize v
+  const u = v.map(x => x/llvll);
+  /// Find our two new points, `spacing` distance away from targetPosition along line v
+  const flankerPositions = [
+    targetPosition.map((x, i) => x+(spacing*u[i])),
+    targetPosition.map((x, i) => x-(spacing*u[i])),
+  ];
+
+}
+
+/**
+ * Return the coordinates of the two flankers around a given target.
+ * @param {Number[]} targetPosition [x,y] position of the target stimuli
+ * @param {Number[]} fixationPosition [x,y] position of the fixation stimuli
+ * @param {("radial"|"tangential")} flankerOrientation String specifying the position of the flankers relative to the line between fixation and the target
+ * @param {Number} spacing Distance between the target and one flanker
+ * @returns {Number[][]} Array containing two [x,y] arrays, each representing the location of one flanker
+ */
+function getFlankerLocations(targetPosition, fixationPosition, flankerOrientation, spacing){
+  switch(flankerOrientation) {
+    case "radial":
+      return radialFlankerPositions(targetPosition, fixationPosition, spacing);
+    case "tangential":
+      return tangentialFlankerPositions(targetPosition, fixationPosition, spacing);
+    default:
+      console.error("Unknown flankerOrientation specified, ", flankerOrientation);
   }
-
-  spacingDeg = Math.pow(10, level);
-
-  if (spacingDirection === "radial") { // WRONG radial doesn't mean "horizontal"
-    pos1XYDeg = [
-      targetEccentricityXYDeg[0] - spacingDeg,
-      targetEccentricityXYDeg[1],
-    ];
-    pos2XYDeg = targetEccentricityXYDeg;
-    pos3XYDeg = [
-      targetEccentricityXYDeg[0] + spacingDeg,
-      targetEccentricityXYDeg[1],
-    ];
-    if (targetEccentricityXDeg < 0) {
-      levelLeft = level;
-    } else {
-      levelRight = level;
-    }
-  } else if (spacingDirection == "tangential") {  // WRONG tangential doesn't mean "vertical"
-    pos1XYDeg = [
-      targetEccentricityXYDeg[0],
-      targetEccentricityXYDeg[1] - spacingDeg,
-    ];
-    pos2XYDeg = targetEccentricityXYDeg;
-    pos3XYDeg = [
-      targetEccentricityXYDeg[0],
-      targetEccentricityXYDeg[1] + spacingDeg,
-    ];
-    if (targetEccentricityYDeg < 0) {
-      levelLeft = level;
-    } else {
-      levelRight = level;
-    }
-  }
-
-  // TODO use actual nearPoint; currently totally ignoring fixation???
-  const nearPointXYDeg = {x:0, y:0}; // TEMP 
-  const nearPointXYPix = {x:0, y:0}; // TEMP 
-  [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg( [pos1XYDeg, pos2XYDeg, pos3XYDeg], 
-    { pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceDesiredCm, 
-      nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}
-  );
-  let [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg( [pos1XYDeg, pos2XYDeg, pos3XYDeg], 
-    { pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceCm, 
-      nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}
-  );
-
-  // WRONG radial does not mean "horizontal"; tangential does not mean "vertical"
-  if (spacingDirection === "radial") {
-    spacingPx = pos2XYPx[0] - pos1XYPx[0];
-  } else if (spacingDirection === "tangential") {
-    spacingPx = pos2XYPx[1] - pos1XYPx[1];
-  }
-};
+}
+/**
+ * Return the extreme points of a rectangle bounding the pair of flankers
+ * @param {Number} level Suggested level from QUEST
+ * @param {Number[]} targetPosition [x,y] position of the target stimulus
+ * @param {Number[]} fixationPosition [x,y] position of the fixation stimulus
+ * @param {("radial"|"tangential")} flankerOrientation Arrangement of the flankers relative to the line between fixation and target
+ * @param {Object} sizingParameters Parameters for drawing stimuli
+ * @param {Number} sizingParameters.spacingOverSizeRatio Ratio of distance between flanker&target to stimuli letter height
+ * @param {Number} sizingParameters.minimumHeight Minimum stimulus letter height (in same units as other parameters)
+ * @param {String} sizingParameters.fontFamily Name of the fontFamily in which the stimuli will be drawn
+ * @returns {Number[][]} [[x_min, y_min], [x_max, y_max]] Array of defining points of the area over which flankers extend
+ */
+function flankersExtent(level, targetPosition, fixationPosition, flankerOrientation, sizingParameters){
+  const spacingDegrees = Math.pow(10, level);
+  const spacingPixels = degreesToPixels(spacingDegrees);
+  const flankerLocations = getFlankerLocations(
+    targetPosition, fixationPosition, spacingPixels, flankerOrientation);
+  const flankerBoxDimensions = boundingBoxFromSpacing(
+    spacingPixels, 
+    sizingParameters.spacingOverSizeRatio, 
+    sizingParameters.minimumHeight,
+    sizingParameters.fontFamily);
+  return flankerLocations.map(
+    (flankerPosition, i) => [
+      flankerPosition[0] + (i === 0 ? -1 : 1)(flankerBoxDimensions.width/2),
+      flankerPosition[1] + (i === 0 ? -1 : 1)(flankerBoxDimensions.height/2)
+    ]);
+}
