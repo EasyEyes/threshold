@@ -1,5 +1,7 @@
 # EasyEyes Threshold
 
+📖 [**Read the Manual**](https://docs.google.com/spreadsheets/d/1x65NjykMm-XUOz98Eu_oo6ON2xspm_h0Q0M2u6UGtug/edit?usp=sharing) (shared via Google Sheets)
+
 A PsychoJS-based experiment generator for the measuring various psychometric thresholds, e.g., crowding.
 
 ## Installation Instructions
