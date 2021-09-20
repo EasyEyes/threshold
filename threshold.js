@@ -686,6 +686,8 @@ const experiment = (blockCount) => {
       console.log("condition: ", condition);
 
       let level = currentLoop._currentStaircase.getQuestValue();
+      console.log("level from getQuestValue(): ", level);
+      console.log("_currentStaircase: ", currentLoop._currentStaircase);
 
       // TODO Based on display size
       // Set maximum level to fully display all text
@@ -750,65 +752,102 @@ const experiment = (blockCount) => {
       correctAns = targetStim.toLowerCase();
       /* -------------------------------------------------------------------------- */
 
-      var heightPx, listXY;
+      var heightPx;
       var pos1XYDeg, pos1XYPx, pos2XYDeg, pos2XYPx, pos3XYDeg, pos3XYPx;
       var spacingDeg, spacingPx;
 
       ////
       // !
-      spacingDeg = Math.pow(10, level);
-
-      if (spacingDirection === "radial") {
-        pos1XYDeg = [
-          targetEccentricityXYDeg[0] - spacingDeg,
-          targetEccentricityXYDeg[1],
-        ];
-        pos2XYDeg = targetEccentricityXYDeg;
-        pos3XYDeg = [
-          targetEccentricityXYDeg[0] + spacingDeg,
-          targetEccentricityXYDeg[1],
-        ];
-        if (targetEccentricityXDeg < 0) {
-          levelLeft = level;
-        } else {
-          levelRight = level;
-        }
-      } else if (spacingDirection == "tangential") {
-        pos1XYDeg = [
-          targetEccentricityXYDeg[0],
-          targetEccentricityXYDeg[1] - spacingDeg,
-        ];
-        pos2XYDeg = targetEccentricityXYDeg;
-        pos3XYDeg = [
-          targetEccentricityXYDeg[0],
-          targetEccentricityXYDeg[1] + spacingDeg,
-        ];
-        if (targetEccentricityYDeg < 0) {
-          levelLeft = level;
-        } else {
-          levelRight = level;
-        }
-      }
-
+      fixationXYPix = [0, 0];
       // TODO use actual nearPoint; currently totally ignoring fixation???
       const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
       const nearPointXYPix = { x: 0, y: 0 }; // TEMP
+      const displayOptions = {
+        pixPerCm: pixPerCm,
+        viewingDistanceCm: viewingDistanceDesiredCm,
+        nearPointXYDeg: nearPointXYDeg,
+        nearPointXYPix: nearPointXYPix,
+        spacingOverSizeRatio: spacingOverSizeRatio,
+        minimumHeight: targetMinimumPix,
+        fontFamily: targetFont,
+        window: psychoJS.window,
+      };
+      const [targetXYPix] = XYPixOfXYDeg(
+        [targetEccentricityXYDeg],
+        displayOptions
+      );
+      console.log("in new location");
+      const areaFlankersCover = flankersExtent(
+        level,
+        targetXYPix,
+        fixationXYPix,
+        spacingDirection,
+        displayOptions
+      );
+      console.log("areaFlankersCover: ", areaFlankersCover);
+      const fixationInfringed = rectangleContainsPoint(
+        areaFlankersCover,
+        fixationXYPix
+      );
+      console.log("fixationInfringed: ", fixationInfringed);
+      const stimuliExtendOffscreen = rectangleOffscreen(areaFlankersCover, {
+        width: screen.width,
+        height: screen.height,
+      });
+      console.log("stimuliExtendOffscreen: ", stimuliExtendOffscreen);
+      const badPresentation = fixationInfringed || stimuliExtendOffscreen;
+      console.log("badPresentation: ", badPresentation);
+
+      spacingDeg = Math.pow(10, level);
+
+      console.log("targetEccentricityXYDeg: ", targetEccentricityXYDeg);
+      console.log(
+        "flanker locations: ",
+        getFlankerLocations(
+          targetEccentricityXYDeg,
+          fixationXYPix,
+          spacingDirection,
+          spacingDeg
+        )
+      );
+
+      [pos1XYDeg, pos3XYDeg] = getFlankerLocations(
+        targetEccentricityXYDeg,
+        fixationXYPix,
+        spacingDirection,
+        spacingDeg
+      );
+      pos2XYDeg = targetEccentricityXYDeg;
+
+      // if (spacingDirection === "radial") {
+      //   if (targetEccentricityXDeg < 0) {
+      //     levelLeft = level;
+      //   } else {
+      //     levelRight = level;
+      //   }
+      // } else if (spacingDirection == "tangential") {
+      //   if (targetEccentricityYDeg < 0) {
+      //     levelLeft = level;
+      //   } else {
+      //     levelRight = level;
+      //   }
+      // }
 
       [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg(
         [pos1XYDeg, pos2XYDeg, pos3XYDeg],
-        {
-          pixPerCm: pixPerCm,
-          viewingDistanceCm: viewingDistanceCm,
-          nearPointXYDeg: nearPointXYDeg,
-          nearPointXYPix: nearPointXYPix,
-        }
+        displayOptions
       );
 
-      if (spacingDirection === "radial") {
-        spacingPx = pos2XYPx[0] - pos1XYPx[0];
-      } else if (spacingDirection === "tangential") {
-        spacingPx = pos2XYPx[1] - pos1XYPx[1];
-      }
+      // if (spacingDirection === "radial") {
+      //   spacingPx = pos2XYPx[0] - pos1XYPx[0];
+      // } else if (spacingDirection === "tangential") {
+      //   spacingPx = pos2XYPx[1] - pos1XYPx[1];
+      // }
+      spacingPx = degreesToPixels(spacingDeg, {
+        pixPerCm: pixPerCm,
+        viewingDistanceCm: viewingDistanceDesiredCm,
+      });
+      console.log("spacingPx: ", spacingPx);
 
       heightPx = Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix);
 
@@ -821,16 +860,17 @@ const experiment = (blockCount) => {
       pos2XYPx = pos2XYPx.map((x) => Math.round(x));
       pos3XYPx = pos3XYPx.map((x) => Math.round(x));
 
+      fixation.setPos(fixationXYPix);
       flanker1.setPos(pos1XYPx);
-      flanker1.setText(firstFlanker);
+      flanker1.setText(firstFlankerCharacter);
       flanker1.setFont(targetFont);
       flanker1.setHeight(heightPx);
       target.setPos(pos2XYPx);
-      target.setText(targetStim);
+      target.setText(targetCharacter);
       target.setFont(targetFont);
       target.setHeight(heightPx);
       flanker2.setPos(pos3XYPx);
-      flanker2.setText(secondFlanker);
+      flanker2.setText(secondFlankerCharacter);
       flanker2.setFont(targetFont);
       flanker2.setHeight(heightPx);
       
@@ -1149,10 +1189,13 @@ const experiment = (blockCount) => {
  * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
  * @returns {Number}
  */
-function degreesToPixels(degrees, displayOptions){
-    const radians = degrees*(Math.PI/180);
-    const pixels = displayOptions.pixPerCm * displayOptions.viewingDistanceCm * Math.tan(radians);
-    return pixels;
+function degreesToPixels(degrees, displayOptions) {
+  const radians = degrees * (Math.PI / 180);
+  const pixels =
+    displayOptions.pixPerCm *
+    displayOptions.viewingDistanceCm *
+    Math.tan(radians);
+  return pixels;
 }
 
 /**
@@ -1179,7 +1222,7 @@ function XYPixOfXYDeg(xyDeg, displayOptions) {
   xyDeg.forEach((position) => {
     position[0] = position[0] - displayOptions.nearPointXYDeg.x;
     position[1] = position[1] - displayOptions.nearPointXYDeg.y;
-    const rDeg = Math.sqrt(position[0]**2 + position[1]**2);
+    const rDeg = Math.sqrt(position[0] ** 2 + position[1] ** 2);
     const rPix = degreesToPixels(rDeg, displayOptions);
     let pixelPosition = [];
     if (rDeg > 0) {
@@ -1203,25 +1246,34 @@ function XYPixOfXYDeg(xyDeg, displayOptions) {
  * @param {Number} spacingOverSizeRatio Specified ratio of distance between flanker&target to letter height
  * @param {Number} minimumHeight Smallest allowable letter height for flanker
  * @param {String} font Font-family in which the stimuli will be presented
- * @returns 
+ * @param {PsychoJS.window} window PsychoJS window, used to create a stimulus to be measured
+ * @returns
  */
-function boundingBoxFromSpacing(spacing, spacingOverSizeRatio, minimumHeight, font) {
-  const height = Math.max(spacing/spacingOverSizeRatio, minimumHeight);
+function boundingBoxFromSpacing(
+  spacing,
+  spacingOverSizeRatio,
+  minimumHeight,
+  font,
+  window
+) {
+  const height = Math.max(spacing / spacingOverSizeRatio, minimumHeight);
   const testTextStim = new visual.TextStim({
-      win: psychoJS.window,
-      name: "testTextStim",
-      text: "H", // TEMP
-      font: font,
-      units: "pix", // ASSUMES that parameters are in pixel units
-      pos: [0,0],
-      height: height,
-      wrapWidth: undefined,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -7.0,
+    win: window,
+    name: "testTextStim",
+    text: "H", // TEMP
+    font: font,
+    units: "pix", // ASSUMES that parameters are in pixel units
+    pos: [0, 0],
+    height: height,
+    wrapWidth: undefined,
+    ori: 0.0,
+    color: new util.Color("black"),
+    opacity: 1.0,
+    depth: -7.0,
+    autoDraw: false,
+    autoLog: false,
   });
-  return testTextStim.boundingBox;
+  return testTextStim._boundingBox;
 }
 
 /**
@@ -1235,21 +1287,25 @@ function boundingBoxFromSpacing(spacing, spacingOverSizeRatio, minimumHeight, fo
 function tangentialFlankerPositions(targetPosition, fixationPosition, spacing) {
   let x, i; // Variables for anonymous fn's
   // Vector representing the line between target and fixation
-  const v = [fixationPosition[0]-targetPosition[0], fixationPosition[1]-targetPosition[1]];
+  const v = [
+    fixationPosition[0] - targetPosition[0],
+    fixationPosition[1] - targetPosition[1],
+  ];
   // Get the vector perpendicular to v
-  const p = [v[1], -v[0]] // SEE https://gamedev.stackexchange.com/questions/70075/how-can-i-find-the-perpendicular-to-a-2d-vector
+  const p = [v[1], -v[0]]; // SEE https://gamedev.stackexchange.com/questions/70075/how-can-i-find-the-perpendicular-to-a-2d-vector
 
   // Find the point that is `spacing` far from `targetPosition` along p
   // SEE https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
   /// Find the length of `p`
   const llpll = Math.sqrt(
-    p.map(x => x**2).reduce((previous, current) => previous + current));
-  /// Normalize `p` 
-  const u = p.map(x => x/llpll);
+    p.map((x) => x ** 2).reduce((previous, current) => previous + current)
+  );
+  /// Normalize `p`
+  const u = p.map((x) => x / llpll);
   /// Find our two new points, `spacing` distance away from targetPosition along line `p`
   const flankerPositions = [
-    targetPosition.map((x, i) => x+(spacing*u[i])),
-    targetPosition.map((x, i) => x-(spacing*u[i])),
+    targetPosition.map((x, i) => x + spacing * u[i]),
+    targetPosition.map((x, i) => x - spacing * u[i]),
   ];
   return flankerPositions;
 }
@@ -1266,18 +1322,22 @@ function radialFlankerPositions(targetPosition, fixationPosition, spacing) {
   // SEE https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
 
   // Vector representing the line between target and fixation
-  const v = [fixationPosition[0]-targetPosition[0], fixationPosition[1]-targetPosition[1]];
+  const v = [
+    fixationPosition[0] - targetPosition[0],
+    fixationPosition[1] - targetPosition[1],
+  ];
   /// Find the length of v
   const llvll = Math.sqrt(
-    v.map(x => x**2).reduce((previous, current) => previous + current));
+    v.map((x) => x ** 2).reduce((previous, current) => previous + current)
+  );
   /// Normalize v
-  const u = v.map(x => x/llvll);
+  const u = v.map((x) => x / llvll);
   /// Find our two new points, `spacing` distance away from targetPosition along line v
   const flankerPositions = [
-    targetPosition.map((x, i) => x+(spacing*u[i])),
-    targetPosition.map((x, i) => x-(spacing*u[i])),
+    targetPosition.map((x, i) => x + spacing * u[i]),
+    targetPosition.map((x, i) => x - spacing * u[i]),
   ];
-
+  return flankerPositions;
 }
 
 /**
@@ -1288,14 +1348,26 @@ function radialFlankerPositions(targetPosition, fixationPosition, spacing) {
  * @param {Number} spacing Distance between the target and one flanker
  * @returns {Number[][]} Array containing two [x,y] arrays, each representing the location of one flanker
  */
-function getFlankerLocations(targetPosition, fixationPosition, flankerOrientation, spacing){
-  switch(flankerOrientation) {
+function getFlankerLocations(
+  targetPosition,
+  fixationPosition,
+  flankerOrientation,
+  spacing
+) {
+  switch (flankerOrientation) {
     case "radial":
       return radialFlankerPositions(targetPosition, fixationPosition, spacing);
     case "tangential":
-      return tangentialFlankerPositions(targetPosition, fixationPosition, spacing);
+      return tangentialFlankerPositions(
+        targetPosition,
+        fixationPosition,
+        spacing
+      );
     default:
-      console.error("Unknown flankerOrientation specified, ", flankerOrientation);
+      console.error(
+        "Unknown flankerOrientation specified, ",
+        flankerOrientation
+      );
   }
 }
 /**
@@ -1308,21 +1380,71 @@ function getFlankerLocations(targetPosition, fixationPosition, flankerOrientatio
  * @param {Number} sizingParameters.spacingOverSizeRatio Ratio of distance between flanker&target to stimuli letter height
  * @param {Number} sizingParameters.minimumHeight Minimum stimulus letter height (in same units as other parameters)
  * @param {String} sizingParameters.fontFamily Name of the fontFamily in which the stimuli will be drawn
+ * @param {Number} sizingParameters.pixPerCm Pixel/cm ratio of the display
+ * @param {Number} sizingParameters.viewingDistanceCm Distance (in cm) of the observer from the near-point
+ * @param {PsychoJS.window} sizingParameters.window Window object, used for creating a mock stimuli for measurement
  * @returns {Number[][]} [[x_min, y_min], [x_max, y_max]] Array of defining points of the area over which flankers extend
  */
-function flankersExtent(level, targetPosition, fixationPosition, flankerOrientation, sizingParameters){
+function flankersExtent(
+  level,
+  targetPosition,
+  fixationPosition,
+  flankerOrientation,
+  sizingParameters
+) {
+  console.log("window: ", sizingParameters.window);
   const spacingDegrees = Math.pow(10, level);
-  const spacingPixels = degreesToPixels(spacingDegrees);
+  const spacingPixels = degreesToPixels(spacingDegrees, {
+    pixPerCm: sizingParameters.pixPerCm,
+    viewingDistanceCm: sizingParameters.viewingDistanceCm,
+  });
   const flankerLocations = getFlankerLocations(
-    targetPosition, fixationPosition, spacingPixels, flankerOrientation);
+    targetPosition,
+    fixationPosition,
+    flankerOrientation,
+    spacingPixels
+  );
   const flankerBoxDimensions = boundingBoxFromSpacing(
-    spacingPixels, 
-    sizingParameters.spacingOverSizeRatio, 
+    spacingPixels,
+    sizingParameters.spacingOverSizeRatio,
     sizingParameters.minimumHeight,
-    sizingParameters.fontFamily);
-  return flankerLocations.map(
-    (flankerPosition, i) => [
-      flankerPosition[0] + (i === 0 ? -1 : 1)(flankerBoxDimensions.width/2),
-      flankerPosition[1] + (i === 0 ? -1 : 1)(flankerBoxDimensions.height/2)
-    ]);
+    sizingParameters.fontFamily,
+    sizingParameters.window
+  );
+  return flankerLocations.map((flankerPosition, i) => [
+    flankerPosition[0] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2),
+    flankerPosition[1] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2),
+  ]);
+}
+
+/**
+ * Determine whether a given point lies inside a given rectangle
+ * @todo Fix; not giving expected values for fixation check, displaying on left side of screen
+ * @param {Number[][]} rectangle Array of two [x,y] points, which define an area
+ * @param {Number[]} point [x,y] coordinate of a point which may be within rectangle
+ * @returns {Boolean}
+ */
+function rectangleContainsPoint(rectangle, point) {
+  const leftX = Math.min(rectangle[0][0], rectangle[1][0]);
+  const rightX = Math.max(rectangle[0][0], rectangle[1][0]);
+  const lowerY = Math.min(rectangle[0][1], rectangle[1][1]);
+  const upperY = Math.max(rectangle[0][1], rectangle[1][1]);
+  const xIsIn = point[0] >= leftX && point[0] <= rightX;
+  const yIsIn = point[1] >= lowerY && point[1] <= upperY;
+  return xIsIn && yIsIn;
+}
+
+/**
+ * Determines whether any part of a given rectangle will extend beyond the screen
+ * @param {Number[][]} rectangle Array of two [x,y] points, defining a rectangle
+ * @param {Object} screenDimensions
+ * @param {Number} screenDimensions.width Width of the screen
+ * @param {Number} screenDimensions.height Height of the screen
+ * @returns {Boolean}
+ */
+function rectangleOffscreen(rectangle, screenDimensions) {
+  const pointOffScreen = (point) =>
+    Math.abs(point[0]) > screenDimensions.width / 2 ||
+    Math.abs(point[1]) > screenDimensions.height / 2;
+  return rectangle.some(pointOffScreen); // VERIFY this logic is correct
 }
