@@ -6,6 +6,8 @@ A PsychoJS-based experiment generator for the measuring various psychometric thr
 
 ## Installation Instructions
 
+Note: We've moved `preprocessor.py` to `lib/legacy/` and future updates of the preprocessor will happen in the [control-panel](https://github.com/EasyEyes/control-panel) repository.
+
 1. Clone this repository.
 
 You will need a copy of the files locally to work with.

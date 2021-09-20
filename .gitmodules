@@ -1,0 +1,3 @@
+[submodule "control-panel"]
+	path = control-panel
+	url = https://github.com/EasyEyes/control-panel.git
