@@ -776,27 +776,9 @@ const experiment = (blockCount) => {
         [targetEccentricityXYDeg],
         displayOptions
       );
-      console.log("in new location");
-      const areaFlankersCover = flankersExtent(
-        level,
-        targetXYPix,
-        fixationXYPix,
-        spacingDirection,
-        displayOptions
-      );
-      console.log("areaFlankersCover: ", areaFlankersCover);
-      const fixationInfringed = rectangleContainsPoint(
-        areaFlankersCover,
-        fixationXYPix
-      );
-      console.log("fixationInfringed: ", fixationInfringed);
-      const stimuliExtendOffscreen = rectangleOffscreen(areaFlankersCover, {
-        width: screen.width,
-        height: screen.height,
-      });
-      console.log("stimuliExtendOffscreen: ", stimuliExtendOffscreen);
-      const badPresentation = fixationInfringed || stimuliExtendOffscreen;
-      console.log("badPresentation: ", badPresentation);
+      // TODO use await to block until suitable `level` value found
+      level = getMaxPresentableLevel(level, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
+      console.log("New level: ", level);
 
       spacingDeg = Math.pow(10, level);
 
@@ -1411,10 +1393,26 @@ function flankersExtent(
     sizingParameters.fontFamily,
     sizingParameters.window
   );
-  return flankerLocations.map((flankerPosition, i) => [
-    flankerPosition[0] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2),
-    flankerPosition[1] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2),
-  ]);
+  const boundingPoints = [];
+  flankerLocations.forEach((flankerPosition, i) => {
+    const boundingPoint = [];
+    if (targetPosition[0] < 0) {
+      boundingPoint.push(
+        flankerPosition[0] - (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2));
+    } else {
+      boundingPoint.push(
+        flankerPosition[0] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2));
+    }
+    if (targetPosition[1] < 0) {
+      boundingPoint.push(
+        flankerPosition[1] - (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2));
+    } else {
+      boundingPoint.push(
+        flankerPosition[1] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2));
+    }
+    boundingPoints.push(boundingPoint);
+  });
+  return boundingPoints;
 }
 
 /**
@@ -1429,8 +1427,11 @@ function rectangleContainsPoint(rectangle, point) {
   const rightX = Math.max(rectangle[0][0], rectangle[1][0]);
   const lowerY = Math.min(rectangle[0][1], rectangle[1][1]);
   const upperY = Math.max(rectangle[0][1], rectangle[1][1]);
+  console.log("flanker rectangle: ", rectangle);
   const xIsIn = point[0] >= leftX && point[0] <= rightX;
+  console.log("xIsIn: ", xIsIn);
   const yIsIn = point[1] >= lowerY && point[1] <= upperY;
+  console.log("yIsIn: ", yIsIn);
   return xIsIn && yIsIn;
 }
 
@@ -1447,4 +1448,39 @@ function rectangleOffscreen(rectangle, screenDimensions) {
     Math.abs(point[0]) > screenDimensions.width / 2 ||
     Math.abs(point[1]) > screenDimensions.height / 2;
   return rectangle.some(pointOffScreen); // VERIFY this logic is correct
+}
+
+function unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions){
+  const areaFlankersCover = flankersExtent(
+    proposedLevel,
+    targetXYPix,
+    fixationXYPix,
+    spacingDirection,
+    displayOptions
+  );
+  const fixationInfringed = rectangleContainsPoint(
+    areaFlankersCover,
+    fixationXYPix
+  );
+  console.log("areaFlankersCover: ", areaFlankersCover);
+  console.log("fixationInfringed: ", fixationInfringed);
+  const stimuliExtendOffscreen = rectangleOffscreen(areaFlankersCover, {
+    width: screen.width,
+    height: screen.height,
+  });
+  console.log("stimuliExtendOffscreen: ", stimuliExtendOffscreen);
+  const badPresentation = fixationInfringed || stimuliExtendOffscreen;
+  console.log("badPresentation: ", badPresentation);
+  return badPresentation;
+}
+
+function getMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions){
+  const granularityOfChange = 0.1;
+  if (!unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions)){
+    console.log("acceptable level found: ", proposedLevel);
+    return proposedLevel;
+  } else {
+    console.log("unacceptable level: ", proposedLevel);
+    getMaxPresentableLevel(proposedLevel - granularityOfChange, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
+  }
 }
