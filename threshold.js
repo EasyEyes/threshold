@@ -124,7 +124,7 @@ const loadBlockFiles = (count, callback) => {
                 "\n" +
                 "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
                 "\n" +
-                "Please verifiy for yourself that " +
+                "Please verify for yourself that " +
                 fontFamily +
                 " is being correctly represented in your experiment."
             );
@@ -236,7 +236,7 @@ const experiment = (blockCount) => {
 
   var fileClock;
   var filterClock;
-  var thisLoopNumber;
+  var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
   var trialClock;
   // var targetBoundingPoly; // Target Bounding Box
