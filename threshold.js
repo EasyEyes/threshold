@@ -660,13 +660,13 @@ const experiment = (blockCount) => {
       }
       console.log("condition: ", condition);
 
-      let level = currentLoop._currentStaircase.getQuestValue();
-      console.log("level from getQuestValue(): ", level);
+      let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+      console.log("level from getQuestValue(): ", proposedLevel);
       console.log("_currentStaircase: ", currentLoop._currentStaircase);
 
-      // TODO Based on display size
+      // TODO Find a real way of estimating the max size
       // Set maximum level to fully display all text
-      level = Math.min(level, 1);
+      proposedLevel = Math.min(proposedLevel, 1.5);
       // TODO set QUEST
       // !
       // !
@@ -730,7 +730,7 @@ const experiment = (blockCount) => {
       ////
       // !
       fixationXYPix = [0, 0];
-      // TODO use actual nearPoint; currently totally ignoring fixation???
+      // TODO use actual nearPoint
       const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
       const nearPointXYPix = { x: 0, y: 0 }; // TEMP
       const displayOptions = {
@@ -747,8 +747,9 @@ const experiment = (blockCount) => {
         [targetEccentricityXYDeg],
         displayOptions
       );
-      // TODO use await to block until suitable `level` value found
-      level = getMaxPresentableLevel(level, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
+      // const level = getMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
+      let level = await awaitMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
+      
       console.log("New level: ", level);
 
       spacingDeg = Math.pow(10, level);
@@ -796,12 +797,14 @@ const experiment = (blockCount) => {
       // } else if (spacingDirection === "tangential") {
       //   spacingPx = pos2XYPx[1] - pos1XYPx[1];
       // }
-      spacingPx = degreesToPixels(spacingDeg, {
+      spacingPx = Math.abs(degreesToPixels(spacingDeg, {
         pixPerCm: pixPerCm,
         viewingDistanceCm: viewingDistanceDesiredCm,
-      });
+      }));
       console.log("spacingPx: ", spacingPx);
 
+      console.log("spacing/spacingOverSizeRation: ", spacingPx/spacingOverSizeRatio);
+      console.log("targetMinimumPix: ", targetMinimumPix);
       heightPx = Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix);
 
       key_resp.keys = undefined;
@@ -1309,10 +1312,10 @@ function flankersExtent(
 ) {
   console.log("window: ", sizingParameters.window);
   const spacingDegrees = Math.pow(10, level);
-  const spacingPixels = degreesToPixels(spacingDegrees, {
+  const spacingPixels = Math.abs(degreesToPixels(spacingDegrees, {
     pixPerCm: sizingParameters.pixPerCm,
     viewingDistanceCm: sizingParameters.viewingDistanceCm,
-  });
+  }));
   const flankerLocations = getFlankerLocations(
     targetPosition,
     fixationPosition,
@@ -1350,7 +1353,6 @@ function flankersExtent(
 
 /**
  * Determine whether a given point lies inside a given rectangle
- * @todo Fix; not giving expected values for fixation check, displaying on left side of screen
  * @param {Number[][]} rectangle Array of two [x,y] points, which define an area
  * @param {Number[]} point [x,y] coordinate of a point which may be within rectangle
  * @returns {Boolean}
@@ -1408,12 +1410,23 @@ function unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingD
 }
 
 function getMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions){
-  const granularityOfChange = 0.1;
+  const granularityOfChange = 0.05;
   if (!unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions)){
     console.log("acceptable level found: ", proposedLevel);
     return proposedLevel;
   } else {
     console.log("unacceptable level: ", proposedLevel);
-    getMaxPresentableLevel(proposedLevel - granularityOfChange, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
+    return getMaxPresentableLevel(proposedLevel - granularityOfChange, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
+  }
+}
+
+function awaitMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions){
+  const granularityOfChange = 0.05;
+  if (!unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions)){
+    console.log("acceptable level found: ", proposedLevel);
+    return new Promise(resolve => resolve(proposedLevel));
+  } else {
+    console.log("unacceptable level: ", proposedLevel);
+    return getMaxPresentableLevel(proposedLevel - granularityOfChange, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
   }
 }
