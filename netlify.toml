@@ -1,5 +1,5 @@
 [build]
 environment = { PYTHON_VERSION = "3.8" }
 
-command = "python preprocessor.py experiment.csv"
+command = "python lib/legacy/preprocessor.py experiment.csv"
 publish = "."
