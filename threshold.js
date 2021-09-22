@@ -1385,6 +1385,17 @@ function rectangleOffscreen(rectangle, screenDimensions) {
   return rectangle.some(pointOffScreen); // VERIFY this logic is correct
 }
 
+/**
+ * Tests whether these proposed parameters for presentation would draw improperly, eg extend beyond the extent of the screen
+ * @todo Test whether the flankers interfer with eachother
+ * @param {Number} proposedLevel Level to be tested, as provided by QUEST
+ * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
+ * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
+ * @param {"radial"|"tangential"} spacingDirection Orientation of flankers relative to fixation-target
+ * @param {Object} displayOptions Set of parameters for the specifics of presentation
+ * @todo Specify necessary members of `displayOptions`
+ * @returns {Boolean}
+ */
 function unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions){
   const areaFlankersCover = flankersExtent(
     proposedLevel,
@@ -1409,6 +1420,16 @@ function unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingD
   return badPresentation;
 }
 
+/**
+ * Estimate the largest `level` value which will still present correctly
+ * @param {Number} proposedLevel Level to be tested, as provided by QUEST
+ * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
+ * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
+ * @param {"radial"|"tangential"} spacingDirection Orientation of flankers relative to fixation-target
+ * @param {Object} displayOptions Set of parameters for the specifics of presentation
+ * @todo Specify necessary members of `displayOptions`
+ * @returns {Number}
+ */
 function getMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions){
   const granularityOfChange = 0.05;
   if (!unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions)){
@@ -1420,6 +1441,16 @@ function getMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spaci
   }
 }
 
+/**
+ * Promise-based equivalent to `getMaxPresentableLevel`
+ * @param {Number} proposedLevel Level to be tested, as provided by QUEST
+ * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
+ * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
+ * @param {"radial"|"tangential"} spacingDirection Orientation of flankers relative to fixation-target
+ * @param {Object} displayOptions Set of parameters for the specifics of presentation
+ * @todo Specify necessary members of `displayOptions`
+ * @returns {Number}
+ */
 function awaitMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions){
   const granularityOfChange = 0.05;
   if (!unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions)){
@@ -1427,6 +1458,6 @@ function awaitMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spa
     return new Promise(resolve => resolve(proposedLevel));
   } else {
     console.log("unacceptable level: ", proposedLevel);
-    return getMaxPresentableLevel(proposedLevel - granularityOfChange, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
+    return awaitMaxPresentableLevel(proposedLevel - granularityOfChange, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
   }
 }
