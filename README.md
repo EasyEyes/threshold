@@ -4,6 +4,14 @@
 
 A PsychoJS-based experiment generator for the measuring various psychometric thresholds, e.g., crowding.
 
+## UPDATE
+What's below is out of date in some ways. It mentions that we replaced the Python preprocessor.py by javascript code,
+but the instructions still use the Python version. Instructions below explain how to put files on a server and run them. 
+This will soon be done for us by the https://easyeyes.app/threshold web page, which also allows uploading of fonts and consent forms directly to the Fonts and ConsentForms folders in EasyEyesResources/ on the scientist's Pavlovia account. 
+The manual is up to date.
+https://docs.google.com/spreadsheets/d/1x65NjykMm-XUOz98Eu_oo6ON2xspm_h0Q0M2u6UGtug/edit#gid=2021552264
+- Denis, Sept 23, 2021.
+
 ## Installation Instructions
 
 Note: We've moved `preprocessor.py` to `lib/legacy/` and future updates of the preprocessor will happen in the [control-panel](https://github.com/EasyEyes/control-panel) repository.
