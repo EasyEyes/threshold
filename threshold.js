@@ -28,6 +28,7 @@ import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphab
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
+var blocksPerTrial;
 var levelLeft, levelRight;
 let correctAns;
 
@@ -48,6 +49,7 @@ Papa.parse("conditions/blockCount.csv", {
   download: true,
   complete: function (results) {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
+    blocksPerTrial = blockCount;
     loadBlockFiles(blockCount, () => {
       if (useRC) {
         rc.panel(
@@ -249,6 +251,17 @@ const experiment = (blockCount) => {
   var target;
   var flanker2;
   var showAlphabet;
+
+  var stepConfig = {
+    initalVal: 0,
+    fontSize: 30,
+    x: -window.innerWidth/2 + 70,
+    y: window.innerHeight/2,
+    fontName: "Arial"
+  }
+  var stepCount,                   // TextSim object
+      step = stepConfig.initalVal; // numerical value of step
+
   var globalClock;
   var routineTimer;
   async function experimentInit() {
@@ -297,6 +310,20 @@ const experiment = (blockCount) => {
     flanker1 = new visual.TextStim({
       win: psychoJS.window,
       name: "flanker1",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [0, 0],
+      height: 1.0,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -7.0,
+    });
+    stepCount = new visual.TextStim({
+      win: psychoJS.window,
+      name: "stepCount",
       text: "",
       font: "Arial",
       units: "pix",
@@ -821,6 +848,10 @@ const experiment = (blockCount) => {
       flanker1.setText(firstFlanker);
       flanker1.setFont(targetFont);
       flanker1.setHeight(heightPx);
+      stepCount.setPos([stepConfig.x, stepConfig.y]);
+      stepCount.setText("Step " + step + "/" + (conditionTrials*blocksPerTrial));
+      stepCount.setFont(stepConfig.fontName);
+      stepCount.setHeight(stepConfig.fontSize);
       target.setPos(pos2XYPx);
       target.setText(targetStim);
       target.setFont(targetFont);
@@ -844,10 +875,15 @@ const experiment = (blockCount) => {
       trialComponents.push(target);
       trialComponents.push(flanker2);
       trialComponents.push(showAlphabet)
+      trialComponents.push(stepCount);
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
+      
+      // update step
+      step = step + 1;
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -925,6 +961,15 @@ const experiment = (blockCount) => {
         fixation.frameNStart = frameN; // exact frame index
 
         fixation.setAutoDraw(true);
+      }
+
+      // *fixation* updates
+      if (t >= 0.0 && stepCount.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        stepCount.tStart = t; // (not accounting for frame time here)
+        stepCount.frameNStart = frameN; // exact frame index
+
+        stepCount.setAutoDraw(true);
       }
 
       // *flanker1* updates
