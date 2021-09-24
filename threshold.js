@@ -192,6 +192,8 @@ const experiment = (blockCount) => {
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
   flowScheduler.add(fileRoutineEnd());
+  flowScheduler.add(instructionRoutineBegin)
+  flowScheduler.add(instructionRoutineEachFrame())
   const blocksLoopScheduler = new Scheduler(psychoJS);
   flowScheduler.add(blocksLoopBegin(blocksLoopScheduler));
   flowScheduler.add(blocksLoopScheduler);
@@ -242,6 +244,7 @@ const experiment = (blockCount) => {
   var thisConditionsFile;
   var trialClock;
   // var targetBoundingPoly; // Target Bounding Box
+  var instructions;
   var key_resp;
   var fixation; ////
   var flanker1;
@@ -421,6 +424,27 @@ const experiment = (blockCount) => {
 
       return Scheduler.Event.NEXT;
     };
+  }
+
+  function instructionRoutineBegin() {
+    instructions = new visual.TextStim({
+      win: psychoJS.window,
+      name: "instructions",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [0, 0],
+      height: 30.0,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -12.0,
+    });
+  }
+
+  function instructionRoutineEachFrame() {
+
   }
 
   var blocks;
