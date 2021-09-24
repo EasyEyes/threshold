@@ -14,6 +14,14 @@ const { round } = util;
 
 ////
 import * as jsQUEST from "./lib/jsQUEST.module.js";
+
+////
+/* ------------------------------- Components ------------------------------- */
+
+import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphabet.js";
+
+/* -------------------------------------------------------------------------- */
+
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
@@ -247,6 +255,7 @@ const experiment = (blockCount) => {
   var flanker1;
   var target;
   var flanker2;
+  var showAlphabet;
   var globalClock;
   var routineTimer;
   async function experimentInit() {
@@ -336,6 +345,21 @@ const experiment = (blockCount) => {
       opacity: 1.0,
       depth: -9.0,
     });
+
+    showAlphabet = new visual.TextStim({
+      win: psychoJS.window,
+      name: "showAlphabet",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [0, 0],
+      height: 1.0,
+      wrapWidth: window.innerWidth,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -5.0,
+    })
 
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
@@ -630,6 +654,7 @@ const experiment = (blockCount) => {
   var targetFont;
   var targetAlphabet;
   var validAns;
+  var showAlphabetWhere
   var targetDurationSec;
   var fixationSizeNow;
   var targetMinimumPix;
@@ -690,6 +715,8 @@ const experiment = (blockCount) => {
 
       targetAlphabet = String(condition["targetAlphabet"]).split("");
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
+
+      showAlphabetWhere = condition["showAlphabetWhere"] || 'bottom';
 
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
@@ -799,6 +826,12 @@ const experiment = (blockCount) => {
       flanker2.setText(secondFlanker);
       flanker2.setFont(targetFont);
       flanker2.setHeight(heightPx);
+      
+      showAlphabet.setPos(getAlphabetShowPos(showAlphabetWhere))
+      showAlphabet.setText(getAlphabetShowText(validAns))
+      showAlphabet.setFont(targetFont)
+      showAlphabet.setHeight(50)
+      
       // keep track of which components have finished
       trialComponents = [];
       trialComponents.push(key_resp);
@@ -807,6 +840,7 @@ const experiment = (blockCount) => {
       trialComponents.push(flanker1);
       trialComponents.push(target);
       trialComponents.push(flanker2);
+      trialComponents.push(showAlphabet)
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -941,6 +975,17 @@ const experiment = (blockCount) => {
       ) {
         return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
       }
+
+      /* -------------------------------------------------------------------------- */
+      // *showAlphabet* updates
+      if (t >= 0.75 + targetDurationSec && showAlphabet.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        showAlphabet.tStart = t; // (not accounting for frame time here)
+        showAlphabet.frameNStart = frameN; // exact frame index
+
+        showAlphabet.setAutoDraw(true);
+      }
+      /* -------------------------------------------------------------------------- */
 
       // check if the Routine should terminate
       if (!continueRoutine) {
