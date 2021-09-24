@@ -2,6 +2,8 @@
  * Crowding Test *
  *****************/
 
+const debug = true
+
 import { core, data, sound, util, visual } from "./lib/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
@@ -161,7 +163,7 @@ const experiment = (blockCount) => {
 
   // open window:
   psychoJS.openWindow({
-    fullscr: true,
+    fullscr: !debug,
     color: new util.Color([0, 0, 0]),
     units: "height", // TODO change to pix
     waitBlanking: true,
