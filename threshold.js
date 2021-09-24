@@ -28,7 +28,7 @@ import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphab
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
-var blocksPerTrial;
+var trialsPerBlock;
 var levelLeft, levelRight;
 let correctAns;
 
@@ -49,7 +49,6 @@ Papa.parse("conditions/blockCount.csv", {
   download: true,
   complete: function (results) {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
-    blocksPerTrial = blockCount;
     loadBlockFiles(blockCount, () => {
       if (useRC) {
         rc.panel(
@@ -252,15 +251,16 @@ const experiment = (blockCount) => {
   var flanker2;
   var showAlphabet;
 
-  var stepConfig = {
+  var totalTrialConfig = {
     initalVal: 0,
     fontSize: 30,
-    x: -window.innerWidth/2 + 70,
-    y: window.innerHeight/2,
+    x: window.innerWidth/2 - 90,
+    y: -window.innerHeight/2,
     fontName: "Arial"
   }
-  var stepCount,                   // TextSim object
-      step = stepConfig.initalVal; // numerical value of step
+  var totalTrial,                   // TextSim object
+      totalTrialIndex = totalTrialConfig.initalVal, // numerical value of totalTrialIndex
+      totalTrialCount = 0;
 
   var globalClock;
   var routineTimer;
@@ -321,9 +321,9 @@ const experiment = (blockCount) => {
       opacity: 1.0,
       depth: -7.0,
     });
-    stepCount = new visual.TextStim({
+    totalTrial = new visual.TextStim({
       win: psychoJS.window,
-      name: "stepCount",
+      name: "totalTrial",
       text: "",
       font: "Arial",
       units: "pix",
@@ -586,6 +586,7 @@ const experiment = (blockCount) => {
         }
       }
       console.log("possibleTrials: ", possibleTrials);
+      totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
       // const trialConfigIndex = thisBlockFileData[0].indexOf("conditionTrials");
       // for (let i = 1; i < thisBlockFileData.length; i++) {
       //   if (thisBlockFileData[i].length > 1) {
@@ -848,10 +849,6 @@ const experiment = (blockCount) => {
       flanker1.setText(firstFlanker);
       flanker1.setFont(targetFont);
       flanker1.setHeight(heightPx);
-      stepCount.setPos([stepConfig.x, stepConfig.y]);
-      stepCount.setText("Step " + step + "/" + (conditionTrials*blocksPerTrial));
-      stepCount.setFont(stepConfig.fontName);
-      stepCount.setHeight(stepConfig.fontSize);
       target.setPos(pos2XYPx);
       target.setText(targetStim);
       target.setFont(targetFont);
@@ -865,7 +862,12 @@ const experiment = (blockCount) => {
       showAlphabet.setText(getAlphabetShowText(validAns))
       showAlphabet.setFont(targetFont)
       showAlphabet.setHeight(50)
-      
+
+      totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
+      totalTrial.setText("Step " + totalTrialIndex + "/" + (totalTrialCount));
+      totalTrial.setFont(totalTrialConfig.fontName);
+      totalTrial.setHeight(totalTrialConfig.fontSize);
+
       // keep track of which components have finished
       trialComponents = [];
       trialComponents.push(key_resp);
@@ -874,15 +876,16 @@ const experiment = (blockCount) => {
       trialComponents.push(flanker1);
       trialComponents.push(target);
       trialComponents.push(flanker2);
+
       trialComponents.push(showAlphabet)
-      trialComponents.push(stepCount);
+      trialComponents.push(totalTrial);
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
       
-      // update step
-      step = step + 1;
+      // update trial index
+      totalTrialIndex = totalTrialIndex + 1;
 
       return Scheduler.Event.NEXT;
     };
@@ -963,13 +966,19 @@ const experiment = (blockCount) => {
         fixation.setAutoDraw(true);
       }
 
-      // *fixation* updates
-      if (t >= 0.0 && stepCount.status === PsychoJS.Status.NOT_STARTED) {
-        // keep track of start time/frame for later
-        stepCount.tStart = t; // (not accounting for frame time here)
-        stepCount.frameNStart = frameN; // exact frame index
+      frameRemains =
+        0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+      if (fixation.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+        fixation.setAutoDraw(false);
+      }
 
-        stepCount.setAutoDraw(true);
+      // *totalTrial* updates
+      if (t >= 0.0 && totalTrial.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        totalTrial.tStart = t; // (not accounting for frame time here)
+        totalTrial.frameNStart = frameN; // exact frame index
+
+        totalTrial.setAutoDraw(true);
       }
 
       // *flanker1* updates
