@@ -30,13 +30,14 @@ var conditionTrials;
 var levelLeft, levelRight;
 let correctAns;
 
-// store info about the experiment session:
-let expName = "Threshold"; // from the Builder filename that created this script
-let expInfo = { participant: "", session: "001" };
-
 // For development purposes, toggle RC off for testing speed
 const useRC = !debug;
 const rc = RemoteCalibrator;
+rc.init();
+
+// store info about the experiment session:
+let expName = "Threshold"; // from the Builder filename that created this script
+let expInfo = { participant: debug ? rc.id.value : '', session: '001' };
 
 const fontsRequired = new Set();
 
@@ -48,7 +49,6 @@ Papa.parse("conditions/blockCount.csv", {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
       if (useRC) {
-        rc.init();
         rc.panel(
           [
             {
@@ -221,7 +221,7 @@ const experiment = (blockCount) => {
     expInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     expInfo["expName"] = expName;
     expInfo["psychopyVersion"] = "2021.3.1";
-    expInfo["OS"] = window.navigator.platform;
+    expInfo["OS"] = rc.systemFamily.value;
 
     // store frame rate of monitor if we can measure it successfully
     expInfo["frameRate"] = psychoJS.window.getActualFrameRate();
@@ -639,6 +639,7 @@ const experiment = (blockCount) => {
   var windowWidthPx;
   var pixPerCm;
   var viewingDistanceDesiredCm;
+  var viewingDistanceCm;
   var fixationXYPx;
   var block;
   var spacingDirection;
@@ -693,10 +694,15 @@ const experiment = (blockCount) => {
       frameN = -1;
       continueRoutine = true; // until we're told otherwise
       // update component parameters for each repeat
-      windowWidthCm = 25; // TODO Use RemoteCalibrator
-      windowWidthPx = screen.width;
+      windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
+      windowWidthPx = rc.displayWidthPx.value;
       pixPerCm = windowWidthPx / windowWidthCm;
+      if (!rc.screenWidthCm) console.warn('[Screen Width] Using arbitrary screen width. Enable RC.');
+
       viewingDistanceDesiredCm = condition["viewingDistanceDesiredCm"];
+      viewingDistanceCm = rc.viewingDistanceCm ? rc.viewingDistanceCm.value : viewingDistanceDesiredCm
+      if (!rc.viewingDistanceCm) console.warn('[Viewing Distance] Using arbitrary viewing distance. Enable RC.');
+
       fixationXYPx = [0, 0];
 
       block = condition["blockOrder"];
@@ -778,11 +784,12 @@ const experiment = (blockCount) => {
       // TODO use actual nearPoint; currently totally ignoring fixation???
       const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
       const nearPointXYPix = { x: 0, y: 0 }; // TEMP
+
       [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg(
         [pos1XYDeg, pos2XYDeg, pos3XYDeg],
         {
           pixPerCm: pixPerCm,
-          viewingDistanceCm: viewingDistanceDesiredCm,
+          viewingDistanceCm: viewingDistanceCm,
           nearPointXYDeg: nearPointXYDeg,
           nearPointXYPix: nearPointXYPix,
         }
