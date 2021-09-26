@@ -4,11 +4,12 @@
 
 const debug = true
 
-import { core, data, sound, util, visual } from "./lib/psychojs-2021.3.0.js";
+import { core, data, util, visual } from "./lib/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
-//some handy aliases as in the psychopy scripts;
+
+// Some handy aliases as in the psychopy scripts;
 const { abs, sin, cos, PI: pi, sqrt } = Math;
 const { round } = util;
 
@@ -18,6 +19,7 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 ////
 /* ------------------------------- Components ------------------------------- */
 
+import { getCorrectSynth } from "./components/sound.js";
 import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphabet.js";
 
 /* -------------------------------------------------------------------------- */
@@ -33,23 +35,10 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: "", session: "001" };
 
 // For development purposes, toggle RC off for testing speed
-const useRC = false;
+const useRC = !debug;
 const rc = RemoteCalibrator;
 
 const fontsRequired = new Set();
-
-var correctAudio = document.getElementById("correctAudio");
-var wrongAudio = document.getElementById("wrongAudio");
-
-function resolveNotAllowedAudio(a) {
-  if (a) {
-    a.catch((e) => {
-      if (e.name === "NotAllowedError" || e.name === "NotSupportedError") {
-        console.log("Audio play failed.");
-      }
-    });
-  }
-}
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -166,8 +155,10 @@ const experiment = (blockCount) => {
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
   const psychoJS = new PsychoJS({
-    debug: true,
+    debug: debug,
   });
+
+  const correctAudio = getCorrectSynth(psychoJS)
 
   // open window:
   psychoJS.openWindow({
@@ -903,11 +894,11 @@ const experiment = (blockCount) => {
           key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
           // was this correct?
           if (key_resp.keys == correctAns) {
-            // Play sound
-            resolveNotAllowedAudio(correctAudio.play());
+            // Play correct audio
+            correctAudio.play()
             key_resp.corr = 1;
           } else {
-            resolveNotAllowedAudio(wrongAudio.play());
+            // Play wrong audio
             key_resp.corr = 0;
           }
           // a response ends the routine
@@ -1023,10 +1014,11 @@ const experiment = (blockCount) => {
       // was no response the correct answer?!
       if (key_resp.keys === undefined) {
         if (["None", "none", undefined].includes(correctAns)) {
-          resolveNotAllowedAudio(correctAudio.play());
+          // Play correct audio
+          correctAudio.play()
           key_resp.corr = 1; // correct non-response
         } else {
-          resolveNotAllowedAudio(wrongAudio.play());
+          // Play wrong audio
           key_resp.corr = 0; // failed to respond (incorrectly)
         }
       }
