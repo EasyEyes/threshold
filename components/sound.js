@@ -20,3 +20,13 @@ export const getWrongSynth = (psychoJS) => {
     loops: 0,
   });
 };
+
+export const getPurrSynth = (psychoJS) => {
+  return new TonePlayer({
+    psychoJS: psychoJS,
+    note: 200,
+    duration_s: 0.6,
+    volume: 0.55,
+    loops: 0,
+  });
+};
