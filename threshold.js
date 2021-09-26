@@ -19,6 +19,7 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 ////
 /* ------------------------------- Components ------------------------------- */
 
+import { shuffle } from "./components/utils.js";
 import { getCorrectSynth, getPurrSynth } from "./components/sound.js";
 import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphabet.js";
 
@@ -760,11 +761,14 @@ const experiment = (blockCount) => {
         condition["wirelessKeyboardNeededYes"] == "TRUE";
 
       var alphabet = targetAlphabet;
-      var firstFlanker = alphabet[Math.floor(Math.random() * alphabet.length)];
-      var targetStim = alphabet[Math.floor(Math.random() * alphabet.length)];
-      var secondFlanker = alphabet[Math.floor(Math.random() * alphabet.length)];
+      /* ------------------------------ Pick triplets ----------------------------- */
+      const tempAlphabet = shuffle(shuffle(alphabet))
+      var firstFlanker = tempAlphabet[0];
+      var targetStim = tempAlphabet[1];
+      var secondFlanker = tempAlphabet[2];
       console.log(firstFlanker, targetStim, secondFlanker);
       correctAns = targetStim.toLowerCase();
+      /* -------------------------------------------------------------------------- */
 
       var heightPx, listXY;
       var pos1XYDeg, pos1XYPx, pos2XYDeg, pos2XYPx, pos3XYDeg, pos3XYPx;
