@@ -19,7 +19,7 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 ////
 /* ------------------------------- Components ------------------------------- */
 
-import { getCorrectSynth } from "./components/sound.js";
+import { getCorrectSynth, getPurrSynth } from "./components/sound.js";
 import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphabet.js";
 
 /* -------------------------------------------------------------------------- */
@@ -159,6 +159,7 @@ const experiment = (blockCount) => {
   });
 
   const correctAudio = getCorrectSynth(psychoJS)
+  const purrAudio = getPurrSynth(psychoJS)
 
   // open window:
   psychoJS.openWindow({
@@ -974,6 +975,11 @@ const experiment = (blockCount) => {
         0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         target.setAutoDraw(false);
+        // Play purr sound
+        // Wait until next frame to play
+        setTimeout(() => {
+          purrAudio.play();
+        }, 17);
       }
 
       // *flanker2* updates
