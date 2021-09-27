@@ -24,9 +24,9 @@ export const getWrongSynth = (psychoJS) => {
 export const getPurrSynth = (psychoJS) => {
   return new TonePlayer({
     psychoJS: psychoJS,
-    note: 200,
-    duration_s: 0.6,
-    volume: 0.55,
+    note: 100,
+    duration_s: 0.5,
+    volume: 0.4,
     loops: 0,
   });
 };
