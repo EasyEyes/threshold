@@ -330,20 +330,6 @@ const experiment = (blockCount) => {
       opacity: 1.0,
       depth: -7.0,
     });
-    totalTrial = new visual.TextStim({
-      win: psychoJS.window,
-      name: "totalTrial",
-      text: "",
-      font: "Arial",
-      units: "pix",
-      pos: [0, 0],
-      height: 1.0,
-      wrapWidth: undefined,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -7.0,
-    });
 
     target = new visual.TextStim({
       win: psychoJS.window,
@@ -389,6 +375,21 @@ const experiment = (blockCount) => {
       opacity: 1.0,
       depth: -5.0,
     })
+
+    totalTrial = new visual.TextStim({
+      win: psychoJS.window,
+      name: "totalTrial",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [0, 0],
+      height: 1.0,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -20.0,
+    });
 
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
@@ -877,7 +878,7 @@ const experiment = (blockCount) => {
       showAlphabet.setHeight(50)
 
       totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
-      totalBlockIndex = calculateBlockWithTrialIndex(totalBlockTrialList);
+      totalBlockIndex = calculateBlockWithTrialIndex(totalBlockTrialList, totalTrialIndex);
       totalTrial.setText(`Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
@@ -978,12 +979,6 @@ const experiment = (blockCount) => {
         fixation.frameNStart = frameN; // exact frame index
 
         fixation.setAutoDraw(true);
-      }
-
-      frameRemains =
-        0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
-      if (fixation.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-        fixation.setAutoDraw(false);
       }
 
       // *totalTrial* updates

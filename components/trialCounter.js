@@ -1,4 +1,4 @@
-export function calculateBlockWithTrialIndex(totalBlockTrialList) {
+export function calculateBlockWithTrialIndex(totalBlockTrialList, totalTrialIndex) {
   let cumulativeTrialCount = 0;
   for (let i = 0; i < totalBlockTrialList.length; i++) {
     cumulativeTrialCount += totalBlockTrialList[i];
