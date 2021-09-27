@@ -89,6 +89,7 @@ Papa.parse("conditions/blockCount.csv", {
 });
 
 const blockFiles = {};
+
 const loadBlockFiles = (count, callback) => {
   if (count === 0) {
     callback();
@@ -137,6 +138,24 @@ const loadBlockFiles = (count, callback) => {
     },
   });
 };
+
+var totalTrialConfig = {
+  initalVal: 0,
+  fontSize: 30,
+  x: window.innerWidth/2 - 200,
+  y: -window.innerHeight/2,
+  fontName: "Arial"
+}
+var totalTrial,                   // TextSim object
+    totalTrialIndex = totalTrialConfig.initalVal, // numerical value of totalTrialIndex
+    totalTrialCount = 0;
+
+var totalBlockConfig = {
+  initialVal: 0
+};
+var totalBlockIndex = totalBlockConfig.initialVal,
+    totalBlockTrialList = [],
+    totalBlockCount = 0;
 
 const experiment = (blockCount) => {
   ////
@@ -250,17 +269,6 @@ const experiment = (blockCount) => {
   var target;
   var flanker2;
   var showAlphabet;
-
-  var totalTrialConfig = {
-    initalVal: 0,
-    fontSize: 30,
-    x: window.innerWidth/2 - 90,
-    y: -window.innerHeight/2,
-    fontName: "Arial"
-  }
-  var totalTrial,                   // TextSim object
-      totalTrialIndex = totalTrialConfig.initalVal, // numerical value of totalTrialIndex
-      totalTrialCount = 0;
 
   var globalClock;
   var routineTimer;
@@ -587,6 +595,10 @@ const experiment = (blockCount) => {
       }
       console.log("possibleTrials: ", possibleTrials);
       totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
+      totalBlockCount = Object.keys(blockFiles).length;
+      totalBlockTrialList = [...possibleTrials];
+      // console.log('totalBlockTrialList', totalBlockTrialList)
+      // totalBlockCount = blockFiles.length;
       // const trialConfigIndex = thisBlockFileData[0].indexOf("conditionTrials");
       // for (let i = 1; i < thisBlockFileData.length; i++) {
       //   if (thisBlockFileData[i].length > 1) {
@@ -864,7 +876,8 @@ const experiment = (blockCount) => {
       showAlphabet.setHeight(50)
 
       totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
-      totalTrial.setText("Step " + totalTrialIndex + "/" + (totalTrialCount));
+      totalBlockIndex = calculateBlockWithTrialIndex();
+      totalTrial.setText(`Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
 
@@ -1361,4 +1374,14 @@ function flankersExtent(level, targetPosition, fixationPosition, flankerOrientat
       flankerPosition[0] + (i === 0 ? -1 : 1)(flankerBoxDimensions.width/2),
       flankerPosition[1] + (i === 0 ? -1 : 1)(flankerBoxDimensions.height/2)
     ]);
+}
+
+function calculateBlockWithTrialIndex() {
+  let cumulativeTrialCount = 0;
+  for(let i=0; i<totalBlockTrialList.length; i++) {
+    cumulativeTrialCount += totalBlockTrialList[i]
+    if (totalTrialIndex<=cumulativeTrialCount)
+      return (i+1);
+  }
+  return totalBlockTrialList.length;
 }
