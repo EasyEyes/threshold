@@ -29,7 +29,6 @@ import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphab
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
-var trialsPerBlock;
 var levelLeft, levelRight;
 let correctAns;
 
@@ -141,14 +140,14 @@ const loadBlockFiles = (count, callback) => {
 };
 
 var totalTrialConfig = {
-  initalVal: 0,
+  initialVal: 0,
   fontSize: 30,
   x: window.innerWidth/2 - 200,
   y: -window.innerHeight/2,
   fontName: "Arial"
 }
-var totalTrial,                   // TextSim object
-    totalTrialIndex = totalTrialConfig.initalVal, // numerical value of totalTrialIndex
+var totalTrial, // TextSim object
+    totalTrialIndex = totalTrialConfig.initialVal, // numerical value of totalTrialIndex
     totalTrialCount = 0;
 
 var totalBlockConfig = {
