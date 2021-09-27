@@ -20,7 +20,7 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { shuffle } from "./components/utils.js";
-import { getCorrectSynth, getPurrSynth } from "./components/sound.js";
+import { playCorrectSynth, playPurrSynth } from "./components/sound.js";
 import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphabet.js";
 
 /* -------------------------------------------------------------------------- */
@@ -158,9 +158,6 @@ const experiment = (blockCount) => {
   const psychoJS = new PsychoJS({
     debug: debug,
   });
-
-  const correctAudio = getCorrectSynth(psychoJS)
-  const purrAudio = getPurrSynth(psychoJS)
 
   // open window:
   psychoJS.openWindow({
@@ -907,7 +904,7 @@ const experiment = (blockCount) => {
           // was this correct?
           if (key_resp.keys == correctAns) {
             // Play correct audio
-            correctAudio.play()
+            playCorrectSynth()
             key_resp.corr = 1;
           } else {
             // Play wrong audio
@@ -958,7 +955,7 @@ const experiment = (blockCount) => {
         // Play purr sound
         // Wait until next frame to play
         setTimeout(() => {
-          purrAudio.play();
+          playPurrSynth()
         }, 17);
       }
 
@@ -1032,7 +1029,7 @@ const experiment = (blockCount) => {
       if (key_resp.keys === undefined) {
         if (["None", "none", undefined].includes(correctAns)) {
           // Play correct audio
-          correctAudio.play()
+          playCorrectSynth()
           key_resp.corr = 1; // correct non-response
         } else {
           // Play wrong audio
