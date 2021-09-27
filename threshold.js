@@ -20,6 +20,7 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { shuffle } from "./components/utils.js";
+import { calculateBlockWithTrialIndex } from "./components/trialCounter.js";
 import { getCorrectSynth, getPurrSynth } from "./components/sound.js";
 import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphabet.js";
 
@@ -876,7 +877,7 @@ const experiment = (blockCount) => {
       showAlphabet.setHeight(50)
 
       totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
-      totalBlockIndex = calculateBlockWithTrialIndex();
+      totalBlockIndex = calculateBlockWithTrialIndex(totalBlockTrialList);
       totalTrial.setText(`Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
@@ -1374,14 +1375,4 @@ function flankersExtent(level, targetPosition, fixationPosition, flankerOrientat
       flankerPosition[0] + (i === 0 ? -1 : 1)(flankerBoxDimensions.width/2),
       flankerPosition[1] + (i === 0 ? -1 : 1)(flankerBoxDimensions.height/2)
     ]);
-}
-
-function calculateBlockWithTrialIndex() {
-  let cumulativeTrialCount = 0;
-  for(let i=0; i<totalBlockTrialList.length; i++) {
-    cumulativeTrialCount += totalBlockTrialList[i]
-    if (totalTrialIndex<=cumulativeTrialCount)
-      return (i+1);
-  }
-  return totalBlockTrialList.length;
 }
