@@ -1,17 +1,23 @@
 import { sound } from "../lib/psychojs-2021.3.0.js";
 const { TonePlayer } = sound;
 
+const synth = new Tone.Synth({
+  oscillator: {
+    type: "sine",
+  },
+}).toDestination();
+
 export const playCorrectSynth = () => {
-  if (playTone) playTone(2000, 'sine', 0.5)
-}
+  synth.triggerAttackRelease(2000, 0.05);
+};
 
 export const playWrongSynth = () => {
-  if (playTone) playTone(500, 'sine', 0.5)
-}
+  synth.triggerAttackRelease(500, 0.5);
+};
 
 export const playPurrSynth = () => {
-  if (playTone) playTone(200, 'sine', 0.6)
-}
+  synth.triggerAttackRelease(200, 0.6);
+};
 
 /* ------------------------------- Deprecated ------------------------------- */
 

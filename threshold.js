@@ -983,7 +983,7 @@ const experiment = (blockCount) => {
 
       /* -------------------------------------------------------------------------- */
       // *showAlphabet* updates
-      if (t >= 0.75 + targetDurationSec && showAlphabet.status === PsychoJS.Status.NOT_STARTED) {
+      if (t >= 0.5 + targetDurationSec && showAlphabet.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         showAlphabet.tStart = t; // (not accounting for frame time here)
         showAlphabet.frameNStart = frameN; // exact frame index
