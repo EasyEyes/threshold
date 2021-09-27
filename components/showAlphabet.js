@@ -10,3 +10,5 @@ export function getAlphabetShowPos(showWhere) {
 export function getAlphabetShowText(valid) {
   return valid.join(" ");
 }
+
+

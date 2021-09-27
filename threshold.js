@@ -831,7 +831,8 @@ const experiment = (blockCount) => {
       flanker2.setHeight(heightPx);
       
       showAlphabet.setPos(getAlphabetShowPos(showAlphabetWhere))
-      showAlphabet.setText(getAlphabetShowText(validAns))
+      // showAlphabet.setText(getAlphabetShowText(validAns))
+      showAlphabet.setText('')
       showAlphabet.setFont(targetFont)
       showAlphabet.setHeight(50)
       
@@ -992,6 +993,7 @@ const experiment = (blockCount) => {
         showAlphabet.frameNStart = frameN; // exact frame index
 
         showAlphabet.setAutoDraw(true);
+        console.log(targetFont, showAlphabetWhere, validAns);
       }
       /* -------------------------------------------------------------------------- */
 
