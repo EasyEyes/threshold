@@ -706,6 +706,8 @@ const experiment = (blockCount) => {
   var validAns;
   var showAlphabetWhere;
   var showAlphabetElement;
+  var showCounterBool;
+  var showViewingDistanceBool;
   const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 }
   var targetDurationSec;
   var fixationSizeNow;
@@ -774,6 +776,8 @@ const experiment = (blockCount) => {
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
 
       showAlphabetWhere = condition["showAlphabetWhere"] || 'bottom';
+      showViewingDistanceBool = condition["showViewingDistanceBool"] === "TRUE";
+      showCounterBool = condition["showCounterBool"] === "TRUE";
 
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
@@ -897,7 +901,12 @@ const experiment = (blockCount) => {
       // totalTrial.setAlignVert('bottom');
 
       totalBlockIndex = calculateBlockWithTrialIndex(totalBlockTrialList, totalTrialIndex);
-      totalTrial.setText(`Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}. At ${viewingDistanceCm}cm`);
+      let trialInfoStr = '';
+      if (showCounterBool) 
+        trialInfoStr = `Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`;
+      if (showViewingDistanceBool)
+        trialInfoStr += `At ${viewingDistanceCm} cm.`;
+      totalTrial.setText(trialInfoStr);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       
