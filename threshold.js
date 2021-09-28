@@ -897,7 +897,7 @@ const experiment = (blockCount) => {
       // totalTrial.setAlignVert('bottom');
 
       totalBlockIndex = calculateBlockWithTrialIndex(totalBlockTrialList, totalTrialIndex);
-      totalTrial.setText(`Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`);
+      totalTrial.setText(`Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}. At ${viewingDistanceCm}cm`);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       
