@@ -2,16 +2,30 @@
  * Crowding Test *
  *****************/
 
-import { core, data, sound, util, visual } from "./lib/psychojs-2021.3.0.js";
+const debug = true
+
+import { core, data, util, visual } from "./lib/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
-//some handy aliases as in the psychopy scripts;
+
+// Some handy aliases as in the psychopy scripts;
 const { abs, sin, cos, PI: pi, sqrt } = Math;
 const { round } = util;
 
 ////
 import * as jsQUEST from "./lib/jsQUEST.module.js";
+
+////
+/* ------------------------------- Components ------------------------------- */
+
+import { shuffle } from "./components/utils.js";
+import { calculateBlockWithTrialIndex } from "./components/trialCounter.js";
+import { playCorrectSynth, playPurrSynth } from "./components/sound.js";
+import { removeClickableAlphabet, setupClickableAlphabet } from "./components/showAlphabet.js";
+
+/* -------------------------------------------------------------------------- */
+
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
@@ -19,28 +33,16 @@ var trialsPerBlock;
 var levelLeft, levelRight;
 let correctAns;
 
+// For development purposes, toggle RC off for testing speed
+const useRC = !debug;
+const rc = RemoteCalibrator;
+rc.init();
+
 // store info about the experiment session:
 let expName = "Threshold"; // from the Builder filename that created this script
-let expInfo = { participant: "", session: "001" };
-
-// For development purposes, toggle RC off for testing speed
-const useRC = false;
-const rc = RemoteCalibrator;
+let expInfo = { participant: debug ? rc.id.value : '', session: '001' };
 
 const fontsRequired = new Set();
-
-var correctAudio = document.getElementById("correctAudio");
-var wrongAudio = document.getElementById("wrongAudio");
-
-function resolveNotAllowedAudio(a) {
-  if (a) {
-    a.catch((e) => {
-      if (e.name === "NotAllowedError" || e.name === "NotSupportedError") {
-        console.log("Audio play failed.");
-      }
-    });
-  }
-}
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -50,7 +52,6 @@ Papa.parse("conditions/blockCount.csv", {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
       if (useRC) {
-        rc.init();
         rc.panel(
           [
             {
@@ -140,14 +141,14 @@ const loadBlockFiles = (count, callback) => {
 };
 
 var totalTrialConfig = {
-  initalVal: 0,
+  initialVal: 0,
   fontSize: 30,
   x: window.innerWidth/2 - 200,
   y: -window.innerHeight/2,
   fontName: "Arial"
 }
-var totalTrial,                   // TextSim object
-    totalTrialIndex = totalTrialConfig.initalVal, // numerical value of totalTrialIndex
+var totalTrial, // TextSim object
+    totalTrialIndex = totalTrialConfig.initialVal, // numerical value of totalTrialIndex
     totalTrialCount = 0;
 
 var totalBlockConfig = {
@@ -176,12 +177,12 @@ const experiment = (blockCount) => {
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
   const psychoJS = new PsychoJS({
-    debug: true,
+    debug: debug,
   });
 
   // open window:
   psychoJS.openWindow({
-    fullscr: true,
+    fullscr: !debug,
     color: new util.Color([0, 0, 0]),
     units: "height", // TODO change to pix
     waitBlanking: true,
@@ -240,7 +241,7 @@ const experiment = (blockCount) => {
     expInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     expInfo["expName"] = expName;
     expInfo["psychopyVersion"] = "2021.3.1";
-    expInfo["OS"] = window.navigator.platform;
+    expInfo["OS"] = rc.systemFamily.value;
 
     // store frame rate of monitor if we can measure it successfully
     expInfo["frameRate"] = psychoJS.window.getActualFrameRate();
@@ -265,6 +266,7 @@ const experiment = (blockCount) => {
   var flanker1;
   var target;
   var flanker2;
+  var showAlphabet;
 
   var globalClock;
   var routineTimer;
@@ -368,6 +370,36 @@ const experiment = (blockCount) => {
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -9.0,
+    });
+
+    showAlphabet = new visual.TextStim({
+      win: psychoJS.window,
+      name: "showAlphabet",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [0, 0],
+      height: 1.0,
+      wrapWidth: window.innerWidth,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -5.0,
+    })
+
+    totalTrial = new visual.TextStim({
+      win: psychoJS.window,
+      name: "totalTrial",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [0, 0],
+      height: 1.0,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -20.0,
     });
 
     // Create some handy timers
@@ -662,12 +694,16 @@ const experiment = (blockCount) => {
   var windowWidthPx;
   var pixPerCm;
   var viewingDistanceDesiredCm;
+  var viewingDistanceCm;
   var fixationXYPx;
   var block;
   var spacingDirection;
   var targetFont;
   var targetAlphabet;
   var validAns;
+  var showAlphabetWhere;
+  var showAlphabetElement;
+  const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 }
   var targetDurationSec;
   var fixationSizeNow;
   var targetMinimumPix;
@@ -715,10 +751,15 @@ const experiment = (blockCount) => {
       frameN = -1;
       continueRoutine = true; // until we're told otherwise
       // update component parameters for each repeat
-      windowWidthCm = 25; // TODO Use RemoteCalibrator
-      windowWidthPx = screen.width;
+      windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
+      windowWidthPx = rc.displayWidthPx.value;
       pixPerCm = windowWidthPx / windowWidthCm;
+      if (!rc.screenWidthCm) console.warn('[Screen Width] Using arbitrary screen width. Enable RC.');
+
       viewingDistanceDesiredCm = condition["viewingDistanceDesiredCm"];
+      viewingDistanceCm = rc.viewingDistanceCm ? rc.viewingDistanceCm.value : viewingDistanceDesiredCm
+      if (!rc.viewingDistanceCm) console.warn('[Viewing Distance] Using arbitrary viewing distance. Enable RC.');
+
       fixationXYPx = [0, 0];
 
       block = condition["blockOrder"];
@@ -728,6 +769,8 @@ const experiment = (blockCount) => {
 
       targetAlphabet = String(condition["targetAlphabet"]).split("");
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
+
+      showAlphabetWhere = condition["showAlphabetWhere"] || 'bottom';
 
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
@@ -749,11 +792,14 @@ const experiment = (blockCount) => {
         condition["wirelessKeyboardNeededYes"] == "TRUE";
 
       var alphabet = targetAlphabet;
-      var firstFlanker = alphabet[Math.floor(Math.random() * alphabet.length)];
-      var targetStim = alphabet[Math.floor(Math.random() * alphabet.length)];
-      var secondFlanker = alphabet[Math.floor(Math.random() * alphabet.length)];
+      /* ------------------------------ Pick triplets ----------------------------- */
+      const tempAlphabet = shuffle(shuffle(alphabet))
+      var firstFlanker = tempAlphabet[0];
+      var targetStim = tempAlphabet[1];
+      var secondFlanker = tempAlphabet[2];
       console.log(firstFlanker, targetStim, secondFlanker);
       correctAns = targetStim.toLowerCase();
+      /* -------------------------------------------------------------------------- */
 
       var heightPx, listXY;
       var pos1XYDeg, pos1XYPx, pos2XYDeg, pos2XYPx, pos3XYDeg, pos3XYPx;
@@ -798,11 +844,12 @@ const experiment = (blockCount) => {
       // TODO use actual nearPoint; currently totally ignoring fixation???
       const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
       const nearPointXYPix = { x: 0, y: 0 }; // TEMP
+
       [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg(
         [pos1XYDeg, pos2XYDeg, pos3XYDeg],
         {
           pixPerCm: pixPerCm,
-          viewingDistanceCm: viewingDistanceDesiredCm,
+          viewingDistanceCm: viewingDistanceCm,
           nearPointXYDeg: nearPointXYDeg,
           nearPointXYPix: nearPointXYPix,
         }
@@ -837,13 +884,17 @@ const experiment = (blockCount) => {
       flanker2.setText(secondFlanker);
       flanker2.setFont(targetFont);
       flanker2.setHeight(heightPx);
+      
+      showAlphabet.setPos([0, 0])
+      showAlphabet.setText('')
+      // showAlphabet.setText(getAlphabetShowText(validAns))
 
       totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
-      totalBlockIndex = calculateBlockWithTrialIndex();
+      totalBlockIndex = calculateBlockWithTrialIndex(totalBlockTrialList, totalTrialIndex);
       totalTrial.setText(`Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
-
+      
       // keep track of which components have finished
       trialComponents = [];
       trialComponents.push(key_resp);
@@ -853,6 +904,9 @@ const experiment = (blockCount) => {
       trialComponents.push(target);
       trialComponents.push(flanker2);
       
+      trialComponents.push(totalTrial);
+
+      trialComponents.push(showAlphabet)
       trialComponents.push(totalTrial);
 
       for (const thisComponent of trialComponents)
@@ -896,6 +950,9 @@ const experiment = (blockCount) => {
         // keep track of start time/frame for later
         key_resp.tStart = t; // (not accounting for frame time here)
         key_resp.frameNStart = frameN; // exact frame index
+        // TODO Use PsychoJS clock if possible
+        // Reset together with PsychoJS
+        showAlphabetResponse.onsetTime = performance.now()
 
         // keyboard checking is just starting
         psychoJS.window.callOnFlip(function () {
@@ -920,16 +977,33 @@ const experiment = (blockCount) => {
           key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
           // was this correct?
           if (key_resp.keys == correctAns) {
-            // Play sound
-            resolveNotAllowedAudio(correctAudio.play());
+            // Play correct audio
+            playCorrectSynth()
             key_resp.corr = 1;
           } else {
-            resolveNotAllowedAudio(wrongAudio.play());
+            // Play wrong audio
             key_resp.corr = 0;
           }
           // a response ends the routine
           continueRoutine = false;
         }
+      }
+
+      // *showAlphabetResponse* updates
+      if (showAlphabetResponse.current) {
+        key_resp.keys = showAlphabetResponse.current
+        key_resp.rt = (showAlphabetResponse.clickTime - showAlphabetResponse.onsetTime) / 1000
+        if (showAlphabetResponse.current == correctAns) {
+          // Play correct audio
+          correctAudio.play()
+          key_resp.corr = 1;
+        } else {
+          // Play wrong audio
+          key_resp.corr = 0;
+        }
+        showAlphabetResponse.current = null
+        removeClickableAlphabet()
+        continueRoutine = false;
       }
 
       // *fixation* updates
@@ -939,12 +1013,6 @@ const experiment = (blockCount) => {
         fixation.frameNStart = frameN; // exact frame index
 
         fixation.setAutoDraw(true);
-      }
-
-      frameRemains =
-        0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
-      if (fixation.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-        fixation.setAutoDraw(false);
       }
 
       // *totalTrial* updates
@@ -984,6 +1052,11 @@ const experiment = (blockCount) => {
         0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         target.setAutoDraw(false);
+        // Play purr sound
+        // Wait until next frame to play
+        setTimeout(() => {
+          playPurrSynth()
+        }, 17);
       }
 
       // *flanker2* updates
@@ -1008,9 +1081,22 @@ const experiment = (blockCount) => {
         return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
       }
 
+      /* -------------------------------------------------------------------------- */
+      // *showAlphabet* updates
+      if (t >= 0.5 + targetDurationSec && showAlphabet.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        showAlphabet.tStart = t; // (not accounting for frame time here)
+        showAlphabet.frameNStart = frameN; // exact frame index
+
+        showAlphabet.setAutoDraw(true);
+        showAlphabetElement = setupClickableAlphabet(validAns, targetFont, showAlphabetWhere, showAlphabetResponse)
+      }
+      /* -------------------------------------------------------------------------- */
+
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
+        removeClickableAlphabet()
         return Scheduler.Event.NEXT;
       }
 
@@ -1043,13 +1129,7 @@ const experiment = (blockCount) => {
       }
       // was no response the correct answer?!
       if (key_resp.keys === undefined) {
-        if (["None", "none", undefined].includes(correctAns)) {
-          resolveNotAllowedAudio(correctAudio.play());
-          key_resp.corr = 1; // correct non-response
-        } else {
-          resolveNotAllowedAudio(wrongAudio.play());
-          key_resp.corr = 0; // failed to respond (incorrectly)
-        }
+        console.error('[key_resp.keys] No response error.');
       }
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler

@@ -1,0 +1,17 @@
+#alphabet-holder {
+  z-index: 999999;
+  font-size: 3rem;
+  max-width: 100%;
+}
+
+#alphabet-holder .alphabet {
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  box-sizing: border-box;
+  border: 2px solid rgba(0, 0, 0, 0);
+}
+
+#alphabet-holder .alphabet:hover {
+  border-color: black;
+  cursor: pointer;
+}
