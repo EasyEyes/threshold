@@ -1053,7 +1053,7 @@ const experiment = (blockCount) => {
       }
       // was no response the correct answer?!
       if (key_resp.keys === undefined) {
-        console.error('[key_resp.keys] No response from the participant.');
+        console.error('[key_resp.keys] No response error.');
       }
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
