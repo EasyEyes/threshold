@@ -29,7 +29,6 @@ import { removeClickableAlphabet, setupClickableAlphabet } from "./components/sh
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
-var trialsPerBlock;
 var levelLeft, levelRight;
 let correctAns;
 
@@ -141,11 +140,13 @@ const loadBlockFiles = (count, callback) => {
 };
 
 var totalTrialConfig = {
-  initialVal: 0,
+  initialVal: 1,
   fontSize: 30,
-  x: window.innerWidth/2 - 200,
+  x: window.innerHeight/2,
   y: -window.innerHeight/2,
-  fontName: "Arial"
+  fontName: "Arial",
+  alignHoriz: "left",
+  alignVert: "bottom"
 }
 var totalTrial, // TextSim object
     totalTrialIndex = totalTrialConfig.initialVal, // numerical value of totalTrialIndex
@@ -391,11 +392,13 @@ const experiment = (blockCount) => {
       win: psychoJS.window,
       name: "totalTrial",
       text: "",
-      font: "Arial",
+      font: totalTrialConfig.fontName,
       units: "pix",
-      pos: [0, 0],
+      pos: [totalTrialConfig.x, totalTrialConfig.y],
+      alignHoriz: totalTrialConfig.alignHoriz,
+      alignVert: totalTrialConfig.alignVert,
       height: 1.0,
-      wrapWidth: undefined,
+      wrapWidth: window.innerWidth,
       ori: 0.0,
       color: new util.Color("black"),
       opacity: 1.0,
@@ -889,7 +892,10 @@ const experiment = (blockCount) => {
       showAlphabet.setText('')
       // showAlphabet.setText(getAlphabetShowText(validAns))
 
-      totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
+      // totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
+      // totalTrial.setAlignHoriz('right');
+      // totalTrial.setAlignVert('bottom');
+
       totalBlockIndex = calculateBlockWithTrialIndex(totalBlockTrialList, totalTrialIndex);
       totalTrial.setText(`Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`);
       totalTrial.setFont(totalTrialConfig.fontName);
@@ -1399,14 +1405,4 @@ function flankersExtent(level, targetPosition, fixationPosition, flankerOrientat
       flankerPosition[0] + (i === 0 ? -1 : 1)(flankerBoxDimensions.width/2),
       flankerPosition[1] + (i === 0 ? -1 : 1)(flankerBoxDimensions.height/2)
     ]);
-}
-
-function calculateBlockWithTrialIndex() {
-  let cumulativeTrialCount = 0;
-  for(let i=0; i<totalBlockTrialList.length; i++) {
-    cumulativeTrialCount += totalBlockTrialList[i]
-    if (totalTrialIndex<=cumulativeTrialCount)
-      return (i+1);
-  }
-  return totalBlockTrialList.length;
 }
