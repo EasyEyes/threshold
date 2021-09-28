@@ -925,7 +925,7 @@ const experiment = (blockCount) => {
         key_resp.rt = (showAlphabetResponse.clickTime - showAlphabetResponse.onsetTime) / 1000
         if (showAlphabetResponse.current == correctAns) {
           // Play correct audio
-          correctAudio.play()
+          playCorrectSynth()
           key_resp.corr = 1;
         } else {
           // Play wrong audio
