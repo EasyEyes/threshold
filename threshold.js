@@ -21,7 +21,7 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 
 import { shuffle } from "./components/utils.js";
 import { playCorrectSynth, playPurrSynth } from "./components/sound.js";
-import { getAlphabetShowPos, getAlphabetShowText } from "./components/showAlphabet.js";
+import { removeClickableAlphabet, setupClickableAlphabet } from "./components/showAlphabet.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -645,7 +645,9 @@ const experiment = (blockCount) => {
   var targetFont;
   var targetAlphabet;
   var validAns;
-  var showAlphabetWhere
+  var showAlphabetWhere;
+  var showAlphabetElement;
+  const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 }
   var targetDurationSec;
   var fixationSizeNow;
   var targetMinimumPix;
@@ -827,10 +829,9 @@ const experiment = (blockCount) => {
       flanker2.setFont(targetFont);
       flanker2.setHeight(heightPx);
       
-      showAlphabet.setPos(getAlphabetShowPos(showAlphabetWhere))
-      showAlphabet.setText(getAlphabetShowText(validAns))
-      showAlphabet.setFont(targetFont)
-      showAlphabet.setHeight(50)
+      showAlphabet.setPos([0, 0])
+      showAlphabet.setText('')
+      // showAlphabet.setText(getAlphabetShowText(validAns))
       
       // keep track of which components have finished
       trialComponents = [];
@@ -879,6 +880,9 @@ const experiment = (blockCount) => {
         // keep track of start time/frame for later
         key_resp.tStart = t; // (not accounting for frame time here)
         key_resp.frameNStart = frameN; // exact frame index
+        // TODO Use PsychoJS clock if possible
+        // Reset together with PsychoJS
+        showAlphabetResponse.onsetTime = performance.now()
 
         // keyboard checking is just starting
         psychoJS.window.callOnFlip(function () {
@@ -913,6 +917,23 @@ const experiment = (blockCount) => {
           // a response ends the routine
           continueRoutine = false;
         }
+      }
+
+      // *showAlphabetResponse* updates
+      if (showAlphabetResponse.current) {
+        key_resp.keys = showAlphabetResponse.current
+        key_resp.rt = (showAlphabetResponse.clickTime - showAlphabetResponse.onsetTime) / 1000
+        if (showAlphabetResponse.current == correctAns) {
+          // Play correct audio
+          correctAudio.play()
+          key_resp.corr = 1;
+        } else {
+          // Play wrong audio
+          key_resp.corr = 0;
+        }
+        showAlphabetResponse.current = null
+        removeClickableAlphabet()
+        continueRoutine = false;
       }
 
       // *fixation* updates
@@ -989,12 +1010,14 @@ const experiment = (blockCount) => {
         showAlphabet.frameNStart = frameN; // exact frame index
 
         showAlphabet.setAutoDraw(true);
+        showAlphabetElement = setupClickableAlphabet(validAns, targetFont, showAlphabetWhere, showAlphabetResponse)
       }
       /* -------------------------------------------------------------------------- */
 
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
+        removeClickableAlphabet()
         return Scheduler.Event.NEXT;
       }
 
@@ -1027,14 +1050,7 @@ const experiment = (blockCount) => {
       }
       // was no response the correct answer?!
       if (key_resp.keys === undefined) {
-        if (["None", "none", undefined].includes(correctAns)) {
-          // Play correct audio
-          playCorrectSynth()
-          key_resp.corr = 1; // correct non-response
-        } else {
-          // Play wrong audio
-          key_resp.corr = 0; // failed to respond (incorrectly)
-        }
+        console.error('[key_resp.keys] No response error.');
       }
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
