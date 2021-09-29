@@ -4,7 +4,7 @@
 
 const debug = true
 
-import { core, data, util, visual } from "./lib/psychojs-2021.3.0.js";
+import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
@@ -20,7 +20,7 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { shuffle } from "./components/utils.js";
-import { playCorrectSynth, playPurrSynth } from "./components/sound.js";
+import { getCorrectSynth, getPurrSynth } from './components/sound.js';
 import { removeClickableAlphabet, setupClickableAlphabet } from "./components/showAlphabet.js";
 
 /* -------------------------------------------------------------------------- */
@@ -159,6 +159,10 @@ const experiment = (blockCount) => {
     debug: debug,
   });
 
+  /* ---------------------------------- Sound --------------------------------- */
+  const correctSynth = getCorrectSynth(psychoJS)
+  const purrSynth = getPurrSynth(psychoJS)
+
   // open window:
   psychoJS.openWindow({
     fullscr: !debug,
@@ -166,6 +170,7 @@ const experiment = (blockCount) => {
     units: "height", // TODO change to pix
     waitBlanking: true,
   });
+
   // schedule the experiment:
   psychoJS.schedule(
     psychoJS.gui.DlgFromDict({
@@ -908,7 +913,7 @@ const experiment = (blockCount) => {
           // was this correct?
           if (key_resp.keys == correctAns) {
             // Play correct audio
-            playCorrectSynth()
+            correctSynth.play()
             key_resp.corr = 1;
           } else {
             // Play wrong audio
@@ -925,7 +930,7 @@ const experiment = (blockCount) => {
         key_resp.rt = (showAlphabetResponse.clickTime - showAlphabetResponse.onsetTime) / 1000
         if (showAlphabetResponse.current == correctAns) {
           // Play correct audio
-          playCorrectSynth()
+          correctSynth.play()
           key_resp.corr = 1;
         } else {
           // Play wrong audio
@@ -976,7 +981,7 @@ const experiment = (blockCount) => {
         // Play purr sound
         // Wait until next frame to play
         setTimeout(() => {
-          playPurrSynth()
+          purrSynth.play()
         }, 17);
       }
 
