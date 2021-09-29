@@ -1015,7 +1015,7 @@ const experiment = (blockCount) => {
         showAlphabet.frameNStart = frameN; // exact frame index
 
         showAlphabet.setAutoDraw(true);
-        showAlphabetElement = setupClickableAlphabet(validAns, targetFont, showAlphabetWhere, showAlphabetResponse)
+        showAlphabetElement = setupClickableAlphabet(targetAlphabet, targetFont, showAlphabetWhere, showAlphabetResponse)
       }
       /* -------------------------------------------------------------------------- */
 
