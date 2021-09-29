@@ -33,7 +33,7 @@ var levelLeft, levelRight;
 let correctAns;
 
 // For development purposes, toggle RC off for testing speed
-const useRC = !debug;
+const useRC = true;
 const rc = RemoteCalibrator;
 rc.init();
 
@@ -61,14 +61,6 @@ Papa.parse("conditions/blockCount.csv", {
               options: {
                 nearPoint: false,
                 showVideo: false,
-              },
-            },
-            {
-              name: "trackGaze",
-              options: {
-                showGazer: false,
-                showVideo: false,
-                calibrationCount: 1,
               },
             },
           ],
@@ -141,11 +133,11 @@ const loadBlockFiles = (count, callback) => {
 
 var totalTrialConfig = {
   initialVal: 1,
-  fontSize: 30,
-  x: window.innerHeight/2,
+  fontSize: 20,
+  x: window.innerWidth/2,
   y: -window.innerHeight/2,
   fontName: "Arial",
-  alignHoriz: "left",
+  alignHoriz: "right",
   alignVert: "bottom"
 }
 var totalTrial, // TextSim object
@@ -333,20 +325,6 @@ const experiment = (blockCount) => {
       opacity: 1.0,
       depth: -7.0,
     });
-    totalTrial = new visual.TextStim({
-      win: psychoJS.window,
-      name: "totalTrial",
-      text: "",
-      font: "Arial",
-      units: "pix",
-      pos: [0, 0],
-      height: 1.0,
-      wrapWidth: undefined,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -7.0,
-    });
 
     target = new visual.TextStim({
       win: psychoJS.window,
@@ -403,7 +381,7 @@ const experiment = (blockCount) => {
       alignHoriz: totalTrialConfig.alignHoriz,
       alignVert: totalTrialConfig.alignVert,
       height: 1.0,
-      wrapWidth: window.innerWidth,
+      wrapWidth: undefined,
       ori: 0.0,
       color: new util.Color("black"),
       opacity: 1.0,
@@ -781,8 +759,8 @@ const experiment = (blockCount) => {
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
 
       showAlphabetWhere = condition["showAlphabetWhere"] || 'bottom';
-      showViewingDistanceBool = condition["showViewingDistanceBool"] === "TRUE";
-      showCounterBool = condition["showCounterBool"] === "TRUE";
+      showViewingDistanceBool = condition["showViewingDistanceBool"] !== "FALSE";
+      showCounterBool = condition["showCounterBool"] !== "FALSE";
 
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
@@ -910,7 +888,7 @@ const experiment = (blockCount) => {
       if (showCounterBool) 
         trialInfoStr = `Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`;
       if (showViewingDistanceBool)
-        trialInfoStr += `At ${viewingDistanceCm} cm.`;
+        trialInfoStr += ` At ${viewingDistanceCm} cm.`;
       totalTrial.setText(trialInfoStr);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
@@ -923,8 +901,6 @@ const experiment = (blockCount) => {
       trialComponents.push(flanker1);
       trialComponents.push(target);
       trialComponents.push(flanker2);
-      
-      trialComponents.push(totalTrial);
 
       trialComponents.push(showAlphabet)
       trialComponents.push(totalTrial);
