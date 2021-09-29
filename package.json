@@ -1,0 +1,25 @@
+{
+  "name": "threshold",
+  "version": "0.0.1",
+  "description": "Threshold Participant.",
+  "main": "threshold.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "setup": "pip install -r lib/legacy/requirements.txt && python lib/legacy/preprocessor.py experiment.csv && cd psychojs && npm i && npm run build:css && npm run build:js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EasyEyes/threshold.git"
+  },
+  "keywords": [
+    "psychology"
+  ],
+  "author": "EasyEyes",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EasyEyes/threshold/issues"
+  },
+  "homepage": "https://github.com/EasyEyes/threshold#readme"
+}

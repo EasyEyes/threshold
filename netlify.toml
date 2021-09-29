@@ -1,5 +1,5 @@
 [build]
 environment = { PYTHON_VERSION = "3.8" }
 
-command = "pip install -r lib/legacy/requirements.txt && python lib/legacy/preprocessor.py experiment.csv && cd psychojs && npm i && npm run build:css && npm run build:js"
+command = "npm run setup"
 publish = "."
