@@ -8,7 +8,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "setup": "pip install -r lib/legacy/requirements.txt && python lib/legacy/preprocessor.py experiment.csv && cd psychojs && npm i && npm run build:css && npm run build:js"
+    "setup": "pip install -r lib/legacy/requirements.txt && python lib/legacy/preprocessor.py experiment.csv && cd psychojs && git checkout threshold-prod && npm i && npm run build:css && npm run build:js"
   },
   "repository": {
     "type": "git",
