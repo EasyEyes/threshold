@@ -771,11 +771,11 @@ const experiment = (blockCount) => {
       var alphabet = targetAlphabet;
       /* ------------------------------ Pick triplets ----------------------------- */
       const tempAlphabet = shuffle(shuffle(alphabet))
-      var firstFlanker = tempAlphabet[0];
-      var targetStim = tempAlphabet[1];
-      var secondFlanker = tempAlphabet[2];
-      console.log(firstFlanker, targetStim, secondFlanker);
-      correctAns = targetStim.toLowerCase();
+      var firstFlankerCharacter = tempAlphabet[0];
+      var targetCharacter = tempAlphabet[1];
+      var secondFlankerCharacter = tempAlphabet[2];
+      if (debug) console.log(firstFlankerCharacter, targetCharacter, secondFlankerCharacter);
+      correctAns = targetCharacter.toLowerCase();
       /* -------------------------------------------------------------------------- */
 
       var heightPx;
