@@ -26,7 +26,7 @@ export function setupClickableAlphabet(ans, font, where, responseRegister) {
     alphabet.innerText = a;
     alphabet.onclick = () => {
       responseRegister.clickTime = performance.now();
-      responseRegister.current = a;
+      responseRegister.current = a.toLowerCase();
     };
     alphabetHolder.appendChild(alphabet);
   }
