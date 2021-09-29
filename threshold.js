@@ -20,6 +20,7 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { shuffle } from "./components/utils.js";
+import { calculateBlockWithTrialIndex } from "./components/trialCounter.js";
 import { getCorrectSynth, getPurrSynth } from './components/sound.js';
 import { removeClickableAlphabet, setupClickableAlphabet } from "./components/showAlphabet.js";
 
@@ -62,14 +63,6 @@ Papa.parse("conditions/blockCount.csv", {
                 showVideo: false,
               },
             },
-            {
-              name: "trackGaze",
-              options: {
-                showGazer: false,
-                showVideo: false,
-                calibrationCount: 1,
-              },
-            },
           ],
           "body",
           {},
@@ -88,6 +81,7 @@ Papa.parse("conditions/blockCount.csv", {
 });
 
 const blockFiles = {};
+
 const loadBlockFiles = (count, callback) => {
   if (count === 0) {
     callback();
@@ -136,6 +130,26 @@ const loadBlockFiles = (count, callback) => {
     },
   });
 };
+
+var totalTrialConfig = {
+  initialVal: 1,
+  fontSize: 20,
+  x: window.innerWidth/2,
+  y: -window.innerHeight/2,
+  fontName: "Arial",
+  alignHoriz: "right",
+  alignVert: "bottom"
+}
+var totalTrial, // TextSim object
+    totalTrialIndex = totalTrialConfig.initialVal, // numerical value of totalTrialIndex
+    totalTrialCount = 0;
+
+var totalBlockConfig = {
+  initialVal: 0
+};
+var totalBlockIndex = totalBlockConfig.initialVal,
+    totalBlockTrialList = [],
+    totalBlockCount = 0;
 
 const experiment = (blockCount) => {
   ////
@@ -251,6 +265,7 @@ const experiment = (blockCount) => {
   var target;
   var flanker2;
   var showAlphabet;
+
   var globalClock;
   var routineTimer;
   async function experimentInit() {
@@ -355,6 +370,23 @@ const experiment = (blockCount) => {
       opacity: 1.0,
       depth: -5.0,
     })
+
+    totalTrial = new visual.TextStim({
+      win: psychoJS.window,
+      name: "totalTrial",
+      text: "",
+      font: totalTrialConfig.fontName,
+      units: "pix",
+      pos: [totalTrialConfig.x, totalTrialConfig.y],
+      alignHoriz: totalTrialConfig.alignHoriz,
+      alignVert: totalTrialConfig.alignVert,
+      height: 1.0,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -20.0,
+    });
 
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
@@ -567,12 +599,11 @@ const experiment = (blockCount) => {
         }
       }
       if (debug) console.log("possibleTrials: ", possibleTrials);
-      // const trialConfigIndex = thisBlockFileData[0].indexOf("conditionTrials");
-      // for (let i = 1; i < thisBlockFileData.length; i++) {
-      //   if (thisBlockFileData[i].length > 1) {
-      //     possibleTrials.push(parseInt(thisBlockFileData[i][trialConfigIndex]));
-      //   }
-      // }
+      totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
+      totalBlockCount = Object.keys(blockFiles).length;
+      totalBlockTrialList = [...possibleTrials];
+      // console.log('totalBlockTrialList', totalBlockTrialList)
+      // totalBlockCount = blockFiles.length;
 
       // TODO Remove this constraint to allow different # of trials for each condition
       if (!possibleTrials.every((a) => a === possibleTrials[0]))
@@ -659,6 +690,8 @@ const experiment = (blockCount) => {
   var validAns;
   var showAlphabetWhere;
   var showAlphabetElement;
+  var showCounterBool;
+  var showViewingDistanceBool;
   const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 }
   var targetDurationSec;
   var showFixation;
@@ -735,6 +768,8 @@ const experiment = (blockCount) => {
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
 
       showAlphabetWhere = condition["showAlphabetWhere"] || 'bottom';
+      showViewingDistanceBool = condition["showViewingDistanceBool"] !== "FALSE";
+      showCounterBool = condition["showCounterBool"] !== "FALSE";
 
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
@@ -858,6 +893,21 @@ const experiment = (blockCount) => {
       showAlphabet.setPos([0, 0])
       showAlphabet.setText('')
       // showAlphabet.setText(getAlphabetShowText(validAns))
+
+      // totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
+      // totalTrial.setAlignHoriz('right');
+      // totalTrial.setAlignVert('bottom');
+
+      totalBlockIndex = calculateBlockWithTrialIndex(totalBlockTrialList, totalTrialIndex);
+      let trialInfoStr = '';
+      if (showCounterBool) 
+        trialInfoStr = `Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`;
+      if (showViewingDistanceBool)
+        trialInfoStr += ` At ${viewingDistanceCm} cm.`;
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setFont(totalTrialConfig.fontName);
+      totalTrial.setHeight(totalTrialConfig.fontSize);
+      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2])
       
       // keep track of which components have finished
       trialComponents = [];
@@ -867,11 +917,17 @@ const experiment = (blockCount) => {
       trialComponents.push(flanker1);
       trialComponents.push(target);
       trialComponents.push(flanker2);
+
       trialComponents.push(showAlphabet)
+      trialComponents.push(totalTrial);
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
+      
+      // update trial index
+      totalTrialIndex = totalTrialIndex + 1;
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -969,6 +1025,15 @@ const experiment = (blockCount) => {
         fixation.frameNStart = frameN; // exact frame index
 
         fixation.setAutoDraw(showFixation);
+      }
+
+      // *totalTrial* updates
+      if (t >= 0.0 && totalTrial.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        totalTrial.tStart = t; // (not accounting for frame time here)
+        totalTrial.frameNStart = frameN; // exact frame index
+
+        totalTrial.setAutoDraw(true);
       }
 
       // *flanker1* updates
