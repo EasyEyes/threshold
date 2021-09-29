@@ -851,15 +851,15 @@ const experiment = (blockCount) => {
       fixation.setPos(fixationXYPx);
       fixation.setHeight(fixationSizeNow);
       flanker1.setPos(pos1XYPx);
-      flanker1.setText(firstFlanker);
+      flanker1.setText(firstFlankerCharacter);
       flanker1.setFont(targetFont);
       flanker1.setHeight(heightPx);
       target.setPos(pos2XYPx);
-      target.setText(targetStim);
+      target.setText(targetCharacter);
       target.setFont(targetFont);
       target.setHeight(heightPx);
       flanker2.setPos(pos3XYPx);
-      flanker2.setText(secondFlanker);
+      flanker2.setText(secondFlankerCharacter);
       flanker2.setFont(targetFont);
       flanker2.setHeight(heightPx);
       
