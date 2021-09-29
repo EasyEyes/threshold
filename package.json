@@ -1,6 +1,7 @@
 {
   "name": "threshold",
   "version": "0.0.1",
+  "private": "true",
   "description": "Threshold Participant.",
   "main": "threshold.js",
   "directories": {
