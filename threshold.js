@@ -41,16 +41,6 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : '', session: '001' };
 
 const fontsRequired = new Set();
-function resolveNotAllowedAudio(a) {
-  if (a) {
-    a.catch((e) => {
-      if (e.name === "NotAllowedError" || e.name === "NotSupportedError") {
-        if (debug) console.log("Reason audio failed: ", e.name);
-        console.log("Audio play failed.");
-      }
-    });
-  }
-}
 
 ////
 // blockCount is just a file telling the program how many blocks in total
