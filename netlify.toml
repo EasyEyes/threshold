@@ -1,5 +1,5 @@
 [build]
-environment = { PYTHON_VERSION = "3.8" }
+environment = { PYTHON_VERSION = "3.8", NPM_VERSION = "7.24.1" }
 
 command = "npm run setup"
 publish = "."
