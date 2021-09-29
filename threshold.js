@@ -41,6 +41,16 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : '', session: '001' };
 
 const fontsRequired = new Set();
+function resolveNotAllowedAudio(a) {
+  if (a) {
+    a.catch((e) => {
+      if (e.name === "NotAllowedError" || e.name === "NotSupportedError") {
+        if (debugging) console.log("Reason audio failed: ", e.name);
+        console.log("Audio play failed.");
+      }
+    });
+  }
+}
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -100,13 +110,13 @@ const loadBlockFiles = (count, callback) => {
     dynamicTyping: true,
     complete: function (results) {
       blockFiles[count] = results.data;
-      console.log("Block " + count + ": ", results.data);
+      if (debugging) console.log("Block " + count + ": ", results.data);
 
       Object.values(results.data).forEach((row) => {
         let fontFamily = row["targetFont"];
         let fontTestString = "12px " + fontFamily;
         let fontPath = "fonts/" + fontFamily + ".woff";
-        console.log("fontTestString: ", fontTestString);
+        if (debugging) console.log("fontTestString: ", fontTestString);
 
         let response = fetch(fontPath).then((response) => {
           if (response.ok) {
@@ -147,7 +157,7 @@ const experiment = (blockCount) => {
       path: `conditions/block_${i}.csv`,
     });
   }
-  console.log("fontsRequired: ", fontsRequired);
+  if (debugging) console.log("fontsRequired: ", fontsRequired);
 
   fontsRequired.forEach((fontFamily) => {
     _resources.push({ name: fontFamily, path: fontPath });
@@ -208,7 +218,7 @@ const experiment = (blockCount) => {
     expInfo["participant"] = rc.id.value;
   }
 
-  console.log("_resources: ", _resources);
+  if (debugging) console.log("_resources: ", _resources);
   psychoJS.start({
     expName: expName,
     expInfo: expInfo,
@@ -286,7 +296,7 @@ const experiment = (blockCount) => {
       name: "fixation",
       text: "+",
       font: "Open Sans",
-      units: "height", // TODO change to pix
+      units: "pix",
       pos: [0, 0],
       height: 0.1,
       wrapWidth: undefined,
@@ -519,6 +529,12 @@ const experiment = (blockCount) => {
   }
 
   async function trialsLoopEnd() {
+    psychoJS.experiment.addData("staircaseName", currentLoop._currentStaircase._name);
+    psychoJS.experiment.addData("questMeanAtEndOfTrialsLoop", currentLoop._currentStaircase.mean());
+    psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", currentLoop._currentStaircase.sd());
+    psychoJS.experiment.addData("questQuantileOfQuantileOrderAtEndOfTrialsLoop", 
+      currentLoop._currentStaircase.quantile(currentLoop._currentStaircase._jsQuest.quantileOrder)
+    );
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
     return Scheduler.Event.NEXT;
@@ -546,12 +562,12 @@ const experiment = (blockCount) => {
 
       const possibleTrials = [];
       const thisBlockFileData = blockFiles[thisLoopNumber];
-      console.log("thisBlockFileData: ", thisBlockFileData);
+      if (debugging) console.log("thisBlockFileData: ", thisBlockFileData);
 
       for (let rowKey in thisBlockFileData) {
         let rowIndex = parseInt(rowKey);
         if (Object.keys(thisBlockFileData[rowIndex]).length > 1) {
-          console.log(
+          if (debugging) console.log(
             "condition trials this row of block: ",
             parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
           );
@@ -560,7 +576,7 @@ const experiment = (blockCount) => {
           );
         }
       }
-      console.log("possibleTrials: ", possibleTrials);
+      if (debugging) console.log("possibleTrials: ", possibleTrials);
       // const trialConfigIndex = thisBlockFileData[0].indexOf("conditionTrials");
       // for (let i = 1; i < thisBlockFileData.length; i++) {
       //   if (thisBlockFileData[i].length > 1) {
@@ -639,6 +655,7 @@ const experiment = (blockCount) => {
     };
   }
 
+  var level;
   var windowWidthCm;
   var windowWidthPx;
   var pixPerCm;
@@ -671,7 +688,7 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       ////
-      console.log(
+      if (debugging) console.log(
         `Level: ${snapshot.getCurrentTrial().trialsVal}, Index: ${
           snapshot.thisIndex
         }`
@@ -683,15 +700,21 @@ const experiment = (blockCount) => {
           condition = c;
         }
       }
-      console.log("condition: ", condition);
+      if (debugging) console.log("condition: ", condition);
 
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-      console.log("level from getQuestValue(): ", proposedLevel);
-      console.log("_currentStaircase: ", currentLoop._currentStaircase);
+      if (debugging) console.log("level from getQuestValue(): ", proposedLevel);
 
+      psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
       // TODO Find a real way of estimating the max size
-      // Set maximum level to fully display all text
-      proposedLevel = Math.min(proposedLevel, 1.5);
+      proposedLevel = Math.min(proposedLevel, 1.75);
+
+      psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
+      psychoJS.experiment.addData("conditionName", condition["label"]);
+      psychoJS.experiment.addData("flankerOrientation", condition["spacingDirection"]);
+      psychoJS.experiment.addData("targetFont", condition["targetFont"]);
+      // TODO add a data field that is unique to this staircase (ie differentiate staircases within the same block, if they have equivalent parameters)
+
       // TODO set QUEST
       // !
       // !
@@ -726,12 +749,15 @@ const experiment = (blockCount) => {
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
 
-      fixationSizeNow = condition["markTheFixationYes"] === "TRUE" ? 30 : 0;
+      const fixationSize = 45;
+      fixationSizeNow = condition["markTheFixationYes"] === "TRUE" ? fixationSize : 0;
       targetMinimumPix = condition["targetMinimumPix"];
       spacingOverSizeRatio = condition["spacingOverSizeRatio"];
 
       targetEccentricityXDeg = condition["targetEccentricityXDeg"];
+      psychoJS.experiment.addData("targetEccentricityXDeg", targetEccentricityXDeg);
       targetEccentricityYDeg = condition["targetEccentricityYDeg"];
+      psychoJS.experiment.addData("targetEccentricityYDeg", targetEccentricityYDeg);
       targetEccentricityXYDeg = [
         targetEccentricityXDeg,
         targetEccentricityYDeg,
@@ -740,7 +766,7 @@ const experiment = (blockCount) => {
       trackGazeYes = condition["trackGazeYes"] === "TRUE";
       trackHeadYes = condition["trackHeadYes"] === "TRUE";
       wirelessKeyboardNeededYes =
-        condition["wirelessKeyboardNeededYes"] == "TRUE";
+        condition["wirelessKeyboardNeededYes"] === "TRUE";
 
       var alphabet = targetAlphabet;
       /* ------------------------------ Pick triplets ----------------------------- */
@@ -759,7 +785,7 @@ const experiment = (blockCount) => {
       ////
       // !
       fixationXYPix = [0, 0];
-      // TODO use actual nearPoint
+      // TODO use actual nearPoint, from RC 
       const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
       const nearPointXYPix = { x: 0, y: 0 }; // TEMP
       const displayOptions = {
@@ -777,22 +803,14 @@ const experiment = (blockCount) => {
         displayOptions
       );
       // const level = getMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
-      let level = await awaitMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
-      
-      console.log("New level: ", level);
+      level = await awaitMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
+      psychoJS.experiment.addData("levelUsed", level);
+      if (debugging) console.log("New level: ", level);
 
       spacingDeg = Math.pow(10, level);
+      psychoJS.experiment.addData("spacingDeg", spacingDeg);
 
-      console.log("targetEccentricityXYDeg: ", targetEccentricityXYDeg);
-      console.log(
-        "flanker locations: ",
-        getFlankerLocations(
-          targetEccentricityXYDeg,
-          fixationXYPix,
-          spacingDirection,
-          spacingDeg
-        )
-      );
+      if (debugging) console.log("targetEccentricityXYDeg: ", targetEccentricityXYDeg);
 
       [pos1XYDeg, pos3XYDeg] = getFlankerLocations(
         targetEccentricityXYDeg,
@@ -800,6 +818,9 @@ const experiment = (blockCount) => {
         spacingDirection,
         spacingDeg
       );
+      if (debugging) console.log("flanker locations: ", [pos1XYDeg, pos3XYDeg]);
+      psychoJS.experiment.addData("flankerLocationsDeg", [pos1XYDeg, pos3XYDeg]);
+
       pos2XYDeg = targetEccentricityXYDeg;
 
       // if (spacingDirection === "radial") {
@@ -820,6 +841,8 @@ const experiment = (blockCount) => {
         [pos1XYDeg, pos2XYDeg, pos3XYDeg],
         displayOptions
       );
+      psychoJS.experiment.addData("targetLocationsPix", pos2XYPx);
+      psychoJS.experiment.addData("flankerLocationsPix", [pos1XYPx, pos3XYPx]);
 
       // if (spacingDirection === "radial") {
       //   spacingPx = pos2XYPx[0] - pos1XYPx[0];
@@ -830,10 +853,11 @@ const experiment = (blockCount) => {
         pixPerCm: pixPerCm,
         viewingDistanceCm: viewingDistanceDesiredCm,
       }));
-      console.log("spacingPx: ", spacingPx);
+      psychoJS.experiment.addData("spacingPx", spacingPx);
+      if (debugging) console.log("spacingPx: ", spacingPx);
 
-      console.log("spacing/spacingOverSizeRation: ", spacingPx/spacingOverSizeRatio);
-      console.log("targetMinimumPix: ", targetMinimumPix);
+      if (debugging) console.log("spacing/spacingOverSizeRation: ", spacingPx/spacingOverSizeRatio);
+      if (debugging) console.log("targetMinimumPix: ", targetMinimumPix);
       heightPx = Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix);
 
       key_resp.keys = undefined;
@@ -846,6 +870,7 @@ const experiment = (blockCount) => {
       pos3XYPx = pos3XYPx.map((x) => Math.round(x));
 
       fixation.setPos(fixationXYPix);
+      fixation.setHeight(fixationSizeNow);
       flanker1.setPos(pos1XYPx);
       flanker1.setText(firstFlankerCharacter);
       flanker1.setFont(targetFont);
@@ -1085,7 +1110,8 @@ const experiment = (blockCount) => {
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
       if (currentLoop instanceof MultiStairHandler) {
-        currentLoop.addResponse(key_resp.corr);
+        currentLoop.addResponse(key_resp.corr, level);
+        if (debugging) console.log("level passed to addResponse: ", level);
       }
       psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
       psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
@@ -1098,6 +1124,13 @@ const experiment = (blockCount) => {
       key_resp.stop();
       // the Routine "trial" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
+      
+      psychoJS.experiment.addData("staircaseName", currentLoop._currentStaircase._name);
+      psychoJS.experiment.addData("questMeanAtEndOfTrial", currentLoop._currentStaircase.mean());
+      psychoJS.experiment.addData("questSDAtEndOfTrial", currentLoop._currentStaircase.sd());
+      psychoJS.experiment.addData("questQuantileOfQuantileOrderAtEndOfTrial", 
+        currentLoop._currentStaircase.quantile(currentLoop._currentStaircase._jsQuest.quantileOrder)
+      );
 
       return Scheduler.Event.NEXT;
     };
@@ -1242,23 +1275,29 @@ function boundingBoxFromSpacing(
   window
 ) {
   const height = Math.max(spacing / spacingOverSizeRatio, minimumHeight);
-  const testTextStim = new visual.TextStim({
-    win: window,
-    name: "testTextStim",
-    text: "H", // TEMP
-    font: font,
-    units: "pix", // ASSUMES that parameters are in pixel units
-    pos: [0, 0],
-    height: height,
-    wrapWidth: undefined,
-    ori: 0.0,
-    color: new util.Color("black"),
-    opacity: 1.0,
-    depth: -7.0,
-    autoDraw: false,
-    autoLog: false,
-  });
-  return testTextStim._boundingBox;
+  try{
+    const testTextStim = new visual.TextStim({
+      win: window,
+      name: "testTextStim",
+      text: "H", // TEMP
+      font: font,
+      units: "pix", // ASSUMES that parameters are in pixel units
+      pos: [0, 0],
+      height: height,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -7.0,
+      autoDraw: false,
+      autoLog: false,
+    });
+    const estimatedBoundingBox = testTextStim._boundingBox;
+    return estimatedBoundingBox;
+  } catch (error) {
+    console.error("Error estimating bounding box of flanker. Likely due to too large a `proposedLevel` value being tested.", error);
+    return error;
+  }
 }
 
 /**
@@ -1377,7 +1416,7 @@ function flankersExtent(
   flankerOrientation,
   sizingParameters
 ) {
-  console.log("window: ", sizingParameters.window);
+  if (debugging) console.log("window: ", sizingParameters.window);
   const spacingDegrees = Math.pow(10, level);
   const spacingPixels = Math.abs(degreesToPixels(spacingDegrees, {
     pixPerCm: sizingParameters.pixPerCm,
@@ -1389,33 +1428,38 @@ function flankersExtent(
     flankerOrientation,
     spacingPixels
   );
-  const flankerBoxDimensions = boundingBoxFromSpacing(
-    spacingPixels,
-    sizingParameters.spacingOverSizeRatio,
-    sizingParameters.minimumHeight,
-    sizingParameters.fontFamily,
-    sizingParameters.window
-  );
-  const boundingPoints = [];
-  flankerLocations.forEach((flankerPosition, i) => {
-    const boundingPoint = [];
-    if (targetPosition[0] < 0) {
-      boundingPoint.push(
-        flankerPosition[0] - (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2));
-    } else {
-      boundingPoint.push(
-        flankerPosition[0] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2));
-    }
-    if (targetPosition[1] < 0) {
-      boundingPoint.push(
-        flankerPosition[1] - (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2));
-    } else {
-      boundingPoint.push(
-        flankerPosition[1] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2));
-    }
-    boundingPoints.push(boundingPoint);
-  });
-  return boundingPoints;
+  try{
+    const flankerBoxDimensions = boundingBoxFromSpacing(
+      spacingPixels,
+      sizingParameters.spacingOverSizeRatio,
+      sizingParameters.minimumHeight,
+      sizingParameters.fontFamily,
+      sizingParameters.window
+    );
+    const boundingPoints = [];
+    flankerLocations.forEach((flankerPosition, i) => {
+      const boundingPoint = [];
+      if (targetPosition[0] < 0) {
+        boundingPoint.push(
+          flankerPosition[0] - (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2));
+      } else {
+        boundingPoint.push(
+          flankerPosition[0] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2));
+      }
+      if (targetPosition[1] < 0) {
+        boundingPoint.push(
+          flankerPosition[1] - (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2));
+      } else {
+        boundingPoint.push(
+          flankerPosition[1] + (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2));
+      }
+      boundingPoints.push(boundingPoint);
+    });
+    return boundingPoints;
+  }catch(error){
+    console.error("Error estimating flankers extent.", error);
+    return error;
+  }
 }
 
 /**
@@ -1429,11 +1473,13 @@ function rectangleContainsPoint(rectangle, point) {
   const rightX = Math.max(rectangle[0][0], rectangle[1][0]);
   const lowerY = Math.min(rectangle[0][1], rectangle[1][1]);
   const upperY = Math.max(rectangle[0][1], rectangle[1][1]);
-  console.log("flanker rectangle: ", rectangle);
   const xIsIn = point[0] >= leftX && point[0] <= rightX;
-  console.log("xIsIn: ", xIsIn);
   const yIsIn = point[1] >= lowerY && point[1] <= upperY;
-  console.log("yIsIn: ", yIsIn);
+  if (debugging) {
+    console.log("flanker rectangle: ", rectangle);
+    console.log("xIsIn: ", xIsIn);
+    console.log("yIsIn: ", yIsIn);
+  }
   return xIsIn && yIsIn;
 }
 
@@ -1471,19 +1517,22 @@ function unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingD
     spacingDirection,
     displayOptions
   );
+  // TODO take the size of fixation into account
   const fixationInfringed = rectangleContainsPoint(
     areaFlankersCover,
     fixationXYPix
   );
-  console.log("areaFlankersCover: ", areaFlankersCover);
-  console.log("fixationInfringed: ", fixationInfringed);
   const stimuliExtendOffscreen = rectangleOffscreen(areaFlankersCover, {
     width: screen.width,
     height: screen.height,
   });
-  console.log("stimuliExtendOffscreen: ", stimuliExtendOffscreen);
   const badPresentation = fixationInfringed || stimuliExtendOffscreen;
-  console.log("badPresentation: ", badPresentation);
+  if (debugging) {
+    console.log("areaFlankersCover: ", areaFlankersCover);
+    console.log("fixationInfringed: ", fixationInfringed);
+    console.log("stimuliExtendOffscreen: ", stimuliExtendOffscreen);
+    console.log("badPresentation: ", badPresentation);
+  };
   return badPresentation;
 }
 
@@ -1500,10 +1549,10 @@ function unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingD
 function getMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions){
   const granularityOfChange = 0.05;
   if (!unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions)){
-    console.log("acceptable level found: ", proposedLevel);
+    if (debugging) console.log("acceptable level found: ", proposedLevel);
     return proposedLevel;
   } else {
-    console.log("unacceptable level: ", proposedLevel);
+    if (debugging) console.log("unacceptable level: ", proposedLevel);
     return getMaxPresentableLevel(proposedLevel - granularityOfChange, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
   }
 }
@@ -1513,18 +1562,22 @@ function getMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spaci
  * @param {Number} proposedLevel Level to be tested, as provided by QUEST
  * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
  * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
- * @param {"radial"|"tangential"} spacingDirection Orientation of flankers relative to fixation-target
+ * @param {("radial"|"tangential")} spacingDirection Orientation of flankers relative to fixation-target
  * @param {Object} displayOptions Set of parameters for the specifics of presentation
  * @todo Specify necessary members of `displayOptions`
  * @returns {Number}
  */
 function awaitMaxPresentableLevel(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions){
   const granularityOfChange = 0.05;
+  if (unacceptableStimuli(granularityOfChange, targetXYPix, fixationXYPix, spacingDirection, displayOptions)){
+    console.error("Unpresentable stimuli, even at level=" + String(granularityOfChange));
+    return new Promise(resolve => resolve(granularityOfChange));
+  }
   if (!unacceptableStimuli(proposedLevel, targetXYPix, fixationXYPix, spacingDirection, displayOptions)){
-    console.log("acceptable level found: ", proposedLevel);
+    if (debugging) console.log("acceptable level found: ", proposedLevel);
     return new Promise(resolve => resolve(proposedLevel));
   } else {
-    console.log("unacceptable level: ", proposedLevel);
+    if (debugging) console.log("unacceptable level: ", proposedLevel);
     return awaitMaxPresentableLevel(proposedLevel - granularityOfChange, targetXYPix, fixationXYPix, spacingDirection, displayOptions);
   }
 }
