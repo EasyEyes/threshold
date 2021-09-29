@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-const debug = true
+const debug = false;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -298,7 +298,7 @@ const experiment = (blockCount) => {
       font: "Open Sans",
       units: "pix",
       pos: [0, 0],
-      height: 0.1,
+      height: 1.0,
       wrapWidth: undefined,
       ori: 0.0,
       color: new util.Color("black"),
@@ -671,7 +671,7 @@ const experiment = (blockCount) => {
   var showAlphabetElement;
   const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 }
   var targetDurationSec;
-  var fixationSizeNow;
+  var showFixation;
   var targetMinimumPix;
   var spacingOverSizeRatio;
   var targetEccentricityXDeg;
@@ -749,8 +749,9 @@ const experiment = (blockCount) => {
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
 
-      const fixationSize = 45;
-      fixationSizeNow = condition["markTheFixationYes"] === "TRUE" ? fixationSize : 0;
+      const fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
+      showFixation = condition["markTheFixationBool"] === "True";
+
       targetMinimumPix = condition["targetMinimumPix"];
       spacingOverSizeRatio = condition["spacingOverSizeRatio"];
 
@@ -763,10 +764,10 @@ const experiment = (blockCount) => {
         targetEccentricityYDeg,
       ];
 
-      trackGazeYes = condition["trackGazeYes"] === "TRUE";
-      trackHeadYes = condition["trackHeadYes"] === "TRUE";
+      trackGazeYes = condition["trackGazeYes"] === "True";
+      trackHeadYes = condition["trackHeadYes"] === "True";
       wirelessKeyboardNeededYes =
-        condition["wirelessKeyboardNeededYes"] === "TRUE";
+        condition["wirelessKeyboardNeededYes"] === "True";
 
       var alphabet = targetAlphabet;
       /* ------------------------------ Pick triplets ----------------------------- */
@@ -849,7 +850,8 @@ const experiment = (blockCount) => {
       pos3XYPx = pos3XYPx.map((x) => Math.round(x));
 
       fixation.setPos(fixationXYPx);
-      fixation.setHeight(fixationSizeNow);
+      fixation.setHeight(fixationSize);
+      fixation.setAutoDraw(showFixation);
       flanker1.setPos(pos1XYPx);
       flanker1.setText(firstFlankerCharacter);
       flanker1.setFont(targetFont);
@@ -976,7 +978,7 @@ const experiment = (blockCount) => {
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
 
-        fixation.setAutoDraw(true);
+        fixation.setAutoDraw(showFixation);
       }
 
       // *flanker1* updates
@@ -1153,19 +1155,6 @@ const experiment = (blockCount) => {
     if (psychoJS.experiment.isEntryEmpty()) {
       psychoJS.experiment.nextEntry();
     }
-
-    console.log("Log threshold right is: ", levelLeft);
-    console.log(
-      "Threshold spacing right is: ",
-      Math.pow(10, levelLeft) - 0.15,
-      " deg"
-    );
-    console.log("Log threshold right is: ", levelRight);
-    console.log(
-      "Threshold spacing right is: ",
-      Math.pow(10, levelRight) - 0.15,
-      " deg"
-    );
 
     psychoJS.window.close();
     psychoJS.quit({ message: message, isCompleted: isCompleted });
