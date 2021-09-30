@@ -1,5 +1,5 @@
 [build]
-environment = { PYTHON_VERSION = "3.8" }
+environment = { PYTHON_VERSION = "3.8", NPM_VERSION = "7.24.1" }
 
-command = "pip install -r lib/legacy/requirements.txt && python lib/legacy/preprocessor.py experiment.csv"
+command = "npm run setup"
 publish = "."

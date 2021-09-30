@@ -8,7 +8,7 @@ conditionName,right,left,right,left
 conditionTrials,10,10,10,10
 markingFixationStrokeLengthDeg,1,1,1,1
 markingFixationStrokeThicknessDeg,0.03,0.03,0.03,0.03
-markTheFixationYes,TRUE,TRUE,TRUE,TRUE
+markTheFixationBool,TRUE,TRUE,TRUE,TRUE
 showAlphabetWhere,bottom,bottom,bottom,bottom
 showCounterWhere,bottomRight,bottomRight,bottomRight,bottomRight
 showInstructionsWhere,topLeft,topLeft,topLeft,topLeft

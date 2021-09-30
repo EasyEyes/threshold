@@ -2,9 +2,9 @@
  * Crowding Test *
  *****************/
 
-const debug = true
+const debug = false;
 
-import { core, data, util, visual } from "./lib/psychojs-2021.3.0.js";
+import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
@@ -20,8 +20,12 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { shuffle } from "./components/utils.js";
-import { playCorrectSynth, playPurrSynth } from "./components/sound.js";
-import { removeClickableAlphabet, setupClickableAlphabet } from "./components/showAlphabet.js";
+import { calculateBlockWithTrialIndex } from "./components/trialCounter.js";
+import { getCorrectSynth, getPurrSynth } from "./components/sound.js";
+import {
+  removeClickableAlphabet,
+  setupClickableAlphabet,
+} from "./components/showAlphabet.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -38,7 +42,7 @@ rc.init();
 
 // store info about the experiment session:
 let expName = "Threshold"; // from the Builder filename that created this script
-let expInfo = { participant: debug ? rc.id.value : '', session: '001' };
+let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = new Set();
 
@@ -62,14 +66,6 @@ Papa.parse("conditions/blockCount.csv", {
                 showVideo: false,
               },
             },
-            {
-              name: "trackGaze",
-              options: {
-                showGazer: false,
-                showVideo: false,
-                calibrationCount: 1,
-              },
-            },
           ],
           "body",
           {},
@@ -88,6 +84,7 @@ Papa.parse("conditions/blockCount.csv", {
 });
 
 const blockFiles = {};
+
 const loadBlockFiles = (count, callback) => {
   if (count === 0) {
     callback();
@@ -100,13 +97,13 @@ const loadBlockFiles = (count, callback) => {
     dynamicTyping: true,
     complete: function (results) {
       blockFiles[count] = results.data;
-      console.log("Block " + count + ": ", results.data);
+      if (debug) console.log("Block " + count + ": ", results.data);
 
       Object.values(results.data).forEach((row) => {
         let fontFamily = row["targetFont"];
         let fontTestString = "12px " + fontFamily;
         let fontPath = "fonts/" + fontFamily + ".woff";
-        console.log("fontTestString: ", fontTestString);
+        if (debug) console.log("fontTestString: ", fontTestString);
 
         let response = fetch(fontPath).then((response) => {
           if (response.ok) {
@@ -137,6 +134,26 @@ const loadBlockFiles = (count, callback) => {
   });
 };
 
+var totalTrialConfig = {
+  initialVal: 1,
+  fontSize: 20,
+  x: window.innerWidth / 2,
+  y: -window.innerHeight / 2,
+  fontName: "Arial",
+  alignHoriz: "right",
+  alignVert: "bottom",
+};
+var totalTrial, // TextSim object
+  totalTrialIndex = totalTrialConfig.initialVal, // numerical value of totalTrialIndex
+  totalTrialCount = 0;
+
+var totalBlockConfig = {
+  initialVal: 0,
+};
+var totalBlockIndex = totalBlockConfig.initialVal,
+  totalBlockTrialList = [],
+  totalBlockCount = 0;
+
 const experiment = (blockCount) => {
   ////
   // Resources
@@ -147,7 +164,7 @@ const experiment = (blockCount) => {
       path: `conditions/block_${i}.csv`,
     });
   }
-  console.log("fontsRequired: ", fontsRequired);
+  if (debug) console.log("fontsRequired: ", fontsRequired);
 
   fontsRequired.forEach((fontFamily) => {
     _resources.push({ name: fontFamily, path: fontPath });
@@ -159,6 +176,10 @@ const experiment = (blockCount) => {
     debug: debug,
   });
 
+  /* ---------------------------------- Sound --------------------------------- */
+  const correctSynth = getCorrectSynth(psychoJS);
+  const purrSynth = getPurrSynth(psychoJS);
+
   // open window:
   psychoJS.openWindow({
     fullscr: !debug,
@@ -166,6 +187,7 @@ const experiment = (blockCount) => {
     units: "height", // TODO change to pix
     waitBlanking: true,
   });
+
   // schedule the experiment:
   psychoJS.schedule(
     psychoJS.gui.DlgFromDict({
@@ -205,7 +227,7 @@ const experiment = (blockCount) => {
     expInfo["participant"] = rc.id.value;
   }
 
-  console.log("_resources: ", _resources);
+  if (debug) console.log("_resources: ", _resources);
   psychoJS.start({
     expName: expName,
     expInfo: expInfo,
@@ -249,6 +271,7 @@ const experiment = (blockCount) => {
   var target;
   var flanker2;
   var showAlphabet;
+
   var globalClock;
   var routineTimer;
   async function experimentInit() {
@@ -284,9 +307,9 @@ const experiment = (blockCount) => {
       name: "fixation",
       text: "+",
       font: "Open Sans",
-      units: "height", // TODO change to pix
+      units: "pix",
       pos: [0, 0],
-      height: 0.1,
+      height: 1.0,
       wrapWidth: undefined,
       ori: 0.0,
       color: new util.Color("black"),
@@ -352,7 +375,24 @@ const experiment = (blockCount) => {
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -5.0,
-    })
+    });
+
+    totalTrial = new visual.TextStim({
+      win: psychoJS.window,
+      name: "totalTrial",
+      text: "",
+      font: totalTrialConfig.fontName,
+      units: "pix",
+      pos: [totalTrialConfig.x, totalTrialConfig.y],
+      alignHoriz: totalTrialConfig.alignHoriz,
+      alignVert: totalTrialConfig.alignVert,
+      height: 1.0,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -20.0,
+    });
 
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
@@ -538,6 +578,24 @@ const experiment = (blockCount) => {
   }
 
   async function trialsLoopEnd() {
+    psychoJS.experiment.addData(
+      "staircaseName",
+      currentLoop._currentStaircase._name
+    );
+    psychoJS.experiment.addData(
+      "questMeanAtEndOfTrialsLoop",
+      currentLoop._currentStaircase.mean()
+    );
+    psychoJS.experiment.addData(
+      "questSDAtEndOfTrialsLoop",
+      currentLoop._currentStaircase.sd()
+    );
+    psychoJS.experiment.addData(
+      "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
+      currentLoop._currentStaircase.quantile(
+        currentLoop._currentStaircase._jsQuest.quantileOrder
+      )
+    );
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
     return Scheduler.Event.NEXT;
@@ -565,27 +623,27 @@ const experiment = (blockCount) => {
 
       const possibleTrials = [];
       const thisBlockFileData = blockFiles[thisLoopNumber];
-      console.log("thisBlockFileData: ", thisBlockFileData);
+      if (debug) console.log("thisBlockFileData: ", thisBlockFileData);
 
       for (let rowKey in thisBlockFileData) {
         let rowIndex = parseInt(rowKey);
         if (Object.keys(thisBlockFileData[rowIndex]).length > 1) {
-          console.log(
-            "condition trials this row of block: ",
-            parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
-          );
+          if (debug)
+            console.log(
+              "condition trials this row of block: ",
+              parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
+            );
           possibleTrials.push(
             parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
           );
         }
       }
-      console.log("possibleTrials: ", possibleTrials);
-      // const trialConfigIndex = thisBlockFileData[0].indexOf("conditionTrials");
-      // for (let i = 1; i < thisBlockFileData.length; i++) {
-      //   if (thisBlockFileData[i].length > 1) {
-      //     possibleTrials.push(parseInt(thisBlockFileData[i][trialConfigIndex]));
-      //   }
-      // }
+      if (debug) console.log("possibleTrials: ", possibleTrials);
+      totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
+      totalBlockCount = Object.keys(blockFiles).length;
+      totalBlockTrialList = [...possibleTrials];
+      // console.log('totalBlockTrialList', totalBlockTrialList)
+      // totalBlockCount = blockFiles.length;
 
       // TODO Remove this constraint to allow different # of trials for each condition
       if (!possibleTrials.every((a) => a === possibleTrials[0]))
@@ -658,6 +716,7 @@ const experiment = (blockCount) => {
     };
   }
 
+  var level;
   var windowWidthCm;
   var windowWidthPx;
   var pixPerCm;
@@ -671,9 +730,11 @@ const experiment = (blockCount) => {
   var validAns;
   var showAlphabetWhere;
   var showAlphabetElement;
-  const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 }
+  var showCounterBool;
+  var showViewingDistanceBool;
+  const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 };
   var targetDurationSec;
-  var fixationSizeNow;
+  var showFixation;
   var targetMinimumPix;
   var spacingOverSizeRatio;
   var targetEccentricityXDeg;
@@ -690,11 +751,12 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       ////
-      console.log(
-        `Level: ${snapshot.getCurrentTrial().trialsVal}, Index: ${
-          snapshot.thisIndex
-        }`
-      );
+      if (debug)
+        console.log(
+          `Level: ${snapshot.getCurrentTrial().trialsVal}, Index: ${
+            snapshot.thisIndex
+          }`
+        );
 
       let condition;
       for (let c of snapshot.handler.getConditions()) {
@@ -702,13 +764,24 @@ const experiment = (blockCount) => {
           condition = c;
         }
       }
-      console.log("condition: ", condition);
+      if (debug) console.log("condition: ", condition);
 
-      let level = currentLoop._currentStaircase.getQuestValue();
+      let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+      if (debug) console.log("level from getQuestValue(): ", proposedLevel);
 
-      // TODO Based on display size
-      // Set maximum level to fully display all text
-      level = Math.min(level, 1);
+      psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+      // TODO Find a real way of estimating the max size
+      proposedLevel = Math.min(proposedLevel, 1.75);
+
+      psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
+      psychoJS.experiment.addData("conditionName", condition["label"]);
+      psychoJS.experiment.addData(
+        "flankerOrientation",
+        condition["spacingDirection"]
+      );
+      psychoJS.experiment.addData("targetFont", condition["targetFont"]);
+      // TODO add a data field that is unique to this staircase (ie differentiate staircases within the same block, if they have equivalent parameters)
+
       // TODO set QUEST
       // !
       // !
@@ -722,11 +795,17 @@ const experiment = (blockCount) => {
       windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
       windowWidthPx = rc.displayWidthPx.value;
       pixPerCm = windowWidthPx / windowWidthCm;
-      if (!rc.screenWidthCm) console.warn('[Screen Width] Using arbitrary screen width. Enable RC.');
+      if (!rc.screenWidthCm)
+        console.warn("[Screen Width] Using arbitrary screen width. Enable RC.");
 
       viewingDistanceDesiredCm = condition["viewingDistanceDesiredCm"];
-      viewingDistanceCm = rc.viewingDistanceCm ? rc.viewingDistanceCm.value : viewingDistanceDesiredCm
-      if (!rc.viewingDistanceCm) console.warn('[Viewing Distance] Using arbitrary viewing distance. Enable RC.');
+      viewingDistanceCm = rc.viewingDistanceCm
+        ? rc.viewingDistanceCm.value
+        : viewingDistanceDesiredCm;
+      if (!rc.viewingDistanceCm)
+        console.warn(
+          "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
+        );
 
       fixationXYPx = [0, 0];
 
@@ -738,97 +817,130 @@ const experiment = (blockCount) => {
       targetAlphabet = String(condition["targetAlphabet"]).split("");
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
 
-      showAlphabetWhere = condition["showAlphabetWhere"] || 'bottom';
+      showAlphabetWhere = condition["showAlphabetWhere"] || "bottom";
+      showViewingDistanceBool =
+        condition["showViewingDistanceBool"] !== "FALSE";
+      showCounterBool = condition["showCounterBool"] !== "FALSE";
 
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
 
-      fixationSizeNow = condition["markTheFixationYes"] === "TRUE" ? 30 : 0;
+      const fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
+      showFixation = condition["markTheFixationBool"] === "True";
+
       targetMinimumPix = condition["targetMinimumPix"];
       spacingOverSizeRatio = condition["spacingOverSizeRatio"];
 
       targetEccentricityXDeg = condition["targetEccentricityXDeg"];
+      psychoJS.experiment.addData(
+        "targetEccentricityXDeg",
+        targetEccentricityXDeg
+      );
       targetEccentricityYDeg = condition["targetEccentricityYDeg"];
+      psychoJS.experiment.addData(
+        "targetEccentricityYDeg",
+        targetEccentricityYDeg
+      );
       targetEccentricityXYDeg = [
         targetEccentricityXDeg,
         targetEccentricityYDeg,
       ];
 
-      trackGazeYes = condition["trackGazeYes"] === "TRUE";
-      trackHeadYes = condition["trackHeadYes"] === "TRUE";
+      trackGazeYes = condition["trackGazeYes"] === "True";
+      trackHeadYes = condition["trackHeadYes"] === "True";
       wirelessKeyboardNeededYes =
-        condition["wirelessKeyboardNeededYes"] == "TRUE";
+        condition["wirelessKeyboardNeededYes"] === "True";
 
       var alphabet = targetAlphabet;
       /* ------------------------------ Pick triplets ----------------------------- */
-      const tempAlphabet = shuffle(shuffle(alphabet))
-      var firstFlanker = tempAlphabet[0];
-      var targetStim = tempAlphabet[1];
-      var secondFlanker = tempAlphabet[2];
-      console.log(firstFlanker, targetStim, secondFlanker);
-      correctAns = targetStim.toLowerCase();
+      const tempAlphabet = shuffle(shuffle(alphabet));
+      var firstFlankerCharacter = tempAlphabet[0];
+      var targetCharacter = tempAlphabet[1];
+      var secondFlankerCharacter = tempAlphabet[2];
+      if (debug)
+        console.log(
+          firstFlankerCharacter,
+          targetCharacter,
+          secondFlankerCharacter
+        );
+      correctAns = targetCharacter.toLowerCase();
       /* -------------------------------------------------------------------------- */
 
-      var heightPx, listXY;
+      var heightPx;
       var pos1XYDeg, pos1XYPx, pos2XYDeg, pos2XYPx, pos3XYDeg, pos3XYPx;
       var spacingDeg, spacingPx;
 
       ////
       // !
-      spacingDeg = Math.pow(10, level);
-
-      if (spacingDirection === "radial") {
-        pos1XYDeg = [
-          targetEccentricityXYDeg[0] - spacingDeg,
-          targetEccentricityXYDeg[1],
-        ];
-        pos2XYDeg = targetEccentricityXYDeg;
-        pos3XYDeg = [
-          targetEccentricityXYDeg[0] + spacingDeg,
-          targetEccentricityXYDeg[1],
-        ];
-        if (targetEccentricityXDeg < 0) {
-          levelLeft = level;
-        } else {
-          levelRight = level;
-        }
-      } else if (spacingDirection == "tangential") {
-        pos1XYDeg = [
-          targetEccentricityXYDeg[0],
-          targetEccentricityXYDeg[1] - spacingDeg,
-        ];
-        pos2XYDeg = targetEccentricityXYDeg;
-        pos3XYDeg = [
-          targetEccentricityXYDeg[0],
-          targetEccentricityXYDeg[1] + spacingDeg,
-        ];
-        if (targetEccentricityYDeg < 0) {
-          levelLeft = level;
-        } else {
-          levelRight = level;
-        }
-      }
-
-      // TODO use actual nearPoint; currently totally ignoring fixation???
+      // TODO use actual nearPoint, from RC
       const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
       const nearPointXYPix = { x: 0, y: 0 }; // TEMP
+      const displayOptions = {
+        pixPerCm: pixPerCm,
+        viewingDistanceCm: viewingDistanceCm,
+        nearPointXYDeg: nearPointXYDeg,
+        nearPointXYPix: nearPointXYPix,
+        spacingOverSizeRatio: spacingOverSizeRatio,
+        minimumHeight: targetMinimumPix,
+        fontFamily: targetFont,
+        window: psychoJS.window,
+      };
+      const [targetXYPix] = XYPixOfXYDeg(
+        [targetEccentricityXYDeg],
+        displayOptions
+      );
+      level = await awaitMaxPresentableLevel(
+        proposedLevel,
+        targetXYPix,
+        fixationXYPx,
+        spacingDirection,
+        displayOptions
+      );
+      psychoJS.experiment.addData("levelUsed", level);
+      if (debug) console.log("New level: ", level);
+
+      spacingDeg = Math.pow(10, level);
+      psychoJS.experiment.addData("spacingDeg", spacingDeg);
+
+      if (debug)
+        console.log("targetEccentricityXYDeg: ", targetEccentricityXYDeg);
+
+      [pos1XYDeg, pos3XYDeg] = getFlankerLocations(
+        targetEccentricityXYDeg,
+        fixationXYPx,
+        spacingDirection,
+        spacingDeg
+      );
+      if (debug) console.log("flanker locations: ", [pos1XYDeg, pos3XYDeg]);
+      psychoJS.experiment.addData("flankerLocationsDeg", [
+        pos1XYDeg,
+        pos3XYDeg,
+      ]);
+
+      pos2XYDeg = targetEccentricityXYDeg;
 
       [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg(
         [pos1XYDeg, pos2XYDeg, pos3XYDeg],
-        {
+        displayOptions
+      );
+      psychoJS.experiment.addData("targetLocationsPix", pos2XYPx);
+      psychoJS.experiment.addData("flankerLocationsPix", [pos1XYPx, pos3XYPx]);
+
+      spacingPx = Math.abs(
+        degreesToPixels(spacingDeg, {
           pixPerCm: pixPerCm,
           viewingDistanceCm: viewingDistanceCm,
-          nearPointXYDeg: nearPointXYDeg,
-          nearPointXYPix: nearPointXYPix,
-        }
+        })
       );
+      psychoJS.experiment.addData("spacingPx", spacingPx);
+      if (debug) console.log("spacingPx: ", spacingPx);
 
-      if (spacingDirection === "radial") {
-        spacingPx = pos2XYPx[0] - pos1XYPx[0];
-      } else if (spacingDirection === "tangential") {
-        spacingPx = pos2XYPx[1] - pos1XYPx[1];
-      }
-
+      if (debug)
+        console.log(
+          "spacing/spacingOverSizeRation: ",
+          spacingPx / spacingOverSizeRatio
+        );
+      if (debug) console.log("targetMinimumPix: ", targetMinimumPix);
       heightPx = Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix);
 
       key_resp.keys = undefined;
@@ -840,23 +952,44 @@ const experiment = (blockCount) => {
       pos2XYPx = pos2XYPx.map((x) => Math.round(x));
       pos3XYPx = pos3XYPx.map((x) => Math.round(x));
 
+      fixation.setPos(fixationXYPx);
+      fixation.setHeight(fixationSize);
+      fixation.setAutoDraw(showFixation);
       flanker1.setPos(pos1XYPx);
-      flanker1.setText(firstFlanker);
+      flanker1.setText(firstFlankerCharacter);
       flanker1.setFont(targetFont);
       flanker1.setHeight(heightPx);
       target.setPos(pos2XYPx);
-      target.setText(targetStim);
+      target.setText(targetCharacter);
       target.setFont(targetFont);
       target.setHeight(heightPx);
       flanker2.setPos(pos3XYPx);
-      flanker2.setText(secondFlanker);
+      flanker2.setText(secondFlankerCharacter);
       flanker2.setFont(targetFont);
       flanker2.setHeight(heightPx);
-      
-      showAlphabet.setPos([0, 0])
-      showAlphabet.setText('')
+
+      showAlphabet.setPos([0, 0]);
+      showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
-      
+
+      // totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
+      // totalTrial.setAlignHoriz('right');
+      // totalTrial.setAlignVert('bottom');
+
+      totalBlockIndex = calculateBlockWithTrialIndex(
+        totalBlockTrialList,
+        totalTrialIndex
+      );
+      let trialInfoStr = "";
+      if (showCounterBool)
+        trialInfoStr = `Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`;
+      if (showViewingDistanceBool)
+        trialInfoStr += ` At ${viewingDistanceCm} cm.`;
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setFont(totalTrialConfig.fontName);
+      totalTrial.setHeight(totalTrialConfig.fontSize);
+      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+
       // keep track of which components have finished
       trialComponents = [];
       trialComponents.push(key_resp);
@@ -865,11 +998,17 @@ const experiment = (blockCount) => {
       trialComponents.push(flanker1);
       trialComponents.push(target);
       trialComponents.push(flanker2);
-      trialComponents.push(showAlphabet)
+
+      trialComponents.push(showAlphabet);
+      trialComponents.push(totalTrial);
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
+
+      // update trial index
+      totalTrialIndex = totalTrialIndex + 1;
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -906,7 +1045,7 @@ const experiment = (blockCount) => {
         key_resp.frameNStart = frameN; // exact frame index
         // TODO Use PsychoJS clock if possible
         // Reset together with PsychoJS
-        showAlphabetResponse.onsetTime = performance.now()
+        showAlphabetResponse.onsetTime = performance.now();
 
         // keyboard checking is just starting
         psychoJS.window.callOnFlip(function () {
@@ -932,7 +1071,7 @@ const experiment = (blockCount) => {
           // was this correct?
           if (key_resp.keys == correctAns) {
             // Play correct audio
-            playCorrectSynth()
+            correctSynth.play();
             key_resp.corr = 1;
           } else {
             // Play wrong audio
@@ -945,18 +1084,20 @@ const experiment = (blockCount) => {
 
       // *showAlphabetResponse* updates
       if (showAlphabetResponse.current) {
-        key_resp.keys = showAlphabetResponse.current
-        key_resp.rt = (showAlphabetResponse.clickTime - showAlphabetResponse.onsetTime) / 1000
+        key_resp.keys = showAlphabetResponse.current;
+        key_resp.rt =
+          (showAlphabetResponse.clickTime - showAlphabetResponse.onsetTime) /
+          1000;
         if (showAlphabetResponse.current == correctAns) {
           // Play correct audio
-          correctAudio.play()
+          correctSynth.play();
           key_resp.corr = 1;
         } else {
           // Play wrong audio
           key_resp.corr = 0;
         }
-        showAlphabetResponse.current = null
-        removeClickableAlphabet()
+        showAlphabetResponse.current = null;
+        removeClickableAlphabet();
         continueRoutine = false;
       }
 
@@ -966,7 +1107,16 @@ const experiment = (blockCount) => {
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
 
-        fixation.setAutoDraw(true);
+        fixation.setAutoDraw(showFixation);
+      }
+
+      // *totalTrial* updates
+      if (t >= 0.0 && totalTrial.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        totalTrial.tStart = t; // (not accounting for frame time here)
+        totalTrial.frameNStart = frameN; // exact frame index
+
+        totalTrial.setAutoDraw(true);
       }
 
       // *flanker1* updates
@@ -1000,7 +1150,7 @@ const experiment = (blockCount) => {
         // Play purr sound
         // Wait until next frame to play
         setTimeout(() => {
-          playPurrSynth()
+          purrSynth.play();
         }, 17);
       }
 
@@ -1028,20 +1178,28 @@ const experiment = (blockCount) => {
 
       /* -------------------------------------------------------------------------- */
       // *showAlphabet* updates
-      if (t >= 0.5 + targetDurationSec && showAlphabet.status === PsychoJS.Status.NOT_STARTED) {
+      if (
+        t >= 0.5 + targetDurationSec &&
+        showAlphabet.status === PsychoJS.Status.NOT_STARTED
+      ) {
         // keep track of start time/frame for later
         showAlphabet.tStart = t; // (not accounting for frame time here)
         showAlphabet.frameNStart = frameN; // exact frame index
 
         showAlphabet.setAutoDraw(true);
-        showAlphabetElement = setupClickableAlphabet(validAns, targetFont, showAlphabetWhere, showAlphabetResponse)
+        showAlphabetElement = setupClickableAlphabet(
+          targetAlphabet,
+          targetFont,
+          showAlphabetWhere,
+          showAlphabetResponse
+        );
       }
       /* -------------------------------------------------------------------------- */
 
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
-        removeClickableAlphabet()
+        removeClickableAlphabet();
         return Scheduler.Event.NEXT;
       }
 
@@ -1074,12 +1232,13 @@ const experiment = (blockCount) => {
       }
       // was no response the correct answer?!
       if (key_resp.keys === undefined) {
-        console.error('[key_resp.keys] No response error.');
+        console.error("[key_resp.keys] No response error.");
       }
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
       if (currentLoop instanceof MultiStairHandler) {
-        currentLoop.addResponse(key_resp.corr);
+        currentLoop.addResponse(key_resp.corr, level);
+        if (debug) console.log("level passed to addResponse: ", level);
       }
       psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
       psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
@@ -1092,6 +1251,25 @@ const experiment = (blockCount) => {
       key_resp.stop();
       // the Routine "trial" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
+
+      psychoJS.experiment.addData(
+        "staircaseName",
+        currentLoop._currentStaircase._name
+      );
+      psychoJS.experiment.addData(
+        "questMeanAtEndOfTrial",
+        currentLoop._currentStaircase.mean()
+      );
+      psychoJS.experiment.addData(
+        "questSDAtEndOfTrial",
+        currentLoop._currentStaircase.sd()
+      );
+      psychoJS.experiment.addData(
+        "questQuantileOfQuantileOrderAtEndOfTrial",
+        currentLoop._currentStaircase.quantile(
+          currentLoop._currentStaircase._jsQuest.quantileOrder
+        )
+      );
 
       return Scheduler.Event.NEXT;
     };
@@ -1136,19 +1314,6 @@ const experiment = (blockCount) => {
       psychoJS.experiment.nextEntry();
     }
 
-    console.log("Log threshold right is: ", levelLeft);
-    console.log(
-      "Threshold spacing right is: ",
-      Math.pow(10, levelLeft) - 0.15,
-      " deg"
-    );
-    console.log("Log threshold right is: ", levelRight);
-    console.log(
-      "Threshold spacing right is: ",
-      Math.pow(10, levelRight) - 0.15,
-      " deg"
-    );
-
     psychoJS.window.close();
     psychoJS.quit({ message: message, isCompleted: isCompleted });
 
@@ -1168,10 +1333,13 @@ const experiment = (blockCount) => {
  * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
  * @returns {Number}
  */
-function degreesToPixels(degrees, displayOptions){
-    const radians = degrees*(Math.PI/180);
-    const pixels = displayOptions.pixPerCm * displayOptions.viewingDistanceCm * Math.tan(radians);
-    return pixels;
+function degreesToPixels(degrees, displayOptions) {
+  const radians = degrees * (Math.PI / 180);
+  const pixels =
+    displayOptions.pixPerCm *
+    displayOptions.viewingDistanceCm *
+    Math.tan(radians);
+  return pixels;
 }
 
 /**
@@ -1198,7 +1366,7 @@ function XYPixOfXYDeg(xyDeg, displayOptions) {
   xyDeg.forEach((position) => {
     position[0] = position[0] - displayOptions.nearPointXYDeg.x;
     position[1] = position[1] - displayOptions.nearPointXYDeg.y;
-    const rDeg = Math.sqrt(position[0]**2 + position[1]**2);
+    const rDeg = Math.sqrt(position[0] ** 2 + position[1] ** 2);
     const rPix = degreesToPixels(rDeg, displayOptions);
     let pixelPosition = [];
     if (rDeg > 0) {
@@ -1222,25 +1390,43 @@ function XYPixOfXYDeg(xyDeg, displayOptions) {
  * @param {Number} spacingOverSizeRatio Specified ratio of distance between flanker&target to letter height
  * @param {Number} minimumHeight Smallest allowable letter height for flanker
  * @param {String} font Font-family in which the stimuli will be presented
- * @returns 
+ * @param {PsychoJS.window} window PsychoJS window, used to create a stimulus to be measured
+ * @returns
  */
-function boundingBoxFromSpacing(spacing, spacingOverSizeRatio, minimumHeight, font) {
-  const height = Math.max(spacing/spacingOverSizeRatio, minimumHeight);
-  const testTextStim = new visual.TextStim({
-      win: psychoJS.window,
+function boundingBoxFromSpacing(
+  spacing,
+  spacingOverSizeRatio,
+  minimumHeight,
+  font,
+  window
+) {
+  const height = Math.max(spacing / spacingOverSizeRatio, minimumHeight);
+  try {
+    const testTextStim = new visual.TextStim({
+      win: window,
       name: "testTextStim",
       text: "H", // TEMP
       font: font,
       units: "pix", // ASSUMES that parameters are in pixel units
-      pos: [0,0],
+      pos: [0, 0],
       height: height,
       wrapWidth: undefined,
       ori: 0.0,
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -7.0,
-  });
-  return testTextStim.boundingBox;
+      autoDraw: false,
+      autoLog: false,
+    });
+    const estimatedBoundingBox = testTextStim._boundingBox;
+    return estimatedBoundingBox;
+  } catch (error) {
+    console.error(
+      "Error estimating bounding box of flanker. Likely due to too large a `proposedLevel` value being tested.",
+      error
+    );
+    return error;
+  }
 }
 
 /**
@@ -1254,21 +1440,25 @@ function boundingBoxFromSpacing(spacing, spacingOverSizeRatio, minimumHeight, fo
 function tangentialFlankerPositions(targetPosition, fixationPosition, spacing) {
   let x, i; // Variables for anonymous fn's
   // Vector representing the line between target and fixation
-  const v = [fixationPosition[0]-targetPosition[0], fixationPosition[1]-targetPosition[1]];
+  const v = [
+    fixationPosition[0] - targetPosition[0],
+    fixationPosition[1] - targetPosition[1],
+  ];
   // Get the vector perpendicular to v
-  const p = [v[1], -v[0]] // SEE https://gamedev.stackexchange.com/questions/70075/how-can-i-find-the-perpendicular-to-a-2d-vector
+  const p = [v[1], -v[0]]; // SEE https://gamedev.stackexchange.com/questions/70075/how-can-i-find-the-perpendicular-to-a-2d-vector
 
   // Find the point that is `spacing` far from `targetPosition` along p
   // SEE https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
   /// Find the length of `p`
   const llpll = Math.sqrt(
-    p.map(x => x**2).reduce((previous, current) => previous + current));
-  /// Normalize `p` 
-  const u = p.map(x => x/llpll);
+    p.map((x) => x ** 2).reduce((previous, current) => previous + current)
+  );
+  /// Normalize `p`
+  const u = p.map((x) => x / llpll);
   /// Find our two new points, `spacing` distance away from targetPosition along line `p`
   const flankerPositions = [
-    targetPosition.map((x, i) => x+(spacing*u[i])),
-    targetPosition.map((x, i) => x-(spacing*u[i])),
+    targetPosition.map((x, i) => x + spacing * u[i]),
+    targetPosition.map((x, i) => x - spacing * u[i]),
   ];
   return flankerPositions;
 }
@@ -1285,18 +1475,22 @@ function radialFlankerPositions(targetPosition, fixationPosition, spacing) {
   // SEE https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
 
   // Vector representing the line between target and fixation
-  const v = [fixationPosition[0]-targetPosition[0], fixationPosition[1]-targetPosition[1]];
+  const v = [
+    fixationPosition[0] - targetPosition[0],
+    fixationPosition[1] - targetPosition[1],
+  ];
   /// Find the length of v
   const llvll = Math.sqrt(
-    v.map(x => x**2).reduce((previous, current) => previous + current));
+    v.map((x) => x ** 2).reduce((previous, current) => previous + current)
+  );
   /// Normalize v
-  const u = v.map(x => x/llvll);
+  const u = v.map((x) => x / llvll);
   /// Find our two new points, `spacing` distance away from targetPosition along line v
   const flankerPositions = [
-    targetPosition.map((x, i) => x+(spacing*u[i])),
-    targetPosition.map((x, i) => x-(spacing*u[i])),
+    targetPosition.map((x, i) => x + spacing * u[i]),
+    targetPosition.map((x, i) => x - spacing * u[i]),
   ];
-
+  return flankerPositions;
 }
 
 /**
@@ -1307,14 +1501,26 @@ function radialFlankerPositions(targetPosition, fixationPosition, spacing) {
  * @param {Number} spacing Distance between the target and one flanker
  * @returns {Number[][]} Array containing two [x,y] arrays, each representing the location of one flanker
  */
-function getFlankerLocations(targetPosition, fixationPosition, flankerOrientation, spacing){
-  switch(flankerOrientation) {
+function getFlankerLocations(
+  targetPosition,
+  fixationPosition,
+  flankerOrientation,
+  spacing
+) {
+  switch (flankerOrientation) {
     case "radial":
       return radialFlankerPositions(targetPosition, fixationPosition, spacing);
     case "tangential":
-      return tangentialFlankerPositions(targetPosition, fixationPosition, spacing);
+      return tangentialFlankerPositions(
+        targetPosition,
+        fixationPosition,
+        spacing
+      );
     default:
-      console.error("Unknown flankerOrientation specified, ", flankerOrientation);
+      console.error(
+        "Unknown flankerOrientation specified, ",
+        flankerOrientation
+      );
   }
 }
 /**
@@ -1327,21 +1533,246 @@ function getFlankerLocations(targetPosition, fixationPosition, flankerOrientatio
  * @param {Number} sizingParameters.spacingOverSizeRatio Ratio of distance between flanker&target to stimuli letter height
  * @param {Number} sizingParameters.minimumHeight Minimum stimulus letter height (in same units as other parameters)
  * @param {String} sizingParameters.fontFamily Name of the fontFamily in which the stimuli will be drawn
+ * @param {Number} sizingParameters.pixPerCm Pixel/cm ratio of the display
+ * @param {Number} sizingParameters.viewingDistanceCm Distance (in cm) of the observer from the near-point
+ * @param {PsychoJS.window} sizingParameters.window Window object, used for creating a mock stimuli for measurement
  * @returns {Number[][]} [[x_min, y_min], [x_max, y_max]] Array of defining points of the area over which flankers extend
  */
-function flankersExtent(level, targetPosition, fixationPosition, flankerOrientation, sizingParameters){
+function flankersExtent(
+  level,
+  targetPosition,
+  fixationPosition,
+  flankerOrientation,
+  sizingParameters
+) {
+  if (debug) console.log("window: ", sizingParameters.window);
   const spacingDegrees = Math.pow(10, level);
-  const spacingPixels = degreesToPixels(spacingDegrees);
+  const spacingPixels = Math.abs(
+    degreesToPixels(spacingDegrees, {
+      pixPerCm: sizingParameters.pixPerCm,
+      viewingDistanceCm: sizingParameters.viewingDistanceCm,
+    })
+  );
   const flankerLocations = getFlankerLocations(
-    targetPosition, fixationPosition, spacingPixels, flankerOrientation);
-  const flankerBoxDimensions = boundingBoxFromSpacing(
-    spacingPixels, 
-    sizingParameters.spacingOverSizeRatio, 
-    sizingParameters.minimumHeight,
-    sizingParameters.fontFamily);
-  return flankerLocations.map(
-    (flankerPosition, i) => [
-      flankerPosition[0] + (i === 0 ? -1 : 1)(flankerBoxDimensions.width/2),
-      flankerPosition[1] + (i === 0 ? -1 : 1)(flankerBoxDimensions.height/2)
-    ]);
+    targetPosition,
+    fixationPosition,
+    flankerOrientation,
+    spacingPixels
+  );
+  try {
+    const flankerBoxDimensions = boundingBoxFromSpacing(
+      spacingPixels,
+      sizingParameters.spacingOverSizeRatio,
+      sizingParameters.minimumHeight,
+      sizingParameters.fontFamily,
+      sizingParameters.window
+    );
+    const boundingPoints = [];
+    flankerLocations.forEach((flankerPosition, i) => {
+      const boundingPoint = [];
+      if (targetPosition[0] < 0) {
+        boundingPoint.push(
+          flankerPosition[0] -
+            (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2)
+        );
+      } else {
+        boundingPoint.push(
+          flankerPosition[0] +
+            (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2)
+        );
+      }
+      if (targetPosition[1] < 0) {
+        boundingPoint.push(
+          flankerPosition[1] -
+            (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2)
+        );
+      } else {
+        boundingPoint.push(
+          flankerPosition[1] +
+            (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2)
+        );
+      }
+      boundingPoints.push(boundingPoint);
+    });
+    return boundingPoints;
+  } catch (error) {
+    console.error("Error estimating flankers extent.", error);
+    return error;
+  }
+}
+
+/**
+ * Determine whether a given point lies inside a given rectangle
+ * @param {Number[][]} rectangle Array of two [x,y] points, which define an area
+ * @param {Number[]} point [x,y] coordinate of a point which may be within rectangle
+ * @returns {Boolean}
+ */
+function rectangleContainsPoint(rectangle, point) {
+  const leftX = Math.min(rectangle[0][0], rectangle[1][0]);
+  const rightX = Math.max(rectangle[0][0], rectangle[1][0]);
+  const lowerY = Math.min(rectangle[0][1], rectangle[1][1]);
+  const upperY = Math.max(rectangle[0][1], rectangle[1][1]);
+  const xIsIn = point[0] >= leftX && point[0] <= rightX;
+  const yIsIn = point[1] >= lowerY && point[1] <= upperY;
+  if (debug) {
+    console.log("flanker rectangle: ", rectangle);
+    console.log("xIsIn: ", xIsIn);
+    console.log("yIsIn: ", yIsIn);
+  }
+  return xIsIn && yIsIn;
+}
+
+/**
+ * Determines whether any part of a given rectangle will extend beyond the screen
+ * @param {Number[][]} rectangle Array of two [x,y] points, defining a rectangle
+ * @param {Object} screenDimensions
+ * @param {Number} screenDimensions.width Width of the screen
+ * @param {Number} screenDimensions.height Height of the screen
+ * @returns {Boolean}
+ */
+function rectangleOffscreen(rectangle, screenDimensions) {
+  const pointOffScreen = (point) =>
+    Math.abs(point[0]) > screenDimensions.width / 2 ||
+    Math.abs(point[1]) > screenDimensions.height / 2;
+  return rectangle.some(pointOffScreen); // VERIFY this logic is correct
+}
+
+/**
+ * Tests whether these proposed parameters for presentation would draw improperly, eg extend beyond the extent of the screen
+ * @todo Test whether the flankers interfer with eachother
+ * @param {Number} proposedLevel Level to be tested, as provided by QUEST
+ * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
+ * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
+ * @param {"radial"|"tangential"} spacingDirection Orientation of flankers relative to fixation-target
+ * @param {Object} displayOptions Set of parameters for the specifics of presentation
+ * @todo Specify necessary members of `displayOptions`
+ * @returns {Boolean}
+ */
+function unacceptableStimuli(
+  proposedLevel,
+  targetXYPix,
+  fixationXYPix,
+  spacingDirection,
+  displayOptions
+) {
+  const areaFlankersCover = flankersExtent(
+    proposedLevel,
+    targetXYPix,
+    fixationXYPix,
+    spacingDirection,
+    displayOptions
+  );
+  // TODO take the size of fixation into account
+  const fixationInfringed = rectangleContainsPoint(
+    areaFlankersCover,
+    fixationXYPix
+  );
+  const stimuliExtendOffscreen = rectangleOffscreen(areaFlankersCover, {
+    width: screen.width,
+    height: screen.height,
+  });
+  const badPresentation = fixationInfringed || stimuliExtendOffscreen;
+  if (debug) {
+    console.log("areaFlankersCover: ", areaFlankersCover);
+    console.log("fixationInfringed: ", fixationInfringed);
+    console.log("stimuliExtendOffscreen: ", stimuliExtendOffscreen);
+    console.log("badPresentation: ", badPresentation);
+  }
+  return badPresentation;
+}
+
+/**
+ * Estimate the largest `level` value which will still present correctly
+ * @param {Number} proposedLevel Level to be tested, as provided by QUEST
+ * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
+ * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
+ * @param {"radial"|"tangential"} spacingDirection Orientation of flankers relative to fixation-target
+ * @param {Object} displayOptions Set of parameters for the specifics of presentation
+ * @todo Specify necessary members of `displayOptions`
+ * @returns {Number}
+ */
+function getMaxPresentableLevel(
+  proposedLevel,
+  targetXYPix,
+  fixationXYPix,
+  spacingDirection,
+  displayOptions
+) {
+  const granularityOfChange = 0.05;
+  if (
+    !unacceptableStimuli(
+      proposedLevel,
+      targetXYPix,
+      fixationXYPix,
+      spacingDirection,
+      displayOptions
+    )
+  ) {
+    if (debug) console.log("acceptable level found: ", proposedLevel);
+    return proposedLevel;
+  } else {
+    if (debug) console.log("unacceptable level: ", proposedLevel);
+    return getMaxPresentableLevel(
+      proposedLevel - granularityOfChange,
+      targetXYPix,
+      fixationXYPix,
+      spacingDirection,
+      displayOptions
+    );
+  }
+}
+
+/**
+ * Promise-based equivalent to `getMaxPresentableLevel`
+ * @param {Number} proposedLevel Level to be tested, as provided by QUEST
+ * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
+ * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
+ * @param {("radial"|"tangential")} spacingDirection Orientation of flankers relative to fixation-target
+ * @param {Object} displayOptions Set of parameters for the specifics of presentation
+ * @todo Specify necessary members of `displayOptions`
+ * @returns {Number}
+ */
+function awaitMaxPresentableLevel(
+  proposedLevel,
+  targetXYPix,
+  fixationXYPix,
+  spacingDirection,
+  displayOptions
+) {
+  const granularityOfChange = 0.05;
+  if (
+    unacceptableStimuli(
+      granularityOfChange,
+      targetXYPix,
+      fixationXYPix,
+      spacingDirection,
+      displayOptions
+    )
+  ) {
+    console.error(
+      "Unpresentable stimuli, even at level=" + String(granularityOfChange)
+    );
+    return new Promise((resolve) => resolve(granularityOfChange));
+  }
+  if (
+    !unacceptableStimuli(
+      proposedLevel,
+      targetXYPix,
+      fixationXYPix,
+      spacingDirection,
+      displayOptions
+    )
+  ) {
+    if (debug) console.log("acceptable level found: ", proposedLevel);
+    return new Promise((resolve) => resolve(proposedLevel));
+  } else {
+    if (debug) console.log("unacceptable level: ", proposedLevel);
+    return awaitMaxPresentableLevel(
+      proposedLevel - granularityOfChange,
+      targetXYPix,
+      fixationXYPix,
+      spacingDirection,
+      displayOptions
+    );
+  }
 }
