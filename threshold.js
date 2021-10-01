@@ -19,7 +19,7 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 ////
 /* ------------------------------- Components ------------------------------- */
 
-import { shuffle } from "./components/utils.js";
+import { hideCursor, showCursor, shuffle } from "./components/utils.js";
 
 import { instructionsText } from "./components/instructions.js";
 
@@ -431,6 +431,8 @@ const experiment = (blockCount) => {
   var continueRoutine;
   var fileComponents;
 
+  var clickedContinue;
+
   function fileRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -514,6 +516,11 @@ const experiment = (blockCount) => {
           instructionsText.initialByThresholdParameter["spacing"]() +
           instructionsText.initialEnd()
       );
+
+      clickedContinue = false;
+      document.addEventListener("click", _clickContinue);
+      document.addEventListener("touchend", _clickContinue);
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -537,6 +544,10 @@ const experiment = (blockCount) => {
     instructions.setAutoDraw(true);
   }
 
+  function _clickContinue() {
+    clickedContinue = true;
+  }
+
   async function _instructionRoutineEachFrame() {
     t = instructionsClock.getTime();
     frameN = frameN + 1;
@@ -557,7 +568,7 @@ const experiment = (blockCount) => {
       continueRoutine = false;
     }
 
-    if (continueRoutine) {
+    if (continueRoutine && !clickedContinue) {
       return Scheduler.Event.FLIP_REPEAT;
     } else {
       return Scheduler.Event.NEXT;
@@ -567,6 +578,10 @@ const experiment = (blockCount) => {
   async function _instructionRoutineEnd() {
     instructions.setAutoDraw(false);
     routineTimer.reset();
+
+    document.removeEventListener("click", _clickContinue);
+    document.removeEventListener("touchend", _clickContinue);
+
     return Scheduler.Event.NEXT;
   }
 
@@ -795,6 +810,11 @@ const experiment = (blockCount) => {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
       _instructionSetup(instructionsText.block(snapshot.block + 1));
+
+      clickedContinue = false;
+      document.addEventListener("click", _clickContinue);
+      document.addEventListener("touchend", _clickContinue);
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -806,6 +826,38 @@ const experiment = (blockCount) => {
   function blockInstructionRoutineEnd() {
     return _instructionRoutineEnd;
   }
+
+  const _takeFixationClick = (e) => {
+    let cX, cY;
+    if (e.clientX) {
+      cX = e.clientX;
+      cY = e.clientY;
+    } else {
+      const t = e.changedTouches[0];
+      if (t.clientX) {
+        cX = t.clientX;
+        cY = t.clientY;
+      } else {
+        clickedContinue = false;
+        return;
+      }
+    }
+
+    if (
+      Math.hypot(
+        cX - (window.innerWidth >> 1),
+        cY - (window.innerHeight >> 1)
+      ) < fixationSize
+    ) {
+      // Clicked on fixation
+      hideCursor();
+      setTimeout(() => {
+        clickedContinue = true;
+      }, 17);
+    } else {
+      clickedContinue = false;
+    }
+  };
 
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
@@ -819,6 +871,10 @@ const experiment = (blockCount) => {
       fixation.setAutoDraw(true);
 
       totalTrial.setAutoDraw(true);
+
+      clickedContinue = false;
+      document.addEventListener("click", _takeFixationClick);
+      document.addEventListener("touchend", _takeFixationClick);
 
       return Scheduler.Event.NEXT;
     };
@@ -845,7 +901,7 @@ const experiment = (blockCount) => {
         continueRoutine = false;
       }
 
-      if (continueRoutine) {
+      if (continueRoutine && !clickedContinue) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
         return Scheduler.Event.NEXT;
@@ -854,7 +910,13 @@ const experiment = (blockCount) => {
   }
 
   function trialInstructionRoutineEnd() {
-    return _instructionRoutineEnd;
+    return async function () {
+      document.removeEventListener("click", _takeFixationClick);
+      document.removeEventListener("touchend", _takeFixationClick);
+      instructions.setAutoDraw(false);
+      routineTimer.reset();
+      return Scheduler.Event.NEXT;
+    };
   }
 
   var level;
@@ -894,6 +956,8 @@ const experiment = (blockCount) => {
   function trialRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
+
+      hideCursor();
 
       ////
       if (debug)
@@ -1305,6 +1369,9 @@ const experiment = (blockCount) => {
         setTimeout(() => {
           purrSynth.play();
         }, 17);
+        setTimeout(() => {
+          showCursor();
+        }, 200);
       }
 
       // *flanker2* updates
