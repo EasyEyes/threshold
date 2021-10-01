@@ -21,10 +21,18 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 
 import { hideCursor, showCursor, shuffle } from "./components/utils.js";
 
-import { instructionsText } from "./components/instructions.js";
+import {
+  addBeepButton,
+  instructionsText,
+  removeBeepButton,
+} from "./components/instructions.js";
 
 import { calculateBlockWithTrialIndex } from "./components/trialCounter.js";
-import { getCorrectSynth, getPurrSynth } from "./components/sound.js";
+import {
+  getCorrectSynth,
+  getWrongSynth,
+  getPurrSynth,
+} from "./components/sound.js";
 import {
   removeClickableAlphabet,
   setupClickableAlphabet,
@@ -181,6 +189,7 @@ const experiment = (blockCount) => {
 
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
+  const wrongSynth = getWrongSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
 
   // open window:
@@ -508,18 +517,22 @@ const experiment = (blockCount) => {
     };
   }
 
+  var _beepButton;
+
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
       _instructionSetup(
         instructionsText.initial(expInfo.participant) +
-          instructionsText.initialByThresholdParameter["spacing"]() +
+          instructionsText.initialByThresholdParameter["spacing"](2) +
           instructionsText.initialEnd()
       );
 
       clickedContinue = false;
       document.addEventListener("click", _clickContinue);
       document.addEventListener("touchend", _clickContinue);
+
+      _beepButton = addBeepButton(correctSynth);
 
       return Scheduler.Event.NEXT;
     };
@@ -530,7 +543,17 @@ const experiment = (blockCount) => {
   }
 
   function initInstructionRoutineEnd() {
-    return _instructionRoutineEnd;
+    return async function () {
+      instructions.setAutoDraw(false);
+      routineTimer.reset();
+
+      document.removeEventListener("click", _clickContinue);
+      document.removeEventListener("touchend", _clickContinue);
+
+      removeBeepButton(_beepButton);
+
+      return Scheduler.Event.NEXT;
+    };
   }
 
   function _instructionSetup(text) {
@@ -612,9 +635,9 @@ const experiment = (blockCount) => {
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
-        blocksLoopScheduler.add(blockInstructionRoutineBegin(snapshot));
-        blocksLoopScheduler.add(blockInstructionRoutineEachFrame());
-        blocksLoopScheduler.add(blockInstructionRoutineEnd());
+        // blocksLoopScheduler.add(blockInstructionRoutineBegin(snapshot));
+        // blocksLoopScheduler.add(blockInstructionRoutineEachFrame());
+        // blocksLoopScheduler.add(blockInstructionRoutineEnd());
         const trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
@@ -855,6 +878,7 @@ const experiment = (blockCount) => {
         clickedContinue = true;
       }, 17);
     } else {
+      wrongSynth.play();
       clickedContinue = false;
     }
   };
@@ -862,7 +886,7 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
-      _instructionSetup(instructionsText.trial());
+      _instructionSetup(instructionsText.trial.fixate["spacing"](2));
 
       fixation.setHeight(fixationSize);
       fixation.setPos(fixationXYPx);
@@ -1185,6 +1209,8 @@ const experiment = (blockCount) => {
       showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
 
+      instructions.setText(instructionsText.trial.respond["spacing"](2));
+
       // totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
       // totalTrial.setAlignHoriz('right');
       // totalTrial.setAlignVert('bottom');
@@ -1251,8 +1277,10 @@ const experiment = (blockCount) => {
       //   targetBoundingPoly.setSize([tightBoundingBox.width, tightBoundingBox.height]);
       // }
 
+      const uniDelay = 0.5;
+
       // *key_resp* updates
-      if (t >= 0.5 && key_resp.status === PsychoJS.Status.NOT_STARTED) {
+      if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         key_resp.tStart = t; // (not accounting for frame time here)
         key_resp.frameNStart = frameN; // exact frame index
@@ -1337,7 +1365,7 @@ const experiment = (blockCount) => {
       }
 
       // *flanker1* updates
-      if (t >= 0.5 && flanker1.status === PsychoJS.Status.NOT_STARTED) {
+      if (t >= uniDelay && flanker1.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         flanker1.tStart = t; // (not accounting for frame time here)
         flanker1.frameNStart = frameN; // exact frame index
@@ -1346,13 +1374,15 @@ const experiment = (blockCount) => {
       }
 
       frameRemains =
-        0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+        uniDelay +
+        targetDurationSec -
+        psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (flanker1.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         flanker1.setAutoDraw(false);
       }
 
       // *target* updates
-      if (t >= 0.5 && target.status === PsychoJS.Status.NOT_STARTED) {
+      if (t >= uniDelay && target.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         target.tStart = t; // (not accounting for frame time here)
         target.frameNStart = frameN; // exact frame index
@@ -1361,7 +1391,9 @@ const experiment = (blockCount) => {
       }
 
       frameRemains =
-        0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+        uniDelay +
+        targetDurationSec -
+        psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         target.setAutoDraw(false);
         // Play purr sound
@@ -1371,11 +1403,11 @@ const experiment = (blockCount) => {
         }, 17);
         setTimeout(() => {
           showCursor();
-        }, 200);
+        }, 500);
       }
 
       // *flanker2* updates
-      if (t >= 0.5 && flanker2.status === PsychoJS.Status.NOT_STARTED) {
+      if (t >= uniDelay && flanker2.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         flanker2.tStart = t; // (not accounting for frame time here)
         flanker2.frameNStart = frameN; // exact frame index
@@ -1384,10 +1416,13 @@ const experiment = (blockCount) => {
       }
 
       frameRemains =
-        0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+        uniDelay +
+        targetDurationSec -
+        psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (flanker2.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         flanker2.setAutoDraw(false);
       }
+
       // check for quit (typically the Esc key)
       if (
         psychoJS.experiment.experimentEnded ||
@@ -1399,13 +1434,12 @@ const experiment = (blockCount) => {
       /* -------------------------------------------------------------------------- */
       // *showAlphabet* updates
       if (
-        t >= 0.5 + targetDurationSec &&
+        t >= uniDelay + targetDurationSec &&
         showAlphabet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
         showAlphabet.tStart = t; // (not accounting for frame time here)
         showAlphabet.frameNStart = frameN; // exact frame index
-
         showAlphabet.setAutoDraw(true);
         showAlphabetElement = setupClickableAlphabet(
           targetAlphabet,
@@ -1413,6 +1447,10 @@ const experiment = (blockCount) => {
           showAlphabetWhere,
           showAlphabetResponse
         );
+
+        instructions.tSTart = t;
+        instructions.frameNStart = frameN;
+        instructions.setAutoDraw(true);
       }
       /* -------------------------------------------------------------------------- */
 
