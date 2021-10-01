@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-const debug = false;
+const debug = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -20,6 +20,9 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { shuffle } from "./components/utils.js";
+
+import { instructionsText } from "./components/instructions.js";
+
 import { calculateBlockWithTrialIndex } from "./components/trialCounter.js";
 import { getCorrectSynth, getPurrSynth } from "./components/sound.js";
 import {
@@ -212,8 +215,9 @@ const experiment = (blockCount) => {
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
   flowScheduler.add(fileRoutineEnd());
-  flowScheduler.add(instructionRoutineBegin)
-  flowScheduler.add(instructionRoutineEachFrame())
+  flowScheduler.add(initInstructionRoutineBegin());
+  flowScheduler.add(initInstructionRoutineEachFrame());
+  flowScheduler.add(initInstructionRoutineEnd());
   const blocksLoopScheduler = new Scheduler(psychoJS);
   flowScheduler.add(blocksLoopBegin(blocksLoopScheduler));
   flowScheduler.add(blocksLoopScheduler);
@@ -260,6 +264,8 @@ const experiment = (blockCount) => {
 
   var fileClock;
   var filterClock;
+  var instructionsClock;
+
   var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
   var trialClock;
@@ -279,6 +285,8 @@ const experiment = (blockCount) => {
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
     filterClock = new util.Clock();
+    instructionsClock = new util.Clock();
+
     thisLoopNumber = 0;
     thisConditionsFile = "./conditions/block_1.csv";
 
@@ -394,6 +402,23 @@ const experiment = (blockCount) => {
       depth: -20.0,
     });
 
+    instructions = new visual.TextStim({
+      win: psychoJS.window,
+      name: "instructions",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
+      height: 32.0,
+      wrapWidth: window.innerWidth * 0.8,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -12.0,
+      alignHoriz: "left",
+      alignVert: "top",
+    });
+
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
     routineTimer = new util.CountdownTimer(); // to track time remaining of each (non-slip) routine
@@ -405,6 +430,7 @@ const experiment = (blockCount) => {
   var frameN;
   var continueRoutine;
   var fileComponents;
+
   function fileRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -480,25 +506,68 @@ const experiment = (blockCount) => {
     };
   }
 
-  function instructionRoutineBegin() {
-    instructions = new visual.TextStim({
-      win: psychoJS.window,
-      name: "instructions",
-      text: "",
-      font: "Arial",
-      units: "pix",
-      pos: [0, 0],
-      height: 30.0,
-      wrapWidth: undefined,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -12.0,
-    });
+  function initInstructionRoutineBegin(snapshot) {
+    return async function () {
+      TrialHandler.fromSnapshot(snapshot);
+      _instructionSetup(
+        instructionsText.initial(expInfo.participant) +
+          instructionsText.initialByThresholdParameter["spacing"]() +
+          instructionsText.initialEnd()
+      );
+      return Scheduler.Event.NEXT;
+    };
   }
 
-  function instructionRoutineEachFrame() {
+  function initInstructionRoutineEachFrame() {
+    return _instructionRoutineEachFrame;
+  }
 
+  function initInstructionRoutineEnd() {
+    return _instructionRoutineEnd;
+  }
+
+  function _instructionSetup(text) {
+    t = 0;
+    instructionsClock.reset(); // clock
+    frameN = -1;
+    continueRoutine = true;
+    instructions.setWrapWidth(window.innerWidth * 0.8);
+    instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
+    instructions.setText(text);
+    instructions.setAutoDraw(true);
+  }
+
+  async function _instructionRoutineEachFrame() {
+    t = instructionsClock.getTime();
+    frameN = frameN + 1;
+
+    if (
+      psychoJS.experiment.experimentEnded ||
+      psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+    ) {
+      return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+    }
+
+    if (!continueRoutine) {
+      return Scheduler.Event.NEXT;
+    }
+
+    continueRoutine = true;
+    if (psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0) {
+      continueRoutine = false;
+    }
+
+    if (continueRoutine) {
+      return Scheduler.Event.FLIP_REPEAT;
+    } else {
+      return Scheduler.Event.NEXT;
+    }
+  }
+
+  async function _instructionRoutineEnd() {
+    instructions.setAutoDraw(false);
+    routineTimer.reset();
+    return Scheduler.Event.NEXT;
   }
 
   var blocks;
@@ -528,6 +597,9 @@ const experiment = (blockCount) => {
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
+        blocksLoopScheduler.add(blockInstructionRoutineBegin(snapshot));
+        blocksLoopScheduler.add(blockInstructionRoutineEachFrame());
+        blocksLoopScheduler.add(blockInstructionRoutineEnd());
         const trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
@@ -565,6 +637,9 @@ const experiment = (blockCount) => {
       for (const thisQuestLoop of trials) {
         const snapshot = trials.getSnapshot();
         trialsLoopScheduler.add(importConditions(snapshot));
+        trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
+        trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
+        trialsLoopScheduler.add(trialInstructionRoutineEnd());
         trialsLoopScheduler.add(trialRoutineBegin(snapshot));
         trialsLoopScheduler.add(trialRoutineEachFrame());
         trialsLoopScheduler.add(trialRoutineEnd());
@@ -716,13 +791,83 @@ const experiment = (blockCount) => {
     };
   }
 
+  function blockInstructionRoutineBegin(snapshot) {
+    return async function () {
+      TrialHandler.fromSnapshot(snapshot);
+      _instructionSetup(instructionsText.block(snapshot.block + 1));
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function blockInstructionRoutineEachFrame() {
+    return _instructionRoutineEachFrame;
+  }
+
+  function blockInstructionRoutineEnd() {
+    return _instructionRoutineEnd;
+  }
+
+  function trialInstructionRoutineBegin(snapshot) {
+    return async function () {
+      TrialHandler.fromSnapshot(snapshot);
+      _instructionSetup(instructionsText.trial());
+
+      fixation.setHeight(fixationSize);
+      fixation.setPos(fixationXYPx);
+      fixation.tStart = t;
+      fixation.frameNStart = frameN;
+      fixation.setAutoDraw(true);
+
+      totalTrial.setAutoDraw(true);
+
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function trialInstructionRoutineEachFrame() {
+    return async function () {
+      t = instructionsClock.getTime();
+      frameN = frameN + 1;
+
+      if (
+        psychoJS.experiment.experimentEnded ||
+        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+      ) {
+        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+      }
+
+      if (!continueRoutine) {
+        return Scheduler.Event.NEXT;
+      }
+
+      continueRoutine = true;
+      if (psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) {
+        continueRoutine = false;
+      }
+
+      if (continueRoutine) {
+        return Scheduler.Event.FLIP_REPEAT;
+      } else {
+        return Scheduler.Event.NEXT;
+      }
+    };
+  }
+
+  function trialInstructionRoutineEnd() {
+    return _instructionRoutineEnd;
+  }
+
   var level;
   var windowWidthCm;
   var windowWidthPx;
   var pixPerCm;
   var viewingDistanceDesiredCm;
   var viewingDistanceCm;
-  var fixationXYPx;
+
+  var fixationXYPx = [0, 0];
+  var fixationSize = 45; // TODO Set on block begins
+  var showFixation = true;
+
   var block;
   var spacingDirection;
   var targetFont;
@@ -734,7 +879,6 @@ const experiment = (blockCount) => {
   var showViewingDistanceBool;
   const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 };
   var targetDurationSec;
-  var showFixation;
   var targetMinimumPix;
   var spacingOverSizeRatio;
   var targetEccentricityXDeg;
@@ -746,6 +890,7 @@ const experiment = (blockCount) => {
 
   var _key_resp_allKeys;
   var trialComponents;
+
   function trialRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -807,6 +952,10 @@ const experiment = (blockCount) => {
           "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
         );
 
+      // TODO
+      // ! Very inefficient to read params very trial as they do not change in a block
+      // ! Move this to a block-level routine and store the values
+
       fixationXYPx = [0, 0];
 
       block = condition["blockOrder"];
@@ -825,7 +974,7 @@ const experiment = (blockCount) => {
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
 
-      const fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
+      fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
       showFixation = condition["markTheFixationBool"] === "True";
 
       targetMinimumPix = condition["targetMinimumPix"];
@@ -954,7 +1103,7 @@ const experiment = (blockCount) => {
 
       fixation.setPos(fixationXYPx);
       fixation.setHeight(fixationSize);
-      fixation.setAutoDraw(showFixation);
+
       flanker1.setPos(pos1XYPx);
       flanker1.setText(firstFlankerCharacter);
       flanker1.setFont(targetFont);
@@ -1102,12 +1251,16 @@ const experiment = (blockCount) => {
       }
 
       // *fixation* updates
-      if (t >= 0.0 && fixation.status === PsychoJS.Status.NOT_STARTED) {
+      if (
+        t >= 0.0 &&
+        fixation.status === PsychoJS.Status.NOT_STARTED &&
+        showFixation
+      ) {
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
 
-        fixation.setAutoDraw(showFixation);
+        fixation.setAutoDraw(true);
       }
 
       // *totalTrial* updates
