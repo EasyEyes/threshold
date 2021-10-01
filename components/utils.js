@@ -18,3 +18,11 @@ export const shuffle = (array) => {
 
   return a;
 };
+
+export const hideCursor = () => {
+  document.body.classList.add("hide-cursor");
+};
+
+export const showCursor = () => {
+  document.body.classList.remove("hide-cursor");
+};

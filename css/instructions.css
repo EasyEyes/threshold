@@ -1,0 +1,9 @@
+.threshold-beep-button {
+  position: fixed;
+  z-index: 999999;
+  font-size: 2rem;
+  margin-top: 55%;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}

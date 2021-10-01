@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-const debug = false;
+const debug = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -19,9 +19,20 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 ////
 /* ------------------------------- Components ------------------------------- */
 
-import { shuffle } from "./components/utils.js";
+import { hideCursor, showCursor, shuffle } from "./components/utils.js";
+
+import {
+  addBeepButton,
+  instructionsText,
+  removeBeepButton,
+} from "./components/instructions.js";
+
 import { calculateBlockWithTrialIndex } from "./components/trialCounter.js";
-import { getCorrectSynth, getPurrSynth } from "./components/sound.js";
+import {
+  getCorrectSynth,
+  getWrongSynth,
+  getPurrSynth,
+} from "./components/sound.js";
 import {
   removeClickableAlphabet,
   setupClickableAlphabet,
@@ -178,6 +189,7 @@ const experiment = (blockCount) => {
 
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
+  const wrongSynth = getWrongSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
 
   // open window:
@@ -212,6 +224,9 @@ const experiment = (blockCount) => {
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
   flowScheduler.add(fileRoutineEnd());
+  flowScheduler.add(initInstructionRoutineBegin());
+  flowScheduler.add(initInstructionRoutineEachFrame());
+  flowScheduler.add(initInstructionRoutineEnd());
   const blocksLoopScheduler = new Scheduler(psychoJS);
   flowScheduler.add(blocksLoopBegin(blocksLoopScheduler));
   flowScheduler.add(blocksLoopScheduler);
@@ -258,10 +273,13 @@ const experiment = (blockCount) => {
 
   var fileClock;
   var filterClock;
+  var instructionsClock;
+
   var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
   var trialClock;
   // var targetBoundingPoly; // Target Bounding Box
+  var instructions;
   var key_resp;
   var fixation; ////
   var flanker1;
@@ -276,6 +294,8 @@ const experiment = (blockCount) => {
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
     filterClock = new util.Clock();
+    instructionsClock = new util.Clock();
+
     thisLoopNumber = 0;
     thisConditionsFile = "./conditions/block_1.csv";
 
@@ -391,6 +411,23 @@ const experiment = (blockCount) => {
       depth: -20.0,
     });
 
+    instructions = new visual.TextStim({
+      win: psychoJS.window,
+      name: "instructions",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
+      height: 32.0,
+      wrapWidth: window.innerWidth * 0.8,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -12.0,
+      alignHoriz: "left",
+      alignVert: "top",
+    });
+
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
     routineTimer = new util.CountdownTimer(); // to track time remaining of each (non-slip) routine
@@ -402,6 +439,9 @@ const experiment = (blockCount) => {
   var frameN;
   var continueRoutine;
   var fileComponents;
+
+  var clickedContinue;
+
   function fileRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -477,6 +517,97 @@ const experiment = (blockCount) => {
     };
   }
 
+  var _beepButton;
+
+  function initInstructionRoutineBegin(snapshot) {
+    return async function () {
+      TrialHandler.fromSnapshot(snapshot);
+      _instructionSetup(
+        instructionsText.initial(expInfo.participant) +
+          instructionsText.initialByThresholdParameter["spacing"](2) +
+          instructionsText.initialEnd()
+      );
+
+      clickedContinue = false;
+      document.addEventListener("click", _clickContinue);
+      document.addEventListener("touchend", _clickContinue);
+
+      _beepButton = addBeepButton(correctSynth);
+
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function initInstructionRoutineEachFrame() {
+    return _instructionRoutineEachFrame;
+  }
+
+  function initInstructionRoutineEnd() {
+    return async function () {
+      instructions.setAutoDraw(false);
+      routineTimer.reset();
+
+      document.removeEventListener("click", _clickContinue);
+      document.removeEventListener("touchend", _clickContinue);
+
+      removeBeepButton(_beepButton);
+
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function _instructionSetup(text) {
+    t = 0;
+    instructionsClock.reset(); // clock
+    frameN = -1;
+    continueRoutine = true;
+    instructions.setWrapWidth(window.innerWidth * 0.8);
+    instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
+    instructions.setText(text);
+    instructions.setAutoDraw(true);
+  }
+
+  function _clickContinue() {
+    clickedContinue = true;
+  }
+
+  async function _instructionRoutineEachFrame() {
+    t = instructionsClock.getTime();
+    frameN = frameN + 1;
+
+    if (
+      psychoJS.experiment.experimentEnded ||
+      psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+    ) {
+      return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+    }
+
+    if (!continueRoutine) {
+      return Scheduler.Event.NEXT;
+    }
+
+    continueRoutine = true;
+    if (psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0) {
+      continueRoutine = false;
+    }
+
+    if (continueRoutine && !clickedContinue) {
+      return Scheduler.Event.FLIP_REPEAT;
+    } else {
+      return Scheduler.Event.NEXT;
+    }
+  }
+
+  async function _instructionRoutineEnd() {
+    instructions.setAutoDraw(false);
+    routineTimer.reset();
+
+    document.removeEventListener("click", _clickContinue);
+    document.removeEventListener("touchend", _clickContinue);
+
+    return Scheduler.Event.NEXT;
+  }
+
   var blocks;
   var currentLoop;
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
@@ -504,6 +635,9 @@ const experiment = (blockCount) => {
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
+        // blocksLoopScheduler.add(blockInstructionRoutineBegin(snapshot));
+        // blocksLoopScheduler.add(blockInstructionRoutineEachFrame());
+        // blocksLoopScheduler.add(blockInstructionRoutineEnd());
         const trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
@@ -541,6 +675,9 @@ const experiment = (blockCount) => {
       for (const thisQuestLoop of trials) {
         const snapshot = trials.getSnapshot();
         trialsLoopScheduler.add(importConditions(snapshot));
+        trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
+        trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
+        trialsLoopScheduler.add(trialInstructionRoutineEnd());
         trialsLoopScheduler.add(trialRoutineBegin(snapshot));
         trialsLoopScheduler.add(trialRoutineEachFrame());
         trialsLoopScheduler.add(trialRoutineEnd());
@@ -692,13 +829,131 @@ const experiment = (blockCount) => {
     };
   }
 
+  function blockInstructionRoutineBegin(snapshot) {
+    return async function () {
+      TrialHandler.fromSnapshot(snapshot);
+      _instructionSetup(instructionsText.block(snapshot.block + 1));
+
+      clickedContinue = false;
+      document.addEventListener("click", _clickContinue);
+      document.addEventListener("touchend", _clickContinue);
+
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function blockInstructionRoutineEachFrame() {
+    return _instructionRoutineEachFrame;
+  }
+
+  function blockInstructionRoutineEnd() {
+    return _instructionRoutineEnd;
+  }
+
+  const _takeFixationClick = (e) => {
+    let cX, cY;
+    if (e.clientX) {
+      cX = e.clientX;
+      cY = e.clientY;
+    } else {
+      const t = e.changedTouches[0];
+      if (t.clientX) {
+        cX = t.clientX;
+        cY = t.clientY;
+      } else {
+        clickedContinue = false;
+        return;
+      }
+    }
+
+    if (
+      Math.hypot(
+        cX - (window.innerWidth >> 1),
+        cY - (window.innerHeight >> 1)
+      ) < fixationSize
+    ) {
+      // Clicked on fixation
+      hideCursor();
+      setTimeout(() => {
+        clickedContinue = true;
+      }, 17);
+    } else {
+      wrongSynth.play();
+      clickedContinue = false;
+    }
+  };
+
+  function trialInstructionRoutineBegin(snapshot) {
+    return async function () {
+      TrialHandler.fromSnapshot(snapshot);
+      _instructionSetup(instructionsText.trial.fixate["spacing"](2));
+
+      fixation.setHeight(fixationSize);
+      fixation.setPos(fixationXYPx);
+      fixation.tStart = t;
+      fixation.frameNStart = frameN;
+      fixation.setAutoDraw(true);
+
+      totalTrial.setAutoDraw(true);
+
+      clickedContinue = false;
+      document.addEventListener("click", _takeFixationClick);
+      document.addEventListener("touchend", _takeFixationClick);
+
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function trialInstructionRoutineEachFrame() {
+    return async function () {
+      t = instructionsClock.getTime();
+      frameN = frameN + 1;
+
+      if (
+        psychoJS.experiment.experimentEnded ||
+        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+      ) {
+        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+      }
+
+      if (!continueRoutine) {
+        return Scheduler.Event.NEXT;
+      }
+
+      continueRoutine = true;
+      if (psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) {
+        continueRoutine = false;
+      }
+
+      if (continueRoutine && !clickedContinue) {
+        return Scheduler.Event.FLIP_REPEAT;
+      } else {
+        return Scheduler.Event.NEXT;
+      }
+    };
+  }
+
+  function trialInstructionRoutineEnd() {
+    return async function () {
+      document.removeEventListener("click", _takeFixationClick);
+      document.removeEventListener("touchend", _takeFixationClick);
+      instructions.setAutoDraw(false);
+      routineTimer.reset();
+      return Scheduler.Event.NEXT;
+    };
+  }
+
   var level;
   var windowWidthCm;
   var windowWidthPx;
   var pixPerCm;
   var viewingDistanceDesiredCm;
   var viewingDistanceCm;
-  var fixationXYPx;
+
+  var fixationXYPx = [0, 0];
+  var fixationSize = 45; // TODO Set on block begins
+  var showFixation = true;
+
   var block;
   var spacingDirection;
   var targetFont;
@@ -710,7 +965,6 @@ const experiment = (blockCount) => {
   var showViewingDistanceBool;
   const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 };
   var targetDurationSec;
-  var showFixation;
   var targetMinimumPix;
   var spacingOverSizeRatio;
   var targetEccentricityXDeg;
@@ -722,9 +976,12 @@ const experiment = (blockCount) => {
 
   var _key_resp_allKeys;
   var trialComponents;
+
   function trialRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
+
+      hideCursor();
 
       ////
       if (debug)
@@ -783,6 +1040,10 @@ const experiment = (blockCount) => {
           "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
         );
 
+      // TODO
+      // ! Very inefficient to read params very trial as they do not change in a block
+      // ! Move this to a block-level routine and store the values
+
       fixationXYPx = [0, 0];
 
       block = condition["blockOrder"];
@@ -801,7 +1062,7 @@ const experiment = (blockCount) => {
       conditionTrials = condition["conditionTrials"];
       targetDurationSec = condition["targetDurationSec"];
 
-      const fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
+      fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
       showFixation = condition["markTheFixationBool"] === "True";
 
       targetMinimumPix = condition["targetMinimumPix"];
@@ -930,7 +1191,7 @@ const experiment = (blockCount) => {
 
       fixation.setPos(fixationXYPx);
       fixation.setHeight(fixationSize);
-      fixation.setAutoDraw(showFixation);
+
       flanker1.setPos(pos1XYPx);
       flanker1.setText(firstFlankerCharacter);
       flanker1.setFont(targetFont);
@@ -947,6 +1208,8 @@ const experiment = (blockCount) => {
       showAlphabet.setPos([0, 0]);
       showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
+
+      instructions.setText(instructionsText.trial.respond["spacing"](2));
 
       // totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
       // totalTrial.setAlignHoriz('right');
@@ -1014,8 +1277,10 @@ const experiment = (blockCount) => {
       //   targetBoundingPoly.setSize([tightBoundingBox.width, tightBoundingBox.height]);
       // }
 
+      const uniDelay = 0.5;
+
       // *key_resp* updates
-      if (t >= 0.5 && key_resp.status === PsychoJS.Status.NOT_STARTED) {
+      if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         key_resp.tStart = t; // (not accounting for frame time here)
         key_resp.frameNStart = frameN; // exact frame index
@@ -1078,12 +1343,16 @@ const experiment = (blockCount) => {
       }
 
       // *fixation* updates
-      if (t >= 0.0 && fixation.status === PsychoJS.Status.NOT_STARTED) {
+      if (
+        t >= 0.0 &&
+        fixation.status === PsychoJS.Status.NOT_STARTED &&
+        showFixation
+      ) {
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
 
-        fixation.setAutoDraw(showFixation);
+        fixation.setAutoDraw(true);
       }
 
       // *totalTrial* updates
@@ -1096,7 +1365,7 @@ const experiment = (blockCount) => {
       }
 
       // *flanker1* updates
-      if (t >= 0.5 && flanker1.status === PsychoJS.Status.NOT_STARTED) {
+      if (t >= uniDelay && flanker1.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         flanker1.tStart = t; // (not accounting for frame time here)
         flanker1.frameNStart = frameN; // exact frame index
@@ -1105,13 +1374,15 @@ const experiment = (blockCount) => {
       }
 
       frameRemains =
-        0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+        uniDelay +
+        targetDurationSec -
+        psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (flanker1.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         flanker1.setAutoDraw(false);
       }
 
       // *target* updates
-      if (t >= 0.5 && target.status === PsychoJS.Status.NOT_STARTED) {
+      if (t >= uniDelay && target.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         target.tStart = t; // (not accounting for frame time here)
         target.frameNStart = frameN; // exact frame index
@@ -1120,7 +1391,9 @@ const experiment = (blockCount) => {
       }
 
       frameRemains =
-        0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+        uniDelay +
+        targetDurationSec -
+        psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         target.setAutoDraw(false);
         // Play purr sound
@@ -1128,10 +1401,13 @@ const experiment = (blockCount) => {
         setTimeout(() => {
           purrSynth.play();
         }, 17);
+        setTimeout(() => {
+          showCursor();
+        }, 500);
       }
 
       // *flanker2* updates
-      if (t >= 0.5 && flanker2.status === PsychoJS.Status.NOT_STARTED) {
+      if (t >= uniDelay && flanker2.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         flanker2.tStart = t; // (not accounting for frame time here)
         flanker2.frameNStart = frameN; // exact frame index
@@ -1140,10 +1416,13 @@ const experiment = (blockCount) => {
       }
 
       frameRemains =
-        0.5 + targetDurationSec - psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+        uniDelay +
+        targetDurationSec -
+        psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (flanker2.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         flanker2.setAutoDraw(false);
       }
+
       // check for quit (typically the Esc key)
       if (
         psychoJS.experiment.experimentEnded ||
@@ -1155,13 +1434,12 @@ const experiment = (blockCount) => {
       /* -------------------------------------------------------------------------- */
       // *showAlphabet* updates
       if (
-        t >= 0.5 + targetDurationSec &&
+        t >= uniDelay + targetDurationSec &&
         showAlphabet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
         showAlphabet.tStart = t; // (not accounting for frame time here)
         showAlphabet.frameNStart = frameN; // exact frame index
-
         showAlphabet.setAutoDraw(true);
         showAlphabetElement = setupClickableAlphabet(
           targetAlphabet,
@@ -1169,6 +1447,10 @@ const experiment = (blockCount) => {
           showAlphabetWhere,
           showAlphabetResponse
         );
+
+        instructions.tSTart = t;
+        instructions.frameNStart = frameN;
+        instructions.setAutoDraw(true);
       }
       /* -------------------------------------------------------------------------- */
 
