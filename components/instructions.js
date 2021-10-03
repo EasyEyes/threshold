@@ -28,8 +28,17 @@ export const instructionsText = {
       return text;
     },
   },
-  initialEnd: () =>
-    `Sometimes the letters will be easy to identify. Sometimes they will be nearly impossible. You can't get much more than half right, so relax. Think of it as a guessing game, and just get as many as you can. Type slowly. (Quit anytime by pressing ESCAPE.) Look at the middle of the screen, ignoring the edges of the screen. To continue, please hit RETURN. `,
+  initialEnd: (responseType = 2) => {
+    let t = `Sometimes the letters will be easy to identify. Sometimes nearly impossible. You can't get much more than half right, so relax. Think of it as a guessing game, and just get as many as you can. (Quit anytime by pressing ESCAPE.) `;
+    switch (responseType) {
+      case 0:
+        return t + `To continue, please hit RETURN.`;
+      case 1:
+        return t + `To continue, click anywhere.`;
+      default:
+        return t + `To continue, please hit RETURN or click anywhere.`;
+    }
+  },
   block: (block = 0) => {
     return (
       `This is block ${block}.\n\n` +
@@ -72,6 +81,7 @@ export const addBeepButton = (synth) => {
     e.stopImmediatePropagation();
     e.stopPropagation();
     synth.play();
+    b.blur();
   };
   b.className = "threshold-beep-button";
   b.id = "threshold-beep-button";

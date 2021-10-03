@@ -442,6 +442,9 @@ const experiment = (blockCount) => {
 
   var clickedContinue;
 
+  // TODO Read from config
+  var responseType = 2;
+
   function fileRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -524,8 +527,10 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot);
       _instructionSetup(
         instructionsText.initial(expInfo.participant) +
-          instructionsText.initialByThresholdParameter["spacing"](2) +
-          instructionsText.initialEnd()
+          instructionsText.initialByThresholdParameter["spacing"](
+            responseType
+          ) +
+          instructionsText.initialEnd(responseType)
       );
 
       clickedContinue = false;
@@ -567,8 +572,8 @@ const experiment = (blockCount) => {
     instructions.setAutoDraw(true);
   }
 
-  function _clickContinue() {
-    clickedContinue = true;
+  function _clickContinue(e) {
+    if (e.target.id !== "threshold-beep-button") clickedContinue = true;
   }
 
   async function _instructionRoutineEachFrame() {
@@ -886,7 +891,7 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
-      _instructionSetup(instructionsText.trial.fixate["spacing"](2));
+      _instructionSetup(instructionsText.trial.fixate["spacing"](responseType));
 
       fixation.setHeight(fixationSize);
       fixation.setPos(fixationXYPx);
@@ -1209,7 +1214,9 @@ const experiment = (blockCount) => {
       showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
 
-      instructions.setText(instructionsText.trial.respond["spacing"](2));
+      instructions.setText(
+        instructionsText.trial.respond["spacing"](responseType)
+      );
 
       // totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
       // totalTrial.setAlignHoriz('right');
