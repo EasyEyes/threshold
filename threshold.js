@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-const debug = false;
+const debug = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -220,9 +220,9 @@ const experiment = (blockCount) => {
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
   flowScheduler.add(fileRoutineEnd());
-  flowScheduler.add(initInstructionRoutineBegin());
-  flowScheduler.add(initInstructionRoutineEachFrame());
-  flowScheduler.add(initInstructionRoutineEnd());
+  // flowScheduler.add(initInstructionRoutineBegin());
+  // flowScheduler.add(initInstructionRoutineEachFrame());
+  // flowScheduler.add(initInstructionRoutineEnd());
   const blocksLoopScheduler = new Scheduler(psychoJS);
   flowScheduler.add(blocksLoopBegin(blocksLoopScheduler));
   flowScheduler.add(blocksLoopScheduler);
@@ -518,45 +518,6 @@ const experiment = (blockCount) => {
 
   var _beepButton;
 
-  function initInstructionRoutineBegin(snapshot) {
-    return async function () {
-      TrialHandler.fromSnapshot(snapshot);
-      _instructionSetup(
-        instructionsText.initial(expInfo.participant) +
-          instructionsText.initialByThresholdParameter["spacing"](
-            responseType
-          ) +
-          instructionsText.initialEnd(responseType)
-      );
-
-      clickedContinue = false;
-      document.addEventListener("click", _clickContinue);
-      document.addEventListener("touchend", _clickContinue);
-
-      _beepButton = addBeepButton(correctSynth);
-
-      return Scheduler.Event.NEXT;
-    };
-  }
-
-  function initInstructionRoutineEachFrame() {
-    return _instructionRoutineEachFrame;
-  }
-
-  function initInstructionRoutineEnd() {
-    return async function () {
-      instructions.setAutoDraw(false);
-      routineTimer.reset();
-
-      document.removeEventListener("click", _clickContinue);
-      document.removeEventListener("touchend", _clickContinue);
-
-      removeBeepButton(_beepButton);
-
-      return Scheduler.Event.NEXT;
-    };
-  }
-
   function _instructionSetup(text) {
     t = 0;
     instructionsClock.reset(); // clock
@@ -640,9 +601,9 @@ const experiment = (blockCount) => {
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
-        // blocksLoopScheduler.add(blockInstructionRoutineBegin(snapshot));
-        // blocksLoopScheduler.add(blockInstructionRoutineEachFrame());
-        // blocksLoopScheduler.add(blockInstructionRoutineEnd());
+        blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
+        blocksLoopScheduler.add(initInstructionRoutineEachFrame());
+        blocksLoopScheduler.add(initInstructionRoutineEnd());
         const trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
@@ -829,6 +790,46 @@ const experiment = (blockCount) => {
       }
       // the Routine "filter" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
+
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function initInstructionRoutineBegin(snapshot) {
+    return async function () {
+      TrialHandler.fromSnapshot(snapshot);
+      _instructionSetup(
+        instructionsText.initial(expInfo.participant) +
+          instructionsText.initialByThresholdParameter["spacing"](
+            responseType,
+            totalTrialCount
+          ) +
+          instructionsText.initialEnd(responseType)
+      );
+
+      clickedContinue = false;
+      document.addEventListener("click", _clickContinue);
+      document.addEventListener("touchend", _clickContinue);
+
+      _beepButton = addBeepButton(correctSynth);
+
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function initInstructionRoutineEachFrame() {
+    return _instructionRoutineEachFrame;
+  }
+
+  function initInstructionRoutineEnd() {
+    return async function () {
+      instructions.setAutoDraw(false);
+      routineTimer.reset();
+
+      document.removeEventListener("click", _clickContinue);
+      document.removeEventListener("touchend", _clickContinue);
+
+      removeBeepButton(_beepButton);
 
       return Scheduler.Event.NEXT;
     };

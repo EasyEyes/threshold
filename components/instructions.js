@@ -5,14 +5,14 @@ export const instructionsText = {
     }. Please make sure this computer's sound is enabled by clicking the Beep button.\n\n`;
   },
   initialByThresholdParameter: {
-    spacing: (responseType = 2) => {
+    spacing: (responseType = 2, trialsThisBlock = 0) => {
       /**
        * responseType
        * 0 - TYPED
        * 1 - CLICKED
        * 2 - TYPED or CLICKED
        */
-      let text = `When you see three letters, please report just the middle letter, `;
+      let text = `You are about to begin a block of ${trialsThisBlock} trials. Each trial will present three letters. Please report just the middle letter, `;
       switch (responseType) {
         case 0:
           text += `by pressing it in the keyboard.\n\n`;
@@ -37,12 +37,6 @@ export const instructionsText = {
       default:
         return t + `To continue, please hit RETURN or click anywhere.`;
     }
-  },
-  block: (block = 0) => {
-    return (
-      `This is block ${block}.\n\n` +
-      `IMPORTANT: Please resist the temptation to type your response as soon as you find a matching response letter. Instead, please hold off responding until your eye is back on the crosshair. Always wait until you're fixating the crosshair before responding. To continue hit RETURN.`
-    );
   },
   trial: {
     fixate: {
