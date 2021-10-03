@@ -9,10 +9,6 @@ const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
 
-// Some handy aliases as in the psychopy scripts;
-const { abs, sin, cos, PI: pi, sqrt } = Math;
-const { round } = util;
-
 ////
 import * as jsQUEST from "./lib/jsQUEST.module.js";
 
@@ -584,6 +580,10 @@ const experiment = (blockCount) => {
       psychoJS.experiment.experimentEnded ||
       psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
     ) {
+      document.removeEventListener("click", _clickContinue);
+      document.removeEventListener("touchend", _clickContinue);
+      removeBeepButton(_beepButton);
+
       return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
     }
 
