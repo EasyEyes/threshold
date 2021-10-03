@@ -20,7 +20,6 @@ export const instructionsText = {
         case 1:
           text += `by clicking it in the displayed list of letters.\n\n`;
           break;
-
         default:
           text += `by pressing it in the keyboard or clicking it in the displayed list of letters.\n\n`;
           break;
@@ -42,7 +41,7 @@ export const instructionsText = {
   block: (block = 0) => {
     return (
       `This is block ${block}.\n\n` +
-      `IMPORTANT: Please resist the temptation to type your response as soon as you find a matching response letter. Instead, please hold off responding until your eye is back on the cross. Always wait until you're fixating the cross before responding. To continue hit RETURN.`
+      `IMPORTANT: Please resist the temptation to type your response as soon as you find a matching response letter. Instead, please hold off responding until your eye is back on the crosshair. Always wait until you're fixating the crosshair before responding. To continue hit RETURN.`
     );
   },
   trial: {
@@ -50,11 +49,11 @@ export const instructionsText = {
       spacing: (responseType = 2) => {
         switch (responseType) {
           case 0:
-            return `While looking directly at the cross, please press the SPACE bar.`;
+            return `While looking directly at the crosshair, please press the SPACE bar.`;
           case 1:
-            return `While looking directly at the cross, please click on the cross.`;
+            return `While looking directly at the crosshair, please click on the crosshair.`;
           default:
-            return `While looking directly at the cross, please press the SPACE bar or click on the cross.`;
+            return `While looking directly at the crosshair, please press the SPACE bar or click on the crosshair.`;
         }
       },
     },

@@ -883,7 +883,7 @@ const experiment = (blockCount) => {
         clickedContinue = true;
       }, 17);
     } else {
-      wrongSynth.play();
+      // wrongSynth.play();
       clickedContinue = false;
     }
   };
