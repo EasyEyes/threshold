@@ -813,6 +813,8 @@ const experiment = (blockCount) => {
 
       _beepButton = addBeepButton(correctSynth);
 
+      psychoJS.eventManager.clearKeys();
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -905,6 +907,8 @@ const experiment = (blockCount) => {
       clickedContinue = false;
       document.addEventListener("click", _takeFixationClick);
       document.addEventListener("touchend", _takeFixationClick);
+
+      psychoJS.eventManager.clearKeys();
 
       return Scheduler.Event.NEXT;
     };
