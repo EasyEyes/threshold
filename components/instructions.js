@@ -28,7 +28,7 @@ export const instructionsText = {
     },
   },
   initialEnd: (responseType = 2) => {
-    let t = `Sometimes the letters will be easy to identify. Sometimes nearly impossible. You can't get much more than half right, so relax. Think of it as a guessing game, and just get as many as you can. (Quit anytime by pressing ESCAPE.) `;
+    let t = `Sometimes the letter will be easy to identify. Sometimes nearly impossible. You can't get much more than half right, so relax. Think of it as a guessing game, and just get as many as you can. (Quit anytime by pressing ESCAPE.) `;
     switch (responseType) {
       case 0:
         return t + `To continue, please hit RETURN.`;
