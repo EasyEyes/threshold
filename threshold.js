@@ -272,7 +272,7 @@ const experiment = (blockCount) => {
   }
 
   var consentClock;
-  // var consent_form_content;
+  var consent_form_content;
   var consent_button_yes;
   var consent_button_no;
 
@@ -297,21 +297,21 @@ const experiment = (blockCount) => {
   async function experimentInit() {
     // Initialize components for Routine "consent"
     consentClock = new util.Clock();
-    // consent_form_content = new visual.TextStim({
-    //   win: psychoJS.window,
-    //   name: 'consent_form_content',
-    //   text: "CONSENT?",
-    //   font: 'Open Sans',
-    //   units: undefined, 
-    //   pos: [0, 0], height: 0.1,  wrapWidth: undefined, ori: 0.0,
-    //   color: new util.Color('white'),  opacity: undefined,
-    //   depth: 0.0 
-    // });
+    consent_form_content = new visual.TextStim({
+      win: psychoJS.window,
+      name: 'consent_form_content',
+      text: "Do you agree to participate in this study?",
+      font: 'Open Sans',
+      units: undefined, 
+      pos: [0, -0.35], height: 0.05,  wrapWidth: undefined, ori: 0.0,
+      color: new util.Color('black'),  opacity: undefined,
+      depth: 0.0 
+    });
     consent_button_yes = new visual.ButtonStim({
       win: psychoJS.window,
       name: 'consent_button_yes',
       text: 'Yes',
-      pos: [-0.1, -0.35], letterHeight: 0.05,
+      pos: [-0.1, -0.45], letterHeight: 0.03,
       size: null
     });
     consent_button_yes.clock = new util.Clock();
@@ -320,7 +320,7 @@ const experiment = (blockCount) => {
       win: psychoJS.window,
       name: 'consent_button_no',
       text: 'No',
-      pos: [0.15, -0.35], letterHeight: 0.05,
+      pos: [0.15, -0.45], letterHeight: 0.03,
       size: null
     });
     consent_button_no.clock = new util.Clock();
@@ -501,7 +501,7 @@ const experiment = (blockCount) => {
       // update component parameters for each repeat
       // keep track of which components have finished
       consentComponents = [];
-      // consentComponents.push(consent_form_content);
+      consentComponents.push(consent_form_content);
       consentComponents.push(consent_button_yes);
       consentComponents.push(consent_button_no);
       
@@ -523,18 +523,18 @@ const experiment = (blockCount) => {
       showConsentForm()
 
       // *consent_form_content* updates
-      // if (t >= 0.0 && consent_form_content.status === PsychoJS.Status.NOT_STARTED) {
-      //   // keep track of start time/frame for later
-      //   consent_form_content.tStart = t;  // (not accounting for frame time here)
-      //   consent_form_content.frameNStart = frameN;  // exact frame index
+      if (t >= 0.0 && consent_form_content.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        consent_form_content.tStart = t;  // (not accounting for frame time here)
+        consent_form_content.frameNStart = frameN;  // exact frame index
         
-      //   consent_form_content.setAutoDraw(true);
-      // }
+        consent_form_content.setAutoDraw(true);
+      }
   
-      // frameRemains = 0.0 + 3.0 - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
-      // if (consent_form_content.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-      //   consent_form_content.setAutoDraw(false);
-      // }
+      frameRemains = 0.0 + 60.0 - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
+      if (consent_form_content.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+        consent_form_content.setAutoDraw(false);
+      }
       
       // *consent_button_yes* updates
       if (t >= 0 && consent_button_yes.status === PsychoJS.Status.NOT_STARTED) {
