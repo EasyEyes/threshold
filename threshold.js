@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-const debug = false;
+const debug = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -109,12 +109,12 @@ const loadBlockFiles = (count, callback) => {
       Object.values(results.data).forEach((row) => {
         let fontFamily = row["targetFont"];
         let fontTestString = "12px " + fontFamily;
-        let fontPath = "fonts/" + fontFamily + ".woff";
+        let fontPath = "fonts/" + fontFamily + ".woff2";
         if (debug) console.log("fontTestString: ", fontTestString);
 
         let response = fetch(fontPath).then((response) => {
           if (response.ok) {
-            fontsRequired.add(row["targetFont"]);
+            fontsRequired.add(fontPath);
           } else {
             console.log(
               "Does the browser consider this font supported?",
@@ -173,8 +173,8 @@ const experiment = (blockCount) => {
   }
   if (debug) console.log("fontsRequired: ", fontsRequired);
 
-  fontsRequired.forEach((fontFamily) => {
-    _resources.push({ name: fontFamily, path: fontPath });
+  fontsRequired.forEach((fontPath) => {
+    _resources.push({ name: fontPath, path: fontPath });
   });
 
   // Start code blocks for 'Before Experiment'
