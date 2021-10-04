@@ -43,11 +43,11 @@ export const instructionsText = {
       spacing: (responseType = 2) => {
         switch (responseType) {
           case 0:
-            return `While looking directly at the crosshair, please press the SPACE bar.`;
+            return `Ready? While looking directly at the crosshair, please press the SPACE bar.`;
           case 1:
-            return `While looking directly at the crosshair, please click on the crosshair.`;
+            return `Ready? While looking directly at the crosshair, please click on the crosshair.`;
           default:
-            return `While looking directly at the crosshair, please press the SPACE bar or click on the crosshair.`;
+            return `Ready? While looking directly at the crosshair, please press the SPACE bar or click on the crosshair.`;
         }
       },
     },

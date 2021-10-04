@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-const debug = true;
+const debug = false;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
