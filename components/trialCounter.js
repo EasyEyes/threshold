@@ -1,11 +1,23 @@
-export function calculateBlockWithTrialIndex(
+export function getNextTrialIndex(
+  currentTrialIndex,
+  currentBlockIndex,
   totalBlockTrialList,
-  totalTrialIndex
 ) {
-  let cumulativeTrialCount = 0;
-  for (let i = 0; i < totalBlockTrialList.length; i++) {
-    cumulativeTrialCount += totalBlockTrialList[i];
-    if (totalTrialIndex <= cumulativeTrialCount) return i + 1;
-  }
-  return totalBlockTrialList.length;
+
+  currentTrialIndex = currentTrialIndex + 1;
+  if (totalBlockTrialList[currentBlockIndex-1] > currentBlockIndex)
+    return {
+      trial: currentBlockIndex,
+      block: currentTrialIndex
+    };
+  else if (currentBlockIndex+1 < totalBlockTrialList.length)
+    return {
+      trial: 1,
+      block: currentBlockIndex+1
+    };
+  else 
+    return {
+      trial: -1,
+      block: -1
+    }; 
 }

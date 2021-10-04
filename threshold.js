@@ -23,7 +23,7 @@ import {
   removeBeepButton,
 } from "./components/instructions.js";
 
-import { calculateBlockWithTrialIndex } from "./components/trialCounter.js";
+import { getNextTrialIndex } from "./components/trialCounter.js";
 import {
   getCorrectSynth,
   getWrongSynth,
@@ -1227,13 +1227,11 @@ const experiment = (blockCount) => {
       // totalTrial.setAlignHoriz('right');
       // totalTrial.setAlignVert('bottom');
 
-      totalBlockIndex = calculateBlockWithTrialIndex(
-        totalBlockTrialList,
-        totalTrialIndex
-      );
+      nextTrialInfo = getNextTrialIndex(totalTrialIndex, totalBlockIndex, totalBlockTrialList);
+
       let trialInfoStr = "";
       if (showCounterBool)
-        trialInfoStr = `Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`;
+        trialInfoStr = `Trial ${nextTrialInfo.trial} of ${totalTrialCount}. Block ${nextTrialInfo.block} of ${totalBlockCount}.`;
       if (showViewingDistanceBool)
         trialInfoStr += ` At ${viewingDistanceCm} cm.`;
       totalTrial.setText(trialInfoStr);
