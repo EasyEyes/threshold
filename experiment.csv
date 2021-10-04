@@ -1,18 +1,18 @@
 ﻿block,1,2,2,3,3
+conditionName,Sloan,RobotoMono,Aragon,ArabicBrief,ArabicProlonged
 conditionTrials,5,5,5,5,5
+spacingDirection,radial,radial,radial,radial,radial
+spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4
 targetAlphabet,DHKNORSVZ,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ابجدهوزحطيكلمنسعفصقرشتثخذضظغ,ابجدهوزحطيكلمنسعفصقرشتثخذضظغ
 targetDurationSec,0.15,0.15,0.15,1,0.15
-targetEccentricityXDeg,10,-10,10,10,10
+targetEccentricityXDeg,10,-10,10,-10,10
 targetEccentricityYDeg,0,0,0,0,0
+targetFont,Sloan,Roboto Mono,P22 Aragon,IBMPlexSansArabic,IBMPlexSansArabic
+targetMinimumPix,8,8,8,8,8
 targetTask,identify,identify,identify,identify,identify
+thresholdBeta,2.3,2.3,2.3,2.3,2.3
+thresholdDelta,0.01,0.01,0.01,0.01,0.01
 thresholdGuess,2,2,2,2,2
 thresholdGuessLogSd,3,3,3,3,3
 thresholdParameter,spacing,spacing,spacing,spacing,spacing
 viewingDistanceDesiredCm,40,40,40,40,40
-targetFont,Sloan,Roboto Mono,P22 Aragon,IBMPlexSansArabic,IBMPlexSansArabic
-conditionName,right1,left2,right2,right3,right3
-spacingDirection,radial,radial,radial,radial
-spacingOverSizeRatio,1.4,1.4,1.4,1.4
-targetMinimumPix,8,8,8,8
-thresholdBeta,2.3,2.3,2.3,2.3,2.3
-thresholdDelta,0.01,0.01,0.01,0.01,0.01
