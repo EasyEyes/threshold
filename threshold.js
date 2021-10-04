@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-const debug = true;
+const debug = false;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -51,7 +51,7 @@ rc.init();
 let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
-const fontsRequired = new Set();
+const fontsRequired = {};
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -114,7 +114,15 @@ const loadBlockFiles = (count, callback) => {
 
         let response = fetch(fontPath).then((response) => {
           if (response.ok) {
-            fontsRequired.add(fontPath);
+            // let f = new FontFace(fontFamily, `url(${response.url})`);
+            // f.load()
+            //   .then((loadedFontFace) => {
+            //     document.fonts.add(loadedFontFace);
+            //   })
+            //   .catch((err) => {
+            //     console.error(err);
+            //   });
+            fontsRequired[fontFamily] = fontPath;
           } else {
             console.log(
               "Does the browser consider this font supported?",
@@ -173,9 +181,10 @@ const experiment = (blockCount) => {
   }
   if (debug) console.log("fontsRequired: ", fontsRequired);
 
-  fontsRequired.forEach((fontPath) => {
-    _resources.push({ name: fontPath, path: fontPath });
-  });
+  for (let i in fontsRequired) {
+    console.log(i, fontsRequired[i]);
+    _resources.push({ name: i, path: fontsRequired[i] });
+  }
 
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
@@ -1059,7 +1068,28 @@ const experiment = (blockCount) => {
       block = condition["blockOrder"];
 
       spacingDirection = condition["spacingDirection"];
-      targetFont = condition["targetFont"].toLowerCase();
+      targetFont = condition["targetFont"];
+      // console.log('!@#$%^&*()', document.fonts.check('12px ' + targetFont));
+      function listFonts() {
+        let { fonts } = document;
+        const it = fonts.entries();
+
+        let arr = [];
+        let done = false;
+
+        while (!done) {
+          const font = it.next();
+          if (!font.done) {
+            arr.push(font.value[0].family);
+          } else {
+            done = font.done;
+          }
+        }
+
+        // converted to set then arr to filter repetitive values
+        return [...new Set(arr)];
+      }
+      console.log(listFonts());
 
       targetAlphabet = String(condition["targetAlphabet"]).split("");
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
