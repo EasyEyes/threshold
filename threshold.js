@@ -1231,7 +1231,7 @@ const experiment = (blockCount) => {
 
       let trialInfoStr = "";
       if (showCounterBool)
-        trialInfoStr = `Trial ${nextTrialInfo.trial} of ${totalTrialCount}. Block ${nextTrialInfo.block} of ${totalBlockCount}.`;
+        trialInfoStr = `Trial ${nextTrialInfo.trial} of ${nextTrialInfo.totalTrials}. Block ${nextTrialInfo.block} of ${totalBlockCount}.`;
       if (showViewingDistanceBool)
         trialInfoStr += ` At ${viewingDistanceCm} cm.`;
       totalTrial.setText(trialInfoStr);
