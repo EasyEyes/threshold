@@ -182,7 +182,7 @@ const experiment = (blockCount) => {
   if (debug) console.log("fontsRequired: ", fontsRequired);
 
   for (let i in fontsRequired) {
-    console.log(i, fontsRequired[i]);
+    if (debug) console.log(i, fontsRequired[i]);
     _resources.push({ name: i, path: fontsRequired[i] });
   }
 
@@ -1069,27 +1069,6 @@ const experiment = (blockCount) => {
 
       spacingDirection = condition["spacingDirection"];
       targetFont = condition["targetFont"];
-      // console.log('!@#$%^&*()', document.fonts.check('12px ' + targetFont));
-      function listFonts() {
-        let { fonts } = document;
-        const it = fonts.entries();
-
-        let arr = [];
-        let done = false;
-
-        while (!done) {
-          const font = it.next();
-          if (!font.done) {
-            arr.push(font.value[0].family);
-          } else {
-            done = font.done;
-          }
-        }
-
-        // converted to set then arr to filter repetitive values
-        return [...new Set(arr)];
-      }
-      console.log(listFonts());
 
       targetAlphabet = String(condition["targetAlphabet"]).split("");
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
