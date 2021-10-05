@@ -111,37 +111,38 @@ const loadBlockFiles = (count, callback) => {
         let fontTestString = "12px " + fontFamily;
         let fontPath = "fonts/" + fontFamily + ".woff2";
         if (debug) console.log("fontTestString: ", fontTestString);
+        fontsRequired[fontFamily] = fontPath;
 
-        let response = fetch(fontPath).then((response) => {
-          if (response.ok) {
-            // let f = new FontFace(fontFamily, `url(${response.url})`);
-            // f.load()
-            //   .then((loadedFontFace) => {
-            //     document.fonts.add(loadedFontFace);
-            //   })
-            //   .catch((err) => {
-            //     console.error(err);
-            //   });
-            fontsRequired[fontFamily] = fontPath;
-          } else {
-            console.log(
-              "Does the browser consider this font supported?",
-              document.fonts.check(fontTestString)
-            );
-            console.log(
-              "Uh oh, unable to find the font file for: " +
-                fontFamily +
-                "\n" +
-                "If this font is already supported by the browser then it should display correctly. " +
-                "\n" +
-                "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
-                "\n" +
-                "Please verify for yourself that " +
-                fontFamily +
-                " is being correctly represented in your experiment."
-            );
-          }
-        });
+        // let response = fetch(fontPath).then((response) => {
+        //   if (response.ok) {
+        //     // let f = new FontFace(fontFamily, `url(${response.url})`);
+        //     // f.load()
+        //     //   .then((loadedFontFace) => {
+        //     //     document.fonts.add(loadedFontFace);
+        //     //   })
+        //     //   .catch((err) => {
+        //     //     console.error(err);
+        //     //   });
+
+        //   } else {
+        //     console.log(
+        //       "Does the browser consider this font supported?",
+        //       document.fonts.check(fontTestString)
+        //     );
+        //     console.log(
+        //       "Uh oh, unable to find the font file for: " +
+        //         fontFamily +
+        //         "\n" +
+        //         "If this font is already supported by the browser then it should display correctly. " +
+        //         "\n" +
+        //         "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
+        //         "\n" +
+        //         "Please verify for yourself that " +
+        //         fontFamily +
+        //         " is being correctly represented in your experiment."
+        //     );
+        //   }
+        // });
       });
 
       loadBlockFiles(count - 1, callback);
