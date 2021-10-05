@@ -23,7 +23,6 @@ import {
   removeBeepButton,
 } from "./components/instructions.js";
 
-import { getNextTrialIndex } from "./components/trialCounter.js";
 import {
   getCorrectSynth,
   getWrongSynth,
@@ -151,15 +150,13 @@ var totalTrialConfig = {
   alignVert: "bottom",
 };
 var totalTrial, // TextSim object
-  totalTrialIndex = totalTrialConfig.initialVal, // numerical value of totalTrialIndex
-  totalTrialCount = 0;
+    totalTrialCount = 0;
 
 var totalBlockConfig = {
   initialVal: 1,
 };
-var totalBlockIndex = totalBlockConfig.initialVal,
-  totalBlockTrialList = [],
-  totalBlockCount = 0;
+var totalBlockTrialList = [],
+    totalBlockCount = 0;
 
 const experiment = (blockCount) => {
   ////
@@ -992,7 +989,7 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       hideCursor();
-
+      
       ////
       if (debug)
         console.log(
@@ -1223,23 +1220,17 @@ const experiment = (blockCount) => {
         instructionsText.trial.respond["spacing"](responseType)
       );
 
-      // totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
-      // totalTrial.setAlignHoriz('right');
-      // totalTrial.setAlignVert('bottom');
-
-      let nextTrialInfo = getNextTrialIndex(totalTrialIndex, totalBlockIndex, totalBlockTrialList);
-
       let trialInfoStr = "";
       if (showCounterBool)
-        trialInfoStr = `Trial ${nextTrialInfo.trial} of ${nextTrialInfo.totalTrials}. Block ${nextTrialInfo.block} of ${totalBlockCount}.`;
+        trialInfoStr = `Trial ${snapshot.thisN+1} of ${snapshot.nTotal}. Block ${condition.blockOrder} of ${totalBlockCount}.`;
       if (showViewingDistanceBool)
         trialInfoStr += ` At ${viewingDistanceCm} cm.`;
       totalTrial.setText(trialInfoStr);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-      totalTrialIndex = nextTrialInfo.trial;
-      totalBlockIndex = nextTrialInfo.block
+      // totalTrialIndex = nextTrialInfo.trial;
+      // totalBlockIndex = nextTrialInfo.block
 
       // keep track of which components have finished
       trialComponents = [];
