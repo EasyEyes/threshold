@@ -3,9 +3,11 @@
   z-index: 999999;
   font-size: 3rem;
   max-width: 100%;
+  text-align: center;
 }
 
 #alphabet-holder .alphabet {
+  display: inline-block;
   padding: 0.5rem 1rem;
   border-radius: 5px;
   box-sizing: border-box;

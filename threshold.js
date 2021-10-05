@@ -634,7 +634,7 @@ const experiment = (blockCount) => {
         psychoJS: psychoJS,
         name: "trials",
         varName: "trialsVal",
-        nTrials: conditionTrials,
+        nTrials: conditionTrials * trialsConditions.length, // TODO Handle unbalanced trials per condition
         conditions: trialsConditions,
         method: TrialHandler.Method.FULLRANDOM,
       });
