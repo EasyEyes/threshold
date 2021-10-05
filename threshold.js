@@ -152,11 +152,8 @@ var totalTrialConfig = {
 var totalTrial, // TextSim object
     totalTrialCount = 0;
 
-var totalBlockConfig = {
-  initialVal: 1,
-};
-var totalBlockTrialList = [],
-    totalBlockCount = 0;
+var currentBlockIndex = 0;
+var totalBlockCount = 0;
 
 const experiment = (blockCount) => {
   ////
@@ -687,6 +684,8 @@ const experiment = (blockCount) => {
   function filterRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
+      currentBlockIndex = snapshot.block + 1;
+      totalBlockCount = snapshot.nTotal;
 
       //------Prepare to start Routine 'filter'-------
       t = 0;
@@ -716,10 +715,7 @@ const experiment = (blockCount) => {
       }
       if (debug) console.log("possibleTrials: ", possibleTrials);
       totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
-      totalBlockCount = Object.keys(blockFiles).length;
-      totalBlockTrialList = [...possibleTrials];
-      // console.log('totalBlockTrialList', totalBlockTrialList)
-      // totalBlockCount = blockFiles.length;
+
 
       // TODO Remove this constraint to allow different # of trials for each condition
       if (!possibleTrials.every((a) => a === possibleTrials[0]))
@@ -1219,10 +1215,10 @@ const experiment = (blockCount) => {
       instructions.setText(
         instructionsText.trial.respond["spacing"](responseType)
       );
-
+      
       let trialInfoStr = "";
       if (showCounterBool)
-        trialInfoStr = `Trial ${snapshot.thisN+1} of ${snapshot.nTotal}. Block ${condition.blockOrder} of ${totalBlockCount}.`;
+        trialInfoStr = `Trial ${snapshot.thisN+1} of ${snapshot.nTotal}. Block ${currentBlockIndex} of ${totalBlockCount}.`;
       if (showViewingDistanceBool)
         trialInfoStr += ` At ${viewingDistanceCm} cm.`;
       totalTrial.setText(trialInfoStr);
