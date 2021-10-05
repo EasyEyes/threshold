@@ -32,6 +32,7 @@ import {
   removeClickableAlphabet,
   setupClickableAlphabet,
 } from "./components/showAlphabet.js";
+import { getTrialInfoStr } from "./components/trialCounter.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -149,9 +150,13 @@ var totalTrialConfig = {
   alignHoriz: "right",
   alignVert: "bottom",
 };
+
+var trialInfoStr = "";
 var totalTrial, // TextSim object
     totalTrialCount = 0;
 
+var currentTrialIndex = 0;
+var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
@@ -521,6 +526,10 @@ const experiment = (blockCount) => {
     instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
     instructions.setText(text);
     instructions.setAutoDraw(true);
+
+    trialInfoStr = getTrialInfoStr(showCounterBool, showViewingDistanceBool, currentTrialIndex, currentTrialLength, currentBlockIndex, totalBlockCount, viewingDistanceCm);
+    totalTrial.setText(trialInfoStr);
+    totalTrial.setAutoDraw(true);
   }
 
   function _clickContinue(e) {
@@ -686,7 +695,6 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
       currentBlockIndex = snapshot.block + 1;
       totalBlockCount = snapshot.nTotal;
-
       //------Prepare to start Routine 'filter'-------
       t = 0;
       filterClock.reset(); // clock
@@ -698,6 +706,7 @@ const experiment = (blockCount) => {
 
       const possibleTrials = [];
       const thisBlockFileData = blockFiles[thisLoopNumber];
+
       if (debug) console.log("thisBlockFileData: ", thisBlockFileData);
 
       for (let rowKey in thisBlockFileData) {
@@ -887,6 +896,17 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
+
+      // update trial/block count
+      currentTrialIndex = snapshot.thisN+1;
+      currentTrialLength = snapshot.nTotal;
+      trialInfoStr = getTrialInfoStr(showCounterBool, showViewingDistanceBool, currentTrialIndex, currentTrialLength, currentBlockIndex, totalBlockCount, viewingDistanceCm);
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setFont(totalTrialConfig.fontName);
+      totalTrial.setHeight(totalTrialConfig.fontSize);
+      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      totalTrial.setAutoDraw(true);
+
       _instructionSetup(instructionsText.trial.fixate["spacing"](responseType));
 
       fixation.setHeight(fixationSize);
@@ -894,8 +914,6 @@ const experiment = (blockCount) => {
       fixation.tStart = t;
       fixation.frameNStart = frameN;
       fixation.setAutoDraw(true);
-
-      totalTrial.setAutoDraw(true);
 
       clickedContinue = false;
       document.addEventListener("click", _takeFixationClick);
@@ -1216,11 +1234,7 @@ const experiment = (blockCount) => {
         instructionsText.trial.respond["spacing"](responseType)
       );
       
-      let trialInfoStr = "";
-      if (showCounterBool)
-        trialInfoStr = `Trial ${snapshot.thisN+1} of ${snapshot.nTotal}. Block ${currentBlockIndex} of ${totalBlockCount}.`;
-      if (showViewingDistanceBool)
-        trialInfoStr += ` At ${viewingDistanceCm} cm.`;
+      trialInfoStr = getTrialInfoStr(showCounterBool, showViewingDistanceBool, currentTrialIndex, currentTrialLength, currentBlockIndex, totalBlockCount, viewingDistanceCm);
       totalTrial.setText(trialInfoStr);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
@@ -1341,6 +1355,15 @@ const experiment = (blockCount) => {
         continueRoutine = false;
       }
 
+      // *totalTrial* updates
+      if (t >= 0.0 && totalTrial.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        totalTrial.tStart = t; // (not accounting for frame time here)
+        totalTrial.frameNStart = frameN; // exact frame index
+
+        totalTrial.setAutoDraw(true);
+      }
+
       // *fixation* updates
       if (
         t >= 0.0 &&
@@ -1352,15 +1375,6 @@ const experiment = (blockCount) => {
         fixation.frameNStart = frameN; // exact frame index
 
         fixation.setAutoDraw(true);
-      }
-
-      // *totalTrial* updates
-      if (t >= 0.0 && totalTrial.status === PsychoJS.Status.NOT_STARTED) {
-        // keep track of start time/frame for later
-        totalTrial.tStart = t; // (not accounting for frame time here)
-        totalTrial.frameNStart = frameN; // exact frame index
-
-        totalTrial.setAutoDraw(true);
       }
 
       // *flanker1* updates

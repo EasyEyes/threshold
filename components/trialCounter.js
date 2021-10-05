@@ -27,3 +27,15 @@
   
 //   return res;
 // }
+
+export function getTrialInfoStr(showCounterBool, showViewingDistanceBool, currentTrialIndex, currentTrialLength, currentBlockIndex, blockCount, viewingDistanceCm) {
+  let res = '';
+
+  if (showCounterBool) 
+    res = `Trial ${currentTrialIndex} of ${currentTrialLength}. Block ${currentBlockIndex} of ${blockCount}.`;
+  
+  if (showViewingDistanceBool)
+    res += ` At ${viewingDistanceCm} cm.`;
+ 
+  return res;
+}
