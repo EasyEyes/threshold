@@ -3,24 +3,27 @@ export function getNextTrialIndex(
   currentBlockIndex,
   totalBlockTrialList,
 ) {
-
-  currentTrialIndex = currentTrialIndex + 1;
-  if (totalBlockTrialList[currentBlockIndex-1] > currentBlockIndex)
-    return {
-      trial: currentTrialIndex,
+  let res;
+  if (totalBlockTrialList[currentBlockIndex-1] >= currentTrialIndex+1)
+    res = {
+      trial: currentTrialIndex+1,
       totalTrials: totalBlockTrialList[currentBlockIndex-1],
       block: currentBlockIndex
     };
-  else if (currentBlockIndex+1 < totalBlockTrialList.length)
-    return {
+  else if (currentBlockIndex+1 <= totalBlockTrialList.length) {
+    currentBlockIndex = currentBlockIndex + 1;
+    res = {
       trial: 1,
-      totalTrials: totalBlockTrialList[currentBlockIndex],
-      block: currentBlockIndex+1
+      totalTrials: totalBlockTrialList[currentBlockIndex-1],
+      block: currentBlockIndex
     };
+  }
   else 
-    return {
+    res = {
       trial: -1,
       totalTrials: -1,
       block: -1
     }; 
+  
+  return res;
 }

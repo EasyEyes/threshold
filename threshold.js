@@ -142,7 +142,7 @@ const loadBlockFiles = (count, callback) => {
 };
 
 var totalTrialConfig = {
-  initialVal: 1,
+  initialVal: 0,
   fontSize: 20,
   x: window.innerWidth / 2,
   y: -window.innerHeight / 2,
@@ -155,7 +155,7 @@ var totalTrial, // TextSim object
   totalTrialCount = 0;
 
 var totalBlockConfig = {
-  initialVal: 0,
+  initialVal: 1,
 };
 var totalBlockIndex = totalBlockConfig.initialVal,
   totalBlockTrialList = [],
@@ -1227,7 +1227,7 @@ const experiment = (blockCount) => {
       // totalTrial.setAlignHoriz('right');
       // totalTrial.setAlignVert('bottom');
 
-      nextTrialInfo = getNextTrialIndex(totalTrialIndex, totalBlockIndex, totalBlockTrialList);
+      let nextTrialInfo = getNextTrialIndex(totalTrialIndex, totalBlockIndex, totalBlockTrialList);
 
       let trialInfoStr = "";
       if (showCounterBool)
@@ -1238,6 +1238,8 @@ const experiment = (blockCount) => {
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      totalTrialIndex = nextTrialInfo.trial;
+      totalBlockIndex = nextTrialInfo.block
 
       // keep track of which components have finished
       trialComponents = [];
@@ -1256,7 +1258,7 @@ const experiment = (blockCount) => {
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
 
       // update trial index
-      totalTrialIndex = totalTrialIndex + 1;
+      // totalTrialIndex = totalTrialIndex + 1;
 
       return Scheduler.Event.NEXT;
     };
