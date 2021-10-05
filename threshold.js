@@ -43,7 +43,7 @@ var levelLeft, levelRight;
 let correctAns;
 
 // For development purposes, toggle RC off for testing speed
-const useRC = !debug;
+const useRC = false;
 const rc = RemoteCalibrator;
 rc.init();
 
@@ -809,7 +809,9 @@ const experiment = (blockCount) => {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
       _instructionSetup(
-        instructionsText.initial(expInfo.participant) +
+        (snapshot.block === 0
+          ? instructionsText.initial(expInfo.participant)
+          : "") +
           instructionsText.initialByThresholdParameter["spacing"](
             responseType,
             totalTrialCount
