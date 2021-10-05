@@ -526,10 +526,6 @@ const experiment = (blockCount) => {
     instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
     instructions.setText(text);
     instructions.setAutoDraw(true);
-
-    trialInfoStr = getTrialInfoStr(showCounterBool, showViewingDistanceBool, currentTrialIndex, currentTrialLength, currentBlockIndex, totalBlockCount, viewingDistanceCm);
-    totalTrial.setText(trialInfoStr);
-    totalTrial.setAutoDraw(true);
   }
 
   function _clickContinue(e) {
@@ -638,6 +634,11 @@ const experiment = (blockCount) => {
         conditions: trialsConditions,
         method: TrialHandler.Method.FULLRANDOM,
       });
+
+      trialInfoStr = getTrialInfoStr(showCounterBool, showViewingDistanceBool, currentTrialIndex, currentTrialLength, currentBlockIndex, totalBlockCount, viewingDistanceCm);
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setAutoDraw(true);
+
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop
       // Schedule all the trials in the trialList:
