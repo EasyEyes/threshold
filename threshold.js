@@ -23,7 +23,6 @@ import {
   removeBeepButton,
 } from "./components/instructions.js";
 
-import { calculateBlockWithTrialIndex } from "./components/trialCounter.js";
 import {
   getCorrectSynth,
   getWrongSynth,
@@ -33,6 +32,7 @@ import {
   removeClickableAlphabet,
   setupClickableAlphabet,
 } from "./components/showAlphabet.js";
+import { getTrialInfoStr } from "./components/trialCounter.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -142,7 +142,7 @@ const loadBlockFiles = (count, callback) => {
 };
 
 var totalTrialConfig = {
-  initialVal: 1,
+  initialVal: 0,
   fontSize: 20,
   x: window.innerWidth / 2,
   y: -window.innerHeight / 2,
@@ -150,16 +150,15 @@ var totalTrialConfig = {
   alignHoriz: "right",
   alignVert: "bottom",
 };
+
+var trialInfoStr = "";
 var totalTrial, // TextSim object
-  totalTrialIndex = totalTrialConfig.initialVal, // numerical value of totalTrialIndex
   totalTrialCount = 0;
 
-var totalBlockConfig = {
-  initialVal: 0,
-};
-var totalBlockIndex = totalBlockConfig.initialVal,
-  totalBlockTrialList = [],
-  totalBlockCount = 0;
+var currentTrialIndex = 0;
+var currentTrialLength = 0;
+var currentBlockIndex = 0;
+var totalBlockCount = 0;
 
 const experiment = (blockCount) => {
   ////
@@ -635,6 +634,19 @@ const experiment = (blockCount) => {
         conditions: trialsConditions,
         method: TrialHandler.Method.FULLRANDOM,
       });
+
+      trialInfoStr = getTrialInfoStr(
+        showCounterBool,
+        showViewingDistanceBool,
+        currentTrialIndex,
+        currentTrialLength,
+        currentBlockIndex,
+        totalBlockCount,
+        viewingDistanceCm
+      );
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setAutoDraw(true);
+
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop
       // Schedule all the trials in the trialList:
@@ -690,7 +702,8 @@ const experiment = (blockCount) => {
   function filterRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-
+      currentBlockIndex = snapshot.block + 1;
+      totalBlockCount = snapshot.nTotal;
       //------Prepare to start Routine 'filter'-------
       t = 0;
       filterClock.reset(); // clock
@@ -702,6 +715,7 @@ const experiment = (blockCount) => {
 
       const possibleTrials = [];
       const thisBlockFileData = blockFiles[thisLoopNumber];
+
       if (debug) console.log("thisBlockFileData: ", thisBlockFileData);
 
       for (let rowKey in thisBlockFileData) {
@@ -719,10 +733,6 @@ const experiment = (blockCount) => {
       }
       if (debug) console.log("possibleTrials: ", possibleTrials);
       totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
-      totalBlockCount = Object.keys(blockFiles).length;
-      totalBlockTrialList = [...possibleTrials];
-      // console.log('totalBlockTrialList', totalBlockTrialList)
-      // totalBlockCount = blockFiles.length;
 
       // TODO Remove this constraint to allow different # of trials for each condition
       if (!possibleTrials.every((a) => a === possibleTrials[0]))
@@ -894,6 +904,25 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
+
+      // update trial/block count
+      currentTrialIndex = snapshot.thisN + 1;
+      currentTrialLength = snapshot.nTotal;
+      trialInfoStr = getTrialInfoStr(
+        showCounterBool,
+        showViewingDistanceBool,
+        currentTrialIndex,
+        currentTrialLength,
+        currentBlockIndex,
+        totalBlockCount,
+        viewingDistanceCm
+      );
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setFont(totalTrialConfig.fontName);
+      totalTrial.setHeight(totalTrialConfig.fontSize);
+      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      totalTrial.setAutoDraw(true);
+
       _instructionSetup(instructionsText.trial.fixate["spacing"](responseType));
 
       fixation.setHeight(fixationSize);
@@ -901,8 +930,6 @@ const experiment = (blockCount) => {
       fixation.tStart = t;
       fixation.frameNStart = frameN;
       fixation.setAutoDraw(true);
-
-      totalTrial.setAutoDraw(true);
 
       clickedContinue = false;
       document.addEventListener("click", _takeFixationClick);
@@ -1223,23 +1250,21 @@ const experiment = (blockCount) => {
         instructionsText.trial.respond["spacing"](responseType)
       );
 
-      // totalTrial.setPos([totalTrialConfig.x, totalTrialConfig.y]);
-      // totalTrial.setAlignHoriz('right');
-      // totalTrial.setAlignVert('bottom');
-
-      totalBlockIndex = calculateBlockWithTrialIndex(
-        totalBlockTrialList,
-        totalTrialIndex
+      trialInfoStr = getTrialInfoStr(
+        showCounterBool,
+        showViewingDistanceBool,
+        currentTrialIndex,
+        currentTrialLength,
+        currentBlockIndex,
+        totalBlockCount,
+        viewingDistanceCm
       );
-      let trialInfoStr = "";
-      if (showCounterBool)
-        trialInfoStr = `Block ${totalBlockIndex} of ${totalBlockCount}. Trial ${totalTrialIndex} of ${totalTrialCount}.`;
-      if (showViewingDistanceBool)
-        trialInfoStr += ` At ${viewingDistanceCm} cm.`;
       totalTrial.setText(trialInfoStr);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      // totalTrialIndex = nextTrialInfo.trial;
+      // totalBlockIndex = nextTrialInfo.block
 
       // keep track of which components have finished
       trialComponents = [];
@@ -1258,7 +1283,7 @@ const experiment = (blockCount) => {
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
 
       // update trial index
-      totalTrialIndex = totalTrialIndex + 1;
+      // totalTrialIndex = totalTrialIndex + 1;
 
       return Scheduler.Event.NEXT;
     };
@@ -1354,6 +1379,15 @@ const experiment = (blockCount) => {
         continueRoutine = false;
       }
 
+      // *totalTrial* updates
+      if (t >= 0.0 && totalTrial.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        totalTrial.tStart = t; // (not accounting for frame time here)
+        totalTrial.frameNStart = frameN; // exact frame index
+
+        totalTrial.setAutoDraw(true);
+      }
+
       // *fixation* updates
       if (
         t >= 0.0 &&
@@ -1365,15 +1399,6 @@ const experiment = (blockCount) => {
         fixation.frameNStart = frameN; // exact frame index
 
         fixation.setAutoDraw(true);
-      }
-
-      // *totalTrial* updates
-      if (t >= 0.0 && totalTrial.status === PsychoJS.Status.NOT_STARTED) {
-        // keep track of start time/frame for later
-        totalTrial.tStart = t; // (not accounting for frame time here)
-        totalTrial.frameNStart = frameN; // exact frame index
-
-        totalTrial.setAutoDraw(true);
       }
 
       // *flanker1* updates
