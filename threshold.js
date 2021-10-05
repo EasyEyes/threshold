@@ -153,7 +153,7 @@ var totalTrialConfig = {
 
 var trialInfoStr = "";
 var totalTrial, // TextSim object
-    totalTrialCount = 0;
+  totalTrialCount = 0;
 
 var currentTrialIndex = 0;
 var currentTrialLength = 0;
@@ -635,7 +635,15 @@ const experiment = (blockCount) => {
         method: TrialHandler.Method.FULLRANDOM,
       });
 
-      trialInfoStr = getTrialInfoStr(showCounterBool, showViewingDistanceBool, currentTrialIndex, currentTrialLength, currentBlockIndex, totalBlockCount, viewingDistanceCm);
+      trialInfoStr = getTrialInfoStr(
+        showCounterBool,
+        showViewingDistanceBool,
+        currentTrialIndex,
+        currentTrialLength,
+        currentBlockIndex,
+        totalBlockCount,
+        viewingDistanceCm
+      );
       totalTrial.setText(trialInfoStr);
       totalTrial.setAutoDraw(true);
 
@@ -725,7 +733,6 @@ const experiment = (blockCount) => {
       }
       if (debug) console.log("possibleTrials: ", possibleTrials);
       totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
-
 
       // TODO Remove this constraint to allow different # of trials for each condition
       if (!possibleTrials.every((a) => a === possibleTrials[0]))
@@ -899,9 +906,17 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot);
 
       // update trial/block count
-      currentTrialIndex = snapshot.thisN+1;
+      currentTrialIndex = snapshot.thisN + 1;
       currentTrialLength = snapshot.nTotal;
-      trialInfoStr = getTrialInfoStr(showCounterBool, showViewingDistanceBool, currentTrialIndex, currentTrialLength, currentBlockIndex, totalBlockCount, viewingDistanceCm);
+      trialInfoStr = getTrialInfoStr(
+        showCounterBool,
+        showViewingDistanceBool,
+        currentTrialIndex,
+        currentTrialLength,
+        currentBlockIndex,
+        totalBlockCount,
+        viewingDistanceCm
+      );
       totalTrial.setText(trialInfoStr);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
@@ -1004,7 +1019,7 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       hideCursor();
-      
+
       ////
       if (debug)
         console.log(
@@ -1234,8 +1249,16 @@ const experiment = (blockCount) => {
       instructions.setText(
         instructionsText.trial.respond["spacing"](responseType)
       );
-      
-      trialInfoStr = getTrialInfoStr(showCounterBool, showViewingDistanceBool, currentTrialIndex, currentTrialLength, currentBlockIndex, totalBlockCount, viewingDistanceCm);
+
+      trialInfoStr = getTrialInfoStr(
+        showCounterBool,
+        showViewingDistanceBool,
+        currentTrialIndex,
+        currentTrialLength,
+        currentBlockIndex,
+        totalBlockCount,
+        viewingDistanceCm
+      );
       totalTrial.setText(trialInfoStr);
       totalTrial.setFont(totalTrialConfig.fontName);
       totalTrial.setHeight(totalTrialConfig.fontSize);
