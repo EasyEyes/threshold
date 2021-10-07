@@ -2,7 +2,7 @@ export const instructionsText = {
   initial: (participantName = null) => {
     return `Hello${
       participantName === null ? "" : ` ${participantName}`
-    }. Please make sure this computer's sound is enabled by clicking the Beep button.\n\n`;
+    }. Please make sure this computer's sound is enabled by clicking the Beep button. By the way, you'll hear a beep like that every time you get a trial right.\n\n`;
   },
   initialByThresholdParameter: {
     spacing: (responseType = 2, trialsThisBlock = 0) => {
