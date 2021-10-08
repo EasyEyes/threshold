@@ -1,9 +1,10 @@
 ﻿block,1,2,2,3,3
 conditionName,Sloan,RobotoMono,Aragon,ArabicBrief,ArabicProlonged
 conditionTrials,5,5,5,5,5
+showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE
 spacingDirection,radial,radial,radial,radial,radial
 spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4
-targetAlphabet,DHKNORSVZ,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ابجدهوزحطيكلمنسعفصقرشتثخذضظغ,ابجدهوزحطيكلمنسعفصقرشتثخذضظغ
+targetAlphabet,DHKNORSVZ,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ابتثجحخدذرزسشصضطظعغفقكلمنهوي,ابتثجحخدذرزسشصضطظعغفقكلمنهوي
 targetDurationSec,0.15,0.15,0.15,1,0.15
 targetEccentricityXDeg,10,-10,10,-10,10
 targetEccentricityYDeg,0,0,0,0,0
