@@ -1,4 +1,4 @@
-import { sound } from "./lib/psychojs-2021.2.3.js";
+import { sound } from "../psychojs/out/psychojs-2021.3.0.js";
 const { TonePlayer } = sound;
 
 const default_env = {

@@ -4,7 +4,7 @@
 
 const debug = false;
 
-import { core, data, util, visual } from "./lib/psychojs-2021.2.3.js";
+import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
