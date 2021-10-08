@@ -4,13 +4,13 @@
 
 const debug = false;
 
-import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
+import { core, data, util, visual } from "./lib/psychojs-2021.2.3.js";
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
 
 ////
-import * as jsQUEST from "./lib/jsQUEST.module.js";
+import * as jsQUEST from "./addons/jsQUEST.module.js";
 
 ////
 /* ------------------------------- Components ------------------------------- */
