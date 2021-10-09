@@ -504,6 +504,8 @@ const experiment = (blockCount) => {
       consentComponents.push(consent_form_content);
       consentComponents.push(consent_button_yes);
       consentComponents.push(consent_button_no);
+
+      showConsentForm()
       
       for (const thisComponent of consentComponents)
         if ('status' in thisComponent)
@@ -519,8 +521,6 @@ const experiment = (blockCount) => {
       t = consentClock.getTime();
       frameN = frameN + 1;// number of completed frames (so 0 is the first frame)
       // update/draw components on each frame
-
-      showConsentForm()
 
       // *consent_form_content* updates
       if (t >= 0.0 && consent_form_content.status === PsychoJS.Status.NOT_STARTED) {

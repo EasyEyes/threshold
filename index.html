@@ -16,9 +16,16 @@
     <link rel="stylesheet" href="./css/showAlphabet.css" />
     <!-- Remote Calibrator -->
     <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.2.2-beta.0/lib/RemoteCalibrator.min.js"></script>
+
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Markdown parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body>
-    <embed src="form/consentform.pdf" id="consent-form" style="position:absolute; left: 15%; top: 2%;z-index: 0;display:none" width="75%" height="75%" type="application/pdf">
+    <embed src="form/consentform.pdf" id="consent-form-pdf" style="position:absolute; left: 15%; top: 2%;z-index: 0;display:none" width="75%" height="75%" type="application/pdf">
+    <div id="consent-form-markdown"></div>
     <div id="root"></div>
     <!-- external libraries -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
