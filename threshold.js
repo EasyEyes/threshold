@@ -300,18 +300,23 @@ const experiment = (blockCount) => {
     consent_form_content = new visual.TextStim({
       win: psychoJS.window,
       name: 'consent_form_content',
-      text: "Do you agree to participate in this study?",
+      text: "I agree to participate in this study (indicate by clicking one option).",
       font: 'Open Sans',
       units: undefined, 
-      pos: [0, -0.35], height: 0.05,  wrapWidth: undefined, ori: 0.0,
-      color: new util.Color('black'),  opacity: undefined,
+      pos: [0, -0.35], 
+      height: 0.03,  
+      wrapWidth: undefined, 
+      ori: 0.0,
+      color: new util.Color('black'),  
+      opacity: undefined,
       depth: 0.0 
     });
     consent_button_yes = new visual.ButtonStim({
       win: psychoJS.window,
       name: 'consent_button_yes',
       text: 'Yes',
-      pos: [-0.1, -0.45], letterHeight: 0.03,
+      pos: [-0.17, -0.41], 
+      letterHeight: 0.02,
       size: null
     });
     consent_button_yes.clock = new util.Clock();
@@ -319,9 +324,10 @@ const experiment = (blockCount) => {
     consent_button_no = new visual.ButtonStim({
       win: psychoJS.window,
       name: 'consent_button_no',
-      text: 'No',
-      pos: [0.15, -0.45], letterHeight: 0.03,
-      size: null
+      text: 'No. (You will leave the study without receiving payment)',
+      pos: [0, -0.46], 
+      letterHeight: 0.02, 
+      size: [5,2]
     });
     consent_button_no.clock = new util.Clock();
 
@@ -496,7 +502,7 @@ const experiment = (blockCount) => {
       // routineTimer.add(5.000000);
 
       consent_button_yes.setSize([0.25, 1]);
-      consent_button_no.setSize([0.25, 1]);
+      consent_button_no.setSize([0.6, 1]);
 
       // update component parameters for each repeat
       // keep track of which components have finished

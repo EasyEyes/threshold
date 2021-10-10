@@ -15,7 +15,7 @@ export const showConsentForm = () => {
 
       // show pdf
       el = document.getElementById('consent-form-pdf');
-      el.style.zIndex = 1000;
+      el.style.zIndex = 999999;
       el.style.display = 'block'
     })
  
