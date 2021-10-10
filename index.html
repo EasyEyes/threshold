@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="./css/custom.css" />
     <link rel="stylesheet" href="./css/instructions.css" />
     <link rel="stylesheet" href="./css/showAlphabet.css" />
+    <link rel="stylesheet" href="./css/consent.css" />
     <!-- Remote Calibrator -->
     <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.2.2-beta.0/lib/RemoteCalibrator.min.js"></script>
 
@@ -24,7 +25,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body>
-    <embed src="form/consentform.pdf" id="consent-form-pdf" style="position:absolute; left: 15%; top: 2%;z-index: 0;display:none" width="75%" height="75%" type="application/pdf">
+    <iframe src="form/consentform.pdf" id="consent-form-pdf" height="75%" width="75%" scrolling="auto"></iframe>
     <div id="consent-form-markdown"></div>
     <div id="root"></div>
     <!-- external libraries -->
