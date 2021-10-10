@@ -252,7 +252,7 @@ const experiment = (blockCount) => {
 
   psychoJS.experimentLogger.setLevel(core.Logger.ServerLevel.EXP);
 
-  var frameDur;
+  // var frameDur;
   async function updateInfo() {
     expInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     expInfo["expName"] = expName;
@@ -261,9 +261,9 @@ const experiment = (blockCount) => {
 
     // store frame rate of monitor if we can measure it successfully
     expInfo["frameRate"] = psychoJS.window.getActualFrameRate();
-    if (typeof expInfo["frameRate"] !== "undefined")
-      frameDur = 1.0 / Math.round(expInfo["frameRate"]);
-    else frameDur = 1.0 / 60.0; // couldn't get a reliable measure so guess
+    // if (typeof expInfo["frameRate"] !== "undefined")
+    //   frameDur = 1.0 / Math.round(expInfo["frameRate"]);
+    // else frameDur = 1.0 / 60.0; // couldn't get a reliable measure so guess
 
     // add info from the URL:
     util.addInfoFromUrl(expInfo);
@@ -493,7 +493,7 @@ const experiment = (blockCount) => {
       consentClock.reset(); // clock
       frameN = -1;
       continueRoutine = true; // until we're told otherwise
-      routineTimer.add(60.000000);
+      // routineTimer.add(5.000000);
 
       consent_button_yes.setSize([0.25, 1]);
       consent_button_no.setSize([0.25, 1]);
@@ -531,11 +531,6 @@ const experiment = (blockCount) => {
         consent_form_content.setAutoDraw(true);
       }
   
-      frameRemains = 0.0 + 60.0 - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
-      if (consent_form_content.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-        consent_form_content.setAutoDraw(false);
-      }
-      
       // *consent_button_yes* updates
       if (t >= 0 && consent_button_yes.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
@@ -545,10 +540,6 @@ const experiment = (blockCount) => {
         consent_button_yes.setAutoDraw(true);
       }
   
-      frameRemains = 0 + 60.0 - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
-      if (consent_button_yes.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-        consent_button_yes.setAutoDraw(false);
-      }
       if (consent_button_yes.status === PsychoJS.Status.STARTED) {
         // check whether consent_button_yes has been pressed
         if (consent_button_yes.isClicked) {
@@ -588,10 +579,6 @@ const experiment = (blockCount) => {
         consent_button_no.setAutoDraw(true);
       }
   
-      frameRemains = 0 + 60.0 - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
-      if (consent_button_no.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-        consent_button_no.setAutoDraw(false);
-      }
       if (consent_button_no.status === PsychoJS.Status.STARTED) {
         // check whether consent_button_no has been pressed
         if (consent_button_no.isClicked) {
@@ -641,11 +628,13 @@ const experiment = (blockCount) => {
           break;
         }
       
-      // refresh the screen if continuing
-      if (continueRoutine && routineTimer.getTime() > 0) {
-        return Scheduler.Event.FLIP_REPEAT;
-      } else {
+      // check if the Routine should terminate
+      if (!continueRoutine) {
+        // end routine
         return Scheduler.Event.NEXT;
+      } else {
+        // stay on this routine
+        return Scheduler.Event.FLIP_REPEAT;
       }
     };
   }
@@ -1031,8 +1020,11 @@ const experiment = (blockCount) => {
       );
 
       clickedContinue = false;
-      document.addEventListener("click", _clickContinue);
-      document.addEventListener("touchend", _clickContinue);
+      setTimeout(() => {
+        document.addEventListener("click", _clickContinue);
+        document.addEventListener("touchend", _clickContinue);
+      }, 800)
+      
 
       _beepButton = addBeepButton(correctSynth);
 

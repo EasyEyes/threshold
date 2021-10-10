@@ -1,26 +1,23 @@
 export const showConsentForm = () => {
-    // show pdf
-    const el = document.getElementById('consent-form-pdf');
-    el.style.zIndex = 1000;
+    // show markdown
+    let el = document.getElementById('consent-form-markdown');
+    el.style.zIndex = 999999;
     el.style.display = 'block'
-  // let el = document.getElementById('consent-form-markdown');
-  // el.style.zIndex = 1000;
-  // el.style.display = 'block'
 
-  // axios.get('/form/consentform.md')
-  // .then(function (response) {
-  //   el.innerHTML = marked(response.data)
-  // })
-  // .catch(function (error) {
-  //   console.log(error)
-    
-  //   hideConsentForm()
+    axios.get('/form/consentform.md')
+    .then(function (response) {
+      el.innerHTML = marked(response.data)
+    })
+    .catch(function (error) {
+      console.log(error)
+      
+      hideConsentForm()
 
-  //   // show pdf
-  //   el = document.getElementById('consent-form-pdf');
-  //   el.style.zIndex = 1000;
-  //   el.style.display = 'block'
-  // })
+      // show pdf
+      el = document.getElementById('consent-form-pdf');
+      el.style.zIndex = 1000;
+      el.style.display = 'block'
+    })
  
   
 }
