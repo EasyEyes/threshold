@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-const debug = false;
+const debug = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -1006,6 +1006,7 @@ const experiment = (blockCount) => {
   var targetDurationSec;
   var targetMinimumPix;
   var spacingOverSizeRatio;
+  var spacingRelationToSize;
   var targetEccentricityXDeg;
   var targetEccentricityYDeg;
   var targetEccentricityXYDeg;
@@ -1106,6 +1107,7 @@ const experiment = (blockCount) => {
 
       targetMinimumPix = condition["targetMinimumPix"];
       spacingOverSizeRatio = condition["spacingOverSizeRatio"];
+      spacingRelationToSize = condition["spacingRelationToSize"] || "ratio";
 
       targetEccentricityXDeg = condition["targetEccentricityXDeg"];
       psychoJS.experiment.addData(
@@ -1121,6 +1123,8 @@ const experiment = (blockCount) => {
         targetEccentricityXDeg,
         targetEccentricityYDeg,
       ];
+      if (debug)
+        console.log("targetEccentricityXYDeg: ", targetEccentricityXYDeg);
 
       trackGazeYes = condition["trackGazeYes"] === "True";
       trackHeadYes = condition["trackHeadYes"] === "True";
@@ -1142,8 +1146,7 @@ const experiment = (blockCount) => {
       correctAns = targetCharacter.toLowerCase();
       /* -------------------------------------------------------------------------- */
 
-      var heightPx;
-      var pos1XYDeg, pos1XYPx, pos2XYDeg, pos2XYPx, pos3XYDeg, pos3XYPx;
+      var pos1XYDeg, pos1XYPx, targetEccentricityXYPx, pos3XYDeg, pos3XYPx;
       var spacingDeg, spacingPx;
 
       ////
@@ -1177,72 +1180,104 @@ const experiment = (blockCount) => {
 
       spacingDeg = Math.pow(10, level);
       psychoJS.experiment.addData("spacingDeg", spacingDeg);
-
-      if (debug)
-        console.log("targetEccentricityXYDeg: ", targetEccentricityXYDeg);
-
-      [pos1XYDeg, pos3XYDeg] = getFlankerLocations(
-        targetEccentricityXYDeg,
-        fixationXYPx,
-        spacingDirection,
-        spacingDeg
-      );
-      if (debug) console.log("flanker locations: ", [pos1XYDeg, pos3XYDeg]);
-      psychoJS.experiment.addData("flankerLocationsDeg", [
-        pos1XYDeg,
-        pos3XYDeg,
-      ]);
-
-      pos2XYDeg = targetEccentricityXYDeg;
-
-      [pos1XYPx, pos2XYPx, pos3XYPx] = XYPixOfXYDeg(
-        [pos1XYDeg, pos2XYDeg, pos3XYDeg],
-        displayOptions
-      );
-      psychoJS.experiment.addData("targetLocationsPix", pos2XYPx);
-      psychoJS.experiment.addData("flankerLocationsPix", [pos1XYPx, pos3XYPx]);
-
       spacingPx = Math.abs(
         degreesToPixels(spacingDeg, {
           pixPerCm: pixPerCm,
           viewingDistanceCm: viewingDistanceCm,
         })
       );
-      psychoJS.experiment.addData("spacingPx", spacingPx);
-      if (debug) console.log("spacingPx: ", spacingPx);
+      psychoJS.experiment.addData("spacingPix", spacingPx);
 
-      if (debug)
-        console.log(
-          "spacing/spacingOverSizeRation: ",
-          spacingPx / spacingOverSizeRatio
+      // Fixation placement does not depend on the value of "spacingRelationToSize"...
+      fixation.setPos(fixationXYPx);
+      fixation.setHeight(fixationSize);
+      // ... neither does target location...
+      [targetEccentricityXYPx] = XYPixOfXYDeg(
+        [targetEccentricityXYDeg],
+        displayOptions
+      );
+      targetEccentricityXYPx = targetEccentricityXYPx.map((x) => Math.round(x));
+      psychoJS.experiment.addData("targetLocationPix", targetEccentricityXYPx);
+      target.setPos(targetEccentricityXYPx);
+      target.setFont(targetFont);
+
+      // ...but size, and content of the target(& flankers) does.
+      psychoJS.experiment.addData(
+        "spacingRelationToSize",
+        spacingRelationToSize
+      );
+      if (spacingRelationToSize === "ratio") {
+        // Get the location of the flankers
+        [pos1XYDeg, pos3XYDeg] = getFlankerLocations(
+          targetEccentricityXYDeg,
+          fixationXYPx,
+          spacingDirection,
+          spacingDeg
         );
-      if (debug) console.log("targetMinimumPix: ", targetMinimumPix);
-      heightPx = Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix);
+        psychoJS.experiment.addData("flankerLocationsDeg", [
+          pos1XYDeg,
+          pos3XYDeg,
+        ]);
+        // Convert flanker locations to pixels
+        [pos1XYPx, pos3XYPx] = XYPixOfXYDeg(
+          [pos1XYDeg, pos3XYDeg],
+          displayOptions
+        );
+        // Round locations to the nearest pixel
+        pos1XYPx = pos1XYPx.map((x) => Math.round(x));
+        pos3XYPx = pos3XYPx.map((x) => Math.round(x));
+        // Save flanker locations to output data
+        psychoJS.experiment.addData("flankerLocationsPix", [
+          pos1XYPx,
+          pos3XYPx,
+        ]);
+        // Find the font size for the flankers & target
+        const heightPx = Math.round(
+          Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
+        );
+        psychoJS.experiment.addData("heightPix", heightPix);
+        // Display flankers, given that "spacingRelationToSize" is set to "ratio"
+        target.setText(targetCharacter);
+        target.setHeight(heightPx);
+        flanker1.setPos(pos1XYPx);
+        flanker1.setText(firstFlankerCharacter);
+        flanker1.setFont(targetFont);
+        flanker1.setHeight(heightPx);
+        flanker2.setPos(pos3XYPx);
+        flanker2.setText(secondFlankerCharacter);
+        flanker2.setFont(targetFont);
+        flanker2.setHeight(heightPx);
+      } else if (spacingRelationToSize === "typographic") {
+        // Don't display flankers if "spacingRelationToSize" is set to typographic
+        flanker1.setAutoDraw(false);
+        flanker2.setAutoDraw(false);
+        // Find the font size for the string containing the flankers & target
+        // TODO figure out what the correct value for "height" should be
+        const heightPx = Math.round(
+          Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
+        );
+        psychoJS.experiment.addData("heightPix", heightPix);
+        // Display flankers in the same string/stim as the target
+        // TODO ask denis whether there should be spaces between, or just the font spacing
+        const fixationsAndTargetString =
+          firstFlankerCharacter + targetCharacter + secondFlankerCharacter;
+        target.setText(fixationAndTargetString);
+        target.setHeight(heightPx);
+      } else if (spacingRelationToSize == "none") {
+        // TODO FUTURE implement spacingRelationToSize === "none"
+        console.error(
+          `spacingRelationToSize value "none" not yet supported. Please use "ratio" or "typographic" for the time being.`
+        );
+      } else {
+        console.error(
+          `spacingRelationToSize value ${spacingRelationToSize} not recognized. Please use "none", "ratio", or "typographic"`
+        );
+      }
 
       key_resp.keys = undefined;
       key_resp.rt = undefined;
       _key_resp_allKeys = [];
       ////
-      heightPx = Math.round(heightPx);
-      pos1XYPx = pos1XYPx.map((x) => Math.round(x));
-      pos2XYPx = pos2XYPx.map((x) => Math.round(x));
-      pos3XYPx = pos3XYPx.map((x) => Math.round(x));
-
-      fixation.setPos(fixationXYPx);
-      fixation.setHeight(fixationSize);
-
-      flanker1.setPos(pos1XYPx);
-      flanker1.setText(firstFlankerCharacter);
-      flanker1.setFont(targetFont);
-      flanker1.setHeight(heightPx);
-      target.setPos(pos2XYPx);
-      target.setText(targetCharacter);
-      target.setFont(targetFont);
-      target.setHeight(heightPx);
-      flanker2.setPos(pos3XYPx);
-      flanker2.setText(secondFlankerCharacter);
-      flanker2.setFont(targetFont);
-      flanker2.setHeight(heightPx);
 
       showAlphabet.setPos([0, 0]);
       showAlphabet.setText("");
@@ -1409,7 +1444,11 @@ const experiment = (blockCount) => {
         flanker1.tStart = t; // (not accounting for frame time here)
         flanker1.frameNStart = frameN; // exact frame index
 
-        flanker1.setAutoDraw(true);
+        if (spacingRelationToSize === "typographic") {
+          flanker1.setAutoDraw(false);
+        } else {
+          flanker1.setAutoDraw(true);
+        }
       }
 
       frameRemains =
@@ -1451,7 +1490,11 @@ const experiment = (blockCount) => {
         flanker2.tStart = t; // (not accounting for frame time here)
         flanker2.frameNStart = frameN; // exact frame index
 
-        flanker2.setAutoDraw(true);
+        if (spacingRelationToSize === "typographic") {
+          flanker2.setAutoDraw(false);
+        } else {
+          flanker2.setAutoDraw(true);
+        }
       }
 
       frameRemains =
