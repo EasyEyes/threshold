@@ -1088,6 +1088,8 @@ const experiment = (blockCount) => {
 
       block = condition["blockOrder"];
 
+      // TODO check that we are actually trying to test for "spacing", not "size"
+
       spacingDirection = condition["spacingDirection"];
       targetFont = condition["targetFont"].toLowerCase();
 
@@ -1108,6 +1110,7 @@ const experiment = (blockCount) => {
       targetMinimumPix = condition["targetMinimumPix"];
       spacingOverSizeRatio = condition["spacingOverSizeRatio"];
       spacingRelationToSize = condition["spacingRelationToSize"] || "ratio";
+      if (debug) console.log("spacingRelationToSize: ", spacingRelationToSize);
 
       targetEccentricityXDeg = condition["targetEccentricityXDeg"];
       psychoJS.experiment.addData(
@@ -1235,7 +1238,7 @@ const experiment = (blockCount) => {
         const heightPx = Math.round(
           Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
         );
-        psychoJS.experiment.addData("heightPix", heightPix);
+        psychoJS.experiment.addData("heightPix", heightPx);
         // Display flankers, given that "spacingRelationToSize" is set to "ratio"
         target.setText(targetCharacter);
         target.setHeight(heightPx);
@@ -1251,18 +1254,38 @@ const experiment = (blockCount) => {
         // Don't display flankers if "spacingRelationToSize" is set to typographic
         flanker1.setAutoDraw(false);
         flanker2.setAutoDraw(false);
-        // Find the font size for the string containing the flankers & target
-        // TODO figure out what the correct value for "height" should be
-        const heightPx = Math.round(
-          Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
-        );
-        psychoJS.experiment.addData("heightPix", heightPix);
+
         // Display flankers in the same string/stim as the target
         // TODO ask denis whether there should be spaces between, or just the font spacing
-        const fixationsAndTargetString =
+        const flankersAndTargetString =
           firstFlankerCharacter + targetCharacter + secondFlankerCharacter;
-        target.setText(fixationAndTargetString);
+        target.setText(flankersAndTargetString);
+
+        // Find the font size for the string containing the flankers & target
+        // TODO verify that desiredStringWidth is what is desired
+        /* If thresholdParameter is "spacing" then the font size of string is adjusted so that the width of the string is 3× specified spacing */
+        const usableSpace = psychoJS.window._size[0] / 2;
+        const desiredStringWidth = Math.round(
+          Math.min(spacingPx * 3, usableSpace)
+        );
+        const sizeFindingGranularity = 50;
+        let heightPx = Math.round(
+          Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
+        );
+        if (debug) console.log(`First proposed heightPx: ${heightPx}`);
         target.setHeight(heightPx);
+        while (target._boundingBox.width < desiredStringWidth) {
+          // TODO use a more efficent algorithm for honing in on an acceptable size
+          if (debug) console.log("bound box: ", target._boundingBox);
+          if (debug)
+            console.log(
+              `Box seems to be too small, at ${target._boundingBox.width}, while we're looking for ${desiredStringWidth}`
+            );
+          heightPx = heightPx + sizeFindingGranularity;
+          target.setHeight(heightPx);
+          if (debug) console.log(`New heightPx prosposed: ${heightPx}`);
+        }
+        psychoJS.experiment.addData("heightPix", heightPx);
       } else if (spacingRelationToSize == "none") {
         // TODO FUTURE implement spacingRelationToSize === "none"
         console.error(
