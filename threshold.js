@@ -43,7 +43,7 @@ var levelLeft, levelRight;
 let correctAns;
 
 // For development purposes, toggle RC off for testing speed
-const useRC = !debug;
+const useRC = false;
 const rc = RemoteCalibrator;
 rc.init();
 
