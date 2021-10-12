@@ -1,3 +1,4 @@
+import { util, visual } from "../psychojs/out/psychojs-2021.3.0.js";
 import { degreesToPixels } from "./utils.js";
 
 const debug = false;
