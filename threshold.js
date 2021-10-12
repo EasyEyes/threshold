@@ -22,6 +22,7 @@ import {
   XYPixOfXYDeg,
   degreesToPixels,
   addConditionToData,
+  spacingPixelsFromLevel,
 } from "./components/utils.js";
 
 import {
@@ -1184,30 +1185,12 @@ const experiment = (blockCount) => {
         minimumHeight: targetMinimumPix,
         fontFamily: targetFont,
         window: psychoJS.window,
+        spacingRelationToSize: spacingRelationToSize,
       };
       const [targetXYPix] = XYPixOfXYDeg(
         [targetEccentricityXYDeg],
         displayOptions
       );
-      level = await awaitMaxPresentableLevel(
-        proposedLevel,
-        targetXYPix,
-        fixationXYPx,
-        spacingDirection,
-        displayOptions
-      );
-      psychoJS.experiment.addData("levelUsed", level);
-      if (debug) console.log("New level: ", level);
-
-      spacingDeg = Math.pow(10, level);
-      psychoJS.experiment.addData("spacingDeg", spacingDeg);
-      spacingPx = Math.abs(
-        degreesToPixels(spacingDeg, {
-          pixPerCm: pixPerCm,
-          viewingDistanceCm: viewingDistanceCm,
-        })
-      );
-      psychoJS.experiment.addData("spacingPix", spacingPx);
 
       // Fixation placement does not depend on the value of "spacingRelationToSize"...
       fixation.setPos(fixationXYPx);
@@ -1228,6 +1211,26 @@ const experiment = (blockCount) => {
         spacingRelationToSize
       );
       if (spacingRelationToSize === "ratio") {
+        // Get a usable "level", ie amount of spacing
+        level = await awaitMaxPresentableLevel(
+          proposedLevel,
+          targetXYPix,
+          fixationXYPx,
+          spacingDirection,
+          displayOptions
+        );
+        psychoJS.experiment.addData("levelUsed", level);
+        if (debug) console.log("New level: ", level);
+
+        spacingDeg = Math.pow(10, level);
+        psychoJS.experiment.addData("spacingDeg", spacingDeg);
+        spacingPx = Math.abs(
+          degreesToPixels(spacingDeg, {
+            pixPerCm: pixPerCm,
+            viewingDistanceCm: viewingDistanceCm,
+          })
+        );
+        psychoJS.experiment.addData("spacingPix", spacingPx);
         // Get the location of the flankers
         [pos1XYDeg, pos3XYDeg] = getFlankerLocations(
           targetEccentricityXYDeg,
@@ -1269,23 +1272,28 @@ const experiment = (blockCount) => {
         flanker2.setFont(targetFont);
         flanker2.setHeight(heightPx);
       } else if (spacingRelationToSize === "typographic") {
-        // Don't display flankers if "spacingRelationToSize" is set to typographic
+        // Don't display flankers if "spacingRelationToSize" is set to typographic...
         flanker1.setAutoDraw(false);
         flanker2.setAutoDraw(false);
 
-        // Display flankers in the same string/stim as the target
+        // ...include the flankers in the same string/stim as the target.
         // TODO ask denis whether there should be spaces between, or just the font spacing
         const flankersAndTargetString =
           firstFlankerCharacter + targetCharacter + secondFlankerCharacter;
         target.setText(flankersAndTargetString);
 
-        // Find the font size for the string containing the flankers & target
-        const targetStimHeight = getTypographicHeight(
+        // Find the font size for the string containing the flankers & target,
+        // and the value of 'level' to which this acceptable size corresponds.
+        const [targetStimHeight, viableLevel] = getTypographicHeight(
           psychoJS.window,
-          spacingPx,
+          proposedLevel,
           target,
-          fixation
+          fixation,
+          displayOptions
         );
+        level = viableLevel;
+        psychoJS.experiment.addData("levelUsed", level);
+
         target.setHeight(targetStimHeight);
         psychoJS.experiment.addData("heightPix", targetStimHeight);
       } else if (spacingRelationToSize == "none") {

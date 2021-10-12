@@ -28,7 +28,8 @@ export const showCursor = () => {
 };
 
 /**
- * Convert a number of visual degrees to pixels VERIFY
+ * Convert a (magnitude) value of visual degrees to pixels
+ * @todo add tests
  * @param {Number} degrees Scalar, in degrees
  * @param {Object} displayOptions Parameters about the stimulus presentation
  * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
@@ -36,12 +37,34 @@ export const showCursor = () => {
  * @returns {Number}
  */
 export const degreesToPixels = (degrees, displayOptions) => {
-  const radians = degrees * (Math.PI / 180);
+  if (Math.abs(degrees) > 90)
+    throw new Error(
+      "To large of an angle (ie > 90 deg) specified for this method of transfering between angles and pixels."
+    );
+  const radians = Math.abs(degrees) * (Math.PI / 180);
   const pixels =
     displayOptions.pixPerCm *
     displayOptions.viewingDistanceCm *
     Math.tan(radians);
   return pixels;
+};
+/**
+ * Convert a (magnitude) of visual degrees to pixels
+ * @todo add tests
+ * @param {Number} pixels Scalar, in pixels
+ * @param {Object} displayOptions Parameters about the stimulus presentation
+ * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
+ * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
+ * @returns {Number}
+ */
+export const pixelsToDegrees = (pixels, displayOptions) => {
+  const radians = Math.atan(
+    Math.abs(pixels) /
+      displayOptions.pixPerCm /
+      displayOptions.viewingDistanceCm
+  );
+  const degrees = radians / (Math.PI / 180);
+  return degrees;
 };
 
 /**
@@ -96,4 +119,42 @@ export const addConditionToData = (experiment, condition, exclude = []) => {
   for (const [key, value] of Object.entries(condition)) {
     if (!exclude.includes(key)) experiment.addData(key, value);
   }
+};
+
+/**
+ *
+ * @todo add tests
+ * @param {*} level
+ * @param {*} pixPerCm
+ * @param {*} viewingDistanceCm
+ * @returns
+ */
+export const spacingPixelsFromLevel = (level, pixPerCm, viewingDistanceCm) => {
+  const spacingDeg = Math.pow(10, level);
+  const spacingPx = degreesToPixels(spacingDeg, {
+    pixPerCm: pixPerCm,
+    viewingDistanceCm: viewingDistanceCm,
+  });
+  return spacingPx;
+};
+
+/**
+ *
+ * @todo add tests
+ * @param {*} spacingPx
+ * @param {*} pixPerCm
+ * @param {*} viewingDistanceCm
+ * @returns
+ */
+export const levelFromSpacingPixels = (
+  spacingPx,
+  pixPerCm,
+  viewingDistanceCm
+) => {
+  const spacingDeg = pixelsToDegrees(spacingPx, {
+    pixPerCm: pixPerCm,
+    viewingDistanceCm: viewingDistanceCm,
+  });
+  const level = Math.log10(spacingDeg);
+  return level;
 };

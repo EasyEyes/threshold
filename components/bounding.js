@@ -1,5 +1,10 @@
 import { util, visual } from "../psychojs/out/psychojs-2021.3.0.js";
-import { degreesToPixels } from "./utils.js";
+import {
+  degreesToPixels,
+  pixelsToDegrees,
+  spacingPixelsFromLevel,
+  levelFromSpacingPixels,
+} from "./utils.js";
 
 const debug = false;
 
@@ -10,40 +15,60 @@ const debug = false;
  * @param {Number} spacingPx Desired spacing, ie intensity/threshold/etc from QUEST, in pixels
  * @param {PsychoJS.visual.textStim} targetStimulus The target, and flankers, to be shown
  * @param {PsychoJS.visual.textStim} fixationStimulus The fixation to be shown
- * @returns {Number} Value to be used as the height for targetStimulus
+ * @param {Object} displayOptions
+ * @param {Number} displayOptions.pixPerCm Pixels per centimeter of participant's display
+ * @param {Number} displayOptions.viewingDistanceCm Participant's viewing distance in cm
+ * @returns {[Number, Number]} Value to be used as the height for targetStimulus, value to be used as the level this trial
  */
 export const getTypographicHeight = (
   window,
-  spacingPx,
+  proposedLevel,
   targetStimulus,
-  fixationStimulus
+  fixationStimulus,
+  displayOptions
 ) => {
-  //   const fixationWidth = fixationStimulus._boundingBox.width;
   const fixationWidth = fixationStimulus.getBoundingBox(true).width;
-  console.log(`Fixtation width: ${fixationWidth}`);
-  // TODO generalize to other fixation locations
-  const usableSpace = window._size[0] / 2 - fixationWidth;
+  // TODO generalize to other fixation locations, ie not just [0,0]
+  const usableSpace = Math.round(window._size[0] / 2 - fixationWidth);
+  const proposedSpacingPx = spacingPixelsFromLevel(
+    proposedLevel,
+    displayOptions.pixPerCm,
+    displayOptions.viewingDistanceCm
+  );
 
   // TODO verify that desiredStringWidth is what is desired
   /* From Denis:
         If thresholdParameter is "spacing" then the font size of string is 
         adjusted so that the width of the string is 3× specified spacing */
-  console.log("SpacingPx*3: ", spacingPx * 3, "usuableSpace: ", usableSpace);
-  const desiredStringWidth = Math.round(Math.min(spacingPx * 3, usableSpace));
+  const proposedSpacingIsTooLarge = proposedSpacingPx * 3 > usableSpace;
+  const desiredStringWidth = proposedSpacingIsTooLarge
+    ? usableSpace
+    : Math.round(proposedSpacingPx * 3);
+  const level = proposedLevel;
+  if (proposedSpacingIsTooLarge) {
+    console.log("PROPOSED SPACING IS TOO LARGE");
+    const constrainedSpacingPx = desiredStringWidth / 3;
+    let level = levelFromSpacingPixels(
+      constrainedSpacingPx,
+      displayOptions.pixPerCm,
+      displayOptions.viewingDistanceCm
+    );
+  } else {
+    console.log("PROPOSED SPACING IS NOT TOO LARGE");
+  }
 
   const testHeight = 10;
   targetStimulus.setHeight(testHeight);
   const testWidth = targetStimulus.getBoundingBox(true).width;
-  //   const testWidth = targetStimulus._boundingBox.width;
-  const widthOverHeightRatio = testWidth / testHeight;
 
+  const widthOverHeightRatio = testWidth / testHeight;
   const desiredHeight = desiredStringWidth / widthOverHeightRatio;
-  return desiredHeight;
+  return [desiredHeight, level];
 };
 
 /**
- *
- * Promise-based equivalent to `getMaxPresentableLevel`
+ * If the proposed `level` would cause the stimuli to the be presented off screen,
+ * get the largest value for `level` which will actually fit on screen.
  * @param {Number} proposedLevel Level to be tested, as provided by QUEST
  * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
  * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
