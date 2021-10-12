@@ -77,12 +77,11 @@ Papa.parse("conditions/blockCount.csv", {
               },
             },
           ],
-          "#rc-panel",
+          "body",
           {},
           () => {
             removeSwitch();
             rc.removePanel();
-            document.body.removeChild(document.querySelector("#rc-panel"));
             // ! Start actual experiment
             experiment(blockCount);
           }
