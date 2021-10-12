@@ -26,3 +26,74 @@ export const hideCursor = () => {
 export const showCursor = () => {
   document.body.classList.remove("hide-cursor");
 };
+
+/**
+ * Convert a number of visual degrees to pixels VERIFY
+ * @param {Number} degrees Scalar, in degrees
+ * @param {Object} displayOptions Parameters about the stimulus presentation
+ * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
+ * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
+ * @returns {Number}
+ */
+export const degreesToPixels = (degrees, displayOptions) => {
+  const radians = degrees * (Math.PI / 180);
+  const pixels =
+    displayOptions.pixPerCm *
+    displayOptions.viewingDistanceCm *
+    Math.tan(radians);
+  return pixels;
+};
+
+/**
+ * Translation of MATLAB function of the same name
+ * by Prof Denis Pelli, XYPixOfXYDeg.m
+ * @param {Array} xyDeg List of [x,y] pairs, representing points x degrees right, and y degrees up, of fixation
+ * @param {Object} displayOptions Parameters about the stimulus presentation
+ * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
+ * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
+ * @param {Object} displayOptions.nearPointXYDeg Near-point on screen, in degrees relative to fixation(?)
+ * @param {Number} displayOptions.nearPointXYDeg.x Degrees along x-axis of near-point from fixation
+ * @param {Number} displayOptions.nearPointXYDeg.y Degrees along y-axis of near-point from fixation
+ * @param {Object} displayOptions.nearPointXYPix Near-point on screen, in pixels relative to origin(?)
+ * @param {Number} displayOptions.nearPointXYPix.x Pixels along x-axis of near-point from origin
+ * @param {Number} displayOptions.nearPointXYPix.y Pixels along y-axis of near-point from origin
+ * @returns {Number[][]} Array of length=2 arrays of numbers, representing the same points in Pixel space
+ */
+export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
+  if (xyDeg.length == 0) {
+    return;
+  } // Return if no points to transform
+  // TODO verify displayOptions has the correct parameters
+  const xyPix = [];
+  xyDeg.forEach((position) => {
+    position[0] = position[0] - displayOptions.nearPointXYDeg.x;
+    position[1] = position[1] - displayOptions.nearPointXYDeg.y;
+    const rDeg = Math.sqrt(position[0] ** 2 + position[1] ** 2);
+    const rPix = degreesToPixels(rDeg, displayOptions);
+    let pixelPosition = [];
+    if (rDeg > 0) {
+      pixelPosition = [
+        (position[0] * rPix) / rDeg,
+        (position[1] * rPix) / rDeg,
+      ];
+    } else {
+      pixelPosition = [0, 0];
+    }
+    pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
+    pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.x;
+    xyPix.push(pixelPosition);
+  });
+  return xyPix;
+};
+
+/**
+ * Add all the information about this trial to the data, for posterity
+ * @param {PsychoJS.experiment} experiment Experiment object currently running
+ * @param {Object} condition Parameters from the current staircase, as specified by the experimenter in experiment.csv
+ * @param {Array} [exclude=[]] List of parameter names which should NOT be added to data
+ */
+export const addConditionToData = (experiment, condition, exclude = []) => {
+  for (const [key, value] of Object.entries(condition)) {
+    if (!exclude.includes(key)) experiment.addData(key, value);
+  }
+};
