@@ -18,7 +18,7 @@ spacingDirection,radial,radial,radial,radial
 spacingOverSizeRatio,1.4,1.4,1.4,1.4
 spacingRelationToSize,typographic,typographic,typographic,typographic
 targetAlphabet,DHKNORSVZ,DHKNORSVZ,acenorsuvxz,acenorsuvxz
-targetDurationSec,0.15,0.15,0.15,0.15
+targetDurationSec,5.15,5.15,5.15,5.15
 targetEccentricityXDeg,10,-10,10,-10
 targetEccentricityYDeg,0,0,0,0
 targetFont,Courier New,Courier New,Verdana,Verdana
