@@ -17,6 +17,8 @@ import * as jsQUEST from "./lib/jsQUEST.module.js";
 
 import { hideCursor, showCursor, shuffle } from "./components/utils.js";
 
+import { buildSwitch, removeSwitch } from "./components/i18n.js";
+
 import {
   addBeepButton,
   instructionsText,
@@ -61,6 +63,7 @@ Papa.parse("conditions/blockCount.csv", {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
       if (useRC) {
+        buildSwitch(rc);
         rc.panel(
           [
             {
@@ -74,9 +77,10 @@ Papa.parse("conditions/blockCount.csv", {
               },
             },
           ],
-          "body",
+          "#rc-panel",
           {},
           () => {
+            removeSwitch();
             rc.removePanel();
             // ! Start actual experiment
             experiment(blockCount);
