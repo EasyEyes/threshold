@@ -2,7 +2,7 @@ export const instructionsText = {
   initial: (participantName = null) => {
     return `Hello${
       participantName === null ? "" : ` ${participantName}`
-    }. Please make sure this computer's sound is enabled by clicking the Beep button.\n\n`;
+    }. Please make sure this computer's sound is enabled by clicking the Beep button. By the way, you'll hear a beep like that every time you get a trial right.\n\n`;
   },
   initialByThresholdParameter: {
     spacing: (responseType = 2, trialsThisBlock = 0) => {
@@ -43,11 +43,11 @@ export const instructionsText = {
       spacing: (responseType = 2) => {
         switch (responseType) {
           case 0:
-            return `While looking directly at the crosshair, please press the SPACE bar.`;
+            return `Ready? While looking directly at the crosshair, please press the SPACE bar.`;
           case 1:
-            return `While looking directly at the crosshair, please click on the crosshair.`;
+            return `Ready? While looking directly at the crosshair, please click on the crosshair.`;
           default:
-            return `While looking directly at the crosshair, please press the SPACE bar or click on the crosshair.`;
+            return `Ready? While looking directly at the crosshair, please press the SPACE bar or click on the crosshair.`;
         }
       },
     },
