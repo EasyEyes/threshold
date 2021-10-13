@@ -299,35 +299,35 @@ const experiment = (blockCount) => {
     consentClock = new util.Clock();
     consent_form_content = new visual.TextStim({
       win: psychoJS.window,
-      name: 'consent_form_content',
+      name: "consent_form_content",
       text: "I agree to participate in this study (indicate by clicking one option).",
-      font: 'Open Sans',
-      units: undefined, 
-      pos: [0, -0.35], 
-      height: 0.03,  
-      wrapWidth: undefined, 
+      font: "Open Sans",
+      units: undefined,
+      pos: [0, -0.35],
+      height: 0.03,
+      wrapWidth: undefined,
       ori: 0.0,
-      color: new util.Color('black'),  
+      color: new util.Color("black"),
       opacity: undefined,
-      depth: 0.0 
+      depth: 0.0,
     });
     consent_button_yes = new visual.ButtonStim({
       win: psychoJS.window,
-      name: 'consent_button_yes',
-      text: 'Yes',
-      pos: [-0.17, -0.41], 
+      name: "consent_button_yes",
+      text: "Yes.",
+      pos: [0.0, -0.41],
       letterHeight: 0.02,
-      size: null
+      size: null,
     });
     consent_button_yes.clock = new util.Clock();
-    
+
     consent_button_no = new visual.ButtonStim({
       win: psychoJS.window,
-      name: 'consent_button_no',
-      text: 'No. (You will leave the study without receiving payment)',
-      pos: [0, -0.46], 
-      letterHeight: 0.02, 
-      size: [5,2]
+      name: "consent_button_no",
+      text: "No. (You will leave the study without receiving payment.)",
+      pos: [0.0, -0.46],
+      letterHeight: 0.02,
+      size: [5, 2],
     });
     consent_button_no.clock = new util.Clock();
 
@@ -493,7 +493,7 @@ const experiment = (blockCount) => {
   function consentRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-      
+
       //------Prepare to start Routine 'consent'-------
       t = 0;
       consentClock.reset(); // clock
@@ -511,13 +511,13 @@ const experiment = (blockCount) => {
       consentComponents.push(consent_button_yes);
       consentComponents.push(consent_button_no);
 
-      showConsentForm()
-      
+      showConsentForm();
+
       for (const thisComponent of consentComponents)
-        if ('status' in thisComponent)
+        if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
       return Scheduler.Event.NEXT;
-    }
+    };
   }
 
   function consentRoutineEachFrame() {
@@ -525,27 +525,30 @@ const experiment = (blockCount) => {
       //------Loop for each frame of Routine 'consent'-------
       // get current time
       t = consentClock.getTime();
-      frameN = frameN + 1;// number of completed frames (so 0 is the first frame)
+      frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
       // update/draw components on each frame
 
       // *consent_form_content* updates
-      if (t >= 0.0 && consent_form_content.status === PsychoJS.Status.NOT_STARTED) {
+      if (
+        t >= 0.0 &&
+        consent_form_content.status === PsychoJS.Status.NOT_STARTED
+      ) {
         // keep track of start time/frame for later
-        consent_form_content.tStart = t;  // (not accounting for frame time here)
-        consent_form_content.frameNStart = frameN;  // exact frame index
-        
+        consent_form_content.tStart = t; // (not accounting for frame time here)
+        consent_form_content.frameNStart = frameN; // exact frame index
+
         consent_form_content.setAutoDraw(true);
       }
-  
+
       // *consent_button_yes* updates
       if (t >= 0 && consent_button_yes.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
-        consent_button_yes.tStart = t;  // (not accounting for frame time here)
-        consent_button_yes.frameNStart = frameN;  // exact frame index
-        
+        consent_button_yes.tStart = t; // (not accounting for frame time here)
+        consent_button_yes.frameNStart = frameN; // exact frame index
+
         consent_button_yes.setAutoDraw(true);
       }
-  
+
       if (consent_button_yes.status === PsychoJS.Status.STARTED) {
         // check whether consent_button_yes has been pressed
         if (consent_button_yes.isClicked) {
@@ -553,10 +556,14 @@ const experiment = (blockCount) => {
             // store time of first click
             consent_button_yes.timesOn.push(consent_button_yes.clock.getTime());
             // store time clicked until
-            consent_button_yes.timesOff.push(consent_button_yes.clock.getTime());
+            consent_button_yes.timesOff.push(
+              consent_button_yes.clock.getTime()
+            );
           } else {
             // update time clicked until;
-            consent_button_yes.timesOff[consent_button_yes.timesOff.length - 1] = consent_button_yes.clock.getTime();
+            consent_button_yes.timesOff[
+              consent_button_yes.timesOff.length - 1
+            ] = consent_button_yes.clock.getTime();
           }
           if (!consent_button_yes.wasClicked) {
             // end routine when consent_button_yes is clicked
@@ -567,7 +574,7 @@ const experiment = (blockCount) => {
           consent_button_yes.wasClicked = true;
         } else {
           // if consent_button_yes is clicked next frame, it is a new click
-          consent_button_yes.wasClicked = false
+          consent_button_yes.wasClicked = false;
         }
       } else {
         // keep clock at 0 if consent_button_yes hasn't started / has finished
@@ -575,16 +582,16 @@ const experiment = (blockCount) => {
         // if consent_button_yes is clicked next frame, it is a new click
         consent_button_yes.wasClicked = false;
       }
-      
+
       // *consent_button_no* updates
       if (t >= 0 && consent_button_no.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
-        consent_button_no.tStart = t;  // (not accounting for frame time here)
-        consent_button_no.frameNStart = frameN;  // exact frame index
-        
+        consent_button_no.tStart = t; // (not accounting for frame time here)
+        consent_button_no.frameNStart = frameN; // exact frame index
+
         consent_button_no.setAutoDraw(true);
       }
-  
+
       if (consent_button_no.status === PsychoJS.Status.STARTED) {
         // check whether consent_button_no has been pressed
         if (consent_button_no.isClicked) {
@@ -595,21 +602,22 @@ const experiment = (blockCount) => {
             consent_button_no.timesOff.push(consent_button_no.clock.getTime());
           } else {
             // update time clicked until;
-            consent_button_no.timesOff[consent_button_no.timesOff.length - 1] = consent_button_no.clock.getTime();
+            consent_button_no.timesOff[consent_button_no.timesOff.length - 1] =
+              consent_button_no.clock.getTime();
           }
           if (!consent_button_no.wasClicked) {
             // end routine when consent_button_no is clicked
             continueRoutine = false;
 
             // quite experiment
-            quitPsychoJS()
+            quitPsychoJS();
             null;
           }
           // if consent_button_no is still clicked next frame, it is not a new click
           consent_button_no.wasClicked = true;
         } else {
           // if consent_button_no is clicked next frame, it is a new click
-          consent_button_no.wasClicked = false
+          consent_button_no.wasClicked = false;
         }
       } else {
         // keep clock at 0 if consent_button_no hasn't started / has finished
@@ -618,22 +626,29 @@ const experiment = (blockCount) => {
         consent_button_no.wasClicked = false;
       }
       // check for quit (typically the Esc key)
-      if (psychoJS.experiment.experimentEnded || psychoJS.eventManager.getKeys({keyList:['escape']}).length > 0) {
-        return quitPsychoJS('The [Escape] key was pressed. Goodbye!', false);
+      if (
+        psychoJS.experiment.experimentEnded ||
+        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+      ) {
+        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
       }
-      
+
       // check if the Routine should terminate
-      if (!continueRoutine) {  // a component has requested a forced-end of Routine
+      if (!continueRoutine) {
+        // a component has requested a forced-end of Routine
         return Scheduler.Event.NEXT;
       }
-      
-      continueRoutine = false;  // reverts to True if at least one component still running
+
+      continueRoutine = false; // reverts to True if at least one component still running
       for (const thisComponent of consentComponents)
-        if ('status' in thisComponent && thisComponent.status !== PsychoJS.Status.FINISHED) {
+        if (
+          "status" in thisComponent &&
+          thisComponent.status !== PsychoJS.Status.FINISHED
+        ) {
           continueRoutine = true;
           break;
         }
-      
+
       // check if the Routine should terminate
       if (!continueRoutine) {
         // end routine
@@ -644,17 +659,16 @@ const experiment = (blockCount) => {
       }
     };
   }
-  
-  
+
   function consentRoutineEnd() {
     return async function () {
       //------Ending Routine 'consent'-------
       for (const thisComponent of consentComponents) {
-        if (typeof thisComponent.setAutoDraw === 'function') {
+        if (typeof thisComponent.setAutoDraw === "function") {
           thisComponent.setAutoDraw(false);
         }
       }
-      hideConsentForm()
+      hideConsentForm();
       return Scheduler.Event.NEXT;
     };
   }
@@ -1029,8 +1043,7 @@ const experiment = (blockCount) => {
       setTimeout(() => {
         document.addEventListener("click", _clickContinue);
         document.addEventListener("touchend", _clickContinue);
-      }, 800)
-      
+      }, 800);
 
       _beepButton = addBeepButton(correctSynth);
 
