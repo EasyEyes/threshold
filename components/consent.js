@@ -1,10 +1,10 @@
 export const showConsentForm = () => {
     // show markdown
-    let el = document.getElementById('consent-form-markdown');
+    let el = document.getElementById('consent-form-pdf');
     el.style.zIndex = 999999;
     el.style.display = 'block'
 
-    axios.get('/form/consentform.md')
+    axios.get('/form/consentform.pdf')
     .then(function (response) {
       el.innerHTML = marked(response.data)
     })
@@ -14,7 +14,7 @@ export const showConsentForm = () => {
       hideConsentForm()
 
       // show pdf
-      el = document.getElementById('consent-form-pdf');
+      el = document.getElementById('consent-form-markdown');
       el.style.zIndex = 999999;
       el.style.display = 'block'
     })
