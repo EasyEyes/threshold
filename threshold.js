@@ -102,6 +102,7 @@ Papa.parse("conditions/blockCount.csv", {
         );
       } else {
         // NO RC
+        document.body.removeChild(document.querySelector("#rc-panel"));
         experiment(blockCount);
       }
     });
