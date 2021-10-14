@@ -1155,8 +1155,6 @@ const experiment = (blockCount) => {
       flanker1.setAutoDraw(true);
       flanker2.setAutoDraw(true);
 
-      _beepButton = addBeepButton(correctSynth);
-
       psychoJS.eventManager.clearKeys();
 
       return Scheduler.Event.NEXT;
@@ -1174,8 +1172,6 @@ const experiment = (blockCount) => {
 
       document.removeEventListener("click", _clickContinue);
       document.removeEventListener("touchend", _clickContinue);
-
-      removeBeepButton(_beepButton);
 
       target.setAutoDraw(false);
       flanker1.setAutoDraw(false);
