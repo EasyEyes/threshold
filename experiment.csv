@@ -1,15 +1,15 @@
-block,1,1,1,1,2,2
-conditionName,printLetters,printString,scriptLetters,scriptString,arabicLetters,arabicString
+block,1,1,2,2,3,3
+conditionName,printLetters,printString,scriptLetters,scriptString,koreanLetters,koreanString
 conditionTrials,3,3,3,3,3,3
 showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 spacingDirection,radial,radial,radial,radial,radial,radial
 spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4,1.4
-spacingRelationToSize,ratio,typographic,ratio,typographic,ratio,typographic
-targetAlphabet,DHKNORSVZ,DHKNORSVZ,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ابتثجحخدذرزسشصضطظعغفقكلمنهوي,ابتثجحخدذرزسشصضطظعغفقكلمنهوي
-targetDurationSec,1,1,1,1,1,1
+spacingRelationToSize,typographic,typographic,ratio,typographic,ratio,typographic
+targetAlphabet,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,________________________________________,________________________________________
+targetDurationSec,0.2,0.2,0.2,0.2,0.2,0.2
 targetEccentricityXDeg,-10,10,-10,10,-10,10
 targetEccentricityYDeg,0,0,0,0,0,0
-targetFont,Sloan,Sloan,Douglass Pen,Douglass Pen,IBMPlexSansArabic,IBMPlexSansArabic
+targetFont,Roboto Mono,P22 Aragon,Douglass Pen,Douglass Pen,Noto Serif KR,Noto Serif KR
 targetMinimumPix,8,8,8,8,8,8
 targetTask,identify,identify,identify,identify,identify,identify
 thresholdBeta,2.3,2.3,2.3,2.3,2.3,2.3
