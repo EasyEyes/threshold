@@ -5,7 +5,7 @@ showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 spacingDirection,radial,radial,radial,radial,radial,radial
 spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4,1.4
 spacingRelationToSize,typographic,typographic,ratio,typographic,ratio,typographic
-targetAlphabet,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,________________________________________,________________________________________
+targetAlphabet,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ,ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ
 targetDurationSec,0.2,0.2,0.2,0.2,0.2,0.2
 targetEccentricityXDeg,-10,10,-10,10,-10,10
 targetEccentricityYDeg,0,0,0,0,0,0
