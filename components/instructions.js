@@ -39,7 +39,7 @@ export const instructionsText = {
     }
   },
   edu: (responseType = 2) => {
-    let t = `On each trial, while you look at the crosshair, three random letters will appear briefly in the corner of your eye. Let’s try it now. While you look at the crosshair, without moving your eyes, try to identify the middle letter.\n\n\n\n\n\n\n\n\n\nIt’s an R. This display is static, so it would be easy to move your eye to the letter and identify it. In a real trial the letters will be brief, so you won't have time to move your eyes.`;
+    let t = `On each trial, while you look at the crosshair, three random letters will appear briefly in the corner of your eye. Let’s try it now. While you look at the crosshair, without moving your eyes, try to identify the middle letter.`;
     switch (responseType) {
       case 0:
         return t + `To continue, please hit RETURN.`;
@@ -48,6 +48,9 @@ export const instructionsText = {
       default:
         return t + `To continue, please hit RETURN or click anywhere.`;
     }
+  },
+  eduBelow: () => {
+    return `It’s an R. This display is static, so it would be easy to move your eye to the letter and identify it. In a real trial the letters will be brief, so you won't have time to move your eyes.`;
   },
   trial: {
     fixate: {

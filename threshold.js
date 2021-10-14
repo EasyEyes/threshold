@@ -316,6 +316,7 @@ const experiment = (blockCount) => {
   var trialClock;
   // var targetBoundingPoly; // Target Bounding Box
   var instructions;
+  var instructions2;
   var key_resp;
   var fixation; ////
   var flanker1;
@@ -498,6 +499,23 @@ const experiment = (blockCount) => {
       depth: -12.0,
       alignHoriz: "left",
       alignVert: "top",
+    });
+
+    instructions2 = new visual.TextStim({
+      win: psychoJS.window,
+      name: "instructions2",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
+      height: 32.0,
+      wrapWidth: window.innerWidth * 0.8,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -12.0,
+      alignHoriz: "left",
+      alignVert: "bottom",
     });
 
     // Create some handy timers
@@ -1126,6 +1144,14 @@ const experiment = (blockCount) => {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
       _instructionSetup(instructionsText.edu(responseType));
+
+      instructions2.setText(instructionsText.eduBelow());
+      instructions2.setWrapWidth(window.innerWidth * 0.8);
+      instructions2.setPos([
+        -window.innerWidth * 0.4,
+        -window.innerHeight * 0.4,
+      ]);
+      instructions2.setAutoDraw(true);
 
       clickedContinue = false;
       setTimeout(() => {
