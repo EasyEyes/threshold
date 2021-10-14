@@ -146,6 +146,6 @@ dmypy.json
 /reference
 
 # Store fonts that you want to use locally
-/fonts
+# /fonts
 
 scratch.js

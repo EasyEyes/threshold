@@ -25,6 +25,8 @@ import {
   spacingPixelsFromLevel,
 } from "./components/utils.js";
 
+import { buildSwitch, removeSwitch } from "./components/i18n.js";
+
 import {
   addBeepButton,
   instructionsText,
@@ -65,7 +67,7 @@ rc.init();
 let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
-const fontsRequired = new Set();
+const fontsRequired = {};
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -75,6 +77,7 @@ Papa.parse("conditions/blockCount.csv", {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
       if (useRC) {
+        buildSwitch(rc);
         rc.panel(
           [
             {
@@ -88,16 +91,19 @@ Papa.parse("conditions/blockCount.csv", {
               },
             },
           ],
-          "body",
+          "#rc-panel",
           {},
           () => {
+            removeSwitch();
             rc.removePanel();
+            document.body.removeChild(document.querySelector("#rc-panel"));
             // ! Start actual experiment
             experiment(blockCount);
           }
         );
       } else {
         // NO RC
+        document.body.removeChild(document.querySelector("#rc-panel"));
         experiment(blockCount);
       }
     });
@@ -123,31 +129,40 @@ const loadBlockFiles = (count, callback) => {
       Object.values(results.data).forEach((row) => {
         let fontFamily = row["targetFont"];
         let fontTestString = "12px " + fontFamily;
-        let fontPath = "fonts/" + fontFamily + ".woff";
+        let fontPath = "fonts/" + fontFamily + ".woff2";
         if (debug) console.log("fontTestString: ", fontTestString);
+        fontsRequired[fontFamily] = fontPath;
 
-        let response = fetch(fontPath).then((response) => {
-          if (response.ok) {
-            fontsRequired.add(row["targetFont"]);
-          } else {
-            console.log(
-              "Does the browser consider this font supported?",
-              document.fonts.check(fontTestString)
-            );
-            console.log(
-              "Uh oh, unable to find the font file for: " +
-                fontFamily +
-                "\n" +
-                "If this font is already supported by the browser then it should display correctly. " +
-                "\n" +
-                "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
-                "\n" +
-                "Please verify for yourself that " +
-                fontFamily +
-                " is being correctly represented in your experiment."
-            );
-          }
-        });
+        // let response = fetch(fontPath).then((response) => {
+        //   if (response.ok) {
+        //     // let f = new FontFace(fontFamily, `url(${response.url})`);
+        //     // f.load()
+        //     //   .then((loadedFontFace) => {
+        //     //     document.fonts.add(loadedFontFace);
+        //     //   })
+        //     //   .catch((err) => {
+        //     //     console.error(err);
+        //     //   });
+
+        //   } else {
+        //     console.log(
+        //       "Does the browser consider this font supported?",
+        //       document.fonts.check(fontTestString)
+        //     );
+        //     console.log(
+        //       "Uh oh, unable to find the font file for: " +
+        //         fontFamily +
+        //         "\n" +
+        //         "If this font is already supported by the browser then it should display correctly. " +
+        //         "\n" +
+        //         "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
+        //         "\n" +
+        //         "Please verify for yourself that " +
+        //         fontFamily +
+        //         " is being correctly represented in your experiment."
+        //     );
+        //   }
+        // });
       });
 
       loadBlockFiles(count - 1, callback);
@@ -186,9 +201,10 @@ const experiment = (blockCount) => {
   }
   if (debug) console.log("fontsRequired: ", fontsRequired);
 
-  fontsRequired.forEach((fontFamily) => {
-    _resources.push({ name: fontFamily, path: fontPath });
-  });
+  for (let i in fontsRequired) {
+    if (debug) console.log(i, fontsRequired[i]);
+    _resources.push({ name: i, path: fontsRequired[i] });
+  }
 
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
@@ -1339,12 +1355,12 @@ const experiment = (blockCount) => {
 
       fixationXYPx = [0, 0];
 
-      block = condition["blockOrder"];
+      block = condition["block"];
 
       // TODO check that we are actually trying to test for "spacing", not "size"
 
       spacingDirection = condition["spacingDirection"];
-      targetFont = condition["targetFont"].toLowerCase();
+      targetFont = condition["targetFont"];
 
       targetAlphabet = String(condition["targetAlphabet"]).split("");
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");

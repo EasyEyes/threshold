@@ -1,4 +1,5 @@
 ## New York University
+
 ### A private university in the public service
 
 # Informed Consent Form for IRB-FY2016-404 for Remote Testing
@@ -8,7 +9,7 @@ learn more about how we perceive things in our everyday life. The research is be
 Denis Pelli who is the principal investigator, as part of faculty research, and by Maria Pombo as part of her
 training.
 If you agree to be in this study, you may be asked to: read, perceive, and/or make judgments about various
-things such as text or symbols hidden in clutter. Your participation will take about ____minutes. You will be
+things such as text or symbols hidden in clutter. Your participation will take about \_\_\_\_minutes. You will be
 paid $15 per hour for completing the online survey; if you withdraw before the end of the study, no payment
 will be given.
 There are no known risks associated with your participation in this research beyond those of everyday life.

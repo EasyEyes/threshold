@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="user-scalable=no" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <title>EasyEyes Threshold [Built with PsychoJS]</title>
     <!-- styles -->
     <link
@@ -17,15 +17,23 @@
     <link rel="stylesheet" href="./css/consent.css" />
 
     <!-- Remote Calibrator -->
-    <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.3.0-beta.6/lib/RemoteCalibrator.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.3.0-beta.8/lib/RemoteCalibrator.min.js"></script>
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Markdown parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body>
-    <iframe src="form/consentform.pdf" id="consent-form-pdf" height="75%" width="75%" scrolling="auto"></iframe>
+    <iframe
+      src="form/consentform.pdf"
+      id="consent-form-pdf"
+      height="75%"
+      width="75%"
+      scrolling="auto"
+    ></iframe>
     <div id="consent-form-markdown"></div>
+    <div id="rc-language"></div>
+    <div id="rc-panel"></div>
     <div id="root"></div>
     <!-- external libraries -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>

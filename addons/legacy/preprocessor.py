@@ -9,9 +9,9 @@ if len(sys.argv) > 1:
 
 # Transpose
 # https://stackoverflow.com/a/58267676/11069914
-with open(fileName, encoding='utf-8') as f, open('t_' + fileName,
+with open(fileName, encoding='utf-8-sig') as f, open('t_' + fileName,
                                                  'w',
-                                                 encoding='utf-8') as fw:
+                                                 encoding='utf-8-sig') as fw:
     writer(fw, delimiter=',').writerows(zip(*reader(f, delimiter=',')))
 
 # Make output directory
@@ -43,14 +43,14 @@ if 'thresholdGuessLogSd' in df_keys:
 
 # Export separate files
 
-dataBlockRange = df['blockOrder'].unique()
+dataBlockRange = df['block'].unique()
 dataBlockRange = dataBlockRange.tolist()
 
 blockCounts = {'block': []}
 
 for i, value in enumerate(dataBlockRange):
     blockCounts['block'].append(i)
-    df[df['blockOrder'] == value].to_csv('./conditions/block_' + str(value) +
+    df[df['block'] == value].to_csv('./conditions/block_' + str(value) +
                                          '.csv',
                                          index=False)
 
