@@ -103,6 +103,7 @@ Papa.parse("conditions/blockCount.csv", {
         );
       } else {
         // NO RC
+        document.body.removeChild(document.querySelector("#rc-panel"));
         experiment(blockCount);
       }
     });
@@ -1354,7 +1355,7 @@ const experiment = (blockCount) => {
 
       fixationXYPx = [0, 0];
 
-      block = condition["blockOrder"];
+      block = condition["block"];
 
       // TODO check that we are actually trying to test for "spacing", not "size"
 
