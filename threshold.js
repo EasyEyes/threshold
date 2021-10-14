@@ -1194,6 +1194,7 @@ const experiment = (blockCount) => {
   function eduInstructionRoutineEnd() {
     return async function () {
       instructions.setAutoDraw(false);
+      instructions2.setAutoDraw(false);
       routineTimer.reset();
 
       document.removeEventListener("click", _clickContinue);
