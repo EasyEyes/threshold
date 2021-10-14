@@ -5,7 +5,7 @@ export const showConsentForm = () => {
   el.style.display = "block";
 
   axios
-    .get("/form/consentform.pdf")
+    .get("/forms/consent-form.pdf")
     .then(function (response) {
       el.innerHTML = marked(response.data);
     })
