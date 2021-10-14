@@ -1143,9 +1143,9 @@ const experiment = (blockCount) => {
   function eduInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
-      _instructionSetup(instructionsText.edu(responseType));
+      _instructionSetup(instructionsText.edu());
 
-      instructions2.setText(instructionsText.eduBelow());
+      instructions2.setText(instructionsText.eduBelow(responseType));
       instructions2.setWrapWidth(window.innerWidth * 0.8);
       instructions2.setPos([
         -window.innerWidth * 0.4,
