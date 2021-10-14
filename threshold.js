@@ -1160,8 +1160,8 @@ const experiment = (blockCount) => {
       }, 1000);
 
       const h = 50;
-      const D = 300;
-      const g = 50;
+      const D = 200;
+      const g = 100;
 
       target.setPos([D, 0]);
       target.setText("R");
