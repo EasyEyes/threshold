@@ -14,10 +14,24 @@
     <link rel="stylesheet" href="./css/custom.css" />
     <link rel="stylesheet" href="./css/instructions.css" />
     <link rel="stylesheet" href="./css/showAlphabet.css" />
+    <link rel="stylesheet" href="./css/consent.css" />
+
     <!-- Remote Calibrator -->
     <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.3.0-beta.8/lib/RemoteCalibrator.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Markdown parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body>
+    <iframe
+      src="form/consentform.pdf"
+      id="consent-form-pdf"
+      height="75%"
+      width="75%"
+      scrolling="auto"
+    ></iframe>
+    <div id="consent-form-markdown"></div>
     <div id="rc-language"></div>
     <div id="rc-panel"></div>
     <div id="root"></div>
