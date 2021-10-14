@@ -9,7 +9,7 @@ targetAlphabet,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijk
 targetDurationSec,0.2,0.2,0.2,0.2,0.2,0.2
 targetEccentricityXDeg,-10,10,-10,10,-10,10
 targetEccentricityYDeg,0,0,0,0,0,0
-targetFont,Roboto Mono,P22 Aragon,Douglass Pen,Douglass Pen,Noto Serif KR,Noto Serif KR
+targetFont,Roboto Mono,P22 Aragon,Douglass Pen,Douglass Pen,NotoSerifKR,NotoSerifKR
 targetMinimumPix,8,8,8,8,8,8
 targetTask,identify,identify,identify,identify,identify,identify
 thresholdBeta,2.3,2.3,2.3,2.3,2.3,2.3
