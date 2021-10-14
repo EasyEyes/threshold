@@ -4,6 +4,9 @@
 
 const debug = true;
 
+const useConsent = !debug;
+const useRC = !debug;
+
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
@@ -58,8 +61,6 @@ var conditionTrials;
 var levelLeft, levelRight;
 let correctAns;
 
-// For development purposes, toggle RC off for testing speed
-const useRC = !debug;
 const rc = RemoteCalibrator;
 rc.init();
 
@@ -246,9 +247,11 @@ const experiment = (blockCount) => {
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(updateInfo); // add timeStamp
   flowScheduler.add(experimentInit);
-  flowScheduler.add(consentRoutineBegin());
-  flowScheduler.add(consentRoutineEachFrame());
-  flowScheduler.add(consentRoutineEnd());
+  if (useConsent) {
+    flowScheduler.add(consentRoutineBegin());
+    flowScheduler.add(consentRoutineEachFrame());
+    flowScheduler.add(consentRoutineEnd());
+  }
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
   flowScheduler.add(fileRoutineEnd());
@@ -864,6 +867,9 @@ const experiment = (blockCount) => {
         blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
         blocksLoopScheduler.add(initInstructionRoutineEachFrame());
         blocksLoopScheduler.add(initInstructionRoutineEnd());
+        blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
+        blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
+        blocksLoopScheduler.add(eduInstructionRoutineEnd());
         const trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
@@ -1066,6 +1072,8 @@ const experiment = (blockCount) => {
     };
   }
 
+  /* ------------------------- Block Init Instructions ------------------------ */
+
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
@@ -1084,7 +1092,7 @@ const experiment = (blockCount) => {
       setTimeout(() => {
         document.addEventListener("click", _clickContinue);
         document.addEventListener("touchend", _clickContinue);
-      }, 800);
+      }, 1000);
 
       _beepButton = addBeepButton(correctSynth);
 
@@ -1112,26 +1120,91 @@ const experiment = (blockCount) => {
     };
   }
 
-  function blockInstructionRoutineBegin(snapshot) {
+  /* ------------------------- Block Edu Instructions ------------------------- */
+
+  function eduInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
-      _instructionSetup(instructionsText.block(snapshot.block + 1));
+      _instructionSetup(instructionsText.edu(responseType));
 
       clickedContinue = false;
-      document.addEventListener("click", _clickContinue);
-      document.addEventListener("touchend", _clickContinue);
+      setTimeout(() => {
+        document.addEventListener("click", _clickContinue);
+        document.addEventListener("touchend", _clickContinue);
+      }, 1000);
+
+      const h = 50;
+      const D = 300;
+      const g = 50;
+
+      target.setPos([D, 0]);
+      target.setText("R");
+      target.setHeight(h);
+      flanker1.setPos([D - g, 0]);
+      flanker1.setText("H");
+      flanker1.setHeight(h);
+      flanker2.setPos([D + g, 0]);
+      flanker2.setText("C");
+      flanker2.setHeight(h);
+
+      fixation.setHeight(fixationSize);
+      fixation.setPos([0, 0]);
+
+      fixation.setAutoDraw(true);
+      target.setAutoDraw(true);
+      flanker1.setAutoDraw(true);
+      flanker2.setAutoDraw(true);
+
+      _beepButton = addBeepButton(correctSynth);
+
+      psychoJS.eventManager.clearKeys();
 
       return Scheduler.Event.NEXT;
     };
   }
 
-  function blockInstructionRoutineEachFrame() {
+  function eduInstructionRoutineEachFrame() {
     return _instructionRoutineEachFrame;
   }
 
-  function blockInstructionRoutineEnd() {
-    return _instructionRoutineEnd;
+  function eduInstructionRoutineEnd() {
+    return async function () {
+      instructions.setAutoDraw(false);
+      routineTimer.reset();
+
+      document.removeEventListener("click", _clickContinue);
+      document.removeEventListener("touchend", _clickContinue);
+
+      removeBeepButton(_beepButton);
+
+      target.setAutoDraw(false);
+      flanker1.setAutoDraw(false);
+      flanker2.setAutoDraw(false);
+
+      return Scheduler.Event.NEXT;
+    };
   }
+
+  // function blockInstructionRoutineBegin(snapshot) {
+  //   return async function () {
+  //     TrialHandler.fromSnapshot(snapshot);
+  //     _instructionSetup(instructionsText.block(snapshot.block + 1));
+
+  //     clickedContinue = false;
+  //     document.addEventListener("click", _clickContinue);
+  //     document.addEventListener("touchend", _clickContinue);
+
+  //     return Scheduler.Event.NEXT;
+  //   };
+  // }
+
+  // function blockInstructionRoutineEachFrame() {
+  //   return _instructionRoutineEachFrame;
+  // }
+
+  // function blockInstructionRoutineEnd() {
+  //   return _instructionRoutineEnd;
+  // }
 
   const _takeFixationClick = (e) => {
     let cX, cY;
