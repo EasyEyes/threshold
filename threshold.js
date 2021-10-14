@@ -4,7 +4,7 @@
 
 const debug = false;
 
-const useConsent = !debug;
+const useConsent = false;
 const useRC = !debug;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
