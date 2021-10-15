@@ -9,6 +9,7 @@
     "setup:preprocessor": "pip install -r addons/legacy/requirements.txt && python addons/legacy/preprocessor.py experiment.csv",
     "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm i && npm run build:css && npm run build:js",
     "format": "prettier --write \"**/*.{js,css,html,md}\"",
+    "phrases": "node i18n/fetch-languages-sheets.js && git add components/i18n.js",
     "prepare": "husky install"
   },
   "repository": {
@@ -25,9 +26,11 @@
   },
   "homepage": "https://github.com/EasyEyes/threshold#readme",
   "devDependencies": {
+    "googleapis": "^88.2.0",
     "husky": "^7.0.2",
     "lint-staged": "^11.2.3",
-    "prettier": "^2.4.1"
+    "prettier": "^2.4.1",
+    "xlsx": "^0.17.3"
   },
   "lint-staged": {
     "*.{js,css,html,md}": "prettier --write"

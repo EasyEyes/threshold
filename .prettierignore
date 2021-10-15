@@ -2,6 +2,8 @@
 package.json
 package-lock.json
 
+addons/*.js
+addons/*.js.map
 lib/*.js
 lib/*.js.map
 
@@ -9,3 +11,5 @@ lib/*.js.map
 
 psychojs
 control-panel
+
+i18n.js
