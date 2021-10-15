@@ -12,6 +12,8 @@ crowding*.py
 experiment_t.csv
 t_experiment.csv
 
+credentials.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
