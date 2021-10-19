@@ -13,3 +13,6 @@ psychojs
 control-panel
 
 i18n.js
+
+js/*.js
+js/*.js.map
