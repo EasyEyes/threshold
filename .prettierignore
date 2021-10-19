@@ -9,3 +9,6 @@ lib/*.js.map
 
 psychojs
 control-panel
+
+js/*.js
+js/*.js.map
