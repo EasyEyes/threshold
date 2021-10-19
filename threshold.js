@@ -2,10 +2,10 @@
  * Crowding Test *
  *****************/
 
-const debug = true;
+const debug = process.env.debug;
 
 const useConsent = false;
-const useRC = !debug;
+const useRC = true;
 const showGrid = debug;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
