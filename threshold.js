@@ -2,7 +2,7 @@
  * Crowding Test *
  *****************/
 
-const debug = false;
+const debug = process.env.debug;
 
 const useConsent = !debug;
 const useRC = !debug;

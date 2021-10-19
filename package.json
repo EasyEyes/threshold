@@ -7,9 +7,11 @@
   "scripts": {
     "setup": "npm run setup:preprocessor && npm run setup:psychojs",
     "setup:preprocessor": "pip install -r addons/legacy/requirements.txt && python addons/legacy/preprocessor.py experiment.csv",
-    "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm i && npm run build:css && npm run build:js",
+    "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm i && npm run build:css && npm run build:js && cd ..",
     "format": "prettier --write \"**/*.{js,css,html,md}\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "start": "webpack --env=development",
+    "build": "webpack --env=production"
   },
   "repository": {
     "type": "git",
@@ -25,9 +27,15 @@
   },
   "homepage": "https://github.com/EasyEyes/threshold#readme",
   "devDependencies": {
+    "babel-loader": "^8.2.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "css-loader": "^6.4.0",
     "husky": "^7.0.2",
     "lint-staged": "^11.2.3",
-    "prettier": "^2.4.1"
+    "prettier": "^2.4.1",
+    "style-loader": "^3.3.0",
+    "webpack": "^5.58.2",
+    "webpack-cli": "^4.9.1"
   },
   "lint-staged": {
     "*.{js,css,html,md}": "prettier --write"
