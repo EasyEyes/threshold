@@ -2,10 +2,11 @@
  * Crowding Test *
  *****************/
 
-const debug = false;
+const debug = true;
 
 const useConsent = !debug;
 const useRC = !debug;
+const showGrid = debug;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -52,6 +53,8 @@ import {
   awaitMaxPresentableLevel,
   getFlankerLocations,
 } from "./components/bounding.js";
+
+import { getGridLines } from "./components/grid.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -222,7 +225,7 @@ const experiment = (blockCount) => {
   psychoJS.openWindow({
     fullscr: !debug,
     color: new util.Color([0.9, 0.9, 0.9]),
-    units: "height", // TODO change to pix
+    units: "pix",
     waitBlanking: true,
   });
 
@@ -311,6 +314,8 @@ const experiment = (blockCount) => {
   var filterClock;
   var instructionsClock;
 
+  var grids;
+
   var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
   var trialClock;
@@ -362,6 +367,8 @@ const experiment = (blockCount) => {
       size: [5, 2],
     });
     consent_button_no.clock = new util.Clock();
+
+    if (showGrid) console.log("Window, for grid purposes: ", psychoJS.window);
 
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
@@ -1437,6 +1444,7 @@ const experiment = (blockCount) => {
         console.warn("[Screen Width] Using arbitrary screen width. Enable RC.");
 
       viewingDistanceDesiredCm = condition["viewingDistanceDesiredCm"];
+      // viewingDistanceDesiredCm = 10;
       viewingDistanceCm = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
         : viewingDistanceDesiredCm;
@@ -1527,12 +1535,15 @@ const experiment = (blockCount) => {
         viewingDistanceCm: viewingDistanceCm,
         nearPointXYDeg: nearPointXYDeg,
         nearPointXYPix: nearPointXYPix,
+        fixationXYPix: fixationXYPx,
         spacingOverSizeRatio: spacingOverSizeRatio,
         minimumHeight: targetMinimumPix,
         fontFamily: targetFont,
         window: psychoJS.window,
         spacingRelationToSize: spacingRelationToSize,
       };
+      grids = getGridLines(psychoJS.window, "deg", displayOptions);
+
       const [targetXYPix] = XYPixOfXYDeg(
         [targetEccentricityXYDeg],
         displayOptions
@@ -1693,6 +1704,13 @@ const experiment = (blockCount) => {
 
       trialComponents.push(showAlphabet);
       trialComponents.push(totalTrial);
+
+      console.log("grids: ", grids);
+      grids.forEach((gridLineStim) => {
+        console.log("gridline stimulus", gridLineStim);
+        gridLineStim.setAutoDraw(true);
+        trialComponents.push(gridLineStim);
+      });
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -1913,6 +1931,27 @@ const experiment = (blockCount) => {
         instructions.frameNStart = frameN;
         instructions.setAutoDraw(true);
       }
+      /* -------------------------------------------------------------------------- */
+      // *grids* updates
+      grids.forEach((gridLineStim) => {
+        if (t >= uniDelay && flanker2.status === PsychoJS.Status.NOT_STARTED) {
+          // keep track of start time/frame for later
+          gridLineStim.tStart = t; // (not accounting for frame time here)
+          gridLineStim.frameNStart = frameN; // exact frame index
+          gridLineStim.setAutoDraw(false);
+        }
+
+        frameRemains =
+          uniDelay +
+          targetDurationSec -
+          psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+        if (
+          gridLineStim.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          gridLineStim.setAutoDraw(false);
+        }
+      });
       /* -------------------------------------------------------------------------- */
 
       // check if the Routine should terminate
