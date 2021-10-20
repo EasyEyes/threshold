@@ -380,6 +380,8 @@ const experiment = (blockCount) => {
     });
     consent_button_no.clock = new util.Clock();
 
+    if (showGrid) console.log("Window, for grid purposes: ", psychoJS.window);
+
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
