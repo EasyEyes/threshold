@@ -17,6 +17,35 @@ deg. The "pix" grid has pix units, origin at lower left, thick
 lines at 500 pix, and regular lines at 100 pix.
 */
 
+export const updateGridVisible = (e, gridVisible, gridKeys) => {
+  if (e.keyCode === gridKeys["pix"].keyCode || e.key === gridKeys["pix"].key) {
+    gridVisible["pix"] = !gridVisible["pix"];
+  } else if (
+    e.keyCode === gridKeys["cm"].keyCode ||
+    e.key === gridKeys["cm"].key
+  ) {
+    gridVisible["cm"] = !gridVisible["cm"];
+  } else if (
+    e.keyCode === gridKeys["deg"].keyCode ||
+    e.key === gridKeys["deg"].key
+  ) {
+    gridVisible["deg"] = !gridVisible["deg"];
+  }
+};
+
+export const addGridsToRoutineComponents = (grids, components) => {};
+// export const updateGridVisibility = (grids, gridsVisible, etc) => {
+//       // *grids* updates
+//       for (const gridType in grids){
+//         grids[gridType].forEach((gridLineStim) => {
+//           // keep track of start time/frame for later
+//           gridLineStim.tStart = t; // (not accounting for frame time here)
+//           gridLineStim.frameNStart = frameN; // exact frame index
+//           gridLineStim.setAutoDraw(gridVisible[gridType]);
+//         });
+//       };
+// };
+
 const getNumberOfGrids = (window, gridUnits, displayOptions) => {
   const dimensions = window._size;
   const dimensionsCm = dimensions.map((dim) => dim / displayOptions.pixPerCm);
@@ -35,9 +64,6 @@ const getNumberOfGrids = (window, gridUnits, displayOptions) => {
 };
 
 export const getGridLines = (window, gridUnits, displayOptions) => {
-  const dimensions = window._size;
-  const widthCm = dimensions[0] / displayOptions.pixPerCm;
-  const widthDeg = pixelsToDegrees(dimensions[0], displayOptions);
   switch (gridUnits) {
     case "pix":
       return getPixelGridLines(window, displayOptions);
@@ -155,8 +181,8 @@ const getCmGridLines = (window, displayOptions) => {
         win: window,
         units: "pix",
         lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("black"),
-        fillColor: new util.Color("black"),
+        lineColor: new util.Color("blue"),
+        fillColor: new util.Color("blue"),
         opacity: 1.0,
         vertices: [
           [+(origin[0] + lineId * spacing), +Math.round(dimensions[1] / 2)],
@@ -180,7 +206,7 @@ const getCmGridLines = (window, displayOptions) => {
         pos: [30 + origin[0] + lineId * spacing, origin[1] + 15],
         height: 15,
         ori: 0.0,
-        color: new util.Color("black"),
+        color: new util.Color("blue"),
         opacity: 1.0,
         depth: 0.0,
       });
@@ -193,8 +219,8 @@ const getCmGridLines = (window, displayOptions) => {
         win: window,
         units: "pix",
         lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("black"),
-        fillColor: new util.Color("black"),
+        lineColor: new util.Color("blue"),
+        fillColor: new util.Color("blue"),
         opacity: 1.0,
         vertices: [
           [+Math.round(dimensions[0] / 2), +(origin[1] + lineId * spacing)],
@@ -218,7 +244,7 @@ const getCmGridLines = (window, displayOptions) => {
         pos: [origin[0] + 25, 20 + origin[1] + lineId * spacing],
         height: 15,
         ori: 0.0,
-        color: new util.Color("black"),
+        color: new util.Color("blue"),
         opacity: 1.0,
         depth: 0.0,
       });
@@ -247,8 +273,8 @@ const getDegGridLines = (window, displayOptions) => {
         win: window,
         units: "pix",
         lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("black"),
-        fillColor: new util.Color("black"),
+        lineColor: new util.Color("red"),
+        fillColor: new util.Color("red"),
         opacity: opacity,
         vertices: [
           [
@@ -274,8 +300,8 @@ const getDegGridLines = (window, displayOptions) => {
         win: window,
         units: "pix",
         lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("black"),
-        fillColor: new util.Color("black"),
+        lineColor: new util.Color("red"),
+        fillColor: new util.Color("red"),
         opacity: opacity,
         vertices: [
           [
@@ -301,8 +327,8 @@ const getDegGridLines = (window, displayOptions) => {
         win: window,
         units: "pix",
         lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("black"),
-        fillColor: new util.Color("black"),
+        lineColor: new util.Color("red"),
+        fillColor: new util.Color("red"),
         opacity: opacity,
         vertices: [
           [
@@ -328,8 +354,8 @@ const getDegGridLines = (window, displayOptions) => {
         win: window,
         units: "pix",
         lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("black"),
-        fillColor: new util.Color("black"),
+        lineColor: new util.Color("red"),
+        fillColor: new util.Color("red"),
         opacity: opacity,
         vertices: [
           [

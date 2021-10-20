@@ -54,10 +54,19 @@ import {
   getFlankerLocations,
 } from "./components/bounding.js";
 
-import { getGridLines } from "./components/grid.js";
+import { getGridLines, updateGridVisible } from "./components/grid.js";
 
 /* -------------------------------------------------------------------------- */
 
+if (showGrid) {
+  var gridVisible = { pix: debug, cm: debug, deg: debug };
+  const gridKeys = {
+    pix: { key: "Control", keyCode: 17 },
+    cm: { key: "Alt", keyCode: 18 },
+    deg: { key: "Meta", keyCode: 91 },
+  };
+  window.onkeydown = (e) => updateGridVisible(e, gridVisible, gridKeys);
+}
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
@@ -314,7 +323,9 @@ const experiment = (blockCount) => {
   var filterClock;
   var instructionsClock;
 
-  var grids;
+  /* --- GRIDS --- */
+  if (showGrid) var grids;
+  /* --- /GRIDS --- */
 
   var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
@@ -367,8 +378,6 @@ const experiment = (blockCount) => {
       size: [5, 2],
     });
     consent_button_no.clock = new util.Clock();
-
-    if (showGrid) console.log("Window, for grid purposes: ", psychoJS.window);
 
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
@@ -1542,7 +1551,15 @@ const experiment = (blockCount) => {
         window: psychoJS.window,
         spacingRelationToSize: spacingRelationToSize,
       };
-      grids = getGridLines(psychoJS.window, "deg", displayOptions);
+      /* --- GRIDS --- */
+      if (showGrid) {
+        grids = {
+          deg: getGridLines(psychoJS.window, "deg", displayOptions),
+          cm: getGridLines(psychoJS.window, "cm", displayOptions),
+          pix: getGridLines(psychoJS.window, "pix", displayOptions),
+        };
+      }
+      /* --- /GRIDS --- */
 
       const [targetXYPix] = XYPixOfXYDeg(
         [targetEccentricityXYDeg],
@@ -1705,12 +1722,16 @@ const experiment = (blockCount) => {
       trialComponents.push(showAlphabet);
       trialComponents.push(totalTrial);
 
-      console.log("grids: ", grids);
-      grids.forEach((gridLineStim) => {
-        console.log("gridline stimulus", gridLineStim);
-        gridLineStim.setAutoDraw(true);
-        trialComponents.push(gridLineStim);
-      });
+      /* --- GRIDS --- */
+      if (showGrid) {
+        for (const gridType in grids) {
+          grids[gridType].forEach((gridLineStim) => {
+            gridLineStim.setAutoDraw(gridVisible[gridType]);
+            trialComponents.push(gridLineStim);
+          });
+        }
+      }
+      /* --- /GRIDS --- */
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -1933,31 +1954,30 @@ const experiment = (blockCount) => {
       }
       /* -------------------------------------------------------------------------- */
       // *grids* updates
-      grids.forEach((gridLineStim) => {
-        if (t >= uniDelay && flanker2.status === PsychoJS.Status.NOT_STARTED) {
-          // keep track of start time/frame for later
-          gridLineStim.tStart = t; // (not accounting for frame time here)
-          gridLineStim.frameNStart = frameN; // exact frame index
-          gridLineStim.setAutoDraw(false);
+      if (showGrid) {
+        for (const gridType in grids) {
+          grids[gridType].forEach((gridLineStim) => {
+            if (t >= uniDelay) {
+              // keep track of start time/frame for later
+              gridLineStim.tStart = t; // (not accounting for frame time here)
+              gridLineStim.frameNStart = frameN; // exact frame index
+              gridLineStim.setAutoDraw(gridVisible[gridType]);
+            }
+          });
         }
-
-        frameRemains =
-          uniDelay +
-          targetDurationSec -
-          psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
-        if (
-          gridLineStim.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          gridLineStim.setAutoDraw(false);
-        }
-      });
-      /* -------------------------------------------------------------------------- */
+      }
 
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
         removeClickableAlphabet();
+        if (showGrid) {
+          for (const gridType in grids) {
+            grids[gridType].forEach((gridLineStim) => {
+              gridLineStim.setAutoDraw(false);
+            });
+          }
+        }
         return Scheduler.Event.NEXT;
       }
 
