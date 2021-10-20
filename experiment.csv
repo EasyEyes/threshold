@@ -9,7 +9,7 @@ targetAlphabet,DHKNORSVZ,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,Ø
 targetDurationSec,0.15,0.15,0.15,1,0.15
 targetEccentricityXDeg,10,-10,10,-10,10
 targetEccentricityYDeg,0,0,0,0,0
-targetFont,Sloan,Roboto Mono,P22 Aragon,IBMPlexSansArabic,IBMPlexSansArabic
+targetFont,Sloan,Roboto Mono,Douglass Pen,IBMPlexSansArabic,IBMPlexSansArabic
 targetMinimumPix,8,8,8,8,8
 targetTask,identify,identify,identify,identify,identify
 thresholdBeta,2.3,2.3,2.3,2.3,2.3
