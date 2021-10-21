@@ -5,7 +5,7 @@
 const debug = process.env.debug;
 
 const useConsent = false;
-const useRC = !debug;
+const useRC = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -29,7 +29,6 @@ import {
 } from "./components/utils.js";
 
 import { phrases } from "./components/i18n.js";
-import { buildSwitch, removeSwitch } from "./components/multiLang.js";
 
 import {
   addBeepButton,
@@ -79,7 +78,6 @@ Papa.parse("conditions/blockCount.csv", {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
       if (useRC) {
-        buildSwitch(rc);
         rc.panel(
           [
             {
@@ -96,7 +94,6 @@ Papa.parse("conditions/blockCount.csv", {
           "#rc-panel",
           {},
           () => {
-            removeSwitch();
             rc.removePanel();
             document.body.removeChild(document.querySelector("#rc-panel"));
             // ! Start actual experiment
@@ -526,6 +523,13 @@ const experiment = (blockCount) => {
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
     routineTimer = new util.CountdownTimer(); // to track time remaining of each (non-slip) routine
+
+    // TODO Not working
+    if (rc.languageDirection.value === "RTL") {
+      Object.assign(document.querySelector("canvas").style, {
+        direction: "rtl",
+      });
+    }
 
     return Scheduler.Event.NEXT;
   }
