@@ -1,33 +1,8 @@
-// export function getNextTrialIndex(
-//   currentTrialIndex,
-//   currentBlockIndex,
-//   totalBlockTrialList
-// ) {
-//   let res;
-//   if (totalBlockTrialList[currentBlockIndex - 1] >= currentTrialIndex + 1)
-//     res = {
-//       trial: currentTrialIndex + 1,
-//       totalTrials: totalBlockTrialList[currentBlockIndex - 1],
-//       block: currentBlockIndex,
-//     };
-//   else if (currentBlockIndex + 1 <= totalBlockTrialList.length) {
-//     currentBlockIndex = currentBlockIndex + 1;
-//     res = {
-//       trial: 1,
-//       totalTrials: totalBlockTrialList[currentBlockIndex - 1],
-//       block: currentBlockIndex,
-//     };
-//   } else
-//     res = {
-//       trial: -1,
-//       totalTrials: -1,
-//       block: -1,
-//     };
-
-//   return res;
-// }
+import { phrases } from "./i18n.js";
+import { replacePlaceholders } from "./multiLang.js";
 
 export function getTrialInfoStr(
+  L,
   showCounterBool,
   showViewingDistanceBool,
   currentTrialIndex,
@@ -39,9 +14,16 @@ export function getTrialInfoStr(
   let res = "";
 
   if (showCounterBool)
-    res = `Trial ${currentTrialIndex} of ${currentTrialLength}. Block ${currentBlockIndex} of ${blockCount}.`;
+    res = replacePlaceholders(
+      phrases.T_counterTrialBlock[L],
+      currentTrialIndex,
+      currentTrialLength,
+      currentBlockIndex,
+      blockCount
+    );
 
-  if (showViewingDistanceBool) res += ` At ${viewingDistanceCm} cm.`;
+  if (showViewingDistanceBool)
+    res += replacePlaceholders(phrases.T_counterCm[L], viewingDistanceCm);
 
   return res;
 }

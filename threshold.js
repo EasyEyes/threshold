@@ -4,8 +4,8 @@
 
 const debug = process.env.debug;
 
-const useConsent = !debug;
-const useRC = !debug;
+const useConsent = false;
+const useRC = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -28,7 +28,7 @@ import {
   spacingPixelsFromLevel,
 } from "./components/utils.js";
 
-import { buildSwitch, removeSwitch } from "./components/i18n.js";
+import { phrases } from "./components/i18n.js";
 
 import {
   addBeepButton,
@@ -78,24 +78,22 @@ Papa.parse("conditions/blockCount.csv", {
     const blockCount = results.data.length - 2; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
       if (useRC) {
-        buildSwitch(rc);
         rc.panel(
           [
             {
               name: "screenSize",
             },
-            {
-              name: "trackDistance",
-              options: {
-                nearPoint: false,
-                showVideo: false,
-              },
-            },
+            // {
+            //   name: "trackDistance",
+            //   options: {
+            //     nearPoint: false,
+            //     showVideo: false,
+            //   },
+            // },
           ],
           "#rc-panel",
           {},
           () => {
-            removeSwitch();
             rc.removePanel();
             document.body.removeChild(document.querySelector("#rc-panel"));
             // ! Start actual experiment
@@ -230,7 +228,11 @@ const experiment = (blockCount) => {
   psychoJS.schedule(
     psychoJS.gui.DlgFromDict({
       dictionary: expInfo,
-      title: expName,
+      title: phrases.T_thresholdTitle[rc.language.value],
+      participantText: phrases.T_participant[rc.language.value],
+      sessionText: phrases.T_session[rc.language.value],
+      cancelText: phrases.T_cancel[rc.language.value],
+      okText: phrases.T_ok[rc.language.value],
     })
   );
 
@@ -521,6 +523,13 @@ const experiment = (blockCount) => {
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
     routineTimer = new util.CountdownTimer(); // to track time remaining of each (non-slip) routine
+
+    // TODO Not working
+    if (rc.languageDirection.value === "RTL") {
+      Object.assign(document.querySelector("canvas").style, {
+        direction: "rtl",
+      });
+    }
 
     return Scheduler.Event.NEXT;
   }
@@ -921,6 +930,7 @@ const experiment = (blockCount) => {
       });
 
       trialInfoStr = getTrialInfoStr(
+        rc.language.value,
         showCounterBool,
         showViewingDistanceBool,
         currentTrialIndex,
@@ -1097,13 +1107,14 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot);
       _instructionSetup(
         (snapshot.block === 0
-          ? instructionsText.initial(expInfo.participant)
+          ? instructionsText.initial(rc.language.value, expInfo.participant)
           : "") +
           instructionsText.initialByThresholdParameter["spacing"](
+            rc.language.value,
             responseType,
             totalTrialCount
           ) +
-          instructionsText.initialEnd(responseType)
+          instructionsText.initialEnd(rc.language.value, responseType)
       );
 
       clickedContinue = false;
@@ -1112,7 +1123,7 @@ const experiment = (blockCount) => {
         document.addEventListener("touchend", _clickContinue);
       }, 1000);
 
-      _beepButton = addBeepButton(correctSynth);
+      _beepButton = addBeepButton(rc.language.value, correctSynth);
 
       psychoJS.eventManager.clearKeys();
 
@@ -1143,9 +1154,11 @@ const experiment = (blockCount) => {
   function eduInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
-      _instructionSetup(instructionsText.edu());
+      _instructionSetup(instructionsText.edu(rc.language.value));
 
-      instructions2.setText(instructionsText.eduBelow(responseType));
+      instructions2.setText(
+        instructionsText.eduBelow(rc.language.value, responseType)
+      );
       instructions2.setWrapWidth(window.innerWidth * 0.8);
       instructions2.setPos([
         -window.innerWidth * 0.4,
@@ -1270,6 +1283,7 @@ const experiment = (blockCount) => {
       currentTrialIndex = snapshot.thisN + 1;
       currentTrialLength = snapshot.nTotal;
       trialInfoStr = getTrialInfoStr(
+        rc.language.value,
         showCounterBool,
         showViewingDistanceBool,
         currentTrialIndex,
@@ -1284,7 +1298,12 @@ const experiment = (blockCount) => {
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       totalTrial.setAutoDraw(true);
 
-      _instructionSetup(instructionsText.trial.fixate["spacing"](responseType));
+      _instructionSetup(
+        instructionsText.trial.fixate["spacing"](
+          rc.language.value,
+          responseType
+        )
+      );
 
       fixation.setHeight(fixationSize);
       fixation.setPos(fixationXYPx);
@@ -1663,10 +1682,14 @@ const experiment = (blockCount) => {
       // showAlphabet.setText(getAlphabetShowText(validAns))
 
       instructions.setText(
-        instructionsText.trial.respond["spacing"](responseType)
+        instructionsText.trial.respond["spacing"](
+          rc.language.value,
+          responseType
+        )
       );
 
       trialInfoStr = getTrialInfoStr(
+        rc.language.value,
         showCounterBool,
         showViewingDistanceBool,
         currentTrialIndex,
