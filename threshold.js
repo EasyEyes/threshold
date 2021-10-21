@@ -5,7 +5,7 @@
 const debug = process.env.debug;
 
 const useConsent = false;
-const useRC = true;
+const useRC = !debug;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -83,13 +83,13 @@ Papa.parse("conditions/blockCount.csv", {
             {
               name: "screenSize",
             },
-            // {
-            //   name: "trackDistance",
-            //   options: {
-            //     nearPoint: false,
-            //     showVideo: false,
-            //   },
-            // },
+            {
+              name: "trackDistance",
+              options: {
+                nearPoint: false,
+                showVideo: false,
+              },
+            },
           ],
           "#rc-panel",
           {},
