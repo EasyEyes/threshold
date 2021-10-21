@@ -5,7 +5,7 @@
 const debug = process.env.debug;
 
 const useConsent = false;
-const useRC = !debug;
+const useRC = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -478,11 +478,12 @@ const experiment = (blockCount) => {
       alignHoriz: totalTrialConfig.alignHoriz,
       alignVert: totalTrialConfig.alignVert,
       height: 1.0,
-      wrapWidth: undefined,
+      wrapWidth: window.innerWidth,
       ori: 0.0,
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -20.0,
+      isInstruction: false,
     });
 
     instructions = new visual.TextStim({
@@ -500,6 +501,7 @@ const experiment = (blockCount) => {
       depth: -12.0,
       alignHoriz: "left",
       alignVert: "top",
+      isInstruction: true, // !
     });
 
     instructions2 = new visual.TextStim({
@@ -517,6 +519,7 @@ const experiment = (blockCount) => {
       depth: -12.0,
       alignHoriz: "left",
       alignVert: "bottom",
+      isInstruction: true, // !
     });
 
     // Create some handy timers
