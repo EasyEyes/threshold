@@ -75,7 +75,7 @@ const fontsRequired = {};
 Papa.parse("conditions/blockCount.csv", {
   download: true,
   complete: function (results) {
-    const blockCount = results.data.length - 2; // TODO Make this calculation robust
+    const blockCount = Number(results.data[results.data.length - 1][0]) + 1; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
       if (useRC) {
         rc.panel(
@@ -130,38 +130,37 @@ const loadBlockFiles = (count, callback) => {
         let fontTestString = "12px " + fontFamily;
         let fontPath = "fonts/" + fontFamily + ".woff2";
         if (debug) console.log("fontTestString: ", fontTestString);
-        fontsRequired[fontFamily] = fontPath;
 
-        // let response = fetch(fontPath).then((response) => {
-        //   if (response.ok) {
-        //     // let f = new FontFace(fontFamily, `url(${response.url})`);
-        //     // f.load()
-        //     //   .then((loadedFontFace) => {
-        //     //     document.fonts.add(loadedFontFace);
-        //     //   })
-        //     //   .catch((err) => {
-        //     //     console.error(err);
-        //     //   });
-
-        //   } else {
-        //     console.log(
-        //       "Does the browser consider this font supported?",
-        //       document.fonts.check(fontTestString)
-        //     );
-        //     console.log(
-        //       "Uh oh, unable to find the font file for: " +
-        //         fontFamily +
-        //         "\n" +
-        //         "If this font is already supported by the browser then it should display correctly. " +
-        //         "\n" +
-        //         "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
-        //         "\n" +
-        //         "Please verify for yourself that " +
-        //         fontFamily +
-        //         " is being correctly represented in your experiment."
-        //     );
-        //   }
-        // });
+        fetch(fontPath).then((response) => {
+          if (response.ok) {
+            fontsRequired[fontFamily] = fontPath;
+            // let f = new FontFace(fontFamily, `url(${response.url})`);
+            // f.load()
+            //   .then((loadedFontFace) => {
+            //     document.fonts.add(loadedFontFace);
+            //   })
+            //   .catch((err) => {
+            //     console.error(err);
+            //   });
+          } else {
+            // console.log(
+            //   "Does the browser consider this font supported?",
+            //   document.fonts.check(fontTestString)
+            // );
+            // console.log(
+            //   "Uh oh, unable to find the font file for: " +
+            //     fontFamily +
+            //     "\n" +
+            //     "If this font is already supported by the browser then it should display correctly. " +
+            //     "\n" +
+            //     "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
+            //     "\n" +
+            //     "Please verify for yourself that " +
+            //     fontFamily +
+            //     " is being correctly represented in your experiment."
+            // );
+          }
+        });
       });
 
       loadBlockFiles(count - 1, callback);
@@ -372,7 +371,7 @@ const experiment = (blockCount) => {
     instructionsClock = new util.Clock();
 
     thisLoopNumber = 0;
-    thisConditionsFile = "./conditions/block_1.csv";
+    thisConditionsFile = "conditions/block_1.csv";
 
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
