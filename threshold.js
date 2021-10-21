@@ -95,13 +95,13 @@ Papa.parse("conditions/blockCount.csv", {
             {
               name: "screenSize",
             },
-            // {
-            //   name: "trackDistance",
-            //   options: {
-            //     nearPoint: false,
-            //     showVideo: false,
-            //   },
-            // },
+            {
+              name: "trackDistance",
+              options: {
+                nearPoint: false,
+                showVideo: false,
+              },
+            },
           ],
           "#rc-panel",
           {},
