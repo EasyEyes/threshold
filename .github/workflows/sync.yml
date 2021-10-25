@@ -21,7 +21,7 @@ jobs:
       - name: Github REST API Call
         env:
           CI_TOKEN: ${{ secrets.CI_TOKEN }}
-          PARENT_REPO: EasyEyes/control-panel
+          PARENT_REPO: EasyEyes/threshold-scientist
           PARENT_BRANCH: main
           WORKFLOW_ID: 14231707
         run: |
