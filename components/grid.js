@@ -33,19 +33,6 @@ export const updateGridVisible = (e, gridVisible, gridKeys) => {
   }
 };
 
-export const addGridsToRoutineComponents = (grids, components) => {};
-// export const updateGridVisibility = (grids, gridsVisible, etc) => {
-//       // *grids* updates
-//       for (const gridType in grids){
-//         grids[gridType].forEach((gridLineStim) => {
-//           // keep track of start time/frame for later
-//           gridLineStim.tStart = t; // (not accounting for frame time here)
-//           gridLineStim.frameNStart = frameN; // exact frame index
-//           gridLineStim.setAutoDraw(gridVisible[gridType]);
-//         });
-//       };
-// };
-
 const getNumberOfGrids = (window, gridUnits, displayOptions) => {
   const dimensions = window._size;
   const dimensionsCm = dimensions.map((dim) => dim / displayOptions.pixPerCm);
@@ -464,37 +451,4 @@ const getDegGridLines = (window, displayOptions) => {
     ...upperGridLineLabels,
     ...lowerGridLineLabels,
   ];
-  // const horizontalGridLines = [...Array(numberOfGridLines[1]).keys()].map(lineId => {
-  //     return new visual.ShapeStim({
-  //         name: `horizontal-grid-line-${lineId}`,
-  //         win: window,
-  //         units: "pix",
-  //         lineWidth: ((lineId%5) === 0) ? 5 : 2,
-  //         lineColor: new util.Color("black"),
-  //         fillColor: new util.Color("black"),
-  //         opacity: 1.0,
-  //         vertices: [[+Math.round(dimensions[0]/2),+(origin[1]+(lineId*spacing))],
-  //                    [-Math.round(dimensions[0]/2),+(origin[1]+(lineId*spacing))]],
-  //         depth: -1000,
-  //         ori: 0.0,
-  //         interpolate: false,
-  //         size: 1,
-  //     });
-  // });
-  // const horizontalGridLineLabels = [...Array(numberOfGridLines[0]).keys()].map(lineId => {
-  //     return new visual.TextStim({
-  //         name: `horizontal-grid-line-label-${lineId}`,
-  //         win: window,
-  //         text: `${lineId} cm`,
-  //         font: "Open Sans",
-  //         units: "pix",
-  //         pos: [origin[0]+25, (20+origin[1]+(lineId*spacing))],
-  //         height: 15,
-  //         ori: 0.0,
-  //         color: new util.Color("black"),
-  //         opacity: 1.0,
-  //         depth: 0.0,
-  //     });
-  // });
-  // return [...verticalGridLines, ...verticalGridLineLabels, ...horizontalGridLines, ...horizontalGridLineLabels];
 };
