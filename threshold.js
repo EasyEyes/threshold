@@ -6,6 +6,7 @@ const debug = process.env.debug;
 
 const useConsent = false;
 const useRC = true;
+const showGrid = debug;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -53,8 +54,19 @@ import {
   getFlankerLocations,
 } from "./components/bounding.js";
 
+import { getGridLines, updateGridVisible } from "./components/grid.js";
+
 /* -------------------------------------------------------------------------- */
 
+if (showGrid) {
+  var gridVisible = { pix: debug, cm: debug, deg: debug };
+  const gridKeys = {
+    pix: { key: "Control", keyCode: 17 },
+    cm: { key: "Alt", keyCode: 18 },
+    deg: { key: "Meta", keyCode: 91 },
+  };
+  window.onkeydown = (e) => updateGridVisible(e, gridVisible, gridKeys);
+}
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
@@ -219,7 +231,7 @@ const experiment = (blockCount) => {
   psychoJS.openWindow({
     fullscr: !debug,
     color: new util.Color([0.9, 0.9, 0.9]),
-    units: "height", // TODO change to pix
+    units: "pix",
     waitBlanking: true,
   });
 
@@ -312,6 +324,10 @@ const experiment = (blockCount) => {
   var filterClock;
   var instructionsClock;
 
+  /* --- GRIDS --- */
+  if (showGrid) var grids;
+  /* --- /GRIDS --- */
+
   var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
   var trialClock;
@@ -363,6 +379,8 @@ const experiment = (blockCount) => {
       size: [5, 2],
     });
     consent_button_no.clock = new util.Clock();
+
+    if (showGrid) console.log("Window, for grid purposes: ", psychoJS.window);
 
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
@@ -1458,6 +1476,7 @@ const experiment = (blockCount) => {
         console.warn("[Screen Width] Using arbitrary screen width. Enable RC.");
 
       viewingDistanceDesiredCm = condition["viewingDistanceDesiredCm"];
+      // viewingDistanceDesiredCm = 10;
       viewingDistanceCm = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
         : viewingDistanceDesiredCm;
@@ -1548,12 +1567,23 @@ const experiment = (blockCount) => {
         viewingDistanceCm: viewingDistanceCm,
         nearPointXYDeg: nearPointXYDeg,
         nearPointXYPix: nearPointXYPix,
+        fixationXYPix: fixationXYPx,
         spacingOverSizeRatio: spacingOverSizeRatio,
         minimumHeight: targetMinimumPix,
         fontFamily: targetFont,
         window: psychoJS.window,
         spacingRelationToSize: spacingRelationToSize,
       };
+      /* --- GRIDS --- */
+      if (showGrid) {
+        grids = {
+          deg: getGridLines(psychoJS.window, "deg", displayOptions),
+          cm: getGridLines(psychoJS.window, "cm", displayOptions),
+          pix: getGridLines(psychoJS.window, "pix", displayOptions),
+        };
+      }
+      /* --- /GRIDS --- */
+
       const [targetXYPix] = XYPixOfXYDeg(
         [targetEccentricityXYDeg],
         displayOptions
@@ -1718,6 +1748,17 @@ const experiment = (blockCount) => {
 
       trialComponents.push(showAlphabet);
       trialComponents.push(totalTrial);
+
+      /* --- GRIDS --- */
+      if (showGrid) {
+        for (const gridType in grids) {
+          grids[gridType].forEach((gridLineStim) => {
+            gridLineStim.setAutoDraw(gridVisible[gridType]);
+            trialComponents.push(gridLineStim);
+          });
+        }
+      }
+      /* --- /GRIDS --- */
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -1939,11 +1980,31 @@ const experiment = (blockCount) => {
         instructions.setAutoDraw(true);
       }
       /* -------------------------------------------------------------------------- */
+      // *grids* updates
+      if (showGrid) {
+        for (const gridType in grids) {
+          grids[gridType].forEach((gridLineStim) => {
+            if (t >= uniDelay) {
+              // keep track of start time/frame for later
+              gridLineStim.tStart = t; // (not accounting for frame time here)
+              gridLineStim.frameNStart = frameN; // exact frame index
+              gridLineStim.setAutoDraw(gridVisible[gridType]);
+            }
+          });
+        }
+      }
 
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
         removeClickableAlphabet();
+        if (showGrid) {
+          for (const gridType in grids) {
+            grids[gridType].forEach((gridLineStim) => {
+              gridLineStim.setAutoDraw(false);
+            });
+          }
+        }
         return Scheduler.Event.NEXT;
       }
 
