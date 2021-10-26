@@ -5,7 +5,8 @@
 const debug = process.env.debug;
 
 const useConsent = false;
-const useRC = true;
+// const useRC = true;
+const useRC = false;
 const showGrid = debug;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
@@ -55,6 +56,7 @@ import {
 } from "./components/bounding.js";
 
 import { getGridLines, updateGridVisible } from "./components/grid.js";
+import { getQRCodeImage } from "./components/keypad.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -70,7 +72,6 @@ if (showGrid) {
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
-var levelLeft, levelRight;
 let correctAns;
 
 const rc = RemoteCalibrator;
@@ -81,6 +82,10 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
+/* --- KEYPAD --- */
+var useKeypad;
+var keypadReceiver;
+/* --- /KEYPAD --- */
 
 ////
 // blockCount is just a file telling the program how many blocks in total
@@ -142,6 +147,10 @@ const loadBlockFiles = (count, callback) => {
         let fontTestString = "12px " + fontFamily;
         let fontPath = "fonts/" + fontFamily + ".woff2";
         if (debug) console.log("fontTestString: ", fontTestString);
+
+        /* --- KEYPAD --- */
+        if (row["simulateKeypadBool"]) useKeypad = true;
+        /* --- /KEYPAD --- */
 
         fetch(fontPath).then((response) => {
           if (response.ok) {
@@ -231,7 +240,7 @@ const experiment = (blockCount) => {
   psychoJS.openWindow({
     fullscr: !debug,
     color: new util.Color([0.9, 0.9, 0.9]),
-    units: "pix",
+    units: "height",
     waitBlanking: true,
   });
 
@@ -264,6 +273,11 @@ const experiment = (blockCount) => {
     flowScheduler.add(consentRoutineBegin());
     flowScheduler.add(consentRoutineEachFrame());
     flowScheduler.add(consentRoutineEnd());
+  }
+  if (useKeypad) {
+    flowScheduler.add(keypadInitRoutineBegin());
+    flowScheduler.add(keypadInitRoutineEachFrame());
+    flowScheduler.add(keypadInitRoutineEnd());
   }
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
@@ -328,6 +342,12 @@ const experiment = (blockCount) => {
   if (showGrid) var grids;
   /* --- /GRIDS --- */
 
+  /* --- KEYPAD --- */
+  var qrImageURI;
+  var qrCodeStim;
+  var keypadInitClock;
+  /* --- /KEYPAD --- */
+
   var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
   var trialClock;
@@ -380,7 +400,53 @@ const experiment = (blockCount) => {
     });
     consent_button_no.clock = new util.Clock();
 
-    if (showGrid) console.log("Window, for grid purposes: ", psychoJS.window);
+    /* --- KEYPAD --- */
+    // Initialize components for Routine "keypadInit"
+    keypadInitClock = new util.Clock();
+    qrCodeStim = new visual.ImageStim({
+      win: psychoJS.window,
+      name: "qrCodeImage",
+      units: undefined,
+      image: undefined,
+      mask: undefined,
+      ori: 0.0,
+      pos: [0, 0],
+      size: [0.5, 0.5],
+      color: new util.Color([0, 0, 0]),
+      opacity: undefined,
+      flipHoriz: false,
+      flipVert: false,
+      texRes: 128.0,
+      interpolate: true,
+      depth: 0.0,
+    });
+
+    const alphabet = [];
+    const ondata_callback = (data) => {
+      console.log("Data from keypad received!", data);
+      console.log("this: ", this);
+      // psychoJS.experiment.nextEntry()
+      // psychoJS.experiment.addData("virtual-keypad-response", data.response);
+      // psychoJS.experiment.nextEntry()
+    };
+    const handshake_callback = () => {
+      console.log("IN handshake callback");
+      keypadReceiver.updateDisplayMessage(
+        "Keypad connected! Please keep this page open, until the experiment prompts you to use it."
+      );
+      keypadInitComponents[0].status = PsychoJS.Status.FINISHED;
+      Scheduler.Event.NEXT;
+    };
+    keypadReceiver = new virtualKeypad.Receiver(
+      { alphabet: alphabet, font: "Sans" },
+      ondata_callback,
+      handshake_callback
+    );
+    window.receiver = keypadReceiver;
+    const qrImage = await getQRCodeImage(keypadReceiver);
+    console.log("QR IMAGE: ", qrImage);
+    qrCodeStim.setImage(qrImage);
+    /* --- /KEYPAD --- */
 
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
@@ -883,6 +949,86 @@ const experiment = (blockCount) => {
 
     return Scheduler.Event.NEXT;
   }
+
+  /* --- KEYPAD --- */
+  var keypadInitComponents;
+  function keypadInitRoutineBegin() {
+    return async function () {
+      //------Prepare to start Routine 'keypadInit'-------
+      t = 0;
+      keypadInitClock.reset(); // clock
+      frameN = -1;
+      continueRoutine = true; // until we're told otherwise
+
+      qrCodeStim.setAutoDraw(false);
+      // keep track of which components have finished
+      keypadInitComponents = [];
+      keypadInitComponents.push(qrCodeStim);
+
+      for (const thisComponent of keypadInitComponents)
+        if ("status" in thisComponent)
+          thisComponent.status = PsychoJS.Status.NOT_STARTED;
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function keypadInitRoutineEachFrame() {
+    return async function () {
+      //------Loop for each frame of Routine 'filter'-------
+      // get current time
+      t = keypadInitClock.getTime();
+      frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
+      // update/draw components on each frame
+      // check for quit (typically the Esc key)
+      if (
+        psychoJS.experiment.experimentEnded ||
+        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+      ) {
+        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+      }
+
+      // check if the Routine should terminate
+      if (!continueRoutine) {
+        // a component has requested a forced-end of Routine
+        return Scheduler.Event.NEXT;
+      }
+
+      continueRoutine = false; // reverts to True if at least one component still running
+      // console.log(`keypadInitComponets.status: ${keypadInitComponents[0].status}`);
+      for (const thisComponent of keypadInitComponents)
+        if (
+          "status" in thisComponent &&
+          thisComponent.status !== PsychoJS.Status.FINISHED
+        ) {
+          thisComponent.setAutoDraw(true);
+          continueRoutine = true;
+          break;
+        }
+
+      // refresh the screen if continuing
+      if (continueRoutine) {
+        return Scheduler.Event.FLIP_REPEAT;
+      } else {
+        return Scheduler.Event.NEXT;
+      }
+    };
+  }
+
+  function keypadInitRoutineEnd() {
+    return async function () {
+      //------Ending Routine 'keypadInit'-------
+      for (const thisComponent of keypadInitComponents) {
+        if (typeof thisComponent.setAutoDraw === "function") {
+          thisComponent.setAutoDraw(false);
+        }
+      }
+      // the Routine "keypadInit" was not non-slip safe, so reset the non-slip timer
+      routineTimer.reset();
+
+      return Scheduler.Event.NEXT;
+    };
+  }
+  /* --- /KEYPAD --- */
 
   var blocks;
   var currentLoop;

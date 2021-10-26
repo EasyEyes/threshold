@@ -5,6 +5,7 @@ showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 spacingDirection,radial,radial,radial,radial,radial,radial
 spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4,1.4
 spacingRelationToSize,ratio,typographic,ratio,typographic,ratio,typographic
+simulateKeypadBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 targetAlphabet,DHKNORSVZ,DHKNORSVZ,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ابتثجحخدذرزسشصضطظعغفقكلمنهوي,ابتثجحخدذرزسشصضطظعغفقكلمنهوي
 targetDurationSec,1,1,1,1,1,1
 targetEccentricityXDeg,-10,10,-10,10,-10,10
