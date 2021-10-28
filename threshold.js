@@ -5,7 +5,7 @@
 const debug = process.env.debug;
 
 const useConsent = false;
-const useRC = true;
+const useRC = false;
 const showGrid = debug;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
@@ -55,6 +55,11 @@ import {
 } from "./components/bounding.js";
 
 import { getGridLines, updateGridVisible } from "./components/grid.js";
+import {
+  WeibullObserver,
+  PerfectObserver,
+  BlindObserver,
+} from "./components/simulatedObserver.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -122,6 +127,8 @@ Papa.parse("conditions/blockCount.csv", {
 });
 
 const blockFiles = {};
+// ASSUMES only one type of simulation is used per block
+var simulated = {};
 
 const loadBlockFiles = (count, callback) => {
   if (count === 0) {
@@ -138,6 +145,8 @@ const loadBlockFiles = (count, callback) => {
       if (debug) console.log("Block " + count + ": ", results.data);
 
       Object.values(results.data).forEach((row) => {
+        simulated[count] = row["simulationModel"];
+        console.log(`simulationModel: ${row["simulationModel"]}`);
         let fontFamily = row["targetFont"];
         let fontTestString = "12px " + fontFamily;
         let fontPath = "fonts/" + fontFamily + ".woff2";
@@ -200,6 +209,7 @@ var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
 const experiment = (blockCount) => {
+  console.log(`simulated: ${simulated}`);
   ////
   // Resources
   const _resources = [];
@@ -410,6 +420,7 @@ const experiment = (blockCount) => {
       clock: new util.Clock(),
       waitForStart: true,
     });
+    console.log("keyboard for response: ", key_resp);
 
     fixation = new visual.TextStim({
       win: psychoJS.window,
@@ -600,6 +611,7 @@ const experiment = (blockCount) => {
 
   function consentRoutineEachFrame() {
     return async function () {
+      if (simulated[0]) return Scheduler.Event.NEXT;
       //------Loop for each frame of Routine 'consent'-------
       // get current time
       t = consentClock.getTime();
@@ -773,6 +785,7 @@ const experiment = (blockCount) => {
 
   function fileRoutineEachFrame() {
     return async function () {
+      if (simulated[0]) return Scheduler.Event.NEXT;
       //------Loop for each frame of Routine 'file'-------
       // get current time
       t = fileClock.getTime();
@@ -844,6 +857,7 @@ const experiment = (blockCount) => {
   }
 
   async function _instructionRoutineEachFrame() {
+    if (simulated[0]) return Scheduler.Event.NEXT;
     t = instructionsClock.getTime();
     frameN = frameN + 1;
 
@@ -889,6 +903,7 @@ const experiment = (blockCount) => {
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
+      console.log(`What the heck is a snapshot? ${snapshot}`);
 
       // set up handler to look after randomisation of conditions etc
       blocks = new TrialHandler({
