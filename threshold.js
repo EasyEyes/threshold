@@ -231,7 +231,7 @@ const experiment = (blockCount) => {
   psychoJS.openWindow({
     fullscr: !debug,
     color: new util.Color([0.9, 0.9, 0.9]),
-    units: "pix",
+    units: "height",
     waitBlanking: true,
   });
 
