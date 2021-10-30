@@ -24,8 +24,24 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body>
-    <iframe src="form/consentform.pdf" id="consent-form-pdf" height="75%" width="75%" scrolling="auto"></iframe>
-    <div id="consent-form-markdown"></div>
+    <div id="form-container">
+      <iframe
+        src="forms/consentform.pdf"
+        id="form-pdf"
+        height="100%"
+        width="100%"
+        scrolling="auto"
+      ></iframe>
+      <div id="form-md"></div>
+      <div id="consent-form-input">
+        <button id="consent-yes">YES</button>
+        <button id="consent-no">NO</button>
+      </div>
+      <div id="debrief-form-input">
+        <button id="debrief-yes">YES</button>
+        <button id="debrief-no">NO</button>
+      </div>
+    </div>
     <div id="root"></div>
     <!-- external libraries -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>

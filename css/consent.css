@@ -1,16 +1,34 @@
-#consent-form-pdf {
-  position:absolute; 
-  top: 2%;
-  left: 15%; 
-  display:none;
+#form-container {
+  position: absolute;
+  top: 7%;
+  left: 15%;
+  width: 75%;
+  height: 75%;
+  display: none;
   z-index: 0;
 }
-#consent-form-markdown {
-  position:absolute; 
-  top: 20%;
-  left: 25%; 
-  width: 50%;
+#form-pdf {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: none;
+  z-index: 0;
+}
+#form-md {
+  position: absolute;
+  width: 100%;
+  height: 100%;
   overflow: auto;
-  display:none;
+  display: none;
+  z-index: 0;
+}
+#consent-form-input,
+#debrief-form-input {
+  position: absolute;
+  top: 110%;
+  left: 20%;
+  width: 65%;
+  height: 3vh;
+  display: none;
   z-index: 0;
 }
