@@ -9,7 +9,7 @@ const useRC = false;
 const showGrid = debug;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
-const { PsychoJS } = core;
+const { PsychoJS, EventManager } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
 
@@ -56,9 +56,8 @@ import {
 
 import { getGridLines, updateGridVisible } from "./components/grid.js";
 import {
-  WeibullObserver,
-  PerfectObserver,
-  BlindObserver,
+  SimulatedObserver,
+  simulateObserverResponse,
 } from "./components/simulatedObserver.js";
 
 /* -------------------------------------------------------------------------- */
@@ -90,6 +89,7 @@ const fontsRequired = {};
 ////
 // blockCount is just a file telling the program how many blocks in total
 Papa.parse("conditions/blockCount.csv", {
+  skipEmptyLines: true,
   download: true,
   complete: function (results) {
     const blockCount = Number(results.data[results.data.length - 1][0]) + 1; // TODO Make this calculation robust
@@ -127,8 +127,11 @@ Papa.parse("conditions/blockCount.csv", {
 });
 
 const blockFiles = {};
+
+/* --- SIMULATED --- */
 // ASSUMES only one type of simulation is used per block
 var simulated = {};
+/* --- /SIMULATED --- */
 
 const loadBlockFiles = (count, callback) => {
   if (count === 0) {
@@ -145,8 +148,13 @@ const loadBlockFiles = (count, callback) => {
       if (debug) console.log("Block " + count + ": ", results.data);
 
       Object.values(results.data).forEach((row) => {
+        /* --- SIMULATED --- */
         simulated[count] = row["simulationModel"];
-        console.log(`simulationModel: ${row["simulationModel"]}`);
+        console.log(
+          `simulationModel: ${row["simulationModel"]}, count: ${count}`
+        );
+        /* --- /SIMULATED --- */
+
         let fontFamily = row["targetFont"];
         let fontTestString = "12px " + fontFamily;
         let fontPath = "fonts/" + fontFamily + ".woff2";
@@ -611,7 +619,10 @@ const experiment = (blockCount) => {
 
   function consentRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
       if (simulated[0]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
+
       //------Loop for each frame of Routine 'consent'-------
       // get current time
       t = consentClock.getTime();
@@ -785,7 +796,9 @@ const experiment = (blockCount) => {
 
   function fileRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
       if (simulated[0]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
       //------Loop for each frame of Routine 'file'-------
       // get current time
       t = fileClock.getTime();
@@ -857,7 +870,10 @@ const experiment = (blockCount) => {
   }
 
   async function _instructionRoutineEachFrame() {
-    if (simulated[0]) return Scheduler.Event.NEXT;
+    /* --- SIMULATED --- */
+    if (simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+    /* --- /SIMULATED --- */
+
     t = instructionsClock.getTime();
     frameN = frameN + 1;
 
@@ -903,7 +919,6 @@ const experiment = (blockCount) => {
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
-      console.log(`What the heck is a snapshot? ${snapshot}`);
 
       // set up handler to look after randomisation of conditions etc
       blocks = new TrialHandler({
@@ -918,6 +933,7 @@ const experiment = (blockCount) => {
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
       currentLoop = blocks; // we're now the current loop
+      console.log("blocks: ", blocks);
 
       // Schedule all the trials in the trialList:
       for (const thisBlock of blocks) {
@@ -1031,6 +1047,7 @@ const experiment = (blockCount) => {
   var filterComponents;
   function filterRoutineBegin(snapshot) {
     return async function () {
+      console.log("snapshot in fileRoutineBegin: ", snapshot);
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
       currentBlockIndex = snapshot.block + 1;
       totalBlockCount = snapshot.nTotal;
@@ -1082,6 +1099,10 @@ const experiment = (blockCount) => {
 
   function filterRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
+      if (simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
+
       //------Loop for each frame of Routine 'filter'-------
       // get current time
       t = filterClock.getTime();
@@ -1358,6 +1379,9 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
+      if (simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
       t = instructionsClock.getTime();
       frameN = frameN + 1;
 
@@ -1429,6 +1453,10 @@ const experiment = (blockCount) => {
 
   var _key_resp_allKeys;
   var trialComponents;
+
+  /* --- SIMULATED --- */
+  var simulatedObserver;
+  /* --- /SIMULATED --- */
 
   function trialRoutineBegin(snapshot) {
     return async function () {
@@ -1590,7 +1618,7 @@ const experiment = (blockCount) => {
         spacingRelationToSize: spacingRelationToSize,
       };
       /* --- GRIDS --- */
-      if (showGrid) {
+      if (showGrid && !simulated[block]) {
         grids = {
           deg: getGridLines(psychoJS.window, "deg", displayOptions),
           cm: getGridLines(psychoJS.window, "cm", displayOptions),
@@ -1774,6 +1802,22 @@ const experiment = (blockCount) => {
         }
       }
       /* --- /GRIDS --- */
+      /* --- SIMULATED --- */
+      if (simulated[block]) {
+        console.log("SIMULATION This block should simulated!");
+        if (!simulatedObserver) {
+          simulatedObserver = new SimulatedObserver(
+            simulated[block],
+            level,
+            alphabet,
+            targetCharacter,
+            condition["thresholdProportionCorrect"]
+          );
+        } else {
+          simulatedObserver.updateTrial(level, alphabet, targetCharacter);
+        }
+      }
+      /* --- /SIMULATED --- */
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -1789,6 +1833,7 @@ const experiment = (blockCount) => {
   var frameRemains;
   function trialRoutineEachFrame() {
     return async function () {
+      console.log("in trialRoutineEachFrame");
       //------Loop for each frame of Routine 'trial'-------
       // get current time
       t = trialClock.getTime();
@@ -1835,6 +1880,15 @@ const experiment = (blockCount) => {
       }
 
       if (key_resp.status === PsychoJS.Status.STARTED) {
+        /* --- SIMULATED --- */
+        if (simulated[thisLoopNumber]) {
+          return simulateObserverResponse(
+            simulatedObserver,
+            key_resp,
+            psychoJS
+          );
+        }
+        /* --- /SIMULATED --- */
         let theseKeys = key_resp.getKeys({
           keyList: validAns,
           waitRelease: false,
@@ -2051,6 +2105,7 @@ const experiment = (blockCount) => {
         }
       }
       // was no response the correct answer?!
+      console.log("trialRoutineEnd key_resp: ", key_resp);
       if (key_resp.keys === undefined) {
         console.error("[key_resp.keys] No response error.");
       }
@@ -2060,6 +2115,9 @@ const experiment = (blockCount) => {
         currentLoop.addResponse(key_resp.corr, level);
         if (debug) console.log("level passed to addResponse: ", level);
       }
+
+      logStaircaseInfoToOutput(currentLoop);
+
       psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
       psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
       if (typeof key_resp.keys !== "undefined") {
@@ -2072,27 +2130,29 @@ const experiment = (blockCount) => {
       // the Routine "trial" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
 
-      psychoJS.experiment.addData(
-        "staircaseName",
-        currentLoop._currentStaircase._name
-      );
-      psychoJS.experiment.addData(
-        "questMeanAtEndOfTrial",
-        currentLoop._currentStaircase.mean()
-      );
-      psychoJS.experiment.addData(
-        "questSDAtEndOfTrial",
-        currentLoop._currentStaircase.sd()
-      );
-      psychoJS.experiment.addData(
-        "questQuantileOfQuantileOrderAtEndOfTrial",
-        currentLoop._currentStaircase.quantile(
-          currentLoop._currentStaircase._jsQuest.quantileOrder
-        )
-      );
-
       return Scheduler.Event.NEXT;
     };
+  }
+
+  function logStaircaseInfoToOutput(currentLoop) {
+    psychoJS.experiment.addData(
+      "staircaseName",
+      currentLoop._currentStaircase._name
+    );
+    psychoJS.experiment.addData(
+      "questMeanAtEndOfTrial",
+      currentLoop._currentStaircase.mean()
+    );
+    psychoJS.experiment.addData(
+      "questSDAtEndOfTrial",
+      currentLoop._currentStaircase.sd()
+    );
+    psychoJS.experiment.addData(
+      "questQuantileOfQuantileOrderAtEndOfTrial",
+      currentLoop._currentStaircase.quantile(
+        currentLoop._currentStaircase._jsQuest.quantileOrder
+      )
+    );
   }
 
   function endLoopIteration(scheduler, snapshot) {
