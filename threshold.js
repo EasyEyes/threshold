@@ -16,8 +16,12 @@ const { Scheduler } = util;
 ////
 import * as jsQUEST from "./addons/jsQUEST.module.js";
 
+import Papa from "papaparse";
+
 ////
 /* ------------------------------- Components ------------------------------- */
+
+import { ParamReader } from "./parameters/paramReader.js";
 
 import {
   hideCursor,
@@ -29,6 +33,12 @@ import {
   spacingPixelsFromLevel,
 } from "./components/utils.js";
 
+import {
+  formCalibrationList,
+  useCalibration,
+} from "./components/useCalibration.js";
+
+import { loadFonts } from "./components/fonts.js";
 import { phrases } from "./components/i18n.js";
 
 import {
@@ -82,103 +92,25 @@ let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
 
-////
-// blockCount is just a file telling the program how many blocks in total
-Papa.parse("conditions/blockCount.csv", {
-  download: true,
-  complete: function (results) {
-    const blockCount = Number(results.data[results.data.length - 1][0]) + 1; // TODO Make this calculation robust
-    loadBlockFiles(blockCount, () => {
-      if (useRC) {
-        rc.panel(
-          [
-            {
-              name: "screenSize",
-            },
-            {
-              name: "trackDistance",
-              options: {
-                nearPoint: false,
-                showVideo: false,
-              },
-            },
-          ],
-          "#rc-panel",
-          {},
-          () => {
-            rc.removePanel();
-            document.body.removeChild(document.querySelector("#rc-panel"));
-            // ! Start actual experiment
-            experiment(blockCount);
-          }
-        );
-      } else {
-        // NO RC
-        document.body.removeChild(document.querySelector("#rc-panel"));
-        experiment(blockCount);
-      }
+const paramReaderInitialized = (reader) => {
+  // Load fonts
+  loadFonts(reader, fontsRequired);
+
+  // Remote Calibrator
+  if (useRC && useCalibration(reader)) {
+    rc.panel(formCalibrationList(reader), "#rc-panel", {}, () => {
+      rc.removePanel();
+      document.body.removeChild(document.querySelector("#rc-panel"));
+      // ! Start actual experiment
+      experiment(reader.blockCount);
     });
-  },
-});
-
-const blockFiles = {};
-
-const loadBlockFiles = (count, callback) => {
-  if (count === 0) {
-    callback();
-    return;
+  } else {
+    document.body.removeChild(document.querySelector("#rc-panel"));
+    experiment(reader.blockCount);
   }
-  Papa.parse(`conditions/block_${count}.csv`, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    dynamicTyping: true,
-    complete: function (results) {
-      blockFiles[count] = results.data;
-      if (debug) console.log("Block " + count + ": ", results.data);
-
-      Object.values(results.data).forEach((row) => {
-        let fontFamily = row["targetFont"];
-        let fontTestString = "12px " + fontFamily;
-        let fontPath = "fonts/" + fontFamily + ".woff2";
-        if (debug) console.log("fontTestString: ", fontTestString);
-
-        fetch(fontPath).then((response) => {
-          if (response.ok) {
-            fontsRequired[fontFamily] = fontPath;
-            // let f = new FontFace(fontFamily, `url(${response.url})`);
-            // f.load()
-            //   .then((loadedFontFace) => {
-            //     document.fonts.add(loadedFontFace);
-            //   })
-            //   .catch((err) => {
-            //     console.error(err);
-            //   });
-          } else {
-            // console.log(
-            //   "Does the browser consider this font supported?",
-            //   document.fonts.check(fontTestString)
-            // );
-            // console.log(
-            //   "Uh oh, unable to find the font file for: " +
-            //     fontFamily +
-            //     "\n" +
-            //     "If this font is already supported by the browser then it should display correctly. " +
-            //     "\n" +
-            //     "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
-            //     "\n" +
-            //     "Please verify for yourself that " +
-            //     fontFamily +
-            //     " is being correctly represented in your experiment."
-            // );
-          }
-        });
-      });
-
-      loadBlockFiles(count - 1, callback);
-    },
-  });
 };
+
+const paramReader = new ParamReader("experiment.csv", paramReaderInitialized);
 
 var totalTrialConfig = {
   initialVal: 0,
