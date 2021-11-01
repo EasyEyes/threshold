@@ -1,10 +1,8 @@
 export const loadFonts = (reader, fontList) => {
   for (let condition of reader.conditions) {
-    const sourceType = reader.read(
-      "targetFontSource",
-      condition.conditionName
-    )[0];
-    const name = reader.read("targetFont", condition.conditionName)[0];
+    const conditionName = condition.label;
+    const sourceType = reader.read("targetFontSource", conditionName);
+    const name = reader.read("targetFont", conditionName);
     const fontFilePath = "fonts/" + name;
     if (sourceType === "file") {
       fetch(fontFilePath)
@@ -13,7 +11,7 @@ export const loadFonts = (reader, fontList) => {
           fontList[n] = fontFilePath;
         })
         .catch((err) => {
-          console.log("No such font file.");
+          console.error(`Font file ${name} not found.`);
         });
     } else if (sourceType === "browser") {
     } else if (sourceType === "server") {

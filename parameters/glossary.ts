@@ -145,6 +145,15 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "1",
   },
+  _prolificEligibilityRequirements: {
+    name: "_prolificEligibilityRequirements",
+    availability: "now",
+    example: "",
+    explanation:
+      "This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
+    type: "",
+    default: "",
+  },
   _prolificStudyType: {
     name: "_prolificStudyType",
     availability: "now",
@@ -155,16 +164,42 @@ export const GLOSSARY: Glossary = {
     default: "SINGLE",
     categories: ["UK_REP_SAMPLE", "US_REP_SAMPLE", "SINGLE"],
   },
-  "block                                                                                                   ":
-    {
-      name: "block                                                                                                   ",
-      availability: "now",
-      example: "1",
-      explanation:
-        "The block number. The first condition (second column) must have a block number of 0 or 1, consistent with zeroBasedNumberingBool. After the first condition, each successive condition (column) must have the same block number as the one preceding it, or increased by +1.",
-      type: "integer",
-      default: "1",
-    },
+  block: {
+    name: "block",
+    availability: "now",
+    example: "1",
+    explanation:
+      "The block number. The first condition (second column) must have a block number of 0 or 1, consistent with zeroBasedNumberingBool. After the first condition, each successive condition (column) must have the same block number as the one preceding it, or increased by +1.",
+    type: "integer",
+    default: "1",
+  },
+  calibrateBlindSpotBool: {
+    name: "calibrateBlindSpotBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      'Initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper.',
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateDistanceCheckBool: {
+    name: "calibrateDistanceCheckBool",
+    availability: "now",
+    example: "",
+    explanation:
+      'When TRUE, requests checking of the calibrator by the participant, provided they have a tape measure, meter stick, or yard stick, or failing that, a ruler. After each size or distance calibration, if calibrationDistanceCheckBool=TRUE, then we will ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick; a 12" or 30 cm ruler could be used if we exclude long distances), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. If no device, then we skip the rest of the calibrations that need a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like “16 3/16” or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. Our current scheme with the calibrator is to have a Boolean parameter for each calibration. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people on Prolific and mention in our job description that they must have a tape measure, meter stick or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.\n',
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateGazeCheckBool: {
+    name: "calibrateGazeCheckBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "To check gaze tracking we don’t need a measuring device, and hardly any instructions. I think we could just put up our fixation cross in a few random places and ask them to click on it. It will be very similar to the training and we don’t need to tell the participant that we progressed from training to checking.",
+    type: "boolean",
+    default: "FALSE",
+  },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
     availability: "now",
@@ -172,7 +207,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Use this to turn EasyEyes distance tracking on and off. Before tracking can begin you must make an initial calibration of distance, either by easyEyesBlindSpotBool or easyEyesPupilDistanceBool, or both. Distance tracking uses the webcam to monitor position of the participant's head. It ignores where you're looking. The head is not a point, of course. Since this is for vision research, the point we estimate is the midpoint between the two eyes. That point is sometime called cyclopean, referring to the mythical one-eyed Cyclops in Homer's Odyssey. From each webcam image we extract: 1. the viewing distance, from the midpoint (between the two eyes) to the screen, and 2. the near point, which is the point in the plane of the screen that is closest to the midpoint between the eyes. When rendering visual stimulus specified in deg, it is necessary to take the viewing distance (and near point) into account. The near point becomes important at large eccentricities and is usually ignored at small eccentricities.",
     type: "boolean",
-    default: "",
+    default: "TRUE",
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
@@ -181,7 +216,16 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Use this to turn EasyEyes gaze tracking on and off. It must be calibrated before use. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 4 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
     type: "boolean",
-    default: "",
+    default: "FALSE",
+  },
+  calibrateTrackNearPointBool: {
+    name: "calibrateTrackNearPointBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "Initial measurement of viewing distance by measuring the pupillary distance.",
+    type: "",
+    default: "FALSE",
   },
   conditionGroup: {
     name: "conditionGroup",
@@ -199,7 +243,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Use this to label your condition to help guide your subsequent data analysis. Not used by EasyEyes.",
     type: "text",
-    default: "",
+    default: "untitled",
   },
   conditionTrials: {
     name: "conditionTrials",
@@ -534,6 +578,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.2",
   },
+  readingNominalSizeDeg: {
+    name: "readingNominalSizeDeg",
+    availability: "later",
+    example: "3",
+    explanation:
+      'If readingSetSizeBy is "nominal", then set point size to readingNominalSizeDeg*pixPerDeg.',
+    type: "",
+    default: "",
+  },
   readingNumberOfPossibleAnswers: {
     name: "readingNumberOfPossibleAnswers",
     availability: "later",
@@ -585,6 +638,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       'If readingSetSizeBy is "spacing", the point size of the text to be read is adjusted to make this the average center-to-center spacing (deg) of neighboring characters in words displayed. Text is displayed with the font\'s default spacing, and the point size is adjusted to achieve the requested average letter spacing.',
     type: "numerical",
+    default: "",
+  },
+  readingXHeightDeg: {
+    name: "readingXHeightDeg",
+    availability: "later",
+    example: "",
+    explanation:
+      'If readingSetSizeBy is "x-height", then set point size to to achieve this specified x-height (the height of lowercase x). ',
+    type: "",
     default: "",
   },
   responseClickedBool: {
@@ -640,6 +702,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "For foreign or symbol alphabets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
     type: "boolean",
+    default: "",
+  },
+  showCounterBool: {
+    name: "showCounterBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      'If TRUE display something like,"Trial 31 of 120. Block 2 of 3. At 32 cm." (The trailing part about distance is included only if showViewingDistanceBool is TRUE.) The trial counter counts all trials in the block, which may have several conditions. If the block has three conditions with 40 blocks each, then there are 120 trials in the block. ',
+    type: "",
     default: "",
   },
   showCounterWhere: {
@@ -699,6 +770,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  simulateKeypadBool: {
+    name: "simulateKeypadBool",
+    availability: "imminent",
+    example: "FALSE",
+    explanation:
+      "Use this to turn EasyEyes keypad simulator on and off. It runs on the participant's smartphone, and the participant must connect the smartphone wirelessly with the computer. This begins with displaying a QR code on the computer,  pointing the smartphone camera at it, and clicking the link that appears. Once connected, the participant can respond on the keypad displayed on the smartphone. It offers keys just for the allowed choices and in the correct font.",
+    type: "",
+    default: "",
+  },
   simulateParticipantBool: {
     name: "simulateParticipantBool",
     availability: "imminent",
@@ -715,6 +795,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       "If true, then display the stimuli as though a participant were present. This is helpful for debugging. If false, then skip display to run as fast as possible.",
     type: "boolean",
+    default: "",
+  },
+  simulationBeta: {
+    name: "simulationBeta",
+    availability: "imminent",
+    example: "3",
+    explanation: "Used by the Weibull observer model.",
+    type: "",
+    default: "",
+  },
+  simulationDelta: {
+    name: "simulationDelta",
+    availability: "imminent",
+    example: "0.01",
+    explanation: "Used by the Weibull observer model.",
+    type: "",
     default: "",
   },
   simulationModel: {
@@ -972,6 +1068,14 @@ export const GLOSSARY: Glossary = {
     default: "identify",
     categories: ["identify", "read"],
   },
+  targetTransparency: {
+    name: "targetTransparency",
+    availability: "later",
+    example: "",
+    explanation: "for MJ",
+    type: "",
+    default: "",
+  },
   thresholdBeta: {
     name: "thresholdBeta",
     availability: "now",
@@ -1063,5 +1167,14 @@ export const GLOSSARY: Glossary = {
       "If true then the first block and condition are numbered 0, otherwise 1.",
     type: "boolean",
     default: "FALSE",
+  },
+  "": {
+    name: "",
+    availability: "now",
+    example: "",
+    explanation:
+      'Any available font. If the file name matches, this will select a font file in the EasyEyesResources/Fonts/ folder on your Pavlovia account. If the targetFont string omits the filename extension (typically woff2, woff, or otf), then matching will prefer the smallest file. If there is no match in that Fonts folder, then the experiment will rely on runtime matching in the browser of the participant\'s computer. Some fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. The preprocessor will warn you if runtime matching seems unlikely. When you specify a font file in your Fonts folder,  the "targetFont" is the name of the font file, which typically specifies both the font and style. When relying on font matching by the participant\'s browser you should specify just the family name, like "Verdana", and you can use the "targetFontStyle" to select italic, bold, or bold-italic. Avoid doing both (i.e. specifying face through both "targetFont" and the targetFontStyle) because some browsers may then apply an algorithm to thicken or slant what is specified by the font file, with results that may be surprising and unwanted.  ',
+    type: "",
+    default: "",
   },
 };

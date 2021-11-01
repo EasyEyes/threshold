@@ -39,8 +39,8 @@ async function processLanguageSheet() {
     if (parameterInfo.type === "categorical")
       parameterInfo.categories = parameter["Categories"].split(", ");
     // Exclude rows that Denis used for other notes
-    if (parameterInfo.name && parameterInfo.type)
-      data[parameterName] = parameterInfo;
+    // if (parameterInfo.name && parameterInfo.type)
+    if (!parameterInfo.name.includes("__")) data[parameterName] = parameterInfo;
   }
 
   const exportWarning = `/*

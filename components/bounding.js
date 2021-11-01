@@ -4,6 +4,7 @@ import {
   pixelsToDegrees,
   spacingPixelsFromLevel,
   levelFromSpacingPixels,
+  logger,
 } from "./utils.js";
 
 const debug = false;
@@ -54,7 +55,7 @@ export const getTypographicHeight = (
       displayOptions.viewingDistanceCm
     );
   } else {
-    console.log("PROPOSED SPACING IS NOT TOO LARGE");
+    console.log("PROPOSED SPACING IS GOOD!");
   }
 
   const testHeight = 10;
@@ -108,10 +109,10 @@ export const awaitMaxPresentableLevel = (
       displayOptions
     )
   ) {
-    if (debug) console.log("acceptable level found: ", proposedLevel);
+    logger("Acceptable level found", proposedLevel);
     return new Promise((resolve) => resolve(proposedLevel));
   } else {
-    if (debug) console.log("unacceptable level: ", proposedLevel);
+    logger("Unacceptable level", proposedLevel);
     return awaitMaxPresentableLevel(
       proposedLevel - granularityOfChange,
       targetXYPix,
@@ -157,12 +158,10 @@ const unacceptableStimuli = (
     height: screen.height,
   });
   const badPresentation = fixationInfringed || stimuliExtendOffscreen;
-  if (debug) {
-    console.log("areaFlankersCover: ", areaFlankersCover);
-    console.log("fixationInfringed: ", fixationInfringed);
-    console.log("stimuliExtendOffscreen: ", stimuliExtendOffscreen);
-    console.log("badPresentation: ", badPresentation);
-  }
+  logger("areaFlankersCover", areaFlankersCover);
+  logger("fixationInfringed", fixationInfringed);
+  logger("stimuliExtendOffscreen", stimuliExtendOffscreen);
+  logger("badPresentation", badPresentation);
   return badPresentation;
 };
 
@@ -194,11 +193,11 @@ const rectangleContainsPoint = (rectangle, point) => {
   const upperY = Math.max(rectangle[0][1], rectangle[1][1]);
   const xIsIn = point[0] >= leftX && point[0] <= rightX;
   const yIsIn = point[1] >= lowerY && point[1] <= upperY;
-  if (debug) {
-    console.log("flanker rectangle: ", rectangle);
-    console.log("xIsIn: ", xIsIn);
-    console.log("yIsIn: ", yIsIn);
-  }
+
+  logger("flanker rectangle", rectangle);
+  logger("xIsIn", xIsIn);
+  logger("yIsIn", yIsIn);
+
   return xIsIn && yIsIn;
 };
 
@@ -224,7 +223,7 @@ const flankersExtent = (
   flankerOrientation,
   sizingParameters
 ) => {
-  if (debug) console.log("window: ", sizingParameters.window);
+  logger("window", sizingParameters.window);
   const spacingDegrees = Math.pow(10, level);
   const spacingPixels = Math.abs(
     degreesToPixels(spacingDegrees, {

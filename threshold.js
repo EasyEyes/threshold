@@ -2,11 +2,11 @@
  * Crowding Test *
  *****************/
 
-const debug = process.env.debug;
+import { debug } from "./components/utils.js";
 
 const useConsent = false;
 const useRC = true;
-const showGrid = debug;
+const showGrid = false;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -16,14 +16,13 @@ const { Scheduler } = util;
 ////
 import * as jsQUEST from "./addons/jsQUEST.module.js";
 
-import Papa from "papaparse";
-
 ////
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
 
 import {
+  logger,
   hideCursor,
   showCursor,
   shuffle,
@@ -92,11 +91,13 @@ let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
 
+/* -------------------------------------------------------------------------- */
+
 const paramReaderInitialized = (reader) => {
-  // Load fonts
+  // ! Load fonts
   loadFonts(reader, fontsRequired);
 
-  // Remote Calibrator
+  // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
     rc.panel(formCalibrationList(reader), "#rc-panel", {}, () => {
       rc.removePanel();
@@ -106,11 +107,14 @@ const paramReaderInitialized = (reader) => {
     });
   } else {
     document.body.removeChild(document.querySelector("#rc-panel"));
+    // ! Start actual experiment
     experiment(reader.blockCount);
   }
 };
 
-const paramReader = new ParamReader("experiment.csv", paramReaderInitialized);
+const paramReader = new ParamReader("conditions", paramReaderInitialized);
+
+/* -------------------------------------------------------------------------- */
 
 var totalTrialConfig = {
   initialVal: 0,
@@ -141,10 +145,10 @@ const experiment = (blockCount) => {
       path: `conditions/block_${i}.csv`,
     });
   }
-  if (debug) console.log("fontsRequired: ", fontsRequired);
+  logger("fontsRequired", fontsRequired);
 
   for (let i in fontsRequired) {
-    if (debug) console.log(i, fontsRequired[i]);
+    logger(i, fontsRequired[i]);
     _resources.push({ name: i, path: fontsRequired[i] });
   }
 
@@ -216,7 +220,7 @@ const experiment = (blockCount) => {
     expInfo["participant"] = rc.id.value;
   }
 
-  if (debug) console.log("_resources: ", _resources);
+  logger("_resources", _resources);
   psychoJS.start({
     expName: expName,
     expInfo: expInfo,
@@ -312,7 +316,7 @@ const experiment = (blockCount) => {
     });
     consent_button_no.clock = new util.Clock();
 
-    if (showGrid) console.log("Window, for grid purposes: ", psychoJS.window);
+    logger("Window (for grid purposes)", psychoJS.window);
 
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
@@ -960,25 +964,18 @@ const experiment = (blockCount) => {
       thisLoopNumber += 1;
       thisConditionsFile = `conditions/block_${thisLoopNumber}.csv`;
 
-      const possibleTrials = [];
-      const thisBlockFileData = blockFiles[thisLoopNumber];
+      if (debug)
+        console.log(
+          "%c=======================\n====== New Block ======\n=======================",
+          "color: purple"
+        );
 
-      if (debug) console.log("thisBlockFileData: ", thisBlockFileData);
+      const possibleTrials = paramReader.read(
+        "conditionTrials",
+        thisLoopNumber
+      );
 
-      for (let rowKey in thisBlockFileData) {
-        let rowIndex = parseInt(rowKey);
-        if (Object.keys(thisBlockFileData[rowIndex]).length > 1) {
-          if (debug)
-            console.log(
-              "condition trials this row of block: ",
-              parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
-            );
-          possibleTrials.push(
-            parseInt(thisBlockFileData[rowIndex]["conditionTrials"])
-          );
-        }
-      }
-      if (debug) console.log("possibleTrials: ", possibleTrials);
+      logger("possibleTrials", possibleTrials);
       totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
 
       // TODO Remove this constraint to allow different # of trials for each condition
@@ -1340,8 +1337,8 @@ const experiment = (blockCount) => {
   var targetEccentricityXDeg;
   var targetEccentricityYDeg;
   var targetEccentricityXYDeg;
-  var trackGazeYes;
-  var trackHeadYes;
+  // var trackGazeYes;
+  // var trackHeadYes;
   var wirelessKeyboardNeededYes;
 
   var _key_resp_allKeys;
@@ -1355,11 +1352,9 @@ const experiment = (blockCount) => {
 
       ////
       if (debug)
-        console.log(
-          `Level: ${snapshot.getCurrentTrial().trialsVal}, Index: ${
-            snapshot.thisIndex
-          }`
-        );
+        console.log("%c\n\n====== New Trial ======\n\n", "color: purple");
+      logger("Level", snapshot.getCurrentTrial().trialsVal);
+      logger("Index", snapshot.thisIndex);
 
       let condition;
       const parametersToExcludeFromData = [];
@@ -1373,22 +1368,30 @@ const experiment = (blockCount) => {
           );
         }
       }
-      if (debug) console.log("condition: ", condition);
+      // logger("condition", condition);
+
+      ////
+      const cName = condition["label"];
+      const reader = paramReader;
+      ////
 
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-      if (debug) console.log("level from getQuestValue(): ", proposedLevel);
+      logger("level from getQuestValue()", proposedLevel);
 
       psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
       // TODO Find a real way of estimating the max size
       proposedLevel = Math.min(proposedLevel, 1.75);
 
       psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
-      psychoJS.experiment.addData("conditionName", condition["label"]);
+      psychoJS.experiment.addData("conditionName", cName);
       psychoJS.experiment.addData(
         "flankerOrientation",
-        condition["spacingDirection"]
+        reader.read("spacingDirection", cName)
       );
-      psychoJS.experiment.addData("targetFont", condition["targetFont"]);
+      psychoJS.experiment.addData(
+        "targetFont",
+        reader.read("targetFont", cName)
+      );
       // TODO add a data field that is unique to this staircase (ie differentiate staircases within the same block, if they have equivalent parameters)
 
       // TODO set QUEST
@@ -1407,7 +1410,7 @@ const experiment = (blockCount) => {
       if (!rc.screenWidthCm)
         console.warn("[Screen Width] Using arbitrary screen width. Enable RC.");
 
-      viewingDistanceDesiredCm = condition["viewingDistanceDesiredCm"];
+      viewingDistanceDesiredCm = reader.read("viewingDistanceDesiredCm", cName);
       // viewingDistanceDesiredCm = 10;
       viewingDistanceCm = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
@@ -1427,34 +1430,35 @@ const experiment = (blockCount) => {
 
       // TODO check that we are actually trying to test for "spacing", not "size"
 
-      spacingDirection = condition["spacingDirection"];
-      targetFont = condition["targetFont"];
+      spacingDirection = reader.read("spacingDirection", cName);
+      targetFont = reader.read("targetFont", cName);
 
-      targetAlphabet = String(condition["targetAlphabet"]).split("");
-      validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
+      targetAlphabet = String(reader.read("targetAlphabet", cName)).split("");
+      validAns = String(reader.read("targetAlphabet", cName))
+        .toLowerCase()
+        .split("");
 
-      showAlphabetWhere = condition["showAlphabetWhere"] || "bottom";
-      showViewingDistanceBool =
-        condition["showViewingDistanceBool"] !== "FALSE";
-      showCounterBool = condition["showCounterBool"] !== "FALSE";
+      showAlphabetWhere = reader.read("showAlphabetWhere", cName);
+      showViewingDistanceBool = reader.read("showViewingDistanceBool", cName);
+      showCounterBool = reader.read("showCounterBool", cName);
 
-      conditionTrials = condition["conditionTrials"];
-      targetDurationSec = condition["targetDurationSec"];
+      conditionTrials = reader.read("conditionTrials", cName);
+      targetDurationSec = reader.read("targetDurationSec", cName);
 
       fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
-      showFixation = condition["markTheFixationBool"] === "True";
+      showFixation = reader.read("markTheFixationBool", cName);
 
-      targetMinimumPix = condition["targetMinimumPix"];
-      spacingOverSizeRatio = condition["spacingOverSizeRatio"];
-      spacingRelationToSize = condition["spacingRelationToSize"] || "ratio";
-      if (debug) console.log("spacingRelationToSize: ", spacingRelationToSize);
+      targetMinimumPix = reader.read("targetMinimumPix", cName);
+      spacingOverSizeRatio = reader.read("spacingOverSizeRatio", cName);
+      spacingRelationToSize = reader.read("spacingRelationToSize", cName);
+      logger("spacingRelationToSize", spacingRelationToSize);
 
-      targetEccentricityXDeg = condition["targetEccentricityXDeg"];
+      targetEccentricityXDeg = reader.read("targetEccentricityXDeg", cName);
       psychoJS.experiment.addData(
         "targetEccentricityXDeg",
         targetEccentricityXDeg
       );
-      targetEccentricityYDeg = condition["targetEccentricityYDeg"];
+      targetEccentricityYDeg = reader.read("targetEccentricityYDeg", cName);
       psychoJS.experiment.addData(
         "targetEccentricityYDeg",
         targetEccentricityYDeg
@@ -1463,13 +1467,14 @@ const experiment = (blockCount) => {
         targetEccentricityXDeg,
         targetEccentricityYDeg,
       ];
-      if (debug)
-        console.log("targetEccentricityXYDeg: ", targetEccentricityXYDeg);
+      logger("targetEccentricityXYDeg", targetEccentricityXYDeg);
 
-      trackGazeYes = condition["trackGazeYes"] === "True";
-      trackHeadYes = condition["trackHeadYes"] === "True";
-      wirelessKeyboardNeededYes =
-        condition["wirelessKeyboardNeededYes"] === "True";
+      // trackGazeYes = reader.read("trackGazeYes", cName);
+      // trackHeadYes = reader.read("trackHeadYes", cName);
+      wirelessKeyboardNeededYes = reader.read(
+        "wirelessKeyboardNeededYes",
+        cName
+      );
 
       var alphabet = targetAlphabet;
       /* ------------------------------ Pick triplets ----------------------------- */
@@ -1479,9 +1484,8 @@ const experiment = (blockCount) => {
       var secondFlankerCharacter = tempAlphabet[2];
       if (debug)
         console.log(
-          firstFlankerCharacter,
-          targetCharacter,
-          secondFlankerCharacter
+          `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
+          "color: red; font-size: 1.5rem"
         );
       correctAns = targetCharacter.toLowerCase();
       /* -------------------------------------------------------------------------- */
@@ -1549,7 +1553,7 @@ const experiment = (blockCount) => {
           displayOptions
         );
         psychoJS.experiment.addData("levelUsed", level);
-        if (debug) console.log("New level: ", level);
+        logger("New level", level);
 
         spacingDeg = Math.pow(10, level);
         psychoJS.experiment.addData("spacingDeg", spacingDeg);
@@ -1975,7 +1979,7 @@ const experiment = (blockCount) => {
       // update the trial handler
       if (currentLoop instanceof MultiStairHandler) {
         currentLoop.addResponse(key_resp.corr, level);
-        if (debug) console.log("level passed to addResponse: ", level);
+        logger("level passed to addResponse", level);
       }
       psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
       psychoJS.experiment.addData("key_resp.corr", key_resp.corr);

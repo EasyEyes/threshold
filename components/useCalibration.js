@@ -1,11 +1,11 @@
 export const useCalibration = (reader) => {
   return ifTrue([
-    ...reader.read("calibrateBlindSpotBool"),
-    ...reader.read("calibrateDistanceCheckBool"),
-    ...reader.read("calibrateGazeCheckBool"),
-    ...reader.read("calibrateTrackDistanceBool"),
-    ...reader.read("calibrateTrackGazeBool"),
-    ...reader.read("calibrateTrackNearPointBool"),
+    ...reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateDistanceCheckBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateGazeCheckBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateTrackNearPointBool", "__ALL_BLOCKS__"),
   ]);
 };
 
@@ -16,15 +16,17 @@ function ifTrue(arr) {
 
 export const formCalibrationList = (reader) => {
   const tasks = ["screenSize"];
-  if (ifTrue(reader.read("calibrateTrackDistanceBool")))
+  if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     tasks.push({
       name: "trackDistance",
       options: {
-        nearPoint: ifTrue(reader.read("calibrateTrackNearPointBool")),
+        nearPoint: ifTrue(
+          reader.read("calibrateTrackNearPointBool", "__ALL_BLOCKS__")
+        ),
         showVideo: false,
       },
     });
-  if (ifTrue(reader.read("calibrateTrackGazeBool")))
+  if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
     tasks.push({
       name: "trackGaze",
       options: {
