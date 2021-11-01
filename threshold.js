@@ -6,7 +6,7 @@ import { debug } from "./components/utils.js";
 
 const useConsent = false;
 const useRC = true;
-const showGrid = false;
+const showGrid = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -68,7 +68,7 @@ import { getGridLines, updateGridVisible } from "./components/grid.js";
 /* -------------------------------------------------------------------------- */
 
 if (showGrid) {
-  var gridVisible = { pix: debug, cm: debug, deg: debug };
+  var gridVisible = { pix: false, cm: false, deg: false };
   const gridKeys = {
     pix: { key: "Control", keyCode: 17 },
     cm: { key: "Alt", keyCode: 18 },
