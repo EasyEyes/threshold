@@ -147,10 +147,10 @@ const experiment = (blockCount) => {
   }
   logger("fontsRequired", fontsRequired);
 
-  // for (let i in fontsRequired) {
-  //   logger(i, fontsRequired[i]);
-  //   _resources.push({ name: i, path: fontsRequired[i] });
-  // }
+  for (let i in fontsRequired) {
+    logger(i, fontsRequired[i]);
+    _resources.push({ name: i, path: fontsRequired[i] });
+  }
 
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
