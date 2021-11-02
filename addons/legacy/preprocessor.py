@@ -3,6 +3,10 @@ import pandas as pd
 import numpy as np
 from csv import reader, writer
 
+print("=============================================")
+print(" THIS PREPROCESSOR IS DEPRECATED! DON'T USE! ")
+print("=============================================")
+
 fileName = 'experiment.csv'
 if len(sys.argv) > 1:
     fileName = sys.argv[1]
