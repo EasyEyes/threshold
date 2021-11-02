@@ -5,7 +5,7 @@
 import { debug } from "./components/utils.js";
 
 const useConsent = false;
-const useRC = false;
+const useRC = true;
 const showGrid = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
