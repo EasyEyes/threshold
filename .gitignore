@@ -12,6 +12,10 @@ crowding*.py
 experiment_t.csv
 t_experiment.csv
 
+credentials.json
+
+# js/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -146,6 +150,6 @@ dmypy.json
 /reference
 
 # Store fonts that you want to use locally
-/fonts
+# /fonts
 
 scratch.js

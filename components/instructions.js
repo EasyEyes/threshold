@@ -1,74 +1,97 @@
+import { phrases } from "./i18n.js";
+import { replacePlaceholders } from "./multiLang.js";
+
 export const instructionsText = {
-  initial: (participantName = null) => {
-    return `Hello${
-      participantName === null ? "" : ` ${participantName}`
-    }. Please make sure this computer's sound is enabled by clicking the Beep button. By the way, you'll hear a beep like that every time you get a trial right.\n\n`;
+  initial: (L, participantName = null) => {
+    return (
+      replacePlaceholders(
+        phrases.T_thresholdSoundCheck[L],
+        participantName === null ? "" : ` ${participantName}`
+      ) + `\n\n`
+    );
   },
   initialByThresholdParameter: {
-    spacing: (responseType = 2, trialsThisBlock = 0) => {
+    spacing: (L, responseType = 2, trialsThisBlock = 0) => {
       /**
        * responseType
        * 0 - TYPED
        * 1 - CLICKED
        * 2 - TYPED or CLICKED
        */
-      let text = `You are about to begin a block of ${trialsThisBlock} trials. Each trial will present three letters. Please report just the middle letter, `;
+      let text = replacePlaceholders(
+        phrases.T_thresholdBeginBlock[L],
+        trialsThisBlock
+      );
       switch (responseType) {
         case 0:
-          text += `by pressing it in the keyboard.\n\n`;
+          text += `${phrases.T_pressingKey[L]}\n\n`;
           break;
         case 1:
-          text += `by clicking it in the displayed list of letters.\n\n`;
+          text += `${phrases.T_clickingLetter[L]}\n\n`;
           break;
         default:
-          text += `by pressing it in the keyboard or clicking it in the displayed list of letters.\n\n`;
+          text += `${phrases.T_pressingKeyOrClickingLetter[L]}\n\n`;
           break;
       }
       return text;
     },
   },
-  initialEnd: (responseType = 2) => {
-    let t = `Sometimes the letter will be easy to identify. Sometimes nearly impossible. You can't get much more than half right, so relax. Think of it as a guessing game, and just get as many as you can. (Quit anytime by pressing ESCAPE.) `;
+  initialEnd: (L, responseType = 2) => {
+    let t = phrases.T_guessingGame[L] + " ";
     switch (responseType) {
       case 0:
-        return t + `To continue, please hit RETURN.`;
+        return t + phrases.T_continueHitReturn[L];
       case 1:
-        return t + `To continue, click anywhere.`;
+        return t + phrases.T_continueClickAnywhere[L];
       default:
-        return t + `To continue, please hit RETURN or click anywhere.`;
+        return t + phrases.T_continueHitReturnOrClickAnywhere[L];
+    }
+  },
+  edu: (L) => {
+    return phrases.T_middleLetterDemo[L];
+  },
+  eduBelow: (L, responseType = 2) => {
+    let t = phrases.T_middleLetterBrief[L];
+    switch (responseType) {
+      case 0:
+        return t + phrases.T_continueHitReturn[L];
+      case 1:
+        return t + phrases.T_continueClickAnywhere[L];
+      default:
+        return t + phrases.T_continueHitReturnOrClickAnywhere[L];
     }
   },
   trial: {
     fixate: {
-      spacing: (responseType = 2) => {
+      spacing: (L, responseType = 2) => {
         switch (responseType) {
           case 0:
-            return `Ready? While looking directly at the crosshair, please press the SPACE bar.`;
+            return phrases.T_readyPressSpace[L];
           case 1:
-            return `Ready? While looking directly at the crosshair, please click on the crosshair.`;
+            return phrases.T_readyClickCrosshair[L];
           default:
-            return `Ready? While looking directly at the crosshair, please press the SPACE bar or click on the crosshair.`;
+            return phrases.T_readyPressSpaceOrClickCrosshair[L];
         }
       },
     },
     respond: {
-      spacing: (responseType = 2) => {
+      spacing: (L, responseType = 2) => {
         switch (responseType) {
           case 0:
-            return `Please identify the middle letter, by pressing it in the keyboard.`;
+            return phrases.T_identifyPressIt[L];
           case 1:
-            return `Please identify the middle letter, by clicking it below.`;
+            return phrases.T_identifyClickIt[L];
           default:
-            return `Please identify the middle letter, by pressing it in the keyboard or clicking it below.`;
+            return phrases.T_identifyPressItOrClickIt[L];
         }
       },
     },
   },
 };
 
-export const addBeepButton = (synth) => {
+export const addBeepButton = (L, synth) => {
   const b = document.createElement("button");
-  b.innerText = "Beep";
+  b.innerText = phrases.T_beep[L];
   b.onclick = (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();

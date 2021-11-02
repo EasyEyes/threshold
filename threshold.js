@@ -2,7 +2,11 @@
  * Crowding Test *
  *****************/
 
-const debug = true;
+const debug = process.env.debug;
+
+const useConsent = false;
+const useRC = true;
+const showGrid = debug;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS } = core;
@@ -24,6 +28,8 @@ import {
   addConditionToData,
   spacingPixelsFromLevel,
 } from "./components/utils.js";
+
+import { phrases } from "./components/i18n.js";
 
 import {
   addBeepButton,
@@ -52,16 +58,25 @@ import {
   getFlankerLocations,
 } from "./components/bounding.js";
 
+import { getGridLines, updateGridVisible } from "./components/grid.js";
+
 /* -------------------------------------------------------------------------- */
 
+if (showGrid) {
+  var gridVisible = { pix: debug, cm: debug, deg: debug };
+  const gridKeys = {
+    pix: { key: "Control", keyCode: 17 },
+    cm: { key: "Alt", keyCode: 18 },
+    deg: { key: "Meta", keyCode: 91 },
+  };
+  window.onkeydown = (e) => updateGridVisible(e, gridVisible, gridKeys);
+}
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
 var levelLeft, levelRight;
 let correctAns;
 
-// For development purposes, toggle RC off for testing speed
-const useRC = !debug;
 const rc = RemoteCalibrator;
 rc.init();
 
@@ -69,14 +84,14 @@ rc.init();
 let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
-const fontsRequired = new Set();
+const fontsRequired = {};
 
 ////
 // blockCount is just a file telling the program how many blocks in total
 Papa.parse("conditions/blockCount.csv", {
   download: true,
   complete: function (results) {
-    const blockCount = results.data.length - 2; // TODO Make this calculation robust
+    const blockCount = Number(results.data[results.data.length - 1][0]) + 1; // TODO Make this calculation robust
     loadBlockFiles(blockCount, () => {
       if (useRC) {
         rc.panel(
@@ -92,16 +107,18 @@ Papa.parse("conditions/blockCount.csv", {
               },
             },
           ],
-          "body",
+          "#rc-panel",
           {},
           () => {
             rc.removePanel();
+            document.body.removeChild(document.querySelector("#rc-panel"));
             // ! Start actual experiment
             experiment(blockCount);
           }
         );
       } else {
         // NO RC
+        document.body.removeChild(document.querySelector("#rc-panel"));
         experiment(blockCount);
       }
     });
@@ -127,29 +144,37 @@ const loadBlockFiles = (count, callback) => {
       Object.values(results.data).forEach((row) => {
         let fontFamily = row["targetFont"];
         let fontTestString = "12px " + fontFamily;
-        let fontPath = "fonts/" + fontFamily + ".woff";
+        let fontPath = "fonts/" + fontFamily + ".woff2";
         if (debug) console.log("fontTestString: ", fontTestString);
 
-        let response = fetch(fontPath).then((response) => {
+        fetch(fontPath).then((response) => {
           if (response.ok) {
-            fontsRequired.add(row["targetFont"]);
+            fontsRequired[fontFamily] = fontPath;
+            // let f = new FontFace(fontFamily, `url(${response.url})`);
+            // f.load()
+            //   .then((loadedFontFace) => {
+            //     document.fonts.add(loadedFontFace);
+            //   })
+            //   .catch((err) => {
+            //     console.error(err);
+            //   });
           } else {
-            console.log(
-              "Does the browser consider this font supported?",
-              document.fonts.check(fontTestString)
-            );
-            console.log(
-              "Uh oh, unable to find the font file for: " +
-                fontFamily +
-                "\n" +
-                "If this font is already supported by the browser then it should display correctly. " +
-                "\n" +
-                "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
-                "\n" +
-                "Please verify for yourself that " +
-                fontFamily +
-                " is being correctly represented in your experiment."
-            );
+            // console.log(
+            //   "Does the browser consider this font supported?",
+            //   document.fonts.check(fontTestString)
+            // );
+            // console.log(
+            //   "Uh oh, unable to find the font file for: " +
+            //     fontFamily +
+            //     "\n" +
+            //     "If this font is already supported by the browser then it should display correctly. " +
+            //     "\n" +
+            //     "If not, however, a different fallback font will be chosen by the browser, and your stimulus will not be displayed as intended. " +
+            //     "\n" +
+            //     "Please verify for yourself that " +
+            //     fontFamily +
+            //     " is being correctly represented in your experiment."
+            // );
           }
         });
       });
@@ -193,9 +218,10 @@ const experiment = (blockCount) => {
   }
   if (debug) console.log("fontsRequired: ", fontsRequired);
 
-  fontsRequired.forEach((fontFamily) => {
-    _resources.push({ name: fontFamily, path: fontPath });
-  });
+  for (let i in fontsRequired) {
+    if (debug) console.log(i, fontsRequired[i]);
+    _resources.push({ name: i, path: fontsRequired[i] });
+  }
 
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
@@ -212,7 +238,7 @@ const experiment = (blockCount) => {
   psychoJS.openWindow({
     fullscr: !debug,
     color: new util.Color([0.9, 0.9, 0.9]),
-    units: "height", // TODO change to pix
+    units: "height",
     waitBlanking: true,
   });
 
@@ -220,7 +246,11 @@ const experiment = (blockCount) => {
   psychoJS.schedule(
     psychoJS.gui.DlgFromDict({
       dictionary: expInfo,
-      title: expName,
+      title: phrases.T_thresholdTitle[rc.language.value],
+      participantText: phrases.T_participant[rc.language.value],
+      sessionText: phrases.T_session[rc.language.value],
+      cancelText: phrases.T_cancel[rc.language.value],
+      okText: phrases.T_ok[rc.language.value],
     })
   );
 
@@ -237,9 +267,11 @@ const experiment = (blockCount) => {
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(updateInfo); // add timeStamp
   flowScheduler.add(experimentInit);
-  flowScheduler.add(consentRoutineBegin());
-  flowScheduler.add(consentRoutineEachFrame());
-  flowScheduler.add(consentRoutineEnd());
+  if (useConsent) {
+    flowScheduler.add(consentRoutineBegin());
+    flowScheduler.add(consentRoutineEachFrame());
+    flowScheduler.add(consentRoutineEnd());
+  }
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
   flowScheduler.add(fileRoutineEnd());
@@ -305,12 +337,16 @@ const experiment = (blockCount) => {
 
   var debriefClock;
   var debrief_form_content;
+  /* --- GRIDS --- */
+  if (showGrid) var grids;
+  /* --- /GRIDS --- */
 
   var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
   var trialClock;
   // var targetBoundingPoly; // Target Bounding Box
   var instructions;
+  var instructions2;
   var key_resp;
   var fixation; ////
   var flanker1;
@@ -338,6 +374,8 @@ const experiment = (blockCount) => {
       depth: 0.0,
     });
 
+    if (showGrid) console.log("Window, for grid purposes: ", psychoJS.window);
+
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
@@ -345,7 +383,7 @@ const experiment = (blockCount) => {
     instructionsClock = new util.Clock();
 
     thisLoopNumber = 0;
-    thisConditionsFile = "./conditions/block_1.csv";
+    thisConditionsFile = "conditions/block_1.csv";
 
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
@@ -452,11 +490,12 @@ const experiment = (blockCount) => {
       alignHoriz: totalTrialConfig.alignHoriz,
       alignVert: totalTrialConfig.alignVert,
       height: 1.0,
-      wrapWidth: undefined,
+      wrapWidth: window.innerWidth,
       ori: 0.0,
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -20.0,
+      isInstruction: false,
     });
 
     instructions = new visual.TextStim({
@@ -474,6 +513,25 @@ const experiment = (blockCount) => {
       depth: -12.0,
       alignHoriz: "left",
       alignVert: "top",
+      isInstruction: true, // !
+    });
+
+    instructions2 = new visual.TextStim({
+      win: psychoJS.window,
+      name: "instructions2",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
+      height: 32.0,
+      wrapWidth: window.innerWidth * 0.8,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -12.0,
+      alignHoriz: "left",
+      alignVert: "bottom",
+      isInstruction: true, // !
     });
 
     debriefClock = new util.Clock();
@@ -495,6 +553,13 @@ const experiment = (blockCount) => {
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
     routineTimer = new util.CountdownTimer(); // to track time remaining of each (non-slip) routine
+
+    // TODO Not working
+    if (rc.languageDirection.value === "RTL") {
+      Object.assign(document.querySelector("canvas").style, {
+        direction: "rtl",
+      });
+    }
 
     return Scheduler.Event.NEXT;
   }
@@ -893,6 +958,9 @@ const experiment = (blockCount) => {
         blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
         blocksLoopScheduler.add(initInstructionRoutineEachFrame());
         blocksLoopScheduler.add(initInstructionRoutineEnd());
+        blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
+        blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
+        blocksLoopScheduler.add(eduInstructionRoutineEnd());
         const trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
@@ -926,6 +994,7 @@ const experiment = (blockCount) => {
       });
 
       trialInfoStr = getTrialInfoStr(
+        rc.language.value,
         showCounterBool,
         showViewingDistanceBool,
         currentTrialIndex,
@@ -1095,27 +1164,30 @@ const experiment = (blockCount) => {
     };
   }
 
+  /* ------------------------- Block Init Instructions ------------------------ */
+
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
       _instructionSetup(
         (snapshot.block === 0
-          ? instructionsText.initial(expInfo.participant)
+          ? instructionsText.initial(rc.language.value, expInfo.participant)
           : "") +
           instructionsText.initialByThresholdParameter["spacing"](
+            rc.language.value,
             responseType,
             totalTrialCount
           ) +
-          instructionsText.initialEnd(responseType)
+          instructionsText.initialEnd(rc.language.value, responseType)
       );
 
       clickedContinue = false;
       setTimeout(() => {
         document.addEventListener("click", _clickContinue);
         document.addEventListener("touchend", _clickContinue);
-      }, 800);
+      }, 1000);
 
-      _beepButton = addBeepButton(correctSynth);
+      _beepButton = addBeepButton(rc.language.value, correctSynth);
 
       psychoJS.eventManager.clearKeys();
 
@@ -1141,26 +1213,98 @@ const experiment = (blockCount) => {
     };
   }
 
-  function blockInstructionRoutineBegin(snapshot) {
+  /* ------------------------- Block Edu Instructions ------------------------- */
+
+  function eduInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
-      _instructionSetup(instructionsText.block(snapshot.block + 1));
+      _instructionSetup(instructionsText.edu(rc.language.value));
+
+      instructions2.setText(
+        instructionsText.eduBelow(rc.language.value, responseType)
+      );
+      instructions2.setWrapWidth(window.innerWidth * 0.8);
+      instructions2.setPos([
+        -window.innerWidth * 0.4,
+        -window.innerHeight * 0.4,
+      ]);
+      instructions2.setAutoDraw(true);
 
       clickedContinue = false;
-      document.addEventListener("click", _clickContinue);
-      document.addEventListener("touchend", _clickContinue);
+      setTimeout(() => {
+        document.addEventListener("click", _clickContinue);
+        document.addEventListener("touchend", _clickContinue);
+      }, 1000);
+
+      const h = 50;
+      const D = 200;
+      const g = 100;
+
+      target.setPos([D, 0]);
+      target.setText("R");
+      target.setHeight(h);
+      flanker1.setPos([D - g, 0]);
+      flanker1.setText("H");
+      flanker1.setHeight(h);
+      flanker2.setPos([D + g, 0]);
+      flanker2.setText("C");
+      flanker2.setHeight(h);
+
+      fixation.setHeight(fixationSize);
+      fixation.setPos([0, 0]);
+
+      fixation.setAutoDraw(true);
+      target.setAutoDraw(true);
+      flanker1.setAutoDraw(true);
+      flanker2.setAutoDraw(true);
+
+      psychoJS.eventManager.clearKeys();
 
       return Scheduler.Event.NEXT;
     };
   }
 
-  function blockInstructionRoutineEachFrame() {
+  function eduInstructionRoutineEachFrame() {
     return _instructionRoutineEachFrame;
   }
 
-  function blockInstructionRoutineEnd() {
-    return _instructionRoutineEnd;
+  function eduInstructionRoutineEnd() {
+    return async function () {
+      instructions.setAutoDraw(false);
+      instructions2.setAutoDraw(false);
+      routineTimer.reset();
+
+      document.removeEventListener("click", _clickContinue);
+      document.removeEventListener("touchend", _clickContinue);
+
+      target.setAutoDraw(false);
+      flanker1.setAutoDraw(false);
+      flanker2.setAutoDraw(false);
+
+      return Scheduler.Event.NEXT;
+    };
   }
+
+  // function blockInstructionRoutineBegin(snapshot) {
+  //   return async function () {
+  //     TrialHandler.fromSnapshot(snapshot);
+  //     _instructionSetup(instructionsText.block(snapshot.block + 1));
+
+  //     clickedContinue = false;
+  //     document.addEventListener("click", _clickContinue);
+  //     document.addEventListener("touchend", _clickContinue);
+
+  //     return Scheduler.Event.NEXT;
+  //   };
+  // }
+
+  // function blockInstructionRoutineEachFrame() {
+  //   return _instructionRoutineEachFrame;
+  // }
+
+  // function blockInstructionRoutineEnd() {
+  //   return _instructionRoutineEnd;
+  // }
 
   const _takeFixationClick = (e) => {
     let cX, cY;
@@ -1203,6 +1347,7 @@ const experiment = (blockCount) => {
       currentTrialIndex = snapshot.thisN + 1;
       currentTrialLength = snapshot.nTotal;
       trialInfoStr = getTrialInfoStr(
+        rc.language.value,
         showCounterBool,
         showViewingDistanceBool,
         currentTrialIndex,
@@ -1217,7 +1362,12 @@ const experiment = (blockCount) => {
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       totalTrial.setAutoDraw(true);
 
-      _instructionSetup(instructionsText.trial.fixate["spacing"](responseType));
+      _instructionSetup(
+        instructionsText.trial.fixate["spacing"](
+          rc.language.value,
+          responseType
+        )
+      );
 
       fixation.setHeight(fixationSize);
       fixation.setPos(fixationXYPx);
@@ -1370,6 +1520,7 @@ const experiment = (blockCount) => {
         console.warn("[Screen Width] Using arbitrary screen width. Enable RC.");
 
       viewingDistanceDesiredCm = condition["viewingDistanceDesiredCm"];
+      // viewingDistanceDesiredCm = 10;
       viewingDistanceCm = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
         : viewingDistanceDesiredCm;
@@ -1384,12 +1535,12 @@ const experiment = (blockCount) => {
 
       fixationXYPx = [0, 0];
 
-      block = condition["blockOrder"];
+      block = condition["block"];
 
       // TODO check that we are actually trying to test for "spacing", not "size"
 
       spacingDirection = condition["spacingDirection"];
-      targetFont = condition["targetFont"].toLowerCase();
+      targetFont = condition["targetFont"];
 
       targetAlphabet = String(condition["targetAlphabet"]).split("");
       validAns = String(condition["targetAlphabet"]).toLowerCase().split("");
@@ -1460,12 +1611,23 @@ const experiment = (blockCount) => {
         viewingDistanceCm: viewingDistanceCm,
         nearPointXYDeg: nearPointXYDeg,
         nearPointXYPix: nearPointXYPix,
+        fixationXYPix: fixationXYPx,
         spacingOverSizeRatio: spacingOverSizeRatio,
         minimumHeight: targetMinimumPix,
         fontFamily: targetFont,
         window: psychoJS.window,
         spacingRelationToSize: spacingRelationToSize,
       };
+      /* --- GRIDS --- */
+      if (showGrid) {
+        grids = {
+          deg: getGridLines(psychoJS.window, "deg", displayOptions),
+          cm: getGridLines(psychoJS.window, "cm", displayOptions),
+          pix: getGridLines(psychoJS.window, "pix", displayOptions),
+        };
+      }
+      /* --- /GRIDS --- */
+
       const [targetXYPix] = XYPixOfXYDeg(
         [targetEccentricityXYDeg],
         displayOptions
@@ -1596,10 +1758,14 @@ const experiment = (blockCount) => {
       // showAlphabet.setText(getAlphabetShowText(validAns))
 
       instructions.setText(
-        instructionsText.trial.respond["spacing"](responseType)
+        instructionsText.trial.respond["spacing"](
+          rc.language.value,
+          responseType
+        )
       );
 
       trialInfoStr = getTrialInfoStr(
+        rc.language.value,
         showCounterBool,
         showViewingDistanceBool,
         currentTrialIndex,
@@ -1626,6 +1792,17 @@ const experiment = (blockCount) => {
 
       trialComponents.push(showAlphabet);
       trialComponents.push(totalTrial);
+
+      /* --- GRIDS --- */
+      if (showGrid) {
+        for (const gridType in grids) {
+          grids[gridType].forEach((gridLineStim) => {
+            gridLineStim.setAutoDraw(gridVisible[gridType]);
+            trialComponents.push(gridLineStim);
+          });
+        }
+      }
+      /* --- /GRIDS --- */
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -1847,11 +2024,31 @@ const experiment = (blockCount) => {
         instructions.setAutoDraw(true);
       }
       /* -------------------------------------------------------------------------- */
+      // *grids* updates
+      if (showGrid) {
+        for (const gridType in grids) {
+          grids[gridType].forEach((gridLineStim) => {
+            if (t >= uniDelay) {
+              // keep track of start time/frame for later
+              gridLineStim.tStart = t; // (not accounting for frame time here)
+              gridLineStim.frameNStart = frameN; // exact frame index
+              gridLineStim.setAutoDraw(gridVisible[gridType]);
+            }
+          });
+        }
+      }
 
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
         removeClickableAlphabet();
+        if (showGrid) {
+          for (const gridType in grids) {
+            grids[gridType].forEach((gridLineStim) => {
+              gridLineStim.setAutoDraw(false);
+            });
+          }
+        }
         return Scheduler.Event.NEXT;
       }
 
