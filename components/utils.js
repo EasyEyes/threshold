@@ -1,4 +1,5 @@
-export const debug = process.env.debug;
+// export const debug = process.env.debug;
+export const debug = true;
 
 // https://stackoverflow.com/a/2450976
 export const shuffle = (array) => {
