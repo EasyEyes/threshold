@@ -41,9 +41,40 @@ rand(1) returns a random sample from the uniform distribution from 0 to 1.
 // eg If simulateParticipantBool -> simulationModel
 //    If simulationModel[Weibull] -> simulationBeta, simulationDelta
 
+// TODO simulateWithDisplayBool
+
 import { core, util } from "../psychojs/out/psychojs-2021.3.0.js";
 const { EventManager } = core;
 const { Scheduler } = util;
+import { createSignalingMap } from "./utils.js";
+
+export const checkIfSimulated = (reader) => {
+  if (
+    !reader.conditions.some(
+      (condition) => condition.simulateParticipantBool === true
+    )
+  )
+    return;
+  const simulated = {};
+  for (const [index, condition] of reader.conditions.entries()) {
+    // TEMP are condition labels auto-assigned earlier?
+    const label = condition.label ? condition.label : index;
+
+    console.log("label: ", label);
+    console.log("simulate observer bool: ", condition.simulateParticipantBool);
+    if (condition.simulateParticipantBool) {
+      if (!simulated.hasOwnProperty(condition.block)) {
+        simulated[condition.block] = {};
+        simulated[condition.block][label] = condition.simulationObserverModel;
+      } else {
+        simulated[condition.block][label] = condition.simulationObserverModel;
+      }
+    }
+  }
+  console.log("simulated: ", simulated);
+  // block# : simulationModel
+  return simulated;
+};
 
 export const simulateObserverResponse = (
   simulatedObserver,
@@ -60,25 +91,30 @@ export const simulateObserverResponse = (
     .toLowerCase();
 
   // Get keys corresponding to the possible, and chosen, stimuli
-  const signalingIndex = possibleResponses.indexOf(simulatedResponse);
-  const startingKeyCode = 65;
-  const signalingKeyCode = signalingIndex + startingKeyCode;
+  const responseToSignalKeyCode = createSignalingMap(possibleResponses);
+
+  // const signalingIndex = possibleResponses.indexOf(simulatedResponse);
+  // const startingKeyCode = 65;
+  // const signalingKeyCode = signalingIndex + startingKeyCode;
+  const signalingKeyCode = responseToSignalKeyCode[simulatedResponse];
   const signalingKey = String.fromCharCode(signalingKeyCode);
   const signalingCode = EventManager.keycode2w3c(signalingKeyCode);
-  const correctSignalingIndex = possibleResponses.indexOf(correctResponse);
-  const signalingAlphabet = possibleResponses.map((c, i) =>
-    String.fromCharCode(startingKeyCode + i)
-  );
+
+  const correctSignalingKeyCode = responseToSignalKeyCode[correctResponse];
+  const correctSignalingKey = String.fromCharCode(correctSignalingKeyCode);
+  // const correctSignalingCode = EventManager.keycode2w3c(correctSignalingKeyCode);
 
   // Add variables to the output datafile
   psychoJS.experiment.addData("simulatedResponse", simulatedResponse);
   psychoJS.experiment.addData("correctResponse", correctResponse);
   psychoJS.experiment.addData("signalingKey", signalingKey);
+  psychoJS.experiment.addData("correctSignalingKey", correctSignalingKey);
   psychoJS.experiment.addData(
-    "correctSignalingKey",
-    signalingAlphabet[correctSignalingIndex]
+    "signalingAlphabet",
+    Object.values(responseToSignalKeyCode).map((keycode) =>
+      String.fromCharCode(keycode)
+    )
   );
-  psychoJS.experiment.addData("signalingAlphabet", signalingAlphabet);
 
   // Simulate a keypress
   const simulatedResponseEvent = {
@@ -96,19 +132,11 @@ export const simulateObserverResponse = (
     // keyList: signalingAlphabet,
     waitRelease: false,
   });
+
   keyboard.keys = theseKeys[0].name;
   keyboard.rt = theseKeys[0].rt;
-  // console.log("_key_resp_allKeys: ", _key_resp_allKeys);
-  // key_resp.keys = _key_resp_allKeys[_key_resp_allKeys.length - 1].name; // just the last key pressed
-  // key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
-  // was this correct?
-  console.log("key responded with: ", keyboard.keys);
-  console.log(
-    "should this be set to correct? ",
-    signalingIndex === correctSignalingIndex
-  );
-  console.log(`correct? ${signalingIndex} === ${correctSignalingIndex}`);
-  if (signalingIndex === correctSignalingIndex) {
+
+  if (signalingKeyCode === correctSignalingKeyCode) {
     keyboard.corr = 1;
   } else {
     keyboard.corr = 0;

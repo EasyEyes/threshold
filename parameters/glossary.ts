@@ -31,7 +31,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "Denis Pelli",
     explanation:
-      "Names of all the authors, separated by semicolons. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "Names of all the authors, separated by semicolons. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty.",
     type: "text",
     default: "",
   },
@@ -40,7 +40,7 @@ export const GLOSSARY: Glossary = {
     availability: "imminent",
     example: "adultConsent2021.txt",
     explanation:
-      "The file name of your PDF (or plain-text Markdown) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "The file name of your PDF (or plain-text Markdown) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -49,7 +49,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "8/1/2021",
     explanation:
-      "Optional date of creation. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "Optional date of creation. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "date",
     default: "",
   },
@@ -58,7 +58,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "8/15/2021",
     explanation:
-      "Optional date of latest modification. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "Optional date of latest modification. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "date",
     default: "",
   },
@@ -67,7 +67,7 @@ export const GLOSSARY: Glossary = {
     availability: "imminent",
     example: "debrief2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "The file name of your PDF (or plain-text Markdown) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -76,7 +76,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "font",
     explanation:
-      "Very important. If omitted, as default we use the table file name (without extension) as the experiment name. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "Very important. If omitted, as default we use the table file name (without extension) as the experiment name. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -85,7 +85,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "At the end of the experiment, invite the participant to make parting comments. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "At the end of the experiment, invite the participant to make parting comments. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "boolean",
     default: "FALSE",
   },
@@ -94,7 +94,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "32",
     explanation:
-      "Expected duration, in minutes, in the offer to participants. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "Expected duration, in minutes, in the offer to participants. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "numerical",
     default: "30",
   },
@@ -103,7 +103,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "7.5",
     explanation:
-      "Payment to offer to each participant. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "Payment to offer to each participant. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "numerical",
     default: "7.5",
   },
@@ -112,7 +112,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "USDollar",
     explanation:
-      "Currency of payment amount: USDollar, Euro, etc. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "Currency of payment amount: USDollar, Euro, etc. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "categorical",
     default: "USDollar",
     categories: ["USDollar", "Euro", "UKPound"],
@@ -122,7 +122,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "Prolific",
     explanation:
-      'Name of recruitment service: none, Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
+      'Name of recruitment service: none, Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
     type: "categorical",
     default: "none",
     categories: ["none", "Prolific", "MTurk", "SONA"],
@@ -132,7 +132,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "123ABC",
     explanation:
-      "Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "0",
   },
@@ -141,7 +141,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "100",
     explanation:
-      "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty or identical.",
+      "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "integer",
     default: "1",
   },

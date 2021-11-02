@@ -5,7 +5,7 @@
 import { debug } from "./components/utils.js";
 
 const useConsent = false;
-const useRC = true;
+const useRC = false;
 const showGrid = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
@@ -65,6 +65,7 @@ import {
 
 import { getGridLines, updateGridVisible } from "./components/grid.js";
 import {
+  checkIfSimulated,
   SimulatedObserver,
   simulateObserverResponse,
 } from "./components/simulatedObserver.js";
@@ -94,15 +95,15 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
-
-// TODOY simulated
-const simulated = {};
-
+var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = (reader) => {
   // ! Load fonts
   loadFonts(reader, fontsRequired);
+
+  // ! Simulate observer
+  simulated = checkIfSimulated(reader);
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
@@ -143,7 +144,6 @@ var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
 const experiment = (blockCount) => {
-  console.log(`simulated: ${simulated}`);
   ////
   // Resources
   const _resources = [];
@@ -323,8 +323,6 @@ const experiment = (blockCount) => {
       size: [5, 2],
     });
     consent_button_no.clock = new util.Clock();
-
-    logger("Window (for grid purposes)", psychoJS.window);
 
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
@@ -546,7 +544,7 @@ const experiment = (blockCount) => {
   function consentRoutineEachFrame() {
     return async function () {
       /* --- SIMULATED --- */
-      if (simulated[0]) return Scheduler.Event.NEXT;
+      if (simulated) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
 
       //------Loop for each frame of Routine 'consent'-------
@@ -723,7 +721,7 @@ const experiment = (blockCount) => {
   function fileRoutineEachFrame() {
     return async function () {
       /* --- SIMULATED --- */
-      if (simulated[0]) return Scheduler.Event.NEXT;
+      if (simulated) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
       //------Loop for each frame of Routine 'file'-------
       // get current time
@@ -797,7 +795,7 @@ const experiment = (blockCount) => {
 
   async function _instructionRoutineEachFrame() {
     /* --- SIMULATED --- */
-    if (simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+    if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
     /* --- /SIMULATED --- */
 
     t = instructionsClock.getTime();
@@ -973,7 +971,6 @@ const experiment = (blockCount) => {
   var filterComponents;
   function filterRoutineBegin(snapshot) {
     return async function () {
-      console.log("snapshot in fileRoutineBegin: ", snapshot);
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
       currentBlockIndex = snapshot.block + 1;
       totalBlockCount = snapshot.nTotal;
@@ -1019,7 +1016,7 @@ const experiment = (blockCount) => {
   function filterRoutineEachFrame() {
     return async function () {
       /* --- SIMULATED --- */
-      if (simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
 
       //------Loop for each frame of Routine 'filter'-------
@@ -1299,7 +1296,7 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineEachFrame() {
     return async function () {
       /* --- SIMULATED --- */
-      if (simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
       t = instructionsClock.getTime();
       frameN = frameN + 1;
@@ -1377,6 +1374,7 @@ const experiment = (blockCount) => {
   var simulatedObserver;
   /* --- /SIMULATED --- */
 
+  var condition;
   function trialRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -1389,7 +1387,7 @@ const experiment = (blockCount) => {
       logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
 
-      let condition;
+      // let condition;
       const parametersToExcludeFromData = [];
       for (let c of snapshot.handler.getConditions()) {
         if (c.label === trials._currentStaircase._name) {
@@ -1544,7 +1542,7 @@ const experiment = (blockCount) => {
         spacingRelationToSize: spacingRelationToSize,
       };
       /* --- GRIDS --- */
-      if (showGrid && !simulated[block]) {
+      if (showGrid && !simulated) {
         grids = {
           deg: getGridLines(psychoJS.window, "deg", displayOptions),
           cm: getGridLines(psychoJS.window, "cm", displayOptions),
@@ -1729,11 +1727,10 @@ const experiment = (blockCount) => {
       }
       /* --- /GRIDS --- */
       /* --- SIMULATED --- */
-      if (simulated[block]) {
-        console.log("SIMULATION This block should simulated!");
+      if (simulated && simulated[block]) {
         if (!simulatedObserver) {
           simulatedObserver = new SimulatedObserver(
-            simulated[block],
+            simulated[block][condition.label],
             level,
             alphabet,
             targetCharacter,
@@ -1759,7 +1756,6 @@ const experiment = (blockCount) => {
   var frameRemains;
   function trialRoutineEachFrame() {
     return async function () {
-      console.log("in trialRoutineEachFrame");
       //------Loop for each frame of Routine 'trial'-------
       // get current time
       t = trialClock.getTime();
@@ -1807,7 +1803,11 @@ const experiment = (blockCount) => {
 
       if (key_resp.status === PsychoJS.Status.STARTED) {
         /* --- SIMULATED --- */
-        if (simulated[thisLoopNumber]) {
+        if (
+          simulated &&
+          simulated[thisLoopNumber] &&
+          simulated[thisLoopNumber][condition.label]
+        ) {
           return simulateObserverResponse(
             simulatedObserver,
             key_resp,
