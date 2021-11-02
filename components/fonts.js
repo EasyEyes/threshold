@@ -3,7 +3,7 @@ export const loadFonts = (reader, fontList) => {
     const conditionName = condition.label;
     const sourceType = reader.read("targetFontSource", conditionName);
     const name = reader.read("targetFont", conditionName);
-    const fontFilePath = "resources/" + name;
+    const fontFilePath = "fonts/" + name;
     if (sourceType === "file") {
       fetch(fontFilePath)
         .then((response) => {
