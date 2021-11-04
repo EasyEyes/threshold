@@ -1,4 +1,5 @@
-export const debug = process.env.debug;
+// export const debug = process.env.debug;
+export const debug = true;
 
 /**
  * Create a mapping between an arbitrary set of strings, ie `possibleResponses`,
