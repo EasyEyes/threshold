@@ -5,7 +5,7 @@
 import { debug } from "./components/utils.js";
 
 const useConsent = false;
-const useRC = true;
+const useRC = false;
 const showGrid = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
@@ -64,7 +64,11 @@ import {
 } from "./components/bounding.js";
 
 import { getGridLines, updateGridVisible } from "./components/grid.js";
-import { getQRCodeImage } from "./components/keypad.js";
+import {
+  getQRCodeImage,
+  initKeypad,
+  readKeypadParams,
+} from "./components/keypad.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -91,7 +95,7 @@ let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
 /* --- KEYPAD --- */
-var useKeypad;
+var keypadParameters;
 var keypadReceiver;
 /* --- /KEYPAD --- */
 
@@ -100,6 +104,9 @@ var keypadReceiver;
 const paramReaderInitialized = (reader) => {
   // ! Load fonts
   loadFonts(reader, fontsRequired);
+
+  // ! Set keypad
+  keypadParameters = readKeypadParams(reader);
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
@@ -205,7 +212,7 @@ const experiment = (blockCount) => {
     flowScheduler.add(consentRoutineEachFrame());
     flowScheduler.add(consentRoutineEnd());
   }
-  if (useKeypad) {
+  if (keypadParameters) {
     flowScheduler.add(keypadInitRoutineBegin());
     flowScheduler.add(keypadInitRoutineEachFrame());
     flowScheduler.add(keypadInitRoutineEnd());
@@ -333,50 +340,7 @@ const experiment = (blockCount) => {
 
     /* --- KEYPAD --- */
     // Initialize components for Routine "keypadInit"
-    keypadInitClock = new util.Clock();
-    qrCodeStim = new visual.ImageStim({
-      win: psychoJS.window,
-      name: "qrCodeImage",
-      units: undefined,
-      image: undefined,
-      mask: undefined,
-      ori: 0.0,
-      pos: [0, 0],
-      size: [0.5, 0.5],
-      color: new util.Color([0, 0, 0]),
-      opacity: undefined,
-      flipHoriz: false,
-      flipVert: false,
-      texRes: 128.0,
-      interpolate: true,
-      depth: 0.0,
-    });
-
-    const alphabet = [];
-    const ondata_callback = (data) => {
-      console.log("Data from keypad received!", data);
-      console.log("this: ", this);
-      // psychoJS.experiment.nextEntry()
-      // psychoJS.experiment.addData("virtual-keypad-response", data.response);
-      // psychoJS.experiment.nextEntry()
-    };
-    const handshake_callback = () => {
-      console.log("IN handshake callback");
-      keypadReceiver.updateDisplayMessage(
-        "Keypad connected! Please keep this page open, until the experiment prompts you to use it."
-      );
-      keypadInitComponents[0].status = PsychoJS.Status.FINISHED;
-      Scheduler.Event.NEXT;
-    };
-    keypadReceiver = new virtualKeypad.Receiver(
-      { alphabet: alphabet, font: "Sans" },
-      ondata_callback,
-      handshake_callback
-    );
-    window.receiver = keypadReceiver;
-    const qrImage = await getQRCodeImage(keypadReceiver);
-    console.log("QR IMAGE: ", qrImage);
-    qrCodeStim.setImage(qrImage);
+    [keypadReceiver, qrCodeStim, keypadInitClock] = await initKeypad(psychoJS);
     /* --- /KEYPAD --- */
 
     // Initialize components for Routine "file"
@@ -925,7 +889,6 @@ const experiment = (blockCount) => {
       }
 
       continueRoutine = false; // reverts to True if at least one component still running
-      // console.log(`keypadInitComponets.status: ${keypadInitComponents[0].status}`);
       for (const thisComponent of keypadInitComponents)
         if (
           "status" in thisComponent &&
@@ -1630,6 +1593,12 @@ const experiment = (blockCount) => {
         );
       correctAns = targetCharacter.toLowerCase();
       /* -------------------------------------------------------------------------- */
+      if (keypadParameters[block] && keypadParameters[block][cName]) {
+        // TEMP
+        window.keypadResponseThisTrial = false;
+        keypadReceiver.updateAlphabet(alphabet);
+        keypadReceiver.updateFont(targetFont);
+      }
 
       var pos1XYDeg, pos1XYPx, targetEccentricityXYPx, pos3XYDeg, pos3XYPx;
       var spacingDeg, spacingPx;
@@ -1918,6 +1887,7 @@ const experiment = (blockCount) => {
           continueRoutine = false;
         }
       }
+      continueRoutine = window.keypadResponseThisTrial;
 
       // *showAlphabetResponse* updates
       if (showAlphabetResponse.current) {
