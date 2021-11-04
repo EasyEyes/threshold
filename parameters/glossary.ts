@@ -37,7 +37,7 @@ export const GLOSSARY: Glossary = {
   },
   _consentForm: {
     name: "_consentForm",
-    availability: "imminent",
+    availability: "now",
     example: "adultConsent2021.txt",
     explanation:
       "The file name of your PDF (or plain-text Markdown) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -51,7 +51,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Optional date of creation. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "date",
-    default: "",
+    default: "NaN",
   },
   _dateModified: {
     name: "_dateModified",
@@ -60,11 +60,11 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Optional date of latest modification. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "date",
-    default: "",
+    default: "NaN",
   },
   _debriefForm: {
     name: "_debriefForm",
-    availability: "imminent",
+    availability: "now",
     example: "debrief2021.pdf",
     explanation:
       "The file name of your PDF (or plain-text Markdown) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -73,8 +73,8 @@ export const GLOSSARY: Glossary = {
   },
   _experimentName: {
     name: "_experimentName",
-    availability: "later",
-    example: "font",
+    availability: "now",
+    example: "crowding",
     explanation:
       "Very important. If omitted, as default we use the table file name (without extension) as the experiment name. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
@@ -92,7 +92,7 @@ export const GLOSSARY: Glossary = {
   _participantDurationMinutes: {
     name: "_participantDurationMinutes",
     availability: "later",
-    example: "32",
+    example: "30",
     explanation:
       "Expected duration, in minutes, in the offer to participants. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "numerical",
@@ -119,7 +119,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantRecruitmentService: {
     name: "_participantRecruitmentService",
-    availability: "later",
+    availability: "now",
     example: "Prolific",
     explanation:
       'Name of recruitment service: none, Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
@@ -134,7 +134,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
-    default: "0",
+    default: "",
   },
   _participantsHowMany: {
     name: "_participantsHowMany",
@@ -147,21 +147,21 @@ export const GLOSSARY: Glossary = {
   },
   _prolificEligibilityRequirements: {
     name: "_prolificEligibilityRequirements",
-    availability: "now",
+    availability: "later",
     example: "",
     explanation:
       "This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
-    type: "",
+    type: "text",
     default: "",
   },
   _prolificStudyType: {
     name: "_prolificStudyType",
-    availability: "now",
+    availability: "later",
     example: "US_REP_SAMPLE",
     explanation:
       "Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
     type: "categorical",
-    default: "SINGLE",
+    default: "US_REP_SAMPLE",
     categories: ["UK_REP_SAMPLE", "US_REP_SAMPLE", "SINGLE"],
   },
   block: {
@@ -184,8 +184,8 @@ export const GLOSSARY: Glossary = {
   },
   calibrateDistanceCheckBool: {
     name: "calibrateDistanceCheckBool",
-    availability: "now",
-    example: "",
+    availability: "soon",
+    example: "FALSE",
     explanation:
       'When TRUE, requests checking of the calibrator by the participant, provided they have a tape measure, meter stick, or yard stick, or failing that, a ruler. After each size or distance calibration, if calibrationDistanceCheckBool=TRUE, then we will ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick; a 12" or 30 cm ruler could be used if we exclude long distances), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. If no device, then we skip the rest of the calibrations that need a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like “16 3/16” or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. Our current scheme with the calibrator is to have a Boolean parameter for each calibration. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people on Prolific and mention in our job description that they must have a tape measure, meter stick or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.\n',
     type: "boolean",
@@ -193,10 +193,26 @@ export const GLOSSARY: Glossary = {
   },
   calibrateGazeCheckBool: {
     name: "calibrateGazeCheckBool",
-    availability: "now",
-    example: "",
+    availability: "soon",
+    example: "FALSE",
     explanation:
       "To check gaze tracking we don’t need a measuring device, and hardly any instructions. I think we could just put up our fixation cross in a few random places and ask them to click on it. It will be very similar to the training and we don’t need to tell the participant that we progressed from training to checking.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateScreenSizeBool: {
+    name: "calibrateScreenSizeBool",
+    availability: "now",
+    example: "TRUE",
+    explanation: "",
+    type: "boolean",
+    default: "TRUE",
+  },
+  calibrateScreenSizeCheckBool: {
+    name: "calibrateScreenSizeCheckBool",
+    availability: "soon",
+    example: "TRUE",
+    explanation: "",
     type: "boolean",
     default: "FALSE",
   },
@@ -212,7 +228,7 @@ export const GLOSSARY: Glossary = {
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
     availability: "now",
-    example: "TRUE",
+    example: "FALSE",
     explanation:
       "Use this to turn EasyEyes gaze tracking on and off. It must be calibrated before use. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 4 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
     type: "boolean",
@@ -223,8 +239,8 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "Initial measurement of viewing distance by measuring the pupillary distance.",
-    type: "",
+      "Initial measurement of the pupillary distance to later estimate near point.",
+    type: "boolean",
     default: "FALSE",
   },
   conditionGroup: {
@@ -232,18 +248,18 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "1",
     explanation:
-      '"conditionGroup" imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many  parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same non-blank conditionGroup number are presented with the same markings (fixation cross, target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among any specified set of targets simply by creating a condition for each target, and giving all the conditions the same non-blank conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a unique conditionGroup number, or none (blank), belongs to a condition group with just that condition.',
+      '"conditionGroup" imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross, target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among any specified set of targets simply by creating a condition for each target, and giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
     type: "integer",
-    default: "",
+    default: "0",
   },
   conditionName: {
     name: "conditionName",
     availability: "now",
-    example: "crowding",
+    example: "Crowding",
     explanation:
       "Use this to label your condition to help guide your subsequent data analysis. Not used by EasyEyes.",
     type: "text",
-    default: "untitled",
+    default: "",
   },
   conditionTrials: {
     name: "conditionTrials",
@@ -256,7 +272,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationCheckBool: {
     name: "fixationCheckBool",
-    availability: "september",
+    availability: "later",
     example: "FALSE",
     explanation:
       "Display a foveal triplet that is easy to read if the participant's eye is on fixation, and hard to read if the eye is elsewhere.",
@@ -280,7 +296,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationXScreen: {
     name: "fixationLocationXScreen",
-    availability: "imminent",
+    availability: "soon",
     example: "0.5",
     explanation:
       'If fixationLocationStrategy is "asSpecified" then this specifies fixation\'s X coordinate in the screen plane, normalized by screen width and height. Origin is lower left.',
@@ -289,7 +305,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationYScreen: {
     name: "fixationLocationYScreen",
-    availability: "imminent",
+    availability: "soon",
     example: "0.5",
     explanation: "As above. The Y coordinate.",
     type: "numerical",
@@ -324,7 +340,7 @@ export const GLOSSARY: Glossary = {
   instructionFont: {
     name: "instructionFont",
     availability: "now",
-    example: "Noto Serif.woff2",
+    example: "Georgia",
     explanation:
       'Font used for participant instructions. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Google Fonts. \nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
     type: "text",
@@ -333,16 +349,25 @@ export const GLOSSARY: Glossary = {
   instructionFontSource: {
     name: "instructionFontSource",
     availability: "now",
-    example: "mineExactly",
+    example: "browser",
     explanation:
-      'instructionFontSource must be "file","server", "browser", or "defaultForLanguage".  [In the future we may add "Google", allowing targetFont to be the name of a font that the preprocessor automatically get a URL for from the Google Fonts website, using their API.] See instructionFont and targetFontSource.',
+      'instructionFontSource must be "file","server", "browser", or "defaultForLanguage".  [In the future we may add "Google", allowing targetFont to be the filename of a font for which the preprocessor automatically gets a URL from the Google Fonts website, using their API.] See instructionFont and targetFontSource.',
     type: "categorical",
-    default: "file",
+    default: "browser",
     categories: ["file", "server", "browser"],
+  },
+  instructionFontStyle: {
+    name: "instructionFontStyle",
+    availability: "soon",
+    example: "regular",
+    explanation: "",
+    type: "categorical",
+    default: "regular",
+    categories: ["regular", "italic", "bold", "boldItalic"],
   },
   instructionLanguage: {
     name: "instructionLanguage",
-    availability: "now",
+    availability: "soon",
     example: "Italian",
     explanation:
       "English name for the language used for instructions to the participant. It must match one of the entries in the second row of the EasyEyes International phrases sheet. If you leave this blank, then the participant will be allowed to select the language from a pull-down menu.",
@@ -350,13 +375,13 @@ export const GLOSSARY: Glossary = {
     default: "English",
     categories: [""],
   },
-  instructionTable: {
-    name: "instructionTable",
+  instructionTableURL: {
+    name: "instructionTableURL",
     availability: "later",
     example: "",
     explanation:
       'The URL of a Google Sheets table of international phrases to be used to give instructions throughout the experiment. A scientist can substitute her own table, presumably a modified copy of the EasyEyes International Phrases Table. https://docs.google.com/spreadsheets/d/1UFfNikfLuo8bSromE34uWDuJrMPFiJG3VpoQKdCGkII/edit#gid=0\nThis table allows the Participant page to make all non-stimulus text international. In every place that it displays text, the Participant page looks up the mnemonic code for the needed phrase in the instruction table, to find a unicode phrase in the selected instructionLanguage (e.g. English, German, or Arabic). It\'s a Google Sheets file called "EasyEyes International Phrases".\nhttps://docs.google.com/spreadsheets/d/1AZbihlk-CP7sitLGb9yZYbmcnqQ_afjjG8h6h5UWvvo/edit#gid=0\nThe first column has mnemonic phrase names. Each of the following columns gives the corresponding text in a different language. After the first, each column represents one language. Each row is devoted to one phrase. The second row is languageNameEnglish, with values: English, German, Polish, etc. The third row is languageNameNative, with values: English, Deutsch, Polskie, etc. \n     We incorporate the latest "EasyEyes International Phrases" file when we compile threshold.js. For a particular experiment, we only need the first column (the mnemonic name) and the column whose heading matches instructionLanguage. We should copy those two columns into a Javascript dictionary, so we can easily look up each mnemonic phrase name to get the phrase in the instructionLanguage. To display any instruction, we will use the dictionary to convert a mnemonic name to a unicode phrase. \n     languageDirection. Note that most languages are left to right (LTR), and a few (e.g. Arabic, Urdu, Farsi, and Hebrew) are right to left (RTL). Text placement may need to take the direction into account. The direction (LTR or RTL) is provided by the languageDirection field.\n     languageNameNative. If we later allow the participant to choose the language, then the language selection should be based on the native language name, like Deustch or Polskie, i.e. using languageNameNative instead of languageNameEnglish.',
-    type: "URL",
+    type: "text",
     default: "",
   },
   invitePartingCommentsBool: {
@@ -496,7 +521,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "After mistaken response, play pure 500 Hz tone for 0.5 sec at amplitude 0.05. Usually we stay positive and give only positive feedback.",
     type: "boolean",
-    default: "",
+    default: "FALSE",
   },
   playPositiveFeedbackBeepBool: {
     name: "playPositiveFeedbackBeepBool",
@@ -505,7 +530,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "After correct response, play pure 2000 Hz tone for 0.05 sec at amplitude 0.05. ",
     type: "boolean",
-    default: "",
+    default: "TRUE",
   },
   playPurrWhenReadyBool: {
     name: "playPurrWhenReadyBool",
@@ -514,7 +539,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Play a purring sound to alert the observer while we await their response. Pure 200 Hz tone for 0.6 sec at amplitude 1.",
     type: "boolean",
-    default: "",
+    default: "TRUE",
   },
   readingCorpusURL: {
     name: "readingCorpusURL",
@@ -532,8 +557,8 @@ export const GLOSSARY: Glossary = {
     explanation:
       'What shall we say is the "single" line spacing of the text to be read? \n• "nominal size" is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. \n• "font" defines single line spacing as the font\'s built-in line spacing, which can be enormous in fonts with large flourishes. \n• "twice x-height" defines single line spacing as twice the font\'s x-height.',
     type: "categorical",
-    default: "nominal size",
-    categories: ["nominal size", "font", "twice x-height", "explicit"],
+    default: "nominalSize",
+    categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
   },
   readingFont: {
     name: "readingFont",
@@ -542,15 +567,25 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Font name, taken from the name of font file, which may include a style.",
     type: "text",
-    default: "Times New Roman",
+    default: "Verdana",
+  },
+  readingFontSource: {
+    name: "readingFontSource",
+    availability: "now",
+    example: "",
+    explanation: "",
+    type: "categorical",
+    default: "browser",
+    categories: ["file", "server", "browser"],
   },
   readingFontStyle: {
     name: "readingFontStyle",
     availability: "later",
     example: "bold",
     explanation: "Font style: regular, bold, italic, bold italic",
-    type: "text",
+    type: "categorical",
     default: "regular",
+    categories: ["regular", "bold", "italic", "bold italic"],
   },
   readingLinesPerPage: {
     name: "readingLinesPerPage",
@@ -560,14 +595,14 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "8",
   },
-  readingMaxSpacingsPerLine: {
-    name: "readingMaxSpacingsPerLine",
+  readingMaxCharactersPerLine: {
+    name: "readingMaxCharactersPerLine",
     availability: "later",
     example: "57",
     explanation:
       "Used for line breaking. Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters, so, counting the space between words, that's (8 to 10) *6=(48 to 60) spacings per line. Line breaking without hyphenation will produce an average line length maybe half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 spacings.",
     type: "numerical",
-    default: "",
+    default: "55",
   },
   readingMultipleOfSingleLineSpacing: {
     name: "readingMultipleOfSingleLineSpacing",
@@ -584,8 +619,8 @@ export const GLOSSARY: Glossary = {
     example: "3",
     explanation:
       'If readingSetSizeBy is "nominal", then set point size to readingNominalSizeDeg*pixPerDeg.',
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "1",
   },
   readingNumberOfPossibleAnswers: {
     name: "readingNumberOfPossibleAnswers",
@@ -594,7 +629,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Number of possible answers for each question. Only one of the possible answers is right.",
     type: "integer",
-    default: "",
+    default: "3",
   },
   readingNumberOfQuestions: {
     name: "readingNumberOfQuestions",
@@ -602,7 +637,7 @@ export const GLOSSARY: Glossary = {
     example: "4",
     explanation: "Number of recall questions posed on each trial. ",
     type: "integer",
-    default: "",
+    default: "3",
   },
   readingPages: {
     name: "readingPages",
@@ -610,7 +645,7 @@ export const GLOSSARY: Glossary = {
     example: "5",
     explanation: "Number of pages to be read.",
     type: "numerical",
-    default: "",
+    default: "4",
   },
   readingSetSizeBy: {
     name: "readingSetSizeBy",
@@ -620,7 +655,7 @@ export const GLOSSARY: Glossary = {
       'How do you specify the size of the text to be read?\n• "nominal" will set the point size of the text to readingNominalSizeDeg*pixPerDeg,  \n• "x-height" will adjust text size to achieve the specified x-height (the height of lowercase x),  i.e. readingXHeightDeg. \n• "spacing" will adjust the text size to achieve the specified letter-to-letter readingSpacingDeg.',
     type: "categorical",
     default: "spacing",
-    categories: ["nominal", "x-height", "spacing"],
+    categories: ["nominal", "xHeight", "spacing"],
   },
   readingSingleLineSpacingDeg: {
     name: "readingSingleLineSpacingDeg",
@@ -629,7 +664,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       'Explicit value of "single" line spacing. This is ignored unless readingDefineSingleLineSpacingAs is "explicit".',
     type: "numerical",
-    default: "",
+    default: "1",
   },
   readingSpacingDeg: {
     name: "readingSpacingDeg",
@@ -638,7 +673,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       'If readingSetSizeBy is "spacing", the point size of the text to be read is adjusted to make this the average center-to-center spacing (deg) of neighboring characters in words displayed. Text is displayed with the font\'s default spacing, and the point size is adjusted to achieve the requested average letter spacing.',
     type: "numerical",
-    default: "",
+    default: "1",
   },
   readingXHeightDeg: {
     name: "readingXHeightDeg",
@@ -646,8 +681,8 @@ export const GLOSSARY: Glossary = {
     example: "",
     explanation:
       'If readingSetSizeBy is "x-height", then set point size to to achieve this specified x-height (the height of lowercase x). ',
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "1",
   },
   responseClickedBool: {
     name: "responseClickedBool",
@@ -656,7 +691,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Allow participant to respond by clicking the target letter in the alphabet. When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive, any number from 1 to all can be enabled.",
     type: "boolean",
-    default: "",
+    default: "TRUE",
   },
   responseSpokenBool: {
     name: "responseSpokenBool",
@@ -665,7 +700,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Allow participant to respond by verbally naming the target. The various response modes are not exclusive, any number from 1 to all can be enabled.",
     type: "boolean",
-    default: "",
+    default: "TRUE",
   },
   responseTypedBool: {
     name: "responseTypedBool",
@@ -674,16 +709,16 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Allow participant to respond by pressing a key in keyboard. The various response modes are not exclusive, any number from 1 to all can be enabled.",
     type: "boolean",
-    default: "",
+    default: "TRUE",
   },
   responseTypedEasyEyesKeypadBool: {
     name: "responseTypedEasyEyesKeypadBool",
-    availability: "imminent",
+    availability: "soon",
     example: "FALSE",
     explanation:
       "Allow participant to respond by pressing a key in EasyEyes keypad. The various response modes are not exclusive, any number from 1 to all can be enabled.",
     type: "boolean",
-    default: "",
+    default: "TRUE",
   },
   showAlphabetWhere: {
     name: "showAlphabetWhere",
@@ -692,17 +727,17 @@ export const GLOSSARY: Glossary = {
     explanation:
       'Can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "alphabet". If the target is a gabor, the alphbet might display all the possible orientations, each labeled by a letter to be pressed.',
     type: "categorical",
-    default: "",
+    default: "bottom",
     categories: ["none", "bottom", "top", "left", "right"],
   },
   showAlphabetWithLabelsBool: {
     name: "showAlphabetWithLabelsBool",
-    availability: "imminent",
+    availability: "soon",
     example: "FALSE",
     explanation:
       "For foreign or symbol alphabets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
     type: "boolean",
-    default: "",
+    default: "FALSE",
   },
   showCounterBool: {
     name: "showCounterBool",
@@ -710,8 +745,8 @@ export const GLOSSARY: Glossary = {
     example: "TRUE",
     explanation:
       'If TRUE display something like,"Trial 31 of 120. Block 2 of 3. At 32 cm." (The trailing part about distance is included only if showViewingDistanceBool is TRUE.) The trial counter counts all trials in the block, which may have several conditions. If the block has three conditions with 40 blocks each, then there are 120 trials in the block. ',
-    type: "",
-    default: "",
+    type: "boolean",
+    default: "TRUE",
   },
   showCounterWhere: {
     name: "showCounterWhere",
@@ -734,7 +769,7 @@ export const GLOSSARY: Glossary = {
   },
   showGridsBool: {
     name: "showGridsBool",
-    availability: "imminent",
+    availability: "soon",
     example: "TRUE",
     explanation:
       'To allow visual checking of location and size, showGridsBool=TRUE requests that the experiment show buttons on the (lower) left of the screen that each turn on and off a different grid over the whole screen. Turning on several buttons shows several grids (in different dark colors). Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.\n',
@@ -748,12 +783,12 @@ export const GLOSSARY: Glossary = {
     explanation:
       'Can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "While keeping your gaze on the fixation cross, type your best guess for what middle letter was just shown." ',
     type: "categorical",
-    default: "",
+    default: "topLeft",
     categories: ["none", "topLeft", "bottomLeft"],
   },
   showProgressBarWhere: {
     name: "showProgressBarWhere",
-    availability: "November",
+    availability: "later",
     example: "right",
     explanation:
       "Can be none or right. Meant for children. Graphically displays a vertical green bar that tracks the trial count. The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the block. Sometimes we call the green liquid spaceship fuel for Jamie the astronaut.",
@@ -770,76 +805,67 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  simulateKeypadBool: {
-    name: "simulateKeypadBool",
-    availability: "imminent",
-    example: "FALSE",
-    explanation:
-      "Use this to turn EasyEyes keypad simulator on and off. It runs on the participant's smartphone, and the participant must connect the smartphone wirelessly with the computer. This begins with displaying a QR code on the computer,  pointing the smartphone camera at it, and clicking the link that appears. Once connected, the participant can respond on the keypad displayed on the smartphone. It offers keys just for the allowed choices and in the correct font.",
-    type: "",
-    default: "",
-  },
   simulateParticipantBool: {
     name: "simulateParticipantBool",
-    availability: "imminent",
+    availability: "soon",
     example: "FALSE",
     explanation:
       'Use the software model specifed by "simulationModel" to generale observer responses. The test runs without human intervention.',
     type: "boolean",
-    default: "",
+    default: "FALSE",
   },
   simulateWithDisplayBool: {
     name: "simulateWithDisplayBool",
-    availability: "imminent",
+    availability: "soon",
     example: "TRUE",
     explanation:
       "If true, then display the stimuli as though a participant were present. This is helpful for debugging. If false, then skip display to run as fast as possible.",
     type: "boolean",
-    default: "",
+    default: "TRUE",
   },
   simulationBeta: {
     name: "simulationBeta",
-    availability: "imminent",
+    availability: "soon",
     example: "3",
     explanation: "Used by the Weibull observer model.",
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "2.3",
   },
   simulationDelta: {
     name: "simulationDelta",
-    availability: "imminent",
+    availability: "soon",
     example: "0.01",
     explanation: "Used by the Weibull observer model.",
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "0.01",
   },
   simulationModel: {
     name: "simulationModel",
-    availability: "imminent",
+    availability: "soon",
     example: "blind",
     explanation:
       'For debugging and checking it is often helpful to simulate the observer. "simulationModel" can be: \n• "blind": This model merely presses a random response key. \n• "ideal": This model does the same task as the human, picking the best response given the stimulus. Its threshold is a useful point of reference in analyzing human data. Without noise, it will always be right. Since noise is still months away, for now, just give the right answer.\n• "weibull": This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately measure its (unknown to Quest) threshold, when the respt of the parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.',
     type: "categorical",
-    default: "",
+    default: "ideal",
     categories: ["blind", "weibull", "ideal"],
   },
   "​simulationThreshold": {
     name: "​simulationThreshold",
-    availability: "imminent",
+    availability: "soon",
     example: "0",
     explanation:
       "The actual threshold of the simulated observer. We test the implementation of Quest by testing how well it estimates simulationThreshold.",
     type: "numerical",
-    default: "",
+    default: "2",
   },
   snapshotBool: {
     name: "snapshotBool",
-    availability: "imminent",
+    availability: "soon",
     example: "FALSE",
     explanation:
       "Requests that a screen shot be recorded of the stimulus display, to be saved in the snapshot folder. Snapshots are useful for debugging, and to illustrate the stimulus in talks and papers.",
     type: "boolean",
-    default: "",
+    default: "FALSE",
   },
   spacingDeg: {
     name: "spacingDeg",
@@ -848,7 +874,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Center-to-center distance from target to inner flanker. Ignored if you're using Quest to measure the spacing threshold.",
     type: "numerical",
-    default: "",
+    default: "2",
   },
   spacingDirection: {
     name: "spacingDirection",
@@ -857,7 +883,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       'When eccentricity is nonzero then the direction can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then the direction can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is not allowed to request radial or tangential at eccentricity zero.',
     type: "categorical",
-    default: "",
+    default: "radial",
     categories: ["radial", "tangential", "horizontal", "vertical", "both"],
   },
   spacingOverSizeRatio: {
@@ -880,7 +906,7 @@ export const GLOSSARY: Glossary = {
   },
   spacingSymmetry: {
     name: "spacingSymmetry",
-    availability: "imminent",
+    availability: "soon",
     example: "linear",
     explanation:
       'spacingSymmetry can be log or linear. When spacing is radial, chooses equal spacing of the outer and inner flanker either on the screen ("linear") or on the cortex ("log"). The log/linear choice makes no difference when the spacingDirection is tangential, or the eccentricity is zero.',
@@ -909,7 +935,7 @@ export const GLOSSARY: Glossary = {
   },
   targetContrast: {
     name: "targetContrast",
-    availability: "imminent",
+    availability: "soon",
     example: "-1",
     explanation:
       "Weber contrast ∆L/L0 of a letter or Michelson contrast (LMax-LMin)/(LMax+LMin) of a Gabor. A white letter is 100% contrast; a black letter is -100% contrast. Currently accurate only for 0 and ±1.",
@@ -948,11 +974,11 @@ export const GLOSSARY: Glossary = {
     explanation:
       'How you set targetFont to specify the font depends on targetFontSource:\n\nfile: targetfont is the filename (including extension, typically woff2, woff, otf, or ttf) of a font file in your Fonts folder in your Pavlovia account. The preprocessor will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment.\n\nserver: targetFont is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )".\n\nbrowser: The experiment will pass the font preference string that you place in targetFont to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "targetFontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
     type: "text",
-    default: "Sloan.woff2",
+    default: "RobotoMono-Regular.woff2",
   },
   targetFontSource: {
     name: "targetFontSource",
-    availability: "later",
+    availability: "now",
     example: "file",
     explanation:
       'targetFontSource must be "file","server", or "browser". Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has targetFontSource "file", the preprocessor checks for presence of the targetFont in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: targetFont contains the filename (with extensition) of a file in the Fonts folder in you Pavlovia account. This is checked by the preprocessor, so there are no runtime surprises. \n\nserver: targetFont contains the URL of the font on a font server.\n\nbrowser: targetFont is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) \n\n[google: In the future we may add "google", allowing targetFont to be the name of a font that the preprocessor automatically gets a URL for from the Google Fonts website, using their API.]',
@@ -966,8 +992,9 @@ export const GLOSSARY: Glossary = {
     example: "bold",
     explanation:
       'Can be regular (default), bold, italic, or bold-italic. \n• If targetFont is a file name that already specifies the style you want, then don\'t specify a style here. Just leave targetFontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if targetFontSource is "browser", and targetFont specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use targetFontStyle to select among the four standard styles.',
-    type: "text",
+    type: "categorical",
     default: "regular",
+    categories: ["regular", "bold", "italic", "boldItalic"],
   },
   targetFontVariationSettings: {
     name: "targetFontVariationSettings",
@@ -985,7 +1012,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = targetFontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if determines that the targetFont is not a variable font.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
     type: "numerical",
-    default: "",
+    default: "NaN",
   },
   targetKind: {
     name: "targetKind",
@@ -1008,16 +1035,16 @@ export const GLOSSARY: Glossary = {
   },
   targetRepeatsBool: {
     name: "targetRepeatsBool",
-    availability: "November",
+    availability: "later",
     example: "FALSE",
     explanation:
       'Display many copies of two targets, alternating across the screen. The observer reports both. Thus each presentation gets two responses, which count as two trials. David Regan and colleagues (1992) reported that in testing foveal acuity of patients with poor fixation (e.g. nystagmus) it helps to have a "repeat-letter format" eye chart covered with letters of the same size, so that no matter where the eye lands, performance is determined by the letter nearest to the point of fixation, where acuity is best. We here extend that idea to crowding. We cover some part of the screen with an alternating pattern of two letters, like a checkerboard, so that the letters can crowd each other, and ask the observer to report both letters. Again, we expect performance to be determined by the letters nearest to the (unpredictable) point of fixation, where crowding distance is least.',
     type: "boolean",
     default: "FALSE",
   },
-  targetRepeatsBorderLetter: {
-    name: "targetRepeatsBorderLetter",
-    availability: "November",
+  targetRepeatsBorderCharacter: {
+    name: "targetRepeatsBorderCharacter",
+    availability: "later",
     example: "$",
     explanation:
       "When targetRepeatsBool we use this character to create an outer border.",
@@ -1026,7 +1053,7 @@ export const GLOSSARY: Glossary = {
   },
   targetRepeatsMaxLines: {
     name: "targetRepeatsMaxLines",
-    availability: "November",
+    availability: "later",
     example: "3",
     explanation: "Can be 1, 3, 4, … . Sarah Waugh recommends 3.",
     type: "numerical",
@@ -1034,7 +1061,7 @@ export const GLOSSARY: Glossary = {
   },
   targetRepeatsPracticeBool: {
     name: "targetRepeatsPracticeBool",
-    availability: "November",
+    availability: "later",
     example: "TRUE",
     explanation:
       "If targetRepeatsBool then precedes data collection by practice, as explained in note below.",
@@ -1044,11 +1071,11 @@ export const GLOSSARY: Glossary = {
   targetSizeDeg: {
     name: "targetSizeDeg",
     availability: "now",
-    example: "nan",
+    example: "NaN",
     explanation:
       "Ignored unless needed. Size is either height or width, as defined below. Height and width are based on the union of the bounding boxes of all the letters in the alphabet. ",
     type: "numerical",
-    default: "?",
+    default: "2",
   },
   targetSizeIsHeightBool: {
     name: "targetSizeIsHeightBool",
@@ -1060,21 +1087,13 @@ export const GLOSSARY: Glossary = {
   },
   targetTask: {
     name: "targetTask",
-    availability: '"identify"\n"read" later\n"detect" November',
+    availability: "now",
     example: "identify",
     explanation:
       'The participant\'s task:\n• "identify" is forced choice categorization of the target among known possibilities, e.g. a letter from an alphabet or an orientation among several. \n• "read" asks the observer to read a passage of text as quickly as possible while maintaining full comprehesion, followed by a test.\n• "detect" might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
     categories: ["identify", "read"],
-  },
-  targetTransparency: {
-    name: "targetTransparency",
-    availability: "later",
-    example: "",
-    explanation: "for MJ",
-    type: "",
-    default: "",
   },
   thresholdBeta: {
     name: "thresholdBeta",
@@ -1101,7 +1120,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Used to prime QUEST by providing a prior PDF, which is specified as a Gaussian as a function of the log threshold parameter. Its mean is the log of your guess, and its SD (in log units) is specifed below . We typically take our guess from our standard formulas for size and spacing threshold as a function of eccentricity.",
     type: "numerical",
-    default: "?",
+    default: "NaN",
   },
   thresholdGuessLogSd: {
     name: "thresholdGuessLogSd",
@@ -1148,7 +1167,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "We will encourage participant to adjust their viewing distance (moving head or display) to approximate this request. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance.",
     type: "numerical",
-    default: "",
+    default: "40",
   },
   wirelessKeyboardNeededBool: {
     name: "wirelessKeyboardNeededBool",
@@ -1157,7 +1176,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Needed at viewing distances beyond 60 cm. Could be commercial wireless keyboard or EasyEyes keypad emulator running on any smartphone. ",
     type: "boolean",
-    default: "",
+    default: "FALSE",
   },
   zeroBasedNumberingBool: {
     name: "zeroBasedNumberingBool",

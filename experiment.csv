@@ -7,7 +7,7 @@ showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 simulateParticipantBool,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 simulationBeta,3,3,3,3,3,3
 simulationDelta,0.01,0.01,0.01,0.01,0.01,0.01
-simulationObserverModel,ideal,ideal,ideal,ideal,ideal,ideal
+simulationObserverModel,weibull,weibull,weibull,weibull,weibull,weibull
 simulationThreshold,0.5,0.5,0.5,0.5,0.5,0.5
 spacingDirection,radial,radial,radial,radial,radial,radial
 spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4,1.4
