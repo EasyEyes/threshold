@@ -1,3 +1,6 @@
+export const debug = process.env.debug;
+// export const debug = true;
+
 // https://stackoverflow.com/a/2450976
 export const shuffle = (array) => {
   if (!array.length) return [];
@@ -25,6 +28,10 @@ export const hideCursor = () => {
 
 export const showCursor = () => {
   document.body.classList.remove("hide-cursor");
+};
+
+export const logger = (label, value) => {
+  if (debug) console.log(`%c${label}`, "color: red", value);
 };
 
 /**

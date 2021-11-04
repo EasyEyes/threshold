@@ -1,4 +1,6 @@
+_authors,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli
 block,1,1,1,1,2,2
+calibrateTrackDistanceBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 conditionName,printLetters,printString,scriptLetters,scriptString,arabicLetters,arabicString
 conditionTrials,3,3,3,3,3,3
 showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
@@ -10,7 +12,7 @@ targetAlphabet,DHKNORSVZ,DHKNORSVZ,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqr
 targetDurationSec,1,1,1,1,1,1
 targetEccentricityXDeg,-10,10,-10,10,-10,10
 targetEccentricityYDeg,0,0,0,0,0,0
-targetFont,Sloan,Sloan,Douglass Pen,Douglass Pen,IBMPlexSansArabic,IBMPlexSansArabic
+targetFont,Sloan.woff2,Sloan.woff2,Douglass Pen.woff2,Douglass Pen.woff2,IBMPlexSansArabic.woff2,IBMPlexSansArabic.woff2
 targetMinimumPix,8,8,8,8,8,8
 targetTask,identify,identify,identify,identify,identify,identify
 thresholdBeta,2.3,2.3,2.3,2.3,2.3,2.3
