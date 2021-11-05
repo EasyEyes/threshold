@@ -20,7 +20,7 @@ import * as jsQUEST from "./addons/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
-
+import { participantRecruitmentService } from "./survey/participantRecruitmentServiceData.js";
 import {
   logger,
   hideCursor,
@@ -2059,7 +2059,20 @@ const experiment = (blockCount) => {
     }
 
     psychoJS.window.close();
-    psychoJS.quit({ message: message, isCompleted: isCompleted });
+    if (participantRecruitmentService?.name == "Prolific" && isCompleted) {
+      let additionalMessage =
+          ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
+          participantRecruitmentService.url +
+          '">' +
+          participantRecruitmentService.url +
+          "</a>";
+      psychoJS.quit({
+        message: message + additionalMessage,
+        isCompleted: isCompleted,
+      });
+    } else {
+      psychoJS.quit({ message: message, isCompleted: isCompleted });
+    }
 
     return Scheduler.Event.QUIT;
   }
