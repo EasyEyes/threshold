@@ -2061,11 +2061,11 @@ const experiment = (blockCount) => {
     psychoJS.window.close();
     if (participantRecruitmentService?.name == "Prolific" && isCompleted) {
       let additionalMessage =
-          ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
-          participantRecruitmentService.url +
-          '">' +
-          participantRecruitmentService.url +
-          "</a>";
+        ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
+        participantRecruitmentService.url +
+        '">' +
+        participantRecruitmentService.url +
+        "</a>";
       psychoJS.quit({
         message: message + additionalMessage,
         isCompleted: isCompleted,

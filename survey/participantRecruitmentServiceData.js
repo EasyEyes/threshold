@@ -1,5 +1,5 @@
 export const participantRecruitmentService = {
-    name: '',
-    code: '',
-    url: ''
-}
+  name: "",
+  code: "",
+  url: "",
+};
