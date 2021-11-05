@@ -1,4 +1,4 @@
-/*****************
+﻿/*****************
  * Crowding Test *
  *****************/
 
@@ -55,8 +55,15 @@ import {
   removeClickableAlphabet,
   setupClickableAlphabet,
 } from "./components/showAlphabet.js";
-import { hideConsentForm, showConsentForm } from "./components/consent.js";
+
+import {
+  hideAllForms,
+  showConsentForm,
+  showDebriefForm,
+} from "./components/consent.js";
+
 import { getTrialInfoStr } from "./components/trialCounter.js";
+
 import {
   getTypographicHeight,
   awaitMaxPresentableLevel,
@@ -135,6 +142,9 @@ var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
+var consentFormName = "consent-form.pdf";
+var debriefFormName = "consent-form.md";
+
 const experiment = (blockCount) => {
   ////
   // Resources
@@ -211,6 +221,10 @@ const experiment = (blockCount) => {
   flowScheduler.add(blocksLoopBegin(blocksLoopScheduler));
   flowScheduler.add(blocksLoopScheduler);
   flowScheduler.add(blocksLoopEnd);
+  flowScheduler.add(debriefRoutineBegin());
+  flowScheduler.add(debriefRoutineEachFrame());
+  flowScheduler.add(debrieftRoutineEnd());
+
   flowScheduler.add(quitPsychoJS, "", true);
 
   // quit if user presses Cancel in dialog box:
@@ -253,8 +267,6 @@ const experiment = (blockCount) => {
 
   var consentClock;
   var consent_form_content;
-  var consent_button_yes;
-  var consent_button_no;
 
   var fileClock;
   var filterClock;
@@ -296,25 +308,6 @@ const experiment = (blockCount) => {
       opacity: undefined,
       depth: 0.0,
     });
-    consent_button_yes = new visual.ButtonStim({
-      win: psychoJS.window,
-      name: "consent_button_yes",
-      text: "Yes.",
-      pos: [0.0, -0.41],
-      letterHeight: 0.02,
-      size: null,
-    });
-    consent_button_yes.clock = new util.Clock();
-
-    consent_button_no = new visual.ButtonStim({
-      win: psychoJS.window,
-      name: "consent_button_no",
-      text: "No. (You will leave the study without receiving payment.)",
-      pos: [0.0, -0.46],
-      letterHeight: 0.02,
-      size: [5, 2],
-    });
-    consent_button_no.clock = new util.Clock();
 
     logger("Window (for grid purposes)", psychoJS.window);
 
@@ -502,30 +495,41 @@ const experiment = (blockCount) => {
 
   var continueRoutine;
   var consentComponents;
+  var debriefComponents;
   var frameRemains;
 
   function consentRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
+      consentFormName = paramReader.read("_consentForm");
+
       //------Prepare to start Routine 'consent'-------
       t = 0;
       consentClock.reset(); // clock
       frameN = -1;
       continueRoutine = true; // until we're told otherwise
-      // routineTimer.add(5.000000);
-
-      consent_button_yes.setSize([0.25, 1]);
-      consent_button_no.setSize([0.6, 1]);
 
       // update component parameters for each repeat
       // keep track of which components have finished
       consentComponents = [];
       consentComponents.push(consent_form_content);
-      consentComponents.push(consent_button_yes);
-      consentComponents.push(consent_button_no);
 
-      showConsentForm();
+      showConsentForm(consentFormName);
+
+      // add event listners to inputs
+      // on 'YES'
+      let el = document.getElementById("consent-yes");
+      el.addEventListener("click", () => {
+        continueRoutine = false;
+      });
+
+      // on 'NO'
+      el = document.getElementById("consent-no");
+      el.addEventListener("click", () => {
+        continueRoutine = false;
+        quitPsychoJS();
+      });
 
       for (const thisComponent of consentComponents)
         if ("status" in thisComponent)
@@ -554,91 +558,6 @@ const experiment = (blockCount) => {
         consent_form_content.setAutoDraw(true);
       }
 
-      // *consent_button_yes* updates
-      if (t >= 0 && consent_button_yes.status === PsychoJS.Status.NOT_STARTED) {
-        // keep track of start time/frame for later
-        consent_button_yes.tStart = t; // (not accounting for frame time here)
-        consent_button_yes.frameNStart = frameN; // exact frame index
-
-        consent_button_yes.setAutoDraw(true);
-      }
-
-      if (consent_button_yes.status === PsychoJS.Status.STARTED) {
-        // check whether consent_button_yes has been pressed
-        if (consent_button_yes.isClicked) {
-          if (!consent_button_yes.wasClicked) {
-            // store time of first click
-            consent_button_yes.timesOn.push(consent_button_yes.clock.getTime());
-            // store time clicked until
-            consent_button_yes.timesOff.push(
-              consent_button_yes.clock.getTime()
-            );
-          } else {
-            // update time clicked until;
-            consent_button_yes.timesOff[
-              consent_button_yes.timesOff.length - 1
-            ] = consent_button_yes.clock.getTime();
-          }
-          if (!consent_button_yes.wasClicked) {
-            // end routine when consent_button_yes is clicked
-            continueRoutine = false;
-            null;
-          }
-          // if consent_button_yes is still clicked next frame, it is not a new click
-          consent_button_yes.wasClicked = true;
-        } else {
-          // if consent_button_yes is clicked next frame, it is a new click
-          consent_button_yes.wasClicked = false;
-        }
-      } else {
-        // keep clock at 0 if consent_button_yes hasn't started / has finished
-        consent_button_yes.clock.reset();
-        // if consent_button_yes is clicked next frame, it is a new click
-        consent_button_yes.wasClicked = false;
-      }
-
-      // *consent_button_no* updates
-      if (t >= 0 && consent_button_no.status === PsychoJS.Status.NOT_STARTED) {
-        // keep track of start time/frame for later
-        consent_button_no.tStart = t; // (not accounting for frame time here)
-        consent_button_no.frameNStart = frameN; // exact frame index
-
-        consent_button_no.setAutoDraw(true);
-      }
-
-      if (consent_button_no.status === PsychoJS.Status.STARTED) {
-        // check whether consent_button_no has been pressed
-        if (consent_button_no.isClicked) {
-          if (!consent_button_no.wasClicked) {
-            // store time of first click
-            consent_button_no.timesOn.push(consent_button_no.clock.getTime());
-            // store time clicked until
-            consent_button_no.timesOff.push(consent_button_no.clock.getTime());
-          } else {
-            // update time clicked until;
-            consent_button_no.timesOff[consent_button_no.timesOff.length - 1] =
-              consent_button_no.clock.getTime();
-          }
-          if (!consent_button_no.wasClicked) {
-            // end routine when consent_button_no is clicked
-            continueRoutine = false;
-
-            // quite experiment
-            quitPsychoJS();
-            null;
-          }
-          // if consent_button_no is still clicked next frame, it is not a new click
-          consent_button_no.wasClicked = true;
-        } else {
-          // if consent_button_no is clicked next frame, it is a new click
-          consent_button_no.wasClicked = false;
-        }
-      } else {
-        // keep clock at 0 if consent_button_no hasn't started / has finished
-        consent_button_no.clock.reset();
-        // if consent_button_no is clicked next frame, it is a new click
-        consent_button_no.wasClicked = false;
-      }
       // check for quit (typically the Esc key)
       if (
         psychoJS.experiment.experimentEnded ||
@@ -682,7 +601,7 @@ const experiment = (blockCount) => {
           thisComponent.setAutoDraw(false);
         }
       }
-      hideConsentForm();
+      hideAllForms();
       return Scheduler.Event.NEXT;
     };
   }
@@ -758,6 +677,120 @@ const experiment = (blockCount) => {
       // the Routine "file" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
 
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function debriefRoutineBegin(snapshot) {
+    return async function () {
+      TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
+
+      debriefFormName = paramReader.read("_debriefForm");
+
+      //------Prepare to start Routine 'consent'-------
+      t = 0;
+      debriefClock.reset(); // clock
+      frameN = -1;
+      continueRoutine = true; // until we're told otherwise
+      // routineTimer.add(5.000000);
+
+      // update component parameters for each repeat
+      // keep track of which components have finished
+      debriefComponents = [];
+      debriefComponents.push(debrief_form_content);
+
+      showDebriefForm(debriefFormName);
+
+      // add event listners to inputs
+      // on 'YES'
+      let el = document.getElementById("debrief-yes");
+      el.addEventListener("click", () => {
+        continueRoutine = false;
+        quitPsychoJS();
+      });
+
+      // on 'NO'
+      el = document.getElementById("debrief-no");
+      el.addEventListener("click", () => {
+        continueRoutine = false;
+        quitPsychoJS();
+      });
+
+      for (const thisComponent of debriefComponents)
+        if ("status" in thisComponent)
+          thisComponent.status = PsychoJS.Status.NOT_STARTED;
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function debriefRoutineEachFrame() {
+    return async function () {
+      //------Loop for each frame of Routine 'consent'-------
+      // get current time
+      t = debriefClock.getTime();
+      frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
+      // update/draw components on each frame
+
+      // *debrief_form_content* updates
+      if (
+        t >= 0.0 &&
+        debrief_form_content.status === PsychoJS.Status.NOT_STARTED
+      ) {
+        // keep track of start time/frame for later
+        debrief_form_content.tStart = t; // (not accounting for frame time here)
+        debrief_form_content.frameNStart = frameN; // exact frame index
+
+        debrief_form_content.setAutoDraw(true);
+      }
+
+      // check for quit (typically the Esc key)
+      if (
+        psychoJS.experiment.experimentEnded ||
+        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+      ) {
+        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+      }
+
+      // check if the Routine should terminate
+      if (!continueRoutine) {
+        console.log("DEBRIEF ENDS");
+
+        // a component has requested a forced-end of Routine
+        return Scheduler.Event.NEXT;
+      }
+
+      continueRoutine = false; // reverts to True if at least one component still running
+      for (const thisComponent of debriefComponents)
+        if (
+          "status" in thisComponent &&
+          thisComponent.status !== PsychoJS.Status.FINISHED
+        ) {
+          continueRoutine = true;
+          break;
+        }
+
+      // check if the Routine should terminate
+      if (!continueRoutine) {
+        // end routine
+        console.log("DEBRIEF ENDS2");
+
+        return Scheduler.Event.NEXT;
+      } else {
+        // stay on this routine
+        return Scheduler.Event.FLIP_REPEAT;
+      }
+    };
+  }
+
+  function debrieftRoutineEnd() {
+    return async function () {
+      //------Ending Routine 'consent'-------
+      for (const thisComponent of debriefComponents) {
+        if (typeof thisComponent.setAutoDraw === "function") {
+          thisComponent.setAutoDraw(false);
+        }
+      }
+      hideAllForms();
       return Scheduler.Event.NEXT;
     };
   }
