@@ -82,8 +82,9 @@ export class ParamReader {
     Papa.parse(`./${this._experimentFilePath}/blockCount.csv`, {
       download: true,
       complete: ({ data }) => {
-        if (parseInt(data[data.length - 1][0]))
+        if (parseInt(data[data.length - 1][0]) !== NaN) {
           this._blockCount = Number(data[data.length - 1][0]) + 1;
+        }
         // Last line in blockCount is space
         else this._blockCount = Number(data[data.length - 2][0]) + 1;
 

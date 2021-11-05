@@ -17,7 +17,7 @@ export function setupClickableAlphabet(ans, font, where, responseRegister) {
   const alphabetHolder = document.createElement("div");
   alphabetHolder.id = "alphabet-holder";
   alphabetHolder.className = "alphabet-holder";
-  alphabetHolder.style.fontFamily = font;
+  alphabetHolder.style.fontFamily = `"${font}"`;
   getAlphabetShowPos(alphabetHolder, where);
 
   for (let a of ans) {

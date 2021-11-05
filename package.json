@@ -47,6 +47,7 @@
     "*.{js,css,html,md}": "prettier --write"
   },
   "dependencies": {
-    "papaparse": "^5.3.1"
+    "papaparse": "^5.3.1",
+    "webfontloader": "^1.6.28"
   }
 }

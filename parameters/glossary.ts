@@ -138,7 +138,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantsHowMany: {
     name: "_participantsHowMany",
-    availability: "later",
+    availability: "now",
     example: "100",
     explanation:
       "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -184,7 +184,7 @@ export const GLOSSARY: Glossary = {
   },
   calibrateDistanceCheckBool: {
     name: "calibrateDistanceCheckBool",
-    availability: "soon",
+    availability: "now",
     example: "FALSE",
     explanation:
       'When TRUE, requests checking of the calibrator by the participant, provided they have a tape measure, meter stick, or yard stick, or failing that, a ruler. After each size or distance calibration, if calibrationDistanceCheckBool=TRUE, then we will ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick; a 12" or 30 cm ruler could be used if we exclude long distances), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. If no device, then we skip the rest of the calibrations that need a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like “16 3/16” or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. Our current scheme with the calibrator is to have a Boolean parameter for each calibration. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people on Prolific and mention in our job description that they must have a tape measure, meter stick or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.\n',
@@ -193,7 +193,7 @@ export const GLOSSARY: Glossary = {
   },
   calibrateGazeCheckBool: {
     name: "calibrateGazeCheckBool",
-    availability: "soon",
+    availability: "now",
     example: "FALSE",
     explanation:
       "To check gaze tracking we don’t need a measuring device, and hardly any instructions. I think we could just put up our fixation cross in a few random places and ask them to click on it. It will be very similar to the training and we don’t need to tell the participant that we progressed from training to checking.",
@@ -207,14 +207,6 @@ export const GLOSSARY: Glossary = {
     explanation: "",
     type: "boolean",
     default: "TRUE",
-  },
-  calibrateScreenSizeCheckBool: {
-    name: "calibrateScreenSizeCheckBool",
-    availability: "soon",
-    example: "TRUE",
-    explanation: "",
-    type: "boolean",
-    default: "FALSE",
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
@@ -239,7 +231,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "Initial measurement of the pupillary distance to later estimate near point.",
+      "Initial measurement of viewing distance by measuring the pupillary distance.",
     type: "boolean",
     default: "FALSE",
   },
@@ -358,7 +350,7 @@ export const GLOSSARY: Glossary = {
   },
   instructionFontStyle: {
     name: "instructionFontStyle",
-    availability: "soon",
+    availability: "now",
     example: "regular",
     explanation: "",
     type: "categorical",
@@ -1044,7 +1036,7 @@ export const GLOSSARY: Glossary = {
   },
   targetRepeatsBorderCharacter: {
     name: "targetRepeatsBorderCharacter",
-    availability: "later",
+    availability: "November",
     example: "$",
     explanation:
       "When targetRepeatsBool we use this character to create an outer border.",
