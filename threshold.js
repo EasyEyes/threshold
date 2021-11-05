@@ -6,10 +6,11 @@ import { debug } from "./components/utils.js";
 
 const useConsent = false;
 const useRC = true;
+// TODO read in `showGridsBool` from reader
 const showGrid = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
-const { PsychoJS } = core;
+const { PsychoJS, EventManager } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
 
@@ -64,6 +65,11 @@ import {
 } from "./components/bounding.js";
 
 import { getGridLines, updateGridVisible } from "./components/grid.js";
+import {
+  checkIfSimulated,
+  SimulatedObserver,
+  simulateObserverResponse,
+} from "./components/simulatedObserver.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -90,12 +96,15 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
-
+var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = (reader) => {
   // ! Load fonts
   loadFonts(reader, fontsRequired);
+
+  // ! Simulate observer
+  simulated = checkIfSimulated(reader);
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
@@ -319,8 +328,6 @@ const experiment = (blockCount) => {
     });
     consent_button_no.clock = new util.Clock();
 
-    logger("Window (for grid purposes)", psychoJS.window);
-
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
@@ -349,6 +356,7 @@ const experiment = (blockCount) => {
       clock: new util.Clock(),
       waitForStart: true,
     });
+    console.log("keyboard for response: ", key_resp);
 
     fixation = new visual.TextStim({
       win: psychoJS.window,
@@ -539,6 +547,10 @@ const experiment = (blockCount) => {
 
   function consentRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
+      if (simulated) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
+
       //------Loop for each frame of Routine 'consent'-------
       // get current time
       t = consentClock.getTime();
@@ -712,6 +724,9 @@ const experiment = (blockCount) => {
 
   function fileRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
+      if (simulated) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
       //------Loop for each frame of Routine 'file'-------
       // get current time
       t = fileClock.getTime();
@@ -783,6 +798,10 @@ const experiment = (blockCount) => {
   }
 
   async function _instructionRoutineEachFrame() {
+    /* --- SIMULATED --- */
+    if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+    /* --- /SIMULATED --- */
+
     t = instructionsClock.getTime();
     frameN = frameN + 1;
 
@@ -842,6 +861,7 @@ const experiment = (blockCount) => {
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
       currentLoop = blocks; // we're now the current loop
+      console.log("blocks: ", blocks);
 
       // Schedule all the trials in the trialList:
       for (const thisBlock of blocks) {
@@ -999,6 +1019,10 @@ const experiment = (blockCount) => {
 
   function filterRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
+      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
+
       //------Loop for each frame of Routine 'filter'-------
       // get current time
       t = filterClock.getTime();
@@ -1275,6 +1299,9 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
+      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
       t = instructionsClock.getTime();
       frameN = frameN + 1;
 
@@ -1347,6 +1374,11 @@ const experiment = (blockCount) => {
   var _key_resp_allKeys;
   var trialComponents;
 
+  /* --- SIMULATED --- */
+  var simulatedObserver;
+  /* --- /SIMULATED --- */
+
+  var condition;
   function trialRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -1359,7 +1391,7 @@ const experiment = (blockCount) => {
       logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
 
-      let condition;
+      // let condition;
       const parametersToExcludeFromData = [];
       for (let c of snapshot.handler.getConditions()) {
         if (c.label === trials._currentStaircase._name) {
@@ -1514,7 +1546,7 @@ const experiment = (blockCount) => {
         spacingRelationToSize: spacingRelationToSize,
       };
       /* --- GRIDS --- */
-      if (showGrid) {
+      if (showGrid && !simulated) {
         grids = {
           deg: getGridLines(psychoJS.window, "deg", displayOptions),
           cm: getGridLines(psychoJS.window, "cm", displayOptions),
@@ -1698,6 +1730,21 @@ const experiment = (blockCount) => {
         }
       }
       /* --- /GRIDS --- */
+      /* --- SIMULATED --- */
+      if (simulated && simulated[block]) {
+        if (!simulatedObserver) {
+          simulatedObserver = new SimulatedObserver(
+            simulated[block][condition.label],
+            level,
+            alphabet,
+            targetCharacter,
+            condition["thresholdProportionCorrect"]
+          );
+        } else {
+          simulatedObserver.updateTrial(level, alphabet, targetCharacter);
+        }
+      }
+      /* --- /SIMULATED --- */
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -1759,6 +1806,19 @@ const experiment = (blockCount) => {
       }
 
       if (key_resp.status === PsychoJS.Status.STARTED) {
+        /* --- SIMULATED --- */
+        if (
+          simulated &&
+          simulated[thisLoopNumber] &&
+          simulated[thisLoopNumber][condition.label]
+        ) {
+          return simulateObserverResponse(
+            simulatedObserver,
+            key_resp,
+            psychoJS
+          );
+        }
+        /* --- /SIMULATED --- */
         let theseKeys = key_resp.getKeys({
           keyList: validAns,
           waitRelease: false,
@@ -1975,6 +2035,7 @@ const experiment = (blockCount) => {
         }
       }
       // was no response the correct answer?!
+      console.log("trialRoutineEnd key_resp: ", key_resp);
       if (key_resp.keys === undefined) {
         console.error("[key_resp.keys] No response error.");
       }
@@ -1984,6 +2045,9 @@ const experiment = (blockCount) => {
         currentLoop.addResponse(key_resp.corr, level);
         logger("level passed to addResponse", level);
       }
+
+      logStaircaseInfoToOutput(currentLoop);
+
       psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
       psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
       if (typeof key_resp.keys !== "undefined") {
@@ -1996,27 +2060,29 @@ const experiment = (blockCount) => {
       // the Routine "trial" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
 
-      psychoJS.experiment.addData(
-        "staircaseName",
-        currentLoop._currentStaircase._name
-      );
-      psychoJS.experiment.addData(
-        "questMeanAtEndOfTrial",
-        currentLoop._currentStaircase.mean()
-      );
-      psychoJS.experiment.addData(
-        "questSDAtEndOfTrial",
-        currentLoop._currentStaircase.sd()
-      );
-      psychoJS.experiment.addData(
-        "questQuantileOfQuantileOrderAtEndOfTrial",
-        currentLoop._currentStaircase.quantile(
-          currentLoop._currentStaircase._jsQuest.quantileOrder
-        )
-      );
-
       return Scheduler.Event.NEXT;
     };
+  }
+
+  function logStaircaseInfoToOutput(currentLoop) {
+    psychoJS.experiment.addData(
+      "staircaseName",
+      currentLoop._currentStaircase._name
+    );
+    psychoJS.experiment.addData(
+      "questMeanAtEndOfTrial",
+      currentLoop._currentStaircase.mean()
+    );
+    psychoJS.experiment.addData(
+      "questSDAtEndOfTrial",
+      currentLoop._currentStaircase.sd()
+    );
+    psychoJS.experiment.addData(
+      "questQuantileOfQuantileOrderAtEndOfTrial",
+      currentLoop._currentStaircase.quantile(
+        currentLoop._currentStaircase._jsQuest.quantileOrder
+      )
+    );
   }
 
   function endLoopIteration(scheduler, snapshot) {
