@@ -155,7 +155,7 @@ const experiment = (blockCount) => {
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
   const psychoJS = new PsychoJS({
-    debug: debug,
+    debug: false,
   });
 
   /* ---------------------------------- Sound --------------------------------- */

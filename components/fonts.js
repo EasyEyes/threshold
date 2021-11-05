@@ -7,8 +7,8 @@ export const loadFonts = (reader, fontList) => {
     if (sourceType === "file") {
       fetch(fontFilePath)
         .then((response) => {
-          let n = name.split(".")[0];
-          fontList[n] = fontFilePath;
+          // let n = name.split(".")[0];
+          fontList[name] = fontFilePath;
         })
         .catch((err) => {
           console.error(`Font file ${name} not found.`);
