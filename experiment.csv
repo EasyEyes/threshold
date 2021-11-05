@@ -1,10 +1,16 @@
 _authors,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli
 block,1,1,1,1,2,2
-calibrateTrackDistanceBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+calibrateBlindSpotBool,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+calibrateDistanceCheckBool,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+calibrateGazeCheckBool,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+calibrateScreenSizeBool,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+calibrateScreenSizeCheckBool,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+calibrateTrackDistanceBool,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+calibrateTrackNearPointBoo,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 conditionName,printLetters,printString,scriptLetters,scriptString,arabicLetters,arabicString
 conditionTrials,9,9,9,9,9,9
 showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
-simulateParticipantBool,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+simulateParticipantBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 simulationBeta,3,3,3,3,3,3
 simulationDelta,0.01,0.01,0.01,0.01,0.01,0.01
 simulationObserverModel,weibull,weibull,weibull,weibull,weibull,weibull
