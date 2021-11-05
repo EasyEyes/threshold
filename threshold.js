@@ -268,8 +268,11 @@ const experiment = (blockCount) => {
   var thisConditionsFile;
   var trialClock;
   // var targetBoundingPoly; // Target Bounding Box
+
   var instructions;
   var instructions2;
+  var instructionFont = paramReader.read("instructionFont")[0];
+
   var key_resp;
   var fixation; ////
   var flanker1;
@@ -444,10 +447,10 @@ const experiment = (blockCount) => {
       win: psychoJS.window,
       name: "instructions",
       text: "",
-      font: "Arial",
+      font: instructionFont,
       units: "pix",
       pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
-      height: 32.0,
+      height: 30.0,
       wrapWidth: window.innerWidth * 0.8,
       ori: 0.0,
       color: new util.Color("black"),
@@ -462,10 +465,10 @@ const experiment = (blockCount) => {
       win: psychoJS.window,
       name: "instructions2",
       text: "",
-      font: "Arial",
+      font: instructionFont,
       units: "pix",
       pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
-      height: 32.0,
+      height: 30.0,
       wrapWidth: window.innerWidth * 0.8,
       ori: 0.0,
       color: new util.Color("black"),

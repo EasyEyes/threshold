@@ -14,7 +14,7 @@ async function processLanguageSheet() {
   const rows = await googleSheets.spreadsheets.values.get({
     auth,
     spreadsheetId,
-    range: "Inputs",
+    range: "Parameters",
   });
 
   const rowsJSON = XLSX.utils.sheet_to_json(
@@ -26,10 +26,10 @@ async function processLanguageSheet() {
 
   const data = {};
   for (let parameter of rowsJSON) {
-    const parameterName = parameter["INPUT PARAMETERS"];
+    const parameterName = parameter["PARAMETER GLOSSARY"];
     const parameterInfo = {
       name: parameterName,
-      availability: parameter["Avail."] || "now",
+      availability: parameter["Now"] || "now",
       example: parameter["Example"],
       explanation: parameter["Explanation"],
       type: parameter["Type"],
