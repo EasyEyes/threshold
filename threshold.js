@@ -4,7 +4,7 @@
 
 import { debug } from "./components/utils.js";
 
-const useConsent = false;
+const useConsent = true;
 const useRC = true;
 const showGrid = true;
 
@@ -206,11 +206,11 @@ const experiment = (blockCount) => {
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(updateInfo); // add timeStamp
   flowScheduler.add(experimentInit);
-  if (useConsent) {
-    flowScheduler.add(consentRoutineBegin());
-    flowScheduler.add(consentRoutineEachFrame());
-    flowScheduler.add(consentRoutineEnd());
-  }
+
+  flowScheduler.add(consentRoutineBegin());
+  flowScheduler.add(consentRoutineEachFrame());
+  flowScheduler.add(consentRoutineEnd());
+
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
   flowScheduler.add(fileRoutineEnd());
@@ -221,6 +221,7 @@ const experiment = (blockCount) => {
   flowScheduler.add(blocksLoopBegin(blocksLoopScheduler));
   flowScheduler.add(blocksLoopScheduler);
   flowScheduler.add(blocksLoopEnd);
+
   flowScheduler.add(debriefRoutineBegin());
   flowScheduler.add(debriefRoutineEachFrame());
   flowScheduler.add(debrieftRoutineEnd());
@@ -292,23 +293,6 @@ const experiment = (blockCount) => {
   var globalClock;
   var routineTimer;
   async function experimentInit() {
-    // Initialize components for Routine "consent"
-    consentClock = new util.Clock();
-    consent_form_content = new visual.TextStim({
-      win: psychoJS.window,
-      name: "consent_form_content",
-      text: "I agree to participate in this study (indicate by clicking one option).",
-      font: "Open Sans",
-      units: undefined,
-      pos: [0, -0.35],
-      height: 0.03,
-      wrapWidth: undefined,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: undefined,
-      depth: 0.0,
-    });
-
     logger("Window (for grid purposes)", psychoJS.window);
 
     // Initialize components for Routine "file"
@@ -500,6 +484,25 @@ const experiment = (blockCount) => {
 
   function consentRoutineBegin(snapshot) {
     return async function () {
+      console.log("CONSENT ROUTINE BEGIN");
+
+      // Initialize components for Routine "consent"
+      consentClock = new util.Clock();
+      consent_form_content = new visual.TextStim({
+        win: psychoJS.window,
+        name: "consent_form_content",
+        text: "I agree to participate in this study (indicate by clicking one option).",
+        font: "Open Sans",
+        units: undefined,
+        pos: [0, -0.35],
+        height: 0.03,
+        wrapWidth: undefined,
+        ori: 0.0,
+        color: new util.Color("black"),
+        opacity: undefined,
+        depth: 0.0,
+      });
+
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       consentFormName = paramReader.read("_consentForm");
@@ -540,6 +543,8 @@ const experiment = (blockCount) => {
 
   function consentRoutineEachFrame() {
     return async function () {
+      console.log("CONSENT ROUTINE ITER");
+
       //------Loop for each frame of Routine 'consent'-------
       // get current time
       t = consentClock.getTime();
@@ -595,6 +600,7 @@ const experiment = (blockCount) => {
 
   function consentRoutineEnd() {
     return async function () {
+      console.log("CONSENT ROUTINE END");
       //------Ending Routine 'consent'-------
       for (const thisComponent of consentComponents) {
         if (typeof thisComponent.setAutoDraw === "function") {
@@ -683,6 +689,8 @@ const experiment = (blockCount) => {
 
   function debriefRoutineBegin(snapshot) {
     return async function () {
+      console.log("DEBRIEF ROUTINE BEGIN");
+
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       debriefFormName = paramReader.read("_debriefForm");
@@ -725,6 +733,7 @@ const experiment = (blockCount) => {
 
   function debriefRoutineEachFrame() {
     return async function () {
+      console.log("DEBRIEF ROUTINE ITER");
       //------Loop for each frame of Routine 'consent'-------
       // get current time
       t = debriefClock.getTime();
@@ -784,6 +793,7 @@ const experiment = (blockCount) => {
 
   function debrieftRoutineEnd() {
     return async function () {
+      console.log("DEBRIEF ROUTINE END");
       //------Ending Routine 'consent'-------
       for (const thisComponent of debriefComponents) {
         if (typeof thisComponent.setAutoDraw === "function") {
