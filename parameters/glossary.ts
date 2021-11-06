@@ -13,7 +13,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "Effect of font on crowding.",
     explanation:
-      "Optional brief description of the whole experiment. Ignored, but saved with results. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -38,9 +38,9 @@ export const GLOSSARY: Glossary = {
   _consentForm: {
     name: "_consentForm",
     availability: "now",
-    example: "adultConsent2021.txt",
+    example: "adultConsent2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "The file name of your PDF (or plain-text Markdown with extension MD) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. When checking your experiment table, the preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Scientific Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -67,7 +67,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "debrief2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -771,7 +771,7 @@ export const GLOSSARY: Glossary = {
   },
   showGridsBool: {
     name: "showGridsBool",
-    availability: "soon",
+    availability: "now",
     example: "TRUE",
     explanation:
       'To allow visual checking of location and size, showGridsBool=TRUE requests that the experiment show buttons on the (lower) left of the screen that each turn on and off a different grid over the whole screen. Turning on several buttons shows several grids (in different dark colors). Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.\n',
@@ -809,7 +809,7 @@ export const GLOSSARY: Glossary = {
   },
   simulateParticipantBool: {
     name: "simulateParticipantBool",
-    availability: "soon",
+    availability: "now",
     example: "FALSE",
     explanation:
       'Use the software model specifed by "simulationModel" to generale observer responses. The test runs without human intervention.',
@@ -818,7 +818,7 @@ export const GLOSSARY: Glossary = {
   },
   simulateWithDisplayBool: {
     name: "simulateWithDisplayBool",
-    availability: "soon",
+    availability: "now",
     example: "TRUE",
     explanation:
       "If true, then display the stimuli as though a participant were present. This is helpful for debugging. If false, then skip display to run as fast as possible.",
@@ -827,7 +827,7 @@ export const GLOSSARY: Glossary = {
   },
   simulationBeta: {
     name: "simulationBeta",
-    availability: "soon",
+    availability: "now",
     example: "3",
     explanation: "Used by the Weibull observer model.",
     type: "numerical",
@@ -835,7 +835,7 @@ export const GLOSSARY: Glossary = {
   },
   simulationDelta: {
     name: "simulationDelta",
-    availability: "soon",
+    availability: "now",
     example: "0.01",
     explanation: "Used by the Weibull observer model.",
     type: "numerical",
@@ -843,7 +843,7 @@ export const GLOSSARY: Glossary = {
   },
   simulationModel: {
     name: "simulationModel",
-    availability: "soon",
+    availability: "now",
     example: "blind",
     explanation:
       'For debugging and checking it is often helpful to simulate the observer. "simulationModel" can be: \n• "blind": This model merely presses a random response key. \n• "ideal": This model does the same task as the human, picking the best response given the stimulus. Its threshold is a useful point of reference in analyzing human data. Without noise, it will always be right. Since noise is still months away, for now, just give the right answer.\n• "weibull": This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately measure its (unknown to Quest) threshold, when the respt of the parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.',
@@ -853,7 +853,7 @@ export const GLOSSARY: Glossary = {
   },
   "​simulationThreshold": {
     name: "​simulationThreshold",
-    availability: "soon",
+    availability: "now",
     example: "0",
     explanation:
       "The actual threshold of the simulated observer. We test the implementation of Quest by testing how well it estimates simulationThreshold.",
