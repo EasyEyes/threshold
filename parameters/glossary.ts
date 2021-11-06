@@ -851,8 +851,8 @@ export const GLOSSARY: Glossary = {
     default: "ideal",
     categories: ["blind", "weibull", "ideal"],
   },
-  "​simulationThreshold": {
-    name: "​simulationThreshold",
+  simulationThreshold: {
+    name: "simulationThreshold",
     availability: "now",
     example: "0",
     explanation:
