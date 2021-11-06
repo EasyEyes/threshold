@@ -13,7 +13,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "Effect of font on crowding.",
     explanation:
-      "Optional brief description of the whole experiment. Ignored, but saved with results. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -38,9 +38,9 @@ export const GLOSSARY: Glossary = {
   _consentForm: {
     name: "_consentForm",
     availability: "now",
-    example: "adultConsent2021.txt",
+    example: "adultConsent2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "The file name of your PDF (or plain-text Markdown with extension MD) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. When checking your experiment table, the preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Scientific Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -67,7 +67,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "debrief2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -138,7 +138,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantsHowMany: {
     name: "_participantsHowMany",
-    availability: "now",
+    availability: "later",
     example: "100",
     explanation:
       "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -147,7 +147,7 @@ export const GLOSSARY: Glossary = {
   },
   _prolificEligibilityRequirements: {
     name: "_prolificEligibilityRequirements",
-    availability: "now",
+    availability: "later",
     example: "",
     explanation:
       "This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
@@ -156,7 +156,7 @@ export const GLOSSARY: Glossary = {
   },
   _prolificStudyType: {
     name: "_prolificStudyType",
-    availability: "now",
+    availability: "later",
     example: "US_REP_SAMPLE",
     explanation:
       "Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
@@ -184,7 +184,7 @@ export const GLOSSARY: Glossary = {
   },
   calibrateDistanceCheckBool: {
     name: "calibrateDistanceCheckBool",
-    availability: "now",
+    availability: "soon",
     example: "FALSE",
     explanation:
       'When TRUE, requests checking of the calibrator by the participant, provided they have a tape measure, meter stick, or yard stick, or failing that, a ruler. After each size or distance calibration, if calibrationDistanceCheckBool=TRUE, then we will ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick; a 12" or 30 cm ruler could be used if we exclude long distances), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. If no device, then we skip the rest of the calibrations that need a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like “16 3/16” or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. Our current scheme with the calibrator is to have a Boolean parameter for each calibration. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people on Prolific and mention in our job description that they must have a tape measure, meter stick or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.\n',
@@ -193,7 +193,7 @@ export const GLOSSARY: Glossary = {
   },
   calibrateGazeCheckBool: {
     name: "calibrateGazeCheckBool",
-    availability: "now",
+    availability: "soon",
     example: "FALSE",
     explanation:
       "To check gaze tracking we don’t need a measuring device, and hardly any instructions. I think we could just put up our fixation cross in a few random places and ask them to click on it. It will be very similar to the training and we don’t need to tell the participant that we progressed from training to checking.",
@@ -207,6 +207,14 @@ export const GLOSSARY: Glossary = {
     explanation: "",
     type: "boolean",
     default: "TRUE",
+  },
+  calibrateScreenSizeCheckBool: {
+    name: "calibrateScreenSizeCheckBool",
+    availability: "soon",
+    example: "TRUE",
+    explanation: "",
+    type: "boolean",
+    default: "FALSE",
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
@@ -231,7 +239,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "Initial measurement of viewing distance by measuring the pupillary distance.",
+      "Initial measurement of the pupillary distance to later estimate near point.",
     type: "boolean",
     default: "FALSE",
   },
@@ -240,7 +248,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "1",
     explanation:
-      '"conditionGroup" imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many  parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same non-blank conditionGroup number are presented with the same markings (fixation cross, target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among any specified set of targets simply by creating a condition for each target, and giving all the conditions the same non-blank conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a unique conditionGroup number, or none (blank), belongs to a condition group with just that condition.',
+      '"conditionGroup" imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross, target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among any specified set of targets simply by creating a condition for each target, and giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
     type: "integer",
     default: "0",
   },
@@ -264,7 +272,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationCheckBool: {
     name: "fixationCheckBool",
-    availability: "september",
+    availability: "later",
     example: "FALSE",
     explanation:
       "Display a foveal triplet that is easy to read if the participant's eye is on fixation, and hard to read if the eye is elsewhere.",
@@ -288,7 +296,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationXScreen: {
     name: "fixationLocationXScreen",
-    availability: "imminent",
+    availability: "soon",
     example: "0.5",
     explanation:
       'If fixationLocationStrategy is "asSpecified" then this specifies fixation\'s X coordinate in the screen plane, normalized by screen width and height. Origin is lower left.',
@@ -297,7 +305,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationYScreen: {
     name: "fixationLocationYScreen",
-    availability: "imminent",
+    availability: "soon",
     example: "0.5",
     explanation: "As above. The Y coordinate.",
     type: "numerical",
@@ -334,7 +342,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "Georgia",
     explanation:
-      'Font used for participant instructions. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Google Fonts. \nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
+      'Font used for participant instructions. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \ngoogle: instructionFont is a filename (including extension) of a font on the Google Fonts server.\nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Adobe. \nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
     type: "text",
     default: "Verdana",
   },
@@ -343,14 +351,14 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "browser",
     explanation:
-      'instructionFontSource must be "file","server", "browser", or "defaultForLanguage".  [In the future we may add "Google", allowing targetFont to be the filename of a font for which the preprocessor automatically gets a URL from the Google Fonts website, using their API.] See instructionFont and targetFontSource.',
+      "instructionFontSource must be file, google, server, browser, or defaultForLanguage. See instructionFont and targetFontSource.",
     type: "categorical",
     default: "browser",
-    categories: ["file", "server", "browser"],
+    categories: ["file", "google", "server", "browser", "defaultForLanguage"],
   },
   instructionFontStyle: {
     name: "instructionFontStyle",
-    availability: "now",
+    availability: "soon",
     example: "regular",
     explanation: "",
     type: "categorical",
@@ -359,7 +367,7 @@ export const GLOSSARY: Glossary = {
   },
   instructionLanguage: {
     name: "instructionLanguage",
-    availability: "now",
+    availability: "soon",
     example: "Italian",
     explanation:
       "English name for the language used for instructions to the participant. It must match one of the entries in the second row of the EasyEyes International phrases sheet. If you leave this blank, then the participant will be allowed to select the language from a pull-down menu.",
@@ -557,7 +565,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "Arial",
     explanation:
-      "Font name, taken from the name of font file, which may include a style.",
+      "Font name, taken from the name of font file, which may include a style. See targetFont for details.",
     type: "text",
     default: "Verdana",
   },
@@ -565,19 +573,21 @@ export const GLOSSARY: Glossary = {
     name: "readingFontSource",
     availability: "now",
     example: "",
-    explanation: "",
+    explanation:
+      "Must be file, google, server, or browser. See targetFontSource for details.",
     type: "categorical",
     default: "browser",
-    categories: ["file", "server", "browser"],
+    categories: ["file", "google", "server", "browser"],
   },
   readingFontStyle: {
     name: "readingFontStyle",
     availability: "later",
     example: "bold",
-    explanation: "Font style: regular, bold, italic, bold italic",
+    explanation:
+      "Font style: regular, bold, italic, or boldItalic. See targetFontStyle for details.",
     type: "categorical",
     default: "regular",
-    categories: ["regular", "bold", "italic", "bold italic"],
+    categories: ["regular", "bold", "italic", "boldItalic"],
   },
   readingLinesPerPage: {
     name: "readingLinesPerPage",
@@ -705,7 +715,7 @@ export const GLOSSARY: Glossary = {
   },
   responseTypedEasyEyesKeypadBool: {
     name: "responseTypedEasyEyesKeypadBool",
-    availability: "imminent",
+    availability: "soon",
     example: "FALSE",
     explanation:
       "Allow participant to respond by pressing a key in EasyEyes keypad. The various response modes are not exclusive, any number from 1 to all can be enabled.",
@@ -724,7 +734,7 @@ export const GLOSSARY: Glossary = {
   },
   showAlphabetWithLabelsBool: {
     name: "showAlphabetWithLabelsBool",
-    availability: "imminent",
+    availability: "soon",
     example: "FALSE",
     explanation:
       "For foreign or symbol alphabets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
@@ -761,7 +771,7 @@ export const GLOSSARY: Glossary = {
   },
   showGridsBool: {
     name: "showGridsBool",
-    availability: "imminent",
+    availability: "now",
     example: "TRUE",
     explanation:
       'To allow visual checking of location and size, showGridsBool=TRUE requests that the experiment show buttons on the (lower) left of the screen that each turn on and off a different grid over the whole screen. Turning on several buttons shows several grids (in different dark colors). Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.\n',
@@ -780,7 +790,7 @@ export const GLOSSARY: Glossary = {
   },
   showProgressBarWhere: {
     name: "showProgressBarWhere",
-    availability: "November",
+    availability: "later",
     example: "right",
     explanation:
       "Can be none or right. Meant for children. Graphically displays a vertical green bar that tracks the trial count. The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the block. Sometimes we call the green liquid spaceship fuel for Jamie the astronaut.",
@@ -799,7 +809,7 @@ export const GLOSSARY: Glossary = {
   },
   simulateParticipantBool: {
     name: "simulateParticipantBool",
-    availability: "imminent",
+    availability: "now",
     example: "FALSE",
     explanation:
       'Use the software model specifed by "simulationModel" to generale observer responses. The test runs without human intervention.',
@@ -808,7 +818,7 @@ export const GLOSSARY: Glossary = {
   },
   simulateWithDisplayBool: {
     name: "simulateWithDisplayBool",
-    availability: "imminent",
+    availability: "now",
     example: "TRUE",
     explanation:
       "If true, then display the stimuli as though a participant were present. This is helpful for debugging. If false, then skip display to run as fast as possible.",
@@ -817,7 +827,7 @@ export const GLOSSARY: Glossary = {
   },
   simulationBeta: {
     name: "simulationBeta",
-    availability: "imminent",
+    availability: "now",
     example: "3",
     explanation: "Used by the Weibull observer model.",
     type: "numerical",
@@ -825,7 +835,7 @@ export const GLOSSARY: Glossary = {
   },
   simulationDelta: {
     name: "simulationDelta",
-    availability: "imminent",
+    availability: "now",
     example: "0.01",
     explanation: "Used by the Weibull observer model.",
     type: "numerical",
@@ -833,7 +843,7 @@ export const GLOSSARY: Glossary = {
   },
   simulationModel: {
     name: "simulationModel",
-    availability: "imminent",
+    availability: "now",
     example: "blind",
     explanation:
       'For debugging and checking it is often helpful to simulate the observer. "simulationModel" can be: \n• "blind": This model merely presses a random response key. \n• "ideal": This model does the same task as the human, picking the best response given the stimulus. Its threshold is a useful point of reference in analyzing human data. Without noise, it will always be right. Since noise is still months away, for now, just give the right answer.\n• "weibull": This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately measure its (unknown to Quest) threshold, when the respt of the parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.',
@@ -843,7 +853,7 @@ export const GLOSSARY: Glossary = {
   },
   "​simulationThreshold": {
     name: "​simulationThreshold",
-    availability: "imminent",
+    availability: "now",
     example: "0",
     explanation:
       "The actual threshold of the simulated observer. We test the implementation of Quest by testing how well it estimates simulationThreshold.",
@@ -852,7 +862,7 @@ export const GLOSSARY: Glossary = {
   },
   snapshotBool: {
     name: "snapshotBool",
-    availability: "imminent",
+    availability: "soon",
     example: "FALSE",
     explanation:
       "Requests that a screen shot be recorded of the stimulus display, to be saved in the snapshot folder. Snapshots are useful for debugging, and to illustrate the stimulus in talks and papers.",
@@ -898,7 +908,7 @@ export const GLOSSARY: Glossary = {
   },
   spacingSymmetry: {
     name: "spacingSymmetry",
-    availability: "imminent",
+    availability: "soon",
     example: "linear",
     explanation:
       'spacingSymmetry can be log or linear. When spacing is radial, chooses equal spacing of the outer and inner flanker either on the screen ("linear") or on the cortex ("log"). The log/linear choice makes no difference when the spacingDirection is tangential, or the eccentricity is zero.',
@@ -927,7 +937,7 @@ export const GLOSSARY: Glossary = {
   },
   targetContrast: {
     name: "targetContrast",
-    availability: "imminent",
+    availability: "soon",
     example: "-1",
     explanation:
       "Weber contrast ∆L/L0 of a letter or Michelson contrast (LMax-LMin)/(LMax+LMin) of a Gabor. A white letter is 100% contrast; a black letter is -100% contrast. Currently accurate only for 0 and ±1.",
@@ -964,16 +974,16 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "Sloan.woff2",
     explanation:
-      'How you set targetFont to specify the font depends on targetFontSource:\n\nfile: targetfont is the filename (including extension, typically woff2, woff, otf, or ttf) of a font file in your Fonts folder in your Pavlovia account. The preprocessor will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment.\n\nserver: targetFont is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )".\n\nbrowser: The experiment will pass the font preference string that you place in targetFont to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "targetFontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
+      'targetFont specified what font you want. How you do that depends on targetFontSource:\n\nfile: targetfont is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The preprocessor will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  targetfont is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: targetFont is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )".\n\nbrowser: The experiment will pass the font preference string that you place in targetFont to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "targetFontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
     type: "text",
     default: "RobotoMono-Regular.woff2",
   },
   targetFontSource: {
     name: "targetFontSource",
-    availability: "later",
+    availability: "now",
     example: "file",
     explanation:
-      'targetFontSource must be "file","server", or "browser". Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has targetFontSource "file", the preprocessor checks for presence of the targetFont in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: targetFont contains the filename (with extensition) of a file in the Fonts folder in you Pavlovia account. This is checked by the preprocessor, so there are no runtime surprises. \n\nserver: targetFont contains the URL of the font on a font server.\n\nbrowser: targetFont is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) \n\n[google: In the future we may add "google", allowing targetFont to be the name of a font that the preprocessor automatically gets a URL for from the Google Fonts website, using their API.]',
+      'targetFontSource must be file, google, server, or browser. Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has targetFontSource "file", the preprocessor checks for presence of the targetFont in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: targetFont contains the filename (with extension) of a file in the Fonts folder in you Pavlovia account. This is checked by the preprocessor, so there are no runtime surprises. \n\ngoogle: targetFont contains the filename (with extension) of a file on the Google Fonts server.\n\nserver: targetFont contains the URL of the font on a font server.\n\nbrowser: targetFont is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) \n\n[google: In the future we may add "google", allowing targetFont to be the name of a font that the preprocessor automatically gets a URL for from the Google Fonts website, using their API.]',
     type: "categorical",
     default: "file",
     categories: ["file", "server", "browser"],
@@ -1027,7 +1037,7 @@ export const GLOSSARY: Glossary = {
   },
   targetRepeatsBool: {
     name: "targetRepeatsBool",
-    availability: "November",
+    availability: "later",
     example: "FALSE",
     explanation:
       'Display many copies of two targets, alternating across the screen. The observer reports both. Thus each presentation gets two responses, which count as two trials. David Regan and colleagues (1992) reported that in testing foveal acuity of patients with poor fixation (e.g. nystagmus) it helps to have a "repeat-letter format" eye chart covered with letters of the same size, so that no matter where the eye lands, performance is determined by the letter nearest to the point of fixation, where acuity is best. We here extend that idea to crowding. We cover some part of the screen with an alternating pattern of two letters, like a checkerboard, so that the letters can crowd each other, and ask the observer to report both letters. Again, we expect performance to be determined by the letters nearest to the (unpredictable) point of fixation, where crowding distance is least.',
@@ -1036,7 +1046,7 @@ export const GLOSSARY: Glossary = {
   },
   targetRepeatsBorderCharacter: {
     name: "targetRepeatsBorderCharacter",
-    availability: "November",
+    availability: "later",
     example: "$",
     explanation:
       "When targetRepeatsBool we use this character to create an outer border.",
@@ -1045,7 +1055,7 @@ export const GLOSSARY: Glossary = {
   },
   targetRepeatsMaxLines: {
     name: "targetRepeatsMaxLines",
-    availability: "November",
+    availability: "later",
     example: "3",
     explanation: "Can be 1, 3, 4, … . Sarah Waugh recommends 3.",
     type: "numerical",
@@ -1053,7 +1063,7 @@ export const GLOSSARY: Glossary = {
   },
   targetRepeatsPracticeBool: {
     name: "targetRepeatsPracticeBool",
-    availability: "November",
+    availability: "later",
     example: "TRUE",
     explanation:
       "If targetRepeatsBool then precedes data collection by practice, as explained in note below.",
@@ -1079,7 +1089,7 @@ export const GLOSSARY: Glossary = {
   },
   targetTask: {
     name: "targetTask",
-    availability: '"identify"\n"read" later\n"detect" November',
+    availability: "now",
     example: "identify",
     explanation:
       'The participant\'s task:\n• "identify" is forced choice categorization of the target among known possibilities, e.g. a letter from an alphabet or an orientation among several. \n• "read" asks the observer to read a passage of text as quickly as possible while maintaining full comprehesion, followed by a test.\n• "detect" might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
@@ -1184,7 +1194,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "",
     explanation:
-      'Any available font. If the file name matches, this will select a font file in the EasyEyesResources/Fonts/ folder on your Pavlovia account. If the targetFont string omits the filename extension (typically woff2, woff, or otf), then matching will prefer the smallest file. If there is no match in that Fonts folder, then the experiment will rely on runtime matching in the browser of the participant\'s computer. Some fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. The preprocessor will warn you if runtime matching seems unlikely. When you specify a font file in your Fonts folder,  the "targetFont" is the name of the font file, which typically specifies both the font and style. When relying on font matching by the participant\'s browser you should specify just the family name, like "Verdana", and you can use the "targetFontStyle" to select italic, bold, or bold-italic. Avoid doing both (i.e. specifying face through both "targetFont" and the targetFontStyle) because some browsers may then apply an algorithm to thicken or slant what is specified by the font file, with results that may be surprising and unwanted.  ',
+      'Any available font. If the file name matches, this will select a font file in the EasyEyesResources/Fonts/ folder on your Pavlovia account. If the targetFont string omits the filename extension (we accept woff2, woff, otf, ttf, or svg), then matching will prefer the smallest file. If there is no match in that Fonts folder, then the experiment will rely on runtime matching in the browser of the participant\'s computer. Some fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. The preprocessor will warn you if runtime matching seems unlikely. When you specify a font file in your Fonts folder,  the "targetFont" is the name of the font file, which typically specifies both the font and style. When relying on font matching by the participant\'s browser you should specify just the family name, like "Verdana", and you can use the "targetFontStyle" to select italic, bold, or bold-italic. Avoid doing both (i.e. specifying face through both "targetFont" and the targetFontStyle) because some browsers may then apply an algorithm to thicken or slant what is specified by the font file, with results that may be surprising and unwanted.  ',
     type: "",
     default: "",
   },
