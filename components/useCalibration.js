@@ -3,6 +3,7 @@ export const useCalibration = (reader) => {
     ...reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateDistanceCheckBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateGazeCheckBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackNearPointBool", "__ALL_BLOCKS__"),
@@ -15,7 +16,9 @@ function ifTrue(arr) {
 }
 
 export const formCalibrationList = (reader) => {
-  const tasks = ["screenSize"];
+  const tasks = [];
+  if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__")))
+    tasks.push("screenSize");
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     tasks.push({
       name: "trackDistance",

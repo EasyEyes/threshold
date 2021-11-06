@@ -47,15 +47,12 @@ export const getTypographicHeight = (
     : Math.round(proposedSpacingPx * 3);
   const level = proposedLevel;
   if (proposedSpacingIsTooLarge) {
-    console.log("PROPOSED SPACING IS TOO LARGE");
     const constrainedSpacingPx = desiredStringWidth / 3;
     let level = levelFromSpacingPixels(
       constrainedSpacingPx,
       displayOptions.pixPerCm,
       displayOptions.viewingDistanceCm
     );
-  } else {
-    console.log("PROPOSED SPACING IS GOOD!");
   }
 
   const testHeight = 10;
@@ -158,10 +155,6 @@ const unacceptableStimuli = (
     height: screen.height,
   });
   const badPresentation = fixationInfringed || stimuliExtendOffscreen;
-  logger("areaFlankersCover", areaFlankersCover);
-  logger("fixationInfringed", fixationInfringed);
-  logger("stimuliExtendOffscreen", stimuliExtendOffscreen);
-  logger("badPresentation", badPresentation);
   return badPresentation;
 };
 
@@ -193,11 +186,6 @@ const rectangleContainsPoint = (rectangle, point) => {
   const upperY = Math.max(rectangle[0][1], rectangle[1][1]);
   const xIsIn = point[0] >= leftX && point[0] <= rightX;
   const yIsIn = point[1] >= lowerY && point[1] <= upperY;
-
-  logger("flanker rectangle", rectangle);
-  logger("xIsIn", xIsIn);
-  logger("yIsIn", yIsIn);
-
   return xIsIn && yIsIn;
 };
 
@@ -223,7 +211,6 @@ const flankersExtent = (
   flankerOrientation,
   sizingParameters
 ) => {
-  logger("window", sizingParameters.window);
   const spacingDegrees = Math.pow(10, level);
   const spacingPixels = Math.abs(
     degreesToPixels(spacingDegrees, {
