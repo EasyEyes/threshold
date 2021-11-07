@@ -110,6 +110,9 @@ const paramReaderInitialized = (reader) => {
   // ! Load fonts
   loadFonts(reader, fontsRequired);
 
+  // show screens before actual experiment begins
+  beforeExperimentBegins();
+
   // ! Simulate observer
   simulated = checkIfSimulated(reader);
 
@@ -153,6 +156,18 @@ var totalBlockCount = 0;
 
 var consentFormName = "consent-form.pdf";
 var debriefFormName = "consent-form.md";
+
+const beforeExperimentBegins = () => {
+  showConsentForm(consentFormName);
+
+  document.getElementById("consent-yes").addEventListener("click", (evt) => {
+    hideAllForms();
+  });
+
+  document.getElementById("consent-no").addEventListener("click", (evt) => {
+    showDebriefForm(debriefFormName);
+  });
+};
 
 const experiment = (blockCount) => {
   ////
@@ -227,9 +242,9 @@ const experiment = (blockCount) => {
   flowScheduler.add(blocksLoopScheduler);
   flowScheduler.add(blocksLoopEnd);
 
-  flowScheduler.add(debriefRoutineBegin());
-  flowScheduler.add(debriefRoutineEachFrame());
-  flowScheduler.add(debriefRoutineEnd());
+  // flowScheduler.add(debriefRoutineBegin());
+  // flowScheduler.add(debriefRoutineEachFrame());
+  // flowScheduler.add(debriefRoutineEnd());
 
   flowScheduler.add(quitPsychoJS, "", true);
 
@@ -2030,7 +2045,7 @@ const experiment = (blockCount) => {
     if (psychoJS.experiment.isEntryEmpty()) {
       psychoJS.experiment.nextEntry();
     }
-
+    showDebriefForm(debriefFormName);
     psychoJS.window.close();
     if (participantRecruitmentService?.name == "Prolific" && isCompleted) {
       let additionalMessage =
