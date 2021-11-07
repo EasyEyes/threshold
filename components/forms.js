@@ -7,17 +7,17 @@ export const showConsentForm = async (formName) => {
 
   // show form container
   const formHolderEl = document.getElementById("form-container");
-  formHolderEl.style.zIndex = 999999;
+  formHolderEl.style.zIndex = 1000005;
   formHolderEl.style.display = "block";
 
   // show form inputs
   const formInputEl = document.getElementById("consent-form-input");
   formInputEl.style.display = "block";
-  formInputEl.style.zIndex = 999999;
+  formInputEl.style.zIndex = 1000005;
 
   if (formNameExt == "pdf") {
     const pdfForm = document.getElementById("form-pdf");
-    pdfForm.style.zIndex = 999999;
+    pdfForm.style.zIndex = 1000005;
     pdfForm.style.display = "block";
     pdfForm.setAttribute("src", `forms/${formName}`);
   } else if (formNameExt == "md") {
@@ -37,17 +37,17 @@ export const showDebriefForm = async (formName) => {
 
   // show form container
   const formHolderEl = document.getElementById("form-container");
-  formHolderEl.style.zIndex = 999999;
+  formHolderEl.style.zIndex = 1000005;
   formHolderEl.style.display = "block";
 
   // show form inputs
   const formInputEl = document.getElementById("debrief-form-input");
   formInputEl.style.display = "block";
-  formInputEl.style.zIndex = 999999;
+  formInputEl.style.zIndex = 1000005;
 
   if (formNameExt == "pdf") {
     const pdfForm = document.getElementById("form-pdf");
-    pdfForm.style.zIndex = 999999;
+    pdfForm.style.zIndex = 1000005;
     pdfForm.style.display = "block";
     pdfForm.setAttribute("src", `forms/${formName}`);
   } else if (formNameExt == "md") {

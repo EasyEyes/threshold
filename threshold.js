@@ -58,6 +58,7 @@ import {
 } from "./components/showAlphabet.js";
 
 import {
+  getConsentFormName,
   hideAllForms,
   showConsentForm,
   showDebriefForm,
@@ -159,14 +160,24 @@ var consentFormName = "consent-form.pdf";
 var debriefFormName = "consent-form.md";
 
 const beforeExperimentBegins = () => {
-  showConsentForm(consentFormName);
+  consentFormName = paramReader.read("_consentForm")[0];
+  if (!(typeof consentFormName === "string" && consentFormName.length > 0)) {
+    consentFormName = "";
+  }
+
+  debriefFormName = paramReader.read("_debriefForm")[0];
+  if (!(typeof debriefFormName === "string" && debriefFormName.length > 0)) {
+    debriefFormName = "";
+  }
+
+  if (consentFormName.length > 0) showConsentForm(consentFormName);
 
   document.getElementById("consent-yes").addEventListener("click", (evt) => {
     hideAllForms();
   });
 
   document.getElementById("consent-no").addEventListener("click", (evt) => {
-    showDebriefForm(debriefFormName);
+    if (debriefFormName.length > 0) showDebriefForm(debriefFormName);
 
     document.getElementById("debrief-yes").addEventListener("click", (evt) => {
       hideAllForms();
@@ -1940,16 +1951,27 @@ const experiment = (blockCount) => {
     }
     psychoJS.window.close();
 
-    showDebriefForm(debriefFormName);
-    document.getElementById("debrief-yes").addEventListener("click", (evt) => {
-      hideAllForms();
-      afterExperimentEnds();
-    });
+    const debriefScreen = new Promise((resolve) => {
+      if (debriefFormName.length > 0) {
+        showDebriefForm(debriefFormName);
+        document
+          .getElementById("debrief-yes")
+          .addEventListener("click", (evt) => {
+            hideAllForms();
+            resolve({});
+          });
 
-    document.getElementById("debrief-no").addEventListener("click", (evt) => {
-      hideAllForms();
-      afterExperimentEnds();
+        document
+          .getElementById("debrief-no")
+          .addEventListener("click", (evt) => {
+            hideAllForms();
+            resolve({});
+          });
+      } else {
+        resolve({});
+      }
     });
+    await debriefScreen;
 
     if (participantRecruitmentService?.name == "Prolific" && isCompleted) {
       let additionalMessage =
