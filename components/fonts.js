@@ -1,7 +1,6 @@
 import WebFont from "webfontloader";
 
 export const loadFonts = (reader, fontList) => {
-  console.log("ulala");
   const fileFonts = [];
   const webFonts = [];
   const googleFonts = [];

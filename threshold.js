@@ -61,7 +61,7 @@ import {
   hideAllForms,
   showConsentForm,
   showDebriefForm,
-} from "./components/consent.js";
+} from "./components/forms.js";
 
 import { getTrialInfoStr } from "./components/trialCounter.js";
 
@@ -77,6 +77,7 @@ import {
   SimulatedObserver,
   simulateObserverResponse,
 } from "./components/simulatedObserver.js";
+import { showExperimentEnding } from "./components/widgets.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -107,11 +108,11 @@ var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = (reader) => {
-  // ! Load fonts
-  loadFonts(reader, fontsRequired);
-
   // show screens before actual experiment begins
   beforeExperimentBegins();
+
+  // ! Load fonts
+  loadFonts(reader, fontsRequired);
 
   // ! Simulate observer
   simulated = checkIfSimulated(reader);
@@ -166,6 +167,16 @@ const beforeExperimentBegins = () => {
 
   document.getElementById("consent-no").addEventListener("click", (evt) => {
     showDebriefForm(debriefFormName);
+
+    document.getElementById("debrief-yes").addEventListener("click", (evt) => {
+      hideAllForms();
+      afterExperimentEnds();
+    });
+
+    document.getElementById("debrief-no").addEventListener("click", (evt) => {
+      hideAllForms();
+      afterExperimentEnds();
+    });
   });
 };
 
@@ -580,124 +591,6 @@ const experiment = (blockCount) => {
       // the Routine "file" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
 
-      return Scheduler.Event.NEXT;
-    };
-  }
-
-  function debriefRoutineBegin(snapshot) {
-    return async function () {
-      console.log("DEBRIEF ROUTINE BEGIN");
-
-      TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-
-      debriefFormName = paramReader.read("_debriefForm");
-
-      //------Prepare to start Routine 'consent'-------
-      t = 0;
-      debriefClock.reset(); // clock
-      frameN = -1;
-      continueRoutine = true; // until we're told otherwise
-      // routineTimer.add(5.000000);
-
-      // update component parameters for each repeat
-      // keep track of which components have finished
-      debriefComponents = [];
-      debriefComponents.push(debrief_form_content);
-
-      showDebriefForm(debriefFormName);
-
-      // add event listners to inputs
-      // on 'YES'
-      let el = document.getElementById("debrief-yes");
-      el.addEventListener("click", () => {
-        continueRoutine = false;
-        quitPsychoJS();
-      });
-
-      // on 'NO'
-      el = document.getElementById("debrief-no");
-      el.addEventListener("click", () => {
-        continueRoutine = false;
-        quitPsychoJS();
-      });
-
-      for (const thisComponent of debriefComponents)
-        if ("status" in thisComponent)
-          thisComponent.status = PsychoJS.Status.NOT_STARTED;
-      return Scheduler.Event.NEXT;
-    };
-  }
-
-  function debriefRoutineEachFrame() {
-    return async function () {
-      console.log("DEBRIEF ROUTINE ITER");
-      //------Loop for each frame of Routine 'consent'-------
-      // get current time
-      t = debriefClock.getTime();
-      frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
-      // update/draw components on each frame
-
-      // *debrief_form_content* updates
-      if (
-        t >= 0.0 &&
-        debrief_form_content.status === PsychoJS.Status.NOT_STARTED
-      ) {
-        // keep track of start time/frame for later
-        debrief_form_content.tStart = t; // (not accounting for frame time here)
-        debrief_form_content.frameNStart = frameN; // exact frame index
-
-        debrief_form_content.setAutoDraw(true);
-      }
-
-      // check for quit (typically the Esc key)
-      if (
-        psychoJS.experiment.experimentEnded ||
-        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-      ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
-      }
-
-      // check if the Routine should terminate
-      if (!continueRoutine) {
-        console.log("DEBRIEF ENDS");
-
-        // a component has requested a forced-end of Routine
-        return Scheduler.Event.NEXT;
-      }
-
-      continueRoutine = false; // reverts to True if at least one component still running
-      for (const thisComponent of debriefComponents)
-        if (
-          "status" in thisComponent &&
-          thisComponent.status !== PsychoJS.Status.FINISHED
-        ) {
-          continueRoutine = true;
-          break;
-        }
-
-      // check if the Routine should terminate
-      if (!continueRoutine) {
-        // end routine
-        console.log("DEBRIEF ENDS2");
-
-        return Scheduler.Event.NEXT;
-      } else {
-        // stay on this routine
-        return Scheduler.Event.FLIP_REPEAT;
-      }
-    };
-  }
-
-  function debriefRoutineEnd() {
-    return async function () {
-      console.log("DEBRIEF ROUTINE END");
-      //------Ending Routine 'consent'-------
-      for (const thisComponent of debriefComponents) {
-        if (typeof thisComponent.setAutoDraw === "function") {
-          thisComponent.setAutoDraw(false);
-        }
-      }
-      hideAllForms();
       return Scheduler.Event.NEXT;
     };
   }
@@ -2045,8 +1938,19 @@ const experiment = (blockCount) => {
     if (psychoJS.experiment.isEntryEmpty()) {
       psychoJS.experiment.nextEntry();
     }
-    showDebriefForm(debriefFormName);
     psychoJS.window.close();
+
+    showDebriefForm(debriefFormName);
+    document.getElementById("debrief-yes").addEventListener("click", (evt) => {
+      hideAllForms();
+      afterExperimentEnds();
+    });
+
+    document.getElementById("debrief-no").addEventListener("click", (evt) => {
+      hideAllForms();
+      afterExperimentEnds();
+    });
+
     if (participantRecruitmentService?.name == "Prolific" && isCompleted) {
       let additionalMessage =
         ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
@@ -2064,4 +1968,8 @@ const experiment = (blockCount) => {
 
     return Scheduler.Event.QUIT;
   }
+};
+
+const afterExperimentEnds = () => {
+  showExperimentEnding();
 };
