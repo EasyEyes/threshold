@@ -60,8 +60,6 @@ export const checkIfSimulated = (reader) => {
     // TEMP are condition labels auto-assigned earlier?
     const label = condition.label ? condition.label : index;
 
-    console.log("label: ", label);
-    console.log("simulate observer bool: ", condition.simulateParticipantBool);
     if (condition.simulateParticipantBool) {
       if (!simulated.hasOwnProperty(condition.block)) {
         simulated[condition.block] = {};
@@ -71,7 +69,6 @@ export const checkIfSimulated = (reader) => {
       }
     }
   }
-  console.log("simulated: ", simulated);
   // block# : simulationModel
   return simulated;
 };

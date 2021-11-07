@@ -6,8 +6,6 @@ import { debug } from "./components/utils.js";
 
 const useConsent = false;
 const useRC = true;
-// TODO read in `showGridsBool` from reader
-const showGrid = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS, EventManager } = core;
@@ -64,7 +62,7 @@ import {
   getFlankerLocations,
 } from "./components/bounding.js";
 
-import { getGridLines, updateGridVisible } from "./components/grid.js";
+import { getGridLines, readGridParameter } from "./components/grid.js";
 import {
   checkIfSimulated,
   SimulatedObserver,
@@ -73,15 +71,6 @@ import {
 
 /* -------------------------------------------------------------------------- */
 
-if (showGrid) {
-  var gridVisible = { pix: false, cm: false, deg: false };
-  const gridKeys = {
-    pix: { key: "Control", keyCode: 17 },
-    cm: { key: "Alt", keyCode: 18 },
-    deg: { key: "Meta", keyCode: 91 },
-  };
-  window.onkeydown = (e) => updateGridVisible(e, gridVisible, gridKeys);
-}
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
@@ -97,11 +86,15 @@ let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
 var simulated;
+var showGrid, gridVisible;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = (reader) => {
   // ! Load fonts
   loadFonts(reader, fontsRequired);
+
+  // ! Check if to use grids
+  [showGrid, gridVisible] = readGridParameter(reader);
 
   // ! Simulate observer
   simulated = checkIfSimulated(reader);

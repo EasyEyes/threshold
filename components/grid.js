@@ -17,6 +17,24 @@ deg. The "pix" grid has pix units, origin at lower left, thick
 lines at 500 pix, and regular lines at 100 pix.
 */
 
+const GRIDKEY = {
+  pix: { key: "Control", keyCode: 17 },
+  cm: { key: "Alt", keyCode: 18 },
+  deg: { key: "Meta", keyCode: 91 },
+};
+
+var showGrid, gridVisible;
+export const readGridParameter = (reader) => {
+  if (reader.conditions.some((condition) => condition.showGridsBool === true)) {
+    showGrid = true;
+  }
+  if (showGrid) {
+    gridVisible = { pix: false, cm: false, deg: false };
+    window.onkeydown = (e) => updateGridVisible(e, gridVisible, GRIDKEY);
+  }
+  return [showGrid, gridVisible];
+};
+
 export const updateGridVisible = (e, gridVisible, gridKeys) => {
   if (e.keyCode === gridKeys["pix"].keyCode || e.key === gridKeys["pix"].key) {
     gridVisible["pix"] = !gridVisible["pix"];
