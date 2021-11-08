@@ -19,7 +19,7 @@ import * as jsQUEST from "./addons/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
-import { participantRecruitmentService } from "./survey/participantRecruitmentServiceData.js";
+import { participantRecruitmentServiceData } from "./parameters/paramReader.js";
 import {
   logger,
   hideCursor,
@@ -2125,12 +2125,12 @@ const experiment = (blockCount) => {
     }
 
     psychoJS.window.close();
-    if (participantRecruitmentService?.name == "Prolific" && isCompleted) {
+    if (participantRecruitmentServiceData?.name == "Prolific" && isCompleted) {
       let additionalMessage =
         ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
-        participantRecruitmentService.url +
+        participantRecruitmentServiceData.url +
         '">' +
-        participantRecruitmentService.url +
+        participantRecruitmentServiceData.url +
         "</a>";
       psychoJS.quit({
         message: message + additionalMessage,
