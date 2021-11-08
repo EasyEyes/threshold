@@ -63,9 +63,15 @@ export const checkIfSimulated = (reader) => {
     if (condition.simulateParticipantBool) {
       if (!simulated.hasOwnProperty(condition.block)) {
         simulated[condition.block] = {};
-        simulated[condition.block][label] = condition.simulationObserverModel;
+        simulated[condition.block][label] = reader.read(
+          "simulationModel",
+          label
+        );
       } else {
-        simulated[condition.block][label] = condition.simulationObserverModel;
+        simulated[condition.block][label] = reader.read(
+          "simulationModel",
+          label
+        );
       }
     }
   }
