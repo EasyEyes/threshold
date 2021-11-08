@@ -1368,7 +1368,7 @@ const experiment = (blockCount) => {
   var trialComponents;
 
   /* --- SIMULATED --- */
-  var simulatedObserver;
+  var simulatedObserver = {};
   /* --- /SIMULATED --- */
 
   var condition;
@@ -1725,16 +1725,23 @@ const experiment = (blockCount) => {
       /* --- /GRIDS --- */
       /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
-        if (!simulatedObserver) {
-          simulatedObserver = new SimulatedObserver(
+        if (!simulatedObserver[condition.label]) {
+          simulatedObserver[condition.label] = new SimulatedObserver(
             simulated[block][condition.label],
             level,
             alphabet,
             targetCharacter,
-            condition["thresholdProportionCorrect"]
+            paramReader.read("thresholdProportionCorrect", condition.label),
+            paramReader.read("simulationBeta", condition.label),
+            paramReader.read("simulationDelta", condition.label),
+            paramReader.read("simulationThreshold", condition.label)
           );
         } else {
-          simulatedObserver.updateTrial(level, alphabet, targetCharacter);
+          simulatedObserver[condition.label].updateTrial(
+            level,
+            alphabet,
+            targetCharacter
+          );
         }
       }
       /* --- /SIMULATED --- */
@@ -1806,7 +1813,7 @@ const experiment = (blockCount) => {
           simulated[thisLoopNumber][condition.label]
         ) {
           return simulateObserverResponse(
-            simulatedObserver,
+            simulatedObserver[condition.label],
             key_resp,
             psychoJS
           );
