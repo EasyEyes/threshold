@@ -1,5 +1,7 @@
 node_modules
 
+debugExperiment.csv
+
 data/
 conditions/
 *_lastrun.py

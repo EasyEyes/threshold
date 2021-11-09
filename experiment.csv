@@ -1,22 +1,23 @@
-_authors,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli
-block,1,1,1,1,2,2
-calibrateTrackDistanceBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
-conditionName,printLetters,printString,scriptLetters,scriptString,arabicLetters,arabicString
-conditionTrials,3,3,3,3,3,3
-showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
-spacingDirection,radial,radial,radial,radial,radial,radial
-spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4,1.4
-spacingRelationToSize,ratio,typographic,ratio,typographic,ratio,typographic
-targetAlphabet,DHKNORSVZ,DHKNORSVZ,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ابتثجحخدذرزسشصضطظعغفقكلمنهوي,ابتثجحخدذرزسشصضطظعغفقكلمنهوي
-targetDurationSec,1,1,1,1,1,1
-targetEccentricityXDeg,-10,10,-10,10,-10,10
-targetEccentricityYDeg,0,0,0,0,0,0
-targetFont,Sloan.woff2,Sloan.woff2,Douglass Pen.woff2,Douglass Pen.woff2,IBMPlexSansArabic.woff2,IBMPlexSansArabic.woff2
-targetMinimumPix,8,8,8,8,8,8
-targetTask,identify,identify,identify,identify,identify,identify
-thresholdBeta,2.3,2.3,2.3,2.3,2.3,2.3
-thresholdDelta,0.01,0.01,0.01,0.01,0.01,0.01
-thresholdGuess,2,2,2,2,2,2
-thresholdGuessLogSd,3,3,3,3,3,3
-thresholdParameter,spacing,spacing,spacing,spacing,spacing,spacing
-viewingDistanceDesiredCm,40,40,40,40,40,40
+_consentForm,202009 IRB-FY2016-404 Remote Testing - Perception Research.pdf,
+_debriefForm,201909 IRB-FY2016-404 Perception debriefing.pdf,
+block,1,2
+calibrateTrackDistanceBool,FALSE,FALSE
+conditionName,triplet,triplet
+conditionTrials,1,1
+showCounterBool,TRUE,TRUE
+showGridsBool,TRUE,TRUE
+spacingDirection,radial,radial
+spacingOverSizeRatio,1.4,1.4
+spacingRelationToSize,typographic,typographic
+targetAlphabet,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz
+targetDurationSec,0.2,0.2
+targetEccentricityXDeg,-10,-10
+targetEccentricityYDeg,0,0
+targetFont,RobotoMono-Regular.woff2,RobotoMono-Regular.woff2
+targetMinimumPix,8,8
+targetTask,identify,identify
+thresholdBeta,2.3,2.3
+thresholdDelta,0.01,0.01
+thresholdGuess,2,2
+thresholdGuessLogSd,3,3
+thresholdParameter,spacing,spacing

@@ -1,15 +1,16 @@
-/*****************
+﻿/*****************
  * Crowding Test *
  *****************/
 
 import { debug } from "./components/utils.js";
 
-const useConsent = false;
+const useConsent = true;
 const useRC = true;
+// TODO read in `showGridsBool` from reader
 const showGrid = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
-const { PsychoJS } = core;
+const { PsychoJS, EventManager } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
 
@@ -20,7 +21,7 @@ import * as jsQUEST from "./addons/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
-
+import { participantRecruitmentService } from "./survey/participantRecruitmentServiceData.js";
 import {
   logger,
   hideCursor,
@@ -55,8 +56,16 @@ import {
   removeClickableAlphabet,
   setupClickableAlphabet,
 } from "./components/showAlphabet.js";
-import { hideConsentForm, showConsentForm } from "./components/consent.js";
+
+import {
+  getConsentFormName,
+  hideAllForms,
+  showConsentForm,
+  showDebriefForm,
+} from "./components/forms.js";
+
 import { getTrialInfoStr } from "./components/trialCounter.js";
+
 import {
   getTypographicHeight,
   awaitMaxPresentableLevel,
@@ -64,6 +73,12 @@ import {
 } from "./components/bounding.js";
 
 import { getGridLines, updateGridVisible } from "./components/grid.js";
+import {
+  checkIfSimulated,
+  SimulatedObserver,
+  simulateObserverResponse,
+} from "./components/simulatedObserver.js";
+import { showExperimentEnding } from "./components/widgets.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -90,12 +105,18 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
-
+var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = (reader) => {
+  // show screens before actual experiment begins
+  beforeExperimentBegins();
+
   // ! Load fonts
   loadFonts(reader, fontsRequired);
+
+  // ! Simulate observer
+  simulated = checkIfSimulated(reader);
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
@@ -135,6 +156,41 @@ var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
+var consentFormName = "consent-form.pdf";
+var debriefFormName = "consent-form.md";
+
+const beforeExperimentBegins = () => {
+  consentFormName = paramReader.read("_consentForm")[0];
+  if (!(typeof consentFormName === "string" && consentFormName.length > 0)) {
+    consentFormName = "";
+  }
+
+  debriefFormName = paramReader.read("_debriefForm")[0];
+  if (!(typeof debriefFormName === "string" && debriefFormName.length > 0)) {
+    debriefFormName = "";
+  }
+
+  if (consentFormName.length > 0) showConsentForm(consentFormName);
+
+  document.getElementById("consent-yes").addEventListener("click", (evt) => {
+    hideAllForms();
+  });
+
+  document.getElementById("consent-no").addEventListener("click", (evt) => {
+    if (debriefFormName.length > 0) showDebriefForm(debriefFormName);
+
+    document.getElementById("debrief-yes").addEventListener("click", (evt) => {
+      hideAllForms();
+      afterExperimentEnds();
+    });
+
+    document.getElementById("debrief-no").addEventListener("click", (evt) => {
+      hideAllForms();
+      afterExperimentEnds();
+    });
+  });
+};
+
 const experiment = (blockCount) => {
   ////
   // Resources
@@ -155,7 +211,7 @@ const experiment = (blockCount) => {
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
   const psychoJS = new PsychoJS({
-    debug: debug,
+    debug: false,
   });
 
   /* ---------------------------------- Sound --------------------------------- */
@@ -196,11 +252,7 @@ const experiment = (blockCount) => {
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(updateInfo); // add timeStamp
   flowScheduler.add(experimentInit);
-  if (useConsent) {
-    flowScheduler.add(consentRoutineBegin());
-    flowScheduler.add(consentRoutineEachFrame());
-    flowScheduler.add(consentRoutineEnd());
-  }
+
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
   flowScheduler.add(fileRoutineEnd());
@@ -211,6 +263,11 @@ const experiment = (blockCount) => {
   flowScheduler.add(blocksLoopBegin(blocksLoopScheduler));
   flowScheduler.add(blocksLoopScheduler);
   flowScheduler.add(blocksLoopEnd);
+
+  // flowScheduler.add(debriefRoutineBegin());
+  // flowScheduler.add(debriefRoutineEachFrame());
+  // flowScheduler.add(debriefRoutineEnd());
+
   flowScheduler.add(quitPsychoJS, "", true);
 
   // quit if user presses Cancel in dialog box:
@@ -251,10 +308,8 @@ const experiment = (blockCount) => {
     return Scheduler.Event.NEXT;
   }
 
-  var consentClock;
-  var consent_form_content;
-  var consent_button_yes;
-  var consent_button_no;
+  var debriefClock;
+  var debrief_form_content;
 
   var fileClock;
   var filterClock;
@@ -268,8 +323,11 @@ const experiment = (blockCount) => {
   var thisConditionsFile;
   var trialClock;
   // var targetBoundingPoly; // Target Bounding Box
+
   var instructions;
   var instructions2;
+  var instructionFont = paramReader.read("instructionFont")[0];
+
   var key_resp;
   var fixation; ////
   var flanker1;
@@ -280,42 +338,6 @@ const experiment = (blockCount) => {
   var globalClock;
   var routineTimer;
   async function experimentInit() {
-    // Initialize components for Routine "consent"
-    consentClock = new util.Clock();
-    consent_form_content = new visual.TextStim({
-      win: psychoJS.window,
-      name: "consent_form_content",
-      text: "I agree to participate in this study (indicate by clicking one option).",
-      font: "Open Sans",
-      units: undefined,
-      pos: [0, -0.35],
-      height: 0.03,
-      wrapWidth: undefined,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: undefined,
-      depth: 0.0,
-    });
-    consent_button_yes = new visual.ButtonStim({
-      win: psychoJS.window,
-      name: "consent_button_yes",
-      text: "Yes.",
-      pos: [0.0, -0.41],
-      letterHeight: 0.02,
-      size: null,
-    });
-    consent_button_yes.clock = new util.Clock();
-
-    consent_button_no = new visual.ButtonStim({
-      win: psychoJS.window,
-      name: "consent_button_no",
-      text: "No. (You will leave the study without receiving payment.)",
-      pos: [0.0, -0.46],
-      letterHeight: 0.02,
-      size: [5, 2],
-    });
-    consent_button_no.clock = new util.Clock();
-
     logger("Window (for grid purposes)", psychoJS.window);
 
     // Initialize components for Routine "file"
@@ -346,6 +368,7 @@ const experiment = (blockCount) => {
       clock: new util.Clock(),
       waitForStart: true,
     });
+    console.log("keyboard for response: ", key_resp);
 
     fixation = new visual.TextStim({
       win: psychoJS.window,
@@ -444,10 +467,10 @@ const experiment = (blockCount) => {
       win: psychoJS.window,
       name: "instructions",
       text: "",
-      font: "Arial",
+      font: instructionFont,
       units: "pix",
       pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
-      height: 32.0,
+      height: 30.0,
       wrapWidth: window.innerWidth * 0.8,
       ori: 0.0,
       color: new util.Color("black"),
@@ -462,10 +485,10 @@ const experiment = (blockCount) => {
       win: psychoJS.window,
       name: "instructions2",
       text: "",
-      font: "Arial",
+      font: instructionFont,
       units: "pix",
       pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
-      height: 32.0,
+      height: 30.0,
       wrapWidth: window.innerWidth * 0.8,
       ori: 0.0,
       color: new util.Color("black"),
@@ -502,190 +525,8 @@ const experiment = (blockCount) => {
 
   var continueRoutine;
   var consentComponents;
+  var debriefComponents;
   var frameRemains;
-
-  function consentRoutineBegin(snapshot) {
-    return async function () {
-      TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-
-      //------Prepare to start Routine 'consent'-------
-      t = 0;
-      consentClock.reset(); // clock
-      frameN = -1;
-      continueRoutine = true; // until we're told otherwise
-      // routineTimer.add(5.000000);
-
-      consent_button_yes.setSize([0.25, 1]);
-      consent_button_no.setSize([0.6, 1]);
-
-      // update component parameters for each repeat
-      // keep track of which components have finished
-      consentComponents = [];
-      consentComponents.push(consent_form_content);
-      consentComponents.push(consent_button_yes);
-      consentComponents.push(consent_button_no);
-
-      showConsentForm();
-
-      for (const thisComponent of consentComponents)
-        if ("status" in thisComponent)
-          thisComponent.status = PsychoJS.Status.NOT_STARTED;
-      return Scheduler.Event.NEXT;
-    };
-  }
-
-  function consentRoutineEachFrame() {
-    return async function () {
-      //------Loop for each frame of Routine 'consent'-------
-      // get current time
-      t = consentClock.getTime();
-      frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
-      // update/draw components on each frame
-
-      // *consent_form_content* updates
-      if (
-        t >= 0.0 &&
-        consent_form_content.status === PsychoJS.Status.NOT_STARTED
-      ) {
-        // keep track of start time/frame for later
-        consent_form_content.tStart = t; // (not accounting for frame time here)
-        consent_form_content.frameNStart = frameN; // exact frame index
-
-        consent_form_content.setAutoDraw(true);
-      }
-
-      // *consent_button_yes* updates
-      if (t >= 0 && consent_button_yes.status === PsychoJS.Status.NOT_STARTED) {
-        // keep track of start time/frame for later
-        consent_button_yes.tStart = t; // (not accounting for frame time here)
-        consent_button_yes.frameNStart = frameN; // exact frame index
-
-        consent_button_yes.setAutoDraw(true);
-      }
-
-      if (consent_button_yes.status === PsychoJS.Status.STARTED) {
-        // check whether consent_button_yes has been pressed
-        if (consent_button_yes.isClicked) {
-          if (!consent_button_yes.wasClicked) {
-            // store time of first click
-            consent_button_yes.timesOn.push(consent_button_yes.clock.getTime());
-            // store time clicked until
-            consent_button_yes.timesOff.push(
-              consent_button_yes.clock.getTime()
-            );
-          } else {
-            // update time clicked until;
-            consent_button_yes.timesOff[
-              consent_button_yes.timesOff.length - 1
-            ] = consent_button_yes.clock.getTime();
-          }
-          if (!consent_button_yes.wasClicked) {
-            // end routine when consent_button_yes is clicked
-            continueRoutine = false;
-            null;
-          }
-          // if consent_button_yes is still clicked next frame, it is not a new click
-          consent_button_yes.wasClicked = true;
-        } else {
-          // if consent_button_yes is clicked next frame, it is a new click
-          consent_button_yes.wasClicked = false;
-        }
-      } else {
-        // keep clock at 0 if consent_button_yes hasn't started / has finished
-        consent_button_yes.clock.reset();
-        // if consent_button_yes is clicked next frame, it is a new click
-        consent_button_yes.wasClicked = false;
-      }
-
-      // *consent_button_no* updates
-      if (t >= 0 && consent_button_no.status === PsychoJS.Status.NOT_STARTED) {
-        // keep track of start time/frame for later
-        consent_button_no.tStart = t; // (not accounting for frame time here)
-        consent_button_no.frameNStart = frameN; // exact frame index
-
-        consent_button_no.setAutoDraw(true);
-      }
-
-      if (consent_button_no.status === PsychoJS.Status.STARTED) {
-        // check whether consent_button_no has been pressed
-        if (consent_button_no.isClicked) {
-          if (!consent_button_no.wasClicked) {
-            // store time of first click
-            consent_button_no.timesOn.push(consent_button_no.clock.getTime());
-            // store time clicked until
-            consent_button_no.timesOff.push(consent_button_no.clock.getTime());
-          } else {
-            // update time clicked until;
-            consent_button_no.timesOff[consent_button_no.timesOff.length - 1] =
-              consent_button_no.clock.getTime();
-          }
-          if (!consent_button_no.wasClicked) {
-            // end routine when consent_button_no is clicked
-            continueRoutine = false;
-
-            // quite experiment
-            quitPsychoJS();
-            null;
-          }
-          // if consent_button_no is still clicked next frame, it is not a new click
-          consent_button_no.wasClicked = true;
-        } else {
-          // if consent_button_no is clicked next frame, it is a new click
-          consent_button_no.wasClicked = false;
-        }
-      } else {
-        // keep clock at 0 if consent_button_no hasn't started / has finished
-        consent_button_no.clock.reset();
-        // if consent_button_no is clicked next frame, it is a new click
-        consent_button_no.wasClicked = false;
-      }
-      // check for quit (typically the Esc key)
-      if (
-        psychoJS.experiment.experimentEnded ||
-        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-      ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
-      }
-
-      // check if the Routine should terminate
-      if (!continueRoutine) {
-        // a component has requested a forced-end of Routine
-        return Scheduler.Event.NEXT;
-      }
-
-      continueRoutine = false; // reverts to True if at least one component still running
-      for (const thisComponent of consentComponents)
-        if (
-          "status" in thisComponent &&
-          thisComponent.status !== PsychoJS.Status.FINISHED
-        ) {
-          continueRoutine = true;
-          break;
-        }
-
-      // check if the Routine should terminate
-      if (!continueRoutine) {
-        // end routine
-        return Scheduler.Event.NEXT;
-      } else {
-        // stay on this routine
-        return Scheduler.Event.FLIP_REPEAT;
-      }
-    };
-  }
-
-  function consentRoutineEnd() {
-    return async function () {
-      //------Ending Routine 'consent'-------
-      for (const thisComponent of consentComponents) {
-        if (typeof thisComponent.setAutoDraw === "function") {
-          thisComponent.setAutoDraw(false);
-        }
-      }
-      hideConsentForm();
-      return Scheduler.Event.NEXT;
-    };
-  }
 
   function fileRoutineBegin(snapshot) {
     return async function () {
@@ -709,6 +550,9 @@ const experiment = (blockCount) => {
 
   function fileRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
+      if (simulated) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
       //------Loop for each frame of Routine 'file'-------
       // get current time
       t = fileClock.getTime();
@@ -780,6 +624,10 @@ const experiment = (blockCount) => {
   }
 
   async function _instructionRoutineEachFrame() {
+    /* --- SIMULATED --- */
+    if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+    /* --- /SIMULATED --- */
+
     t = instructionsClock.getTime();
     frameN = frameN + 1;
 
@@ -839,6 +687,7 @@ const experiment = (blockCount) => {
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
       currentLoop = blocks; // we're now the current loop
+      console.log("blocks: ", blocks);
 
       // Schedule all the trials in the trialList:
       for (const thisBlock of blocks) {
@@ -996,6 +845,10 @@ const experiment = (blockCount) => {
 
   function filterRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
+      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
+
       //------Loop for each frame of Routine 'filter'-------
       // get current time
       t = filterClock.getTime();
@@ -1272,6 +1125,9 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineEachFrame() {
     return async function () {
+      /* --- SIMULATED --- */
+      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
       t = instructionsClock.getTime();
       frameN = frameN + 1;
 
@@ -1344,6 +1200,11 @@ const experiment = (blockCount) => {
   var _key_resp_allKeys;
   var trialComponents;
 
+  /* --- SIMULATED --- */
+  var simulatedObserver;
+  /* --- /SIMULATED --- */
+
+  var condition;
   function trialRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -1356,7 +1217,7 @@ const experiment = (blockCount) => {
       logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
 
-      let condition;
+      // let condition;
       const parametersToExcludeFromData = [];
       for (let c of snapshot.handler.getConditions()) {
         if (c.label === trials._currentStaircase._name) {
@@ -1511,7 +1372,7 @@ const experiment = (blockCount) => {
         spacingRelationToSize: spacingRelationToSize,
       };
       /* --- GRIDS --- */
-      if (showGrid) {
+      if (showGrid && !simulated) {
         grids = {
           deg: getGridLines(psychoJS.window, "deg", displayOptions),
           cm: getGridLines(psychoJS.window, "cm", displayOptions),
@@ -1695,6 +1556,21 @@ const experiment = (blockCount) => {
         }
       }
       /* --- /GRIDS --- */
+      /* --- SIMULATED --- */
+      if (simulated && simulated[block]) {
+        if (!simulatedObserver) {
+          simulatedObserver = new SimulatedObserver(
+            simulated[block][condition.label],
+            level,
+            alphabet,
+            targetCharacter,
+            condition["thresholdProportionCorrect"]
+          );
+        } else {
+          simulatedObserver.updateTrial(level, alphabet, targetCharacter);
+        }
+      }
+      /* --- /SIMULATED --- */
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -1756,6 +1632,19 @@ const experiment = (blockCount) => {
       }
 
       if (key_resp.status === PsychoJS.Status.STARTED) {
+        /* --- SIMULATED --- */
+        if (
+          simulated &&
+          simulated[thisLoopNumber] &&
+          simulated[thisLoopNumber][condition.label]
+        ) {
+          return simulateObserverResponse(
+            simulatedObserver,
+            key_resp,
+            psychoJS
+          );
+        }
+        /* --- /SIMULATED --- */
         let theseKeys = key_resp.getKeys({
           keyList: validAns,
           waitRelease: false,
@@ -1972,6 +1861,7 @@ const experiment = (blockCount) => {
         }
       }
       // was no response the correct answer?!
+      console.log("trialRoutineEnd key_resp: ", key_resp);
       if (key_resp.keys === undefined) {
         console.error("[key_resp.keys] No response error.");
       }
@@ -1981,6 +1871,9 @@ const experiment = (blockCount) => {
         currentLoop.addResponse(key_resp.corr, level);
         logger("level passed to addResponse", level);
       }
+
+      logStaircaseInfoToOutput(currentLoop);
+
       psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
       psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
       if (typeof key_resp.keys !== "undefined") {
@@ -1993,27 +1886,29 @@ const experiment = (blockCount) => {
       // the Routine "trial" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
 
-      psychoJS.experiment.addData(
-        "staircaseName",
-        currentLoop._currentStaircase._name
-      );
-      psychoJS.experiment.addData(
-        "questMeanAtEndOfTrial",
-        currentLoop._currentStaircase.mean()
-      );
-      psychoJS.experiment.addData(
-        "questSDAtEndOfTrial",
-        currentLoop._currentStaircase.sd()
-      );
-      psychoJS.experiment.addData(
-        "questQuantileOfQuantileOrderAtEndOfTrial",
-        currentLoop._currentStaircase.quantile(
-          currentLoop._currentStaircase._jsQuest.quantileOrder
-        )
-      );
-
       return Scheduler.Event.NEXT;
     };
+  }
+
+  function logStaircaseInfoToOutput(currentLoop) {
+    psychoJS.experiment.addData(
+      "staircaseName",
+      currentLoop._currentStaircase._name
+    );
+    psychoJS.experiment.addData(
+      "questMeanAtEndOfTrial",
+      currentLoop._currentStaircase.mean()
+    );
+    psychoJS.experiment.addData(
+      "questSDAtEndOfTrial",
+      currentLoop._currentStaircase.sd()
+    );
+    psychoJS.experiment.addData(
+      "questQuantileOfQuantileOrderAtEndOfTrial",
+      currentLoop._currentStaircase.quantile(
+        currentLoop._currentStaircase._jsQuest.quantileOrder
+      )
+    );
   }
 
   function endLoopIteration(scheduler, snapshot) {
@@ -2054,10 +1949,49 @@ const experiment = (blockCount) => {
     if (psychoJS.experiment.isEntryEmpty()) {
       psychoJS.experiment.nextEntry();
     }
-
     psychoJS.window.close();
-    psychoJS.quit({ message: message, isCompleted: isCompleted });
+
+    const debriefScreen = new Promise((resolve) => {
+      if (debriefFormName.length > 0) {
+        showDebriefForm(debriefFormName);
+        document
+          .getElementById("debrief-yes")
+          .addEventListener("click", (evt) => {
+            hideAllForms();
+            resolve({});
+          });
+
+        document
+          .getElementById("debrief-no")
+          .addEventListener("click", (evt) => {
+            hideAllForms();
+            resolve({});
+          });
+      } else {
+        resolve({});
+      }
+    });
+    await debriefScreen;
+
+    if (participantRecruitmentService?.name == "Prolific" && isCompleted) {
+      let additionalMessage =
+        ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
+        participantRecruitmentService.url +
+        '">' +
+        participantRecruitmentService.url +
+        "</a>";
+      psychoJS.quit({
+        message: message + additionalMessage,
+        isCompleted: isCompleted,
+      });
+    } else {
+      psychoJS.quit({ message: message, isCompleted: isCompleted });
+    }
 
     return Scheduler.Event.QUIT;
   }
+};
+
+const afterExperimentEnds = () => {
+  showExperimentEnding();
 };

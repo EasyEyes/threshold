@@ -1,6 +1,40 @@
 export const debug = process.env.debug;
 // export const debug = true;
 
+/**
+ * Create a mapping between an arbitrary set of strings, ie `possibleResponses`,
+ * and a set of ascii-supported keys, ie [0,1,...,9,A,B,...Z].
+ *
+ * Example: given the response options:
+ *              ["#", "@", "≠"],
+ *          will create the mapping:
+ *              {1: "#", 2: "@", 3:"≠"},
+ *          such that a participant can press the "1" key to respond "#", the "2" key to respond, or the "3" key to respond "≠"
+ * @param {string[]} possibleResponses the (order-sensitive) array of actual responses; the keys of the produced mapping
+ * @returns {Object.<string, number>} { response: ascii keycode }  mapping, to be used for simplified signaling of responses
+ */
+export const createSignalingMap = (possibleResponses) => {
+  const zeroNum = 48;
+  const nineNum = 57;
+  const ANum = 65;
+  const ZNum = 90;
+
+  const digits = [...new Array(nineNum - zeroNum).keys()].map(
+    (x) => x + zeroNum
+  );
+  const letters = [...new Array(ZNum - ANum).keys()].map((x) => x + ANum);
+  const signalingAlphabet = [...digits, ...letters].slice(
+    0,
+    possibleResponses.length
+  );
+  const signalingMap = {};
+  possibleResponses.map((response, i) => {
+    signalingMap[response] = signalingAlphabet[i];
+  });
+  console.log("signaling map: ", signalingMap);
+  return signalingMap;
+};
+
 // https://stackoverflow.com/a/2450976
 export const shuffle = (array) => {
   if (!array.length) return [];
