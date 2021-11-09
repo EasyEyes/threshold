@@ -1973,7 +1973,7 @@ const experiment = (blockCount) => {
     });
     await debriefScreen;
 
-    if (participantRecruitmentServiceData?.name == "Prolific" && isCompleted) {
+    if (participantRecruitmentServiceData.name == "Prolific" && isCompleted) {
       let additionalMessage =
         ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
         participantRecruitmentServiceData.url +
