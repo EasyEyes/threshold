@@ -58,20 +58,20 @@ export const checkIfSimulated = (reader) => {
   const simulated = {};
   for (const [index, condition] of reader.conditions.entries()) {
     // TEMP are condition labels auto-assigned earlier?
-    const label = condition.label ? condition.label : index;
+    if (!condition.label)
+      throw "No conditionName (label) provided for this condition.";
+    const label = condition.label;
+    const block = reader.read("block", label);
 
-    console.log("label: ", label);
-    console.log("simulate observer bool: ", condition.simulateParticipantBool);
-    if (condition.simulateParticipantBool) {
-      if (!simulated.hasOwnProperty(condition.block)) {
-        simulated[condition.block] = {};
-        simulated[condition.block][label] = condition.simulationObserverModel;
+    if (reader.read("simulateParticipantBool", label)) {
+      if (!simulated.hasOwnProperty(block)) {
+        simulated[block] = {};
+        simulated[block][label] = reader.read("simulationModel", label);
       } else {
-        simulated[condition.block][label] = condition.simulationObserverModel;
+        simulated[block][label] = reader.read("simulationModel", label);
       }
     }
   }
-  console.log("simulated: ", simulated);
   // block# : simulationModel
   return simulated;
 };
@@ -232,6 +232,19 @@ export class SimulatedObserver {
     this.trial = newTrial;
     this.observer.updateTrial(newTrial);
   }
+  updateSimulationParameters(
+    simulationBeta,
+    simulationDelta,
+    simulationThreshold
+  ) {
+    if (this.simulationModel === "weibull") {
+      this.observer.updateSimulationParameters(
+        simulationBeta,
+        simulationDelta,
+        simulationThreshold
+      );
+    }
+  }
   simulateTrial() {
     return this.observer.simulateTrial();
   }
@@ -261,6 +274,17 @@ class WeibullObserver {
     this.beta = simulationBeta;
     this.delta = simulationDelta;
     this.simulationThreshold = simulationThreshold;
+    this.setGamma();
+    this.setEpsilon();
+  }
+  updateSimulationParameters(
+    simulationBeta,
+    simulationDelta,
+    simulationThreshold
+  ) {
+    if (simulationBeta) this.beta = simulationBeta;
+    if (simulationDelta) this.delta = simulationDelta;
+    if (simulationThreshold) this.simulationThreshold = simulationThreshold;
     this.setGamma();
     this.setEpsilon();
   }

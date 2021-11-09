@@ -6,8 +6,6 @@ import { debug } from "./components/utils.js";
 
 const useConsent = true;
 const useRC = true;
-// TODO read in `showGridsBool` from reader
-const showGrid = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS, EventManager } = core;
@@ -21,7 +19,7 @@ import * as jsQUEST from "./addons/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
-import { participantRecruitmentService } from "./survey/participantRecruitmentServiceData.js";
+import { participantRecruitmentServiceData } from "./parameters/paramReader.js";
 import {
   logger,
   hideCursor,
@@ -72,7 +70,7 @@ import {
   getFlankerLocations,
 } from "./components/bounding.js";
 
-import { getGridLines, updateGridVisible } from "./components/grid.js";
+import { getGridLines, readGridParameter } from "./components/grid.js";
 import {
   checkIfSimulated,
   SimulatedObserver,
@@ -82,15 +80,6 @@ import { showExperimentEnding } from "./components/widgets.js";
 
 /* -------------------------------------------------------------------------- */
 
-if (showGrid) {
-  var gridVisible = { pix: false, cm: false, deg: false };
-  const gridKeys = {
-    pix: { key: "Control", keyCode: 17 },
-    cm: { key: "Alt", keyCode: 18 },
-    deg: { key: "Meta", keyCode: 91 },
-  };
-  window.onkeydown = (e) => updateGridVisible(e, gridVisible, gridKeys);
-}
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
@@ -106,6 +95,7 @@ let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
 var simulated;
+var showGrid, gridVisible;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = (reader) => {
@@ -114,6 +104,9 @@ const paramReaderInitialized = (reader) => {
 
   // ! Load fonts
   loadFonts(reader, fontsRequired);
+
+  // ! Check if to use grids
+  [showGrid, gridVisible] = readGridParameter(reader);
 
   // ! Simulate observer
   simulated = checkIfSimulated(reader);
@@ -1201,7 +1194,7 @@ const experiment = (blockCount) => {
   var trialComponents;
 
   /* --- SIMULATED --- */
-  var simulatedObserver;
+  var simulatedObserver = {};
   /* --- /SIMULATED --- */
 
   var condition;
@@ -1558,16 +1551,23 @@ const experiment = (blockCount) => {
       /* --- /GRIDS --- */
       /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
-        if (!simulatedObserver) {
-          simulatedObserver = new SimulatedObserver(
+        if (!simulatedObserver[condition.label]) {
+          simulatedObserver[condition.label] = new SimulatedObserver(
             simulated[block][condition.label],
             level,
             alphabet,
             targetCharacter,
-            condition["thresholdProportionCorrect"]
+            paramReader.read("thresholdProportionCorrect", condition.label),
+            paramReader.read("simulationBeta", condition.label),
+            paramReader.read("simulationDelta", condition.label),
+            paramReader.read("simulationThreshold", condition.label)
           );
         } else {
-          simulatedObserver.updateTrial(level, alphabet, targetCharacter);
+          simulatedObserver[condition.label].updateTrial(
+            level,
+            alphabet,
+            targetCharacter
+          );
         }
       }
       /* --- /SIMULATED --- */
@@ -1639,7 +1639,7 @@ const experiment = (blockCount) => {
           simulated[thisLoopNumber][condition.label]
         ) {
           return simulateObserverResponse(
-            simulatedObserver,
+            simulatedObserver[condition.label],
             key_resp,
             psychoJS
           );
@@ -1976,9 +1976,9 @@ const experiment = (blockCount) => {
     if (participantRecruitmentService?.name == "Prolific" && isCompleted) {
       let additionalMessage =
         ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
-        participantRecruitmentService.url +
+        participantRecruitmentServiceData.url +
         '">' +
-        participantRecruitmentService.url +
+        participantRecruitmentServiceData.url +
         "</a>";
       psychoJS.quit({
         message: message + additionalMessage,
