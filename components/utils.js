@@ -31,7 +31,6 @@ export const createSignalingMap = (possibleResponses) => {
   possibleResponses.map((response, i) => {
     signalingMap[response] = signalingAlphabet[i];
   });
-  console.log("signaling map: ", signalingMap);
   return signalingMap;
 };
 
@@ -198,4 +197,27 @@ export const levelFromSpacingPixels = (
   });
   const level = Math.log10(spacingDeg);
   return level;
+};
+
+/**
+ * Element-wise check of whether two arrays are equal
+ * @see https://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript/16430730
+ * @param {any[]} a
+ * @param {any[]} b
+ * @returns {boolean}
+ */
+export const arraysEqual = (a, b) => {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length !== b.length) return false;
+
+  // If you don't care about the order of the elements inside
+  // the array, you should sort both arrays here.
+  // Please note that calling sort on an array will modify that array.
+  // you might want to clone your array first.
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 };

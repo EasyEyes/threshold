@@ -361,7 +361,6 @@ const experiment = (blockCount) => {
       clock: new util.Clock(),
       waitForStart: true,
     });
-    console.log("keyboard for response: ", key_resp);
 
     fixation = new visual.TextStim({
       win: psychoJS.window,
@@ -680,7 +679,6 @@ const experiment = (blockCount) => {
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
       currentLoop = blocks; // we're now the current loop
-      console.log("blocks: ", blocks);
 
       // Schedule all the trials in the trialList:
       for (const thisBlock of blocks) {
@@ -1861,7 +1859,6 @@ const experiment = (blockCount) => {
         }
       }
       // was no response the correct answer?!
-      console.log("trialRoutineEnd key_resp: ", key_resp);
       if (key_resp.keys === undefined) {
         console.error("[key_resp.keys] No response error.");
       }
