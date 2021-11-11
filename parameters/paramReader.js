@@ -1,12 +1,5 @@
 import Papa from "papaparse";
-import XLSX from "xlsx";
 import { GLOSSARY } from "./glossary.ts";
-
-export const participantRecruitmentServiceData = {
-  name: "",
-  code: "",
-  url: "",
-};
 
 export class ParamReader {
   constructor(experimentFilePath = "conditions", callback) {
@@ -118,25 +111,6 @@ export class ParamReader {
             },
           });
         }
-      },
-    });
-
-    Papa.parse(`./survey/participantRecruitmentServiceData.csv`, {
-      download: true,
-      complete: ({ data }) => {
-        data.forEach((param) => {
-          switch (param[0]) {
-            case "name":
-              participantRecruitmentServiceData.name = param[1];
-              break;
-            case "code":
-              participantRecruitmentServiceData.code = param[1];
-              break;
-            case "url":
-              participantRecruitmentServiceData.url = param[1];
-              break;
-          }
-        });
       },
     });
   }

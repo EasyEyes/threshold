@@ -19,7 +19,7 @@ import * as jsQUEST from "./addons/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
-import { participantRecruitmentServiceData } from "./parameters/paramReader.js";
+
 import {
   logger,
   hideCursor,
@@ -37,6 +37,10 @@ import {
 } from "./components/useCalibration.js";
 
 import { loadFonts } from "./components/fonts.js";
+import {
+  loadRecruitmentServiceConfig,
+  recruitmentServiceData,
+} from "./components/recruitmentService.js";
 import { phrases } from "./components/i18n.js";
 
 import {
@@ -105,6 +109,9 @@ const paramReaderInitialized = (reader) => {
   // ! Load fonts
   loadFonts(reader, fontsRequired);
 
+  // ! Load recruitment service config
+  loadRecruitmentServiceConfig();
+
   // ! Check if to use grids
   [showGrid, gridVisible] = readGridParameter(reader);
 
@@ -149,19 +156,17 @@ var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
-var consentFormName = "consent-form.pdf";
-var debriefFormName = "consent-form.md";
+var consentFormName = "";
+var debriefFormName = "";
 
 const beforeExperimentBegins = () => {
   consentFormName = paramReader.read("_consentForm")[0];
-  if (!(typeof consentFormName === "string" && consentFormName.length > 0)) {
+  if (!(typeof consentFormName === "string" && consentFormName.length > 0))
     consentFormName = "";
-  }
 
   debriefFormName = paramReader.read("_debriefForm")[0];
-  if (!(typeof debriefFormName === "string" && debriefFormName.length > 0)) {
+  if (!(typeof debriefFormName === "string" && debriefFormName.length > 0))
     debriefFormName = "";
-  }
 
   if (consentFormName.length > 0) showConsentForm(consentFormName);
 
@@ -1949,7 +1954,7 @@ const experiment = (blockCount) => {
     psychoJS.window.close();
 
     const debriefScreen = new Promise((resolve) => {
-      if (debriefFormName.length > 0) {
+      if (debriefFormName.length) {
         showDebriefForm(debriefFormName);
         document
           .getElementById("debrief-yes")
@@ -1970,13 +1975,8 @@ const experiment = (blockCount) => {
     });
     await debriefScreen;
 
-    if (participantRecruitmentServiceData.name == "Prolific" && isCompleted) {
-      let additionalMessage =
-        ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
-        participantRecruitmentServiceData.url +
-        '">' +
-        participantRecruitmentServiceData.url +
-        "</a>";
+    if (recruitmentServiceData.name == "Prolific" && isCompleted) {
+      additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
       psychoJS.quit({
         message: message + additionalMessage,
         isCompleted: isCompleted,
