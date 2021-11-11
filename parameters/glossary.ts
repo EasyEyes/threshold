@@ -10,7 +10,7 @@ interface Glossary {
 export const GLOSSARY: Glossary = {
   _about: {
     name: "_about",
-    availability: "later",
+    availability: "now",
     example: "Effect of font on crowding.",
     explanation:
       "Optional brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -19,7 +19,7 @@ export const GLOSSARY: Glossary = {
   },
   _authorEmails: {
     name: "_authorEmails",
-    availability: "later",
+    availability: "now",
     example: "dp3@nyu.edu",
     explanation:
       "Optional, semicolon-separated email addresses of the authors.  The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -28,7 +28,7 @@ export const GLOSSARY: Glossary = {
   },
   _authors: {
     name: "_authors",
-    availability: "later",
+    availability: "now",
     example: "Denis Pelli",
     explanation:
       "Names of all the authors, separated by semicolons. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty.",
@@ -46,7 +46,7 @@ export const GLOSSARY: Glossary = {
   },
   _dateCreated: {
     name: "_dateCreated",
-    availability: "later",
+    availability: "now",
     example: "8/1/2021",
     explanation:
       "Optional date of creation. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -55,7 +55,7 @@ export const GLOSSARY: Glossary = {
   },
   _dateModified: {
     name: "_dateModified",
-    availability: "later",
+    availability: "now",
     example: "8/15/2021",
     explanation:
       "Optional date of latest modification. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -91,7 +91,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantDurationMinutes: {
     name: "_participantDurationMinutes",
-    availability: "later",
+    availability: "now",
     example: "30",
     explanation:
       "Expected duration, in minutes, in the offer to participants. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -100,7 +100,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantPay: {
     name: "_participantPay",
-    availability: "later",
+    availability: "now",
     example: "7.5",
     explanation:
       "Payment to offer to each participant. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -109,7 +109,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantPayCurrency: {
     name: "_participantPayCurrency",
-    availability: "later",
+    availability: "now",
     example: "USDollar",
     explanation:
       "Currency of payment amount: USDollar, Euro, etc. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -342,7 +342,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "Georgia",
     explanation:
-      'Font used for participant instructions. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \ngoogle: instructionFont is a filename (including extension) of a font on the Google Fonts server.\nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Adobe. \nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
+      'Font used for participant instructions. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \ngoogle: instructionFont is a filename (including extension) of a font on the Google Fonts server.\nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Adobe. ("server" support is coming.)\nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
     type: "text",
     default: "Verdana",
   },
@@ -351,10 +351,10 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "browser",
     explanation:
-      "instructionFontSource must be file, google, server, browser, or defaultForLanguage. See instructionFont and targetFontSource.",
+      'instructionFontSource must be file, google, server, browser, or defaultForLanguage. "server" support is coming.',
     type: "categorical",
     default: "browser",
-    categories: ["file", "google", "server", "browser", "defaultForLanguage"],
+    categories: ["file", "google", "browser"],
   },
   instructionFontStyle: {
     name: "instructionFontStyle",
@@ -574,10 +574,10 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "",
     explanation:
-      "Must be file, google, server, or browser. See targetFontSource for details.",
+      'Must be file, google, server, or browser. ("server" support is coming.) See targetFontSource for details.',
     type: "categorical",
     default: "browser",
-    categories: ["file", "google", "server", "browser"],
+    categories: ["file", "google", "browser"],
   },
   readingFontStyle: {
     name: "readingFontStyle",
@@ -727,7 +727,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "bottom",
     explanation:
-      'Can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "alphabet". If the target is a gabor, the alphbet might display all the possible orientations, each labeled by a letter to be pressed.',
+      'Can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "alphabet". If the target is a gabor, the alphabet might display all the possible orientations, each labeled by a letter to be pressed.',
     type: "categorical",
     default: "bottom",
     categories: ["none", "bottom", "top", "left", "right"],
@@ -974,7 +974,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "Sloan.woff2",
     explanation:
-      'targetFont specified what font you want. How you do that depends on targetFontSource:\n\nfile: targetfont is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The preprocessor will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  targetfont is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: targetFont is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )".\n\nbrowser: The experiment will pass the font preference string that you place in targetFont to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "targetFontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
+      'targetFont specified what font you want. How you do that depends on targetFontSource:\n\nfile: targetfont is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The preprocessor will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  targetfont is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: targetFont is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". ("server" support is coming.)\n\nbrowser: The experiment will pass the font preference string that you place in targetFont to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "targetFontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
     type: "text",
     default: "RobotoMono-Regular.woff2",
   },
@@ -983,10 +983,10 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "file",
     explanation:
-      'targetFontSource must be file, google, server, or browser. Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has targetFontSource "file", the preprocessor checks for presence of the targetFont in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: targetFont contains the filename (with extension) of a file in the Fonts folder in you Pavlovia account. This is checked by the preprocessor, so there are no runtime surprises. \n\ngoogle: targetFont contains the filename (with extension) of a file on the Google Fonts server.\n\nserver: targetFont contains the URL of the font on a font server.\n\nbrowser: targetFont is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) \n\n[google: In the future we may add "google", allowing targetFont to be the name of a font that the preprocessor automatically gets a URL for from the Google Fonts website, using their API.]',
+      'targetFontSource must be file, google, server, or browser. Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has targetFontSource "file", the preprocessor checks for presence of the targetFont in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: targetFont contains the filename (with extension) of a file in the Fonts folder in you Pavlovia account. This is checked by the preprocessor, so there are no runtime surprises. \n\ngoogle: targetFont contains the filename (with extension) of a file on the Google Fonts server.\n\nserver: targetFont contains the URL of the font on a font server. ("server" support is coming.)\n\nbrowser: targetFont is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) \n\n[google: In the future we may add "google", allowing targetFont to be the name of a font that the preprocessor automatically gets a URL for from the Google Fonts website, using their API.]',
     type: "categorical",
     default: "file",
-    categories: ["file", "server", "browser"],
+    categories: ["file", "google", "browser"],
   },
   targetFontStyle: {
     name: "targetFontStyle",
