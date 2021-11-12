@@ -1976,7 +1976,7 @@ const experiment = (blockCount) => {
     await debriefScreen;
 
     if (recruitmentServiceData.name == "Prolific" && isCompleted) {
-      additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
+      let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
       psychoJS.quit({
         message: message + additionalMessage,
         isCompleted: isCompleted,
