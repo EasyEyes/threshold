@@ -120,7 +120,14 @@ const paramReaderInitialized = (reader) => {
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
-    rc.panel(formCalibrationList(reader), "#rc-panel", {}, () => {
+    const hasDesiredDistance = reader.has("viewingDistanceDesiredCm");
+    const rcOptions = {
+      desiredDistanceCm: hasDesiredDistance
+        ? reader.read("viewingDistanceDesiredCm")[0]
+        : undefined,
+      desiredDistanceMonitor: hasDesiredDistance,
+    };
+    rc.panel(formCalibrationList(reader), "#rc-panel", rcOptions, () => {
       rc.removePanel();
       document.body.removeChild(document.querySelector("#rc-panel"));
       // ! Start actual experiment
@@ -291,7 +298,7 @@ const experiment = (blockCount) => {
   async function updateInfo() {
     expInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     expInfo["expName"] = expName;
-    expInfo["psychopyVersion"] = "2021.3.1";
+    expInfo["psychopyVersion"] = "2021.3.1-threshold-prod";
     expInfo["OS"] = rc.systemFamily.value;
 
     // store frame rate of monitor if we can measure it successfully
