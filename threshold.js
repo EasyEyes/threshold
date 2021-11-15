@@ -149,7 +149,6 @@ var totalTrialConfig = {
   fontSize: 20,
   x: window.innerWidth / 2,
   y: -window.innerHeight / 2,
-  fontName: "Arial",
   alignHoriz: "right",
   alignVert: "bottom",
 };
@@ -453,7 +452,7 @@ const experiment = (blockCount) => {
       win: psychoJS.window,
       name: "totalTrial",
       text: "",
-      font: totalTrialConfig.fontName,
+      font: instructionFont,
       units: "pix",
       pos: [totalTrialConfig.x, totalTrialConfig.y],
       alignHoriz: totalTrialConfig.alignHoriz,
@@ -981,12 +980,17 @@ const experiment = (blockCount) => {
       const D = 200;
       const g = 100;
 
+      target.setFont(instructionFont);
       target.setPos([D, 0]);
       target.setText("R");
       target.setHeight(h);
+
+      flanker1.setFont(instructionFont);
       flanker1.setPos([D - g, 0]);
       flanker1.setText("H");
       flanker1.setHeight(h);
+
+      flanker2.setFont(instructionFont);
       flanker2.setPos([D + g, 0]);
       flanker2.setText("C");
       flanker2.setHeight(h);
@@ -1098,7 +1102,7 @@ const experiment = (blockCount) => {
         viewingDistanceCm
       );
       totalTrial.setText(trialInfoStr);
-      totalTrial.setFont(totalTrialConfig.fontName);
+      totalTrial.setFont(instructionFont);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       totalTrial.setAutoDraw(true);
@@ -1531,7 +1535,7 @@ const experiment = (blockCount) => {
         viewingDistanceCm
       );
       totalTrial.setText(trialInfoStr);
-      totalTrial.setFont(totalTrialConfig.fontName);
+      totalTrial.setFont(instructionFont);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       // totalTrialIndex = nextTrialInfo.trial;
@@ -1954,6 +1958,8 @@ const experiment = (blockCount) => {
   }
 
   async function quitPsychoJS(message, isCompleted) {
+    showCursor();
+
     // Check for and save orphaned data
     if (psychoJS.experiment.isEntryEmpty()) {
       psychoJS.experiment.nextEntry();
