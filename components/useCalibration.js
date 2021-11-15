@@ -17,9 +17,12 @@ function ifTrue(arr) {
 
 export const formCalibrationList = (reader) => {
   const tasks = [];
+
   if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__")))
-    tasks.push("screenSize");
+    ////
+    tasks.push({ name: "screenSize" });
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
+    ////
     tasks.push({
       name: "trackDistance",
       options: {
@@ -27,9 +30,14 @@ export const formCalibrationList = (reader) => {
           reader.read("calibrateTrackNearPointBool", "__ALL_BLOCKS__")
         ),
         showVideo: false,
+        desiredDistanceCm: reader.has("viewingDistanceDesiredCm")
+          ? reader.read("viewingDistanceDesiredCm")[0]
+          : undefined,
+        desiredDistanceMonitor: reader.has("viewingDistanceDesiredCm"),
       },
     });
   if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
+    ////
     tasks.push({
       name: "trackGaze",
       options: {

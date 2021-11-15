@@ -120,14 +120,7 @@ const paramReaderInitialized = (reader) => {
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
-    const hasDesiredDistance = reader.has("viewingDistanceDesiredCm");
-    const rcOptions = {
-      desiredDistanceCm: hasDesiredDistance
-        ? reader.read("viewingDistanceDesiredCm")[0]
-        : undefined,
-      desiredDistanceMonitor: hasDesiredDistance,
-    };
-    rc.panel(formCalibrationList(reader), "#rc-panel", rcOptions, () => {
+    rc.panel(formCalibrationList(reader), "#rc-panel", {}, () => {
       rc.removePanel();
       document.body.removeChild(document.querySelector("#rc-panel"));
       // ! Start actual experiment
