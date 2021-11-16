@@ -19,7 +19,10 @@ export const showConsentForm = async (formName) => {
     const pdfForm = document.getElementById("form-pdf");
     pdfForm.style.zIndex = 1000005;
     pdfForm.style.display = "block";
-    pdfForm.setAttribute("src", `forms/${formName}`);
+    pdfForm.setAttribute(
+      "src",
+      `forms/${formName}#toolbar=0&navpanes=0&scrollbar=0`
+    );
   } else if (formNameExt == "md") {
     const response = await axios.get(`/forms/${formName}`);
     const mdForm = document.getElementById("form-md");
