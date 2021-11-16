@@ -104,7 +104,7 @@ var showGrid, gridVisible;
 
 const paramReaderInitialized = (reader) => {
   // show screens before actual experiment begins
-  beforeExperimentBegins();
+  beforeExperimentBegins(reader);
 
   // ! Load fonts
   loadFonts(reader, fontsRequired);
@@ -158,8 +158,8 @@ var totalBlockCount = 0;
 var consentFormName = "";
 var debriefFormName = "";
 
-const beforeExperimentBegins = () => {
-  consentFormName = paramReader.read("_consentForm")[0];
+const beforeExperimentBegins = (reader) => {
+  consentFormName = reader.read("_consentForm")[0];
   if (!(typeof consentFormName === "string" && consentFormName.length > 0))
     consentFormName = "";
 
