@@ -46,7 +46,7 @@ rand(1) returns a random sample from the uniform distribution from 0 to 1.
 import { core, util } from "../psychojs/out/psychojs-2021.3.0.js";
 const { EventManager } = core;
 const { Scheduler } = util;
-import { createSignalingMap } from "./utils.js";
+import { createSignalingMap, arraysEqual } from "./utils.js";
 
 export const checkIfSimulated = (reader) => {
   if (
@@ -58,20 +58,20 @@ export const checkIfSimulated = (reader) => {
   const simulated = {};
   for (const [index, condition] of reader.conditions.entries()) {
     // TEMP are condition labels auto-assigned earlier?
-    const label = condition.label ? condition.label : index;
+    if (!condition.label)
+      throw "No conditionName (label) provided for this condition.";
+    const label = condition.label;
+    const block = reader.read("block", label);
 
-    console.log("label: ", label);
-    console.log("simulate observer bool: ", condition.simulateParticipantBool);
-    if (condition.simulateParticipantBool) {
-      if (!simulated.hasOwnProperty(condition.block)) {
-        simulated[condition.block] = {};
-        simulated[condition.block][label] = condition.simulationObserverModel;
+    if (reader.read("simulateParticipantBool", label)) {
+      if (!simulated.hasOwnProperty(block)) {
+        simulated[block] = {};
+        simulated[block][label] = reader.read("simulationModel", label);
       } else {
-        simulated[condition.block][label] = condition.simulationObserverModel;
+        simulated[block][label] = reader.read("simulationModel", label);
       }
     }
   }
-  console.log("simulated: ", simulated);
   // block# : simulationModel
   return simulated;
 };
@@ -198,9 +198,6 @@ export class SimulatedObserver {
     this.simulationModel = simulationModel;
     switch (this.simulationModel) {
       case "weibull":
-        // this.simulationBeta = simulationBeta;
-        // this.simulationDelta = simulationDelta;
-        // this.simulationThreshold = simulationThreshold;
         this.observer = new WeibullObserver(
           this.trial,
           thresholdProportionCorrect,
@@ -229,8 +226,21 @@ export class SimulatedObserver {
       possibleResponses,
       correctResponse
     );
-    this.trial = newTrial;
     this.observer.updateTrial(newTrial);
+    this.trial = newTrial;
+  }
+  updateSimulationParameters(
+    simulationBeta,
+    simulationDelta,
+    simulationThreshold
+  ) {
+    if (this.simulationModel === "weibull") {
+      this.observer.updateSimulationParameters(
+        simulationBeta,
+        simulationDelta,
+        simulationThreshold
+      );
+    }
   }
   simulateTrial() {
     return this.observer.simulateTrial();
@@ -264,6 +274,17 @@ class WeibullObserver {
     this.setGamma();
     this.setEpsilon();
   }
+  updateSimulationParameters(
+    simulationBeta,
+    simulationDelta,
+    simulationThreshold
+  ) {
+    if (simulationBeta) this.beta = simulationBeta;
+    if (simulationDelta) this.delta = simulationDelta;
+    if (simulationThreshold) this.simulationThreshold = simulationThreshold;
+    this.setGamma();
+    this.setEpsilon();
+  }
   /**
    * Calculate the gamma value for the Weibull function,
    * ie the probability of blindly guessing the correct answer.
@@ -276,23 +297,35 @@ class WeibullObserver {
    * set (once) so that P=thresholdProportionCorrect when tTest-tActual=0.
    */
   setEpsilon() {
-    this.epsilon =
+    const epsilon =
       log(
-        Math.log(
-          (this.tpc - this.delta * this.gamma) /
-            ((1 - this.delta) * (1 - (1 - this.gamma)))
-        ),
-        -10
+        -1 *
+          Math.log(
+            (-1 * ((this.tpc - this.delta * this.gamma) / (1 - this.delta)) +
+              1) /
+              (1 - this.gamma)
+          ),
+        10
       ) / this.beta;
+    this.epsilon = epsilon;
   }
   /**
    * Update the trial to which the simulated observer is responding.
    * @param {TrialProperties} newTrial The new trial information to replace the old.
    */
   updateTrial(newTrial) {
+    const alphabetsEqual = arraysEqual(
+      this.trial.possibleResponses,
+      newTrial.possibleResponses
+    );
     this.trial = newTrial;
-    this.setGamma();
-    this.setEpsilon();
+    if (!alphabetsEqual) {
+      console.error(
+        "Simulated observer not operated as intended: Epsilon changed.\nThe same simulated observer is not intended to be used across multiple conditions (ie columns of your experiment.csv file)."
+      );
+      this.setGamma();
+      this.setEpsilon();
+    }
   }
   /**
    * Simulates the current trial by returning the correctness of the observer's response,
@@ -300,17 +333,16 @@ class WeibullObserver {
    * @returns {{0|1} Whether or not this observer responded correctly
    */
   simulateTrial() {
-    //    t=tTest-tActual+q.epsilon;
     const tTest = this.trial.stimulusIntensity;
-    const tActual = this.simulationThreshold;
+    const tActual = log(this.simulationThreshold, 10);
+    //    t=tTest-tActual+q.epsilon;
     const t = tTest - tActual + this.epsilon;
 
     //    P=q.deltaq.gamma+(1-q.delta)(1-(1-q.gamma)exp(-10.^(q.betat)));
     const P =
       this.delta * this.gamma +
       (1 - this.delta) *
-        (1 - (1 - this.gamma)) *
-        Math.exp((-10) ** (this.beta * t));
+        (1 - (1 - this.gamma) * Math.exp(-1 * 10 ** (this.beta * t)));
 
     //    response= P > rand(1);
     const responseCorrect = P > Math.random();

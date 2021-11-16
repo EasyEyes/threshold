@@ -1,6 +1,7 @@
 node_modules
 
 debugExperiment.csv
+simulateExperiment.csv
 
 data/
 conditions/

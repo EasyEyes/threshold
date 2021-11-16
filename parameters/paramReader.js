@@ -1,5 +1,4 @@
 import Papa from "papaparse";
-import XLSX from "xlsx";
 import { GLOSSARY } from "./glossary.ts";
 
 export class ParamReader {
@@ -18,9 +17,13 @@ export class ParamReader {
     )
       return;
 
-    if (name in this._experiment[0])
-      return this._getParam(name, blockOrConditionName);
+    if (this.has(name)) return this._getParam(name, blockOrConditionName);
     else return this._getParamGlossary(name, blockOrConditionName);
+  }
+
+  has(name) {
+    if (!this.conditions) return false;
+    return name in this.conditions[0];
   }
 
   _getParam(name, blockOrConditionName) {

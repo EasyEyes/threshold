@@ -6,8 +6,6 @@ import { debug } from "./components/utils.js";
 
 const useConsent = true;
 const useRC = true;
-// TODO read in `showGridsBool` from reader
-const showGrid = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS, EventManager } = core;
@@ -21,7 +19,7 @@ import * as jsQUEST from "./addons/jsQUEST.module.js";
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
-import { participantRecruitmentService } from "./survey/participantRecruitmentServiceData.js";
+
 import {
   logger,
   hideCursor,
@@ -39,6 +37,10 @@ import {
 } from "./components/useCalibration.js";
 
 import { loadFonts } from "./components/fonts.js";
+import {
+  loadRecruitmentServiceConfig,
+  recruitmentServiceData,
+} from "./components/recruitmentService.js";
 import { phrases } from "./components/i18n.js";
 
 import {
@@ -72,7 +74,7 @@ import {
   getFlankerLocations,
 } from "./components/bounding.js";
 
-import { getGridLines, updateGridVisible } from "./components/grid.js";
+import { getGridLines, readGridParameter } from "./components/grid.js";
 import {
   checkIfSimulated,
   SimulatedObserver,
@@ -82,15 +84,6 @@ import { showExperimentEnding } from "./components/widgets.js";
 
 /* -------------------------------------------------------------------------- */
 
-if (showGrid) {
-  var gridVisible = { pix: false, cm: false, deg: false };
-  const gridKeys = {
-    pix: { key: "Control", keyCode: 17 },
-    cm: { key: "Alt", keyCode: 18 },
-    deg: { key: "Meta", keyCode: 91 },
-  };
-  window.onkeydown = (e) => updateGridVisible(e, gridVisible, gridKeys);
-}
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
@@ -106,6 +99,7 @@ let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
 var simulated;
+var showGrid, gridVisible;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = (reader) => {
@@ -114,6 +108,12 @@ const paramReaderInitialized = (reader) => {
 
   // ! Load fonts
   loadFonts(reader, fontsRequired);
+
+  // ! Load recruitment service config
+  loadRecruitmentServiceConfig();
+
+  // ! Check if to use grids
+  [showGrid, gridVisible] = readGridParameter(reader);
 
   // ! Simulate observer
   simulated = checkIfSimulated(reader);
@@ -142,7 +142,6 @@ var totalTrialConfig = {
   fontSize: 20,
   x: window.innerWidth / 2,
   y: -window.innerHeight / 2,
-  fontName: "Arial",
   alignHoriz: "right",
   alignVert: "bottom",
 };
@@ -156,19 +155,17 @@ var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
-var consentFormName = "consent-form.pdf";
-var debriefFormName = "consent-form.md";
+var consentFormName = "";
+var debriefFormName = "";
 
 const beforeExperimentBegins = () => {
   consentFormName = paramReader.read("_consentForm")[0];
-  if (!(typeof consentFormName === "string" && consentFormName.length > 0)) {
+  if (!(typeof consentFormName === "string" && consentFormName.length > 0))
     consentFormName = "";
-  }
 
   debriefFormName = paramReader.read("_debriefForm")[0];
-  if (!(typeof debriefFormName === "string" && debriefFormName.length > 0)) {
+  if (!(typeof debriefFormName === "string" && debriefFormName.length > 0))
     debriefFormName = "";
-  }
 
   if (consentFormName.length > 0) showConsentForm(consentFormName);
 
@@ -293,7 +290,7 @@ const experiment = (blockCount) => {
   async function updateInfo() {
     expInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     expInfo["expName"] = expName;
-    expInfo["psychopyVersion"] = "2021.3.1";
+    expInfo["psychopyVersion"] = "2021.3.1-threshold-prod";
     expInfo["OS"] = rc.systemFamily.value;
 
     // store frame rate of monitor if we can measure it successfully
@@ -368,7 +365,6 @@ const experiment = (blockCount) => {
       clock: new util.Clock(),
       waitForStart: true,
     });
-    console.log("keyboard for response: ", key_resp);
 
     fixation = new visual.TextStim({
       win: psychoJS.window,
@@ -449,7 +445,7 @@ const experiment = (blockCount) => {
       win: psychoJS.window,
       name: "totalTrial",
       text: "",
-      font: totalTrialConfig.fontName,
+      font: instructionFont,
       units: "pix",
       pos: [totalTrialConfig.x, totalTrialConfig.y],
       alignHoriz: totalTrialConfig.alignHoriz,
@@ -687,7 +683,6 @@ const experiment = (blockCount) => {
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
       currentLoop = blocks; // we're now the current loop
-      console.log("blocks: ", blocks);
 
       // Schedule all the trials in the trialList:
       for (const thisBlock of blocks) {
@@ -978,12 +973,17 @@ const experiment = (blockCount) => {
       const D = 200;
       const g = 100;
 
+      target.setFont(instructionFont);
       target.setPos([D, 0]);
       target.setText("R");
       target.setHeight(h);
+
+      flanker1.setFont(instructionFont);
       flanker1.setPos([D - g, 0]);
       flanker1.setText("H");
       flanker1.setHeight(h);
+
+      flanker2.setFont(instructionFont);
       flanker2.setPos([D + g, 0]);
       flanker2.setText("C");
       flanker2.setHeight(h);
@@ -1095,7 +1095,7 @@ const experiment = (blockCount) => {
         viewingDistanceCm
       );
       totalTrial.setText(trialInfoStr);
-      totalTrial.setFont(totalTrialConfig.fontName);
+      totalTrial.setFont(instructionFont);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       totalTrial.setAutoDraw(true);
@@ -1201,7 +1201,7 @@ const experiment = (blockCount) => {
   var trialComponents;
 
   /* --- SIMULATED --- */
-  var simulatedObserver;
+  var simulatedObserver = {};
   /* --- /SIMULATED --- */
 
   var condition;
@@ -1528,7 +1528,7 @@ const experiment = (blockCount) => {
         viewingDistanceCm
       );
       totalTrial.setText(trialInfoStr);
-      totalTrial.setFont(totalTrialConfig.fontName);
+      totalTrial.setFont(instructionFont);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       // totalTrialIndex = nextTrialInfo.trial;
@@ -1558,16 +1558,23 @@ const experiment = (blockCount) => {
       /* --- /GRIDS --- */
       /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
-        if (!simulatedObserver) {
-          simulatedObserver = new SimulatedObserver(
+        if (!simulatedObserver[condition.label]) {
+          simulatedObserver[condition.label] = new SimulatedObserver(
             simulated[block][condition.label],
             level,
             alphabet,
             targetCharacter,
-            condition["thresholdProportionCorrect"]
+            paramReader.read("thresholdProportionCorrect", condition.label),
+            paramReader.read("simulationBeta", condition.label),
+            paramReader.read("simulationDelta", condition.label),
+            paramReader.read("simulationThreshold", condition.label)
           );
         } else {
-          simulatedObserver.updateTrial(level, alphabet, targetCharacter);
+          simulatedObserver[condition.label].updateTrial(
+            level,
+            alphabet,
+            targetCharacter
+          );
         }
       }
       /* --- /SIMULATED --- */
@@ -1639,7 +1646,7 @@ const experiment = (blockCount) => {
           simulated[thisLoopNumber][condition.label]
         ) {
           return simulateObserverResponse(
-            simulatedObserver,
+            simulatedObserver[condition.label],
             key_resp,
             psychoJS
           );
@@ -1861,7 +1868,6 @@ const experiment = (blockCount) => {
         }
       }
       // was no response the correct answer?!
-      console.log("trialRoutineEnd key_resp: ", key_resp);
       if (key_resp.keys === undefined) {
         console.error("[key_resp.keys] No response error.");
       }
@@ -1945,6 +1951,8 @@ const experiment = (blockCount) => {
   }
 
   async function quitPsychoJS(message, isCompleted) {
+    showCursor();
+
     // Check for and save orphaned data
     if (psychoJS.experiment.isEntryEmpty()) {
       psychoJS.experiment.nextEntry();
@@ -1952,7 +1960,7 @@ const experiment = (blockCount) => {
     psychoJS.window.close();
 
     const debriefScreen = new Promise((resolve) => {
-      if (debriefFormName.length > 0) {
+      if (debriefFormName.length) {
         showDebriefForm(debriefFormName);
         document
           .getElementById("debrief-yes")
@@ -1973,13 +1981,8 @@ const experiment = (blockCount) => {
     });
     await debriefScreen;
 
-    if (participantRecruitmentService?.name == "Prolific" && isCompleted) {
-      let additionalMessage =
-        ' Please visit the following URL to complete the experiment - <a target="_blank" href="' +
-        participantRecruitmentService.url +
-        '">' +
-        participantRecruitmentService.url +
-        "</a>";
+    if (recruitmentServiceData.name == "Prolific" && isCompleted) {
+      let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
       psychoJS.quit({
         message: message + additionalMessage,
         isCompleted: isCompleted,
