@@ -1268,7 +1268,7 @@ const experiment = (blockCount) => {
       proposedLevel = Math.min(proposedLevel, 1.75);
 
       psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
-      psychoJS.experiment.addData("conditionName", cName);
+      psychoJS.experiment.addData("label", cName);
       psychoJS.experiment.addData(
         "flankerOrientation",
         reader.read("spacingDirection", cName)
