@@ -1,36 +1,60 @@
 import { phrases } from "./i18n.js";
 import { replacePlaceholders } from "./multiLang.js";
 
+/**
+ * responseType
+ *      click   type    keypad    speak
+ * 0    x       o       x         x
+ * 1    o       x       x         x
+ * 2    o       o       x         x
+ * 3
+ * 4
+ * 5
+ * 6
+ * 7
+ * 8
+ * 9
+ * 10
+ * 11
+ * 12
+ * 13
+ * 14
+ * 15
+ */
+
+export const getResponseType = (click, type, keypad, speak) => {
+  const c = click,
+    t = type,
+    k = keypad,
+    s = speak;
+  if (!c && t && !k && !s) return 0;
+  else if (c && !t && !k && !s) return 1;
+  else if (c && t && !k && !s) return 2;
+  else return 2;
+  // TODO finish other situations
+};
+
 export const instructionsText = {
-  initial: (L, participantName = null) => {
-    return (
-      replacePlaceholders(
-        phrases.T_thresholdSoundCheck[L],
-        participantName === null ? "" : ` ${participantName}`
-      ) + `\n\n`
-    );
+  initial: (L) => {
+    return phrases.T_thresholdSoundCheck[L] + `\n\n`;
   },
   initialByThresholdParameter: {
     spacing: (L, responseType = 2, trialsThisBlock = 0) => {
-      /**
-       * responseType
-       * 0 - TYPED
-       * 1 - CLICKED
-       * 2 - TYPED or CLICKED
-       */
+      const extraSpace = phrases.EE_languageUseSpace[L] ? " " : "";
       let text = replacePlaceholders(
         phrases.T_thresholdBeginBlock[L],
         trialsThisBlock
       );
       switch (responseType) {
         case 0:
-          text += `${phrases.T_pressingKey[L]}\n\n`;
+          text += extraSpace + `${phrases.T_pressingKey[L]}\n\n`;
           break;
         case 1:
-          text += `${phrases.T_clickingLetter[L]}\n\n`;
+          text += extraSpace + `${phrases.T_clickingLetter[L]}\n\n`;
           break;
         default:
-          text += `${phrases.T_pressingKeyOrClickingLetter[L]}\n\n`;
+          text +=
+            extraSpace + `${phrases.T_pressingKeyOrClickingLetter[L]}\n\n`;
           break;
       }
       return text;

@@ -45,6 +45,7 @@ import { phrases } from "./components/i18n.js";
 
 import {
   addBeepButton,
+  getResponseType,
   instructionsText,
   removeBeepButton,
 } from "./components/instructions.js";
@@ -344,7 +345,7 @@ const experiment = (blockCount) => {
     instructionsClock = new util.Clock();
 
     thisLoopNumber = 0;
-    thisConditionsFile = "conditions/block_1.csv";
+    thisConditionsFile = `conditions/block_${thisLoopNumber + 1}.csv`;
 
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
@@ -516,7 +517,6 @@ const experiment = (blockCount) => {
 
   var clickedContinue;
 
-  // TODO Read from config
   var responseType = 2;
 
   var continueRoutine;
@@ -793,17 +793,23 @@ const experiment = (blockCount) => {
     return Scheduler.Event.NEXT;
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                  NEW BLOCK                                 */
+  /* -------------------------------------------------------------------------- */
+
   var filterComponents;
   function filterRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
       currentBlockIndex = snapshot.block + 1;
       totalBlockCount = snapshot.nTotal;
+
       //------Prepare to start Routine 'filter'-------
       t = 0;
       filterClock.reset(); // clock
       frameN = -1;
       continueRoutine = true; // until we're told otherwise
+
       // update component parameters for each repeat
       thisLoopNumber += 1;
       thisConditionsFile = `conditions/block_${thisLoopNumber}.csv`;
@@ -830,6 +836,8 @@ const experiment = (blockCount) => {
 
       // keep track of which components have finished
       filterComponents = [];
+
+      // ! Set block params
 
       for (const thisComponent of filterComponents)
         if ("status" in thisComponent)
@@ -904,7 +912,7 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot);
       _instructionSetup(
         (snapshot.block === 0
-          ? instructionsText.initial(rc.language.value, expInfo.participant)
+          ? instructionsText.initial(rc.language.value)
           : "") +
           instructionsText.initialByThresholdParameter["spacing"](
             rc.language.value,
@@ -1080,6 +1088,22 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
+
+      for (let c of snapshot.handler.getConditions()) {
+        if (c.label === trials._currentStaircase._name) {
+          condition = c;
+        }
+      }
+      const cName = condition["label"];
+
+      // ! responseType
+      responseType = getResponseType(
+        paramReader.read("responseClickedBool", cName),
+        paramReader.read("responseTypedBool", cName),
+        paramReader.read("responseTypedEasyEyesKeypadBool", cName),
+        paramReader.read("responseSpokenBool", cName)
+      );
+      logger("responseType", responseType);
 
       // update trial/block count
       currentTrialIndex = snapshot.thisN + 1;

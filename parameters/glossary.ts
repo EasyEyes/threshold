@@ -35,6 +35,15 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  _completionURL: {
+    name: "_completionURL",
+    availability: "now",
+    example: "http://xyz?cc=123",
+    explanation:
+      "A completion URL that will be used to form a daisy chain of testing apps. The participant who completes the EasyEyes tasks will be invited to click on this link to go to the next app in the chain. Typically the last step is the completion page in Prolific, marking the participant eligible for payment. Suggested by Becca Hirst at Open Science Tools. ",
+    type: "text",
+    default: "",
+  },
   _consentForm: {
     name: "_consentForm",
     availability: "now",
@@ -163,6 +172,15 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "US_REP_SAMPLE",
     categories: ["UK_REP_SAMPLE", "US_REP_SAMPLE", "SINGLE"],
+  },
+  _zeroBasedNumberingBool: {
+    name: "_zeroBasedNumberingBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "If true then the first block and condition are numbered 0, otherwise 1.",
+    type: "boolean",
+    default: "FALSE",
   },
   block: {
     name: "block",
@@ -702,7 +720,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Allow participant to respond by verbally naming the target. The various response modes are not exclusive, any number from 1 to all can be enabled.",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   responseTypedBool: {
     name: "responseTypedBool",
@@ -720,7 +738,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Allow participant to respond by pressing a key in EasyEyes keypad. The various response modes are not exclusive, any number from 1 to all can be enabled.",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   showAlphabetWhere: {
     name: "showAlphabetWhere",
@@ -1162,12 +1180,21 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.7",
   },
+  viewingDistanceAllowedRatio: {
+    name: "viewingDistanceAllowedRatio",
+    availability: "now",
+    example: "",
+    explanation:
+      "Can be larger or smaller than 1, and must be in the range [0 inf]. If the specified tolerance ratio is R, then the ratio of actual to desired viewing distance must be in the range 1/R to R. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, to approximately the desired viewing distance. Values of 0, inf, and NaN all have the same effect, of allowing all viewing distances.",
+    type: "",
+    default: "1.2",
+  },
   viewingDistanceDesiredCm: {
     name: "viewingDistanceDesiredCm",
     availability: "now",
     example: "40",
     explanation:
-      "We will encourage participant to adjust their viewing distance (moving head or display) to approximate this request. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance.",
+      "At the beginning of the block, we encourage the participant to adjust their viewing distance (moving head or display) to approximate the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. All conditions within a block must have the same desired viewing distance.\n     The viewing-distance nudger (Closer! Farther!) is working fine at getting the participant to the right distance, but we need to cancel any trials in which the stimulus was obscured by nudging. We have a three-period solution, that is being introduced in two stages. First we describe the ideal scheme that is our goal. Period A. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging and the rest of our software ignores it. Period B. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus we also allow nudging, but any nudge cancels the trial. Period C. From the end of the stimulus until the observer responds we suspend nudging (so the nudge won't interfere with remembering the target). Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. I'm not sure that the current version of MultistairHandler will cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during period A, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during period B we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. ",
     type: "numerical",
     default: "40",
   },
@@ -1177,15 +1204,6 @@ export const GLOSSARY: Glossary = {
     example: "FALSE",
     explanation:
       "Needed at viewing distances beyond 60 cm. Could be commercial wireless keyboard or EasyEyes keypad emulator running on any smartphone. ",
-    type: "boolean",
-    default: "FALSE",
-  },
-  zeroBasedNumberingBool: {
-    name: "zeroBasedNumberingBool",
-    availability: "later",
-    example: "FALSE",
-    explanation:
-      "If true then the first block and condition are numbered 0, otherwise 1.",
     type: "boolean",
     default: "FALSE",
   },
