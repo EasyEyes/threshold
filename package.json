@@ -35,13 +35,13 @@
     "css-loader": "^6.5.1",
     "googleapis": "^91.0.0",
     "husky": "^7.0.4",
-    "lint-staged": "^11.2.6",
+    "lint-staged": "^12.0.2",
     "prettier": "^2.4.1",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.6",
-    "webpack": "^5.64.0",
+    "webpack": "^5.64.1",
     "webpack-cli": "^4.9.1",
-    "xlsx": "^0.17.3"
+    "xlsx": "^0.17.4"
   },
   "lint-staged": {
     "*.{js,css,html,md}": "prettier --write"
