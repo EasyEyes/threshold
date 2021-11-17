@@ -33,3 +33,6 @@
   display: none;
   z-index: 0;
 }
+.form-input-btn {
+  font-size: 1.2rem;
+}
