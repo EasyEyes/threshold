@@ -28,6 +28,8 @@ import {
   XYPixOfXYDeg,
   degreesToPixels,
   addConditionToData,
+  addTrialStaircaseSummariesToData,
+  addBlockStaircaseSummariesToData,
   spacingPixelsFromLevel,
 } from "./components/utils.js";
 
@@ -764,24 +766,8 @@ const experiment = (blockCount) => {
   }
 
   async function trialsLoopEnd() {
-    psychoJS.experiment.addData(
-      "staircaseName",
-      currentLoop._currentStaircase._name
-    );
-    psychoJS.experiment.addData(
-      "questMeanAtEndOfTrialsLoop",
-      currentLoop._currentStaircase.mean()
-    );
-    psychoJS.experiment.addData(
-      "questSDAtEndOfTrialsLoop",
-      currentLoop._currentStaircase.sd()
-    );
-    psychoJS.experiment.addData(
-      "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
-      currentLoop._currentStaircase.quantile(
-        currentLoop._currentStaircase._jsQuest.quantileOrder
-      )
-    );
+    console.log("currentLoop (can I access all staircases??): ", currentLoop);
+    addBlockStaircaseSummariesToData(currentLoop, psychoJS);
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
     return Scheduler.Event.NEXT;
@@ -1902,7 +1888,7 @@ const experiment = (blockCount) => {
         logger("level passed to addResponse", level);
       }
 
-      logStaircaseInfoToOutput(currentLoop);
+      addTrialStaircaseSummariesToData(currentLoop, psychoJS);
 
       psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
       psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
@@ -1918,27 +1904,6 @@ const experiment = (blockCount) => {
 
       return Scheduler.Event.NEXT;
     };
-  }
-
-  function logStaircaseInfoToOutput(currentLoop) {
-    psychoJS.experiment.addData(
-      "staircaseName",
-      currentLoop._currentStaircase._name
-    );
-    psychoJS.experiment.addData(
-      "questMeanAtEndOfTrial",
-      currentLoop._currentStaircase.mean()
-    );
-    psychoJS.experiment.addData(
-      "questSDAtEndOfTrial",
-      currentLoop._currentStaircase.sd()
-    );
-    psychoJS.experiment.addData(
-      "questQuantileOfQuantileOrderAtEndOfTrial",
-      currentLoop._currentStaircase.quantile(
-        currentLoop._currentStaircase._jsQuest.quantileOrder
-      )
-    );
   }
 
   function endLoopIteration(scheduler, snapshot) {

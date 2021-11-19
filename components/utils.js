@@ -161,6 +161,40 @@ export const addConditionToData = (experiment, condition, exclude = []) => {
   }
 };
 
+export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
+  psychoJS.experiment.addData(
+    "staircaseName",
+    currentLoop._currentStaircase._name
+  );
+  psychoJS.experiment.addData(
+    "questMeanAtEndOfTrial",
+    currentLoop._currentStaircase.mean()
+  );
+  psychoJS.experiment.addData(
+    "questSDAtEndOfTrial",
+    currentLoop._currentStaircase.sd()
+  );
+  psychoJS.experiment.addData(
+    "questQuantileOfQuantileOrderAtEndOfTrial",
+    currentLoop._currentStaircase.quantile(
+      currentLoop._currentStaircase._jsQuest.quantileOrder
+    )
+  );
+};
+
+export const addBlockStaircaseSummariesToData = (loop, psychoJS) => {
+  loop._staircases.forEach((staircase, i) => {
+    psychoJS.experiment.addData("staircaseName", staircase._name);
+    psychoJS.experiment.addData("questMeanAtEndOfTrialsLoop", staircase.mean());
+    psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", staircase.sd());
+    psychoJS.experiment.addData(
+      "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
+      staircase.quantile(staircase._jsQuest.quantileOrder)
+    );
+    if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
+  });
+};
+
 /**
  *
  * @todo add tests
