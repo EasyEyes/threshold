@@ -13,7 +13,8 @@
     "glossary": "node server/prepare-glossary.js && prettier --write parameters/glossary.ts && git add parameters/glossary.ts",
     "prepare": "husky install",
     "start": "webpack --env=development",
-    "build": "webpack --env=production"
+    "build": "webpack --env=production",
+    "netlify:website": "npm ci && npm run build && rm -r node_modules"
   },
   "repository": {
     "type": "git",
@@ -35,7 +36,7 @@
     "css-loader": "^6.5.1",
     "googleapis": "^91.0.0",
     "husky": "^7.0.4",
-    "lint-staged": "^12.0.2",
+    "lint-staged": "^12.0.3",
     "prettier": "^2.4.1",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.6",
