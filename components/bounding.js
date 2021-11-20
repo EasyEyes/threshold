@@ -19,6 +19,7 @@ const debug = false;
  * @param {Object} displayOptions
  * @param {Number} displayOptions.pixPerCm Pixels per centimeter of participant's display
  * @param {Number} displayOptions.viewingDistanceCm Participant's viewing distance in cm
+ * @param {Number} displayOptions.minimumHeight Smallest height (in px) that a stimulus can be
  * @returns {[Number, Number]} Value to be used as the height for targetStimulus, value to be used as the level this trial
  */
 export const getTypographicHeight = (
@@ -47,20 +48,26 @@ export const getTypographicHeight = (
     : Math.round(proposedSpacingPx * 3);
   const level = proposedLevel;
   if (proposedSpacingIsTooLarge) {
-    const constrainedSpacingPx = desiredStringWidth / 3;
     let level = levelFromSpacingPixels(
-      constrainedSpacingPx,
+      desiredStringWidth / 3,
       displayOptions.pixPerCm,
       displayOptions.viewingDistanceCm
     );
   }
-
-  const testHeight = 10;
+  // Get the width, given our desired height
+  const testHeight = displayOptions.minimumHeight;
   targetStimulus.setHeight(testHeight);
   const testWidth = targetStimulus.getBoundingBox(true).width;
-
+  // Find the height we should use, given our desired string width
   const widthOverHeightRatio = testWidth / testHeight;
   const desiredHeight = desiredStringWidth / widthOverHeightRatio;
+  // Check that the desired height isn't too small
+  if (desiredHeight < displayOptions.minimumHeight) {
+    let desiredHeight = displayOptions.minimumHeight;
+    const minDesiredStringWidth = desiredHeight * widthOverHeightRatio;
+    const minSpacingPx = Math.round(minDesiredStringWidth / 3);
+    let level = levelFromSpacingPixels(minSpacingPx);
+  }
   return [desiredHeight, level];
 };
 
