@@ -74,6 +74,7 @@ export const getTypographicHeight = (
 /**
  * If the proposed `level` would cause the stimuli to the be presented off screen,
  * get the largest value for `level` which will actually fit on screen.
+ * Used in `ratio` mode, rather than `typographic`
  * @param {Number} proposedLevel Level to be tested, as provided by QUEST
  * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
  * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
@@ -153,15 +154,16 @@ const unacceptableStimuli = (
     displayOptions
   );
   // TODO take the size of fixation into account
-  const fixationInfringed = rectangleContainsPoint(
-    areaFlankersCover,
-    fixationXYPix
-  );
+  // const fixationInfringed = rectangleContainsPoint(
+  //   areaFlankersCover,
+  //   fixationXYPix
+  // );
   const stimuliExtendOffscreen = rectangleOffscreen(areaFlankersCover, {
     width: screen.width,
     height: screen.height,
   });
-  const badPresentation = fixationInfringed || stimuliExtendOffscreen;
+  // const badPresentation = fixationInfringed || stimuliExtendOffscreen;
+  const badPresentation = stimuliExtendOffscreen;
   return badPresentation;
 };
 
