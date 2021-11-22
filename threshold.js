@@ -896,6 +896,16 @@ const experiment = (blockCount) => {
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
+
+      const blockCount = snapshot.block + 1;
+
+      responseType = getResponseType(
+        paramReader.read("responseClickedBool", blockCount)[0],
+        paramReader.read("responseTypedBool", blockCount)[0],
+        paramReader.read("responseTypedEasyEyesKeypadBool", blockCount)[0],
+        paramReader.read("responseSpokenBool", blockCount)[0]
+      );
+
       _instructionSetup(
         (snapshot.block === 0
           ? instructionsText.initial(rc.language.value)

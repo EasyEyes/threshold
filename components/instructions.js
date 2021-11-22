@@ -23,6 +23,7 @@ import { replacePlaceholders } from "./multiLang.js";
  */
 
 export const getResponseType = (click, type, keypad, speak) => {
+  console.log(click, type, keypad, speak);
   const c = click,
     t = type,
     k = keypad,
@@ -30,7 +31,7 @@ export const getResponseType = (click, type, keypad, speak) => {
   if (!c && t && !k && !s) return 0;
   else if (c && !t && !k && !s) return 1;
   else if (c && t && !k && !s) return 2;
-  else return 2;
+  else return 1;
   // TODO finish other situations
 };
 

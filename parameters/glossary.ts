@@ -35,21 +35,30 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  _completionURL: {
-    name: "_completionURL",
-    availability: "now",
-    example: "http://xyz?cc=123",
-    explanation:
-      "A completion URL that will be used to form a daisy chain of testing apps. The participant who completes the EasyEyes tasks will be invited to click on this link to go to the next app in the chain. Typically the last step is the completion page in Prolific, marking the participant eligible for payment. Suggested by Becca Hirst at Open Science Tools. ",
-    type: "text",
-    default: "",
-  },
   _consentForm: {
     name: "_consentForm",
     availability: "now",
     example: "adultConsent2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown with extension MD) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. When checking your experiment table, the preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Scientific Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "The file name of your PDF (or plain-text Markdown with extension MD) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. When checking your experiment table, the compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Scientific Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+    type: "text",
+    default: "",
+  },
+  _daisyChainURLAfterEasyEyes: {
+    name: "_daisyChainURLAfterEasyEyes",
+    availability: "soon",
+    example: "http://xyz?cc=123",
+    explanation:
+      "A URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
+    type: "text",
+    default: "",
+  },
+  _daisyChainURLBeforeEasyEyes: {
+    name: "_daisyChainURLBeforeEasyEyes",
+    availability: "soon",
+    example: "http://xyz?cc=123",
+    explanation:
+      "A URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
     type: "text",
     default: "",
   },
@@ -76,7 +85,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "debrief2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The preprocessor will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
@@ -222,7 +231,8 @@ export const GLOSSARY: Glossary = {
     name: "calibrateScreenSizeBool",
     availability: "now",
     example: "TRUE",
-    explanation: "",
+    explanation:
+      "Adjust the screen image of a common object of known size to match, to determine the size in cm of the participant's screen. Thanks to Li et al. 2020.",
     type: "boolean",
     default: "TRUE",
   },
@@ -230,7 +240,8 @@ export const GLOSSARY: Glossary = {
     name: "calibrateScreenSizeCheckBool",
     availability: "soon",
     example: "TRUE",
-    explanation: "",
+    explanation:
+      "Ask the participant to use a ruler, yardstick, meter stick, or tape measure to measure the distance directly to assess accuracy.",
     type: "boolean",
     default: "FALSE",
   },
@@ -369,7 +380,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "browser",
     explanation:
-      'instructionFontSource must be file, google, server, browser, or defaultForLanguage. "server" support is coming.',
+      'instructionFontSource must be file, google, server, or browser. "server" support is coming. See targetFontSource for explanation.',
     type: "categorical",
     default: "browser",
     categories: ["file", "google", "browser"],
@@ -378,7 +389,8 @@ export const GLOSSARY: Glossary = {
     name: "instructionFontStyle",
     availability: "soon",
     example: "regular",
-    explanation: "",
+    explanation:
+      "Must be regular, bold, italic, or boldItalic. When you select a font file that is already styled, just select regular here. Otherwise the browser might try to tilt or thicken the already italic or bold font with unexpected results.",
     type: "categorical",
     default: "regular",
     categories: ["regular", "italic", "bold", "boldItalic"],
@@ -388,7 +400,7 @@ export const GLOSSARY: Glossary = {
     availability: "soon",
     example: "Italian",
     explanation:
-      "English name for the language used for instructions to the participant. It must match one of the entries in the second row of the EasyEyes International phrases sheet. If you leave this blank, then the participant will be allowed to select the language from a pull-down menu.",
+      "English name for the language used for instructions to the participant. It must match one of the entries in the second row of the EasyEyes International phrases sheet. If you leave this blank, then the participant will be allowed to select the instruction language from a pull-down menu.",
     type: "categorical",
     default: "English",
     categories: [""],
@@ -398,7 +410,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "",
     explanation:
-      'The URL of a Google Sheets table of international phrases to be used to give instructions throughout the experiment. A scientist can substitute her own table, presumably a modified copy of the EasyEyes International Phrases Table. https://docs.google.com/spreadsheets/d/1UFfNikfLuo8bSromE34uWDuJrMPFiJG3VpoQKdCGkII/edit#gid=0\nThis table allows the Participant page to make all non-stimulus text international. In every place that it displays text, the Participant page looks up the mnemonic code for the needed phrase in the instruction table, to find a unicode phrase in the selected instructionLanguage (e.g. English, German, or Arabic). It\'s a Google Sheets file called "EasyEyes International Phrases".\nhttps://docs.google.com/spreadsheets/d/1AZbihlk-CP7sitLGb9yZYbmcnqQ_afjjG8h6h5UWvvo/edit#gid=0\nThe first column has mnemonic phrase names. Each of the following columns gives the corresponding text in a different language. After the first, each column represents one language. Each row is devoted to one phrase. The second row is languageNameEnglish, with values: English, German, Polish, etc. The third row is languageNameNative, with values: English, Deutsch, Polskie, etc. \n     We incorporate the latest "EasyEyes International Phrases" file when we compile threshold.js. For a particular experiment, we only need the first column (the mnemonic name) and the column whose heading matches instructionLanguage. We should copy those two columns into a Javascript dictionary, so we can easily look up each mnemonic phrase name to get the phrase in the instructionLanguage. To display any instruction, we will use the dictionary to convert a mnemonic name to a unicode phrase. \n     languageDirection. Note that most languages are left to right (LTR), and a few (e.g. Arabic, Urdu, Farsi, and Hebrew) are right to left (RTL). Text placement may need to take the direction into account. The direction (LTR or RTL) is provided by the languageDirection field.\n     languageNameNative. If we later allow the participant to choose the language, then the language selection should be based on the native language name, like Deustch or Polskie, i.e. using languageNameNative instead of languageNameEnglish.',
+      'The URL of a Google Sheets table of international phrases to be used to give instructions throughout the experiment. A scientist can substitute her own table, presumably a modified copy of the EasyEyes International Phrases Table. https://docs.google.com/spreadsheets/d/1UFfNikfLuo8bSromE34uWDuJrMPFiJG3VpoQKdCGkII/edit#gid=0\nThis table allows the Participant page to make all non-stimulus text international. In every place that it displays instruction text, the Participant page looks up the mnemonic code for the needed phrase in the instruction table, to find a unicode phrase in the selected instructionLanguage (e.g. English, German, or Arabic). It\'s a Google Sheets file called "EasyEyes International Phrases".\nhttps://docs.google.com/spreadsheets/d/1AZbihlk-CP7sitLGb9yZYbmcnqQ_afjjG8h6h5UWvvo/edit#gid=0\nThe first column has mnemonic phrase names. Each of the following columns gives the corresponding text in a different language. After the first column, each column represents one language. Each row is devoted to one phrase. The second row is languageNameEnglish, with values: English, German, Polish, etc. The third row is languageNameNative, with values: English, Deutsch, Polskie, etc. \n     We incorporate the latest "EasyEyes International Phrases" file when we compile threshold.js. For a particular experiment, we only need the first column (the mnemonic name) and the column whose heading matches instructionLanguage. We should copy those two columns into a Javascript dictionary, so we can easily look up each mnemonic phrase name to get the phrase in the instructionLanguage. To display any instruction, we will use the dictionary to convert a mnemonic name to a unicode phrase. \n     languageDirection. Note that most languages are left to right (LTR), and a few (e.g. Arabic, Urdu, Farsi, and Hebrew) are right to left (RTL). Text placement may need to take the direction into account. The direction (LTR or RTL) is provided by the languageDirection field.\n     languageNameNative. If we later allow the participant to choose the language, then the language selection should be based on the native language name, like Deustch or Polskie, i.e. using languageNameNative instead of languageNameEnglish.',
     type: "text",
     default: "",
   },
@@ -709,7 +721,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Allow participant to respond by clicking the target letter in the alphabet. When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive, any number from 1 to all can be enabled.",
+      "Allow participant to respond by clicking the target letter in the alphabet. When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too.",
     type: "boolean",
     default: "TRUE",
   },
@@ -718,7 +730,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "FALSE",
     explanation:
-      "Allow participant to respond by verbally naming the target. The various response modes are not exclusive, any number from 1 to all can be enabled.",
+      "Allow participant to respond by verbally naming the target. The various response modes are not exclusive. Enable as many as you like.",
     type: "boolean",
     default: "FALSE",
   },
@@ -727,16 +739,16 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Allow participant to respond by pressing a key in keyboard. The various response modes are not exclusive, any number from 1 to all can be enabled.",
+      "Allow participant to respond by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented.",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   responseTypedEasyEyesKeypadBool: {
     name: "responseTypedEasyEyesKeypadBool",
     availability: "soon",
     example: "FALSE",
     explanation:
-      "Allow participant to respond by pressing a key in EasyEyes keypad. The various response modes are not exclusive, any number from 1 to all can be enabled.",
+      "Allow participant to respond by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like.",
     type: "boolean",
     default: "FALSE",
   },
@@ -847,7 +859,7 @@ export const GLOSSARY: Glossary = {
     name: "simulationBeta",
     availability: "now",
     example: "3",
-    explanation: "Used by the Weibull observer model.",
+    explanation: "Used by the Weibull observer model. ",
     type: "numerical",
     default: "2.3",
   },
@@ -864,7 +876,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "blind",
     explanation:
-      'For debugging and checking it is often helpful to simulate the observer. "simulationModel" can be: \n• "blind": This model merely presses a random response key. \n• "ideal": This model does the same task as the human, picking the best response given the stimulus. Its threshold is a useful point of reference in analyzing human data. Without noise, it will always be right. Since noise is still months away, for now, just give the right answer.\n• "weibull": This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately measure its (unknown to Quest) threshold, when the respt of the parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.',
+      'For debugging and checking it is often helpful to simulate the observer. "simulationModel" can be: \n• "blind": This model merely presses a random response key. \n• "ideal": This model does the same task as the human, picking the best response given the stimulus. Its threshold is a useful point of reference in analyzing human data. Without noise, it will always be right. Since noise is still months away, for now, just give the right answer.\n• "weibull": This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately measure its (unknown to Quest) threshold, when the respt of the parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.\nThe source code for our simulation model is here:\nhttps://github.com/EasyEyes/threshold/blob/a9ea5a6c64d3c5ff0aacfc01c86b6a5aecf64369/components/simulatedObserver.js',
     type: "categorical",
     default: "ideal",
     categories: ["blind", "weibull", "ideal"],
@@ -874,16 +886,16 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0",
     explanation:
-      "The actual threshold of the simulated observer. We test the implementation of Quest by testing how well it estimates simulationThreshold.",
+      "The actual threshold of the simulated observer in linear units (not log). We test the implementation of Quest by testing how well it estimates simulationThreshold.",
     type: "numerical",
     default: "2",
   },
   snapshotBool: {
     name: "snapshotBool",
-    availability: "soon",
+    availability: "now",
     example: "FALSE",
     explanation:
-      "Requests that a screen shot be recorded of the stimulus display, to be saved in the snapshot folder. Snapshots are useful for debugging, and to illustrate the stimulus in talks and papers.",
+      'Requests saving of a full-screen snapshot of every stimulus display. Can we save this to a "snapshots" folder in the participant\'s computer or in the experiment repository? Snapshots are useful for debugging and to illustrate the stimulus in talks and papers. It is expected that taking snapshots will severely degrade timing, so it should not be requested while a participant is being tested. Instead the scientist will pretend to be the participant and collect the images she needs.',
     type: "boolean",
     default: "FALSE",
   },
@@ -901,7 +913,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "radial",
     explanation:
-      'When eccentricity is nonzero then the direction can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then the direction can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is not allowed to request radial or tangential at eccentricity zero.',
+      'When eccentricity is nonzero then the direction can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then the direction can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is an error to request radial or tangential at eccentricity zero.',
     type: "categorical",
     default: "radial",
     categories: ["radial", "tangential", "horizontal", "vertical", "both"],
@@ -992,7 +1004,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "Sloan.woff2",
     explanation:
-      'targetFont specified what font you want. How you do that depends on targetFontSource:\n\nfile: targetFont is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The preprocessor will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  targetFont is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: targetFont is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". ("server" support is coming.)\n\nbrowser: The experiment will pass the font preference string that you place in targetFont to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "targetFontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
+      'targetFont specified what font you want. How you do that depends on targetFontSource:\n\nfile: targetFont is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The compiler will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  targetFont is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: targetFont is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". ("server" support is coming.)\n\nbrowser: The experiment will pass the font preference string that you place in targetFont to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "targetFontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
     type: "text",
     default: "RobotoMono-Regular.woff2",
   },
@@ -1001,7 +1013,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "file",
     explanation:
-      'targetFontSource must be file, google, server, or browser. Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has targetFontSource "file", the preprocessor checks for presence of the targetFont in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: targetFont contains the filename (with extension) of a file in the Fonts folder in you Pavlovia account. This is checked by the preprocessor, so there are no runtime surprises. \n\ngoogle: targetFont contains the filename (with extension) of a file on the Google Fonts server.\n\nserver: targetFont contains the URL of the font on a font server. ("server" support is coming.)\n\nbrowser: targetFont is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) \n\n[google: In the future we may add "google", allowing targetFont to be the name of a font that the preprocessor automatically gets a URL for from the Google Fonts website, using their API.]',
+      'targetFontSource must be file, google, server, or browser. Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has targetFontSource "file", the compiler checks for presence of the targetFont in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: targetFont contains the filename (with extension) of a file in the Fonts folder in the EasyEyesResources repository in your Pavlovia account. This is checked by the compiler, to avoid runtime surprises. \n\ngoogle: targetFont contains the font name as recognized by the Google Fonts server.\n\nserver: targetFont contains the URL of the font on a font server. ("server" support is coming.)\n\nbrowser: targetFont is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) ',
     type: "categorical",
     default: "file",
     categories: ["file", "google", "browser"],
@@ -1030,7 +1042,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "550",
     explanation:
-      "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = targetFontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if determines that the targetFont is not a variable font.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
+      "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = targetFontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if it determines that the targetFont is not a variable font.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
     type: "numerical",
     default: "NaN",
   },
@@ -1176,7 +1188,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.7",
     explanation:
-      'Used by QUEST. This is the threshold criterion. In Methods you might say that "We defined threshold as the intensity at which the participant attained 70% correct."',
+      'Used by QUEST, which calls it "pThreshold". This is the threshold criterion. In Methods you might say that "We defined threshold as the intensity at which the participant attained 70% correct." This corresponds to setting thresholdProportionCorrect to 0.7.\nPsychoJS code:\nhttps://github.com/kurokida/jsQUEST/blob/main/src/jsQUEST.js\nhttps://github.com/psychopy/psychojs/blob/2021.3.0/src/data/QuestHandler.js',
     type: "numerical",
     default: "0.7",
   },
