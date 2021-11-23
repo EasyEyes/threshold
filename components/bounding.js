@@ -418,3 +418,45 @@ export const getFlankerLocations = (
       );
   }
 };
+
+export const getLowerBoundedLevel = (proposedLevel, displayOptions) => {
+  // Spacing value corresponding to the provided `level` value
+  const proposedSpacingDeg = Math.pow(10, proposedLevel);
+  const proposedSpacingPix = Math.abs(
+    degreesToPixels(proposedSpacingDeg, {
+      pixPerCm: displayOptions.pixPerCm,
+      viewingDistanceCm: displayOptions.viewingDistanceCm,
+    })
+  );
+  // Find the font height that would result from the provided level
+  const proposedHeight = Math.round(
+    proposedSpacingPix / displayOptions.spacingOverSizeRatio
+  );
+  // Check whether this height is less than the minimum
+  const levelIsTooSmall = proposedHeight < displayOptions.minimumHeight;
+  // If the value of `proposedLevel` is fine, just return it
+  if (!levelIsTooSmall) return proposedLevel;
+  // Else work backwards...
+  const minimumSpacingPix = Math.round(
+    displayOptions.minimumHeight * displayOptions.spacingOverSizeRatio
+  );
+  // ... to find...
+  const minimumSpacingDeg = pixelsToDegrees(minimumSpacingPix, displayOptions);
+  // ... the closet value to `proposedLevel` which doesn't produce too small a font height
+  return Math.log10(minimumSpacingDeg);
+};
+
+/*
+  // Get the location of the flankers
+  const [flanker1PosDeg, flanker2PosDeg] = getFlankerLocations(
+    displayOptions.targetEccentricityXYDeg,
+    displayOptions.fixationXYPix,
+    displayOptions.spacingDirection,
+    proposedSpacingDeg
+  );
+  // Convert flanker locations to pixels
+  const [flanker1PosPix, flanker1PosDix] = XYPixOfXYDeg(
+    [flanker1PosDeg, flanker2PosDeg],
+    displayOptions
+  ).map(x => Math.round(x));
+*/

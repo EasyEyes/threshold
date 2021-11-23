@@ -75,6 +75,7 @@ import {
   getTypographicHeight,
   awaitMaxPresentableLevel,
   getFlankerLocations,
+  getLowerBoundedLevel,
 } from "./components/bounding.js";
 
 import { getGridLines, readGridParameter } from "./components/grid.js";
@@ -1380,6 +1381,8 @@ const experiment = (blockCount) => {
         fontFamily: targetFont,
         window: psychoJS.window,
         spacingRelationToSize: spacingRelationToSize,
+        targetEccentricityXYDeg: targetEccentricityXYDeg,
+        spacingDirection: spacingDirection,
       };
       /* --- GRIDS --- */
       if (showGrid && !simulated) {
@@ -1416,15 +1419,15 @@ const experiment = (blockCount) => {
       );
       if (spacingRelationToSize === "ratio") {
         // Get a usable "level", ie amount of spacing
-        level = await awaitMaxPresentableLevel(
+        const upperBoundedLevel = await awaitMaxPresentableLevel(
           proposedLevel,
           targetXYPix,
           fixationXYPx,
           spacingDirection,
           displayOptions
         );
+        level = getLowerBoundedLevel(upperBoundedLevel, displayOptions);
         psychoJS.experiment.addData("levelUsed", level);
-        logger("New level", level);
 
         spacingDeg = Math.pow(10, level);
         psychoJS.experiment.addData("spacingDeg", spacingDeg);
@@ -1463,6 +1466,15 @@ const experiment = (blockCount) => {
         const heightPx = Math.round(
           Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
         );
+        if (heightPx < targetMinimumPix) {
+          console.error(
+            `Assumption broken! 
+            Target height, in pixel, is falling below the minimum allowed, 
+            even though it should have been previously constrained when we
+            found the lower bound of \`level\``
+          );
+          let heightPx = Math.round(Math.max(heightPx, targetMinimumPix));
+        }
         psychoJS.experiment.addData("heightPix", heightPx);
         // Display flankers, given that "spacingRelationToSize" is set to "ratio"
         target.setText(targetCharacter);

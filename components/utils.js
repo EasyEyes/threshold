@@ -255,3 +255,7 @@ export const arraysEqual = (a, b) => {
   }
   return true;
 };
+
+export const log = (x, base) => {
+  return Math.log(x) / Math.log(base);
+};

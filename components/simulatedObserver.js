@@ -46,7 +46,7 @@ rand(1) returns a random sample from the uniform distribution from 0 to 1.
 import { core, util } from "../psychojs/out/psychojs-2021.3.0.js";
 const { EventManager } = core;
 const { Scheduler } = util;
-import { createSignalingMap, arraysEqual } from "./utils.js";
+import { createSignalingMap, arraysEqual, log } from "./utils.js";
 
 export const checkIfSimulated = (reader) => {
   if (
@@ -406,7 +406,3 @@ class BlindObserver {
     ];
   }
 }
-
-const log = (x, base) => {
-  return Math.log(x) / Math.log(base);
-};
