@@ -38,6 +38,8 @@ import {
   useCalibration,
 } from "./components/useCalibration.js";
 
+import { canType, getResponseType } from "./components/response.js";
+
 import { loadFonts } from "./components/fonts.js";
 import {
   loadRecruitmentServiceConfig,
@@ -47,7 +49,6 @@ import { phrases } from "./components/i18n.js";
 
 import {
   addBeepButton,
-  getResponseType,
   instructionsText,
   removeBeepButton,
 } from "./components/instructions.js";
@@ -646,7 +647,10 @@ const experiment = (blockCount) => {
     }
 
     continueRoutine = true;
-    if (psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0) {
+    if (
+      canType(responseType) &&
+      psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+    ) {
       continueRoutine = false;
     }
 
@@ -897,6 +901,16 @@ const experiment = (blockCount) => {
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot);
+
+      const blockCount = snapshot.block + 1;
+
+      responseType = getResponseType(
+        paramReader.read("responseClickedBool", blockCount)[0],
+        paramReader.read("responseTypedBool", blockCount)[0],
+        paramReader.read("responseTypedEasyEyesKeypadBool", blockCount)[0],
+        paramReader.read("responseSpokenBool", blockCount)[0]
+      );
+
       _instructionSetup(
         (snapshot.block === 0
           ? instructionsText.initial(rc.language.value)
@@ -1154,7 +1168,10 @@ const experiment = (blockCount) => {
       }
 
       continueRoutine = true;
-      if (psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) {
+      if (
+        canType(responseType) &&
+        psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
+      ) {
         continueRoutine = false;
       }
 
@@ -1640,59 +1657,70 @@ const experiment = (blockCount) => {
       const uniDelay = 0.5;
 
       // *key_resp* updates
-      if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
-        // keep track of start time/frame for later
-        key_resp.tStart = t; // (not accounting for frame time here)
-        key_resp.frameNStart = frameN; // exact frame index
-        // TODO Use PsychoJS clock if possible
-        // Reset together with PsychoJS
-        showAlphabetResponse.onsetTime = performance.now();
-
-        // keyboard checking is just starting
-        psychoJS.window.callOnFlip(function () {
-          key_resp.clock.reset();
-        }); // t=0 on next screen flip
-        psychoJS.window.callOnFlip(function () {
-          key_resp.start();
-        }); // start on screen flip
-        psychoJS.window.callOnFlip(function () {
-          key_resp.clearEvents();
-        });
-      }
-
-      if (key_resp.status === PsychoJS.Status.STARTED) {
-        /* --- SIMULATED --- */
-        if (
-          simulated &&
+      // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
+      // response type more independent
+      if (
+        canType(responseType) ||
+        showGrid ||
+        (simulated &&
           simulated[thisLoopNumber] &&
-          simulated[thisLoopNumber][condition.label]
-        ) {
-          return simulateObserverResponse(
-            simulatedObserver[condition.label],
-            key_resp,
-            psychoJS
-          );
+          simulated[thisLoopNumber][condition.label])
+      ) {
+        if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
+          // keep track of start time/frame for later
+          key_resp.tStart = t; // (not accounting for frame time here)
+          key_resp.frameNStart = frameN; // exact frame index
+          // TODO Use PsychoJS clock if possible
+          // Reset together with PsychoJS
+          showAlphabetResponse.onsetTime = performance.now();
+
+          // keyboard checking is just starting
+          psychoJS.window.callOnFlip(function () {
+            key_resp.clock.reset();
+          }); // t=0 on next screen flip
+          psychoJS.window.callOnFlip(function () {
+            key_resp.start();
+          }); // start on screen flip
+          psychoJS.window.callOnFlip(function () {
+            key_resp.clearEvents();
+          });
         }
-        /* --- /SIMULATED --- */
-        let theseKeys = key_resp.getKeys({
-          keyList: validAns,
-          waitRelease: false,
-        });
-        _key_resp_allKeys = _key_resp_allKeys.concat(theseKeys);
-        if (_key_resp_allKeys.length > 0) {
-          key_resp.keys = _key_resp_allKeys[_key_resp_allKeys.length - 1].name; // just the last key pressed
-          key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
-          // was this correct?
-          if (key_resp.keys == correctAns) {
-            // Play correct audio
-            correctSynth.play();
-            key_resp.corr = 1;
-          } else {
-            // Play wrong audio
-            key_resp.corr = 0;
+
+        if (key_resp.status === PsychoJS.Status.STARTED) {
+          /* --- SIMULATED --- */
+          if (
+            simulated &&
+            simulated[thisLoopNumber] &&
+            simulated[thisLoopNumber][condition.label]
+          ) {
+            return simulateObserverResponse(
+              simulatedObserver[condition.label],
+              key_resp,
+              psychoJS
+            );
           }
-          // a response ends the routine
-          continueRoutine = false;
+          /* --- /SIMULATED --- */
+          let theseKeys = key_resp.getKeys({
+            keyList: validAns,
+            waitRelease: false,
+          });
+          _key_resp_allKeys = _key_resp_allKeys.concat(theseKeys);
+          if (_key_resp_allKeys.length > 0) {
+            key_resp.keys =
+              _key_resp_allKeys[_key_resp_allKeys.length - 1].name; // just the last key pressed
+            key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
+            // was this correct?
+            if (key_resp.keys == correctAns) {
+              // Play correct audio
+              correctSynth.play();
+              key_resp.corr = 1;
+            } else {
+              // Play wrong audio
+              key_resp.corr = 0;
+            }
+            // a response ends the routine
+            continueRoutine = false;
+          }
         }
       }
 
