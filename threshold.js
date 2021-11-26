@@ -5,7 +5,7 @@
 import { debug } from "./components/utils.js";
 
 const useConsent = true;
-const useRC = true;
+const useRC = false;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS, EventManager } = core;
@@ -86,6 +86,12 @@ import {
   simulateObserverResponse,
 } from "./components/simulatedObserver.js";
 import { showExperimentEnding } from "./components/widgets.js";
+import {
+  getCanvasContext,
+  getPixelRGBA,
+  initPixelsArray,
+  readPixels,
+} from "./components/canvasContext.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -288,6 +294,15 @@ const experiment = (blockCount) => {
       ..._resources,
     ],
   });
+
+  // Get canvas
+  const [canvas, canvasContext] = getCanvasContext();
+  initPixelsArray(canvasContext);
+
+  // Demo read pixels
+  readPixels(canvasContext);
+  console.log(getPixelRGBA(10, 20, canvasContext));
+  ////
 
   psychoJS.experimentLogger.setLevel(core.Logger.ServerLevel.EXP);
 
