@@ -63,16 +63,17 @@ const _loadNameFromSource = (
   const name = reader.read(target, conditionName);
   const fontFilePath = "fonts/" + name;
   if (sourceType === "file") {
-    if (!fileFonts.includes(name))
-      fetch(fontFilePath)
-        .then((response) => {
-          // let n = name.split(".")[0];
-          fileFonts.push(name);
-          fontList[name] = fontFilePath;
-        })
-        .catch((err) => {
-          console.error(`Font file ${name} not found.`);
-        });
+    if (!fileFonts.includes(name)) {
+      fileFonts.push(name);
+      fontList[name] = fontFilePath;
+    }
+    // fetch(fontFilePath)
+    //   .then((response) => {
+    //     // let n = name.split(".")[0];
+    //   })
+    //   .catch((err) => {
+    //     console.error(`Font file ${name} not found.`);
+    //   });
   } else if (sourceType === "browser") {
     // Don't need to do ny preloading...
   } else if (sourceType === "server") {

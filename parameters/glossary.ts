@@ -739,7 +739,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Allow participant to respond by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented.",
+      "Allow participant to respond by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool or showGridBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool.",
     type: "boolean",
     default: "FALSE",
   },
@@ -804,7 +804,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      'To allow visual checking of location and size, showGridsBool=TRUE requests that the experiment show buttons on the (lower) left of the screen that each turn on and off a different grid over the whole screen. Turning on several buttons shows several grids (in different dark colors). Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.\n',
+      'To allow visual checking of location and size, showGridsBool=TRUE requests that the experiment show buttons on the (lower) left of the screen that each turn on and off a different grid over the whole screen. Turning on several buttons shows several grids (in different dark colors). Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.\nSIDE EFFECT: Setting showGridBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool.',
     type: "boolean",
     default: "FALSE",
   },
@@ -842,7 +842,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      'Use the software model specifed by "simulationModel" to generale observer responses. The test runs without human intervention.',
+      'Use the software model specifed by "simulationModel" to generale observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool.',
     type: "boolean",
     default: "FALSE",
   },
@@ -978,7 +978,8 @@ export const GLOSSARY: Glossary = {
     name: "targetDurationSec",
     availability: "now",
     example: "0.15",
-    explanation: "The duration of target presentation.",
+    explanation:
+      "The duration of target presentation. EXCEPTION: When targetDurationSec==999, as a special case, the stimulus persists until the participant responds. The participant can respond at any time. Then, as usual, the screen is cleared to show the crosshair for the next trial. This is nice for demos, debugging, and screenshots (e.g. to make a slide for a talk). [It would be more elegant to use INF as the special value, but Excel and apparently CSV files don't support INF, which seems terribly archaic. Hence 999.]",
     type: "numerical",
     default: "0.15",
   },
@@ -1192,13 +1193,22 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.7",
   },
+  thresholdRepeatBadBlockBool: {
+    name: "thresholdRepeatBadBlockBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      'If true, and this condition\'s threshold is "bad" (see below), then the block will be run again (only once even if again bad). The criterion for "bad" is that QuestSD>0.25. Several conditions in a block may make this request and be bad, but we still repeat the block only once. When we add a block, we should adjust the trial/block counter to reflect the change. (The 0.25 criterion is right for 35 trials, beta=2.3, and many possible targets. Later i\'ll write a more general formula and provide a way for the scientist to specify an arbitrary criterion value of QuestSD.)',
+    type: "boolean",
+    default: "FALSE",
+  },
   viewingDistanceAllowedRatio: {
     name: "viewingDistanceAllowedRatio",
     availability: "now",
     example: "",
     explanation:
       "Can be larger or smaller than 1, and must be in the range [0 inf]. If the specified tolerance ratio is R, then the ratio of actual to desired viewing distance must be in the range 1/R to R. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, to approximately the desired viewing distance. Values of 0, inf, and NaN all have the same effect, of allowing all viewing distances.",
-    type: "",
+    type: "numerical",
     default: "1.2",
   },
   viewingDistanceDesiredCm: {

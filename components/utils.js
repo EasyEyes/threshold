@@ -1,6 +1,10 @@
 export const debug = process.env.debug;
 // export const debug = true;
 
+export function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * Create a mapping between an arbitrary set of strings, ie `possibleResponses`,
  * and a set of ascii-supported keys, ie [0,1,...,9,A,B,...Z].

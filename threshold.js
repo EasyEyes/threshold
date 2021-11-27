@@ -2,10 +2,10 @@
  * Crowding Test *
  *****************/
 
-import { debug } from "./components/utils.js";
+import { debug, sleep } from "./components/utils.js";
 
 const useConsent = true;
-const useRC = false;
+const useRC = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS, EventManager } = core;
@@ -113,7 +113,7 @@ var simulated;
 var showGrid, gridVisible;
 /* -------------------------------------------------------------------------- */
 
-const paramReaderInitialized = (reader) => {
+const paramReaderInitialized = async (reader) => {
   // show screens before actual experiment begins
   beforeExperimentBegins(reader);
 
@@ -128,6 +128,8 @@ const paramReaderInitialized = (reader) => {
 
   // ! Simulate observer
   simulated = checkIfSimulated(reader);
+
+  await sleep(100);
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
@@ -296,12 +298,12 @@ const experiment = (blockCount) => {
   });
 
   // Get canvas
-  const [canvas, canvasContext] = getCanvasContext();
-  initPixelsArray(canvasContext);
+  // const [canvas, canvasContext] = getCanvasContext();
+  // initPixelsArray(canvasContext);
 
-  // Demo read pixels
-  readPixels(canvasContext);
-  console.log(getPixelRGBA(10, 20, canvasContext));
+  // // Demo read pixels
+  // readPixels(canvasContext);
+  // console.log(getPixelRGBA(10, 20, canvasContext));
   ////
 
   psychoJS.experimentLogger.setLevel(core.Logger.ServerLevel.EXP);
