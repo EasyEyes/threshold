@@ -1,6 +1,6 @@
 #alphabet-holder {
   position: fixed;
-  z-index: 999999;
+  z-index: 9999999;
   font-size: 3rem;
   max-width: 100%;
   text-align: center;
