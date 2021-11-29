@@ -65,7 +65,7 @@ const _loadNameFromSource = (
   if (sourceType === "file") {
     if (!fileFonts.includes(name)) {
       fileFonts.push(name);
-      fontList[name] = fontFilePath;
+      fontList[`"${name}"`] = fontFilePath;
     }
     // fetch(fontFilePath)
     //   .then((response) => {
