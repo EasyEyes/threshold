@@ -129,7 +129,7 @@ const paramReaderInitialized = async (reader) => {
   // ! Simulate observer
   simulated = checkIfSimulated(reader);
 
-  await sleep(100);
+  await sleep(500);
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
