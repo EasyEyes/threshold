@@ -20,7 +20,12 @@ export const formCalibrationList = (reader) => {
 
   if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__")))
     ////
-    tasks.push({ name: "screenSize" });
+    tasks.push({
+      name: "screenSize",
+      options: {
+        fullscreen: true,
+      },
+    });
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({
@@ -34,6 +39,7 @@ export const formCalibrationList = (reader) => {
           ? reader.read("viewingDistanceDesiredCm")[0]
           : undefined,
         desiredDistanceMonitor: reader.has("viewingDistanceDesiredCm"),
+        fullscreen: true,
       },
     });
   if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
@@ -43,6 +49,7 @@ export const formCalibrationList = (reader) => {
       options: {
         showGazer: false,
         showVideo: false,
+        fullscreen: true,
       },
     });
 
