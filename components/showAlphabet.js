@@ -1,10 +1,10 @@
 function getAlphabetShowPos(ele, showWhere) {
   switch (showWhere) {
     case "bottom":
-      ele.style.marginTop = "40%";
+      ele.style.bottom = "10%";
       break;
     default:
-      ele.style.marginTop = "40%";
+      ele.style.bottom = "10%";
       break;
   }
 }
