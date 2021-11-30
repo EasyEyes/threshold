@@ -357,7 +357,8 @@ const experiment = (blockCount) => {
   var showAlphabet;
 
   var globalClock;
-  var routineTimer;
+  var routineTimer, routineClock, blockClock;
+  var initInstructionClock, eduInstructionClock, trialInstructionClock;
   async function experimentInit() {
     logger("Window (for grid purposes)", psychoJS.window);
 
@@ -522,6 +523,13 @@ const experiment = (blockCount) => {
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
     routineTimer = new util.CountdownTimer(); // to track time remaining of each (non-slip) routine
+    routineClock = new util.Clock();
+    blockClock = new util.Clock();
+
+    // Extra clocks for clear timing
+    initInstructionClock = new util.Clock();
+    eduInstructionClock = new util.Clock();
+    trialInstructionClock = new util.Clock();
 
     // TODO Not working
     if (rc.languageDirection.value === "RTL") {
@@ -620,6 +628,7 @@ const experiment = (blockCount) => {
       }
       // the Routine "file" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
+      routineClock.reset();
 
       return Scheduler.Event.NEXT;
     };
@@ -682,10 +691,12 @@ const experiment = (blockCount) => {
 
   async function _instructionRoutineEnd() {
     instructions.setAutoDraw(false);
-    routineTimer.reset();
 
     document.removeEventListener("click", _clickContinue);
     document.removeEventListener("touchend", _clickContinue);
+
+    routineTimer.reset();
+    routineClock.reset();
 
     return Scheduler.Event.NEXT;
   }
@@ -910,6 +921,7 @@ const experiment = (blockCount) => {
       }
       // the Routine "filter" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
+      routineClock.reset();
 
       return Scheduler.Event.NEXT;
     };
@@ -919,6 +931,7 @@ const experiment = (blockCount) => {
 
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
+      initInstructionClock.reset(); // clock
       TrialHandler.fromSnapshot(snapshot);
 
       const blockCount = snapshot.block + 1;
@@ -963,12 +976,24 @@ const experiment = (blockCount) => {
   function initInstructionRoutineEnd() {
     return async function () {
       instructions.setAutoDraw(false);
-      routineTimer.reset();
 
       document.removeEventListener("click", _clickContinue);
       document.removeEventListener("touchend", _clickContinue);
 
       removeBeepButton(_beepButton);
+
+      psychoJS.experiment.addData(
+        "initInstructionRoutineDurationFromBegin",
+        initInstructionClock.getTime()
+      );
+      psychoJS.experiment.addData(
+        "initInstructionRoutineDurationFromPreviousEnd",
+        routineClock.getTime()
+      );
+
+      initInstructionClock.reset();
+      routineTimer.reset();
+      routineClock.reset();
 
       return Scheduler.Event.NEXT;
     };
@@ -978,6 +1003,8 @@ const experiment = (blockCount) => {
 
   function eduInstructionRoutineBegin(snapshot) {
     return async function () {
+      eduInstructionClock.reset();
+
       TrialHandler.fromSnapshot(snapshot);
       _instructionSetup(instructionsText.edu(rc.language.value));
 
@@ -1038,7 +1065,6 @@ const experiment = (blockCount) => {
     return async function () {
       instructions.setAutoDraw(false);
       instructions2.setAutoDraw(false);
-      routineTimer.reset();
 
       document.removeEventListener("click", _clickContinue);
       document.removeEventListener("touchend", _clickContinue);
@@ -1046,6 +1072,19 @@ const experiment = (blockCount) => {
       target.setAutoDraw(false);
       flanker1.setAutoDraw(false);
       flanker2.setAutoDraw(false);
+
+      psychoJS.experiment.addData(
+        "eduInstructionRoutineDurationFromBegin",
+        eduInstructionClock.getTime()
+      );
+      psychoJS.experiment.addData(
+        "eduInstructionRoutineDurationFromPreviousEnd",
+        routineClock.getTime()
+      );
+
+      eduInstructionClock.reset();
+      routineTimer.reset();
+      routineClock.reset();
 
       return Scheduler.Event.NEXT;
     };
@@ -1107,6 +1146,7 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
       for (let c of snapshot.handler.getConditions()) {
@@ -1207,7 +1247,18 @@ const experiment = (blockCount) => {
       document.removeEventListener("click", _takeFixationClick);
       document.removeEventListener("touchend", _takeFixationClick);
       instructions.setAutoDraw(false);
+
+      psychoJS.experiment.addData(
+        "trialInstructionRoutineDurationFromBegin",
+        trialInstructionClock.getTime()
+      );
+      psychoJS.experiment.addData(
+        "trialInstructionRoutineDurationFromPreviousEnd",
+        routineClock.getTime()
+      );
+
       routineTimer.reset();
+      routineClock.reset();
       return Scheduler.Event.NEXT;
     };
   }
@@ -1254,6 +1305,12 @@ const experiment = (blockCount) => {
   var condition;
   function trialRoutineBegin(snapshot) {
     return async function () {
+      psychoJS.experiment.addData(
+        "clickToTrialPreparationDelay",
+        routineClock.getTime()
+      );
+      trialClock.reset(); // clock
+
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       hideCursor();
@@ -1300,7 +1357,6 @@ const experiment = (blockCount) => {
         "targetFont",
         reader.read("targetFont", cName)
       );
-      // TODO add a data field that is unique to this staircase (ie differentiate staircases within the same block, if they have equivalent parameters)
 
       // TODO set QUEST
       // !
@@ -1308,7 +1364,6 @@ const experiment = (blockCount) => {
 
       //------Prepare to start Routine 'trial'-------
       t = 0;
-      trialClock.reset(); // clock
       frameN = -1;
       continueRoutine = true; // until we're told otherwise
       // update component parameters for each repeat
@@ -1646,6 +1701,7 @@ const experiment = (blockCount) => {
       // update trial index
       // totalTrialIndex = totalTrialIndex + 1;
 
+      psychoJS.experiment.addData("trialBeginDuration", trialClock.getTime());
       return Scheduler.Event.NEXT;
     };
   }
@@ -1657,6 +1713,11 @@ const experiment = (blockCount) => {
       // get current time
       t = trialClock.getTime();
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
+      if (frameN === 0)
+        psychoJS.experiment.addData(
+          "clickToStimulusDelay",
+          routineClock.getTime()
+        );
       // update/draw components on each frame
 
       // Target Bounding Box
@@ -1947,6 +2008,8 @@ const experiment = (blockCount) => {
       if (currentLoop instanceof MultiStairHandler) {
         currentLoop.addResponse(key_resp.corr, level);
         logger("level passed to addResponse", level);
+      } else {
+        console.error("currentLoop is not MultiStairHandler");
       }
 
       addTrialStaircaseSummariesToData(currentLoop, psychoJS);
@@ -1956,12 +2019,23 @@ const experiment = (blockCount) => {
       if (typeof key_resp.keys !== "undefined") {
         // we had a response
         psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
+        psychoJS.experiment.addData(
+          "trialRoutineDurationFromBegin",
+          trialClock.getTime()
+        );
+        psychoJS.experiment.addData(
+          "trialRoutineDurationFromPreviousEnd",
+          routineClock.getTime()
+        );
+
         routineTimer.reset();
+        routineClock.reset();
       }
 
       key_resp.stop();
       // the Routine "trial" was not non-slip safe, so reset the non-slip timer
       routineTimer.reset();
+      routineClock.reset();
 
       return Scheduler.Event.NEXT;
     };
@@ -2009,6 +2083,7 @@ const experiment = (blockCount) => {
     }
     psychoJS.window.close();
 
+    const timeBeforeDebriefDisplay = globalClock.getTime();
     const debriefScreen = new Promise((resolve) => {
       if (debriefFormName.length) {
         showDebriefForm(debriefFormName);
@@ -2030,6 +2105,12 @@ const experiment = (blockCount) => {
       }
     });
     await debriefScreen;
+
+    psychoJS.experiment.addData(
+      "debriefDuration",
+      globalClock.getTime() - timeBeforeDebriefDisplay
+    );
+    psychoJS.experiment.addData("durationOfExperiment", globalClock.getTime());
 
     if (recruitmentServiceData.name == "Prolific" && isCompleted) {
       let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
