@@ -40,7 +40,7 @@ import {
 
 import { canType, getResponseType } from "./components/response.js";
 
-import { loadFonts } from "./components/fonts.js";
+import { cleanFontName, loadFonts } from "./components/fonts.js";
 import {
   loadRecruitmentServiceConfig,
   recruitmentServiceData,
@@ -346,6 +346,8 @@ const experiment = (blockCount) => {
   var instructions;
   var instructions2;
   var instructionFont = paramReader.read("instructionFont")[0];
+  if (paramReader.read("instructionFontSource")[0] === "file")
+    instructionFont = cleanFontName(instructionFont);
 
   var key_resp;
   var fixation; ////
@@ -1337,7 +1339,9 @@ const experiment = (blockCount) => {
       // TODO check that we are actually trying to test for "spacing", not "size"
 
       spacingDirection = reader.read("spacingDirection", cName);
+      let targetFontSource = reader.read("targetFontSource", cName);
       targetFont = reader.read("targetFont", cName);
+      if (targetFontSource === "file") targetFont = cleanFontName(targetFont);
 
       targetAlphabet = String(reader.read("targetAlphabet", cName)).split("");
       validAns = String(reader.read("targetAlphabet", cName))

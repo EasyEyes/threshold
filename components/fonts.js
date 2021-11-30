@@ -65,7 +65,7 @@ const _loadNameFromSource = (
   if (sourceType === "file") {
     if (!fileFonts.includes(name)) {
       fileFonts.push(name);
-      fontList[`"${name}"`] = fontFilePath;
+      fontList[cleanFontName(name)] = fontFilePath;
     }
     // fetch(fontFilePath)
     //   .then((response) => {
@@ -86,3 +86,7 @@ const _loadNameFromSource = (
 // const nameIsValidURL = (name) => {
 //   return name.includes("http") && name.includes("woff");
 // };
+
+export const cleanFontName = (name) => {
+  return name.replace(/\./g, "").replace(/ /g, "");
+};
