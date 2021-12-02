@@ -24,6 +24,7 @@ export const formCalibrationList = (reader) => {
       name: "screenSize",
       options: {
         fullscreen: true,
+        check: false,
       },
     });
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))

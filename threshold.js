@@ -1351,6 +1351,9 @@ const experiment = (blockCount) => {
   var condition;
   function trialRoutineBegin(snapshot) {
     return async function () {
+      rc.pauseNudger();
+      await sleep(100);
+
       psychoJS.experiment.addData(
         "clickToTrialPreparationDelaySecs",
         routineClock.getTime()
@@ -2117,6 +2120,8 @@ const experiment = (blockCount) => {
 
   function trialRoutineEnd() {
     return async function () {
+      rc.resumeNudger();
+
       //------Ending Routine 'trial'-------
       for (const thisComponent of trialComponents) {
         if (typeof thisComponent.setAutoDraw === "function") {
@@ -2199,6 +2204,7 @@ const experiment = (blockCount) => {
   }
 
   async function quitPsychoJS(message, isCompleted) {
+    rc.endNudger();
     showCursor();
 
     // Check for and save orphaned data
