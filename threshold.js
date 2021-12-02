@@ -205,7 +205,8 @@ const experiment = (blockCount) => {
   ////
   // Resources
   const _resources = [];
-  for (let i = 1; i <= blockCount; i++) {
+  const blockNumbers = paramReader._experiment.map((block) => block.block);
+  for (const i of blockNumbers) {
     _resources.push({
       name: `conditions/block_${i}.csv`,
       path: `conditions/block_${i}.csv`,
