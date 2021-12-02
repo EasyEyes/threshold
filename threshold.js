@@ -338,10 +338,15 @@ const experiment = (blockCount) => {
   if (showGrid) var grids;
   /* --- /GRIDS --- */
 
+  /* --- BOUNDING BOX --- */
+  var targetBoundingPoly;
+  var flanker1BoundingPoly;
+  var flanker2BoundingPoly;
+  /* --- /BOUNDING BOX --- */
+
   var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
   var trialClock;
-  // var targetBoundingPoly; // Target Bounding Box
 
   var instructions;
   var instructions2;
@@ -373,17 +378,6 @@ const experiment = (blockCount) => {
 
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
-
-    // Target Bounding Box
-    // targetBoundingPoly = new visual.Rect ({
-    //   win: psychoJS.window, name: 'targetBoundingPoly', units : 'pix',
-    //   width: [1.0, 1.0][0], height: [1.0, 1.0][1],
-    //   ori: 0.0, pos: [0, 0],
-    //   lineWidth: 1.0, lineColor: new util.Color('pink'),
-    //   // fillColor: new util.Color('pink'),
-    //   fillColor: undefined,
-    //   opacity: undefined, depth: -10, interpolate: true,
-    // });
 
     key_resp = new core.Keyboard({
       psychoJS: psychoJS,
@@ -519,6 +513,57 @@ const experiment = (blockCount) => {
       alignVert: "bottom",
       isInstruction: true, // !
     });
+
+    /* --- BOUNDING BOX --- */
+    targetBoundingPoly = new visual.Rect({
+      win: psychoJS.window,
+      name: "targetBoundingPoly",
+      units: "pix",
+      width: [1.0, 1.0][0],
+      height: [1.0, 1.0][1],
+      ori: 0.0,
+      pos: [0, 0],
+      lineWidth: 1.0,
+      lineColor: new util.Color("blue"),
+      // fillColor: new util.Color('pink'),
+      fillColor: undefined,
+      opacity: undefined,
+      depth: -10,
+      interpolate: true,
+    });
+    flanker1BoundingPoly = new visual.Rect({
+      win: psychoJS.window,
+      name: "flanker1BoundingPoly",
+      units: "pix",
+      width: [1.0, 1.0][0],
+      height: [1.0, 1.0][1],
+      ori: 0.0,
+      pos: [0, 0],
+      lineWidth: 1.0,
+      lineColor: new util.Color("blue"),
+      // fillColor: new util.Color('pink'),
+      fillColor: undefined,
+      opacity: undefined,
+      depth: -10,
+      interpolate: true,
+    });
+    flanker2BoundingPoly = new visual.Rect({
+      win: psychoJS.window,
+      name: "flanker2BoundingPoly",
+      units: "pix",
+      width: [1.0, 1.0][0],
+      height: [1.0, 1.0][1],
+      ori: 0.0,
+      pos: [0, 0],
+      lineWidth: 1.0,
+      lineColor: new util.Color("blue"),
+      // fillColor: new util.Color('pink'),
+      fillColor: undefined,
+      opacity: undefined,
+      depth: -10,
+      interpolate: true,
+    });
+    /* --- BOUNDING BOX --- */
 
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
@@ -801,7 +846,6 @@ const experiment = (blockCount) => {
   }
 
   async function trialsLoopEnd() {
-    console.log("currentLoop (can I access all staircases??): ", currentLoop);
     addBlockStaircaseSummariesToData(currentLoop, psychoJS);
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
@@ -983,11 +1027,11 @@ const experiment = (blockCount) => {
       removeBeepButton(_beepButton);
 
       psychoJS.experiment.addData(
-        "initInstructionRoutineDurationFromBegin",
+        "initInstructionRoutineDurationFromBeginSecs",
         initInstructionClock.getTime()
       );
       psychoJS.experiment.addData(
-        "initInstructionRoutineDurationFromPreviousEnd",
+        "initInstructionRoutineDurationFromPreviousEndSecs",
         routineClock.getTime()
       );
 
@@ -1074,11 +1118,11 @@ const experiment = (blockCount) => {
       flanker2.setAutoDraw(false);
 
       psychoJS.experiment.addData(
-        "eduInstructionRoutineDurationFromBegin",
+        "eduInstructionRoutineDurationFromBeginSecs",
         eduInstructionClock.getTime()
       );
       psychoJS.experiment.addData(
-        "eduInstructionRoutineDurationFromPreviousEnd",
+        "eduInstructionRoutineDurationFromPreviousEndSecs",
         routineClock.getTime()
       );
 
@@ -1249,11 +1293,11 @@ const experiment = (blockCount) => {
       instructions.setAutoDraw(false);
 
       psychoJS.experiment.addData(
-        "trialInstructionRoutineDurationFromBegin",
+        "trialInstructionRoutineDurationFromBeginSecs",
         trialInstructionClock.getTime()
       );
       psychoJS.experiment.addData(
-        "trialInstructionRoutineDurationFromPreviousEnd",
+        "trialInstructionRoutineDurationFromPreviousEndSecs",
         routineClock.getTime()
       );
 
@@ -1284,6 +1328,7 @@ const experiment = (blockCount) => {
   var showCounterBool;
   var showViewingDistanceBool;
   const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 };
+  var showBoundingBox;
   var targetDurationSec;
   var targetMinimumPix;
   var spacingOverSizeRatio;
@@ -1306,7 +1351,7 @@ const experiment = (blockCount) => {
   function trialRoutineBegin(snapshot) {
     return async function () {
       psychoJS.experiment.addData(
-        "clickToTrialPreparationDelay",
+        "clickToTrialPreparationDelaySecs",
         routineClock.getTime()
       );
       trialClock.reset(); // clock
@@ -1416,7 +1461,6 @@ const experiment = (blockCount) => {
       targetMinimumPix = reader.read("targetMinimumPix", cName);
       spacingOverSizeRatio = reader.read("spacingOverSizeRatio", cName);
       spacingRelationToSize = reader.read("spacingRelationToSize", cName);
-      logger("spacingRelationToSize", spacingRelationToSize);
 
       targetEccentricityXDeg = reader.read("targetEccentricityXDeg", cName);
       psychoJS.experiment.addData(
@@ -1432,7 +1476,7 @@ const experiment = (blockCount) => {
         targetEccentricityXDeg,
         targetEccentricityYDeg,
       ];
-      logger("targetEccentricityXYDeg", targetEccentricityXYDeg);
+      showBoundingBox = reader.read("showBoundingBoxBool", cName) || false;
 
       // trackGazeYes = reader.read("trackGazeYes", cName);
       // trackHeadYes = reader.read("trackHeadYes", cName);
@@ -1652,7 +1696,6 @@ const experiment = (blockCount) => {
       // keep track of which components have finished
       trialComponents = [];
       trialComponents.push(key_resp);
-      // trialComponents.push(targetBoundingPoly); // Target Bounding Box
       trialComponents.push(fixation);
       trialComponents.push(flanker1);
       trialComponents.push(target);
@@ -1660,6 +1703,17 @@ const experiment = (blockCount) => {
 
       trialComponents.push(showAlphabet);
       trialComponents.push(totalTrial);
+
+      /* --- BOUNDING BOX --- */
+      if (showBoundingBox) {
+        trialComponents.push(targetBoundingPoly);
+        if (spacingRelationToSize === "ratio") {
+          trialComponents.push(flanker1BoundingPoly);
+          trialComponents.push(flanker2BoundingPoly);
+          logger("flanker1boudnign", flanker1BoundingPoly);
+        }
+      }
+      /* --- /BOUNDING BOX --- */
 
       /* --- GRIDS --- */
       if (showGrid) {
@@ -1701,7 +1755,10 @@ const experiment = (blockCount) => {
       // update trial index
       // totalTrialIndex = totalTrialIndex + 1;
 
-      psychoJS.experiment.addData("trialBeginDuration", trialClock.getTime());
+      psychoJS.experiment.addData(
+        "trialBeginDurationSecs",
+        trialClock.getTime()
+      );
       return Scheduler.Event.NEXT;
     };
   }
@@ -1715,28 +1772,12 @@ const experiment = (blockCount) => {
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
       if (frameN === 0)
         psychoJS.experiment.addData(
-          "clickToStimulusDelay",
+          "clickToStimulusOnsetSecs",
           routineClock.getTime()
         );
       // update/draw components on each frame
 
-      // Target Bounding Box
-      // // *targetBoundingPoly* updates
-      // if (t >= 0.0 && targetBoundingPoly.status === PsychoJS.Status.NOT_STARTED) {
-      //   // keep track of start time/frame for later
-      //   targetBoundingPoly.tStart = t;  // (not accounting for frame time here)
-      //   targetBoundingPoly.frameNStart = frameN;  // exact frame index
-
-      //   targetBoundingPoly.setAutoDraw(true);
-      // }
-
-      // if (targetBoundingPoly.status === PsychoJS.Status.STARTED){ // only update if being drawn
-      //   const tightBoundingBox = target.getBoundingBox(true);
-      //   targetBoundingPoly.setPos([tightBoundingBox.left, tightBoundingBox.top]);
-      //   targetBoundingPoly.setSize([tightBoundingBox.width, tightBoundingBox.height]);
-      // }
-
-      const uniDelay = 0.5;
+      const uniDelay = 0; // 0.5 by default?
 
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
@@ -1877,10 +1918,6 @@ const experiment = (blockCount) => {
         target.setAutoDraw(true);
       }
 
-      frameRemains =
-        uniDelay +
-        targetDurationSec -
-        psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         target.setAutoDraw(false);
         // Play purr sound
@@ -1906,13 +1943,99 @@ const experiment = (blockCount) => {
         }
       }
 
-      frameRemains =
-        uniDelay +
-        targetDurationSec -
-        psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (flanker2.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         flanker2.setAutoDraw(false);
       }
+
+      /* --- BOUNDING BOX --- */
+      if (showBoundingBox) {
+        // // *targetBoundingPoly* updates
+        if (
+          t >= 0.0 &&
+          targetBoundingPoly.status === PsychoJS.Status.NOT_STARTED
+        ) {
+          // keep track of start time/frame for later
+          targetBoundingPoly.tStart = t; // (not accounting for frame time here)
+          targetBoundingPoly.frameNStart = frameN; // exact frame index
+
+          const tightBoundingBox = target.getBoundingBox(true);
+          targetBoundingPoly.setPos([
+            tightBoundingBox.left,
+            tightBoundingBox.top,
+          ]);
+          targetBoundingPoly.setSize([
+            tightBoundingBox.width,
+            tightBoundingBox.height,
+          ]);
+
+          targetBoundingPoly.setAutoDraw(true);
+        }
+        if (
+          targetBoundingPoly.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          targetBoundingPoly.setAutoDraw(false);
+        }
+
+        // // *flanker1BoundingPoly* updates
+        if (
+          t >= 0.0 &&
+          flanker1BoundingPoly.status === PsychoJS.Status.NOT_STARTED &&
+          spacingRelationToSize === "ratio"
+        ) {
+          // keep track of start time/frame for later
+          flanker1BoundingPoly.tStart = t; // (not accounting for frame time here)
+          flanker1BoundingPoly.frameNStart = frameN; // exact frame index
+
+          const tightBoundingBox = flanker1.getBoundingBox(true);
+          flanker1BoundingPoly.setPos([
+            tightBoundingBox.left,
+            tightBoundingBox.top,
+          ]);
+          flanker1BoundingPoly.setSize([
+            tightBoundingBox.width,
+            tightBoundingBox.height,
+          ]);
+
+          flanker1BoundingPoly.setAutoDraw(true);
+        }
+        if (
+          flanker1BoundingPoly.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          flanker1BoundingPoly.setAutoDraw(false);
+        }
+
+        // // *flanker2BoundingPoly* updates
+        if (
+          t >= 0.0 &&
+          flanker2BoundingPoly.status === PsychoJS.Status.NOT_STARTED &&
+          spacingRelationToSize === "ratio"
+        ) {
+          // keep track of start time/frame for later
+          flanker2BoundingPoly.tStart = t; // (not accounting for frame time here)
+          flanker2BoundingPoly.frameNStart = frameN; // exact frame index
+
+          const tightBoundingBox = flanker2.getBoundingBox(true);
+          flanker2BoundingPoly.setPos([
+            tightBoundingBox.left,
+            tightBoundingBox.top,
+          ]);
+          flanker2BoundingPoly.setSize([
+            tightBoundingBox.width,
+            tightBoundingBox.height,
+          ]);
+
+          flanker2BoundingPoly.setAutoDraw(true);
+        }
+        if (
+          flanker2BoundingPoly.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          flanker2BoundingPoly.setAutoDraw(false);
+        }
+      }
+      /* --- /BOUNDING BOX --- */
 
       // check for quit (typically the Esc key)
       if (
@@ -2020,11 +2143,11 @@ const experiment = (blockCount) => {
         // we had a response
         psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
         psychoJS.experiment.addData(
-          "trialRoutineDurationFromBegin",
+          "trialRoutineDurationFromBeginSecs",
           trialClock.getTime()
         );
         psychoJS.experiment.addData(
-          "trialRoutineDurationFromPreviousEnd",
+          "trialRoutineDurationFromPreviousEndSecs",
           routineClock.getTime()
         );
 
@@ -2107,10 +2230,13 @@ const experiment = (blockCount) => {
     await debriefScreen;
 
     psychoJS.experiment.addData(
-      "debriefDuration",
+      "debriefDurationSecs",
       globalClock.getTime() - timeBeforeDebriefDisplay
     );
-    psychoJS.experiment.addData("durationOfExperiment", globalClock.getTime());
+    psychoJS.experiment.addData(
+      "durationOfExperimentSecs",
+      globalClock.getTime()
+    );
 
     if (recruitmentServiceData.name == "Prolific" && isCompleted) {
       let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
