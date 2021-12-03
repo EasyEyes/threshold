@@ -813,7 +813,7 @@ const experiment = (blockCount) => {
         psychoJS: psychoJS,
         name: "trials",
         varName: "trialsVal",
-        nTrials: conditionTrials * trialsConditions.length, // TODO Handle unbalanced trials per condition
+        nTrials: nTrialsTotal,
         conditions: trialsConditions,
         method: TrialHandler.Method.FULLRANDOM,
       });
@@ -899,12 +899,7 @@ const experiment = (blockCount) => {
 
       logger("possibleTrials", possibleTrials);
       totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
-
-      // TODO Remove this constraint to allow different # of trials for each condition
-      if (!possibleTrials.every((a) => a === possibleTrials[0]))
-        throw "Number of trials for each condition within one block has to be equal. (Will be updated soon.)";
-
-      conditionTrials = possibleTrials[0];
+      conditionTrials = Math.max(...possibleTrials);
 
       // keep track of which components have finished
       filterComponents = [];

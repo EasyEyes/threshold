@@ -20,7 +20,7 @@ export const populateQuestDefaults = (conditionsList, reader) => {
         */
     for (const property in questValues) {
       if (!questValues[property])
-        throw `property: ${property}, value: ${questValues[property]}`;
+        console.error(`property: ${property}, value: ${questValues[property]}`);
       conditionsList[i][property] = questValues[property];
     }
   }
