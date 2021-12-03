@@ -761,6 +761,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  showAlphabetEarlyBool: {
+    name: "showAlphabetEarlyBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "If showAlphabetEarlyBool is TRUE then alphabet is displayed at target onset. Otherwise it is displayed 0.5 s after target offset. You need an early alphabet if you want to allow an early response (responseAllowedEarlyBool) by clicking.",
+    type: "",
+    default: "",
+  },
   showAlphabetWhere: {
     name: "showAlphabetWhere",
     availability: "now",

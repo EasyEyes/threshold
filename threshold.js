@@ -1353,7 +1353,7 @@ const experiment = (blockCount) => {
   function trialRoutineBegin(snapshot) {
     return async function () {
       rc.pauseNudger();
-      await sleep(100);
+      await sleep(700);
 
       psychoJS.experiment.addData(
         "clickToTrialPreparationDelaySec",
