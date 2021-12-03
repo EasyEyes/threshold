@@ -92,6 +92,7 @@ import {
   initPixelsArray,
   readPixels,
 } from "./components/canvasContext.js";
+import { populateQuestDefaults } from "./components/data.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -315,6 +316,7 @@ const experiment = (blockCount) => {
     expInfo["expName"] = expName;
     expInfo["psychopyVersion"] = "2021.3.1-threshold-prod";
     expInfo["OS"] = rc.systemFamily.value;
+    expInfo["psychojsWindowDimensions"] = String(psychoJS._window._size);
 
     // store frame rate of monitor if we can measure it successfully
     expInfo["frameRate"] = psychoJS.window.getActualFrameRate();
@@ -802,6 +804,10 @@ const experiment = (blockCount) => {
         psychoJS.serverManager,
         thisConditionsFile
       );
+      trialsConditions = populateQuestDefaults(trialsConditions, paramReader);
+      const nTrialsTotal = trialsConditions
+        .map((c) => Number(paramReader.read("conditionTrials", c.label)))
+        .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
       trials = new data.MultiStairHandler({
         stairType: MultiStairHandler.StaircaseType.QUEST,
         psychoJS: psychoJS,
@@ -1028,11 +1034,11 @@ const experiment = (blockCount) => {
       removeBeepButton(_beepButton);
 
       psychoJS.experiment.addData(
-        "initInstructionRoutineDurationFromBeginSecs",
+        "initInstructionRoutineDurationFromBeginSec",
         initInstructionClock.getTime()
       );
       psychoJS.experiment.addData(
-        "initInstructionRoutineDurationFromPreviousEndSecs",
+        "initInstructionRoutineDurationFromPreviousEndSec",
         routineClock.getTime()
       );
 
@@ -1119,11 +1125,11 @@ const experiment = (blockCount) => {
       flanker2.setAutoDraw(false);
 
       psychoJS.experiment.addData(
-        "eduInstructionRoutineDurationFromBeginSecs",
+        "eduInstructionRoutineDurationFromBeginSec",
         eduInstructionClock.getTime()
       );
       psychoJS.experiment.addData(
-        "eduInstructionRoutineDurationFromPreviousEndSecs",
+        "eduInstructionRoutineDurationFromPreviousEndSec",
         routineClock.getTime()
       );
 
@@ -1294,11 +1300,11 @@ const experiment = (blockCount) => {
       instructions.setAutoDraw(false);
 
       psychoJS.experiment.addData(
-        "trialInstructionRoutineDurationFromBeginSecs",
+        "trialInstructionRoutineDurationFromBeginSec",
         trialInstructionClock.getTime()
       );
       psychoJS.experiment.addData(
-        "trialInstructionRoutineDurationFromPreviousEndSecs",
+        "trialInstructionRoutineDurationFromPreviousEndSec",
         routineClock.getTime()
       );
 
@@ -1352,7 +1358,7 @@ const experiment = (blockCount) => {
   function trialRoutineBegin(snapshot) {
     return async function () {
       psychoJS.experiment.addData(
-        "clickToTrialPreparationDelaySecs",
+        "clickToTrialPreparationDelaySec",
         routineClock.getTime()
       );
       trialClock.reset(); // clock
@@ -1711,7 +1717,6 @@ const experiment = (blockCount) => {
         if (spacingRelationToSize === "ratio") {
           trialComponents.push(flanker1BoundingPoly);
           trialComponents.push(flanker2BoundingPoly);
-          logger("flanker1boudnign", flanker1BoundingPoly);
         }
       }
       /* --- /BOUNDING BOX --- */
@@ -1757,7 +1762,7 @@ const experiment = (blockCount) => {
       // totalTrialIndex = totalTrialIndex + 1;
 
       psychoJS.experiment.addData(
-        "trialBeginDurationSecs",
+        "trialBeginDurationSec",
         trialClock.getTime()
       );
       return Scheduler.Event.NEXT;
@@ -1773,7 +1778,7 @@ const experiment = (blockCount) => {
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
       if (frameN === 0)
         psychoJS.experiment.addData(
-          "clickToStimulusOnsetSecs",
+          "clickToStimulusOnsetSec",
           routineClock.getTime()
         );
       // update/draw components on each frame
@@ -2144,11 +2149,11 @@ const experiment = (blockCount) => {
         // we had a response
         psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
         psychoJS.experiment.addData(
-          "trialRoutineDurationFromBeginSecs",
+          "trialRoutineDurationFromBeginSec",
           trialClock.getTime()
         );
         psychoJS.experiment.addData(
-          "trialRoutineDurationFromPreviousEndSecs",
+          "trialRoutineDurationFromPreviousEndSec",
           routineClock.getTime()
         );
 
@@ -2231,11 +2236,11 @@ const experiment = (blockCount) => {
     await debriefScreen;
 
     psychoJS.experiment.addData(
-      "debriefDurationSecs",
+      "debriefDurationSec",
       globalClock.getTime() - timeBeforeDebriefDisplay
     );
     psychoJS.experiment.addData(
-      "durationOfExperimentSecs",
+      "durationOfExperimentSec",
       globalClock.getTime()
     );
 
