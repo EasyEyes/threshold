@@ -46,7 +46,7 @@ export const GLOSSARY: Glossary = {
   },
   _daisyChainURLAfterEasyEyes: {
     name: "_daisyChainURLAfterEasyEyes",
-    availability: "soon",
+    availability: "now",
     example: "http://xyz?cc=123",
     explanation:
       "A URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
@@ -55,7 +55,7 @@ export const GLOSSARY: Glossary = {
   },
   _daisyChainURLBeforeEasyEyes: {
     name: "_daisyChainURLBeforeEasyEyes",
-    availability: "soon",
+    availability: "now",
     example: "http://xyz?cc=123",
     explanation:
       "A URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
@@ -716,6 +716,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
   },
+  responseAllowedEarlyBool: {
+    name: "responseAllowedEarlyBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "When TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. ",
+    type: "boolean",
+    default: "TRUE",
+  },
   responseClickedBool: {
     name: "responseClickedBool",
     availability: "now",
@@ -768,6 +777,15 @@ export const GLOSSARY: Glossary = {
     example: "FALSE",
     explanation:
       "For foreign or symbol alphabets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  showBoundingBoxBool: {
+    name: "showBoundingBoxBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "For debugging, setting showBoundingBoxBool TRUE displays the bounding box around the target character (if spacing is ratio) or flanker-target-flanker triplet (if spacing typographic). We show the getBoundingBox method from psychojs, using tight=true. ",
     type: "boolean",
     default: "FALSE",
   },
@@ -979,7 +997,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.15",
     explanation:
-      "The duration of target presentation. EXCEPTION: When targetDurationSec==999, as a special case, the stimulus persists until the participant responds. The participant can respond at any time. Then, as usual, the screen is cleared to show the crosshair for the next trial. This is nice for demos, debugging, and screenshots (e.g. to make a slide for a talk). [It would be more elegant to use INF as the special value, but Excel and apparently CSV files don't support INF, which seems terribly archaic. Hence 999.]",
+      "The duration of target presentation. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. Set responseAllowedEarlyBool to FALSE if you want to allow response only after target offset.",
     type: "numerical",
     default: "0.15",
   },
