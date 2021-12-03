@@ -2120,7 +2120,9 @@ const experiment = (blockCount) => {
 
   function trialRoutineEnd() {
     return async function () {
-      rc.resumeNudger();
+      setTimeout(() => {
+        rc.resumeNudger();
+      }, 700);
 
       //------Ending Routine 'trial'-------
       for (const thisComponent of trialComponents) {
