@@ -19,7 +19,7 @@
  * 15
  */
 
-const _responseTypes = {
+export const _responseTypes = {
   // [click, type, keypad, speak]
   0: [false, true, false, false],
   1: [true, false, false, false],

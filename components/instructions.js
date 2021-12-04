@@ -1,5 +1,6 @@
 import { phrases } from "./i18n.js";
 import { replacePlaceholders } from "./multiLang.js";
+import { _responseTypes } from "./response.js";
 
 export const instructionsText = {
   initial: (L) => {
@@ -29,6 +30,8 @@ export const instructionsText = {
   },
   initialEnd: (L, responseType = 2) => {
     let t = phrases.T_guessingGame[L] + " ";
+    if (_onlyClick(responseType)) t += phrases.T_whyClick[L] + " ";
+    t += phrases.T_escapeToQuit[L] + " ";
     switch (responseType) {
       case 0:
         return t + phrases.T_continueHitReturn[L];
@@ -100,4 +103,11 @@ export const addBeepButton = (L, synth) => {
 
 export const removeBeepButton = (button) => {
   document.body.removeChild(button);
+};
+
+/* -------------------------------------------------------------------------- */
+
+const _onlyClick = (responseType) => {
+  const types = _responseTypes[responseType];
+  return types[0] && !types[1] && !types[2] && !types[3];
 };
