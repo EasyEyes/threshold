@@ -1247,6 +1247,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "40",
   },
+  viewingDistanceNudgingBool: {
+    name: "viewingDistanceNudgingBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Set TRUE to enable the nudger. The nudger compares measured viewing distance to viewingDistanceDesiredCm, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. PROTECTING THE STIMULUS FROM NUDGING. As I think about it, the trial begins at the click (or keypress) requesting the stimulus and ends at the click (or keypress) response, and we have a dead time in between the response and the next request. We only nudge in the dead time. However, we need to make sure that the nudge ends at least 700 ms before the click requesting a trial.  So we ignore attempts to click during nudging and until 700 ms after nudging. I think we need to add a click sound so the participant can tell that a  click registered. This is not a delay in click response. When we re-enable click response there is no cache of stored clicks. It waits for a fresh click. \n",
+    type: "",
+    default: "",
+  },
   wirelessKeyboardNeededBool: {
     name: "wirelessKeyboardNeededBool",
     availability: "now",

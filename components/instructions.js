@@ -30,7 +30,7 @@ export const instructionsText = {
   },
   initialEnd: (L, responseType = 2) => {
     let t = phrases.T_guessingGame[L] + " ";
-    if (_onlyClick(responseType)) t += phrases.T_whyClick[L] + " ";
+    if (_onlyClick(responseType)) t += phrases.T_whyClick[L] + "\n\n";
     t += phrases.T_escapeToQuit[L] + " ";
     switch (responseType) {
       case 0:
