@@ -862,6 +862,8 @@ const experiment = (blockCount) => {
   async function blocksLoopEnd() {
     psychoJS.experiment.removeLoop(blocks);
 
+    // ! Distance ?
+
     return Scheduler.Event.NEXT;
   }
 
@@ -977,6 +979,9 @@ const experiment = (blockCount) => {
 
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
+      // ! Distance
+      rc.resumeDistance();
+
       initInstructionClock.reset(); // clock
       TrialHandler.fromSnapshot(snapshot);
 
@@ -1109,6 +1114,9 @@ const experiment = (blockCount) => {
 
   function eduInstructionRoutineEnd() {
     return async function () {
+      // ! Distance
+      rc.pauseDistance();
+
       instructions.setAutoDraw(false);
       instructions2.setAutoDraw(false);
 
@@ -1352,8 +1360,8 @@ const experiment = (blockCount) => {
   var condition;
   function trialRoutineBegin(snapshot) {
     return async function () {
-      rc.pauseNudger();
-      await sleep(700);
+      // rc.pauseNudger();
+      // await sleep(700);
 
       psychoJS.experiment.addData(
         "clickToTrialPreparationDelaySec",
@@ -2120,9 +2128,9 @@ const experiment = (blockCount) => {
 
   function trialRoutineEnd() {
     return async function () {
-      setTimeout(() => {
-        rc.resumeNudger();
-      }, 700);
+      // setTimeout(() => {
+      //   rc.resumeNudger();
+      // }, 700);
 
       //------Ending Routine 'trial'-------
       for (const thisComponent of trialComponents) {
