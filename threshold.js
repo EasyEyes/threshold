@@ -866,6 +866,7 @@ const experiment = (blockCount) => {
       // Schedule all the trials in the trialList:
       for (const thisQuestLoop of trials) {
         const snapshot = trials.getSnapshot();
+        logger("snapshot in thisQuestLoop of trials", snapshot);
         trialsLoopScheduler.add(importConditions(snapshot));
         trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
         trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
@@ -1228,14 +1229,61 @@ const experiment = (blockCount) => {
     }
   };
 
+  var level;
+  var windowWidthCm;
+  var windowWidthPx;
+  var pixPerCm;
+  var viewingDistanceDesiredCm;
+  var viewingDistanceCm;
+
+  var fixationXYPx = [0, 0];
+  var fixationSize = 45; // TODO Set on block begins
+  var showFixation = true;
+
+  var block;
+  var spacingDirection;
+  var targetFont;
+  var targetAlphabet;
+  var validAns;
+  var showAlphabetWhere;
+  var showAlphabetElement;
+  var showCounterBool;
+  var showViewingDistanceBool;
+  const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 };
+  var showBoundingBox;
+  var targetDurationSec;
+  var targetMinimumPix;
+  var spacingOverSizeRatio;
+  var spacingRelationToSize;
+  var targetEccentricityXDeg;
+  var targetEccentricityYDeg;
+  var targetEccentricityXYDeg;
+  // var trackGazeYes;
+  // var trackHeadYes;
+  var wirelessKeyboardNeededYes;
+
+  var _key_resp_allKeys;
+  var trialComponents;
+
+  /* --- SIMULATED --- */
+  var simulatedObserver = {};
+  /* --- /SIMULATED --- */
+
+  var condition;
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
+      const parametersToExcludeFromData = [];
       for (let c of snapshot.handler.getConditions()) {
         if (c.label === trials._currentStaircase._name) {
           condition = c;
+          addConditionToData(
+            psychoJS.experiment,
+            condition,
+            parametersToExcludeFromData
+          );
         }
       }
       const cName = condition["label"];
@@ -1285,152 +1333,10 @@ const experiment = (blockCount) => {
       document.addEventListener("click", _takeFixationClick);
       document.addEventListener("touchend", _takeFixationClick);
 
-      psychoJS.eventManager.clearKeys();
-
-      return Scheduler.Event.NEXT;
-    };
-  }
-
-  function trialInstructionRoutineEachFrame() {
-    return async function () {
-      /* --- SIMULATED --- */
-      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
-      /* --- /SIMULATED --- */
-      t = instructionsClock.getTime();
-      frameN = frameN + 1;
-
-      if (
-        psychoJS.experiment.experimentEnded ||
-        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-      ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
-      }
-
-      if (!continueRoutine) {
-        return Scheduler.Event.NEXT;
-      }
-
-      continueRoutine = true;
-      if (
-        canType(responseType) &&
-        psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
-      ) {
-        continueRoutine = false;
-      }
-
-      if (continueRoutine && !clickedContinue) {
-        return Scheduler.Event.FLIP_REPEAT;
-      } else {
-        return Scheduler.Event.NEXT;
-      }
-    };
-  }
-
-  function trialInstructionRoutineEnd() {
-    return async function () {
-      document.removeEventListener("click", _takeFixationClick);
-      document.removeEventListener("touchend", _takeFixationClick);
-      instructions.setAutoDraw(false);
-
-      psychoJS.experiment.addData(
-        "trialInstructionRoutineDurationFromBeginSec",
-        trialInstructionClock.getTime()
-      );
-      psychoJS.experiment.addData(
-        "trialInstructionRoutineDurationFromPreviousEndSec",
-        routineClock.getTime()
-      );
-
-      routineTimer.reset();
-      routineClock.reset();
-      return Scheduler.Event.NEXT;
-    };
-  }
-
-  var level;
-  var windowWidthCm;
-  var windowWidthPx;
-  var pixPerCm;
-  var viewingDistanceDesiredCm;
-  var viewingDistanceCm;
-
-  var fixationXYPx = [0, 0];
-  var fixationSize = 45; // TODO Set on block begins
-  var showFixation = true;
-
-  var block;
-  var spacingDirection;
-  var targetFont;
-  var targetAlphabet;
-  var validAns;
-  var showAlphabetWhere;
-  var showAlphabetElement;
-  var showCounterBool;
-  var showViewingDistanceBool;
-  const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 };
-  var showBoundingBox;
-  var targetDurationSec;
-  var targetMinimumPix;
-  var spacingOverSizeRatio;
-  var spacingRelationToSize;
-  var targetEccentricityXDeg;
-  var targetEccentricityYDeg;
-  var targetEccentricityXYDeg;
-  // var trackGazeYes;
-  // var trackHeadYes;
-  var wirelessKeyboardNeededYes;
-
-  var _key_resp_allKeys;
-  var trialComponents;
-
-  /* --- SIMULATED --- */
-  var simulatedObserver = {};
-  /* --- /SIMULATED --- */
-
-  var condition;
-  function trialRoutineBegin(snapshot) {
-    return async function () {
-      // rc.pauseNudger();
-      // await sleep(700);
-
-      psychoJS.experiment.addData(
-        "clickToTrialPreparationDelaySec",
-        routineClock.getTime()
-      );
-      trialClock.reset(); // clock
-
+      /* PRECOMPUTE UP STIMULI FOR THE UPCOMING TRIAL */
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-
-      hideCursor();
-
-      ////
-      if (debug)
-        console.log("%c\n\n====== New Trial ======\n\n", "color: purple");
-      logger("Level", snapshot.getCurrentTrial().trialsVal);
-      logger("Index", snapshot.thisIndex);
-
-      // let condition;
-      const parametersToExcludeFromData = [];
-      for (let c of snapshot.handler.getConditions()) {
-        if (c.label === trials._currentStaircase._name) {
-          condition = c;
-          addConditionToData(
-            psychoJS.experiment,
-            condition,
-            parametersToExcludeFromData
-          );
-        }
-      }
-      // logger("condition", condition);
-
-      ////
-      const cName = condition["label"];
       const reader = paramReader;
-      ////
-
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-      logger("level from getQuestValue()", proposedLevel);
-
       psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
       // TODO Find a real way of estimating the max size
       proposedLevel = Math.min(proposedLevel, 1.75);
@@ -1445,15 +1351,6 @@ const experiment = (blockCount) => {
         "targetFont",
         reader.read("targetFont", cName)
       );
-
-      // TODO set QUEST
-      // !
-      // !
-
-      //------Prepare to start Routine 'trial'-------
-      t = 0;
-      frameN = -1;
-      continueRoutine = true; // until we're told otherwise
       // update component parameters for each repeat
       windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
       windowWidthPx = rc.displayWidthPx.value;
@@ -1470,11 +1367,6 @@ const experiment = (blockCount) => {
         console.warn(
           "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
         );
-
-      // TODO
-      // ! Very inefficient to read params very trial as they do not change in a block
-      // ! Move this to a block-level routine and store the values
-
       fixationXYPx = [0, 0];
 
       block = condition["block"];
@@ -1702,12 +1594,6 @@ const experiment = (blockCount) => {
           `spacingRelationToSize value ${spacingRelationToSize} not recognized. Please use "none", "ratio", or "typographic"`
         );
       }
-
-      key_resp.keys = undefined;
-      key_resp.rt = undefined;
-      _key_resp_allKeys = [];
-      ////
-
       showAlphabet.setPos([0, 0]);
       showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
@@ -1739,10 +1625,9 @@ const experiment = (blockCount) => {
       totalTrial.setFont(instructionFont);
       totalTrial.setHeight(totalTrialConfig.fontSize);
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-      // totalTrialIndex = nextTrialInfo.trial;
-      // totalBlockIndex = nextTrialInfo.block
-
-      // keep track of which components have finished
+      // // totalTrialIndex = nextTrialInfo.trial;
+      // // totalBlockIndex = nextTrialInfo.block
+      // // keep track of which components have finished
       trialComponents = [];
       trialComponents.push(key_resp);
       trialComponents.push(fixation);
@@ -1752,8 +1637,7 @@ const experiment = (blockCount) => {
 
       trialComponents.push(showAlphabet);
       trialComponents.push(totalTrial);
-
-      /* --- BOUNDING BOX --- */
+      // /* --- BOUNDING BOX --- */
       if (showBoundingBox) {
         trialComponents.push(targetBoundingPoly);
         if (spacingRelationToSize === "ratio") {
@@ -1761,9 +1645,8 @@ const experiment = (blockCount) => {
           trialComponents.push(flanker2BoundingPoly);
         }
       }
-      /* --- /BOUNDING BOX --- */
-
-      /* --- GRIDS --- */
+      // /* --- /BOUNDING BOX --- */
+      // /* --- GRIDS --- */
       if (showGrid) {
         for (const gridType in grids) {
           grids[gridType].forEach((gridLineStim) => {
@@ -1772,8 +1655,8 @@ const experiment = (blockCount) => {
           });
         }
       }
-      /* --- /GRIDS --- */
-      /* --- SIMULATED --- */
+      // /* --- /GRIDS --- */
+      // /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
         if (!simulatedObserver[condition.label]) {
           simulatedObserver[condition.label] = new SimulatedObserver(
@@ -1794,14 +1677,126 @@ const experiment = (blockCount) => {
           );
         }
       }
-      /* --- /SIMULATED --- */
-
+      // /* --- /SIMULATED --- */
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
 
       // update trial index
       // totalTrialIndex = totalTrialIndex + 1;
+      /* /PRECOMPUTE UP STIMULI FOR THE UPCOMING TRIAL */
+
+      psychoJS.eventManager.clearKeys();
+
+      psychoJS.experiment.addData(
+        "trialInstructionBeginDurationSec",
+        trialInstructionClock.getTime()
+      );
+      return Scheduler.Event.NEXT;
+    };
+  }
+
+  function trialInstructionRoutineEachFrame() {
+    return async function () {
+      /* --- SIMULATED --- */
+      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
+      t = instructionsClock.getTime();
+      frameN = frameN + 1;
+
+      if (
+        psychoJS.experiment.experimentEnded ||
+        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+      ) {
+        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+      }
+
+      if (!continueRoutine) {
+        return Scheduler.Event.NEXT;
+      }
+
+      continueRoutine = true;
+      if (
+        canType(responseType) &&
+        psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
+      ) {
+        continueRoutine = false;
+      }
+
+      if (continueRoutine && !clickedContinue) {
+        return Scheduler.Event.FLIP_REPEAT;
+      } else {
+        return Scheduler.Event.NEXT;
+      }
+    };
+  }
+
+  function trialInstructionRoutineEnd() {
+    return async function () {
+      document.removeEventListener("click", _takeFixationClick);
+      document.removeEventListener("touchend", _takeFixationClick);
+      instructions.setAutoDraw(false);
+
+      psychoJS.experiment.addData(
+        "trialInstructionRoutineDurationFromBeginSec",
+        trialInstructionClock.getTime()
+      );
+      psychoJS.experiment.addData(
+        "trialInstructionRoutineDurationFromPreviousEndSec",
+        routineClock.getTime()
+      );
+
+      routineTimer.reset();
+      routineClock.reset();
+      return Scheduler.Event.NEXT;
+    };
+  }
+  function trialRoutineBegin(snapshot) {
+    return async function () {
+      // rc.pauseNudger();
+      // await sleep(100);
+
+      psychoJS.experiment.addData(
+        "clickToTrialPreparationDelaySec",
+        routineClock.getTime()
+      );
+      trialClock.reset(); // clock
+
+      TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
+
+      hideCursor();
+
+      ////
+      if (debug)
+        console.log("%c\n\n====== New Trial ======\n\n", "color: purple");
+      logger("Level", snapshot.getCurrentTrial().trialsVal);
+      logger("Index", snapshot.thisIndex);
+
+      //------Prepare to start Routine 'trial'-------
+      t = 0;
+      frameN = -1;
+      continueRoutine = true; // until we're told otherwise
+
+      key_resp.keys = undefined;
+      key_resp.rt = undefined;
+      _key_resp_allKeys = [];
+
+      /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
+      psychoJS.experiment.addData(
+        "targetBoundingBox",
+        String(target.getBoundingBox(true))
+      );
+      if (spacingRelationToSize === "ratio") {
+        psychoJS.experiment.addData(
+          "flanker1BoundingBox",
+          String(flanker1.getBoundingBox(true))
+        );
+        psychoJS.experiment.addData(
+          "flanker2BoundingBox",
+          String(flanker2.getBoundingBox(true))
+        );
+      }
+      /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
 
       psychoJS.experiment.addData(
         "trialBeginDurationSec",
@@ -2244,6 +2239,7 @@ const experiment = (blockCount) => {
 
   function importConditions(currentLoop) {
     return async function () {
+      console.log("current trial: ", currentLoop.getCurrentTrial());
       psychoJS.importAttributes(currentLoop.getCurrentTrial());
       return Scheduler.Event.NEXT;
     };
