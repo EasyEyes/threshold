@@ -83,7 +83,7 @@ export const getTypographicHeight = (
  * @todo Specify necessary members of `displayOptions`
  * @returns {Number}
  */
-export const awaitMaxPresentableLevel = (
+export const getMaxPresentableLevel = (
   proposedLevel,
   targetXYPix,
   fixationXYPix,
@@ -103,28 +103,25 @@ export const awaitMaxPresentableLevel = (
     console.error(
       "Unpresentable stimuli, even at level=" + String(granularityOfChange)
     );
-    return new Promise((resolve) => resolve(granularityOfChange));
+    return granularityOfChange;
   }
-  if (
-    !unacceptableStimuli(
-      proposedLevel,
-      targetXYPix,
-      fixationXYPix,
-      spacingDirection,
-      displayOptions
-    )
+  for (
+    let l = proposedLevel;
+    l > granularityOfChange;
+    l -= granularityOfChange
   ) {
-    logger("Acceptable level found", proposedLevel);
-    return new Promise((resolve) => resolve(proposedLevel));
-  } else {
-    logger("Unacceptable level", proposedLevel);
-    return awaitMaxPresentableLevel(
-      proposedLevel - granularityOfChange,
-      targetXYPix,
-      fixationXYPix,
-      spacingDirection,
-      displayOptions
-    );
+    if (
+      !unacceptableStimuli(
+        l,
+        targetXYPix,
+        fixationXYPix,
+        spacingDirection,
+        displayOptions
+      )
+    ) {
+      logger("Acceptable level found", l);
+      return l;
+    }
   }
 };
 

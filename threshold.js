@@ -74,7 +74,7 @@ import { getTrialInfoStr } from "./components/trialCounter.js";
 
 import {
   getTypographicHeight,
-  awaitMaxPresentableLevel,
+  getMaxPresentableLevel,
   getFlankerLocations,
   getLowerBoundedLevel,
 } from "./components/bounding.js";
@@ -100,7 +100,7 @@ import {
   prepareForReading,
   readBookText,
   readingTaskFields,
-} from "./components/reading/readingUtils.js";
+} from "./components/readingUtil.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -1491,13 +1491,14 @@ const experiment = (blockCount) => {
       );
       if (spacingRelationToSize === "ratio") {
         // Get a usable "level", ie amount of spacing
-        const upperBoundedLevel = await awaitMaxPresentableLevel(
+        const upperBoundedLevel = getMaxPresentableLevel(
           proposedLevel,
           targetXYPix,
           fixationXYPx,
           spacingDirection,
           displayOptions
         );
+        logger("upperBoundedLevel", upperBoundedLevel);
         level = getLowerBoundedLevel(upperBoundedLevel, displayOptions);
         psychoJS.experiment.addData("levelUsed", level);
 
