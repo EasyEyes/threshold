@@ -17,37 +17,37 @@ deg. The "pix" grid has pix units, origin at lower left, thick
 lines at 500 pix, and regular lines at 100 pix.
 */
 
-const GRIDKEY = {
-  pix: { key: "Control", keyCode: 17 },
-  cm: { key: "Alt", keyCode: 18 },
-  deg: { key: "Meta", keyCode: 91 },
+const rotate = (l) => {
+  const rotated = [...l];
+  rotated.push(rotated.shift());
+  return rotated;
 };
 
-var showGrid, gridVisible;
+export var showGrid, gridVisible;
+
 export const readGridParameter = (reader) => {
+  showGrid = false;
+  gridVisible = [undefined];
+  const gridkey = { key: ["`", "~"], code: "Backquote", keyCode: 192 };
+
   if (reader.conditions.some((condition) => condition.showGridsBool === true)) {
     showGrid = true;
   }
+
   if (showGrid) {
-    gridVisible = { pix: false, cm: false, deg: false };
-    window.onkeydown = (e) => updateGridVisible(e, gridVisible, GRIDKEY);
+    gridVisible.push("pix", "cm", "deg");
+    window.onkeydown = (e) => updateGridVisible(e, gridVisible, gridkey);
   }
   return [showGrid, gridVisible];
 };
 
-export const updateGridVisible = (e, gridVisible, gridKeys) => {
-  if (e.keyCode === gridKeys["pix"].keyCode || e.key === gridKeys["pix"].key) {
-    gridVisible["pix"] = !gridVisible["pix"];
-  } else if (
-    e.keyCode === gridKeys["cm"].keyCode ||
-    e.key === gridKeys["cm"].key
+export const updateGridVisible = (e, gridVisible, gridkey) => {
+  if (
+    e.code === gridkey.code ||
+    gridkey.key.includes(e.key) ||
+    e.keyCode === gridkey.keyCode
   ) {
-    gridVisible["cm"] = !gridVisible["cm"];
-  } else if (
-    e.keyCode === gridKeys["deg"].keyCode ||
-    e.key === gridKeys["deg"].key
-  ) {
-    gridVisible["deg"] = !gridVisible["deg"];
+    gridVisible.push(gridVisible.shift());
   }
 };
 
