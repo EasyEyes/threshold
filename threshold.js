@@ -1333,7 +1333,7 @@ const experiment = (blockCount) => {
       document.addEventListener("click", _takeFixationClick);
       document.addEventListener("touchend", _takeFixationClick);
 
-      /* PRECOMPUTE UP STIMULI FOR THE UPCOMING TRIAL */
+      /* PRECOMPUTE STIMULI FOR THE UPCOMING TRIAL */
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
       const reader = paramReader;
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
@@ -1684,7 +1684,7 @@ const experiment = (blockCount) => {
 
       // update trial index
       // totalTrialIndex = totalTrialIndex + 1;
-      /* /PRECOMPUTE UP STIMULI FOR THE UPCOMING TRIAL */
+      /* /PRECOMPUTE STIMULI FOR THE UPCOMING TRIAL */
 
       psychoJS.eventManager.clearKeys();
 
@@ -1781,23 +1781,6 @@ const experiment = (blockCount) => {
       key_resp.rt = undefined;
       _key_resp_allKeys = [];
 
-      /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
-      psychoJS.experiment.addData(
-        "targetBoundingBox",
-        String(target.getBoundingBox(true))
-      );
-      if (spacingRelationToSize === "ratio") {
-        psychoJS.experiment.addData(
-          "flanker1BoundingBox",
-          String(flanker1.getBoundingBox(true))
-        );
-        psychoJS.experiment.addData(
-          "flanker2BoundingBox",
-          String(flanker2.getBoundingBox(true))
-        );
-      }
-      /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
-
       psychoJS.experiment.addData(
         "trialBeginDurationSec",
         trialClock.getTime()
@@ -1813,11 +1796,28 @@ const experiment = (blockCount) => {
       // get current time
       t = trialClock.getTime();
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
-      if (frameN === 0)
+      if (frameN === 0) {
         psychoJS.experiment.addData(
           "clickToStimulusOnsetSec",
           routineClock.getTime()
         );
+        /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
+        psychoJS.experiment.addData(
+          "targetBoundingBox",
+          String(target.getBoundingBox(true))
+        );
+        if (spacingRelationToSize === "ratio") {
+          psychoJS.experiment.addData(
+            "flanker1BoundingBox",
+            String(flanker1.getBoundingBox(true))
+          );
+          psychoJS.experiment.addData(
+            "flanker2BoundingBox",
+            String(flanker2.getBoundingBox(true))
+          );
+        }
+        /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
+      }
       // update/draw components on each frame
 
       const uniDelay = 0; // 0.5 by default?
