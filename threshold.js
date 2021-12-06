@@ -93,7 +93,11 @@ import {
   readPixels,
 } from "./components/canvasContext.js";
 import { populateQuestDefaults } from "./components/data.js";
-import { readBookText, readingTaskFields } from "./components/readingUtil.js";
+import {
+  getPageData,
+  readBookText,
+  readingTaskFields,
+} from "./components/readingUtil.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -211,11 +215,11 @@ const beforeExperimentBegins = async (reader) => {
   });
 
   // load reading data
-  const readingTaskInfo = {};
-  readingTaskFields.map((fieldLabel) => {
-    readingTaskInfo[fieldLabel] = paramReader.read(fieldLabel)[0];
-  });
-  const readingPageList = getPageData(readingTaskInfo);
+  // const readingTaskInfo = {};
+  // readingTaskFields.map((fieldLabel) => {
+  //   readingTaskInfo[fieldLabel] = paramReader.read(fieldLabel)[0];
+  // });
+  // const readingPageList = getPageData(readingTaskInfo);
 };
 
 const experiment = (blockCount) => {
@@ -707,6 +711,22 @@ const experiment = (blockCount) => {
     continueRoutine = true;
     instructions.setWrapWidth(window.innerWidth * 0.8);
     instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
+    instructions.setText(text);
+    instructions.setAutoDraw(true);
+  }
+
+  function _instructionBeforeStimulusSetup(text) {
+    t = 0;
+    instructionsClock.reset(); // clock
+    frameN = -1;
+    continueRoutine = true;
+    // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
+    const wrapWidth = window.innerWidth / 4;
+    instructions.setWrapWidth(wrapWidth);
+    instructions.setPos([
+      -window.innerWidth / 2 + 5,
+      window.innerHeight / 2 - 5,
+    ]);
     instructions.setText(text);
     instructions.setAutoDraw(true);
   }
@@ -1254,7 +1274,7 @@ const experiment = (blockCount) => {
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       totalTrial.setAutoDraw(true);
 
-      _instructionSetup(
+      _instructionBeforeStimulusSetup(
         instructionsText.trial.fixate["spacing"](
           rc.language.value,
           responseType
@@ -1698,6 +1718,12 @@ const experiment = (blockCount) => {
       showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
 
+      _instructionSetup(
+        instructionsText.trial.respond["spacing"](
+          rc.language.value,
+          responseType
+        )
+      );
       instructions.setText(
         instructionsText.trial.respond["spacing"](
           rc.language.value,
