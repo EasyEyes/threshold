@@ -93,6 +93,7 @@ import {
   readPixels,
 } from "./components/canvasContext.js";
 import { populateQuestDefaults } from "./components/data.js";
+import { readBookText, readingTaskFields } from "./components/readingUtil.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -101,6 +102,8 @@ window.jsQUEST = jsQUEST;
 var conditionTrials;
 var levelLeft, levelRight;
 let correctAns;
+
+var experimentMode = "reading";
 
 const rc = RemoteCalibrator;
 rc.init();
@@ -172,21 +175,27 @@ var totalBlockCount = 0;
 var consentFormName = "";
 var debriefFormName = "";
 
-const beforeExperimentBegins = (reader) => {
+const beforeExperimentBegins = async (reader) => {
+  // TODO get experiment mode from experimentFile
+  // experimentMode = reader.read('experimentMode')[0]; // ='reading' for reading task
+
+  // get consent form
   consentFormName = reader.read("_consentForm")[0];
   if (!(typeof consentFormName === "string" && consentFormName.length > 0))
     consentFormName = "";
 
+  // get debrief form
   debriefFormName = paramReader.read("_debriefForm")[0];
   if (!(typeof debriefFormName === "string" && debriefFormName.length > 0))
     debriefFormName = "";
 
+  // show consent form if field is valid
   if (consentFormName.length > 0) showConsentForm(consentFormName);
 
+  // add event listners to form buttons
   document.getElementById("consent-yes").addEventListener("click", (evt) => {
     hideAllForms();
   });
-
   document.getElementById("consent-no").addEventListener("click", (evt) => {
     if (debriefFormName.length > 0) showDebriefForm(debriefFormName);
 
@@ -200,6 +209,13 @@ const beforeExperimentBegins = (reader) => {
       afterExperimentEnds();
     });
   });
+
+  // load reading data
+  const readingTaskInfo = {};
+  readingTaskFields.map((fieldLabel) => {
+    readingTaskInfo[fieldLabel] = paramReader.read(fieldLabel)[0];
+  });
+  const readingPageList = getPageData(readingTaskInfo);
 };
 
 const experiment = (blockCount) => {
