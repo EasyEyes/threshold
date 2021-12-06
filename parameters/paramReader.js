@@ -80,12 +80,13 @@ export class ParamReader {
   }
 
   _loadFile(callback) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const that = this;
 
     Papa.parse(`./${this._experimentFilePath}/blockCount.csv`, {
       download: true,
       complete: ({ data }) => {
-        if (parseInt(data[data.length - 1][0]) !== NaN) {
+        if (!isNaN(parseInt(data[data.length - 1][0]))) {
           this._blockCount = Number(data[data.length - 1][0]) + 1;
         }
         // Last line in blockCount is space

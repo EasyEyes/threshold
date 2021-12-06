@@ -93,11 +93,14 @@ import {
   readPixels,
 } from "./components/canvasContext.js";
 import { populateQuestDefaults } from "./components/data.js";
+
+// READING
 import {
   getPageData,
+  prepareForReading,
   readBookText,
   readingTaskFields,
-} from "./components/readingUtil.js";
+} from "./components/reading/readingUtils.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -107,8 +110,7 @@ var conditionTrials;
 var levelLeft, levelRight;
 let correctAns;
 
-var experimentMode = "reading";
-
+// eslint-disable-next-line no-undef
 const rc = RemoteCalibrator;
 rc.init();
 
@@ -124,6 +126,8 @@ var showGrid, gridVisible;
 const paramReaderInitialized = async (reader) => {
   // show screens before actual experiment begins
   beforeExperimentBegins(reader);
+
+  // prepareForReading(reader);
 
   // ! Load fonts
   loadFonts(reader, fontsRequired);
@@ -180,9 +184,6 @@ var consentFormName = "";
 var debriefFormName = "";
 
 const beforeExperimentBegins = async (reader) => {
-  // TODO get experiment mode from experimentFile
-  // experimentMode = reader.read('experimentMode')[0]; // ='reading' for reading task
-
   // get consent form
   consentFormName = reader.read("_consentForm")[0];
   if (!(typeof consentFormName === "string" && consentFormName.length > 0))
@@ -213,13 +214,6 @@ const beforeExperimentBegins = async (reader) => {
       afterExperimentEnds();
     });
   });
-
-  // load reading data
-  // const readingTaskInfo = {};
-  // readingTaskFields.map((fieldLabel) => {
-  //   readingTaskInfo[fieldLabel] = paramReader.read(fieldLabel)[0];
-  // });
-  // const readingPageList = getPageData(readingTaskInfo);
 };
 
 const experiment = (blockCount) => {

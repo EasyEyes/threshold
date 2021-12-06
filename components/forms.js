@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const showConsentForm = async (formName) => {
   // reset all form outputs
   hideAllForms();
@@ -60,6 +62,7 @@ export const showDebriefForm = async (formName) => {
     const response = await axios.get(`/forms/${formName}`);
     const mdForm = document.getElementById("form-md");
     mdForm.style.display = "block";
+    // eslint-disable-next-line no-undef
     mdForm.innerHTML = marked.parse(response.data);
   }
 };

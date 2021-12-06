@@ -855,6 +855,24 @@ export const GLOSSARY: Glossary = {
     default: "none",
     categories: ["none", "right"],
   },
+  showTakeABreakCreditBool: {
+    name: "showTakeABreakCreditBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Displays the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, bottom up, with glowing green. Empty for zero and full for 1.",
+    type: "boolean",
+    default: "TRUE",
+  },
+  showTargetSpecsBool: {
+    name: "showTargetSpecsBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "For debugging. If true, show target size and spacing in deg in lower left corner, similar to the trial/block counter.",
+    type: "boolean",
+    default: "FALSE",
+  },
   showViewingDistanceBool: {
     name: "showViewingDistanceBool",
     availability: "now",
@@ -972,6 +990,24 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "linear",
     categories: ["log", "linear"],
+  },
+  takeABreakMinimumDurationSec: {
+    name: "takeABreakMinimumDurationSec",
+    availability: "now",
+    example: "30",
+    explanation:
+      "The minimum duration when EasyEyes takes a break. See takeABreakTrialCredit.",
+    type: "numerical",
+    default: "30",
+  },
+  takeABreakTrialCredit: {
+    name: "takeABreakTrialCredit",
+    availability: "now",
+    example: "0.01",
+    explanation:
+      'Intended for long blocks, over 100 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don\'t within a long block, and later complain that they feel stressed and that their corneas sting (because they didn\'t blink during the block), so we added this feature to force a break every so often. takeABreakTrialCredit sets the value that accrues from performing each trial of this condition. Set it to zero for no breaks. The block\'s running total, regardless of condition, is kept in internal parameter takeABreakCredit, which is zero at the beginning of each block. When takeABreakCredit exceeds 1, EasyEyes immediately subtracts 1 and takes a break. \nTHE BREAK\nEasyEyes displays a pop up window with a dark surround, "Good work! Please take a brief break to relax and blink." Responses (except ESCAPE) and the nudger are suspended for the time specified by takeABreakMinimumDurationSec. Then EasyEyes reenables responses, adds an Ok button, and adds text, "To continue hit OK or RETURN." The participant can take as long as they need. When they hit OK (or RETURN), EasyEyes closes the pop up window, reenables the nudger (If it was formerly active), and resumes testing. ',
+    type: "numerical",
+    default: "0.01",
   },
   targetAlphabet: {
     name: "targetAlphabet",
@@ -1128,6 +1164,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  targetSafetyMarginSec: {
+    name: "targetSafetyMarginSec",
+    availability: "now",
+    example: "0.5",
+    explanation:
+      "EasyEyes guarantees a blank time of targetSafetyMarginSec before and after the target presentation to minimize forward and backward masking of the target by instructions and other non-stimulus elements, including the alphabet and nudger. \n     ONSET: Since target onset is almost immediately after trial initiation, initiation of a trial is disabled until targetSafetyMarginSec has passed since the nudger and instructions were erased. \n     Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to alphabet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves to the crosshair, the instruction contrast will initally be 1 when the cursor is at the alphabet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). \n     OFFSET: After target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the alphabet. (Nudging isn't allowed until after the participant responds.)",
+    type: "numerical",
+    default: "0,7",
+  },
   targetSizeDeg: {
     name: "targetSizeDeg",
     availability: "now",
@@ -1252,7 +1297,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set TRUE to enable the nudger. The nudger compares measured viewing distance to viewingDistanceDesiredCm, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. PROTECTING THE STIMULUS FROM NUDGING. As I think about it, the trial begins at the click (or keypress) requesting the stimulus and ends at the click (or keypress) response, and we have a dead time in between the response and the next request. We only nudge in the dead time. However, we need to make sure that the nudge ends at least 700 ms before the click requesting a trial.  So we ignore attempts to click during nudging and until 700 ms after nudging. I think we need to add a click sound so the participant can tell that a  click registered. This is not a delay in click response. When we re-enable click response there is no cache of stored clicks. It waits for a fresh click. \n",
+      "Set TRUE to enable the nudger. The nudger compares measured viewing distance to viewingDistanceDesiredCm, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range.\nPROTECTING THE STIMULUS FROM NUDGING. The nudger will never occlude (or forward or backward mask) the stimulus. Think of the trial as beginning at the participant's click (or keypress) requesting the stimulus and ending at the click (or keypress) response. This leaves a dead time from the response until the click requesting the next trial. EasyEyes nudges only in the dead time. Furthermore, to prevent forward masking, the nudge must end at least 700 ms before the click requesting a trial even though the participant's timing may be unpredictable.  EasyEyes achieves that by ignoring attempts to click (or respond) during nudging and until 700 ms after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n",
     type: "",
     default: "",
   },
