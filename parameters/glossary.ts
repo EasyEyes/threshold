@@ -761,6 +761,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  showAlphabetEarlyBool: {
+    name: "showAlphabetEarlyBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "If showAlphabetEarlyBool is TRUE then alphabet is displayed at target onset. Otherwise it is displayed 0.5 s after target offset. You need an early alphabet if you want to allow an early response (responseAllowedEarlyBool) by clicking.",
+    type: "",
+    default: "",
+  },
   showAlphabetWhere: {
     name: "showAlphabetWhere",
     availability: "now",
@@ -1237,6 +1246,15 @@ export const GLOSSARY: Glossary = {
       "At the beginning of the block, we encourage the participant to adjust their viewing distance (moving head or display) to approximate the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. All conditions within a block must have the same desired viewing distance.\n     The viewing-distance nudger (Closer! Farther!) is working fine at getting the participant to the right distance, but we need to cancel any trials in which the stimulus was obscured by nudging. We have a three-period solution, that is being introduced in two stages. First we describe the ideal scheme that is our goal. Period A. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging and the rest of our software ignores it. Period B. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus we also allow nudging, but any nudge cancels the trial. Period C. From the end of the stimulus until the observer responds we suspend nudging (so the nudge won't interfere with remembering the target). Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. I'm not sure that the current version of MultistairHandler will cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during period A, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during period B we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. ",
     type: "numerical",
     default: "40",
+  },
+  viewingDistanceNudgingBool: {
+    name: "viewingDistanceNudgingBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Set TRUE to enable the nudger. The nudger compares measured viewing distance to viewingDistanceDesiredCm, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. PROTECTING THE STIMULUS FROM NUDGING. As I think about it, the trial begins at the click (or keypress) requesting the stimulus and ends at the click (or keypress) response, and we have a dead time in between the response and the next request. We only nudge in the dead time. However, we need to make sure that the nudge ends at least 700 ms before the click requesting a trial.  So we ignore attempts to click during nudging and until 700 ms after nudging. I think we need to add a click sound so the participant can tell that a  click registered. This is not a delay in click response. When we re-enable click response there is no cache of stored clicks. It waits for a fresh click. \n",
+    type: "",
+    default: "",
   },
   wirelessKeyboardNeededBool: {
     name: "wirelessKeyboardNeededBool",

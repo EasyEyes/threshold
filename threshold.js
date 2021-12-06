@@ -93,6 +93,11 @@ import {
   readPixels,
 } from "./components/canvasContext.js";
 import { populateQuestDefaults } from "./components/data.js";
+import {
+  getPageData,
+  readBookText,
+  readingTaskFields,
+} from "./components/readingUtil.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -101,6 +106,8 @@ window.jsQUEST = jsQUEST;
 var conditionTrials;
 var levelLeft, levelRight;
 let correctAns;
+
+var experimentMode = "reading";
 
 const rc = RemoteCalibrator;
 rc.init();
@@ -172,21 +179,27 @@ var totalBlockCount = 0;
 var consentFormName = "";
 var debriefFormName = "";
 
-const beforeExperimentBegins = (reader) => {
+const beforeExperimentBegins = async (reader) => {
+  // TODO get experiment mode from experimentFile
+  // experimentMode = reader.read('experimentMode')[0]; // ='reading' for reading task
+
+  // get consent form
   consentFormName = reader.read("_consentForm")[0];
   if (!(typeof consentFormName === "string" && consentFormName.length > 0))
     consentFormName = "";
 
+  // get debrief form
   debriefFormName = paramReader.read("_debriefForm")[0];
   if (!(typeof debriefFormName === "string" && debriefFormName.length > 0))
     debriefFormName = "";
 
+  // show consent form if field is valid
   if (consentFormName.length > 0) showConsentForm(consentFormName);
 
+  // add event listners to form buttons
   document.getElementById("consent-yes").addEventListener("click", (evt) => {
     hideAllForms();
   });
-
   document.getElementById("consent-no").addEventListener("click", (evt) => {
     if (debriefFormName.length > 0) showDebriefForm(debriefFormName);
 
@@ -200,6 +213,13 @@ const beforeExperimentBegins = (reader) => {
       afterExperimentEnds();
     });
   });
+
+  // load reading data
+  // const readingTaskInfo = {};
+  // readingTaskFields.map((fieldLabel) => {
+  //   readingTaskInfo[fieldLabel] = paramReader.read(fieldLabel)[0];
+  // });
+  // const readingPageList = getPageData(readingTaskInfo);
 };
 
 const experiment = (blockCount) => {
@@ -695,6 +715,22 @@ const experiment = (blockCount) => {
     instructions.setAutoDraw(true);
   }
 
+  function _instructionBeforeStimulusSetup(text) {
+    t = 0;
+    instructionsClock.reset(); // clock
+    frameN = -1;
+    continueRoutine = true;
+    // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
+    const wrapWidth = window.innerWidth / 4;
+    instructions.setWrapWidth(wrapWidth);
+    instructions.setPos([
+      -window.innerWidth / 2 + 5,
+      window.innerHeight / 2 - 5,
+    ]);
+    instructions.setText(text);
+    instructions.setAutoDraw(true);
+  }
+
   function _clickContinue(e) {
     if (e.target.id !== "threshold-beep-button") clickedContinue = true;
   }
@@ -863,6 +899,8 @@ const experiment = (blockCount) => {
   async function blocksLoopEnd() {
     psychoJS.experiment.removeLoop(blocks);
 
+    // ! Distance ?
+
     return Scheduler.Event.NEXT;
   }
 
@@ -978,6 +1016,9 @@ const experiment = (blockCount) => {
 
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
+      // ! Distance
+      rc.resumeDistance();
+
       initInstructionClock.reset(); // clock
       TrialHandler.fromSnapshot(snapshot);
 
@@ -1110,6 +1151,9 @@ const experiment = (blockCount) => {
 
   function eduInstructionRoutineEnd() {
     return async function () {
+      // ! Distance
+      rc.pauseDistance();
+
       instructions.setAutoDraw(false);
       instructions2.setAutoDraw(false);
 
@@ -1278,7 +1322,7 @@ const experiment = (blockCount) => {
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       totalTrial.setAutoDraw(true);
 
-      _instructionSetup(
+      _instructionBeforeStimulusSetup(
         instructionsText.trial.fixate["spacing"](
           rc.language.value,
           responseType
@@ -1296,6 +1340,7 @@ const experiment = (blockCount) => {
       document.addEventListener("touchend", _takeFixationClick);
 
       /* PRECOMPUTE UP STIMULI FOR THE UPCOMING TRIAL */
+      TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
       const reader = paramReader;
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
       psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
@@ -1558,6 +1603,13 @@ const experiment = (blockCount) => {
       showAlphabet.setPos([0, 0]);
       showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
+
+      _instructionSetup(
+        instructionsText.trial.respond["spacing"](
+          rc.language.value,
+          responseType
+        )
+      );
       instructions.setText(
         instructionsText.trial.respond["spacing"](
           rc.language.value,
@@ -1707,8 +1759,8 @@ const experiment = (blockCount) => {
   }
   function trialRoutineBegin(snapshot) {
     return async function () {
-      rc.pauseNudger();
-      await sleep(100);
+      // rc.pauseNudger();
+      // await sleep(100);
 
       psychoJS.experiment.addData(
         "clickToTrialPreparationDelaySec",
@@ -2113,7 +2165,9 @@ const experiment = (blockCount) => {
 
   function trialRoutineEnd() {
     return async function () {
-      rc.resumeNudger();
+      // setTimeout(() => {
+      //   rc.resumeNudger();
+      // }, 700);
 
       //------Ending Routine 'trial'-------
       for (const thisComponent of trialComponents) {
