@@ -100,7 +100,7 @@ import {
   prepareForReading,
   readBookText,
   readingTaskFields,
-} from "./components/readingUtil.js";
+} from "./components/readingUtils.js";
 
 /* -------------------------------------------------------------------------- */
 
