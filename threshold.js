@@ -1599,19 +1599,6 @@ const experiment = (blockCount) => {
       showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
 
-      _instructionSetup(
-        instructionsText.trial.respond["spacing"](
-          rc.language.value,
-          responseType
-        )
-      );
-      instructions.setText(
-        instructionsText.trial.respond["spacing"](
-          rc.language.value,
-          responseType
-        )
-      );
-
       trialInfoStr = getTrialInfoStr(
         rc.language.value,
         showCounterBool,
@@ -1786,6 +1773,21 @@ const experiment = (blockCount) => {
         "trialBeginDurationSec",
         trialClock.getTime()
       );
+
+      _instructionSetup(
+        instructionsText.trial.respond["spacing"](
+          rc.language.value,
+          responseType
+        )
+      );
+      instructions.setText(
+        instructionsText.trial.respond["spacing"](
+          rc.language.value,
+          responseType
+        )
+      );
+      instructions.setAutoDraw(false);
+
       return Scheduler.Event.NEXT;
     };
   }
