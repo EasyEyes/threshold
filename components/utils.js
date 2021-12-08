@@ -263,3 +263,43 @@ export const arraysEqual = (a, b) => {
 export const log = (x, base) => {
   return Math.log(x) / Math.log(base);
 };
+
+export const getPixPerCm = (rc) => {
+  if (!rc.screenWidthCm)
+    console.warn("[Screen Width] Using arbitrary screen width. Enable RC.");
+  const windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
+  const windowWidthPx = rc.displayWidthPx.value;
+  const pixPerCm = windowWidthPx / windowWidthCm;
+  return pixPerCm;
+};
+
+export const getViewingDistanceCm = (rc, reader, condition = "") => {
+  if (!rc.viewingDistanceCm)
+    console.warn(
+      "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
+    );
+  let viewingDistanceDesiredCm;
+  if (!condition) {
+    viewingDistanceDesiredCm = reader.read("viewingDistanceDesiredCm")[0];
+  } else if (!isNaN(condition)) {
+    viewingDistanceDesiredCm = reader.read(
+      "viewingDistanceDesiredCm",
+      Number(condition)
+    )[0];
+  } else {
+    viewingDistanceDesiredCm = reader.read(
+      "viewingDistanceDesiredCm",
+      condition
+    );
+  }
+  const viewingDistanceCm = rc.viewingDistanceCm
+    ? rc.viewingDistanceCm.value
+    : viewingDistanceDesiredCm;
+  return viewingDistanceCm;
+};
+
+export const rotate = (l) => {
+  const rotated = [...l];
+  rotated.push(rotated.shift());
+  return rotated;
+};

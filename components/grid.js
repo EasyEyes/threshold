@@ -1,5 +1,12 @@
 import { visual, util } from "../psychojs/out/psychojs-2021.3.0.js";
-import { degreesToPixels, pixelsToDegrees, XYPixOfXYDeg } from "./utils.js";
+import {
+  degreesToPixels,
+  pixelsToDegrees,
+  getPixPerCm,
+  getViewingDistanceCm,
+  logger,
+  rotate,
+} from "./utils.js";
 
 const opacity = 0.3;
 /*
@@ -17,38 +24,32 @@ deg. The "pix" grid has pix units, origin at lower left, thick
 lines at 500 pix, and regular lines at 100 pix.
 */
 
-const rotate = (l) => {
-  const rotated = [...l];
-  rotated.push(rotated.shift());
-  return rotated;
-};
+var showGrid, gridVisible;
 
-export var showGrid, gridVisible;
-
-export const readGridParameter = (reader) => {
+export const readGridParameter = (reader, simulated) => {
   showGrid = false;
-  gridVisible = [undefined];
+  gridVisible = ["none"];
   const gridkey = { key: ["`", "~"], code: "Backquote", keyCode: 192 };
-
-  if (reader.conditions.some((condition) => condition.showGridsBool === true)) {
+  const showGridsBools = reader.read("showGridsBool", "__ALL_BLOCKS__");
+  if (showGridsBools.some((gridBool) => gridBool) && !simulated) {
     showGrid = true;
   }
 
   if (showGrid) {
-    gridVisible.push("pix", "cm", "deg");
-    window.onkeydown = (e) => updateGridVisible(e, gridVisible, gridkey);
+    gridVisible.unshift("pix", "cm", "deg");
+    window.onkeydown = (e) => {
+      if (
+        e.code === gridkey.code ||
+        gridkey.key.includes(e.key) ||
+        e.keyCode === gridkey.keyCode
+      ) {
+        gridVisible.push(gridVisible.shift());
+        console.log("new gridVisible: ", gridVisible);
+        updateGrids(gridVisible, window.grids);
+      }
+    };
   }
   return [showGrid, gridVisible];
-};
-
-export const updateGridVisible = (e, gridVisible, gridkey) => {
-  if (
-    e.code === gridkey.code ||
-    gridkey.key.includes(e.key) ||
-    e.keyCode === gridkey.keyCode
-  ) {
-    gridVisible.push(gridVisible.shift());
-  }
 };
 
 const getNumberOfGrids = (window, gridUnits, displayOptions) => {
@@ -122,6 +123,7 @@ const getPixelGridLines = (window, displayOptions) => {
         color: new util.Color("black"),
         opacity: opacity,
         depth: 0.0,
+        size: 1,
       });
     }
   );
@@ -160,6 +162,7 @@ const getPixelGridLines = (window, displayOptions) => {
         color: new util.Color("black"),
         opacity: opacity,
         depth: 0.0,
+        size: 1,
       });
     }
   );
@@ -214,6 +217,7 @@ const getCmGridLines = (window, displayOptions) => {
         color: new util.Color("blue"),
         opacity: 1.0,
         depth: 0.0,
+        size: 1,
       });
     }
   );
@@ -252,6 +256,7 @@ const getCmGridLines = (window, displayOptions) => {
         color: new util.Color("blue"),
         opacity: 1.0,
         depth: 0.0,
+        size: 1,
       });
     }
   );
@@ -397,6 +402,7 @@ const getDegGridLines = (window, displayOptions) => {
         color: new util.Color("red"),
         opacity: 1.0,
         depth: 0.0,
+        size: 1,
       });
     });
   const leftGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
@@ -417,6 +423,7 @@ const getDegGridLines = (window, displayOptions) => {
         color: new util.Color("red"),
         opacity: 1.0,
         depth: 0.0,
+        size: 1,
       });
     });
   const lowerGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
@@ -437,6 +444,7 @@ const getDegGridLines = (window, displayOptions) => {
         color: new util.Color("red"),
         opacity: 1.0,
         depth: 0.0,
+        size: 1,
       });
     });
   const upperGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
@@ -457,6 +465,7 @@ const getDegGridLines = (window, displayOptions) => {
         color: new util.Color("red"),
         opacity: 1.0,
         depth: 0.0,
+        size: 1,
       });
     });
   return [
@@ -469,4 +478,55 @@ const getDegGridLines = (window, displayOptions) => {
     ...upperGridLineLabels,
     ...lowerGridLineLabels,
   ];
+};
+
+export const turnOnGrid = (gridTypes, grids) => {
+  const gridType = gridTypes[0];
+  grids[gridType].forEach((gridLineStim) => {
+    gridLineStim.setAutoDraw(true);
+  });
+};
+
+export const updateGrids = (gridTypes, grids) => {
+  const gridType = gridTypes[0];
+  if (grids[gridType]) {
+    grids[gridType].forEach((line) => line.setAutoDraw(true));
+    for (const otherType of gridTypes.filter(
+      (typeOfGrid) => typeOfGrid !== gridType
+    )) {
+      grids[otherType].forEach((line) => line.setAutoDraw(false));
+    }
+  }
+};
+
+export const undrawGrids = (grids) => {
+  for (const gridType in grids) {
+    grids[gridType].forEach((gridLineStim) => {
+      gridLineStim.setAutoDraw(false);
+    });
+  }
+  return { pix: [], cm: [], deg: [], none: [] };
+};
+
+export const spawnGrids = (
+  rc,
+  reader,
+  blockNumber,
+  psychoJS,
+  fixationXYPix
+) => {
+  const pixPerCm = getPixPerCm(rc);
+  const viewingDistanceCm = getViewingDistanceCm(rc, reader, blockNumber);
+  const displayOptions = {
+    fixationXYPix: fixationXYPix,
+    pixPerCm: pixPerCm,
+    viewingDistanceCm: viewingDistanceCm,
+  };
+  const grids = {
+    deg: getGridLines(psychoJS.window, "deg", displayOptions),
+    cm: getGridLines(psychoJS.window, "cm", displayOptions),
+    pix: getGridLines(psychoJS.window, "pix", displayOptions),
+    none: [],
+  };
+  return grids;
 };

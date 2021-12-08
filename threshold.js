@@ -79,7 +79,12 @@ import {
   getLowerBoundedLevel,
 } from "./components/bounding.js";
 
-import { getGridLines, readGridParameter } from "./components/grid.js";
+import {
+  readGridParameter,
+  turnOnGrid,
+  spawnGrids,
+  undrawGrids,
+} from "./components/grid.js";
 import {
   checkIfSimulated,
   SimulatedObserver,
@@ -107,7 +112,6 @@ import {
 window.jsQUEST = jsQUEST;
 
 var conditionTrials;
-var levelLeft, levelRight;
 let correctAns;
 
 // eslint-disable-next-line no-undef
@@ -119,11 +123,12 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
-var simulated;
-var showGrid, gridVisible;
+var showGrid, gridVisible, simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
+  await sleep(250);
+
   // show screens before actual experiment begins
   beforeExperimentBegins(reader);
 
@@ -135,11 +140,11 @@ const paramReaderInitialized = async (reader) => {
   // ! Load recruitment service config
   loadRecruitmentServiceConfig();
 
-  // ! Check if to use grids
-  [showGrid, gridVisible] = readGridParameter(reader);
-
   // ! Simulate observer
   simulated = checkIfSimulated(reader);
+
+  // ! Check if to use grids
+  [showGrid, gridVisible] = readGridParameter(reader, simulated);
 
   await sleep(500);
 
@@ -350,10 +355,6 @@ const experiment = (blockCount) => {
   var fileClock;
   var filterClock;
   var instructionsClock;
-
-  /* --- GRIDS --- */
-  if (showGrid) var grids;
-  /* --- /GRIDS --- */
 
   /* --- BOUNDING BOX --- */
   var targetBoundingPoly;
@@ -617,6 +618,13 @@ const experiment = (blockCount) => {
   var debriefComponents;
   var frameRemains;
 
+  var fixationXYPx;
+  var fixationSize;
+  var showFixation;
+  var windowWidthCm;
+  var windowWidthPx;
+  var pixPerCm;
+
   function fileRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -848,6 +856,11 @@ const experiment = (blockCount) => {
         method: TrialHandler.Method.FULLRANDOM,
       });
 
+      // TODO set fixation from the actual parameter
+      fixationXYPx = [0, 0];
+      fixationSize = 45;
+      showFixation = true;
+
       trialInfoStr = getTrialInfoStr(
         rc.language.value,
         showCounterBool,
@@ -1017,6 +1030,25 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot);
 
       const blockCount = snapshot.block + 1;
+
+      fixationXYPx = [0, 0];
+      if (showGrid) {
+        // Undraw any grids from the previous block
+        if (window.grids) window.grids = undrawGrids(window.grids);
+        // Only include grids if they're used in this block
+        if (paramReader.read("showGridsBool", blockCount).some((t) => t)) {
+          // Create the appropriate trio of grids for this block
+          window.grids = spawnGrids(
+            rc,
+            paramReader,
+            snapshot.block,
+            psychoJS,
+            fixationXYPx
+          );
+          // Turn on the currently visible grid
+          turnOnGrid(gridVisible, window.grids);
+        }
+      }
 
       responseType = getResponseType(
         paramReader.read("responseClickedBool", blockCount)[0],
@@ -1230,15 +1262,8 @@ const experiment = (blockCount) => {
   };
 
   var level;
-  var windowWidthCm;
-  var windowWidthPx;
-  var pixPerCm;
   var viewingDistanceDesiredCm;
   var viewingDistanceCm;
-
-  var fixationXYPx = [0, 0];
-  var fixationSize = 45; // TODO Set on block begins
-  var showFixation = true;
 
   var block;
   var spacingDirection;
@@ -1367,7 +1392,6 @@ const experiment = (blockCount) => {
         console.warn(
           "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
         );
-      fixationXYPx = [0, 0];
 
       block = condition["block"];
 
@@ -1456,15 +1480,6 @@ const experiment = (blockCount) => {
         targetEccentricityXYDeg: targetEccentricityXYDeg,
         spacingDirection: spacingDirection,
       };
-      /* --- GRIDS --- */
-      if (showGrid && !simulated) {
-        grids = {
-          deg: getGridLines(psychoJS.window, "deg", displayOptions),
-          cm: getGridLines(psychoJS.window, "cm", displayOptions),
-          pix: getGridLines(psychoJS.window, "pix", displayOptions),
-        };
-      }
-      /* --- /GRIDS --- */
 
       const [targetXYPix] = XYPixOfXYDeg(
         [targetEccentricityXYDeg],
@@ -1634,16 +1649,6 @@ const experiment = (blockCount) => {
         }
       }
       // /* --- /BOUNDING BOX --- */
-      // /* --- GRIDS --- */
-      if (showGrid) {
-        for (const gridType in grids) {
-          grids[gridType].forEach((gridLineStim) => {
-            gridLineStim.setAutoDraw(gridVisible[gridType]);
-            trialComponents.push(gridLineStim);
-          });
-        }
-      }
-      // /* --- /GRIDS --- */
       // /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
         if (!simulatedObserver[condition.label]) {
@@ -2113,31 +2118,11 @@ const experiment = (blockCount) => {
         instructions.setAutoDraw(true);
       }
       /* -------------------------------------------------------------------------- */
-      // *grids* updates
-      if (showGrid) {
-        for (const gridType in grids) {
-          grids[gridType].forEach((gridLineStim) => {
-            if (t >= uniDelay) {
-              // keep track of start time/frame for later
-              gridLineStim.tStart = t; // (not accounting for frame time here)
-              gridLineStim.frameNStart = frameN; // exact frame index
-              gridLineStim.setAutoDraw(gridVisible[gridType]);
-            }
-          });
-        }
-      }
 
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
         removeClickableAlphabet();
-        if (showGrid) {
-          for (const gridType in grids) {
-            grids[gridType].forEach((gridLineStim) => {
-              gridLineStim.setAutoDraw(false);
-            });
-          }
-        }
         return Scheduler.Event.NEXT;
       }
 
@@ -2180,7 +2165,6 @@ const experiment = (blockCount) => {
       // update the trial handler
       if (currentLoop instanceof MultiStairHandler) {
         currentLoop.addResponse(key_resp.corr, level);
-        logger("level passed to addResponse", level);
       } else {
         console.error("currentLoop is not MultiStairHandler");
       }
