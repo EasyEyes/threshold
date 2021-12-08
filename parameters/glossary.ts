@@ -211,7 +211,7 @@ export const GLOSSARY: Glossary = {
   },
   calibrateDistanceCheckBool: {
     name: "calibrateDistanceCheckBool",
-    availability: "soon",
+    availability: "now",
     example: "FALSE",
     explanation:
       'When TRUE, requests checking of the calibrator by the participant, provided they have a tape measure, meter stick, or yard stick, or failing that, a ruler. After each size or distance calibration, if calibrationDistanceCheckBool=TRUE, then we will ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick; a 12" or 30 cm ruler could be used if we exclude long distances), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. If no device, then we skip the rest of the calibrations that need a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like “16 3/16” or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. Our current scheme with the calibrator is to have a Boolean parameter for each calibration. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people on Prolific and mention in our job description that they must have a tape measure, meter stick or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.\n',
@@ -220,7 +220,7 @@ export const GLOSSARY: Glossary = {
   },
   calibrateGazeCheckBool: {
     name: "calibrateGazeCheckBool",
-    availability: "soon",
+    availability: "now",
     example: "FALSE",
     explanation:
       "To check gaze tracking we don’t need a measuring device, and hardly any instructions. I think we could just put up our fixation cross in a few random places and ask them to click on it. It will be very similar to the training and we don’t need to tell the participant that we progressed from training to checking.",
@@ -238,7 +238,7 @@ export const GLOSSARY: Glossary = {
   },
   calibrateScreenSizeCheckBool: {
     name: "calibrateScreenSizeCheckBool",
-    availability: "soon",
+    availability: "now",
     example: "TRUE",
     explanation:
       "Ask the participant to use a ruler, yardstick, meter stick, or tape measure to measure the distance directly to assess accuracy.",
@@ -252,7 +252,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Use this to turn EasyEyes distance tracking on and off. Before tracking can begin you must make an initial calibration of distance, either by easyEyesBlindSpotBool or easyEyesPupilDistanceBool, or both. Distance tracking uses the webcam to monitor position of the participant's head. It ignores where you're looking. The head is not a point, of course. Since this is for vision research, the point we estimate is the midpoint between the two eyes. That point is sometime called cyclopean, referring to the mythical one-eyed Cyclops in Homer's Odyssey. From each webcam image we extract: 1. the viewing distance, from the midpoint (between the two eyes) to the screen, and 2. the near point, which is the point in the plane of the screen that is closest to the midpoint between the eyes. When rendering visual stimulus specified in deg, it is necessary to take the viewing distance (and near point) into account. The near point becomes important at large eccentricities and is usually ignored at small eccentricities.",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
@@ -573,7 +573,7 @@ export const GLOSSARY: Glossary = {
   },
   readingCorpusURL: {
     name: "readingCorpusURL",
-    availability: "later",
+    availability: "now",
     example: "http://xxx",
     explanation:
       'Book of readable text. We typically use "The phantom tollbooth" a popular American children\'s book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. Every passage selection begins and ends at a sentence break.',
@@ -582,17 +582,17 @@ export const GLOSSARY: Glossary = {
   },
   readingDefineSingleLineSpacingAs: {
     name: "readingDefineSingleLineSpacingAs",
-    availability: "later",
-    example: "nominal size",
+    availability: "now",
+    example: "nominalSize",
     explanation:
-      'What shall we say is the "single" line spacing of the text to be read? \n• "nominal size" is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. \n• "font" defines single line spacing as the font\'s built-in line spacing, which can be enormous in fonts with large flourishes. \n• "twice x-height" defines single line spacing as twice the font\'s x-height.',
+      'What shall we say is the "single" line spacing of the text to be read? \n• "nominalSize" is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. \n• "font" defines single line spacing as the font\'s built-in line spacing, which can be enormous in fonts with large flourishes. \n• "twice x-height" defines single line spacing as twice the font\'s x-height.',
     type: "categorical",
     default: "nominalSize",
     categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
   },
   readingFont: {
     name: "readingFont",
-    availability: "later",
+    availability: "now",
     example: "Arial",
     explanation:
       "Font name, taken from the name of font file, which may include a style. See targetFont for details.",
@@ -611,7 +611,7 @@ export const GLOSSARY: Glossary = {
   },
   readingFontStyle: {
     name: "readingFontStyle",
-    availability: "later",
+    availability: "now",
     example: "bold",
     explanation:
       "Font style: regular, bold, italic, or boldItalic. See targetFontStyle for details.",
@@ -621,7 +621,7 @@ export const GLOSSARY: Glossary = {
   },
   readingLinesPerPage: {
     name: "readingLinesPerPage",
-    availability: "later",
+    availability: "now",
     example: "8",
     explanation: "Number of lines of text per page.",
     type: "numerical",
@@ -629,7 +629,7 @@ export const GLOSSARY: Glossary = {
   },
   readingMaxCharactersPerLine: {
     name: "readingMaxCharactersPerLine",
-    availability: "later",
+    availability: "now",
     example: "57",
     explanation:
       "Used for line breaking. Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters, so, counting the space between words, that's (8 to 10) *6=(48 to 60) spacings per line. Line breaking without hyphenation will produce an average line length maybe half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 spacings.",
@@ -638,7 +638,7 @@ export const GLOSSARY: Glossary = {
   },
   readingMultipleOfSingleLineSpacing: {
     name: "readingMultipleOfSingleLineSpacing",
-    availability: "later",
+    availability: "now",
     example: "1.2",
     explanation:
       'Set the line spacing (measured baseline to baseline) as this multiple of "single" line spacing, which is defined by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
@@ -647,7 +647,7 @@ export const GLOSSARY: Glossary = {
   },
   readingNominalSizeDeg: {
     name: "readingNominalSizeDeg",
-    availability: "later",
+    availability: "now",
     example: "3",
     explanation:
       'If readingSetSizeBy is "nominal", then set point size to readingNominalSizeDeg*pixPerDeg.',
@@ -656,7 +656,7 @@ export const GLOSSARY: Glossary = {
   },
   readingNumberOfPossibleAnswers: {
     name: "readingNumberOfPossibleAnswers",
-    availability: "later",
+    availability: "now",
     example: "3",
     explanation:
       "Number of possible answers for each question. Only one of the possible answers is right.",
@@ -665,23 +665,24 @@ export const GLOSSARY: Glossary = {
   },
   readingNumberOfQuestions: {
     name: "readingNumberOfQuestions",
-    availability: "later",
+    availability: "now",
     example: "4",
-    explanation: "Number of recall questions posed on each trial. ",
+    explanation:
+      'Number of recall questions posed after each reading. Each question asks "Which of the following words appeared in the passage that you just read?" Below are several words. The number of words, N, is set by readingNumberOfPossibleAnswers. The actual word is a random sample from the passage read, omitting the first and last pages. The foils (wrong answers) are taken from the corpus, and are selected to have approximately the same frequency in the corpus as the correct answer. We will, once, compute the word frequency in the corpus of every word in the corpus. We can save this as a two column table (word and number of instances in the corpus), sorted by frequency. Once EasyEyes randomly selects the word that will be the correct answer, EasyEyes will look in the word-frequency table and take, as foils, the N-1 words with frequency most similar to that of the correct answer. Then the N words are arranged in alphabetical order below the question. The participant responds by clicking on the chosen word. It\'s "forced choice"; the participant must click a word. We give a "correct" beep if the answer is right. We repeat this several times, as specified by readingNumberOfQuestions.',
     type: "integer",
     default: "3",
   },
   readingPages: {
     name: "readingPages",
-    availability: "later",
-    example: "5",
+    availability: "now",
+    example: "4",
     explanation: "Number of pages to be read.",
     type: "numerical",
     default: "4",
   },
   readingSetSizeBy: {
     name: "readingSetSizeBy",
-    availability: "later",
+    availability: "now",
     example: "spacing",
     explanation:
       'How do you specify the size of the text to be read?\n• "nominal" will set the point size of the text to readingNominalSizeDeg*pixPerDeg,  \n• "x-height" will adjust text size to achieve the specified x-height (the height of lowercase x),  i.e. readingXHeightDeg. \n• "spacing" will adjust the text size to achieve the specified letter-to-letter readingSpacingDeg.',
@@ -691,7 +692,7 @@ export const GLOSSARY: Glossary = {
   },
   readingSingleLineSpacingDeg: {
     name: "readingSingleLineSpacingDeg",
-    availability: "later",
+    availability: "now",
     example: "2",
     explanation:
       'Explicit value of "single" line spacing. This is ignored unless readingDefineSingleLineSpacingAs is "explicit".',
@@ -700,7 +701,7 @@ export const GLOSSARY: Glossary = {
   },
   readingSpacingDeg: {
     name: "readingSpacingDeg",
-    availability: "later",
+    availability: "now",
     example: "0.5",
     explanation:
       'If readingSetSizeBy is "spacing", the point size of the text to be read is adjusted to make this the average center-to-center spacing (deg) of neighboring characters in words displayed. Text is displayed with the font\'s default spacing, and the point size is adjusted to achieve the requested average letter spacing.',
@@ -709,8 +710,8 @@ export const GLOSSARY: Glossary = {
   },
   readingXHeightDeg: {
     name: "readingXHeightDeg",
-    availability: "later",
-    example: "",
+    availability: "now",
+    example: "0.5",
     explanation:
       'If readingSetSizeBy is "x-height", then set point size to to achieve this specified x-height (the height of lowercase x). ',
     type: "numerical",
@@ -760,6 +761,15 @@ export const GLOSSARY: Glossary = {
       "Allow participant to respond by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like.",
     type: "boolean",
     default: "FALSE",
+  },
+  showAlphabetEarlyBool: {
+    name: "showAlphabetEarlyBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "If showAlphabetEarlyBool is TRUE then alphabet is displayed at target onset. Otherwise it is displayed 0.5 s after target offset. You need an early alphabet if you want to allow an early response (responseAllowedEarlyBool) by clicking.",
+    type: "",
+    default: "",
   },
   showAlphabetWhere: {
     name: "showAlphabetWhere",
@@ -845,6 +855,24 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "none",
     categories: ["none", "right"],
+  },
+  showTakeABreakCreditBool: {
+    name: "showTakeABreakCreditBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Displays the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, bottom up, with glowing green. Empty for zero and full for 1.",
+    type: "boolean",
+    default: "TRUE",
+  },
+  showTargetSpecsBool: {
+    name: "showTargetSpecsBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "For debugging. If true, show target size and spacing in deg in lower left corner, similar to the trial/block counter.",
+    type: "boolean",
+    default: "FALSE",
   },
   showViewingDistanceBool: {
     name: "showViewingDistanceBool",
@@ -963,6 +991,24 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "linear",
     categories: ["log", "linear"],
+  },
+  takeABreakMinimumDurationSec: {
+    name: "takeABreakMinimumDurationSec",
+    availability: "now",
+    example: "30",
+    explanation:
+      "The minimum duration when EasyEyes takes a break. See takeABreakTrialCredit.",
+    type: "numerical",
+    default: "30",
+  },
+  takeABreakTrialCredit: {
+    name: "takeABreakTrialCredit",
+    availability: "now",
+    example: "0.01",
+    explanation:
+      'Intended for long blocks, over 100 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don\'t within a long block, and later complain that they feel stressed and that their corneas sting (because they didn\'t blink during the block), so we added this feature to force a break every so often. takeABreakTrialCredit sets the value that accrues from performing each trial of this condition. Set it to zero for no breaks. The block\'s running total, regardless of condition, is kept in internal parameter takeABreakCredit, which is zero at the beginning of each block. When takeABreakCredit exceeds 1, EasyEyes immediately subtracts 1 and takes a break. \nTHE BREAK\nEasyEyes displays a pop up window with a dark surround, "Good work! Please take a brief break to relax and blink." Responses (except ESCAPE) and the nudger are suspended for the time specified by takeABreakMinimumDurationSec. Then EasyEyes reenables responses, adds an Ok button, and adds text, "To continue hit OK or RETURN." The participant can take as long as they need. When they hit OK (or RETURN), EasyEyes closes the pop up window, reenables the nudger (If it was formerly active), and resumes testing. ',
+    type: "numerical",
+    default: "0.01",
   },
   targetAlphabet: {
     name: "targetAlphabet",
@@ -1119,6 +1165,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  targetSafetyMarginSec: {
+    name: "targetSafetyMarginSec",
+    availability: "now",
+    example: "0.5",
+    explanation:
+      "EasyEyes guarantees a blank time of targetSafetyMarginSec before and after the target presentation to minimize forward and backward masking of the target by instructions and other non-stimulus elements, including the alphabet and nudger. \n     ONSET: Since target onset is almost immediately after trial initiation, initiation of a trial is disabled until targetSafetyMarginSec has passed since the nudger and instructions were erased. \n     Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to alphabet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves to the crosshair, the instruction contrast will initally be 1 when the cursor is at the alphabet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). \n     OFFSET: After target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the alphabet. (Nudging isn't allowed until after the participant responds.)",
+    type: "numerical",
+    default: "0,7",
+  },
   targetSizeDeg: {
     name: "targetSizeDeg",
     availability: "now",
@@ -1237,6 +1292,15 @@ export const GLOSSARY: Glossary = {
       "At the beginning of the block, we encourage the participant to adjust their viewing distance (moving head or display) to approximate the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. All conditions within a block must have the same desired viewing distance.\n     The viewing-distance nudger (Closer! Farther!) is working fine at getting the participant to the right distance, but we need to cancel any trials in which the stimulus was obscured by nudging. We have a three-period solution, that is being introduced in two stages. First we describe the ideal scheme that is our goal. Period A. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging and the rest of our software ignores it. Period B. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus we also allow nudging, but any nudge cancels the trial. Period C. From the end of the stimulus until the observer responds we suspend nudging (so the nudge won't interfere with remembering the target). Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. I'm not sure that the current version of MultistairHandler will cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during period A, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during period B we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. ",
     type: "numerical",
     default: "40",
+  },
+  viewingDistanceNudgingBool: {
+    name: "viewingDistanceNudgingBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Set TRUE to enable the nudger. The nudger compares measured viewing distance to viewingDistanceDesiredCm, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range.\nPROTECTING THE STIMULUS FROM NUDGING. The nudger will never occlude (or forward or backward mask) the stimulus. Think of the trial as beginning at the participant's click (or keypress) requesting the stimulus and ending at the click (or keypress) response. This leaves a dead time from the response until the click requesting the next trial. EasyEyes nudges only in the dead time. Furthermore, to prevent forward masking, the nudge must end at least 700 ms before the click requesting a trial even though the participant's timing may be unpredictable.  EasyEyes achieves that by ignoring attempts to click (or respond) during nudging and until 700 ms after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n",
+    type: "",
+    default: "",
   },
   wirelessKeyboardNeededBool: {
     name: "wirelessKeyboardNeededBool",

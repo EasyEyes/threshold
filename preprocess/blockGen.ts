@@ -29,19 +29,19 @@ export const splitIntoBlockFiles = (df: any) => {
       // zip.file(blockFileName, blockCSVString);
     });
 
-    // Create a "blockCount" file, just one column with the the indices of the blocks
-    const blockCountCSVString = Papa.unparse({
-      fields: ["block"],
-      data: blockIndices.block.map((x: any) => [x]),
-    });
-    const blockCountFileName = "blockCount.csv";
+  // Create a "blockCount" file, just one column with the the indices of the blocks
+  const blockCountCSVString = Papa.unparse({
+    fields: ["block"],
+    data: blockIndices.block.map((x: any) => [x]),
+  });
+  const blockCountFileName = "blockCount.csv";
 
-    // store blockCount file
-    const blockCountBlob = new Blob([blockCountCSVString], { type: "text/csv" });
-    const blockCountFile = new File([blockCountBlob], blockCountFileName, {
-      type: "text/csv",
-    });
-    resultFileList.push(blockCountFile);
+  // store blockCount file
+  const blockCountBlob = new Blob([blockCountCSVString], { type: "text/csv" });
+  const blockCountFile = new File([blockCountBlob], blockCountFileName, {
+    type: "text/csv",
+  });
+  resultFileList.push(blockCountFile);
 
-    return resultFileList;
+  return resultFileList;
 };

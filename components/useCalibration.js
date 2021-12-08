@@ -39,6 +39,7 @@ export const formCalibrationList = (reader) => {
         desiredDistanceCm: reader.has("viewingDistanceDesiredCm")
           ? reader.read("viewingDistanceDesiredCm")[0]
           : undefined,
+        desiredDistanceTolerance: reader.read("viewingDistanceAllowedRatio")[0],
         desiredDistanceMonitor: reader.has("viewingDistanceDesiredCm"),
         fullscreen: true,
       },
