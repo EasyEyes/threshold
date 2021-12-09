@@ -5,7 +5,7 @@
 import { debug, sleep } from "./components/utils.js";
 
 const useConsent = true;
-const useRC = false;
+const useRC = true;
 
 import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
 const { PsychoJS, EventManager } = core;
