@@ -310,7 +310,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationStrategy: {
     name: "fixationLocationStrategy",
-    availability: "now",
+    availability: "soon",
     example: "centerFixation",
     explanation:
       'Choose the strategy by which EasyEyes should place the point of fixation, which is the origin of the visual coordinate system. This is complicated. Most experimenters will choose "centerFixation", which simply places fixation at the center of the screen. But for peripheral testing you might want to put fixation near one edge to maximize the eccentricity of a target at the other edge. To test even farther into the periphery, you might want to put fixation off-screen by putting tape on a bottle or a box and drawing a fixation cross on it. Those cases and others are handled by choosing other strategies. Fixation, whether, on- or off-screen, is always specified as a point in (x,y) pixel coordinates in the plane of the display. We never change fixation within a block, so all conditions in a block must have the same fixation point and fixationLocationStrategy. This is checked by the pre-processor. If the strategy refers to targets, we consider all possible targets across all conditions within the block.  \n• "asSpecifed" indicates that fixation is specified by (fixationLocationXScreen,  fixationLocationYScreen). \n• "centerFixation" places fixation at the center of the screen. \n• "centerTargets" sets the (possibly offscreen) fixation location so as to maximize the screen margin around the edges of all the possible targets.  \n• "centerFixationAndTargets" places fixation so as to maximize the screen margin around the fixation and the edges of all the possible targets within the block. It may be impossible to satisfy the strategies that mention targets without reducing viewing distance. Ideally, the pre-processor would flag this error before we start running the experiment.',
@@ -734,6 +734,15 @@ export const GLOSSARY: Glossary = {
       "Allow participant to respond by clicking the target letter in the alphabet. When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too.",
     type: "boolean",
     default: "TRUE",
+  },
+  responseRequiresAlphabet: {
+    name: "responseRequiresAlphabet",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "It's obvious that identifying a letter by clicking requires an alphabet to click on. However, sometimes we show a foreign alphabet with Roman labels, to enable use of a Roman keyboard, or the scientist may just want the actual letter shapes to be visible while the participant types. This flag tells EasyEyes to display alphabet whenever the participant is responding.",
+    type: "boolean",
+    default: "FALSE",
   },
   responseSpokenBool: {
     name: "responseSpokenBool",
