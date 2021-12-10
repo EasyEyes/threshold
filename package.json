@@ -6,7 +6,6 @@
   "main": "threshold.js",
   "scripts": {
     "setup": "npm run setup:preprocessor && npm run setup:psychojs",
-    "setup:preprocessor": "pip install -r addons/legacy/requirements.txt && python addons/legacy/preprocessor.py experiment.csv && cp experiment.csv conditions/experiment.csv",
     "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm i && npm run build:css && npm run build:js && cd ..",
     "format": "prettier --write \"**/*.{js,css,html,md,ts}\"",
     "phrases": "node server/fetch-languages-sheets.js && git add components/i18n.js",
