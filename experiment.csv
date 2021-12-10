@@ -1,23 +1,28 @@
-_consentForm,202009 IRB-FY2016-404 Remote Testing - Perception Research.pdf,
-_debriefForm,201909 IRB-FY2016-404 Perception debriefing.pdf,
-block,1,2
-calibrateTrackDistanceBool,FALSE,FALSE
-conditionName,triplet,triplet
-conditionTrials,1,1
-showCounterBool,TRUE,TRUE
-showGridsBool,TRUE,TRUE
-spacingDirection,radial,radial
-spacingOverSizeRatio,1.4,1.4
-spacingRelationToSize,typographic,typographic
-targetAlphabet,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz
-targetDurationSec,0.2,0.2
-targetEccentricityXDeg,-10,-10
-targetEccentricityYDeg,0,0
-targetFont,RobotoMono-Regular.woff2,RobotoMono-Regular.woff2
-targetMinimumPix,8,8
-targetTask,identify,identify
-thresholdBeta,2.3,2.3
-thresholdDelta,0.01,0.01
-thresholdGuess,2,2
-thresholdGuessLogSd,3,3
-thresholdParameter,spacing,spacing
+﻿_about,Take a break every 3 trials. Minimum break 5 s.,,,,
+_participantRecruitmentService,Prolific,,,,
+block,1,1,2,2,3
+calibrateBlindSpotBool,TRUE,TRUE,TRUE,TRUE,TRUE
+calibrateScreenSizeBool,TRUE,TRUE,TRUE,TRUE,TRUE
+calibrateTrackDistanceBool,FALSE,FALSE,FALSE,FALSE,FALSE
+conditionName,printString,printString,printLetters,printLetters,printString
+conditionTrials,6,6,6,6,6
+showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE
+showGridsBool,FALSE,FALSE,FALSE,FALSE,FALSE
+spacingDirection,radial,radial,radial,radial,radial
+spacingRelationToSize,typographic,typographic,typographic,typographic,typographic
+takeABreakMinimumDurationSec,5,5,5,5,5
+takeABreakTrialCredit,0.33,0.33,0.33,0.33,0.33
+targetAlphabet,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz
+targetDurationSec,0.2,0.2,0.2,0.2,0.2
+targetEccentricityXDeg,-5,5,-5,5,5
+targetEccentricityYDeg,0,0,0,0,0
+targetFont,Roboto Mono,Roboto Mono,Roboto Mono,Roboto Mono,Roboto Mono
+targetFontSource,google,google,google,google,google
+targetMinimumPix,8,8,8,8,8
+targetTask,identify,identify,identify,identify,identify
+thresholdBeta,2.3,2.3,2.3,2.3,2.3
+thresholdDelta,0.01,0.01,0.01,0.01,0.01
+thresholdGuess,2,2,2,2,2
+thresholdGuessLogSd,3,3,3,3,3
+thresholdParameter,spacing,spacing,spacing,spacing,spacing
+viewingDistanceDesiredCm,50,50,50,50,50

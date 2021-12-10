@@ -106,6 +106,12 @@ import {
   readBookText,
   readingTaskFields,
 } from "./components/readingUtils.js";
+import {
+  hideTrialBreakWidget,
+  hideTrialProceedButton,
+  showTrialBreakWidget,
+  showTrialProceedButton,
+} from "./components/trialBreak.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -382,6 +388,16 @@ const experiment = (blockCount) => {
   var globalClock;
   var routineTimer, routineClock, blockClock;
   var initInstructionClock, eduInstructionClock, trialInstructionClock;
+
+  // TODO uncomment after testing
+  // var showTakeABreakCreditBool = paramReader.read("showTakeABreakCreditBool")[0];
+  var takeABreakMinimumDurationSec;
+  var takeABreakTrialCredit;
+  var currentTrialCredit;
+  var trialBreakStartTime = 0;
+  var trialBreakStatus;
+  var trialBreakButtonStatus;
+
   async function experimentInit() {
     logger("Window (for grid purposes)", psychoJS.window);
 
@@ -891,6 +907,27 @@ const experiment = (blockCount) => {
           endLoopIteration(trialsLoopScheduler, snapshot)
         );
       }
+
+      // initialize takeABreakCredit values
+      // TODO read values from experiment file
+      logger(
+        "takeABreakTrialCredit",
+        paramReader.read("takeABreakTrialCredit")[currentBlockIndex]
+      );
+      logger(
+        "takeABreakMinimumDurationSec",
+        paramReader.read("takeABreakMinimumDurationSec")[currentBlockIndex]
+      );
+      currentTrialCredit = 0;
+      trialBreakStatus = false;
+      trialBreakButtonStatus = false;
+      hideTrialBreakWidget();
+      takeABreakTrialCredit = paramReader.read("takeABreakTrialCredit")[
+        currentBlockIndex
+      ];
+      takeABreakMinimumDurationSec = paramReader.read(
+        "takeABreakMinimumDurationSec"
+      )[currentBlockIndex];
 
       return Scheduler.Event.NEXT;
     };
@@ -2151,50 +2188,91 @@ const experiment = (blockCount) => {
       //   rc.resumeNudger();
       // }, 700);
 
-      //------Ending Routine 'trial'-------
-      for (const thisComponent of trialComponents) {
-        if (typeof thisComponent.setAutoDraw === "function") {
-          thisComponent.setAutoDraw(false);
+      // if trialBreak is not ongoing
+      console.log("TRIAL ROUTINE END");
+      if (!trialBreakStatus) {
+        //------Ending Routine 'trial'-------
+        for (const thisComponent of trialComponents) {
+          if (typeof thisComponent.setAutoDraw === "function") {
+            thisComponent.setAutoDraw(false);
+          }
         }
-      }
-      // was no response the correct answer?!
-      if (key_resp.keys === undefined) {
-        console.error("[key_resp.keys] No response error.");
-      }
-      // store data for psychoJS.experiment (ExperimentHandler)
-      // update the trial handler
-      if (currentLoop instanceof MultiStairHandler) {
-        currentLoop.addResponse(key_resp.corr, level);
-      } else {
-        console.error("currentLoop is not MultiStairHandler");
-      }
+        // was no response the correct answer?!
+        if (key_resp.keys === undefined) {
+          console.error("[key_resp.keys] No response error.");
+        }
+        // store data for psychoJS.experiment (ExperimentHandler)
+        // update the trial handler
+        if (currentLoop instanceof MultiStairHandler) {
+          currentLoop.addResponse(key_resp.corr, level);
+        } else {
+          console.error("currentLoop is not MultiStairHandler");
+        }
 
-      addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+        addTrialStaircaseSummariesToData(currentLoop, psychoJS);
 
-      psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
-      psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
-      if (typeof key_resp.keys !== "undefined") {
-        // we had a response
-        psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
-        psychoJS.experiment.addData(
-          "trialRoutineDurationFromBeginSec",
-          trialClock.getTime()
-        );
-        psychoJS.experiment.addData(
-          "trialRoutineDurationFromPreviousEndSec",
-          routineClock.getTime()
-        );
+        psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
+        psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
+        if (typeof key_resp.keys !== "undefined") {
+          // we had a response
+          psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
+          psychoJS.experiment.addData(
+            "trialRoutineDurationFromBeginSec",
+            trialClock.getTime()
+          );
+          psychoJS.experiment.addData(
+            "trialRoutineDurationFromPreviousEndSec",
+            routineClock.getTime()
+          );
 
+          routineTimer.reset();
+          routineClock.reset();
+        }
+
+        key_resp.stop();
+        // the Routine "trial" was not non-slip safe, so reset the non-slip timer
         routineTimer.reset();
         routineClock.reset();
+
+        currentTrialCredit += takeABreakTrialCredit;
+        logger("currentTrialCredit", currentTrialCredit);
+        // check if trialBreak should be triggered
+        if (currentTrialCredit >= 1) {
+          trialBreakStartTime = Date.now();
+          trialBreakStatus = true;
+          currentTrialCredit -= 1;
+
+          const trialBreakBody = instructionsText.trialBreak(
+            rc.language.value,
+            responseType
+          );
+          showTrialBreakWidget(trialBreakBody);
+
+          hideTrialProceedButton();
+        }
       }
 
-      key_resp.stop();
-      // the Routine "trial" was not non-slip safe, so reset the non-slip timer
-      routineTimer.reset();
-      routineClock.reset();
+      // if trialBreak is ongoing
+      if (trialBreakStatus) {
+        const breakTimeElapsed = (Date.now() - trialBreakStartTime) / 1000;
+        if (
+          !trialBreakButtonStatus &&
+          breakTimeElapsed >= takeABreakMinimumDurationSec
+        ) {
+          trialBreakButtonStatus = true;
+          showTrialProceedButton();
+          document.getElementById("trial-proceed").onclick = () => {
+            trialBreakStatus = false;
+            trialBreakButtonStatus = false;
+            hideTrialBreakWidget();
+            hideTrialProceedButton();
+          };
+        }
 
-      return Scheduler.Event.NEXT;
+        return Scheduler.Event.FLIP_REPEAT;
+      } else {
+        return Scheduler.Event.NEXT;
+      }
     };
   }
 

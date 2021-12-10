@@ -81,6 +81,16 @@ export const instructionsText = {
       },
     },
   },
+  trialBreak: (L, responseType = 2) => {
+    switch (responseType) {
+      case 0:
+        return phrases.T_continueHitReturn[L];
+      case 1:
+        return phrases.T_continueClickProceed[L];
+      default:
+        return phrases.T_continueHitReturnOrClickProceed[L];
+    }
+  },
 };
 
 export const addBeepButton = (L, synth) => {
