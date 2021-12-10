@@ -1,4 +1,6 @@
-﻿/*****************
+﻿/* eslint-disable no-redeclare */
+
+/*****************
  * Crowding Test *
  *****************/
 
@@ -13,7 +15,7 @@ const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
 
 ////
-import * as jsQUEST from "./addons/jsQUEST.module.js";
+import * as jsQUEST from "./components/addons/jsQUEST.module.js";
 
 ////
 /* ------------------------------- Components ------------------------------- */
