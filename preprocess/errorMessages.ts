@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { GLOSSARY } from "../parameters/glossary";
 import { getNumericalSuffix, verballyEnumerate } from "./utilities";
 
@@ -219,7 +220,7 @@ export const NONSEQUENTIAL_BLOCK_VALUE = (
   nonsequentials: { value: number; previous: number; index: number }[],
   blockValues: number[]
 ): EasyEyesError => {
-  let problemStatement: string;
+  // let problemStatement: string;
   const illustratedValues =
     '<span class="error-parameter">' +
     blockValues
@@ -265,6 +266,7 @@ export const NO_RESPONSE_POSSIBLE = (
 ): EasyEyesError => {
   const startingCondition = zeroIndexed ? 0 : 1;
   const plural = conditionsLacking.length > 1 ? "s" : "";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const whereNotPermitted =
     conditionsLacking.length &&
     conditionsLacking.length !== totalNumberOfConditions
@@ -276,7 +278,7 @@ export const NO_RESPONSE_POSSIBLE = (
           )
         )} condition${plural}.`
       : `any condition.`;
-  const hintBlob = `If you intend to collect data from participant, make sure that, in each condition, at least one of <span class="error-parameter">responseClickedBool</span>, <span class="error-parameter">responseTypedBool</span>, or <span class="error-parameter">responseEasyEyesKeypadBool</span> is true. If you'd like to simulate a participant, set <span class="error-parameter">simulateParticipantBool</span> to true instead. In your case, no response modality was permitted in ${whereNotPermitted}`;
+  // const hintBlob = `If you intend to collect data from participant, make sure that, in each condition, at least one of <span class="error-parameter">responseClickedBool</span>, <span class="error-parameter">responseTypedBool</span>, or <span class="error-parameter">responseEasyEyesKeypadBool</span> is true. If you'd like to simulate a participant, set <span class="error-parameter">simulateParticipantBool</span> to true instead. In your case, no response modality was permitted in ${whereNotPermitted}`;
   return {
     name: "Experiment lacks any response",
     message:

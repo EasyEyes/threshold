@@ -118,7 +118,7 @@ export const addUniqueLabelsToDf = (df: any): any => {
   const blocks = df.select("block").toArray();
   const blockCounts: any = {};
   const labels: string[] = [];
-  blocks.forEach((nestedBlock: number[], i: number) => {
+  blocks.forEach((nestedBlock: number[]) => {
     const block = nestedBlock[0];
     if (blockCounts.hasOwnProperty(block)) {
       blockCounts[block] += 1;

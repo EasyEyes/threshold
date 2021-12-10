@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-case-declarations */
 /* eslint-disable no-prototype-builtins */
 /**
@@ -55,6 +56,7 @@ export const validatedCommas = (
       correctLength: number;
     }[] = [];
     Object.entries(rowLengths)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .filter(([length, _]) => length !== lengthOrdering[0])
       .forEach(([badLength, rowNums]) => {
         const offendingOfThisLength = rowNums.map((i) => {
@@ -438,7 +440,7 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
   return [];
 };
 
-const _getDuplicateValuesAndIndicies = (
+export const _getDuplicateValuesAndIndicies = (
   l: any[]
 ): { [key: string]: number[] } => {
   // const seen: {[key: T]: number[]} = {};
@@ -452,7 +454,11 @@ const _getDuplicateValuesAndIndicies = (
   });
   return seen;
 };
-const _areColumnValuesUnique = (targetColumn: string, df: any): boolean => {
+
+export const _areColumnValuesUnique = (
+  targetColumn: string,
+  df: any
+): boolean => {
   if (df.unique(targetColumn) !== df.select(targetColumn)) return false;
   return true;
 };
@@ -468,6 +474,7 @@ export const isConsentFormMissing = (
 
   return errorList;
 };
+
 export const isDebriefFormMissing = (
   requestedDebriefForm: string,
   existingFormList: string[]
@@ -499,9 +506,10 @@ export const isFontMissing = (
   return errorList;
 };
 
-// --------------- FUTURE ---------------
-const parameterSpecificChecks = (experiment: any): any => {
-  // TODO misc checks for other parameters
-  // check font files according to 'targetFontSelection'
-  // check consent file according to '_consentForm'
-};
+/* --------------------------------- Future --------------------------------- */
+
+// export const parameterSpecificChecks = (experiment: any): any => {
+//   // TODO misc checks for other parameters
+//   // check font files according to 'targetFontSelection'
+//   // check consent file according to '_consentForm'
+// };
