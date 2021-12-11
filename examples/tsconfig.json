@@ -3,5 +3,5 @@
     "esModuleInterop": true,
     "downlevelIteration": true,
   },
-  "include": ["../preprocess/main.ts"]
+  "include": ["../preprocess/main.ts", "../node_modules/dataframe-js/dataframe-js.d.ts",]
 }
