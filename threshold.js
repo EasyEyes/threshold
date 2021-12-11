@@ -15,7 +15,19 @@ const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
 
 ////
+/* -------------------------------- External -------------------------------- */
 import * as jsQUEST from "./components/addons/jsQUEST.module.js";
+
+////
+/* ----------------------------------- CSS ---------------------------------- */
+import "./psychojs/out/psychojs-2021.3.0.css";
+import "./components/css/utils.css";
+import "./components/css/custom.css";
+import "./components/css/instructions.css";
+import "./components/css/showAlphabet.css";
+import "./components/css/forms.css";
+import "./components/css/trialBreak.css";
+import "./components/css/widgets.css";
 
 ////
 /* ------------------------------- Components ------------------------------- */

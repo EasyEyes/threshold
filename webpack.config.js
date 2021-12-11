@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-undef */
+
 const webpack = require("webpack");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
@@ -31,9 +34,18 @@ const config = {
 
 const plugins = [new webpack.ProgressPlugin(), new CleanWebpackPlugin()];
 
-module.exports = (env) => {
+module.exports = (env, options) => {
+  const extra = {};
+  if (options.name)
+    extra.output = {
+      path: __dirname + `/examples/${options.name}/js`,
+      filename: "threshold.min.js",
+      sourceMapFilename: "threshold.min.js.map",
+    };
+
   if (env.development) {
     return Object.assign({}, config, {
+      ...extra,
       mode: "development",
       optimization: {
         minimize: false,

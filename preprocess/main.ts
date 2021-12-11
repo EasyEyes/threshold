@@ -7,29 +7,25 @@ import { addUniqueLabelsToDf, dataframeFromPapaParsed } from "./utilities";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 
-const userLocal: any = { current: null };
-const errorsLocal: any = { current: null };
-const callbackLocal: any = { current: null };
-
 export const preprocessExperimentFile = async (
   file: File,
   user: any,
   errors: EasyEyesError[],
   callback: any
 ) => {
+  const completeCallback = (parsed: Papa.ParseResult<any>) => {
+    prepareExperimentFileForThreshold(parsed, user, errors, callback, "web");
+  };
+
   if (file.name.includes("xlsx")) {
     const data = await file.arrayBuffer();
     const book = XLSX.read(data);
-
-    userLocal.current = user;
-    errorsLocal.current = errors;
-    callbackLocal.current = callback;
 
     for (const sheet in book.Sheets) {
       const csv: any = XLSX.utils.sheet_to_csv(book.Sheets[sheet]);
       Papa.parse(csv, {
         skipEmptyLines: true,
-        complete: prepareExperimentFileForThreshold,
+        complete: completeCallback,
       });
       // Only parse the very first sheet
       break;
@@ -38,19 +34,24 @@ export const preprocessExperimentFile = async (
     Papa.parse(file, {
       dynamicTyping: false, // check out index 23; make sure null values preserve
       skipEmptyLines: true,
-      complete: prepareExperimentFileForThreshold,
+      complete: completeCallback,
     });
 };
 
-const prepareExperimentFileForThreshold = (parsed: Papa.ParseResult<any>) => {
+export const prepareExperimentFileForThreshold = (
+  parsed: Papa.ParseResult<any>,
+  user: any,
+  errors: any[],
+  callback: any,
+  space: string
+) => {
   // Recruitment
   if (
     parsed.data.find((i: string[]) => i[0] == "_participantRecruitmentService")
   ) {
-    userLocal.current.currentExperiment.participantRecruitmentServiceName =
-      parsed.data.find(
-        (i: string[]) => i[0] == "_participantRecruitmentService"
-      )?.[1];
+    user.currentExperiment.participantRecruitmentServiceName = parsed.data.find(
+      (i: string[]) => i[0] == "_participantRecruitmentService"
+    )?.[1];
   }
 
   // Check that every row has the same number of values
@@ -61,23 +62,23 @@ const prepareExperimentFileForThreshold = (parsed: Papa.ParseResult<any>) => {
 
   // Run the compiler checks on our experiment
   try {
-    errorsLocal.current.push(
+    errors.push(
       ...(unbalancedCommasError
         ? [unbalancedCommasError, ...validateExperimentDf(df)]
         : validateExperimentDf(df))
     );
   } catch (e) {
     console.error(e);
-    if (unbalancedCommasError) errorsLocal.current.push(unbalancedCommasError);
+    if (unbalancedCommasError) errors.push(unbalancedCommasError);
   }
 
   df = addUniqueLabelsToDf(df);
 
   /* --------------------------------- Errors --------------------------------- */
-  console.log(errorsLocal.current);
-  if (errorsLocal.current.length) {
-    callbackLocal.current([], errorsLocal.current);
+  if (errors.length) {
+    console.log("ERRORS", errors);
+    callback([], errors);
   } else {
-    callbackLocal.current(splitIntoBlockFiles(df), []);
+    callback(splitIntoBlockFiles(df, space), []);
   }
 };

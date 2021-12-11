@@ -1,6 +1,10 @@
 # lib
 js
 
+examples/*/**
+!examples/fonts/*
+!examples/forms/*
+
 node_modules
 
 debugExperiment.csv

@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+  },
+  "include": ["../preprocess/main.ts"]
+}
