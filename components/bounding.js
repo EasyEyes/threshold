@@ -29,9 +29,15 @@ export const getTypographicHeight = (
   fixationStimulus,
   displayOptions
 ) => {
-  const fixationWidth = fixationStimulus.getBoundingBox(true).width;
+  const fixationBoundingBox = fixationStimulus.getBoundingBox(true);
+  const fixationWidth = fixationBoundingBox.width;
+  const fixationHeight = fixationBoundingBox.height;
+
   // TODO generalize to other fixation locations, ie not just [0,0]
-  const usableSpace = Math.round(window._size[0] / 2 - fixationWidth);
+  const usableSpace = [
+    Math.round(window._size[0] / 2 - fixationWidth), // Width
+    Math.round(window._size[1] / 2 - fixationHeight), // Height
+  ];
   const proposedSpacingPx = spacingPixelsFromLevel(
     proposedLevel,
     displayOptions.pixPerCm,
@@ -42,9 +48,9 @@ export const getTypographicHeight = (
   /* From Denis:
         If thresholdParameter is "spacing" then the font size of string is 
         adjusted so that the width of the string is 3× specified spacing */
-  const proposedSpacingIsTooLarge = proposedSpacingPx * 3 > usableSpace;
+  const proposedSpacingIsTooLarge = proposedSpacingPx * 3 > usableSpace[0];
   const desiredStringWidth = proposedSpacingIsTooLarge
-    ? usableSpace
+    ? usableSpace[0]
     : Math.round(proposedSpacingPx * 3);
   const level = proposedLevel;
   if (proposedSpacingIsTooLarge) {
@@ -55,8 +61,9 @@ export const getTypographicHeight = (
     );
   }
   // Get the width, given our desired height
-  const testHeight = displayOptions.minimumHeight;
+  const testHeight = displayOptions.minimumHeight * 10;
   targetStimulus.setHeight(testHeight);
+  targetStimulus._updateIfNeeded();
   const testWidth = targetStimulus.getBoundingBox(true).width;
   // Find the height we should use, given our desired string width
   const widthOverHeightRatio = testWidth / testHeight;

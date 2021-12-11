@@ -164,3 +164,6 @@ dmypy.json
 # /fonts
 
 scratch.js
+
+fonts/CatalinaScriptBold.woff2
+fonts/DharmaGothicCRegular.woff2

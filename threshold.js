@@ -1661,6 +1661,43 @@ const experiment = (blockCount) => {
           `spacingRelationToSize value ${spacingRelationToSize} not recognized. Please use "none", "ratio", or "typographic"`
         );
       }
+      [target, flanker1, flanker2, fixation, showAlphabet, totalTrial].forEach(
+        (c) => c._updateIfNeeded()
+      );
+      if (showBoundingBox) {
+        const boundingStims = [targetBoundingPoly];
+        const tightBoundingBox = target.getBoundingBox(true);
+        targetBoundingPoly.setPos([
+          tightBoundingBox.left,
+          tightBoundingBox.top,
+        ]);
+        targetBoundingPoly.setSize([
+          tightBoundingBox.width,
+          tightBoundingBox.height,
+        ]);
+        if (spacingRelationToSize === "ratio") {
+          boundingStims.push(flanker1BoundingPoly, flanker2BoundingPoly);
+          const flanker1BoundingBox = flanker1.getBoundingBox(true);
+          flanker1BoundingPoly.setPos([
+            flanker1BoundingBox.left,
+            flanker1BoundingBox.top,
+          ]);
+          flanker1BoundingPoly.setSize([
+            flanker1BoundingBox.width,
+            flanker1BoundingBox.height,
+          ]);
+          const flanker2BoundingBox = flanker2.getBoundingBox(true);
+          flanker2BoundingPoly.setPos([
+            flanker2BoundingBox.left,
+            flanker2BoundingBox.top,
+          ]);
+          flanker2BoundingPoly.setSize([
+            flanker2BoundingBox.width,
+            flanker2BoundingBox.height,
+          ]);
+        }
+        boundingStims.forEach((c) => c._updateIfNeeded());
+      }
       showAlphabet.setPos([0, 0]);
       showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
@@ -2061,14 +2098,6 @@ const experiment = (blockCount) => {
           targetBoundingPoly.frameNStart = frameN; // exact frame index
 
           const tightBoundingBox = target.getBoundingBox(true);
-          targetBoundingPoly.setPos([
-            tightBoundingBox.left,
-            tightBoundingBox.top,
-          ]);
-          targetBoundingPoly.setSize([
-            tightBoundingBox.width,
-            tightBoundingBox.height,
-          ]);
 
           targetBoundingPoly.setAutoDraw(true);
         }
@@ -2088,16 +2117,6 @@ const experiment = (blockCount) => {
           // keep track of start time/frame for later
           flanker1BoundingPoly.tStart = t; // (not accounting for frame time here)
           flanker1BoundingPoly.frameNStart = frameN; // exact frame index
-
-          const tightBoundingBox = flanker1.getBoundingBox(true);
-          flanker1BoundingPoly.setPos([
-            tightBoundingBox.left,
-            tightBoundingBox.top,
-          ]);
-          flanker1BoundingPoly.setSize([
-            tightBoundingBox.width,
-            tightBoundingBox.height,
-          ]);
 
           flanker1BoundingPoly.setAutoDraw(true);
         }
