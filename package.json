@@ -30,12 +30,14 @@
   },
   "homepage": "https://github.com/EasyEyes/threshold#readme",
   "devDependencies": {
+    "@babel/core": "^7.16.0",
     "@types/papaparse": "^5.3.1",
     "@typescript-eslint/eslint-plugin": "^5.6.0",
     "@typescript-eslint/parser": "^5.6.0",
     "babel-loader": "^8.2.3",
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.5.1",
+    "dataframe-js": "^1.4.4",
     "eslint": "^8.4.1",
     "googleapis": "^92.0.0",
     "husky": "^7.0.4",
@@ -53,7 +55,6 @@
     "*.{js,css,html,md,ts}": "prettier --write"
   },
   "dependencies": {
-    "@babel/core": "^7.16.0",
     "axios": "^0.24.0",
     "papaparse": "^5.3.1",
     "webfontloader": "^1.6.28"
