@@ -4,6 +4,7 @@ js
 examples/*/**
 !examples/fonts/*
 !examples/forms/*
+!examples/tables/*
 
 node_modules
 
