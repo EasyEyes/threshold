@@ -14,7 +14,7 @@ import {
 } from "fs";
 import { prepareExperimentFileForThreshold } from "../preprocess/main";
 
-const dirCount = readdirSync(".");
+const dirCount = readdirSync("tables/");
 const dir = dirCount.filter((e) => {
   return e.match(/.*\.(xlsx|csv?)/gi);
 });
@@ -61,7 +61,7 @@ const main = async () => {
   for (const d of dir) {
     console.log(`%c===--- ${d.split(".")[0]} ---===`, "color: yellow");
     await preprocessExperimentFileLocal(
-      d,
+      "tables/" + d,
       readFileSync,
       (fileStringList: string[][], errorList: any[]) => {
         if (errorList.length) {
