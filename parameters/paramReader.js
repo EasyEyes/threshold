@@ -15,7 +15,7 @@ export class ParamReader {
       typeof blockOrConditionName === "number" &&
       blockOrConditionName > this.blockCount
     )
-      return;
+      throw "[READER] Invalid Block Number";
 
     if (this.has(name)) return this._getParam(name, blockOrConditionName);
     else return this._getParamGlossary(name, blockOrConditionName);
@@ -62,7 +62,8 @@ export class ParamReader {
       } else {
         // __ALL_BLOCKS__
         const returner = [];
-        for (let i in this._experiment)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for (let _i in this._experiment)
           returner.push(this.parse(GLOSSARY[name].default));
         return returner;
       }

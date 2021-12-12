@@ -111,7 +111,7 @@ import {
   initPixelsArray,
   readPixels,
 } from "./components/canvasContext.js";
-import { populateQuestDefaults } from "./components/data.js";
+import { populateQuestDefaults } from "./components/questValues.js";
 
 // READING
 import {
@@ -440,7 +440,7 @@ const experiment = (blockCount) => {
       font: "Open Sans",
       units: "pix",
       pos: [0, 0],
-      height: 1.0,
+      height: 45.0,
       wrapWidth: undefined,
       ori: 0.0,
       color: new util.Color("black"),
@@ -533,7 +533,7 @@ const experiment = (blockCount) => {
       font: instructionFont,
       units: "pix",
       pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
-      height: 30.0,
+      height: 27.0,
       wrapWidth: window.innerWidth * 0.8,
       ori: 0.0,
       color: new util.Color("black"),
@@ -551,7 +551,7 @@ const experiment = (blockCount) => {
       font: instructionFont,
       units: "pix",
       pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
-      height: 30.0,
+      height: 27.0,
       wrapWidth: window.innerWidth * 0.8,
       ori: 0.0,
       color: new util.Color("black"),
@@ -649,7 +649,7 @@ const experiment = (blockCount) => {
   var frameRemains;
 
   var fixationXYPx;
-  var fixationSize;
+  var fixationSize = 45.0;
   var showFixation;
   var windowWidthCm;
   var windowWidthPx;
@@ -872,7 +872,9 @@ const experiment = (blockCount) => {
         psychoJS.serverManager,
         thisConditionsFile
       );
+
       trialsConditions = populateQuestDefaults(trialsConditions, paramReader);
+
       const nTrialsTotal = trialsConditions
         .map((c) => Number(paramReader.read("conditionTrials", c.label)))
         .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
@@ -1124,7 +1126,7 @@ const experiment = (blockCount) => {
       setTimeout(() => {
         document.addEventListener("click", _clickContinue);
         document.addEventListener("touchend", _clickContinue);
-      }, 1000);
+      }, 500);
 
       _beepButton = addBeepButton(rc.language.value, correctSynth);
 

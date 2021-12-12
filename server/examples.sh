@@ -1,3 +1,3 @@
-npm run build
+# npm run build
 cd examples
 ts-node buildExamples.ts

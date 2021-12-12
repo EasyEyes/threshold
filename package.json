@@ -13,7 +13,7 @@
     "start": "webpack --env=development",
     "build": "webpack --env=production",
     "examples": "sh server/examples.sh",
-    "netlify": "npm run examples",
+    "netlify": "npm run build && npm run examples",
     "netlify:website": "npm ci && npm run build && rm -r node_modules"
   },
   "repository": {
