@@ -43,7 +43,9 @@ rand(1) returns a random sample from the uniform distribution from 0 to 1.
 
 // TODO simulateWithDisplayBool
 
-import { core, util } from "../psychojs/out/psychojs-2021.3.0.js";
+import * as core from "../psychojs/src/core/index.js";
+import * as util from "../psychojs/src/util/index.js";
+
 const { EventManager } = core;
 const { Scheduler } = util;
 import { createSignalingMap, arraysEqual, log } from "./utils.js";
@@ -64,6 +66,7 @@ export const checkIfSimulated = (reader) => {
     const block = reader.read("block", label);
 
     if (reader.read("simulateParticipantBool", label)) {
+      // eslint-disable-next-line no-prototype-builtins
       if (!simulated.hasOwnProperty(block)) {
         simulated[block] = {};
         simulated[block][label] = reader.read("simulationModel", label);
@@ -193,7 +196,7 @@ export class SimulatedObserver {
       correctResponse
     );
     if (!["weibull", "blind", "ideal"].includes(simulationModel)) {
-      throw `Simulated observer type \"${simulationModel}\" not recognized.`;
+      throw `Simulated observer type "${simulationModel}" not recognized.`;
     }
     this.simulationModel = simulationModel;
     switch (this.simulationModel) {

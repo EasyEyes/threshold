@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 export const debug = process.env.debug;
 // export const debug = true;
 
@@ -69,6 +70,10 @@ export const showCursor = () => {
 
 export const logger = (label, value) => {
   if (debug) console.log(`%c${label}`, "color: red", value);
+};
+
+export const loggerText = (text) => {
+  if (debug) console.log(`%c${text}`, "color: red");
 };
 
 /**

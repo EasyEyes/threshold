@@ -1,3 +1,5 @@
+import { debug } from "./utils";
+
 export const useCalibration = (reader) => {
   return ifTrue([
     ...reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__"),
@@ -23,7 +25,7 @@ export const formCalibrationList = (reader) => {
     tasks.push({
       name: "screenSize",
       options: {
-        fullscreen: true,
+        fullscreen: !debug,
         check: false,
       },
     });
@@ -41,7 +43,7 @@ export const formCalibrationList = (reader) => {
           : undefined,
         desiredDistanceTolerance: reader.read("viewingDistanceAllowedRatio")[0],
         desiredDistanceMonitor: reader.has("viewingDistanceDesiredCm"),
-        fullscreen: true,
+        fullscreen: !debug,
       },
     });
   if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
@@ -51,7 +53,7 @@ export const formCalibrationList = (reader) => {
       options: {
         showGazer: false,
         showVideo: false,
-        fullscreen: true,
+        fullscreen: !debug,
       },
     });
 

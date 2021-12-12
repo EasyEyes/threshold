@@ -1,11 +1,13 @@
-import { visual, util } from "../psychojs/out/psychojs-2021.3.0.js";
+import * as util from "../psychojs/src/util/index.js";
+import * as visual from "../psychojs/src/visual/index.js";
+
 import {
   degreesToPixels,
   pixelsToDegrees,
   getPixPerCm,
   getViewingDistanceCm,
   logger,
-  rotate,
+  // rotate,
 } from "./utils.js";
 
 const opacity = 0.3;
@@ -44,7 +46,7 @@ export const readGridParameter = (reader, simulated) => {
         e.keyCode === gridkey.keyCode
       ) {
         gridVisible.push(gridVisible.shift());
-        console.log("new gridVisible: ", gridVisible);
+        logger("new gridVisible", gridVisible[0]);
         updateGrids(gridVisible, window.grids);
       }
     };
@@ -115,7 +117,7 @@ const getPixelGridLines = (window, displayOptions) => {
         name: `vertical-grid-line-label-${lineId}`,
         win: window,
         text: `${spacing * lineId} pix`,
-        font: "Open Sans",
+        font: "Arial",
         units: "pix",
         pos: [30 + origin[0] + lineId * spacing, origin[1] + 15],
         height: 15,
@@ -123,7 +125,6 @@ const getPixelGridLines = (window, displayOptions) => {
         color: new util.Color("black"),
         opacity: opacity,
         depth: 0.0,
-        size: 1,
       });
     }
   );
@@ -154,7 +155,7 @@ const getPixelGridLines = (window, displayOptions) => {
         name: `horizontal-grid-line-label-${lineId}`,
         win: window,
         text: `${spacing * lineId} pix`,
-        font: "Open Sans",
+        font: "Arial",
         units: "pix",
         pos: [origin[0] + 25, 20 + origin[1] + lineId * spacing],
         height: 15,
@@ -162,7 +163,6 @@ const getPixelGridLines = (window, displayOptions) => {
         color: new util.Color("black"),
         opacity: opacity,
         depth: 0.0,
-        size: 1,
       });
     }
   );
@@ -209,7 +209,7 @@ const getCmGridLines = (window, displayOptions) => {
         name: `vertical-grid-line-label-${lineId}`,
         win: window,
         text: `${lineId} cm`,
-        font: "Open Sans",
+        font: "Arial",
         units: "pix",
         pos: [30 + origin[0] + lineId * spacing, origin[1] + 15],
         height: 15,
@@ -217,7 +217,6 @@ const getCmGridLines = (window, displayOptions) => {
         color: new util.Color("blue"),
         opacity: 1.0,
         depth: 0.0,
-        size: 1,
       });
     }
   );
@@ -248,7 +247,7 @@ const getCmGridLines = (window, displayOptions) => {
         name: `horizontal-grid-line-label-${lineId}`,
         win: window,
         text: `${lineId} cm`,
-        font: "Open Sans",
+        font: "Arial",
         units: "pix",
         pos: [origin[0] + 25, 20 + origin[1] + lineId * spacing],
         height: 15,
@@ -256,7 +255,6 @@ const getCmGridLines = (window, displayOptions) => {
         color: new util.Color("blue"),
         opacity: 1.0,
         depth: 0.0,
-        size: 1,
       });
     }
   );
@@ -391,7 +389,7 @@ const getDegGridLines = (window, displayOptions) => {
         name: `right-grid-line-label-${lineId}`,
         win: window,
         text: `${lineId} deg`,
-        font: "Open Sans",
+        font: "Arial",
         units: "pix",
         pos: [
           origin[0] + degreesToPixels(lineId, displayOptions) - 5,
@@ -402,7 +400,6 @@ const getDegGridLines = (window, displayOptions) => {
         color: new util.Color("red"),
         opacity: 1.0,
         depth: 0.0,
-        size: 1,
       });
     });
   const leftGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
@@ -412,7 +409,7 @@ const getDegGridLines = (window, displayOptions) => {
         name: `left-grid-line-label-${lineId}`,
         win: window,
         text: `-${lineId} deg`,
-        font: "Open Sans",
+        font: "Arial",
         units: "pix",
         pos: [
           origin[0] - degreesToPixels(lineId, displayOptions) + 5,
@@ -423,7 +420,6 @@ const getDegGridLines = (window, displayOptions) => {
         color: new util.Color("red"),
         opacity: 1.0,
         depth: 0.0,
-        size: 1,
       });
     });
   const lowerGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
@@ -433,7 +429,7 @@ const getDegGridLines = (window, displayOptions) => {
         name: `lower-grid-line-label-${lineId}`,
         win: window,
         text: `-${lineId} deg`,
-        font: "Open Sans",
+        font: "Arial",
         units: "pix",
         pos: [
           -(window._size[0] / 2) + degreesToPixels(0.75, displayOptions),
@@ -444,7 +440,6 @@ const getDegGridLines = (window, displayOptions) => {
         color: new util.Color("red"),
         opacity: 1.0,
         depth: 0.0,
-        size: 1,
       });
     });
   const upperGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
@@ -454,7 +449,7 @@ const getDegGridLines = (window, displayOptions) => {
         name: `upper-grid-line-label-${lineId}`,
         win: window,
         text: `${lineId} deg`,
-        font: "Open Sans",
+        font: "Arial",
         units: "pix",
         pos: [
           -(window._size[0] / 2) + degreesToPixels(0.75, displayOptions),
@@ -465,7 +460,6 @@ const getDegGridLines = (window, displayOptions) => {
         color: new util.Color("red"),
         opacity: 1.0,
         depth: 0.0,
-        size: 1,
       });
     });
   return [

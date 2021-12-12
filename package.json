@@ -5,16 +5,16 @@
   "description": "Threshold Participant.",
   "main": "threshold.js",
   "scripts": {
-    "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm i && npm run build:css && npm run build:js && cd ..",
+    "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm ci && cd ..",
     "format": "prettier --write \"**/*.{js,css,html,md,ts}\"",
     "phrases": "node server/fetch-languages-sheets.js && git add components/i18n.js",
     "glossary": "node server/prepare-glossary.js && prettier --write parameters/glossary.ts && git add parameters/glossary.ts",
-    "prepare": "husky install",
+    "prepare": "husky install && npm run setup:psychojs",
     "start": "webpack --env=development",
     "build": "webpack --env=production",
     "examples": "sh server/examples.sh",
-    "netlify": "npm run build && npm run examples",
-    "netlify:website": "npm ci && npm run build && rm -r node_modules"
+    "netlify": "npm run setup:psychojs && npm run build && npm run examples",
+    "netlify:website": "npm run setup:psychojs && npm ci && npm run build && rm -r node_modules"
   },
   "repository": {
     "type": "git",

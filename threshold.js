@@ -6,10 +6,13 @@
 
 import { debug, sleep } from "./components/utils.js";
 
-const useConsent = true;
 const useRC = true;
 
-import { core, data, util, visual } from "./psychojs/out/psychojs-2021.3.0.js";
+import * as core from "./psychojs/src/core/index.js";
+import * as data from "./psychojs/src/data/index.js";
+import * as util from "./psychojs/src/util/index.js";
+import * as visual from "./psychojs/src/visual/index.js";
+
 const { PsychoJS, EventManager } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
@@ -20,7 +23,8 @@ import * as jsQUEST from "./components/addons/jsQUEST.module.js";
 
 ////
 /* ----------------------------------- CSS ---------------------------------- */
-import "./psychojs/out/psychojs-2021.3.0.css";
+import "./psychojs/src/index.css";
+
 import "./components/css/utils.css";
 import "./components/css/custom.css";
 import "./components/css/instructions.css";
@@ -36,6 +40,7 @@ import { ParamReader } from "./parameters/paramReader.js";
 
 import {
   logger,
+  loggerText,
   hideCursor,
   showCursor,
   shuffle,
@@ -526,46 +531,36 @@ const experiment = (blockCount) => {
       isInstruction: false,
     });
 
+    const instructionsConfig = {
+      win: psychoJS.window,
+      text: "",
+      font: instructionFont,
+      units: "pix",
+      height: 27.0,
+      wrapWidth: window.innerWidth * 0.8,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -12.0,
+      alignHoriz: "left",
+      isInstruction: true, // !
+    };
     instructions = new visual.TextStim({
-      win: psychoJS.window,
+      ...instructionsConfig,
       name: "instructions",
-      text: "",
-      font: instructionFont,
-      units: "pix",
       pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
-      height: 27.0,
-      wrapWidth: window.innerWidth * 0.8,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -12.0,
-      alignHoriz: "left",
       alignVert: "top",
-      isInstruction: true, // !
     });
-
     instructions2 = new visual.TextStim({
-      win: psychoJS.window,
+      ...instructionsConfig,
       name: "instructions2",
-      text: "",
-      font: instructionFont,
-      units: "pix",
       pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
-      height: 27.0,
-      wrapWidth: window.innerWidth * 0.8,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -12.0,
-      alignHoriz: "left",
       alignVert: "bottom",
-      isInstruction: true, // !
     });
 
     /* --- BOUNDING BOX --- */
-    targetBoundingPoly = new visual.Rect({
+    const boundingConfig = {
       win: psychoJS.window,
-      name: "targetBoundingPoly",
       units: "pix",
       width: [1.0, 1.0][0],
       height: [1.0, 1.0][1],
@@ -573,43 +568,23 @@ const experiment = (blockCount) => {
       pos: [0, 0],
       lineWidth: 1.0,
       lineColor: new util.Color("blue"),
-      // fillColor: new util.Color('pink'),
-      fillColor: undefined,
+      // fillColor: "#000000",
       opacity: undefined,
       depth: -10,
       interpolate: true,
+      size: 0,
+    };
+    targetBoundingPoly = new visual.Rect({
+      ...boundingConfig,
+      name: "targetBoundingPoly",
     });
     flanker1BoundingPoly = new visual.Rect({
-      win: psychoJS.window,
+      ...boundingConfig,
       name: "flanker1BoundingPoly",
-      units: "pix",
-      width: [1.0, 1.0][0],
-      height: [1.0, 1.0][1],
-      ori: 0.0,
-      pos: [0, 0],
-      lineWidth: 1.0,
-      lineColor: new util.Color("blue"),
-      // fillColor: new util.Color('pink'),
-      fillColor: undefined,
-      opacity: undefined,
-      depth: -10,
-      interpolate: true,
     });
     flanker2BoundingPoly = new visual.Rect({
-      win: psychoJS.window,
+      ...boundingConfig,
       name: "flanker2BoundingPoly",
-      units: "pix",
-      width: [1.0, 1.0][0],
-      height: [1.0, 1.0][1],
-      ori: 0.0,
-      pos: [0, 0],
-      lineWidth: 1.0,
-      lineColor: new util.Color("blue"),
-      // fillColor: new util.Color('pink'),
-      fillColor: undefined,
-      opacity: undefined,
-      depth: -10,
-      interpolate: true,
     });
     /* --- BOUNDING BOX --- */
 
@@ -878,6 +853,7 @@ const experiment = (blockCount) => {
       const nTrialsTotal = trialsConditions
         .map((c) => Number(paramReader.read("conditionTrials", c.label)))
         .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
+
       trials = new data.MultiStairHandler({
         stairType: MultiStairHandler.StaircaseType.QUEST,
         psychoJS: psychoJS,
@@ -2224,7 +2200,7 @@ const experiment = (blockCount) => {
       // }, 700);
 
       // if trialBreak is not ongoing
-      console.log("TRIAL ROUTINE END");
+      loggerText("TRIAL ROUTINE END");
       if (!trialBreakStatus) {
         //------Ending Routine 'trial'-------
         for (const thisComponent of trialComponents) {
@@ -2339,7 +2315,7 @@ const experiment = (blockCount) => {
 
   function importConditions(currentLoop) {
     return async function () {
-      console.log("current trial: ", currentLoop.getCurrentTrial());
+      logger("current trial", currentLoop.getCurrentTrial());
       psychoJS.importAttributes(currentLoop.getCurrentTrial());
       return Scheduler.Event.NEXT;
     };

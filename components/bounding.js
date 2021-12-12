@@ -1,4 +1,6 @@
-import { util, visual } from "../psychojs/out/psychojs-2021.3.0.js";
+import * as util from "../psychojs/src/util/index.js";
+import * as visual from "../psychojs/src/visual/index.js";
+
 import {
   degreesToPixels,
   pixelsToDegrees,
