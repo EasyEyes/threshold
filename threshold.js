@@ -171,7 +171,11 @@ const paramReaderInitialized = async (reader) => {
   // ! Check if to use grids
   [showGrid, gridVisible] = readGridParameter(reader, simulated);
 
-  await sleep(500);
+  /* ---------------- TEMPORARY! PLEASE UPDATE AND REMOVE @svr8 --------------- */
+  document.getElementById("temp-element-hider").remove();
+  /* -------------------------------------------------------------------------- */
+
+  await sleep(50);
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {

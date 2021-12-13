@@ -15,8 +15,30 @@
     <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.5.0-beta.14"></script>
     <!-- Others -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- -------------- TEMPORARY! PLEASE UPDATE AND REMOVE @svr8 -------------- -->
+    <style>
+      #temp-element-hider {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-color: white;
+        z-index: 999999999999;
+      }
+    </style>
+    <!-- ----------------------------------------------------------------------- -->
   </head>
   <body>
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- -------------- TEMPORARY! PLEASE UPDATE AND REMOVE @svr8 -------------- -->
+    <div id="temp-element-hider"></div>
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- ------------- Every DOM element below should be removed! -------------- -->
     <div id="form-container">
       <iframe
         src=""
@@ -53,8 +75,9 @@
 
     <div id="exp-end">Experiment has ended.</div>
 
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- valid DOM element -->
     <div id="rc-panel"></div>
-
     <div id="root"></div>
     <!-- external libraries -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
