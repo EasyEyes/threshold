@@ -38,7 +38,7 @@ export const readGridParameter = (reader, simulated) => {
   }
 
   if (showGrid) {
-    gridVisible.unshift("pix", "cm", "deg");
+    gridVisible.push("pix", "cm", "deg");
     window.onkeydown = (e) => {
       if (
         e.code === gridkey.code ||
