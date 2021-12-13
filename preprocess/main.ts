@@ -45,6 +45,7 @@ export const prepareExperimentFileForThreshold = (
   callback: any,
   space: string
 ) => {
+  parsed.data = discardCommentedLines(parsed);
   // Recruitment
   if (
     parsed.data.find((i: string[]) => i[0] == "_participantRecruitmentService")
@@ -81,4 +82,12 @@ export const prepareExperimentFileForThreshold = (
   } else {
     callback(splitIntoBlockFiles(df, space), []);
   }
+};
+
+const discardCommentedLines = (parsed: Papa.ParseResult<any>): String[][] => {
+  const commentRegex = /^\%/;
+  const noncommentedRows = parsed.data.filter(
+    (row) => !commentRegex.test(row[0].trim())
+  );
+  return noncommentedRows;
 };
