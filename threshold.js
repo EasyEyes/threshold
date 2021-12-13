@@ -2261,11 +2261,7 @@ const experiment = (blockCount) => {
           trialBreakStatus = true;
           currentTrialCredit -= 1;
 
-          const trialBreakBody = instructionsText.trialBreak(
-            rc.language.value,
-            responseType
-          );
-          showTrialBreakWidget(trialBreakBody);
+          showTrialBreakWidget("");
 
           hideTrialProceedButton();
         }
@@ -2280,6 +2276,12 @@ const experiment = (blockCount) => {
         ) {
           trialBreakButtonStatus = true;
           showTrialProceedButton();
+          const trialBreakBody = instructionsText.trialBreak(
+            rc.language.value,
+            responseType
+          );
+          showTrialBreakWidget(trialBreakBody);
+
           document.getElementById("trial-proceed").onclick = () => {
             trialBreakStatus = false;
             trialBreakButtonStatus = false;
