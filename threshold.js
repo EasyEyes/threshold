@@ -1057,7 +1057,7 @@ const experiment = (blockCount) => {
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
       // ! Distance
-      rc.resumeDistance();
+      // rc.resumeDistance();
 
       initInstructionClock.reset(); // clock
       TrialHandler.fromSnapshot(snapshot);
@@ -1150,6 +1150,10 @@ const experiment = (blockCount) => {
 
   function eduInstructionRoutineBegin(snapshot) {
     return async function () {
+      ////
+      // End distance once the exp begins
+      rc.endDistance();
+      ////
       eduInstructionClock.reset();
 
       TrialHandler.fromSnapshot(snapshot);
@@ -1211,7 +1215,7 @@ const experiment = (blockCount) => {
   function eduInstructionRoutineEnd() {
     return async function () {
       // ! Distance
-      rc.pauseDistance();
+      // rc.pauseDistance();
 
       instructions.setAutoDraw(false);
       instructions2.setAutoDraw(false);
