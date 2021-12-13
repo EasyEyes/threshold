@@ -7,7 +7,7 @@ export const populateQuestDefaults = (conditionsList, reader) => {
       startValSd: reader.read("thresholdGuessLogSd", condition.label),
       beta: reader.read("thresholdBeta", condition.label) || 2.3,
       delta: reader.read("thresholdDelta", condition.label) || 0.01,
-      gamma: 1 / String(reader.read("targetAlphabet", condition.label)).length,
+      gamma: getGamma(reader.read("targetAlphabet", condition.label)),
       pThreshold: reader.read("thresholdProportionCorrect", condition.label),
       nTrials: reader.read("conditionTrials", condition.label),
     };
@@ -24,4 +24,17 @@ export const populateQuestDefaults = (conditionsList, reader) => {
     }
   }
   return conditionsList;
+};
+
+const getGamma = (alphabet) => {
+  const valueCounts = {};
+  for (let i = 0; i < alphabet.length; i++) {
+    if (valueCounts.hasOwnProperty(alphabet[i])) valueCounts[alphabet[i]]++;
+    else valueCounts[alphabet[i]] = 1;
+  }
+  const probabilityOrderedValues = [...new Set(...alphabet)].sort((a, b) =>
+    valueCounts[a] < valueCounts[b] ? 1 : -1
+  );
+  const gamma = valueCounts[probabilityOrderedValues.pop()] / alphabet.length;
+  return gamma;
 };

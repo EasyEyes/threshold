@@ -891,7 +891,6 @@ const experiment = (blockCount) => {
       // Schedule all the trials in the trialList:
       for (const thisQuestLoop of trials) {
         const snapshot = trials.getSnapshot();
-        logger("snapshot in thisQuestLoop of trials", snapshot);
         trialsLoopScheduler.add(importConditions(snapshot));
         trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
         trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
@@ -1543,17 +1542,22 @@ const experiment = (blockCount) => {
       );
       if (spacingRelationToSize === "ratio") {
         // Get a usable "level", ie amount of spacing
-        const upperBoundedLevel = getMaxPresentableLevel(
+        logger("proposedLevel", proposedLevel);
+        const lowerBoundedLevel = getLowerBoundedLevel(
           proposedLevel,
+          displayOptions
+        );
+        psychoJS.experiment.addData("levelUsed", level);
+        logger("before upper bounding level", lowerBoundedLevel);
+        const upperAndLowerBoundedLevel = getMaxPresentableLevel(
+          lowerBoundedLevel,
           targetXYPix,
           fixationXYPx,
           spacingDirection,
           displayOptions
         );
-        logger("upperBoundedLevel", upperBoundedLevel);
-        level = getLowerBoundedLevel(upperBoundedLevel, displayOptions);
-        psychoJS.experiment.addData("levelUsed", level);
-
+        logger("upperAndLowerBoundedLevel", upperAndLowerBoundedLevel);
+        level = upperAndLowerBoundedLevel;
         spacingDeg = Math.pow(10, level);
         psychoJS.experiment.addData("spacingDeg", spacingDeg);
         spacingPx = Math.abs(
