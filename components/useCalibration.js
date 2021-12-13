@@ -29,6 +29,13 @@ export const formCalibrationList = (reader) => {
         check: false,
       },
     });
+  if (ifTrue(reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__")))
+    tasks.push({
+      name: "measureDistance",
+      options: {
+        fullscreen: !debug,
+      },
+    });
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({

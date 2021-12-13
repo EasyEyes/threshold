@@ -9,6 +9,7 @@
     "format": "prettier --write \"**/*.{js,css,html,md,ts}\"",
     "phrases": "node server/fetch-languages-sheets.js && git add components/i18n.js",
     "glossary": "node server/prepare-glossary.js && prettier --write parameters/glossary.ts && git add parameters/glossary.ts",
+    "fetch": "npm run phrases && npm run glossary",
     "prepare": "husky install && npm run setup:psychojs",
     "start": "webpack --env=development",
     "build": "webpack --env=production",
