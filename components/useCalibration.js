@@ -34,6 +34,7 @@ export const formCalibrationList = (reader) => {
       name: "measureDistance",
       options: {
         fullscreen: !debug,
+        sparkle: true,
       },
     });
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
@@ -51,6 +52,7 @@ export const formCalibrationList = (reader) => {
         desiredDistanceTolerance: reader.read("viewingDistanceAllowedRatio")[0],
         desiredDistanceMonitor: reader.has("viewingDistanceDesiredCm"),
         fullscreen: !debug,
+        sparkle: true,
       },
     });
   if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
