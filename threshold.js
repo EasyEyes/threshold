@@ -96,6 +96,7 @@ import {
   getMaxPresentableLevel,
   getFlankerLocations,
   getLowerBoundedLevel,
+  getTestabilityBoundedLevel,
 } from "./components/bounding.js";
 
 import {
@@ -422,8 +423,6 @@ const experiment = (blockCount) => {
   var trialBreakButtonStatus;
 
   async function experimentInit() {
-    logger("Window (for grid purposes)", psychoJS.window);
-
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
@@ -1399,10 +1398,13 @@ const experiment = (blockCount) => {
       const reader = paramReader;
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
       psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-      // TODO Find a real way of estimating the max size
-      proposedLevel = Math.min(proposedLevel, 1.75);
 
-      psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
+      let largestAllowedAngle = 89.5; // NOTE must be <90
+      largestAllowedAngle = Math.min(largestAllowedAngle, 90);
+      const largestTrigonometricLevel =
+        Math.log(largestAllowedAngle) / Math.log(10);
+      proposedLevel = Math.min(proposedLevel, largestTrigonometricLevel);
+
       psychoJS.experiment.addData("label", cName);
       psychoJS.experiment.addData(
         "flankerOrientation",
@@ -1480,6 +1482,17 @@ const experiment = (blockCount) => {
         cName
       );
 
+      proposedLevel = getTestabilityBoundedLevel(
+        proposedLevel,
+        pixPerCm,
+        viewingDistanceCm,
+        spacingOverSizeRatio,
+        targetFont,
+        targetMinimumPix,
+        psychoJS.window
+      );
+      psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
+
       var alphabet = targetAlphabet;
       /* ------------------------------ Pick triplets ----------------------------- */
       const tempAlphabet = shuffle(shuffle(alphabet));
@@ -1494,7 +1507,7 @@ const experiment = (blockCount) => {
       correctAns = targetCharacter.toLowerCase();
       /* -------------------------------------------------------------------------- */
 
-      var pos1XYDeg, pos1XYPx, targetEccentricityXYPx, pos3XYDeg, pos3XYPx;
+      var pos1XYPx, targetEccentricityXYPx, pos3XYPx;
       var spacingDeg, spacingPx;
 
       ////
@@ -1515,6 +1528,8 @@ const experiment = (blockCount) => {
         spacingRelationToSize: spacingRelationToSize,
         targetEccentricityXYDeg: targetEccentricityXYDeg,
         spacingDirection: spacingDirection,
+        flankerCharacters: [firstFlankerCharacter, secondFlankerCharacter],
+        targetCharacter: targetCharacter,
       };
 
       const [targetXYPix] = XYPixOfXYDeg(
@@ -1542,13 +1557,11 @@ const experiment = (blockCount) => {
       );
       if (spacingRelationToSize === "ratio") {
         // Get a usable "level", ie amount of spacing
-        logger("proposedLevel", proposedLevel);
         const lowerBoundedLevel = getLowerBoundedLevel(
           proposedLevel,
           displayOptions
         );
         psychoJS.experiment.addData("levelUsed", level);
-        logger("before upper bounding level", lowerBoundedLevel);
         const upperAndLowerBoundedLevel = getMaxPresentableLevel(
           lowerBoundedLevel,
           targetXYPix,
@@ -1556,8 +1569,8 @@ const experiment = (blockCount) => {
           spacingDirection,
           displayOptions
         );
-        logger("upperAndLowerBoundedLevel", upperAndLowerBoundedLevel);
         level = upperAndLowerBoundedLevel;
+        logger("level", level);
         spacingDeg = Math.pow(10, level);
         psychoJS.experiment.addData("spacingDeg", spacingDeg);
         spacingPx = Math.abs(
@@ -1568,20 +1581,11 @@ const experiment = (blockCount) => {
         );
         psychoJS.experiment.addData("spacingPix", spacingPx);
         // Get the location of the flankers
-        [pos1XYDeg, pos3XYDeg] = getFlankerLocations(
-          targetEccentricityXYDeg,
+        [pos1XYPx, pos3XYPx] = getFlankerLocations(
+          targetEccentricityXYPx,
           fixationXYPx,
           spacingDirection,
-          spacingDeg
-        );
-        psychoJS.experiment.addData("flankerLocationsDeg", [
-          pos1XYDeg,
-          pos3XYDeg,
-        ]);
-        // Convert flanker locations to pixels
-        [pos1XYPx, pos3XYPx] = XYPixOfXYDeg(
-          [pos1XYDeg, pos3XYDeg],
-          displayOptions
+          spacingPx
         );
         // Round locations to the nearest pixel
         pos1XYPx = pos1XYPx.map((x) => Math.round(x));
@@ -1595,7 +1599,7 @@ const experiment = (blockCount) => {
         const heightPx = Math.round(
           Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
         );
-        if (heightPx < targetMinimumPix) {
+        if (Math.round(spacingPx / spacingOverSizeRatio) < targetMinimumPix) {
           console.error(
             `Assumption broken! 
             Target height, in pixel, is falling below the minimum allowed, 
@@ -2336,6 +2340,7 @@ const experiment = (blockCount) => {
   }
 
   async function quitPsychoJS(message, isCompleted) {
+    removeClickableAlphabet();
     rc.endNudger();
     showCursor();
 

@@ -1,3 +1,4 @@
+import { preProcessFile } from "typescript";
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
 
@@ -103,7 +104,9 @@ export const getMaxPresentableLevel = (
   const granularityOfChange = 0.05;
   const smallestDisplayableLevel = levelFromTargetHeight(
     displayOptions.minimumHeight,
-    displayOptions
+    displayOptions.spacingOverSizeRatio,
+    displayOptions.pixPerCm,
+    displayOptions.viewingDistanceCm
   );
   if (
     unacceptableStimuli(
@@ -115,7 +118,7 @@ export const getMaxPresentableLevel = (
     )
   ) {
     console.error(
-      "Unpresentable stimuli, even at level=" + String(granularityOfChange)
+      "Unpresentable stimuli, even at level=" + String(smallestDisplayableLevel)
     );
     return smallestDisplayableLevel;
   }
@@ -222,6 +225,8 @@ const rectangleContainsPoint = (rectangle, point) => {
  * @param {String} sizingParameters.fontFamily Name of the fontFamily in which the stimuli will be drawn
  * @param {Number} sizingParameters.pixPerCm Pixel/cm ratio of the display
  * @param {Number} sizingParameters.viewingDistanceCm Distance (in cm) of the observer from the near-point
+ * @param {String[]} sizingParameters.flankerCharacters List of the (2) characters that will be used for the flankers
+ * @param {String} sizingParameters.targetCharacter The character that will be used for the target
  * @param {PsychoJS.window} sizingParameters.window Window object, used for creating a mock stimuli for measurement
  * @returns {Number[][]} [[x_min, y_min], [x_max, y_max]] Array of defining points of the area over which flankers extend
  */
@@ -251,12 +256,14 @@ const flankersExtent = (
       sizingParameters.spacingOverSizeRatio,
       sizingParameters.minimumHeight,
       sizingParameters.fontFamily,
-      sizingParameters.window
+      sizingParameters.window,
+      sizingParameters.flankerCharacters
     );
     const boundingPoints = [];
+    const fixationXY = sizingParameters.fixationXYPix;
     flankerLocations.forEach((flankerPosition, i) => {
       const boundingPoint = [];
-      if (targetPosition[0] < 0) {
+      if (targetPosition[0] < fixationXY[0]) {
         boundingPoint.push(
           flankerPosition[0] -
             (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2)
@@ -267,7 +274,7 @@ const flankersExtent = (
             (i === 0 ? -1 : 1) * (flankerBoxDimensions.width / 2)
         );
       }
-      if (targetPosition[1] < 0) {
+      if (targetPosition[1] < fixationXY[1]) {
         boundingPoint.push(
           flankerPosition[1] -
             (i === 0 ? -1 : 1) * (flankerBoxDimensions.height / 2)
@@ -294,6 +301,7 @@ const flankersExtent = (
  * @param {Number} minimumHeight Smallest allowable letter height for flanker
  * @param {String} font Font-family in which the stimuli will be presented
  * @param {PsychoJS.window} window PsychoJS window, used to create a stimulus to be measured
+ * @param {String[]} testCharacters List of the flanker characters
  * @returns
  */
 const boundingBoxFromSpacing = (
@@ -301,34 +309,46 @@ const boundingBoxFromSpacing = (
   spacingOverSizeRatio,
   minimumHeight,
   font,
-  window
+  window,
+  testCharacters = ["j", "Y"]
 ) => {
   const height = Math.max(spacing / spacingOverSizeRatio, minimumHeight);
   try {
-    const testTextStim = new visual.TextStim({
-      win: window,
-      name: "testTextStim",
-      text: "H", // TEMP
-      font: font,
-      units: "pix", // ASSUMES that parameters are in pixel units
-      pos: [0, 0],
-      height: height,
-      wrapWidth: undefined,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -7.0,
-      autoDraw: false,
-      autoLog: false,
-    });
-    const estimatedBoundingBox = testTextStim._boundingBox;
-    return estimatedBoundingBox;
+    const testTextStims = testCharacters.map(
+      (character) =>
+        new visual.TextStim({
+          win: window,
+          name: "testTextStim",
+          text: character,
+          font: font,
+          units: "pix", // ASSUMES that parameters are in pixel units
+          pos: [0, 0],
+          height: height,
+          wrapWidth: undefined,
+          ori: 0.0,
+          color: new util.Color("black"),
+          opacity: 1.0,
+          depth: -7.0,
+          autoDraw: false,
+          autoLog: false,
+        })
+    );
+    const boundingBoxes = testTextStims.map((stim) =>
+      stim.getBoundingBox(true)
+    );
+    const heights = boundingBoxes.map((box) => box.height);
+    const widths = boundingBoxes.map((box) => box.width);
+    const maximalBoundingBox = {
+      height: Math.max(...heights),
+      width: Math.max(...widths),
+    };
+    return maximalBoundingBox;
   } catch (error) {
     console.error(
       "Error estimating bounding box of flanker. Likely due to too large a `proposedLevel` value being tested.",
       error
     );
-    return error;
+    return { height: Infinity, width: Infinity };
   }
 };
 
@@ -458,17 +478,79 @@ export const getLowerBoundedLevel = (proposedLevel, displayOptions) => {
   return Math.log10(minimumSpacingDeg);
 };
 
-/*
-  // Get the location of the flankers
-  const [flanker1PosDeg, flanker2PosDeg] = getFlankerLocations(
-    displayOptions.targetEccentricityXYDeg,
-    displayOptions.fixationXYPix,
-    displayOptions.spacingDirection,
-    proposedSpacingDeg
+export const getTestabilityBoundedLevel = (
+  proposedLevel,
+  pixPerCm,
+  viewingDistanceCm,
+  spacingOverSizeRatio,
+  font,
+  minimumHeight,
+  window
+) => {
+  const granularityOfChange = 0.05;
+  const smallestDisplayableLevel = levelFromTargetHeight(
+    minimumHeight,
+    spacingOverSizeRatio,
+    pixPerCm,
+    viewingDistanceCm
   );
-  // Convert flanker locations to pixels
-  const [flanker1PosPix, flanker1PosDix] = XYPixOfXYDeg(
-    [flanker1PosDeg, flanker2PosDeg],
-    displayOptions
-  ).map(x => Math.round(x));
-*/
+  if (proposedLevel <= smallestDisplayableLevel)
+    return smallestDisplayableLevel;
+  if (
+    testableLevel(
+      proposedLevel,
+      pixPerCm,
+      viewingDistanceCm,
+      spacingOverSizeRatio,
+      font,
+      window
+    )
+  )
+    return proposedLevel;
+  return getTestabilityBoundedLevel(
+    proposedLevel - granularityOfChange,
+    pixPerCm,
+    viewingDistanceCm,
+    spacingOverSizeRatio,
+    font,
+    minimumHeight,
+    window
+  );
+};
+
+export const testableLevel = (
+  proposedLevel,
+  pixPerCm,
+  viewingDistanceCm,
+  spacingOverSizeRatio,
+  font,
+  window
+) => {
+  const spacingPx = spacingPixelsFromLevel(
+    proposedLevel,
+    pixPerCm,
+    viewingDistanceCm
+  );
+  const heightPx = spacingPx / spacingOverSizeRatio;
+  try {
+    const testStim = new visual.TextStim({
+      win: window,
+      name: "testTextStim",
+      text: "H", // ASSUMES text parameter doesn't matter much for this
+      font: font,
+      units: "pix",
+      pos: [0, 0],
+      height: heightPx,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -7.0,
+      autoDraw: false,
+      autoLog: false,
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+};

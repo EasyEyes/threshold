@@ -309,11 +309,17 @@ export const rotate = (l) => {
   return rotated;
 };
 
-export const levelFromTargetHeight = (targetHeight, displayOptions) => {
-  const spacingPx = Math.round(
-    targetHeight * displayOptions.spacingOverSizeRatio
-  );
-  const spacingDeg = pixelsToDegrees(spacingPx, displayOptions);
+export const levelFromTargetHeight = (
+  targetHeight,
+  spacingOverSizeRatio,
+  pixPerCm,
+  viewingDistanceCm
+) => {
+  const spacingPx = Math.round(targetHeight * spacingOverSizeRatio);
+  const spacingDeg = pixelsToDegrees(spacingPx, {
+    pixPerCm: pixPerCm,
+    viewingDistanceCm: viewingDistanceCm,
+  });
   const targetLevel = Math.log10(spacingDeg);
   return targetLevel;
 };
