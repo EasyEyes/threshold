@@ -308,3 +308,12 @@ export const rotate = (l) => {
   rotated.push(rotated.shift());
   return rotated;
 };
+
+export const levelFromTargetHeight = (targetHeight, displayOptions) => {
+  const spacingPx = Math.round(
+    targetHeight * displayOptions.spacingOverSizeRatio
+  );
+  const spacingDeg = pixelsToDegrees(spacingPx, displayOptions);
+  const targetLevel = Math.log10(spacingDeg);
+  return targetLevel;
+};

@@ -7,6 +7,7 @@ import {
   spacingPixelsFromLevel,
   levelFromSpacingPixels,
   logger,
+  levelFromTargetHeight,
 } from "./utils.js";
 
 const debug = false;
@@ -100,9 +101,13 @@ export const getMaxPresentableLevel = (
   displayOptions
 ) => {
   const granularityOfChange = 0.05;
+  const smallestDisplayableLevel = levelFromTargetHeight(
+    displayOptions.minimumHeight,
+    displayOptions
+  );
   if (
     unacceptableStimuli(
-      granularityOfChange,
+      smallestDisplayableLevel,
       targetXYPix,
       fixationXYPix,
       spacingDirection,
@@ -112,11 +117,11 @@ export const getMaxPresentableLevel = (
     console.error(
       "Unpresentable stimuli, even at level=" + String(granularityOfChange)
     );
-    return granularityOfChange;
+    return smallestDisplayableLevel;
   }
   for (
     let l = proposedLevel;
-    l > granularityOfChange;
+    l > smallestDisplayableLevel;
     l -= granularityOfChange
   ) {
     if (
@@ -128,10 +133,11 @@ export const getMaxPresentableLevel = (
         displayOptions
       )
     ) {
-      logger("Acceptable level found", l);
       return l;
     }
   }
+  // proposedLevel === smallestDisplayableLevel
+  return smallestDisplayableLevel;
 };
 
 /**
