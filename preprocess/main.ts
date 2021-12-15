@@ -50,6 +50,7 @@ export const prepareExperimentFileForThreshold = (
   if (
     parsed.data.find((i: string[]) => i[0] == "_participantRecruitmentService")
   ) {
+    if (!user.currentExperiment) user.currentExperiment = {};
     user.currentExperiment.participantRecruitmentServiceName = parsed.data.find(
       (i: string[]) => i[0] == "_participantRecruitmentService"
     )?.[1];
@@ -84,8 +85,8 @@ export const prepareExperimentFileForThreshold = (
   }
 };
 
-const discardCommentedLines = (parsed: Papa.ParseResult<any>): String[][] => {
-  const commentRegex = /^\%/;
+const discardCommentedLines = (parsed: Papa.ParseResult<any>): string[][] => {
+  const commentRegex = /^%/;
   const noncommentedRows = parsed.data.filter(
     (row) => !commentRegex.test(row[0].trim())
   );
