@@ -2282,19 +2282,28 @@ const experiment = (blockCount) => {
           !trialBreakButtonStatus &&
           breakTimeElapsed >= takeABreakMinimumDurationSec
         ) {
-          trialBreakButtonStatus = true;
-          showTrialProceedButton();
+          // update trialbreak modal body text
           const trialBreakBody = instructionsText.trialBreak(
             rc.language.value,
             responseType
           );
           showTrialBreakWidget(trialBreakBody);
 
+          // show proceed button
+          trialBreakButtonStatus = true;
+          showTrialProceedButton();
           document.getElementById("trial-proceed").onclick = () => {
             trialBreakStatus = false;
             trialBreakButtonStatus = false;
             hideTrialBreakWidget();
             hideTrialProceedButton();
+
+            // the trialCredit value is updated on every iteration of this routine.
+            // while the routine is waiting for "proceed" during trialbreak, nothing happens.
+            // but when its time to move to next routine, one more iteration of current routine is needed.
+            // this last iteration will increase the trialcredit. To nullify the extra credit,
+            // the credit is decreased here.
+            currentTrialCredit -= takeABreakTrialCredit;
           };
         }
 
