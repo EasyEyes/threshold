@@ -1359,6 +1359,13 @@ const experiment = (blockCount) => {
   /* --- /SIMULATED --- */
 
   var condition;
+  var skipTrialOrBlock = {
+    blockId: null,
+    trialId: null,
+    skipTrial: false,
+    skipBlock: false,
+  };
+
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       trialInstructionClock.reset();
@@ -1820,6 +1827,16 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineEachFrame() {
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        return Scheduler.Event.NEXT;
+      }
       /* --- SIMULATED --- */
       if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
@@ -1830,7 +1847,13 @@ const experiment = (blockCount) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        let action = await handleEscapeKey();
+        if (action.quitSurvey) {
+          return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        }
+        if (action.skipTrial || action.skipBlock) {
+          return Scheduler.Event.NEXT;
+        }
       }
 
       if (!continueRoutine) {
@@ -1855,6 +1878,17 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineEnd() {
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        return Scheduler.Event.NEXT;
+      }
+
       document.removeEventListener("click", _takeFixationClick);
       document.removeEventListener("touchend", _takeFixationClick);
       instructions.setAutoDraw(false);
@@ -1877,6 +1911,17 @@ const experiment = (blockCount) => {
     return async function () {
       // rc.pauseNudger();
       // await sleep(100);
+
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        return Scheduler.Event.NEXT;
+      }
 
       psychoJS.experiment.addData(
         "clickToTrialPreparationDelaySec",
@@ -1929,6 +1974,18 @@ const experiment = (blockCount) => {
   var frameRemains;
   function trialRoutineEachFrame() {
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        removeClickableAlphabet();
+        return Scheduler.Event.NEXT;
+      }
+
       //------Loop for each frame of Routine 'trial'-------
       // get current time
       t = trialClock.getTime();
@@ -2215,7 +2272,10 @@ const experiment = (blockCount) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        let action = await handleEscapeKey();
+        if (action.quitSurvey) {
+          return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        }
       }
 
       /* -------------------------------------------------------------------------- */
@@ -2269,6 +2329,28 @@ const experiment = (blockCount) => {
 
   function trialRoutineEnd() {
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        if (currentLoop instanceof MultiStairHandler) {
+          for (const thisComponent of trialComponents) {
+            if (typeof thisComponent.setAutoDraw === "function") {
+              thisComponent.setAutoDraw(false);
+            }
+          }
+          currentLoop.addResponse(0, level);
+          routineTimer.reset();
+          routineClock.reset();
+        }
+        key_resp.stop();
+        return Scheduler.Event.NEXT;
+      }
+
       // setTimeout(() => {
       //   rc.resumeNudger();
       // }, 700);
@@ -2375,6 +2457,18 @@ const experiment = (blockCount) => {
   function endLoopIteration(scheduler, snapshot) {
     // ------Prepare for next entry------
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        psychoJS.experiment.nextEntry(snapshot);
+        return Scheduler.Event.NEXT;
+      }
+
       if (typeof snapshot !== "undefined") {
         // ------Check if user ended loop early------
         if (snapshot.finished) {
@@ -2461,6 +2555,87 @@ const experiment = (blockCount) => {
 
     return Scheduler.Event.QUIT;
   }
+
+  async function handleEscapeKey() {
+    // check if esc handling enabled for this condition, if not, quit
+    if (
+      !(
+        condition.responseEscapeOptionsBool &&
+        condition.responseEscapeOptionsBool.toLowerCase() === "true"
+      )
+    ) {
+      return {
+        skipTrial: false,
+        skipBlock: false,
+        quitSurvey: true,
+      };
+    }
+    if (isProlificExperiment()) {
+      // hide skipBlock Btn
+      document.getElementById("skip-block-btn").style.visibility = "hidden";
+    }
+    let action = {
+      skipTrial: false,
+      skipBlock: false,
+      quitSurvey: false,
+    };
+    const escapeKeyHandling = new Promise((resolve) => {
+      let dialog = new bootstrap.Modal(
+        document.getElementById("exampleModal"),
+        { backdrop: "static", keyboard: false }
+      );
+      document.getElementById("quit-btn").addEventListener("click", (event) => {
+        event.preventDefault();
+        action.quitSurvey = true;
+        dialog.hide();
+        resolve();
+      });
+      document
+        .getElementById("skip-trial-btn")
+        .addEventListener("click", (event) => {
+          console.log("Skip Trial");
+          event.preventDefault();
+          skipTrialOrBlock.skipTrial = true;
+          skipTrialOrBlock.trialId = currentTrialIndex;
+          skipTrialOrBlock.blockId = currentBlockIndex;
+          action.skipTrial = true;
+          dialog.hide();
+          console.log("Skip Trial Ends");
+          resolve();
+        });
+      document
+        .getElementById("skip-block-btn")
+        .addEventListener("click", (event) => {
+          console.log("Skip Block");
+          event.preventDefault();
+          skipTrialOrBlock.skipBlock = true;
+          skipTrialOrBlock.blockId = currentBlockIndex;
+          action.skipBlock = true;
+          dialog.hide();
+          console.log("Skip Block Ends");
+          resolve();
+        });
+      dialog.show();
+    });
+    await escapeKeyHandling;
+    // adding following lines to remove listeners
+    document.getElementById("skip-trial-btn").outerHTML =
+      document.getElementById("skip-trial-btn").outerHTML;
+    document.getElementById("skip-block-btn").outerHTML =
+      document.getElementById("skip-block-btn").outerHTML;
+    document.getElementById("quit-btn").outerHTML =
+      document.getElementById("quit-btn").outerHTML;
+    return action;
+  }
+};
+
+const isProlificExperiment = () => {
+  let searchParams = window.location.search;
+  return (
+    searchParams.search("participant") != -1 &&
+    searchParams.search("session") != -1 &&
+    searchParams.search("study_id") != -1
+  );
 };
 
 const afterExperimentEnds = () => {
