@@ -1,3 +1,5 @@
+import { is } from "express/lib/request";
+
 // eslint-disable-next-line no-undef
 export const debug = process.env.debug;
 // export const debug = true;
@@ -141,7 +143,10 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
     position[0] = position[0] - displayOptions.nearPointXYDeg.x;
     position[1] = position[1] - displayOptions.nearPointXYDeg.y;
     const rDeg = Math.sqrt(position[0] ** 2 + position[1] ** 2);
-    const rPix = degreesToPixels(rDeg, displayOptions);
+    const rPix =
+      displayOptions.pixPerCm *
+      displayOptions.viewingDistanceCm *
+      Math.tan(rDeg * (Math.PI / 180));
     let pixelPosition = [];
     if (rDeg > 0) {
       pixelPosition = [
@@ -310,12 +315,12 @@ export const rotate = (l) => {
 };
 
 export const levelFromTargetHeight = (
-  targetHeight,
+  targetHeightPx,
   spacingOverSizeRatio,
   pixPerCm,
   viewingDistanceCm
 ) => {
-  const spacingPx = Math.round(targetHeight * spacingOverSizeRatio);
+  const spacingPx = Math.round(targetHeightPx * spacingOverSizeRatio);
   const spacingDeg = pixelsToDegrees(spacingPx, {
     pixPerCm: pixPerCm,
     viewingDistanceCm: viewingDistanceCm,
@@ -323,3 +328,89 @@ export const levelFromTargetHeight = (
   const targetLevel = Math.log10(spacingDeg);
   return targetLevel;
 };
+
+/** 
+  @author translated by ajb 12-15-21, from original by dhb 3-5-97
+  @param {number} x x-coordinate
+  @param {number} y y-coordinate
+  @param {object} rect
+  @param {number} rect.left smaller (left) x value of the rectangle
+  @param {number} rect.right bigger (right) x value of the rectangle
+  @param {number} rect.top bigger (top) y value of the rectangle
+  @param {number} rect.bottom smaller (bottom) y value of the rectangle
+*/
+export const isInRect = (x, y, rect) => {
+  if (x >= rect.left && x <= rect.right && y >= rect.bottom && y <= rect.top)
+    return true;
+  return false;
+};
+
+/** 
+  @author translated by ajb 12-15-21, from original by dgp 7-9-15
+  @param {object} smallRect Smaller rectangle, contained by bigRect if this returns true
+  @param {number} smallRect.left smaller (left) x value of the rectangle
+  @param {number} smallRect.right bigger (right) x value of the rectangle
+  @param {number} smallRect.top bigger (top) y value of the rectangle
+  @param {number} smallRect.bottom smaller (bottom) y value of the rectangle
+  @param {object} bigRect Bigger rectangle, contains smallRect if this returns true
+  @param {number} bigRect.left smaller (left) x value of the rectangle
+  @param {number} bigRect.right bigger (right) x value of the rectangle
+  @param {number} bigRect.top bigger (top) y value of the rectangle
+  @param {number} bigRect.bottom smaller (bottom) y value of the rectangle
+  @returns {boolean} Whether or not smallRect is entirely contained by bigRect
+*/
+export const isRectInRect = (smallRect, bigRect) => {
+  return (
+    isInRect(smallRect.left, smallRect.bottom, bigRect) &&
+    isInRect(smallRect.right, smallRect.top)
+  );
+};
+
+const getUnionRect = (a, b) => {
+  // a = [[x1,y1],[x2,y2]]
+  // b = [[x1,y1],[x2,y2]]
+  if (rectIsEmpty(a)) return b;
+  if (rectIsEmpty(b)) return a;
+  const lowerLeft = [Math.min(a[0][0], b[0][0]), Math.min(a[0][1], b[0][1])];
+  const upperRight = [Math.max(a[1][0], b[1][0]), Math.max(a[1][1], b[1][1])];
+  const newRect = [lowerLeft, upperRight];
+  return newRect;
+};
+
+const rectIsEmpty = (rect) => {
+  if (rect[0][0] === rect[1][0] && rect[0][1] === rect[1][1]) return true;
+  return false;
+};
+
+const rectFromPixiRect = (pixiRect) => {
+  // ASSUMES `center` aligned
+  const lowerLeft = [
+    pixiRect.x - pixiRect.width / 2,
+    pixiRect.y - pixiRect.height / 2,
+  ];
+  const upperRight = [
+    pixiRect.x + pixiRect.width / 2,
+    pixiRect.y + pixiRect.height / 2,
+  ];
+  const newRect = [lowerLeft, upperRight];
+  return newRect;
+};
+/* 
+function newRect = UnionRect(a,b)
+% newRect = UnionRect(a,b)
+% 
+% Returns the smallest rect that contains the two rects a and b.
+% Also see PsychRects.
+
+% 7/10/96 dgp  Wrote it.
+% 8/5/96 dgp check rect size.
+
+if size(a,2)~=4 || size(b,2)~=4
+    error('Wrong size rect argument. Usage:  newRect=UnionRect(a,b)');
+end
+newRect=a;
+newRect(RectTop)=min(a(RectTop),b(RectTop));
+newRect(RectBottom)=max(a(RectBottom),b(RectBottom));
+newRect(RectLeft)=min(a(RectLeft),b(RectLeft));
+newRect(RectRight)=max(a(RectRight),b(RectRight));
+*/

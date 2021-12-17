@@ -9,9 +9,10 @@ import {
   levelFromSpacingPixels,
   logger,
   levelFromTargetHeight,
+  XYPixOfXYDeg,
+  isRectInRect,
+  isInRect,
 } from "./utils.js";
-
-const debug = false;
 
 // Find the font size for the string containing the flankers & target
 /**
@@ -82,25 +83,327 @@ export const getTypographicHeight = (
   return [desiredHeight, level];
 };
 
-/**
+export const boundLevel = (proposedLevel) => {
+  const upperBounded = getUpperBoundedLevel(
+    proposedLevel,
+    targetPositionDeg,
+    screenDimensions,
+    spacingDirection,
+    spacingOverSizeRatio,
+    pixPerCm,
+    viewingDistanceCm,
+    nearPointXYDeg,
+    nearPointXYPix
+  );
+  const lowerBounded = getLowerBoundedLevel(upperBounded);
+};
+/*
  * If the proposed `level` would cause the stimuli to the be presented off screen,
  * get the largest value for `level` which will actually fit on screen.
  * Used in `ratio` mode, rather than `typographic`
- * @param {Number} proposedLevel Level to be tested, as provided by QUEST
- * @param {Number[]} targetXYPix [x,y] position of the target (in pixels)
- * @param {Number[]} fixationXYPix [x,y] position of the fixation (in pixels)
- * @param {("radial"|"tangential")} spacingDirection Orientation of flankers relative to fixation-target
- * @param {Object} displayOptions Set of parameters for the specifics of presentation
- * @todo Specify necessary members of `displayOptions`
- * @returns {Number}
  */
-export const getMaxPresentableLevel = (
+export const getUpperBoundedLevel = (
   proposedLevel,
-  targetXYPix,
-  fixationXYPix,
+  targetPositionDeg,
+  screenDimensions,
   spacingDirection,
+  spacingOverSizeRatio,
+  normalizedAlphabetBoundingRect,
   displayOptions
 ) => {
+  // First check that the
+  const targetPositionPx = XYPixOfXYDeg(targetPositionDeg, displayOptions);
+  const screenBoundsPx = [
+    [-screenDimensions.width / 2, -screenDimensions.height / 2],
+    [-screenDimensions.width / 2, -screenDimensions.height / 2],
+  ];
+  const screenRectPx = {
+    left: screenBoundsPx[0][0],
+    right: screenBoundsPx[1][0],
+    bottom: screenBoundsPx[0][1],
+    top: screenBoundsPx[1][1],
+  };
+  const targetIsOnScreen = isInRect(
+    targetPositionPx[0],
+    targetPositionPx[1],
+    screenBoundsPx
+  );
+  if (!targetIsOnScreen)
+    throw "Target is off-screen. Please contact experimenter.";
+
+  const stimulusBoundsPx = getStimulusBoundsPx(
+    proposedLevel,
+    targetPositionDeg,
+    spacingDirection,
+    spacingOverSizeRatio,
+    normalizedAlphabetBoundingRect
+  );
+
+  const stimulusRectPx = {
+    left: stimulusBoundsPx[0][0],
+    right: stimulusBoundsPx[1][0],
+    bottom: stimulusBoundsPx[0][1],
+    top: stimulusBoundsPx[1][1],
+  };
+  const levelTooLarge = !isRectInRect(stimulusRectPx, screenRectPx);
+
+  return largestPossibleLevel;
+};
+
+export const getLowerBoundedLevel = (
+  proposedLevel,
+  spacingOverSizeRatio,
+  targetEccentricityXYDeg,
+  targetMinimumPix
+) => {
+  // Given level (log), get character height (px)
+  const targetHeightPix = getTargetHeightPix(
+    proposedLevel,
+    spacingOverSizeRatio,
+    targetEccentricityXYDeg
+  );
+  // Check whether this height is less than the minimum
+  const levelIsTooSmall = targetHeightPix < targetMinimumPix;
+  // If the value of `proposedLevel` is fine, just return it
+  if (!levelIsTooSmall) return proposedLevel;
+  // Else work backwards...
+  const minimumSpacingPix = Math.round(targetMinimumPix * spacingOverSizeRatio);
+  // ... to find...
+  const minimumSpacingDeg = pixelsToDegrees(minimumSpacingPix, {
+    pixPerCm: pixPerCm,
+    viewingDistanceCm: viewingDistanceCm,
+  });
+  // ... the closet value to `proposedLevel` which doesn't produce too small a font height
+  return Math.log10(minimumSpacingDeg);
+};
+
+export const getFlankerLocationsDeg = (
+  targetPositionDeg,
+  spacingDeg,
+  flankerOrientation
+) => {
+  const lengthOfTargetPositions = Math.sqrt(
+    targetPositionDeg
+      .map((x) => x ** 2)
+      .reduce((previous, current) => previous + current)
+  );
+  let v = targetPositionDeg.map((x) => x / lengthOfTargetPositions);
+  if (flankerOrientation === "tangential") v = [v[1], -v[0]]; // SEE https://gamedev.stackexchange.com/questions/70075/how-can-i-find-the-perpendicular-to-a-2d-vector
+  const flankerLocationsDeg = [
+    targetPositionDeg.map((_, i) => targetPositionDeg[i] - v[i] * spacingDeg),
+    targetPositionDeg.map((_, i) => targetPositionDeg[i] + v[i] * spacingDeg),
+  ];
+  return flankerLocationsDeg;
+};
+
+export const distancePix = (position1Deg, position2Deg) => {
+  // ... by finding two points in deg spacing,
+  // ... convert both to pixel space
+  // ... and find the distance between them
+  const position1Pix = XYPixOfXYDeg(position1Deg);
+  const position2Pix = XYPixOfXYDeg(position2Deg);
+  const v = position1Pix.map(_, (i) => position1Pix[i] - position2Pix[i]);
+  const distanceInPix = Math.sqrt(
+    v.map((x) => x ** 2).reduce((previous, current) => previous + current)
+  );
+  return distanceInPix;
+};
+
+const getTargetHeightPix = (
+  proposedLevel,
+  spacingOverSizeRatio,
+  targetEccentricityXYDeg
+) => {
+  // Spacing value corresponding to the provided `level` value
+  const proposedSpacingDeg = Math.pow(10, proposedLevel);
+  const proposedHeightDeg = proposedSpacingDeg / spacingOverSizeRatio;
+  const targetTopDeg = [
+    targetEccentricityXYDeg[0],
+    targetEccentricityXYDeg[1] + proposedHeightDeg / 2,
+  ];
+  const targetBottomDeg = [
+    targetEccentricityXYDeg[0],
+    targetEccentricityXYDeg[1] - proposedHeightDeg / 2,
+  ];
+  const targetHeightPix = distancePix(targetTopDeg, targetBottomDeg);
+  return targetHeightPix;
+};
+
+const getFlankerHeightsPix = (
+  proposedLevel,
+  spacingOverSizeRatio,
+  targetEccentricityXYDeg,
+  spacingDirection
+) => {
+  // Spacing value corresponding to the provided `level` value
+  const proposedSpacingDeg = Math.pow(10, proposedLevel);
+  const proposedHeightDeg = proposedSpacingDeg / spacingOverSizeRatio;
+  // Convert to pixels to determine if too small...
+  const flankerLocationsDeg = getFlankerLocationsDeg(
+    targetEccentricityXYDeg,
+    proposedSpacingDeg,
+    spacingDirection
+  );
+  const flankerTopsAndBottomsDeg = flankerLocations.map((flankerLocation) => [
+    flankerLocation[0],
+    flankerLocation[1] + proposedHeightDeg / 2,
+    flankerLocation[0],
+    flankerLocation[1] - proposedHeightDeg / 2,
+  ]);
+  const flankerHeightsPix = flankerTopsAndBottoms.map(distancePix);
+  return flankerHeightsPix;
+};
+
+/**
+ * Return a bounding rectangle (defined by two points, the bottom-left and top-right) around the flankers and target
+ * @param {Number} proposedLevel
+ * @param {Number[]} targetEccentricityXYDeg
+ * @param {"radial"|"tangential"} spacingDirection
+ * @param {Number} spacingOverSizeRatio
+ * @returns {Number[][]}
+ */
+export const getStimulusBoundsPx = (
+  proposedLevel,
+  targetEccentricityXYDeg,
+  spacingDirection,
+  spacingOverSizeRatio,
+  normalizedAlphabetBoundingRect
+) => {
+  // Spacing value corresponding to the provided `level` value
+  const proposedSpacingDeg = Math.pow(10, proposedLevel);
+  const proposedHeightDeg = proposedSpacingDeg / spacingOverSizeRatio;
+
+  const targetTopDeg = [
+    targetEccentricityXYDeg[0] + proposedHeightDeg,
+    targetEccentricityXYDeg[1] + proposedHeightDeg,
+  ];
+  const targetEccentricityXYPix = XYPixOfXYDeg(targetEccentricityXYDeg);
+  const targetTopPix = XYPixOfXYDeg(targetTopDeg);
+  const proposedHeightPix = targetTopPix[1] - targetEccentricityXYDeg[1];
+
+  const alphabetBoundingRect = [
+    [
+      normalizedAlphabetBoundingRect[0][0] * proposedHeightPix,
+      normalizedAlphabetBoundingRect[0][1] * proposedHeightPix,
+    ],
+    [
+      normalizedAlphabetBoundingRect[1][0] * proposedHeightPix,
+      normalizedAlphabetBoundingRect[1][1] * proposedHeightPix,
+    ],
+  ];
+  const flankerLocationsDeg = getFlankerLocationsDeg(
+    targetEccentricityXYDeg,
+    proposedSpacingDeg,
+    spacingDirection
+  );
+  const flankerLocationsPix = flankerLocationsDeg.map(XYPixOfXYDeg);
+  const flankerRectanglesPix = flankerLocationsPix.map((location) => {
+    const lowerLeft = [
+      location[0] + alphabetBoundingRect[0][0],
+      location[0] + alphabetBoundingRect[0][1],
+    ];
+    const upperRight = [
+      location[1] + alphabetBoundingRect[1][0],
+      location[1] + alphabetBoundingRect[1][1],
+    ];
+    return [lowerLeft, upperRight];
+  });
+  const stimulusRect = getUnionRect(...flankerRectanglesPix);
+  return stimulusRect;
+};
+/*
+  const flankerBottomsAndTopsDeg = flankerLocationsDeg.map(flankerLocation => [
+    flankerLocation[0], flankerLocation[1] - proposedHeightDeg/2,
+    flankerLocation[0], flankerLocation[1] + proposedHeightDeg/2,
+  ]);
+  const flankerHeightsPix = flankerBottomsAndTopsDeg.map(distancePix);
+  // ASSUMES flanker height is the same as width, ie square flankers
+  const flankerLeftsAndRightsDeg = flankerLocationsDeg.map(flankerLocation => [
+    flankerLocation[0] - proposedHeightDeg/2, flankerLocation[1],
+    flankerLocation[0] + proposedHeightDeg/2, flankerLocation[1],
+  ]);
+  const stimulusBoundsDeg = [
+     // Left,bottom point (x,y)
+     [flankerLeftsAndRightsDeg[0][0], flankerBottomsAndTopsDeg[0][0]],
+     // Right,top point (x,y)
+     [flankerLeftsAndRightsDeg[1][1]], flankerBottomsAndTopsDeg[1][1]
+  ];
+  const stimulusBoundsPx = stimulusBoundsDeg.map(point => XYPixOfXYDeg(point, {
+    pixPerCm: pixPerCm, viewingDistanceCm: viewingDistanceCm, nearPointXYDeg: nearPointXYDeg, nearPointXYPix: nearPointXYPix}))
+  return stimulusBoundsPx;
+};
+*/
+export const getAlphabetBoundingBox = (
+  alphabet,
+  targetFont,
+  height,
+  repeats = 1
+) => {
+  // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
+  let alphabetBoundingRect = [
+    [0, 0],
+    [0, 0],
+  ];
+  const testStim = new visual.TextStim({
+    win: window,
+    name: "alphabetBoundingBoxStim",
+    text: "",
+    font: targetFont,
+    units: "pix",
+    pos: [0, 0],
+    height: height,
+    wrapWidth: undefined,
+    ori: 0.0,
+    color: new util.Color("black"),
+    opacity: 1.0,
+    depth: -7.0,
+    autoDraw: false,
+    autoLog: false,
+  });
+  for (const character of alphabet) {
+    testStim.setText(character.repeat(repeats));
+    testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
+    let thisBoundingBox = testStim.getBoundingBox(true);
+    console.log("thisBoundingBox");
+    let thisBoundingRect = rectFromPixiRect(thisBoundingBox);
+    alphabetBoundingRect = getUnionRect(thisBoundingRect, alphabetBoundingRect);
+  }
+  const normalizedAlphabetBoundingRect = [
+    [alphabetBoundingRect[0][0] / height, alphabetBoundingRect[0][1] / height],
+    [alphabetBoundingRect[1][0] / height, alphabetBoundingRect[1][1] / height],
+  ];
+  return normalizedAlphabetBoundingRect;
+};
+/*
+Hi Gus, i have a few minutes before the fac. meeting at 12:30 pm. 
+We want a bounding box for the stimulus, to check whether it fits 
+on-screen and to estimate a new level that wil fit if it doesn't. 
+Yesterday i thought we could get away with assuming a nominal size 
+for the flankers. I'm now thinking that it's better to just do it 
+right and finish the job. 
+1. Determine the alphabet bounding box. Get a joint bounding box for 
+  all the letters in the alphabet. Logically, this is the union of the 
+  bounding box for each letter. Drawing all letters with the same baseline. 
+  I've always centered horizontally. Once we have this bounding box we 
+  should retain it for the whole block. It's useful for targets and 
+  flankers in ratio mode, and for targets, when measuring acuity. It's 
+  not relevant in typographic mode.
+2. For typographic mode i think we should compute a special tripleAlphabet 
+   mode in which we measure the union of the bounding boxes of every same 
+   letter triplet, aaa, bbb, etc. The assumption is that this union will 
+   also contain any random triplet.
+3. Compute the bounding box of the whole stimulus. In acuity mode, this 
+   is just the alphabet bounding box at the target position. In typographic 
+   mode, it's very similar, substituting the tripleAlphabet bounding box. 
+   I forgotten our rule for determining size fo the triplet based on desired 
+   spacing. In ratio mode, we place the alphabet bounding box at the location 
+   of each flanker. 
+4. If the stimulus bounding box is on screen, then we're done checking. If the 
+   bounding box is too big, then we'll need to estimate by how much we've exceeded 
+   and try to calculate by how much to reduce the spacing to fit. It may not be 
+   possible to fit, in which case this whole condition cannot be tested. 
+*/
+/*
   const granularityOfChange = 0.05;
   const smallestDisplayableLevel = levelFromTargetHeight(
     displayOptions.minimumHeight,
@@ -142,6 +445,7 @@ export const getMaxPresentableLevel = (
   // proposedLevel === smallestDisplayableLevel
   return smallestDisplayableLevel;
 };
+*/
 
 /**
  * Tests whether these proposed parameters for presentation would draw improperly, eg extend beyond the extent of the screen
@@ -244,7 +548,7 @@ const flankersExtent = (
       viewingDistanceCm: sizingParameters.viewingDistanceCm,
     })
   );
-  const flankerLocations = getFlankerLocations(
+  const flankerLocations = wronggetFlankerLocations(
     targetPosition,
     fixationPosition,
     flankerOrientation,
@@ -360,19 +664,10 @@ const boundingBoxFromSpacing = (
  * @param {Number} spacing How far the flankers are to be from the target (in the same units as the target & fixation positions)
  * @returns {Number[][]} Array containing two Arrays which represent the positions of Flanker 1 and Flanker 2
  */
-const tangentialFlankerPositions = (
-  targetPosition,
-  fixationPosition,
-  spacing
-) => {
+const tangentialFlankerPositionsDeg = (targetPosition, spacing) => {
   let x, i; // Variables for anonymous fn's
-  // Vector representing the line between target and fixation
-  const v = [
-    fixationPosition[0] - targetPosition[0],
-    fixationPosition[1] - targetPosition[1],
-  ];
   // Get the vector perpendicular to v
-  const p = [v[1], -v[0]]; // SEE https://gamedev.stackexchange.com/questions/70075/how-can-i-find-the-perpendicular-to-a-2d-vector
+  const p = [targetPosition[1], -targetPosition[0]]; // SEE https://gamedev.stackexchange.com/questions/70075/how-can-i-find-the-perpendicular-to-a-2d-vector
 
   // Find the point that is `spacing` far from `targetPosition` along p
   // SEE https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
@@ -398,17 +693,14 @@ const tangentialFlankerPositions = (
  * @param {Number} spacing How far the flankers are to be from the target (in the same units as the target & fixation positions)
  * @returns {Number[][]} Array containing two Arrays, which represent the positions of Flanker 1 and Flanker 2
  */
-const radialFlankerPositions = (targetPosition, fixationPosition, spacing) => {
+const radialFlankerPositionsDeg = (targetPositionDeg, spacingDeg) => {
   // SEE https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
 
-  // Vector representing the line between target and fixation
-  const v = [
-    fixationPosition[0] - targetPosition[0],
-    fixationPosition[1] - targetPosition[1],
-  ];
   /// Find the length of v
   const llvll = Math.sqrt(
-    v.map((x) => x ** 2).reduce((previous, current) => previous + current)
+    targetPositionDeg
+      .map((x) => x ** 2)
+      .reduce((previous, current) => previous + current)
   );
   /// Normalize v
   const u = v.map((x) => x / llvll);
@@ -428,7 +720,7 @@ const radialFlankerPositions = (targetPosition, fixationPosition, spacing) => {
  * @param {Number} spacing Distance between the target and one flanker
  * @returns {Number[][]} Array containing two [x,y] arrays, each representing the location of one flanker
  */
-export const getFlankerLocations = (
+export const wronggetFlankerLocations = (
   targetPosition,
   fixationPosition,
   flankerOrientation,
@@ -449,33 +741,6 @@ export const getFlankerLocations = (
         flankerOrientation
       );
   }
-};
-
-export const getLowerBoundedLevel = (proposedLevel, displayOptions) => {
-  // Spacing value corresponding to the provided `level` value
-  const proposedSpacingDeg = Math.pow(10, proposedLevel);
-  const proposedSpacingPix = Math.abs(
-    degreesToPixels(proposedSpacingDeg, {
-      pixPerCm: displayOptions.pixPerCm,
-      viewingDistanceCm: displayOptions.viewingDistanceCm,
-    })
-  );
-  // Find the font height that would result from the provided level
-  const proposedHeight = Math.round(
-    proposedSpacingPix / displayOptions.spacingOverSizeRatio
-  );
-  // Check whether this height is less than the minimum
-  const levelIsTooSmall = proposedHeight < displayOptions.minimumHeight;
-  // If the value of `proposedLevel` is fine, just return it
-  if (!levelIsTooSmall) return proposedLevel;
-  // Else work backwards...
-  const minimumSpacingPix = Math.round(
-    displayOptions.minimumHeight * displayOptions.spacingOverSizeRatio
-  );
-  // ... to find...
-  const minimumSpacingDeg = pixelsToDegrees(minimumSpacingPix, displayOptions);
-  // ... the closet value to `proposedLevel` which doesn't produce too small a font height
-  return Math.log10(minimumSpacingDeg);
 };
 
 export const getTestabilityBoundedLevel = (

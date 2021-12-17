@@ -97,6 +97,7 @@ import {
   getFlankerLocations,
   getLowerBoundedLevel,
   getTestabilityBoundedLevel,
+  getAlphabetBoundingBox,
 } from "./components/bounding.js";
 
 import {
@@ -1494,6 +1495,9 @@ const experiment = (blockCount) => {
       psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
 
       var alphabet = targetAlphabet;
+
+      const alphabetBoundingBox = getAlphabetBoundingBox(alphabet, targetFont);
+      logger("alphabet bounding box", alphabetBoundingBox);
       /* ------------------------------ Pick triplets ----------------------------- */
       const tempAlphabet = shuffle(shuffle(alphabet));
       var firstFlankerCharacter = tempAlphabet[0];
@@ -1522,7 +1526,7 @@ const experiment = (blockCount) => {
         nearPointXYPix: nearPointXYPix,
         fixationXYPix: fixationXYPx,
         spacingOverSizeRatio: spacingOverSizeRatio,
-        minimumHeight: targetMinimumPix,
+        targetMinimumPix: targetMinimumPix,
         fontFamily: targetFont,
         window: psychoJS.window,
         spacingRelationToSize: spacingRelationToSize,
@@ -1561,8 +1565,7 @@ const experiment = (blockCount) => {
           proposedLevel,
           displayOptions
         );
-        psychoJS.experiment.addData("levelUsed", level);
-        const upperAndLowerBoundedLevel = getMaxPresentableLevel(
+        const upperAndLowerBoundedLevel = getUpperBoundedLevel(
           lowerBoundedLevel,
           targetXYPix,
           fixationXYPx,
@@ -1570,6 +1573,7 @@ const experiment = (blockCount) => {
           displayOptions
         );
         level = upperAndLowerBoundedLevel;
+        psychoJS.experiment.addData("levelUsed", level);
         logger("level", level);
         spacingDeg = Math.pow(10, level);
         psychoJS.experiment.addData("spacingDeg", spacingDeg);
