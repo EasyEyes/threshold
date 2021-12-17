@@ -206,6 +206,15 @@ var totalTrialConfig = {
   alignVert: "bottom",
 };
 
+var targetSpecsConfig = {
+  fontSize: 20,
+  x: -window.innerWidth / 2,
+  y: -window.innerHeight / 2,
+  alignHoriz: "left",
+  alignVert: "bottom",
+};
+var targetSpecs; // TextStim object
+
 var trialInfoStr = "";
 var totalTrial, // TextSim object
   totalTrialCount = 0;
@@ -532,6 +541,25 @@ const experiment = (blockCount) => {
       opacity: 1.0,
       depth: -20.0,
       isInstruction: false,
+    });
+
+    targetSpecs = new visual.TextStim({
+      win: psychoJS.window,
+      name: "targetSpecs",
+      text: "",
+      font: instructionFont,
+      units: "pix",
+      pos: [targetSpecsConfig.x, targetSpecsConfig.y],
+      alignHoriz: targetSpecsConfig.alignHoriz,
+      alignVert: targetSpecsConfig.alignVert,
+      height: targetSpecsConfig.fontSize,
+      wrapWidth: window.innerWidth,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -20.0,
+      isInstruction: false,
+      autoDraw: false,
     });
 
     const instructionsConfig = {
@@ -1308,6 +1336,7 @@ const experiment = (blockCount) => {
   var showAlphabetWhere;
   var showAlphabetElement;
   var showCounterBool;
+  var showTargetSpecs;
   var showViewingDistanceBool;
   const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 };
   var showBoundingBox;
@@ -1448,6 +1477,7 @@ const experiment = (blockCount) => {
       showAlphabetWhere = reader.read("showAlphabetWhere", cName);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", cName);
       showCounterBool = reader.read("showCounterBool", cName);
+      showTargetSpecs = paramReader.read("showTargetSpecsBool", cName);
 
       conditionTrials = reader.read("conditionTrials", cName);
       targetDurationSec = reader.read("targetDurationSec", cName);
@@ -1555,6 +1585,7 @@ const experiment = (blockCount) => {
         "spacingRelationToSize",
         spacingRelationToSize
       );
+      let targetHeightPx;
       if (spacingRelationToSize === "ratio") {
         // Get a usable "level", ie amount of spacing
         const lowerBoundedLevel = getLowerBoundedLevel(
@@ -1596,7 +1627,7 @@ const experiment = (blockCount) => {
           pos3XYPx,
         ]);
         // Find the font size for the flankers & target
-        const heightPx = Math.round(
+        targetHeightPx = Math.round(
           Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
         );
         if (Math.round(spacingPx / spacingOverSizeRatio) < targetMinimumPix) {
@@ -1606,20 +1637,22 @@ const experiment = (blockCount) => {
             even though it should have been previously constrained when we
             found the lower bound of \`level\``
           );
-          let heightPx = Math.round(Math.max(heightPx, targetMinimumPix));
+          let targetHeightPx = Math.round(
+            Math.max(targetHeightPx, targetMinimumPix)
+          );
         }
-        psychoJS.experiment.addData("heightPix", heightPx);
+        psychoJS.experiment.addData("heightPix", targetHeightPx);
         // Display flankers, given that "spacingRelationToSize" is set to "ratio"
         target.setText(targetCharacter);
-        target.setHeight(heightPx);
+        target.setHeight(targetHeightPx);
         flanker1.setPos(pos1XYPx);
         flanker1.setText(firstFlankerCharacter);
         flanker1.setFont(targetFont);
-        flanker1.setHeight(heightPx);
+        flanker1.setHeight(targetHeightPx);
         flanker2.setPos(pos3XYPx);
         flanker2.setText(secondFlankerCharacter);
         flanker2.setFont(targetFont);
-        flanker2.setHeight(heightPx);
+        flanker2.setHeight(targetHeightPx);
       } else if (spacingRelationToSize === "typographic") {
         // Don't display flankers if "spacingRelationToSize" is set to typographic...
         flanker1.setAutoDraw(false);
@@ -1633,7 +1666,7 @@ const experiment = (blockCount) => {
 
         // Find the font size for the string containing the flankers & target,
         // and the value of 'level' to which this acceptable size corresponds.
-        const [targetStimHeight, viableLevel] = getTypographicHeight(
+        const [targetHeightPx, viableLevel] = getTypographicHeight(
           psychoJS.window,
           proposedLevel,
           target,
@@ -1643,8 +1676,8 @@ const experiment = (blockCount) => {
         level = viableLevel;
         psychoJS.experiment.addData("levelUsed", level);
 
-        target.setHeight(targetStimHeight);
-        psychoJS.experiment.addData("heightPix", targetStimHeight);
+        target.setHeight(targetHeightPx);
+        psychoJS.experiment.addData("heightPix", targetHeightPx);
       } else if (spacingRelationToSize == "none") {
         // TODO FUTURE implement spacingRelationToSize === "none"
         console.error(
@@ -1696,6 +1729,19 @@ const experiment = (blockCount) => {
       showAlphabet.setText("");
       // showAlphabet.setText(getAlphabetShowText(validAns))
 
+      if (showTargetSpecs) {
+        const spacing =
+          Math.round((Math.pow(10, level) + Number.EPSILON) * 1000) / 1000;
+        const size =
+          Math.round((spacing / spacingOverSizeRatio + Number.EPSILON) * 1000) /
+          1000;
+        let targetSpecsString = `size: ${size} deg`;
+        if (spacingRelationToSize === "ratio")
+          targetSpecsString += `\nspacing: ${spacing} deg`;
+        targetSpecs.setText(targetSpecsString);
+        targetSpecs.setAutoDraw(true);
+      }
+
       trialInfoStr = getTrialInfoStr(
         rc.language.value,
         showCounterBool,
@@ -1722,6 +1768,7 @@ const experiment = (blockCount) => {
 
       trialComponents.push(showAlphabet);
       trialComponents.push(totalTrial);
+      if (showTargetSpecs) trialComponents.push(targetSpecs);
       // /* --- BOUNDING BOX --- */
       if (showBoundingBox) {
         trialComponents.push(targetBoundingPoly);
@@ -2006,6 +2053,17 @@ const experiment = (blockCount) => {
         totalTrial.frameNStart = frameN; // exact frame index
 
         totalTrial.setAutoDraw(true);
+      }
+
+      if (showTargetSpecs) {
+        // *targetSpecs* updates
+        if (t >= 0.0 && targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
+          // keep track of start time/frame for later
+          targetSpecs.tStart = t; // (not accounting for frame time here)
+          targetSpecs.frameNStart = frameN; // exact frame index
+
+          targetSpecs.setAutoDraw(true);
+        }
       }
 
       // *fixation* updates
