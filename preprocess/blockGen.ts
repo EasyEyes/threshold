@@ -3,6 +3,7 @@ import Papa from "papaparse";
 import { transpose } from "./utilities";
 
 export const splitIntoBlockFiles = (df: any, space = "web") => {
+  const getFile = space === "web" ? getFileOnWeb : getFileNode;
   const resultFileList = [];
 
   // Split up into block files
@@ -20,38 +21,34 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
 
     const data = transpose(columns.map((column) => blockDict[column]));
     // ... and use them to create a csv file for this block.
-    const blockCSVString = Papa.unparse({ fields: columns, data: data });
+    const blockCsvString = Papa.unparse({ fields: columns, data: data });
     const blockName = "block_" + String(blockId) + ".csv";
 
     // store block file
-    if (space === "web")
-      resultFileList.push(getFileOnWeb(blockCSVString, blockName));
-    else resultFileList.push(getFileNode(blockCSVString, blockName));
+    resultFileList.push(getFile(blockCsvString, blockName));
 
     // Add this block file to the output zip
-    // zip.file(blockFileName, blockCSVString);
+    // zip.file(blockFileName, blockCsvString);
   });
 
   // Create a "blockCount" file, just one column with the the indices of the blocks
-  const blockCountCSVString = Papa.unparse({
+  const blockCountCsvString = Papa.unparse({
     fields: ["block"],
     data: blockIndices.block.map((x: any) => [x]),
   });
 
   // store blockCount file
-  if (space === "web")
-    resultFileList.push(getFileOnWeb(blockCountCSVString, "blockCount.csv"));
-  else resultFileList.push(getFileNode(blockCountCSVString, "blockCount.csv"));
+  resultFileList.push(getFile(blockCountCsvString, "blockCount.csv"));
 
   return resultFileList;
 };
 
-const getFileOnWeb = (blockCSVString: string, name: string) => {
-  const csvBlob = new Blob([blockCSVString], { type: "text/csv" });
-  const csvFile = new File([csvBlob], name, { type: "text/csv" });
+const getFileOnWeb = (blockCsvString: string, name: string) => {
+  const csvBlob = new Blob([blockCsvString], { type: "text/csv;charset=utf8" });
+  const csvFile = new File([csvBlob], name, { type: "text/csv;charset=utf8" });
   return csvFile;
 };
 
-const getFileNode = (blockCSVString: string, name: string) => {
-  return [blockCSVString, name];
+const getFileNode = (blockCsvString: string, name: string) => {
+  return [blockCsvString, name];
 };

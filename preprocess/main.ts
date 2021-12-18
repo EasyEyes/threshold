@@ -19,12 +19,16 @@ export const preprocessExperimentFile = async (
 
   if (file.name.includes("xlsx")) {
     const data = await file.arrayBuffer();
-    const book = XLSX.read(data);
+    const book = XLSX.read(data, {
+      type: "string",
+    });
 
     for (const sheet in book.Sheets) {
       const csv: any = XLSX.utils.sheet_to_csv(book.Sheets[sheet]);
+
       Papa.parse(csv, {
         skipEmptyLines: true,
+        encoding: "UTF-8",
         complete: completeCallback,
       });
       // Only parse the very first sheet
@@ -32,8 +36,8 @@ export const preprocessExperimentFile = async (
     }
   } else
     Papa.parse(file, {
-      dynamicTyping: false, // check out index 23; make sure null values preserve
       skipEmptyLines: true,
+      encoding: "UTF-8",
       complete: completeCallback,
     });
 };
