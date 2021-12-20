@@ -13,7 +13,7 @@ import * as data from "./psychojs/src/data/index.js";
 import * as util from "./psychojs/src/util/index.js";
 import * as visual from "./psychojs/src/visual/index.js";
 
-const { PsychoJS, EventManager } = core;
+const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
 
@@ -49,7 +49,7 @@ import {
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
-  spacingPixelsFromLevel,
+  // spacingPixelsFromLevel,
 } from "./components/utils.js";
 
 import {
@@ -180,12 +180,19 @@ const paramReaderInitialized = async (reader) => {
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
-    rc.panel(formCalibrationList(reader), "#rc-panel", {}, () => {
-      rc.removePanel();
-      document.body.removeChild(document.querySelector("#rc-panel"));
-      // ! Start actual experiment
-      experiment(reader.blockCount);
-    });
+    rc.panel(
+      formCalibrationList(reader),
+      "#rc-panel",
+      {
+        debug: debug,
+      },
+      () => {
+        rc.removePanel();
+        document.body.removeChild(document.querySelector("#rc-panel"));
+        // ! Start actual experiment
+        experiment(reader.blockCount);
+      }
+    );
   } else {
     document.body.removeChild(document.querySelector("#rc-panel"));
     // ! Start actual experiment
@@ -2580,6 +2587,8 @@ const experiment = (blockCount) => {
       quitSurvey: false,
     };
     const escapeKeyHandling = new Promise((resolve) => {
+      // ! Maybe switch to import?
+      // eslint-disable-next-line no-undef
       let dialog = new bootstrap.Modal(
         document.getElementById("exampleModal"),
         { backdrop: "static", keyboard: false }
