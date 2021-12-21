@@ -121,7 +121,7 @@ export const pixelsToDegrees = (pixels, displayOptions) => {
 /**
  * Translation of MATLAB function of the same name
  * by Prof Denis Pelli, XYPixOfXYDeg.m
- * @param {Array} xyDeg List of [x,y] pairs, representing points x degrees right, and y degrees up, of fixation
+ * @param {Array} xyDegs List of [x,y] pairs, representing points x degrees right, and y degrees up, of fixation
  * @param {Object} displayOptions Parameters about the stimulus presentation
  * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
  * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
@@ -133,10 +133,37 @@ export const pixelsToDegrees = (pixels, displayOptions) => {
  * @param {Number} displayOptions.nearPointXYPix.y Pixels along y-axis of near-point from origin
  * @returns {Number[][]} Array of length=2 arrays of numbers, representing the same points in Pixel space
  */
-export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
-  if (xyDeg.length == 0) {
+export const XYPixsOfXYDegs = (xyDegs, displayOptions) => {
+  if (xyDegs.length == 0) {
     return;
   } // Return if no points to transform
+  // TODO verify displayOptions has the correct parameters
+  const xyPixs = [];
+  xyDegs.forEach((position) => {
+    position[0] = position[0] - displayOptions.nearPointXYDeg.x;
+    position[1] = position[1] - displayOptions.nearPointXYDeg.y;
+    const rDeg = Math.sqrt(position[0] ** 2 + position[1] ** 2);
+    const rPix =
+      displayOptions.pixPerCm *
+      displayOptions.viewingDistanceCm *
+      Math.tan(rDeg * (Math.PI / 180));
+    let pixelPosition = [];
+    if (rDeg > 0) {
+      pixelPosition = [
+        (position[0] * rPix) / rDeg,
+        (position[1] * rPix) / rDeg,
+      ];
+    } else {
+      pixelPosition = [0, 0];
+    }
+    pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
+    pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.x;
+    xyPixs.push(pixelPosition);
+  });
+  return xyPixs;
+};
+
+export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   // TODO verify displayOptions has the correct parameters
   const xyPix = [];
   xyDeg.forEach((position) => {
@@ -369,6 +396,25 @@ export const isRectInRect = (smallRect, bigRect) => {
 const getUnionRect = (a, b) => {
   // a = [[x1,y1],[x2,y2]]
   // b = [[x1,y1],[x2,y2]]
+  /* 
+  function newRect = UnionRect(a,b)
+  % newRect = UnionRect(a,b)
+  % 
+  % Returns the smallest rect that contains the two rects a and b.
+  % Also see PsychRects.
+
+  % 7/10/96 dgp  Wrote it.
+  % 8/5/96 dgp check rect size.
+
+  if size(a,2)~=4 || size(b,2)~=4
+      error('Wrong size rect argument. Usage:  newRect=UnionRect(a,b)');
+  end
+  newRect=a;
+  newRect(RectTop)=min(a(RectTop),b(RectTop));
+  newRect(RectBottom)=max(a(RectBottom),b(RectBottom));
+  newRect(RectLeft)=min(a(RectLeft),b(RectLeft));
+  newRect(RectRight)=max(a(RectRight),b(RectRight));
+  */
   if (rectIsEmpty(a)) return b;
   if (rectIsEmpty(b)) return a;
   const lowerLeft = [Math.min(a[0][0], b[0][0]), Math.min(a[0][1], b[0][1])];
@@ -395,22 +441,54 @@ const rectFromPixiRect = (pixiRect) => {
   const newRect = [lowerLeft, upperRight];
   return newRect;
 };
-/* 
-function newRect = UnionRect(a,b)
-% newRect = UnionRect(a,b)
-% 
-% Returns the smallest rect that contains the two rects a and b.
-% Also see PsychRects.
 
-% 7/10/96 dgp  Wrote it.
-% 8/5/96 dgp check rect size.
+export class Rectangle {
+  constructor(lowerLeft, upperRight, units = undefined) {
+    this.units = units;
+    this.left = lowerLeft[0];
+    this.right = upperRight[0];
+    this.bottom = lowerLeft[1];
+    this.top = upperRight[1];
 
-if size(a,2)~=4 || size(b,2)~=4
-    error('Wrong size rect argument. Usage:  newRect=UnionRect(a,b)');
-end
-newRect=a;
-newRect(RectTop)=min(a(RectTop),b(RectTop));
-newRect(RectBottom)=max(a(RectBottom),b(RectBottom));
-newRect(RectLeft)=min(a(RectLeft),b(RectLeft));
-newRect(RectRight)=max(a(RectRight),b(RectRight));
-*/
+    this.height = this.top - this.bottom;
+    this.width = this.left - this.right;
+  }
+  getUnits() {
+    return this.units;
+  }
+  getWidth() {
+    return this.width;
+  }
+  getHeight() {
+    return this.height;
+  }
+  toArray() {
+    const lowerLeft = [this.left, this.bottom];
+    const upperRight = [this.right, this.top];
+    return [lowerLeft, upperRight];
+  }
+  scale(scalar) {
+    const lowerLeft = [this.left * scalar, this.bottom * scalar];
+    const upperRight = [this.right * scalar, this.top * scalar];
+    const scaled = new Rectangle(lowerLeft, upperRight);
+    return scaled;
+  }
+  offset(positionXY) {
+    const lowerLeft = [this.left + positionXY[0], this.bottom + positionXY[1]];
+    const upperRight = [this.right + positionXY[0], this.top + positionXY[1]];
+    const offsetted = new Rectangle(lowerLeft, upperRight);
+    return offsetted;
+  }
+  inset(x, y) {
+    // aka shrink
+    const lowerLeft = [this.left + x, this.bottom + y];
+    const upperRight = [this.right - x, this.top - y];
+    return new Rectangle(lowerLeft, upperRight);
+  }
+}
+
+export const norm = (v) => {
+  return Math.sqrt(
+    v.map((x) => x ** 2).reduce((previous, current) => previous + current)
+  );
+};
