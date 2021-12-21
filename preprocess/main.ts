@@ -19,12 +19,16 @@ export const preprocessExperimentFile = async (
 
   if (file.name.includes("xlsx")) {
     const data = await file.arrayBuffer();
-    const book = XLSX.read(data);
+    const book = XLSX.read(data, {
+      type: "string",
+    });
 
     for (const sheet in book.Sheets) {
       const csv: any = XLSX.utils.sheet_to_csv(book.Sheets[sheet]);
+
       Papa.parse(csv, {
         skipEmptyLines: true,
+        encoding: "UTF-8",
         complete: completeCallback,
       });
       // Only parse the very first sheet
@@ -32,8 +36,8 @@ export const preprocessExperimentFile = async (
     }
   } else
     Papa.parse(file, {
-      dynamicTyping: false, // check out index 23; make sure null values preserve
       skipEmptyLines: true,
+      encoding: "UTF-8",
       complete: completeCallback,
     });
 };
@@ -50,6 +54,7 @@ export const prepareExperimentFileForThreshold = (
   if (
     parsed.data.find((i: string[]) => i[0] == "_participantRecruitmentService")
   ) {
+    if (!user.currentExperiment) user.currentExperiment = {};
     user.currentExperiment.participantRecruitmentServiceName = parsed.data.find(
       (i: string[]) => i[0] == "_participantRecruitmentService"
     )?.[1];
@@ -84,8 +89,8 @@ export const prepareExperimentFileForThreshold = (
   }
 };
 
-const discardCommentedLines = (parsed: Papa.ParseResult<any>): String[][] => {
-  const commentRegex = /^\%/;
+const discardCommentedLines = (parsed: Papa.ParseResult<any>): string[][] => {
+  const commentRegex = /^%/;
   const noncommentedRows = parsed.data.filter(
     (row) => !commentRegex.test(row[0].trim())
   );

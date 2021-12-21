@@ -13,7 +13,7 @@ import * as data from "./psychojs/src/data/index.js";
 import * as util from "./psychojs/src/util/index.js";
 import * as visual from "./psychojs/src/visual/index.js";
 
-const { PsychoJS, EventManager } = core;
+const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
 
@@ -49,7 +49,7 @@ import {
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
-  spacingPixelsFromLevel,
+  // spacingPixelsFromLevel,
 } from "./components/utils.js";
 
 import {
@@ -177,12 +177,19 @@ const paramReaderInitialized = async (reader) => {
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
-    rc.panel(formCalibrationList(reader), "#rc-panel", {}, () => {
-      rc.removePanel();
-      document.body.removeChild(document.querySelector("#rc-panel"));
-      // ! Start actual experiment
-      experiment(reader.blockCount);
-    });
+    rc.panel(
+      formCalibrationList(reader),
+      "#rc-panel",
+      {
+        debug: debug,
+      },
+      () => {
+        rc.removePanel();
+        document.body.removeChild(document.querySelector("#rc-panel"));
+        // ! Start actual experiment
+        experiment(reader.blockCount);
+      }
+    );
   } else {
     document.body.removeChild(document.querySelector("#rc-panel"));
     // ! Start actual experiment
@@ -202,6 +209,15 @@ var totalTrialConfig = {
   alignHoriz: "right",
   alignVert: "bottom",
 };
+
+var targetSpecsConfig = {
+  fontSize: 20,
+  x: -window.innerWidth / 2,
+  y: -window.innerHeight / 2,
+  alignHoriz: "left",
+  alignVert: "bottom",
+};
+var targetSpecs; // TextStim object
 
 var trialInfoStr = "";
 var totalTrial, // TextSim object
@@ -533,6 +549,25 @@ const experiment = (blockCount) => {
       opacity: 1.0,
       depth: -20.0,
       isInstruction: false,
+    });
+
+    targetSpecs = new visual.TextStim({
+      win: psychoJS.window,
+      name: "targetSpecs",
+      text: "",
+      font: instructionFont,
+      units: "pix",
+      pos: [targetSpecsConfig.x, targetSpecsConfig.y],
+      alignHoriz: targetSpecsConfig.alignHoriz,
+      alignVert: targetSpecsConfig.alignVert,
+      height: targetSpecsConfig.fontSize,
+      wrapWidth: window.innerWidth,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -20.0,
+      isInstruction: false,
+      autoDraw: false,
     });
 
     const instructionsConfig = {
@@ -1313,6 +1348,7 @@ const experiment = (blockCount) => {
   var showCharacterSetWhere;
   var showCharacterSetElement;
   var showCounterBool;
+  var showTargetSpecs;
   var showViewingDistanceBool;
   const showCharacterSetResponse = {
     current: null,
@@ -1344,6 +1380,13 @@ const experiment = (blockCount) => {
   /* --- /SIMULATED --- */
 
   var condition;
+  var skipTrialOrBlock = {
+    blockId: null,
+    trialId: null,
+    skipTrial: false,
+    skipBlock: false,
+  };
+
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       trialInstructionClock.reset();
@@ -1458,6 +1501,7 @@ const experiment = (blockCount) => {
       showCharacterSetWhere = reader.read("showCharacterSetWhere", cName);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", cName);
       showCounterBool = reader.read("showCounterBool", cName);
+      showTargetSpecs = paramReader.read("showTargetSpecsBool", cName);
 
       conditionTrials = reader.read("conditionTrials", cName);
       targetDurationSec = reader.read("targetDurationSec", cName);
@@ -1668,6 +1712,19 @@ const experiment = (blockCount) => {
       showCharacterSet.setText("");
       // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
+      if (showTargetSpecs) {
+        const spacing =
+          Math.round((Math.pow(10, level) + Number.EPSILON) * 1000) / 1000;
+        const size =
+          Math.round((spacing / spacingOverSizeRatio + Number.EPSILON) * 1000) /
+          1000;
+        let targetSpecsString = `size: ${size} deg`;
+        if (spacingRelationToSize === "ratio")
+          targetSpecsString += `\nspacing: ${spacing} deg`;
+        targetSpecs.setText(targetSpecsString);
+        targetSpecs.setAutoDraw(true);
+      }
+
       trialInfoStr = getTrialInfoStr(
         rc.language.value,
         showCounterBool,
@@ -1694,6 +1751,7 @@ const experiment = (blockCount) => {
 
       trialComponents.push(showCharacterSet);
       trialComponents.push(totalTrial);
+      if (showTargetSpecs) trialComponents.push(targetSpecs);
       // /* --- BOUNDING BOX --- */
       if (showBoundingBox) {
         trialComponents.push(targetBoundingPoly);
@@ -1749,6 +1807,16 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineEachFrame() {
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        return Scheduler.Event.NEXT;
+      }
       /* --- SIMULATED --- */
       if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
@@ -1759,7 +1827,13 @@ const experiment = (blockCount) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        let action = await handleEscapeKey();
+        if (action.quitSurvey) {
+          return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        }
+        if (action.skipTrial || action.skipBlock) {
+          return Scheduler.Event.NEXT;
+        }
       }
 
       if (!continueRoutine) {
@@ -1784,6 +1858,17 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineEnd() {
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        return Scheduler.Event.NEXT;
+      }
+
       document.removeEventListener("click", _takeFixationClick);
       document.removeEventListener("touchend", _takeFixationClick);
       instructions.setAutoDraw(false);
@@ -1806,6 +1891,17 @@ const experiment = (blockCount) => {
     return async function () {
       // rc.pauseNudger();
       // await sleep(100);
+
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        return Scheduler.Event.NEXT;
+      }
 
       psychoJS.experiment.addData(
         "clickToTrialPreparationDelaySec",
@@ -1858,6 +1954,18 @@ const experiment = (blockCount) => {
   var frameRemains;
   function trialRoutineEachFrame() {
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        removeClickableAlphabet();
+        return Scheduler.Event.NEXT;
+      }
+
       //------Loop for each frame of Routine 'trial'-------
       // get current time
       t = trialClock.getTime();
@@ -1983,6 +2091,17 @@ const experiment = (blockCount) => {
         totalTrial.frameNStart = frameN; // exact frame index
 
         totalTrial.setAutoDraw(true);
+      }
+
+      if (showTargetSpecs) {
+        // *targetSpecs* updates
+        if (t >= 0.0 && targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
+          // keep track of start time/frame for later
+          targetSpecs.tStart = t; // (not accounting for frame time here)
+          targetSpecs.frameNStart = frameN; // exact frame index
+
+          targetSpecs.setAutoDraw(true);
+        }
       }
 
       // *fixation* updates
@@ -2134,7 +2253,10 @@ const experiment = (blockCount) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        let action = await handleEscapeKey();
+        if (action.quitSurvey) {
+          return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        }
       }
 
       /* -------------------------------------------------------------------------- */
@@ -2188,6 +2310,28 @@ const experiment = (blockCount) => {
 
   function trialRoutineEnd() {
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        if (currentLoop instanceof MultiStairHandler) {
+          for (const thisComponent of trialComponents) {
+            if (typeof thisComponent.setAutoDraw === "function") {
+              thisComponent.setAutoDraw(false);
+            }
+          }
+          currentLoop.addResponse(0, level);
+          routineTimer.reset();
+          routineClock.reset();
+        }
+        key_resp.stop();
+        return Scheduler.Event.NEXT;
+      }
+
       // setTimeout(() => {
       //   rc.resumeNudger();
       // }, 700);
@@ -2259,19 +2403,28 @@ const experiment = (blockCount) => {
           !trialBreakButtonStatus &&
           breakTimeElapsed >= takeABreakMinimumDurationSec
         ) {
-          trialBreakButtonStatus = true;
-          showTrialProceedButton();
+          // update trialbreak modal body text
           const trialBreakBody = instructionsText.trialBreak(
             rc.language.value,
             responseType
           );
           showTrialBreakWidget(trialBreakBody);
 
+          // show proceed button
+          trialBreakButtonStatus = true;
+          showTrialProceedButton();
           document.getElementById("trial-proceed").onclick = () => {
             trialBreakStatus = false;
             trialBreakButtonStatus = false;
             hideTrialBreakWidget();
             hideTrialProceedButton();
+
+            // the trialCredit value is updated on every iteration of this routine.
+            // while the routine is waiting for "proceed" during trialbreak, nothing happens.
+            // but when its time to move to next routine, one more iteration of current routine is needed.
+            // this last iteration will increase the trialcredit. To nullify the extra credit,
+            // the credit is decreased here.
+            currentTrialCredit -= takeABreakTrialCredit;
           };
         }
 
@@ -2285,6 +2438,18 @@ const experiment = (blockCount) => {
   function endLoopIteration(scheduler, snapshot) {
     // ------Prepare for next entry------
     return async function () {
+      if (
+        (skipTrialOrBlock.trialId == currentTrialIndex &&
+          skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipTrial) ||
+        (skipTrialOrBlock.blockId == currentBlockIndex &&
+          skipTrialOrBlock.skipBlock)
+      ) {
+        showCursor();
+        psychoJS.experiment.nextEntry(snapshot);
+        return Scheduler.Event.NEXT;
+      }
+
       if (typeof snapshot !== "undefined") {
         // ------Check if user ended loop early------
         if (snapshot.finished) {
@@ -2371,6 +2536,89 @@ const experiment = (blockCount) => {
 
     return Scheduler.Event.QUIT;
   }
+
+  async function handleEscapeKey() {
+    // check if esc handling enabled for this condition, if not, quit
+    if (
+      !(
+        condition.responseEscapeOptionsBool &&
+        condition.responseEscapeOptionsBool.toLowerCase() === "true"
+      )
+    ) {
+      return {
+        skipTrial: false,
+        skipBlock: false,
+        quitSurvey: true,
+      };
+    }
+    if (isProlificExperiment()) {
+      // hide skipBlock Btn
+      document.getElementById("skip-block-btn").style.visibility = "hidden";
+    }
+    let action = {
+      skipTrial: false,
+      skipBlock: false,
+      quitSurvey: false,
+    };
+    const escapeKeyHandling = new Promise((resolve) => {
+      // ! Maybe switch to import?
+      // eslint-disable-next-line no-undef
+      let dialog = new bootstrap.Modal(
+        document.getElementById("exampleModal"),
+        { backdrop: "static", keyboard: false }
+      );
+      document.getElementById("quit-btn").addEventListener("click", (event) => {
+        event.preventDefault();
+        action.quitSurvey = true;
+        dialog.hide();
+        resolve();
+      });
+      document
+        .getElementById("skip-trial-btn")
+        .addEventListener("click", (event) => {
+          console.log("Skip Trial");
+          event.preventDefault();
+          skipTrialOrBlock.skipTrial = true;
+          skipTrialOrBlock.trialId = currentTrialIndex;
+          skipTrialOrBlock.blockId = currentBlockIndex;
+          action.skipTrial = true;
+          dialog.hide();
+          console.log("Skip Trial Ends");
+          resolve();
+        });
+      document
+        .getElementById("skip-block-btn")
+        .addEventListener("click", (event) => {
+          console.log("Skip Block");
+          event.preventDefault();
+          skipTrialOrBlock.skipBlock = true;
+          skipTrialOrBlock.blockId = currentBlockIndex;
+          action.skipBlock = true;
+          dialog.hide();
+          console.log("Skip Block Ends");
+          resolve();
+        });
+      dialog.show();
+    });
+    await escapeKeyHandling;
+    // adding following lines to remove listeners
+    document.getElementById("skip-trial-btn").outerHTML =
+      document.getElementById("skip-trial-btn").outerHTML;
+    document.getElementById("skip-block-btn").outerHTML =
+      document.getElementById("skip-block-btn").outerHTML;
+    document.getElementById("quit-btn").outerHTML =
+      document.getElementById("quit-btn").outerHTML;
+    return action;
+  }
+};
+
+const isProlificExperiment = () => {
+  let searchParams = window.location.search;
+  return (
+    searchParams.search("participant") != -1 &&
+    searchParams.search("session") != -1 &&
+    searchParams.search("study_id") != -1
+  );
 };
 
 const afterExperimentEnds = () => {
