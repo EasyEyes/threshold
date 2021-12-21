@@ -6,7 +6,7 @@ export const loadFonts = (reader, fontList) => {
   const googleFonts = [];
 
   for (let condition of reader.conditions) {
-    const conditionName = condition.label;
+    const conditionName = condition["condition_block"];
     _loadNameFromSource(
       reader,
       fontList,

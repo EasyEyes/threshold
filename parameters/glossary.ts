@@ -668,7 +668,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "4",
     explanation:
-      'Number of recall questions posed after each reading. Each question asks "Which of the following words appeared in the passage that you just read?" Below are several words. The number of words, N, is set by readingNumberOfPossibleAnswers. The actual word is a random sample from the passage read, omitting the first and last pages. The foils (wrong answers) are taken from the corpus, and are selected to have approximately the same frequency in the corpus as the correct answer. We will, once, compute the word frequency in the corpus of every word in the corpus. We can save this as a two column table (word and number of instances in the corpus), sorted by frequency. Once EasyEyes randomly selects the word that will be the correct answer, EasyEyes will look in the word-frequency table and take, as foils, the N-1 words with frequency most similar to that of the correct answer. Then the N words are arranged in alphabetical order below the question. The participant responds by clicking on the chosen word. It\'s "forced choice"; the participant must click a word. We give a "correct" beep if the answer is right. We repeat this several times, as specified by readingNumberOfQuestions.',
+      'Number of recall questions posed after each reading. Each question asks "Which of the following words appeared in the passage that you just read?" Below are several words. The number of words, N, is set by readingNumberOfPossibleAnswers. The actual word is a random sample from the passage read, omitting the first and last pages. The foils (wrong answers) are taken from the corpus, and are selected to have approximately the same frequency in the corpus as the correct answer. We will, once, compute the word frequency in the corpus of every word in the corpus. We can save this as a two column table (word and number of instances in the corpus), sorted by frequency. Once EasyEyes randomly selects the word that will be the correct answer, EasyEyes will look in the word-frequency table and take, as foils, the N-1 words with frequency most similar to that of the correct answer. Then the N words are arranged in characterSetical order below the question. The participant responds by clicking on the chosen word. It\'s "forced choice"; the participant must click a word. We give a "correct" beep if the answer is right. We repeat this several times, as specified by readingNumberOfQuestions.',
     type: "integer",
     default: "3",
   },
@@ -722,7 +722,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "When TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. ",
+      "When TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. Note that enabling early response while clicked responses are allowed forces EasyEyes to show the characterSet early, since clicking requires something to click on. And if responseRequiresCharacterSetBool is TRUE then setting responseAllowedEarlyBool TRUE will force early display of the characterSet regardless of which response modalities are enabled.",
     type: "boolean",
     default: "TRUE",
   },
@@ -731,25 +731,34 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Allow participant to respond by clicking the target letter in the alphabet. When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too.",
+      "Allow participant to respond at every occasion by clicking (e.g. clickingthe target letter in the characterSet). When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too.",
     type: "boolean",
     default: "TRUE",
   },
-  responseRequiresAlphabet: {
-    name: "responseRequiresAlphabet",
+  responseEscapeOptionsBool: {
+    name: "responseEscapeOptionsBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      "It's obvious that identifying a letter by clicking requires an alphabet to click on. However, sometimes we show a foreign alphabet with Roman labels, to enable use of a Roman keyboard, or the scientist may just want the actual letter shapes to be visible while the participant types. This flag tells EasyEyes to display alphabet whenever the participant is responding.",
+      "Once debugged this option will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offeres two or three options. The miidest optiion is to continue from where the escape was presssed, deleting any trail for which the response was not collected. The middle option is only presented if we think we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rules for guessing that the participant is the scientist is either the Prolific URL parameters are absent or we are in Prolific Preview mode.",
     type: "boolean",
     default: "FALSE",
+  },
+  responseMustClickCrosshairBool: {
+    name: "responseMustClickCrosshairBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Overrules other response boolean parameters to enable clicking, and ONLY clicking, to request the next trial by clicking the crosshair. The hope is that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) This is our response to frequent requests from our participants that they prefer to use the keyboard to choose the letter, even if they're required to click on the crosshair to begin each trial. ",
+    type: "boolean",
+    default: "TRUE",
   },
   responseSpokenBool: {
     name: "responseSpokenBool",
     availability: "later",
     example: "FALSE",
     explanation:
-      "Allow participant to respond by verbally naming the target. The various response modes are not exclusive. Enable as many as you like.",
+      "Allow participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like.",
     type: "boolean",
     default: "FALSE",
   },
@@ -758,7 +767,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Allow participant to respond by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool or showGridBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool.",
+      "Allow participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool or showGridBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool.",
     type: "boolean",
     default: "FALSE",
   },
@@ -767,35 +776,7 @@ export const GLOSSARY: Glossary = {
     availability: "soon",
     example: "FALSE",
     explanation:
-      "Allow participant to respond by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like.",
-    type: "boolean",
-    default: "FALSE",
-  },
-  showAlphabetEarlyBool: {
-    name: "showAlphabetEarlyBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "If showAlphabetEarlyBool is TRUE then alphabet is displayed at target onset. Otherwise it is displayed 0.5 s after target offset. You need an early alphabet if you want to allow an early response (responseAllowedEarlyBool) by clicking.",
-    type: "",
-    default: "",
-  },
-  showAlphabetWhere: {
-    name: "showAlphabetWhere",
-    availability: "now",
-    example: "bottom",
-    explanation:
-      'Can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "alphabet". If the target is a gabor, the alphabet might display all the possible orientations, each labeled by a letter to be pressed.',
-    type: "categorical",
-    default: "bottom",
-    categories: ["none", "bottom", "top", "left", "right"],
-  },
-  showAlphabetWithLabelsBool: {
-    name: "showAlphabetWithLabelsBool",
-    availability: "soon",
-    example: "FALSE",
-    explanation:
-      "For foreign or symbol alphabets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
+      "Allow participant to respond at every occasion by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like.",
     type: "boolean",
     default: "FALSE",
   },
@@ -805,6 +786,34 @@ export const GLOSSARY: Glossary = {
     example: "TRUE",
     explanation:
       "For debugging, setting showBoundingBoxBool TRUE displays the bounding box around the target character (if spacing is ratio) or flanker-target-flanker triplet (if spacing typographic). We show the getBoundingBox method from psychojs, using tight=true. ",
+    type: "boolean",
+    default: "FALSE",
+  },
+  showCharacterSetForAllResponsesBool: {
+    name: "showCharacterSetForAllResponsesBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "It's obvious that identifying a letter by clicking requires display of a characterSet to click on. However, sometimes we show a foreign characterSet with Roman labels, to enable use of a Roman keyboard, or the scientist may just want the actual letter shapes to be visible while the participant types. This flag tells EasyEyes to display the characterSet whenever the participant is responding.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  showCharacterSetWhere: {
+    name: "showCharacterSetWhere",
+    availability: "now",
+    example: "bottom",
+    explanation:
+      'Can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "characterSet". If the target is a gabor, the characterSet might display all the possible orientations, each labeled by a letter to be pressed.',
+    type: "categorical",
+    default: "bottom",
+    categories: ["none", "bottom", "top", "left", "right"],
+  },
+  showCharacterSetWithLabelsBool: {
+    name: "showCharacterSetWithLabelsBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "For foreign or symbol characterSets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
     type: "boolean",
     default: "FALSE",
   },
@@ -986,20 +995,20 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "ratio",
     explanation:
-      'spacingRelationToSize can be none, ratio, or typographic. \nWhen thresholdParameter is "spacing", spacingRelationToSize specifies how size depend on center-to-center target-flanker spacing. And when thresholdParameter is "size", spacingRelationToSize specifies how spacing depend on size. Can be none, ratio, or typographic. \n"none" means no dependence; they are set independently. \n"ratio" means accept the thresholdParameter (which is either size or spacing) and adjusts the other parameter to satisfy the specified "spacingOverSizeRatio". \n"typographic" prints the triplet (flanker, target, flanker) as a (horizontal) string (horizontally) centered on the specified target eccentricity. By "horizontal" and "vertical", we just mean the orientation of the baseline, and orthogonal to it. ("Vertically," the alphabet bounding box is centered on the eccentric location, and all letters in the string are on same baseline.) If thresholdParameter is "size" then EasyEyes adjusts the font size of the string to achieve the specified target size. If thresholdParameter is "spacing" then the font size of string is adjusted so that the width of the string is 3× specified spacing. Works with both left-to-right and right-to-left alphabets. ',
+      'spacingRelationToSize can be none, ratio, or typographic. \nWhen thresholdParameter is "spacing", spacingRelationToSize specifies how size depend on center-to-center target-flanker spacing. And when thresholdParameter is "size", spacingRelationToSize specifies how spacing depend on size. Can be none, ratio, or typographic. \n"none" means no dependence; they are set independently. \n"ratio" means accept the thresholdParameter (which is either size or spacing) and adjusts the other parameter to satisfy the specified "spacingOverSizeRatio". \n"typographic" prints the triplet (flanker, target, flanker) as a (horizontal) string (horizontally) centered on the specified target eccentricity. By "horizontal" and "vertical", we just mean the orientation of the baseline, and orthogonal to it. ("Vertically," the characterSet bounding box is centered on the eccentric location, and all letters in the string are on same baseline.) If thresholdParameter is "size" then EasyEyes adjusts the font size of the string to achieve the specified target size. If thresholdParameter is "spacing" then the font size of string is adjusted so that the width of the string is 3× specified spacing. Works with both left-to-right and right-to-left characterSets. ',
     type: "categorical",
     default: "ratio",
     categories: ["none", "ratio", "typographic"],
   },
   spacingSymmetry: {
     name: "spacingSymmetry",
-    availability: "soon",
-    example: "linear",
+    availability: "now",
+    example: "screen",
     explanation:
-      'spacingSymmetry can be log or linear. When spacing is radial, chooses equal spacing of the outer and inner flanker either on the screen ("linear") or on the cortex ("log"). The log/linear choice makes no difference when the spacingDirection is tangential, or the eccentricity is zero.',
+      "spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity eccDeg is nonzero and spacingDirection is radial. The inner flanker will have the specified spacingDeg. This only affects the spacing of the outer flanker, which is adjusted to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e. equal in log(eccDeg + 0.15). ",
     type: "categorical",
-    default: "linear",
-    categories: ["log", "linear"],
+    default: "retina",
+    categories: ["screen", "retina", "cortex"],
   },
   takeABreakMinimumDurationSec: {
     name: "takeABreakMinimumDurationSec",
@@ -1019,24 +1028,24 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.01",
   },
-  targetAlphabet: {
-    name: "targetAlphabet",
-    availability: "now",
-    example: "DHKNORSVZ",
-    explanation:
-      "A string of unicode characters. On each trial, the target and flankers are randomly drawn from this alphabet, without replacement. Allowed responses are restricted to this alphabet. The other keys on the keyboard are dead. (If keyEscapeBool is true, then we also enable the escape key.)",
-    type: "text",
-    default: "acenorsuvxz",
-  },
   targetBoundingBoxHorizontalAlignment: {
     name: "targetBoundingBoxHorizontalAlignment",
     availability: "now",
     example: "center",
     explanation:
-      'When computing the alphabet bounding box as the union of the bounding box of each letter, align the bounding boxes horizontally by "center" or "origin". The bounding boxes are always vertically aligned by baseline.',
+      'When computing the characterSet bounding box as the union of the bounding box of each letter, align the bounding boxes horizontally by "center" or "origin". The bounding boxes are always vertically aligned by baseline.',
     type: "categorical",
     default: "center",
     categories: ["center", "origin"],
+  },
+  targetCharacterSet: {
+    name: "targetCharacterSet",
+    availability: "now",
+    example: "DHKNORSVZ",
+    explanation:
+      "A string of unicode characters. On each trial, the target and flankers are randomly drawn from this characterSet, without replacement. Allowed responses are restricted to this characterSet. The other keys on the keyboard are dead. (If keyEscapeBool is true, then we also enable the escape key.) Letters may appear more than once in the string, to increase their probability of being drawn, but once one is drawn the rest are removed with it, so the drawn samples won't have any repeats.",
+    type: "text",
+    default: "acenorsuvxz",
   },
   targetContrast: {
     name: "targetContrast",
@@ -1061,7 +1070,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "10",
     explanation:
-      "The x location of the target center, relative to fixation. The target center is defined as the center of the bounding box for the letters in the targetAlphabet. (See targetBoundingBoxHorizontalAlignment.)",
+      "The x location of the target center, relative to fixation. The target center is defined as the center of the bounding box for the letters in the targetCharacterSet. (See targetBoundingBoxHorizontalAlignment.)",
     type: "numerical",
     default: "0",
   },
@@ -1125,7 +1134,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "letter",
     explanation:
-      '• "letter" On each trial, the target is a randomly selected character from the targetAlphabet displayed in the specified targetFont and targetStyle.\n• A "gabor" (named after Dennis Gabor inventor of the laser) is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.',
+      '• "letter" On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• A "gabor" (named after Dennis Gabor inventor of the laser) is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.',
     type: "categorical",
     default: "letter",
     categories: ["letter", "gabor"],
@@ -1179,7 +1188,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.5",
     explanation:
-      "EasyEyes guarantees a blank time of targetSafetyMarginSec before and after the target presentation to minimize forward and backward masking of the target by instructions and other non-stimulus elements, including the alphabet and nudger. \n     ONSET: Since target onset is almost immediately after trial initiation, initiation of a trial is disabled until targetSafetyMarginSec has passed since the nudger and instructions were erased. \n     Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to alphabet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves to the crosshair, the instruction contrast will initally be 1 when the cursor is at the alphabet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). \n     OFFSET: After target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the alphabet. (Nudging isn't allowed until after the participant responds.)",
+      "EasyEyes guarantees a blank time of targetSafetyMarginSec before and after the target presentation to minimize forward and backward masking of the target by instructions and other non-stimulus elements, including the characterSet and nudger. \n     ONSET: Since target onset is almost immediately after trial initiation, initiation of a trial is disabled until targetSafetyMarginSec has passed since the nudger and instructions were erased. \n     Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to characterSet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves to the crosshair, the instruction contrast will initally be 1 when the cursor is at the characterSet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). \n     OFFSET: After target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the characterSet. (Nudging isn't allowed until after the participant responds.)",
     type: "numerical",
     default: "0,7",
   },
@@ -1188,7 +1197,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "NaN",
     explanation:
-      "Ignored unless needed. Size is either height or width, as defined below. Height and width are based on the union of the bounding boxes of all the letters in the alphabet. ",
+      "Ignored unless needed. Size is either height or width, as defined below. Height and width are based on the union of the bounding boxes of all the letters in the characterSet. ",
     type: "numerical",
     default: "2",
   },
@@ -1205,7 +1214,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "identify",
     explanation:
-      'The participant\'s task:\n• "identify" is forced choice categorization of the target among known possibilities, e.g. a letter from an alphabet or an orientation among several. \n• "read" asks the observer to read a passage of text as quickly as possible while maintaining full comprehesion, followed by a test.\n• "detect" might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'The participant\'s task:\n• "identify" is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• "read" asks the observer to read a passage of text as quickly as possible while maintaining full comprehesion, followed by a test.\n• "detect" might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
     categories: ["identify", "read"],
@@ -1289,7 +1298,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "1.3",
     explanation:
-      "viewingDistanceAllowedRatio must be larger or smaller than 1, and must be in the range [0 inf]. If the specified tolerance ratio is R, then the ratio of actual to desired viewing distance must be in the range 1/R to R. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, toward the desired viewing distance. Values of 0, inf, and NaN all have the same effect, of allowing all viewing distances. [Actually CSV and Excel files do not allow Inf.]",
+      'viewingDistanceAllowedRatio must be larger or smaller than 1, and must be greater than or equal to zero. If the specified tolerance ratio is R, then the ratio of actual to desired viewing distance must be in the range 1/R to R. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, toward the desired viewing distance. We call that "nudging". A value of 0 allows all viewing distances. [CSV and Excel files do not allow Inf.]',
     type: "numerical",
     default: "1.2",
   },

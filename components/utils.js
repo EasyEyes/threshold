@@ -30,13 +30,13 @@ export const createSignalingMap = (possibleResponses) => {
     (x) => x + zeroNum
   );
   const letters = [...new Array(ZNum - ANum).keys()].map((x) => x + ANum);
-  const signalingAlphabet = [...digits, ...letters].slice(
+  const signalingCharacterSet = [...digits, ...letters].slice(
     0,
     possibleResponses.length
   );
   const signalingMap = {};
   possibleResponses.map((response, i) => {
-    signalingMap[response] = signalingAlphabet[i];
+    signalingMap[response] = signalingCharacterSet[i];
   });
   return signalingMap;
 };
@@ -491,4 +491,13 @@ export const norm = (v) => {
   return Math.sqrt(
     v.map((x) => x ** 2).reduce((previous, current) => previous + current)
   );
+};
+
+export const getTripletCharacters = (charset) => {
+  let allCharacters = shuffle([...charset]);
+  const samples = [];
+  samples.push(allCharacters[0]);
+  samples.push(allCharacters.filter((char) => !samples.includes[char])[0]);
+  samples.push(allCharacters.filter((char) => !samples.includes[char])[0]);
+  return shuffle(samples);
 };

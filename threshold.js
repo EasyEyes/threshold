@@ -4,7 +4,7 @@
  * Crowding Test *
  *****************/
 
-import { debug, sleep } from "./components/utils.js";
+import { debug, getTripletCharacters, sleep } from "./components/utils.js";
 
 const useRC = true;
 
@@ -28,7 +28,7 @@ import "./psychojs/src/index.css";
 import "./components/css/utils.css";
 import "./components/css/custom.css";
 import "./components/css/instructions.css";
-import "./components/css/showAlphabet.css";
+import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
 import "./components/css/trialBreak.css";
 import "./components/css/widgets.css";
@@ -78,9 +78,9 @@ import {
   getPurrSynth,
 } from "./components/sound.js";
 import {
-  removeClickableAlphabet,
-  setupClickableAlphabet,
-} from "./components/showAlphabet.js";
+  removeClickableCharacterSet,
+  setupClickableCharacterSet,
+} from "./components/showCharacterSet.js";
 
 import {
   getConsentFormName,
@@ -92,12 +92,8 @@ import {
 import { getTrialInfoStr } from "./components/trialCounter.js";
 
 import {
-  getTypographicHeight,
-  getMaxPresentableLevel,
-  getFlankerLocations,
-  getLowerBoundedLevel,
-  getTestabilityBoundedLevel,
-  getAlphabetBoundingBox,
+  getCharacterSetBoundingBox,
+  restrictLevel,
 } from "./components/bounding.js";
 
 import {
@@ -218,6 +214,10 @@ var totalBlockCount = 0;
 
 var consentFormName = "";
 var debriefFormName = "";
+
+// Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
+// In typographic condition, the bounds are around a triplet
+var characterSetBoundingRects = {};
 
 const beforeExperimentBegins = async (reader) => {
   // get consent form
@@ -408,7 +408,7 @@ const experiment = (blockCount) => {
   var flanker1;
   var target;
   var flanker2;
-  var showAlphabet;
+  var showCharacterSet;
 
   var globalClock;
   var routineTimer, routineClock, blockClock;
@@ -502,9 +502,9 @@ const experiment = (blockCount) => {
       depth: -9.0,
     });
 
-    showAlphabet = new visual.TextStim({
+    showCharacterSet = new visual.TextStim({
       win: psychoJS.window,
-      name: "showAlphabet",
+      name: "showCharacterSet",
       text: "",
       font: "Arial",
       units: "pix",
@@ -851,11 +851,15 @@ const experiment = (blockCount) => {
         psychoJS.serverManager,
         thisConditionsFile
       );
-
+      trialsConditions = trialsConditions.map(
+        (condition) => (condition["label"] = condition["block_condition"])
+      );
       trialsConditions = populateQuestDefaults(trialsConditions, paramReader);
 
       const nTrialsTotal = trialsConditions
-        .map((c) => Number(paramReader.read("conditionTrials", c.label)))
+        .map((c) =>
+          Number(paramReader.read("conditionTrials", c["block_condition"]))
+        )
         .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
 
       trials = new data.MultiStairHandler({
@@ -1304,16 +1308,25 @@ const experiment = (blockCount) => {
   var block;
   var spacingDirection;
   var targetFont;
-  var targetAlphabet;
+  var targetCharacterSet;
   var validAns;
-  var showAlphabetWhere;
-  var showAlphabetElement;
+  var showCharacterSetWhere;
+  var showCharacterSetElement;
   var showCounterBool;
   var showViewingDistanceBool;
-  const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 };
+  const showCharacterSetResponse = {
+    current: null,
+    onsetTime: 0,
+    clickTime: 0,
+  };
   var showBoundingBox;
+  var stimulusParameters;
+  var targetKind;
   var targetDurationSec;
   var targetMinimumPix;
+  var targetSizeDeg;
+  var targetSizeIsHeightBool;
+  var thresholdParameter;
   var spacingOverSizeRatio;
   var spacingRelationToSize;
   var targetEccentricityXDeg;
@@ -1338,7 +1351,7 @@ const experiment = (blockCount) => {
 
       const parametersToExcludeFromData = [];
       for (let c of snapshot.handler.getConditions()) {
-        if (c.label === trials._currentStaircase._name) {
+        if (c["block_condition"] === trials._currentStaircase._name) {
           condition = c;
           addConditionToData(
             psychoJS.experiment,
@@ -1347,7 +1360,7 @@ const experiment = (blockCount) => {
           );
         }
       }
-      const cName = condition["label"];
+      const cName = condition["block_condition"];
 
       // ! responseType
       responseType = getResponseType(
@@ -1400,13 +1413,7 @@ const experiment = (blockCount) => {
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
       psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-      let largestAllowedAngle = 89.5; // NOTE must be <90
-      largestAllowedAngle = Math.min(largestAllowedAngle, 90);
-      const largestTrigonometricLevel =
-        Math.log(largestAllowedAngle) / Math.log(10);
-      proposedLevel = Math.min(proposedLevel, largestTrigonometricLevel);
-
-      psychoJS.experiment.addData("label", cName);
+      psychoJS.experiment.addData("block_condition", cName);
       psychoJS.experiment.addData(
         "flankerOrientation",
         reader.read("spacingDirection", cName)
@@ -1441,12 +1448,14 @@ const experiment = (blockCount) => {
       targetFont = reader.read("targetFont", cName);
       if (targetFontSource === "file") targetFont = cleanFontName(targetFont);
 
-      targetAlphabet = String(reader.read("targetAlphabet", cName)).split("");
-      validAns = String(reader.read("targetAlphabet", cName))
+      targetCharacterSet = String(
+        reader.read("targetCharacterSet", cName)
+      ).split("");
+      validAns = String(reader.read("targetCharacterSet", cName))
         .toLowerCase()
         .split("");
 
-      showAlphabetWhere = reader.read("showAlphabetWhere", cName);
+      showCharacterSetWhere = reader.read("showCharacterSetWhere", cName);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", cName);
       showCounterBool = reader.read("showCounterBool", cName);
 
@@ -1456,6 +1465,10 @@ const experiment = (blockCount) => {
       fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
       showFixation = reader.read("markTheFixationBool", cName);
 
+      targetKind = reader.read("targetKind", cName);
+      targetSizeDeg = reader.read("targetSizeDeg", cName);
+      targetSizeIsHeightBool = reader.read("targetSizeIsHeightBool", cName);
+      thresholdParameter = reader.read("thresholdParameter", cName);
       targetMinimumPix = reader.read("targetMinimumPix", cName);
       spacingOverSizeRatio = reader.read("spacingOverSizeRatio", cName);
       spacingRelationToSize = reader.read("spacingRelationToSize", cName);
@@ -1483,26 +1496,21 @@ const experiment = (blockCount) => {
         cName
       );
 
-      proposedLevel = getTestabilityBoundedLevel(
-        proposedLevel,
-        pixPerCm,
-        viewingDistanceCm,
-        spacingOverSizeRatio,
-        targetFont,
-        targetMinimumPix,
-        psychoJS.window
-      );
-      psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
+      var characterSet = targetCharacterSet;
 
-      var alphabet = targetAlphabet;
-
-      const alphabetBoundingBox = getAlphabetBoundingBox(alphabet, targetFont);
-      logger("alphabet bounding box", alphabetBoundingBox);
+      // Repeat letters 3 times when in 'typographic' mode,
+      // ie the relevant bounding box is that of three letters.
+      const letterRepeats = spacingRelationToSize === "ratio" ? 1 : 3;
+      if (!characterSetBoundingRects.hasOwnProperty(cName)) {
+        characterSetBoundingRects[cName] = getCharacterSetBoundingBox(
+          characterSet,
+          targetFont,
+          letterRepeats
+        );
+      }
       /* ------------------------------ Pick triplets ----------------------------- */
-      const tempAlphabet = shuffle(shuffle(alphabet));
-      var firstFlankerCharacter = tempAlphabet[0];
-      var targetCharacter = tempAlphabet[1];
-      var secondFlankerCharacter = tempAlphabet[2];
+      var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
+        getTripletCharacters(characterSet);
       if (debug)
         console.log(
           `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
@@ -1534,23 +1542,20 @@ const experiment = (blockCount) => {
         spacingDirection: spacingDirection,
         flankerCharacters: [firstFlankerCharacter, secondFlankerCharacter],
         targetCharacter: targetCharacter,
+        targetSizeDeg: targetSizeDeg,
+        targetKind: targetKind,
       };
-
-      const [targetXYPix] = XYPixOfXYDeg(
-        [targetEccentricityXYDeg],
-        displayOptions
-      );
 
       // Fixation placement does not depend on the value of "spacingRelationToSize"...
       fixation.setPos(fixationXYPx);
       fixation.setHeight(fixationSize);
       // ... neither does target location...
-      [targetEccentricityXYPx] = XYPixOfXYDeg(
-        [targetEccentricityXYDeg],
+      targetEccentricityXYPx = XYPixOfXYDeg(
+        targetEccentricityXYDeg,
         displayOptions
       );
-      targetEccentricityXYPx = targetEccentricityXYPx.map((x) => Math.round(x));
-      psychoJS.experiment.addData("targetLocationPix", targetEccentricityXYPx);
+      // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
+      psychoJS.experiment.addData("targetLocationPx", targetEccentricityXYPx);
       target.setPos(targetEccentricityXYPx);
       target.setFont(targetFont);
 
@@ -1559,109 +1564,68 @@ const experiment = (blockCount) => {
         "spacingRelationToSize",
         spacingRelationToSize
       );
-      if (spacingRelationToSize === "ratio") {
-        // Get a usable "level", ie amount of spacing
-        const lowerBoundedLevel = getLowerBoundedLevel(
-          proposedLevel,
-          displayOptions
-        );
-        const upperAndLowerBoundedLevel = getUpperBoundedLevel(
-          lowerBoundedLevel,
-          targetXYPix,
-          fixationXYPx,
-          spacingDirection,
-          displayOptions
-        );
-        level = upperAndLowerBoundedLevel;
-        psychoJS.experiment.addData("levelUsed", level);
-        logger("level", level);
-        spacingDeg = Math.pow(10, level);
-        psychoJS.experiment.addData("spacingDeg", spacingDeg);
-        spacingPx = Math.abs(
-          degreesToPixels(spacingDeg, {
-            pixPerCm: pixPerCm,
-            viewingDistanceCm: viewingDistanceCm,
-          })
-        );
-        psychoJS.experiment.addData("spacingPix", spacingPx);
-        // Get the location of the flankers
-        [pos1XYPx, pos3XYPx] = getFlankerLocations(
-          targetEccentricityXYPx,
-          fixationXYPx,
-          spacingDirection,
-          spacingPx
-        );
-        // Round locations to the nearest pixel
-        pos1XYPx = pos1XYPx.map((x) => Math.round(x));
-        pos3XYPx = pos3XYPx.map((x) => Math.round(x));
-        // Save flanker locations to output data
-        psychoJS.experiment.addData("flankerLocationsPix", [
-          pos1XYPx,
-          pos3XYPx,
-        ]);
-        // Find the font size for the flankers & target
-        const heightPx = Math.round(
-          Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
-        );
-        if (Math.round(spacingPx / spacingOverSizeRatio) < targetMinimumPix) {
-          console.error(
-            `Assumption broken! 
-            Target height, in pixel, is falling below the minimum allowed, 
-            even though it should have been previously constrained when we
-            found the lower bound of \`level\``
-          );
-          let heightPx = Math.round(Math.max(heightPx, targetMinimumPix));
-        }
-        psychoJS.experiment.addData("heightPix", heightPx);
-        // Display flankers, given that "spacingRelationToSize" is set to "ratio"
-        target.setText(targetCharacter);
-        target.setHeight(heightPx);
-        flanker1.setPos(pos1XYPx);
-        flanker1.setText(firstFlankerCharacter);
-        flanker1.setFont(targetFont);
-        flanker1.setHeight(heightPx);
-        flanker2.setPos(pos3XYPx);
-        flanker2.setText(secondFlankerCharacter);
-        flanker2.setFont(targetFont);
-        flanker2.setHeight(heightPx);
-      } else if (spacingRelationToSize === "typographic") {
-        // Don't display flankers if "spacingRelationToSize" is set to typographic...
-        flanker1.setAutoDraw(false);
-        flanker2.setAutoDraw(false);
-
-        // ...include the flankers in the same string/stim as the target.
-        // TODO ask denis whether there should be spaces between, or just the font spacing
-        const flankersAndTargetString =
-          firstFlankerCharacter + targetCharacter + secondFlankerCharacter;
-        target.setText(flankersAndTargetString);
-
-        // Find the font size for the string containing the flankers & target,
-        // and the value of 'level' to which this acceptable size corresponds.
-        const [targetStimHeight, viableLevel] = getTypographicHeight(
-          psychoJS.window,
-          proposedLevel,
-          target,
-          fixation,
-          displayOptions
-        );
-        level = viableLevel;
-        psychoJS.experiment.addData("levelUsed", level);
-
-        target.setHeight(targetStimHeight);
-        psychoJS.experiment.addData("heightPix", targetStimHeight);
-      } else if (spacingRelationToSize == "none") {
-        // TODO FUTURE implement spacingRelationToSize === "none"
-        console.error(
-          `spacingRelationToSize value "none" not yet supported. Please use "ratio" or "typographic" for the time being.`
-        );
-      } else {
-        console.error(
-          `spacingRelationToSize value ${spacingRelationToSize} not recognized. Please use "none", "ratio", or "typographic"`
-        );
-      }
-      [target, flanker1, flanker2, fixation, showAlphabet, totalTrial].forEach(
-        (c) => c._updateIfNeeded()
+      [level, stimulusParameters] = restrictLevel(
+        thresholdParameter,
+        characterSetBoundingRects[cName],
+        spacingDirection,
+        spacingRelationToSize,
+        spacingSymmetry,
+        spacingOverSizeRatio,
+        targetSizeIsHeightBool,
+        displayOptions
       );
+      psychoJS.experiment.addData("level", level);
+      psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
+      target.setHeight(heightPx);
+      target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+      psychoJS.experiment.addData(
+        "targetLocationPx",
+        stimulusParameters.targetAndFlankersXYPx[0]
+      );
+      switch (thresholdParameter) {
+        case "size":
+          flanker1.setAutoDraw(false);
+          flanker2.setAutoDraw(false);
+          break;
+        case "spacing":
+          switch (spacingRelationToSize) {
+            case "none":
+            case "ratio":
+              target.setText(targetCharacter);
+              flanker1.setText(firstFlankerCharacter);
+              flanker2.setText(secondFlankerCharacter);
+              flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
+              flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
+              flanker1.setFont(targetFont);
+              flanker2.setFont(targetFont);
+              flanker1.setHeight(heightPx);
+              flanker2.setHeight(heightPx);
+              psychoJS.experiment.addData("flankerLocationsPx", [
+                stimulusParameters.targetAndFlankersXYPx[1],
+                stimulusParameters.targetAndFlankersXYPx[2],
+              ]);
+              break;
+            case "typographic":
+              // ...include the flankers in the same string/stim as the target.
+              const flankersAndTargetString =
+                firstFlankerCharacter +
+                targetCharacter +
+                secondFlankerCharacter;
+              target.setText(flankersAndTargetString);
+              flanker1.setAutoDraw(false);
+              flanker2.setAutoDraw(false);
+              break;
+          }
+          break;
+      }
+      [
+        target,
+        flanker1,
+        flanker2,
+        fixation,
+        showCharacterSet,
+        totalTrial,
+      ].forEach((c) => c._updateIfNeeded());
       if (showBoundingBox) {
         const boundingStims = [targetBoundingPoly];
         const tightBoundingBox = target.getBoundingBox(true);
@@ -1673,7 +1637,11 @@ const experiment = (blockCount) => {
           tightBoundingBox.width,
           tightBoundingBox.height,
         ]);
-        if (spacingRelationToSize === "ratio") {
+        if (
+          (spacingRelationToSize === "ratio" ||
+            spacingRelationToSize === "none") &&
+          thresholdParameter === "spacing"
+        ) {
           boundingStims.push(flanker1BoundingPoly, flanker2BoundingPoly);
           const flanker1BoundingBox = flanker1.getBoundingBox(true);
           flanker1BoundingPoly.setPos([
@@ -1696,9 +1664,9 @@ const experiment = (blockCount) => {
         }
         boundingStims.forEach((c) => c._updateIfNeeded());
       }
-      showAlphabet.setPos([0, 0]);
-      showAlphabet.setText("");
-      // showAlphabet.setText(getAlphabetShowText(validAns))
+      showCharacterSet.setPos([0, 0]);
+      showCharacterSet.setText("");
+      // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
       trialInfoStr = getTrialInfoStr(
         rc.language.value,
@@ -1724,12 +1692,16 @@ const experiment = (blockCount) => {
       trialComponents.push(target);
       trialComponents.push(flanker2);
 
-      trialComponents.push(showAlphabet);
+      trialComponents.push(showCharacterSet);
       trialComponents.push(totalTrial);
       // /* --- BOUNDING BOX --- */
       if (showBoundingBox) {
         trialComponents.push(targetBoundingPoly);
-        if (spacingRelationToSize === "ratio") {
+        if (
+          (spacingRelationToSize === "ratio" ||
+            spacingRelationToSize === "none") &&
+          thresholdParameter === "spacing"
+        ) {
           trialComponents.push(flanker1BoundingPoly);
           trialComponents.push(flanker2BoundingPoly);
         }
@@ -1737,21 +1709,21 @@ const experiment = (blockCount) => {
       // /* --- /BOUNDING BOX --- */
       // /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
-        if (!simulatedObserver[condition.label]) {
-          simulatedObserver[condition.label] = new SimulatedObserver(
-            simulated[block][condition.label],
+        if (!simulatedObserver[cName]) {
+          simulatedObserver[cName] = new SimulatedObserver(
+            simulated[block][cName],
             level,
-            alphabet,
+            characterSet,
             targetCharacter,
-            paramReader.read("thresholdProportionCorrect", condition.label),
-            paramReader.read("simulationBeta", condition.label),
-            paramReader.read("simulationDelta", condition.label),
-            paramReader.read("simulationThreshold", condition.label)
+            paramReader.read("thresholdProportionCorrect", cName),
+            paramReader.read("simulationBeta", cName),
+            paramReader.read("simulationDelta", cName),
+            paramReader.read("simulationThreshold", cName)
           );
         } else {
-          simulatedObserver[condition.label].updateTrial(
+          simulatedObserver[cName].updateTrial(
             level,
-            alphabet,
+            characterSet,
             targetCharacter
           );
         }
@@ -1924,7 +1896,7 @@ const experiment = (blockCount) => {
         showGrid ||
         (simulated &&
           simulated[thisLoopNumber] &&
-          simulated[thisLoopNumber][condition.label])
+          simulated[thisLoopNumber][condition["block_condition"]])
       ) {
         if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
           // keep track of start time/frame for later
@@ -1932,7 +1904,7 @@ const experiment = (blockCount) => {
           key_resp.frameNStart = frameN; // exact frame index
           // TODO Use PsychoJS clock if possible
           // Reset together with PsychoJS
-          showAlphabetResponse.onsetTime = performance.now();
+          showCharacterSetResponse.onsetTime = performance.now();
 
           // keyboard checking is just starting
           psychoJS.window.callOnFlip(function () {
@@ -1951,10 +1923,10 @@ const experiment = (blockCount) => {
           if (
             simulated &&
             simulated[thisLoopNumber] &&
-            simulated[thisLoopNumber][condition.label]
+            simulated[thisLoopNumber][condition["block_condition"]]
           ) {
             return simulateObserverResponse(
-              simulatedObserver[condition.label],
+              simulatedObserver[condition["block_condition"]],
               key_resp,
               psychoJS
             );
@@ -1984,13 +1956,14 @@ const experiment = (blockCount) => {
         }
       }
 
-      // *showAlphabetResponse* updates
-      if (showAlphabetResponse.current) {
-        key_resp.keys = showAlphabetResponse.current;
+      // *showCharacterSetResponse* updates
+      if (showCharacterSetResponse.current) {
+        key_resp.keys = showCharacterSetResponse.current;
         key_resp.rt =
-          (showAlphabetResponse.clickTime - showAlphabetResponse.onsetTime) /
+          (showCharacterSetResponse.clickTime -
+            showCharacterSetResponse.onsetTime) /
           1000;
-        if (showAlphabetResponse.current == correctAns) {
+        if (showCharacterSetResponse.current == correctAns) {
           // Play correct audio
           correctSynth.play();
           key_resp.corr = 1;
@@ -1998,8 +1971,8 @@ const experiment = (blockCount) => {
           // Play wrong audio
           key_resp.corr = 0;
         }
-        showAlphabetResponse.current = null;
-        removeClickableAlphabet();
+        showCharacterSetResponse.current = null;
+        removeClickableCharacterSet();
         continueRoutine = false;
       }
 
@@ -2165,20 +2138,20 @@ const experiment = (blockCount) => {
       }
 
       /* -------------------------------------------------------------------------- */
-      // *showAlphabet* updates
+      // *showCharacterSet* updates
       if (
         t >= uniDelay + targetDurationSec &&
-        showAlphabet.status === PsychoJS.Status.NOT_STARTED
+        showCharacterSet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
-        showAlphabet.tStart = t; // (not accounting for frame time here)
-        showAlphabet.frameNStart = frameN; // exact frame index
-        showAlphabet.setAutoDraw(true);
-        showAlphabetElement = setupClickableAlphabet(
-          targetAlphabet,
+        showCharacterSet.tStart = t; // (not accounting for frame time here)
+        showCharacterSet.frameNStart = frameN; // exact frame index
+        showCharacterSet.setAutoDraw(true);
+        showCharacterSetElement = setupClickableCharacterSet(
+          targetCharacterSet,
           targetFont,
-          showAlphabetWhere,
-          showAlphabetResponse
+          showCharacterSetWhere,
+          showCharacterSetResponse
         );
 
         instructions.tSTart = t;
@@ -2190,7 +2163,7 @@ const experiment = (blockCount) => {
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
-        removeClickableAlphabet();
+        removeClickableCharacterSet();
         return Scheduler.Event.NEXT;
       }
 
@@ -2344,7 +2317,7 @@ const experiment = (blockCount) => {
   }
 
   async function quitPsychoJS(message, isCompleted) {
-    removeClickableAlphabet();
+    removeClickableCharacterSet();
     rc.endNudger();
     showCursor();
 

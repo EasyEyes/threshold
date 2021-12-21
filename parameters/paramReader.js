@@ -32,7 +32,7 @@ export class ParamReader {
       if (blockOrConditionName !== "__ALL_BLOCKS__") {
         for (let b of this._experiment) {
           if (
-            b.label === blockOrConditionName ||
+            b.block_condition === blockOrConditionName ||
             b.conditionName === blockOrConditionName
           ) {
             return b[name];

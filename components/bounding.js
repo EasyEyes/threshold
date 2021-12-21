@@ -111,7 +111,7 @@ export const getUpperBoundedLevel = (
   screenDimensions,
   spacingDirection,
   spacingOverSizeRatio,
-  normalizedAlphabetBoundingRect,
+  normalizedCharacterSetBoundingRect,
   displayOptions
 ) => {
   // First check that the
@@ -139,7 +139,7 @@ export const getUpperBoundedLevel = (
     targetPositionDeg,
     spacingDirection,
     spacingOverSizeRatio,
-    normalizedAlphabetBoundingRect
+    normalizedCharacterSetBoundingRect
   );
 
   const stimulusRectPx = {
@@ -193,8 +193,8 @@ export const getFlankerLocationsDeg = (
   let v = targetPositionDeg.map((x) => x / lengthOfTargetPositions);
   if (flankerOrientation === "tangential") v = [v[1], -v[0]]; // SEE https://gamedev.stackexchange.com/questions/70075/how-can-i-find-the-perpendicular-to-a-2d-vector
   const flankerLocationsDeg = [
-    targetPositionDeg.map((_, i) => targetPositionDeg[i] - v[i] * spacingDeg),
-    targetPositionDeg.map((_, i) => targetPositionDeg[i] + v[i] * spacingDeg),
+    targetPositionDeg.map((x, i) => targetPositionDeg[i] - v[i] * spacingDeg),
+    targetPositionDeg.map((x, i) => targetPositionDeg[i] + v[i] * spacingDeg),
   ];
   return flankerLocationsDeg;
 };
@@ -205,7 +205,7 @@ export const distancePix = (position1Deg, position2Deg) => {
   // ... and find the distance between them
   const [position1Pix] = XYPixOfXYDeg([position1Deg], displayOptions);
   const [position2Pix] = XYPixOfXYDeg([position2Deg], displayOptions);
-  const v = position1Pix.map(_, (i) => position1Pix[i] - position2Pix[i]);
+  const v = position1Pix.map((x, i) => position1Pix[i] - position2Pix[i]);
   const distanceInPix = Math.sqrt(
     v.map((x) => x ** 2).reduce((previous, current) => previous + current)
   );
@@ -270,7 +270,7 @@ export const getStimulusBoundsPx = (
   targetEccentricityXYDeg,
   spacingDirection,
   spacingOverSizeRatio,
-  normalizedAlphabetBoundingRect,
+  normalizedCharacterSetBoundingRect,
   displayOptions
 ) => {
   // Spacing value corresponding to the provided `level` value
@@ -288,14 +288,14 @@ export const getStimulusBoundsPx = (
   const [targetTopPix] = XYPixOfXYDeg([targetTopDeg], displayOptions);
   const proposedHeightPix = targetTopPix[1] - targetEccentricityXYDeg[1];
 
-  const alphabetBoundingRect = [
+  const characterSetBoundingRect = [
     [
-      normalizedAlphabetBoundingRect[0][0] * proposedHeightPix,
-      normalizedAlphabetBoundingRect[0][1] * proposedHeightPix,
+      normalizedCharacterSetBoundingRect[0][0] * proposedHeightPix,
+      normalizedCharacterSetBoundingRect[0][1] * proposedHeightPix,
     ],
     [
-      normalizedAlphabetBoundingRect[1][0] * proposedHeightPix,
-      normalizedAlphabetBoundingRect[1][1] * proposedHeightPix,
+      normalizedCharacterSetBoundingRect[1][0] * proposedHeightPix,
+      normalizedCharacterSetBoundingRect[1][1] * proposedHeightPix,
     ],
   ];
   const flankerLocationsDeg = getFlankerLocationsDeg(
@@ -308,12 +308,12 @@ export const getStimulusBoundsPx = (
   );
   const flankerRectanglesPix = flankerLocationsPix.map((location) => {
     const lowerLeft = [
-      location[0] + alphabetBoundingRect[0][0],
-      location[0] + alphabetBoundingRect[0][1],
+      location[0] + characterSetBoundingRect[0][0],
+      location[0] + characterSetBoundingRect[0][1],
     ];
     const upperRight = [
-      location[1] + alphabetBoundingRect[1][0],
-      location[1] + alphabetBoundingRect[1][1],
+      location[1] + characterSetBoundingRect[1][0],
+      location[1] + characterSetBoundingRect[1][1],
     ];
     return [lowerLeft, upperRight];
   });
@@ -342,20 +342,20 @@ export const getStimulusBoundsPx = (
   return stimulusBoundsPx;
 };
 */
-export const getAlphabetBoundingBox = (
-  alphabet,
+export const getCharacterSetBoundingBox = (
+  characterSet,
   targetFont,
-  height,
   repeats = 1
 ) => {
+  const height = 50;
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
-  let alphabetBoundingRect = [
+  let characterSetBoundingRect = [
     [0, 0],
     [0, 0],
   ];
   const testStim = new visual.TextStim({
     win: window,
-    name: "alphabetBoundingBoxStim",
+    name: "characterSetBoundingBoxStim",
     text: "",
     font: targetFont,
     units: "pix",
@@ -369,18 +369,30 @@ export const getAlphabetBoundingBox = (
     autoDraw: false,
     autoLog: false,
   });
-  for (const character of alphabet) {
+  for (const character of characterSet) {
     testStim.setText(character.repeat(repeats));
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
     let thisBoundingBox = testStim.getBoundingBox(true);
     let thisBoundingRect = rectFromPixiRect(thisBoundingBox);
-    alphabetBoundingRect = getUnionRect(thisBoundingRect, alphabetBoundingRect);
+    characterSetBoundingRect = getUnionRect(
+      thisBoundingRect,
+      characterSetBoundingRect
+    );
   }
-  const normalizedAlphabetBoundingRect = [
-    [alphabetBoundingRect[0][0] / height, alphabetBoundingRect[0][1] / height],
-    [alphabetBoundingRect[1][0] / height, alphabetBoundingRect[1][1] / height],
+  const normalizedCharacterSetBoundingPoints = [
+    [
+      characterSetBoundingRect[0][0] / height,
+      characterSetBoundingRect[0][1] / height,
+    ],
+    [
+      characterSetBoundingRect[1][0] / height,
+      characterSetBoundingRect[1][1] / height,
+    ],
   ];
-  return normalizedAlphabetBoundingRect;
+  const normalizedCharacterSetBoundingRect = new Rectangle(
+    ...normalizedCharacterSetBoundingPoints
+  );
+  return normalizedCharacterSetBoundingRect;
 };
 /*
 Hi Gus, i have a few minutes before the fac. meeting at 12:30 pm. 
@@ -389,22 +401,22 @@ on-screen and to estimate a new level that wil fit if it doesn't.
 Yesterday i thought we could get away with assuming a nominal size 
 for the flankers. I'm now thinking that it's better to just do it 
 right and finish the job. 
-1. Determine the alphabet bounding box. Get a joint bounding box for 
-  all the letters in the alphabet. Logically, this is the union of the 
+1. Determine the characterSet bounding box. Get a joint bounding box for 
+  all the letters in the characterSet. Logically, this is the union of the 
   bounding box for each letter. Drawing all letters with the same baseline. 
   I've always centered horizontally. Once we have this bounding box we 
   should retain it for the whole block. It's useful for targets and 
   flankers in ratio mode, and for targets, when measuring acuity. It's 
   not relevant in typographic mode.
-2. For typographic mode i think we should compute a special tripleAlphabet 
+2. For typographic mode i think we should compute a special tripleCharacterSet 
    mode in which we measure the union of the bounding boxes of every same 
    letter triplet, aaa, bbb, etc. The assumption is that this union will 
    also contain any random triplet.
 3. Compute the bounding box of the whole stimulus. In acuity mode, this 
-   is just the alphabet bounding box at the target position. In typographic 
-   mode, it's very similar, substituting the tripleAlphabet bounding box. 
+   is just the characterSet bounding box at the target position. In typographic 
+   mode, it's very similar, substituting the tripleCharacterSet bounding box. 
    I forgotten our rule for determining size fo the triplet based on desired 
-   spacing. In ratio mode, we place the alphabet bounding box at the location 
+   spacing. In ratio mode, we place the characterSet bounding box at the location 
    of each flanker. 
 4. If the stimulus bounding box is on screen, then we're done checking. If the 
    bounding box is too big, then we'll need to estimate by how much we've exceeded 
@@ -876,23 +888,27 @@ export const adjustSpacingRatio = (targetXYDeg, screenRectPx) => {
   // TARGET SIZE
   switch (spacingRelationToSize) {
     case "none":
-      const [_, topPx] = XYPixOfXYDeg([[targetX]]);
+      const [, topPx] = XYPixOfXYDeg([[targetX]]);
     case "ratio":
     case "typographic":
   }
 };
 
 /**
- * Pseudo code prepares to draw a spacing trial with a target letter. It also figures out the max value of spacingDeg that can be rendered on this screen with the given target position, screen size, font, and alphabet.
- * @return {Number} maximum safe spacingDeg
+ * Pseudo code prepares to draw a spacing trial with a target letter.
+ * It restricts level to within the realizable range for this screen
+ * with the given target position, screen size, font, and characterSet.
+ * @return {[Number, Object]} [restricted level, stimulus parameters]
  */
-export const prepareToDrawLetters = (
+export const restrictLevel = (
+  thresholdParameter,
+  characterSetRectPx,
   spacingDirection,
   spacingRelationToSize,
   spacingSymmetry,
   spacingOverSizeRatio,
   targetSizeIsHeightBool,
-  thresholdParameter
+  displayOptions
 ) => {
   if (
     !["radial", "tangential", "horizontal", "vertical"].includes(
@@ -907,24 +923,135 @@ export const prepareToDrawLetters = (
   if (!["spacing", "size"].includes(thresholdParameter))
     throw `thresholdParameter must equal 'spacing' or 'size', not '${thresholdParameter}'`;
 
+  let level, stimulusParameters, spacingDeg, sizeDeg;
+  const screenLowerLeft = [
+    -displayOptions.window._size[0] / 2,
+    -displayOptions.window._size[1] / 2,
+  ];
+  const screenUpperRight = [
+    displayOptions.window._size[0] / 2,
+    displayOptions.window._size[1] / 2,
+  ];
+  const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
     case "size":
-      prepareToDrawALetterSizeTrial;
+      [sizeDeg, stimulusParameters] = restrictSizeDeg(
+        displayOptions.targetEccentricityXYDeg,
+        displayOptions.targetKind,
+        screenRectPx,
+        spacingRelationToSize,
+        targetSizeIsHeightBool,
+        characterSetRectPx,
+        spacingOverSizeRatio,
+        displayOptions
+      );
+      level = Math.log10(sizeDeg);
     case "spacing":
-      // TODO pass parameters
-      return prepareToDrawALetterSpacingTrial();
+      [spacingDeg, stimulusParameters] = restrictSpacingDeg(
+        displayOptions.targetEccentricityXYDeg,
+        displayOptions.targetKind,
+        screenRectPx,
+        spacingRelationToSize,
+        targetSizeIsHeightBool,
+        characterSetRectPx,
+        spacingOverSizeRatio,
+        displayOptions
+      );
+      level = Math.log10(spacingDeg);
   }
+  return [level, stimulusParameters];
 };
 
-export const prepareToDrawALetterSpacingTrial = (
+export const restrictSizeDeg = (
   targetXYDeg,
   targetKind,
   screenRectPx,
   spacingRelationToSize,
-  targetSizeDeg,
   targetSizeIsHeightBool,
-  alphabetRectPx,
-  spacingOverSizeRatio
+  characterSetRectPx,
+  spacingOverSizeRatio,
+  displayOptions
+) => {
+  switch (targetKind) {
+    case "letter":
+      break;
+    default:
+      throw "At this point targetKind must be letter. gabor is coming.";
+  }
+  const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
+  const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
+  let heightDeg, heightPx, topPx, bottomPx;
+  let targetSizeDeg = displayOptions.targetSizeDeg;
+
+  // We scale the alphabet bounding box to have the specified heightPx.
+  // widthPx = width of scaled alphabet bounding box.
+
+  // This loop accepts a requested targetSizeDeg and adjusts it, if necessary, to get the
+  // stimulus to fit onscreen. If targetSizeDeg is already ok, then we'll do one pass.
+  // If the stimulus extends beyond the screen, then we'll need 2 iterations. We allow
+  // a 3rd iteration to allow for the case that the 2nd iteration isn't quite right, and
+  // it homes in on the third.
+  for (const iteration of [0, 1, 2]) {
+    // SET TARGET SIZE
+    heightDeg = targetSizeIsHeightBool
+      ? targetSizeDeg
+      : (targetSizeDeg * characterSetRectPx.height) / characterSetRectPx.width;
+    [, topPx] = XYPixOfXYDeg(
+      [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
+      displayOptions
+    );
+    [, bottomPx] = XYPixOfXYDeg(
+      [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
+      displayOptions
+    );
+    heightPx = topPx - bottomPx;
+    stimulusRectPx = characterSetRectPx.scale(
+      widthDeg / characterSetRectPx.width
+    );
+    stimulusRectPx = stimulusRectPx.offset(targetXYPx);
+
+    // WE'RE DONE IF STIMULUS FITS
+    if (isRectInRect(stimulusRectPx.toArray(), screenRectPx.toArray())) {
+      return [
+        targetSizeDeg,
+        {
+          heightPx: heightPx,
+          targetAndFlankersXYPx: [targetXYPx],
+        },
+      ];
+    }
+
+    // Stimulus extends off-screen. Reduce targetSizeDeg so stimulus fits onscreen.
+    // stimulusRectPx has four bounds. We check them all. We assume that the bound's
+    // distance from the target location is proportional to targetSizeDeg. So, we first
+    // change coordinates to treat the target as the origin. Then we compute the ratio of
+    // each stimulus bound to the corresponding screen bound. Let maxRatio be the
+    // biggest of the four ratios. We set targetSizeDeg=targetSizeDeg/maxRatio.
+
+    // REDUCE targetSizeDeg TO MAKE STIMULUS FIT
+    const largestBoundsRatio = getLargestBoundsRatio(
+      stimulusRectPx,
+      screenRectPx,
+      targetXYPx,
+      thresholdParameter,
+      spacingRelationToSize
+    );
+    targetSizeDeg = targetSizeDeg / largestBoundsRatio;
+  }
+};
+/**
+ *
+ * @returns {[Number, Object]} [spacingDeg, stimulusParameters]
+ */
+export const restrictSpacingDeg = (
+  targetXYDeg,
+  targetKind,
+  screenRectPx,
+  spacingRelationToSize,
+  targetSizeIsHeightBool,
+  characterSetRectPx,
+  spacingOverSizeRatio,
+  displayOptions
 ) => {
   /* 
   // Given the desired spacingDeg, compute the letter sizes and locations and the  
@@ -935,7 +1062,7 @@ export const prepareToDrawALetterSpacingTrial = (
   // require only one iteration, instead of two. However, this routine is
   // quick, so it may not be worth the trouble to cache its answers.
   //
-  // We anticipate that the slowest computation is computing the alphabet bounds,
+  // We anticipate that the slowest computation is computing the characterSet bounds,
   // followed by rendering the letters. We r
   //
   // Target is at (targetXDeg, targetYDeg).
@@ -949,72 +1076,26 @@ export const prepareToDrawALetterSpacingTrial = (
       throw "At this point targetKind must be letter. gabor is coming.";
   }
 
-  const diplayOptions = {
-    pixPerCm: pixPerCm,
-    viewingDistanceCm: viewingDistanceCm,
-    nearPointXYDeg: nearPointXYDeg,
-    nearPointXYPix: nearPointXYPix,
-  };
+  if (
+    spacingRelationToSize === "none" &&
+    !displayOptions.hasOwnProperty(targetSizeDeg)
+  )
+    throw "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'";
   const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
   const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
-
-  let sizeDeg, heightDeg, widthDeg, heightPx, widthPx;
-  // SET TARGET SIZE
-  switch (spacingRelationToSize) {
-    case "none":
-      // Use specified targetSizeDeg
-      sizeDeg = targetSizeDeg;
-      heightDeg = targetSizeIsHeightBool
-        ? sizeDeg
-        : (sizeDeg * alphabetRectPx.height) / alphabetRectPx.width;
-      const [_, topPx] = XYPixOfXYDeg(
-        [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
-        displayOptions
-      );
-      const [_, bottomPx] = XYPixOfXYDeg(
-        [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
-        displayOptions
-      );
-      heightPx = topPx - bottomPx;
-      widthPx = (heightPx * alphabetRectPx.width) / alphabetRectPx.height;
-      break;
-    case "ratio":
-      // Use spacingDeg and spacingOverSizeRatio to set size.
-      sizeDeg = spacingDeg / spacingOverSizeRatio;
-      heightDeg = targetSizeIsHeightBool
-        ? sizeDeg
-        : (sizeDeg * alphabetRectPx.height) / alphabetRectPx.width;
-      const [_, topPx] = XYPixOfXYDeg(
-        [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
-        displayOptions
-      );
-      const [_, bottomPx] = XYPixOfXYDeg(
-        [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
-        displayOptions
-      );
-      heightPx = topPx - bottomPx;
-      widthPx = (heightPx * alphabetRectPx.width) / alphabetRectPx.height;
-      break;
-    case "typographic":
-      // Use spacingDeg to set size.
-      widthDeg = 3 * spacingDeg;
-      heightDeg = (widthDeg * alphabetRectPx.height) / alphabetRectPx.width;
-      const [leftPx, _] = XYPixOfXYDeg([
-        targetXYDeg[0] - widthDeg / 2,
-        targetXYDeg[1],
-      ]);
-      const [rightPx, _] = XYPixOfXYDeg([
-        targetXYDeg[0] + widthDeg / 2,
-        targetXYDeg[1],
-      ]);
-      widthPx = rightPx - leftPx;
-      heightPx = (widthPx * alphabetRectPx.height) / alphabetRectPx.width;
-      break;
-  }
+  let sizeDeg, heightDeg, widthDeg, heightPx, widthPx, topPx, bottomPx;
+  let stimulusRectPx,
+    flanker1XYDeg,
+    flanker1XYPx,
+    flanker2XYPx,
+    flanker2XYDeg,
+    spacingInnerDeg,
+    maxSpacingDeg,
+    spacingOuterDeg;
 
   // We will impose the target's height heightPx on all three letters in the triplet.
-  // We scale the alphabet bounding box to have the specified heightPx.
-  // widthPx = width of scaled alphabet bounding box.
+  // We scale the characterSet bounding box to have the specified heightPx.
+  // widthPx = width of scaled characterSet bounding box.
   // Direction of the RADIAL spacing is specified by a dimensionless unit vector (from 0,0):
   // Tangential spacing direction is the unit vector orthogonal to the radial vector.
 
@@ -1029,20 +1110,77 @@ export const prepareToDrawALetterSpacingTrial = (
   // If the stimulus extends beyond the screen, then we'll need 2 iterations. We allow
   // a 3rd iteration to allow for the case that the 2nd iteration isn't quite right, and
   // it homes in on the third.
-  let stimulusRectPx,
-    flanker1XYDeg,
-    flanker1XYPx,
-    flanker2XYPx,
-    flanker2XYDeg,
-    spacingInnerDeg,
-    spacingOuterDeg,
-    largestBoundsRatio;
   let v1XY, v2XY;
-  for (const iteration of [0, 1, 2]) {
+  for (const iteration of [0, 1, 2, 3]) {
+    // SET TARGET SIZE
+    switch (spacingRelationToSize) {
+      case "none":
+        // Use specified targetSizeDeg
+        sizeDeg = displayOptions.targetSizeDeg;
+        heightDeg = targetSizeIsHeightBool
+          ? sizeDeg
+          : (sizeDeg * characterSetRectPx.height) / characterSetRectPx.width;
+        [, topPx] = XYPixOfXYDeg(
+          [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
+          displayOptions
+        );
+        [, bottomPx] = XYPixOfXYDeg(
+          [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
+          displayOptions
+        );
+        heightPx = topPx - bottomPx;
+        widthPx =
+          (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
+        break;
+      case "ratio":
+        // Use spacingDeg and spacingOverSizeRatio to set size.
+        sizeDeg = spacingDeg / spacingOverSizeRatio;
+        heightDeg = targetSizeIsHeightBool
+          ? sizeDeg
+          : (sizeDeg * characterSetRectPx.height) / characterSetRectPx.width;
+        [, topPx] = XYPixOfXYDeg(
+          [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
+          displayOptions
+        );
+        const [, bottomPx] = XYPixOfXYDeg(
+          [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
+          displayOptions
+        );
+        heightPx = topPx - bottomPx;
+        widthPx =
+          (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
+        break;
+      case "typographic":
+        // Use spacingDeg to set size.
+        widthDeg = 3 * spacingDeg;
+        heightDeg =
+          (widthDeg * characterSetRectPx.height) / characterSetRectPx.width;
+        const [leftPx] = XYPixOfXYDeg([
+          targetXYDeg[0] - widthDeg / 2,
+          targetXYDeg[1],
+        ]);
+        const [rightPx] = XYPixOfXYDeg([
+          targetXYDeg[0] + widthDeg / 2,
+          targetXYDeg[1],
+        ]);
+        widthPx = rightPx - leftPx;
+        heightPx =
+          (widthPx * characterSetRectPx.height) / characterSetRectPx.width;
+        break;
+    }
+
+    // Compute lower bound
+    if (heightPx < displayOptions.targetMinimumPix) {
+      spacingDeg = spacingDeg * (displayOptions.targetMinimumPix / heightPx);
+      continue;
+    }
+
     // COMPUTE STIMULUS RECT
     switch (spacingRelationToSize) {
       case "typographic":
-        stimulusRectPx = alphabetRectPx.scale(widthDeg / alphabetRectPx.width);
+        stimulusRectPx = characterSetRectPx.scale(
+          widthDeg / characterSetRectPx.width
+        );
         stimulusRectPx = stimulusRectPx.offset(targetXYPx);
         break;
       case "none": // 'none' and 'ratio' should behave the same; intentional fall-through
@@ -1126,25 +1264,35 @@ export const prepareToDrawALetterSpacingTrial = (
         stimulusRectPx = stimulusRectPx.inset(-widthPx / 2, -heightPx / 2);
         break;
     }
-    const largestBoundsRatio = getLargetBoundsRatio(
+    const largestBoundsRatio = getLargestBoundsRatio(
       stimulusRectPx,
       screenRectPx,
       targetXYPx,
       thresholdParameter,
       spacingRelationToSize
     );
-    const maxSpacingDeg = spacingDeg / largestBoundsRatio;
+    maxSpacingDeg = spacingDeg / largestBoundsRatio;
 
     // WE'RE DONE IF STIMULUS FITS
     // Should be equivalent to isRectInRect(stimulusRectPx,screenRectPx)
-    if (largestBoundsRatio <= 1) return spacingDeg;
+    if (largestBoundsRatio <= 1) {
+      const targetAndFlankerLocationsPx = [targetXYPx];
+      if (spacingRelationToSize === "ratio")
+        targetAndFlankerLocationsPx.push(flanker1XYPx, flanker2XYPx);
+      const stimulusParameters = {
+        heightPx: heightPx,
+        targetAndFlankersXYPx: targetAndFlankerLocationsPx,
+      };
+      return [spacingDeg, stimulusParameters];
+    }
 
     // REDUCE SPACINGDEG TO MAKE STIMULUS FIT, AND TRY AGAIN
     spacingDeg = maxSpacingDeg;
   }
+  throw `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${displayOptions.targetMinimumPix}`;
 };
 
-const getLargetBoundsRatio = (
+const getLargestBoundsRatio = (
   stimulusRectPx,
   screenRectPx,
   targetXYPx,
@@ -1173,7 +1321,7 @@ const getLargetBoundsRatio = (
   // Shift origin to the target
   let stim = stimulusRectPx.offset([-targetXYPx[0], -targetXYPx[1]]);
   let screen = screenRectPx.offset([-targetXYPx[0], -targetXYPx[1]]);
-  screen.inset(1, 1); // Give a 1 pixel margin
+  screen = screen.inset(1, 1); // Give a 1 pixel margin
 
   switch (thresholdParameter) {
     case "spacing":
@@ -1202,7 +1350,7 @@ const getLargetBoundsRatio = (
     stim.top / screen.top,
     stim.bottom / screen.bottom,
   ];
-  let largetBoundsRatio = Math.max(...ratios);
+  const largetBoundsRatio = Math.max(...ratios);
   if (largetBoundsRatio <= 0) throw "Largest ratio is non-positive.";
   return largetBoundsRatio;
 };
