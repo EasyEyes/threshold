@@ -1,4 +1,3 @@
-import { preProcessFile } from "typescript";
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
 
