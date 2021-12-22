@@ -2,8 +2,19 @@
 import XLSX from "xlsx";
 import Papa from "papaparse";
 
-import { validatedCommas, validateExperimentDf } from "./experimentFileChecks";
-import { addUniqueLabelsToDf, dataframeFromPapaParsed } from "./utilities";
+import {
+  isConsentFormMissing,
+  isDebriefFormMissing,
+  isFontMissing,
+  validatedCommas,
+  validateExperimentDf,
+} from "./experimentFileChecks";
+import {
+  addUniqueLabelsToDf,
+  dataframeFromPapaParsed,
+  getFontNameListBySource,
+  getFormNames,
+} from "./utilities";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 
@@ -11,10 +22,18 @@ export const preprocessExperimentFile = async (
   file: File,
   user: any,
   errors: EasyEyesError[],
+  easyeyesResources: any,
   callback: any
 ) => {
   const completeCallback = (parsed: Papa.ParseResult<any>) => {
-    prepareExperimentFileForThreshold(parsed, user, errors, callback, "web");
+    prepareExperimentFileForThreshold(
+      parsed,
+      user,
+      errors,
+      easyeyesResources,
+      callback,
+      "web"
+    );
   };
 
   if (file.name.includes("xlsx")) {
@@ -46,6 +65,7 @@ export const prepareExperimentFileForThreshold = (
   parsed: Papa.ParseResult<any>,
   user: any,
   errors: any[],
+  easyeyesResources: any,
   callback: any,
   space: string
 ) => {
@@ -59,6 +79,27 @@ export const prepareExperimentFileForThreshold = (
       (i: string[]) => i[0] == "_participantRecruitmentService"
     )?.[1];
   }
+
+  // validate requested fonts
+  const requestedFontList: string[] = getFontNameListBySource(parsed, "file");
+  errors.push(...isFontMissing(requestedFontList, easyeyesResources.fonts));
+
+  // validate requested forms
+  const requestedForms: any = getFormNames(parsed);
+  if (requestedForms.consentForm)
+    errors.push(
+      ...isConsentFormMissing(
+        requestedForms.consentForm,
+        easyeyesResources.forms
+      )
+    );
+  if (requestedForms.debriefForm)
+    errors.push(
+      ...isDebriefFormMissing(
+        requestedForms.debriefForm,
+        easyeyesResources.forms
+      )
+    );
 
   // Check that every row has the same number of values
   const unbalancedCommasError = validatedCommas(parsed);
@@ -83,9 +124,14 @@ export const prepareExperimentFileForThreshold = (
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
     console.log("ERRORS", errors);
-    callback([], errors);
+    callback(requestedForms, requestedFontList, [], errors);
   } else {
-    callback(splitIntoBlockFiles(df, space), []);
+    callback(
+      requestedForms,
+      requestedFontList,
+      splitIntoBlockFiles(df, space),
+      []
+    );
   }
 };
 
