@@ -2,6 +2,75 @@
 /* eslint-disable no-prototype-builtins */
 // Initialize dataframe-js module
 import { DataFrame } from "dataframe-js";
+import { GLOSSARY } from "../parameters/glossary";
+
+/**
+ * get requested consentForm and debreifForms
+ * @param {Papa.ParseResult<string[]>} parsed
+ * @returns {consentForm: string, debreifForm: string}
+ */
+export const getFormNames = (parsed: any): any => {
+  let consentFormRow: string[] = [];
+  let debriefFormRow: string[] = [];
+
+  for (let i = 0; i < parsed.data.length; i++) {
+    if (parsed.data[i][0] == "_consentForm") {
+      consentFormRow = parsed.data[i];
+    } else if (parsed.data[i][0] == "_debriefForm") {
+      debriefFormRow = parsed.data[i];
+    }
+  }
+
+  const formData: any = {};
+  if (consentFormRow[1]) formData["consentForm"] = consentFormRow[1];
+  if (debriefFormRow[1]) formData["debriefForm"] = debriefFormRow[1];
+
+  return formData;
+};
+
+/**
+ * get list of fonts required with given font source
+ * @param {Papa.ParseResult<string[]>} parsed
+ * @param {string} fontSource
+ * @returns {string[]}
+ */
+export const getFontNameListBySource = (
+  parsed: any,
+  fontSource: string
+): string[] => {
+  const fontList: string[] = [];
+  let targetFontRow: string[] = [];
+  let targetFontSourceRow: string[] = [];
+  let foundTargetFontSourceRow = false;
+
+  for (let i = 0; i < parsed.data.length; i++) {
+    if (parsed.data[i][0] == "targetFont") {
+      targetFontRow = parsed.data[i];
+    } else if (parsed.data[i][0] == "targetFontSource") {
+      targetFontSourceRow = parsed.data[i];
+      foundTargetFontSourceRow = true;
+    }
+  }
+
+  // read default value if it is absent
+  if (!foundTargetFontSourceRow) {
+    let defaultValue = GLOSSARY["targetFontSource"].default;
+    if (Array.isArray(defaultValue)) defaultValue = defaultValue[0];
+    for (let i = 0; i < targetFontRow.length; i++)
+      targetFontSourceRow[i] = defaultValue;
+    targetFontSourceRow[0] = "";
+  }
+
+  for (let i = 0; i < targetFontRow.length; i++) {
+    if (
+      targetFontSourceRow[i].trim() == fontSource &&
+      !fontList.includes(targetFontRow[i])
+    )
+      fontList.push(targetFontRow[i]);
+  }
+
+  return fontList;
+};
 
 /**
  * Return a transposed copy of a 2D table.
