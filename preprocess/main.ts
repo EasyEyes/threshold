@@ -3,8 +3,7 @@ import XLSX from "xlsx";
 import Papa from "papaparse";
 
 import {
-  isConsentFormMissing,
-  isDebriefFormMissing,
+  isFormMissing,
   isFontMissing,
   validatedCommas,
   validateExperimentDf,
@@ -80,24 +79,27 @@ export const prepareExperimentFileForThreshold = (
     )?.[1];
   }
 
-  // validate requested fonts
+  // Validate requested fonts
   const requestedFontList: string[] = getFontNameListBySource(parsed, "file");
-  errors.push(...isFontMissing(requestedFontList, easyeyesResources.fonts));
+  if (space === "web")
+    errors.push(...isFontMissing(requestedFontList, easyeyesResources.fonts));
 
-  // validate requested forms
+  // Validate requested forms
   const requestedForms: any = getFormNames(parsed);
-  if (requestedForms.consentForm)
+  if (space === "web" && requestedForms.consentForm)
     errors.push(
-      ...isConsentFormMissing(
+      ...isFormMissing(
         requestedForms.consentForm,
-        easyeyesResources.forms
+        easyeyesResources.forms,
+        "_consentForm"
       )
     );
-  if (requestedForms.debriefForm)
+  if (space === "web" && requestedForms.debriefForm)
     errors.push(
-      ...isDebriefFormMissing(
+      ...isFormMissing(
         requestedForms.debriefForm,
-        easyeyesResources.forms
+        easyeyesResources.forms,
+        "_debriefForm"
       )
     );
 

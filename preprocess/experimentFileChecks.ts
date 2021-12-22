@@ -462,30 +462,20 @@ export const _areColumnValuesUnique = (
   if (df.unique(targetColumn) !== df.select(targetColumn)) return false;
   return true;
 };
-export const isConsentFormMissing = (
-  requestedConsentForm: string,
-  existingFormList: string[]
+
+export const isFormMissing = (
+  requestedForm: string,
+  existingFormList: string[],
+  formType: string
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
-  // if requested form is not found in existing resources list
-  if (!existingFormList.includes(requestedConsentForm)) {
-    errorList.push(FORM_FILES_MISSING("_consentForm", [requestedConsentForm]));
+  if (!existingFormList.includes(requestedForm)) {
+    errorList.push(FORM_FILES_MISSING(formType, [requestedForm]));
   }
 
   return errorList;
 };
 
-export const isDebriefFormMissing = (
-  requestedDebriefForm: string,
-  existingFormList: string[]
-): EasyEyesError[] => {
-  const errorList: EasyEyesError[] = [];
-  if (!existingFormList.includes(requestedDebriefForm)) {
-    errorList.push(FORM_FILES_MISSING("_debriefForm", [requestedDebriefForm]));
-  }
-
-  return errorList;
-};
 export const isFontMissing = (
   requestedFontList: string[],
   existingFontList: string[]

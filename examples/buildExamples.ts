@@ -36,7 +36,17 @@ const preprocessExperimentFileLocal = async (
   const data = readFileSync(file);
 
   const completeCallback = (parsed: Papa.ParseResult<any>) => {
-    prepareExperimentFileForThreshold(parsed, {}, [], callback, "node");
+    prepareExperimentFileForThreshold(
+      parsed,
+      {},
+      [],
+      {
+        fonts: [],
+        forms: [],
+      },
+      callback,
+      "node"
+    );
   };
 
   const book = XLSX.read(data);
