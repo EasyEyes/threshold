@@ -73,7 +73,15 @@ const main = async () => {
     await preprocessExperimentFileLocal(
       "tables/" + d,
       readFileSync,
-      (fileStringList: string[][], errorList: any[]) => {
+      (
+        forms: any,
+        fonts: string[],
+        fileStringList: string[][],
+        errorList: any[]
+      ) => {
+        console.log("Requested FORMS", forms);
+        console.log("Requested FONTS", fonts);
+
         if (errorList.length) {
           errorList.forEach((err) => console.log(err));
           throw "Found errors!";
