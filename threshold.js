@@ -886,10 +886,15 @@ const experiment = (blockCount) => {
         thisConditionsFile
       );
 
+      trialsConditions = trialsConditions.map((condition) =>
+        Object.assign(condition, { label: condition["block_condition"] })
+      );
       trialsConditions = populateQuestDefaults(trialsConditions, paramReader);
 
       const nTrialsTotal = trialsConditions
-        .map((c) => Number(paramReader.read("conditionTrials", c.label)))
+        .map((c) =>
+          Number(paramReader.read("conditionTrials", c.block_condition))
+        )
         .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
 
       trials = new data.MultiStairHandler({
@@ -1380,7 +1385,7 @@ const experiment = (blockCount) => {
 
       const parametersToExcludeFromData = [];
       for (let c of snapshot.handler.getConditions()) {
-        if (c.label === trials._currentStaircase._name) {
+        if (c.block_condition === trials._currentStaircase._name) {
           condition = c;
           addConditionToData(
             psychoJS.experiment,
@@ -1389,7 +1394,7 @@ const experiment = (blockCount) => {
           );
         }
       }
-      const cName = condition["label"];
+      const cName = condition["block_condition"];
 
       // ! responseType
       responseType = getResponseType(
@@ -1448,7 +1453,7 @@ const experiment = (blockCount) => {
         Math.log(largestAllowedAngle) / Math.log(10);
       proposedLevel = Math.min(proposedLevel, largestTrigonometricLevel);
 
-      psychoJS.experiment.addData("label", cName);
+      psychoJS.experiment.addData("block_condition", cName);
       psychoJS.experiment.addData(
         "flankerOrientation",
         reader.read("spacingDirection", cName)
@@ -1794,19 +1799,22 @@ const experiment = (blockCount) => {
       // /* --- /BOUNDING BOX --- */
       // /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
-        if (!simulatedObserver[condition.label]) {
-          simulatedObserver[condition.label] = new SimulatedObserver(
-            simulated[block][condition.label],
+        if (!simulatedObserver[condition.block_condition]) {
+          simulatedObserver[condition.block_condition] = new SimulatedObserver(
+            simulated[block][condition.block_condition],
             level,
             alphabet,
             targetCharacter,
-            paramReader.read("thresholdProportionCorrect", condition.label),
-            paramReader.read("simulationBeta", condition.label),
-            paramReader.read("simulationDelta", condition.label),
-            paramReader.read("simulationThreshold", condition.label)
+            paramReader.read(
+              "thresholdProportionCorrect",
+              condition.block_condition
+            ),
+            paramReader.read("simulationBeta", condition.block_condition),
+            paramReader.read("simulationDelta", condition.block_condition),
+            paramReader.read("simulationThreshold", condition.block_condition)
           );
         } else {
-          simulatedObserver[condition.label].updateTrial(
+          simulatedObserver[condition.block_condition].updateTrial(
             level,
             alphabet,
             targetCharacter
@@ -2031,7 +2039,7 @@ const experiment = (blockCount) => {
         showGrid ||
         (simulated &&
           simulated[thisLoopNumber] &&
-          simulated[thisLoopNumber][condition.label])
+          simulated[thisLoopNumber][condition.block_condition])
       ) {
         if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
           // keep track of start time/frame for later
@@ -2058,10 +2066,10 @@ const experiment = (blockCount) => {
           if (
             simulated &&
             simulated[thisLoopNumber] &&
-            simulated[thisLoopNumber][condition.label]
+            simulated[thisLoopNumber][condition.block_condition]
           ) {
             return simulateObserverResponse(
-              simulatedObserver[condition.label],
+              simulatedObserver[condition.block_condition],
               key_resp,
               psychoJS
             );
