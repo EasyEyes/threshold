@@ -1354,6 +1354,7 @@ const experiment = (blockCount) => {
   var targetEccentricityXDeg;
   var targetEccentricityYDeg;
   var targetEccentricityXYDeg;
+  var targetSafetyMarginSec;
   // var trackGazeYes;
   // var trackHeadYes;
   var wirelessKeyboardNeededYes;
@@ -1499,10 +1500,11 @@ const experiment = (blockCount) => {
       fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
       showFixation = reader.read("markTheFixationBool", cName);
 
-      targetMinimumPix = reader.read("targetMinimumPix", cName);
       spacingOverSizeRatio = reader.read("spacingOverSizeRatio", cName);
       spacingRelationToSize = reader.read("spacingRelationToSize", cName);
+      showBoundingBox = reader.read("showBoundingBoxBool", cName) || false;
 
+      targetMinimumPix = reader.read("targetMinimumPix", cName);
       targetEccentricityXDeg = reader.read("targetEccentricityXDeg", cName);
       psychoJS.experiment.addData(
         "targetEccentricityXDeg",
@@ -1517,7 +1519,7 @@ const experiment = (blockCount) => {
         targetEccentricityXDeg,
         targetEccentricityYDeg,
       ];
-      showBoundingBox = reader.read("showBoundingBoxBool", cName) || false;
+      targetSafetyMarginSec = paramReader.read("targetSafetyMarginSec", cName);
 
       // trackGazeYes = reader.read("trackGazeYes", cName);
       // trackHeadYes = reader.read("trackHeadYes", cName);
@@ -2021,7 +2023,7 @@ const experiment = (blockCount) => {
       }
       // update/draw components on each frame
 
-      const uniDelay = 0; // 0.5 by default?
+      const uniDelay = 0;
 
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
@@ -2286,9 +2288,10 @@ const experiment = (blockCount) => {
       }
 
       /* -------------------------------------------------------------------------- */
+      // SHOW ALPHABET AND INSTRUCTIONS
       // *showAlphabet* updates
       if (
-        t >= uniDelay + targetDurationSec &&
+        t >= targetSafetyMarginSec + targetDurationSec &&
         showAlphabet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
