@@ -1,4 +1,4 @@
-#alphabet-holder {
+#characterSet-holder {
   position: fixed;
   margin: 0;
   padding: 0;
@@ -8,7 +8,7 @@
   text-align: center;
 }
 
-#alphabet-holder .alphabet {
+#characterSet-holder .characterSet {
   display: inline-block;
   padding: 0.5rem 1rem;
   border-radius: 5px;
@@ -16,7 +16,7 @@
   border: 2px solid rgba(0, 0, 0, 0);
 }
 
-#alphabet-holder .alphabet:hover {
+#characterSet-holder .characterSet:hover {
   border-color: black;
   cursor: pointer;
 }
