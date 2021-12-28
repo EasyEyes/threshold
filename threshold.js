@@ -28,7 +28,7 @@ import "./psychojs/src/index.css";
 import "./components/css/utils.css";
 import "./components/css/custom.css";
 import "./components/css/instructions.css";
-import "./components/css/showAlphabet.css";
+import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
 import "./components/css/trialBreak.css";
 import "./components/css/widgets.css";
@@ -78,9 +78,9 @@ import {
   getPurrSynth,
 } from "./components/sound.js";
 import {
-  removeClickableAlphabet,
-  setupClickableAlphabet,
-} from "./components/showAlphabet.js";
+  removeClickableCharacterSet,
+  setupClickableCharacterSet,
+} from "./components/showCharacterSet.js";
 
 import {
   getConsentFormName,
@@ -423,7 +423,7 @@ const experiment = (blockCount) => {
   var flanker1;
   var target;
   var flanker2;
-  var showAlphabet;
+  var showCharacterSet;
 
   var globalClock;
   var routineTimer, routineClock, blockClock;
@@ -517,9 +517,9 @@ const experiment = (blockCount) => {
       depth: -9.0,
     });
 
-    showAlphabet = new visual.TextStim({
+    showCharacterSet = new visual.TextStim({
       win: psychoJS.window,
-      name: "showAlphabet",
+      name: "showCharacterSet",
       text: "",
       font: "Arial",
       units: "pix",
@@ -1343,14 +1343,18 @@ const experiment = (blockCount) => {
   var block;
   var spacingDirection;
   var targetFont;
-  var targetAlphabet;
+  var targetCharacterSet;
   var validAns;
-  var showAlphabetWhere;
-  var showAlphabetElement;
+  var showCharacterSetWhere;
+  var showCharacterSetElement;
   var showCounterBool;
   var showTargetSpecs;
   var showViewingDistanceBool;
-  const showAlphabetResponse = { current: null, onsetTime: 0, clickTime: 0 };
+  const showCharacterSetResponse = {
+    current: null,
+    onsetTime: 0,
+    clickTime: 0,
+  };
   var showBoundingBox;
   var targetDurationSec;
   var targetMinimumPix;
@@ -1488,12 +1492,14 @@ const experiment = (blockCount) => {
       targetFont = reader.read("targetFont", cName);
       if (targetFontSource === "file") targetFont = cleanFontName(targetFont);
 
-      targetAlphabet = String(reader.read("targetAlphabet", cName)).split("");
-      validAns = String(reader.read("targetAlphabet", cName))
+      targetCharacterSet = String(
+        reader.read("targetCharacterSet", cName)
+      ).split("");
+      validAns = String(reader.read("targetCharacterSet", cName))
         .toLowerCase()
         .split("");
 
-      showAlphabetWhere = reader.read("showAlphabetWhere", cName);
+      showCharacterSetWhere = reader.read("showCharacterSetWhere", cName);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", cName);
       showCounterBool = reader.read("showCounterBool", cName);
       showTargetSpecs = paramReader.read("showTargetSpecsBool", cName);
@@ -1542,12 +1548,12 @@ const experiment = (blockCount) => {
       );
       psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
 
-      var alphabet = targetAlphabet;
+      var characterSet = targetCharacterSet;
       /* ------------------------------ Pick triplets ----------------------------- */
-      const tempAlphabet = shuffle(shuffle(alphabet));
-      var firstFlankerCharacter = tempAlphabet[0];
-      var targetCharacter = tempAlphabet[1];
-      var secondFlankerCharacter = tempAlphabet[2];
+      const tempCharacterSet = shuffle(shuffle(characterSet));
+      var firstFlankerCharacter = tempCharacterSet[0];
+      var targetCharacter = tempCharacterSet[1];
+      var secondFlankerCharacter = tempCharacterSet[2];
       if (debug)
         console.log(
           `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
@@ -1707,9 +1713,14 @@ const experiment = (blockCount) => {
           `spacingRelationToSize value ${spacingRelationToSize} not recognized. Please use "none", "ratio", or "typographic"`
         );
       }
-      [target, flanker1, flanker2, fixation, showAlphabet, totalTrial].forEach(
-        (c) => c._updateIfNeeded()
-      );
+      [
+        target,
+        flanker1,
+        flanker2,
+        fixation,
+        showCharacterSet,
+        totalTrial,
+      ].forEach((c) => c._updateIfNeeded());
       if (showBoundingBox) {
         const boundingStims = [targetBoundingPoly];
         const tightBoundingBox = target.getBoundingBox(true);
@@ -1744,9 +1755,9 @@ const experiment = (blockCount) => {
         }
         boundingStims.forEach((c) => c._updateIfNeeded());
       }
-      showAlphabet.setPos([0, 0]);
-      showAlphabet.setText("");
-      // showAlphabet.setText(getAlphabetShowText(validAns))
+      showCharacterSet.setPos([0, 0]);
+      showCharacterSet.setText("");
+      // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
       if (showTargetSpecs) {
         const spacing =
@@ -1785,7 +1796,7 @@ const experiment = (blockCount) => {
       trialComponents.push(target);
       trialComponents.push(flanker2);
 
-      trialComponents.push(showAlphabet);
+      trialComponents.push(showCharacterSet);
       trialComponents.push(totalTrial);
       if (showTargetSpecs) trialComponents.push(targetSpecs);
       // /* --- BOUNDING BOX --- */
@@ -1803,7 +1814,7 @@ const experiment = (blockCount) => {
           simulatedObserver[condition.block_condition] = new SimulatedObserver(
             simulated[block][condition.block_condition],
             level,
-            alphabet,
+            characterSet,
             targetCharacter,
             paramReader.read(
               "thresholdProportionCorrect",
@@ -1816,7 +1827,7 @@ const experiment = (blockCount) => {
         } else {
           simulatedObserver[condition.block_condition].updateTrial(
             level,
-            alphabet,
+            characterSet,
             targetCharacter
           );
         }
@@ -1997,7 +2008,7 @@ const experiment = (blockCount) => {
           skipTrialOrBlock.skipBlock)
       ) {
         showCursor();
-        removeClickableAlphabet();
+        removeClickableCharacterSet();
         return Scheduler.Event.NEXT;
       }
 
@@ -2047,7 +2058,7 @@ const experiment = (blockCount) => {
           key_resp.frameNStart = frameN; // exact frame index
           // TODO Use PsychoJS clock if possible
           // Reset together with PsychoJS
-          showAlphabetResponse.onsetTime = performance.now();
+          showCharacterSetResponse.onsetTime = performance.now();
 
           // keyboard checking is just starting
           psychoJS.window.callOnFlip(function () {
@@ -2099,13 +2110,14 @@ const experiment = (blockCount) => {
         }
       }
 
-      // *showAlphabetResponse* updates
-      if (showAlphabetResponse.current) {
-        key_resp.keys = showAlphabetResponse.current;
+      // *showCharacterSetResponse* updates
+      if (showCharacterSetResponse.current) {
+        key_resp.keys = showCharacterSetResponse.current;
         key_resp.rt =
-          (showAlphabetResponse.clickTime - showAlphabetResponse.onsetTime) /
+          (showCharacterSetResponse.clickTime -
+            showCharacterSetResponse.onsetTime) /
           1000;
-        if (showAlphabetResponse.current == correctAns) {
+        if (showCharacterSetResponse.current == correctAns) {
           // Play correct audio
           correctSynth.play();
           key_resp.corr = 1;
@@ -2113,8 +2125,8 @@ const experiment = (blockCount) => {
           // Play wrong audio
           key_resp.corr = 0;
         }
-        showAlphabetResponse.current = null;
-        removeClickableAlphabet();
+        showCharacterSetResponse.current = null;
+        removeClickableCharacterSet();
         continueRoutine = false;
       }
 
@@ -2294,20 +2306,20 @@ const experiment = (blockCount) => {
       }
 
       /* -------------------------------------------------------------------------- */
-      // *showAlphabet* updates
+      // *showCharacterSet* updates
       if (
         t >= uniDelay + targetDurationSec &&
-        showAlphabet.status === PsychoJS.Status.NOT_STARTED
+        showCharacterSet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
-        showAlphabet.tStart = t; // (not accounting for frame time here)
-        showAlphabet.frameNStart = frameN; // exact frame index
-        showAlphabet.setAutoDraw(true);
-        showAlphabetElement = setupClickableAlphabet(
-          targetAlphabet,
+        showCharacterSet.tStart = t; // (not accounting for frame time here)
+        showCharacterSet.frameNStart = frameN; // exact frame index
+        showCharacterSet.setAutoDraw(true);
+        showCharacterSetElement = setupClickableCharacterSet(
+          targetCharacterSet,
           targetFont,
-          showAlphabetWhere,
-          showAlphabetResponse
+          showCharacterSetWhere,
+          showCharacterSetResponse
         );
 
         instructions.tSTart = t;
@@ -2319,7 +2331,7 @@ const experiment = (blockCount) => {
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
-        removeClickableAlphabet();
+        removeClickableCharacterSet();
         return Scheduler.Event.NEXT;
       }
 
@@ -2516,7 +2528,7 @@ const experiment = (blockCount) => {
   }
 
   async function quitPsychoJS(message, isCompleted) {
-    removeClickableAlphabet();
+    removeClickableCharacterSet();
     rc.endNudger();
     showCursor();
 

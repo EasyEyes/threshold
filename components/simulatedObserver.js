@@ -1,7 +1,7 @@
 /*
 SIMULATION MODEL. Participant page. 
 Implement simulationModel: blind, ideal, and weibull.
-blind: the simulated observer randomly chooses one of the letters from the possible targets, i.e. the "alphabet".
+blind: the simulated observer randomly chooses one of the letters from the possible targets, i.e. the "characterSet".
 ideal: since we have no noise (and won't for months), this simulated observer will choose the correct response on every trial.
 weibull: this simulated observer gets the trial right with a probability given by the Weibull psychometric function: (see https://psychopy.org/api/data.html)
 Weibull=deltagamma+(1-delta)(1-(1-gamma)exp(-10**(beta(x-T+epsilon)))
@@ -119,7 +119,7 @@ export const simulateObserverResponse = (
   psychoJS.experiment.addData("signalingKey", signalingKey);
   psychoJS.experiment.addData("correctSignalingKey", correctSignalingKey);
   psychoJS.experiment.addData(
-    "signalingAlphabet",
+    "signalingCharacterSet",
     Object.values(responseToSignalKeyCode).map((keycode) =>
       String.fromCharCode(keycode)
     )
@@ -138,7 +138,7 @@ export const simulateObserverResponse = (
   window.dispatchEvent(simulatedKeyup);
 
   const theseKeys = keyboard.getKeys({
-    // keyList: signalingAlphabet,
+    // keyList: signalingCharacterSet,
     waitRelease: false,
   });
 
@@ -323,12 +323,12 @@ class WeibullObserver {
    * @param {TrialProperties} newTrial The new trial information to replace the old.
    */
   updateTrial(newTrial) {
-    const alphabetsEqual = arraysEqual(
+    const characterSetsEqual = arraysEqual(
       this.trial.possibleResponses,
       newTrial.possibleResponses
     );
     this.trial = newTrial;
-    if (!alphabetsEqual) {
+    if (!characterSetsEqual) {
       console.error(
         "Simulated observer not operated as intended: Epsilon changed.\nThe same simulated observer is not intended to be used across multiple conditions (ie columns of your experiment.csv file)."
       );

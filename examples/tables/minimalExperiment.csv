@@ -8,7 +8,7 @@ showGridsBool,FALSE
 spacingDirection,radial
 spacingOverSizeRatio,1.4
 spacingRelationToSize,typographic
-targetAlphabet,abcdefghijklmnopqrstuvwxyz
+targetCharacterSet,abcdefghijklmnopqrstuvwxyz
 targetDurationSec,0.2
 targetEccentricityXDeg,-10
 targetEccentricityYDeg,0

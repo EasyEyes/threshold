@@ -31,20 +31,22 @@ export const populateQuestDefaults = (conditionsList, reader) => {
   return conditionsList;
 };
 
-const getGamma = (alphabet) => {
-  if (!isNaN(alphabet)) alphabet = alphabet.toString();
+const getGamma = (characterSet) => {
+  if (!isNaN(characterSet)) characterSet = characterSet.toString();
 
   const valueCounts = {};
-  for (let i = 0; i < alphabet.length; i++) {
+  for (let i = 0; i < characterSet.length; i++) {
     // eslint-disable-next-line no-prototype-builtins
-    if (valueCounts.hasOwnProperty(alphabet[i])) valueCounts[alphabet[i]]++;
-    else valueCounts[alphabet[i]] = 1;
+    if (valueCounts.hasOwnProperty(characterSet[i]))
+      valueCounts[characterSet[i]]++;
+    else valueCounts[characterSet[i]] = 1;
   }
 
-  const probabilityOrderedValues = Array.from(new Set(alphabet)).sort((a, b) =>
-    valueCounts[a] < valueCounts[b] ? 1 : -1
+  const probabilityOrderedValues = Array.from(new Set(characterSet)).sort(
+    (a, b) => (valueCounts[a] < valueCounts[b] ? 1 : -1)
   );
 
-  const gamma = valueCounts[probabilityOrderedValues.pop()] / alphabet.length;
+  const gamma =
+    valueCounts[probabilityOrderedValues.pop()] / characterSet.length;
   return gamma;
 };

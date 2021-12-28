@@ -28,13 +28,13 @@ export const createSignalingMap = (possibleResponses) => {
     (x) => x + zeroNum
   );
   const letters = [...new Array(ZNum - ANum).keys()].map((x) => x + ANum);
-  const signalingAlphabet = [...digits, ...letters].slice(
+  const signalingCharacterSet = [...digits, ...letters].slice(
     0,
     possibleResponses.length
   );
   const signalingMap = {};
   possibleResponses.map((response, i) => {
-    signalingMap[response] = signalingAlphabet[i];
+    signalingMap[response] = signalingCharacterSet[i];
   });
   return signalingMap;
 };

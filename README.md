@@ -105,14 +105,14 @@ conditionTrials,40,40,40,40
 markingFixationStrokeLengthDeg,1,1,1,1
 markingFixationStrokeThicknessDeg,0.03,0.03,0.03,0.03
 markTheFixationYes,TRUE,TRUE,TRUE,TRUE
-showAlphabetWhere,bottom,bottom,bottom,bottom
+showCharacterSetWhere,bottom,bottom,bottom,bottom
 showCounterWhere,bottomRight,bottomRight,bottomRight,bottomRight
 showInstructionsWhere,topLeft,topLeft,topLeft,topLeft
 simulateParticipantYes,FALSE,FALSE,FALSE,FALSE
 simulationModel,blind,blind,blind,blind
 spacingDirection,radial,radial,radial,radial
 spacingOverSizeRatio,1.4,1.4,1.4,1.4
-targetAlphabet,DHKNORSVZ,DHKNORSVZ,acenorsuvxz,acenorsuvxz
+targetCharacterSet,DHKNORSVZ,DHKNORSVZ,acenorsuvxz,acenorsuvxz
 targetDurationSec,0.15,0.15,0.15,0.15
 targetEccentricityXDeg,10,-10,10,-10
 targetEccentricityYDeg,0,0,0,0
@@ -182,14 +182,14 @@ x   conditionTrials
     fixationStrokeLengthDeg
     fixationStrokeThicknessDeg
 x   fixationYes
-    showAlphabetWhere
+    showCharacterSetWhere
     showCounterWhere
     showInstructionsWhere
     simulateParticipantYes
     simulationModel
 x   spacingDirection
 x   spacingOverSizeRatio
-!   targetAlphabet => (Allowed keys) not supported when export to JS
+!   targetCharacterSet => (Allowed keys) not supported when export to JS
 x   targetDurationSec
 x   targetEccentricityXDeg
 x   targetEccentricityYDeg
