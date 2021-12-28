@@ -2291,7 +2291,7 @@ const experiment = (blockCount) => {
       // SHOW ALPHABET AND INSTRUCTIONS
       // *showAlphabet* updates
       if (
-        t >= targetSafetyMarginSec + targetDurationSec &&
+        t >= uniDelay + targetSafetyMarginSec + targetDurationSec &&
         showAlphabet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
