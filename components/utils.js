@@ -1,5 +1,3 @@
-import { is } from "express/lib/request";
-
 // eslint-disable-next-line no-undef
 export const debug = process.env.debug;
 // export const debug = true;
@@ -165,29 +163,75 @@ export const XYPixsOfXYDegs = (xyDegs, displayOptions) => {
 
 export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   // TODO verify displayOptions has the correct parameters
-  const xyPix = [];
-  xyDeg.forEach((position) => {
-    position[0] = position[0] - displayOptions.nearPointXYDeg.x;
-    position[1] = position[1] - displayOptions.nearPointXYDeg.y;
-    const rDeg = Math.sqrt(position[0] ** 2 + position[1] ** 2);
-    const rPix =
-      displayOptions.pixPerCm *
-      displayOptions.viewingDistanceCm *
-      Math.tan(rDeg * (Math.PI / 180));
-    let pixelPosition = [];
-    if (rDeg > 0) {
-      pixelPosition = [
-        (position[0] * rPix) / rDeg,
-        (position[1] * rPix) / rDeg,
-      ];
-    } else {
-      pixelPosition = [0, 0];
-    }
-    pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
-    pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.x;
-    xyPix.push(pixelPosition);
-  });
-  return xyPix;
+  const degPosition = [];
+  let pixelPosition = [];
+  degPosition[0] = xyDeg[0] - displayOptions.nearPointXYDeg.x;
+  degPosition[1] = xyDeg[1] - displayOptions.nearPointXYDeg.y;
+  const rDeg = Math.sqrt(degPosition[0] ** 2 + degPosition[1] ** 2);
+  const rPix =
+    displayOptions.pixPerCm *
+    displayOptions.viewingDistanceCm *
+    Math.tan(rDeg * (Math.PI / 180));
+  if (rDeg > 0) {
+    pixelPosition = [
+      (degPosition[0] * rPix) / rDeg,
+      (degPosition[1] * rPix) / rDeg,
+    ];
+  } else {
+    pixelPosition = [0, 0];
+  }
+  pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
+  pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.x;
+  return pixelPosition;
+};
+
+/**
+ * Convert position from (x,y) screen coordinate in pixels to deg
+ * (relative to fixation). Coordinate increase right and up.
+ * screen coordinates which increase down and right. The perspective
+ * transformation is relative to location of near point, which is orthogonal
+ * to line of sight. We typically put the target at the near point, but that
+ * is not assumed in this routine.
+ *
+ * Translation of MATLAB function of the same name
+ * by Prof Denis Pelli, XYPixOfXYDeg.m
+ * @param {*} xyPix
+ * @param {*} displayOptions
+ */
+export const XYDegOfXYPix = (xyPix, displayOptions) => {
+  if (!displayOptions.hasOwnProperty(nearPointXYDeg))
+    throw "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix";
+  if (!displayOptions.hasOwnProperty(nearPointXYPix))
+    throw "Please provide a 'nearPointXYPix' property to displayOptions passed to XYDegOfXYPix";
+  if (xyPix.length !== 2)
+    throw "'xyPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
+  if (displayOptions.nearPointXYDeg.length !== 2)
+    throw "'nearPointXYDeg' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
+  if (displayOptions.nearPointXYPix.length !== 2)
+    throw "'nearPointXYPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
+  /*
+    To convert screen position in pixels to ecc in deg, we first convert pix
+    to be relative to the near point. We use trig to get the radial deg, and
+    we use the direction of the pixel vector (re near point).
+  */
+  const nearPointOffsetXYPx = [
+    xyPix[0] - displayOptions.nearPointXYPix[0],
+    xyPix[1] - displayOptions.nearPointXYPix[1],
+  ];
+  const rPix = norm(nearPointOffsetXYPx);
+  // equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB
+  const rRad = Math.atan2(
+    rPix / displayOptions.pixPerCm,
+    displayOptions.viewingDistanceCm
+  );
+  const rDeg = rRad * (180 / Math.PI);
+  let xyDeg =
+    rPix > 0 ? [(xyPix[0] * rDeg) / rPix, (xyPix[1] * rDeg) / rPix] : [0, 0];
+  xyDeg = [
+    xyDeg[0] + displayOptions.nearPointXYDeg[0],
+    xyDeg[1] + displayOptions.nearPointXYDeg[1],
+  ];
+  return xyDeg;
 };
 
 /**
@@ -393,7 +437,7 @@ export const isRectInRect = (smallRect, bigRect) => {
   );
 };
 
-const getUnionRect = (a, b) => {
+export const getUnionRect = (a, b) => {
   // a = [[x1,y1],[x2,y2]]
   // b = [[x1,y1],[x2,y2]]
   /* 
@@ -428,7 +472,7 @@ const rectIsEmpty = (rect) => {
   return false;
 };
 
-const rectFromPixiRect = (pixiRect) => {
+export const rectFromPixiRect = (pixiRect) => {
   // ASSUMES `center` aligned
   const lowerLeft = [
     pixiRect.x - pixiRect.width / 2,
@@ -497,7 +541,7 @@ export const getTripletCharacters = (charset) => {
   let allCharacters = shuffle([...charset]);
   const samples = [];
   samples.push(allCharacters[0]);
-  samples.push(allCharacters.filter((char) => !samples.includes[char])[0]);
-  samples.push(allCharacters.filter((char) => !samples.includes[char])[0]);
+  samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
+  samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
   return shuffle(samples);
 };

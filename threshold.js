@@ -43,9 +43,8 @@ import {
   loggerText,
   hideCursor,
   showCursor,
-  shuffle,
   XYPixOfXYDeg,
-  degreesToPixels,
+  XYDegOfXYPix,
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
@@ -886,8 +885,8 @@ const experiment = (blockCount) => {
         psychoJS.serverManager,
         thisConditionsFile
       );
-      trialsConditions = trialsConditions.map(
-        (condition) => (condition["label"] = condition["block_condition"])
+      trialsConditions = trialsConditions.map((condition) =>
+        Object.assign(condition, { label: condition["block_condition"] })
       );
       trialsConditions = populateQuestDefaults(trialsConditions, paramReader);
 
@@ -1363,6 +1362,7 @@ const experiment = (blockCount) => {
   var targetSizeDeg;
   var targetSizeIsHeightBool;
   var thresholdParameter;
+  var spacingSymmetry;
   var spacingOverSizeRatio;
   var spacingRelationToSize;
   var targetEccentricityXDeg;
@@ -1487,6 +1487,7 @@ const experiment = (blockCount) => {
       // TODO check that we are actually trying to test for "spacing", not "size"
 
       spacingDirection = reader.read("spacingDirection", cName);
+      spacingSymmetry = reader.read("spacingSymmetry", cName);
       let targetFontSource = reader.read("targetFontSource", cName);
       targetFont = reader.read("targetFont", cName);
       if (targetFontSource === "file") targetFont = cleanFontName(targetFont);
@@ -1549,6 +1550,7 @@ const experiment = (blockCount) => {
         characterSetBoundingRects[cName] = getCharacterSetBoundingBox(
           characterSet,
           targetFont,
+          psychoJS.window,
           letterRepeats
         );
       }
@@ -1609,6 +1611,7 @@ const experiment = (blockCount) => {
         spacingRelationToSize
       );
       [level, stimulusParameters] = restrictLevel(
+        proposedLevel,
         thresholdParameter,
         characterSetBoundingRects[cName],
         spacingDirection,
@@ -1620,7 +1623,7 @@ const experiment = (blockCount) => {
       );
       psychoJS.experiment.addData("level", level);
       psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
-      target.setHeight(heightPx);
+      target.setHeight(stimulusParameters.heightPx);
       target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
       psychoJS.experiment.addData(
         "targetLocationPx",
@@ -1642,8 +1645,8 @@ const experiment = (blockCount) => {
               flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
               flanker1.setFont(targetFont);
               flanker2.setFont(targetFont);
-              flanker1.setHeight(heightPx);
-              flanker2.setHeight(heightPx);
+              flanker1.setHeight(stimulusParameters.heightPx);
+              flanker2.setHeight(stimulusParameters.heightPx);
               psychoJS.experiment.addData("flankerLocationsPx", [
                 stimulusParameters.targetAndFlankersXYPx[1],
                 stimulusParameters.targetAndFlankersXYPx[2],
@@ -1719,9 +1722,10 @@ const experiment = (blockCount) => {
           Math.round((spacing / spacingOverSizeRatio + Number.EPSILON) * 1000) /
           1000;
         let targetSpecsString = `size: ${size} deg`;
-        if (spacingRelationToSize === "ratio")
-          targetSpecsString += `\nspacing: ${spacing} deg`;
+        // if (spacingRelationToSize === "ratio")
+        targetSpecsString += `\nspacing: ${spacing} deg`;
         targetSpecs.setText(targetSpecsString);
+        targetSpecs.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
         targetSpecs.setAutoDraw(true);
       }
 
@@ -2094,12 +2098,16 @@ const experiment = (blockCount) => {
       }
 
       if (showTargetSpecs) {
+        targetSpecsConfig.x = -window.innerWidth / 2;
+        targetSpecsConfig.y = -window.innerHeight / 2;
         // *targetSpecs* updates
-        if (t >= 0.0 && targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
-          // keep track of start time/frame for later
-          targetSpecs.tStart = t; // (not accounting for frame time here)
-          targetSpecs.frameNStart = frameN; // exact frame index
-
+        if (t >= 0.0) {
+          if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
+            // keep track of start time/frame for later
+            targetSpecs.tStart = t; // (not accounting for frame time here)
+            targetSpecs.frameNStart = frameN; // exact frame index
+          }
+          targetSpecs.setPos([targetSpecsConfig.x, targetSpecsConfig.y]);
           targetSpecs.setAutoDraw(true);
         }
       }

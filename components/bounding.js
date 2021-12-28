@@ -1,16 +1,17 @@
-import { range } from "express/lib/request";
-import { preProcessFile } from "typescript";
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
 
 import {
-  degreesToPixels,
-  pixelsToDegrees,
+  // degreesToPixels,
+  // pixelsToDegrees,
   spacingPixelsFromLevel,
   levelFromSpacingPixels,
   logger,
   levelFromTargetHeight,
   XYPixOfXYDeg,
+  XYDegOfXYPix,
+  rectFromPixiRect,
+  getUnionRect,
   isRectInRect,
   isInRect,
   norm,
@@ -345,6 +346,7 @@ export const getStimulusBoundsPx = (
 export const getCharacterSetBoundingBox = (
   characterSet,
   targetFont,
+  window,
   repeats = 1
 ) => {
   const height = 50;
@@ -394,78 +396,6 @@ export const getCharacterSetBoundingBox = (
   );
   return normalizedCharacterSetBoundingRect;
 };
-/*
-Hi Gus, i have a few minutes before the fac. meeting at 12:30 pm. 
-We want a bounding box for the stimulus, to check whether it fits 
-on-screen and to estimate a new level that wil fit if it doesn't. 
-Yesterday i thought we could get away with assuming a nominal size 
-for the flankers. I'm now thinking that it's better to just do it 
-right and finish the job. 
-1. Determine the characterSet bounding box. Get a joint bounding box for 
-  all the letters in the characterSet. Logically, this is the union of the 
-  bounding box for each letter. Drawing all letters with the same baseline. 
-  I've always centered horizontally. Once we have this bounding box we 
-  should retain it for the whole block. It's useful for targets and 
-  flankers in ratio mode, and for targets, when measuring acuity. It's 
-  not relevant in typographic mode.
-2. For typographic mode i think we should compute a special tripleCharacterSet 
-   mode in which we measure the union of the bounding boxes of every same 
-   letter triplet, aaa, bbb, etc. The assumption is that this union will 
-   also contain any random triplet.
-3. Compute the bounding box of the whole stimulus. In acuity mode, this 
-   is just the characterSet bounding box at the target position. In typographic 
-   mode, it's very similar, substituting the tripleCharacterSet bounding box. 
-   I forgotten our rule for determining size fo the triplet based on desired 
-   spacing. In ratio mode, we place the characterSet bounding box at the location 
-   of each flanker. 
-4. If the stimulus bounding box is on screen, then we're done checking. If the 
-   bounding box is too big, then we'll need to estimate by how much we've exceeded 
-   and try to calculate by how much to reduce the spacing to fit. It may not be 
-   possible to fit, in which case this whole condition cannot be tested. 
-*/
-/*
-  const granularityOfChange = 0.05;
-  const smallestDisplayableLevel = levelFromTargetHeight(
-    displayOptions.minimumHeight,
-    displayOptions.spacingOverSizeRatio,
-    displayOptions.pixPerCm,
-    displayOptions.viewingDistanceCm
-  );
-  if (
-    unacceptableStimuli(
-      smallestDisplayableLevel,
-      targetXYPix,
-      fixationXYPix,
-      spacingDirection,
-      displayOptions
-    )
-  ) {
-    console.error(
-      "Unpresentable stimuli, even at level=" + String(smallestDisplayableLevel)
-    );
-    return smallestDisplayableLevel;
-  }
-  for (
-    let l = proposedLevel;
-    l > smallestDisplayableLevel;
-    l -= granularityOfChange
-  ) {
-    if (
-      !unacceptableStimuli(
-        l,
-        targetXYPix,
-        fixationXYPix,
-        spacingDirection,
-        displayOptions
-      )
-    ) {
-      return l;
-    }
-  }
-  // proposedLevel === smallestDisplayableLevel
-  return smallestDisplayableLevel;
-};
-*/
 
 /**
  * Tests whether these proposed parameters for presentation would draw improperly, eg extend beyond the extent of the screen
@@ -901,6 +831,7 @@ export const adjustSpacingRatio = (targetXYDeg, screenRectPx) => {
  * @return {[Number, Object]} [restricted level, stimulus parameters]
  */
 export const restrictLevel = (
+  proposedLevel,
   thresholdParameter,
   characterSetRectPx,
   spacingDirection,
@@ -932,6 +863,8 @@ export const restrictLevel = (
     displayOptions.window._size[0] / 2,
     displayOptions.window._size[1] / 2,
   ];
+  logger("psychoJS window size", displayOptions.window._size);
+  logger("JS window", [Window.width, Window.height]);
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
     case "size":
@@ -948,6 +881,7 @@ export const restrictLevel = (
       level = Math.log10(sizeDeg);
     case "spacing":
       [spacingDeg, stimulusParameters] = restrictSpacingDeg(
+        proposedLevel,
         displayOptions.targetEccentricityXYDeg,
         displayOptions.targetKind,
         screenRectPx,
@@ -955,6 +889,8 @@ export const restrictLevel = (
         targetSizeIsHeightBool,
         characterSetRectPx,
         spacingOverSizeRatio,
+        spacingSymmetry,
+        thresholdParameter,
         displayOptions
       );
       level = Math.log10(spacingDeg);
@@ -1044,6 +980,7 @@ export const restrictSizeDeg = (
  * @returns {[Number, Object]} [spacingDeg, stimulusParameters]
  */
 export const restrictSpacingDeg = (
+  proposedLevel,
   targetXYDeg,
   targetKind,
   screenRectPx,
@@ -1051,6 +988,8 @@ export const restrictSpacingDeg = (
   targetSizeIsHeightBool,
   characterSetRectPx,
   spacingOverSizeRatio,
+  spacingSymmetry,
+  thresholdParameter,
   displayOptions
 ) => {
   /* 
@@ -1069,6 +1008,22 @@ export const restrictSpacingDeg = (
   // If (targetXPx,targetYPx) is not inside screenRect, issue error and quit.
   // level=log10(spacingDeg).
   */
+  let spacingDeg = Math.pow(10, proposedLevel);
+  let stimulusRectPx,
+    flanker1XYDeg,
+    flanker1XYPx,
+    flanker2XYPx,
+    flanker2XYDeg,
+    spacingInnerDeg,
+    maxSpacingDeg,
+    spacingOuterDeg,
+    sizeDeg,
+    heightDeg,
+    widthDeg,
+    heightPx,
+    widthPx,
+    topPx,
+    bottomPx;
   switch (targetKind) {
     case "letter":
       break;
@@ -1083,15 +1038,6 @@ export const restrictSpacingDeg = (
     throw "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'";
   const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
   const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
-  let sizeDeg, heightDeg, widthDeg, heightPx, widthPx, topPx, bottomPx;
-  let stimulusRectPx,
-    flanker1XYDeg,
-    flanker1XYPx,
-    flanker2XYPx,
-    flanker2XYDeg,
-    spacingInnerDeg,
-    maxSpacingDeg,
-    spacingOuterDeg;
 
   // We will impose the target's height heightPx on all three letters in the triplet.
   // We scale the characterSet bounding box to have the specified heightPx.
@@ -1155,14 +1101,14 @@ export const restrictSpacingDeg = (
         widthDeg = 3 * spacingDeg;
         heightDeg =
           (widthDeg * characterSetRectPx.height) / characterSetRectPx.width;
-        const [leftPx] = XYPixOfXYDeg([
-          targetXYDeg[0] - widthDeg / 2,
-          targetXYDeg[1],
-        ]);
-        const [rightPx] = XYPixOfXYDeg([
-          targetXYDeg[0] + widthDeg / 2,
-          targetXYDeg[1],
-        ]);
+        const [leftPx] = XYPixOfXYDeg(
+          [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
+          displayOptions
+        );
+        const [rightPx] = XYPixOfXYDeg(
+          [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
+          displayOptions
+        );
         widthPx = rightPx - leftPx;
         heightPx =
           (widthPx * characterSetRectPx.height) / characterSetRectPx.width;
@@ -1185,7 +1131,7 @@ export const restrictSpacingDeg = (
         break;
       case "none": // 'none' and 'ratio' should behave the same; intentional fall-through
       case "ratio":
-        switch (spacingDirection) {
+        switch (displayOptions.spacingDirection) {
           case "radial":
             if (targetIsFoveal) throw "Radial flankers are undefined at fovea.";
             spacingOuterDeg = spacingDeg;
@@ -1251,7 +1197,7 @@ export const restrictSpacingDeg = (
         flanker2XYDeg = [targetXYDeg[0] + v2XY[0], targetXYDeg[1] + v2XY[1]];
         flanker1XYPx = XYPixOfXYDeg(flanker1XYDeg, displayOptions);
         flanker2XYPx = XYPixOfXYDeg(flanker2XYDeg, displayOptions);
-        let stimulusRectPx = new Rectangle(
+        stimulusRectPx = new Rectangle(
           [
             Math.min(flanker1XYPx[0], flanker2XYPx[0]),
             Math.min(flanker1XYPx[1], flanker2XYPx[1]),
@@ -1271,6 +1217,8 @@ export const restrictSpacingDeg = (
       thresholdParameter,
       spacingRelationToSize
     );
+    logger("largestBoundsRatio", largestBoundsRatio);
+    logger("spacingDeg", spacingDeg);
     maxSpacingDeg = spacingDeg / largestBoundsRatio;
 
     // WE'RE DONE IF STIMULUS FITS
@@ -1350,7 +1298,8 @@ const getLargestBoundsRatio = (
     stim.top / screen.top,
     stim.bottom / screen.bottom,
   ];
-  const largetBoundsRatio = Math.max(...ratios);
-  if (largetBoundsRatio <= 0) throw "Largest ratio is non-positive.";
-  return largetBoundsRatio;
+  logger("ratios (L,R,T,B)", ratios);
+  const largestBoundsRatio = Math.max(...ratios);
+  if (largestBoundsRatio <= 0) throw "Largest ratio is non-positive.";
+  return largestBoundsRatio;
 };
