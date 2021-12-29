@@ -54,6 +54,8 @@ import {
 
 import {
   formCalibrationList,
+  ifAnyCheck,
+  saveCheckData,
   useCalibration,
 } from "./components/useCalibration.js";
 
@@ -1178,6 +1180,9 @@ const experiment = (blockCount) => {
         "initInstructionRoutineDurationFromPreviousEndSec",
         routineClock.getTime()
       );
+
+      /* ----------------------------------- RC ----------------------------------- */
+      if (ifAnyCheck(paramReader)) saveCheckData(rc, psychoJS);
 
       initInstructionClock.reset();
       routineTimer.reset();
