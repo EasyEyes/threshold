@@ -59,7 +59,6 @@ export const checkIfSimulated = (reader) => {
     return;
   const simulated = {};
   for (const [index, condition] of reader.conditions.entries()) {
-    // TEMP are condition block_conditions auto-assigned earlier?
     if (!condition.block_condition)
       throw "No conditionName (block_condition) provided for this condition.";
     const block_condition = condition.block_condition;
