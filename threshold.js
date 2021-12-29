@@ -129,8 +129,10 @@ import {
   readingTaskFields,
 } from "./components/readingUtils.js";
 import {
+  hideTrialBreakProgressbar,
   hideTrialBreakWidget,
   hideTrialProceedButton,
+  showTrialBreakProgressbar,
   showTrialBreakWidget,
   showTrialProceedButton,
 } from "./components/trialBreak.js";
@@ -888,13 +890,15 @@ const experiment = (blockCount) => {
         thisConditionsFile
       );
 
-      // trialsConditions = trialsConditions.map((condition) =>
-      //   Object.assign(condition, { label: condition["block_condition"] })
-      // );
+      trialsConditions = trialsConditions.map((condition) =>
+        Object.assign(condition, { label: condition["block_condition"] })
+      );
       trialsConditions = populateQuestDefaults(trialsConditions, paramReader);
 
       const nTrialsTotal = trialsConditions
-        .map((c) => Number(paramReader.read("conditionTrials", c.label)))
+        .map((c) =>
+          Number(paramReader.read("conditionTrials", c.block_condition))
+        )
         .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
 
       trials = new data.MultiStairHandler({
@@ -924,6 +928,7 @@ const experiment = (blockCount) => {
       );
       totalTrial.setText(trialInfoStr);
       totalTrial.setAutoDraw(true);
+      showTrialBreakProgressbar(currentTrialCredit);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop
@@ -1366,6 +1371,7 @@ const experiment = (blockCount) => {
   var targetEccentricityXDeg;
   var targetEccentricityYDeg;
   var targetEccentricityXYDeg;
+  var targetSafetyMarginSec;
   // var trackGazeYes;
   // var trackHeadYes;
   var wirelessKeyboardNeededYes;
@@ -1392,7 +1398,7 @@ const experiment = (blockCount) => {
 
       const parametersToExcludeFromData = [];
       for (let c of snapshot.handler.getConditions()) {
-        if (c.label === trials._currentStaircase._name) {
+        if (c.block_condition === trials._currentStaircase._name) {
           condition = c;
           addConditionToData(
             psychoJS.experiment,
@@ -1401,7 +1407,7 @@ const experiment = (blockCount) => {
           );
         }
       }
-      const cName = condition["label"];
+      const cName = condition["block_condition"];
 
       // ! responseType
       responseType = getResponseType(
@@ -1460,7 +1466,7 @@ const experiment = (blockCount) => {
         Math.log(largestAllowedAngle) / Math.log(10);
       proposedLevel = Math.min(proposedLevel, largestTrigonometricLevel);
 
-      psychoJS.experiment.addData("label", cName);
+      psychoJS.experiment.addData("block_condition", cName);
       psychoJS.experiment.addData(
         "flankerOrientation",
         reader.read("spacingDirection", cName)
@@ -1513,10 +1519,11 @@ const experiment = (blockCount) => {
       fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
       showFixation = reader.read("markTheFixationBool", cName);
 
-      targetMinimumPix = reader.read("targetMinimumPix", cName);
       spacingOverSizeRatio = reader.read("spacingOverSizeRatio", cName);
       spacingRelationToSize = reader.read("spacingRelationToSize", cName);
+      showBoundingBox = reader.read("showBoundingBoxBool", cName) || false;
 
+      targetMinimumPix = reader.read("targetMinimumPix", cName);
       targetEccentricityXDeg = reader.read("targetEccentricityXDeg", cName);
       psychoJS.experiment.addData(
         "targetEccentricityXDeg",
@@ -1531,7 +1538,7 @@ const experiment = (blockCount) => {
         targetEccentricityXDeg,
         targetEccentricityYDeg,
       ];
-      showBoundingBox = reader.read("showBoundingBoxBool", cName) || false;
+      targetSafetyMarginSec = paramReader.read("targetSafetyMarginSec", cName);
 
       // trackGazeYes = reader.read("trackGazeYes", cName);
       // trackHeadYes = reader.read("trackHeadYes", cName);
@@ -1813,19 +1820,22 @@ const experiment = (blockCount) => {
       // /* --- /BOUNDING BOX --- */
       // /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
-        if (!simulatedObserver[condition.label]) {
-          simulatedObserver[condition.label] = new SimulatedObserver(
-            simulated[block][condition.label],
+        if (!simulatedObserver[condition.block_condition]) {
+          simulatedObserver[condition.block_condition] = new SimulatedObserver(
+            simulated[block][condition.block_condition],
             level,
             characterSet,
             targetCharacter,
-            paramReader.read("thresholdProportionCorrect", condition.label),
-            paramReader.read("simulationBeta", condition.label),
-            paramReader.read("simulationDelta", condition.label),
-            paramReader.read("simulationThreshold", condition.label)
+            paramReader.read(
+              "thresholdProportionCorrect",
+              condition.block_condition
+            ),
+            paramReader.read("simulationBeta", condition.block_condition),
+            paramReader.read("simulationDelta", condition.block_condition),
+            paramReader.read("simulationThreshold", condition.block_condition)
           );
         } else {
-          simulatedObserver[condition.label].updateTrial(
+          simulatedObserver[condition.block_condition].updateTrial(
             level,
             characterSet,
             targetCharacter
@@ -2040,7 +2050,7 @@ const experiment = (blockCount) => {
       }
       // update/draw components on each frame
 
-      const uniDelay = 0; // 0.5 by default?
+      const uniDelay = 0;
 
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
@@ -2050,7 +2060,7 @@ const experiment = (blockCount) => {
         showGrid ||
         (simulated &&
           simulated[thisLoopNumber] &&
-          simulated[thisLoopNumber][condition.label])
+          simulated[thisLoopNumber][condition.block_condition])
       ) {
         if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
           // keep track of start time/frame for later
@@ -2077,10 +2087,10 @@ const experiment = (blockCount) => {
           if (
             simulated &&
             simulated[thisLoopNumber] &&
-            simulated[thisLoopNumber][condition.label]
+            simulated[thisLoopNumber][condition.block_condition]
           ) {
             return simulateObserverResponse(
-              simulatedObserver[condition.label],
+              simulatedObserver[condition.block_condition],
               key_resp,
               psychoJS
             );
@@ -2306,9 +2316,10 @@ const experiment = (blockCount) => {
       }
 
       /* -------------------------------------------------------------------------- */
+      // SHOW CharacterSet AND INSTRUCTIONS
       // *showCharacterSet* updates
       if (
-        t >= uniDelay + targetDurationSec &&
+        t >= uniDelay + targetSafetyMarginSec + targetDurationSec &&
         showCharacterSet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
@@ -2429,6 +2440,7 @@ const experiment = (blockCount) => {
         routineClock.reset();
 
         currentTrialCredit += takeABreakTrialCredit;
+        showTrialBreakProgressbar(currentTrialCredit);
         logger("currentTrialCredit", currentTrialCredit);
         // check if trialBreak should be triggered
         if (currentTrialCredit >= 1) {
@@ -2587,8 +2599,8 @@ const experiment = (blockCount) => {
     // check if esc handling enabled for this condition, if not, quit
     if (
       !(
-        condition.responseEscapeOptionsBool &&
-        condition.responseEscapeOptionsBool.toLowerCase() === "true"
+        condition.keyEscapeEnable &&
+        condition.keyEscapeEnable.toLowerCase() === "true"
       )
     ) {
       return {
@@ -2597,7 +2609,7 @@ const experiment = (blockCount) => {
         quitSurvey: true,
       };
     }
-    if (isProlificExperiment()) {
+    if (isProlificPreviewExperiment()) {
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
     }
@@ -2658,12 +2670,13 @@ const experiment = (blockCount) => {
   }
 };
 
-const isProlificExperiment = () => {
+const isProlificPreviewExperiment = () => {
   let searchParams = window.location.search;
   return (
     searchParams.search("participant") != -1 &&
     searchParams.search("session") != -1 &&
-    searchParams.search("study_id") != -1
+    searchParams.search("study_id") != -1 &&
+    searchParams.search("preview") != -1
   );
 };
 

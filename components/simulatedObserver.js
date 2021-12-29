@@ -59,19 +59,24 @@ export const checkIfSimulated = (reader) => {
     return;
   const simulated = {};
   for (const [index, condition] of reader.conditions.entries()) {
-    // TEMP are condition labels auto-assigned earlier?
-    if (!condition.label)
-      throw "No conditionName (label) provided for this condition.";
-    const label = condition.label;
-    const block = reader.read("block", label);
+    if (!condition.block_condition)
+      throw "No conditionName (block_condition) provided for this condition.";
+    const block_condition = condition.block_condition;
+    const block = reader.read("block", block_condition);
 
-    if (reader.read("simulateParticipantBool", label)) {
+    if (reader.read("simulateParticipantBool", block_condition)) {
       // eslint-disable-next-line no-prototype-builtins
       if (!simulated.hasOwnProperty(block)) {
         simulated[block] = {};
-        simulated[block][label] = reader.read("simulationModel", label);
+        simulated[block][block_condition] = reader.read(
+          "simulationModel",
+          block_condition
+        );
       } else {
-        simulated[block][label] = reader.read("simulationModel", label);
+        simulated[block][block_condition] = reader.read(
+          "simulationModel",
+          block_condition
+        );
       }
     }
   }

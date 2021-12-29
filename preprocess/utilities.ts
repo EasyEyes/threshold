@@ -186,7 +186,7 @@ export const addUniqueLabelsToDf = (df: any): any => {
   }
   const blocks = df.select("block").toArray();
   const blockCounts: any = {};
-  const labels: string[] = [];
+  const block_conditions: string[] = [];
   blocks.forEach((nestedBlock: number[]) => {
     const block = nestedBlock[0];
     if (blockCounts.hasOwnProperty(block)) {
@@ -194,9 +194,12 @@ export const addUniqueLabelsToDf = (df: any): any => {
     } else {
       blockCounts[block] = 1;
     }
-    labels.push(String(block) + "_" + String(blockCounts[block]));
+    block_conditions.push(String(block) + "_" + String(blockCounts[block]));
   });
-  df = df.withColumn("label", (row: any, index: number) => labels[index]);
+  df = df.withColumn(
+    "block_condition",
+    (row: any, index: number) => block_conditions[index]
+  );
   return df;
 };
 
