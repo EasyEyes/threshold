@@ -59,9 +59,9 @@ export const checkIfSimulated = (reader) => {
     return;
   const simulated = {};
   for (const [index, condition] of reader.conditions.entries()) {
-    if (!condition["block_condition"])
-      throw "No block_condition provided for this condition.";
-    const block_condition = condition["block_condition"];
+    if (!condition.block_condition)
+      throw "No block_condition (unique id for this staircase) provided for this condition.";
+    const block_condition = condition.block_condition;
     const block = reader.read("block", block_condition);
 
     if (reader.read("simulateParticipantBool", block_condition)) {

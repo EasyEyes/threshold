@@ -57,7 +57,7 @@ export const prepareForReading = (reader) => {
 
   if (modes.includes("reading")) {
     for (let condition of reader.conditions) {
-      const block_condition = condition["block_condition"];
+      const block_condition = condition.block_condition;
       const mode = reader.read(expModeParam, block_condition);
       if (mode === "reading") {
         // Load reading data

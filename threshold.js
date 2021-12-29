@@ -894,7 +894,7 @@ const experiment = (blockCount) => {
 
       const nTrialsTotal = trialsConditions
         .map((c) =>
-          Number(paramReader.read("conditionTrials", c["block_condition"]))
+          Number(paramReader.read("conditionTrials", c.block_condition))
         )
         .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
 
@@ -1371,6 +1371,7 @@ const experiment = (blockCount) => {
   var targetEccentricityXDeg;
   var targetEccentricityYDeg;
   var targetEccentricityXYDeg;
+  var targetSafetyMarginSec;
   // var trackGazeYes;
   // var trackHeadYes;
   var wirelessKeyboardNeededYes;
@@ -1397,7 +1398,7 @@ const experiment = (blockCount) => {
 
       const parametersToExcludeFromData = [];
       for (let c of snapshot.handler.getConditions()) {
-        if (c["block_condition"] === trials._currentStaircase._name) {
+        if (c.block_condition === trials._currentStaircase._name) {
           condition = c;
           addConditionToData(
             psychoJS.experiment,
@@ -1520,7 +1521,9 @@ const experiment = (blockCount) => {
       targetMinimumPix = reader.read("targetMinimumPix", cName);
       spacingOverSizeRatio = reader.read("spacingOverSizeRatio", cName);
       spacingRelationToSize = reader.read("spacingRelationToSize", cName);
+      showBoundingBox = reader.read("showBoundingBoxBool", cName) || false;
 
+      targetMinimumPix = reader.read("targetMinimumPix", cName);
       targetEccentricityXDeg = reader.read("targetEccentricityXDeg", cName);
       psychoJS.experiment.addData(
         "targetEccentricityXDeg",
@@ -1535,7 +1538,7 @@ const experiment = (blockCount) => {
         targetEccentricityXDeg,
         targetEccentricityYDeg,
       ];
-      showBoundingBox = reader.read("showBoundingBoxBool", cName) || false;
+      targetSafetyMarginSec = paramReader.read("targetSafetyMarginSec", cName);
 
       // trackGazeYes = reader.read("trackGazeYes", cName);
       // trackHeadYes = reader.read("trackHeadYes", cName);
@@ -2012,7 +2015,7 @@ const experiment = (blockCount) => {
       }
       // update/draw components on each frame
 
-      const uniDelay = 0; // 0.5 by default?
+      const uniDelay = 0;
 
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
@@ -2022,7 +2025,7 @@ const experiment = (blockCount) => {
         showGrid ||
         (simulated &&
           simulated[thisLoopNumber] &&
-          simulated[thisLoopNumber][condition["block_condition"]])
+          simulated[thisLoopNumber][condition.block_condition])
       ) {
         if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
           // keep track of start time/frame for later
@@ -2049,10 +2052,10 @@ const experiment = (blockCount) => {
           if (
             simulated &&
             simulated[thisLoopNumber] &&
-            simulated[thisLoopNumber][condition["block_condition"]]
+            simulated[thisLoopNumber][condition.block_condition]
           ) {
             return simulateObserverResponse(
-              simulatedObserver[condition["block_condition"]],
+              simulatedObserver[condition.block_condition],
               key_resp,
               psychoJS
             );
@@ -2277,9 +2280,10 @@ const experiment = (blockCount) => {
       }
 
       /* -------------------------------------------------------------------------- */
+      // SHOW CharacterSet AND INSTRUCTIONS
       // *showCharacterSet* updates
       if (
-        t >= uniDelay + targetDurationSec &&
+        t >= uniDelay + targetSafetyMarginSec + targetDurationSec &&
         showCharacterSet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
