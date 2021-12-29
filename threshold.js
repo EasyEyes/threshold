@@ -1728,7 +1728,7 @@ const experiment = (blockCount) => {
         // if (spacingRelationToSize === "ratio")
         targetSpecsString += `\nspacing: ${spacing} deg`;
         targetSpecs.setText(targetSpecsString);
-        targetSpecs.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+        targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
         targetSpecs.setAutoDraw(true);
       }
 
@@ -1758,7 +1758,7 @@ const experiment = (blockCount) => {
 
       trialComponents.push(showCharacterSet);
       trialComponents.push(totalTrial);
-      if (showTargetSpecs) trialComponents.push(targetSpecs);
+      // if (showTargetSpecs) trialComponents.push(targetSpecs);
       // /* --- BOUNDING BOX --- */
       if (showBoundingBox) {
         trialComponents.push(targetBoundingPoly);
@@ -1829,6 +1829,17 @@ const experiment = (blockCount) => {
       /* --- /SIMULATED --- */
       t = instructionsClock.getTime();
       frameN = frameN + 1;
+
+      if (showTargetSpecs) {
+        targetSpecsConfig.x = -window.innerWidth / 2;
+        targetSpecsConfig.y = -window.innerHeight / 2;
+        if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
+          // keep track of start time/frame for later
+          targetSpecs.tStart = t; // (not accounting for frame time here)
+          targetSpecs.frameNStart = frameN; // exact frame index
+        }
+        targetSpecs.setAutoDraw(true);
+      }
 
       if (
         psychoJS.experiment.experimentEnded ||
@@ -2105,11 +2116,6 @@ const experiment = (blockCount) => {
         targetSpecsConfig.y = -window.innerHeight / 2;
         // *targetSpecs* updates
         if (t >= 0.0) {
-          if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
-            // keep track of start time/frame for later
-            targetSpecs.tStart = t; // (not accounting for frame time here)
-            targetSpecs.frameNStart = frameN; // exact frame index
-          }
           targetSpecs.setPos([targetSpecsConfig.x, targetSpecsConfig.y]);
           targetSpecs.setAutoDraw(true);
         }
