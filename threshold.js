@@ -123,8 +123,10 @@ import {
   readingTaskFields,
 } from "./components/readingUtils.js";
 import {
+  hideTrialBreakProgressbar,
   hideTrialBreakWidget,
   hideTrialProceedButton,
+  showTrialBreakProgressbar,
   showTrialBreakWidget,
   showTrialProceedButton,
 } from "./components/trialBreak.js";
@@ -923,6 +925,7 @@ const experiment = (blockCount) => {
       );
       totalTrial.setText(trialInfoStr);
       totalTrial.setAutoDraw(true);
+      showTrialBreakProgressbar(currentTrialCredit);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop
@@ -1966,7 +1969,7 @@ const experiment = (blockCount) => {
           skipTrialOrBlock.skipBlock)
       ) {
         showCursor();
-        removeClickableAlphabet();
+        removeClickableCharacterSet();
         return Scheduler.Event.NEXT;
       }
 
@@ -2391,6 +2394,7 @@ const experiment = (blockCount) => {
         routineClock.reset();
 
         currentTrialCredit += takeABreakTrialCredit;
+        showTrialBreakProgressbar(currentTrialCredit);
         logger("currentTrialCredit", currentTrialCredit);
         // check if trialBreak should be triggered
         if (currentTrialCredit >= 1) {
@@ -2549,8 +2553,8 @@ const experiment = (blockCount) => {
     // check if esc handling enabled for this condition, if not, quit
     if (
       !(
-        condition.responseEscapeOptionsBool &&
-        condition.responseEscapeOptionsBool.toLowerCase() === "true"
+        condition.keyEscapeEnable &&
+        condition.keyEscapeEnable.toLowerCase() === "true"
       )
     ) {
       return {
@@ -2559,7 +2563,7 @@ const experiment = (blockCount) => {
         quitSurvey: true,
       };
     }
-    if (isProlificExperiment()) {
+    if (isProlificPreviewExperiment()) {
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
     }
@@ -2620,12 +2624,13 @@ const experiment = (blockCount) => {
   }
 };
 
-const isProlificExperiment = () => {
+const isProlificPreviewExperiment = () => {
   let searchParams = window.location.search;
   return (
     searchParams.search("participant") != -1 &&
     searchParams.search("session") != -1 &&
-    searchParams.search("study_id") != -1
+    searchParams.search("study_id") != -1 &&
+    searchParams.search("preview") != -1
   );
 };
 

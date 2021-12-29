@@ -36,7 +36,17 @@ const preprocessExperimentFileLocal = async (
   const data = readFileSync(file);
 
   const completeCallback = (parsed: Papa.ParseResult<any>) => {
-    prepareExperimentFileForThreshold(parsed, {}, [], callback, "node");
+    prepareExperimentFileForThreshold(
+      parsed,
+      {},
+      [],
+      {
+        fonts: [],
+        forms: [],
+      },
+      callback,
+      "node"
+    );
   };
 
   const book = XLSX.read(data);
@@ -63,7 +73,15 @@ const main = async () => {
     await preprocessExperimentFileLocal(
       "tables/" + d,
       readFileSync,
-      (fileStringList: string[][], errorList: any[]) => {
+      (
+        forms: any,
+        fonts: string[],
+        fileStringList: string[][],
+        errorList: any[]
+      ) => {
+        console.log("Requested FORMS", forms);
+        console.log("Requested FONTS", fonts);
+
         if (errorList.length) {
           errorList.forEach((err) => console.log(err));
           throw "Found errors!";
