@@ -54,6 +54,8 @@ import {
 
 import {
   formCalibrationList,
+  ifAnyCheck,
+  saveCheckData,
   useCalibration,
 } from "./components/useCalibration.js";
 
@@ -290,6 +292,10 @@ const experiment = (blockCount) => {
   const psychoJS = new PsychoJS({
     debug: false,
   });
+
+  /* ----------------------------------- RC ----------------------------------- */
+  // If any check, save check data
+  if (ifAnyCheck(paramReader)) saveCheckData(rc, psychoJS.experiment.addData);
 
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);

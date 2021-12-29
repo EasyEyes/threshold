@@ -3,8 +3,6 @@ import { debug } from "./utils";
 export const useCalibration = (reader) => {
   return ifTrue([
     ...reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__"),
-    ...reader.read("calibrateDistanceCheckBool", "__ALL_BLOCKS__"),
-    ...reader.read("calibrateGazeCheckBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__"),
@@ -17,6 +15,16 @@ function ifTrue(arr) {
   return false;
 }
 
+/* -------------------------------------------------------------------------- */
+
+export const ifAnyCheck = (reader) => {
+  return ifTrue([
+    ...reader.read("calibrateScreenSizeCheckBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateDistanceCheckBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateGazeCheckBool", "__ALL_BLOCKS__"),
+  ]);
+};
+
 export const formCalibrationList = (reader) => {
   const tasks = [];
 
@@ -26,7 +34,7 @@ export const formCalibrationList = (reader) => {
       name: "screenSize",
       options: {
         fullscreen: !debug,
-        check: false,
+        check: reader.read("calibrateScreenSizeCheckBool")[0],
       },
     });
   if (ifTrue(reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__")))
@@ -68,4 +76,17 @@ export const formCalibrationList = (reader) => {
     });
 
   return tasks;
+};
+
+export const saveCheckData = (rc, addData) => {
+  // rc.checkData is a list of objects { timestamp: "", value: { field1: value1, filed2: value2 } }
+  for (let data of rc.checkData) {
+    addData(
+      "calibrationCheckTimestamp",
+      data.timestamp.getTime ? data.timestamp.getTime() : data.timestamp
+    );
+    for (let name in data.value) {
+      addData("calibrationCheck_" + name, data.value[name]);
+    }
+  }
 };
