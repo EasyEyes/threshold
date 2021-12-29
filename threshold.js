@@ -293,10 +293,6 @@ const experiment = (blockCount) => {
     debug: false,
   });
 
-  /* ----------------------------------- RC ----------------------------------- */
-  // If any check, save check data
-  if (ifAnyCheck(paramReader)) saveCheckData(rc, psychoJS.experiment.addData);
-
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
   const wrongSynth = getWrongSynth(psychoJS);
@@ -1179,6 +1175,9 @@ const experiment = (blockCount) => {
         "initInstructionRoutineDurationFromPreviousEndSec",
         routineClock.getTime()
       );
+
+      /* ----------------------------------- RC ----------------------------------- */
+      if (ifAnyCheck(paramReader)) saveCheckData(rc, psychoJS);
 
       initInstructionClock.reset();
       routineTimer.reset();

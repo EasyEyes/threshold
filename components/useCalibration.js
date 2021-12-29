@@ -43,6 +43,7 @@ export const formCalibrationList = (reader) => {
       options: {
         fullscreen: !debug,
         sparkle: true,
+        check: reader.read("calibrateDistanceCheckBool")[0],
       },
     });
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
@@ -78,15 +79,15 @@ export const formCalibrationList = (reader) => {
   return tasks;
 };
 
-export const saveCheckData = (rc, addData) => {
+export const saveCheckData = (rc, psychoJS) => {
   // rc.checkData is a list of objects { timestamp: "", value: { field1: value1, filed2: value2 } }
   for (let data of rc.checkData) {
-    addData(
+    psychoJS.experiment.addData(
       "calibrationCheckTimestamp",
       data.timestamp.getTime ? data.timestamp.getTime() : data.timestamp
     );
     for (let name in data.value) {
-      addData("calibrationCheck_" + name, data.value[name]);
+      psychoJS.experiment.addData("calibrationCheck_" + name, data.value[name]);
     }
   }
 };
