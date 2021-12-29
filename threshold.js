@@ -2582,8 +2582,8 @@ const experiment = (blockCount) => {
     // check if esc handling enabled for this condition, if not, quit
     if (
       !(
-        condition.responseEscapeOptionsBool &&
-        condition.responseEscapeOptionsBool.toLowerCase() === "true"
+        condition.keyEscapeEnable &&
+        condition.keyEscapeEnable.toLowerCase() === "true"
       )
     ) {
       return {
