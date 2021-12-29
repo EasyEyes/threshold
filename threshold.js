@@ -924,6 +924,7 @@ const experiment = (blockCount) => {
       );
       totalTrial.setText(trialInfoStr);
       totalTrial.setAutoDraw(true);
+      showTrialBreakProgressbar(currentTrialCredit);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop

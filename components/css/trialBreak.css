@@ -60,8 +60,8 @@
 
 #trialBreakProgressbarWrapper {
   position: absolute;
-  bottom: 5px;
-  right: 5px;
+  bottom: 2px;
+  right: 18%;
   width: 6vw;
   height: 3vh;
   border: 1px solid black;
