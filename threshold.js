@@ -127,8 +127,10 @@ import {
   readingTaskFields,
 } from "./components/readingUtils.js";
 import {
+  hideTrialBreakProgressbar,
   hideTrialBreakWidget,
   hideTrialProceedButton,
+  showTrialBreakProgressbar,
   showTrialBreakWidget,
   showTrialProceedButton,
 } from "./components/trialBreak.js";
@@ -2409,6 +2411,7 @@ const experiment = (blockCount) => {
         routineClock.reset();
 
         currentTrialCredit += takeABreakTrialCredit;
+        showTrialBreakProgressbar(currentTrialCredit);
         logger("currentTrialCredit", currentTrialCredit);
         // check if trialBreak should be triggered
         if (currentTrialCredit >= 1) {

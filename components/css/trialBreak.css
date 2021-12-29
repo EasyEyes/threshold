@@ -57,3 +57,23 @@
   cursor: pointer;
   background-color: rgb(66, 66, 66);
 }
+
+#trialBreakProgressbarWrapper {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 6vw;
+  height: 3vh;
+  border: 1px solid black;
+  background-color: white;
+  z-index: 999999;
+}
+#trialBreakProgressbar {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: green;
+  z-index: 999999;
+}
