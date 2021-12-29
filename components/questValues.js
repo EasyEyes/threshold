@@ -9,7 +9,9 @@ export const populateQuestDefaults = (conditionsList, reader) => {
       startValSd: reader.read("thresholdGuessLogSd", condition.block_condition),
       beta: reader.read("thresholdBeta", condition.block_condition) || 2.3,
       delta: reader.read("thresholdDelta", condition.block_condition) || 0.01,
-      gamma: getGamma(reader.read("targetAlphabet", condition.block_condition)),
+      gamma: getGamma(
+        reader.read("targetCharacterSet", condition.block_condition)
+      ),
       pThreshold: reader.read(
         "thresholdProportionCorrect",
         condition.block_condition
