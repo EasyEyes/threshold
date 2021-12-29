@@ -2592,7 +2592,7 @@ const experiment = (blockCount) => {
         quitSurvey: true,
       };
     }
-    if (isProlificExperiment()) {
+    if (isProlificPreviewExperiment()) {
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
     }
@@ -2653,12 +2653,13 @@ const experiment = (blockCount) => {
   }
 };
 
-const isProlificExperiment = () => {
+const isProlificPreviewExperiment = () => {
   let searchParams = window.location.search;
   return (
     searchParams.search("participant") != -1 &&
     searchParams.search("session") != -1 &&
-    searchParams.search("study_id") != -1
+    searchParams.search("study_id") != -1 &&
+    searchParams.search("preview") != -1
   );
 };
 
