@@ -2311,11 +2311,11 @@ const experiment = (blockCount) => {
       }
 
       /* -------------------------------------------------------------------------- */
-      // SHOW ALPHABET AND INSTRUCTIONS
-      // *showAlphabet* updates
+      // SHOW CharacterSet AND INSTRUCTIONS
+      // *showCharacterSet* updates
       if (
         t >= uniDelay + targetSafetyMarginSec + targetDurationSec &&
-        showAlphabet.status === PsychoJS.Status.NOT_STARTED
+        showCharacterSet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
         showCharacterSet.tStart = t; // (not accounting for frame time here)
