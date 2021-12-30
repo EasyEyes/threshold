@@ -2568,8 +2568,8 @@ const experiment = (blockCount) => {
     // check if esc handling enabled for this condition, if not, quit
     if (
       !(
-        condition.keyEscapeEnable &&
-        condition.keyEscapeEnable.toLowerCase() === "true"
+        condition.responseEscapeOptionsBool &&
+        condition.responseEscapeOptionsBool.toLowerCase() === "true"
       )
     ) {
       return {
@@ -2578,7 +2578,7 @@ const experiment = (blockCount) => {
         quitSurvey: true,
       };
     }
-    if (isProlificPreviewExperiment()) {
+    if (!isProlificPreviewExperiment()) {
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
     }
