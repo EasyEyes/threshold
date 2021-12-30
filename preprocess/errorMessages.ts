@@ -171,7 +171,7 @@ export const UNRECOGNIZED_PARAMETER = (report: any): EasyEyesError => {
   return {
     name: `Parameter is unrecognized`,
     message: `Sorry, we couldn't recognize the parameter <span class="error-parameter">${report.name}</span>. The closest supported parameter is <span class="error-parameter">${report.closest[0]}</span> &#8212 is that what you meant?`,
-    hint: `Make sure that you are only including parameter which are supported, and remember that all parameters are case-sensitive. Double check the spelling of <span class="error-parameter">${report.name}</span> if you think it ought to be supported. The other closest supported parameters found were <span class="error-parameter">${report.closest[1]}</span> and <span class="error-parameter">${report.closest[2]}</span>.`,
+    hint: `The other closest supported parameters found were <span class="error-parameter">${report.closest[1]}</span> and <span class="error-parameter">${report.closest[2]}</span>. All parameters are case-sensitive.`,
     context: "preprocessor",
     kind: "error",
     parameters: [report.name],
