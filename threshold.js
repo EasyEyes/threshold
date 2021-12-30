@@ -4,7 +4,7 @@
  * Crowding Test *
  *****************/
 
-import { debug, sleep } from "./components/utils.js";
+import { debug, getTripletCharacters, sleep } from "./components/utils.js";
 
 const useRC = true;
 
@@ -43,9 +43,8 @@ import {
   loggerText,
   hideCursor,
   showCursor,
-  shuffle,
   XYPixOfXYDeg,
-  degreesToPixels,
+  XYDegOfXYPix,
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
@@ -94,11 +93,8 @@ import {
 import { getTrialInfoStr } from "./components/trialCounter.js";
 
 import {
-  getTypographicHeight,
-  getMaxPresentableLevel,
-  getFlankerLocations,
-  getLowerBoundedLevel,
-  getTestabilityBoundedLevel,
+  getCharacterSetBoundingBox,
+  restrictLevel,
 } from "./components/bounding.js";
 
 import {
@@ -237,6 +233,10 @@ var totalBlockCount = 0;
 
 var consentFormName = "";
 var debriefFormName = "";
+
+// Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
+// In typographic condition, the bounds are around a triplet
+var characterSetBoundingRects = {};
 
 const beforeExperimentBegins = async (reader) => {
   // get consent form
@@ -889,7 +889,6 @@ const experiment = (blockCount) => {
         psychoJS.serverManager,
         thisConditionsFile
       );
-
       trialsConditions = trialsConditions.map((condition) =>
         Object.assign(condition, { label: condition["block_condition"] })
       );
@@ -1364,8 +1363,14 @@ const experiment = (blockCount) => {
     clickTime: 0,
   };
   var showBoundingBox;
+  var stimulusParameters;
+  var targetKind;
   var targetDurationSec;
   var targetMinimumPix;
+  var targetSizeDeg;
+  var targetSizeIsHeightBool;
+  var thresholdParameter;
+  var spacingSymmetry;
   var spacingOverSizeRatio;
   var spacingRelationToSize;
   var targetEccentricityXDeg;
@@ -1460,12 +1465,6 @@ const experiment = (blockCount) => {
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
       psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-      let largestAllowedAngle = 89.5; // NOTE must be <90
-      largestAllowedAngle = Math.min(largestAllowedAngle, 90);
-      const largestTrigonometricLevel =
-        Math.log(largestAllowedAngle) / Math.log(10);
-      proposedLevel = Math.min(proposedLevel, largestTrigonometricLevel);
-
       psychoJS.experiment.addData("block_condition", cName);
       psychoJS.experiment.addData(
         "flankerOrientation",
@@ -1497,6 +1496,7 @@ const experiment = (blockCount) => {
       // TODO check that we are actually trying to test for "spacing", not "size"
 
       spacingDirection = reader.read("spacingDirection", cName);
+      spacingSymmetry = reader.read("spacingSymmetry", cName);
       let targetFontSource = reader.read("targetFontSource", cName);
       targetFont = reader.read("targetFont", cName);
       if (targetFontSource === "file") targetFont = cleanFontName(targetFont);
@@ -1519,6 +1519,11 @@ const experiment = (blockCount) => {
       fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
       showFixation = reader.read("markTheFixationBool", cName);
 
+      targetKind = reader.read("targetKind", cName);
+      targetSizeDeg = reader.read("targetSizeDeg", cName);
+      targetSizeIsHeightBool = reader.read("targetSizeIsHeightBool", cName);
+      thresholdParameter = reader.read("thresholdParameter", cName);
+      targetMinimumPix = reader.read("targetMinimumPix", cName);
       spacingOverSizeRatio = reader.read("spacingOverSizeRatio", cName);
       spacingRelationToSize = reader.read("spacingRelationToSize", cName);
       showBoundingBox = reader.read("showBoundingBoxBool", cName) || false;
@@ -1547,23 +1552,22 @@ const experiment = (blockCount) => {
         cName
       );
 
-      proposedLevel = getTestabilityBoundedLevel(
-        proposedLevel,
-        pixPerCm,
-        viewingDistanceCm,
-        spacingOverSizeRatio,
-        targetFont,
-        targetMinimumPix,
-        psychoJS.window
-      );
-      psychoJS.experiment.addData("levelRoughlyLimited", proposedLevel);
-
       var characterSet = targetCharacterSet;
+
+      // Repeat letters 3 times when in 'typographic' mode,
+      // ie the relevant bounding box is that of three letters.
+      const letterRepeats = spacingRelationToSize === "ratio" ? 1 : 3;
+      if (!characterSetBoundingRects.hasOwnProperty(cName)) {
+        characterSetBoundingRects[cName] = getCharacterSetBoundingBox(
+          characterSet,
+          targetFont,
+          psychoJS.window,
+          letterRepeats
+        );
+      }
       /* ------------------------------ Pick triplets ----------------------------- */
-      const tempCharacterSet = shuffle(shuffle(characterSet));
-      var firstFlankerCharacter = tempCharacterSet[0];
-      var targetCharacter = tempCharacterSet[1];
-      var secondFlankerCharacter = tempCharacterSet[2];
+      var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
+        getTripletCharacters(characterSet);
       if (debug)
         console.log(
           `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
@@ -1587,7 +1591,7 @@ const experiment = (blockCount) => {
         nearPointXYPix: nearPointXYPix,
         fixationXYPix: fixationXYPx,
         spacingOverSizeRatio: spacingOverSizeRatio,
-        minimumHeight: targetMinimumPix,
+        targetMinimumPix: targetMinimumPix,
         fontFamily: targetFont,
         window: psychoJS.window,
         spacingRelationToSize: spacingRelationToSize,
@@ -1595,23 +1599,20 @@ const experiment = (blockCount) => {
         spacingDirection: spacingDirection,
         flankerCharacters: [firstFlankerCharacter, secondFlankerCharacter],
         targetCharacter: targetCharacter,
+        targetSizeDeg: targetSizeDeg,
+        targetKind: targetKind,
       };
-
-      const [targetXYPix] = XYPixOfXYDeg(
-        [targetEccentricityXYDeg],
-        displayOptions
-      );
 
       // Fixation placement does not depend on the value of "spacingRelationToSize"...
       fixation.setPos(fixationXYPx);
       fixation.setHeight(fixationSize);
       // ... neither does target location...
-      [targetEccentricityXYPx] = XYPixOfXYDeg(
-        [targetEccentricityXYDeg],
+      targetEccentricityXYPx = XYPixOfXYDeg(
+        targetEccentricityXYDeg,
         displayOptions
       );
-      targetEccentricityXYPx = targetEccentricityXYPx.map((x) => Math.round(x));
-      psychoJS.experiment.addData("targetLocationPix", targetEccentricityXYPx);
+      // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
+      psychoJS.experiment.addData("targetLocationPx", targetEccentricityXYPx);
       target.setPos(targetEccentricityXYPx);
       target.setFont(targetFont);
 
@@ -1620,108 +1621,60 @@ const experiment = (blockCount) => {
         "spacingRelationToSize",
         spacingRelationToSize
       );
-      let targetHeightPx;
-      if (spacingRelationToSize === "ratio") {
-        // Get a usable "level", ie amount of spacing
-        const lowerBoundedLevel = getLowerBoundedLevel(
-          proposedLevel,
-          displayOptions
-        );
-        psychoJS.experiment.addData("levelUsed", level);
-        const upperAndLowerBoundedLevel = getMaxPresentableLevel(
-          lowerBoundedLevel,
-          targetXYPix,
-          fixationXYPx,
-          spacingDirection,
-          displayOptions
-        );
-        level = upperAndLowerBoundedLevel;
-        logger("level", level);
-        spacingDeg = Math.pow(10, level);
-        psychoJS.experiment.addData("spacingDeg", spacingDeg);
-        spacingPx = Math.abs(
-          degreesToPixels(spacingDeg, {
-            pixPerCm: pixPerCm,
-            viewingDistanceCm: viewingDistanceCm,
-          })
-        );
-        psychoJS.experiment.addData("spacingPix", spacingPx);
-        // Get the location of the flankers
-        [pos1XYPx, pos3XYPx] = getFlankerLocations(
-          targetEccentricityXYPx,
-          fixationXYPx,
-          spacingDirection,
-          spacingPx
-        );
-        // Round locations to the nearest pixel
-        pos1XYPx = pos1XYPx.map((x) => Math.round(x));
-        pos3XYPx = pos3XYPx.map((x) => Math.round(x));
-        // Save flanker locations to output data
-        psychoJS.experiment.addData("flankerLocationsPix", [
-          pos1XYPx,
-          pos3XYPx,
-        ]);
-        // Find the font size for the flankers & target
-        targetHeightPx = Math.round(
-          Math.max(spacingPx / spacingOverSizeRatio, targetMinimumPix)
-        );
-        if (Math.round(spacingPx / spacingOverSizeRatio) < targetMinimumPix) {
-          console.error(
-            `Assumption broken! 
-            Target height, in pixel, is falling below the minimum allowed, 
-            even though it should have been previously constrained when we
-            found the lower bound of \`level\``
-          );
-          let targetHeightPx = Math.round(
-            Math.max(targetHeightPx, targetMinimumPix)
-          );
-        }
-        psychoJS.experiment.addData("heightPix", targetHeightPx);
-        // Display flankers, given that "spacingRelationToSize" is set to "ratio"
-        target.setText(targetCharacter);
-        target.setHeight(targetHeightPx);
-        flanker1.setPos(pos1XYPx);
-        flanker1.setText(firstFlankerCharacter);
-        flanker1.setFont(targetFont);
-        flanker1.setHeight(targetHeightPx);
-        flanker2.setPos(pos3XYPx);
-        flanker2.setText(secondFlankerCharacter);
-        flanker2.setFont(targetFont);
-        flanker2.setHeight(targetHeightPx);
-      } else if (spacingRelationToSize === "typographic") {
-        // Don't display flankers if "spacingRelationToSize" is set to typographic...
-        flanker1.setAutoDraw(false);
-        flanker2.setAutoDraw(false);
-
-        // ...include the flankers in the same string/stim as the target.
-        // TODO ask denis whether there should be spaces between, or just the font spacing
-        const flankersAndTargetString =
-          firstFlankerCharacter + targetCharacter + secondFlankerCharacter;
-        target.setText(flankersAndTargetString);
-
-        // Find the font size for the string containing the flankers & target,
-        // and the value of 'level' to which this acceptable size corresponds.
-        const [targetHeightPx, viableLevel] = getTypographicHeight(
-          psychoJS.window,
-          proposedLevel,
-          target,
-          fixation,
-          displayOptions
-        );
-        level = viableLevel;
-        psychoJS.experiment.addData("levelUsed", level);
-
-        target.setHeight(targetHeightPx);
-        psychoJS.experiment.addData("heightPix", targetHeightPx);
-      } else if (spacingRelationToSize == "none") {
-        // TODO FUTURE implement spacingRelationToSize === "none"
-        console.error(
-          `spacingRelationToSize value "none" not yet supported. Please use "ratio" or "typographic" for the time being.`
-        );
-      } else {
-        console.error(
-          `spacingRelationToSize value ${spacingRelationToSize} not recognized. Please use "none", "ratio", or "typographic"`
-        );
+      [level, stimulusParameters] = restrictLevel(
+        proposedLevel,
+        thresholdParameter,
+        characterSetBoundingRects[cName],
+        spacingDirection,
+        spacingRelationToSize,
+        spacingSymmetry,
+        spacingOverSizeRatio,
+        targetSizeIsHeightBool,
+        displayOptions
+      );
+      psychoJS.experiment.addData("level", level);
+      psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
+      target.setHeight(stimulusParameters.heightPx);
+      target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+      psychoJS.experiment.addData(
+        "targetLocationPx",
+        stimulusParameters.targetAndFlankersXYPx[0]
+      );
+      switch (thresholdParameter) {
+        case "size":
+          flanker1.setAutoDraw(false);
+          flanker2.setAutoDraw(false);
+          break;
+        case "spacing":
+          switch (spacingRelationToSize) {
+            case "none":
+            case "ratio":
+              target.setText(targetCharacter);
+              flanker1.setText(firstFlankerCharacter);
+              flanker2.setText(secondFlankerCharacter);
+              flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
+              flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
+              flanker1.setFont(targetFont);
+              flanker2.setFont(targetFont);
+              flanker1.setHeight(stimulusParameters.heightPx);
+              flanker2.setHeight(stimulusParameters.heightPx);
+              psychoJS.experiment.addData("flankerLocationsPx", [
+                stimulusParameters.targetAndFlankersXYPx[1],
+                stimulusParameters.targetAndFlankersXYPx[2],
+              ]);
+              break;
+            case "typographic":
+              // ...include the flankers in the same string/stim as the target.
+              const flankersAndTargetString =
+                firstFlankerCharacter +
+                targetCharacter +
+                secondFlankerCharacter;
+              target.setText(flankersAndTargetString);
+              flanker1.setAutoDraw(false);
+              flanker2.setAutoDraw(false);
+              break;
+          }
+          break;
       }
       [
         target,
@@ -1742,7 +1695,11 @@ const experiment = (blockCount) => {
           tightBoundingBox.width,
           tightBoundingBox.height,
         ]);
-        if (spacingRelationToSize === "ratio") {
+        if (
+          (spacingRelationToSize === "ratio" ||
+            spacingRelationToSize === "none") &&
+          thresholdParameter === "spacing"
+        ) {
           boundingStims.push(flanker1BoundingPoly, flanker2BoundingPoly);
           const flanker1BoundingBox = flanker1.getBoundingBox(true);
           flanker1BoundingPoly.setPos([
@@ -1776,9 +1733,10 @@ const experiment = (blockCount) => {
           Math.round((spacing / spacingOverSizeRatio + Number.EPSILON) * 1000) /
           1000;
         let targetSpecsString = `size: ${size} deg`;
-        if (spacingRelationToSize === "ratio")
-          targetSpecsString += `\nspacing: ${spacing} deg`;
+        // if (spacingRelationToSize === "ratio")
+        targetSpecsString += `\nspacing: ${spacing} deg`;
         targetSpecs.setText(targetSpecsString);
+        targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
         targetSpecs.setAutoDraw(true);
       }
 
@@ -1808,11 +1766,15 @@ const experiment = (blockCount) => {
 
       trialComponents.push(showCharacterSet);
       trialComponents.push(totalTrial);
-      if (showTargetSpecs) trialComponents.push(targetSpecs);
+      // if (showTargetSpecs) trialComponents.push(targetSpecs);
       // /* --- BOUNDING BOX --- */
       if (showBoundingBox) {
         trialComponents.push(targetBoundingPoly);
-        if (spacingRelationToSize === "ratio") {
+        if (
+          (spacingRelationToSize === "ratio" ||
+            spacingRelationToSize === "none") &&
+          thresholdParameter === "spacing"
+        ) {
           trialComponents.push(flanker1BoundingPoly);
           trialComponents.push(flanker2BoundingPoly);
         }
@@ -1820,22 +1782,19 @@ const experiment = (blockCount) => {
       // /* --- /BOUNDING BOX --- */
       // /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
-        if (!simulatedObserver[condition.block_condition]) {
-          simulatedObserver[condition.block_condition] = new SimulatedObserver(
-            simulated[block][condition.block_condition],
+        if (!simulatedObserver[cName]) {
+          simulatedObserver[cName] = new SimulatedObserver(
+            simulated[block][cName],
             level,
             characterSet,
             targetCharacter,
-            paramReader.read(
-              "thresholdProportionCorrect",
-              condition.block_condition
-            ),
-            paramReader.read("simulationBeta", condition.block_condition),
-            paramReader.read("simulationDelta", condition.block_condition),
-            paramReader.read("simulationThreshold", condition.block_condition)
+            paramReader.read("thresholdProportionCorrect", cName),
+            paramReader.read("simulationBeta", cName),
+            paramReader.read("simulationDelta", cName),
+            paramReader.read("simulationThreshold", cName)
           );
         } else {
-          simulatedObserver[condition.block_condition].updateTrial(
+          simulatedObserver[cName].updateTrial(
             level,
             characterSet,
             targetCharacter
@@ -1878,6 +1837,17 @@ const experiment = (blockCount) => {
       /* --- /SIMULATED --- */
       t = instructionsClock.getTime();
       frameN = frameN + 1;
+
+      if (showTargetSpecs) {
+        targetSpecsConfig.x = -window.innerWidth / 2;
+        targetSpecsConfig.y = -window.innerHeight / 2;
+        if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
+          // keep track of start time/frame for later
+          targetSpecs.tStart = t; // (not accounting for frame time here)
+          targetSpecs.frameNStart = frameN; // exact frame index
+        }
+        targetSpecs.setAutoDraw(true);
+      }
 
       if (
         psychoJS.experiment.experimentEnded ||
@@ -2150,12 +2120,11 @@ const experiment = (blockCount) => {
       }
 
       if (showTargetSpecs) {
+        targetSpecsConfig.x = -window.innerWidth / 2;
+        targetSpecsConfig.y = -window.innerHeight / 2;
         // *targetSpecs* updates
-        if (t >= 0.0 && targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
-          // keep track of start time/frame for later
-          targetSpecs.tStart = t; // (not accounting for frame time here)
-          targetSpecs.frameNStart = frameN; // exact frame index
-
+        if (t >= 0.0) {
+          targetSpecs.setPos([targetSpecsConfig.x, targetSpecsConfig.y]);
           targetSpecs.setAutoDraw(true);
         }
       }

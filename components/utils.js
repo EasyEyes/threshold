@@ -119,7 +119,7 @@ export const pixelsToDegrees = (pixels, displayOptions) => {
 /**
  * Translation of MATLAB function of the same name
  * by Prof Denis Pelli, XYPixOfXYDeg.m
- * @param {Array} xyDeg List of [x,y] pairs, representing points x degrees right, and y degrees up, of fixation
+ * @param {Array} xyDegs List of [x,y] pairs, representing points x degrees right, and y degrees up, of fixation
  * @param {Object} displayOptions Parameters about the stimulus presentation
  * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
  * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
@@ -131,17 +131,20 @@ export const pixelsToDegrees = (pixels, displayOptions) => {
  * @param {Number} displayOptions.nearPointXYPix.y Pixels along y-axis of near-point from origin
  * @returns {Number[][]} Array of length=2 arrays of numbers, representing the same points in Pixel space
  */
-export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
-  if (xyDeg.length == 0) {
+export const XYPixsOfXYDegs = (xyDegs, displayOptions) => {
+  if (xyDegs.length == 0) {
     return;
   } // Return if no points to transform
   // TODO verify displayOptions has the correct parameters
-  const xyPix = [];
-  xyDeg.forEach((position) => {
+  const xyPixs = [];
+  xyDegs.forEach((position) => {
     position[0] = position[0] - displayOptions.nearPointXYDeg.x;
     position[1] = position[1] - displayOptions.nearPointXYDeg.y;
     const rDeg = Math.sqrt(position[0] ** 2 + position[1] ** 2);
-    const rPix = degreesToPixels(rDeg, displayOptions);
+    const rPix =
+      displayOptions.pixPerCm *
+      displayOptions.viewingDistanceCm *
+      Math.tan(rDeg * (Math.PI / 180));
     let pixelPosition = [];
     if (rDeg > 0) {
       pixelPosition = [
@@ -153,9 +156,82 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
     }
     pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
     pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.x;
-    xyPix.push(pixelPosition);
+    xyPixs.push(pixelPosition);
   });
-  return xyPix;
+  return xyPixs;
+};
+
+export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
+  // TODO verify displayOptions has the correct parameters
+  const degPosition = [];
+  let pixelPosition = [];
+  degPosition[0] = xyDeg[0] - displayOptions.nearPointXYDeg.x;
+  degPosition[1] = xyDeg[1] - displayOptions.nearPointXYDeg.y;
+  const rDeg = Math.sqrt(degPosition[0] ** 2 + degPosition[1] ** 2);
+  const rPix =
+    displayOptions.pixPerCm *
+    displayOptions.viewingDistanceCm *
+    Math.tan(rDeg * (Math.PI / 180));
+  if (rDeg > 0) {
+    pixelPosition = [
+      (degPosition[0] * rPix) / rDeg,
+      (degPosition[1] * rPix) / rDeg,
+    ];
+  } else {
+    pixelPosition = [0, 0];
+  }
+  pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
+  pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.x;
+  return pixelPosition;
+};
+
+/**
+ * Convert position from (x,y) screen coordinate in pixels to deg
+ * (relative to fixation). Coordinate increase right and up.
+ * screen coordinates which increase down and right. The perspective
+ * transformation is relative to location of near point, which is orthogonal
+ * to line of sight. We typically put the target at the near point, but that
+ * is not assumed in this routine.
+ *
+ * Translation of MATLAB function of the same name
+ * by Prof Denis Pelli, XYPixOfXYDeg.m
+ * @param {*} xyPix
+ * @param {*} displayOptions
+ */
+export const XYDegOfXYPix = (xyPix, displayOptions) => {
+  if (!displayOptions.hasOwnProperty(nearPointXYDeg))
+    throw "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix";
+  if (!displayOptions.hasOwnProperty(nearPointXYPix))
+    throw "Please provide a 'nearPointXYPix' property to displayOptions passed to XYDegOfXYPix";
+  if (xyPix.length !== 2)
+    throw "'xyPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
+  if (displayOptions.nearPointXYDeg.length !== 2)
+    throw "'nearPointXYDeg' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
+  if (displayOptions.nearPointXYPix.length !== 2)
+    throw "'nearPointXYPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
+  /*
+    To convert screen position in pixels to ecc in deg, we first convert pix
+    to be relative to the near point. We use trig to get the radial deg, and
+    we use the direction of the pixel vector (re near point).
+  */
+  const nearPointOffsetXYPx = [
+    xyPix[0] - displayOptions.nearPointXYPix[0],
+    xyPix[1] - displayOptions.nearPointXYPix[1],
+  ];
+  const rPix = norm(nearPointOffsetXYPx);
+  // equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB
+  const rRad = Math.atan2(
+    rPix / displayOptions.pixPerCm,
+    displayOptions.viewingDistanceCm
+  );
+  const rDeg = rRad * (180 / Math.PI);
+  let xyDeg =
+    rPix > 0 ? [(xyPix[0] * rDeg) / rPix, (xyPix[1] * rDeg) / rPix] : [0, 0];
+  xyDeg = [
+    xyDeg[0] + displayOptions.nearPointXYDeg[0],
+    xyDeg[1] + displayOptions.nearPointXYDeg[1],
+  ];
+  return xyDeg;
 };
 
 /**
@@ -310,16 +386,162 @@ export const rotate = (l) => {
 };
 
 export const levelFromTargetHeight = (
-  targetHeight,
+  targetHeightPx,
   spacingOverSizeRatio,
   pixPerCm,
   viewingDistanceCm
 ) => {
-  const spacingPx = Math.round(targetHeight * spacingOverSizeRatio);
+  const spacingPx = Math.round(targetHeightPx * spacingOverSizeRatio);
   const spacingDeg = pixelsToDegrees(spacingPx, {
     pixPerCm: pixPerCm,
     viewingDistanceCm: viewingDistanceCm,
   });
   const targetLevel = Math.log10(spacingDeg);
   return targetLevel;
+};
+
+/** 
+  @author translated by ajb 12-15-21, from original by dhb 3-5-97
+  @param {number} x x-coordinate
+  @param {number} y y-coordinate
+  @param {object} rect
+  @param {number} rect.left smaller (left) x value of the rectangle
+  @param {number} rect.right bigger (right) x value of the rectangle
+  @param {number} rect.top bigger (top) y value of the rectangle
+  @param {number} rect.bottom smaller (bottom) y value of the rectangle
+*/
+export const isInRect = (x, y, rect) => {
+  if (x >= rect.left && x <= rect.right && y >= rect.bottom && y <= rect.top)
+    return true;
+  return false;
+};
+
+/** 
+  @author translated by ajb 12-15-21, from original by dgp 7-9-15
+  @param {object} smallRect Smaller rectangle, contained by bigRect if this returns true
+  @param {number} smallRect.left smaller (left) x value of the rectangle
+  @param {number} smallRect.right bigger (right) x value of the rectangle
+  @param {number} smallRect.top bigger (top) y value of the rectangle
+  @param {number} smallRect.bottom smaller (bottom) y value of the rectangle
+  @param {object} bigRect Bigger rectangle, contains smallRect if this returns true
+  @param {number} bigRect.left smaller (left) x value of the rectangle
+  @param {number} bigRect.right bigger (right) x value of the rectangle
+  @param {number} bigRect.top bigger (top) y value of the rectangle
+  @param {number} bigRect.bottom smaller (bottom) y value of the rectangle
+  @returns {boolean} Whether or not smallRect is entirely contained by bigRect
+*/
+export const isRectInRect = (smallRect, bigRect) => {
+  return (
+    isInRect(smallRect.left, smallRect.bottom, bigRect) &&
+    isInRect(smallRect.right, smallRect.top)
+  );
+};
+
+export const getUnionRect = (a, b) => {
+  // a = [[x1,y1],[x2,y2]]
+  // b = [[x1,y1],[x2,y2]]
+  /* 
+  function newRect = UnionRect(a,b)
+  % newRect = UnionRect(a,b)
+  % 
+  % Returns the smallest rect that contains the two rects a and b.
+  % Also see PsychRects.
+
+  % 7/10/96 dgp  Wrote it.
+  % 8/5/96 dgp check rect size.
+
+  if size(a,2)~=4 || size(b,2)~=4
+      error('Wrong size rect argument. Usage:  newRect=UnionRect(a,b)');
+  end
+  newRect=a;
+  newRect(RectTop)=min(a(RectTop),b(RectTop));
+  newRect(RectBottom)=max(a(RectBottom),b(RectBottom));
+  newRect(RectLeft)=min(a(RectLeft),b(RectLeft));
+  newRect(RectRight)=max(a(RectRight),b(RectRight));
+  */
+  if (rectIsEmpty(a)) return b;
+  if (rectIsEmpty(b)) return a;
+  const lowerLeft = [Math.min(a[0][0], b[0][0]), Math.min(a[0][1], b[0][1])];
+  const upperRight = [Math.max(a[1][0], b[1][0]), Math.max(a[1][1], b[1][1])];
+  const newRect = [lowerLeft, upperRight];
+  return newRect;
+};
+
+const rectIsEmpty = (rect) => {
+  if (rect[0][0] === rect[1][0] && rect[0][1] === rect[1][1]) return true;
+  return false;
+};
+
+export const rectFromPixiRect = (pixiRect) => {
+  // ASSUMES `center` aligned
+  const lowerLeft = [
+    pixiRect.x - pixiRect.width / 2,
+    pixiRect.y - pixiRect.height / 2,
+  ];
+  const upperRight = [
+    pixiRect.x + pixiRect.width / 2,
+    pixiRect.y + pixiRect.height / 2,
+  ];
+  const newRect = [lowerLeft, upperRight];
+  return newRect;
+};
+
+export class Rectangle {
+  constructor(lowerLeft, upperRight, units = undefined) {
+    this.units = units;
+    this.left = lowerLeft[0];
+    this.right = upperRight[0];
+    this.bottom = lowerLeft[1];
+    this.top = upperRight[1];
+
+    this.height = this.top - this.bottom;
+    this.width = this.left - this.right;
+  }
+  getUnits() {
+    return this.units;
+  }
+  getWidth() {
+    return this.width;
+  }
+  getHeight() {
+    return this.height;
+  }
+  toArray() {
+    const lowerLeft = [this.left, this.bottom];
+    const upperRight = [this.right, this.top];
+    return [lowerLeft, upperRight];
+  }
+  scale(scalar) {
+    const lowerLeft = [this.left * scalar, this.bottom * scalar];
+    const upperRight = [this.right * scalar, this.top * scalar];
+    const scaled = new Rectangle(lowerLeft, upperRight);
+    return scaled;
+  }
+  offset(positionXY) {
+    const lowerLeft = [this.left + positionXY[0], this.bottom + positionXY[1]];
+    const upperRight = [this.right + positionXY[0], this.top + positionXY[1]];
+    const offsetted = new Rectangle(lowerLeft, upperRight);
+    return offsetted;
+  }
+  inset(x, y) {
+    // aka shrink
+    const lowerLeft = [this.left + x, this.bottom + y];
+    const upperRight = [this.right - x, this.top - y];
+    return new Rectangle(lowerLeft, upperRight);
+  }
+}
+
+export const norm = (v) => {
+  return Math.sqrt(
+    v.map((x) => x ** 2).reduce((previous, current) => previous + current)
+  );
+};
+
+export const getTripletCharacters = (charset) => {
+  let allCharacters = shuffle([...charset]);
+  const samples = [];
+  samples.push(allCharacters[0]);
+  samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
+  samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
+  return shuffle(samples);
 };

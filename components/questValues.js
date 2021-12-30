@@ -1,22 +1,17 @@
+import { logger } from "./utils";
+
 export const populateQuestDefaults = (conditionsList, reader) => {
   for (let i = 0; i < conditionsList.length; i++) {
     const condition = conditionsList[i];
-
+    const cName = condition["block_condition"];
     const questValues = {
-      startVal: Math.log10(
-        reader.read("thresholdGuess", condition.block_condition)
-      ),
-      startValSd: reader.read("thresholdGuessLogSd", condition.block_condition),
-      beta: reader.read("thresholdBeta", condition.block_condition) || 2.3,
-      delta: reader.read("thresholdDelta", condition.block_condition) || 0.01,
-      gamma: getGamma(
-        reader.read("targetCharacterSet", condition.block_condition)
-      ),
-      pThreshold: reader.read(
-        "thresholdProportionCorrect",
-        condition.block_condition
-      ),
-      nTrials: reader.read("conditionTrials", condition.block_condition),
+      startVal: Math.log10(reader.read("thresholdGuess", cName)),
+      startValSd: reader.read("thresholdGuessLogSd", cName),
+      beta: reader.read("thresholdBeta", cName) || 2.3,
+      delta: reader.read("thresholdDelta", cName) || 0.01,
+      gamma: getGamma(reader.read("targetCharacterSet", cName)),
+      pThreshold: reader.read("thresholdProportionCorrect", cName),
+      nTrials: reader.read("conditionTrials", cName),
     };
     /*
       Other parameters specified for QuestHandler:
