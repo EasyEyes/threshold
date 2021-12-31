@@ -2569,7 +2569,7 @@ const experiment = (blockCount) => {
     if (
       !(
         condition.responseEscapeOptionsBool &&
-        condition.responseEscapeOptionsBool.toLowerCase() === "true"
+        condition.responseEscapeOptionsBool.toString().toLowerCase() === "true"
       )
     ) {
       return {
