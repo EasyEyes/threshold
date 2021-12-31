@@ -181,7 +181,7 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
     pixelPosition = [0, 0];
   }
   pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
-  pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.x;
+  pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.y;
   return pixelPosition;
 };
 
