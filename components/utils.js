@@ -168,6 +168,15 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   degPosition[0] = xyDeg[0] - displayOptions.nearPointXYDeg.x;
   degPosition[1] = xyDeg[1] - displayOptions.nearPointXYDeg.y;
   const rDeg = Math.sqrt(degPosition[0] ** 2 + degPosition[1] ** 2);
+  if (rDeg > 90) {
+    console.log("Angle too large! Trying again with a nearer colinear point.");
+    const rCompensation = 90 / rDeg;
+    const constrainedPoint = [
+      rCompensation * degPosition[0] + displayOptions.nearPointXYDeg.x,
+      rCompensation * degPosition[1] + displayOptions.nearPointXYDeg.y,
+    ];
+    return XYPixOfXYDeg(constrainedPoint, displayOptions);
+  }
   const rPix =
     displayOptions.pixPerCm *
     displayOptions.viewingDistanceCm *
