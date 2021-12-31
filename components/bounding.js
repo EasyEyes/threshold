@@ -770,60 +770,6 @@ export const testableLevel = (
   }
 };
 
-export const spacingDeg = (
-  targetPositionDeg,
-  spacingDirection,
-  spacingRelationToSize,
-  spacingSymmetry,
-  spacingOverSizeRatio,
-  targetSizeIsHeightBool,
-  thresholdParameter
-) => {
-  if (!["radial", "tangential"].includes(spacingDirection))
-    throw `spacingDirection must equal 'radial' or 'tangential', not '${spacingDirection}'`;
-  if (!["screen", "retina", "cortext"].includes(spacingSymmetry))
-    throw `spacingDirection must equal 'screen', 'retina', or 'cortex', not '${spacingSymmetry}'`;
-
-  switch (spacingRelationToSize) {
-    case undefined:
-      return adjustRatioSpacing();
-    case "ratio":
-      return adjustRatioSpacing();
-    case "typographic":
-    // TODO
-  }
-};
-
-/**
- * @param {*} targetPositionDeg
- */
-export const adjustSpacingRatio = (targetXYDeg, screenRectPx) => {
-  /*
-   * Target is at (targetXDeg, targetYDeg).
-   * If (targetXPx,targetYPx) is not inside screenRect, issue error and quit.
-   * level=log10(spacingDeg).
-   */
-  const targetXDeg = targetXYDeg[0];
-  const targetYDeg = targetXYDeg[1];
-  const [targetXYPx] = XYPixOfXYDeg([targetXYDeg], {
-    pixPerCm: pixPerCm,
-    viewingDistanceCm: viewingDistanceCm,
-    nearPointXYDeg: nearPointXYDeg,
-    nearPointXYPix: nearPointXYPix,
-  });
-  const targetXPx = targetXYPx[0];
-  const targetyPx = targetXYPx[1];
-  const targetIsFoveal = targetXDeg === 0 && targetYDeg === 0;
-
-  // TARGET SIZE
-  switch (spacingRelationToSize) {
-    case "none":
-      const [, topPx] = XYPixOfXYDeg([[targetX]]);
-    case "ratio":
-    case "typographic":
-  }
-};
-
 /**
  * Pseudo code prepares to draw a spacing trial with a target letter.
  * It restricts level to within the realizable range for this screen
