@@ -7,8 +7,8 @@ export const populateQuestDefaults = (conditionsList, reader) => {
     const questValues = {
       startVal: Math.log10(reader.read("thresholdGuess", cName)),
       startValSd: reader.read("thresholdGuessLogSd", cName),
-      beta: reader.read("thresholdBeta", cName) || 2.3,
-      delta: reader.read("thresholdDelta", cName) || 0.01,
+      beta: reader.read("thresholdBeta", cName),
+      delta: reader.read("thresholdDelta", cName),
       gamma: getGamma(reader.read("targetCharacterSet", cName)),
       pThreshold: reader.read("thresholdProportionCorrect", cName),
       nTrials: reader.read("conditionTrials", cName),

@@ -219,7 +219,7 @@ export const XYDegOfXYPix = (xyPix, displayOptions) => {
     xyPix[1] - displayOptions.nearPointXYPix[1],
   ];
   const rPix = norm(nearPointOffsetXYPx);
-  // equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB
+  // ASSUMES equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB
   const rRad = Math.atan2(
     rPix / displayOptions.pixPerCm,
     displayOptions.viewingDistanceCm
@@ -433,7 +433,7 @@ export const isInRect = (x, y, rect) => {
 export const isRectInRect = (smallRect, bigRect) => {
   return (
     isInRect(smallRect.left, smallRect.bottom, bigRect) &&
-    isInRect(smallRect.right, smallRect.top)
+    isInRect(smallRect.right, smallRect.top, bigRect)
   );
 };
 
@@ -495,7 +495,7 @@ export class Rectangle {
     this.top = upperRight[1];
 
     this.height = this.top - this.bottom;
-    this.width = this.left - this.right;
+    this.width = this.right - this.left;
   }
   getUnits() {
     return this.units;

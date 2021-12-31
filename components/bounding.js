@@ -1099,8 +1099,8 @@ export const restrictSpacingDeg = (
       case "typographic":
         // Use spacingDeg to set size.
         widthDeg = 3 * spacingDeg;
-        heightDeg =
-          (widthDeg * characterSetRectPx.height) / characterSetRectPx.width;
+        // heightDeg =
+        //   widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
         const [leftPx] = XYPixOfXYDeg(
           [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
           displayOptions
@@ -1125,7 +1125,7 @@ export const restrictSpacingDeg = (
     switch (spacingRelationToSize) {
       case "typographic":
         stimulusRectPx = characterSetRectPx.scale(
-          widthDeg / characterSetRectPx.width
+          widthPx / characterSetRectPx.width
         );
         stimulusRectPx = stimulusRectPx.offset(targetXYPx);
         break;
@@ -1217,8 +1217,6 @@ export const restrictSpacingDeg = (
       thresholdParameter,
       spacingRelationToSize
     );
-    logger("largestBoundsRatio", largestBoundsRatio);
-    logger("spacingDeg", spacingDeg);
     maxSpacingDeg = spacingDeg / largestBoundsRatio;
 
     // WE'RE DONE IF STIMULUS FITS
