@@ -62,8 +62,8 @@
   position: absolute;
   bottom: 2px;
   right: 18%;
-  width: 6vw;
-  height: 3vh;
+  width: 0.5vw;
+  height: 4vh;
   border: 1px solid black;
   background-color: white;
   z-index: 999999;

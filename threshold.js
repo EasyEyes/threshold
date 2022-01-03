@@ -433,8 +433,7 @@ const experiment = (blockCount) => {
   var routineTimer, routineClock, blockClock;
   var initInstructionClock, eduInstructionClock, trialInstructionClock;
 
-  // TODO uncomment after testing
-  // var showTakeABreakCreditBool = paramReader.read("showTakeABreakCreditBool")[0];
+  var showTakeABreakCreditBool;
   var takeABreakMinimumDurationSec;
   var takeABreakTrialCredit;
   var currentTrialCredit;
@@ -947,25 +946,19 @@ const experiment = (blockCount) => {
       }
 
       // initialize takeABreakCredit values
-      // TODO read values from experiment file
-      logger(
-        "takeABreakTrialCredit",
-        paramReader.read("takeABreakTrialCredit")[currentBlockIndex]
-      );
-      logger(
-        "takeABreakMinimumDurationSec",
-        paramReader.read("takeABreakMinimumDurationSec")[currentBlockIndex]
-      );
-      currentTrialCredit = 0;
-      trialBreakStatus = false;
-      trialBreakButtonStatus = false;
-      hideTrialBreakWidget();
+      showTakeABreakCreditBool = paramReader.read("showTakeABreakCreditBool")[
+        currentBlockIndex
+      ];
       takeABreakTrialCredit = paramReader.read("takeABreakTrialCredit")[
         currentBlockIndex
       ];
       takeABreakMinimumDurationSec = paramReader.read(
         "takeABreakMinimumDurationSec"
       )[currentBlockIndex];
+      currentTrialCredit = 0;
+      trialBreakStatus = false;
+      trialBreakButtonStatus = false;
+      hideTrialBreakWidget();
 
       return Scheduler.Event.NEXT;
     };
@@ -1153,6 +1146,9 @@ const experiment = (blockCount) => {
       _beepButton = addBeepButton(rc.language.value, correctSynth);
 
       psychoJS.eventManager.clearKeys();
+
+      logger("hideTrialBreakProgressbar");
+      hideTrialBreakProgressbar();
 
       return Scheduler.Event.NEXT;
     };
@@ -2409,7 +2405,10 @@ const experiment = (blockCount) => {
         routineClock.reset();
 
         currentTrialCredit += takeABreakTrialCredit;
-        showTrialBreakProgressbar(currentTrialCredit);
+        logger("currentTrialCredit", currentTrialCredit);
+        if (showTakeABreakCreditBool) {
+          showTrialBreakProgressbar(currentTrialCredit);
+        }
         logger("currentTrialCredit", currentTrialCredit);
         // check if trialBreak should be triggered
         if (currentTrialCredit >= 1) {
