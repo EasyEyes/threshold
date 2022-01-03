@@ -809,8 +809,6 @@ export const restrictLevel = (
     displayOptions.window._size[0] / 2,
     displayOptions.window._size[1] / 2,
   ];
-  logger("psychoJS window size", displayOptions.window._size);
-  logger("JS window", [Window.width, Window.height]);
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
     case "size":
@@ -938,6 +936,7 @@ export const restrictSpacingDeg = (
   thresholdParameter,
   displayOptions
 ) => {
+  // TODO make sure rects are valid, ie height&width are nonnegative
   /* 
   // Given the desired spacingDeg, compute the letter sizes and locations and the  
   // stimulusBounds. If the stimulus exceeds the screen, then this code computes the 
@@ -1003,7 +1002,7 @@ export const restrictSpacingDeg = (
   // a 3rd iteration to allow for the case that the 2nd iteration isn't quite right, and
   // it homes in on the third.
   let v1XY, v2XY;
-  for (const iteration of [0, 1, 2, 3]) {
+  for (let iteration of [...new Array(200).keys()]) {
     // SET TARGET SIZE
     switch (spacingRelationToSize) {
       case "none":
@@ -1156,13 +1155,15 @@ export const restrictSpacingDeg = (
         stimulusRectPx = stimulusRectPx.inset(-widthPx / 2, -heightPx / 2);
         break;
     }
-    const largestBoundsRatio = getLargestBoundsRatio(
+    let largestBoundsRatio = getLargestBoundsRatio(
       stimulusRectPx,
       screenRectPx,
       targetXYPx,
       thresholdParameter,
       spacingRelationToSize
     );
+    // Set largestBoundsRatio to some max, so we don't dwarf the value of spacingDeg
+    largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
     maxSpacingDeg = spacingDeg / largestBoundsRatio;
 
     // WE'RE DONE IF STIMULUS FITS
@@ -1242,7 +1243,6 @@ const getLargestBoundsRatio = (
     stim.top / screen.top,
     stim.bottom / screen.bottom,
   ];
-  logger("ratios (L,R,T,B)", ratios);
   const largestBoundsRatio = Math.max(...ratios);
   if (largestBoundsRatio <= 0) throw "Largest ratio is non-positive.";
   return largestBoundsRatio;

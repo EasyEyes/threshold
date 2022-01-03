@@ -1394,6 +1394,8 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      // showCursor();
+      logger("not showing cursor!");
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
