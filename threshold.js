@@ -1555,6 +1555,7 @@ const experiment = (blockCount) => {
       // Repeat letters 3 times when in 'typographic' mode,
       // ie the relevant bounding box is that of three letters.
       const letterRepeats = spacingRelationToSize === "ratio" ? 1 : 3;
+      // eslint-disable-next-line no-prototype-builtins
       if (!characterSetBoundingRects.hasOwnProperty(cName)) {
         characterSetBoundingRects[cName] = getCharacterSetBoundingBox(
           characterSet,
@@ -1663,11 +1664,13 @@ const experiment = (blockCount) => {
               break;
             case "typographic":
               // ...include the flankers in the same string/stim as the target.
-              const flankersAndTargetString =
-                firstFlankerCharacter +
-                targetCharacter +
-                secondFlankerCharacter;
-              target.setText(flankersAndTargetString);
+              // const flankersAndTargetString =
+              //   firstFlankerCharacter +
+              //   targetCharacter +
+              //   secondFlankerCharacter;
+              target.setText(
+                firstFlankerCharacter + targetCharacter + secondFlankerCharacter
+              );
               flanker1.setAutoDraw(false);
               flanker2.setAutoDraw(false);
               break;
