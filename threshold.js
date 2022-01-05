@@ -2400,7 +2400,6 @@ const experiment = (blockCount) => {
       // }, 700);
 
       // if trialBreak is not ongoing
-      loggerText("TRIAL ROUTINE END");
       if (!trialBreakStatus) {
         //------Ending Routine 'trial'-------
         for (const thisComponent of trialComponents) {
@@ -2477,8 +2476,8 @@ const experiment = (blockCount) => {
 
           // show proceed button
           trialBreakButtonStatus = true;
-          showTrialProceedButton();
-          document.getElementById("trial-proceed").onclick = () => {
+
+          const resetTrialBreakWidgetState = () => {
             trialBreakStatus = false;
             trialBreakButtonStatus = false;
             hideTrialBreakWidget();
@@ -2490,6 +2489,39 @@ const experiment = (blockCount) => {
             // this last iteration will increase the trialcredit. To nullify the extra credit,
             // the credit is decreased here.
             currentTrialCredit -= takeABreakTrialCredit;
+          };
+
+          // responseType: 1,2 means click is allowed
+          if (responseType === 1 || responseType === 2) {
+            showTrialProceedButton();
+          }
+
+          // responseType: 0,2 means return key is allowed
+          const handleReturnKeyOnTrialBreakWidget = (evt) => {
+            if (evt.key === "Enter") {
+              resetTrialBreakWidgetState();
+
+              // remove self from document event listeners
+              document.removeEventListener(
+                "keypress",
+                handleReturnKeyOnTrialBreakWidget
+              );
+            }
+          };
+          if (responseType === 0 || responseType === 2) {
+            document.addEventListener(
+              "keypress",
+              handleReturnKeyOnTrialBreakWidget
+            );
+          }
+          document.getElementById("trial-proceed").onclick = () => {
+            resetTrialBreakWidgetState();
+
+            // remove enter key handler on document
+            document.removeEventListener(
+              "keypress",
+              handleReturnKeyOnTrialBreakWidget
+            );
           };
         }
 
