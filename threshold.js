@@ -2447,6 +2447,8 @@ const experiment = (blockCount) => {
         currentTrialCredit += takeABreakTrialCredit;
         if (showTakeABreakCreditBool) {
           showTrialBreakProgressbar(currentTrialCredit);
+        } else {
+          hideTrialBreakProgressbar();
         }
         // check if trialBreak should be triggered
         if (currentTrialCredit >= 1) {
