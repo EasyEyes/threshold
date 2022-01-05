@@ -1409,6 +1409,8 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      // showCursor();
+      logger("not showing cursor!");
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
@@ -1707,11 +1709,13 @@ const experiment = (blockCount) => {
               break;
             case "typographic":
               // ...include the flankers in the same string/stim as the target.
-              const flankersAndTargetString =
-                firstFlankerCharacter +
-                targetCharacter +
-                secondFlankerCharacter;
-              target.setText(flankersAndTargetString);
+              // const flankersAndTargetString =
+              //   firstFlankerCharacter +
+              //   targetCharacter +
+              //   secondFlankerCharacter;
+              target.setText(
+                firstFlankerCharacter + targetCharacter + secondFlankerCharacter
+              );
               flanker1.setAutoDraw(false);
               flanker2.setAutoDraw(false);
               break;

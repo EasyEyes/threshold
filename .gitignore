@@ -2,9 +2,22 @@
 js
 
 examples/**/
-!examples/fonts
-!examples/forms
-!examples/tables
+# !examples/fonts
+# !examples/forms
+# !examples/tables
+
+!examples/fonts/Auckland Optotype.woff2
+!examples/fonts/Douglass Pen.woff2
+!examples/fonts/IBM Plex Sans Arabic.woff2
+!examples/fonts/P22 Aragon.woff2
+!examples/fonts/Roboto Mono.woff2
+!examples/fonts/Sloan.woff2
+
+!examples/forms/Demo consent form.pdf
+!examples/forms/Demo debrief form.pdf
+
+!examples/tables/demoExperiment.xlsx
+!examples/tables/minimalExperiment.csv
 
 node_modules
 
@@ -170,3 +183,4 @@ fonts/DharmaGothicCRegular.woff2
 fonts/Roboto.woff2
 
 examples/tables/testScript_myfonts.xlsx
+examples/fonts/Bitstream_-_CentSchbook_BT_Roman.woff2
