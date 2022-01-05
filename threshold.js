@@ -234,6 +234,8 @@ var totalBlockCount = 0;
 var consentFormName = "";
 var debriefFormName = "";
 
+var currentBlockCondition;
+
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
@@ -946,30 +948,18 @@ const experiment = (blockCount) => {
       }
 
       // initialize takeABreakCredit values
-      // for (let c of snapshot.handler.getConditions()) {
-      //   if (c.block_condition === trials._currentStaircase._name) {
-      //     condition = c;
-      //     addConditionToData(
-      //       psychoJS.experiment,
-      //       condition,
-      //       parametersToExcludeFromData
-      //     );
-      //   }
-      // }
-      logger("currentBlockIndex", currentBlockIndex);
-      logger(
+      showTakeABreakCreditBool = paramReader.read(
+        "showTakeABreakCreditBool",
+        currentBlockCondition
+      )[0];
+      takeABreakTrialCredit = paramReader.read(
         "takeABreakTrialCredit",
-        paramReader.read("takeABreakTrialCredit")
-      );
-      showTakeABreakCreditBool = paramReader.read("showTakeABreakCreditBool")[
-        currentBlockIndex - 1
-      ];
-      takeABreakTrialCredit = paramReader.read("takeABreakTrialCredit")[
-        currentBlockIndex - 1
-      ];
+        currentBlockCondition
+      )[0];
       takeABreakMinimumDurationSec = paramReader.read(
-        "takeABreakMinimumDurationSec"
-      )[currentBlockIndex - 1];
+        "takeABreakMinimumDurationSec",
+        currentBlockCondition
+      )[0];
       currentTrialCredit = 0;
       trialBreakStatus = false;
       trialBreakButtonStatus = false;
@@ -1426,6 +1416,7 @@ const experiment = (blockCount) => {
         }
       }
       const block_condition = condition["block_condition"];
+      currentBlockCondition = block_condition;
 
       // ! responseType
       responseType = getResponseType(
@@ -2455,11 +2446,9 @@ const experiment = (blockCount) => {
         routineClock.reset();
 
         currentTrialCredit += takeABreakTrialCredit;
-        logger("currentTrialCredit", currentTrialCredit);
         if (showTakeABreakCreditBool) {
           showTrialBreakProgressbar(currentTrialCredit);
         }
-        logger("currentTrialCredit", currentTrialCredit);
         // check if trialBreak should be triggered
         if (currentTrialCredit >= 1) {
           trialBreakStartTime = Date.now();
