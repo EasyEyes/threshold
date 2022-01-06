@@ -36,8 +36,8 @@ export const distancePix = (position1Deg, position2Deg) => {
   // ... by finding two points in deg spacing,
   // ... convert both to pixel space
   // ... and find the distance between them
-  const [position1Pix] = XYPixOfXYDeg([position1Deg], displayOptions);
-  const [position2Pix] = XYPixOfXYDeg([position2Deg], displayOptions);
+  const position1Pix = XYPixOfXYDeg(position1Deg, displayOptions);
+  const position2Pix = XYPixOfXYDeg(position2Deg, displayOptions);
   const v = position1Pix.map((x, i) => position1Pix[i] - position2Pix[i]);
   const distanceInPix = Math.sqrt(
     v.map((x) => x ** 2).reduce((previous, current) => previous + current)
@@ -69,12 +69,12 @@ export const getStimulusBoundsPx = (
     targetEccentricityXYDeg[0] + proposedHeightDeg,
     targetEccentricityXYDeg[1] + proposedHeightDeg,
   ];
-  const [targetEccentricityXYPix] = XYPixOfXYDeg(
-    [targetEccentricityXYDeg],
+  const targetEccentricityXYPix = XYPixOfXYDeg(
+    targetEccentricityXYDeg,
     displayOptions
   );
-  const [targetTopPix] = XYPixOfXYDeg([targetTopDeg], displayOptions);
-  const proposedHeightPix = targetTopPix[1] - targetEccentricityXYDeg[1];
+  const targetTopPix = XYPixOfXYDeg(targetTopDeg, displayOptions);
+  const proposedHeightPix = targetTopPix[1] - targetEccentricityXYPix[1];
 
   const characterSetBoundingRect = [
     [
@@ -584,6 +584,24 @@ export const restrictSpacingDeg = (
     // WE'RE DONE IF STIMULUS FITS
     // Should be equivalent to isRectInRect(stimulusRectPx,screenRectPx)
     if (largestBoundsRatio <= 1) {
+      if (
+        !(
+          (spacingDeg > Math.pow(10, proposedLevel) &&
+            Math.round(heightPx) === displayOptions.targetMinimumPix) ||
+          spacingDeg === Math.pow(10, proposedLevel) ||
+          (spacingDeg < Math.pow(10, proposedLevel) &&
+            0.99 < largestBoundsRatio)
+        )
+      )
+        console.error(
+          `While largestBoundsRatio is less than 1, none of the three viable conditions are met.\nspacingDeg is ${
+            spacingDeg > Math.pow(10, proposedLevel)
+              ? "larger than"
+              : spacingDeg < Math.pow(10, proposedLevel)
+              ? "less than"
+              : "equal to"
+          } QUEST's proposed spacing. Largest bounds ratio: ${largestBoundsRatio}.`
+        );
       const targetAndFlankerLocationsPx = [targetXYPx];
       if (spacingRelationToSize === "ratio")
         targetAndFlankerLocationsPx.push(flanker1XYPx, flanker2XYPx);
