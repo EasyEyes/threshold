@@ -1746,9 +1746,11 @@ const experiment = (blockCount) => {
         const size =
           Math.round((spacing / spacingOverSizeRatio + Number.EPSILON) * 1000) /
           1000;
-        let targetSpecsString = `size: ${size} deg`;
-        // if (spacingRelationToSize === "ratio")
-        targetSpecsString += `\nspacing: ${spacing} deg`;
+        let targetSpecsString = `size: ${size} deg
+spacing: ${spacing} deg
+targetFont: ${targetFont}
+spacingRelationToSize: ${spacingRelationToSize}
+spacingOverSizeRatio: ${spacingOverSizeRatio}`;
         targetSpecs.setText(targetSpecsString);
         targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
         targetSpecs.setAutoDraw(true);
