@@ -1127,7 +1127,6 @@ const experiment = (blockCount) => {
 
       psychoJS.eventManager.clearKeys();
 
-      logger("hideTrialBreakProgressbar");
       hideTrialBreakProgressbar();
 
       return Scheduler.Event.NEXT;

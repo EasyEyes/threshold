@@ -1,5 +1,4 @@
 export const showTrialBreakWidget = (bodyContent) => {
-  console.log("showTrialBreakWidget");
   // wrapper container
   let el = document.getElementById("trialBreakContainer");
   el.style.visibility = "visible";
@@ -11,21 +10,17 @@ export const showTrialBreakWidget = (bodyContent) => {
 };
 
 export const hideTrialBreakWidget = () => {
-  console.log("hideTrialBreakWidget");
   document.getElementById("trialBreakContainer").style.visibility = "hidden";
 };
 
 export const hideTrialProceedButton = () => {
-  console.log("hideTrialProceedButton");
   document.getElementById("trial-proceed").style.visibility = "hidden";
 };
 export const showTrialProceedButton = () => {
-  console.log("showTrialProceedButton");
   document.getElementById("trial-proceed").style.visibility = "visible";
 };
 
 export const showTrialBreakProgressbar = (height = 0.0) => {
-  console.log("showTrialBreakProgressbar");
   height = Math.min(height, 1.0);
   hideTrialBreakProgressbar();
 
@@ -41,7 +36,6 @@ export const showTrialBreakProgressbar = (height = 0.0) => {
 };
 
 export const hideTrialBreakProgressbar = () => {
-  console.log("hideTrialBreakProgressbar");
   let el = document.getElementById("trialBreakProgressbarWrapper");
   if (el) el.remove();
 };
