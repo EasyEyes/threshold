@@ -42,5 +42,6 @@ export const showTrialBreakProgressbar = (height = 0.0) => {
 
 export const hideTrialBreakProgressbar = () => {
   let el = document.getElementById("trialBreakProgressbarWrapper");
+  console.log("EL#", el);
   if (el) el.remove();
 };

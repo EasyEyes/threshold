@@ -61,11 +61,11 @@
 #trialBreakProgressbarWrapper {
   position: absolute;
   bottom: 2px;
-  right: 18%;
-  width: 0.5vw;
-  height: 4vh;
+  right: 49%;
+  width: 1.5vw;
+  height: 1.5vw;
   border: 1px solid black;
-  background-color: white;
+  background-color: #f2f2f2;
   z-index: 999999;
 }
 #trialBreakProgressbar {

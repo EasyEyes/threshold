@@ -234,6 +234,8 @@ var totalBlockCount = 0;
 var consentFormName = "";
 var debriefFormName = "";
 
+var currentBlockCondition;
+
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
@@ -946,15 +948,18 @@ const experiment = (blockCount) => {
       }
 
       // initialize takeABreakCredit values
-      showTakeABreakCreditBool = paramReader.read("showTakeABreakCreditBool")[
-        currentBlockIndex
-      ];
-      takeABreakTrialCredit = paramReader.read("takeABreakTrialCredit")[
-        currentBlockIndex
-      ];
+      showTakeABreakCreditBool = paramReader.read(
+        "showTakeABreakCreditBool",
+        currentBlockCondition
+      )[0];
+      takeABreakTrialCredit = paramReader.read(
+        "takeABreakTrialCredit",
+        currentBlockCondition
+      )[0];
       takeABreakMinimumDurationSec = paramReader.read(
-        "takeABreakMinimumDurationSec"
-      )[currentBlockIndex];
+        "takeABreakMinimumDurationSec",
+        currentBlockCondition
+      )[0];
       currentTrialCredit = 0;
       trialBreakStatus = false;
       trialBreakButtonStatus = false;
@@ -1410,14 +1415,15 @@ const experiment = (blockCount) => {
           );
         }
       }
-      const cName = condition["block_condition"];
+      const block_condition = condition["block_condition"];
+      currentBlockCondition = block_condition;
 
       // ! responseType
       responseType = getResponseType(
-        paramReader.read("responseClickedBool", cName),
-        paramReader.read("responseTypedBool", cName),
-        paramReader.read("responseTypedEasyEyesKeypadBool", cName),
-        paramReader.read("responseSpokenBool", cName)
+        paramReader.read("responseClickedBool", block_condition),
+        paramReader.read("responseTypedBool", block_condition),
+        paramReader.read("responseTypedEasyEyesKeypadBool", block_condition),
+        paramReader.read("responseSpokenBool", block_condition)
       );
       logger("responseType", responseType);
 
@@ -1463,14 +1469,14 @@ const experiment = (blockCount) => {
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
       psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-      psychoJS.experiment.addData("block_condition", cName);
+      psychoJS.experiment.addData("block_condition", block_condition);
       psychoJS.experiment.addData(
         "flankerOrientation",
-        reader.read("spacingDirection", cName)
+        reader.read("spacingDirection", block_condition)
       );
       psychoJS.experiment.addData(
         "targetFont",
-        reader.read("targetFont", cName)
+        reader.read("targetFont", block_condition)
       );
       // update component parameters for each repeat
       windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
@@ -1479,7 +1485,10 @@ const experiment = (blockCount) => {
       if (!rc.screenWidthCm)
         console.warn("[Screen Width] Using arbitrary screen width. Enable RC.");
 
-      viewingDistanceDesiredCm = reader.read("viewingDistanceDesiredCm", cName);
+      viewingDistanceDesiredCm = reader.read(
+        "viewingDistanceDesiredCm",
+        block_condition
+      );
       // viewingDistanceDesiredCm = 10;
       viewingDistanceCm = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
@@ -1493,46 +1502,71 @@ const experiment = (blockCount) => {
 
       // TODO check that we are actually trying to test for "spacing", not "size"
 
-      spacingDirection = reader.read("spacingDirection", cName);
-      spacingSymmetry = reader.read("spacingSymmetry", cName);
-      let targetFontSource = reader.read("targetFontSource", cName);
-      targetFont = reader.read("targetFont", cName);
+      spacingDirection = reader.read("spacingDirection", block_condition);
+      spacingSymmetry = reader.read("spacingSymmetry", block_condition);
+      let targetFontSource = reader.read("targetFontSource", block_condition);
+      targetFont = reader.read("targetFont", block_condition);
       if (targetFontSource === "file") targetFont = cleanFontName(targetFont);
 
       targetCharacterSet = String(
-        reader.read("targetCharacterSet", cName)
+        reader.read("targetCharacterSet", block_condition)
       ).split("");
-      validAns = String(reader.read("targetCharacterSet", cName))
+      validAns = String(reader.read("targetCharacterSet", block_condition))
         .toLowerCase()
         .split("");
 
-      showCharacterSetWhere = reader.read("showCharacterSetWhere", cName);
-      showViewingDistanceBool = reader.read("showViewingDistanceBool", cName);
-      showCounterBool = reader.read("showCounterBool", cName);
-      showTargetSpecs = paramReader.read("showTargetSpecsBool", cName);
+      showCharacterSetWhere = reader.read(
+        "showCharacterSetWhere",
+        block_condition
+      );
+      showViewingDistanceBool = reader.read(
+        "showViewingDistanceBool",
+        block_condition
+      );
+      showCounterBool = reader.read("showCounterBool", block_condition);
+      showTargetSpecs = paramReader.read(
+        "showTargetSpecsBool",
+        block_condition
+      );
 
-      conditionTrials = reader.read("conditionTrials", cName);
-      targetDurationSec = reader.read("targetDurationSec", cName);
+      conditionTrials = reader.read("conditionTrials", block_condition);
+      targetDurationSec = reader.read("targetDurationSec", block_condition);
 
       fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
-      showFixation = reader.read("markTheFixationBool", cName);
+      showFixation = reader.read("markTheFixationBool", block_condition);
 
-      targetKind = reader.read("targetKind", cName);
-      targetSizeDeg = reader.read("targetSizeDeg", cName);
-      targetSizeIsHeightBool = reader.read("targetSizeIsHeightBool", cName);
-      thresholdParameter = reader.read("thresholdParameter", cName);
-      targetMinimumPix = reader.read("targetMinimumPix", cName);
-      spacingOverSizeRatio = reader.read("spacingOverSizeRatio", cName);
-      spacingRelationToSize = reader.read("spacingRelationToSize", cName);
-      showBoundingBox = reader.read("showBoundingBoxBool", cName) || false;
+      targetKind = reader.read("targetKind", block_condition);
+      targetSizeDeg = reader.read("targetSizeDeg", block_condition);
+      targetSizeIsHeightBool = reader.read(
+        "targetSizeIsHeightBool",
+        block_condition
+      );
+      thresholdParameter = reader.read("thresholdParameter", block_condition);
+      targetMinimumPix = reader.read("targetMinimumPix", block_condition);
+      spacingOverSizeRatio = reader.read(
+        "spacingOverSizeRatio",
+        block_condition
+      );
+      spacingRelationToSize = reader.read(
+        "spacingRelationToSize",
+        block_condition
+      );
+      showBoundingBox =
+        reader.read("showBoundingBoxBool", block_condition) || false;
 
-      targetMinimumPix = reader.read("targetMinimumPix", cName);
-      targetEccentricityXDeg = reader.read("targetEccentricityXDeg", cName);
+      targetMinimumPix = reader.read("targetMinimumPix", block_condition);
+      targetEccentricityXDeg = reader.read(
+        "targetEccentricityXDeg",
+        block_condition
+      );
       psychoJS.experiment.addData(
         "targetEccentricityXDeg",
         targetEccentricityXDeg
       );
-      targetEccentricityYDeg = reader.read("targetEccentricityYDeg", cName);
+      targetEccentricityYDeg = reader.read(
+        "targetEccentricityYDeg",
+        block_condition
+      );
       psychoJS.experiment.addData(
         "targetEccentricityYDeg",
         targetEccentricityYDeg
@@ -1541,13 +1575,16 @@ const experiment = (blockCount) => {
         targetEccentricityXDeg,
         targetEccentricityYDeg,
       ];
-      targetSafetyMarginSec = paramReader.read("targetSafetyMarginSec", cName);
+      targetSafetyMarginSec = paramReader.read(
+        "targetSafetyMarginSec",
+        block_condition
+      );
 
-      // trackGazeYes = reader.read("trackGazeYes", cName);
-      // trackHeadYes = reader.read("trackHeadYes", cName);
+      // trackGazeYes = reader.read("trackGazeYes", block_condition);
+      // trackHeadYes = reader.read("trackHeadYes", block_condition);
       wirelessKeyboardNeededYes = reader.read(
         "wirelessKeyboardNeededYes",
-        cName
+        block_condition
       );
 
       var characterSet = targetCharacterSet;
@@ -1555,9 +1592,8 @@ const experiment = (blockCount) => {
       // Repeat letters 3 times when in 'typographic' mode,
       // ie the relevant bounding box is that of three letters.
       const letterRepeats = spacingRelationToSize === "ratio" ? 1 : 3;
-      // eslint-disable-next-line no-prototype-builtins
-      if (!characterSetBoundingRects.hasOwnProperty(cName)) {
-        characterSetBoundingRects[cName] = getCharacterSetBoundingBox(
+      if (!characterSetBoundingRects.hasOwnProperty(block_condition)) {
+        characterSetBoundingRects[block_condition] = getCharacterSetBoundingBox(
           characterSet,
           targetFont,
           psychoJS.window,
@@ -1623,7 +1659,7 @@ const experiment = (blockCount) => {
       [level, stimulusParameters] = restrictLevel(
         proposedLevel,
         thresholdParameter,
-        characterSetBoundingRects[cName],
+        characterSetBoundingRects[block_condition],
         spacingDirection,
         spacingRelationToSize,
         spacingSymmetry,
@@ -1783,19 +1819,19 @@ const experiment = (blockCount) => {
       // /* --- /BOUNDING BOX --- */
       // /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
-        if (!simulatedObserver[cName]) {
-          simulatedObserver[cName] = new SimulatedObserver(
-            simulated[block][cName],
+        if (!simulatedObserver[block_condition]) {
+          simulatedObserver[block_condition] = new SimulatedObserver(
+            simulated[block][block_condition],
             level,
             characterSet,
             targetCharacter,
-            paramReader.read("thresholdProportionCorrect", cName),
-            paramReader.read("simulationBeta", cName),
-            paramReader.read("simulationDelta", cName),
-            paramReader.read("simulationThreshold", cName)
+            paramReader.read("thresholdProportionCorrect", block_condition),
+            paramReader.read("simulationBeta", block_condition),
+            paramReader.read("simulationDelta", block_condition),
+            paramReader.read("simulationThreshold", block_condition)
           );
         } else {
-          simulatedObserver[cName].updateTrial(
+          simulatedObserver[block_condition].updateTrial(
             level,
             characterSet,
             targetCharacter
@@ -2364,7 +2400,6 @@ const experiment = (blockCount) => {
       // }, 700);
 
       // if trialBreak is not ongoing
-      loggerText("TRIAL ROUTINE END");
       if (!trialBreakStatus) {
         //------Ending Routine 'trial'-------
         for (const thisComponent of trialComponents) {
@@ -2410,11 +2445,11 @@ const experiment = (blockCount) => {
         routineClock.reset();
 
         currentTrialCredit += takeABreakTrialCredit;
-        logger("currentTrialCredit", currentTrialCredit);
         if (showTakeABreakCreditBool) {
           showTrialBreakProgressbar(currentTrialCredit);
+        } else {
+          hideTrialBreakProgressbar();
         }
-        logger("currentTrialCredit", currentTrialCredit);
         // check if trialBreak should be triggered
         if (currentTrialCredit >= 1) {
           trialBreakStartTime = Date.now();
@@ -2443,8 +2478,8 @@ const experiment = (blockCount) => {
 
           // show proceed button
           trialBreakButtonStatus = true;
-          showTrialProceedButton();
-          document.getElementById("trial-proceed").onclick = () => {
+
+          const resetTrialBreakWidgetState = () => {
             trialBreakStatus = false;
             trialBreakButtonStatus = false;
             hideTrialBreakWidget();
@@ -2456,6 +2491,39 @@ const experiment = (blockCount) => {
             // this last iteration will increase the trialcredit. To nullify the extra credit,
             // the credit is decreased here.
             currentTrialCredit -= takeABreakTrialCredit;
+          };
+
+          // responseType: 1,2 means click is allowed
+          if (responseType === 1 || responseType === 2) {
+            showTrialProceedButton();
+          }
+
+          // responseType: 0,2 means return key is allowed
+          const handleReturnKeyOnTrialBreakWidget = (evt) => {
+            if (evt.key === "Enter") {
+              resetTrialBreakWidgetState();
+
+              // remove self from document event listeners
+              document.removeEventListener(
+                "keypress",
+                handleReturnKeyOnTrialBreakWidget
+              );
+            }
+          };
+          if (responseType === 0 || responseType === 2) {
+            document.addEventListener(
+              "keypress",
+              handleReturnKeyOnTrialBreakWidget
+            );
+          }
+          document.getElementById("trial-proceed").onclick = () => {
+            resetTrialBreakWidgetState();
+
+            // remove enter key handler on document
+            document.removeEventListener(
+              "keypress",
+              handleReturnKeyOnTrialBreakWidget
+            );
           };
         }
 
