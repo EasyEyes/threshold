@@ -268,7 +268,7 @@ const checkAndCorrectUnderscoreParams = (df: any): [any, EasyEyesError[]] => {
         .select(parameter)
         .toArray()
         .map((x: string[]) => x[0]);
-      return !_valueOnlyInFirstPosition(values);
+      return !_valueOnlyInFirstPosition(values, parameter);
     }
   );
   underscoreParams.forEach((p: string) => {
@@ -280,7 +280,9 @@ const checkAndCorrectUnderscoreParams = (df: any): [any, EasyEyesError[]] => {
   return [df, errors];
 };
 
-const _valueOnlyInFirstPosition = (a: any[]): boolean => {
+const _valueOnlyInFirstPosition = (a: any[], parameter: string): boolean => {
+  const unregulatedParameters = ["_about"];
+  if (unregulatedParameters.includes(parameter)) return true;
   return !a.some(
     (value: any, i: number) => (i === 0 && !value) || (i !== 0 && value)
   );
