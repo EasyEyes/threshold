@@ -234,8 +234,6 @@ var totalBlockCount = 0;
 var consentFormName = "";
 var debriefFormName = "";
 
-var currentBlockCondition;
-
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
@@ -435,10 +433,7 @@ const experiment = (blockCount) => {
   var routineTimer, routineClock, blockClock;
   var initInstructionClock, eduInstructionClock, trialInstructionClock;
 
-  var showTakeABreakCreditBool;
-  var takeABreakMinimumDurationSec;
-  var takeABreakTrialCredit;
-  var currentTrialCredit;
+  var currentBlockCredit;
   var trialBreakStartTime = 0;
   var trialBreakStatus;
   var trialBreakButtonStatus;
@@ -900,7 +895,6 @@ const experiment = (blockCount) => {
           Number(paramReader.read("conditionTrials", c.block_condition))
         )
         .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
-
       trials = new data.MultiStairHandler({
         stairType: MultiStairHandler.StaircaseType.QUEST,
         psychoJS: psychoJS,
@@ -928,7 +922,6 @@ const experiment = (blockCount) => {
       );
       totalTrial.setText(trialInfoStr);
       totalTrial.setAutoDraw(true);
-      showTrialBreakProgressbar(currentTrialCredit);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop
@@ -946,24 +939,6 @@ const experiment = (blockCount) => {
           endLoopIteration(trialsLoopScheduler, snapshot)
         );
       }
-
-      // initialize takeABreakCredit values
-      showTakeABreakCreditBool = paramReader.read(
-        "showTakeABreakCreditBool",
-        currentBlockCondition
-      )[0];
-      takeABreakTrialCredit = paramReader.read(
-        "takeABreakTrialCredit",
-        currentBlockCondition
-      )[0];
-      takeABreakMinimumDurationSec = paramReader.read(
-        "takeABreakMinimumDurationSec",
-        currentBlockCondition
-      )[0];
-      currentTrialCredit = 0;
-      trialBreakStatus = false;
-      trialBreakButtonStatus = false;
-      hideTrialBreakWidget();
 
       return Scheduler.Event.NEXT;
     };
@@ -1390,6 +1365,10 @@ const experiment = (blockCount) => {
   /* --- /SIMULATED --- */
 
   var condition;
+
+  // Credit
+  var currentBlockCredit = 0;
+
   var skipTrialOrBlock = {
     blockId: null,
     trialId: null,
@@ -1416,7 +1395,6 @@ const experiment = (blockCount) => {
         }
       }
       const block_condition = condition["block_condition"];
-      currentBlockCondition = block_condition;
 
       // ! responseType
       responseType = getResponseType(
@@ -2444,17 +2422,21 @@ const experiment = (blockCount) => {
         routineTimer.reset();
         routineClock.reset();
 
-        currentTrialCredit += takeABreakTrialCredit;
-        if (showTakeABreakCreditBool) {
-          showTrialBreakProgressbar(currentTrialCredit);
+        // increase takeABreakCredit
+        currentBlockCredit += condition["takeABreakTrialCredit"];
+
+        // toggle takeABreak credit progress-bar
+        if (condition["showTakeABreakCreditBool"]) {
+          showTrialBreakProgressbar(currentBlockCredit);
         } else {
           hideTrialBreakProgressbar();
         }
+
         // check if trialBreak should be triggered
-        if (currentTrialCredit >= 1) {
+        if (currentBlockCredit >= 1) {
           trialBreakStartTime = Date.now();
           trialBreakStatus = true;
-          currentTrialCredit -= 1;
+          currentBlockCredit -= 1;
 
           showTrialBreakWidget("");
 
@@ -2463,6 +2445,8 @@ const experiment = (blockCount) => {
       }
 
       // if trialBreak is ongoing
+      const takeABreakMinimumDurationSec =
+        condition["takeABreakMinimumDurationSec"];
       if (trialBreakStatus) {
         const breakTimeElapsed = (Date.now() - trialBreakStartTime) / 1000;
         if (
@@ -2490,7 +2474,7 @@ const experiment = (blockCount) => {
             // but when its time to move to next routine, one more iteration of current routine is needed.
             // this last iteration will increase the trialcredit. To nullify the extra credit,
             // the credit is decreased here.
-            currentTrialCredit -= takeABreakTrialCredit;
+            currentBlockCredit -= condition["takeABreakTrialCredit"];
           };
 
           // responseType: 1,2 means click is allowed
