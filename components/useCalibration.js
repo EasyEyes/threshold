@@ -82,12 +82,16 @@ export const formCalibrationList = (reader) => {
 export const saveCheckData = (rc, psychoJS) => {
   // rc.checkData is a list of objects { timestamp: "", value: { field1: value1, filed2: value2 } }
   for (let data of rc.checkData) {
+    console.log(data);
     psychoJS.experiment.addData(
-      "calibrationCheckTimestamp",
+      `calibrationCheck_${data.measure}_timestamp`,
       data.timestamp.getTime ? data.timestamp.getTime() : data.timestamp
     );
     for (let name in data.value) {
-      psychoJS.experiment.addData("calibrationCheck_" + name, data.value[name]);
+      psychoJS.experiment.addData(
+        `calibrationCheck_${data.measure}_${name}`,
+        data.value[name]
+      );
     }
   }
 };

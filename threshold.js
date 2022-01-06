@@ -1569,6 +1569,7 @@ const experiment = (blockCount) => {
       // Repeat letters 3 times when in 'typographic' mode,
       // ie the relevant bounding box is that of three letters.
       const letterRepeats = spacingRelationToSize === "ratio" ? 1 : 3;
+      // eslint-disable-next-line no-prototype-builtins
       if (!characterSetBoundingRects.hasOwnProperty(block_condition)) {
         characterSetBoundingRects[block_condition] = getCharacterSetBoundingBox(
           characterSet,
