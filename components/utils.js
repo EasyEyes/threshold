@@ -116,51 +116,6 @@ export const pixelsToDegrees = (pixels, displayOptions) => {
   return degrees;
 };
 
-/**
- * Translation of MATLAB function of the same name
- * by Prof Denis Pelli, XYPixOfXYDeg.m
- * @param {Array} xyDegs List of [x,y] pairs, representing points x degrees right, and y degrees up, of fixation
- * @param {Object} displayOptions Parameters about the stimulus presentation
- * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
- * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
- * @param {Object} displayOptions.nearPointXYDeg Near-point on screen, in degrees relative to fixation(?)
- * @param {Number} displayOptions.nearPointXYDeg.x Degrees along x-axis of near-point from fixation
- * @param {Number} displayOptions.nearPointXYDeg.y Degrees along y-axis of near-point from fixation
- * @param {Object} displayOptions.nearPointXYPix Near-point on screen, in pixels relative to origin(?)
- * @param {Number} displayOptions.nearPointXYPix.x Pixels along x-axis of near-point from origin
- * @param {Number} displayOptions.nearPointXYPix.y Pixels along y-axis of near-point from origin
- * @returns {Number[][]} Array of length=2 arrays of numbers, representing the same points in Pixel space
- */
-export const XYPixsOfXYDegs = (xyDegs, displayOptions) => {
-  if (xyDegs.length == 0) {
-    return;
-  } // Return if no points to transform
-  // TODO verify displayOptions has the correct parameters
-  const xyPixs = [];
-  xyDegs.forEach((position) => {
-    position[0] = position[0] - displayOptions.nearPointXYDeg.x;
-    position[1] = position[1] - displayOptions.nearPointXYDeg.y;
-    const rDeg = Math.sqrt(position[0] ** 2 + position[1] ** 2);
-    const rPix =
-      displayOptions.pixPerCm *
-      displayOptions.viewingDistanceCm *
-      Math.tan(rDeg * (Math.PI / 180));
-    let pixelPosition = [];
-    if (rDeg > 0) {
-      pixelPosition = [
-        (position[0] * rPix) / rDeg,
-        (position[1] * rPix) / rDeg,
-      ];
-    } else {
-      pixelPosition = [0, 0];
-    }
-    pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
-    pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.x;
-    xyPixs.push(pixelPosition);
-  });
-  return xyPixs;
-};
-
 export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   // TODO verify displayOptions has the correct parameters
   const degPosition = [];
@@ -168,9 +123,10 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   degPosition[0] = xyDeg[0] - displayOptions.nearPointXYDeg.x;
   degPosition[1] = xyDeg[1] - displayOptions.nearPointXYDeg.y;
   const rDeg = Math.sqrt(degPosition[0] ** 2 + degPosition[1] ** 2);
-  if (rDeg > 90) {
+  if (rDeg > 89) {
     console.log("Angle too large! Trying again with a nearer colinear point.");
-    const rCompensation = 90 / rDeg;
+    // VERIFY that nearPoint is being considered properly, ie this is correct, rather than `rCompensation = 89 / Math.sqrt(xyDeg[0]**2 + xyDeg[1]**2)`
+    const rCompensation = 89 / rDeg;
     const constrainedPoint = [
       rCompensation * degPosition[0] + displayOptions.nearPointXYDeg.x,
       rCompensation * degPosition[1] + displayOptions.nearPointXYDeg.y,
