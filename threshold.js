@@ -1128,6 +1128,8 @@ const experiment = (blockCount) => {
 
       psychoJS.eventManager.clearKeys();
 
+      // reset takeABreak state
+      currentBlockCredit = 0;
       hideTrialBreakProgressbar();
 
       return Scheduler.Event.NEXT;
@@ -2518,6 +2520,8 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
 
         return Scheduler.Event.FLIP_REPEAT;
       } else {
+        if (currentTrialLength == currentTrialIndex)
+          hideTrialBreakProgressbar();
         return Scheduler.Event.NEXT;
       }
     };
