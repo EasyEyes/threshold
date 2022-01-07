@@ -2639,9 +2639,27 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
         quitSurvey: true,
       };
     }
+    function logKey(e) {
+      console.log(` ${e.code}`);
+      switch (e.code) {
+        case "Escape":
+          document.getElementById("quit-btn").click();
+          break;
+        case "Enter":
+          document.getElementById("skip-block-btn").click();
+          break;
+        case "Space":
+          document.getElementById("skip-trial-btn").click();
+          break;
+      }
+    }
+    document.addEventListener("keydown", logKey);
+    document.getElementById("skip-trial-btn").disabled = false;
+    document.getElementById("quit-btn").disabled = false;
     if (!isProlificPreviewExperiment()) {
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
+      document.getElementById("skip-block-btn").disabled = true;
     }
     let action = {
       skipTrial: false,
@@ -2689,6 +2707,9 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
       dialog.show();
     });
     await escapeKeyHandling;
+    document.getElementById("skip-trial-btn").disabled = true;
+    document.getElementById("quit-btn").disabled = true;
+    document.getElementById("skip-block-btn").disabled = true;
     // adding following lines to remove listeners
     document.getElementById("skip-trial-btn").outerHTML =
       document.getElementById("skip-trial-btn").outerHTML;
@@ -2696,6 +2717,8 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
       document.getElementById("skip-block-btn").outerHTML;
     document.getElementById("quit-btn").outerHTML =
       document.getElementById("quit-btn").outerHTML;
+
+    document.removeEventListener("keydown", logKey);
     return action;
   }
 };
