@@ -79,19 +79,57 @@ export const formCalibrationList = (reader) => {
   return tasks;
 };
 
+export const saveCalibratorData = (reader, rc, psychoJS) => {
+  if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"))) {
+    psychoJS.experiment.addData(
+      `screenWidthByObjectCm`,
+      rc.screenWidthCm ? rc.screenWidthCm.value : 0
+    );
+    psychoJS.experiment.addData(
+      `screenHeightByObjectCm`,
+      rc.screenHeightCm ? rc.screenHeightCm.value : 0
+    );
+  }
+
+  if (rc.viewingDistanceCm) {
+    for (let viewingDistanceData of rc.viewingDistanceData) {
+      if (viewingDistanceData.method === "BlindSpot") {
+        psychoJS.experiment.addData(
+          `viewingDistanceByBlindSpotCm`,
+          viewingDistanceData.value
+        );
+      }
+    }
+  }
+};
+
 export const saveCheckData = (rc, psychoJS) => {
   // rc.checkData is a list of objects { timestamp: "", value: { field1: value1, filed2: value2 } }
   for (let data of rc.checkData) {
-    console.log(data);
-    psychoJS.experiment.addData(
-      `calibrationCheck_${data.measure}_timestamp`,
-      data.timestamp.getTime ? data.timestamp.getTime() : data.timestamp
-    );
-    for (let name in data.value) {
+    // psychoJS.experiment.addData(
+    //   `calibrationCheck_${data.measure}_timestamp`,
+    //   data.timestamp.getTime ? data.timestamp.getTime() : data.timestamp
+    // );
+    if (data.measure === "screenSize") {
       psychoJS.experiment.addData(
-        `calibrationCheck_${data.measure}_${name}`,
-        data.value[name]
+        "screenWidthByRulerCm",
+        getCmValue(data.value.numerical, data.value.unit)
+      );
+    } else if (
+      data.measure === "measureDistance" ||
+      data.measure === "trackDistance"
+    ) {
+      psychoJS.experiment.addData(
+        "viewingDistanceByRulerCm",
+        getCmValue(data.value.numerical, data.value.unit)
       );
     }
   }
+};
+
+/* -------------------------------------------------------------------------- */
+
+const getCmValue = (numericalValue, unit) => {
+  if (unit === "cm") return numericalValue;
+  else return numericalValue * 2.54;
 };
