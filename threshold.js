@@ -54,6 +54,7 @@ import {
 import {
   formCalibrationList,
   ifAnyCheck,
+  saveCalibratorData,
   saveCheckData,
   useCalibration,
 } from "./components/useCalibration.js";
@@ -1156,6 +1157,8 @@ const experiment = (blockCount) => {
       );
 
       /* ----------------------------------- RC ----------------------------------- */
+      if (rc.viewingDistanceData.length || rc.screenData.length)
+        saveCalibratorData(paramReader, rc, psychoJS);
       if (ifAnyCheck(paramReader)) saveCheckData(rc, psychoJS);
 
       initInstructionClock.reset();
