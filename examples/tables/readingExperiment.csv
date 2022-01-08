@@ -1,0 +1,18 @@
+_about,reading experiment to aid Peiling's development
+_authors,Denis Pelli
+block,1
+calibrateBlindSpotBool,FALSE
+calibrateScreenSizeBool,FALSE
+readingCorpusURL,https://PhantomTollbooth.txt
+readingDefineSingleLineSpacingAs,nominalSize
+readingFont,Roboto Mono
+readingFontSource,google
+readingLinesPerPage,12
+readingMaxCharactersPerLine,57
+readingMultipleOfSingleLineSpacing,1.2
+readingNominalSizeDeg,0.5
+readingNumberOfPossibleAnswers,4
+readingNumberOfQuestions,3
+readingPages,4
+readingSetSizeBy,nominal
+targetTask,read

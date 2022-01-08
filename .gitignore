@@ -1,10 +1,13 @@
 # lib
 js
 
-examples/**/
-# !examples/fonts
-# !examples/forms
-# !examples/tables
+###
+# examples
+
+examples/*/*
+examples/tables/*
+examples/fonts/*
+examples/forms/*
 
 !examples/fonts/Auckland Optotype.woff2
 !examples/fonts/Douglass Pen.woff2
@@ -18,6 +21,9 @@ examples/**/
 
 !examples/tables/demoExperiment.xlsx
 !examples/tables/minimalExperiment.csv
+!examples/tables/readingExperiment.csv
+
+###
 
 node_modules
 
