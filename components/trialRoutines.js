@@ -237,10 +237,11 @@ export const _identify_trialInstructionRoutineBegin = (
 
   // trackGazeYes = reader.read("trackGazeYes", block_condition);
   // trackHeadYes = reader.read("trackHeadYes", block_condition);
-  let wirelessKeyboardNeededYes = reader.read(
-    "wirelessKeyboardNeededYes",
-    block_condition
-  );
+
+  // let wirelessKeyboardNeededYes = reader.read(
+  //   "wirelessKeyboardNeededYes",
+  //   block_condition
+  // );
 
   var characterSet = targetCharacterSet;
 
