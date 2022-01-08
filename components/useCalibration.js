@@ -111,10 +111,23 @@ export const saveCheckData = (rc, psychoJS) => {
     //   data.timestamp.getTime ? data.timestamp.getTime() : data.timestamp
     // );
     if (data.measure === "screenSize") {
-      psychoJS.experiment.addData(
-        "screenWidthByRulerCm",
-        getCmValue(data.value.numerical, data.value.unit)
-      );
+      if (data.value.horizontal)
+        psychoJS.experiment.addData(
+          "screenWidthByRulerCm",
+          (getCmValue(
+            data.value.horizontal.numerical,
+            data.value.horizontal.unit
+          ) *
+            screen.width) /
+            data.value.horizontal.arrowWidthPx
+        );
+      if (data.value.vertical)
+        psychoJS.experiment.addData(
+          "screenHeightByRulerCm",
+          (getCmValue(data.value.vertical.numerical, data.value.vertical.unit) *
+            screen.height) /
+            data.value.vertical.arrowHeightPx
+        );
     } else if (
       data.measure === "measureDistance" ||
       data.measure === "trackDistance"
