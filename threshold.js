@@ -4,7 +4,12 @@
  * Crowding Test *
  *****************/
 
-import { debug, getTripletCharacters, sleep } from "./components/utils.js";
+import {
+  debug,
+  getTripletCharacters,
+  sleep,
+  toShowCursor,
+} from "./components/utils.js";
 
 const useRC = true;
 
@@ -40,11 +45,9 @@ import { ParamReader } from "./parameters/paramReader.js";
 
 import {
   logger,
-  loggerText,
+  // loggerText,
   hideCursor,
   showCursor,
-  XYPixOfXYDeg,
-  XYDegOfXYPix,
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
@@ -110,21 +113,21 @@ import {
   simulateObserverResponse,
 } from "./components/simulatedObserver.js";
 import { showExperimentEnding } from "./components/widgets.js";
-import {
-  getCanvasContext,
-  getPixelRGBA,
-  initPixelsArray,
-  readPixels,
-} from "./components/canvasContext.js";
+// import {
+//   getCanvasContext,
+//   getPixelRGBA,
+//   initPixelsArray,
+//   readPixels,
+// } from "./components/canvasContext.js";
 import { populateQuestDefaults } from "./components/questValues.js";
 
 // READING
-import {
-  getPageData,
-  prepareForReading,
-  readBookText,
-  readingTaskFields,
-} from "./components/readingUtils.js";
+// import {
+//   getPageData,
+//   prepareForReading,
+//   readBookText,
+//   readingTaskFields,
+// } from "./components/readingUtils.js";
 import {
   hideTrialBreakProgressbar,
   hideTrialBreakWidget,
@@ -133,6 +136,10 @@ import {
   showTrialBreakWidget,
   showTrialProceedButton,
 } from "./components/trialBreak.js";
+import {
+  _identify_trialInstructionRoutineBegin,
+  _identify_trialInstructionRoutineEnd,
+} from "./components/trialRoutines.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -653,7 +660,7 @@ const experiment = (blockCount) => {
   var continueRoutine;
   var fileComponents;
 
-  var clickedContinue;
+  var clickedContinue = { current: false };
 
   var responseType = 2;
 
@@ -665,9 +672,9 @@ const experiment = (blockCount) => {
   var fixationXYPx;
   var fixationSize = 45.0;
   var showFixation;
-  var windowWidthCm;
-  var windowWidthPx;
-  var pixPerCm;
+  // var windowWidthCm;
+  // var windowWidthPx;
+  // var pixPerCm;
 
   function fileRoutineBegin(snapshot) {
     return async function () {
@@ -761,24 +768,8 @@ const experiment = (blockCount) => {
     instructions.setAutoDraw(true);
   }
 
-  function _instructionBeforeStimulusSetup(text) {
-    t = 0;
-    instructionsClock.reset(); // clock
-    frameN = -1;
-    continueRoutine = true;
-    // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
-    const wrapWidth = window.innerWidth / 4;
-    instructions.setWrapWidth(wrapWidth);
-    instructions.setPos([
-      -window.innerWidth / 2 + 5,
-      window.innerHeight / 2 - 5,
-    ]);
-    instructions.setText(text);
-    instructions.setAutoDraw(true);
-  }
-
   function _clickContinue(e) {
-    if (e.target.id !== "threshold-beep-button") clickedContinue = true;
+    if (e.target.id !== "threshold-beep-button") clickedContinue.current = true;
   }
 
   async function _instructionRoutineEachFrame() {
@@ -812,7 +803,7 @@ const experiment = (blockCount) => {
       continueRoutine = false;
     }
 
-    if (continueRoutine && !clickedContinue) {
+    if (continueRoutine && !clickedContinue.current) {
       return Scheduler.Event.FLIP_REPEAT;
     } else {
       return Scheduler.Event.NEXT;
@@ -863,7 +854,7 @@ const experiment = (blockCount) => {
         blocksLoopScheduler.add(initInstructionRoutineEnd());
         blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
         blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
-        blocksLoopScheduler.add(eduInstructionRoutineEnd());
+        blocksLoopScheduler.add(eduInstructionRoutineEnd(snapshot));
         const trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
@@ -889,13 +880,20 @@ const experiment = (blockCount) => {
       trialsConditions = trialsConditions.map((condition) =>
         Object.assign(condition, { label: condition["block_condition"] })
       );
-      trialsConditions = populateQuestDefaults(trialsConditions, paramReader);
 
+      // nTrialsTotal
       const nTrialsTotal = trialsConditions
         .map((c) =>
           Number(paramReader.read("conditionTrials", c.block_condition))
         )
         .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
+
+      if (snapshot.targetTask === "read") {
+        // READ
+      } else {
+        trialsConditions = populateQuestDefaults(trialsConditions, paramReader);
+      }
+
       trials = new data.MultiStairHandler({
         stairType: MultiStairHandler.StaircaseType.QUEST,
         psychoJS: psychoJS,
@@ -911,18 +909,9 @@ const experiment = (blockCount) => {
       fixationSize = 45;
       showFixation = true;
 
-      trialInfoStr = getTrialInfoStr(
-        rc.language.value,
-        showCounterBool,
-        showViewingDistanceBool,
-        currentTrialIndex,
-        currentTrialLength,
-        currentBlockIndex,
-        totalBlockCount,
-        viewingDistanceCm
-      );
+      trialInfoStr = "";
       totalTrial.setText(trialInfoStr);
-      totalTrial.setAutoDraw(true);
+      totalTrial.setAutoDraw(false);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop
@@ -1118,7 +1107,7 @@ const experiment = (blockCount) => {
           instructionsText.initialEnd(rc.language.value, responseType)
       );
 
-      clickedContinue = false;
+      clickedContinue.current = false;
       setTimeout(() => {
         document.addEventListener("click", _clickContinue);
         document.addEventListener("touchend", _clickContinue);
@@ -1182,53 +1171,68 @@ const experiment = (blockCount) => {
       eduInstructionClock.reset();
 
       TrialHandler.fromSnapshot(snapshot);
-      _instructionSetup(instructionsText.edu(rc.language.value));
 
-      instructions2.setText(
-        instructionsText.eduBelow(rc.language.value, responseType)
-      );
-      instructions2.setWrapWidth(window.innerWidth * 0.8);
-      instructions2.setPos([
-        -window.innerWidth * 0.4,
-        -window.innerHeight * 0.4,
-      ]);
-      instructions2.setAutoDraw(true);
-
-      clickedContinue = false;
+      clickedContinue.current = false;
       setTimeout(() => {
         document.addEventListener("click", _clickContinue);
         document.addEventListener("touchend", _clickContinue);
       }, 1000);
 
-      const h = 50;
-      const D = 200;
-      const g = 100;
+      const { targetTask } = snapshot;
 
-      target.setFont(instructionFont);
-      target.setPos([D, 0]);
-      target.setText("R");
-      target.setHeight(h);
+      if (targetTask === "read") {
+        // READING
+        _instructionSetup(
+          "This block is READING TASK. Here are the instructions... To continue, click anywhere."
+        );
+        instructions2.setAutoDraw(false);
+        fixation.setAutoDraw(false);
+        target.setAutoDraw(false);
+        flanker1.setAutoDraw(false);
+        flanker2.setAutoDraw(false);
+      } else {
+        // IDENTIFY
+        _instructionSetup(instructionsText.edu(rc.language.value));
 
-      flanker1.setFont(instructionFont);
-      flanker1.setPos([D - g, 0]);
-      flanker1.setText("H");
-      flanker1.setHeight(h);
+        instructions2.setText(
+          instructionsText.eduBelow(rc.language.value, responseType)
+        );
+        instructions2.setWrapWidth(window.innerWidth * 0.8);
+        instructions2.setPos([
+          -window.innerWidth * 0.4,
+          -window.innerHeight * 0.4,
+        ]);
+        instructions2.setAutoDraw(true);
 
-      flanker2.setFont(instructionFont);
-      flanker2.setPos([D + g, 0]);
-      flanker2.setText("C");
-      flanker2.setHeight(h);
+        const h = 50;
+        const D = 200;
+        const g = 100;
 
-      fixation.setHeight(fixationSize);
-      fixation.setPos([0, 0]);
+        target.setFont(instructionFont);
+        target.setPos([D, 0]);
+        target.setText("R");
+        target.setHeight(h);
 
-      fixation.setAutoDraw(true);
-      target.setAutoDraw(true);
-      flanker1.setAutoDraw(true);
-      flanker2.setAutoDraw(true);
+        flanker1.setFont(instructionFont);
+        flanker1.setPos([D - g, 0]);
+        flanker1.setText("H");
+        flanker1.setHeight(h);
+
+        flanker2.setFont(instructionFont);
+        flanker2.setPos([D + g, 0]);
+        flanker2.setText("C");
+        flanker2.setHeight(h);
+
+        fixation.setHeight(fixationSize);
+        fixation.setPos([0, 0]);
+
+        fixation.setAutoDraw(true);
+        target.setAutoDraw(true);
+        flanker1.setAutoDraw(true);
+        flanker2.setAutoDraw(true);
+      }
 
       psychoJS.eventManager.clearKeys();
-
       return Scheduler.Event.NEXT;
     };
   }
@@ -1237,29 +1241,34 @@ const experiment = (blockCount) => {
     return _instructionRoutineEachFrame;
   }
 
-  function eduInstructionRoutineEnd() {
+  function eduInstructionRoutineEnd({ targetTask }) {
     return async function () {
       // ! Distance
       // rc.pauseDistance();
 
       instructions.setAutoDraw(false);
-      instructions2.setAutoDraw(false);
 
       document.removeEventListener("click", _clickContinue);
       document.removeEventListener("touchend", _clickContinue);
 
-      target.setAutoDraw(false);
-      flanker1.setAutoDraw(false);
-      flanker2.setAutoDraw(false);
+      if (targetTask === "read") {
+        // READ
+      } else {
+        instructions2.setAutoDraw(false);
 
-      psychoJS.experiment.addData(
-        "eduInstructionRoutineDurationFromBeginSec",
-        eduInstructionClock.getTime()
-      );
-      psychoJS.experiment.addData(
-        "eduInstructionRoutineDurationFromPreviousEndSec",
-        routineClock.getTime()
-      );
+        target.setAutoDraw(false);
+        flanker1.setAutoDraw(false);
+        flanker2.setAutoDraw(false);
+
+        psychoJS.experiment.addData(
+          "eduInstructionRoutineDurationFromBeginSec",
+          eduInstructionClock.getTime()
+        );
+        psychoJS.experiment.addData(
+          "eduInstructionRoutineDurationFromPreviousEndSec",
+          routineClock.getTime()
+        );
+      }
 
       eduInstructionClock.reset();
       routineTimer.reset();
@@ -1274,7 +1283,7 @@ const experiment = (blockCount) => {
   //     TrialHandler.fromSnapshot(snapshot);
   //     _instructionSetup(instructionsText.block(snapshot.block + 1));
 
-  //     clickedContinue = false;
+  //     clickedContinue.current = false;
   //     document.addEventListener("click", _clickContinue);
   //     document.addEventListener("touchend", _clickContinue);
 
@@ -1290,53 +1299,19 @@ const experiment = (blockCount) => {
   //   return _instructionRoutineEnd;
   // }
 
-  const _takeFixationClick = (e) => {
-    let cX, cY;
-    if (e.clientX) {
-      cX = e.clientX;
-      cY = e.clientY;
-    } else {
-      const t = e.changedTouches[0];
-      if (t.clientX) {
-        cX = t.clientX;
-        cY = t.clientY;
-      } else {
-        clickedContinue = false;
-        return;
-      }
-    }
-
-    if (
-      Math.hypot(
-        cX - (window.innerWidth >> 1),
-        cY - (window.innerHeight >> 1)
-      ) < fixationSize
-    ) {
-      // Clicked on fixation
-      hideCursor();
-      setTimeout(() => {
-        clickedContinue = true;
-      }, 17);
-    } else {
-      // wrongSynth.play();
-      clickedContinue = false;
-    }
-  };
-
   var level;
-  var viewingDistanceDesiredCm;
-  var viewingDistanceCm;
+  // var viewingDistanceDesiredCm;
 
-  var block;
-  var spacingDirection;
+  // var block;
+  // var spacingDirection;
   var targetFont;
   var targetCharacterSet;
   var validAns;
   var showCharacterSetWhere;
-  var showCharacterSetElement;
-  var showCounterBool;
+  // var showCharacterSetElement;
+  // var showCounterBool;
   var showTargetSpecs;
-  var showViewingDistanceBool;
+  // var showViewingDistanceBool;
   const showCharacterSetResponse = {
     current: null,
     onsetTime: 0,
@@ -1344,22 +1319,22 @@ const experiment = (blockCount) => {
   };
   var showBoundingBox;
   var stimulusParameters;
-  var targetKind;
+  // var targetKind;
   var targetDurationSec;
-  var targetMinimumPix;
-  var targetSizeDeg;
-  var targetSizeIsHeightBool;
-  var thresholdParameter;
-  var spacingSymmetry;
-  var spacingOverSizeRatio;
+  // var targetMinimumPix;
+  // var targetSizeDeg;
+  // var targetSizeIsHeightBool;
+  // var thresholdParameter;
+  // var spacingSymmetry;
+  // var spacingOverSizeRatio;
   var spacingRelationToSize;
-  var targetEccentricityXDeg;
-  var targetEccentricityYDeg;
-  var targetEccentricityXYDeg;
+  // var targetEccentricityXDeg;
+  // var targetEccentricityYDeg;
+  // var targetEccentricityXYDeg;
   var targetSafetyMarginSec;
   // var trackGazeYes;
   // var trackHeadYes;
-  var wirelessKeyboardNeededYes;
+  // var wirelessKeyboardNeededYes;
 
   var _key_resp_allKeys;
   var trialComponents;
@@ -1369,6 +1344,7 @@ const experiment = (blockCount) => {
   /* --- /SIMULATED --- */
 
   var condition;
+  var targetTask;
 
   // Credit
   var currentBlockCredit = 0;
@@ -1383,11 +1359,11 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       // showCursor();
-      logger("not showing cursor!");
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
       const parametersToExcludeFromData = [];
+
       for (let c of snapshot.handler.getConditions()) {
         if (c.block_condition === trials._currentStaircase._name) {
           condition = c;
@@ -1409,428 +1385,99 @@ const experiment = (blockCount) => {
       );
       logger("responseType", responseType);
 
-      // update trial/block count
-      currentTrialIndex = snapshot.thisN + 1;
-      currentTrialLength = snapshot.nTotal;
-      trialInfoStr = getTrialInfoStr(
-        rc.language.value,
-        showCounterBool,
-        showViewingDistanceBool,
-        currentTrialIndex,
-        currentTrialLength,
-        currentBlockIndex,
-        totalBlockCount,
-        viewingDistanceCm
-      );
-      totalTrial.setText(trialInfoStr);
-      totalTrial.setFont(instructionFont);
-      totalTrial.setHeight(totalTrialConfig.fontSize);
-      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-      totalTrial.setAutoDraw(true);
+      targetTask = paramReader.read("targetTask", block_condition);
 
-      _instructionBeforeStimulusSetup(
-        instructionsText.trial.fixate["spacing"](
-          rc.language.value,
-          responseType
-        )
-      );
-
-      fixation.setHeight(fixationSize);
-      fixation.setPos(fixationXYPx);
-      fixation.tStart = t;
-      fixation.frameNStart = frameN;
-      fixation.setAutoDraw(true);
-
-      clickedContinue = false;
-      document.addEventListener("click", _takeFixationClick);
-      document.addEventListener("touchend", _takeFixationClick);
-
-      /* PRECOMPUTE STIMULI FOR THE UPCOMING TRIAL */
-      TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-      const reader = paramReader;
-      let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-      psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-
-      psychoJS.experiment.addData("block_condition", block_condition);
-      psychoJS.experiment.addData(
-        "flankerOrientation",
-        reader.read("spacingDirection", block_condition)
-      );
-      psychoJS.experiment.addData(
-        "targetFont",
-        reader.read("targetFont", block_condition)
-      );
-      // update component parameters for each repeat
-      windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
-      windowWidthPx = rc.displayWidthPx.value;
-      pixPerCm = windowWidthPx / windowWidthCm;
-      if (!rc.screenWidthCm)
-        console.warn("[Screen Width] Using arbitrary screen width. Enable RC.");
-
-      viewingDistanceDesiredCm = reader.read(
-        "viewingDistanceDesiredCm",
-        block_condition
-      );
-      // viewingDistanceDesiredCm = 10;
-      viewingDistanceCm = rc.viewingDistanceCm
-        ? rc.viewingDistanceCm.value
-        : viewingDistanceDesiredCm;
-      if (!rc.viewingDistanceCm)
-        console.warn(
-          "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
-        );
-
-      block = condition["block"];
-
-      // TODO check that we are actually trying to test for "spacing", not "size"
-
-      spacingDirection = reader.read("spacingDirection", block_condition);
-      spacingSymmetry = reader.read("spacingSymmetry", block_condition);
-      let targetFontSource = reader.read("targetFontSource", block_condition);
-      targetFont = reader.read("targetFont", block_condition);
-      if (targetFontSource === "file") targetFont = cleanFontName(targetFont);
-
-      targetCharacterSet = String(
-        reader.read("targetCharacterSet", block_condition)
-      ).split("");
-      validAns = String(reader.read("targetCharacterSet", block_condition))
-        .toLowerCase()
-        .split("");
-
-      showCharacterSetWhere = reader.read(
-        "showCharacterSetWhere",
-        block_condition
-      );
-      showViewingDistanceBool = reader.read(
-        "showViewingDistanceBool",
-        block_condition
-      );
-      showCounterBool = reader.read("showCounterBool", block_condition);
-      showTargetSpecs = paramReader.read(
-        "showTargetSpecsBool",
-        block_condition
-      );
-
-      conditionTrials = reader.read("conditionTrials", block_condition);
-      targetDurationSec = reader.read("targetDurationSec", block_condition);
-
-      fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
-      showFixation = reader.read("markTheFixationBool", block_condition);
-
-      targetKind = reader.read("targetKind", block_condition);
-      targetSizeDeg = reader.read("targetSizeDeg", block_condition);
-      targetSizeIsHeightBool = reader.read(
-        "targetSizeIsHeightBool",
-        block_condition
-      );
-      thresholdParameter = reader.read("thresholdParameter", block_condition);
-      targetMinimumPix = reader.read("targetMinimumPix", block_condition);
-      spacingOverSizeRatio = reader.read(
-        "spacingOverSizeRatio",
-        block_condition
-      );
-      spacingRelationToSize = reader.read(
-        "spacingRelationToSize",
-        block_condition
-      );
-      showBoundingBox =
-        reader.read("showBoundingBoxBool", block_condition) || false;
-
-      targetMinimumPix = reader.read("targetMinimumPix", block_condition);
-      targetEccentricityXDeg = reader.read(
-        "targetEccentricityXDeg",
-        block_condition
-      );
-      psychoJS.experiment.addData(
-        "targetEccentricityXDeg",
-        targetEccentricityXDeg
-      );
-      targetEccentricityYDeg = reader.read(
-        "targetEccentricityYDeg",
-        block_condition
-      );
-      psychoJS.experiment.addData(
-        "targetEccentricityYDeg",
-        targetEccentricityYDeg
-      );
-      targetEccentricityXYDeg = [
-        targetEccentricityXDeg,
-        targetEccentricityYDeg,
-      ];
-      targetSafetyMarginSec = paramReader.read(
-        "targetSafetyMarginSec",
-        block_condition
-      );
-
-      // trackGazeYes = reader.read("trackGazeYes", block_condition);
-      // trackHeadYes = reader.read("trackHeadYes", block_condition);
-      wirelessKeyboardNeededYes = reader.read(
-        "wirelessKeyboardNeededYes",
-        block_condition
-      );
-
-      var characterSet = targetCharacterSet;
-
-      // Repeat letters 3 times when in 'typographic' mode,
-      // ie the relevant bounding box is that of three letters.
-      const letterRepeats = spacingRelationToSize === "ratio" ? 1 : 3;
-      // eslint-disable-next-line no-prototype-builtins
-      if (!characterSetBoundingRects.hasOwnProperty(block_condition)) {
-        characterSetBoundingRects[block_condition] = getCharacterSetBoundingBox(
-          characterSet,
+      if (targetTask === "read") {
+        // READ
+        console.log("read");
+      } else {
+        // IDENTIFY
+        [
+          currentTrialIndex,
+          currentTrialLength,
+          trialInfoStr, //
+          t,
+          frameN,
+          continueRoutine, //
+          fixationSize,
+          fixationXYPx, //
           targetFont,
-          psychoJS.window,
-          letterRepeats
-        );
-      }
-      /* ------------------------------ Pick triplets ----------------------------- */
-      var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
-        getTripletCharacters(characterSet);
-      if (debug)
-        console.log(
-          `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
-          "color: red; font-size: 1.5rem"
-        );
-      correctAns = targetCharacter.toLowerCase();
-      /* -------------------------------------------------------------------------- */
-
-      var pos1XYPx, targetEccentricityXYPx, pos3XYPx;
-      var spacingDeg, spacingPx;
-
-      ////
-      // !
-      // TODO use actual nearPoint, from RC
-      const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
-      const nearPointXYPix = { x: 0, y: 0 }; // TEMP
-      const displayOptions = {
-        pixPerCm: pixPerCm,
-        viewingDistanceCm: viewingDistanceCm,
-        nearPointXYDeg: nearPointXYDeg,
-        nearPointXYPix: nearPointXYPix,
-        fixationXYPix: fixationXYPx,
-        spacingOverSizeRatio: spacingOverSizeRatio,
-        targetMinimumPix: targetMinimumPix,
-        fontFamily: targetFont,
-        window: psychoJS.window,
-        spacingRelationToSize: spacingRelationToSize,
-        targetEccentricityXYDeg: targetEccentricityXYDeg,
-        spacingDirection: spacingDirection,
-        flankerCharacters: [firstFlankerCharacter, secondFlankerCharacter],
-        targetCharacter: targetCharacter,
-        targetSizeDeg: targetSizeDeg,
-        targetKind: targetKind,
-      };
-
-      // Fixation placement does not depend on the value of "spacingRelationToSize"...
-      fixation.setPos(fixationXYPx);
-      fixation.setHeight(fixationSize);
-      // ... neither does target location...
-      targetEccentricityXYPx = XYPixOfXYDeg(
-        targetEccentricityXYDeg,
-        displayOptions
-      );
-      // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
-      psychoJS.experiment.addData("targetLocationPx", targetEccentricityXYPx);
-      target.setPos(targetEccentricityXYPx);
-      target.setFont(targetFont);
-
-      // ...but size, and content of the target(& flankers) does.
-      psychoJS.experiment.addData(
-        "spacingRelationToSize",
-        spacingRelationToSize
-      );
-      [level, stimulusParameters] = restrictLevel(
-        proposedLevel,
-        thresholdParameter,
-        characterSetBoundingRects[block_condition],
-        spacingDirection,
-        spacingRelationToSize,
-        spacingSymmetry,
-        spacingOverSizeRatio,
-        targetSizeIsHeightBool,
-        displayOptions
-      );
-      psychoJS.experiment.addData("level", level);
-      psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
-      target.setHeight(stimulusParameters.heightPx);
-      target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
-      psychoJS.experiment.addData(
-        "targetLocationPx",
-        stimulusParameters.targetAndFlankersXYPx[0]
-      );
-      switch (thresholdParameter) {
-        case "size":
-          flanker1.setAutoDraw(false);
-          flanker2.setAutoDraw(false);
-          break;
-        case "spacing":
-          switch (spacingRelationToSize) {
-            case "none":
-            case "ratio":
-              target.setText(targetCharacter);
-              flanker1.setText(firstFlankerCharacter);
-              flanker2.setText(secondFlankerCharacter);
-              flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
-              flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
-              flanker1.setFont(targetFont);
-              flanker2.setFont(targetFont);
-              flanker1.setHeight(stimulusParameters.heightPx);
-              flanker2.setHeight(stimulusParameters.heightPx);
-              psychoJS.experiment.addData("flankerLocationsPx", [
-                stimulusParameters.targetAndFlankersXYPx[1],
-                stimulusParameters.targetAndFlankersXYPx[2],
-              ]);
-              break;
-            case "typographic":
-              // ...include the flankers in the same string/stim as the target.
-              // const flankersAndTargetString =
-              //   firstFlankerCharacter +
-              //   targetCharacter +
-              //   secondFlankerCharacter;
-              target.setText(
-                firstFlankerCharacter + targetCharacter + secondFlankerCharacter
-              );
-              flanker1.setAutoDraw(false);
-              flanker2.setAutoDraw(false);
-              break;
+          targetCharacterSet,
+          validAns,
+          showCharacterSetWhere,
+          correctAns, //
+          showTargetSpecs,
+          conditionTrials,
+          targetDurationSec, //
+          showFixation,
+          spacingRelationToSize,
+          showBoundingBox,
+          targetSafetyMarginSec, //
+          level,
+          stimulusParameters,
+          trialComponents, //
+          simulated,
+          simulatedObserver,
+        ] = _identify_trialInstructionRoutineBegin(
+          psychoJS,
+          PsychoJS,
+          rc,
+          paramReader,
+          snapshot,
+          condition,
+          block_condition,
+          {
+            currentTrialIndex,
+            currentTrialLength,
+            trialInfoStr, //
+            t,
+            frameN,
+            continueRoutine, //
+            fixationSize,
+            fixationXYPx, //
+            targetFont,
+            targetCharacterSet,
+            validAns,
+            showCharacterSetWhere,
+            correctAns, //
+            showTargetSpecs,
+            conditionTrials,
+            targetDurationSec, //
+            showFixation,
+            spacingRelationToSize,
+            showBoundingBox,
+            targetSafetyMarginSec, //
+            level,
+            stimulusParameters,
+            trialComponents, //
+            simulated,
+            simulatedObserver, //
+            // ---
+            TrialHandler, //
+            instructionsClock,
+            key_resp, //
+            instructions,
+            fixation,
+            target,
+            flanker1,
+            flanker2,
+            showCharacterSet,
+            totalTrial,
+            targetBoundingPoly,
+            flanker1BoundingPoly,
+            flanker2BoundingPoly,
+            targetSpecs, //
+            clickedContinue,
+            characterSetBoundingRects,
+            totalTrialConfig, //
+            currentBlockIndex,
+            totalBlockCount,
+            responseType,
+            instructionFont, //
+            currentLoop, //
           }
-          break;
+        );
       }
-      [
-        target,
-        flanker1,
-        flanker2,
-        fixation,
-        showCharacterSet,
-        totalTrial,
-      ].forEach((c) => c._updateIfNeeded());
-      if (showBoundingBox) {
-        const boundingStims = [targetBoundingPoly];
-        const tightBoundingBox = target.getBoundingBox(true);
-        targetBoundingPoly.setPos([
-          tightBoundingBox.left,
-          tightBoundingBox.top,
-        ]);
-        targetBoundingPoly.setSize([
-          tightBoundingBox.width,
-          tightBoundingBox.height,
-        ]);
-        if (
-          (spacingRelationToSize === "ratio" ||
-            spacingRelationToSize === "none") &&
-          thresholdParameter === "spacing"
-        ) {
-          boundingStims.push(flanker1BoundingPoly, flanker2BoundingPoly);
-          const flanker1BoundingBox = flanker1.getBoundingBox(true);
-          flanker1BoundingPoly.setPos([
-            flanker1BoundingBox.left,
-            flanker1BoundingBox.top,
-          ]);
-          flanker1BoundingPoly.setSize([
-            flanker1BoundingBox.width,
-            flanker1BoundingBox.height,
-          ]);
-          const flanker2BoundingBox = flanker2.getBoundingBox(true);
-          flanker2BoundingPoly.setPos([
-            flanker2BoundingBox.left,
-            flanker2BoundingBox.top,
-          ]);
-          flanker2BoundingPoly.setSize([
-            flanker2BoundingBox.width,
-            flanker2BoundingBox.height,
-          ]);
-        }
-        boundingStims.forEach((c) => c._updateIfNeeded());
-      }
-      showCharacterSet.setPos([0, 0]);
-      showCharacterSet.setText("");
-      // showCharacterSet.setText(getCharacterSetShowText(validAns))
-
-      if (showTargetSpecs) {
-        const spacing =
-          Math.round((Math.pow(10, level) + Number.EPSILON) * 1000) / 1000;
-        const size =
-          Math.round((spacing / spacingOverSizeRatio + Number.EPSILON) * 1000) /
-          1000;
-        let targetSpecsString = `size: ${size} deg
-spacing: ${spacing} deg
-targetFont: ${targetFont}
-spacingRelationToSize: ${spacingRelationToSize}
-spacingOverSizeRatio: ${spacingOverSizeRatio}`;
-        targetSpecs.setText(targetSpecsString);
-        targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
-        targetSpecs.setAutoDraw(true);
-      }
-
-      trialInfoStr = getTrialInfoStr(
-        rc.language.value,
-        showCounterBool,
-        showViewingDistanceBool,
-        currentTrialIndex,
-        currentTrialLength,
-        currentBlockIndex,
-        totalBlockCount,
-        viewingDistanceCm
-      );
-      totalTrial.setText(trialInfoStr);
-      totalTrial.setFont(instructionFont);
-      totalTrial.setHeight(totalTrialConfig.fontSize);
-      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-      // // totalTrialIndex = nextTrialInfo.trial;
-      // // totalBlockIndex = nextTrialInfo.block
-      // // keep track of which components have finished
-      trialComponents = [];
-      trialComponents.push(key_resp);
-      trialComponents.push(fixation);
-      trialComponents.push(flanker1);
-      trialComponents.push(target);
-      trialComponents.push(flanker2);
-
-      trialComponents.push(showCharacterSet);
-      trialComponents.push(totalTrial);
-      // if (showTargetSpecs) trialComponents.push(targetSpecs);
-      // /* --- BOUNDING BOX --- */
-      if (showBoundingBox) {
-        trialComponents.push(targetBoundingPoly);
-        if (
-          (spacingRelationToSize === "ratio" ||
-            spacingRelationToSize === "none") &&
-          thresholdParameter === "spacing"
-        ) {
-          trialComponents.push(flanker1BoundingPoly);
-          trialComponents.push(flanker2BoundingPoly);
-        }
-      }
-      // /* --- /BOUNDING BOX --- */
-      // /* --- SIMULATED --- */
-      if (simulated && simulated[block]) {
-        if (!simulatedObserver[block_condition]) {
-          simulatedObserver[block_condition] = new SimulatedObserver(
-            simulated[block][block_condition],
-            level,
-            characterSet,
-            targetCharacter,
-            paramReader.read("thresholdProportionCorrect", block_condition),
-            paramReader.read("simulationBeta", block_condition),
-            paramReader.read("simulationDelta", block_condition),
-            paramReader.read("simulationThreshold", block_condition)
-          );
-        } else {
-          simulatedObserver[block_condition].updateTrial(
-            level,
-            characterSet,
-            targetCharacter
-          );
-        }
-      }
-      // /* --- /SIMULATED --- */
-      for (const thisComponent of trialComponents)
-        if ("status" in thisComponent)
-          thisComponent.status = PsychoJS.Status.NOT_STARTED;
-
-      // update trial index
-      // totalTrialIndex = totalTrialIndex + 1;
-      /* /PRECOMPUTE STIMULI FOR THE UPCOMING TRIAL */
 
       psychoJS.eventManager.clearKeys();
 
@@ -1838,6 +1485,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
         "trialInstructionBeginDurationSec",
         trialInstructionClock.getTime()
       );
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -1845,30 +1493,32 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
   function trialInstructionRoutineEachFrame() {
     return async function () {
       if (
-        (skipTrialOrBlock.trialId == currentTrialIndex &&
-          skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipTrial) ||
-        (skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipBlock)
+        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
       ) {
         showCursor();
         return Scheduler.Event.NEXT;
       }
-      /* --- SIMULATED --- */
-      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
-      /* --- /SIMULATED --- */
-      t = instructionsClock.getTime();
-      frameN = frameN + 1;
 
-      if (showTargetSpecs) {
-        targetSpecsConfig.x = -window.innerWidth / 2;
-        targetSpecsConfig.y = -window.innerHeight / 2;
-        if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
-          // keep track of start time/frame for later
-          targetSpecs.tStart = t; // (not accounting for frame time here)
-          targetSpecs.frameNStart = frameN; // exact frame index
+      if (targetTask === "read") {
+        // READ
+      } else {
+        // IDENTIFY
+        /* --- SIMULATED --- */
+        if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+        /* --- /SIMULATED --- */
+        t = instructionsClock.getTime();
+        frameN = frameN + 1;
+
+        if (showTargetSpecs) {
+          targetSpecsConfig.x = -window.innerWidth / 2;
+          targetSpecsConfig.y = -window.innerHeight / 2;
+          if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
+            // keep track of start time/frame for later
+            targetSpecs.tStart = t; // (not accounting for frame time here)
+            targetSpecs.frameNStart = frameN; // exact frame index
+          }
+          targetSpecs.setAutoDraw(true);
         }
-        targetSpecs.setAutoDraw(true);
       }
 
       if (
@@ -1896,7 +1546,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
         continueRoutine = false;
       }
 
-      if (continueRoutine && !clickedContinue) {
+      if (continueRoutine && !clickedContinue.current) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
         return Scheduler.Event.NEXT;
@@ -1907,19 +1557,17 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
   function trialInstructionRoutineEnd() {
     return async function () {
       if (
-        (skipTrialOrBlock.trialId == currentTrialIndex &&
-          skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipTrial) ||
-        (skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipBlock)
+        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
       ) {
         showCursor();
         return Scheduler.Event.NEXT;
       }
 
-      document.removeEventListener("click", _takeFixationClick);
-      document.removeEventListener("touchend", _takeFixationClick);
-      instructions.setAutoDraw(false);
+      if (targetTask === "read") {
+        // READ
+      } else {
+        _identify_trialInstructionRoutineEnd(instructions);
+      }
 
       psychoJS.experiment.addData(
         "trialInstructionRoutineDurationFromBeginSec",
@@ -1941,11 +1589,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
       // await sleep(100);
 
       if (
-        (skipTrialOrBlock.trialId == currentTrialIndex &&
-          skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipTrial) ||
-        (skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipBlock)
+        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
       ) {
         showCursor();
         return Scheduler.Event.NEXT;
@@ -2003,11 +1647,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
   function trialRoutineEachFrame() {
     return async function () {
       if (
-        (skipTrialOrBlock.trialId == currentTrialIndex &&
-          skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipTrial) ||
-        (skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipBlock)
+        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
       ) {
         showCursor();
         removeClickableCharacterSet();
@@ -2317,7 +1957,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
         showCharacterSet.tStart = t; // (not accounting for frame time here)
         showCharacterSet.frameNStart = frameN; // exact frame index
         showCharacterSet.setAutoDraw(true);
-        showCharacterSetElement = setupClickableCharacterSet(
+        setupClickableCharacterSet(
           targetCharacterSet,
           targetFont,
           showCharacterSetWhere,
@@ -2359,11 +1999,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
   function trialRoutineEnd() {
     return async function () {
       if (
-        (skipTrialOrBlock.trialId == currentTrialIndex &&
-          skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipTrial) ||
-        (skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipBlock)
+        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
       ) {
         showCursor();
         if (currentLoop instanceof MultiStairHandler) {
@@ -2531,11 +2167,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
     // ------Prepare for next entry------
     return async function () {
       if (
-        (skipTrialOrBlock.trialId == currentTrialIndex &&
-          skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipTrial) ||
-        (skipTrialOrBlock.blockId == currentBlockIndex &&
-          skipTrialOrBlock.skipBlock)
+        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
       ) {
         showCursor();
         psychoJS.experiment.nextEntry(snapshot);

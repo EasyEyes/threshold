@@ -60,6 +60,21 @@ export const shuffle = (array) => {
   return a;
 };
 
+////
+export const toShowCursor = (
+  skipTrialOrBlock,
+  currentTrialIndex,
+  currentBlockIndex
+) => {
+  return (
+    (skipTrialOrBlock.trialId == currentTrialIndex &&
+      skipTrialOrBlock.blockId == currentBlockIndex &&
+      skipTrialOrBlock.skipTrial) ||
+    (skipTrialOrBlock.blockId == currentBlockIndex &&
+      skipTrialOrBlock.skipBlock)
+  );
+};
+
 export const hideCursor = () => {
   document.body.classList.add("hide-cursor");
 };
@@ -164,9 +179,11 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
  * @param {*} displayOptions
  */
 export const XYDegOfXYPix = (xyPix, displayOptions) => {
-  if (!displayOptions.hasOwnProperty(nearPointXYDeg))
+  // eslint-disable-next-line no-prototype-builtins
+  if (!displayOptions.hasOwnProperty("nearPointXYDeg"))
     throw "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix";
-  if (!displayOptions.hasOwnProperty(nearPointXYPix))
+  // eslint-disable-next-line no-prototype-builtins
+  if (!displayOptions.hasOwnProperty("nearPointXYPix"))
     throw "Please provide a 'nearPointXYPix' property to displayOptions passed to XYDegOfXYPix";
   if (xyPix.length !== 2)
     throw "'xyPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
