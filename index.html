@@ -94,33 +94,42 @@
               id="modalBody"
               style="display: flex; justify-content: space-around"
             >
-              <button
-                type="button"
-                id="skip-trial-btn"
-                class="btn btn-outline-secondary"
-                style="font-size: x-large"
-                data-bs-dismiss="modal"
-              >
-                Skip Trial
-              </button>
-              <button
-                type="button"
-                id="skip-block-btn"
-                class="btn btn-outline-secondary"
-                style="font-size: x-large"
-                data-bs-dismiss="modal"
-              >
-                Skip Block
-              </button>
-              <button
-                type="button"
-                id="quit-btn"
-                class="btn btn-outline-danger"
-                style="font-size: x-large"
-                data-bs-dismiss="modal"
-              >
-                Quit
-              </button>
+              <div style="display: grid">
+                <button
+                  type="button"
+                  id="skip-trial-btn"
+                  class="btn btn-outline-secondary"
+                  style="font-size: x-large"
+                  data-bs-dismiss="modal"
+                >
+                  Skip Trial
+                </button>
+                <span style="text-align: center">(Space)</span>
+              </div>
+              <div id="skip-block-div" style="display: grid">
+                <button
+                  type="button"
+                  id="skip-block-btn"
+                  class="btn btn-outline-secondary"
+                  style="font-size: x-large"
+                  data-bs-dismiss="modal"
+                >
+                  Skip Block
+                </button>
+                <span style="text-align: center">(Enter)</span>
+              </div>
+              <div style="display: grid">
+                <button
+                  type="button"
+                  id="quit-btn"
+                  class="btn btn-outline-danger"
+                  style="font-size: x-large"
+                  data-bs-dismiss="modal"
+                >
+                  Quit
+                </button>
+                <span style="text-align: center">(Escape)</span>
+              </div>
             </div>
           </div>
         </div>

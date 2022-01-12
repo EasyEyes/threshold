@@ -1609,8 +1609,8 @@ const experiment = (blockCount) => {
       ////
       // !
       // TODO use actual nearPoint, from RC
-      const nearPointXYDeg = { x: 0, y: 0 }; // TEMP
-      const nearPointXYPix = { x: 0, y: 0 }; // TEMP
+      const nearPointXYDeg = [0, 0]; // TEMP
+      const nearPointXYPix = [0, 0]; // TEMP
       const displayOptions = {
         pixPerCm: pixPerCm,
         viewingDistanceCm: viewingDistanceCm,
@@ -1765,7 +1765,8 @@ const experiment = (blockCount) => {
 spacing: ${spacing} deg
 targetFont: ${targetFont}
 spacingRelationToSize: ${spacingRelationToSize}
-spacingOverSizeRatio: ${spacingOverSizeRatio}`;
+spacingOverSizeRatio: ${spacingOverSizeRatio}
+spacingSymmetry: ${spacingSymmetry}`;
         targetSpecs.setText(targetSpecsString);
         targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
         targetSpecs.setAutoDraw(true);
@@ -2684,6 +2685,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
       document.getElementById("skip-block-btn").disabled = true;
+      document.getElementById("skip-block-div").style.visibility = "hidden";
     }
     let action = {
       skipTrial: false,
