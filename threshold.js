@@ -32,6 +32,7 @@ import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
 import "./components/css/trialBreak.css";
 import "./components/css/widgets.css";
+import "./components/css/psychojsExtra.css";
 
 ////
 /* ------------------------------- Components ------------------------------- */
