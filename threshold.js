@@ -1108,7 +1108,10 @@ const experiment = (blockCount) => {
 
       _instructionSetup(
         (snapshot.block === 0
-          ? instructionsText.initial(rc.language.value)
+          ? instructionsText.initial(
+              rc.language.value,
+              paramReader.read("takeABreakTrialCredit", blockCount)[0]
+            )
           : "") +
           instructionsText.initialByThresholdParameter["spacing"](
             rc.language.value,
