@@ -2683,6 +2683,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
       document.getElementById("skip-block-btn").disabled = true;
+      document.getElementById("skip-block-div").style.visibility = "hidden";
     }
     let action = {
       skipTrial: false,

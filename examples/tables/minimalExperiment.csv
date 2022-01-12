@@ -3,6 +3,7 @@ block,1
 calibrateTrackDistanceBool,FALSE
 conditionName,triplet
 conditionTrials,4
+responseEscapeOptionsBool,TRUE
 showCounterBool,TRUE
 showGridsBool,FALSE
 spacingDirection,radial
