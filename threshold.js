@@ -1292,8 +1292,13 @@ const experiment = (blockCount) => {
   // function blockInstructionRoutineEnd() {
   //   return _instructionRoutineEnd;
   // }
-
+  let modalButtonTriggeredViaKeyboard = false;
   const _takeFixationClick = (e) => {
+    if (modalButtonTriggeredViaKeyboard) {
+      // modal button click event triggered by jquery
+      modalButtonTriggeredViaKeyboard = false;
+      return;
+    }
     let cX, cY;
     if (e.clientX) {
       cX = e.clientX;
@@ -2657,18 +2662,22 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
       console.log(` ${e.code}`);
       switch (e.code) {
         case "Escape":
+          modalButtonTriggeredViaKeyboard = true;
           document.getElementById("quit-btn").click();
           break;
         case "Enter":
+          modalButtonTriggeredViaKeyboard = true;
           document.getElementById("skip-block-btn").click();
           break;
         case "Space":
+          modalButtonTriggeredViaKeyboard = true;
           document.getElementById("skip-trial-btn").click();
           break;
       }
     }
     document.addEventListener("keydown", logKey);
     document.getElementById("skip-trial-btn").disabled = false;
+    document.getElementById("skip-block-btn").disabled = false;
     document.getElementById("quit-btn").disabled = false;
     if (!isProlificPreviewExperiment()) {
       // hide skipBlock Btn
