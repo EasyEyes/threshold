@@ -1838,6 +1838,13 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
         "trialInstructionBeginDurationSec",
         trialInstructionClock.getTime()
       );
+
+      if (condition["showTakeABreakCreditBool"]) {
+        showTrialBreakProgressbar(currentBlockCredit);
+      } else {
+        hideTrialBreakProgressbar();
+      }
+
       return Scheduler.Event.NEXT;
     };
   }
