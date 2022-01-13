@@ -45,7 +45,7 @@ export const ILL_FORMED_UNDERSCORE_PARAM = (
   return {
     name: `_Underscore parameter incorrectly formatted`,
     message: `Experiment-scope parameters, such as <span class="error-parameter">${parameter}</span>, start with an underscore and require exactly one value, as they don't vary across conditions.`,
-    hint: `Make sure that you give <span class="error-parameter">${parameter}</span> a value for only the very first column. The <span class="error-parameter">${parameter}</span> row should look something like: "${parameter}, [your ${parameter} value]", with the appropriate amount of trailing commas but no other values.`,
+    hint: `Make sure that you give <span class="error-parameter">${parameter}</span> a value for only the first column.`,
     kind: "error",
     context: "preprocessor",
     parameters: [parameter],
@@ -159,7 +159,7 @@ export const DUPLICATE_PARAMETER = (parameter: string): EasyEyesError => {
   return {
     name: `Parameter is duplicated`,
     message: `The parameter <span class="error-parameter">${parameter}</span> appears more than once! Unintended behavior lurks ahead...`,
-    hint: `Remove duplicate references to <span class="error-parameter">${parameter}</span> &#8212 each parameter should only be set once per experiment file, so we know we're using exactly the value you want.`,
+    hint: `Each parameter may only be set once per experiment file, so there's no abiguity in which value to use.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],

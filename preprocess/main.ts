@@ -10,6 +10,7 @@ import {
 } from "./experimentFileChecks";
 import {
   addUniqueLabelsToDf,
+  populateUnderscoreValues,
   dataframeFromPapaParsed,
   getFontNameListBySource,
   getFormNames,
@@ -122,10 +123,11 @@ export const prepareExperimentFileForThreshold = (
   }
 
   df = addUniqueLabelsToDf(df);
+  df = populateUnderscoreValues(df);
 
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
-    console.log("ERRORS", errors);
+    // console.log("ERRORS", errors);
     callback(requestedForms, requestedFontList, [], errors);
   } else {
     callback(
