@@ -10,7 +10,7 @@ spacingDirection,radial
 spacingOverSizeRatio,1.4
 spacingRelationToSize,typographic
 targetCharacterSet,abcdefghijklmnopqrstuvwxyz
-targetDurationSec,0.2
+targetDurationSec,0.3
 targetEccentricityXDeg,-10
 targetEccentricityYDeg,0
 targetFont,Roboto Mono
