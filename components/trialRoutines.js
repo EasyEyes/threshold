@@ -6,7 +6,17 @@ import { cleanFontName } from "./fonts.js";
 import { getCharacterSetBoundingBox, restrictLevel } from "./bounding.js";
 import { SimulatedObserver } from "./simulatedObserver.js";
 
-const _takeFixationClick = (e, fixationSize, clickedContinue) => {
+const _takeFixationClick = (
+  e,
+  fixationSize,
+  clickedContinue,
+  modalButtonTriggeredViaKeyboard
+) => {
+  if (modalButtonTriggeredViaKeyboard.current) {
+    // modal button click event triggered by jquery
+    modalButtonTriggeredViaKeyboard.current = false;
+    return;
+  }
   let cX, cY;
   if (e.clientX) {
     cX = e.clientX;
@@ -87,6 +97,7 @@ export const _identify_trialInstructionRoutineBegin = (
     flanker2BoundingPoly,
     targetSpecs, //
     clickedContinue,
+    modalButtonTriggeredViaKeyboard,
     characterSetBoundingRects,
     totalTrialConfig, //
     currentBlockIndex,
@@ -130,8 +141,15 @@ export const _identify_trialInstructionRoutineBegin = (
   fixation.setAutoDraw(true);
 
   clickedContinue.current = false;
-  document.addEventListener("click", _takeFixationClick);
-  document.addEventListener("touchend", _takeFixationClick);
+
+  const takeFixationClick = _takeFixationClick.bind(
+    null,
+    fixationSize,
+    clickedContinue,
+    modalButtonTriggeredViaKeyboard
+  );
+  document.addEventListener("click", takeFixationClick);
+  document.addEventListener("touchend", takeFixationClick);
 
   /* PRECOMPUTE STIMULI FOR THE UPCOMING TRIAL */
   TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -517,11 +535,16 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}`;
     trialComponents, //
     simulated,
     simulatedObserver,
+    // NEW THINGS
+    takeFixationClick,
   ];
 };
 
-export const _identify_trialInstructionRoutineEnd = (instructions) => {
-  document.removeEventListener("click", _takeFixationClick);
-  document.removeEventListener("touchend", _takeFixationClick);
+export const _identify_trialInstructionRoutineEnd = (
+  instructions,
+  takeFixationClick
+) => {
+  document.removeEventListener("click", takeFixationClick);
+  document.removeEventListener("touchend", takeFixationClick);
   instructions.setAutoDraw(false);
 };

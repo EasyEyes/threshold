@@ -135,16 +135,16 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   // TODO verify displayOptions has the correct parameters
   const degPosition = [];
   let pixelPosition = [];
-  degPosition[0] = xyDeg[0] - displayOptions.nearPointXYDeg.x;
-  degPosition[1] = xyDeg[1] - displayOptions.nearPointXYDeg.y;
+  degPosition[0] = xyDeg[0] - displayOptions.nearPointXYDeg[0];
+  degPosition[1] = xyDeg[1] - displayOptions.nearPointXYDeg[1];
   const rDeg = Math.sqrt(degPosition[0] ** 2 + degPosition[1] ** 2);
   if (rDeg > 89) {
     console.log("Angle too large! Trying again with a nearer colinear point.");
     // VERIFY that nearPoint is being considered properly, ie this is correct, rather than `rCompensation = 89 / Math.sqrt(xyDeg[0]**2 + xyDeg[1]**2)`
     const rCompensation = 89 / rDeg;
     const constrainedPoint = [
-      rCompensation * degPosition[0] + displayOptions.nearPointXYDeg.x,
-      rCompensation * degPosition[1] + displayOptions.nearPointXYDeg.y,
+      rCompensation * degPosition[0] + displayOptions.nearPointXYDeg[0],
+      rCompensation * degPosition[1] + displayOptions.nearPointXYDeg[1],
     ];
     return XYPixOfXYDeg(constrainedPoint, displayOptions);
   }
@@ -160,8 +160,8 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   } else {
     pixelPosition = [0, 0];
   }
-  pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix.x;
-  pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix.y;
+  pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix[0];
+  pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix[1];
   return pixelPosition;
 };
 

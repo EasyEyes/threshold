@@ -3,8 +3,11 @@ import { replacePlaceholders } from "./multiLang.js";
 import { _responseTypes } from "./response.js";
 
 export const instructionsText = {
-  initial: (L) => {
-    return phrases.T_thresholdSoundCheck[L] + `\n\n`;
+  initial: (L, takeABreakTrialCreditsThisBlock = 0) => {
+    const t1 = phrases.T_thresholdSoundCheck[L] + `\n\n`;
+    const t2 =
+      takeABreakTrialCreditsThisBlock == 0 ? "" : phrases.T_takingBreaks[L];
+    return t1 + t2 + `\n\n`;
   },
   initialByThresholdParameter: {
     spacing: (L, responseType = 2, trialsThisBlock = 0) => {

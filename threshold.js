@@ -37,6 +37,7 @@ import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
 import "./components/css/trialBreak.css";
 import "./components/css/widgets.css";
+import "./components/css/psychojsExtra.css";
 
 ////
 /* ------------------------------- Components ------------------------------- */
@@ -1097,7 +1098,10 @@ const experiment = (blockCount) => {
 
       _instructionSetup(
         (snapshot.block === 0
-          ? instructionsText.initial(rc.language.value)
+          ? instructionsText.initial(
+              rc.language.value,
+              paramReader.read("takeABreakTrialCredit", blockCount)[0]
+            )
           : "") +
           instructionsText.initialByThresholdParameter["spacing"](
             rc.language.value,
@@ -1299,6 +1303,9 @@ const experiment = (blockCount) => {
   //   return _instructionRoutineEnd;
   // }
 
+  let takeFixationClick;
+  let modalButtonTriggeredViaKeyboard = false;
+
   var level;
   // var viewingDistanceDesiredCm;
 
@@ -1418,6 +1425,8 @@ const experiment = (blockCount) => {
           trialComponents, //
           simulated,
           simulatedObserver,
+          // NEW THINGS
+          takeFixationClick,
         ] = _identify_trialInstructionRoutineBegin(
           psychoJS,
           PsychoJS,
@@ -1468,6 +1477,7 @@ const experiment = (blockCount) => {
             flanker2BoundingPoly,
             targetSpecs, //
             clickedContinue,
+            modalButtonTriggeredViaKeyboard,
             characterSetBoundingRects,
             totalTrialConfig, //
             currentBlockIndex,
@@ -1478,15 +1488,6 @@ const experiment = (blockCount) => {
           }
         );
       }
-
-      psychoJS.eventManager.clearKeys();
-
-      psychoJS.experiment.addData(
-        "trialInstructionBeginDurationSec",
-        trialInstructionClock.getTime()
-      );
-
-      return Scheduler.Event.NEXT;
     };
   }
 
@@ -1566,7 +1567,7 @@ const experiment = (blockCount) => {
       if (targetTask === "read") {
         // READ
       } else {
-        _identify_trialInstructionRoutineEnd(instructions);
+        _identify_trialInstructionRoutineEnd(instructions, takeFixationClick);
       }
 
       psychoJS.experiment.addData(
@@ -2279,23 +2280,28 @@ const experiment = (blockCount) => {
       console.log(` ${e.code}`);
       switch (e.code) {
         case "Escape":
+          modalButtonTriggeredViaKeyboard = true;
           document.getElementById("quit-btn").click();
           break;
         case "Enter":
+          modalButtonTriggeredViaKeyboard = true;
           document.getElementById("skip-block-btn").click();
           break;
         case "Space":
+          modalButtonTriggeredViaKeyboard = true;
           document.getElementById("skip-trial-btn").click();
           break;
       }
     }
     document.addEventListener("keydown", logKey);
     document.getElementById("skip-trial-btn").disabled = false;
+    document.getElementById("skip-block-btn").disabled = false;
     document.getElementById("quit-btn").disabled = false;
     if (!isProlificPreviewExperiment()) {
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
       document.getElementById("skip-block-btn").disabled = true;
+      document.getElementById("skip-block-div").style.visibility = "hidden";
     }
     let action = {
       skipTrial: false,

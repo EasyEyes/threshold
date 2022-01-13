@@ -1,0 +1,8 @@
+#progressMsg {
+  display: none !important;
+}
+
+.ui-progressbar-complete {
+  height: 110% !important;
+  background-color: #96ceb4 !important;
+}
