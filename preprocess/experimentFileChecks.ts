@@ -90,14 +90,20 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   // Check parameters are alphabetical
   const parametersArentAlphabetical = areParametersAlphabetical(parameters);
   if (parametersArentAlphabetical) errors.push(parametersArentAlphabetical);
-  // Alphabetize experimentDf
-  experimentDf = experimentDf.restructure(experimentDf.listColumns().sort());
-  parametersToCheck.push(...experimentDf.listColumns());
 
   // Check validity of parameters
+  parametersToCheck.push(...experimentDf.listColumns().sort());
   errors.push(...areParametersDuplicated(parametersToCheck));
   errors.push(...areAllPresentParametersRecognized(parametersToCheck));
   errors.push(...areAllPresentParametersCurrentlySupported(parametersToCheck));
+
+  // Alphabetize experimentDf
+  experimentDf = experimentDf.select(...parametersToCheck).restructure(
+    experimentDf
+      .select(...parametersToCheck)
+      .listColumns()
+      .sort()
+  );
 
   // Check for properly formatted "block" parameter values
   errors.push(...isBlockPresentAndProper(experimentDf));
@@ -148,9 +154,13 @@ const areParametersAlphabetical = (
  */
 const areParametersDuplicated = (parameters: string[]): EasyEyesError[] => {
   const seenParameters = new Set<any>();
-  const duplicatesErrors = [];
+  const duplicatesErrors: EasyEyesError[] = [];
   for (const parameter of parameters) {
-    if (seenParameters.has(parameter))
+    // We've seen this parameter before, and haven't yet produced and error
+    if (
+      seenParameters.has(parameter) &&
+      !duplicatesErrors.some((e) => e.parameters.includes(parameter))
+    )
       duplicatesErrors.push(DUPLICATE_PARAMETER(parameter));
     seenParameters.add(parameter);
   }

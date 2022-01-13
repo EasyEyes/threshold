@@ -125,7 +125,7 @@ export const prepareExperimentFileForThreshold = (
 
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
-    console.log("ERRORS", errors);
+    // console.log("ERRORS", errors);
     callback(requestedForms, requestedFontList, [], errors);
   } else {
     callback(
