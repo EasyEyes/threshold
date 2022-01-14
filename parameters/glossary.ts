@@ -31,7 +31,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "Denis Pelli",
     explanation:
-      "Names of all the authors, separated by semicolons. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty.",
+      "Optional, names of all the authors, separated by semicolons. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty.",
     type: "text",
     default: "",
   },
@@ -205,7 +205,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      'Initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper.',
+      'Initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position.',
     type: "boolean",
     default: "FALSE",
   },
@@ -250,7 +250,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Use this to turn EasyEyes distance tracking on and off. Before tracking can begin you must make an initial calibration of distance, either by easyEyesBlindSpotBool or easyEyesPupilDistanceBool, or both. Distance tracking uses the webcam to monitor position of the participant's head. It ignores where you're looking. The head is not a point, of course. Since this is for vision research, the point we estimate is the midpoint between the two eyes. That point is sometime called cyclopean, referring to the mythical one-eyed Cyclops in Homer's Odyssey. From each webcam image we extract: 1. the viewing distance, from the midpoint (between the two eyes) to the screen, and 2. the near point, which is the point in the plane of the screen that is closest to the midpoint between the eyes. When rendering visual stimulus specified in deg, it is necessary to take the viewing distance (and near point) into account. The near point becomes important at large eccentricities and is usually ignored at small eccentricities.",
+      "Use this to turn EasyEyes distance tracking on and off. Before tracking can begin you must make an initial calibration of distance, either by easyEyesBlindSpotBool or easyEyesPupilDistanceBool, or both. Distance tracking uses the webcam to monitor position of the participant's head. It ignores where you're looking. The head is not a point, of course. Since this is for vision research, the point we estimate is the midpoint between the two eyes. That point is sometimes called cyclopean, referring to the mythical one-eyed Cyclops in Homer's Odyssey. From each webcam image we extract: 1. the viewing distance, from the midpoint (between the two eyes) to the screen, and 2. the near point, which is the point in the plane of the screen that is closest to the midpoint between the eyes. When rendering visual stimulus specified in deg, it is necessary to take the viewing distance (and near point) into account. The location of the near point is important at large eccentricities (over 10 deg) and is usually safely ignored at small eccentricities (less than 10 deg).",
     type: "boolean",
     default: "FALSE",
   },
@@ -400,7 +400,7 @@ export const GLOSSARY: Glossary = {
     availability: "soon",
     example: "Italian",
     explanation:
-      "English name for the language used for instructions to the participant. It must match one of the entries in the second row of the EasyEyes International phrases sheet. If you leave this blank, then the participant will be allowed to select the instruction language from a pull-down menu.",
+      'English name for the language used for instructions to the participant. It must be "participant" or match one of the entries in the second row of the EasyEyes International phrases sheet. If you enter "participant", then the participant will be allowed to select the instruction language from a pull-down menu.',
     type: "categorical",
     default: "English",
     categories: [""],
@@ -422,15 +422,6 @@ export const GLOSSARY: Glossary = {
       "At the end of this block, invite the participant to make parting comments. ",
     type: "boolean",
     default: "FALSE",
-  },
-  keyEscapeEnable: {
-    name: "keyEscapeEnable",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "If true, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
-    type: "boolean",
-    default: "TRUE",
   },
   markingBlankedNearTargetBool: {
     name: "markingBlankedNearTargetBool",
@@ -540,7 +531,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "",
     explanation:
-      "Optional. Use this to add comments about the condition that you want preserved in the data file. Ignored and saved with results.",
+      "Optional. Use this to add comments about the condition that you want preserved in the data file. Ignored by EasyEyes and saved with results.",
     type: "text",
     default: "",
   },
@@ -549,7 +540,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "After mistaken response, play pure 500 Hz tone for 0.5 sec at amplitude 0.05. Usually we stay positive and give only positive feedback.",
+      "After a mistaken response, play pure 500 Hz tone for 0.5 sec at amplitude 0.05. Usually FALSE, as we stay positive and give only positive feedback.",
     type: "boolean",
     default: "FALSE",
   },
@@ -570,6 +561,24 @@ export const GLOSSARY: Glossary = {
       "Play a purring sound to alert the observer while we await their response. Pure 200 Hz tone for 0.6 sec at amplitude 1.",
     type: "boolean",
     default: "TRUE",
+  },
+  questionAndAnswer: {
+    name: "questionAndAnswer",
+    availability: "now",
+    example: "",
+    explanation:
+      "A series of strings separated by the vertical bar character |. The first string is a question, and the rest are possible answers. The participant is required to click on one. For example “How much beauty do you get from this image right now?|1|2|3|4|5|6|7”\nOr   “Which kind of image is it?|figurative painting|abstract painting|photograph”",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer2: {
+    name: "questionAndAnswer2",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same purpose, with a different name, so that you can have two questions in one trial. ",
+    type: "",
+    default: "",
   },
   readingCorpusURL: {
     name: "readingCorpusURL",
@@ -740,7 +749,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Once debugged this option will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offeres two or three options. The miidest optiion is to continue from where the escape was presssed, deleting any trail for which the response was not collected. The middle option is only presented if we think we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rules for guessing that the participant is the scientist is either the Prolific URL parameters are absent or we are in Prolific Preview mode.",
+      "Once debugged this option will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest optiion is to continue from where the escape was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n\nIf responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
     type: "boolean",
     default: "FALSE",
   },
@@ -758,7 +767,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "FALSE",
     explanation:
-      "Allow participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like.",
+      "Allow participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
     type: "boolean",
     default: "FALSE",
   },
@@ -767,16 +776,25 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Allow participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool or showGridBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool.",
+      "Allow participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool or showGridBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool. But responseMustClickCrosshairBool overrides all other settings.",
     type: "boolean",
     default: "FALSE",
   },
   responseTypedEasyEyesKeypadBool: {
     name: "responseTypedEasyEyesKeypadBool",
-    availability: "soon",
+    availability: "now",
     example: "FALSE",
     explanation:
-      "Allow participant to respond at every occasion by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like.",
+      "Allow participant to respond at every occasion by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  screenshotBool: {
+    name: "screenshotBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      'Requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to illustrate the stimulus in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n\nCan we save these files to a "Screenshots" folder in the participant computer\'s Download folder or in the experiment repository on Pavlovia? ',
     type: "boolean",
     default: "FALSE",
   },
@@ -786,6 +804,14 @@ export const GLOSSARY: Glossary = {
     example: "TRUE",
     explanation:
       "For debugging, setting showBoundingBoxBool TRUE displays the bounding box around the target character (if spacing is ratio) or flanker-target-flanker triplet (if spacing typographic). We show the getBoundingBox method from psychojs, using tight=true. ",
+    type: "boolean",
+    default: "FALSE",
+  },
+  showCharacterSetBoundingBoxBool: {
+    name: "showCharacterSetBoundingBoxBool",
+    availability: "now",
+    example: "TRUE",
+    explanation: "Shows the bounding box of the whole targetCharacterSet.",
     type: "boolean",
     default: "FALSE",
   },
@@ -838,10 +864,10 @@ export const GLOSSARY: Glossary = {
   },
   showFixationMarkBool: {
     name: "showFixationMarkBool",
-    availability: "later",
+    availability: "now",
     example: "TRUE",
     explanation:
-      'Whether or not to show the fixation mark. We don\'t show fixation when we cover a large area of the screen with repeated targets. See "targetRepeatsBool".',
+      "Whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
     type: "boolean",
     default: "TRUE",
   },
@@ -850,7 +876,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      'To allow visual checking of location and size, showGridsBool=TRUE requests that the experiment show buttons on the (lower) left of the screen that each turn on and off a different grid over the whole screen. Turning on several buttons shows several grids (in different dark colors). Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.\nSIDE EFFECT: Setting showGridBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool.',
+      'To allow visual checking of location and size, setting showGridsBool to TRUE requests that the experiment allow optional display of one of several grids over the whole screen. Pressing the backquote key (below ESCAPE) turns on the first grid, and pressing it again cycles through the various grids. Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.\nSIDE EFFECT?: Does setting showGridBool to TRUE enables type as a response method, regardless of the setting of responseTypedBool?',
     type: "boolean",
     default: "FALSE",
   },
@@ -879,9 +905,9 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Displays the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, bottom up, with glowing green. Empty for zero and full for 1.",
+      "Displays the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, from the bottom up, with glowing green. Empty for zero and full for 1. The box is currently centered at bottom of screen, but we plan to make it contiguous to the trial counter display.",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   showTargetSpecsBool: {
     name: "showTargetSpecsBool",
@@ -954,15 +980,6 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
   },
-  snapshotBool: {
-    name: "snapshotBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      'Requests saving of a full-screen snapshot of every stimulus display. Can we save this to a "snapshots" folder in the participant\'s computer or in the experiment repository? Snapshots are useful for debugging and to illustrate the stimulus in talks and papers. It is expected that taking snapshots will severely degrade timing, so it should not be requested while a participant is being tested. Instead the scientist will pretend to be the participant and collect the images she needs.',
-    type: "boolean",
-    default: "FALSE",
-  },
   spacingDeg: {
     name: "spacingDeg",
     availability: "now",
@@ -1013,20 +1030,20 @@ export const GLOSSARY: Glossary = {
   takeABreakMinimumDurationSec: {
     name: "takeABreakMinimumDurationSec",
     availability: "now",
-    example: "30",
+    example: "2",
     explanation:
-      "The minimum duration when EasyEyes takes a break. See takeABreakTrialCredit.",
+      "The minimum duration when EasyEyes takes a break. The main purpose of the break is to blink, so 2 sec is enough. See takeABreakTrialCredit.",
     type: "numerical",
-    default: "30",
+    default: "2",
   },
   takeABreakTrialCredit: {
     name: "takeABreakTrialCredit",
     availability: "now",
-    example: "0.01",
+    example: "0.05",
     explanation:
-      'Intended for long blocks, over 50 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don\'t within a long block, and later complain that they feel stressed and that their eyes sting (because they didn\'t blink during the block), so we added this feature to force a break every so often. takeABreakTrialCredit sets the value that accrues from performing each trial of this condition. Set it to zero for no breaks. The block\'s running total, regardless of condition, is kept in internal parameter takeABreakCredit, which is zero at the beginning of each block. When takeABreakCredit exceeds 1, EasyEyes immediately subtracts 1 and takes a break. \nTHE BREAK\nEasyEyes displays a pop up window with a dark surround, "Good work! Please take a brief break to relax and blink." Responses (except ESCAPE) and the nudger are suspended for the time specified by takeABreakMinimumDurationSec. Then EasyEyes reenables responses, adds a Proceed button, and adds text, "To continue hit Proceed or RETURN." The participant can take as long as they need. When they hit Proceed (or RETURN), EasyEyes closes the pop up window, reenables the nudger (if it was formerly active), and resumes testing. ',
+      'Intended for long blocks, over 50 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don\'t do that within a long block, and later complain that they feel stressed and that their eyes sting (because they didn\'t blink during the block), so we added this feature to force a break every so often. takeABreakTrialCredit sets the value that accrues from performing each trial of this condition. Set it to zero for no breaks. The block\'s running total, regardless of condition, is kept in the internal parameter takeABreakCredit, which is zero at the beginning of each block. When takeABreakCredit exceeds 1, EasyEyes immediately subtracts 1 and takes a break. \nTHE BREAK\nEasyEyes displays a pop-up window with a dark surround, "Good work! Please take a brief break to relax and blink." Responses (except ESCAPE) and viewing-distance nudging are suspended for the time specified by takeABreakMinimumDurationSec. Then EasyEyes reenables responses, adds a Proceed button, and adds text, "To continue hit Proceed or RETURN." The participant can take as long as they need. When they hit Proceed (or RETURN), EasyEyes closes the pop up window, reenables the nudger (if it was formerly active), and resumes testing. ',
     type: "numerical",
-    default: "0.01",
+    default: "0.05",
   },
   targetBoundingBoxHorizontalAlignment: {
     name: "targetBoundingBoxHorizontalAlignment",
@@ -1091,6 +1108,15 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "RobotoMono-Regular.woff2",
   },
+  targetFontFeatureSettings: {
+    name: "targetFontFeatureSettings",
+    availability: "now",
+    example: "",
+    explanation:
+      'Font features provide information about how to use the glyphs in a font to render a script or language. targetFontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. “calt” enables the font’s “contextual alternates”, especially connections between adjacent letters in a script font. “smcp” enables small caps. “zero” requests a slash through the zero character to distinguish it from O. Most font features are Boolean and accept an argument of 0 for off, and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, including Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\n',
+    type: "text",
+    default: "",
+  },
   targetFontSource: {
     name: "targetFontSource",
     availability: "now",
@@ -1113,10 +1139,10 @@ export const GLOSSARY: Glossary = {
   },
   targetFontVariationSettings: {
     name: "targetFontVariationSettings",
-    availability: "later",
-    example: ' "\\"wght\\" 550, \\"ital\\" 6"',
+    availability: "now",
+    example: "",
     explanation:
-      "To control a variable font, this parameter accepts a string to be assigned like this: \nmyText.style.fontVariationSettings = targetFontVariationSettings\nYou can set all the axes at once. Any axis you don't set will be set to its default. Every axis has a four-character name. Standard axes have lowercase names, e.g. 'wght'. Novel axes have ALL-UPPERCASE names. To discover your variable font's axes of variation, and their allowed ranges, try this web page:\nhttps://fontgauntlet.com/\nFor an introduction to variable fonts:\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
+      'targetFontVariationSettings accepts a string to control a variable font. You can set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variable, and we can pick any value along each axis to control the font rendering. targetFontVariationSettings receives a string. The default is the empty string. A typical value is\n"wght" 625\nor\n"wght" 625”, wdth" 25\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. “wght” is weight, which allows you to select any weight from extra thin to regular to bold, to black. “wdth” is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. One must consult the documentation of each variable font to discover which axes it supports. Supported by all modern browsers, except Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
     type: "text",
     default: "",
   },
@@ -1125,19 +1151,28 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "550",
     explanation:
-      "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = targetFontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if it determines that the targetFont is not a variable font.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
+      "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = targetFontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
     type: "numerical",
     default: "NaN",
+  },
+  targetImageFolder: {
+    name: "targetImageFolder",
+    availability: "now",
+    example: "myImages",
+    explanation:
+      "The name of a folder of images, to be used when targetKind==image. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder.",
+    type: "",
+    default: "",
   },
   targetKind: {
     name: "targetKind",
     availability: "now",
     example: "letter",
     explanation:
-      '• "letter" On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• A "gabor" (named after Dennis Gabor inventor of the laser) is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.',
+      "• letter On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is diplayed at the target eccentricity with the target size.",
     type: "categorical",
     default: "letter",
-    categories: ["letter", "gabor"],
+    categories: ["letter", "gabor", "image"],
   },
   targetMinimumPix: {
     name: "targetMinimumPix",
@@ -1207,17 +1242,33 @@ export const GLOSSARY: Glossary = {
     example: "FALSE",
     explanation: 'Define "size" as height (true) or width (false).',
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   targetTask: {
     name: "targetTask",
     availability: "now",
     example: "identify",
     explanation:
-      'The participant\'s task:\n• "identify" is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• "read" asks the observer to read a passage of text as quickly as possible while maintaining full comprehesion, followed by a test.\n• "detect" might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer uses the question and answers provided by parameter questionAndAnswer. The participant must click on one of the answers.\n• questionAndAnswer2 uses the question and answers provided by parameter questionAndAnswer2. The participant must click on one of the answers.\n• read asks the observer to read a passage of text as quickly as possible while maintaining full comprehesion, followed by a test.\n• detect might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
-    categories: ["identify", "read"],
+    categories: [
+      "identify",
+      "read",
+      "categorize",
+      "questionAndAnswer",
+      "questionAndAnswer2",
+    ],
+  },
+  targetTask2: {
+    name: "targetTask2",
+    availability: "now",
+    example: "questionAndAnswer",
+    explanation:
+      "Specifies performance of a second task with the same target. Currently the only allowed values are questionAndAnswer, questionAndAnswer2 and none.",
+    type: "categorical",
+    default: "none",
+    categories: ["none", "questionAndAnswer", "questionAndAnswer2"],
   },
   thresholdBeta: {
     name: "thresholdBeta",

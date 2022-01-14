@@ -412,6 +412,9 @@ const experiment = (blockCount) => {
   var targetBoundingPoly;
   var flanker1BoundingPoly;
   var flanker2BoundingPoly;
+  var targetCharacterSetBoundingPoly;
+  var flanker1CharacterSetBoundingPoly;
+  var flanker2CharacterSetBoundingPoly;
   /* --- /BOUNDING BOX --- */
 
   var thisLoopNumber; // ! BLOCK COUNTER
@@ -607,7 +610,6 @@ const experiment = (blockCount) => {
       ori: 0.0,
       pos: [0, 0],
       lineWidth: 1.0,
-      lineColor: new util.Color("blue"),
       // fillColor: "#000000",
       opacity: undefined,
       depth: -10,
@@ -616,15 +618,33 @@ const experiment = (blockCount) => {
     };
     targetBoundingPoly = new visual.Rect({
       ...boundingConfig,
+      lineColor: new util.Color("blue"),
       name: "targetBoundingPoly",
     });
     flanker1BoundingPoly = new visual.Rect({
       ...boundingConfig,
+      lineColor: new util.Color("blue"),
       name: "flanker1BoundingPoly",
     });
     flanker2BoundingPoly = new visual.Rect({
       ...boundingConfig,
+      lineColor: new util.Color("blue"),
       name: "flanker2BoundingPoly",
+    });
+    targetCharacterSetBoundingPoly = new visual.Rect({
+      ...boundingConfig,
+      lineColor: new util.Color("green"),
+      name: "targetCharacterSetBoundingPoly",
+    });
+    flanker1CharacterSetBoundingPoly = new visual.Rect({
+      ...boundingConfig,
+      lineColor: new util.Color("green"),
+      name: "flanker1CharacterSetBoundingPoly",
+    });
+    flanker2CharacterSetBoundingPoly = new visual.Rect({
+      ...boundingConfig,
+      lineColor: new util.Color("green"),
+      name: "flanker2CharacterSetBoundingPoly",
     });
     /* --- BOUNDING BOX --- */
 
@@ -1352,6 +1372,7 @@ const experiment = (blockCount) => {
     clickTime: 0,
   };
   var showBoundingBox;
+  var showCharacterSetBoundingBox;
   var stimulusParameters;
   var targetKind;
   var targetDurationSec;
@@ -1392,7 +1413,6 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       // showCursor();
-      logger("not showing cursor!");
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
@@ -1544,6 +1564,10 @@ const experiment = (blockCount) => {
       );
       showBoundingBox =
         reader.read("showBoundingBoxBool", block_condition) || false;
+      showCharacterSetBoundingBox = reader.read(
+        "showCharacterSetBoundingBoxBool",
+        block_condition
+      );
 
       targetMinimumPix = reader.read("targetMinimumPix", block_condition);
       targetEccentricityXDeg = reader.read(
@@ -1751,6 +1775,44 @@ const experiment = (blockCount) => {
         }
         boundingStims.forEach((c) => c._updateIfNeeded());
       }
+      if (showCharacterSetBoundingBox) {
+        const characterSetBoundingStims = [targetCharacterSetBoundingPoly];
+        const characterSetBounds = [
+          characterSetBoundingRects[block_condition].width *
+            stimulusParameters.heightPx,
+          characterSetBoundingRects[block_condition].height *
+            stimulusParameters.heightPx,
+        ];
+        const targetBB = target.getBoundingBox(true);
+        targetCharacterSetBoundingPoly.setPos([targetBB.left, targetBB.top]);
+        targetCharacterSetBoundingPoly.setSize(characterSetBounds);
+        if (
+          (spacingRelationToSize === "ratio" ||
+            spacingRelationToSize === "none") &&
+          thresholdParameter === "spacing"
+        ) {
+          const flanker1BB = flanker1.getBoundingBox(true);
+          const flanker2BB = flanker2.getBoundingBox(true);
+          targetCharacterSetBoundingPoly.setPos([targetBB.left, targetBB.top]);
+          characterSetBoundingStims.push(
+            flanker1CharacterSetBoundingPoly,
+            flanker2CharacterSetBoundingPoly
+          );
+          // flanker1CharacterSetBoundingPoly.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
+          flanker1CharacterSetBoundingPoly.setPos([
+            flanker1BB.left,
+            flanker1BB.top,
+          ]);
+          flanker1CharacterSetBoundingPoly.setSize(characterSetBounds);
+          // flanker2CharacterSetBoundingPoly.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
+          flanker2CharacterSetBoundingPoly.setPos([
+            flanker2BB.left,
+            flanker2BB.top,
+          ]);
+          flanker2CharacterSetBoundingPoly.setSize(characterSetBounds);
+        }
+        characterSetBoundingStims.forEach((c) => c._updateIfNeeded());
+      }
       showCharacterSet.setPos([0, 0]);
       showCharacterSet.setText("");
       // showCharacterSet.setText(getCharacterSetShowText(validAns))
@@ -1809,6 +1871,17 @@ spacingSymmetry: ${spacingSymmetry}`;
         ) {
           trialComponents.push(flanker1BoundingPoly);
           trialComponents.push(flanker2BoundingPoly);
+        }
+      }
+      if (showCharacterSetBoundingBox) {
+        trialComponents.push(targetCharacterSetBoundingPoly);
+        if (
+          (spacingRelationToSize === "ratio" ||
+            spacingRelationToSize === "none") &&
+          thresholdParameter === "spacing"
+        ) {
+          trialComponents.push(flanker1CharacterSetBoundingPoly);
+          trialComponents.push(flanker2CharacterSetBoundingPoly);
         }
       }
       // /* --- /BOUNDING BOX --- */
@@ -2308,6 +2381,61 @@ spacingSymmetry: ${spacingSymmetry}`;
           t >= frameRemains
         ) {
           flanker2BoundingPoly.setAutoDraw(false);
+        }
+      }
+      if (showCharacterSetBoundingBox) {
+        // // *targetCharacterSetBoundingPoly* updates
+        if (
+          t >= 0.0 &&
+          targetCharacterSetBoundingPoly.status === PsychoJS.Status.NOT_STARTED
+        ) {
+          // keep track of start time/frame for later
+          targetCharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
+          targetCharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
+          targetCharacterSetBoundingPoly.setAutoDraw(true);
+        }
+        if (
+          targetCharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          targetCharacterSetBoundingPoly.setAutoDraw(false);
+        }
+
+        // // *flanker1CharacterSetBoundingPoly* updates
+        if (
+          t >= 0.0 &&
+          flanker1CharacterSetBoundingPoly.status ===
+            PsychoJS.Status.NOT_STARTED &&
+          spacingRelationToSize === "ratio"
+        ) {
+          // keep track of start time/frame for later
+          flanker1CharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
+          flanker1CharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
+          flanker1CharacterSetBoundingPoly.setAutoDraw(true);
+        }
+        if (
+          flanker1CharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          flanker1CharacterSetBoundingPoly.setAutoDraw(false);
+        }
+        // // *flanker2CharacterSetBoundingPoly* updates
+        if (
+          t >= 0.0 &&
+          flanker2CharacterSetBoundingPoly.status ===
+            PsychoJS.Status.NOT_STARTED &&
+          spacingRelationToSize === "ratio"
+        ) {
+          // keep track of start time/frame for later
+          flanker2CharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
+          flanker2CharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
+          flanker2CharacterSetBoundingPoly.setAutoDraw(true);
+        }
+        if (
+          flanker2CharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          flanker2CharacterSetBoundingPoly.setAutoDraw(false);
         }
       }
       /* --- /BOUNDING BOX --- */
