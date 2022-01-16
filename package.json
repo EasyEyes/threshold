@@ -39,7 +39,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.5.1",
     "dataframe-js": "^1.4.4",
-    "eslint": "^8.6.0",
+    "eslint": "^8.7.0",
     "googleapis": "^92.0.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.1.7",

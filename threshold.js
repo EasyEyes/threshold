@@ -361,14 +361,35 @@ const experiment = (blockCount) => {
   }
 
   logger("_resources", _resources);
-  psychoJS.start({
-    expName: expName,
-    expInfo: expInfo,
-    resources: [
-      { name: "conditions/blockCount.csv", path: "conditions/blockCount.csv" },
-      ..._resources,
-    ],
-  });
+  psychoJS
+    .start({
+      expName: expName,
+      expInfo: expInfo,
+      resources: [
+        {
+          name: "conditions/blockCount.csv",
+          path: "conditions/blockCount.csv",
+        },
+        ..._resources,
+      ],
+    })
+    .then(() => {
+      document.body.classList.add("hide-ui-dialog");
+      const _ = setInterval(() => {
+        if (psychoJS.gui._allResourcesDownloaded) {
+          clearInterval(_);
+          loggerText("all resources loaded");
+
+          psychoJS.gui.dialogComponent.button = "OK";
+          psychoJS.gui._removeWelcomeDialogBox();
+          psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
+          psychoJS.window.adjustScreenSize();
+          psychoJS.eventManager.clearEvents();
+
+          document.body.classList.remove("hide-ui-dialog");
+        }
+      }, 300);
+    });
 
   // Get canvas
   // const [canvas, canvasContext] = getCanvasContext();
