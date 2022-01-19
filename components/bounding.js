@@ -13,6 +13,13 @@ import {
   Rectangle,
 } from "./utils.js";
 
+import {
+  getCanvasContext,
+  initPixelsArray,
+  readPixels,
+  getPixelRGBA,
+} from "./canvasContext.js";
+
 export const getFlankerLocationsDeg = (
   targetPositionDeg,
   spacingDeg,
@@ -134,9 +141,9 @@ export const getCharacterSetBoundingBox = (
   characterSet,
   targetFont,
   window,
-  repeats = 1
+  repeats = 1,
+  height = 50
 ) => {
-  const height = 50;
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
   let characterSetBoundingRect = [
     [0, 0],
@@ -164,6 +171,7 @@ export const getCharacterSetBoundingBox = (
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
     let thisBoundingBox = testStim.getBoundingBox(true);
     let thisBoundingRect = rectFromPixiRect(thisBoundingBox);
+    logger(`rect for '${textToSet}'`, thisBoundingRect);
     characterSetBoundingRect = getUnionRect(
       thisBoundingRect,
       characterSetBoundingRect
@@ -693,49 +701,88 @@ const getLargestBoundsRatio = (
   return largestBoundsRatio;
 };
 
-const getTargetHeightPix = (
-  proposedLevel,
-  spacingOverSizeRatio,
-  targetEccentricityXYDeg
-) => {
-  // Spacing value corresponding to the provided `level` value
-  const proposedSpacingDeg = Math.pow(10, proposedLevel);
-  const proposedHeightDeg = proposedSpacingDeg / spacingOverSizeRatio;
-  const targetTopDeg = [
-    targetEccentricityXYDeg[0],
-    targetEccentricityXYDeg[1] + proposedHeightDeg / 2,
-  ];
-  const targetBottomDeg = [
-    targetEccentricityXYDeg[0],
-    targetEccentricityXYDeg[1] - proposedHeightDeg / 2,
-  ];
-  const targetHeightPix = distancePix(targetTopDeg, targetBottomDeg);
-  return targetHeightPix;
+// const getTargetHeightPix = (
+//   proposedLevel,
+//   spacingOverSizeRatio,
+//   targetEccentricityXYDeg
+// ) => {
+//   // Spacing value corresponding to the provided `level` value
+//   const proposedSpacingDeg = Math.pow(10, proposedLevel);
+//   const proposedHeightDeg = proposedSpacingDeg / spacingOverSizeRatio;
+//   const targetTopDeg = [
+//     targetEccentricityXYDeg[0],
+//     targetEccentricityXYDeg[1] + proposedHeightDeg / 2,
+//   ];
+//   const targetBottomDeg = [
+//     targetEccentricityXYDeg[0],
+//     targetEccentricityXYDeg[1] - proposedHeightDeg / 2,
+//   ];
+//   const targetHeightPix = distancePix(targetTopDeg, targetBottomDeg);
+//   return targetHeightPix;
+// };
+
+// const getFlankerHeightsPix = (
+//   proposedLevel,
+//   spacingOverSizeRatio,
+//   targetEccentricityXYDeg,
+//   spacingDirection
+// ) => {
+//   // Spacing value corresponding to the provided `level` value
+//   const proposedSpacingDeg = Math.pow(10, proposedLevel);
+//   const proposedHeightDeg = proposedSpacingDeg / spacingOverSizeRatio;
+//   // Convert to pixels to determine if too small...
+//   const flankerLocationsDeg = getFlankerLocationsDeg(
+//     targetEccentricityXYDeg,
+//     proposedSpacingDeg,
+//     spacingDirection
+//   );
+//   const flankerTopsAndBottomsDeg = flankerLocations.map((flankerLocation) => [
+//     flankerLocation[0],
+//     flankerLocation[1] + proposedHeightDeg / 2,
+//     flankerLocation[0],
+//     flankerLocation[1] - proposedHeightDeg / 2,
+//   ]);
+//   const flankerHeightsPix = flankerTopsAndBottoms.map(distancePix);
+//   return flankerHeightsPix;
+// };
+
+const getBoundingRectFromCanvas = () => {
+  const [canvas, context] = getCanvasContext();
+  const canvasWidth = context.drawingBufferWidth;
+  const canvasHeight = context.drawingBufferHeight;
+  const pixels = new Uint8Array(4 * canvasWidth * canvasHeight);
+  context.readPixels(
+    0,
+    0,
+    canvasWidth,
+    canvasHeight,
+    context.RGBA,
+    context.UNSIGNED_BYTE,
+    pixels
+  );
+  logger(
+    "non-zero pixels",
+    pixels.filter((x) => x !== 0)
+  );
+
+  const bottomLeftFound = false;
+  const latestDrawn = [];
+  for (let i = 0; i < canvasWidth * canvasHeight * 4; i += 4) {
+    let pixel = [pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3]];
+    let drawn = pixelDrawn(pixel);
+    if (drawn && !bottomLeftFound) {
+      bottomLeftFound = true;
+      continue;
+    }
+    if (bottomLeftFound && drawn && !topRightFound) latestDrawn = [];
+  }
+  logger("latestDrawn", latestDrawn);
 };
 
-const getFlankerHeightsPix = (
-  proposedLevel,
-  spacingOverSizeRatio,
-  targetEccentricityXYDeg,
-  spacingDirection
-) => {
-  // Spacing value corresponding to the provided `level` value
-  const proposedSpacingDeg = Math.pow(10, proposedLevel);
-  const proposedHeightDeg = proposedSpacingDeg / spacingOverSizeRatio;
-  // Convert to pixels to determine if too small...
-  const flankerLocationsDeg = getFlankerLocationsDeg(
-    targetEccentricityXYDeg,
-    proposedSpacingDeg,
-    spacingDirection
-  );
-  const flankerTopsAndBottomsDeg = flankerLocations.map((flankerLocation) => [
-    flankerLocation[0],
-    flankerLocation[1] + proposedHeightDeg / 2,
-    flankerLocation[0],
-    flankerLocation[1] - proposedHeightDeg / 2,
-  ]);
-  const flankerHeightsPix = flankerTopsAndBottoms.map(distancePix);
-  return flankerHeightsPix;
+const pixelDrawn = (pixel) => {
+  const [pixelR, pixelG, pixelB, pixelA] = pixel;
+  const drawn = pixelR || pixelG || pixelB || pixelA;
+  return drawn;
 };
 // // Find the font size for the string containing the flankers & target
 // /**
