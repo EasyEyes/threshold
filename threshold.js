@@ -46,7 +46,7 @@ import { ParamReader } from "./parameters/paramReader.js";
 
 import {
   logger,
-  // loggerText,
+  loggerText,
   hideCursor,
   showCursor,
   addConditionToData,
@@ -368,14 +368,35 @@ const experiment = (blockCount) => {
   }
 
   logger("_resources", _resources);
-  psychoJS.start({
-    expName: expName,
-    expInfo: expInfo,
-    resources: [
-      { name: "conditions/blockCount.csv", path: "conditions/blockCount.csv" },
-      ..._resources,
-    ],
-  });
+  psychoJS
+    .start({
+      expName: expName,
+      expInfo: expInfo,
+      resources: [
+        {
+          name: "conditions/blockCount.csv",
+          path: "conditions/blockCount.csv",
+        },
+        ..._resources,
+      ],
+    })
+    .then(() => {
+      document.body.classList.add("hide-ui-dialog");
+      const _ = setInterval(() => {
+        if (psychoJS.gui._allResourcesDownloaded) {
+          clearInterval(_);
+          loggerText("all resources loaded");
+
+          psychoJS.gui.dialogComponent.button = "OK";
+          psychoJS.gui._removeWelcomeDialogBox();
+          psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
+          psychoJS.window.adjustScreenSize();
+          psychoJS.eventManager.clearEvents();
+
+          document.body.classList.remove("hide-ui-dialog");
+        }
+      }, 300);
+    });
 
   // Get canvas
   // const [canvas, canvasContext] = getCanvasContext();
@@ -419,6 +440,9 @@ const experiment = (blockCount) => {
   var targetBoundingPoly;
   var flanker1BoundingPoly;
   var flanker2BoundingPoly;
+  var targetCharacterSetBoundingPoly;
+  var flanker1CharacterSetBoundingPoly;
+  var flanker2CharacterSetBoundingPoly;
   /* --- /BOUNDING BOX --- */
 
   var thisLoopNumber; // ! BLOCK COUNTER
@@ -614,7 +638,6 @@ const experiment = (blockCount) => {
       ori: 0.0,
       pos: [0, 0],
       lineWidth: 1.0,
-      lineColor: new util.Color("blue"),
       // fillColor: "#000000",
       opacity: undefined,
       depth: -10,
@@ -623,15 +646,33 @@ const experiment = (blockCount) => {
     };
     targetBoundingPoly = new visual.Rect({
       ...boundingConfig,
+      lineColor: new util.Color("blue"),
       name: "targetBoundingPoly",
     });
     flanker1BoundingPoly = new visual.Rect({
       ...boundingConfig,
+      lineColor: new util.Color("blue"),
       name: "flanker1BoundingPoly",
     });
     flanker2BoundingPoly = new visual.Rect({
       ...boundingConfig,
+      lineColor: new util.Color("blue"),
       name: "flanker2BoundingPoly",
+    });
+    targetCharacterSetBoundingPoly = new visual.Rect({
+      ...boundingConfig,
+      lineColor: new util.Color("green"),
+      name: "targetCharacterSetBoundingPoly",
+    });
+    flanker1CharacterSetBoundingPoly = new visual.Rect({
+      ...boundingConfig,
+      lineColor: new util.Color("green"),
+      name: "flanker1CharacterSetBoundingPoly",
+    });
+    flanker2CharacterSetBoundingPoly = new visual.Rect({
+      ...boundingConfig,
+      lineColor: new util.Color("green"),
+      name: "flanker2CharacterSetBoundingPoly",
     });
     /* --- BOUNDING BOX --- */
 
@@ -1325,6 +1366,7 @@ const experiment = (blockCount) => {
     clickTime: 0,
   };
   var showBoundingBox;
+  var showCharacterSetBoundingBox;
   var stimulusParameters;
   // var targetKind;
   var targetDurationSec;
@@ -1932,6 +1974,61 @@ const experiment = (blockCount) => {
           t >= frameRemains
         ) {
           flanker2BoundingPoly.setAutoDraw(false);
+        }
+      }
+      if (showCharacterSetBoundingBox) {
+        // // *targetCharacterSetBoundingPoly* updates
+        if (
+          t >= 0.0 &&
+          targetCharacterSetBoundingPoly.status === PsychoJS.Status.NOT_STARTED
+        ) {
+          // keep track of start time/frame for later
+          targetCharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
+          targetCharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
+          targetCharacterSetBoundingPoly.setAutoDraw(true);
+        }
+        if (
+          targetCharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          targetCharacterSetBoundingPoly.setAutoDraw(false);
+        }
+
+        // // *flanker1CharacterSetBoundingPoly* updates
+        if (
+          t >= 0.0 &&
+          flanker1CharacterSetBoundingPoly.status ===
+            PsychoJS.Status.NOT_STARTED &&
+          spacingRelationToSize === "ratio"
+        ) {
+          // keep track of start time/frame for later
+          flanker1CharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
+          flanker1CharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
+          flanker1CharacterSetBoundingPoly.setAutoDraw(true);
+        }
+        if (
+          flanker1CharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          flanker1CharacterSetBoundingPoly.setAutoDraw(false);
+        }
+        // // *flanker2CharacterSetBoundingPoly* updates
+        if (
+          t >= 0.0 &&
+          flanker2CharacterSetBoundingPoly.status ===
+            PsychoJS.Status.NOT_STARTED &&
+          spacingRelationToSize === "ratio"
+        ) {
+          // keep track of start time/frame for later
+          flanker2CharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
+          flanker2CharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
+          flanker2CharacterSetBoundingPoly.setAutoDraw(true);
+        }
+        if (
+          flanker2CharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
+          t >= frameRemains
+        ) {
+          flanker2CharacterSetBoundingPoly.setAutoDraw(false);
         }
       }
       /* --- /BOUNDING BOX --- */

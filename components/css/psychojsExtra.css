@@ -6,3 +6,23 @@
   height: 110% !important;
   background-color: #96ceb4 !important;
 }
+
+.ui-dialog-titlebar-close,
+.ui-dialog-buttonset,
+.ui-dialog-buttonpane {
+  display: none !important;
+}
+
+.ui-dialog-content {
+  padding: 0.5rem 1rem 1rem 1rem !important;
+}
+
+.ui-dialog-content input {
+  pointer-events: none !important;
+}
+
+/* -------------------------------------------------------------------------- */
+
+.hide-ui-dialog .ui-dialog {
+  display: none !important;
+}

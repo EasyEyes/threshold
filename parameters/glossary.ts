@@ -562,6 +562,24 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  questionAndAnswer: {
+    name: "questionAndAnswer",
+    availability: "now",
+    example: "",
+    explanation:
+      "A series of strings separated by the vertical bar character |. The first string is a question, and the rest are possible answers. The participant is required to click on one. For example “How much beauty do you get from this image right now?|1|2|3|4|5|6|7”\nOr   “Which kind of image is it?|figurative painting|abstract painting|photograph”",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer2: {
+    name: "questionAndAnswer2",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same purpose, with a different name, so that you can have two questions in one trial. ",
+    type: "",
+    default: "",
+  },
   readingCorpusURL: {
     name: "readingCorpusURL",
     availability: "now",
@@ -786,6 +804,14 @@ export const GLOSSARY: Glossary = {
     example: "TRUE",
     explanation:
       "For debugging, setting showBoundingBoxBool TRUE displays the bounding box around the target character (if spacing is ratio) or flanker-target-flanker triplet (if spacing typographic). We show the getBoundingBox method from psychojs, using tight=true. ",
+    type: "boolean",
+    default: "FALSE",
+  },
+  showCharacterSetBoundingBoxBool: {
+    name: "showCharacterSetBoundingBoxBool",
+    availability: "now",
+    example: "TRUE",
+    explanation: "Shows the bounding box of the whole targetCharacterSet.",
     type: "boolean",
     default: "FALSE",
   },
@@ -1082,6 +1108,15 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "RobotoMono-Regular.woff2",
   },
+  targetFontFeatureSettings: {
+    name: "targetFontFeatureSettings",
+    availability: "now",
+    example: "",
+    explanation:
+      'Font features provide information about how to use the glyphs in a font to render a script or language. targetFontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. “calt” enables the font’s “contextual alternates”, especially connections between adjacent letters in a script font. “smcp” enables small caps. “zero” requests a slash through the zero character to distinguish it from O. Most font features are Boolean and accept an argument of 0 for off, and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, including Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\n',
+    type: "text",
+    default: "",
+  },
   targetFontSource: {
     name: "targetFontSource",
     availability: "now",
@@ -1104,10 +1139,10 @@ export const GLOSSARY: Glossary = {
   },
   targetFontVariationSettings: {
     name: "targetFontVariationSettings",
-    availability: "later",
-    example: ' "\\"wght\\" 550, \\"ital\\" 6"',
+    availability: "now",
+    example: "",
     explanation:
-      "To control a variable font, this parameter accepts a string to be assigned like this: \nmyText.style.fontVariationSettings = targetFontVariationSettings\nYou can set all the axes at once. Any axis you don't set will be set to its default. Every axis has a four-character name. Standard axes have lowercase names, e.g. 'wght'. Novel axes have ALL-UPPERCASE names. To discover your variable font's axes of variation, and their allowed ranges, try this web page:\nhttps://fontgauntlet.com/\nFor an introduction to variable fonts:\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
+      'targetFontVariationSettings accepts a string to control a variable font. You can set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variable, and we can pick any value along each axis to control the font rendering. targetFontVariationSettings receives a string. The default is the empty string. A typical value is\n"wght" 625\nor\n"wght" 625”, wdth" 25\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. “wght” is weight, which allows you to select any weight from extra thin to regular to bold, to black. “wdth” is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. One must consult the documentation of each variable font to discover which axes it supports. Supported by all modern browsers, except Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
     type: "text",
     default: "",
   },
@@ -1116,19 +1151,28 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "550",
     explanation:
-      "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = targetFontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if it determines that the targetFont is not a variable font.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
+      "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = targetFontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
     type: "numerical",
     default: "NaN",
+  },
+  targetImageFolder: {
+    name: "targetImageFolder",
+    availability: "now",
+    example: "myImages",
+    explanation:
+      "The name of a folder of images, to be used when targetKind==image. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder.",
+    type: "",
+    default: "",
   },
   targetKind: {
     name: "targetKind",
     availability: "now",
     example: "letter",
     explanation:
-      '• "letter" On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• A "gabor" (named after Dennis Gabor inventor of the laser) is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.',
+      "• letter On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is diplayed at the target eccentricity with the target size.",
     type: "categorical",
     default: "letter",
-    categories: ["letter", "gabor"],
+    categories: ["letter", "gabor", "image"],
   },
   targetMinimumPix: {
     name: "targetMinimumPix",
@@ -1198,17 +1242,33 @@ export const GLOSSARY: Glossary = {
     example: "FALSE",
     explanation: 'Define "size" as height (true) or width (false).',
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   targetTask: {
     name: "targetTask",
     availability: "now",
     example: "identify",
     explanation:
-      'The participant\'s task:\n• "identify" is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• "read" asks the observer to read a passage of text as quickly as possible while maintaining full comprehesion, followed by a test.\n• "detect" might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer uses the question and answers provided by parameter questionAndAnswer. The participant must click on one of the answers.\n• questionAndAnswer2 uses the question and answers provided by parameter questionAndAnswer2. The participant must click on one of the answers.\n• read asks the observer to read a passage of text as quickly as possible while maintaining full comprehesion, followed by a test.\n• detect might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
-    categories: ["identify", "read"],
+    categories: [
+      "identify",
+      "read",
+      "categorize",
+      "questionAndAnswer",
+      "questionAndAnswer2",
+    ],
+  },
+  targetTask2: {
+    name: "targetTask2",
+    availability: "now",
+    example: "questionAndAnswer",
+    explanation:
+      "Specifies performance of a second task with the same target. Currently the only allowed values are questionAndAnswer, questionAndAnswer2 and none.",
+    type: "categorical",
+    default: "none",
+    categories: ["none", "questionAndAnswer", "questionAndAnswer2"],
   },
   thresholdBeta: {
     name: "thresholdBeta",
