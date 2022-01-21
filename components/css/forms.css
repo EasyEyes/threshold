@@ -23,8 +23,7 @@
   display: none;
   z-index: 1000005;
 }
-#consent-form-input,
-#debrief-form-input {
+#form-input {
   position: absolute;
   top: 110%;
   left: 20%;

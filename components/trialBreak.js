@@ -1,23 +1,45 @@
 export const showTrialBreakWidget = (bodyContent) => {
-  // wrapper container
-  let el = document.getElementById("trialBreakContainer");
-  el.style.visibility = "visible";
-  el.style.zIndex = 1000005;
+  const wrapperEl = document.createElement("div");
+  wrapperEl.setAttribute("id", "trialBreakContainer");
+  wrapperEl.style.visibility = "visible";
+  wrapperEl.style.zIndex = 1000005;
 
-  // set body content
-  el = document.getElementById("trialBreakPhrase");
-  el.innerHTML = bodyContent;
+  const backgroundEl = document.createElement("div");
+  backgroundEl.setAttribute("id", "trialBreakBackground");
+  wrapperEl.appendChild(backgroundEl);
+
+  const modalEl = document.createElement("div");
+  modalEl.classList.add("trialBreakModal");
+
+  const titleEl = document.createElement("div");
+  titleEl.classList.add("trialBreakTitle");
+  titleEl.innerHTML =
+    "Good work! Please take a brief break to relax and blink.";
+  modalEl.appendChild(titleEl);
+
+  const trialBreakPhraseEl = document.createElement("div");
+  trialBreakPhraseEl.setAttribute("id", "trialBreakPhrase");
+  trialBreakPhraseEl.classList.add("trialBreakBody");
+  trialBreakPhraseEl.innerHTML = bodyContent;
+  modalEl.appendChild(trialBreakPhraseEl);
+
+  const trialProceedEl = document.createElement("div");
+  trialProceedEl.setAttribute("id", "trial-proceed");
+  trialProceedEl.classList.add("trialBreakButton");
+  modalEl.appendChild(trialProceedEl);
+
+  wrapperEl.appendChild(modalEl);
 };
 
 export const hideTrialBreakWidget = () => {
-  document.getElementById("trialBreakContainer").style.visibility = "hidden";
+  document.getElementById("trialBreakContainer")?.remove();
 };
 
 export const hideTrialProceedButton = () => {
-  document.getElementById("trial-proceed").style.visibility = "hidden";
+  document.getElementById("trial-proceed")?.remove();
 };
 export const showTrialProceedButton = () => {
-  document.getElementById("trial-proceed").style.visibility = "visible";
+  document.getElementById("trial-proceed")?.remove();
 };
 
 export const showTrialBreakProgressbar = (height = 0.0) => {
@@ -36,6 +58,5 @@ export const showTrialBreakProgressbar = (height = 0.0) => {
 };
 
 export const hideTrialBreakProgressbar = () => {
-  let el = document.getElementById("trialBreakProgressbarWrapper");
-  if (el) el.remove();
+  document.getElementById("trialBreakProgressbarWrapper")?.remove();
 };

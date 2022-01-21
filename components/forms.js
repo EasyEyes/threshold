@@ -1,88 +1,125 @@
 import axios from "axios";
 
-export const showConsentForm = async (formName) => {
-  // reset all form outputs
-  hideAllForms();
+/**
+ * returns true when user clicks "yes" on consent form
+ * @param {ParamReader} reader used to read form names
+ * @returns Promise<boolean> true if user gives consent, else false
+ */
+export const showForm = async (formName) => {
+  return new Promise(async (resolve) => {
+    // if form name is invalid, continue experiment
+    if (!(typeof formName === "string" && formName.length > 0)) resolve(false);
 
-  const formNameTokens = formName.split(".");
-  const formNameExt = formNameTokens[formNameTokens.length - 1].toLowerCase();
+    // reset all form outputs
+    hideForm();
 
-  // show form container
-  const formHolderEl = document.getElementById("form-container");
-  formHolderEl.style.zIndex = 1000005;
-  formHolderEl.style.display = "block";
+    // get form name extension
+    const formNameTokens = formName.split(".");
+    const formNameExt = formNameTokens[formNameTokens.length - 1].toLowerCase();
 
-  // show form inputs
-  const formInputEl = document.getElementById("consent-form-input");
-  formInputEl.style.display = "block";
-  formInputEl.style.zIndex = 1000005;
+    if (formNameExt == "pdf") {
+      renderPDFForm(`forms/${formName}#toolbar=0&navpanes=0&scrollbar=0`);
+    } else if (formNameExt == "md") {
+      const response = await axios.get(`/forms/${formName}`);
+      renderMarkdownForm(marked.parse(response.data));
+    }
 
-  if (formNameExt == "pdf") {
-    const pdfForm = document.getElementById("form-pdf");
-    pdfForm.style.zIndex = 1000005;
-    pdfForm.style.display = "block";
-    pdfForm.setAttribute(
-      "src",
-      `forms/${formName}#toolbar=0&navpanes=0&scrollbar=0`
-    );
-  } else if (formNameExt == "md") {
-    const response = await axios.get(`/forms/${formName}`);
-    const mdForm = document.getElementById("form-md");
-    mdForm.style.display = "block";
-    mdForm.innerHTML = marked.parse(response.data);
-  }
+    // when user gives consent
+    document.getElementById("form-yes").addEventListener("click", (evt) => {
+      resolve(true);
+    });
+
+    // when user declines consent
+    document.getElementById("form-no").addEventListener("click", (evt) => {
+      resolve(false);
+    });
+  });
 };
 
-export const showDebriefForm = async (formName) => {
-  // reset all form outputs
-  hideAllForms();
-
-  const formNameTokens = formName.split(".");
-  const formNameExt = formNameTokens[formNameTokens.length - 1].toLowerCase();
-
-  // show form container
-  const formHolderEl = document.getElementById("form-container");
-  formHolderEl.style.zIndex = 1000005;
-  formHolderEl.style.display = "block";
-
-  // show form inputs
-  const formInputEl = document.getElementById("debrief-form-input");
-  formInputEl.style.display = "block";
-  formInputEl.style.zIndex = 1000005;
-
-  if (formNameExt == "pdf") {
-    const pdfForm = document.getElementById("form-pdf");
-    pdfForm.style.zIndex = 1000005;
-    pdfForm.style.display = "block";
-    pdfForm.setAttribute(
-      "src",
-      `forms/${formName}#toolbar=0&navpanes=0&scrollbar=0`
-    );
-  } else if (formNameExt == "md") {
-    const response = await axios.get(`/forms/${formName}`);
-    const mdForm = document.getElementById("form-md");
-    mdForm.style.display = "block";
-    // eslint-disable-next-line no-undef
-    mdForm.innerHTML = marked.parse(response.data);
-  }
-};
-
-export const hideAllForms = () => {
+export const hideForm = () => {
   // hide all form types
-  document.getElementById("form-pdf").style.display = "none";
-  document.getElementById("form-md").style.display = "none";
+  document.getElementById("form-pdf")?.remove();
+  document.getElementById("form-md")?.remove();
 
-  // hide form inputs
-  let consentFormInputEl = document.getElementById("consent-form-input");
-  consentFormInputEl.style.display = "none";
-  consentFormInputEl.style.zIndex = 0;
-
-  consentFormInputEl = document.getElementById("debrief-form-input");
-  consentFormInputEl.style.display = "none";
-  consentFormInputEl.style.zIndex = 0;
+  document.getElementById("form-input")?.remove();
 
   // hide form container
-  const formHolderEl = document.getElementById("form-container");
-  formHolderEl.style.zIndex = 0;
-  formHolderEl.style.display = "none";
+  document.getElementById("form-container")?.remove();
+};
+
+const renderPDFForm = (src) => {
+  // create wrapper El
+  const formContainerEl = document.createElement("form");
+  formContainerEl.setAttribute("id", "form-container");
+  formContainerEl.style.display = "block";
+
+  // create iframe for PDF
+  const iframeEl = document.createElement("iframe");
+  iframeEl.setAttribute("id", "form-pdf");
+  iframeEl.setAttribute("width", "100%");
+  iframeEl.setAttribute("height", "100%");
+  iframeEl.setAttribute("scrolling", "auto");
+  iframeEl.setAttribute("src", src);
+  iframeEl.style.display = "block";
+  iframeEl.style.zIndex = 1000005;
+
+  // input button wrapper
+  const formInputContainerEl = document.createElement("div");
+  formInputContainerEl.setAttribute("id", "form-input");
+  formInputContainerEl.style.display = "block";
+  formInputContainerEl.style.zIndex = 1000005;
+
+  // yes button
+  const yesBtnEl = document.createElement("button");
+  yesBtnEl.setAttribute("id", "form-yes");
+  yesBtnEl.classList.add("form-input-btn");
+  yesBtnEl.innerHTML = "YES";
+
+  // no button
+  const noBtnEl = document.createElement("button");
+  noBtnEl.setAttribute("id", "form-no");
+  noBtnEl.classList.add("form-input-btn");
+  noBtnEl.innerHTML = "NO";
+
+  formInputContainerEl.appendChild(yesBtnEl);
+  formInputContainerEl.appendChild(noBtnEl);
+
+  // update DOM
+  formContainerEl.appendChild(iframeEl);
+  formContainerEl.appendChild(formInputContainerEl);
+  document.body.appendChild(formContainerEl);
+};
+
+const renderMarkdownForm = (content) => {
+  // create wrapper El
+  const formContainerEl = document.createElement("form");
+  formContainerEl.setAttribute("id", "form-container");
+
+  // create div for md
+  const iframeEl = document.createElement("div");
+  iframeEl.setAttribute("id", "form-md");
+  iframeEl.style.zIndex = 1000005;
+  iframeEl.innerHTML = content;
+
+  /// input button wrapper
+  const formInputContainerEl = document.createElement("div");
+  formInputContainerEl.setAttribute("id", "form-input");
+  formInputContainerEl.style.zIndex = 1000005;
+
+  // yes button
+  const yesBtnEl = document.createElement("button");
+  yesBtnEl.setAttribute("id", "form-yes");
+  yesBtnEl.classList.add("form-input-btn");
+
+  // no button
+  const noBtnEl = document.createElement("button");
+  noBtnEl.setAttribute("id", "form-no");
+  noBtnEl.classList.add("form-input-btn");
+
+  formInputContainerEl.appendChild(yesBtnEl);
+  formInputContainerEl.appendChild(noBtnEl);
+
+  // update DOM
+  formContainerEl.appendChild(formInputContainerEl);
+  document.body.appendChild(formContainerEl);
 };
