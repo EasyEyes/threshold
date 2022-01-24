@@ -354,7 +354,8 @@ const experiment = (blockCount) => {
           loggerText("all resources loaded");
 
           psychoJS.gui.dialogComponent.button = "OK";
-          psychoJS.gui._removeWelcomeDialogBox();
+          // psychoJS.gui._removeWelcomeDialogBox();
+          psychoJS.gui.closeDialog();
           psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
           psychoJS.window.adjustScreenSize();
           psychoJS.eventManager.clearEvents();
@@ -1822,7 +1823,10 @@ spacing: ${spacing} deg
 targetFont: ${targetFont}
 spacingRelationToSize: ${spacingRelationToSize}
 spacingOverSizeRatio: ${spacingOverSizeRatio}
-spacingSymmetry: ${spacingSymmetry}`;
+spacingSymmetry: ${spacingSymmetry}
+targetSizeIsHeightBool: ${targetSizeIsHeightBool}
+targetEccentricityXYDeg: ${targetEccentricityXYDeg}
+viewingDistanceCm: ${viewingDistanceCm}`;
         targetSpecs.setText(targetSpecsString);
         targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
         targetSpecs.setAutoDraw(true);
