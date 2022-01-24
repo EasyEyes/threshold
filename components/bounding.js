@@ -145,7 +145,7 @@ export const getCharacterSetBoundingBox = (
   height = 50
 ) => {
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
-  let characterSetBoundingRect = [
+  let characterSetBoundingRectPoints = [
     [0, 0],
     [0, 0],
   ];
@@ -170,21 +170,20 @@ export const getCharacterSetBoundingBox = (
     testStim.setText(textToSet);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
     let thisBoundingBox = testStim.getBoundingBox(true);
-    let thisBoundingRect = rectFromPixiRect(thisBoundingBox);
-    logger(`rect for '${textToSet}'`, thisBoundingRect);
-    characterSetBoundingRect = getUnionRect(
-      thisBoundingRect,
-      characterSetBoundingRect
+    let thisBoundingRectPoints = rectFromPixiRect(thisBoundingBox, [0, 0]);
+    characterSetBoundingRectPoints = getUnionRect(
+      thisBoundingRectPoints,
+      characterSetBoundingRectPoints
     );
   }
   const normalizedCharacterSetBoundingPoints = [
     [
-      characterSetBoundingRect[0][0] / height,
-      characterSetBoundingRect[0][1] / height,
+      characterSetBoundingRectPoints[0][0] / height,
+      characterSetBoundingRectPoints[0][1] / height,
     ],
     [
-      characterSetBoundingRect[1][0] / height,
-      characterSetBoundingRect[1][1] / height,
+      characterSetBoundingRectPoints[1][0] / height,
+      characterSetBoundingRectPoints[1][1] / height,
     ],
   ];
   const normalizedCharacterSetBoundingRect = new Rectangle(

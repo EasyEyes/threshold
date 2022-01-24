@@ -1,8 +1,10 @@
 import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
+import { logger } from "./utils.js";
+import { ParamReader } from "../parameters/paramReader.js";
 
-export const generateBoundingBoxPolies = (psychoJS) => {
+export const generateBoundingBoxPolies = (reader, psychoJS) => {
   const boundingConfig = {
     win: psychoJS.window,
     units: "pix",
@@ -57,7 +59,35 @@ export const generateBoundingBoxPolies = (psychoJS) => {
     flanker1: flanker1CharacterSetBoundingPoly,
     flanker2: flanker2CharacterSetBoundingPoly,
   };
-  return [boundingBoxPolies, characterSetBoundingBoxPolies];
+  const clickableCharacterSetBoundingBoxPolies = {};
+  for (const cond of reader.read("block_condition", "__ALL_BLOCKS__")) {
+    const characterSet = reader.read("targetCharacterSet", cond).split("");
+    if (reader.read("showCharacterSetBoundingBoxBool", cond)) {
+      clickableCharacterSetBoundingBoxPolies[cond] =
+        getClickableCharacterSetBoundingPolies(characterSet, boundingConfig);
+    }
+  }
+  return [
+    boundingBoxPolies,
+    characterSetBoundingBoxPolies,
+    clickableCharacterSetBoundingBoxPolies,
+  ];
+};
+
+const getClickableCharacterSetBoundingPolies = (
+  characterSet,
+  boundingConfig
+) => {
+  const polies = [];
+  for (const character of characterSet)
+    polies.push(
+      new visual.Rect({
+        ...boundingConfig,
+        lineColor: new util.Color("red"),
+        name: `clickableCharacterSetBoundingBox-${character}`,
+      })
+    );
+  return polies;
 };
 
 /**
@@ -74,6 +104,7 @@ export const addBoundingBoxesToComponents = (
   showCharacterSetBoundingBox,
   stimulusPolies,
   characterSetPolies,
+  clickableCharacterSetPolies,
   spacingRelationToSize,
   thresholdParameter,
   trialComponents
@@ -98,6 +129,8 @@ export const addBoundingBoxesToComponents = (
       trialComponents.push(characterSetPolies.flanker2);
     }
   }
+  if (clickableCharacterSetPolies)
+    trialComponents.push(...clickableCharacterSetPolies);
 };
 
 export const updateBoundingBoxPolies = (
@@ -108,6 +141,7 @@ export const updateBoundingBoxPolies = (
   showCharacterSetBoundingBox,
   boundingBoxPolies,
   characterSetBoundingBoxPolies,
+  clickableCharacterSetPolies,
   spacingRelationToSize
 ) => {
   if (showBoundingBox) {
@@ -228,6 +262,27 @@ export const updateBoundingBoxPolies = (
     }
   }
 };
+export const updateClickableCharacterSetBoundingBoxPolies = (
+  clickableCharacterSetPolies,
+  timeWhenRespondable,
+  t,
+  frameN
+) => {
+  if (clickableCharacterSetPolies) {
+    for (const characterPoly of clickableCharacterSetPolies) {
+      if (
+        t >= timeWhenRespondable &&
+        characterPoly.status === PsychoJS.Status.NOT_STARTED
+      ) {
+        // keep track of start time/frame for later
+        characterPoly.tStart = t; // (not accounting for frame time here)
+        characterPoly.frameNStart = frameN; // exact frame index
+
+        characterPoly.setAutoDraw(true);
+      }
+    }
+  }
+};
 
 export const sizeAndPositionBoundingBoxes = (
   showBoundingBox,
@@ -313,3 +368,59 @@ export const sizeAndPositionBoundingBoxes = (
     characterSetBoundingStims.forEach((c) => c._updateIfNeeded());
   }
 };
+
+export const sizeAndPositionClickableCharacterSet = (
+  thisClickableCharacterSetBoundingBoxPolies,
+  normalizedCharacterSetBoundingRect,
+  heightPx,
+  psychoJSWindowSize
+) => {
+  // SEE https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript
+  const nominalSize =
+    [...document.querySelectorAll(".characterSet")][0].getBoundingClientRect()
+      .top -
+    [...document.querySelectorAll(".characterSet")][0].getBoundingClientRect()
+      .bottom;
+  const characterSetBounds = [
+    normalizedCharacterSetBoundingRect.width * nominalSize,
+    normalizedCharacterSetBoundingRect.height * nominalSize,
+  ];
+  for (const clickableCharacterBox of thisClickableCharacterSetBoundingBoxPolies) {
+    const character = clickableCharacterBox._name.match(/\-(.*)/)[1];
+    const correspondingCharacterElem = [
+      ...document.querySelectorAll(".characterSet"),
+    ].filter((e) => e.innerText === character)[0];
+    const characterElemWindowCoords = getCoords(correspondingCharacterElem);
+    const topLeftOfCharacterElem = [
+      characterElemWindowCoords.left,
+      characterElemWindowCoords.top,
+    ];
+    const topLeftPsychoJSCentered = [
+      topLeftOfCharacterElem[0] -
+        psychoJSWindowSize[0] / 2 -
+        (characterElemWindowCoords.left - characterElemWindowCoords.right) / 2,
+      -1 * topLeftOfCharacterElem[1] +
+        psychoJSWindowSize[1] / 2 -
+        (characterElemWindowCoords.bottom - characterElemWindowCoords.top) / 2,
+    ];
+    clickableCharacterBox.setSize(characterSetBounds);
+    clickableCharacterBox.setPos(topLeftPsychoJSCentered);
+  }
+};
+
+/**
+ * get document coordinates of the element
+ * @source https://javascript.info/coordinates
+ * @param {*} elem
+ * @returns
+ */
+function getCoords(elem) {
+  let box = elem.getBoundingClientRect();
+
+  return {
+    top: box.top + window.pageYOffset,
+    right: box.right + window.pageXOffset,
+    bottom: box.bottom + window.pageYOffset,
+    left: box.left + window.pageXOffset,
+  };
+}

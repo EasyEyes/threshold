@@ -122,7 +122,9 @@ import {
   generateBoundingBoxPolies,
   addBoundingBoxesToComponents,
   updateBoundingBoxPolies,
+  updateClickableCharacterSetBoundingBoxPolies,
   sizeAndPositionBoundingBoxes,
+  sizeAndPositionClickableCharacterSet,
 } from "./components/boundingBoxes.js";
 
 // READING
@@ -245,6 +247,7 @@ var debriefFormName = "";
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
+var clickableCharacterSetBoundingPolies = {};
 
 const beforeExperimentBegins = async (reader) => {
   // get consent form
@@ -439,12 +442,7 @@ const experiment = (blockCount) => {
   /* --- BOUNDING BOX --- */
   var boundingBoxPolies;
   var characterSetBoundingBoxPolies;
-  var targetBoundingPoly;
-  var flanker1BoundingPoly;
-  var flanker2BoundingPoly;
-  var targetCharacterSetBoundingPoly;
-  var flanker1CharacterSetBoundingPoly;
-  var flanker2CharacterSetBoundingPoly;
+  var clickableCharacterSetBoundingBoxPolies;
   /* --- /BOUNDING BOX --- */
 
   var thisLoopNumber; // ! BLOCK COUNTER
@@ -631,23 +629,30 @@ const experiment = (blockCount) => {
       alignVert: "bottom",
     });
 
+    characterSetBoundingRects = {};
+    for (const cond of paramReader.read("block_condition", "__ALL_BLOCKS__")) {
+      const characterSet = String(
+        paramReader.read("targetCharacterSet", cond)
+      ).split("");
+      const font = paramReader.read("targetFont", cond);
+      const letterRepeats =
+        paramReader.read("spacingRelationToSize", cond) === "ratio" ? 1 : 3;
+      characterSetBoundingRects[cond] = getCharacterSetBoundingBox(
+        characterSet,
+        font,
+        psychoJS.window,
+        letterRepeats,
+        100
+      );
+    }
     /* --- BOUNDING BOX --- */
-    [boundingBoxPolies, characterSetBoundingBoxPolies] =
-      generateBoundingBoxPolies(psychoJS);
-    [targetBoundingPoly, flanker1BoundingPoly, flanker2BoundingPoly] = [
-      boundingBoxPolies.target,
-      boundingBoxPolies.flanker1,
-      boundingBoxPolies.flanker2,
-    ];
+    // Generate the bounding boxes to display overlaid with the triplet
     [
-      targetCharacterSetBoundingPoly,
-      flanker1CharacterSetBoundingPoly,
-      flanker2CharacterSetBoundingPoly,
-    ] = [
-      characterSetBoundingBoxPolies.target,
-      characterSetBoundingBoxPolies.flanker1,
-      characterSetBoundingBoxPolies.flanker2,
-    ];
+      boundingBoxPolies,
+      characterSetBoundingBoxPolies,
+      clickableCharacterSetBoundingBoxPolies,
+    ] = generateBoundingBoxPolies(paramReader, psychoJS);
+    // NOTE Bounding boxes on the clickable alphabet are generated each trial
     /* --- BOUNDING BOX --- */
 
     // Create some handy timers
@@ -1608,49 +1613,39 @@ const experiment = (blockCount) => {
 
       // Repeat letters 3 times when in 'typographic' mode,
       // ie the relevant bounding box is that of three letters.
-      const letterRepeats = spacingRelationToSize === "ratio" ? 1 : 3;
-      // eslint-disable-next-line no-prototype-builtins
-      if (!characterSetBoundingRects.hasOwnProperty(block_condition)) {
-        characterSetBoundingRects[block_condition] = getCharacterSetBoundingBox(
-          characterSet,
-          targetFont,
-          psychoJS.window,
-          letterRepeats
-        );
-        const ten = getCharacterSetBoundingBox(
-          characterSet,
-          targetFont,
-          psychoJS.window,
-          letterRepeats,
-          10
-        );
-        const fifty = getCharacterSetBoundingBox(
-          characterSet,
-          targetFont,
-          psychoJS.window,
-          letterRepeats,
-          50
-        );
-        const twofifty = getCharacterSetBoundingBox(
-          characterSet,
-          targetFont,
-          psychoJS.window,
-          letterRepeats,
-          250
-        );
-        logger(
-          "nominal size: 10",
-          `height: ${ten.height}, width: ${ten.width}`
-        );
-        logger(
-          "nominal size: 50",
-          `height: ${fifty.height}, width: ${fifty.width}`
-        );
-        logger(
-          "nominal size: 250",
-          `height: ${twofifty.height}, width: ${twofifty.width}`
-        );
-      }
+      // const ten = getCharacterSetBoundingBox(
+      //   characterSet,
+      //   targetFont,
+      //   psychoJS.window,
+      //   letterRepeats,
+      //   10
+      // );
+      // const fifty = getCharacterSetBoundingBox(
+      //   characterSet,
+      //   targetFont,
+      //   psychoJS.window,
+      //   letterRepeats,
+      //   50
+      // );
+      // const twofifty = getCharacterSetBoundingBox(
+      //   characterSet,
+      //   targetFont,
+      //   psychoJS.window,
+      //   letterRepeats,
+      //   250
+      // );
+      // logger(
+      //   "nominal size: 10",
+      //   `height: ${ten.height}, width: ${ten.width}`
+      // );
+      // logger(
+      //   "nominal size: 50",
+      //   `height: ${fifty.height}, width: ${fifty.width}`
+      // );
+      // logger(
+      //   "nominal size: 250",
+      //   `height: ${twofifty.height}, width: ${twofifty.width}`
+      // );
       /* ------------------------------ Pick triplets ----------------------------- */
       var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
         getTripletCharacters(characterSet);
@@ -1662,8 +1657,7 @@ const experiment = (blockCount) => {
       correctAns = targetCharacter.toLowerCase();
       /* -------------------------------------------------------------------------- */
 
-      var pos1XYPx, targetEccentricityXYPx, pos3XYPx;
-      var spacingDeg, spacingPx;
+      var targetEccentricityXYPx;
 
       ////
       // !
@@ -1844,6 +1838,7 @@ spacingSymmetry: ${spacingSymmetry}`;
         showCharacterSetBoundingBox,
         boundingBoxPolies,
         characterSetBoundingBoxPolies,
+        clickableCharacterSetBoundingBoxPolies[block_condition],
         spacingRelationToSize,
         thresholdParameter,
         trialComponents
@@ -2277,19 +2272,6 @@ spacingSymmetry: ${spacingSymmetry}`;
         flanker2.setAutoDraw(false);
       }
 
-      /* --- BOUNDING BOX --- */
-      updateBoundingBoxPolies(
-        t,
-        frameRemains,
-        frameN,
-        showBoundingBox,
-        showCharacterSetBoundingBox,
-        boundingBoxPolies,
-        characterSetBoundingBoxPolies,
-        spacingRelationToSize
-      );
-      /* --- /BOUNDING BOX --- */
-
       // check for quit (typically the Esc key)
       if (
         psychoJS.experiment.experimentEnded ||
@@ -2301,6 +2283,25 @@ spacingSymmetry: ${spacingSymmetry}`;
         }
       }
 
+      updateBoundingBoxPolies(
+        t,
+        frameRemains,
+        frameN,
+        showBoundingBox,
+        showCharacterSetBoundingBox,
+        boundingBoxPolies,
+        characterSetBoundingBoxPolies,
+        clickableCharacterSetBoundingBoxPolies[condition.block_condition],
+        spacingRelationToSize
+      );
+      const timeWhenRespondable =
+        uniDelay + targetSafetyMarginSec + targetDurationSec;
+      updateClickableCharacterSetBoundingBoxPolies(
+        clickableCharacterSetBoundingBoxPolies[condition.block_condition],
+        timeWhenRespondable,
+        t,
+        frameN
+      );
       /* -------------------------------------------------------------------------- */
       // SHOW CharacterSet AND INSTRUCTIONS
       // *showCharacterSet* updates
@@ -2318,6 +2319,14 @@ spacingSymmetry: ${spacingSymmetry}`;
           showCharacterSetWhere,
           showCharacterSetResponse
         );
+
+        if (showCharacterSetBoundingBox)
+          sizeAndPositionClickableCharacterSet(
+            clickableCharacterSetBoundingBoxPolies[condition.block_condition],
+            characterSetBoundingRects[condition.block_condition],
+            stimulusParameters.heightPx,
+            psychoJS.window._size
+          );
 
         instructions.tSTart = t;
         instructions.frameNStart = frameN;
