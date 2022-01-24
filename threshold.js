@@ -1415,8 +1415,9 @@ const experiment = (blockCount) => {
         if (c.block_condition === trials._currentStaircase._name) {
           condition = c;
           addConditionToData(
+            paramReader,
+            condition["block_condition"],
             psychoJS.experiment,
-            condition,
             parametersToExcludeFromData
           );
         }

@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-undef
 export const debug = process.env.debug;
 // export const debug = true;
+import { GLOSSARY } from "../parameters/glossary.ts";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -205,9 +206,15 @@ export const XYDegOfXYPix = (xyPix, displayOptions) => {
  * @param {Object} condition Parameters from the current staircase, as specified by the experimenter in experiment.csv
  * @param {Array} [exclude=[]] List of parameter names which should NOT be added to data
  */
-export const addConditionToData = (experiment, condition, exclude = []) => {
-  for (const [key, value] of Object.entries(condition)) {
-    if (!exclude.includes(key)) experiment.addData(key, value);
+export const addConditionToData = (
+  reader,
+  conditionName,
+  experiment,
+  exclude = []
+) => {
+  for (const parameter of Object.keys(GLOSSARY)) {
+    if (!exclude.includes(parameter))
+      experiment.addData(parameter, reader.read(parameter, conditionName));
   }
 };
 
