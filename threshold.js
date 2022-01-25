@@ -2807,7 +2807,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
     document.getElementById("skip-trial-btn").disabled = false;
     document.getElementById("skip-block-btn").disabled = false;
     document.getElementById("quit-btn").disabled = false;
-    if (!isProlificPreviewExperiment()) {
+    if (!(isProlificPreviewExperiment() || isPavloviaExperiment())) {
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
       document.getElementById("skip-block-btn").disabled = true;
@@ -2876,11 +2876,20 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 };
 
 const isProlificPreviewExperiment = () => {
-  let searchParams = window.location.search;
+  let urlSearchParams = URLSearchParams(window.location.search);
   return (
-    searchParams.search("participant") != -1 &&
-    searchParams.search("session") != -1 &&
-    searchParams.search("study_id") != -1 &&
-    searchParams.search("preview") != -1
+    urlSearchParams.get("participant") != null &&
+    urlSearchParams.get("session") != null &&
+    urlSearchParams.get("study_id") != null &&
+    urlSearchParams.get("preview") != null
+  );
+};
+
+const isPavloviaExperiment = () => {
+  let urlSearchParams = URLSearchParams(window.location.search);
+  return (
+    urlSearchParams.get("participant") == null &&
+    urlSearchParams.get("session") == null &&
+    urlSearchParams.get("study_id") == null
   );
 };
