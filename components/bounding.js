@@ -169,9 +169,8 @@ export const getCharacterSetBoundingBox = (
     let textToSet = character.repeat(repeats);
     testStim.setText(textToSet);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
-    console.log("textToSet", textToSet);
     let thisBoundingBox = testStim.getBoundingBox(true);
-    console.log("thisBoundingBox", thisBoundingBox);
+    console.log(`thisBoundingBox ${textToSet}`, thisBoundingBox);
     let thisBoundingRectPoints = rectFromPixiRect(thisBoundingBox, [0, 0]);
     characterSetBoundingRectPoints = getUnionRect(
       thisBoundingRectPoints,
