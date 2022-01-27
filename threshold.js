@@ -2897,6 +2897,7 @@ const isPavloviaExperiment = () => {
 
 const initializeEscHandlingDiv = () => {
   if (document.getElementById("esc-key-handling-div").children.length == 0) {
+    // add only if not present
     document.getElementById("esc-key-handling-div").innerHTML =
       "<div\n" +
       '        class="modal fade"\n' +
