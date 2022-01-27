@@ -296,7 +296,7 @@ export const sizeAndPositionBoundingBoxes = (
   thresholdParameter
 ) => {
   if (showBoundingBox) {
-    const boundingStims = [targetBoundingPoly];
+    const boundingStims = [boundingBoxPolies.target];
     const targetBoundingBox = triplet.target.getBoundingBox(true);
     boundingBoxPolies.target.setPos([
       targetBoundingBox.left,
@@ -323,7 +323,7 @@ export const sizeAndPositionBoundingBoxes = (
         flanker1BoundingBox.width,
         flanker1BoundingBox.height,
       ]);
-      const flanker2BoundingBox = flanker2.getBoundingBox(true);
+      const flanker2BoundingBox = triplet.flanker2.getBoundingBox(true);
       boundingBoxPolies.flanker2.setPos([
         flanker2BoundingBox.left,
         flanker2BoundingBox.top,
