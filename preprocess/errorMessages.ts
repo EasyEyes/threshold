@@ -58,16 +58,17 @@ export const INCORRECT_PARAMETER_TYPE = (
   categories?: string[]
 ): EasyEyesError => {
   const offendingMessage = offendingValues.map(
-    (offending) => ` "${offending.value}" [condition ${offending.block}]`
+    (offending) =>
+      ` "${offending.value}" [column ${Number(offending.block) + 1}]`
   );
-  let message = `All values for the parameter <span class="error-parameter">${parameter}</span> must be "${correctType}" type.`;
+  let message = `All values for the parameter <span class="error-parameter">${parameter}</span> must be ${correctType}.`;
   if (categories) {
     message = message + ` Valid categories are: ${categories.join(", ")}.`;
   }
   return {
     name: `Parameter contains values of the wrong type`,
     message: message,
-    hint: `We're having trouble with the following values, try double checking them:${offendingMessage}.`,
+    hint: `The erroneous values are: ${offendingMessage}.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],

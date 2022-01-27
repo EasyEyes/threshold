@@ -88,8 +88,10 @@ import {
 import {
   getConsentFormName,
   hideAllForms,
+  hideForm,
   showConsentForm,
   showDebriefForm,
+  showForm,
 } from "./components/forms.js";
 
 import { getTrialInfoStr } from "./components/trialCounter.js";
@@ -166,7 +168,15 @@ const paramReaderInitialized = async (reader) => {
   await sleep(250);
 
   // show screens before actual experiment begins
-  beforeExperimentBegins(reader);
+  const continueExperiment = await showForm(reader.read("_consentForm")[0]);
+  hideForm();
+
+  if (!continueExperiment) {
+    await showForm(reader.read("_debriefForm")[0]);
+    hideForm();
+    showExperimentEnding();
+    return;
+  }
 
   // prepareForReading(reader);
 
@@ -181,10 +191,6 @@ const paramReaderInitialized = async (reader) => {
 
   // ! Check if to use grids
   [showGrid, gridVisible] = readGridParameter(reader, simulated);
-
-  /* ---------------- TEMPORARY! PLEASE UPDATE AND REMOVE @svr8 --------------- */
-  document.getElementById("temp-element-hider").remove();
-  /* -------------------------------------------------------------------------- */
 
   await sleep(50);
 
@@ -248,39 +254,6 @@ var debriefFormName = "";
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
 var clickableCharacterSetBoundingPolies = {};
-
-const beforeExperimentBegins = async (reader) => {
-  // get consent form
-  consentFormName = reader.read("_consentForm")[0];
-  if (!(typeof consentFormName === "string" && consentFormName.length > 0))
-    consentFormName = "";
-
-  // get debrief form
-  debriefFormName = paramReader.read("_debriefForm")[0];
-  if (!(typeof debriefFormName === "string" && debriefFormName.length > 0))
-    debriefFormName = "";
-
-  // show consent form if field is valid
-  if (consentFormName.length > 0) showConsentForm(consentFormName);
-
-  // add event listners to form buttons
-  document.getElementById("consent-yes").addEventListener("click", (evt) => {
-    hideAllForms();
-  });
-  document.getElementById("consent-no").addEventListener("click", (evt) => {
-    if (debriefFormName.length > 0) showDebriefForm(debriefFormName);
-
-    document.getElementById("debrief-yes").addEventListener("click", (evt) => {
-      hideAllForms();
-      afterExperimentEnds();
-    });
-
-    document.getElementById("debrief-no").addEventListener("click", (evt) => {
-      hideAllForms();
-      afterExperimentEnds();
-    });
-  });
-};
 
 const experiment = (blockCount) => {
   ////
@@ -1428,8 +1401,9 @@ const experiment = (blockCount) => {
         if (c.block_condition === trials._currentStaircase._name) {
           condition = c;
           addConditionToData(
+            paramReader,
+            condition["block_condition"],
             psychoJS.experiment,
-            condition,
             parametersToExcludeFromData
           );
         }
@@ -1799,7 +1773,10 @@ spacing: ${spacing} deg
 targetFont: ${targetFont}
 spacingRelationToSize: ${spacingRelationToSize}
 spacingOverSizeRatio: ${spacingOverSizeRatio}
-spacingSymmetry: ${spacingSymmetry}`;
+spacingSymmetry: ${spacingSymmetry}
+targetSizeIsHeightBool: ${targetSizeIsHeightBool}
+targetEccentricityXYDeg: ${targetEccentricityXYDeg}
+viewingDistanceCm: ${viewingDistanceCm}`;
         targetSpecs.setText(targetSpecsString);
         targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
         targetSpecs.setAutoDraw(true);
@@ -2668,7 +2645,7 @@ spacingSymmetry: ${spacingSymmetry}`;
     document.getElementById("skip-trial-btn").disabled = false;
     document.getElementById("skip-block-btn").disabled = false;
     document.getElementById("quit-btn").disabled = false;
-    if (!isProlificPreviewExperiment()) {
+    if (!(isProlificPreviewExperiment() || isPavloviaExperiment())) {
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
       document.getElementById("skip-block-btn").disabled = true;
@@ -2737,15 +2714,20 @@ spacingSymmetry: ${spacingSymmetry}`;
 };
 
 const isProlificPreviewExperiment = () => {
-  let searchParams = window.location.search;
+  let urlSearchParams = URLSearchParams(window.location.search);
   return (
-    searchParams.search("participant") != -1 &&
-    searchParams.search("session") != -1 &&
-    searchParams.search("study_id") != -1 &&
-    searchParams.search("preview") != -1
+    urlSearchParams.get("participant") != null &&
+    urlSearchParams.get("session") != null &&
+    urlSearchParams.get("study_id") != null &&
+    urlSearchParams.get("preview") != null
   );
 };
 
-const afterExperimentEnds = () => {
-  showExperimentEnding();
+const isPavloviaExperiment = () => {
+  let urlSearchParams = URLSearchParams(window.location.search);
+  return (
+    urlSearchParams.get("participant") == null &&
+    urlSearchParams.get("session") == null &&
+    urlSearchParams.get("study_id") == null
+  );
 };
