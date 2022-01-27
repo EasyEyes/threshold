@@ -363,8 +363,8 @@ const experiment = (blockCount) => {
           loggerText("all resources loaded");
 
           psychoJS.gui.dialogComponent.button = "OK";
-          // psychoJS.gui._removeWelcomeDialogBox();
-          psychoJS.gui.closeDialog();
+          psychoJS.gui._removeWelcomeDialogBox();
+          // psychoJS.gui.closeDialog();
           psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
           psychoJS.window.adjustScreenSize();
           psychoJS.eventManager.clearEvents();
@@ -607,7 +607,9 @@ const experiment = (blockCount) => {
       const characterSet = String(
         paramReader.read("targetCharacterSet", cond)
       ).split("");
-      const font = paramReader.read("targetFont", cond);
+      let font = paramReader.read("targetFont", cond);
+      if (paramReader.read("targetFontSource", cond) === "file")
+        font = cleanFontName(font);
       const letterRepeats =
         paramReader.read("spacingRelationToSize", cond) === "ratio" ? 1 : 3;
       characterSetBoundingRects[cond] = getCharacterSetBoundingBox(
