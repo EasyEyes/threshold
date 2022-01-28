@@ -376,15 +376,24 @@ export const sizeAndPositionClickableCharacterSet = (
   psychoJSWindowSize
 ) => {
   // SEE https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript
-  const nominalSize =
-    [...document.querySelectorAll(".characterSet")][0].getBoundingClientRect()
-      .top -
-    [...document.querySelectorAll(".characterSet")][0].getBoundingClientRect()
-      .bottom;
+  logger(
+    `boundingClientRect of ${document.querySelectorAll(".characterSet")[0]}`,
+    document.querySelectorAll(".characterSet")[0].getBoundingClientRect()
+  );
+  const sampleLetter = document.querySelectorAll(".characterSet")[0];
+  const sampleLetterWidth = getElementContentWidth(sampleLetter);
+  logger("sampleLetterWidth", sampleLetterWidth);
+  // sampleLetterWidth is desired width of clickableCharacterBoxes later
+  // so, `sampleLetterWidth = normalizedCharacterSetBoundingRect.width * nominalScalar`
+  const nominalScalar =
+    sampleLetterWidth / normalizedCharacterSetBoundingRect.width;
+
+  logger("nominalScalar", nominalScalar);
   const characterSetBounds = [
-    normalizedCharacterSetBoundingRect.width * nominalSize,
-    normalizedCharacterSetBoundingRect.height * nominalSize,
+    normalizedCharacterSetBoundingRect.width * nominalScalar,
+    normalizedCharacterSetBoundingRect.height * nominalScalar,
   ];
+  logger("characterSetBounds[0]", characterSetBounds[0]);
   for (const clickableCharacterBox of thisClickableCharacterSetBoundingBoxPolies) {
     const character = clickableCharacterBox._name.match(/\-(.*)/)[1];
     const correspondingCharacterElem = [
@@ -406,6 +415,22 @@ export const sizeAndPositionClickableCharacterSet = (
     clickableCharacterBox.setSize(characterSetBounds);
     clickableCharacterBox.setPos(topLeftPsychoJSCentered);
   }
+};
+
+/**
+ * Get the width of the the content of an element, ie after accounting for its padding
+ * @param {HTMLElement} elem HTML element, ie containing a single letter
+ * @returns {number}
+ */
+const getElementContentWidth = (elem) => {
+  const style = getComputedStyle(elem);
+  const clientWidth = elem.clientWidth;
+  const clientHeight = elem.clientHeight;
+  const paddingWidth =
+    parseFloat(style.getPropertyValue("padding-left")) +
+    parseFloat(style.getPropertyValue("padding-right"));
+  const unpaddedWidth = clientWidth - paddingWidth;
+  return unpaddedWidth;
 };
 
 /**
