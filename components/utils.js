@@ -2,6 +2,12 @@
 export const debug = process.env.debug;
 // export const debug = true;
 
+export function safeExecuteFunc(f, ...a) {
+  if (f && typeof f === "function")
+    if (a.length) return f(...a);
+    else return f();
+}
+
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

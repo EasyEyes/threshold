@@ -112,7 +112,7 @@ export const _identify_trialInstructionRoutineBegin = (
     instructionsClock.reset(); // clock
     frameN = -1;
     continueRoutine = true;
-    // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
+
     const wrapWidth = window.innerWidth / 4;
     instructions.setWrapWidth(wrapWidth);
     instructions.setPos([

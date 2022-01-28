@@ -20,9 +20,9 @@ export const showTrialProceedButton = () => {
   document.getElementById("trial-proceed").style.visibility = "visible";
 };
 
-export const showTrialBreakProgressbar = (height = 0.0) => {
+export const showTrialBreakProgressBar = (height = 0.0) => {
   height = Math.min(height, 1.0);
-  hideTrialBreakProgressbar();
+  hideTrialBreakProgressBar();
 
   // wrapper element
   const wrapperEl = document.createElement("div");
@@ -35,7 +35,7 @@ export const showTrialBreakProgressbar = (height = 0.0) => {
   wrapperEl.appendChild(progressEl);
 };
 
-export const hideTrialBreakProgressbar = () => {
+export const hideTrialBreakProgressBar = () => {
   let el = document.getElementById("trialBreakProgressbarWrapper");
   if (el) el.remove();
 };
