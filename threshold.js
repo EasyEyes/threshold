@@ -124,9 +124,9 @@ import {
   generateBoundingBoxPolies,
   addBoundingBoxesToComponents,
   updateBoundingBoxPolies,
-  updateClickableCharacterSetBoundingBoxPolies,
+  updateDisplayCharacterSetBoundingBoxPolies,
   sizeAndPositionBoundingBoxes,
-  sizeAndPositionClickableCharacterSet,
+  sizeAndPositionDisplayCharacterSet,
 } from "./components/boundingBoxes.js";
 
 // READING
@@ -415,7 +415,7 @@ const experiment = (blockCount) => {
   /* --- BOUNDING BOX --- */
   var boundingBoxPolies;
   var characterSetBoundingBoxPolies;
-  var clickableCharacterSetBoundingBoxPolies;
+  var displayCharacterSetBoundingBoxPolies;
   /* --- /BOUNDING BOX --- */
 
   var thisLoopNumber; // ! BLOCK COUNTER
@@ -621,13 +621,12 @@ const experiment = (blockCount) => {
       );
     }
     /* --- BOUNDING BOX --- */
-    // Generate the bounding boxes to display overlaid with the triplet
+    // Generate the bounding boxes to be displayed superimposing...
     [
-      boundingBoxPolies,
-      characterSetBoundingBoxPolies,
-      clickableCharacterSetBoundingBoxPolies,
+      boundingBoxPolies, // ... the triplet.
+      characterSetBoundingBoxPolies, // ... the triplet.
+      displayCharacterSetBoundingBoxPolies, // .. the full character set displayed during response time.
     ] = generateBoundingBoxPolies(paramReader, psychoJS);
-    // NOTE Bounding boxes on the clickable alphabet are generated each trial
     /* --- BOUNDING BOX --- */
 
     // Create some handy timers
@@ -1759,6 +1758,14 @@ const experiment = (blockCount) => {
         spacingRelationToSize,
         thresholdParameter
       );
+      if (showCharacterSetBoundingBox)
+        sizeAndPositionDisplayCharacterSet(
+          displayCharacterSetBoundingBoxPolies[condition.block_condition],
+          characterSetBoundingRects[condition.block_condition],
+          stimulusParameters.heightPx,
+          targetFont,
+          psychoJS.window._size
+        );
 
       showCharacterSet.setPos([0, 0]);
       showCharacterSet.setText("");
@@ -1817,7 +1824,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         showCharacterSetBoundingBox,
         boundingBoxPolies,
         characterSetBoundingBoxPolies,
-        clickableCharacterSetBoundingBoxPolies[block_condition],
+        displayCharacterSetBoundingBoxPolies[block_condition],
         spacingRelationToSize,
         thresholdParameter,
         trialComponents
@@ -2270,17 +2277,17 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         showCharacterSetBoundingBox,
         boundingBoxPolies,
         characterSetBoundingBoxPolies,
-        clickableCharacterSetBoundingBoxPolies[condition.block_condition],
         spacingRelationToSize
       );
       const timeWhenRespondable =
         uniDelay + targetSafetyMarginSec + targetDurationSec;
-      updateClickableCharacterSetBoundingBoxPolies(
-        clickableCharacterSetBoundingBoxPolies[condition.block_condition],
-        timeWhenRespondable,
-        t,
-        frameN
-      );
+      if (showCharacterSetBoundingBox)
+        updateDisplayCharacterSetBoundingBoxPolies(
+          displayCharacterSetBoundingBoxPolies[condition.block_condition],
+          timeWhenRespondable,
+          t,
+          frameN
+        );
       /* -------------------------------------------------------------------------- */
       // SHOW CharacterSet AND INSTRUCTIONS
       // *showCharacterSet* updates
@@ -2298,14 +2305,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           showCharacterSetWhere,
           showCharacterSetResponse
         );
-
-        if (showCharacterSetBoundingBox)
-          sizeAndPositionClickableCharacterSet(
-            clickableCharacterSetBoundingBoxPolies[condition.block_condition],
-            characterSetBoundingRects[condition.block_condition],
-            stimulusParameters.heightPx,
-            psychoJS.window._size
-          );
 
         instructions.tSTart = t;
         instructions.frameNStart = frameN;

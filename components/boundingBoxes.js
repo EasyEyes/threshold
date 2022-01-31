@@ -2,7 +2,6 @@ import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
 import { logger } from "./utils.js";
-import { ParamReader } from "../parameters/paramReader.js";
 
 export const generateBoundingBoxPolies = (reader, psychoJS) => {
   const boundingConfig = {
@@ -59,35 +58,57 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
     flanker1: flanker1CharacterSetBoundingPoly,
     flanker2: flanker2CharacterSetBoundingPoly,
   };
-  const clickableCharacterSetBoundingBoxPolies = {};
+  const displayCharacterSetBoundingBoxPolies = {};
   for (const cond of reader.read("block_condition", "__ALL_BLOCKS__")) {
     const characterSet = reader.read("targetCharacterSet", cond).split("");
     if (reader.read("showCharacterSetBoundingBoxBool", cond)) {
-      clickableCharacterSetBoundingBoxPolies[cond] =
-        getClickableCharacterSetBoundingPolies(characterSet, boundingConfig);
+      displayCharacterSetBoundingBoxPolies[cond] =
+        getDisplayCharacterSetBoundingPolies(
+          characterSet,
+          boundingConfig,
+          psychoJS
+        );
     }
   }
   return [
     boundingBoxPolies,
     characterSetBoundingBoxPolies,
-    clickableCharacterSetBoundingBoxPolies,
+    displayCharacterSetBoundingBoxPolies,
   ];
 };
 
-const getClickableCharacterSetBoundingPolies = (
+const getDisplayCharacterSetBoundingPolies = (
   characterSet,
-  boundingConfig
+  boundingConfig,
+  psychoJS
 ) => {
-  const polies = [];
-  for (const character of characterSet)
+  const [polies, characters] = [[], []];
+  for (const character of characterSet) {
+    characters.push(
+      new visual.TextStim({
+        win: psychoJS.window,
+        name: `displayCharacterSet_${character}`,
+        text: character,
+        font: "Arial",
+        units: "pix",
+        pos: [0, 0],
+        height: 1.0,
+        wrapWidth: undefined,
+        ori: 0.0,
+        color: new util.Color("black"),
+        opacity: 1.0,
+        depth: -10,
+      })
+    );
     polies.push(
       new visual.Rect({
         ...boundingConfig,
         lineColor: new util.Color("red"),
-        name: `clickableCharacterSetBoundingBox-${character}`,
+        name: `displayCharacterSetBoundingBox-${character}`,
       })
     );
-  return polies;
+  }
+  return { characters: characters, polies: polies };
 };
 
 /**
@@ -104,7 +125,7 @@ export const addBoundingBoxesToComponents = (
   showCharacterSetBoundingBox,
   stimulusPolies,
   characterSetPolies,
-  clickableCharacterSetPolies,
+  displayCharacterSetPolies,
   spacingRelationToSize,
   thresholdParameter,
   trialComponents
@@ -128,9 +149,11 @@ export const addBoundingBoxesToComponents = (
       trialComponents.push(characterSetPolies.flanker1);
       trialComponents.push(characterSetPolies.flanker2);
     }
+    trialComponents.push(
+      ...displayCharacterSetPolies.characters,
+      ...displayCharacterSetPolies.polies
+    );
   }
-  if (clickableCharacterSetPolies)
-    trialComponents.push(...clickableCharacterSetPolies);
 };
 
 export const updateBoundingBoxPolies = (
@@ -141,7 +164,6 @@ export const updateBoundingBoxPolies = (
   showCharacterSetBoundingBox,
   boundingBoxPolies,
   characterSetBoundingBoxPolies,
-  clickableCharacterSetPolies,
   spacingRelationToSize
 ) => {
   if (showBoundingBox) {
@@ -262,22 +284,22 @@ export const updateBoundingBoxPolies = (
     }
   }
 };
-export const updateClickableCharacterSetBoundingBoxPolies = (
-  clickableCharacterSetPolies,
+export const updateDisplayCharacterSetBoundingBoxPolies = (
+  displayCharacterSetPolies,
   timeWhenRespondable,
   t,
   frameN
 ) => {
-  if (clickableCharacterSetPolies) {
-    for (const characterPoly of clickableCharacterSetPolies) {
-      if (
-        t >= timeWhenRespondable &&
-        characterPoly.status === PsychoJS.Status.NOT_STARTED
-      ) {
+  if (t >= timeWhenRespondable) {
+    const characterAndPolygonStims = [
+      ...displayCharacterSetPolies.characters,
+      ...displayCharacterSetPolies.polies,
+    ];
+    for (const characterPoly of characterAndPolygonStims) {
+      if (characterPoly.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         characterPoly.tStart = t; // (not accounting for frame time here)
         characterPoly.frameNStart = frameN; // exact frame index
-
         characterPoly.setAutoDraw(true);
       }
     }
@@ -369,83 +391,34 @@ export const sizeAndPositionBoundingBoxes = (
   }
 };
 
-export const sizeAndPositionClickableCharacterSet = (
-  thisClickableCharacterSetBoundingBoxPolies,
+export const sizeAndPositionDisplayCharacterSet = (
+  displayCharacterSetStimuli,
   normalizedCharacterSetBoundingRect,
   heightPx,
-  psychoJSWindowSize
+  font,
+  windowDims
 ) => {
-  // SEE https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript
-  logger(
-    `boundingClientRect of ${document.querySelectorAll(".characterSet")[0]}`,
-    document.querySelectorAll(".characterSet")[0].getBoundingClientRect()
-  );
-  const sampleLetter = document.querySelectorAll(".characterSet")[0];
-  const sampleLetterWidth = getElementContentWidth(sampleLetter);
-  logger("sampleLetterWidth", sampleLetterWidth);
-  // sampleLetterWidth is desired width of clickableCharacterBoxes later
-  // so, `sampleLetterWidth = normalizedCharacterSetBoundingRect.width * nominalScalar`
-  const nominalScalar =
-    sampleLetterWidth / normalizedCharacterSetBoundingRect.width;
-
-  logger("nominalScalar", nominalScalar);
   const characterSetBounds = [
-    normalizedCharacterSetBoundingRect.width * nominalScalar,
-    normalizedCharacterSetBoundingRect.height * nominalScalar,
+    normalizedCharacterSetBoundingRect.width * heightPx,
+    normalizedCharacterSetBoundingRect.height * heightPx,
   ];
-  logger("characterSetBounds[0]", characterSetBounds[0]);
-  for (const clickableCharacterBox of thisClickableCharacterSetBoundingBoxPolies) {
-    const character = clickableCharacterBox._name.match(/\-(.*)/)[1];
-    const correspondingCharacterElem = [
-      ...document.querySelectorAll(".characterSet"),
-    ].filter((e) => e.innerText === character)[0];
-    const characterElemWindowCoords = getCoords(correspondingCharacterElem);
-    const topLeftOfCharacterElem = [
-      characterElemWindowCoords.left,
-      characterElemWindowCoords.top,
-    ];
-    const topLeftPsychoJSCentered = [
-      topLeftOfCharacterElem[0] -
-        psychoJSWindowSize[0] / 2 -
-        (characterElemWindowCoords.left - characterElemWindowCoords.right) / 2,
-      -1 * topLeftOfCharacterElem[1] +
-        psychoJSWindowSize[1] / 2 -
-        (characterElemWindowCoords.bottom - characterElemWindowCoords.top) / 2,
-    ];
-    clickableCharacterBox.setSize(characterSetBounds);
-    clickableCharacterBox.setPos(topLeftPsychoJSCentered);
+  const paddedWidthOfCharacter = characterSetBounds[0] * 1.2;
+  const indicies = [...displayCharacterSetStimuli.polies.keys()];
+  const middleIndex = Math.floor(indicies.length / 2);
+  const positions = indicies.map((i) => [
+    (i - middleIndex) * paddedWidthOfCharacter,
+    -windowDims[1] / 2.5,
+  ]);
+  logger("positions", positions);
+  for (const i of indicies) {
+    const displayCharacterBox = displayCharacterSetStimuli.polies[i];
+    const displayCharacter = displayCharacterSetStimuli.characters[i];
+    const position = positions[i];
+
+    displayCharacterBox.setSize(characterSetBounds);
+    displayCharacterBox.setPos(position);
+    displayCharacter.setFont(font);
+    displayCharacter.setHeight(heightPx);
+    displayCharacter.setPos(position);
   }
 };
-
-/**
- * Get the width of the the content of an element, ie after accounting for its padding
- * @param {HTMLElement} elem HTML element, ie containing a single letter
- * @returns {number}
- */
-const getElementContentWidth = (elem) => {
-  const style = getComputedStyle(elem);
-  const clientWidth = elem.clientWidth;
-  const clientHeight = elem.clientHeight;
-  const paddingWidth =
-    parseFloat(style.getPropertyValue("padding-left")) +
-    parseFloat(style.getPropertyValue("padding-right"));
-  const unpaddedWidth = clientWidth - paddingWidth;
-  return unpaddedWidth;
-};
-
-/**
- * get document coordinates of the element
- * @source https://javascript.info/coordinates
- * @param {*} elem
- * @returns
- */
-function getCoords(elem) {
-  let box = elem.getBoundingClientRect();
-
-  return {
-    top: box.top + window.pageYOffset,
-    right: box.right + window.pageXOffset,
-    bottom: box.bottom + window.pageYOffset,
-    left: box.left + window.pageXOffset,
-  };
-}
