@@ -258,6 +258,7 @@ var clickableCharacterSetBoundingPolies = {};
 const experiment = (blockCount) => {
   ////
   // Resources
+  initializeEscHandlingDiv();
   const _resources = [];
   const blockNumbers = paramReader._experiment.map((block) => block.block);
   for (const i of blockNumbers) {
@@ -2714,7 +2715,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 };
 
 const isProlificPreviewExperiment = () => {
-  let urlSearchParams = URLSearchParams(window.location.search);
+  let urlSearchParams = new URLSearchParams(window.location.search);
   return (
     urlSearchParams.get("participant") != null &&
     urlSearchParams.get("session") != null &&
@@ -2724,10 +2725,76 @@ const isProlificPreviewExperiment = () => {
 };
 
 const isPavloviaExperiment = () => {
-  let urlSearchParams = URLSearchParams(window.location.search);
+  let urlSearchParams = new URLSearchParams(window.location.search);
   return (
     urlSearchParams.get("participant") == null &&
     urlSearchParams.get("session") == null &&
     urlSearchParams.get("study_id") == null
   );
+};
+
+const initializeEscHandlingDiv = () => {
+  if (document.getElementById("esc-key-handling-div").children.length == 0) {
+    // add only if not present
+    document.getElementById("esc-key-handling-div").innerHTML =
+      "<div\n" +
+      '        class="modal fade"\n' +
+      '        id="exampleModal"\n' +
+      '        tabindex="-1"\n' +
+      '        aria-labelledby="exampleModalLabel"\n' +
+      '        aria-hidden="true"\n' +
+      "      >\n" +
+      '        <div class="modal-dialog">\n' +
+      '          <div class="modal-content">\n' +
+      '            <div class="modal-header">\n' +
+      '              <h3 class="modal-title" id="modalTitle">\n' +
+      "                Escape Key was Pressed\n" +
+      "              </h3>\n" +
+      "            </div>\n" +
+      "            <div\n" +
+      '              class="modal-body"\n' +
+      '              id="modalBody"\n' +
+      '              style="display: flex; justify-content: space-around"\n' +
+      "            >\n" +
+      '              <div style="display: grid">\n' +
+      "                <button\n" +
+      '                  type="button"\n' +
+      '                  id="skip-trial-btn"\n' +
+      '                  class="btn btn-outline-secondary"\n' +
+      '                  style="font-size: x-large"\n' +
+      '                  data-bs-dismiss="modal"\n' +
+      "                >\n" +
+      "                  Skip Trial\n" +
+      "                </button>\n" +
+      '                <span style="text-align: center">(Space)</span>\n' +
+      "              </div>\n" +
+      '              <div id="skip-block-div" style="display: grid">\n' +
+      "                <button\n" +
+      '                  type="button"\n' +
+      '                  id="skip-block-btn"\n' +
+      '                  class="btn btn-outline-secondary"\n' +
+      '                  style="font-size: x-large"\n' +
+      '                  data-bs-dismiss="modal"\n' +
+      "                >\n" +
+      "                  Skip Block\n" +
+      "                </button>\n" +
+      '                <span style="text-align: center">(Enter)</span>\n' +
+      "              </div>\n" +
+      '              <div style="display: grid">\n' +
+      "                <button\n" +
+      '                  type="button"\n' +
+      '                  id="quit-btn"\n' +
+      '                  class="btn btn-outline-danger"\n' +
+      '                  style="font-size: x-large"\n' +
+      '                  data-bs-dismiss="modal"\n' +
+      "                >\n" +
+      "                  Quit\n" +
+      "                </button>\n" +
+      '                <span style="text-align: center">(Escape)</span>\n' +
+      "              </div>\n" +
+      "            </div>\n" +
+      "          </div>\n" +
+      "        </div>\n" +
+      "      </div>";
+  }
 };
