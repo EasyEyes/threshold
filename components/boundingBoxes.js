@@ -394,10 +394,10 @@ export const sizeAndPositionBoundingBoxes = (
 export const sizeAndPositionDisplayCharacterSet = (
   displayCharacterSetStimuli,
   normalizedCharacterSetBoundingRect,
-  heightPx,
   font,
   windowDims
 ) => {
+  const heightPx = 150;
   const characterSetBounds = [
     normalizedCharacterSetBoundingRect.width * heightPx,
     normalizedCharacterSetBoundingRect.height * heightPx,
@@ -407,7 +407,7 @@ export const sizeAndPositionDisplayCharacterSet = (
   const middleIndex = Math.floor(indicies.length / 2);
   const positions = indicies.map((i) => [
     (i - middleIndex) * paddedWidthOfCharacter,
-    -windowDims[1] / 2.5,
+    -windowDims[1] / 10,
   ]);
   logger("positions", positions);
   for (const i of indicies) {
@@ -415,10 +415,16 @@ export const sizeAndPositionDisplayCharacterSet = (
     const displayCharacter = displayCharacterSetStimuli.characters[i];
     const position = positions[i];
 
-    displayCharacterBox.setSize(characterSetBounds);
-    displayCharacterBox.setPos(position);
     displayCharacter.setFont(font);
     displayCharacter.setHeight(heightPx);
     displayCharacter.setPos(position);
+    displayCharacter._updateIfNeeded();
+
+    const displayCharacterBoundingBox = displayCharacter.getBoundingBox(true);
+    displayCharacterBox.setSize(characterSetBounds);
+    displayCharacterBox.setPos([
+      displayCharacterBoundingBox.left,
+      displayCharacterBoundingBox.top,
+    ]);
   }
 };

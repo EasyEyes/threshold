@@ -1762,7 +1762,6 @@ const experiment = (blockCount) => {
         sizeAndPositionDisplayCharacterSet(
           displayCharacterSetBoundingBoxPolies[condition.block_condition],
           characterSetBoundingRects[condition.block_condition],
-          stimulusParameters.heightPx,
           targetFont,
           psychoJS.window._size
         );
