@@ -123,10 +123,8 @@ import { populateQuestDefaults } from "./components/questValues.js";
 import {
   generateBoundingBoxPolies,
   addBoundingBoxesToComponents,
-  updateBoundingBoxPolies,
-  updateDisplayCharacterSetBoundingBoxPolies,
   sizeAndPositionBoundingBoxes,
-  sizeAndPositionDisplayCharacterSet,
+  updateBoundingBoxPolies,
 } from "./components/boundingBoxes.js";
 
 // READING
@@ -1749,24 +1747,25 @@ const experiment = (blockCount) => {
         flanker2: flanker2,
       };
       sizeAndPositionBoundingBoxes(
-        showBoundingBox,
-        showCharacterSetBoundingBox,
-        boundingBoxPolies,
-        characterSetBoundingBoxPolies,
+        {
+          stimulus: showBoundingBox,
+          characterSet: showCharacterSetBoundingBox,
+        },
+        {
+          stimulus: boundingBoxPolies,
+          characterSet: characterSetBoundingBoxPolies,
+        },
+        displayCharacterSetBoundingBoxPolies[block_condition],
         tripletStims,
         characterSetBoundingRects[block_condition],
-        stimulusParameters.heightPx,
-        spacingRelationToSize,
-        thresholdParameter
+        {
+          heightPx: stimulusParameters.heightPx,
+          spacingRelationToSize: spacingRelationToSize,
+          thresholdParameter: thresholdParameter,
+          windowSize: psychoJS.window._size,
+          targetFont: targetFont,
+        }
       );
-      if (showCharacterSetBoundingBox)
-        sizeAndPositionDisplayCharacterSet(
-          displayCharacterSetBoundingBoxPolies[condition.block_condition],
-          characterSetBoundingRects[condition.block_condition],
-          targetFont,
-          psychoJS.window._size
-        );
-
       showCharacterSet.setPos([0, 0]);
       showCharacterSet.setText("");
       // showCharacterSet.setText(getCharacterSetShowText(validAns))
@@ -2269,6 +2268,8 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         }
       }
 
+      const timeWhenRespondable =
+        uniDelay + targetSafetyMarginSec + targetDurationSec;
       updateBoundingBoxPolies(
         t,
         frameRemains,
@@ -2277,17 +2278,10 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         showCharacterSetBoundingBox,
         boundingBoxPolies,
         characterSetBoundingBoxPolies,
-        spacingRelationToSize
+        displayCharacterSetBoundingBoxPolies[condition.block_condition],
+        spacingRelationToSize,
+        timeWhenRespondable
       );
-      const timeWhenRespondable =
-        uniDelay + targetSafetyMarginSec + targetDurationSec;
-      if (showCharacterSetBoundingBox)
-        updateDisplayCharacterSetBoundingBoxPolies(
-          displayCharacterSetBoundingBoxPolies[condition.block_condition],
-          timeWhenRespondable,
-          t,
-          frameN
-        );
       /* -------------------------------------------------------------------------- */
       // SHOW CharacterSet AND INSTRUCTIONS
       // *showCharacterSet* updates
