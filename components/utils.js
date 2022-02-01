@@ -444,16 +444,28 @@ const rectIsEmpty = (rect) => {
   return false;
 };
 
-export const rectFromPixiRect = (pixiRect) => {
+export const rectFromPixiRect = (pixiRect, centerXY = undefined) => {
   // ASSUMES `center` aligned
-  const lowerLeft = [
-    pixiRect.x - pixiRect.width / 2,
-    pixiRect.y - pixiRect.height / 2,
-  ];
-  const upperRight = [
-    pixiRect.x + pixiRect.width / 2,
-    pixiRect.y + pixiRect.height / 2,
-  ];
+  let lowerLeft, upperRight;
+  if (centerXY) {
+    lowerLeft = [
+      centerXY[0] - pixiRect.width / 2,
+      centerXY[1] - pixiRect.height / 2,
+    ];
+    upperRight = [
+      centerXY[0] + pixiRect.width / 2,
+      centerXY[1] + pixiRect.height / 2,
+    ];
+  } else {
+    lowerLeft = [
+      pixiRect.x - pixiRect.width / 2,
+      pixiRect.y - pixiRect.height / 2,
+    ];
+    upperRight = [
+      pixiRect.x + pixiRect.width / 2,
+      pixiRect.y + pixiRect.height / 2,
+    ];
+  }
   const newRect = [lowerLeft, upperRight];
   return newRect;
 };

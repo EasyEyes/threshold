@@ -120,6 +120,12 @@ import {
   readPixels,
 } from "./components/canvasContext.js";
 import { populateQuestDefaults } from "./components/questValues.js";
+import {
+  generateBoundingBoxPolies,
+  addBoundingBoxesToComponents,
+  sizeAndPositionBoundingBoxes,
+  updateBoundingBoxPolies,
+} from "./components/boundingBoxes.js";
 
 // READING
 import {
@@ -245,6 +251,7 @@ var debriefFormName = "";
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
+var clickableCharacterSetBoundingPolies = {};
 
 const experiment = (blockCount) => {
   ////
@@ -356,6 +363,7 @@ const experiment = (blockCount) => {
 
           psychoJS.gui.dialogComponent.button = "OK";
           psychoJS.gui._removeWelcomeDialogBox();
+          // psychoJS.gui.closeDialog();
           psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
           psychoJS.window.adjustScreenSize();
           psychoJS.eventManager.clearEvents();
@@ -404,12 +412,9 @@ const experiment = (blockCount) => {
   var instructionsClock;
 
   /* --- BOUNDING BOX --- */
-  var targetBoundingPoly;
-  var flanker1BoundingPoly;
-  var flanker2BoundingPoly;
-  var targetCharacterSetBoundingPoly;
-  var flanker1CharacterSetBoundingPoly;
-  var flanker2CharacterSetBoundingPoly;
+  var boundingBoxPolies;
+  var characterSetBoundingBoxPolies;
+  var displayCharacterSetBoundingBoxPolies;
   /* --- /BOUNDING BOX --- */
 
   var thisLoopNumber; // ! BLOCK COUNTER
@@ -596,51 +601,31 @@ const experiment = (blockCount) => {
       alignVert: "bottom",
     });
 
+    characterSetBoundingRects = {};
+    for (const cond of paramReader.read("block_condition", "__ALL_BLOCKS__")) {
+      const characterSet = String(
+        paramReader.read("targetCharacterSet", cond)
+      ).split("");
+      let font = paramReader.read("targetFont", cond);
+      if (paramReader.read("targetFontSource", cond) === "file")
+        font = cleanFontName(font);
+      const letterRepeats =
+        paramReader.read("spacingRelationToSize", cond) === "ratio" ? 1 : 3;
+      characterSetBoundingRects[cond] = getCharacterSetBoundingBox(
+        characterSet,
+        font,
+        psychoJS.window,
+        letterRepeats,
+        100
+      );
+    }
     /* --- BOUNDING BOX --- */
-    const boundingConfig = {
-      win: psychoJS.window,
-      units: "pix",
-      width: [1.0, 1.0][0],
-      height: [1.0, 1.0][1],
-      ori: 0.0,
-      pos: [0, 0],
-      lineWidth: 1.0,
-      // fillColor: "#000000",
-      opacity: undefined,
-      depth: -10,
-      interpolate: true,
-      size: 0,
-    };
-    targetBoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("blue"),
-      name: "targetBoundingPoly",
-    });
-    flanker1BoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("blue"),
-      name: "flanker1BoundingPoly",
-    });
-    flanker2BoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("blue"),
-      name: "flanker2BoundingPoly",
-    });
-    targetCharacterSetBoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("green"),
-      name: "targetCharacterSetBoundingPoly",
-    });
-    flanker1CharacterSetBoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("green"),
-      name: "flanker1CharacterSetBoundingPoly",
-    });
-    flanker2CharacterSetBoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("green"),
-      name: "flanker2CharacterSetBoundingPoly",
-    });
+    // Generate the bounding boxes to be displayed superimposing...
+    [
+      boundingBoxPolies, // ... the triplet.
+      characterSetBoundingBoxPolies, // ... the triplet.
+      displayCharacterSetBoundingBoxPolies, // .. the full character set displayed during response time.
+    ] = generateBoundingBoxPolies(paramReader, psychoJS);
     /* --- BOUNDING BOX --- */
 
     // Create some handy timers
@@ -1602,16 +1587,39 @@ const experiment = (blockCount) => {
 
       // Repeat letters 3 times when in 'typographic' mode,
       // ie the relevant bounding box is that of three letters.
-      const letterRepeats = spacingRelationToSize === "ratio" ? 1 : 3;
-      // eslint-disable-next-line no-prototype-builtins
-      if (!characterSetBoundingRects.hasOwnProperty(block_condition)) {
-        characterSetBoundingRects[block_condition] = getCharacterSetBoundingBox(
-          characterSet,
-          targetFont,
-          psychoJS.window,
-          letterRepeats
-        );
-      }
+      // const ten = getCharacterSetBoundingBox(
+      //   characterSet,
+      //   targetFont,
+      //   psychoJS.window,
+      //   letterRepeats,
+      //   10
+      // );
+      // const fifty = getCharacterSetBoundingBox(
+      //   characterSet,
+      //   targetFont,
+      //   psychoJS.window,
+      //   letterRepeats,
+      //   50
+      // );
+      // const twofifty = getCharacterSetBoundingBox(
+      //   characterSet,
+      //   targetFont,
+      //   psychoJS.window,
+      //   letterRepeats,
+      //   250
+      // );
+      // logger(
+      //   "nominal size: 10",
+      //   `height: ${ten.height}, width: ${ten.width}`
+      // );
+      // logger(
+      //   "nominal size: 50",
+      //   `height: ${fifty.height}, width: ${fifty.width}`
+      // );
+      // logger(
+      //   "nominal size: 250",
+      //   `height: ${twofifty.height}, width: ${twofifty.width}`
+      // );
       /* ------------------------------ Pick triplets ----------------------------- */
       var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
         getTripletCharacters(characterSet);
@@ -1623,8 +1631,7 @@ const experiment = (blockCount) => {
       correctAns = targetCharacter.toLowerCase();
       /* -------------------------------------------------------------------------- */
 
-      var pos1XYPx, targetEccentricityXYPx, pos3XYPx;
-      var spacingDeg, spacingPx;
+      var targetEccentricityXYPx;
 
       ////
       // !
@@ -1733,82 +1740,32 @@ const experiment = (blockCount) => {
         showCharacterSet,
         totalTrial,
       ].forEach((c) => c._updateIfNeeded());
-      if (showBoundingBox) {
-        const boundingStims = [targetBoundingPoly];
-        const tightBoundingBox = target.getBoundingBox(true);
-        targetBoundingPoly.setPos([
-          tightBoundingBox.left,
-          tightBoundingBox.top,
-        ]);
-        targetBoundingPoly.setSize([
-          tightBoundingBox.width,
-          tightBoundingBox.height,
-        ]);
-        if (
-          (spacingRelationToSize === "ratio" ||
-            spacingRelationToSize === "none") &&
-          thresholdParameter === "spacing"
-        ) {
-          boundingStims.push(flanker1BoundingPoly, flanker2BoundingPoly);
-          const flanker1BoundingBox = flanker1.getBoundingBox(true);
-          flanker1BoundingPoly.setPos([
-            flanker1BoundingBox.left,
-            flanker1BoundingBox.top,
-          ]);
-          flanker1BoundingPoly.setSize([
-            flanker1BoundingBox.width,
-            flanker1BoundingBox.height,
-          ]);
-          const flanker2BoundingBox = flanker2.getBoundingBox(true);
-          flanker2BoundingPoly.setPos([
-            flanker2BoundingBox.left,
-            flanker2BoundingBox.top,
-          ]);
-          flanker2BoundingPoly.setSize([
-            flanker2BoundingBox.width,
-            flanker2BoundingBox.height,
-          ]);
+
+      const tripletStims = {
+        target: target,
+        flanker1: flanker1,
+        flanker2: flanker2,
+      };
+      sizeAndPositionBoundingBoxes(
+        {
+          stimulus: showBoundingBox,
+          characterSet: showCharacterSetBoundingBox,
+        },
+        {
+          stimulus: boundingBoxPolies,
+          characterSet: characterSetBoundingBoxPolies,
+        },
+        displayCharacterSetBoundingBoxPolies[block_condition],
+        tripletStims,
+        characterSetBoundingRects[block_condition],
+        {
+          heightPx: stimulusParameters.heightPx,
+          spacingRelationToSize: spacingRelationToSize,
+          thresholdParameter: thresholdParameter,
+          windowSize: psychoJS.window._size,
+          targetFont: targetFont,
         }
-        boundingStims.forEach((c) => c._updateIfNeeded());
-      }
-      if (showCharacterSetBoundingBox) {
-        const characterSetBoundingStims = [targetCharacterSetBoundingPoly];
-        const characterSetBounds = [
-          characterSetBoundingRects[block_condition].width *
-            stimulusParameters.heightPx,
-          characterSetBoundingRects[block_condition].height *
-            stimulusParameters.heightPx,
-        ];
-        const targetBB = target.getBoundingBox(true);
-        targetCharacterSetBoundingPoly.setPos([targetBB.left, targetBB.top]);
-        targetCharacterSetBoundingPoly.setSize(characterSetBounds);
-        if (
-          (spacingRelationToSize === "ratio" ||
-            spacingRelationToSize === "none") &&
-          thresholdParameter === "spacing"
-        ) {
-          const flanker1BB = flanker1.getBoundingBox(true);
-          const flanker2BB = flanker2.getBoundingBox(true);
-          targetCharacterSetBoundingPoly.setPos([targetBB.left, targetBB.top]);
-          characterSetBoundingStims.push(
-            flanker1CharacterSetBoundingPoly,
-            flanker2CharacterSetBoundingPoly
-          );
-          // flanker1CharacterSetBoundingPoly.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
-          flanker1CharacterSetBoundingPoly.setPos([
-            flanker1BB.left,
-            flanker1BB.top,
-          ]);
-          flanker1CharacterSetBoundingPoly.setSize(characterSetBounds);
-          // flanker2CharacterSetBoundingPoly.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
-          flanker2CharacterSetBoundingPoly.setPos([
-            flanker2BB.left,
-            flanker2BB.top,
-          ]);
-          flanker2CharacterSetBoundingPoly.setSize(characterSetBounds);
-        }
-        characterSetBoundingStims.forEach((c) => c._updateIfNeeded());
-      }
+      );
       showCharacterSet.setPos([0, 0]);
       showCharacterSet.setText("");
       // showCharacterSet.setText(getCharacterSetShowText(validAns))
@@ -1861,28 +1818,16 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       trialComponents.push(totalTrial);
       // if (showTargetSpecs) trialComponents.push(targetSpecs);
       // /* --- BOUNDING BOX --- */
-      if (showBoundingBox) {
-        trialComponents.push(targetBoundingPoly);
-        if (
-          (spacingRelationToSize === "ratio" ||
-            spacingRelationToSize === "none") &&
-          thresholdParameter === "spacing"
-        ) {
-          trialComponents.push(flanker1BoundingPoly);
-          trialComponents.push(flanker2BoundingPoly);
-        }
-      }
-      if (showCharacterSetBoundingBox) {
-        trialComponents.push(targetCharacterSetBoundingPoly);
-        if (
-          (spacingRelationToSize === "ratio" ||
-            spacingRelationToSize === "none") &&
-          thresholdParameter === "spacing"
-        ) {
-          trialComponents.push(flanker1CharacterSetBoundingPoly);
-          trialComponents.push(flanker2CharacterSetBoundingPoly);
-        }
-      }
+      addBoundingBoxesToComponents(
+        showBoundingBox,
+        showCharacterSetBoundingBox,
+        boundingBoxPolies,
+        characterSetBoundingBoxPolies,
+        displayCharacterSetBoundingBoxPolies[block_condition],
+        spacingRelationToSize,
+        thresholdParameter,
+        trialComponents
+      );
       // /* --- /BOUNDING BOX --- */
       // /* --- SIMULATED --- */
       if (simulated && simulated[block]) {
@@ -2312,133 +2257,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         flanker2.setAutoDraw(false);
       }
 
-      /* --- BOUNDING BOX --- */
-      if (showBoundingBox) {
-        // // *targetBoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          targetBoundingPoly.status === PsychoJS.Status.NOT_STARTED
-        ) {
-          // keep track of start time/frame for later
-          targetBoundingPoly.tStart = t; // (not accounting for frame time here)
-          targetBoundingPoly.frameNStart = frameN; // exact frame index
-
-          const tightBoundingBox = target.getBoundingBox(true);
-
-          targetBoundingPoly.setAutoDraw(true);
-        }
-        if (
-          targetBoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          targetBoundingPoly.setAutoDraw(false);
-        }
-
-        // // *flanker1BoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          flanker1BoundingPoly.status === PsychoJS.Status.NOT_STARTED &&
-          spacingRelationToSize === "ratio"
-        ) {
-          // keep track of start time/frame for later
-          flanker1BoundingPoly.tStart = t; // (not accounting for frame time here)
-          flanker1BoundingPoly.frameNStart = frameN; // exact frame index
-
-          flanker1BoundingPoly.setAutoDraw(true);
-        }
-        if (
-          flanker1BoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          flanker1BoundingPoly.setAutoDraw(false);
-        }
-
-        // // *flanker2BoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          flanker2BoundingPoly.status === PsychoJS.Status.NOT_STARTED &&
-          spacingRelationToSize === "ratio"
-        ) {
-          // keep track of start time/frame for later
-          flanker2BoundingPoly.tStart = t; // (not accounting for frame time here)
-          flanker2BoundingPoly.frameNStart = frameN; // exact frame index
-
-          const tightBoundingBox = flanker2.getBoundingBox(true);
-          flanker2BoundingPoly.setPos([
-            tightBoundingBox.left,
-            tightBoundingBox.top,
-          ]);
-          flanker2BoundingPoly.setSize([
-            tightBoundingBox.width,
-            tightBoundingBox.height,
-          ]);
-
-          flanker2BoundingPoly.setAutoDraw(true);
-        }
-        if (
-          flanker2BoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          flanker2BoundingPoly.setAutoDraw(false);
-        }
-      }
-      if (showCharacterSetBoundingBox) {
-        // // *targetCharacterSetBoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          targetCharacterSetBoundingPoly.status === PsychoJS.Status.NOT_STARTED
-        ) {
-          // keep track of start time/frame for later
-          targetCharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
-          targetCharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
-          targetCharacterSetBoundingPoly.setAutoDraw(true);
-        }
-        if (
-          targetCharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          targetCharacterSetBoundingPoly.setAutoDraw(false);
-        }
-
-        // // *flanker1CharacterSetBoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          flanker1CharacterSetBoundingPoly.status ===
-            PsychoJS.Status.NOT_STARTED &&
-          spacingRelationToSize === "ratio"
-        ) {
-          // keep track of start time/frame for later
-          flanker1CharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
-          flanker1CharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
-          flanker1CharacterSetBoundingPoly.setAutoDraw(true);
-        }
-        if (
-          flanker1CharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          flanker1CharacterSetBoundingPoly.setAutoDraw(false);
-        }
-        // // *flanker2CharacterSetBoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          flanker2CharacterSetBoundingPoly.status ===
-            PsychoJS.Status.NOT_STARTED &&
-          spacingRelationToSize === "ratio"
-        ) {
-          // keep track of start time/frame for later
-          flanker2CharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
-          flanker2CharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
-          flanker2CharacterSetBoundingPoly.setAutoDraw(true);
-        }
-        if (
-          flanker2CharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          flanker2CharacterSetBoundingPoly.setAutoDraw(false);
-        }
-      }
-      /* --- /BOUNDING BOX --- */
-
       // check for quit (typically the Esc key)
       if (
         psychoJS.experiment.experimentEnded ||
@@ -2450,6 +2268,20 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         }
       }
 
+      const timeWhenRespondable =
+        uniDelay + targetSafetyMarginSec + targetDurationSec;
+      updateBoundingBoxPolies(
+        t,
+        frameRemains,
+        frameN,
+        showBoundingBox,
+        showCharacterSetBoundingBox,
+        boundingBoxPolies,
+        characterSetBoundingBoxPolies,
+        displayCharacterSetBoundingBoxPolies[condition.block_condition],
+        spacingRelationToSize,
+        timeWhenRespondable
+      );
       /* -------------------------------------------------------------------------- */
       // SHOW CharacterSet AND INSTRUCTIONS
       // *showCharacterSet* updates
