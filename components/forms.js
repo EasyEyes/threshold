@@ -6,6 +6,7 @@ import axios from "axios";
  * @returns Promise<boolean> true if user gives consent, else false
  */
 export const showForm = async (formName) => {
+  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve) => {
     // if form name is invalid, continue experiment
     if (!(typeof formName === "string" && formName.length > 0)) resolve(false);
@@ -21,6 +22,7 @@ export const showForm = async (formName) => {
       renderPDFForm(`forms/${formName}#toolbar=0&navpanes=0&scrollbar=0`);
     } else if (formNameExt == "md") {
       const response = await axios.get(`/forms/${formName}`);
+      // eslint-disable-next-line no-undef
       renderMarkdownForm(marked.parse(response.data));
     }
 
@@ -50,34 +52,40 @@ export const hideForm = () => {
 const renderPDFForm = (src) => {
   // create wrapper El
   const formContainerEl = document.createElement("form");
-  formContainerEl.setAttribute("id", "form-container");
+  formContainerEl.id = "form-container";
   formContainerEl.style.display = "block";
 
   // create iframe for PDF
   const iframeEl = document.createElement("iframe");
-  iframeEl.setAttribute("id", "form-pdf");
-  iframeEl.setAttribute("width", "100%");
-  iframeEl.setAttribute("height", "100%");
-  iframeEl.setAttribute("scrolling", "auto");
+  iframeEl.id = "form-pdf";
+  // TODO Rewrite in .css file
+  Object.assign(iframeEl.style, {
+    width: "100%",
+    height: "100%",
+    scrolling: "auto",
+    display: "block",
+    zIndex: 1000005,
+  });
+  // iframeEl.setAttribute("width", "100%");
+  // iframeEl.setAttribute("height", "100%");
+  // iframeEl.setAttribute("scrolling", "auto");
   iframeEl.setAttribute("src", src);
-  iframeEl.style.display = "block";
-  iframeEl.style.zIndex = 1000005;
 
   // input button wrapper
   const formInputContainerEl = document.createElement("div");
-  formInputContainerEl.setAttribute("id", "form-input");
+  formInputContainerEl.id = "form-input";
   formInputContainerEl.style.display = "block";
   formInputContainerEl.style.zIndex = 1000005;
 
   // yes button
   const yesBtnEl = document.createElement("button");
-  yesBtnEl.setAttribute("id", "form-yes");
+  yesBtnEl.id = "form-yes";
   yesBtnEl.classList.add("form-input-btn");
-  yesBtnEl.innerHTML = "YES";
+  yesBtnEl.innerHTML = "YES"; // TODO i18n
 
   // no button
   const noBtnEl = document.createElement("button");
-  noBtnEl.setAttribute("id", "form-no");
+  noBtnEl.id = "form-no";
   noBtnEl.classList.add("form-input-btn");
   noBtnEl.innerHTML = "NO";
 
@@ -92,6 +100,7 @@ const renderPDFForm = (src) => {
 
 const renderMarkdownForm = (content) => {
   // create wrapper El
+  // TODO Modularize buttons
   const formContainerEl = document.createElement("form");
   formContainerEl.setAttribute("id", "form-container");
 
@@ -122,4 +131,22 @@ const renderMarkdownForm = (content) => {
   // update DOM
   formContainerEl.appendChild(formInputContainerEl);
   document.body.appendChild(formContainerEl);
+};
+
+/* -------------------------------------------------------------------------- */
+
+// If the consent form were denied... Show the ending directly
+
+export const showExperimentEnding = (newEnding = true) => {
+  // ? Do we really need this function?
+  // Why not do through PsychoJS or other interfaces?
+  // Fixed for old code by @svr8
+  let endingText;
+  if (newEnding) endingText = document.createElement("div");
+  else endingText = document.getElementById("exp-end-text");
+
+  endingText.innerHTML = "Thank you. The experiment has ended."; // TODO i18n
+  endingText.id = "exp-end-text";
+  document.body.appendChild(endingText);
+  endingText.style.visibility = "visible";
 };

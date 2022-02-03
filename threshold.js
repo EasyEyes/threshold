@@ -31,7 +31,6 @@ import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
 import "./components/css/trialBreak.css";
-import "./components/css/widgets.css";
 import "./components/css/psychojsExtra.css";
 
 ////
@@ -86,12 +85,9 @@ import {
 } from "./components/showCharacterSet.js";
 
 import {
-  getConsentFormName,
-  hideAllForms,
   hideForm,
-  showConsentForm,
-  showDebriefForm,
   showForm,
+  showExperimentEnding,
 } from "./components/forms.js";
 
 import { getTrialInfoStr } from "./components/trialCounter.js";
@@ -112,7 +108,6 @@ import {
   SimulatedObserver,
   simulateObserverResponse,
 } from "./components/simulatedObserver.js";
-import { showExperimentEnding } from "./components/widgets.js";
 import {
   getCanvasContext,
   getPixelRGBA,
@@ -172,7 +167,7 @@ const paramReaderInitialized = async (reader) => {
   if (!continueExperiment) {
     await showForm(reader.read("_debriefForm")[0]);
     hideForm();
-    showExperimentEnding();
+    showExperimentEnding(); // TODO Rethink about this function in terms of UI and logic
     return;
   }
 
@@ -2563,18 +2558,18 @@ viewingDistanceCm: ${viewingDistanceCm}`;
     const timeBeforeDebriefDisplay = globalClock.getTime();
     const debriefScreen = new Promise((resolve) => {
       if (debriefFormName.length) {
-        showDebriefForm(debriefFormName);
+        showForm(debriefFormName);
         document
           .getElementById("debrief-yes")
           .addEventListener("click", (evt) => {
-            hideAllForms();
+            hideForm();
             resolve({});
           });
 
         document
           .getElementById("debrief-no")
           .addEventListener("click", (evt) => {
-            hideAllForms();
+            hideForm();
             resolve({});
           });
       } else {

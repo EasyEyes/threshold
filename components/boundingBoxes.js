@@ -69,7 +69,9 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
   };
   const displayCharacterSetBoundingBoxPolies = {};
   for (const cond of reader.read("block_condition", "__ALL_BLOCKS__")) {
-    const characterSet = reader.read("targetCharacterSet", cond).split("");
+    const characterSet = String(reader.read("targetCharacterSet", cond)).split(
+      ""
+    );
     if (reader.read("showCharacterSetBoundingBoxBool", cond)) {
       displayCharacterSetBoundingBoxPolies[cond] =
         getDisplayCharacterSetBoundingPolies(
