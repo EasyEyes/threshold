@@ -295,3 +295,21 @@ export const NO_RESPONSE_POSSIBLE = (
     ],
   };
 };
+
+export const INCONSISTENT_VIEWING_DISTANCES = (
+  offendingBlocks: string[]
+): EasyEyesError => {
+  const multiple = offendingBlocks.length > 1;
+  return {
+    name: "Viewing distances are not unique within blocks",
+    message: `All conditions within a given block must specify the same viewing distance. Block${
+      multiple ? "s" : ""
+    } ${verballyEnumerate(offendingBlocks)} request${
+      multiple ? "" : "s"
+    } multiple different viewing distances.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["viewingDistanceDesiredCm"],
+  };
+};
