@@ -6,6 +6,9 @@ import axios from "axios";
  * @returns Promise<boolean> true if user gives consent, else false
  */
 export const showForm = async (formName) => {
+  // No form, just continue
+  if (!formName) return true;
+
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve) => {
     // if form name is invalid, continue experiment
