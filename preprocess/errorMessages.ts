@@ -124,6 +124,24 @@ export const FONT_FILES_MISSING = (
   };
 };
 
+export const FONT_FILES_MISSING_WEB = (
+  parameter: string,
+  missingFileNameList: string[]
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList.map((fileName: string) => {
+    htmlList += `<li>${fileName}</li>`;
+  });
+  return {
+    name: "Font file is missing",
+    message: `We could not find the following file specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Check if font is spelled correctly. Browse through Google fonts to get the correct name`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 export const FORM_FILES_MISSING = (
   parameter: string,
   missingFileNameList: string[]
@@ -293,5 +311,23 @@ export const NO_RESPONSE_POSSIBLE = (
       "responseTypedEasyEyesKeypadBool",
       "simulateParticipantBool",
     ],
+  };
+};
+
+export const INCONSISTENT_VIEWING_DISTANCES = (
+  offendingBlocks: string[]
+): EasyEyesError => {
+  const multiple = offendingBlocks.length > 1;
+  return {
+    name: "Viewing distances are not unique within blocks",
+    message: `All conditions within a given block must specify the same viewing distance. Block${
+      multiple ? "s" : ""
+    } ${verballyEnumerate(offendingBlocks)} request${
+      multiple ? "" : "s"
+    } multiple different viewing distances.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["viewingDistanceDesiredCm"],
   };
 };
