@@ -4,8 +4,8 @@ import { EasyEyesError } from "./errorMessages";
 
 export const webFontChecker = async (
   requestedFontListWeb: string[]
-): Promise<EasyEyesError> => {
-  const errorList: string[] = [];
+): Promise<any> => {
+  const errorList: any[] = [];
   for (let i = 0; i < requestedFontListWeb.length; i++) {
     const response = await fetchWebFont(
       requestedFontListWeb[i].replace(/\s/g, "+").replace(/(\r\n|\n|\r)/gm, "")
@@ -14,8 +14,9 @@ export const webFontChecker = async (
       errorList.push(requestedFontListWeb[i]);
     }
   }
-
-  return FONT_FILES_MISSING_WEB("targetFont", errorList);
+  if (errorList.length > 0)
+    return FONT_FILES_MISSING_WEB("targetFont", errorList);
+  else return errorList;
 };
 
 const fetchWebFont = async (font: string) => {

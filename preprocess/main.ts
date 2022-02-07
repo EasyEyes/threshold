@@ -91,8 +91,8 @@ export const prepareExperimentFileForThreshold = async (
   );
   if (space === "web") {
     errors.push(...isFontMissing(requestedFontList, easyeyesResources.fonts));
-    const error: EasyEyesError = await webFontChecker(requestedFontListWeb);
-    errors.push(error);
+    const error: any = await webFontChecker(requestedFontListWeb);
+    if (!Array.isArray(error)) errors.push(error);
   }
 
   // Validate requested forms
