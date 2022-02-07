@@ -14,6 +14,7 @@ export const webFontChecker = async (
       errorList.push(requestedFontListWeb[i]);
     }
   }
+
   if (errorList.length > 0)
     return FONT_FILES_MISSING_WEB("targetFont", errorList);
   else return errorList;
