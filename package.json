@@ -56,6 +56,7 @@
     "*.{js,css,html,md,ts}": "prettier --write"
   },
   "dependencies": {
+    "@types/webfontloader": "^1.6.34",
     "axios": "^0.25.0",
     "papaparse": "^5.3.1",
     "webfontloader": "^1.6.28"

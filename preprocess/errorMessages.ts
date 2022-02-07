@@ -124,6 +124,24 @@ export const FONT_FILES_MISSING = (
   };
 };
 
+export const FONT_FILES_MISSING_WEB = (
+  parameter: string,
+  missingFileNameList: string[]
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList.map((fileName: string) => {
+    htmlList += `<li>${fileName}</li>`;
+  });
+  return {
+    name: "Font file is missing",
+    message: `We could not find the following file specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Check if font is spelled correctly. Browse through Google fonts to get the correct name`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 export const FORM_FILES_MISSING = (
   parameter: string,
   missingFileNameList: string[]

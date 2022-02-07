@@ -8,6 +8,8 @@ import {
   validatedCommas,
   validateExperimentDf,
 } from "./experimentFileChecks";
+
+import { FONT_FILES_MISSING_WEB } from "./errorMessages";
 import {
   addUniqueLabelsToDf,
   populateUnderscoreValues,
@@ -17,6 +19,7 @@ import {
 } from "./utilities";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
+import { webFontChecker } from "./fontCheck";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -61,7 +64,7 @@ export const preprocessExperimentFile = async (
     });
 };
 
-export const prepareExperimentFileForThreshold = (
+export const prepareExperimentFileForThreshold = async (
   parsed: Papa.ParseResult<any>,
   user: any,
   errors: any[],
@@ -82,8 +85,15 @@ export const prepareExperimentFileForThreshold = (
 
   // Validate requested fonts
   const requestedFontList: string[] = getFontNameListBySource(parsed, "file");
-  if (space === "web")
+  const requestedFontListWeb: string[] = getFontNameListBySource(
+    parsed,
+    "google"
+  );
+  if (space === "web") {
     errors.push(...isFontMissing(requestedFontList, easyeyesResources.fonts));
+    const error: EasyEyesError = await webFontChecker(requestedFontListWeb);
+    errors.push(error);
+  }
 
   // Validate requested forms
   const requestedForms: any = getFormNames(parsed);

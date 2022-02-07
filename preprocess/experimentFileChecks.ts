@@ -506,8 +506,9 @@ export const isFontMissing = (
       missingFontList.push(requestedFontList[i]);
     }
   }
-  if (missingFontList.length > 0)
+  if (missingFontList.length > 0) {
     errorList.push(FONT_FILES_MISSING("targetFont", missingFontList));
+  }
 
   return errorList;
 };
