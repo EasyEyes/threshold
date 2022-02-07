@@ -168,6 +168,7 @@ export const getCharacterSetBoundingBox = (
     autoDraw: false,
     autoLog: false,
   });
+  const ascentDescent = [];
   for (const character of characterSet) {
     let textToSet = character.repeat(repeats);
     testStim.setText(textToSet);
@@ -193,6 +194,10 @@ export const getCharacterSetBoundingBox = (
       "center"
     );
     // const thisBoundingRectPoints = rectFromPixiRect(thisBoundingBox, [0,0]);
+    ascentDescent.push(
+      thisMetrics.boundingBox.actualBoundingBoxAscent +
+        thisMetrics.boundingBox.actualBoundingBoxDescent
+    );
     ascent = Math.max(thisMetrics.boundingBox.actualBoundingBoxAscent, ascent);
     descent = Math.max(
       thisMetrics.boundingBox.actualBoundingBoxDescent,
@@ -208,6 +213,10 @@ export const getCharacterSetBoundingBox = (
       characterSetBoundingRectPoints
     );
   }
+  const largestAscentDescentCharacter =
+    characterSet[
+      ascentDescent.findIndex((aD) => aD === Math.max(...ascentDescent))
+    ];
   const normalizedAscent = ascent / height;
   const normalizedDescent = descent / height;
   const normalizedCharacterSetBoundingPoints = [
@@ -225,7 +234,9 @@ export const getCharacterSetBoundingBox = (
     normalizedCharacterSetBoundingPoints[1],
     "pix",
     normalizedAscent,
-    normalizedDescent
+    normalizedDescent,
+    characterSet,
+    largestAscentDescentCharacter
   );
   return normalizedCharacterSetBoundingRect;
 };

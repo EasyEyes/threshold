@@ -102,7 +102,7 @@ const getDisplayCharacterSetBoundingPolies = (
   for (const character of characterSet) {
     characters.push(
       new visual.TextStim({
-        // alignHoriz: "left",
+        // alignHoriz: "right",
         // alignVert: "top",
         win: psychoJS.window,
         name: `displayCharacterSet_${character}`,
@@ -473,13 +473,27 @@ const sizeAndPositionTripletBoundingBoxes = (
     boundingStims.forEach((c) => c._updateIfNeeded());
   }
   if (showCharacterSetBoundingBox) {
+    const separateFlankers =
+      (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
+      thresholdParameter === "spacing";
+    const tripletCharacterSetBoundingBoxPositions = separateFlankers
+      ? getCharacterSetBoundingBoxPositions(
+          [triplet.target, triplet.flanker1, triplet.flanker2],
+          normalizedCharacterSetBoundingRect
+        )
+      : getCharacterSetBoundingBoxPositions(
+          [triplet.target],
+          normalizedCharacterSetBoundingRect
+        );
     const characterSetBoundingStims = [characterSetBoundingBoxPolies.target];
     const characterSetBounds = [
       normalizedCharacterSetBoundingRect.width * heightPx,
       normalizedCharacterSetBoundingRect.height * heightPx,
     ];
     const targetBB = triplet.target.getBoundingBox(true);
-    characterSetBoundingBoxPolies.target.setPos([targetBB.left, targetBB.top]);
+    characterSetBoundingBoxPolies.target.setPos(
+      tripletCharacterSetBoundingBoxPositions[0]
+    );
     characterSetBoundingBoxPolies.target.setSize(characterSetBounds);
     if (
       (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
@@ -491,15 +505,13 @@ const sizeAndPositionTripletBoundingBoxes = (
         characterSetBoundingBoxPolies.flanker1,
         characterSetBoundingBoxPolies.flanker2
       );
-      characterSetBoundingBoxPolies.flanker1.setPos([
-        flanker1BB.left,
-        flanker1BB.top,
-      ]);
+      characterSetBoundingBoxPolies.flanker1.setPos(
+        tripletCharacterSetBoundingBoxPositions[1]
+      );
       characterSetBoundingBoxPolies.flanker1.setSize(characterSetBounds);
-      characterSetBoundingBoxPolies.flanker2.setPos([
-        flanker2BB.left,
-        flanker2BB.top,
-      ]);
+      characterSetBoundingBoxPolies.flanker2.setPos(
+        tripletCharacterSetBoundingBoxPositions[2]
+      );
       characterSetBoundingBoxPolies.flanker2.setSize(characterSetBounds);
     }
     characterSetBoundingStims.forEach((c) => c._updateIfNeeded());
@@ -512,7 +524,7 @@ const sizeAndPositionDisplayCharacterSet = (
   font,
   windowDims
 ) => {
-  const heightPx = 150;
+  const heightPx = 250;
   const characterSetBounds = [
     normalizedCharacterSetBoundingRect.width * heightPx,
     normalizedCharacterSetBoundingRect.height * heightPx,
@@ -533,33 +545,48 @@ const sizeAndPositionDisplayCharacterSet = (
     }
   );
 
-  const ascentOffset = normalizedCharacterSetBoundingRect.ascent * heightPx;
-  const descentOffset = normalizedCharacterSetBoundingRect.descent * heightPx;
-  const ascents = displayCharacterMetrics.map(
-    (m) => m.boundingBox.actualBoundingBoxAscent
+  const characterSetBoundingBoxPositions = getCharacterSetBoundingBoxPositions(
+    displayCharacterSetStimuli.characters,
+    normalizedCharacterSetBoundingRect
   );
-  const descents = displayCharacterMetrics.map(
-    (m) => m.boundingBox.actualBoundingBoxDescent
-  );
-  console.log("descents", descents);
-  const tops = displayCharacterSetStimuli.characters.map(
-    (s) => s.getBoundingBox(true).top + descentOffset
-  );
-  console.log(
-    "top of charbb",
-    displayCharacterSetStimuli.characters.map((s) => s.getBoundingBox(true).top)
-  );
-
-  const hightestTop = Math.max(...tops);
-  const baseBoxPositionY = hightestTop;
-  console.log("tops", tops);
-
   displayCharacterSetStimuli.polies.forEach((displayCharacterBox, i) => {
     displayCharacterBox.setSize(characterSetBounds);
     const x = (i - middleIndex) * paddedWidthOfCharacter;
-    const boxPosition = [x, baseBoxPositionY];
+    // const boxPosition = [x, tops[largestAscentIdx]];
+    const boxPosition = characterSetBoundingBoxPositions[i];
     console.log("boxPosition", boxPosition);
     displayCharacterBox.setPos(boxPosition);
     displayCharacterBox._updateIfNeeded();
   });
+};
+
+/**
+ * Given an array of (positioned, sized, ie ready) text stims, return the positions which should
+ * be used for positioning a character-set bounding rect around each text stim
+ * @param {PsychoJS.visual.TextStim[]} stims Array of text stims
+ * @returns {[number, number][]}
+ */
+const getCharacterSetBoundingBoxPositions = (
+  stims,
+  normalizedCharacterSetBoundingRect
+) => {
+  const oldText = stims[0].getText();
+  stims[0].setText(normalizedCharacterSetBoundingRect.largestCharacter);
+  stims[0]._updateIfNeeded();
+  const y = stims[0].getBoundingBox(true).top;
+  stims[0].setText(oldText);
+  stims[0]._updateIfNeeded();
+  console.log("y in getCharacterSEt", y);
+  console.log(
+    "largestCharacter",
+    normalizedCharacterSetBoundingRect.largestCharacter
+  );
+  // const metrics = stims.map(s => s.getTextMetrics());
+  // const ascents = metrics.map((m) => m.boundingBox.actualBoundingBoxAscent);
+  // const descents = metrics.map((m) => m.boundingBox.actualBoundingBoxDescent);
+  // const ascentsAndDescents = ascents.map((a, i) => a + descents[i]);
+  // const largestAscentDescentIdx = ascentsAndDescents.findIndex(a => a === Math.max(...ascentsAndDescents));
+  // const tops = stims.map((s) => s.getBoundingBox(true).top);
+  // const y = tops[largestAscentDescentIdx];
+  return stims.map((s) => [s.getBoundingBox(true).x, y]);
 };

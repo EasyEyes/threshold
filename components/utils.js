@@ -485,7 +485,9 @@ export class Rectangle {
     upperRight,
     units = undefined,
     ascent = undefined,
-    descent = undefined
+    descent = undefined,
+    characterSet = undefined,
+    largestCharacter = undefined
   ) {
     this.units = units;
     this.left = lowerLeft[0];
@@ -498,6 +500,9 @@ export class Rectangle {
 
     this.ascent = ascent;
     this.descent = descent;
+
+    this.characterSet = characterSet;
+    this.largestCharacter = largestCharacter;
   }
   getUnits() {
     return this.units;
