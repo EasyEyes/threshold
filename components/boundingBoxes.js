@@ -1,7 +1,12 @@
 import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
-import { logger, Rectangle } from "./utils.js";
+import {
+  logger,
+  Rectangle,
+  textStimPosFromNominalXY,
+  getCharSetBaselineOffsetPosition,
+} from "./utils.js";
 
 /**
  * Generate all the stim objects for the various bounding boxes, ie
@@ -95,6 +100,8 @@ const getDisplayCharacterSetBoundingPolies = (
   for (const character of characterSet) {
     characters.push(
       new visual.TextStim({
+        // alignHoriz: "left",
+        // alignVert: "top",
         win: psychoJS.window,
         name: `displayCharacterSet_${character}`,
         text: character,
@@ -511,25 +518,46 @@ const sizeAndPositionDisplayCharacterSet = (
   const paddedWidthOfCharacter = characterSetBounds[0] * 1.2;
   const indicies = [...displayCharacterSetStimuli.polies.keys()];
   const middleIndex = Math.floor(indicies.length / 2);
-  const positions = indicies.map((i) => [
-    (i - middleIndex) * paddedWidthOfCharacter,
-    -windowDims[1] / 10,
-  ]);
-  for (const i of indicies) {
-    const displayCharacterBox = displayCharacterSetStimuli.polies[i];
-    const displayCharacter = displayCharacterSetStimuli.characters[i];
-    const position = positions[i];
+  let y = -windowDims[1] / 8;
+  const displayCharacterMetrics = displayCharacterSetStimuli.characters.map(
+    (displayCharacter, i) => {
+      const x = (i - middleIndex) * paddedWidthOfCharacter;
+      const characterPosition = [x, y];
+      displayCharacter.setFont(font);
+      displayCharacter.setHeight(heightPx);
+      displayCharacter.setPos(characterPosition);
+      displayCharacter._updateIfNeeded();
+      return displayCharacter.getTextMetrics();
+    }
+  );
 
-    displayCharacter.setFont(font);
-    displayCharacter.setHeight(heightPx);
-    displayCharacter.setPos(position);
-    displayCharacter._updateIfNeeded();
+  const ascentOffset = normalizedCharacterSetBoundingRect.ascent * heightPx;
+  const descentOffset = normalizedCharacterSetBoundingRect.descent * heightPx;
+  const ascents = displayCharacterMetrics.map(
+    (m) => m.boundingBox.actualBoundingBoxAscent
+  );
+  const descents = displayCharacterMetrics.map(
+    (m) => m.boundingBox.actualBoundingBoxDescent
+  );
+  console.log("descents", descents);
+  const tops = displayCharacterSetStimuli.characters.map(
+    (s) => s.getBoundingBox(true).top + descentOffset
+  );
+  console.log(
+    "top of charbb",
+    displayCharacterSetStimuli.characters.map((s) => s.getBoundingBox(true).top)
+  );
 
-    const displayCharacterBoundingBox = displayCharacter.getBoundingBox(true);
+  const hightestTop = Math.max(...tops);
+  const baseBoxPositionY = hightestTop;
+  console.log("tops", tops);
+
+  displayCharacterSetStimuli.polies.forEach((displayCharacterBox, i) => {
     displayCharacterBox.setSize(characterSetBounds);
-    displayCharacterBox.setPos([
-      displayCharacterBoundingBox.left,
-      displayCharacterBoundingBox.top,
-    ]);
-  }
+    const x = (i - middleIndex) * paddedWidthOfCharacter;
+    const boxPosition = [x, baseBoxPositionY];
+    console.log("boxPosition", boxPosition);
+    displayCharacterBox.setPos(boxPosition);
+    displayCharacterBox._updateIfNeeded();
+  });
 };

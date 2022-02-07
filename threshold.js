@@ -619,6 +619,7 @@ const experiment = (blockCount) => {
         100
       );
     }
+    console.log("characterSetBoundingRects", characterSetBoundingRects);
     /* --- BOUNDING BOX --- */
     // Generate the bounding boxes to be displayed superimposing...
     [

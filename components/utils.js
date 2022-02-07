@@ -444,18 +444,27 @@ const rectIsEmpty = (rect) => {
   return false;
 };
 
-export const rectFromPixiRect = (pixiRect, centerXY = undefined) => {
+export const rectFromPixiRect = (
+  pixiRect,
+  anchorXY = undefined,
+  centerOrLeft = "center"
+) => {
+  console.log("pixiRect", pixiRect);
   // ASSUMES `center` aligned
   let lowerLeft, upperRight;
-  if (centerXY) {
+  if (centerOrLeft === "center" && anchorXY) {
     lowerLeft = [
-      centerXY[0] - pixiRect.width / 2,
-      centerXY[1] - pixiRect.height / 2,
+      anchorXY[0] - pixiRect.width / 2,
+      anchorXY[1] - pixiRect.height / 2,
     ];
     upperRight = [
-      centerXY[0] + pixiRect.width / 2,
-      centerXY[1] + pixiRect.height / 2,
+      anchorXY[0] + pixiRect.width / 2,
+      anchorXY[1] + pixiRect.height / 2,
     ];
+  } else if (centerOrLeft === "left" && anchorXY) {
+    // anchor = upperLeft
+    lowerLeft = [anchorXY[0], anchorXY[1] - pixiRect.height];
+    upperRight = [anchorXY[0] + pixiRect.width, anchorXY[1]];
   } else {
     lowerLeft = [
       pixiRect.x - pixiRect.width / 2,
@@ -471,7 +480,13 @@ export const rectFromPixiRect = (pixiRect, centerXY = undefined) => {
 };
 
 export class Rectangle {
-  constructor(lowerLeft, upperRight, units = undefined) {
+  constructor(
+    lowerLeft,
+    upperRight,
+    units = undefined,
+    ascent = undefined,
+    descent = undefined
+  ) {
     this.units = units;
     this.left = lowerLeft[0];
     this.right = upperRight[0];
@@ -480,6 +495,9 @@ export class Rectangle {
 
     this.height = this.top - this.bottom;
     this.width = this.right - this.left;
+
+    this.ascent = ascent;
+    this.descent = descent;
   }
   getUnits() {
     return this.units;
@@ -528,4 +546,23 @@ export const getTripletCharacters = (charset) => {
   samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
   samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
   return shuffle(samples);
+};
+
+export const textStimPosFromNominalXY = (stim, XYPix) => {
+  const stimMetrics = stim.getTextMetrics();
+  const yOffset = stimMetrics.boundingBox.actualBoundingBoxDescent;
+  const psychoJSPosition = [XYPix[0], XYPix[1] + yOffset];
+  return psychoJSPosition;
+};
+
+export const getCharSetBaselineOffsetPosition = (
+  XYPix,
+  normalizedCharacterSetRect,
+  heightPx
+) => {
+  const descent = normalizedCharacterSetRect.descent;
+  const ascent = normalizedCharacterSetRect.ascent;
+  const yOffset = descent * heightPx;
+  // const yOffset = descent * (heightPx * (descent/(descent + ascent)));
+  return [XYPix[0], XYPix[1] + yOffset];
 };
