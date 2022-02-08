@@ -151,7 +151,9 @@ export const getCharacterSetBoundingBox = (
     [0, 0],
   ];
   let ascent = 0,
-    descent = 0;
+    descent = 0,
+    left = 0,
+    right = 0;
   const testStim = new visual.TextStim({
     win: window,
     name: "characterSetBoundingBoxStim",
@@ -175,25 +177,21 @@ export const getCharacterSetBoundingBox = (
     testStim.setPos([0, 0]);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
     const thisMetrics = testStim.getTextMetrics();
-    console.log("thisMetrics", thisMetrics);
     let thisBoundingBox = testStim.getBoundingBox(true);
-    console.log("thisBoundingBox", thisBoundingBox);
     // let thisBoundingRectPoints = rectFromPixiRect(thisBoundingBox, [0, 0]);
     ascent = thisMetrics.boundingBox.actualBoundingBoxAscent;
     descent = thisMetrics.boundingBox.actualBoundingBoxDescent;
+    left = thisMetrics.boundingBox.actualBoundingBoxAscent;
+    right = thisMetrics.boundingBox.actualBoundingBoxDescent;
     console.log("ascent+descent", ascent + descent);
-    console.log("thisBoundingBox.height", thisBoundingBox.height);
+    console.log("left", left);
+    console.log("right", right);
 
     // const thisBoundingRectPoints = [
-    //   [-thisMetrics.boundingBox.width/2, -descent],  // lower left
-    //   [ thisMetrics.boundingBox.width/2,  ascent ]  // upper right
+    //   [-thisMetrics.boundingBox.width/2, -descent ],  // lower left
+    //   [ thisMetrics.boundingBox.width/2,  ascent  + thisMetrics.fontProperties.descent]  // upper right
     // ];
-    const thisBoundingRectPoints = rectFromPixiRect(
-      thisBoundingBox,
-      [thisBoundingBox.x, thisBoundingBox.y],
-      "center"
-    );
-    // const thisBoundingRectPoints = rectFromPixiRect(thisBoundingBox, [0,0]);
+    const thisBoundingRectPoints = rectFromPixiRect(thisBoundingBox);
     ascentDescent.push(
       thisMetrics.boundingBox.actualBoundingBoxAscent +
         thisMetrics.boundingBox.actualBoundingBoxDescent

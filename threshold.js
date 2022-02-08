@@ -2276,7 +2276,8 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         characterSetBoundingBoxPolies,
         displayCharacterSetBoundingBoxPolies[condition.block_condition],
         spacingRelationToSize,
-        timeWhenRespondable
+        timeWhenRespondable,
+        thresholdParameter
       );
       /* -------------------------------------------------------------------------- */
       // SHOW CharacterSet AND INSTRUCTIONS
