@@ -1810,7 +1810,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       trialComponents.push(flanker2);
 
       trialComponents.push(showCharacterSet);
-      trialComponents.push(totalTrial);
+      // trialComponents.push(totalTrial);
       // if (showTargetSpecs) trialComponents.push(targetSpecs);
       // /* --- BOUNDING BOX --- */
       addBoundingBoxesToComponents(
