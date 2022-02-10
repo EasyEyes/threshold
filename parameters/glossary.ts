@@ -147,7 +147,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantRecruitmentServiceAccount: {
     name: "_participantRecruitmentServiceAccount",
-    availability: "later",
+    availability: "now",
     example: "123ABC",
     explanation:
       "Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -156,7 +156,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantsHowMany: {
     name: "_participantsHowMany",
-    availability: "later",
+    availability: "now",
     example: "100",
     explanation:
       "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -165,7 +165,7 @@ export const GLOSSARY: Glossary = {
   },
   _prolificEligibilityRequirements: {
     name: "_prolificEligibilityRequirements",
-    availability: "later",
+    availability: "now",
     example: "",
     explanation:
       "This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
@@ -174,7 +174,7 @@ export const GLOSSARY: Glossary = {
   },
   _prolificStudyType: {
     name: "_prolificStudyType",
-    availability: "later",
+    availability: "now",
     example: "US_REP_SAMPLE",
     explanation:
       "Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
@@ -301,7 +301,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationCheckBool: {
     name: "fixationCheckBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
       "Display a foveal triplet that is easy to read if the participant's eye is on fixation, and hard to read if the eye is elsewhere.",
@@ -685,7 +685,8 @@ export const GLOSSARY: Glossary = {
     name: "readingPages",
     availability: "now",
     example: "4",
-    explanation: "Number of pages to be read.",
+    explanation:
+      "Number of pages to be read. The first and last pages will not be used for testing.",
     type: "numerical",
     default: "4",
   },
@@ -843,6 +844,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  showConditionName: {
+    name: "showConditionName",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "If TRUE, then display condition name as text at lower-left corner, or, if showTargetSpecsBool is TRUE, above target specs. See showTargetSpecsBool. The point size of condition-name text should be 1.4x bigger than we use for target specs.",
+    type: "boolean",
+    default: "FALSE",
+  },
   showCounterBool: {
     name: "showCounterBool",
     availability: "now",
@@ -914,7 +924,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "For debugging. If true, show target size and spacing in deg in lower left corner, similar to the trial/block counter.",
+      "For debugging. If true, show target size and spacing in deg in lower left corner, similar to the trial/block counter. See showTitle.",
     type: "boolean",
     default: "FALSE",
   },
@@ -1172,7 +1182,7 @@ export const GLOSSARY: Glossary = {
       "• letter On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is diplayed at the target eccentricity with the target size.",
     type: "categorical",
     default: "letter",
-    categories: ["letter", "gabor", "image"],
+    categories: ["letter", "gabor", "image", "reading"],
   },
   targetMinimumPix: {
     name: "targetMinimumPix",
@@ -1182,6 +1192,15 @@ export const GLOSSARY: Glossary = {
       "Enough pixels for decent rendering of this target. This refers to size (in pixels) as specified by targetSizeIsHeightBool.",
     type: "numerical",
     default: "8",
+  },
+  "targetQuestion@": {
+    name: "targetQuestion@",
+    availability: "later",
+    example:
+      "How much beauty do you get from this image right now?|1|2|3|4|5|6|7",
+    explanation: "",
+    type: "text",
+    default: "",
   },
   targetRepeatsBool: {
     name: "targetRepeatsBool",
@@ -1249,26 +1268,10 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "identify",
     explanation:
-      'The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer uses the question and answers provided by parameter questionAndAnswer. The participant must click on one of the answers.\n• questionAndAnswer2 uses the question and answers provided by parameter questionAndAnswer2. The participant must click on one of the answers.\n• read asks the observer to read a passage of text as quickly as possible while maintaining full comprehesion, followed by a test.\n• detect might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'Can be one or multiple of the following categories. If there are multiple tasks in one trial, use comma to divide them, e.g., "identify,targetQuestion1". The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• targetQuestion@ (e.g., targetQuestion1) uses the question and answers provided by parameter targetQuestion@. The participant must click on one of the answers.\n• detect might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
-    categories: [
-      "identify",
-      "read",
-      "categorize",
-      "questionAndAnswer",
-      "questionAndAnswer2",
-    ],
-  },
-  targetTask2: {
-    name: "targetTask2",
-    availability: "now",
-    example: "questionAndAnswer",
-    explanation:
-      "Specifies performance of a second task with the same target. Currently the only allowed values are questionAndAnswer, questionAndAnswer2 and none.",
-    type: "categorical",
-    default: "none",
-    categories: ["none", "questionAndAnswer", "questionAndAnswer2"],
+    categories: ["identify", "read", "categorize", "targetQuestion@"],
   },
   thresholdBeta: {
     name: "thresholdBeta",

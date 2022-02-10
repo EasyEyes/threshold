@@ -540,7 +540,7 @@ const experiment = (blockCount) => {
       pos: [totalTrialConfig.x, totalTrialConfig.y],
       alignHoriz: totalTrialConfig.alignHoriz,
       alignVert: totalTrialConfig.alignVert,
-      height: 1.0,
+      height: totalTrialConfig.fontSize,
       wrapWidth: window.innerWidth,
       ori: 0.0,
       color: new util.Color("black"),
@@ -906,19 +906,6 @@ const experiment = (blockCount) => {
       fixationSize = 45;
       showFixation = true;
 
-      trialInfoStr = getTrialInfoStr(
-        rc.language.value,
-        showCounterBool,
-        showViewingDistanceBool,
-        currentTrialIndex,
-        currentTrialLength,
-        currentBlockIndex,
-        totalBlockCount,
-        viewingDistanceCm
-      );
-      totalTrial.setText(trialInfoStr);
-      totalTrial.setAutoDraw(true);
-
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop
       // Schedule all the trials in the trialList:
@@ -1129,6 +1116,19 @@ const experiment = (blockCount) => {
       // reset takeABreak state
       currentBlockCredit = 0;
       hideTrialBreakProgressbar();
+
+      trialInfoStr = getTrialInfoStr(
+        rc.language.value,
+        paramReader.read("showCounterBool", blockCount)[0],
+        paramReader.read("showViewingDistanceBool", blockCount)[0],
+        undefined,
+        undefined,
+        blockCount,
+        totalBlockCount,
+        viewingDistanceCm
+      );
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setAutoDraw(true);
 
       return Scheduler.Event.NEXT;
     };
