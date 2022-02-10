@@ -8,10 +8,8 @@ import {
   rectFromPixiRect,
   getUnionRect,
   isRectInRect,
-  isInRect,
   norm,
   Rectangle,
-  textStimPosFromNominalXY,
 } from "./utils.js";
 
 import {

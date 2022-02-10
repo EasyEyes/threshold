@@ -1,12 +1,7 @@
 import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
-import {
-  logger,
-  Rectangle,
-  textStimPosFromNominalXY,
-  getCharSetBaselineOffsetPosition,
-} from "./utils.js";
+import { logger, Rectangle } from "./utils.js";
 
 /**
  * Generate all the stim objects for the various bounding boxes, ie
@@ -454,7 +449,7 @@ const sizeAndPositionDisplayCharacterSet = (
   font,
   windowDims
 ) => {
-  const heightPx = 550;
+  const heightPx = 150;
   const characterSetBounds = [
     normalizedCharacterSetBoundingRect.width * heightPx,
     normalizedCharacterSetBoundingRect.height * heightPx,
