@@ -246,7 +246,6 @@ var debriefFormName = "";
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
-var clickableCharacterSetBoundingPolies = {};
 
 const experiment = (blockCount) => {
   ////
