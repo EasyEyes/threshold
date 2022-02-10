@@ -8,7 +8,6 @@ import {
   rectFromPixiRect,
   getUnionRect,
   isRectInRect,
-  isInRect,
   norm,
   Rectangle,
 } from "./utils.js";
@@ -149,6 +148,10 @@ export const getCharacterSetBoundingBox = (
     [0, 0],
     [0, 0],
   ];
+  let ascent = 0,
+    descent = 0,
+    left = 0,
+    right = 0;
   const testStim = new visual.TextStim({
     win: window,
     name: "characterSetBoundingBoxStim",
@@ -165,17 +168,50 @@ export const getCharacterSetBoundingBox = (
     autoDraw: false,
     autoLog: false,
   });
+  const ascentDescent = [];
   for (const character of characterSet) {
+    const xy = [0, 0];
     let textToSet = character.repeat(repeats);
     testStim.setText(textToSet);
+    testStim.setPos(xy);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
-    let thisBoundingBox = testStim.getBoundingBox(true);
-    let thisBoundingRectPoints = rectFromPixiRect(thisBoundingBox, [0, 0]);
+
+    const thisMetrics = testStim.getTextMetrics();
+    ascent = thisMetrics.boundingBox.actualBoundingBoxAscent;
+    descent = thisMetrics.boundingBox.actualBoundingBoxDescent;
+    left = thisMetrics.boundingBox.actualBoundingBoxLeft;
+    right = thisMetrics.boundingBox.actualBoundingBoxRight;
+    console.log("left, right, ascent, descent", [left, right, ascent, descent]);
+
+    // let thisBoundingBox = testStim.getBoundingBox(true);
+    // const thisBoundingRectPoints = rectFromPixiRect(thisBoundingBox);
+    const thisBoundingRectPoints = [
+      [left + xy[0], -descent + xy[1]],
+      [right + xy[0], ascent + xy[1]],
+    ];
+    ascentDescent.push(ascent + descent);
+
+    // ascent = Math.max(thisMetrics.boundingBox.actualBoundingBoxAscent, ascent);
+    // descent = Math.max(
+    //   thisMetrics.boundingBox.actualBoundingBoxDescent,
+    //   descent
+    // );
+    // console.log(`asc,dec,height ${textToSet}, ${targetFont}`, [
+    //   ascent,
+    //   descent,
+    //   thisBoundingBox.height,
+    // ]);
     characterSetBoundingRectPoints = getUnionRect(
       thisBoundingRectPoints,
       characterSetBoundingRectPoints
     );
   }
+  const largestAscentDescentCharacter =
+    characterSet[
+      ascentDescent.findIndex((aD) => aD === Math.max(...ascentDescent))
+    ];
+  // const normalizedAscent = ascent / height;
+  // const normalizedDescent = descent / height;
   const normalizedCharacterSetBoundingPoints = [
     [
       characterSetBoundingRectPoints[0][0] / height,
@@ -187,7 +223,11 @@ export const getCharacterSetBoundingBox = (
     ],
   ];
   const normalizedCharacterSetBoundingRect = new Rectangle(
-    ...normalizedCharacterSetBoundingPoints
+    normalizedCharacterSetBoundingPoints[0],
+    normalizedCharacterSetBoundingPoints[1],
+    "pix",
+    characterSet,
+    largestAscentDescentCharacter
   );
   return normalizedCharacterSetBoundingRect;
 };

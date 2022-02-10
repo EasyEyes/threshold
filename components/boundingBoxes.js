@@ -97,6 +97,8 @@ const getDisplayCharacterSetBoundingPolies = (
   for (const character of characterSet) {
     characters.push(
       new visual.TextStim({
+        // alignHoriz: "right",
+        // alignVert: "top",
         win: psychoJS.window,
         name: `displayCharacterSet_${character}`,
         text: character,
@@ -196,7 +198,8 @@ export const updateBoundingBoxPolies = (
   characterSetBoundingBoxPolies,
   displayCharacterSetStims,
   spacingRelationToSize,
-  timeWhenRespondable
+  timeWhenRespondable,
+  thresholdParameter
 ) => {
   updateTripletBoundingBoxPolies(
     t,
@@ -206,7 +209,8 @@ export const updateBoundingBoxPolies = (
     showCharacterSetBoundingBox,
     boundingBoxPolies,
     characterSetBoundingBoxPolies,
-    spacingRelationToSize
+    spacingRelationToSize,
+    thresholdParameter
   );
   if (showCharacterSetBoundingBox)
     updateDisplayCharacterSetBoundingBoxStims(
@@ -225,122 +229,50 @@ const updateTripletBoundingBoxPolies = (
   showCharacterSetBoundingBox,
   boundingBoxPolies,
   characterSetBoundingBoxPolies,
-  spacingRelationToSize
+  spacingRelationToSize,
+  thresholdParameter
 ) => {
+  const separateFlankers =
+    (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
+    thresholdParameter === "spacing";
   if (showBoundingBox) {
-    // // *targetBoundingPoly* updates
-    if (
-      t >= 0.0 &&
-      boundingBoxPolies.target.status === PsychoJS.Status.NOT_STARTED
-    ) {
-      // keep track of start time/frame for later
-      boundingBoxPolies.target.tStart = t; // (not accounting for frame time here)
-      boundingBoxPolies.target.frameNStart = frameN; // exact frame index
-      boundingBoxPolies.target.setAutoDraw(true);
-    }
-    if (
-      boundingBoxPolies.target.status === PsychoJS.Status.STARTED &&
-      t >= frameRemains
-    ) {
-      boundingBoxPolies.target.setAutoDraw(false);
-    }
-
-    // // *flanker1BoundingPoly* updates
-    if (
-      t >= 0.0 &&
-      boundingBoxPolies.flanker1.status === PsychoJS.Status.NOT_STARTED &&
-      spacingRelationToSize === "ratio"
-    ) {
-      // keep track of start time/frame for later
-      boundingBoxPolies.flanker1.tStart = t; // (not accounting for frame time here)
-      boundingBoxPolies.flanker1.frameNStart = frameN; // exact frame index
-      boundingBoxPolies.flanker1.setAutoDraw(true);
-    }
-    if (
-      boundingBoxPolies.flanker1.status === PsychoJS.Status.STARTED &&
-      t >= frameRemains
-    ) {
-      boundingBoxPolies.flanker1.setAutoDraw(false);
-    }
-
-    // // *flanker2BoundingPoly* updates
-    if (
-      t >= 0.0 &&
-      boundingBoxPolies.flanker2.status === PsychoJS.Status.NOT_STARTED &&
-      spacingRelationToSize === "ratio"
-    ) {
-      // keep track of start time/frame for later
-      boundingBoxPolies.flanker2.tStart = t; // (not accounting for frame time here)
-      boundingBoxPolies.flanker2.frameNStart = frameN; // exact frame index
-
-      boundingBoxPolies.flanker2.setAutoDraw(true);
-    }
-    if (
-      boundingBoxPolies.flanker2.status === PsychoJS.Status.STARTED &&
-      t >= frameRemains
-    ) {
-      boundingBoxPolies.flanker2.setAutoDraw(false);
+    const stimsToUpdate = separateFlankers
+      ? [
+          boundingBoxPolies.target,
+          boundingBoxPolies.flanker1,
+          boundingBoxPolies.flanker2,
+        ]
+      : [boundingBoxPolies.target];
+    for (const stimulus of stimsToUpdate) {
+      if (t >= 0.0 && stimulus.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        stimulus.tStart = t; // (not accounting for frame time here)
+        stimulus.frameNStart = frameN; // exact frame index
+        stimulus.setAutoDraw(true);
+      }
+      if (stimulus.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+        stimulus.setAutoDraw(false);
+      }
     }
   }
   if (showCharacterSetBoundingBox) {
-    // // *targetBoundingPoly* updates
-    if (
-      t >= 0.0 &&
-      characterSetBoundingBoxPolies.target.status ===
-        PsychoJS.Status.NOT_STARTED
-    ) {
-      // keep track of start time/frame for later
-      characterSetBoundingBoxPolies.target.tStart = t; // (not accounting for frame time here)
-      characterSetBoundingBoxPolies.target.frameNStart = frameN; // exact frame index
-      characterSetBoundingBoxPolies.target.setAutoDraw(true);
-    }
-    if (
-      characterSetBoundingBoxPolies.target.status === PsychoJS.Status.STARTED &&
-      t >= frameRemains
-    ) {
-      characterSetBoundingBoxPolies.target.setAutoDraw(false);
-    }
-
-    // // *flanker1BoundingPoly* updates
-    if (
-      t >= 0.0 &&
-      characterSetBoundingBoxPolies.flanker1.status ===
-        PsychoJS.Status.NOT_STARTED &&
-      spacingRelationToSize === "ratio"
-    ) {
-      // keep track of start time/frame for later
-      characterSetBoundingBoxPolies.flanker1.tStart = t; // (not accounting for frame time here)
-      characterSetBoundingBoxPolies.flanker1.frameNStart = frameN; // exact frame index
-
-      characterSetBoundingBoxPolies.flanker1.setAutoDraw(true);
-    }
-    if (
-      characterSetBoundingBoxPolies.flanker1.status ===
-        PsychoJS.Status.STARTED &&
-      t >= frameRemains
-    ) {
-      characterSetBoundingBoxPolies.flanker1.setAutoDraw(false);
-    }
-
-    // // *flanker2BoundingPoly* updates
-    if (
-      t >= 0.0 &&
-      characterSetBoundingBoxPolies.flanker2.status ===
-        PsychoJS.Status.NOT_STARTED &&
-      spacingRelationToSize === "ratio"
-    ) {
-      // keep track of start time/frame for later
-      characterSetBoundingBoxPolies.flanker2.tStart = t; // (not accounting for frame time here)
-      characterSetBoundingBoxPolies.flanker2.frameNStart = frameN; // exact frame index
-
-      characterSetBoundingBoxPolies.flanker2.setAutoDraw(true);
-    }
-    if (
-      characterSetBoundingBoxPolies.flanker2.status ===
-        PsychoJS.Status.STARTED &&
-      t >= frameRemains
-    ) {
-      characterSetBoundingBoxPolies.flanker2.setAutoDraw(false);
+    const stimsToUpdate = separateFlankers
+      ? [
+          characterSetBoundingBoxPolies.target,
+          characterSetBoundingBoxPolies.flanker1,
+          characterSetBoundingBoxPolies.flanker2,
+        ]
+      : [characterSetBoundingBoxPolies.target];
+    for (const stimulus of stimsToUpdate) {
+      if (t >= 0.0 && stimulus.status === PsychoJS.Status.NOT_STARTED) {
+        // keep track of start time/frame for later
+        stimulus.tStart = t; // (not accounting for frame time here)
+        stimulus.frameNStart = frameN; // exact frame index
+        stimulus.setAutoDraw(true);
+      }
+      if (stimulus.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+        stimulus.setAutoDraw(false);
+      }
     }
   }
 };
@@ -466,13 +398,27 @@ const sizeAndPositionTripletBoundingBoxes = (
     boundingStims.forEach((c) => c._updateIfNeeded());
   }
   if (showCharacterSetBoundingBox) {
+    const separateFlankers =
+      (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
+      thresholdParameter === "spacing";
+    const tripletCharacterSetBoundingBoxPositions = separateFlankers
+      ? getCharacterSetBoundingBoxPositions(
+          [triplet.target, triplet.flanker1, triplet.flanker2],
+          normalizedCharacterSetBoundingRect
+        )
+      : getCharacterSetBoundingBoxPositions(
+          [triplet.target],
+          normalizedCharacterSetBoundingRect
+        );
     const characterSetBoundingStims = [characterSetBoundingBoxPolies.target];
     const characterSetBounds = [
       normalizedCharacterSetBoundingRect.width * heightPx,
       normalizedCharacterSetBoundingRect.height * heightPx,
     ];
     const targetBB = triplet.target.getBoundingBox(true);
-    characterSetBoundingBoxPolies.target.setPos([targetBB.left, targetBB.top]);
+    characterSetBoundingBoxPolies.target.setPos(
+      tripletCharacterSetBoundingBoxPositions[0]
+    );
     characterSetBoundingBoxPolies.target.setSize(characterSetBounds);
     if (
       (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
@@ -484,15 +430,13 @@ const sizeAndPositionTripletBoundingBoxes = (
         characterSetBoundingBoxPolies.flanker1,
         characterSetBoundingBoxPolies.flanker2
       );
-      characterSetBoundingBoxPolies.flanker1.setPos([
-        flanker1BB.left,
-        flanker1BB.top,
-      ]);
+      characterSetBoundingBoxPolies.flanker1.setPos(
+        tripletCharacterSetBoundingBoxPositions[1]
+      );
       characterSetBoundingBoxPolies.flanker1.setSize(characterSetBounds);
-      characterSetBoundingBoxPolies.flanker2.setPos([
-        flanker2BB.left,
-        flanker2BB.top,
-      ]);
+      characterSetBoundingBoxPolies.flanker2.setPos(
+        tripletCharacterSetBoundingBoxPositions[2]
+      );
       characterSetBoundingBoxPolies.flanker2.setSize(characterSetBounds);
     }
     characterSetBoundingStims.forEach((c) => c._updateIfNeeded());
@@ -513,25 +457,55 @@ const sizeAndPositionDisplayCharacterSet = (
   const paddedWidthOfCharacter = characterSetBounds[0] * 1.2;
   const indicies = [...displayCharacterSetStimuli.polies.keys()];
   const middleIndex = Math.floor(indicies.length / 2);
-  const positions = indicies.map((i) => [
-    (i - middleIndex) * paddedWidthOfCharacter,
-    -windowDims[1] / 10,
-  ]);
-  for (const i of indicies) {
-    const displayCharacterBox = displayCharacterSetStimuli.polies[i];
-    const displayCharacter = displayCharacterSetStimuli.characters[i];
-    const position = positions[i];
+  let y = -windowDims[1] / 8;
+  const displayCharacterMetrics = displayCharacterSetStimuli.characters.map(
+    (displayCharacter, i) => {
+      const x = (i - middleIndex) * paddedWidthOfCharacter;
+      const characterPosition = [x, y];
+      displayCharacter.setFont(font);
+      displayCharacter.setHeight(heightPx);
+      displayCharacter.setPos(characterPosition);
+      displayCharacter._updateIfNeeded();
+      return displayCharacter.getTextMetrics();
+    }
+  );
 
-    displayCharacter.setFont(font);
-    displayCharacter.setHeight(heightPx);
-    displayCharacter.setPos(position);
-    displayCharacter._updateIfNeeded();
-
-    const displayCharacterBoundingBox = displayCharacter.getBoundingBox(true);
+  const characterSetBoundingBoxPositions = getCharacterSetBoundingBoxPositions(
+    displayCharacterSetStimuli.characters,
+    normalizedCharacterSetBoundingRect
+  );
+  displayCharacterSetStimuli.polies.forEach((displayCharacterBox, i) => {
     displayCharacterBox.setSize(characterSetBounds);
-    displayCharacterBox.setPos([
-      displayCharacterBoundingBox.left,
-      displayCharacterBoundingBox.top,
-    ]);
-  }
+    const x = (i - middleIndex) * paddedWidthOfCharacter;
+    // const boxPosition = [x, tops[largestAscentIdx]];
+    const boxPosition = characterSetBoundingBoxPositions[i];
+    displayCharacterBox.setPos(boxPosition);
+    displayCharacterBox._updateIfNeeded();
+  });
+};
+
+/**
+ * Given an array of (positioned, sized, ie ready) text stims, return the positions which should
+ * be used for positioning a character-set bounding rect around each text stim
+ * @param {PsychoJS.visual.TextStim[]} stims Array of text stims
+ * @returns {[number, number][]}
+ */
+const getCharacterSetBoundingBoxPositions = (
+  stims,
+  normalizedCharacterSetBoundingRect
+) => {
+  const oldText = stims[0].getText();
+  stims[0].setText(normalizedCharacterSetBoundingRect.largestCharacter);
+  stims[0]._updateIfNeeded();
+  const y = stims[0].getBoundingBox(true).top;
+  stims[0].setText(oldText);
+  stims[0]._updateIfNeeded();
+  // const metrics = stims.map(s => s.getTextMetrics());
+  // const ascents = metrics.map((m) => m.boundingBox.actualBoundingBoxAscent);
+  // const descents = metrics.map((m) => m.boundingBox.actualBoundingBoxDescent);
+  // const ascentsAndDescents = ascents.map((a, i) => a + descents[i]);
+  // const largestAscentDescentIdx = ascentsAndDescents.findIndex(a => a === Math.max(...ascentsAndDescents));
+  // const tops = stims.map((s) => s.getBoundingBox(true).top);
+  // const y = tops[largestAscentDescentIdx];
+  return stims.map((s) => [s.getBoundingBox(true).x, y]);
 };
