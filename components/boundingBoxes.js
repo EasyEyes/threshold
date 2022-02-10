@@ -484,7 +484,6 @@ const sizeAndPositionDisplayCharacterSet = (
     const x = (i - middleIndex) * paddedWidthOfCharacter;
     // const boxPosition = [x, tops[largestAscentIdx]];
     const boxPosition = characterSetBoundingBoxPositions[i];
-    console.log("boxPosition", boxPosition);
     displayCharacterBox.setPos(boxPosition);
     displayCharacterBox._updateIfNeeded();
   });

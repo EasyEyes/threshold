@@ -484,8 +484,6 @@ export class Rectangle {
     lowerLeft,
     upperRight,
     units = undefined,
-    ascent = undefined,
-    descent = undefined,
     characterSet = undefined,
     largestCharacter = undefined
   ) {
@@ -497,9 +495,6 @@ export class Rectangle {
 
     this.height = this.top - this.bottom;
     this.width = this.right - this.left;
-
-    this.ascent = ascent;
-    this.descent = descent;
 
     this.characterSet = characterSet;
     this.largestCharacter = largestCharacter;
