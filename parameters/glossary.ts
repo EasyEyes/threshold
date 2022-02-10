@@ -685,7 +685,8 @@ export const GLOSSARY: Glossary = {
     name: "readingPages",
     availability: "now",
     example: "4",
-    explanation: "Number of pages to be read.",
+    explanation:
+      "Number of pages to be read. The first and last pages will not be used for testing.",
     type: "numerical",
     default: "4",
   },

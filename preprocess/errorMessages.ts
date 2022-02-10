@@ -224,7 +224,7 @@ export const INVALID_STARTING_BLOCK = (
   correctStartingValue: 0 | 1
 ): EasyEyesError => {
   const zeroBasedNumberingBool = correctStartingValue ? false : true;
-  const complementaryStart = correctStartingValue ? 1 : 0;
+  const complementaryStart = correctStartingValue ? 0 : 1;
   return {
     name: "Invalid initial value",
     message: `The first value in your <span class="error-parameter">block</span> row isn't correct; it is <em>${actualStartingValue}</em>, when it ought to be <em>${correctStartingValue}</em>.`,
