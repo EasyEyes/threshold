@@ -1829,7 +1829,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         if (showTargetSpecs) {
           conditionName.setPos([
             -window.innerWidth / 2,
-            -window.innerHeight / 6,
+            -window.innerWidth / 8,
           ]);
         } else {
           conditionName.setPos([
@@ -2250,7 +2250,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       if (showConditionNameBool) {
         if (showTargetSpecs) {
           conditionNameConfig.x = -window.innerWidth / 2;
-          conditionNameConfig.y = -window.innerHeight / 6;
+          conditionNameConfig.y = -window.innerWidth / 8;
         } else {
           conditionNameConfig.x = -window.innerWidth / 2;
           conditionNameConfig.y = -window.innerHeight / 2;
