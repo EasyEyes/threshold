@@ -229,7 +229,18 @@ var targetSpecsConfig = {
   alignHoriz: "left",
   alignVert: "bottom",
 };
+
 var targetSpecs; // TextStim object
+
+var conditionNameConfig = {
+  fontSize: 28,
+  x: -window.innerWidth / 2,
+  y: -window.innerHeight / 2,
+  alignHoriz: "left",
+  alignVert: "bottom",
+};
+
+var conditionName;
 
 var trialInfoStr = "";
 var totalTrial, // TextSim object
@@ -559,6 +570,25 @@ const experiment = (blockCount) => {
       alignHoriz: targetSpecsConfig.alignHoriz,
       alignVert: targetSpecsConfig.alignVert,
       height: targetSpecsConfig.fontSize,
+      wrapWidth: window.innerWidth,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -20.0,
+      isInstruction: false,
+      autoDraw: false,
+    });
+
+    conditionName = new visual.TextStim({
+      win: psychoJS.window,
+      name: "conditionName",
+      text: "",
+      font: instructionFont,
+      units: "pix",
+      pos: [conditionNameConfig.x, conditionNameConfig.y],
+      alignHoriz: conditionNameConfig.alignHoriz,
+      alignVert: conditionNameConfig.alignVert,
+      height: conditionNameConfig.fontSize,
       wrapWidth: window.innerWidth,
       ori: 0.0,
       color: new util.Color("black"),
@@ -1339,6 +1369,7 @@ const experiment = (blockCount) => {
   var showCharacterSetElement;
   var showCounterBool;
   var showTargetSpecs;
+  var showConditionNameBool;
   var showViewingDistanceBool;
   const showCharacterSetResponse = {
     current: null,
@@ -1510,6 +1541,10 @@ const experiment = (blockCount) => {
         block_condition
       );
       showCounterBool = reader.read("showCounterBool", block_condition);
+      showConditionNameBool = paramReader.read(
+        "showConditionName",
+        block_condition
+      );
       showTargetSpecs = paramReader.read(
         "showTargetSpecsBool",
         block_condition
@@ -1784,6 +1819,24 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         targetSpecs.setAutoDraw(true);
       }
 
+      if (showConditionNameBool) {
+        let conditionNameString = `condition: ${condition["block_condition"]}`;
+        conditionName.setText(conditionNameString);
+        if (showTargetSpecs) {
+          conditionName.setPos([
+            -window.innerWidth / 2,
+            -window.innerHeight / 4,
+          ]);
+        } else {
+          conditionName.setPos([
+            -window.innerWidth / 2,
+            -window.innerHeight / 2,
+          ]);
+        }
+
+        conditionName.setAutoDraw(true);
+      }
+
       trialInfoStr = getTrialInfoStr(
         rc.language.value,
         showCounterBool,
@@ -1897,6 +1950,17 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           targetSpecs.frameNStart = frameN; // exact frame index
         }
         targetSpecs.setAutoDraw(true);
+      }
+
+      if (showConditionNameBool) {
+        conditionNameConfig.x = -window.innerWidth / 2;
+        conditionNameConfig.y = -window.innerHeight / 2;
+        if (conditionName.status === PsychoJS.Status.NOT_STARTED) {
+          // keep track of start time/frame for later
+          conditionName.tStart = t; // (not accounting for frame time here)
+          conditionName.frameNStart = frameN; // exact frame index
+        }
+        conditionName.setAutoDraw(true);
       }
 
       if (
@@ -2176,6 +2240,21 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         if (t >= 0.0) {
           targetSpecs.setPos([targetSpecsConfig.x, targetSpecsConfig.y]);
           targetSpecs.setAutoDraw(true);
+        }
+      }
+
+      if (showConditionNameBool) {
+        if (showTargetSpecs) {
+          conditionNameConfig.x = -window.innerWidth / 2;
+          conditionNameConfig.y = -window.innerHeight / 4;
+        } else {
+          conditionNameConfig.x = -window.innerWidth / 2;
+          conditionNameConfig.y = -window.innerHeight / 2;
+        }
+        // *targetSpecs* updates
+        if (t >= 0.0) {
+          conditionName.setPos([conditionNameConfig.x, conditionNameConfig.y]);
+          conditionName.setAutoDraw(true);
         }
       }
 
