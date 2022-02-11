@@ -1543,7 +1543,7 @@ const experiment = (blockCount) => {
       );
       showCounterBool = reader.read("showCounterBool", block_condition);
       showConditionNameBool = paramReader.read(
-        "showConditionName",
+        "showConditionNameBool",
         block_condition
       );
 
@@ -1829,7 +1829,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         if (showTargetSpecs) {
           conditionName.setPos([
             -window.innerWidth / 2,
-            -window.innerHeight / 4,
+            -window.innerHeight / 6,
           ]);
         } else {
           conditionName.setPos([
@@ -2250,7 +2250,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       if (showConditionNameBool) {
         if (showTargetSpecs) {
           conditionNameConfig.x = -window.innerWidth / 2;
-          conditionNameConfig.y = -window.innerHeight / 4;
+          conditionNameConfig.y = -window.innerHeight / 6;
         } else {
           conditionNameConfig.x = -window.innerWidth / 2;
           conditionNameConfig.y = -window.innerHeight / 2;

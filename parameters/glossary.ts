@@ -844,8 +844,8 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  showConditionName: {
-    name: "showConditionName",
+  showConditionNameBool: {
+    name: "showConditionNameBool",
     availability: "now",
     example: "TRUE",
     explanation:
