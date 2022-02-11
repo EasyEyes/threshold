@@ -1370,6 +1370,7 @@ const experiment = (blockCount) => {
   var showCounterBool;
   var showTargetSpecs;
   var showConditionNameBool;
+  var condName;
   var showViewingDistanceBool;
   const showCharacterSetResponse = {
     current: null,
@@ -1545,6 +1546,9 @@ const experiment = (blockCount) => {
         "showConditionName",
         block_condition
       );
+
+      condName = paramReader.read("conditionName", block_condition);
+
       showTargetSpecs = paramReader.read(
         "showTargetSpecsBool",
         block_condition
@@ -1820,7 +1824,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       }
 
       if (showConditionNameBool) {
-        let conditionNameString = `${condition["block_condition"]}`;
+        let conditionNameString = `${condName}`;
         conditionName.setText(conditionNameString);
         if (showTargetSpecs) {
           conditionName.setPos([
