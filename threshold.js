@@ -1820,7 +1820,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       }
 
       if (showConditionNameBool) {
-        let conditionNameString = `condition: ${condition["block_condition"]}`;
+        let conditionNameString = `${condition["block_condition"]}`;
         conditionName.setText(conditionNameString);
         if (showTargetSpecs) {
           conditionName.setPos([
