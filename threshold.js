@@ -2412,6 +2412,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
   function trialRoutineEnd() {
     return async function () {
+      if (showTargetSpecs) targetSpecs.setAutoDraw(false);
       if (
         (skipTrialOrBlock.trialId == currentTrialIndex &&
           skipTrialOrBlock.blockId == currentBlockIndex &&
