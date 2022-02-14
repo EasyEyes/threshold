@@ -1418,6 +1418,9 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      // Check fullscreen and if not, get fullscreen
+      rc.getFullscreen();
+
       // showCursor();
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
