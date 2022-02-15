@@ -166,8 +166,10 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
  * @param {*} displayOptions
  */
 export const XYDegOfXYPix = (xyPix, displayOptions) => {
+  // eslint-disable-next-line no-prototype-builtins
   if (!displayOptions.hasOwnProperty("nearPointXYDeg"))
     throw "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix";
+  // eslint-disable-next-line no-prototype-builtins
   if (!displayOptions.hasOwnProperty("nearPointXYPix"))
     throw "Please provide a 'nearPointXYPix' property to displayOptions passed to XYDegOfXYPix";
   if (xyPix.length !== 2)
@@ -220,36 +222,49 @@ export const addConditionToData = (
 };
 
 export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
-  psychoJS.experiment.addData(
-    "staircaseName",
-    currentLoop._currentStaircase._name
-  );
-  psychoJS.experiment.addData(
-    "questMeanAtEndOfTrial",
-    currentLoop._currentStaircase.mean()
-  );
-  psychoJS.experiment.addData(
-    "questSDAtEndOfTrial",
-    currentLoop._currentStaircase.sd()
-  );
-  psychoJS.experiment.addData(
-    "questQuantileOfQuantileOrderAtEndOfTrial",
-    currentLoop._currentStaircase.quantile(
-      currentLoop._currentStaircase._jsQuest.quantileOrder
-    )
-  );
+  // TODO What to do when data saving is rejected?
+  if (currentLoop._currentStaircase) {
+    psychoJS.experiment.addData(
+      "staircaseName",
+      currentLoop._currentStaircase._name
+    );
+    psychoJS.experiment.addData(
+      "questMeanAtEndOfTrial",
+      currentLoop._currentStaircase.mean()
+    );
+    psychoJS.experiment.addData(
+      "questSDAtEndOfTrial",
+      currentLoop._currentStaircase.sd()
+    );
+    psychoJS.experiment.addData(
+      "questQuantileOfQuantileOrderAtEndOfTrial",
+      currentLoop._currentStaircase.quantile(
+        currentLoop._currentStaircase._jsQuest.quantileOrder
+      )
+    );
+  } else {
+    console.error("undefined currentLoop._currentStaircase [utils.js 222]");
+  }
 };
 
 export const addBlockStaircaseSummariesToData = (loop, psychoJS) => {
   loop._staircases.forEach((staircase, i) => {
-    psychoJS.experiment.addData("staircaseName", staircase._name);
-    psychoJS.experiment.addData("questMeanAtEndOfTrialsLoop", staircase.mean());
-    psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", staircase.sd());
-    psychoJS.experiment.addData(
-      "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
-      staircase.quantile(staircase._jsQuest.quantileOrder)
-    );
-    if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
+    // TODO What to do when data saving is rejected?
+    if (staircase) {
+      psychoJS.experiment.addData("staircaseName", staircase._name);
+      psychoJS.experiment.addData(
+        "questMeanAtEndOfTrialsLoop",
+        staircase.mean()
+      );
+      psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", staircase.sd());
+      psychoJS.experiment.addData(
+        "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
+        staircase.quantile(staircase._jsQuest.quantileOrder)
+      );
+      if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
+    } else {
+      console.error("undefined staircase [utils.js 248]");
+    }
   });
 };
 
