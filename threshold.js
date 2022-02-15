@@ -1832,7 +1832,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         if (showTargetSpecs) {
           conditionName.setPos([
             -window.innerWidth / 2,
-            -window.innerWidth / 20,
+            targetSpecs.getBoundingBox(true).height,
           ]);
         } else {
           conditionName.setPos([
@@ -2253,7 +2253,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       if (showConditionNameBool) {
         if (showTargetSpecs) {
           conditionNameConfig.x = -window.innerWidth / 2;
-          conditionNameConfig.y = -window.innerWidth / 20;
+          targetSpecs.getBoundingBox(true).height;
         } else {
           conditionNameConfig.x = -window.innerWidth / 2;
           conditionNameConfig.y = -window.innerHeight / 2;
