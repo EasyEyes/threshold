@@ -1414,6 +1414,9 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      // Check fullscreen and if not, get fullscreen
+      rc.getFullscreen();
+
       // showCursor();
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
@@ -1787,7 +1790,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         if (showTargetSpecs) {
           conditionName.setPos([
             -window.innerWidth / 2,
-            -window.innerWidth / 8,
+            targetSpecs.getBoundingBox(true).height,
           ]);
         } else {
           conditionName.setPos([
@@ -2211,7 +2214,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       if (showConditionNameBool) {
         if (showTargetSpecs) {
           conditionNameConfig.x = -window.innerWidth / 2;
-          conditionNameConfig.y = -window.innerWidth / 8;
+          conditionNameConfig.y = targetSpecs.getBoundingBox(true).height;
         } else {
           conditionNameConfig.x = -window.innerWidth / 2;
           conditionNameConfig.y = -window.innerHeight / 2;
@@ -2375,6 +2378,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
     return async function () {
       grid.hide(true);
       if (showTargetSpecs) targetSpecs.setAutoDraw(false);
+      if (showConditionNameBool) conditionName.setAutoDraw(false);
       if (
         (skipTrialOrBlock.trialId == currentTrialIndex &&
           skipTrialOrBlock.blockId == currentBlockIndex &&
