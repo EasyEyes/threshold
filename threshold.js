@@ -149,7 +149,7 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
-var showGrid, gridVisible, simulated;
+var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
@@ -696,7 +696,6 @@ const experiment = (blockCount) => {
       window: psychoJS.window,
     };
     grid = new Grid("none", displayOptions, psychoJS);
-    window.EEgrid = grid;
     return Scheduler.Event.NEXT;
   }
 
