@@ -7,520 +7,433 @@ import {
   getPixPerCm,
   getViewingDistanceCm,
   logger,
-  // rotate,
+  XYPixOfXYDeg,
+  XYDegOfXYPix,
 } from "./utils.js";
 
-const opacity = 0.3;
 /*
 GRIDS. Participant page. 
 For verification, provide optional grids over the whole screen. 
-Parameter showGridsBool requests that threshold.js show buttons 
-on the (lower) left of the screen that each turn on and off a 
-different grid over the whole screen. Turning on several buttons 
-should show several grids (in different dark colors). Each grid 
-should be labeled  with numbers and units on the major axes.
+Each grid should be labeled  with numbers and units on the major axes.
 The "cm" grid has cm units, origin in lower left, thick lines at
 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, 
 origin at fixation, thick lines at 5 deg, and regular lines at 1 
 deg. The "pix" grid has pix units, origin at lower left, thick 
 lines at 500 pix, and regular lines at 100 pix.
 */
+export class Grid {
+  /**
+   * Setup the grid.
+   * @param {("px" | "cm" | "deg" | "none")} units Which type of grid should be shown.
+   * @param {object} displayOptions Current values about the screen, trial, etc
+   * @param {PsychoJS} psychoJS PsychoJS instance for the experiment
+   */
+  constructor(units, displayOptions, psychoJS) {
+    this.units = units ? units : "none";
+    this.displayOptions = displayOptions;
+    this.psychoJS = psychoJS;
+    this.visible = false;
+    this.allGrids = {};
+    this.lines = [];
+    this.labels = [];
+    this.opacity = 0.3;
+    this.dimensions = this.psychoJS.window._size;
+    this.gridkey = { key: ["`", "~"], code: "Backquote", keyCode: 192 };
 
-var showGrid, gridVisible;
+    this.spawnGridStims();
 
-export const readGridParameter = (reader, simulated) => {
-  showGrid = false;
-  gridVisible = ["none"];
-  const gridkey = { key: ["`", "~"], code: "Backquote", keyCode: 192 };
-  const showGridsBools = reader.read("showGridsBool", "__ALL_BLOCKS__");
-  if (showGridsBools.some((gridBool) => gridBool) && !simulated) {
-    showGrid = true;
-  }
-
-  if (showGrid) {
-    gridVisible.push("pix", "cm", "deg");
     window.onkeydown = (e) => {
       if (
-        e.code === gridkey.code ||
-        gridkey.key.includes(e.key) ||
-        e.keyCode === gridkey.keyCode
-      ) {
-        gridVisible.push(gridVisible.shift());
-        logger("new gridVisible", gridVisible[0]);
-        updateGrids(gridVisible, window.grids);
-      }
+        e.code === this.gridkey.code ||
+        this.gridkey.key.includes(e.key) ||
+        e.keyCode === this.gridkey.keyCode
+      )
+        this.cycle();
     };
+    // EXPERIMENTAL window.onresize = (e) => this.update();
+    this._reflectVisibility();
   }
-  return [showGrid, gridVisible];
-};
 
-const getNumberOfGrids = (window, gridUnits, displayOptions) => {
-  const dimensions = window._size;
-  const dimensionsCm = dimensions.map((dim) => dim / displayOptions.pixPerCm);
-  // TODO generalize to fixation != [0,0]
-  const dimensionsDeg = dimensions.map((dim) =>
-    pixelsToDegrees(Math.round(dim / 2), displayOptions)
-  );
-  switch (gridUnits) {
-    case "pix":
-      return dimensions.map((dim) => Math.floor(dim / 100) + 1);
-    case "cm":
-      return dimensionsCm.map((dim) => Math.floor(dim / 1) + 1);
-    case "deg":
-      return dimensionsDeg.map((dim) => Math.floor(dim / 1) + 1);
+  /**
+   * Re-spawn grids, given new `displayOptions` values (eg to reflect a new viewing distance)
+   * and optionally change which is the current grid
+   * @param {("px" | "cm" | "deg" | "none" | "disabled")} units The grid-type to set as current.
+   * @param {object} displayOptions
+   */
+  update(units = undefined, displayOptions = undefined) {
+    if (units) this.units = units;
+    if (displayOptions) this.displayOptions = displayOptions;
+    this.visible = this.units === "disabled" ? false : true;
+    this._undraw();
+    this.spawnGridStims();
+    [this.lines, this.labels] = this.allGrids[this.units];
+    this._reflectVisibility(); // Draw new stims if visible==true
   }
-};
 
-export const getGridLines = (window, gridUnits, displayOptions) => {
-  switch (gridUnits) {
-    case "pix":
-      return getPixelGridLines(window, displayOptions);
-    case "cm":
-      return getCmGridLines(window, displayOptions);
-    case "deg":
-      return getDegGridLines(window, displayOptions);
+  /**
+   * Grid ought to be shown.
+   * Set `visibile` to reflect this desire, and call `_draw()` to draw the stims.
+   */
+  show() {
+    this.visible = true;
+    this._draw();
   }
-};
 
-const getPixelGridLines = (window, displayOptions) => {
-  const dimensions = window._size;
-  const spacing = 100;
-  const origin = [
-    -Math.round(dimensions[0] / 2),
-    -Math.round(dimensions[1] / 2),
-  ];
-  const numberOfGridLines = getNumberOfGrids(window, "pix", displayOptions);
-  const verticalGridLines = [...Array(numberOfGridLines[0]).keys()].map(
-    (lineId) => {
-      return new visual.ShapeStim({
-        name: `vertical-grid-line-${lineId}`,
-        win: window,
-        units: "pix",
-        lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("black"),
-        fillColor: new util.Color("black"),
-        opacity: opacity,
-        vertices: [
-          [+(origin[0] + lineId * spacing), +Math.round(dimensions[1] / 2)],
-          [+(origin[0] + lineId * spacing), -Math.round(dimensions[1] / 2)],
-        ],
-        depth: -1000,
-        ori: 0.0,
-        interpolate: false,
-        size: 1,
-      });
-    }
-  );
-  const verticalGridLineLabels = [...Array(numberOfGridLines[0]).keys()].map(
-    (lineId) => {
-      return new visual.TextStim({
-        name: `vertical-grid-line-label-${lineId}`,
-        win: window,
-        text: `${spacing * lineId} pix`,
-        font: "Arial",
-        units: "pix",
-        pos: [30 + origin[0] + lineId * spacing, origin[1] + 15],
-        height: 15,
-        ori: 0.0,
-        color: new util.Color("black"),
-        opacity: opacity,
-        depth: 0.0,
-      });
-    }
-  );
-  const horizontalGridLines = [...Array(numberOfGridLines[1]).keys()].map(
-    (lineId) => {
-      return new visual.ShapeStim({
-        name: `horizontal-grid-line-${lineId}`,
-        win: window,
-        units: "pix",
-        lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("black"),
-        fillColor: new util.Color("black"),
-        opacity: opacity,
-        vertices: [
-          [+Math.round(dimensions[0] / 2), +(origin[1] + lineId * spacing)],
-          [-Math.round(dimensions[0] / 2), +(origin[1] + lineId * spacing)],
-        ],
-        depth: -1000,
-        ori: 0.0,
-        interpolate: false,
-        size: 1,
-      });
-    }
-  );
-  const horizontalGridLineLabels = [...Array(numberOfGridLines[0]).keys()].map(
-    (lineId) => {
-      return new visual.TextStim({
-        name: `horizontal-grid-line-label-${lineId}`,
-        win: window,
-        text: `${spacing * lineId} pix`,
-        font: "Arial",
-        units: "pix",
-        pos: [origin[0] + 25, 20 + origin[1] + lineId * spacing],
-        height: 15,
-        ori: 0.0,
-        color: new util.Color("black"),
-        opacity: opacity,
-        depth: 0.0,
-      });
-    }
-  );
-  return [
-    ...verticalGridLines,
-    ...verticalGridLineLabels,
-    ...horizontalGridLines,
-    ...horizontalGridLineLabels,
-  ];
-};
-
-const getCmGridLines = (window, displayOptions) => {
-  const dimensions = window._size;
-  const spacing = displayOptions.pixPerCm;
-  const origin = [
-    -Math.round(dimensions[0] / 2),
-    -Math.round(dimensions[1] / 2),
-  ];
-  const numberOfGridLines = getNumberOfGrids(window, "cm", displayOptions);
-  const verticalGridLines = [...Array(numberOfGridLines[0]).keys()].map(
-    (lineId) => {
-      return new visual.ShapeStim({
-        name: `vertical-grid-line-${lineId}`,
-        win: window,
-        units: "pix",
-        lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("blue"),
-        fillColor: new util.Color("blue"),
-        opacity: 1.0,
-        vertices: [
-          [+(origin[0] + lineId * spacing), +Math.round(dimensions[1] / 2)],
-          [+(origin[0] + lineId * spacing), -Math.round(dimensions[1] / 2)],
-        ],
-        depth: -1000,
-        ori: 0.0,
-        interpolate: false,
-        size: 1,
-      });
-    }
-  );
-  const verticalGridLineLabels = [...Array(numberOfGridLines[0]).keys()].map(
-    (lineId) => {
-      return new visual.TextStim({
-        name: `vertical-grid-line-label-${lineId}`,
-        win: window,
-        text: `${lineId} cm`,
-        font: "Arial",
-        units: "pix",
-        pos: [30 + origin[0] + lineId * spacing, origin[1] + 15],
-        height: 15,
-        ori: 0.0,
-        color: new util.Color("blue"),
-        opacity: 1.0,
-        depth: 0.0,
-      });
-    }
-  );
-  const horizontalGridLines = [...Array(numberOfGridLines[1]).keys()].map(
-    (lineId) => {
-      return new visual.ShapeStim({
-        name: `horizontal-grid-line-${lineId}`,
-        win: window,
-        units: "pix",
-        lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("blue"),
-        fillColor: new util.Color("blue"),
-        opacity: 1.0,
-        vertices: [
-          [+Math.round(dimensions[0] / 2), +(origin[1] + lineId * spacing)],
-          [-Math.round(dimensions[0] / 2), +(origin[1] + lineId * spacing)],
-        ],
-        depth: -1000,
-        ori: 0.0,
-        interpolate: false,
-        size: 1,
-      });
-    }
-  );
-  const horizontalGridLineLabels = [...Array(numberOfGridLines[0]).keys()].map(
-    (lineId) => {
-      return new visual.TextStim({
-        name: `horizontal-grid-line-label-${lineId}`,
-        win: window,
-        text: `${lineId} cm`,
-        font: "Arial",
-        units: "pix",
-        pos: [origin[0] + 25, 20 + origin[1] + lineId * spacing],
-        height: 15,
-        ori: 0.0,
-        color: new util.Color("blue"),
-        opacity: 1.0,
-        depth: 0.0,
-      });
-    }
-  );
-  return [
-    ...verticalGridLines,
-    ...verticalGridLineLabels,
-    ...horizontalGridLines,
-    ...horizontalGridLineLabels,
-  ];
-};
-
-const getDegGridLines = (window, displayOptions) => {
-  const dimensions = window._size;
-  const origin = displayOptions.fixationXYPix;
-  const numberOfGridLinesPerSide = getNumberOfGrids(
-    window,
-    "deg",
-    displayOptions
-  );
-  const rightGridLines = [...Array(numberOfGridLinesPerSide[0]).keys()].map(
-    (lineId) => {
-      return new visual.ShapeStim({
-        name: `right-grid-line-${lineId}`,
-        win: window,
-        units: "pix",
-        lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("red"),
-        fillColor: new util.Color("red"),
-        opacity: opacity,
-        vertices: [
-          [
-            +(origin[0] + degreesToPixels(lineId, displayOptions)),
-            +Math.round(dimensions[1] / 2),
-          ],
-          [
-            +(origin[0] + degreesToPixels(lineId, displayOptions)),
-            -Math.round(dimensions[1] / 2),
-          ],
-        ],
-        depth: -1000,
-        ori: 0.0,
-        interpolate: false,
-        size: 1,
-      });
-    }
-  );
-  const leftGridLines = [...Array(numberOfGridLinesPerSide[0]).keys()].map(
-    (lineId) => {
-      return new visual.ShapeStim({
-        name: `left-grid-line-${lineId}`,
-        win: window,
-        units: "pix",
-        lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("red"),
-        fillColor: new util.Color("red"),
-        opacity: opacity,
-        vertices: [
-          [
-            -(origin[0] + degreesToPixels(lineId, displayOptions)),
-            +Math.round(dimensions[1] / 2),
-          ],
-          [
-            -(origin[0] + degreesToPixels(lineId, displayOptions)),
-            -Math.round(dimensions[1] / 2),
-          ],
-        ],
-        depth: -1000,
-        ori: 0.0,
-        interpolate: false,
-        size: 1,
-      });
-    }
-  );
-  const upperGridLines = [...Array(numberOfGridLinesPerSide[1]).keys()].map(
-    (lineId) => {
-      return new visual.ShapeStim({
-        name: `upper-grid-line-${lineId}`,
-        win: window,
-        units: "pix",
-        lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("red"),
-        fillColor: new util.Color("red"),
-        opacity: opacity,
-        vertices: [
-          [
-            +Math.round(dimensions[0] / 2),
-            +(origin[1] + degreesToPixels(lineId, displayOptions)),
-          ],
-          [
-            -Math.round(dimensions[0] / 2),
-            +(origin[1] + degreesToPixels(lineId, displayOptions)),
-          ],
-        ],
-        depth: -1000,
-        ori: 0.0,
-        interpolate: false,
-        size: 1,
-      });
-    }
-  );
-  const lowerGridLines = [...Array(numberOfGridLinesPerSide[1]).keys()].map(
-    (lineId) => {
-      return new visual.ShapeStim({
-        name: `lower-grid-line-${lineId}`,
-        win: window,
-        units: "pix",
-        lineWidth: lineId % 5 === 0 ? 5 : 2,
-        lineColor: new util.Color("red"),
-        fillColor: new util.Color("red"),
-        opacity: opacity,
-        vertices: [
-          [
-            +Math.round(dimensions[0] / 2),
-            -(origin[1] + degreesToPixels(lineId, displayOptions)),
-          ],
-          [
-            -Math.round(dimensions[0] / 2),
-            -(origin[1] + degreesToPixels(lineId, displayOptions)),
-          ],
-        ],
-        depth: -1000,
-        ori: 0.0,
-        interpolate: false,
-        size: 1,
-      });
-    }
-  );
-  const rightGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
-    .filter((lineId) => lineId % 5 === 0)
-    .map((lineId) => {
-      return new visual.TextStim({
-        name: `right-grid-line-label-${lineId}`,
-        win: window,
-        text: `${lineId} deg`,
-        font: "Arial",
-        units: "pix",
-        pos: [
-          origin[0] + degreesToPixels(lineId, displayOptions) - 5,
-          -(window._size[1] / 2) + degreesToPixels(0.25, displayOptions),
-        ],
-        height: Math.round(degreesToPixels(0.5, displayOptions)),
-        ori: 0.0,
-        color: new util.Color("red"),
-        opacity: 1.0,
-        depth: 0.0,
-      });
-    });
-  const leftGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
-    .filter((lineId) => lineId % 5 === 0 && lineId !== 0)
-    .map((lineId) => {
-      return new visual.TextStim({
-        name: `left-grid-line-label-${lineId}`,
-        win: window,
-        text: `-${lineId} deg`,
-        font: "Arial",
-        units: "pix",
-        pos: [
-          origin[0] - degreesToPixels(lineId, displayOptions) + 5,
-          -(window._size[1] / 2) + degreesToPixels(0.25, displayOptions),
-        ],
-        height: Math.round(degreesToPixels(0.5, displayOptions)),
-        ori: 0.0,
-        color: new util.Color("red"),
-        opacity: 1.0,
-        depth: 0.0,
-      });
-    });
-  const lowerGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
-    .filter((lineId) => lineId % 5 === 0 && lineId !== 0)
-    .map((lineId) => {
-      return new visual.TextStim({
-        name: `lower-grid-line-label-${lineId}`,
-        win: window,
-        text: `-${lineId} deg`,
-        font: "Arial",
-        units: "pix",
-        pos: [
-          -(window._size[0] / 2) + degreesToPixels(0.75, displayOptions),
-          origin[1] - degreesToPixels(lineId, displayOptions) + 5,
-        ],
-        height: Math.round(degreesToPixels(0.5, displayOptions)),
-        ori: 0.0,
-        color: new util.Color("red"),
-        opacity: 1.0,
-        depth: 0.0,
-      });
-    });
-  const upperGridLineLabels = [...Array(numberOfGridLinesPerSide[0]).keys()]
-    .filter((lineId) => lineId % 5 === 0)
-    .map((lineId) => {
-      return new visual.TextStim({
-        name: `upper-grid-line-label-${lineId}`,
-        win: window,
-        text: `${lineId} deg`,
-        font: "Arial",
-        units: "pix",
-        pos: [
-          -(window._size[0] / 2) + degreesToPixels(0.75, displayOptions),
-          origin[1] + degreesToPixels(lineId, displayOptions) - 5,
-        ],
-        height: Math.round(degreesToPixels(0.5, displayOptions)),
-        ori: 0.0,
-        color: new util.Color("red"),
-        opacity: 1.0,
-        depth: 0.0,
-      });
-    });
-  return [
-    ...rightGridLines,
-    ...leftGridLines,
-    ...upperGridLines,
-    ...lowerGridLines,
-    ...rightGridLineLabels,
-    ...leftGridLineLabels,
-    ...upperGridLineLabels,
-    ...lowerGridLineLabels,
-  ];
-};
-
-export const turnOnGrid = (gridTypes, grids) => {
-  const gridType = gridTypes[0];
-  grids[gridType].forEach((gridLineStim) => {
-    gridLineStim.setAutoDraw(true);
-  });
-};
-
-export const updateGrids = (gridTypes, grids) => {
-  const gridType = gridTypes[0];
-  if (grids[gridType]) {
-    grids[gridType].forEach((line) => line.setAutoDraw(true));
-    for (const otherType of gridTypes.filter(
-      (typeOfGrid) => typeOfGrid !== gridType
-    )) {
-      grids[otherType].forEach((line) => line.setAutoDraw(false));
-    }
+  /**
+   * Grid ought not be shown.
+   * Set `visibile` to reflect this desire, and call `_undraw()` to remove the stims.
+   */
+  hide() {
+    this.visible = false;
+    this._undraw();
   }
-};
+  /**
+   * Change to showing the grid corresponding to the next units
+   * [Triggered on relevant keypress, ie tilde]
+   */
+  cycle() {
+    this._undraw(true);
+    this.units = this._cycleUnits(this.units);
+    // this.spawnGridStims(this.units);
+    [this.lines, this.labels] = this.allGrids[this.units];
+    this._reflectVisibility();
+  }
 
-export const undrawGrids = (grids) => {
-  for (const gridType in grids) {
-    grids[gridType].forEach((gridLineStim) => {
-      gridLineStim.setAutoDraw(false);
+  /**
+   * Generate the stims for the grid, and store in `this._allGridStims`.
+   * Generates all three grids if now parameter is provided, or else just the provided unit's grid.
+   * @param {("px" | "cm" | "deg" | "none")} units
+   */
+  spawnGridStims(units = undefined) {
+    if (units) this.allGrids[units] = this._getGridStims(units);
+    else
+      for (const unit of ["px", "cm", "deg", "none", "disabled"]) {
+        this.allGrids[unit] = this._getGridStims(unit);
+      }
+  }
+
+  /**
+   * Set autoDraw=false for all lines&labels of the current grid.
+   */
+  _undraw() {
+    const stims = [...this.lines, ...this.labels];
+    stims.forEach((s) => {
+      if (s) s.setAutoDraw(false);
     });
   }
-  return { pix: [], cm: [], deg: [], none: [] };
-};
 
-export const spawnGrids = (
-  rc,
-  reader,
-  blockNumber,
-  psychoJS,
-  fixationXYPix
-) => {
-  const pixPerCm = getPixPerCm(rc);
-  const viewingDistanceCm = getViewingDistanceCm(rc, reader, blockNumber);
-  const displayOptions = {
-    fixationXYPix: fixationXYPix,
-    pixPerCm: pixPerCm,
-    viewingDistanceCm: viewingDistanceCm,
+  /**
+   * Set autoDraw=ture for all lines&labels of the current grid.
+   */
+  _draw() {
+    const stims = [...this.lines, ...this.labels];
+    stims.forEach((s) => {
+      if (s) s.setAutoDraw(true);
+    });
+  }
+
+  /**
+   * Set autoDraw of all stims ot the current value of `visibile`,
+   * ie `_draw` if `visible===true`, else `_undraw`
+   */
+  _reflectVisibility() {
+    const stims = [...this.lines, ...this.labels];
+    stims.forEach((s) => {
+      if (s) s.setAutoDraw(this.visible);
+    });
+  }
+  _getGridStims(units) {
+    switch (units) {
+      case "px":
+        return this._getPixelGridStims();
+      case "cm":
+        return this._getCmGridStims();
+      case "deg":
+        return this._getDegGridStims();
+      case "none":
+        return [[], []];
+      case "disabled":
+        return [[], []];
+    }
+  }
+
+  _getNumberOfGridLines = (units) => {
+    this.dimensionsCm = this.dimensions.map(
+      (dim) => dim / this.displayOptions.pixPerCm
+    );
+    // TODO generalize to fixation != [0,0]
+    this.dimensionsDeg = XYDegOfXYPix(
+      [this.dimensions[0] / 2, this.dimensions[1] / 2],
+      this.displayOptions
+    );
+    switch (units) {
+      case "px":
+        return this.dimensions.map((dim) => Math.floor(dim / 100) + 1);
+      case "cm":
+        return this.dimensionsCm.map((dim) => Math.floor(dim / 1) + 1);
+      case "deg":
+        return this.dimensionsDeg.map((dim) => Math.floor(dim / 1) + 1);
+    }
   };
-  const grids = {
-    deg: getGridLines(psychoJS.window, "deg", displayOptions),
-    cm: getGridLines(psychoJS.window, "cm", displayOptions),
-    pix: getGridLines(psychoJS.window, "pix", displayOptions),
-    none: [],
+
+  _gridStillValid(units) {
+    // TODO implement checks to see if the stims need to be recalculated
+    // so that grids can stay current with minimal computation
+  }
+
+  _cycleUnits(previousUnits) {
+    switch (previousUnits) {
+      case "none":
+        return "px";
+      case "px":
+        return "cm";
+      case "cm":
+        return "deg";
+      case "deg":
+        return "none";
+      case "disabled":
+        return "disabled";
+    }
+    return "none";
+  }
+
+  _getPixelGridStims = () => {
+    const spacing = 100;
+    const origin = [
+      -Math.round(this.dimensions[0] / 2),
+      -Math.round(this.dimensions[1] / 2),
+    ];
+    const numberOfGridLines = this._getNumberOfGridLines("px");
+    const [lines, labels] = [[], []];
+    for (const region of ["vertical", "horizontal"]) {
+      const nGridlines =
+        region === "vertical" ? numberOfGridLines[0] : numberOfGridLines[1];
+      for (let i = 0; i < nGridlines; i++) {
+        const verticies =
+          region === "vertical"
+            ? [
+                [
+                  +(origin[0] + i * spacing),
+                  +Math.round(this.dimensions[1] / 2),
+                ],
+                [
+                  +(origin[0] + i * spacing),
+                  -Math.round(this.dimensions[1] / 2),
+                ],
+              ]
+            : [
+                [
+                  +Math.round(this.dimensions[0] / 2),
+                  +(origin[1] + i * spacing),
+                ],
+                [
+                  -Math.round(this.dimensions[0] / 2),
+                  +(origin[1] + i * spacing),
+                ],
+              ];
+        const pos =
+          region === "vertical"
+            ? [30 + origin[0] + i * spacing, origin[1] + 15]
+            : [origin[0] + 25, 20 + origin[1] + i * spacing];
+        const lineName = `${region}-grid-line-${i}`;
+        lines.push(
+          new visual.ShapeStim({
+            name: lineName,
+            win: this.psychoJS.window,
+            units: "pix",
+            lineWidth: i % 5 === 0 ? 5 : 2,
+            lineColor: new util.Color("black"),
+            fillColor: new util.Color("black"),
+            opacity: this.opacity,
+            vertices: verticies,
+            depth: -1000,
+            ori: 0.0,
+            interpolate: false,
+            size: 1,
+          })
+        );
+        labels.push(
+          new visual.TextStim({
+            name: `${region}-grid-line-label-${i}`,
+            win: this.psychoJS.window,
+            text: `${spacing * i} pix`,
+            font: "Arial",
+            units: "pix",
+            pos: pos,
+            height: 15,
+            ori: 0.0,
+            color: new util.Color("black"),
+            opacity: this.opacity,
+            depth: 0.0,
+          })
+        );
+      }
+    }
+    return [lines, labels];
   };
-  return grids;
-};
+
+  _getCmGridStims = () => {
+    const spacing = this.displayOptions.pixPerCm;
+    const origin = [
+      -Math.round(this.dimensions[0] / 2),
+      -Math.round(this.dimensions[1] / 2),
+    ];
+    const numberOfGridLines = this._getNumberOfGridLines("cm");
+    const [lines, labels] = [[], []];
+    for (const region of ["vertical", "horizontal"]) {
+      const nGridlines =
+        region === "vertical" ? numberOfGridLines[0] : numberOfGridLines[1];
+      for (let i = 0; i < nGridlines; i++) {
+        const verticies =
+          region === "vertical"
+            ? [
+                [
+                  +(origin[0] + i * spacing),
+                  +Math.round(this.dimensions[1] / 2),
+                ],
+                [
+                  +(origin[0] + i * spacing),
+                  -Math.round(this.dimensions[1] / 2),
+                ],
+              ]
+            : [
+                [
+                  +Math.round(this.dimensions[0] / 2),
+                  +(origin[1] + i * spacing),
+                ],
+                [
+                  -Math.round(this.dimensions[0] / 2),
+                  +(origin[1] + i * spacing),
+                ],
+              ];
+        const pos =
+          region === "vertical"
+            ? [30 + origin[0] + i * spacing, origin[1] + 15]
+            : [origin[0] + 25, 20 + origin[1] + i * spacing];
+        lines.push(
+          new visual.ShapeStim({
+            name: `${region}-grid-line-${i}`,
+            win: this.psychoJS.window,
+            units: "pix",
+            lineWidth: i % 5 === 0 ? 5 : 2,
+            lineColor: new util.Color("blue"),
+            fillColor: new util.Color("blue"),
+            opacity: 1.0,
+            vertices: verticies,
+            depth: -1000,
+            ori: 0.0,
+            interpolate: false,
+            size: 1,
+          })
+        );
+        labels.push(
+          new visual.TextStim({
+            name: `${region}-grid-line-label-${i}`,
+            win: this.psychoJS.window,
+            text: `${i} cm`,
+            font: "Arial",
+            units: "pix",
+            pos: pos,
+            height: 15,
+            ori: 0.0,
+            color: new util.Color("blue"),
+            opacity: 1.0,
+            depth: 0.0,
+          })
+        );
+      }
+    }
+    return [lines, labels];
+  };
+
+  _getDegGridStims = () => {
+    const origin = this.displayOptions.fixationXYPix;
+    const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg");
+    const [lines, labels] = [[], []];
+    for (const region of ["right", "left", "upper", "lower"]) {
+      const nGridlines = ["right", "left"].includes(region)
+        ? numberOfGridLinesPerSide[0]
+        : numberOfGridLinesPerSide[1];
+      for (let i = 0; i < nGridlines; i++) {
+        let verticies, pos;
+        switch (region) {
+          case "right":
+            verticies = [
+              XYPixOfXYDeg([i, this.dimensionsDeg[1]], this.displayOptions),
+              XYPixOfXYDeg([i, -this.dimensionsDeg[1]], this.displayOptions),
+            ];
+            pos = XYPixOfXYDeg(
+              [origin[0] + i, -this.dimensionsDeg[1] * 0.9],
+              this.displayOptions
+            );
+            break;
+          case "left":
+            if (i === 0) continue;
+            verticies = [
+              XYPixOfXYDeg([-i, this.dimensionsDeg[1]], this.displayOptions),
+              XYPixOfXYDeg([-i, -this.dimensionsDeg[1]], this.displayOptions),
+            ];
+            pos = XYPixOfXYDeg(
+              [origin[0] - i, -this.dimensionsDeg[1] * 0.9],
+              this.displayOptions
+            );
+            break;
+          case "upper":
+            verticies = [
+              XYPixOfXYDeg([this.dimensionsDeg[0], i], this.displayOptions),
+              XYPixOfXYDeg([-this.dimensionsDeg[0], i], this.displayOptions),
+            ];
+            pos = XYPixOfXYDeg(
+              [-this.dimensionsDeg[0] * 0.9, i],
+              this.displayOptions
+            );
+            break;
+          case "lower":
+            if (i === 0) continue;
+            verticies = [
+              XYPixOfXYDeg([this.dimensionsDeg[0], -i], this.displayOptions),
+              XYPixOfXYDeg([-this.dimensionsDeg[0], -i], this.displayOptions),
+            ];
+            pos = XYPixOfXYDeg(
+              [-this.dimensionsDeg[0] * 0.9, -i],
+              this.displayOptions
+            );
+            break;
+        }
+        lines.push(
+          new visual.ShapeStim({
+            name: `${region}-grid-line-${i}`,
+            win: this.psychoJS.window,
+            units: "pix",
+            lineWidth: i % 5 === 0 ? 5 : 2,
+            lineColor: new util.Color("red"),
+            fillColor: new util.Color("red"),
+            opacity: this.opacity,
+            vertices: verticies,
+            depth: -1000,
+            ori: 0.0,
+            interpolate: false,
+            size: 1,
+          })
+        );
+        if (i % 5 === 0)
+          labels.push(
+            new visual.TextStim({
+              name: `${region}-grid-line-label-${i}`,
+              win: this.psychoJS.window,
+              text: `${i} deg`,
+              font: "Arial",
+              units: "pix",
+              pos: pos,
+              height: Math.round(degreesToPixels(0.5, this.displayOptions)),
+              ori: 0.0,
+              color: new util.Color("red"),
+              opacity: 1.0,
+              depth: 0.0,
+            })
+          );
+      }
+    }
+    return [lines, labels];
+  };
+}

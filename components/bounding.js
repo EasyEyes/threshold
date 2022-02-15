@@ -181,7 +181,7 @@ export const getCharacterSetBoundingBox = (
     descent = thisMetrics.boundingBox.actualBoundingBoxDescent;
     left = thisMetrics.boundingBox.actualBoundingBoxLeft;
     right = thisMetrics.boundingBox.actualBoundingBoxRight;
-    console.log("left, right, ascent, descent", [left, right, ascent, descent]);
+    logger("left, right, ascent, descent", [left, right, ascent, descent]);
 
     // let thisBoundingBox = testStim.getBoundingBox(true);
     // const thisBoundingRectPoints = rectFromPixiRect(thisBoundingBox);

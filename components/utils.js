@@ -2,6 +2,7 @@
 export const debug = process.env.debug;
 // export const debug = true;
 import { GLOSSARY } from "../parameters/glossary.ts";
+import { ParamReader } from "../parameters/paramReader";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -449,7 +450,6 @@ export const rectFromPixiRect = (
   anchorXY = undefined,
   centerOrLeft = "center"
 ) => {
-  console.log("pixiRect", pixiRect);
   // ASSUMES `center` aligned
   let lowerLeft, upperRight;
   if (centerOrLeft === "center" && anchorXY) {
@@ -565,4 +565,23 @@ export const getCharSetBaselineOffsetPosition = (
   const yOffset = descent * heightPx;
   // const yOffset = descent * (heightPx * (descent/(descent + ascent)));
   return [XYPix[0], XYPix[1] + yOffset];
+};
+
+/**
+ * Survey all the values for a given parameter.
+ * Returns an object mapping each block_condition to its `parameter` value.
+ * @param {ParamReader} reader Parameter reader initialized for this experiment
+ * @param {string} parameter The parameter being queried
+ * @returns Object enumerating the value of `parameter` for each `block_condition`
+ */
+export const surveyParameter = (reader, parameter) => {
+  const conditionIds = reader.read("block_condition", "__ALL_BLOCKS__");
+  const parameterValues = reader.read(parameter, "__ALL_BLOCKS__");
+  // Create a mapping of {block_condition -> value}
+  // see: https://www.geeksforgeeks.org/how-to-create-an-object-from-two-arrays-in-javascript/
+  return Object.assign(
+    ...conditionIds.map((conditionId, i) => ({
+      [conditionId]: parameterValues[i],
+    }))
+  );
 };

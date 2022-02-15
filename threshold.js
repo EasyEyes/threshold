@@ -97,12 +97,7 @@ import {
   restrictLevel,
 } from "./components/bounding.js";
 
-import {
-  readGridParameter,
-  turnOnGrid,
-  spawnGrids,
-  undrawGrids,
-} from "./components/grid.js";
+import { Grid } from "./components/grid.js";
 import {
   checkIfSimulated,
   SimulatedObserver,
@@ -181,9 +176,6 @@ const paramReaderInitialized = async (reader) => {
 
   // ! Simulate observer
   simulated = checkIfSimulated(reader);
-
-  // ! Check if to use grids
-  [showGrid, gridVisible] = readGridParameter(reader, simulated);
 
   await sleep(50);
 
@@ -448,6 +440,17 @@ const experiment = (blockCount) => {
   var trialBreakStatus;
   var trialBreakButtonStatus;
 
+  var displayOptions;
+  var fixationXYPx;
+  var fixationSize = 45.0;
+  var nearPointXYDeg;
+  var nearPointXYPix;
+  var showFixation;
+  var windowWidthCm;
+  var windowWidthPx;
+  var pixPerCm;
+  var grid;
+
   async function experimentInit() {
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
@@ -670,6 +673,30 @@ const experiment = (blockCount) => {
       });
     }
 
+    // TODO use actual nearPoint, from RC
+    nearPointXYDeg = [0, 0]; // TEMP
+    nearPointXYPix = [0, 0]; // TEMP
+    fixationXYPx = [0, 0];
+    // TODO set fixation from the actual parameter
+    fixationSize = 45;
+    showFixation = true;
+    windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
+    windowWidthPx = rc.displayWidthPx.value;
+    pixPerCm = windowWidthPx / windowWidthCm;
+    // NOTE viewingDistanceCm is not necessarily correct, as the first trial could be from any condition in the first block
+    // viewingDistanceCm = rc.viewingDistanceCm
+    //   ? rc.viewingDistanceCm.value
+    //   : reader.read("viewingDistanceDesiredCm", "__ALL_BLOCKS__")[0];
+    displayOptions = {
+      pixPerCm: pixPerCm,
+      // viewingDistanceCm: viewingDistanceCm,
+      nearPointXYDeg: nearPointXYDeg,
+      nearPointXYPix: nearPointXYPix,
+      fixationXYPix: fixationXYPx,
+      window: psychoJS.window,
+    };
+    grid = new Grid("none", displayOptions, psychoJS);
+    window.EEgrid = grid;
     return Scheduler.Event.NEXT;
   }
 
@@ -686,13 +713,6 @@ const experiment = (blockCount) => {
   var consentComponents;
   var debriefComponents;
   var frameRemains;
-
-  var fixationXYPx;
-  var fixationSize = 45.0;
-  var showFixation;
-  var windowWidthCm;
-  var windowWidthPx;
-  var pixPerCm;
 
   function fileRoutineBegin(snapshot) {
     return async function () {
@@ -931,11 +951,6 @@ const experiment = (blockCount) => {
         method: TrialHandler.Method.FULLRANDOM,
       });
 
-      // TODO set fixation from the actual parameter
-      fixationXYPx = [0, 0];
-      fixationSize = 45;
-      showFixation = true;
-
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop
       // Schedule all the trials in the trialList:
@@ -1091,25 +1106,6 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot);
 
       const blockCount = snapshot.block + 1;
-
-      fixationXYPx = [0, 0];
-      if (showGrid) {
-        // Undraw any grids from the previous block
-        if (window.grids) window.grids = undrawGrids(window.grids);
-        // Only include grids if they're used in this block
-        if (paramReader.read("showGridsBool", blockCount).some((t) => t)) {
-          // Create the appropriate trio of grids for this block
-          window.grids = spawnGrids(
-            rc,
-            paramReader,
-            snapshot.block,
-            psychoJS,
-            fixationXYPx
-          );
-          // Turn on the currently visible grid
-          turnOnGrid(gridVisible, window.grids);
-        }
-      }
 
       responseType = getResponseType(
         paramReader.read("responseClickedBool", blockCount)[0],
@@ -1618,41 +1614,6 @@ const experiment = (blockCount) => {
 
       var characterSet = targetCharacterSet;
 
-      // Repeat letters 3 times when in 'typographic' mode,
-      // ie the relevant bounding box is that of three letters.
-      // const ten = getCharacterSetBoundingBox(
-      //   characterSet,
-      //   targetFont,
-      //   psychoJS.window,
-      //   letterRepeats,
-      //   10
-      // );
-      // const fifty = getCharacterSetBoundingBox(
-      //   characterSet,
-      //   targetFont,
-      //   psychoJS.window,
-      //   letterRepeats,
-      //   50
-      // );
-      // const twofifty = getCharacterSetBoundingBox(
-      //   characterSet,
-      //   targetFont,
-      //   psychoJS.window,
-      //   letterRepeats,
-      //   250
-      // );
-      // logger(
-      //   "nominal size: 10",
-      //   `height: ${ten.height}, width: ${ten.width}`
-      // );
-      // logger(
-      //   "nominal size: 50",
-      //   `height: ${fifty.height}, width: ${fifty.width}`
-      // );
-      // logger(
-      //   "nominal size: 250",
-      //   `height: ${twofifty.height}, width: ${twofifty.width}`
-      // );
       /* ------------------------------ Pick triplets ----------------------------- */
       var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
         getTripletCharacters(characterSet);
@@ -1668,10 +1629,7 @@ const experiment = (blockCount) => {
 
       ////
       // !
-      // TODO use actual nearPoint, from RC
-      const nearPointXYDeg = [0, 0]; // TEMP
-      const nearPointXYPix = [0, 0]; // TEMP
-      const displayOptions = {
+      displayOptions = {
         pixPerCm: pixPerCm,
         viewingDistanceCm: viewingDistanceCm,
         nearPointXYDeg: nearPointXYDeg,
@@ -1902,6 +1860,10 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         }
       }
       // /* --- /SIMULATED --- */
+
+      const gridDesired = reader.read("showGrid", block_condition);
+      grid.update(gridDesired, displayOptions);
+
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
@@ -2145,7 +2107,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       // response type more independent
       if (
         canType(responseType) ||
-        showGrid ||
         (simulated &&
           simulated[thisLoopNumber] &&
           simulated[thisLoopNumber][condition.block_condition])
@@ -2412,6 +2373,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
   function trialRoutineEnd() {
     return async function () {
+      grid.hide(true);
       if (showTargetSpecs) targetSpecs.setAutoDraw(false);
       if (
         (skipTrialOrBlock.trialId == currentTrialIndex &&

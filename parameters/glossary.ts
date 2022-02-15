@@ -163,6 +163,15 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "1",
   },
+  _pavloviaOfferPilotingOptionBool: {
+    name: "_pavloviaOfferPilotingOptionBool",
+    availability: "now",
+    example: "PILOTING",
+    explanation:
+      "EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two ways of running your experiment, PILOTING and RUNNING. PILOTING mode is free, but your experiment can only be run directly from the Pavlovia dashboard and cannot be deployed. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), but you get a URL that you can deploy. It is our impression that most Pavlovia users belong to institutions that own site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaOfferPilotingOptionBool be FALSE (the default) to disable the PILOTING option, to streamline the EasyEyes scientist page.",
+    type: "boolean",
+    default: "FALSE",
+  },
   _prolificEligibilityRequirements: {
     name: "_prolificEligibilityRequirements",
     availability: "now",
@@ -793,7 +802,7 @@ export const GLOSSARY: Glossary = {
   screenshotBool: {
     name: "screenshotBool",
     availability: "now",
-    example: "FALSE",
+    example: "TRUE",
     explanation:
       'Requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to illustrate the stimulus in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n\nCan we save these files to a "Screenshots" folder in the participant computer\'s Download folder or in the experiment repository on Pavlovia? ',
     type: "boolean",
@@ -881,12 +890,22 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  showGrid: {
+    name: "showGrid",
+    availability: "now",
+    example: "deg",
+    explanation:
+      "Show a full-screen grid that aids visual checking of location and size. Set showGridsBool to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', pressing the backquote key (below ESCAPE) repeatedly cyles through the four states: px, cm, deg, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' grid has its origin at fixation. ",
+    type: "categorical",
+    default: "disabled",
+    categories: ["px", "cm", "deg", "none", "disabled"],
+  },
   showGridsBool: {
     name: "showGridsBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      'To allow visual checking of location and size, setting showGridsBool to TRUE requests that the experiment allow optional display of one of several grids over the whole screen. Pressing the backquote key (below ESCAPE) turns on the first grid, and pressing it again cycles through the various grids. Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.\nSIDE EFFECT?: Does setting showGridBool to TRUE enables type as a response method, regardless of the setting of responseTypedBool?',
+      'TO BE REPLACED BY showGrid. To allow visual checking of location and size, setting showGridsBool to TRUE requests that the experiment allow optional display of one of several grids over the whole screen. Pressing the backquote key (below ESCAPE) turns on the first grid, and pressing it again cycles through the various grids. Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.',
     type: "boolean",
     default: "FALSE",
   },
@@ -933,7 +952,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "If TRUE display something like \"Trial 31 of 120. Block 2 of 3. At 32 cm.\" (The trial and block counters appear only if showCounterBool is TRUE.) Without distance tracking, this is a subtle reminder to the participant of the distance they are supposed to be at. With distance tracking, it allows both the participant and the experimenter to monitor the dynamic viewing distance. It's updated only once or twice per trial, so it's not distracting.",
+      'If TRUE display something like "Trial 31 of 120. Block 2 of 3. At 32 cm." (The trial and block counters appear only if showCounterBool is TRUE.) Without distance tracking, this is a subtle reminder to the participant of the distance they are supposed to be at. With distance tracking, it allows both the participant and the experimenter to monitor the dynamic viewing distance. It\'s updated only once or twice per trial, to avoid drawing attention away from the stimulus.',
     type: "boolean",
     default: "FALSE",
   },
