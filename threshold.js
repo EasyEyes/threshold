@@ -2253,7 +2253,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       if (showConditionNameBool) {
         if (showTargetSpecs) {
           conditionNameConfig.x = -window.innerWidth / 2;
-          targetSpecs.getBoundingBox(true).height;
+          conditionNameConfig.y = targetSpecs.getBoundingBox(true).height;
         } else {
           conditionNameConfig.x = -window.innerWidth / 2;
           conditionNameConfig.y = -window.innerHeight / 2;
@@ -2416,6 +2416,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
   function trialRoutineEnd() {
     return async function () {
       if (showTargetSpecs) targetSpecs.setAutoDraw(false);
+      if (showConditionNameBool) conditionName.setAutoDraw(false);
       if (
         (skipTrialOrBlock.trialId == currentTrialIndex &&
           skipTrialOrBlock.blockId == currentBlockIndex &&
