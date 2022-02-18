@@ -243,9 +243,6 @@ var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
-var consentFormName = "";
-var debriefFormName = "";
-
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
@@ -277,7 +274,7 @@ const experiment = (blockCount) => {
 
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
-  const wrongSynth = getWrongSynth(psychoJS);
+  // const wrongSynth = getWrongSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
 
   // open window:
@@ -2606,23 +2603,19 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
     const timeBeforeDebriefDisplay = globalClock.getTime();
     const debriefScreen = new Promise((resolve) => {
-      if (debriefFormName.length) {
-        showForm(debriefFormName);
-        document
-          .getElementById("debrief-yes")
-          .addEventListener("click", (evt) => {
-            hideForm();
-            resolve({});
-          });
+      if (paramReader.read("_debriefForm")[0]) {
+        showForm(paramReader.read("_debriefForm")[0]);
+        document.getElementById("form-yes").addEventListener("click", () => {
+          hideForm();
+          resolve();
+        });
 
-        document
-          .getElementById("debrief-no")
-          .addEventListener("click", (evt) => {
-            hideForm();
-            resolve({});
-          });
+        document.getElementById("form-no").addEventListener("click", () => {
+          hideForm();
+          resolve();
+        });
       } else {
-        resolve({});
+        resolve();
       }
     });
     await debriefScreen;
