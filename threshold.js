@@ -1102,6 +1102,7 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot);
 
       const blockCount = snapshot.block + 1;
+
       responseType = getResponseType(
         paramReader.read("responseClickedBool", blockCount)[0],
         paramReader.read("responseTypedBool", blockCount)[0],
