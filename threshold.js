@@ -243,9 +243,6 @@ var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
-var consentFormName = "";
-var debriefFormName = "";
-
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
@@ -277,7 +274,7 @@ const experiment = (blockCount) => {
 
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
-  const wrongSynth = getWrongSynth(psychoJS);
+  // const wrongSynth = getWrongSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
 
   // open window:
@@ -1433,14 +1430,22 @@ const experiment = (blockCount) => {
         }
       }
       const block_condition = condition["block_condition"];
+      if (
+        paramReader.has("responseMustClickCrosshairBool") &&
+        paramReader.read("responseMustClickCrosshairBool", block_condition) ==
+          true
+      ) {
+        responseType = 1;
+      } else {
+        // ! responseType
+        responseType = getResponseType(
+          paramReader.read("responseClickedBool", block_condition),
+          paramReader.read("responseTypedBool", block_condition),
+          paramReader.read("responseTypedEasyEyesKeypadBool", block_condition),
+          paramReader.read("responseSpokenBool", block_condition)
+        );
+      }
 
-      // ! responseType
-      responseType = getResponseType(
-        paramReader.read("responseClickedBool", block_condition),
-        paramReader.read("responseTypedBool", block_condition),
-        paramReader.read("responseTypedEasyEyesKeypadBool", block_condition),
-        paramReader.read("responseSpokenBool", block_condition)
-      );
       logger("responseType", responseType);
 
       // update trial/block count
@@ -2027,6 +2032,15 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
 
+      const block_condition = condition["block_condition"];
+      if (paramReader.has("responseMustClickCrosshairBool")) {
+        if (
+          paramReader.read("responseMustClickCrosshairBool", block_condition) ==
+          true
+        )
+          responseType = 2;
+      }
+
       //------Prepare to start Routine 'trial'-------
       t = 0;
       frameN = -1;
@@ -2399,7 +2413,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         key_resp.stop();
         return Scheduler.Event.NEXT;
       }
-
       // setTimeout(() => {
       //   rc.resumeNudger();
       // }, 700);
@@ -2470,7 +2483,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           hideTrialProceedButton();
         }
       }
-
       // if trialBreak is ongoing
       const takeABreakMinimumDurationSec =
         condition["takeABreakMinimumDurationSec"];
@@ -2606,23 +2618,19 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
     const timeBeforeDebriefDisplay = globalClock.getTime();
     const debriefScreen = new Promise((resolve) => {
-      if (debriefFormName.length) {
-        showForm(debriefFormName);
-        document
-          .getElementById("debrief-yes")
-          .addEventListener("click", (evt) => {
-            hideForm();
-            resolve({});
-          });
+      if (paramReader.read("_debriefForm")[0]) {
+        showForm(paramReader.read("_debriefForm")[0]);
+        document.getElementById("form-yes").addEventListener("click", () => {
+          hideForm();
+          resolve();
+        });
 
-        document
-          .getElementById("debrief-no")
-          .addEventListener("click", (evt) => {
-            hideForm();
-            resolve({});
-          });
+        document.getElementById("form-no").addEventListener("click", () => {
+          hideForm();
+          resolve();
+        });
       } else {
-        resolve({});
+        resolve();
       }
     });
     await debriefScreen;
