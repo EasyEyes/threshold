@@ -1102,7 +1102,6 @@ const experiment = (blockCount) => {
       TrialHandler.fromSnapshot(snapshot);
 
       const blockCount = snapshot.block + 1;
-
       responseType = getResponseType(
         paramReader.read("responseClickedBool", blockCount)[0],
         paramReader.read("responseTypedBool", blockCount)[0],
@@ -1430,14 +1429,22 @@ const experiment = (blockCount) => {
         }
       }
       const block_condition = condition["block_condition"];
+      if (
+        paramReader.has("responseMustClickCrosshairBool") &&
+        paramReader.read("responseMustClickCrosshairBool", block_condition) ==
+          true
+      ) {
+        responseType = 1;
+      } else {
+        // ! responseType
+        responseType = getResponseType(
+          paramReader.read("responseClickedBool", block_condition),
+          paramReader.read("responseTypedBool", block_condition),
+          paramReader.read("responseTypedEasyEyesKeypadBool", block_condition),
+          paramReader.read("responseSpokenBool", block_condition)
+        );
+      }
 
-      // ! responseType
-      responseType = getResponseType(
-        paramReader.read("responseClickedBool", block_condition),
-        paramReader.read("responseTypedBool", block_condition),
-        paramReader.read("responseTypedEasyEyesKeypadBool", block_condition),
-        paramReader.read("responseSpokenBool", block_condition)
-      );
       logger("responseType", responseType);
 
       // update trial/block count
@@ -2024,6 +2031,15 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
 
+      const block_condition = condition["block_condition"];
+      if (paramReader.has("responseMustClickCrosshairBool")) {
+        if (
+          paramReader.read("responseMustClickCrosshairBool", block_condition) ==
+          true
+        )
+          responseType = 2;
+      }
+
       //------Prepare to start Routine 'trial'-------
       t = 0;
       frameN = -1;
@@ -2396,7 +2412,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         key_resp.stop();
         return Scheduler.Event.NEXT;
       }
-
       // setTimeout(() => {
       //   rc.resumeNudger();
       // }, 700);
@@ -2467,7 +2482,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           hideTrialProceedButton();
         }
       }
-
       // if trialBreak is ongoing
       const takeABreakMinimumDurationSec =
         condition["takeABreakMinimumDurationSec"];
