@@ -1,7 +1,7 @@
 import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
-import { logger, Rectangle } from "./utils.js";
+import { logger, norm, Rectangle } from "./utils.js";
 
 /**
  * Generate all the stim objects for the various bounding boxes, ie
@@ -44,17 +44,17 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
   });
   const targetCharacterSetBoundingPoly = new visual.Rect({
     ...boundingConfig,
-    lineColor: new util.Color("green"),
+    lineColor: new util.Color("red"),
     name: "targetCharacterSetBoundingPoly",
   });
   const flanker1CharacterSetBoundingPoly = new visual.Rect({
     ...boundingConfig,
-    lineColor: new util.Color("green"),
+    lineColor: new util.Color("red"),
     name: "flanker1CharacterSetBoundingPoly",
   });
   const flanker2CharacterSetBoundingPoly = new visual.Rect({
     ...boundingConfig,
-    lineColor: new util.Color("green"),
+    lineColor: new util.Color("red"),
     name: "flanker2CharacterSetBoundingPoly",
   });
   const boundingBoxPolies = {
@@ -359,63 +359,46 @@ const sizeAndPositionTripletBoundingBoxes = (
 ) => {
   if (showBoundingBox) {
     const boundingStims = [boundingBoxPolies.target];
-    const targetBoundingBox = triplet.target.getBoundingBox(true);
-    boundingBoxPolies.target.setPos([
-      targetBoundingBox.left,
-      targetBoundingBox.top,
-    ]);
-    boundingBoxPolies.target.setSize([
-      targetBoundingBox.width,
-      targetBoundingBox.height,
-    ]);
+    const targetBB = triplet.target.getBoundingBox(true);
+    boundingBoxPolies.target.setPos([targetBB.left, targetBB.top]);
+    boundingBoxPolies.target.setSize([targetBB.width, targetBB.height]);
     if (
-      (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
+      ["none", "ratio"].includes(spacingRelationToSize) &&
       thresholdParameter === "spacing"
     ) {
       boundingStims.push(
         boundingBoxPolies.flanker1,
         boundingBoxPolies.flanker2
       );
-      const flanker1BoundingBox = triplet.flanker1.getBoundingBox(true);
-      boundingBoxPolies.flanker1.setPos([
-        flanker1BoundingBox.left,
-        flanker1BoundingBox.top,
-      ]);
-      boundingBoxPolies.flanker1.setSize([
-        flanker1BoundingBox.width,
-        flanker1BoundingBox.height,
-      ]);
-      const flanker2BoundingBox = triplet.flanker2.getBoundingBox(true);
-      boundingBoxPolies.flanker2.setPos([
-        flanker2BoundingBox.left,
-        flanker2BoundingBox.top,
-      ]);
-      boundingBoxPolies.flanker2.setSize([
-        flanker2BoundingBox.width,
-        flanker2BoundingBox.height,
-      ]);
+      const flanker1BB = triplet.flanker1.getBoundingBox(true);
+      boundingBoxPolies.flanker1.setPos([flanker1BB.left, flanker1BB.top]);
+      boundingBoxPolies.flanker1.setSize([flanker1BB.width, flanker1BB.height]);
+      const flanker2BB = triplet.flanker2.getBoundingBox(true);
+      boundingBoxPolies.flanker2.setPos([flanker2BB.left, flanker2BB.top]);
+      boundingBoxPolies.flanker2.setSize([flanker2BB.width, flanker2BB.height]);
     }
     boundingStims.forEach((c) => c._updateIfNeeded());
   }
   if (showCharacterSetBoundingBox) {
     const separateFlankers =
-      (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
+      ["none", "ratio"].includes(spacingRelationToSize) &&
       thresholdParameter === "spacing";
     const tripletCharacterSetBoundingBoxPositions = separateFlankers
       ? getCharacterSetBoundingBoxPositions(
           [triplet.target, triplet.flanker1, triplet.flanker2],
-          normalizedCharacterSetBoundingRect
+          normalizedCharacterSetBoundingRect,
+          heightPx
         )
       : getCharacterSetBoundingBoxPositions(
           [triplet.target],
-          normalizedCharacterSetBoundingRect
+          normalizedCharacterSetBoundingRect,
+          heightPx
         );
     const characterSetBoundingStims = [characterSetBoundingBoxPolies.target];
     const characterSetBounds = [
       normalizedCharacterSetBoundingRect.width * heightPx,
       normalizedCharacterSetBoundingRect.height * heightPx,
     ];
-    const targetBB = triplet.target.getBoundingBox(true);
     characterSetBoundingBoxPolies.target.setPos(
       tripletCharacterSetBoundingBoxPositions[0]
     );
@@ -424,8 +407,6 @@ const sizeAndPositionTripletBoundingBoxes = (
       (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
       thresholdParameter === "spacing"
     ) {
-      const flanker1BB = triplet.flanker1.getBoundingBox(true);
-      const flanker2BB = triplet.flanker2.getBoundingBox(true);
       characterSetBoundingStims.push(
         characterSetBoundingBoxPolies.flanker1,
         characterSetBoundingBoxPolies.flanker2
@@ -458,22 +439,28 @@ const sizeAndPositionDisplayCharacterSet = (
   const indicies = [...displayCharacterSetStimuli.polies.keys()];
   const middleIndex = Math.floor(indicies.length / 2);
   let y = -windowDims[1] / 8;
-  const displayCharacterMetrics = displayCharacterSetStimuli.characters.map(
-    (displayCharacter, i) => {
+  const characterSetBoundingBoxPositions =
+    displayCharacterSetStimuli.characters.map((displayCharacter, i) => {
       const x = (i - middleIndex) * paddedWidthOfCharacter;
       const characterPosition = [x, y];
       displayCharacter.setFont(font);
       displayCharacter.setHeight(heightPx);
       displayCharacter.setPos(characterPosition);
       displayCharacter._updateIfNeeded();
-      return displayCharacter.getTextMetrics();
-    }
-  );
+      const displayCharacterBoundingBox = displayCharacter.getBoundingBox(true);
+      const displayCharacterXY = [
+        displayCharacterBoundingBox.x,
+        displayCharacterBoundingBox.y,
+      ];
+      let displayText = displayCharacter.getText();
+      return getRelativePosition(
+        displayCharacterXY,
+        normalizedCharacterSetBoundingRect,
+        displayText,
+        heightPx
+      );
+    });
 
-  const characterSetBoundingBoxPositions = getCharacterSetBoundingBoxPositions(
-    displayCharacterSetStimuli.characters,
-    normalizedCharacterSetBoundingRect
-  );
   displayCharacterSetStimuli.polies.forEach((displayCharacterBox, i) => {
     displayCharacterBox.setSize(characterSetBounds);
     const x = (i - middleIndex) * paddedWidthOfCharacter;
@@ -492,20 +479,29 @@ const sizeAndPositionDisplayCharacterSet = (
  */
 const getCharacterSetBoundingBoxPositions = (
   stims,
-  normalizedCharacterSetBoundingRect
+  normalizedCharacterSetBoundingRect,
+  height
 ) => {
-  const oldText = stims[0].getText();
-  stims[0].setText(normalizedCharacterSetBoundingRect.largestCharacter);
-  stims[0]._updateIfNeeded();
-  const y = stims[0].getBoundingBox(true).top;
-  stims[0].setText(oldText);
-  stims[0]._updateIfNeeded();
-  // const metrics = stims.map(s => s.getTextMetrics());
-  // const ascents = metrics.map((m) => m.boundingBox.actualBoundingBoxAscent);
-  // const descents = metrics.map((m) => m.boundingBox.actualBoundingBoxDescent);
-  // const ascentsAndDescents = ascents.map((a, i) => a + descents[i]);
-  // const largestAscentDescentIdx = ascentsAndDescents.findIndex(a => a === Math.max(...ascentsAndDescents));
-  // const tops = stims.map((s) => s.getBoundingBox(true).top);
-  // const y = tops[largestAscentDescentIdx];
-  return stims.map((s) => [s.getBoundingBox(true).x, y]);
+  const stimBoxes = stims.map((s) => s.getBoundingBox(true));
+  const texts = stims.map((s) => s.getText());
+  return stimBoxes.map((b, i) =>
+    getRelativePosition(
+      [b.x, b.y],
+      normalizedCharacterSetBoundingRect,
+      texts[i],
+      height
+    )
+  );
+};
+
+export const getRelativePosition = (
+  stimBoundingBoxXY,
+  normalizedCharacterSetRect,
+  text,
+  height
+) => {
+  return [
+    stimBoundingBoxXY[0] + normalizedCharacterSetRect.centers[text][0] * height,
+    stimBoundingBoxXY[1] + normalizedCharacterSetRect.centers[text][1] * height,
+  ];
 };

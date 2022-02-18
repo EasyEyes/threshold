@@ -460,36 +460,17 @@ const rectIsEmpty = (rect) => {
   return false;
 };
 
-export const rectFromPixiRect = (
-  pixiRect,
-  anchorXY = undefined,
-  centerOrLeft = "center"
-) => {
-  // ASSUMES `center` aligned
+export const rectFromPixiRect = (pixiRect) => {
+  // // ASSUMES `center` aligned
   let lowerLeft, upperRight;
-  if (centerOrLeft === "center" && anchorXY) {
-    lowerLeft = [
-      anchorXY[0] - pixiRect.width / 2,
-      anchorXY[1] - pixiRect.height / 2,
-    ];
-    upperRight = [
-      anchorXY[0] + pixiRect.width / 2,
-      anchorXY[1] + pixiRect.height / 2,
-    ];
-  } else if (centerOrLeft === "left" && anchorXY) {
-    // anchor = upperLeft
-    lowerLeft = [anchorXY[0], anchorXY[1] - pixiRect.height];
-    upperRight = [anchorXY[0] + pixiRect.width, anchorXY[1]];
-  } else {
-    lowerLeft = [
-      pixiRect.x - pixiRect.width / 2,
-      pixiRect.y - pixiRect.height / 2,
-    ];
-    upperRight = [
-      pixiRect.x + pixiRect.width / 2,
-      pixiRect.y + pixiRect.height / 2,
-    ];
-  }
+  lowerLeft = [
+    pixiRect.x - pixiRect.width / 2,
+    pixiRect.y - pixiRect.height / 2,
+  ];
+  upperRight = [
+    pixiRect.x + pixiRect.width / 2,
+    pixiRect.y + pixiRect.height / 2,
+  ];
   const newRect = [lowerLeft, upperRight];
   return newRect;
 };
@@ -500,7 +481,7 @@ export class Rectangle {
     upperRight,
     units = undefined,
     characterSet = undefined,
-    largestCharacter = undefined
+    centers = undefined
   ) {
     this.units = units;
     this.left = lowerLeft[0];
@@ -512,7 +493,7 @@ export class Rectangle {
     this.width = this.right - this.left;
 
     this.characterSet = characterSet;
-    this.largestCharacter = largestCharacter;
+    this.centers = centers;
   }
   getUnits() {
     return this.units;
@@ -599,4 +580,15 @@ export const surveyParameter = (reader, parameter) => {
       [conditionId]: parameterValues[i],
     }))
   );
+};
+
+export const validateRectPoints = ([lowerLeft, upperRight]) => {
+  if (lowerLeft[0] > upperRight[0])
+    console.error(
+      "INVALID RECT x of lowerLeft is greater than x of upperRight"
+    );
+  if (lowerLeft[1] > upperRight[1])
+    console.error(
+      "INVALID RECT y of lowerLeft is greater than y of upperRight"
+    );
 };
