@@ -12,23 +12,25 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
 
   uniqueBlock.forEach((blockId: string, index: number) => {
     // Add an index to our blockCount file (see below) for this block
-    blockIndices["block"].push(index);
+    if (blockId && blockId.length) {
+      blockIndices["block"].push(index);
 
-    // Get the parameters from just this block...
-    const blockDf = df.filter((row: any) => row.get("block") === blockId);
-    const blockDict = blockDf.toDict();
-    const columns = Object.keys(blockDict);
+      // Get the parameters from just this block...
+      const blockDf = df.filter((row: any) => row.get("block") === blockId);
+      const blockDict = blockDf.toDict();
+      const columns = Object.keys(blockDict);
 
-    const data = transpose(columns.map((column) => blockDict[column]));
-    // ... and use them to create a csv file for this block.
-    const blockCsvString = Papa.unparse({ fields: columns, data: data });
-    const blockName = "block_" + String(blockId) + ".csv";
+      const data = transpose(columns.map((column) => blockDict[column]));
+      // ... and use them to create a csv file for this block.
+      const blockCsvString = Papa.unparse({ fields: columns, data: data });
+      const blockName = `block_${String(blockId)}.csv`;
 
-    // store block file
-    resultFileList.push(getFile(blockCsvString, blockName));
+      // store block file
+      resultFileList.push(getFile(blockCsvString, blockName));
 
-    // Add this block file to the output zip
-    // zip.file(blockFileName, blockCsvString);
+      // Add this block file to the output zip
+      // zip.file(blockFileName, blockCsvString);
+    }
   });
 
   // Create a "blockCount" file, just one column with the the indices of the blocks
