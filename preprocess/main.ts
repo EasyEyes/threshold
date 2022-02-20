@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import XLSX from "xlsx";
+import { read, utils } from "xlsx";
 import Papa from "papaparse";
 
 import {
@@ -41,12 +41,12 @@ export const preprocessExperimentFile = async (
 
   if (file.name.includes("xlsx")) {
     const data = await file.arrayBuffer();
-    const book = XLSX.read(data, {
+    const book = read(data, {
       type: "string",
     });
 
     for (const sheet in book.Sheets) {
-      const csv: any = XLSX.utils.sheet_to_csv(book.Sheets[sheet]);
+      const csv: any = utils.sheet_to_csv(book.Sheets[sheet]);
 
       Papa.parse(csv, {
         skipEmptyLines: true,
