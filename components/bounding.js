@@ -5,7 +5,7 @@ import {
   logger,
   XYPixOfXYDeg,
   XYDegOfXYPix,
-  rectFromPixiRect,
+  // rectFromPixiRect,
   getUnionRect,
   isRectInRect,
   norm,
@@ -15,9 +15,9 @@ import {
 
 import {
   getCanvasContext,
-  initPixelsArray,
-  readPixels,
-  getPixelRGBA,
+  // initPixelsArray,
+  // readPixels,
+  // getPixelRGBA,
 } from "./canvasContext.js";
 
 import { Permutation } from "js-combinatorics";
@@ -281,6 +281,7 @@ export const restrictLevel = (
         displayOptions
       );
       level = Math.log10(sizeDeg);
+      break;
     case "spacing":
       [spacingDeg, stimulusParameters] = restrictSpacingDeg(
         proposedLevel,
@@ -296,6 +297,7 @@ export const restrictLevel = (
         displayOptions
       );
       level = Math.log10(spacingDeg);
+      break;
   }
   return [level, stimulusParameters];
 };
