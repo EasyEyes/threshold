@@ -34,9 +34,6 @@ const config = {
 
 const plugins = [new webpack.ProgressPlugin(), new CleanWebpackPlugin()];
 
-const white = "color: white;";
-const green = "color: green;";
-
 module.exports = (env, options) => {
   const extra = {};
   if (options.name) {
@@ -74,6 +71,7 @@ module.exports = (env, options) => {
         }),
       ],
       watch: true,
+      devtool: "source-map",
     });
   } else if (env.production) {
     return Object.assign({}, config, {

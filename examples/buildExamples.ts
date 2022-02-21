@@ -65,60 +65,80 @@ const preprocessExperimentFileLocal = async (
 
 /* -------------------------------------------------------------------------- */
 
+const constructForEXperiment = async (d: string) => {
+  console.log(
+    `%c=====================--- ${d.split(".")[0]} ---=====================`,
+    "color: yellow"
+  );
+  await preprocessExperimentFileLocal(
+    "tables/" + d,
+    readFileSync,
+    (
+      forms: any,
+      fonts: string[],
+      fileStringList: string[][],
+      errorList: any[]
+    ) => {
+      console.log("Requested FORMS", forms);
+      console.log("Requested FONTS", fonts);
+
+      if (errorList.length) {
+        errorList.forEach((err) => console.log(err));
+        throw "Found errors!";
+      }
+
+      const dir = `${__dirname}/${d.split(".")[0]}`;
+      if (existsSync(dir)) rmSync(dir, { recursive: true });
+      mkdirSync(dir);
+      mkdirSync(dir + "/conditions");
+
+      fileStringList.forEach((file) => {
+        writeFile(`${dir}/conditions/${file[1]}`, file[0], (err) => {
+          if (err) throw err;
+          console.log(`${file[1]} created.`);
+        });
+      });
+
+      copyFileSync("../index.html", `${dir}/index.html`);
+      copyFileSync(
+        "../recruitmentServiceConfig.csv",
+        `${dir}/recruitmentServiceConfig.csv`
+      );
+
+      mkdirSync(`${dir}/components`);
+      mkdirSync(`${dir}/components/images`);
+      copyFileSync(
+        "../components/images/favicon.ico",
+        `${dir}/components/images/favicon.ico`
+      );
+
+      copyFolder("fonts", dir);
+      copyFolder("forms", dir);
+
+      mkdirSync(`${dir}/js`);
+      copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);
+    }
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+
 // __main__
 
 const main = async () => {
+  if (process.argv.length === 3) {
+    const experimentName = process.argv[2];
+
+    if (dir.includes(experimentName)) {
+      await constructForEXperiment(experimentName);
+    } else {
+      console.error(`:( ${experimentName} not found in examples/tables/ .`);
+    }
+    return;
+  }
+
   for (const d of dir) {
-    console.log(`%c===--- ${d.split(".")[0]} ---===`, "color: yellow");
-    await preprocessExperimentFileLocal(
-      "tables/" + d,
-      readFileSync,
-      (
-        forms: any,
-        fonts: string[],
-        fileStringList: string[][],
-        errorList: any[]
-      ) => {
-        console.log("Requested FORMS", forms);
-        console.log("Requested FONTS", fonts);
-
-        if (errorList.length) {
-          errorList.forEach((err) => console.log(err));
-          throw "Found errors!";
-        }
-
-        const dir = `${__dirname}/${d.split(".")[0]}`;
-        if (existsSync(dir)) rmSync(dir, { recursive: true });
-        mkdirSync(dir);
-        mkdirSync(dir + "/conditions");
-
-        fileStringList.forEach((file) => {
-          writeFile(`${dir}/conditions/${file[1]}`, file[0], (err) => {
-            if (err) throw err;
-            console.log(`${file[1]} created.`);
-          });
-        });
-
-        copyFileSync("../index.html", `${dir}/index.html`);
-        copyFileSync(
-          "../recruitmentServiceConfig.csv",
-          `${dir}/recruitmentServiceConfig.csv`
-        );
-
-        mkdirSync(`${dir}/components`);
-        mkdirSync(`${dir}/components/images`);
-        copyFileSync(
-          "../components/images/favicon.ico",
-          `${dir}/components/images/favicon.ico`
-        );
-
-        copyFolder("fonts", dir);
-        copyFolder("forms", dir);
-
-        mkdirSync(`${dir}/js`);
-        copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);
-      }
-    );
+    await constructForEXperiment(d);
     await sleep(100);
   }
 };

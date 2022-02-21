@@ -1632,6 +1632,8 @@ const experiment = (blockCount) => {
       var characterSet = targetCharacterSet;
 
       /* ------------------------------ Pick triplets ----------------------------- */
+      if (characterSet.length < 3)
+        throw `[EasyEyes experiment configuration error] You must have 3 characters in your character set for this block_condition, however, the researcher only put ${characterSet.length}.`;
       var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
         getTripletCharacters(characterSet);
       if (debug)
