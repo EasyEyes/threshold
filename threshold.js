@@ -132,6 +132,7 @@ import {
   showTrialBreakWidget,
   showTrialProceedButton,
 } from "./components/trialBreak.js";
+import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -274,7 +275,7 @@ const experiment = (blockCount) => {
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
   const psychoJS = new PsychoJS({
-    debug: false,
+    debug: debug,
   });
 
   /* ---------------------------------- Sound --------------------------------- */
@@ -1418,6 +1419,7 @@ const experiment = (blockCount) => {
       // Check fullscreen and if not, get fullscreen
       if (!rc.isFullscreen.value) {
         rc.getFullscreen();
+        showCursor(); // TODO Show only when the cursor is strictly needed
         await sleep(1000);
       }
 
@@ -2673,6 +2675,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         condition.responseEscapeOptionsBool.toString().toLowerCase() === "true"
       )
     ) {
+      showCursor();
       return {
         skipTrial: false,
         skipBlock: false,
@@ -2756,6 +2759,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
     document.getElementById("quit-btn").disabled = true;
     document.getElementById("skip-block-btn").disabled = true;
     // adding following lines to remove listeners
+    // TODO Bad code
     document.getElementById("skip-trial-btn").outerHTML =
       document.getElementById("skip-trial-btn").outerHTML;
     document.getElementById("skip-block-btn").outerHTML =
@@ -2785,69 +2789,4 @@ const isPavloviaExperiment = () => {
     urlSearchParams.get("session") == null &&
     urlSearchParams.get("study_id") == null
   );
-};
-
-const initializeEscHandlingDiv = () => {
-  // TODO This could be improved by a lot
-  // Fixed for old code by @sagarrpandav
-  if (document.getElementById("esc-key-handling-div").children.length == 0) {
-    // Add only if not present
-    document.getElementById("esc-key-handling-div").innerHTML = `<div
-  class="modal fade"
-  id="exampleModal"
-  tabindex="-1"
-  aria-labelledby="exampleModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="modalTitle">Escape Key was Pressed</h3>
-      </div>
-      <div
-        class="modal-body"
-        id="modalBody"
-        style="display: flex; justify-content: space-around"
-      >
-        <div style="display: grid">
-          <button
-            type="button"
-            id="skip-trial-btn"
-            class="btn btn-outline-secondary"
-            style="font-size: x-large"
-            data-bs-dismiss="modal"
-          >
-            Skip Trial
-          </button>
-          <span style="text-align: center">(Space)</span>
-        </div>
-        <div id="skip-block-div" style="display: grid">
-          <button
-            type="button"
-            id="skip-block-btn"
-            class="btn btn-outline-secondary"
-            style="font-size: x-large"
-            data-bs-dismiss="modal"
-          >
-            Skip Block
-          </button>
-          <span style="text-align: center">(Enter)</span>
-        </div>
-        <div style="display: grid">
-          <button
-            type="button"
-            id="quit-btn"
-            class="btn btn-outline-danger"
-            style="font-size: x-large"
-            data-bs-dismiss="modal"
-          >
-            Quit
-          </button>
-          <span style="text-align: center">(Escape)</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>`;
-  }
 };

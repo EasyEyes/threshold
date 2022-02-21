@@ -900,15 +900,6 @@ export const GLOSSARY: Glossary = {
     default: "disabled",
     categories: ["px", "cm", "deg", "none", "disabled"],
   },
-  showGridsBool: {
-    name: "showGridsBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      'TO BE REPLACED BY showGrid. To allow visual checking of location and size, setting showGridsBool to TRUE requests that the experiment allow optional display of one of several grids over the whole screen. Pressing the backquote key (below ESCAPE) turns on the first grid, and pressing it again cycles through the various grids. Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.',
-    type: "boolean",
-    default: "FALSE",
-  },
   showInstructionsWhere: {
     name: "showInstructionsWhere",
     availability: "now",
@@ -1051,7 +1042,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "screen",
     explanation:
-      "spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity eccDeg is nonzero and spacingDirection is radial. The inner flanker will have the specified spacingDeg. This only affects the spacing of the outer flanker, which is adjusted to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e. equal in log(eccDeg + 0.15). ",
+      "spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity eccDeg is nonzero and spacingDirection is radial. The inner flanker will have the specified spacingDeg. This only affects the spacing of the outer flanker, which is adjusted to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e. equal in log(eccDeg + 0.15), where eccDeg is the radial eccentricity in deg.",
     type: "categorical",
     default: "retina",
     categories: ["screen", "retina", "cortex"],

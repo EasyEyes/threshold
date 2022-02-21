@@ -34,13 +34,23 @@ const config = {
 
 const plugins = [new webpack.ProgressPlugin(), new CleanWebpackPlugin()];
 
+const white = "color: white;";
+const green = "color: green;";
+
 module.exports = (env, options) => {
   const extra = {};
   if (options.name) {
+    // prettier-ignore
     console.log(`
-      =========================================================================================
-       Go to >>>   http://localhost:5500/docs/threshold/threshold/examples/${options.name}   <<<
-      =========================================================================================
+      ==- \x1b[32m\x1b[1mEasyEyes Threshold Example Dev\x1b[22m\x1b[0m -================================${'='.repeat(options.name.length)}======
+      ====================================================================${'='.repeat(options.name.length)}======
+
+      Go to >>>   \x1b[36mhttp://localhost:5500/docs/threshold/threshold/examples/${options.name}   \x1b[0m<<<
+
+      OR (If your ROOT is at \`participant\` threshold)
+            >>>   \x1b[36mhttp://localhost:5500/examples/${options.name}                            \x1b[0m<<<
+
+      ====================================================================${'='.repeat(options.name.length)}======
 
 `);
     extra.output = {
