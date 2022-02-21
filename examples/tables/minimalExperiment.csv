@@ -6,7 +6,7 @@ conditionTrials,4
 responseEscapeOptionsBool,TRUE
 showConditionNameBool,TRUE
 showCounterBool,TRUE
-showGridsBool,FALSE
+showGrid,none
 showTargetSpecsBool,TRUE
 spacingDirection,radial
 spacingOverSizeRatio,1.4

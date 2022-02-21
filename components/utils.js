@@ -544,13 +544,6 @@ export const getTripletCharacters = (charset) => {
   return shuffle(samples);
 };
 
-export const textStimPosFromNominalXY = (stim, XYPix) => {
-  const stimMetrics = stim.getTextMetrics();
-  const yOffset = stimMetrics.boundingBox.actualBoundingBoxDescent;
-  const psychoJSPosition = [XYPix[0], XYPix[1] + yOffset];
-  return psychoJSPosition;
-};
-
 export const getCharSetBaselineOffsetPosition = (
   XYPix,
   normalizedCharacterSetRect,
@@ -591,4 +584,16 @@ export const validateRectPoints = ([lowerLeft, upperRight]) => {
     console.error(
       "INVALID RECT y of lowerLeft is greater than y of upperRight"
     );
+};
+
+/**
+ * Given two XY positions, return the X and Y displacements
+ * @param {[number, number]} a
+ * @param {[number, number]} b
+ * @returns {[number, number]}
+ */
+export const displacementBetweenXY = (a, b) => {
+  const xDisplacement = a[0] - b[0];
+  const yDisplacement = a[1] - b[1];
+  return [xDisplacement, yDisplacement];
 };

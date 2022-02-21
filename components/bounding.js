@@ -472,8 +472,8 @@ export const restrictSpacingDeg = (
                   Math.pow(10, Math.log10(eccDeg + 0.15) - cortical) - 0.15;
                 break;
             }
-            v1XY = radialXY.map((z) => z * spacingInnerDeg);
-            v2XY = radialXY.map((z) => z * -spacingOuterDeg);
+            v1XY = radialXY.map((z) => z * spacingOuterDeg);
+            v2XY = radialXY.map((z) => z * -spacingInnerDeg);
             break;
           case "tangential":
             if (targetIsFoveal)
