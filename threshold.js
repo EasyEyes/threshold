@@ -164,6 +164,11 @@ const paramReaderInitialized = async (reader) => {
     hideForm();
     showExperimentEnding(); // TODO Rethink about this function in terms of UI and logic
     return;
+  } else {
+    // Get fullscreen
+    if (!rc.isFullscreen.value && !debug) {
+      rc.getFullscreen();
+    }
   }
 
   // prepareForReading(reader);
@@ -860,17 +865,17 @@ const experiment = (blockCount) => {
     }
   }
 
-  async function _instructionRoutineEnd() {
-    instructions.setAutoDraw(false);
+  // async function _instructionRoutineEnd() {
+  //   instructions.setAutoDraw(false);
 
-    document.removeEventListener("click", _clickContinue);
-    document.removeEventListener("touchend", _clickContinue);
+  //   document.removeEventListener("click", _clickContinue);
+  //   document.removeEventListener("touchend", _clickContinue);
 
-    routineTimer.reset();
-    routineClock.reset();
+  //   routineTimer.reset();
+  //   routineClock.reset();
 
-    return Scheduler.Event.NEXT;
-  }
+  //   return Scheduler.Event.NEXT;
+  // }
 
   var blocks;
   var currentLoop;
@@ -1411,7 +1416,7 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       // Check fullscreen and if not, get fullscreen
-      if (!rc.isFullscreen.value && !debug) {
+      if (!rc.isFullscreen.value) {
         rc.getFullscreen();
         await sleep(1000);
       }

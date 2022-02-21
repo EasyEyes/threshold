@@ -36,12 +36,19 @@ const plugins = [new webpack.ProgressPlugin(), new CleanWebpackPlugin()];
 
 module.exports = (env, options) => {
   const extra = {};
-  if (options.name)
+  if (options.name) {
+    console.log(`
+      =========================================================================================
+       Go to >>>   http://localhost:5500/docs/threshold/threshold/examples/${options.name}   <<<
+      =========================================================================================
+
+`);
     extra.output = {
       path: __dirname + `/examples/${options.name}/js`,
       filename: "threshold.min.js",
       sourceMapFilename: "threshold.min.js.map",
     };
+  }
 
   if (env.development) {
     return Object.assign({}, config, {
