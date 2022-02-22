@@ -2292,7 +2292,21 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
 
-      const block_condition = condition["block_condition"];
+      ////
+      let block_condition;
+      switchKind(targetKind.current, {
+        reading: () => {
+          const currentTrial = snapshot.getCurrentTrial();
+          // ! Is it correct?
+          condition = currentTrial; // ?
+          block_condition = currentTrial.block_condition;
+        },
+        letter: () => {
+          block_condition = condition["block_condition"];
+        },
+      });
+      ////
+
       if (paramReader.has("responseMustClickCrosshairBool")) {
         if (
           paramReader.read("responseMustClickCrosshairBool", block_condition) ==
@@ -2332,10 +2346,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
       /* -------------------------------------------------------------------------- */
       // ! TEMP set reading text
-
       // readingParagraph.setText()
-      const currentTrial = snapshot.getCurrentTrial();
-      const block_condition = currentTrial.block_condition;
 
       switchKind(targetKind.current, {
         reading: () => {
