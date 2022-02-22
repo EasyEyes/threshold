@@ -12,10 +12,15 @@ export const prepareReadingQuestions = (
   usablePages.pop();
   usablePages.shift();
 
+  const textWordList = [];
+  for (const page of textPages) {
+    textWordList.push(...preprocessCorpusToWordList(page));
+  }
+
   const questions: ReadingQuestionAnswers[] = [];
   for (let i = 0; i < numberOfQ; i++) {
     const newQuestion: ReadingQuestionAnswers = {
-      correctAnswer: shuffle(shuffle(usablePages)[0].split(" "))[0],
+      correctAnswer: getCorrectAnswer(usablePages, wordFrequencies),
       foils: [],
     };
 
@@ -41,13 +46,22 @@ export const prepareReadingQuestions = (
       roundFetchingFoils++;
     }
 
-    while (newQuestion.foils.length < foilCount) {
-      possibleFoils = shuffle(possibleFoils);
-      newQuestion.foils.push(possibleFoils.pop());
+    possibleFoils = shuffle(possibleFoils);
+
+    while (newQuestion.foils.length < foilCount && possibleFoils.length) {
+      const pickedFoil = possibleFoils.pop();
+      // if (newQuestion.correctAnswer !== pickedFoil && !textWordList.includes(pickedFoil))
+      if (
+        newQuestion.correctAnswer !== pickedFoil &&
+        !newQuestion.foils.includes(pickedFoil)
+      )
+        newQuestion.foils.push(pickedFoil);
     }
 
     questions.push(newQuestion);
   }
+
+  return questions;
 };
 
 interface WordFrequencies {
@@ -110,6 +124,18 @@ export const preprocessCorpusToSentenceList = (
 };
 
 /* -------------------------------------------------------------------------- */
+
+export const getCorrectAnswer = (
+  usablePages: string[],
+  wordFrequencies: WordFrequencies
+) => {
+  let confirmedAnswer = "";
+  while (!confirmedAnswer.length) {
+    const a = shuffle(shuffle(usablePages)[0].split(" "))[0];
+    if (wordFrequencies[a]) confirmedAnswer = a;
+  }
+  return confirmedAnswer;
+};
 
 export const wordFreqCloseEnoughToTarget = (
   wordFreq: number,

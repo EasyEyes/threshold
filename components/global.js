@@ -14,3 +14,9 @@ export const readingWOrdFrequencyArchive = {};
 
 export const readingUsedText = {};
 export const readingThisBlockPages = []; // string[]
+
+export const readingQuestions = { current: undefined };
+export const readingCurrentQuestionIndex = { current: 0 };
+
+export const readingClickableAnswersSetup = { current: false };
+export const readingClickableAnswersUpdate = { current: false };

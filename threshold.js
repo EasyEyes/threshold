@@ -46,6 +46,10 @@ import {
   readingWordListArchive,
   readingWOrdFrequencyArchive,
   readingThisBlockPages,
+  readingQuestions,
+  readingCurrentQuestionIndex,
+  readingClickableAnswersSetup,
+  readingClickableAnswersUpdate,
 } from "./components/global.js";
 
 ////
@@ -96,6 +100,7 @@ import {
 import {
   removeClickableCharacterSet,
   setupClickableCharacterSet,
+  updateClickableCharacterSet,
 } from "./components/showCharacterSet.js";
 
 import {
@@ -1106,8 +1111,15 @@ const experiment = (blockCount) => {
   }
 
   // An extra routine after all the trials are finished
+  // Currently made solely for the reading task
   function blockSchedulerFinalRoutineBegin(snapshot) {
     return async function () {
+      // Stop drawing reading pages
+      readingParagraph.setAutoDraw(false);
+
+      // ? Check for response type first
+      showCursor();
+
       loggerText("blockSchedulerFinalRoutineBegin");
 
       TrialHandler.fromSnapshot(snapshot);
@@ -1116,7 +1128,8 @@ const experiment = (blockCount) => {
       continueRoutine = true;
 
       const blockCount = snapshot.block + 1;
-      prepareReadingQuestions(
+
+      readingQuestions.current = prepareReadingQuestions(
         paramReader.read("readingNumberOfQuestions", blockCount)[0],
         paramReader.read("readingNumberOfPossibleAnswers", blockCount)[0],
         readingThisBlockPages,
@@ -1124,18 +1137,109 @@ const experiment = (blockCount) => {
           paramReader.read("readingCorpusSource", blockCount)[0]
         ]
       );
+      readingCurrentQuestionIndex.current = 0;
+      readingClickableAnswersSetup.current = false;
+      readingClickableAnswersUpdate.current = false;
+
+      // Display
+      instructions.setText(
+        "Which of the following words appeared in the passage that you just read?"
+      );
+      instructions.setAutoDraw(true);
+
+      return Scheduler.Event.NEXT;
     };
   }
 
   function blockSchedulerFinalRoutineEachFrame() {
     return async function () {
-      //
+      t = blockScheduleFinalClock.getTime();
+      frameN = frameN + 1;
+
+      // Display actual question
+      // SETUP
+      if (!readingClickableAnswersSetup.current) {
+        readingClickableAnswersSetup.current = true;
+
+        const thisQuestion =
+          readingQuestions.current[readingCurrentQuestionIndex.current];
+        console.log(
+          `%c${thisQuestion.correctAnswer}`,
+          "color: red; font-size: 1.5rem"
+        );
+
+        setupClickableCharacterSet(
+          [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
+          paramReader.read("readingFont")[0],
+          "bottom",
+          showCharacterSetResponse,
+          (clickedWord) => {
+            readingClickableAnswersUpdate.current = true;
+            if (clickedWord === thisQuestion.correctAnswer) correctSynth.play();
+          }
+        );
+
+        readingCurrentQuestionIndex.current++;
+      }
+
+      // UPDATE
+      if (readingClickableAnswersUpdate.current) {
+        readingClickableAnswersUpdate.current = false;
+
+        if (
+          readingCurrentQuestionIndex.current >= readingQuestions.current.length
+        )
+          return Scheduler.Event.NEXT;
+
+        const thisQuestion =
+          readingQuestions.current[readingCurrentQuestionIndex.current];
+        console.log(
+          `%c${thisQuestion.correctAnswer}`,
+          "color: red; font-size: 1.5rem"
+        );
+
+        updateClickableCharacterSet(
+          [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
+          showCharacterSetResponse,
+          (clickedWord) => {
+            readingClickableAnswersUpdate.current = true;
+            if (clickedWord === thisQuestion.correctAnswer) correctSynth.play();
+          }
+        );
+
+        readingCurrentQuestionIndex.current++;
+      }
+
+      if (
+        psychoJS.experiment.experimentEnded ||
+        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+      ) {
+        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+      }
+
+      // Continue?
+      if (!continueRoutine) {
+        return Scheduler.Event.NEXT;
+      }
+      continueRoutine = true;
+      // if (
+      //   readingCurrentQuestionIndex.current >= readingQuestions.current.length
+      // )
+      //   continueRoutine = false;
+      if (continueRoutine) {
+        return Scheduler.Event.FLIP_REPEAT;
+      } else {
+        return Scheduler.Event.NEXT;
+      }
     };
   }
 
   function blockSchedulerFinalRoutineEnd() {
     return async function () {
-      //
+      loggerText("blockSchedulerFinalRoutineEnd");
+      removeClickableCharacterSet();
+
+      return Scheduler.Event.NEXT;
     };
   }
 
@@ -1594,7 +1698,7 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       // Check fullscreen and if not, get fullscreen
-      if (!rc.isFullscreen.value) {
+      if (!rc.isFullscreen.value && !debug) {
         rc.getFullscreen();
         showCursor(); // TODO Show only when the cursor is strictly needed
         await sleep(1000);

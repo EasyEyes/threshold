@@ -24,7 +24,8 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
       const columns = Object.keys(blockDict);
 
       // Add an index to our blockCount file (see below) for this block
-      blockIndices.block.push(index);
+      // blockIndices.block.push(index);
+
       if (blockDict["targetKind"])
         blockIndices.targetKind.push(blockDict["targetKind"][0]);
       else blockIndices.targetKind.push("letter");

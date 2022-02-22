@@ -13,23 +13,20 @@ export function getCharacterSetShowText(valid) {
   return valid.join(" ");
 }
 
-export function setupClickableCharacterSet(ans, font, where, responseRegister) {
+export function setupClickableCharacterSet(
+  ans,
+  font,
+  where,
+  responseRegister,
+  extraFunction = null
+) {
   const characterSetHolder = document.createElement("div");
   characterSetHolder.id = "characterSet-holder";
   characterSetHolder.className = "characterSet-holder";
   characterSetHolder.style.fontFamily = `"${font}"`;
   getCharacterSetShowPos(characterSetHolder, where);
 
-  for (let a of ans) {
-    let characterSet = document.createElement("span");
-    characterSet.className = "characterSet";
-    characterSet.innerText = a;
-    characterSet.onclick = () => {
-      responseRegister.clickTime = performance.now();
-      responseRegister.current = a.toLowerCase();
-    };
-    characterSetHolder.appendChild(characterSet);
-  }
+  pushCharacterSet(ans, characterSetHolder, responseRegister, extraFunction);
 
   document.body.appendChild(characterSetHolder);
 
@@ -42,3 +39,38 @@ export function removeClickableCharacterSet() {
     document.body.removeChild(e);
   });
 }
+
+export function updateClickableCharacterSet(
+  ans,
+  responseRegister,
+  extraFunction
+) {
+  const characterSetHolder = document.querySelector(".characterSet-holder");
+  while (characterSetHolder.firstChild) {
+    characterSetHolder.removeChild(characterSetHolder.firstChild);
+  }
+
+  pushCharacterSet(ans, characterSetHolder, responseRegister, extraFunction);
+  return characterSetHolder;
+}
+
+/* -------------------------------------------------------------------------- */
+
+const pushCharacterSet = (
+  ans,
+  characterSetHolder,
+  responseRegister,
+  extraFunction
+) => {
+  for (let a of ans) {
+    let characterSet = document.createElement("span");
+    characterSet.className = "characterSet";
+    characterSet.innerText = a;
+    characterSet.onclick = () => {
+      responseRegister.clickTime = performance.now();
+      responseRegister.current = a.toLowerCase();
+      if (extraFunction) extraFunction(a); // TEMP? For reading response
+    };
+    characterSetHolder.appendChild(characterSet);
+  }
+};
