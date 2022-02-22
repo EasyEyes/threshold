@@ -162,10 +162,18 @@ export class Grid {
       (dim) => dim / this.displayOptions.pixPerCm
     );
     // TODO generalize to fixation != [0,0]
-    this.dimensionsDeg = XYDegOfXYPix(
-      [this.dimensions[0] / 2, this.dimensions[1] / 2],
-      this.displayOptions
-    );
+    this.dimensionsDeg = [
+      XYDegOfXYPix(
+        [this.dimensions[0] / 2, this.displayOptions.fixationXYPix[1]],
+        this.displayOptions
+      )[0],
+      XYDegOfXYPix(
+        [this.displayOptions.fixationXYPix[0], this.dimensions[1] / 2],
+        this.displayOptions
+      )[1],
+    ];
+    // VERIFY why isn't this equivalent?
+    // const oneCallDimensionsDeg = XYDegOfXYPix([this.dimensions[0]/2, this.dimensions[1]/2], this.displayOptions);
     switch (units) {
       case "px":
         return this.dimensions.map((dim) => Math.floor(dim / 100) + 1);
@@ -336,7 +344,7 @@ export class Grid {
             pos: pos,
             height: 15,
             ori: 0.0,
-            color: new util.Color("blue"),
+            color: new util.Color("black"),
             opacity: 1.0,
             depth: 0.0,
           })
@@ -350,64 +358,62 @@ export class Grid {
     const origin = this.displayOptions.fixationXYPix;
     const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg");
     const [lines, labels] = [[], []];
+    const wPx = this.dimensions[0];
+    const hPx = this.dimensions[1];
+    const xPadding = 35;
+    const yPadding = 10;
     for (const region of ["right", "left", "upper", "lower"]) {
       const nGridlines = ["right", "left"].includes(region)
         ? numberOfGridLinesPerSide[0]
         : numberOfGridLinesPerSide[1];
       for (let i = 0; i < nGridlines; i++) {
-        let verticies, pos;
+        let verticies, pos, x, y;
         switch (region) {
           case "right":
+            x = XYPixOfXYDeg([i, origin[1]], this.displayOptions)[0];
             verticies = [
-              XYPixOfXYDeg([i, this.dimensionsDeg[1]], this.displayOptions),
-              XYPixOfXYDeg([i, -this.dimensionsDeg[1]], this.displayOptions),
+              [x, hPx / 2],
+              [x, -hPx / 2],
             ];
-            pos = XYPixOfXYDeg(
-              [origin[0] + i, -this.dimensionsDeg[1] * 0.9],
-              this.displayOptions
-            );
+            pos = [x + xPadding, -hPx / 2 + yPadding];
+            logger;
             break;
           case "left":
             if (i === 0) continue;
+            x = XYPixOfXYDeg([-i, origin[1]], this.displayOptions)[0];
             verticies = [
-              XYPixOfXYDeg([-i, this.dimensionsDeg[1]], this.displayOptions),
-              XYPixOfXYDeg([-i, -this.dimensionsDeg[1]], this.displayOptions),
+              [x, hPx / 2],
+              [x, -hPx / 2],
             ];
-            pos = XYPixOfXYDeg(
-              [origin[0] - i, -this.dimensionsDeg[1] * 0.9],
-              this.displayOptions
-            );
+            pos = [x + xPadding, -hPx / 2 + yPadding];
             break;
           case "upper":
+            y = XYPixOfXYDeg([origin[0], i], this.displayOptions)[1];
             verticies = [
-              XYPixOfXYDeg([this.dimensionsDeg[0], i], this.displayOptions),
-              XYPixOfXYDeg([-this.dimensionsDeg[0], i], this.displayOptions),
+              [-wPx / 2, y],
+              [wPx / 2, y],
             ];
-            pos = XYPixOfXYDeg(
-              [-this.dimensionsDeg[0] * 0.9, i],
-              this.displayOptions
-            );
+            pos = [-wPx / 2 + xPadding, y + yPadding];
             break;
           case "lower":
             if (i === 0) continue;
+            y = XYPixOfXYDeg([origin[0], -i], this.displayOptions)[1];
             verticies = [
-              XYPixOfXYDeg([this.dimensionsDeg[0], -i], this.displayOptions),
-              XYPixOfXYDeg([-this.dimensionsDeg[0], -i], this.displayOptions),
+              [-wPx / 2, y],
+              [wPx / 2, y],
             ];
-            pos = XYPixOfXYDeg(
-              [-this.dimensionsDeg[0] * 0.9, -i],
-              this.displayOptions
-            );
+            pos = [-wPx / 2 + xPadding, y + yPadding];
             break;
         }
+        logger("verticies", verticies);
         lines.push(
           new visual.ShapeStim({
             name: `${region}-grid-line-${i}`,
             win: this.psychoJS.window,
             units: "pix",
             lineWidth: i % 5 === 0 ? 5 : 2,
-            lineColor: new util.Color("red"),
-            fillColor: new util.Color("red"),
+            lineColor: new util.Color("crimson"),
+            fillColor: new util.Color("crimson"),
             opacity: this.opacity,
             vertices: verticies,
             depth: -1000,
@@ -425,9 +431,9 @@ export class Grid {
               font: "Arial",
               units: "pix",
               pos: pos,
-              height: Math.round(degreesToPixels(0.5, this.displayOptions)),
+              height: Math.round(degreesToPixels(1, this.displayOptions)),
               ori: 0.0,
-              color: new util.Color("red"),
+              color: new util.Color("black"),
               opacity: 1.0,
               depth: 0.0,
             })
