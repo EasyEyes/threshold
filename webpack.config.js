@@ -36,12 +36,26 @@ const plugins = [new webpack.ProgressPlugin(), new CleanWebpackPlugin()];
 
 module.exports = (env, options) => {
   const extra = {};
-  if (options.name)
+  if (options.name) {
+    // prettier-ignore
+    console.log(`
+      ==- \x1b[32m\x1b[1mEasyEyes Threshold Example Dev\x1b[22m\x1b[0m -================================${'='.repeat(options.name.length)}======
+      ====================================================================${'='.repeat(options.name.length)}======
+
+      Go to >>>   \x1b[36mhttp://localhost:5500/docs/threshold/threshold/examples/${options.name}   \x1b[0m<<<
+
+      OR (If your ROOT is at \`participant\` threshold)
+            >>>   \x1b[36mhttp://localhost:5500/examples/${options.name}                            \x1b[0m<<<
+
+      ====================================================================${'='.repeat(options.name.length)}======
+
+`);
     extra.output = {
       path: __dirname + `/examples/${options.name}/js`,
       filename: "threshold.min.js",
       sourceMapFilename: "threshold.min.js.map",
     };
+  }
 
   if (env.development) {
     return Object.assign({}, config, {
@@ -57,6 +71,7 @@ module.exports = (env, options) => {
         }),
       ],
       watch: true,
+      devtool: "source-map",
     });
   } else if (env.production) {
     return Object.assign({}, config, {

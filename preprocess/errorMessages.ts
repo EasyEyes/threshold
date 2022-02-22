@@ -58,16 +58,17 @@ export const INCORRECT_PARAMETER_TYPE = (
   categories?: string[]
 ): EasyEyesError => {
   const offendingMessage = offendingValues.map(
-    (offending) => ` "${offending.value}" [condition ${offending.block}]`
+    (offending) =>
+      ` "${offending.value}" [column ${Number(offending.block) + 1}]`
   );
-  let message = `All values for the parameter <span class="error-parameter">${parameter}</span> must be "${correctType}" type.`;
+  let message = `All values for the parameter <span class="error-parameter">${parameter}</span> must be ${correctType}.`;
   if (categories) {
     message = message + ` Valid categories are: ${categories.join(", ")}.`;
   }
   return {
     name: `Parameter contains values of the wrong type`,
     message: message,
-    hint: `We're having trouble with the following values, try double checking them:${offendingMessage}.`,
+    hint: `The erroneous values are: ${offendingMessage}.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -117,6 +118,24 @@ export const FONT_FILES_MISSING = (
     name: "Font file is missing",
     message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
     hint: `Submit the file(s) to the drop box above ↑`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const FONT_FILES_MISSING_WEB = (
+  parameter: string,
+  missingFileNameList: string[]
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList.map((fileName: string) => {
+    htmlList += `<li>${fileName}</li>`;
+  });
+  return {
+    name: "Font file is missing",
+    message: `We could not find the following file specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Check if font is spelled correctly. Browse through Google fonts to get the correct name`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -205,7 +224,7 @@ export const INVALID_STARTING_BLOCK = (
   correctStartingValue: 0 | 1
 ): EasyEyesError => {
   const zeroBasedNumberingBool = correctStartingValue ? false : true;
-  const complementaryStart = correctStartingValue ? 1 : 0;
+  const complementaryStart = correctStartingValue ? 0 : 1;
   return {
     name: "Invalid initial value",
     message: `The first value in your <span class="error-parameter">block</span> row isn't correct; it is <em>${actualStartingValue}</em>, when it ought to be <em>${correctStartingValue}</em>.`,
@@ -292,5 +311,23 @@ export const NO_RESPONSE_POSSIBLE = (
       "responseTypedEasyEyesKeypadBool",
       "simulateParticipantBool",
     ],
+  };
+};
+
+export const INCONSISTENT_VIEWING_DISTANCES = (
+  offendingBlocks: string[]
+): EasyEyesError => {
+  const multiple = offendingBlocks.length > 1;
+  return {
+    name: "Viewing distances are not unique within blocks",
+    message: `All conditions within a given block must specify the same viewing distance. Block${
+      multiple ? "s" : ""
+    } ${verballyEnumerate(offendingBlocks)} request${
+      multiple ? "" : "s"
+    } multiple different viewing distances.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["viewingDistanceDesiredCm"],
   };
 };

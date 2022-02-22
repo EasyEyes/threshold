@@ -3,8 +3,10 @@ const fs = require("fs");
 const XLSX = require("xlsx");
 const google = require("googleapis");
 
+const credentialPath = `${__dirname}/credentials.json`;
+
 const auth = new google.Auth.GoogleAuth({
-  keyFile: `${__dirname}/credentials.json`,
+  keyFile: credentialPath,
   scopes: "https://www.googleapis.com/auth/spreadsheets",
 });
 
@@ -65,7 +67,15 @@ require("dns").resolve("www.google.com", function (err) {
   if (err) {
     console.log("No internet connection. Skip fetching phrases.");
   } else {
-    console.log("Fetching up-to-date phrases...");
-    processLanguageSheet();
+    try {
+      if (fs.existsSync(credentialPath)) {
+        console.log("Fetching up-to-date phrases...");
+        processLanguageSheet();
+      } else {
+        console.log(":( Failed to fetch PHRASES. No credentials.json found.");
+      }
+    } catch (error) {
+      console.error(err);
+    }
   }
 });

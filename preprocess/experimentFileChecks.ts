@@ -24,6 +24,7 @@ import {
   NO_RESPONSE_POSSIBLE,
   FORM_FILES_MISSING,
   FONT_FILES_MISSING,
+  INCONSISTENT_VIEWING_DISTANCES,
 } from "./errorMessages";
 import { GLOSSARY } from "../parameters/glossary";
 import { isNumeric, levDist, arraysEqual } from "./utilities";
@@ -119,6 +120,9 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
 
   // Verify there is at least one response method turned on
   errors.push(...isResponsePossible(experimentDf));
+
+  // Check that there is only one unique viewing distance within each block
+  errors.push(...areViewingDistancesConsistentWithinBlocks(experimentDf));
 
   // Remove empty errors (FUTURE ought to be unnecessary, find root cause)
   errors = errors
@@ -245,21 +249,21 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   }
 
   // Check that each value is sequential
-  let previousBlockValue = blockValues[0];
+  let previous = blockValues[0];
   const nonsequentialValues: {
     value: number;
     previous: number;
     index: number;
   }[] = [];
   blockValues.forEach((value: number, i: number) => {
-    if (value < previousBlockValue || value - previousBlockValue > 1) {
+    if (value < previous || value - previous > 1) {
       nonsequentialValues.push({
         value: value,
-        previous: previousBlockValue,
+        previous: previous,
         index: i,
       });
     }
-    previousBlockValue = value;
+    previous = value;
   });
   if (nonsequentialValues.length) {
     blockValueErrors.push(
@@ -502,16 +506,42 @@ export const isFontMissing = (
       missingFontList.push(requestedFontList[i]);
     }
   }
-  if (missingFontList.length > 0)
+  if (missingFontList.length > 0) {
     errorList.push(FONT_FILES_MISSING("targetFont", missingFontList));
+  }
 
   return errorList;
 };
 
-/* --------------------------------- Future --------------------------------- */
-
-// export const parameterSpecificChecks = (experiment: any): any => {
-//   // TODO misc checks for other parameters
-//   // check font files according to 'targetFontSelection'
-//   // check consent file according to '_consentForm'
-// };
+interface stringToString {
+  [index: string]: string;
+}
+const areViewingDistancesConsistentWithinBlocks = (
+  df: any
+): EasyEyesError[] => {
+  if (df.listColumns().includes("viewingDistanceDesiredCm")) {
+    const inconsistentBlocks: string[] = [];
+    const blocks = df
+      .select("block")
+      .toArray()
+      .map(([x]: [string]) => x);
+    const distances = df
+      .select("viewingDistanceDesiredCm")
+      .toArray()
+      .map(([x]: [string]) => x);
+    const distancePerBlock: stringToString = {};
+    for (const [i, block] of blocks.entries()) {
+      if (
+        distancePerBlock.hasOwnProperty(block) &&
+        distancePerBlock[block] !== distances[i]
+      ) {
+        inconsistentBlocks.push(block);
+      }
+      distancePerBlock[block] = distances[i];
+    }
+    if (inconsistentBlocks.length)
+      return [INCONSISTENT_VIEWING_DISTANCES(inconsistentBlocks)];
+  }
+  // If the scientist didn't specify viewing distances, then the (consistent) defaults will be used
+  return [];
+};

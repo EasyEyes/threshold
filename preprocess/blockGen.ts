@@ -14,27 +14,32 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
   const uniqueBlock = df.unique("block").toDict()["block"];
 
   uniqueBlock.forEach((blockId: string, index: number) => {
-    // Get the parameters from just this block...
-    const blockDf = df.filter((row: any) => row.get("block") === blockId);
-    const blockDict = blockDf.toDict();
-    const columns = Object.keys(blockDict);
-
     // Add an index to our blockCount file (see below) for this block
-    blockIndices.block.push(index);
-    if (blockDict["targetTask"])
-      blockIndices.targetTask.push(blockDict["targetTask"][0]);
-    else blockIndices.targetTask.push("identify");
+    if (blockId && blockId.length) {
+      blockIndices["block"].push(index);
 
-    const data = transpose(columns.map((column) => blockDict[column]));
-    // ... and use them to create a csv file for this block.
-    const blockCsvString = Papa.unparse({ fields: columns, data: data });
-    const blockName = "block_" + String(blockId) + ".csv";
+      // Get the parameters from just this block...
+      const blockDf = df.filter((row: any) => row.get("block") === blockId);
+      const blockDict = blockDf.toDict();
+      const columns = Object.keys(blockDict);
 
-    // store block file
-    resultFileList.push(getFile(blockCsvString, blockName));
+      // Add an index to our blockCount file (see below) for this block
+      blockIndices.block.push(index);
+      if (blockDict["targetTask"])
+        blockIndices.targetTask.push(blockDict["targetTask"][0]);
+      else blockIndices.targetTask.push("identify");
 
-    // Add this block file to the output zip
-    // zip.file(blockFileName, blockCsvString);
+      const data = transpose(columns.map((column) => blockDict[column]));
+      // ... and use them to create a csv file for this block.
+      const blockCsvString = Papa.unparse({ fields: columns, data: data });
+      const blockName = `block_${String(blockId)}.csv`;
+
+      // store block file
+      resultFileList.push(getFile(blockCsvString, blockName));
+
+      // Add this block file to the output zip
+      // zip.file(blockFileName, blockCsvString);
+    }
   });
 
   // Create a "blockCount" file, just one column with the the indices of the blocks

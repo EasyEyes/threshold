@@ -6,7 +6,7 @@
 
 import {
   debug,
-  // getTripletCharacters,
+  getTripletCharacters,
   sleep,
   toShowCursor,
 } from "./components/utils.js";
@@ -34,7 +34,6 @@ import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
 import "./components/css/trialBreak.css";
-import "./components/css/widgets.css";
 import "./components/css/psychojsExtra.css";
 
 ////
@@ -59,6 +58,7 @@ import {
   loggerText,
   hideCursor,
   showCursor,
+  XYPixOfXYDeg,
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
@@ -99,10 +99,9 @@ import {
 } from "./components/showCharacterSet.js";
 
 import {
-  getConsentFormName,
-  hideAllForms,
-  showConsentForm,
-  showDebriefForm,
+  hideForm,
+  showForm,
+  showExperimentEnding,
 } from "./components/forms.js";
 
 import { getTrialInfoStr } from "./components/trialCounter.js";
@@ -112,25 +111,28 @@ import {
   restrictLevel,
 } from "./components/bounding.js";
 
-import {
-  readGridParameter,
-  turnOnGrid,
-  spawnGrids,
-  undrawGrids,
-} from "./components/grid.js";
+import { Grid } from "./components/grid.js";
 import {
   checkIfSimulated,
   SimulatedObserver,
   simulateObserverResponse,
 } from "./components/simulatedObserver.js";
-import { showExperimentEnding } from "./components/widgets.js";
+
 // import {
 //   getCanvasContext,
 //   getPixelRGBA,
 //   initPixelsArray,
 //   readPixels,
 // } from "./components/canvasContext.js";
+
 import { populateQuestDefaults } from "./components/questValues.js";
+
+import {
+  generateBoundingBoxPolies,
+  addBoundingBoxesToComponents,
+  sizeAndPositionBoundingBoxes,
+  updateBoundingBoxPolies,
+} from "./components/boundingBoxes.js";
 
 // READING
 import { prepareReadingQuestions } from "./components/reading.ts";
@@ -148,19 +150,19 @@ import {
   showTrialBreakWidget,
   showTrialProceedButton,
 } from "./components/trialBreak.js";
+import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
 
 /* ---------------------------------- */
 // * TRIAL ROUTINES
 
-import {
-  _identify_trialInstructionRoutineBegin,
-  _identify_trialInstructionRoutineEnd,
-} from "./components/trialRoutines.js";
+import { _identify_trialInstructionRoutineEnd } from "./components/trialRoutines.js";
 
 /* ---------------------------------- */
 
-import { exampleReadingParagraphs } from "./components/hardcodedExamples.js";
-import { isProlificPreviewExperiment } from "./components/prolific.js";
+import {
+  isPavloviaExperiment,
+  isProlificPreviewExperiment,
+} from "./components/externalServices.js";
 import { switchKind } from "./components/blockTargetKind.js";
 
 /* -------------------------------------------------------------------------- */
@@ -175,14 +177,27 @@ let expName = "Threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
-var showGrid, gridVisible, simulated;
+var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
   await sleep(250);
 
   // show screens before actual experiment begins
-  beforeExperimentBegins(reader);
+  const continueExperiment = await showForm(reader.read("_consentForm")[0]);
+  hideForm();
+
+  if (!continueExperiment) {
+    await showForm(reader.read("_debriefForm")[0]);
+    hideForm();
+    showExperimentEnding(); // TODO Rethink about this function in terms of UI and logic
+    return;
+  } else {
+    // Get fullscreen
+    if (!rc.isFullscreen.value && !debug) {
+      rc.getFullscreen();
+    }
+  }
 
   // prepareForReading(reader);
 
@@ -195,9 +210,6 @@ const paramReaderInitialized = async (reader) => {
   // ! Simulate observer
   simulated = checkIfSimulated(reader);
 
-  // ! Check if to use grids
-  [showGrid, gridVisible] = readGridParameter(reader, simulated);
-
   // ! Load reading corpus and preprocess
   loadReadingCorpus(reader);
   console.log(
@@ -205,12 +217,6 @@ const paramReaderInitialized = async (reader) => {
     readingWordListArchive,
     readingWOrdFrequencyArchive
   );
-
-  /* ---------------- TEMPORARY! PLEASE UPDATE AND REMOVE @svr8 --------------- */
-  document.getElementById("temp-element-hider").remove();
-  /* -------------------------------------------------------------------------- */
-
-  await sleep(50);
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
@@ -254,7 +260,18 @@ var targetSpecsConfig = {
   alignHoriz: "left",
   alignVert: "bottom",
 };
+
 var targetSpecs; // TextStim object
+
+var conditionNameConfig = {
+  fontSize: 28,
+  x: -window.innerWidth / 2,
+  y: -window.innerHeight / 2,
+  alignHoriz: "left",
+  alignVert: "bottom",
+};
+
+var conditionName;
 
 var trialInfoStr = "";
 var totalTrial, // TextSim object
@@ -265,49 +282,14 @@ var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
 
-var consentFormName = "";
-var debriefFormName = "";
-
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
 
-const beforeExperimentBegins = async (reader) => {
-  // get consent form
-  consentFormName = reader.read("_consentForm")[0];
-  if (!(typeof consentFormName === "string" && consentFormName.length > 0))
-    consentFormName = "";
-
-  // get debrief form
-  debriefFormName = paramReader.read("_debriefForm")[0];
-  if (!(typeof debriefFormName === "string" && debriefFormName.length > 0))
-    debriefFormName = "";
-
-  // show consent form if field is valid
-  if (consentFormName.length > 0) showConsentForm(consentFormName);
-
-  // add event listners to form buttons
-  document.getElementById("consent-yes").addEventListener("click", (evt) => {
-    hideAllForms();
-  });
-  document.getElementById("consent-no").addEventListener("click", (evt) => {
-    if (debriefFormName.length > 0) showDebriefForm(debriefFormName);
-
-    document.getElementById("debrief-yes").addEventListener("click", (evt) => {
-      hideAllForms();
-      afterExperimentEnds();
-    });
-
-    document.getElementById("debrief-no").addEventListener("click", (evt) => {
-      hideAllForms();
-      afterExperimentEnds();
-    });
-  });
-};
-
 const experiment = (blockCount) => {
   ////
   // Resources
+  initializeEscHandlingDiv();
   const _resources = [];
   const blockNumbers = paramReader._experiment.map((block) => block.block);
   for (const i of blockNumbers) {
@@ -326,12 +308,12 @@ const experiment = (blockCount) => {
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
   const psychoJS = new PsychoJS({
-    debug: false,
+    debug: debug,
   });
 
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
-  const wrongSynth = getWrongSynth(psychoJS);
+  // const wrongSynth = getWrongSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
 
   // open window:
@@ -414,6 +396,7 @@ const experiment = (blockCount) => {
 
           psychoJS.gui.dialogComponent.button = "OK";
           psychoJS.gui._removeWelcomeDialogBox();
+          // psychoJS.gui.closeDialog();
           psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
           psychoJS.window.adjustScreenSize();
           psychoJS.eventManager.clearEvents();
@@ -462,12 +445,9 @@ const experiment = (blockCount) => {
   var instructionsClock;
 
   /* --- BOUNDING BOX --- */
-  var targetBoundingPoly;
-  var flanker1BoundingPoly;
-  var flanker2BoundingPoly;
-  var targetCharacterSetBoundingPoly;
-  var flanker1CharacterSetBoundingPoly;
-  var flanker2CharacterSetBoundingPoly;
+  var boundingBoxPolies;
+  var characterSetBoundingBoxPolies;
+  var displayCharacterSetBoundingBoxPolies;
   /* --- /BOUNDING BOX --- */
 
   var thisLoopNumber; // ! BLOCK COUNTER
@@ -501,6 +481,17 @@ const experiment = (blockCount) => {
   var trialBreakStartTime = 0;
   var trialBreakStatus;
   var trialBreakButtonStatus;
+
+  var displayOptions;
+  var fixationXYPx;
+  var fixationSize = 45.0;
+  var nearPointXYDeg;
+  var nearPointXYPix;
+  var showFixation;
+  var windowWidthCm;
+  var windowWidthPx;
+  var pixPerCm;
+  var grid;
 
   async function experimentInit() {
     // Initialize components for Routine "file"
@@ -605,7 +596,7 @@ const experiment = (blockCount) => {
       pos: [totalTrialConfig.x, totalTrialConfig.y],
       alignHoriz: totalTrialConfig.alignHoriz,
       alignVert: totalTrialConfig.alignVert,
-      height: 1.0,
+      height: totalTrialConfig.fontSize,
       wrapWidth: window.innerWidth,
       ori: 0.0,
       color: new util.Color("black"),
@@ -624,6 +615,25 @@ const experiment = (blockCount) => {
       alignHoriz: targetSpecsConfig.alignHoriz,
       alignVert: targetSpecsConfig.alignVert,
       height: targetSpecsConfig.fontSize,
+      wrapWidth: window.innerWidth,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 1.0,
+      depth: -20.0,
+      isInstruction: false,
+      autoDraw: false,
+    });
+
+    conditionName = new visual.TextStim({
+      win: psychoJS.window,
+      name: "conditionName",
+      text: "",
+      font: instructionFont,
+      units: "pix",
+      pos: [conditionNameConfig.x, conditionNameConfig.y],
+      alignHoriz: conditionNameConfig.alignHoriz,
+      alignVert: conditionNameConfig.alignVert,
+      height: conditionNameConfig.fontSize,
       wrapWidth: window.innerWidth,
       ori: 0.0,
       color: new util.Color("black"),
@@ -660,51 +670,31 @@ const experiment = (blockCount) => {
       alignVert: "bottom",
     });
 
+    characterSetBoundingRects = {};
+    for (const cond of paramReader.read("block_condition", "__ALL_BLOCKS__")) {
+      const characterSet = String(
+        paramReader.read("targetCharacterSet", cond)
+      ).split("");
+      let font = paramReader.read("targetFont", cond);
+      if (paramReader.read("targetFontSource", cond) === "file")
+        font = cleanFontName(font);
+      const letterRepeats =
+        paramReader.read("spacingRelationToSize", cond) === "ratio" ? 1 : 3;
+      characterSetBoundingRects[cond] = getCharacterSetBoundingBox(
+        characterSet,
+        font,
+        psychoJS.window,
+        letterRepeats,
+        100
+      );
+    }
     /* --- BOUNDING BOX --- */
-    const boundingConfig = {
-      win: psychoJS.window,
-      units: "pix",
-      width: [1.0, 1.0][0],
-      height: [1.0, 1.0][1],
-      ori: 0.0,
-      pos: [0, 0],
-      lineWidth: 1.0,
-      // fillColor: "#000000",
-      opacity: undefined,
-      depth: -10,
-      interpolate: true,
-      size: 0,
-    };
-    targetBoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("blue"),
-      name: "targetBoundingPoly",
-    });
-    flanker1BoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("blue"),
-      name: "flanker1BoundingPoly",
-    });
-    flanker2BoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("blue"),
-      name: "flanker2BoundingPoly",
-    });
-    targetCharacterSetBoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("green"),
-      name: "targetCharacterSetBoundingPoly",
-    });
-    flanker1CharacterSetBoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("green"),
-      name: "flanker1CharacterSetBoundingPoly",
-    });
-    flanker2CharacterSetBoundingPoly = new visual.Rect({
-      ...boundingConfig,
-      lineColor: new util.Color("green"),
-      name: "flanker2CharacterSetBoundingPoly",
-    });
+    // Generate the bounding boxes to be displayed superimposing...
+    [
+      boundingBoxPolies, // ... the triplet.
+      characterSetBoundingBoxPolies, // ... the triplet.
+      displayCharacterSetBoundingBoxPolies, // .. the full character set displayed during response time.
+    ] = generateBoundingBoxPolies(paramReader, psychoJS);
     /* --- BOUNDING BOX --- */
 
     /* --------------------------------- READING -------------------------------- */
@@ -745,6 +735,29 @@ const experiment = (blockCount) => {
       });
     }
 
+    // TODO use actual nearPoint, from RC
+    nearPointXYDeg = [0, 0]; // TEMP
+    nearPointXYPix = [0, 0]; // TEMP
+    fixationXYPx = [0, 0];
+    // TODO set fixation from the actual parameter
+    fixationSize = 45;
+    showFixation = true;
+    windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
+    windowWidthPx = rc.displayWidthPx.value;
+    pixPerCm = windowWidthPx / windowWidthCm;
+    // NOTE viewingDistanceCm is not necessarily correct, as the first trial could be from any condition in the first block
+    // viewingDistanceCm = rc.viewingDistanceCm
+    //   ? rc.viewingDistanceCm.value
+    //   : reader.read("viewingDistanceDesiredCm", "__ALL_BLOCKS__")[0];
+    displayOptions = {
+      pixPerCm: pixPerCm,
+      // viewingDistanceCm: viewingDistanceCm,
+      nearPointXYDeg: nearPointXYDeg,
+      nearPointXYPix: nearPointXYPix,
+      fixationXYPix: fixationXYPx,
+      window: psychoJS.window,
+    };
+    grid = new Grid("none", displayOptions, psychoJS);
     return Scheduler.Event.NEXT;
   }
 
@@ -761,13 +774,6 @@ const experiment = (blockCount) => {
   var consentComponents;
   var debriefComponents;
   var frameRemains;
-
-  var fixationXYPx;
-  var fixationSize = 45.0;
-  var showFixation;
-  // var windowWidthCm;
-  // var windowWidthPx;
-  // var pixPerCm;
 
   function fileRoutineBegin(snapshot) {
     return async function () {
@@ -861,6 +867,22 @@ const experiment = (blockCount) => {
     instructions.setAutoDraw(true);
   }
 
+  function _instructionBeforeStimulusSetup(text) {
+    t = 0;
+    instructionsClock.reset(); // clock
+    frameN = -1;
+    continueRoutine = true;
+    // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
+    const wrapWidth = window.innerWidth / 4;
+    instructions.setWrapWidth(wrapWidth);
+    instructions.setPos([
+      -window.innerWidth / 2 + 5,
+      window.innerHeight / 2 - 5,
+    ]);
+    instructions.setText(text);
+    instructions.setAutoDraw(true);
+  }
+
   function _clickContinue(e) {
     if (e.target.id !== "threshold-beep-button") clickedContinue.current = true;
   }
@@ -903,17 +925,17 @@ const experiment = (blockCount) => {
     }
   }
 
-  async function _instructionRoutineEnd() {
-    instructions.setAutoDraw(false);
+  // async function _instructionRoutineEnd() {
+  //   instructions.setAutoDraw(false);
 
-    document.removeEventListener("click", _clickContinue);
-    document.removeEventListener("touchend", _clickContinue);
+  //   document.removeEventListener("click", _clickContinue);
+  //   document.removeEventListener("touchend", _clickContinue);
 
-    routineTimer.reset();
-    routineClock.reset();
+  //   routineTimer.reset();
+  //   routineClock.reset();
 
-    return Scheduler.Event.NEXT;
-  }
+  //   return Scheduler.Event.NEXT;
+  // }
 
   var blocks;
   var currentLoop;
@@ -1239,25 +1261,6 @@ const experiment = (blockCount) => {
 
       const blockCount = snapshot.block + 1;
 
-      fixationXYPx = [0, 0];
-      if (showGrid) {
-        // Undraw any grids from the previous block
-        if (window.grids) window.grids = undrawGrids(window.grids);
-        // Only include grids if they're used in this block
-        if (paramReader.read("showGridsBool", blockCount).some((t) => t)) {
-          // Create the appropriate trio of grids for this block
-          window.grids = spawnGrids(
-            rc,
-            paramReader,
-            snapshot.block,
-            psychoJS,
-            fixationXYPx
-          );
-          // Turn on the currently visible grid
-          turnOnGrid(gridVisible, window.grids);
-        }
-      }
-
       responseType = getResponseType(
         paramReader.read("responseClickedBool", blockCount)[0],
         paramReader.read("responseTypedBool", blockCount)[0],
@@ -1293,6 +1296,19 @@ const experiment = (blockCount) => {
       // reset takeABreak state
       currentBlockCredit = 0;
       hideTrialBreakProgressBar();
+
+      trialInfoStr = getTrialInfoStr(
+        rc.language.value,
+        paramReader.read("showCounterBool", blockCount)[0],
+        paramReader.read("showViewingDistanceBool", blockCount)[0],
+        undefined,
+        undefined,
+        blockCount,
+        totalBlockCount,
+        viewingDistanceCm
+      );
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setAutoDraw(true);
 
       return Scheduler.Event.NEXT;
     };
@@ -1479,19 +1495,60 @@ const experiment = (blockCount) => {
   let takeFixationClick;
   let modalButtonTriggeredViaKeyboard = false;
 
-  var level;
-  // var viewingDistanceDesiredCm;
+  const _takeFixationClick = (e) => {
+    if (modalButtonTriggeredViaKeyboard) {
+      // modal button click event triggered by jquery
+      modalButtonTriggeredViaKeyboard = false;
+      return;
+    }
+    let cX, cY;
+    if (e.clientX) {
+      cX = e.clientX;
+      cY = e.clientY;
+    } else {
+      const t = e.changedTouches[0];
+      if (t.clientX) {
+        cX = t.clientX;
+        cY = t.clientY;
+      } else {
+        clickedContinue = false;
+        return;
+      }
+    }
 
-  // var block;
-  // var spacingDirection;
+    if (
+      Math.hypot(
+        cX - (window.innerWidth >> 1),
+        cY - (window.innerHeight >> 1)
+      ) < fixationSize
+    ) {
+      // Clicked on fixation
+      hideCursor();
+      setTimeout(() => {
+        clickedContinue = true;
+      }, 17);
+    } else {
+      // wrongSynth.play();
+      clickedContinue = false;
+    }
+  };
+
+  var level;
+  var viewingDistanceDesiredCm;
+  var viewingDistanceCm;
+
+  var block;
+  var spacingDirection;
   var targetFont;
   var targetCharacterSet;
   var validAns;
   var showCharacterSetWhere;
-  // var showCharacterSetElement;
-  // var showCounterBool;
+  var showCharacterSetElement;
+  var showCounterBool;
   var showTargetSpecs;
-  // var showViewingDistanceBool;
+  var showConditionNameBool;
+  var condName;
+  var showViewingDistanceBool;
   const showCharacterSetResponse = {
     current: null,
     onsetTime: 0,
@@ -1501,20 +1558,18 @@ const experiment = (blockCount) => {
   var showCharacterSetBoundingBox;
   var stimulusParameters;
   var targetDurationSec;
-  // var targetMinimumPix;
-  // var targetSizeDeg;
-  // var targetSizeIsHeightBool;
-  // var thresholdParameter;
-  // var spacingSymmetry;
-  // var spacingOverSizeRatio;
+  var targetMinimumPix;
+  var targetSizeDeg;
+  var targetSizeIsHeightBool;
+  var thresholdParameter;
+  var spacingSymmetry;
+  var spacingOverSizeRatio;
   var spacingRelationToSize;
-  // var targetEccentricityXDeg;
-  // var targetEccentricityYDeg;
-  // var targetEccentricityXYDeg;
+  var targetEccentricityXDeg;
+  var targetEccentricityYDeg;
+  var targetEccentricityXYDeg;
   var targetSafetyMarginSec;
-  // var trackGazeYes;
-  // var trackHeadYes;
-  // var wirelessKeyboardNeededYes;
+  var wirelessKeyboardNeededYes;
 
   var _key_resp_allKeys;
   var trialComponents;
@@ -1538,6 +1593,13 @@ const experiment = (blockCount) => {
 
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      // Check fullscreen and if not, get fullscreen
+      if (!rc.isFullscreen.value) {
+        rc.getFullscreen();
+        showCursor(); // TODO Show only when the cursor is strictly needed
+        await sleep(1000);
+      }
+
       // showCursor();
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
@@ -1561,17 +1623,32 @@ const experiment = (blockCount) => {
               );
             }
           }
+
           block_condition = condition["block_condition"];
+
+          if (
+            paramReader.has("responseMustClickCrosshairBool") &&
+            paramReader.read(
+              "responseMustClickCrosshairBool",
+              block_condition
+            ) == true
+          ) {
+            responseType = 1;
+          } else {
+            // ! responseType
+            responseType = getResponseType(
+              paramReader.read("responseClickedBool", block_condition),
+              paramReader.read("responseTypedBool", block_condition),
+              paramReader.read(
+                "responseTypedEasyEyesKeypadBool",
+                block_condition
+              ),
+              paramReader.read("responseSpokenBool", block_condition)
+            );
+          }
         },
       });
 
-      // ! responseType
-      responseType = getResponseType(
-        paramReader.read("responseClickedBool", block_condition),
-        paramReader.read("responseTypedBool", block_condition),
-        paramReader.read("responseTypedEasyEyesKeypadBool", block_condition),
-        paramReader.read("responseSpokenBool", block_condition)
-      );
       logger("responseType", responseType);
 
       switchKind(targetKind.current, {
@@ -1592,96 +1669,485 @@ const experiment = (blockCount) => {
           instructions.setAutoDraw(true);
         },
         letter: () => {
-          [
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* ----------------- LETTER Trial Instruction Routine BEGIN ----------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          // update trial/block count
+          currentTrialIndex = snapshot.thisN + 1;
+          currentTrialLength = snapshot.nTotal;
+          trialInfoStr = getTrialInfoStr(
+            rc.language.value,
+            showCounterBool,
+            showViewingDistanceBool,
             currentTrialIndex,
             currentTrialLength,
-            trialInfoStr, //
-            t,
-            frameN,
-            continueRoutine, //
-            fixationSize,
-            fixationXYPx, //
-            targetFont,
-            targetCharacterSet,
-            validAns,
-            showCharacterSetWhere,
-            correctAns, //
-            showTargetSpecs,
-            conditionTrials,
-            targetDurationSec, //
-            showFixation,
+            currentBlockIndex,
+            totalBlockCount,
+            viewingDistanceCm
+          );
+          totalTrial.setText(trialInfoStr);
+          totalTrial.setFont(instructionFont);
+          totalTrial.setHeight(totalTrialConfig.fontSize);
+          totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+          totalTrial.setAutoDraw(true);
+
+          _instructionBeforeStimulusSetup(
+            instructionsText.trial.fixate["spacing"](
+              rc.language.value,
+              responseType
+            )
+          );
+
+          fixation.setHeight(fixationSize);
+          fixation.setPos(fixationXYPx);
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
+          fixation.setAutoDraw(true);
+
+          clickedContinue = false;
+          document.addEventListener("click", _takeFixationClick);
+          document.addEventListener("touchend", _takeFixationClick);
+
+          /* PRECOMPUTE STIMULI FOR THE UPCOMING TRIAL */
+          TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
+          const reader = paramReader;
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+
+          psychoJS.experiment.addData("block_condition", block_condition);
+          psychoJS.experiment.addData(
+            "flankerOrientation",
+            reader.read("spacingDirection", block_condition)
+          );
+          psychoJS.experiment.addData(
+            "targetFont",
+            reader.read("targetFont", block_condition)
+          );
+          // update component parameters for each repeat
+          windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
+          windowWidthPx = rc.displayWidthPx.value;
+          pixPerCm = windowWidthPx / windowWidthCm;
+          if (!rc.screenWidthCm)
+            console.warn(
+              "[Screen Width] Using arbitrary screen width. Enable RC."
+            );
+
+          viewingDistanceDesiredCm = reader.read(
+            "viewingDistanceDesiredCm",
+            block_condition
+          );
+          // viewingDistanceDesiredCm = 10;
+          viewingDistanceCm = rc.viewingDistanceCm
+            ? rc.viewingDistanceCm.value
+            : viewingDistanceDesiredCm;
+          if (!rc.viewingDistanceCm)
+            console.warn(
+              "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
+            );
+
+          block = condition["block"];
+
+          // TODO check that we are actually trying to test for "spacing", not "size"
+
+          spacingDirection = reader.read("spacingDirection", block_condition);
+          spacingSymmetry = reader.read("spacingSymmetry", block_condition);
+          let targetFontSource = reader.read(
+            "targetFontSource",
+            block_condition
+          );
+          targetFont = reader.read("targetFont", block_condition);
+          if (targetFontSource === "file")
+            targetFont = cleanFontName(targetFont);
+
+          targetCharacterSet = String(
+            reader.read("targetCharacterSet", block_condition)
+          ).split("");
+          validAns = String(reader.read("targetCharacterSet", block_condition))
+            .toLowerCase()
+            .split("");
+
+          showCharacterSetWhere = reader.read(
+            "showCharacterSetWhere",
+            block_condition
+          );
+          showViewingDistanceBool = reader.read(
+            "showViewingDistanceBool",
+            block_condition
+          );
+          showCounterBool = reader.read("showCounterBool", block_condition);
+          showConditionNameBool = paramReader.read(
+            "showConditionNameBool",
+            block_condition
+          );
+
+          condName = paramReader.read("conditionName", block_condition);
+
+          showTargetSpecs = paramReader.read(
+            "showTargetSpecsBool",
+            block_condition
+          );
+
+          conditionTrials = reader.read("conditionTrials", block_condition);
+          targetDurationSec = reader.read("targetDurationSec", block_condition);
+
+          fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
+          showFixation = reader.read("markTheFixationBool", block_condition);
+
+          targetSizeDeg = reader.read("targetSizeDeg", block_condition);
+          targetSizeIsHeightBool = reader.read(
+            "targetSizeIsHeightBool",
+            block_condition
+          );
+          thresholdParameter = reader.read(
+            "thresholdParameter",
+            block_condition
+          );
+          targetMinimumPix = reader.read("targetMinimumPix", block_condition);
+          spacingOverSizeRatio = reader.read(
+            "spacingOverSizeRatio",
+            block_condition
+          );
+          spacingRelationToSize = reader.read(
+            "spacingRelationToSize",
+            block_condition
+          );
+          showBoundingBox =
+            reader.read("showBoundingBoxBool", block_condition) || false;
+          showCharacterSetBoundingBox = reader.read(
+            "showCharacterSetBoundingBoxBool",
+            block_condition
+          );
+
+          targetMinimumPix = reader.read("targetMinimumPix", block_condition);
+          targetEccentricityXDeg = reader.read(
+            "targetEccentricityXDeg",
+            block_condition
+          );
+          psychoJS.experiment.addData(
+            "targetEccentricityXDeg",
+            targetEccentricityXDeg
+          );
+          targetEccentricityYDeg = reader.read(
+            "targetEccentricityYDeg",
+            block_condition
+          );
+          psychoJS.experiment.addData(
+            "targetEccentricityYDeg",
+            targetEccentricityYDeg
+          );
+          targetEccentricityXYDeg = [
+            targetEccentricityXDeg,
+            targetEccentricityYDeg,
+          ];
+          targetSafetyMarginSec = paramReader.read(
+            "targetSafetyMarginSec",
+            block_condition
+          );
+
+          wirelessKeyboardNeededYes = reader.read(
+            "wirelessKeyboardNeededYes",
+            block_condition
+          );
+
+          var characterSet = targetCharacterSet;
+
+          /* ------------------------------ Pick triplets ----------------------------- */
+          if (characterSet.length < 3)
+            throw `[EasyEyes experiment configuration error] You must have 3 characters in your character set for this block_condition, however, the researcher only put ${characterSet.length}.`;
+          var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
+            getTripletCharacters(characterSet);
+          if (debug)
+            console.log(
+              `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
+              "color: red; font-size: 1.5rem"
+            );
+          correctAns = targetCharacter.toLowerCase();
+          /* -------------------------------------------------------------------------- */
+
+          var targetEccentricityXYPx;
+
+          ////
+          // !
+          displayOptions = {
+            pixPerCm: pixPerCm,
+            viewingDistanceCm: viewingDistanceCm,
+            nearPointXYDeg: nearPointXYDeg,
+            nearPointXYPix: nearPointXYPix,
+            fixationXYPix: fixationXYPx,
+            spacingOverSizeRatio: spacingOverSizeRatio,
+            targetMinimumPix: targetMinimumPix,
+            fontFamily: targetFont,
+            window: psychoJS.window,
+            spacingRelationToSize: spacingRelationToSize,
+            targetEccentricityXYDeg: targetEccentricityXYDeg,
+            spacingDirection: spacingDirection,
+            flankerCharacters: [firstFlankerCharacter, secondFlankerCharacter],
+            targetCharacter: targetCharacter,
+            targetSizeDeg: targetSizeDeg,
+            targetKind: targetKind,
+          };
+
+          // Fixation placement does not depend on the value of "spacingRelationToSize"...
+          fixation.setPos(fixationXYPx);
+          fixation.setHeight(fixationSize);
+          // ... neither does target location...
+          targetEccentricityXYPx = XYPixOfXYDeg(
+            targetEccentricityXYDeg,
+            displayOptions
+          );
+          // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
+          psychoJS.experiment.addData(
+            "targetLocationPx",
+            targetEccentricityXYPx
+          );
+          target.setPos(targetEccentricityXYPx);
+          target.setFont(targetFont);
+
+          // ...but size, and content of the target(& flankers) does.
+          psychoJS.experiment.addData(
+            "spacingRelationToSize",
+            spacingRelationToSize
+          );
+          [level, stimulusParameters] = restrictLevel(
+            proposedLevel,
+            thresholdParameter,
+            characterSetBoundingRects[block_condition],
+            spacingDirection,
             spacingRelationToSize,
-            showBoundingBox,
-            targetSafetyMarginSec, //
-            level,
-            stimulusParameters,
-            trialComponents, //
-            simulated,
-            simulatedObserver,
-            // NEW THINGS
-            takeFixationClick,
-          ] = _identify_trialInstructionRoutineBegin(
-            psychoJS,
-            PsychoJS,
-            rc,
-            paramReader,
-            snapshot,
-            condition,
-            block_condition,
+            spacingSymmetry,
+            spacingOverSizeRatio,
+            targetSizeIsHeightBool,
+            displayOptions
+          );
+          psychoJS.experiment.addData("level", level);
+          psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
+          target.setHeight(stimulusParameters.heightPx);
+          target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+          psychoJS.experiment.addData(
+            "targetLocationPx",
+            stimulusParameters.targetAndFlankersXYPx[0]
+          );
+          switch (thresholdParameter) {
+            case "size":
+              flanker1.setAutoDraw(false);
+              flanker2.setAutoDraw(false);
+              break;
+            case "spacing":
+              switch (spacingRelationToSize) {
+                case "none":
+                case "ratio":
+                  target.setText(targetCharacter);
+                  flanker1.setText(firstFlankerCharacter);
+                  flanker2.setText(secondFlankerCharacter);
+                  flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
+                  flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
+                  flanker1.setFont(targetFont);
+                  flanker2.setFont(targetFont);
+                  flanker1.setHeight(stimulusParameters.heightPx);
+                  flanker2.setHeight(stimulusParameters.heightPx);
+                  psychoJS.experiment.addData("flankerLocationsPx", [
+                    stimulusParameters.targetAndFlankersXYPx[1],
+                    stimulusParameters.targetAndFlankersXYPx[2],
+                  ]);
+                  break;
+                case "typographic":
+                  // ...include the flankers in the same string/stim as the target.
+                  // const flankersAndTargetString =
+                  //   firstFlankerCharacter +
+                  //   targetCharacter +
+                  //   secondFlankerCharacter;
+                  target.setText(
+                    firstFlankerCharacter +
+                      targetCharacter +
+                      secondFlankerCharacter
+                  );
+                  flanker1.setAutoDraw(false);
+                  flanker2.setAutoDraw(false);
+                  break;
+              }
+              break;
+          }
+          [
+            target,
+            flanker1,
+            flanker2,
+            fixation,
+            showCharacterSet,
+            totalTrial,
+          ].forEach((c) => c._updateIfNeeded());
+
+          const tripletStims = {
+            target: target,
+            flanker1: flanker1,
+            flanker2: flanker2,
+          };
+          sizeAndPositionBoundingBoxes(
             {
-              currentTrialIndex,
-              currentTrialLength,
-              trialInfoStr, //
-              t,
-              frameN,
-              continueRoutine, //
-              fixationSize,
-              fixationXYPx, //
-              targetFont,
-              targetCharacterSet,
-              validAns,
-              showCharacterSetWhere,
-              correctAns, //
-              showTargetSpecs,
-              conditionTrials,
-              targetDurationSec, //
-              showFixation,
-              spacingRelationToSize,
-              showBoundingBox,
-              targetSafetyMarginSec, //
-              level,
-              stimulusParameters,
-              trialComponents, //
-              simulated,
-              simulatedObserver, //
-              // ---
-              TrialHandler, //
-              instructionsClock,
-              key_resp, //
-              instructions,
-              fixation,
-              target,
-              flanker1,
-              flanker2,
-              showCharacterSet,
-              totalTrial,
-              targetBoundingPoly,
-              flanker1BoundingPoly,
-              flanker2BoundingPoly,
-              targetSpecs, //
-              clickedContinue,
-              modalButtonTriggeredViaKeyboard,
-              characterSetBoundingRects,
-              totalTrialConfig, //
-              currentBlockIndex,
-              totalBlockCount,
-              responseType,
-              instructionFont, //
-              currentLoop, //
+              stimulus: showBoundingBox,
+              characterSet: showCharacterSetBoundingBox,
+            },
+            {
+              stimulus: boundingBoxPolies,
+              characterSet: characterSetBoundingBoxPolies,
+            },
+            displayCharacterSetBoundingBoxPolies[block_condition],
+            tripletStims,
+            characterSetBoundingRects[block_condition],
+            {
+              heightPx: stimulusParameters.heightPx,
+              spacingRelationToSize: spacingRelationToSize,
+              thresholdParameter: thresholdParameter,
+              windowSize: psychoJS.window._size,
+              targetFont: targetFont,
             }
           );
+          showCharacterSet.setPos([0, 0]);
+          showCharacterSet.setText("");
+          // showCharacterSet.setText(getCharacterSetShowText(validAns))
+
+          if (showTargetSpecs) {
+            const spacing =
+              Math.round((Math.pow(10, level) + Number.EPSILON) * 1000) / 1000;
+            const size =
+              Math.round(
+                (spacing / spacingOverSizeRatio + Number.EPSILON) * 1000
+              ) / 1000;
+            let targetSpecsString = `size: ${size} deg
+spacing: ${spacing} deg
+targetFont: ${targetFont}
+spacingRelationToSize: ${spacingRelationToSize}
+spacingOverSizeRatio: ${spacingOverSizeRatio}
+spacingSymmetry: ${spacingSymmetry}
+targetSizeIsHeightBool: ${targetSizeIsHeightBool}
+targetEccentricityXYDeg: ${targetEccentricityXYDeg}
+viewingDistanceCm: ${viewingDistanceCm}`;
+            targetSpecs.setText(targetSpecsString);
+            targetSpecs.setPos([
+              -window.innerWidth / 2,
+              -window.innerHeight / 2,
+            ]);
+            targetSpecs.setAutoDraw(true);
+          }
+
+          if (showConditionNameBool) {
+            let conditionNameString = `${condName}`;
+            conditionName.setText(conditionNameString);
+            if (showTargetSpecs) {
+              conditionName.setPos([
+                -window.innerWidth / 2,
+                targetSpecs.getBoundingBox(true).height,
+              ]);
+            } else {
+              conditionName.setPos([
+                -window.innerWidth / 2,
+                -window.innerHeight / 2,
+              ]);
+            }
+
+            conditionName.setAutoDraw(true);
+          }
+
+          trialInfoStr = getTrialInfoStr(
+            rc.language.value,
+            showCounterBool,
+            showViewingDistanceBool,
+            currentTrialIndex,
+            currentTrialLength,
+            currentBlockIndex,
+            totalBlockCount,
+            viewingDistanceCm
+          );
+          totalTrial.setText(trialInfoStr);
+          totalTrial.setFont(instructionFont);
+          totalTrial.setHeight(totalTrialConfig.fontSize);
+          totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+          // // totalTrialIndex = nextTrialInfo.trial;
+          // // totalBlockIndex = nextTrialInfo.block
+          // // keep track of which components have finished
+          trialComponents = [];
+          trialComponents.push(key_resp);
+          trialComponents.push(fixation);
+          trialComponents.push(flanker1);
+          trialComponents.push(target);
+          trialComponents.push(flanker2);
+
+          trialComponents.push(showCharacterSet);
+          // trialComponents.push(totalTrial);
+          // if (showTargetSpecs) trialComponents.push(targetSpecs);
+          // /* --- BOUNDING BOX --- */
+          addBoundingBoxesToComponents(
+            showBoundingBox,
+            showCharacterSetBoundingBox,
+            boundingBoxPolies,
+            characterSetBoundingBoxPolies,
+            displayCharacterSetBoundingBoxPolies[block_condition],
+            spacingRelationToSize,
+            thresholdParameter,
+            trialComponents
+          );
+          // /* --- /BOUNDING BOX --- */
+          // /* --- SIMULATED --- */
+          if (simulated && simulated[block]) {
+            if (!simulatedObserver[block_condition]) {
+              simulatedObserver[block_condition] = new SimulatedObserver(
+                simulated[block][block_condition],
+                level,
+                characterSet,
+                targetCharacter,
+                paramReader.read("thresholdProportionCorrect", block_condition),
+                paramReader.read("simulationBeta", block_condition),
+                paramReader.read("simulationDelta", block_condition),
+                paramReader.read("simulationThreshold", block_condition)
+              );
+            } else {
+              simulatedObserver[block_condition].updateTrial(
+                level,
+                characterSet,
+                targetCharacter
+              );
+            }
+          }
+          // /* --- /SIMULATED --- */
+
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* ------------------ LETTER Trial Instruction Routine END ------------------ */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
         },
       });
+
+      const gridDesired = paramReader.read("showGrid", block_condition);
+      grid.update(gridDesired, displayOptions);
+
+      for (const thisComponent of trialComponents)
+        if ("status" in thisComponent)
+          thisComponent.status = PsychoJS.Status.NOT_STARTED;
+
+      // update trial index
+      // totalTrialIndex = totalTrialIndex + 1;
+      /* /PRE-COMPUTE STIMULI FOR THE UPCOMING TRIAL */
+
+      psychoJS.eventManager.clearKeys();
+
+      psychoJS.experiment.addData(
+        "trialInstructionBeginDurationSec",
+        trialInstructionClock.getTime()
+      );
+
+      if (condition["showTakeABreakCreditBool"]) {
+        showTrialBreakProgressBar(currentBlockCredit);
+      } else {
+        hideTrialBreakProgressBar();
+      }
+
+      return Scheduler.Event.NEXT;
     };
   }
 
@@ -1719,6 +2185,17 @@ const experiment = (blockCount) => {
           }
         },
       });
+
+      if (showConditionNameBool) {
+        conditionNameConfig.x = -window.innerWidth / 2;
+        conditionNameConfig.y = -window.innerHeight / 2;
+        if (conditionName.status === PsychoJS.Status.NOT_STARTED) {
+          // keep track of start time/frame for later
+          conditionName.tStart = t; // (not accounting for frame time here)
+          conditionName.frameNStart = frameN; // exact frame index
+        }
+        conditionName.setAutoDraw(true);
+      }
 
       if (
         psychoJS.experiment.experimentEnded ||
@@ -1814,6 +2291,15 @@ const experiment = (blockCount) => {
       if (snapshot.getCurrentTrial().trialsVal)
         logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
+
+      const block_condition = condition["block_condition"];
+      if (paramReader.has("responseMustClickCrosshairBool")) {
+        if (
+          paramReader.read("responseMustClickCrosshairBool", block_condition) ==
+          true
+        )
+          responseType = 2;
+      }
 
       //------Prepare to start Routine 'trial'-------
       t = 0;
@@ -1920,7 +2406,6 @@ const experiment = (blockCount) => {
       if (
         targetKind.current === "reading" ||
         canType(responseType) ||
-        showGrid ||
         (simulated &&
           simulated[thisLoopNumber] &&
           simulated[thisLoopNumber][condition.block_condition])
@@ -2025,6 +2510,21 @@ const experiment = (blockCount) => {
         }
       }
 
+      if (showConditionNameBool) {
+        if (showTargetSpecs) {
+          conditionNameConfig.x = -window.innerWidth / 2;
+          conditionNameConfig.y = targetSpecs.getBoundingBox(true).height;
+        } else {
+          conditionNameConfig.x = -window.innerWidth / 2;
+          conditionNameConfig.y = -window.innerHeight / 2;
+        }
+        // *targetSpecs* updates
+        if (t >= 0.0) {
+          conditionName.setPos([conditionNameConfig.x, conditionNameConfig.y]);
+          conditionName.setAutoDraw(true);
+        }
+      }
+
       // *fixation* updates
       if (
         t >= 0.0 &&
@@ -2097,133 +2597,6 @@ const experiment = (blockCount) => {
         flanker2.setAutoDraw(false);
       }
 
-      /* --- BOUNDING BOX --- */
-      if (showBoundingBox) {
-        // // *targetBoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          targetBoundingPoly.status === PsychoJS.Status.NOT_STARTED
-        ) {
-          // keep track of start time/frame for later
-          targetBoundingPoly.tStart = t; // (not accounting for frame time here)
-          targetBoundingPoly.frameNStart = frameN; // exact frame index
-
-          const tightBoundingBox = target.getBoundingBox(true);
-
-          targetBoundingPoly.setAutoDraw(true);
-        }
-        if (
-          targetBoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          targetBoundingPoly.setAutoDraw(false);
-        }
-
-        // // *flanker1BoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          flanker1BoundingPoly.status === PsychoJS.Status.NOT_STARTED &&
-          spacingRelationToSize === "ratio"
-        ) {
-          // keep track of start time/frame for later
-          flanker1BoundingPoly.tStart = t; // (not accounting for frame time here)
-          flanker1BoundingPoly.frameNStart = frameN; // exact frame index
-
-          flanker1BoundingPoly.setAutoDraw(true);
-        }
-        if (
-          flanker1BoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          flanker1BoundingPoly.setAutoDraw(false);
-        }
-
-        // // *flanker2BoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          flanker2BoundingPoly.status === PsychoJS.Status.NOT_STARTED &&
-          spacingRelationToSize === "ratio"
-        ) {
-          // keep track of start time/frame for later
-          flanker2BoundingPoly.tStart = t; // (not accounting for frame time here)
-          flanker2BoundingPoly.frameNStart = frameN; // exact frame index
-
-          const tightBoundingBox = flanker2.getBoundingBox(true);
-          flanker2BoundingPoly.setPos([
-            tightBoundingBox.left,
-            tightBoundingBox.top,
-          ]);
-          flanker2BoundingPoly.setSize([
-            tightBoundingBox.width,
-            tightBoundingBox.height,
-          ]);
-
-          flanker2BoundingPoly.setAutoDraw(true);
-        }
-        if (
-          flanker2BoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          flanker2BoundingPoly.setAutoDraw(false);
-        }
-      }
-      if (showCharacterSetBoundingBox) {
-        // // *targetCharacterSetBoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          targetCharacterSetBoundingPoly.status === PsychoJS.Status.NOT_STARTED
-        ) {
-          // keep track of start time/frame for later
-          targetCharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
-          targetCharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
-          targetCharacterSetBoundingPoly.setAutoDraw(true);
-        }
-        if (
-          targetCharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          targetCharacterSetBoundingPoly.setAutoDraw(false);
-        }
-
-        // // *flanker1CharacterSetBoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          flanker1CharacterSetBoundingPoly.status ===
-            PsychoJS.Status.NOT_STARTED &&
-          spacingRelationToSize === "ratio"
-        ) {
-          // keep track of start time/frame for later
-          flanker1CharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
-          flanker1CharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
-          flanker1CharacterSetBoundingPoly.setAutoDraw(true);
-        }
-        if (
-          flanker1CharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          flanker1CharacterSetBoundingPoly.setAutoDraw(false);
-        }
-        // // *flanker2CharacterSetBoundingPoly* updates
-        if (
-          t >= 0.0 &&
-          flanker2CharacterSetBoundingPoly.status ===
-            PsychoJS.Status.NOT_STARTED &&
-          spacingRelationToSize === "ratio"
-        ) {
-          // keep track of start time/frame for later
-          flanker2CharacterSetBoundingPoly.tStart = t; // (not accounting for frame time here)
-          flanker2CharacterSetBoundingPoly.frameNStart = frameN; // exact frame index
-          flanker2CharacterSetBoundingPoly.setAutoDraw(true);
-        }
-        if (
-          flanker2CharacterSetBoundingPoly.status === PsychoJS.Status.STARTED &&
-          t >= frameRemains
-        ) {
-          flanker2CharacterSetBoundingPoly.setAutoDraw(false);
-        }
-      }
-      /* --- /BOUNDING BOX --- */
-
       // check for quit (typically the Esc key)
       if (
         psychoJS.experiment.experimentEnded ||
@@ -2235,6 +2608,21 @@ const experiment = (blockCount) => {
         }
       }
 
+      const timeWhenRespondable =
+        uniDelay + targetSafetyMarginSec + targetDurationSec;
+      updateBoundingBoxPolies(
+        t,
+        frameRemains,
+        frameN,
+        showBoundingBox,
+        showCharacterSetBoundingBox,
+        boundingBoxPolies,
+        characterSetBoundingBoxPolies,
+        displayCharacterSetBoundingBoxPolies[condition.block_condition],
+        spacingRelationToSize,
+        timeWhenRespondable,
+        thresholdParameter
+      );
       /* -------------------------------------------------------------------------- */
       // SHOW CharacterSet AND INSTRUCTIONS
       // *showCharacterSet* updates
@@ -2289,6 +2677,9 @@ const experiment = (blockCount) => {
 
   function trialRoutineEnd(snapshot) {
     return async function () {
+      grid.hide(true);
+      if (showTargetSpecs) targetSpecs.setAutoDraw(false);
+      if (showConditionNameBool) conditionName.setAutoDraw(false);
       if (
         toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
       ) {
@@ -2306,7 +2697,6 @@ const experiment = (blockCount) => {
         key_resp.stop();
         return Scheduler.Event.NEXT;
       }
-
       // setTimeout(() => {
       //   rc.resumeNudger();
       // }, 700);
@@ -2393,7 +2783,6 @@ const experiment = (blockCount) => {
           hideTrialProceedButton();
         }
       }
-
       // if trialBreak is ongoing
       const takeABreakMinimumDurationSec = condition
         ? paramReader.read(
@@ -2533,23 +2922,19 @@ const experiment = (blockCount) => {
 
     const timeBeforeDebriefDisplay = globalClock.getTime();
     const debriefScreen = new Promise((resolve) => {
-      if (debriefFormName.length) {
-        showDebriefForm(debriefFormName);
-        document
-          .getElementById("debrief-yes")
-          .addEventListener("click", (evt) => {
-            hideAllForms();
-            resolve({});
-          });
+      if (paramReader.read("_debriefForm")[0]) {
+        showForm(paramReader.read("_debriefForm")[0]);
+        document.getElementById("form-yes").addEventListener("click", () => {
+          hideForm();
+          resolve();
+        });
 
-        document
-          .getElementById("debrief-no")
-          .addEventListener("click", (evt) => {
-            hideAllForms();
-            resolve({});
-          });
+        document.getElementById("form-no").addEventListener("click", () => {
+          hideForm();
+          resolve();
+        });
       } else {
-        resolve({});
+        resolve();
       }
     });
     await debriefScreen;
@@ -2584,6 +2969,7 @@ const experiment = (blockCount) => {
         condition.responseEscapeOptionsBool.toString().toLowerCase() === "true"
       )
     ) {
+      showCursor();
       return {
         skipTrial: false,
         skipBlock: false,
@@ -2611,7 +2997,7 @@ const experiment = (blockCount) => {
     document.getElementById("skip-trial-btn").disabled = false;
     document.getElementById("skip-block-btn").disabled = false;
     document.getElementById("quit-btn").disabled = false;
-    if (!isProlificPreviewExperiment()) {
+    if (!(isProlificPreviewExperiment() || isPavloviaExperiment())) {
       // hide skipBlock Btn
       document.getElementById("skip-block-btn").style.visibility = "hidden";
       document.getElementById("skip-block-btn").disabled = true;
@@ -2667,6 +3053,7 @@ const experiment = (blockCount) => {
     document.getElementById("quit-btn").disabled = true;
     document.getElementById("skip-block-btn").disabled = true;
     // adding following lines to remove listeners
+    // TODO Bad code
     document.getElementById("skip-trial-btn").outerHTML =
       document.getElementById("skip-trial-btn").outerHTML;
     document.getElementById("skip-block-btn").outerHTML =
@@ -2677,8 +3064,4 @@ const experiment = (blockCount) => {
     document.removeEventListener("keydown", logKey);
     return action;
   }
-};
-
-const afterExperimentEnds = () => {
-  showExperimentEnding();
 };

@@ -7,3 +7,12 @@ export const isProlificPreviewExperiment = () => {
     searchParams.search("preview") != -1
   );
 };
+
+export const isPavloviaExperiment = () => {
+  let urlSearchParams = new URLSearchParams(window.location.search);
+  return (
+    urlSearchParams.get("participant") == null &&
+    urlSearchParams.get("session") == null &&
+    urlSearchParams.get("study_id") == null
+  );
+};

@@ -1,6 +1,8 @@
 // eslint-disable-next-line no-undef
 export const debug = process.env.debug;
 // export const debug = true;
+import { GLOSSARY } from "../parameters/glossary.ts";
+import { ParamReader } from "../parameters/paramReader";
 
 export function safeExecuteFunc(f, ...a) {
   if (f && typeof f === "function")
@@ -228,43 +230,62 @@ export const XYDegOfXYPix = (xyPix, displayOptions) => {
  * @param {Object} condition Parameters from the current staircase, as specified by the experimenter in experiment.csv
  * @param {Array} [exclude=[]] List of parameter names which should NOT be added to data
  */
-export const addConditionToData = (experiment, condition, exclude = []) => {
-  for (const [key, value] of Object.entries(condition)) {
-    if (!exclude.includes(key)) experiment.addData(key, value);
+export const addConditionToData = (
+  reader,
+  conditionName,
+  experiment,
+  exclude = []
+) => {
+  for (const parameter of Object.keys(GLOSSARY)) {
+    if (!exclude.includes(parameter))
+      experiment.addData(parameter, reader.read(parameter, conditionName));
   }
 };
 
 export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
-  psychoJS.experiment.addData(
-    "staircaseName",
-    currentLoop._currentStaircase._name
-  );
-  psychoJS.experiment.addData(
-    "questMeanAtEndOfTrial",
-    currentLoop._currentStaircase.mean()
-  );
-  psychoJS.experiment.addData(
-    "questSDAtEndOfTrial",
-    currentLoop._currentStaircase.sd()
-  );
-  psychoJS.experiment.addData(
-    "questQuantileOfQuantileOrderAtEndOfTrial",
-    currentLoop._currentStaircase.quantile(
-      currentLoop._currentStaircase._jsQuest.quantileOrder
-    )
-  );
+  // TODO What to do when data saving is rejected?
+  if (currentLoop._currentStaircase) {
+    psychoJS.experiment.addData(
+      "staircaseName",
+      currentLoop._currentStaircase._name
+    );
+    psychoJS.experiment.addData(
+      "questMeanAtEndOfTrial",
+      currentLoop._currentStaircase.mean()
+    );
+    psychoJS.experiment.addData(
+      "questSDAtEndOfTrial",
+      currentLoop._currentStaircase.sd()
+    );
+    psychoJS.experiment.addData(
+      "questQuantileOfQuantileOrderAtEndOfTrial",
+      currentLoop._currentStaircase.quantile(
+        currentLoop._currentStaircase._jsQuest.quantileOrder
+      )
+    );
+  } else {
+    console.error("undefined currentLoop._currentStaircase [utils.js 222]");
+  }
 };
 
 export const addBlockStaircaseSummariesToData = (loop, psychoJS) => {
   loop._staircases.forEach((staircase, i) => {
-    psychoJS.experiment.addData("staircaseName", staircase._name);
-    psychoJS.experiment.addData("questMeanAtEndOfTrialsLoop", staircase.mean());
-    psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", staircase.sd());
-    psychoJS.experiment.addData(
-      "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
-      staircase.quantile(staircase._jsQuest.quantileOrder)
-    );
-    if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
+    // TODO What to do when data saving is rejected?
+    if (staircase) {
+      psychoJS.experiment.addData("staircaseName", staircase._name);
+      psychoJS.experiment.addData(
+        "questMeanAtEndOfTrialsLoop",
+        staircase.mean()
+      );
+      psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", staircase.sd());
+      psychoJS.experiment.addData(
+        "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
+        staircase.quantile(staircase._jsQuest.quantileOrder)
+      );
+      if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
+    } else {
+      console.error("undefined staircase [utils.js 248]");
+    }
   });
 };
 
@@ -461,12 +482,13 @@ const rectIsEmpty = (rect) => {
 };
 
 export const rectFromPixiRect = (pixiRect) => {
-  // ASSUMES `center` aligned
-  const lowerLeft = [
+  // // ASSUMES `center` aligned
+  let lowerLeft, upperRight;
+  lowerLeft = [
     pixiRect.x - pixiRect.width / 2,
     pixiRect.y - pixiRect.height / 2,
   ];
-  const upperRight = [
+  upperRight = [
     pixiRect.x + pixiRect.width / 2,
     pixiRect.y + pixiRect.height / 2,
   ];
@@ -475,7 +497,13 @@ export const rectFromPixiRect = (pixiRect) => {
 };
 
 export class Rectangle {
-  constructor(lowerLeft, upperRight, units = undefined) {
+  constructor(
+    lowerLeft,
+    upperRight,
+    units = undefined,
+    characterSet = undefined,
+    centers = undefined
+  ) {
     this.units = units;
     this.left = lowerLeft[0];
     this.right = upperRight[0];
@@ -484,6 +512,9 @@ export class Rectangle {
 
     this.height = this.top - this.bottom;
     this.width = this.right - this.left;
+
+    this.characterSet = characterSet;
+    this.centers = centers;
   }
   getUnits() {
     return this.units;
@@ -532,4 +563,58 @@ export const getTripletCharacters = (charset) => {
   samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
   samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
   return shuffle(samples);
+};
+
+export const getCharSetBaselineOffsetPosition = (
+  XYPix,
+  normalizedCharacterSetRect,
+  heightPx
+) => {
+  const descent = normalizedCharacterSetRect.descent;
+  const ascent = normalizedCharacterSetRect.ascent;
+  const yOffset = descent * heightPx;
+  // const yOffset = descent * (heightPx * (descent/(descent + ascent)));
+  return [XYPix[0], XYPix[1] + yOffset];
+};
+
+/**
+ * Survey all the values for a given parameter.
+ * Returns an object mapping each block_condition to its `parameter` value.
+ * @param {ParamReader} reader Parameter reader initialized for this experiment
+ * @param {string} parameter The parameter being queried
+ * @returns Object enumerating the value of `parameter` for each `block_condition`
+ */
+export const surveyParameter = (reader, parameter) => {
+  const conditionIds = reader.read("block_condition", "__ALL_BLOCKS__");
+  const parameterValues = reader.read(parameter, "__ALL_BLOCKS__");
+  // Create a mapping of {block_condition -> value}
+  // see: https://www.geeksforgeeks.org/how-to-create-an-object-from-two-arrays-in-javascript/
+  return Object.assign(
+    ...conditionIds.map((conditionId, i) => ({
+      [conditionId]: parameterValues[i],
+    }))
+  );
+};
+
+export const validateRectPoints = ([lowerLeft, upperRight]) => {
+  if (lowerLeft[0] > upperRight[0])
+    console.error(
+      "INVALID RECT x of lowerLeft is greater than x of upperRight"
+    );
+  if (lowerLeft[1] > upperRight[1])
+    console.error(
+      "INVALID RECT y of lowerLeft is greater than y of upperRight"
+    );
+};
+
+/**
+ * Given two XY positions, return the X and Y displacements
+ * @param {[number, number]} a
+ * @param {[number, number]} b
+ * @returns {[number, number]}
+ */
+export const displacementBetweenXY = (a, b) => {
+  const xDisplacement = a[0] - b[0];
+  const yDisplacement = a[1] - b[1];
+  return [xDisplacement, yDisplacement];
 };

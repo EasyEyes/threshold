@@ -44,6 +44,7 @@ export const formCalibrationList = (reader) => {
         fullscreen: !debug,
         sparkle: true,
         check: reader.read("calibrateDistanceCheckBool")[0],
+        showCancelButton: false,
       },
     });
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
@@ -63,6 +64,7 @@ export const formCalibrationList = (reader) => {
         fullscreen: !debug,
         sparkle: true,
         check: reader.read("calibrateDistanceCheckBool")[0],
+        showCancelButton: false,
       },
     });
   if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
