@@ -26,6 +26,24 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  _allowedBrowsers: {
+    name: "_allowedBrowsers",
+    availability: "now",
+    example: "Safari",
+    explanation:
+      "A comma separated list of allowed browsers. If not allowed, we reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all browsers.",
+    type: "multicategorical",
+    default: "",
+  },
+  _allowedOperatingSystems: {
+    name: "_allowedOperatingSystems",
+    availability: "now",
+    example: "iOS,Linux",
+    explanation:
+      "A comma separated list of allowed operating systems. If not allowed, we reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all operating systems. ",
+    type: "multicategorical",
+    default: "",
+  },
   _authors: {
     name: "_authors",
     availability: "now",
@@ -87,6 +105,24 @@ export const GLOSSARY: Glossary = {
     explanation:
       "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
+    default: "",
+  },
+  _disallowedBrowsers: {
+    name: "_disallowedBrowsers",
+    availability: "now",
+    example: "Safari",
+    explanation:
+      "A comma separated list of browsers to be rejected. We reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all browsers. It is an error to include the parameter _disallowedBrowsers when _allowedBrowsers is already present.",
+    type: "multicategorical",
+    default: "",
+  },
+  _disallowedOperatingSystems: {
+    name: "_disallowedOperatingSystems",
+    availability: "now",
+    example: "iOS,Android",
+    explanation:
+      "A comma separated list of operating systems to be rejected. We reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all operating systems. It is an error to include the parameter _disallowedOperatingSystems when _allowedOperatingSystems is already present. ",
+    type: "multicategorical",
     default: "",
   },
   _experimentName: {
@@ -589,10 +625,10 @@ export const GLOSSARY: Glossary = {
     type: "",
     default: "",
   },
-  readingCorpusURL: {
-    name: "readingCorpusURL",
+  readingCorpusSource: {
+    name: "readingCorpusSource",
     availability: "now",
-    example: "http://xxx",
+    example: "the-phantom-tollbooth.txt",
     explanation:
       'Book of readable text. We typically use "The phantom tollbooth" a popular American children\'s book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. Every passage selection begins and ends at a sentence break.',
     type: "text",
