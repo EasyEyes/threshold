@@ -201,6 +201,7 @@ const paramReaderInitialized = async (reader) => {
     // Get fullscreen
     if (!rc.isFullscreen.value && !debug) {
       rc.getFullscreen();
+      await sleep(1000);
     }
   }
 
