@@ -360,8 +360,8 @@ export class Grid {
     const [lines, labels] = [[], []];
     const wPx = this.dimensions[0];
     const hPx = this.dimensions[1];
-    const xPadding = 35;
-    const yPadding = 10;
+    const xPadding = 0;
+    const yPadding = 0;
     for (const region of ["right", "left", "upper", "lower"]) {
       const nGridlines = ["right", "left"].includes(region)
         ? numberOfGridLinesPerSide[0]
@@ -431,7 +431,12 @@ export class Grid {
               font: "Arial",
               units: "pix",
               pos: pos,
-              height: Math.round(degreesToPixels(1, this.displayOptions)),
+              height: Math.min(
+                Math.round(degreesToPixels(1, this.displayOptions)),
+                50
+              ),
+              alignHoriz: "left",
+              alignVert: "bottom",
               ori: 0.0,
               color: new util.Color("black"),
               opacity: 1.0,
