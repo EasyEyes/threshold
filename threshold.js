@@ -6,12 +6,10 @@
 
 import {
   debug,
-  getTripletCharacters,
+  // getTripletCharacters,
   sleep,
   toShowCursor,
 } from "./components/utils.js";
-
-const useRC = true;
 
 import * as core from "./psychojs/src/core/index.js";
 import * as data from "./psychojs/src/data/index.js";
@@ -40,11 +38,21 @@ import "./components/css/widgets.css";
 import "./components/css/psychojsExtra.css";
 
 ////
+/* --------------------------------- Global --------------------------------- */
+import {
+  useRC,
+  rc,
+  targetKind,
+  readingCorpusArchive,
+  readingWordListArchive,
+  readingWOrdFrequencyArchive,
+  readingThisBlockPages,
+} from "./components/global.js";
+
+////
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
-
-import { targetKind } from "./components/global.js";
 
 import {
   logger,
@@ -125,12 +133,13 @@ import { showExperimentEnding } from "./components/widgets.js";
 import { populateQuestDefaults } from "./components/questValues.js";
 
 // READING
-// import {
-//   getPageData,
-//   prepareForReading,
-//   readBookText,
-//   readingTaskFields,
-// } from "./components/readingUtils.js";
+import { prepareReadingQuestions } from "./components/reading.ts";
+import {
+  getThisBlockPages,
+  loadReadingCorpus,
+} from "./components/readingAddons.js";
+
+// Break
 import {
   hideTrialBreakProgressBar,
   hideTrialBreakWidget,
@@ -139,10 +148,17 @@ import {
   showTrialBreakWidget,
   showTrialProceedButton,
 } from "./components/trialBreak.js";
+
+/* ---------------------------------- */
+// * TRIAL ROUTINES
+
 import {
   _identify_trialInstructionRoutineBegin,
   _identify_trialInstructionRoutineEnd,
 } from "./components/trialRoutines.js";
+
+/* ---------------------------------- */
+
 import { exampleReadingParagraphs } from "./components/hardcodedExamples.js";
 import { isProlificPreviewExperiment } from "./components/prolific.js";
 import { switchKind } from "./components/blockTargetKind.js";
@@ -153,10 +169,6 @@ window.jsQUEST = jsQUEST;
 
 var conditionTrials;
 let correctAns;
-
-// eslint-disable-next-line no-undef
-const rc = RemoteCalibrator;
-rc.init();
 
 // store info about the experiment session:
 let expName = "Threshold"; // from the Builder filename that created this script
@@ -185,6 +197,14 @@ const paramReaderInitialized = async (reader) => {
 
   // ! Check if to use grids
   [showGrid, gridVisible] = readGridParameter(reader, simulated);
+
+  // ! Load reading corpus and preprocess
+  loadReadingCorpus(reader);
+  console.log(
+    readingCorpusArchive,
+    readingWordListArchive,
+    readingWOrdFrequencyArchive
+  );
 
   /* ---------------- TEMPORARY! PLEASE UPDATE AND REMOVE @svr8 --------------- */
   document.getElementById("temp-element-hider").remove();
@@ -472,7 +492,10 @@ const experiment = (blockCount) => {
 
   var globalClock;
   var routineTimer, routineClock, blockClock;
-  var initInstructionClock, eduInstructionClock, trialInstructionClock;
+  var initInstructionClock,
+    eduInstructionClock,
+    trialInstructionClock,
+    blockScheduleFinalClock;
 
   var currentBlockCredit;
   var trialBreakStartTime = 0;
@@ -713,6 +736,7 @@ const experiment = (blockCount) => {
     initInstructionClock = new util.Clock();
     eduInstructionClock = new util.Clock();
     trialInstructionClock = new util.Clock();
+    blockScheduleFinalClock = new util.Clock();
 
     // TODO Not working
     if (rc.languageDirection.value === "RTL") {
@@ -911,6 +935,12 @@ const experiment = (blockCount) => {
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
       currentLoop = blocks; // we're now the current loop
 
+      /* -------------------------------------------------------------------------- */
+      // Preset params
+      // ! Set current targetKind for the block
+      targetKind.current = paramReader.read("targetKind")[0];
+      /* -------------------------------------------------------------------------- */
+
       // Schedule all the trials in the trialList:
       for (const thisBlock of blocks) {
         const snapshot = blocks.getSnapshot();
@@ -928,6 +958,15 @@ const experiment = (blockCount) => {
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
         blocksLoopScheduler.add(trialsLoopEnd);
+
+        switchKind(targetKind.current, {
+          reading: () => {
+            blocksLoopScheduler.add(blockSchedulerFinalRoutineBegin(snapshot));
+            blocksLoopScheduler.add(blockSchedulerFinalRoutineEachFrame());
+            blocksLoopScheduler.add(blockSchedulerFinalRoutineEnd());
+          },
+        });
+
         blocksLoopScheduler.add(
           endLoopIteration(blocksLoopScheduler, snapshot)
         );
@@ -970,6 +1009,9 @@ const experiment = (blockCount) => {
             method: TrialHandler.Method.SEQUENTIAL,
             seed: undefined,
           });
+
+          // Construct this block pages
+          getThisBlockPages(paramReader, trialsConditions[0].block_condition);
         },
         letter: () => {
           trialsConditions = populateQuestDefaults(
@@ -1041,6 +1083,40 @@ const experiment = (blockCount) => {
     return Scheduler.Event.NEXT;
   }
 
+  // An extra routine after all the trials are finished
+  function blockSchedulerFinalRoutineBegin(snapshot) {
+    return async function () {
+      loggerText("blockSchedulerFinalRoutineBegin");
+
+      TrialHandler.fromSnapshot(snapshot);
+      blockScheduleFinalClock.reset();
+      frameN = -1;
+      continueRoutine = true;
+
+      const blockCount = snapshot.block + 1;
+      prepareReadingQuestions(
+        paramReader.read("readingNumberOfQuestions", blockCount)[0],
+        paramReader.read("readingNumberOfPossibleAnswers", blockCount)[0],
+        readingThisBlockPages,
+        readingWOrdFrequencyArchive[
+          paramReader.read("readingCorpusSource", blockCount)[0]
+        ]
+      );
+    };
+  }
+
+  function blockSchedulerFinalRoutineEachFrame() {
+    return async function () {
+      //
+    };
+  }
+
+  function blockSchedulerFinalRoutineEnd() {
+    return async function () {
+      //
+    };
+  }
+
   /* -------------------------------------------------------------------------- */
   /*                                  NEW BLOCK                                 */
   /* -------------------------------------------------------------------------- */
@@ -1072,9 +1148,6 @@ const experiment = (blockCount) => {
         "conditionTrials",
         thisLoopNumber
       );
-
-      // ! Set current targetKind for the block
-      targetKind.current = paramReader.read("targetKind")[0];
 
       logger("possibleTrials", possibleTrials);
       totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
@@ -1159,8 +1232,10 @@ const experiment = (blockCount) => {
       // ! Distance
       // rc.resumeDistance();
 
-      initInstructionClock.reset(); // clock
       TrialHandler.fromSnapshot(snapshot);
+      initInstructionClock.reset(); // clock
+      frameN = -1;
+      continueRoutine = true;
 
       const blockCount = snapshot.block + 1;
 
@@ -1782,7 +1857,7 @@ const experiment = (blockCount) => {
           trialComponents.push(key_resp);
           trialComponents.push(readingParagraph);
 
-          readingParagraph.setText(exampleReadingParagraphs[readingIndex]);
+          readingParagraph.setText(readingThisBlockPages[readingIndex]);
           readingParagraph.setFont(
             paramReader.read("readingFont", block_condition)
           );

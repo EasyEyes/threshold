@@ -1,10 +1,12 @@
 import axios from "axios";
 
+// Old code
+
 /*
   returns list of pages to be displayed on each page. each page entry contains a list of strings
 */
 export const getPageData = async (readingTaskInfo) => {
-  const completeText = await readBookText(readingTaskInfo.readingCorpusURL);
+  const completeText = await readBookText(readingTaskInfo.readingCorpusSource);
   let curVal, localOffset;
 
   // break text into lines: readingMaxCharactersPerLine characters per line

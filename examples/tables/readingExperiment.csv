@@ -3,7 +3,7 @@ _authors,Denis Pelli
 block,1
 calibrateBlindSpotBool,FALSE
 calibrateScreenSizeBool,FALSE
-readingCorpusURL,https://PhantomTollbooth.txt
+readingCorpusSource,the-phantom-tollbooth.txt
 readingDefineSingleLineSpacingAs,nominalSize
 readingFont,Roboto Mono
 readingFontSource,google
@@ -13,6 +13,6 @@ readingMultipleOfSingleLineSpacing,1.2
 readingNominalSizeDeg,0.5
 readingNumberOfPossibleAnswers,4
 readingNumberOfQuestions,3
-readingPages,3
+readingPages,4
 readingSetSizeBy,nominal
 targetKind,reading

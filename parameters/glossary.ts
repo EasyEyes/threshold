@@ -147,7 +147,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantRecruitmentServiceAccount: {
     name: "_participantRecruitmentServiceAccount",
-    availability: "later",
+    availability: "now",
     example: "123ABC",
     explanation:
       "Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -156,16 +156,25 @@ export const GLOSSARY: Glossary = {
   },
   _participantsHowMany: {
     name: "_participantsHowMany",
-    availability: "later",
+    availability: "now",
     example: "100",
     explanation:
       "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "integer",
     default: "1",
   },
+  _pavloviaOfferPilotingOptionBool: {
+    name: "_pavloviaOfferPilotingOptionBool",
+    availability: "now",
+    example: "PILOTING",
+    explanation:
+      "EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two ways of running your experiment, PILOTING and RUNNING. PILOTING mode is free, but your experiment can only be run directly from the Pavlovia dashboard and cannot be deployed. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), but you get a URL that you can deploy. It is our impression that most Pavlovia users belong to institutions that own site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaOfferPilotingOptionBool be FALSE (the default) to disable the PILOTING option, to streamline the EasyEyes scientist page.",
+    type: "boolean",
+    default: "FALSE",
+  },
   _prolificEligibilityRequirements: {
     name: "_prolificEligibilityRequirements",
-    availability: "later",
+    availability: "now",
     example: "",
     explanation:
       "This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
@@ -174,7 +183,7 @@ export const GLOSSARY: Glossary = {
   },
   _prolificStudyType: {
     name: "_prolificStudyType",
-    availability: "later",
+    availability: "now",
     example: "US_REP_SAMPLE",
     explanation:
       "Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
@@ -301,7 +310,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationCheckBool: {
     name: "fixationCheckBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
       "Display a foveal triplet that is easy to read if the participant's eye is on fixation, and hard to read if the eye is elsewhere.",
@@ -580,10 +589,10 @@ export const GLOSSARY: Glossary = {
     type: "",
     default: "",
   },
-  readingCorpusURL: {
-    name: "readingCorpusURL",
+  readingCorpusSource: {
+    name: "readingCorpusSource",
     availability: "now",
-    example: "http://xxx",
+    example: "the-phantom-tollbooth.txt",
     explanation:
       'Book of readable text. We typically use "The phantom tollbooth" a popular American children\'s book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. Every passage selection begins and ends at a sentence break.',
     type: "text",
@@ -685,7 +694,8 @@ export const GLOSSARY: Glossary = {
     name: "readingPages",
     availability: "now",
     example: "4",
-    explanation: "Number of pages to be read.",
+    explanation:
+      "Number of pages to be read. The first and last pages will not be used for testing.",
     type: "numerical",
     default: "4",
   },
@@ -776,7 +786,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Allow participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool or showGridBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool. But responseMustClickCrosshairBool overrides all other settings.",
+      'Allow participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. But responseMustClickCrosshairBool overrides all other settings while the crosshair is available for clicking.',
     type: "boolean",
     default: "FALSE",
   },
@@ -792,7 +802,7 @@ export const GLOSSARY: Glossary = {
   screenshotBool: {
     name: "screenshotBool",
     availability: "now",
-    example: "FALSE",
+    example: "TRUE",
     explanation:
       'Requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to illustrate the stimulus in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n\nCan we save these files to a "Screenshots" folder in the participant computer\'s Download folder or in the experiment repository on Pavlovia? ',
     type: "boolean",
@@ -843,6 +853,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  showConditionNameBool: {
+    name: "showConditionNameBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "If TRUE, then display condition name as text at lower-left corner, or, if showTargetSpecsBool is TRUE, above target specs. See showTargetSpecsBool. The point size of condition-name text should be 1.4x bigger than we use for target specs.",
+    type: "boolean",
+    default: "FALSE",
+  },
   showCounterBool: {
     name: "showCounterBool",
     availability: "now",
@@ -871,14 +890,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  showGridsBool: {
-    name: "showGridsBool",
+  showGrid: {
+    name: "showGrid",
     availability: "now",
-    example: "TRUE",
+    example: "deg",
     explanation:
-      'To allow visual checking of location and size, setting showGridsBool to TRUE requests that the experiment allow optional display of one of several grids over the whole screen. Pressing the backquote key (below ESCAPE) turns on the first grid, and pressing it again cycles through the various grids. Each grid should be labeled  with numbers and units on the major axes. The "cm" grid has cm units, origin in lower left, thick lines at 5 cm, and regular lines at 1 cm. The "deg" grid has deg units, origin at fixation, thick lines at 5 deg, and regular lines at 1 deg. The "pix" grid has pix units, origin at lower left, thick lines at 500 pix, and regular lines at 100 pix.  Any snapshot should include whatever grids are being displayed.\nSIDE EFFECT?: Does setting showGridBool to TRUE enables type as a response method, regardless of the setting of responseTypedBool?',
-    type: "boolean",
-    default: "FALSE",
+      "Show a full-screen grid that aids visual checking of location and size. Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', pressing the backquote key (below ESCAPE) repeatedly cyles through the four states: px, cm, deg, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' grid has its origin at fixation. ",
+    type: "categorical",
+    default: "disabled",
+    categories: ["px", "cm", "deg", "none", "disabled"],
   },
   showInstructionsWhere: {
     name: "showInstructionsWhere",
@@ -918,21 +938,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  showTitle: {
-    name: "showTitle",
-    availability: "now",
-    example: "Font demo.",
-    explanation:
-      "If nonempty, then display it as text at lower-left corner, or, if showTargetSpecsBool is TRUE, above target specs. See showTargetSpecsBool.",
-    type: "text",
-    default: "",
-  },
   showViewingDistanceBool: {
     name: "showViewingDistanceBool",
     availability: "now",
     example: "FALSE",
     explanation:
-      "If TRUE display something like \"Trial 31 of 120. Block 2 of 3. At 32 cm.\" (The trial and block counters appear only if showCounterBool is TRUE.) Without distance tracking, this is a subtle reminder to the participant of the distance they are supposed to be at. With distance tracking, it allows both the participant and the experimenter to monitor the dynamic viewing distance. It's updated only once or twice per trial, so it's not distracting.",
+      'If TRUE display something like "Trial 31 of 120. Block 2 of 3. At 32 cm." (The trial and block counters appear only if showCounterBool is TRUE.) Without distance tracking, this is a subtle reminder to the participant of the distance they are supposed to be at. With distance tracking, it allows both the participant and the experimenter to monitor the dynamic viewing distance. It\'s updated only once or twice per trial, to avoid drawing attention away from the stimulus.',
     type: "boolean",
     default: "FALSE",
   },
@@ -1031,7 +1042,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "screen",
     explanation:
-      "spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity eccDeg is nonzero and spacingDirection is radial. The inner flanker will have the specified spacingDeg. This only affects the spacing of the outer flanker, which is adjusted to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e. equal in log(eccDeg + 0.15). ",
+      "spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity eccDeg is nonzero and spacingDirection is radial. The inner flanker will have the specified spacingDeg. This only affects the spacing of the outer flanker, which is adjusted to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e. equal in log(eccDeg + 0.15), where eccDeg is the radial eccentricity in deg.",
     type: "categorical",
     default: "retina",
     categories: ["screen", "retina", "cortex"],
