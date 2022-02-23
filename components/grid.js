@@ -40,7 +40,7 @@ export class Grid {
     this.dimensions = this.psychoJS.window._size;
     this.gridkey = { key: ["`", "~"], code: "Backquote", keyCode: 192 };
 
-    this.spawnGridStims();
+    // this.spawnGridStims();
 
     window.onkeydown = (e) => {
       if (
@@ -49,6 +49,7 @@ export class Grid {
         e.keyCode === this.gridkey.keyCode
       )
         this.cycle();
+      e.stopPropagation();
     };
     // EXPERIMENTAL window.onresize = (e) => this.update();
     this._reflectVisibility();
@@ -102,12 +103,12 @@ export class Grid {
   /**
    * Generate the stims for the grid, and store in `this._allGridStims`.
    * Generates all three grids if now parameter is provided, or else just the provided unit's grid.
-   * @param {("px" | "cm" | "deg" | "none")} units
+   * @param {("px" | "cm" | "deg" | "mm" | "none")} units
    */
   spawnGridStims(units = undefined) {
     if (units) this.allGrids[units] = this._getGridStims(units);
     else
-      for (const unit of ["px", "cm", "deg", "none", "disabled"]) {
+      for (const unit of ["px", "cm", "deg", "mm", "none", "disabled"]) {
         this.allGrids[unit] = this._getGridStims(unit);
       }
   }
@@ -150,6 +151,8 @@ export class Grid {
         return this._getCmGridStims();
       case "deg":
         return this._getDegGridStims();
+      case "mm":
+        return this._getMmGridStims();
       case "none":
         return [[], []];
       case "disabled":
@@ -184,11 +187,6 @@ export class Grid {
     }
   };
 
-  _gridStillValid(units) {
-    // TODO implement checks to see if the stims need to be recalculated
-    // so that grids can stay current with minimal computation
-  }
-
   _cycleUnits(previousUnits) {
     switch (previousUnits) {
       case "none":
@@ -198,6 +196,8 @@ export class Grid {
       case "cm":
         return "deg";
       case "deg":
+        return "mm";
+      case "mm":
         return "none";
       case "disabled":
         return "disabled";
@@ -446,5 +446,102 @@ export class Grid {
       }
     }
     return [lines, labels];
+  };
+
+  /**
+   * rMm = 38*log10((norm(xy)+0.15)/0.15) [1]
+   * rMm/38 = log10((r+0.15)/0.15)        [2]
+   * 10**(rMm/38) = (r+0.15)/0.15         [3]
+   * 10**(rMm/38)*0.15 = r + 0.15         [4]
+   * 10**(rMm/38)*0.15 - 0.15 = r         [5]
+   */
+  _getMmGridStims = () => {
+    const fixation = this.displayOptions.fixationXYPix;
+    const fixationDeg = XYDegOfXYPix(fixation, this.displayOptions);
+    const screen = {
+      top: this.dimensions[1] / 2,
+      bottom: -this.dimensions[1] / 2,
+      left: -this.dimensions[0] / 2,
+      right: this.dimensions[0] / 2,
+    };
+    const circle = {
+      top: fixation[1],
+      bottom: fixation[1],
+      left: fixation[0],
+      right: fixation[0],
+    };
+    let moreCirclesNeeded =
+      circle.top < screen.top ||
+      circle.bottom > screen.bottom ||
+      circle.right < screen.right ||
+      circle.left > screen.left;
+    const [circles, labels] = [[], []];
+    let rMm = 0,
+      mostRecentLabel = fixation[0];
+    while (moreCirclesNeeded) {
+      // Find new r, aka norm(xy). See [5] above.
+      const r = Math.pow(10, rMm / 38) * 0.15 - 0.15;
+      const rPix = XYPixOfXYDeg(
+        [fixationDeg[0] + r, fixationDeg[1]],
+        this.displayOptions
+      )[0];
+
+      // Create circle
+      circles.push(
+        new visual.Polygon({
+          win: this.psychoJS.window,
+          name: `mm-grid-circle-${rMm}`,
+          units: "pix",
+          edges: 360,
+          radius: rPix,
+          ori: 0,
+          pos: fixation,
+          lineWidth: 1,
+          lineColor: new util.Color("plum"),
+          opacity: 1,
+          depth: -1,
+          interpolate: true,
+        })
+      );
+
+      if (rPix - mostRecentLabel > 50) {
+        // Create label
+        const pos = XYPixOfXYDeg(
+          [fixationDeg[0] + r, fixationDeg[1]],
+          this.displayOptions
+        );
+        labels.push(
+          new visual.TextStim({
+            name: `mm-grid-label-${rMm}`,
+            win: this.psychoJS.window,
+            text: `${rMm} rMm`,
+            font: "Arial",
+            units: "pix",
+            pos: pos,
+            height: 15,
+            ori: 0.0,
+            color: new util.Color("black"),
+            opacity: 1.0,
+            depth: 0.0,
+          })
+        );
+        mostRecentLabel = rPix;
+      }
+      // Add & update
+      rMm += 1;
+      circle.top = XYPixOfXYDeg([fixationDeg[0], r], this.displayOptions)[1];
+      circle.bottom = XYPixOfXYDeg(
+        [fixationDeg[0], -r],
+        this.displayOptions
+      )[1];
+      circle.left = XYPixOfXYDeg([-r, fixationDeg[1]], this.displayOptions)[0];
+      circle.right = XYPixOfXYDeg([r, fixationDeg[1]], this.displayOptions)[0];
+      moreCirclesNeeded =
+        circle.top < screen.top ||
+        circle.bottom > screen.bottom ||
+        circle.right < screen.right ||
+        circle.left > screen.left;
+    }
+    return [circles, labels];
   };
 }
