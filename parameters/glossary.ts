@@ -934,7 +934,7 @@ export const GLOSSARY: Glossary = {
       "Show a full-screen grid that aids visual checking of location and size. Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', pressing the backquote key (below ESCAPE) repeatedly cyles through the four states: px, cm, deg, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' grid has its origin at fixation. ",
     type: "categorical",
     default: "disabled",
-    categories: ["px", "cm", "deg", "none", "disabled"],
+    categories: ["px", "cm", "deg", "mm", "none", "disabled"],
   },
   showInstructionsWhere: {
     name: "showInstructionsWhere",
