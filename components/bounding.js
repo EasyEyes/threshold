@@ -11,6 +11,7 @@ import {
   norm,
   Rectangle,
   validateRectPoints,
+  displacementBetweenXY,
 } from "./utils.js";
 
 import { Permutation } from "js-combinatorics";
@@ -44,6 +45,8 @@ export const getCharacterSetBoundingBox = (
     autoLog: false,
   });
   const [centers, boundingRectPoints] = [{}, {}];
+  let setAscent = -Infinity;
+  let setDescent = -Infinity;
   // Create a list of all possible text strings that could be used as stimuli
   const texts = [...new Permutation(characterSet, repeats)].map((a) =>
     "".concat(...a)
@@ -64,6 +67,8 @@ export const getCharacterSetBoundingBox = (
     const descent = thisMetrics.boundingBox.actualBoundingBoxDescent;
     const left = thisMetrics.boundingBox.actualBoundingBoxLeft;
     const right = thisMetrics.boundingBox.actualBoundingBoxRight;
+    setAscent = Math.max(setAscent, ascent);
+    setDescent = Math.max(setDescent, descent);
 
     // Get the bounding points around this specific text stim
     const thisBoundingRectPoints = [
@@ -102,6 +107,15 @@ export const getCharacterSetBoundingBox = (
       characterSetBoundingRectPoints[1][1] / height,
     ],
   ];
+
+  const normalizedAscent = setAscent / height;
+  const normalizedDescent = setDescent / height;
+  const ascentToDescent =
+    normalizedAscent / (normalizedDescent + normalizedAscent);
+  logger("ascentToDescent", ascentToDescent);
+  logger("normalizedAscent", normalizedAscent);
+  logger("normalizedDescent", normalizedDescent);
+
   // Get the center of this (ie global over the character set) bounding points
   const normalizedCenter = [
     (normalizedCharacterSetBoundingPoints[0][0] +
@@ -121,7 +135,8 @@ export const getCharacterSetBoundingBox = (
     normalizedCharacterSetBoundingPoints[1],
     "pix",
     characterSet,
-    centers
+    centers,
+    ascentToDescent
   );
   return normalizedCharacterSetBoundingRect;
 };
@@ -387,11 +402,18 @@ export const restrictSpacingDeg = (
           ? sizeDeg
           : (sizeDeg * characterSetRectPx.height) / characterSetRectPx.width;
         [, topPx] = XYPixOfXYDeg(
-          [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
+          [
+            targetXYDeg[0],
+            targetXYDeg[1] + heightDeg * characterSetRectPx.ascentToDescent,
+          ],
           displayOptions
         );
-        const [, bottomPx] = XYPixOfXYDeg(
-          [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
+        [, bottomPx] = XYPixOfXYDeg(
+          [
+            targetXYDeg[0],
+            targetXYDeg[1] -
+              heightDeg * (1 - characterSetRectPx.ascentToDescent),
+          ],
           displayOptions
         );
         heightPx = topPx - bottomPx;
@@ -449,10 +471,28 @@ export const restrictSpacingDeg = (
                   flanker1XYPx[0] - targetXYPx[0],
                   flanker1XYPx[1] - targetXYPx[1],
                 ];
+                logger("screen norm(delatXYPx)", norm(deltaXYPx));
+                logger("screen heightPx", heightPx);
+                logger("screen deltaXYPx", deltaXYPx);
+                const oldHeightPx = heightPx;
+                heightPx = targetSizeIsHeightBool
+                  ? norm(deltaXYPx)
+                  : (norm(deltaXYPx) * characterSetRectPx.height) /
+                    characterSetRectPx.width;
+                logger("characterSet", characterSetRectPx.characterSet);
+                logger("old-new heightPx", oldHeightPx - heightPx);
+                logger(
+                  "w/h",
+                  characterSetRectPx.width / characterSetRectPx.height
+                );
+                widthPx =
+                  heightPx *
+                  (characterSetRectPx.width / characterSetRectPx.height);
                 flanker2XYPx = [
                   targetXYPx[0] - deltaXYPx[0],
                   targetXYPx[1] - deltaXYPx[1],
                 ];
+                logger("screen new heightPx", heightPx);
                 flanker2XYDeg = XYDegOfXYPix(flanker2XYPx, displayOptions);
                 const deltaXYDeg = [
                   flanker2XYDeg[0] - targetXYDeg[0],
@@ -498,6 +538,16 @@ export const restrictSpacingDeg = (
         flanker2XYDeg = [targetXYDeg[0] + v2XY[0], targetXYDeg[1] + v2XY[1]];
         flanker1XYPx = XYPixOfXYDeg(flanker1XYDeg, displayOptions);
         flanker2XYPx = XYPixOfXYDeg(flanker2XYDeg, displayOptions);
+        logger("screen flanker1XYPx", flanker1XYPx);
+        logger(
+          "screen f1 dist",
+          displacementBetweenXY(flanker1XYPx, targetXYPx)
+        );
+        logger("screen flanker2XYPx", flanker2XYPx);
+        logger(
+          "screen f2 dist",
+          displacementBetweenXY(flanker2XYPx, targetXYPx)
+        );
         stimulusRectPx = new Rectangle(
           [
             Math.min(flanker1XYPx[0], flanker2XYPx[0]),

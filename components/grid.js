@@ -405,7 +405,6 @@ export class Grid {
             pos = [-wPx / 2 + xPadding, y + yPadding];
             break;
         }
-        logger("verticies", verticies);
         lines.push(
           new visual.ShapeStim({
             name: `${region}-grid-line-${i}`,
