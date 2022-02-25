@@ -169,6 +169,7 @@ const paramReaderInitialized = async (reader) => {
     // Get fullscreen
     if (!rc.isFullscreen.value && !debug) {
       rc.getFullscreen();
+      await sleep(1000);
     }
   }
 
@@ -880,6 +881,8 @@ const experiment = (blockCount) => {
 
   var blocks;
   var currentLoop;
+  // var currentLoopBlock;
+
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
@@ -896,7 +899,7 @@ const experiment = (blockCount) => {
         name: "blocks",
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
-      currentLoop = blocks; // we're now the current loop
+      // currentLoopBlock = blocks;
 
       // Schedule all the trials in the trialList:
       for (const thisBlock of blocks) {
@@ -952,8 +955,10 @@ const experiment = (blockCount) => {
         conditions: trialsConditions,
         method: TrialHandler.Method.FULLRANDOM,
       });
+
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
-      currentLoop = trials; // we're now the current loop
+      currentLoop = trials;
+
       // Schedule all the trials in the trialList:
       for (const thisQuestLoop of trials) {
         const snapshot = trials.getSnapshot();
@@ -1496,6 +1501,7 @@ const experiment = (blockCount) => {
       /* PRECOMPUTE STIMULI FOR THE UPCOMING TRIAL */
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
       const reader = paramReader;
+
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
       psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
@@ -1666,6 +1672,11 @@ const experiment = (blockCount) => {
         targetKind: targetKind,
       };
 
+      grid.update(
+        paramReader.read("showGrid", block_condition),
+        displayOptions
+      );
+
       // Fixation placement does not depend on the value of "spacingRelationToSize"...
       fixation.setPos(fixationXYPx);
       fixation.setHeight(fixationSize);
@@ -1786,14 +1797,14 @@ const experiment = (blockCount) => {
           Math.round((spacing / spacingOverSizeRatio + Number.EPSILON) * 1000) /
           1000;
         let targetSpecsString = `size: ${size} deg
-          spacing: ${spacing} deg
-          targetFont: ${targetFont}
-          spacingRelationToSize: ${spacingRelationToSize}
-          spacingOverSizeRatio: ${spacingOverSizeRatio}
-          spacingSymmetry: ${spacingSymmetry}
-          targetSizeIsHeightBool: ${targetSizeIsHeightBool}
-          targetEccentricityXYDeg: ${targetEccentricityXYDeg}
-          viewingDistanceCm: ${viewingDistanceCm}`;
+spacing: ${spacing} deg
+targetFont: ${targetFont}
+spacingRelationToSize: ${spacingRelationToSize}
+spacingOverSizeRatio: ${spacingOverSizeRatio}
+spacingSymmetry: ${spacingSymmetry}
+targetSizeIsHeightBool: ${targetSizeIsHeightBool}
+targetEccentricityXYDeg: ${targetEccentricityXYDeg}
+viewingDistanceCm: ${viewingDistanceCm}`;
         targetSpecs.setText(targetSpecsString);
         targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
         targetSpecs.setAutoDraw(true);
@@ -1879,9 +1890,6 @@ const experiment = (blockCount) => {
       }
       // /* --- /SIMULATED --- */
 
-      const gridDesired = reader.read("showGrid", block_condition);
-      grid.update(gridDesired, displayOptions);
-
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
@@ -1902,6 +1910,7 @@ const experiment = (blockCount) => {
       } else {
         hideTrialBreakProgressbar();
       }
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -2037,9 +2046,8 @@ const experiment = (blockCount) => {
       hideCursor();
 
       ////
-      if (debug) {
+      if (debug)
         console.log("%c\n\n====== New Trial ======\n\n", "color: purple");
-      }
       logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
 
@@ -2079,9 +2087,7 @@ const experiment = (blockCount) => {
         )
       );
       instructions.setAutoDraw(false);
-      if (debug) {
-        logger("trials trialRoutineBegin :", trials);
-      }
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -2402,9 +2408,6 @@ const experiment = (blockCount) => {
 
   function trialRoutineEnd() {
     return async function () {
-      if (debug) {
-        logger("trials Inside trialRoutineEnd :", trials);
-      }
       grid.hide(true);
       if (showTargetSpecs) targetSpecs.setAutoDraw(false);
       if (showConditionNameBool) conditionName.setAutoDraw(false);
@@ -2449,10 +2452,10 @@ const experiment = (blockCount) => {
         // update the trial handler
         if (currentLoop instanceof MultiStairHandler) {
           currentLoop.addResponse(key_resp.corr, level);
+          addTrialStaircaseSummariesToData(currentLoop, psychoJS);
         } else {
           console.error("currentLoop is not MultiStairHandler");
         }
-        addTrialStaircaseSummariesToData(currentLoop, psychoJS);
 
         psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
         psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
@@ -2479,8 +2482,7 @@ const experiment = (blockCount) => {
 
         // increase takeABreakCredit
         currentBlockCredit += condition["takeABreakTrialCredit"];
-        // console.log("condition[takeABreakTrialCredit] is ", condition["takeABreakTrialCredit"])
-        // console.log("currentBlockCredit ", currentBlockCredit)
+
         // toggle takeABreak credit progress-bar
         if (condition["showTakeABreakCreditBool"]) {
           showTrialBreakProgressbar(currentBlockCredit);
@@ -2493,7 +2495,9 @@ const experiment = (blockCount) => {
           trialBreakStartTime = Date.now();
           trialBreakStatus = true;
           currentBlockCredit -= 1;
+
           showTrialBreakWidget("");
+
           hideTrialProceedButton();
         }
       }
@@ -2511,7 +2515,6 @@ const experiment = (blockCount) => {
             rc.language.value,
             responseType
           );
-          //console.log("trialBreakBody :", trialBreakBody)
           showTrialBreakWidget(trialBreakBody);
 
           // show proceed button
@@ -2564,6 +2567,9 @@ const experiment = (blockCount) => {
             );
           };
         }
+
+        return Scheduler.Event.FLIP_REPEAT;
+      } else {
         if (currentTrialLength == currentTrialIndex)
           hideTrialBreakProgressbar();
         return Scheduler.Event.NEXT;
@@ -2609,10 +2615,10 @@ const experiment = (blockCount) => {
     };
   }
 
-  function importConditions(currentLoop) {
+  function importConditions(currentLoopSnapshot) {
     return async function () {
-      logger("current trial", currentLoop.getCurrentTrial());
-      psychoJS.importAttributes(currentLoop.getCurrentTrial());
+      logger("current trial", currentLoopSnapshot.getCurrentTrial());
+      psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());
       return Scheduler.Event.NEXT;
     };
   }
