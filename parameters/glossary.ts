@@ -1041,7 +1041,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "",
     explanation:
-      "Center-to-center distance from target to inner flanker. Ignored if you're using Quest to measure the spacing threshold.",
+      "Specifies the spacing, in degrees, center-to-center from target to inner flanker. This parameter is ignored if you're using Quest to measure the spacing threshold.",
     type: "numerical",
     default: "2",
   },
@@ -1053,13 +1053,21 @@ export const GLOSSARY: Glossary = {
       'When eccentricity is nonzero then the direction can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then the direction can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is an error to request radial or tangential at eccentricity zero.',
     type: "categorical",
     default: "radial",
-    categories: ["radial", "tangential", "horizontal", "vertical", "both"],
+    categories: [
+      "horizontal",
+      "vertical",
+      "horizontalAndVertical",
+      "radial",
+      "tangential",
+      "radialAndTangential",
+    ],
   },
   spacingOverSizeRatio: {
     name: "spacingOverSizeRatio",
     availability: "now",
     example: "1.4",
-    explanation: "Ignored unless spacingRelationToSize is 'ratio'.",
+    explanation:
+      "Specifies the ratio of spacing (in deg, center of target to center of inner flanker) to size (in deg, can be width or height as specified by targetSizeIsHeightBool). Ignored unless spacingRelationToSize is 'ratio'.",
     type: "numerical",
     default: "1.4",
   },
