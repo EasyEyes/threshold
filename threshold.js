@@ -2393,14 +2393,8 @@ const experiment = (blockCount) => {
 
       // refresh the screen if continuing
       if (continueRoutine) {
-        if (debug) {
-          logger("1st if trials :", trials);
-        }
         return Scheduler.Event.FLIP_REPEAT;
       } else {
-        if (debug) {
-          logger("2nd if trials :", trials);
-        }
         return Scheduler.Event.NEXT;
       }
     };
