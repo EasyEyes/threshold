@@ -218,11 +218,9 @@ const paramReaderInitialized = async (reader) => {
 
   // ! Load reading corpus and preprocess
   loadReadingCorpus(reader);
-  console.log(
-    readingCorpusArchive,
-    readingWordListArchive,
-    readingWOrdFrequencyArchive
-  );
+  logger("READ readingCorpusArchive", readingCorpusArchive);
+  logger("READ readingWordListArchive", readingWordListArchive);
+  logger("READ readingWOrdFrequencyArchive", readingWOrdFrequencyArchive);
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
@@ -314,7 +312,7 @@ const experiment = (blockCount) => {
   // Start code blocks for 'Before Experiment'
   // init psychoJS:
   const psychoJS = new PsychoJS({
-    debug: debug,
+    debug: false,
   });
 
   /* ---------------------------------- Sound --------------------------------- */
@@ -772,7 +770,7 @@ const experiment = (blockCount) => {
   var continueRoutine;
   var fileComponents;
 
-  var clickedContinue = { current: false };
+  var clickedContinue = false;
 
   var responseType = 2;
 
@@ -890,7 +888,7 @@ const experiment = (blockCount) => {
   }
 
   function _clickContinue(e) {
-    if (e.target.id !== "threshold-beep-button") clickedContinue.current = true;
+    if (e.target.id !== "threshold-beep-button") clickedContinue = true;
   }
 
   async function _instructionRoutineEachFrame() {
@@ -924,7 +922,7 @@ const experiment = (blockCount) => {
       continueRoutine = false;
     }
 
-    if (continueRoutine && !clickedContinue.current) {
+    if (continueRoutine && !clickedContinue) {
       return Scheduler.Event.FLIP_REPEAT;
     } else {
       return Scheduler.Event.NEXT;
@@ -1359,6 +1357,7 @@ const experiment = (blockCount) => {
 
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
+      loggerText("initInstructionRoutineBegin");
       // ! Distance
       // rc.resumeDistance();
 
@@ -1391,7 +1390,7 @@ const experiment = (blockCount) => {
           instructionsText.initialEnd(rc.language.value, responseType)
       );
 
-      clickedContinue.current = false;
+      clickedContinue = false;
       setTimeout(() => {
         document.addEventListener("click", _clickContinue);
         document.addEventListener("touchend", _clickContinue);
@@ -1469,7 +1468,7 @@ const experiment = (blockCount) => {
 
       TrialHandler.fromSnapshot(snapshot);
 
-      clickedContinue.current = false;
+      clickedContinue = false;
       setTimeout(() => {
         document.addEventListener("click", _clickContinue);
         document.addEventListener("touchend", _clickContinue);
@@ -1584,7 +1583,7 @@ const experiment = (blockCount) => {
   //     TrialHandler.fromSnapshot(snapshot);
   //     _instructionSetup(instructionsText.block(snapshot.block + 1));
 
-  //     clickedContinue.current = false;
+  //     clickedContinue = false;
   //     document.addEventListener("click", _clickContinue);
   //     document.addEventListener("touchend", _clickContinue);
 
@@ -1600,7 +1599,6 @@ const experiment = (blockCount) => {
   //   return _instructionRoutineEnd;
   // }
 
-  let takeFixationClick;
   let modalButtonTriggeredViaKeyboard = false;
 
   const _takeFixationClick = (e) => {
@@ -1725,8 +1723,9 @@ const experiment = (blockCount) => {
             if (c.block_condition === trials._currentStaircase._name) {
               condition = c;
               addConditionToData(
+                paramReader,
+                condition["block_condition"],
                 psychoJS.experiment,
-                condition,
                 parametersToExcludeFromData
               );
             }
@@ -1957,6 +1956,8 @@ const experiment = (blockCount) => {
             block_condition
           );
 
+          // trackGazeYes = reader.read("trackGazeYes", block_condition);
+          // trackHeadYes = reader.read("trackHeadYes", block_condition);
           wirelessKeyboardNeededYes = reader.read(
             "wirelessKeyboardNeededYes",
             block_condition
@@ -1997,7 +1998,7 @@ const experiment = (blockCount) => {
             flankerCharacters: [firstFlankerCharacter, secondFlankerCharacter],
             targetCharacter: targetCharacter,
             targetSizeDeg: targetSizeDeg,
-            targetKind: targetKind,
+            targetKind: targetKind.current,
           };
 
           // Fixation placement does not depend on the value of "spacingRelationToSize"...
@@ -2331,7 +2332,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         continueRoutine = false;
       }
 
-      if (continueRoutine && !clickedContinue.current) {
+      if (continueRoutine && !clickedContinue) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
         return Scheduler.Event.NEXT;
@@ -2341,6 +2342,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
   function trialInstructionRoutineEnd() {
     return async function () {
+      loggerText("trialInstructionRoutineEnd");
       if (
         toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
       ) {
@@ -2353,7 +2355,10 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           // READING
         },
         letter: () => {
-          _identify_trialInstructionRoutineEnd(instructions, takeFixationClick);
+          _identify_trialInstructionRoutineEnd(
+            instructions,
+            _takeFixationClick
+          );
         },
       });
 
