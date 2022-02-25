@@ -1,11 +1,11 @@
 export const showTrialBreakWidget = (bodyContent) => {
   const wrapperEl = document.createElement("div");
-  wrapperEl.setAttribute("id", "trialBreakContainer");
+  wrapperEl.id = "trialBreakContainer";
   wrapperEl.style.visibility = "visible";
   wrapperEl.style.zIndex = 1000005;
 
   const backgroundEl = document.createElement("div");
-  backgroundEl.setAttribute("id", "trialBreakBackground");
+  backgroundEl.id = "trialBreakBackground";
   wrapperEl.appendChild(backgroundEl);
 
   const modalEl = document.createElement("div");
@@ -18,17 +18,19 @@ export const showTrialBreakWidget = (bodyContent) => {
   modalEl.appendChild(titleEl);
 
   const trialBreakPhraseEl = document.createElement("div");
-  trialBreakPhraseEl.setAttribute("id", "trialBreakPhrase");
+  trialBreakPhraseEl.id = "trialBreakPhrase";
   trialBreakPhraseEl.classList.add("trialBreakBody");
   trialBreakPhraseEl.innerHTML = bodyContent;
   modalEl.appendChild(trialBreakPhraseEl);
 
   const trialProceedEl = document.createElement("div");
-  trialProceedEl.setAttribute("id", "trial-proceed");
+  trialProceedEl.id = "trial-proceed";
   trialProceedEl.classList.add("trialBreakButton");
   modalEl.appendChild(trialProceedEl);
 
   wrapperEl.appendChild(modalEl);
+  document.getElementById("trialBreakContainer")?.remove();
+  document.body.appendChild(wrapperEl);
 };
 
 export const hideTrialBreakWidget = () => {
@@ -39,7 +41,7 @@ export const hideTrialProceedButton = () => {
   document.getElementById("trial-proceed")?.remove();
 };
 export const showTrialProceedButton = () => {
-  document.getElementById("trial-proceed")?.remove();
+  document.getElementById("trial-proceed").innerHTML = "Proceed";
 };
 
 export const showTrialBreakProgressbar = (height = 0.0) => {

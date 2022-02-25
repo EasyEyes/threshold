@@ -952,7 +952,6 @@ const experiment = (blockCount) => {
         conditions: trialsConditions,
         method: TrialHandler.Method.FULLRANDOM,
       });
-
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials; // we're now the current loop
       // Schedule all the trials in the trialList:
@@ -1787,14 +1786,14 @@ const experiment = (blockCount) => {
           Math.round((spacing / spacingOverSizeRatio + Number.EPSILON) * 1000) /
           1000;
         let targetSpecsString = `size: ${size} deg
-spacing: ${spacing} deg
-targetFont: ${targetFont}
-spacingRelationToSize: ${spacingRelationToSize}
-spacingOverSizeRatio: ${spacingOverSizeRatio}
-spacingSymmetry: ${spacingSymmetry}
-targetSizeIsHeightBool: ${targetSizeIsHeightBool}
-targetEccentricityXYDeg: ${targetEccentricityXYDeg}
-viewingDistanceCm: ${viewingDistanceCm}`;
+          spacing: ${spacing} deg
+          targetFont: ${targetFont}
+          spacingRelationToSize: ${spacingRelationToSize}
+          spacingOverSizeRatio: ${spacingOverSizeRatio}
+          spacingSymmetry: ${spacingSymmetry}
+          targetSizeIsHeightBool: ${targetSizeIsHeightBool}
+          targetEccentricityXYDeg: ${targetEccentricityXYDeg}
+          viewingDistanceCm: ${viewingDistanceCm}`;
         targetSpecs.setText(targetSpecsString);
         targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
         targetSpecs.setAutoDraw(true);
@@ -1903,7 +1902,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       } else {
         hideTrialBreakProgressbar();
       }
-
       return Scheduler.Event.NEXT;
     };
   }
@@ -2039,8 +2037,9 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       hideCursor();
 
       ////
-      if (debug)
+      if (debug) {
         console.log("%c\n\n====== New Trial ======\n\n", "color: purple");
+      }
       logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
 
@@ -2080,7 +2079,9 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         )
       );
       instructions.setAutoDraw(false);
-
+      if (debug) {
+        logger("trials trialRoutineBegin :", trials);
+      }
       return Scheduler.Event.NEXT;
     };
   }
@@ -2392,8 +2393,14 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
       // refresh the screen if continuing
       if (continueRoutine) {
+        if (debug) {
+          logger("1st if trials :", trials);
+        }
         return Scheduler.Event.FLIP_REPEAT;
       } else {
+        if (debug) {
+          logger("2nd if trials :", trials);
+        }
         return Scheduler.Event.NEXT;
       }
     };
@@ -2401,6 +2408,9 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
   function trialRoutineEnd() {
     return async function () {
+      if (debug) {
+        logger("trials Inside trialRoutineEnd :", trials);
+      }
       grid.hide(true);
       if (showTargetSpecs) targetSpecs.setAutoDraw(false);
       if (showConditionNameBool) conditionName.setAutoDraw(false);
@@ -2448,7 +2458,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         } else {
           console.error("currentLoop is not MultiStairHandler");
         }
-
         addTrialStaircaseSummariesToData(currentLoop, psychoJS);
 
         psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
@@ -2476,7 +2485,8 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
         // increase takeABreakCredit
         currentBlockCredit += condition["takeABreakTrialCredit"];
-
+        // console.log("condition[takeABreakTrialCredit] is ", condition["takeABreakTrialCredit"])
+        // console.log("currentBlockCredit ", currentBlockCredit)
         // toggle takeABreak credit progress-bar
         if (condition["showTakeABreakCreditBool"]) {
           showTrialBreakProgressbar(currentBlockCredit);
@@ -2489,9 +2499,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           trialBreakStartTime = Date.now();
           trialBreakStatus = true;
           currentBlockCredit -= 1;
-
           showTrialBreakWidget("");
-
           hideTrialProceedButton();
         }
       }
@@ -2509,6 +2517,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             rc.language.value,
             responseType
           );
+          //console.log("trialBreakBody :", trialBreakBody)
           showTrialBreakWidget(trialBreakBody);
 
           // show proceed button
@@ -2561,9 +2570,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             );
           };
         }
-
-        return Scheduler.Event.FLIP_REPEAT;
-      } else {
         if (currentTrialLength == currentTrialIndex)
           hideTrialBreakProgressbar();
         return Scheduler.Event.NEXT;
