@@ -881,6 +881,8 @@ const experiment = (blockCount) => {
 
   var blocks;
   var currentLoop;
+  // var currentLoopBlock;
+
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
@@ -897,7 +899,7 @@ const experiment = (blockCount) => {
         name: "blocks",
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
-      currentLoop = blocks; // we're now the current loop
+      // currentLoopBlock = blocks;
 
       // Schedule all the trials in the trialList:
       for (const thisBlock of blocks) {
@@ -955,7 +957,8 @@ const experiment = (blockCount) => {
       });
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
-      currentLoop = trials; // we're now the current loop
+      currentLoop = trials;
+
       // Schedule all the trials in the trialList:
       for (const thisQuestLoop of trials) {
         const snapshot = trials.getSnapshot();
@@ -1498,6 +1501,7 @@ const experiment = (blockCount) => {
       /* PRECOMPUTE STIMULI FOR THE UPCOMING TRIAL */
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
       const reader = paramReader;
+
       let proposedLevel = currentLoop._currentStaircase.getQuestValue();
       psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
@@ -1667,6 +1671,11 @@ const experiment = (blockCount) => {
         targetSizeDeg: targetSizeDeg,
         targetKind: targetKind,
       };
+
+      grid.update(
+        paramReader.read("showGrid", block_condition),
+        displayOptions
+      );
 
       // Fixation placement does not depend on the value of "spacingRelationToSize"...
       fixation.setPos(fixationXYPx);
@@ -1880,9 +1889,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         }
       }
       // /* --- /SIMULATED --- */
-
-      const gridDesired = reader.read("showGrid", block_condition);
-      grid.update(gridDesired, displayOptions);
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -2446,11 +2452,10 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         // update the trial handler
         if (currentLoop instanceof MultiStairHandler) {
           currentLoop.addResponse(key_resp.corr, level);
+          addTrialStaircaseSummariesToData(currentLoop, psychoJS);
         } else {
           console.error("currentLoop is not MultiStairHandler");
         }
-
-        addTrialStaircaseSummariesToData(currentLoop, psychoJS);
 
         psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
         psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
@@ -2610,10 +2615,10 @@ viewingDistanceCm: ${viewingDistanceCm}`;
     };
   }
 
-  function importConditions(currentLoop) {
+  function importConditions(currentLoopSnapshot) {
     return async function () {
-      logger("current trial", currentLoop.getCurrentTrial());
-      psychoJS.importAttributes(currentLoop.getCurrentTrial());
+      logger("current trial", currentLoopSnapshot.getCurrentTrial());
+      psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());
       return Scheduler.Event.NEXT;
     };
   }
