@@ -40,7 +40,7 @@ export class Grid {
     this.dimensions = this.psychoJS.window._size;
     this.gridkey = { key: ["`", "~"], code: "Backquote", keyCode: 192 };
 
-    this.spawnGridStims();
+    // this.spawnGridStims();
 
     window.onkeydown = (e) => {
       if (
@@ -49,6 +49,7 @@ export class Grid {
         e.keyCode === this.gridkey.keyCode
       )
         this.cycle();
+      e.stopPropagation();
     };
     // EXPERIMENTAL window.onresize = (e) => this.update();
     this._reflectVisibility();
@@ -102,12 +103,12 @@ export class Grid {
   /**
    * Generate the stims for the grid, and store in `this._allGridStims`.
    * Generates all three grids if now parameter is provided, or else just the provided unit's grid.
-   * @param {("px" | "cm" | "deg" | "none")} units
+   * @param {("px" | "cm" | "deg" | "mm" | "none")} units
    */
   spawnGridStims(units = undefined) {
     if (units) this.allGrids[units] = this._getGridStims(units);
     else
-      for (const unit of ["px", "cm", "deg", "none", "disabled"]) {
+      for (const unit of ["px", "cm", "deg", "mm", "none", "disabled"]) {
         this.allGrids[unit] = this._getGridStims(unit);
       }
   }
@@ -150,6 +151,8 @@ export class Grid {
         return this._getCmGridStims();
       case "deg":
         return this._getDegGridStims();
+      case "mm":
+        return this._getMmGridStims();
       case "none":
         return [[], []];
       case "disabled":
@@ -162,10 +165,18 @@ export class Grid {
       (dim) => dim / this.displayOptions.pixPerCm
     );
     // TODO generalize to fixation != [0,0]
-    this.dimensionsDeg = XYDegOfXYPix(
-      [this.dimensions[0] / 2, this.dimensions[1] / 2],
-      this.displayOptions
-    );
+    this.dimensionsDeg = [
+      XYDegOfXYPix(
+        [this.dimensions[0] / 2, this.displayOptions.fixationXYPix[1]],
+        this.displayOptions
+      )[0],
+      XYDegOfXYPix(
+        [this.displayOptions.fixationXYPix[0], this.dimensions[1] / 2],
+        this.displayOptions
+      )[1],
+    ];
+    // VERIFY why isn't this equivalent?
+    // const oneCallDimensionsDeg = XYDegOfXYPix([this.dimensions[0]/2, this.dimensions[1]/2], this.displayOptions);
     switch (units) {
       case "px":
         return this.dimensions.map((dim) => Math.floor(dim / 100) + 1);
@@ -176,11 +187,6 @@ export class Grid {
     }
   };
 
-  _gridStillValid(units) {
-    // TODO implement checks to see if the stims need to be recalculated
-    // so that grids can stay current with minimal computation
-  }
-
   _cycleUnits(previousUnits) {
     switch (previousUnits) {
       case "none":
@@ -190,6 +196,8 @@ export class Grid {
       case "cm":
         return "deg";
       case "deg":
+        return "mm";
+      case "mm":
         return "none";
       case "disabled":
         return "disabled";
@@ -233,8 +241,8 @@ export class Grid {
               ];
         const pos =
           region === "vertical"
-            ? [30 + origin[0] + i * spacing, origin[1] + 15]
-            : [origin[0] + 25, 20 + origin[1] + i * spacing];
+            ? [origin[0] + i * spacing + 3, origin[1]]
+            : [origin[0] + 3, origin[1] + i * spacing];
         const lineName = `${region}-grid-line-${i}`;
         lines.push(
           new visual.ShapeStim({
@@ -246,27 +254,30 @@ export class Grid {
             fillColor: new util.Color("black"),
             opacity: this.opacity,
             vertices: verticies,
-            depth: -1000,
+            depth: -999999,
             ori: 0.0,
             interpolate: false,
             size: 1,
           })
         );
-        labels.push(
-          new visual.TextStim({
-            name: `${region}-grid-line-label-${i}`,
-            win: this.psychoJS.window,
-            text: `${spacing * i} pix`,
-            font: "Arial",
-            units: "pix",
-            pos: pos,
-            height: 15,
-            ori: 0.0,
-            color: new util.Color("black"),
-            opacity: this.opacity,
-            depth: 0.0,
-          })
-        );
+        if (i % 5 === 0)
+          labels.push(
+            new visual.TextStim({
+              name: `${region}-grid-line-label-${i}`,
+              win: this.psychoJS.window,
+              text: `${spacing * i} pix`,
+              font: "Arial",
+              units: "pix",
+              pos: pos,
+              alignHoriz: "left",
+              alignVert: "bottom",
+              height: 15,
+              ori: 0.0,
+              color: new util.Color("black"),
+              opacity: 1.0,
+              depth: 0.0,
+            })
+          );
       }
     }
     return [lines, labels];
@@ -308,8 +319,8 @@ export class Grid {
               ];
         const pos =
           region === "vertical"
-            ? [30 + origin[0] + i * spacing, origin[1] + 15]
-            : [origin[0] + 25, 20 + origin[1] + i * spacing];
+            ? [origin[0] + i * spacing + 3, origin[1]]
+            : [origin[0] + 3, origin[1] + i * spacing];
         lines.push(
           new visual.ShapeStim({
             name: `${region}-grid-line-${i}`,
@@ -320,27 +331,30 @@ export class Grid {
             fillColor: new util.Color("blue"),
             opacity: 1.0,
             vertices: verticies,
-            depth: -1000,
+            depth: -999999,
             ori: 0.0,
             interpolate: false,
             size: 1,
           })
         );
-        labels.push(
-          new visual.TextStim({
-            name: `${region}-grid-line-label-${i}`,
-            win: this.psychoJS.window,
-            text: `${i} cm`,
-            font: "Arial",
-            units: "pix",
-            pos: pos,
-            height: 15,
-            ori: 0.0,
-            color: new util.Color("blue"),
-            opacity: 1.0,
-            depth: 0.0,
-          })
-        );
+        if (i % 5 === 0)
+          labels.push(
+            new visual.TextStim({
+              name: `${region}-grid-line-label-${i}`,
+              win: this.psychoJS.window,
+              text: `${i} cm`,
+              font: "Arial",
+              units: "pix",
+              alignHoriz: "left",
+              alignVert: "bottom",
+              pos: pos,
+              height: 15,
+              ori: 0.0,
+              color: new util.Color("black"),
+              opacity: 1.0,
+              depth: 0.0,
+            })
+          );
       }
     }
     return [lines, labels];
@@ -350,54 +364,50 @@ export class Grid {
     const origin = this.displayOptions.fixationXYPix;
     const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg");
     const [lines, labels] = [[], []];
+    const wPx = this.dimensions[0];
+    const hPx = this.dimensions[1];
+    const xPadding = 3;
+    const yPadding = 0;
     for (const region of ["right", "left", "upper", "lower"]) {
       const nGridlines = ["right", "left"].includes(region)
         ? numberOfGridLinesPerSide[0]
         : numberOfGridLinesPerSide[1];
       for (let i = 0; i < nGridlines; i++) {
-        let verticies, pos;
+        let verticies, pos, x, y;
         switch (region) {
           case "right":
+            x = XYPixOfXYDeg([i, origin[1]], this.displayOptions)[0];
             verticies = [
-              XYPixOfXYDeg([i, this.dimensionsDeg[1]], this.displayOptions),
-              XYPixOfXYDeg([i, -this.dimensionsDeg[1]], this.displayOptions),
+              [x, hPx / 2],
+              [x, -hPx / 2],
             ];
-            pos = XYPixOfXYDeg(
-              [origin[0] + i, -this.dimensionsDeg[1] * 0.9],
-              this.displayOptions
-            );
+            pos = [x + xPadding, -hPx / 2 + yPadding];
             break;
           case "left":
             if (i === 0) continue;
+            x = XYPixOfXYDeg([-i, origin[1]], this.displayOptions)[0];
             verticies = [
-              XYPixOfXYDeg([-i, this.dimensionsDeg[1]], this.displayOptions),
-              XYPixOfXYDeg([-i, -this.dimensionsDeg[1]], this.displayOptions),
+              [x, hPx / 2],
+              [x, -hPx / 2],
             ];
-            pos = XYPixOfXYDeg(
-              [origin[0] - i, -this.dimensionsDeg[1] * 0.9],
-              this.displayOptions
-            );
+            pos = [x + xPadding, -hPx / 2 + yPadding];
             break;
           case "upper":
+            y = XYPixOfXYDeg([origin[0], i], this.displayOptions)[1];
             verticies = [
-              XYPixOfXYDeg([this.dimensionsDeg[0], i], this.displayOptions),
-              XYPixOfXYDeg([-this.dimensionsDeg[0], i], this.displayOptions),
+              [-wPx / 2, y],
+              [wPx / 2, y],
             ];
-            pos = XYPixOfXYDeg(
-              [-this.dimensionsDeg[0] * 0.9, i],
-              this.displayOptions
-            );
+            pos = [-wPx / 2 + xPadding, y + yPadding];
             break;
           case "lower":
             if (i === 0) continue;
+            y = XYPixOfXYDeg([origin[0], -i], this.displayOptions)[1];
             verticies = [
-              XYPixOfXYDeg([this.dimensionsDeg[0], -i], this.displayOptions),
-              XYPixOfXYDeg([-this.dimensionsDeg[0], -i], this.displayOptions),
+              [-wPx / 2, y],
+              [wPx / 2, y],
             ];
-            pos = XYPixOfXYDeg(
-              [-this.dimensionsDeg[0] * 0.9, -i],
-              this.displayOptions
-            );
+            pos = [-wPx / 2 + xPadding, y + yPadding];
             break;
         }
         lines.push(
@@ -406,11 +416,11 @@ export class Grid {
             win: this.psychoJS.window,
             units: "pix",
             lineWidth: i % 5 === 0 ? 5 : 2,
-            lineColor: new util.Color("red"),
-            fillColor: new util.Color("red"),
+            lineColor: new util.Color("crimson"),
+            fillColor: new util.Color("crimson"),
             opacity: this.opacity,
             vertices: verticies,
-            depth: -1000,
+            depth: -999999,
             ori: 0.0,
             interpolate: false,
             size: 1,
@@ -425,9 +435,14 @@ export class Grid {
               font: "Arial",
               units: "pix",
               pos: pos,
-              height: Math.round(degreesToPixels(0.5, this.displayOptions)),
+              height: Math.min(
+                Math.round(degreesToPixels(1, this.displayOptions)),
+                50
+              ),
+              alignHoriz: "left",
+              alignVert: "bottom",
               ori: 0.0,
-              color: new util.Color("red"),
+              color: new util.Color("black"),
               opacity: 1.0,
               depth: 0.0,
             })
@@ -435,5 +450,105 @@ export class Grid {
       }
     }
     return [lines, labels];
+  };
+
+  /**
+   * rMm = 38*log10((norm(xy)+0.15)/0.15) [1]
+   * rMm/38 = log10((r+0.15)/0.15)        [2]
+   * 10**(rMm/38) = (r+0.15)/0.15         [3]
+   * 10**(rMm/38)*0.15 = r + 0.15         [4]
+   * 10**(rMm/38)*0.15 - 0.15 = r         [5]
+   */
+  _getMmGridStims = () => {
+    const fixation = this.displayOptions.fixationXYPix;
+    const fixationDeg = XYDegOfXYPix(fixation, this.displayOptions);
+    const screen = {
+      top: this.dimensions[1] / 2,
+      bottom: -this.dimensions[1] / 2,
+      left: -this.dimensions[0] / 2,
+      right: this.dimensions[0] / 2,
+    };
+    const circle = {
+      top: fixation[1],
+      bottom: fixation[1],
+      left: fixation[0],
+      right: fixation[0],
+    };
+    let moreCirclesNeeded =
+      circle.top < screen.top ||
+      circle.bottom > screen.bottom ||
+      circle.right < screen.right ||
+      circle.left > screen.left;
+    const [circles, labels] = [[], []];
+    let rMm = 0,
+      mostRecentLabel = fixation[0];
+    while (moreCirclesNeeded) {
+      // Find new r, aka norm(xy). See [5] above.
+      const r = Math.pow(10, rMm / 38) * 0.15 - 0.15;
+      const rPix = XYPixOfXYDeg(
+        [fixationDeg[0] + r, fixationDeg[1]],
+        this.displayOptions
+      )[0];
+      if (rPix < 50) {
+        rMm += 1;
+        continue;
+      }
+      // Create circle
+      circles.push(
+        new visual.Polygon({
+          win: this.psychoJS.window,
+          name: `mm-grid-circle-${rMm}`,
+          units: "pix",
+          edges: 360,
+          radius: rPix,
+          ori: 0,
+          pos: fixation,
+          lineWidth: 1,
+          lineColor: new util.Color("plum"),
+          opacity: 1,
+          depth: -999999,
+          interpolate: true,
+        })
+      );
+
+      if (rPix - mostRecentLabel > 50) {
+        // Create label
+        const pos = XYPixOfXYDeg(
+          [fixationDeg[0] + r, fixationDeg[1]],
+          this.displayOptions
+        );
+        labels.push(
+          new visual.TextStim({
+            name: `mm-grid-label-${rMm}`,
+            win: this.psychoJS.window,
+            text: `${rMm} mm`,
+            font: "Arial",
+            units: "pix",
+            pos: pos,
+            height: 15,
+            ori: 0.0,
+            color: new util.Color("black"),
+            opacity: 1.0,
+            depth: 0.0,
+          })
+        );
+        mostRecentLabel = rPix;
+      }
+      // Add & update
+      rMm += 1;
+      circle.top = XYPixOfXYDeg([fixationDeg[0], r], this.displayOptions)[1];
+      circle.bottom = XYPixOfXYDeg(
+        [fixationDeg[0], -r],
+        this.displayOptions
+      )[1];
+      circle.left = XYPixOfXYDeg([-r, fixationDeg[1]], this.displayOptions)[0];
+      circle.right = XYPixOfXYDeg([r, fixationDeg[1]], this.displayOptions)[0];
+      moreCirclesNeeded =
+        circle.top < screen.top ||
+        circle.bottom > screen.bottom ||
+        circle.right < screen.right ||
+        circle.left > screen.left;
+    }
+    return [circles, labels];
   };
 }

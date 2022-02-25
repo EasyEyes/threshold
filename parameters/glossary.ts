@@ -26,6 +26,24 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  _allowedBrowsers: {
+    name: "_allowedBrowsers",
+    availability: "now",
+    example: "Safari",
+    explanation:
+      "A comma separated list of allowed browsers. If not allowed, we reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all browsers.",
+    type: "multicategorical",
+    default: "",
+  },
+  _allowedOperatingSystems: {
+    name: "_allowedOperatingSystems",
+    availability: "now",
+    example: "iOS,Linux",
+    explanation:
+      "A comma separated list of allowed operating systems. If not allowed, we reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all operating systems. ",
+    type: "multicategorical",
+    default: "",
+  },
   _authors: {
     name: "_authors",
     availability: "now",
@@ -87,6 +105,24 @@ export const GLOSSARY: Glossary = {
     explanation:
       "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
+    default: "",
+  },
+  _disallowedBrowsers: {
+    name: "_disallowedBrowsers",
+    availability: "now",
+    example: "Safari",
+    explanation:
+      "A comma separated list of browsers to be rejected. We reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all browsers. It is an error to include the parameter _disallowedBrowsers when _allowedBrowsers is already present.",
+    type: "multicategorical",
+    default: "",
+  },
+  _disallowedOperatingSystems: {
+    name: "_disallowedOperatingSystems",
+    availability: "now",
+    example: "iOS,Android",
+    explanation:
+      "A comma separated list of operating systems to be rejected. We reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all operating systems. It is an error to include the parameter _disallowedOperatingSystems when _allowedOperatingSystems is already present. ",
+    type: "multicategorical",
     default: "",
   },
   _experimentName: {
@@ -589,10 +625,10 @@ export const GLOSSARY: Glossary = {
     type: "",
     default: "",
   },
-  readingCorpusURL: {
-    name: "readingCorpusURL",
+  readingCorpusSource: {
+    name: "readingCorpusSource",
     availability: "now",
-    example: "http://xxx",
+    example: "the-phantom-tollbooth.txt",
     explanation:
       'Book of readable text. We typically use "The phantom tollbooth" a popular American children\'s book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. Every passage selection begins and ends at a sentence break.',
     type: "text",
@@ -898,7 +934,7 @@ export const GLOSSARY: Glossary = {
       "Show a full-screen grid that aids visual checking of location and size. Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', pressing the backquote key (below ESCAPE) repeatedly cyles through the four states: px, cm, deg, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' grid has its origin at fixation. ",
     type: "categorical",
     default: "disabled",
-    categories: ["px", "cm", "deg", "none", "disabled"],
+    categories: ["px", "cm", "deg", "mm", "none", "disabled"],
   },
   showInstructionsWhere: {
     name: "showInstructionsWhere",
@@ -1005,7 +1041,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "",
     explanation:
-      "Center-to-center distance from target to inner flanker. Ignored if you're using Quest to measure the spacing threshold.",
+      "Specifies the spacing, in degrees, center-to-center from target to inner flanker. This parameter is ignored if you're using Quest to measure the spacing threshold.",
     type: "numerical",
     default: "2",
   },
@@ -1017,13 +1053,21 @@ export const GLOSSARY: Glossary = {
       'When eccentricity is nonzero then the direction can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then the direction can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is an error to request radial or tangential at eccentricity zero.',
     type: "categorical",
     default: "radial",
-    categories: ["radial", "tangential", "horizontal", "vertical", "both"],
+    categories: [
+      "horizontal",
+      "vertical",
+      "horizontalAndVertical",
+      "radial",
+      "tangential",
+      "radialAndTangential",
+    ],
   },
   spacingOverSizeRatio: {
     name: "spacingOverSizeRatio",
     availability: "now",
     example: "1.4",
-    explanation: "Ignored unless spacingRelationToSize is 'ratio'.",
+    explanation:
+      "Specifies the ratio of spacing (in deg, center of target to center of inner flanker) to size (in deg, can be width or height as specified by targetSizeIsHeightBool). Ignored unless spacingRelationToSize is 'ratio'.",
     type: "numerical",
     default: "1.4",
   },
