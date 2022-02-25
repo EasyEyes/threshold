@@ -1672,6 +1672,11 @@ const experiment = (blockCount) => {
         targetKind: targetKind,
       };
 
+      grid.update(
+        paramReader.read("showGrid", block_condition),
+        displayOptions
+      );
+
       // Fixation placement does not depend on the value of "spacingRelationToSize"...
       fixation.setPos(fixationXYPx);
       fixation.setHeight(fixationSize);
@@ -1884,9 +1889,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         }
       }
       // /* --- /SIMULATED --- */
-
-      const gridDesired = reader.read("showGrid", block_condition);
-      grid.update(gridDesired, displayOptions);
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)

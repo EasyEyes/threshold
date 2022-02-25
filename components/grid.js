@@ -241,8 +241,8 @@ export class Grid {
               ];
         const pos =
           region === "vertical"
-            ? [30 + origin[0] + i * spacing, origin[1] + 15]
-            : [origin[0] + 25, 20 + origin[1] + i * spacing];
+            ? [origin[0] + i * spacing + 3, origin[1]]
+            : [origin[0] + 3, origin[1] + i * spacing];
         const lineName = `${region}-grid-line-${i}`;
         lines.push(
           new visual.ShapeStim({
@@ -254,27 +254,30 @@ export class Grid {
             fillColor: new util.Color("black"),
             opacity: this.opacity,
             vertices: verticies,
-            depth: -1000,
+            depth: -999999,
             ori: 0.0,
             interpolate: false,
             size: 1,
           })
         );
-        labels.push(
-          new visual.TextStim({
-            name: `${region}-grid-line-label-${i}`,
-            win: this.psychoJS.window,
-            text: `${spacing * i} pix`,
-            font: "Arial",
-            units: "pix",
-            pos: pos,
-            height: 15,
-            ori: 0.0,
-            color: new util.Color("black"),
-            opacity: this.opacity,
-            depth: 0.0,
-          })
-        );
+        if (i % 5 === 0)
+          labels.push(
+            new visual.TextStim({
+              name: `${region}-grid-line-label-${i}`,
+              win: this.psychoJS.window,
+              text: `${spacing * i} pix`,
+              font: "Arial",
+              units: "pix",
+              pos: pos,
+              alignHoriz: "left",
+              alignVert: "bottom",
+              height: 15,
+              ori: 0.0,
+              color: new util.Color("black"),
+              opacity: 1.0,
+              depth: 0.0,
+            })
+          );
       }
     }
     return [lines, labels];
@@ -316,8 +319,8 @@ export class Grid {
               ];
         const pos =
           region === "vertical"
-            ? [30 + origin[0] + i * spacing, origin[1] + 15]
-            : [origin[0] + 25, 20 + origin[1] + i * spacing];
+            ? [origin[0] + i * spacing + 3, origin[1]]
+            : [origin[0] + 3, origin[1] + i * spacing];
         lines.push(
           new visual.ShapeStim({
             name: `${region}-grid-line-${i}`,
@@ -328,27 +331,30 @@ export class Grid {
             fillColor: new util.Color("blue"),
             opacity: 1.0,
             vertices: verticies,
-            depth: -1000,
+            depth: -999999,
             ori: 0.0,
             interpolate: false,
             size: 1,
           })
         );
-        labels.push(
-          new visual.TextStim({
-            name: `${region}-grid-line-label-${i}`,
-            win: this.psychoJS.window,
-            text: `${i} cm`,
-            font: "Arial",
-            units: "pix",
-            pos: pos,
-            height: 15,
-            ori: 0.0,
-            color: new util.Color("black"),
-            opacity: 1.0,
-            depth: 0.0,
-          })
-        );
+        if (i % 5 === 0)
+          labels.push(
+            new visual.TextStim({
+              name: `${region}-grid-line-label-${i}`,
+              win: this.psychoJS.window,
+              text: `${i} cm`,
+              font: "Arial",
+              units: "pix",
+              alignHoriz: "left",
+              alignVert: "bottom",
+              pos: pos,
+              height: 15,
+              ori: 0.0,
+              color: new util.Color("black"),
+              opacity: 1.0,
+              depth: 0.0,
+            })
+          );
       }
     }
     return [lines, labels];
@@ -360,7 +366,7 @@ export class Grid {
     const [lines, labels] = [[], []];
     const wPx = this.dimensions[0];
     const hPx = this.dimensions[1];
-    const xPadding = 0;
+    const xPadding = 3;
     const yPadding = 0;
     for (const region of ["right", "left", "upper", "lower"]) {
       const nGridlines = ["right", "left"].includes(region)
@@ -376,7 +382,6 @@ export class Grid {
               [x, -hPx / 2],
             ];
             pos = [x + xPadding, -hPx / 2 + yPadding];
-            logger;
             break;
           case "left":
             if (i === 0) continue;
@@ -405,7 +410,6 @@ export class Grid {
             pos = [-wPx / 2 + xPadding, y + yPadding];
             break;
         }
-        logger("verticies", verticies);
         lines.push(
           new visual.ShapeStim({
             name: `${region}-grid-line-${i}`,
@@ -416,7 +420,7 @@ export class Grid {
             fillColor: new util.Color("crimson"),
             opacity: this.opacity,
             vertices: verticies,
-            depth: -1000,
+            depth: -999999,
             ori: 0.0,
             interpolate: false,
             size: 1,
@@ -485,7 +489,10 @@ export class Grid {
         [fixationDeg[0] + r, fixationDeg[1]],
         this.displayOptions
       )[0];
-
+      if (rPix < 50) {
+        rMm += 1;
+        continue;
+      }
       // Create circle
       circles.push(
         new visual.Polygon({
@@ -499,7 +506,7 @@ export class Grid {
           lineWidth: 1,
           lineColor: new util.Color("plum"),
           opacity: 1,
-          depth: -1,
+          depth: -999999,
           interpolate: true,
         })
       );
@@ -514,7 +521,7 @@ export class Grid {
           new visual.TextStim({
             name: `mm-grid-label-${rMm}`,
             win: this.psychoJS.window,
-            text: `${rMm} rMm`,
+            text: `${rMm} mm`,
             font: "Arial",
             units: "pix",
             pos: pos,
