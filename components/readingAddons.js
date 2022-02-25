@@ -1,3 +1,5 @@
+import axios from "axios";
+
 import {
   readingCorpusArchive,
   readingThisBlockPages,
@@ -5,7 +7,7 @@ import {
   readingWOrdFrequencyArchive,
   readingWordListArchive,
 } from "./global";
-import { loggerText } from "./utils";
+import { logger } from "./utils";
 
 import {
   preprocessRawCorpus,
@@ -14,34 +16,37 @@ import {
   preprocessCorpusToSentenceList,
 } from "./reading.ts";
 
-import { exampleReadingCorpus } from "./hardcodedExamples";
-
-export const loadReadingCorpus = (paramReader) => {
+export const loadReadingCorpus = async (paramReader) => {
   // return new Promise((resolve, reject) => {
   //   const readingCorpus = require('./reading.txt');
   //   resolve(readingCorpus);
   // });
 
   if (paramReader.has("readingCorpusSource")) {
-    for (let url of [...new Set(paramReader.read("readingCorpusSource"))]) {
+    const uniqueBookSources = [
+      ...new Set(paramReader.read("readingCorpusSource")),
+    ];
+    for (let url of uniqueBookSources) {
       // Load from URL
-      loggerText(url);
-    }
-    ////
-    // ! Remove this line
-    readingCorpusArchive["the-phantom-tollbooth.txt"] =
-      preprocessRawCorpus(exampleReadingCorpus); // ! Hardcoded
+      logger("loading this text/book", url);
 
-    ////
-    // Preprocess & Frequencies
-    for (let corpus in readingCorpusArchive) {
-      readingWordListArchive[corpus] = preprocessCorpusToWordList(
-        readingCorpusArchive[corpus]
-      );
-      readingWOrdFrequencyArchive[corpus] = getWordFrequencies(
-        readingWordListArchive[corpus]
-      );
-      readingUsedText[corpus] = readingCorpusArchive[corpus];
+      const response = await axios.get(`texts/${url}`);
+      if (!response)
+        console.error(`Error loading text from this source (./texts/${url})!`);
+
+      readingCorpusArchive[url] = preprocessRawCorpus(response.data);
+
+      ////
+      // Preprocess & Frequencies
+      for (let corpus in readingCorpusArchive) {
+        readingWordListArchive[corpus] = preprocessCorpusToWordList(
+          readingCorpusArchive[corpus]
+        );
+        readingWOrdFrequencyArchive[corpus] = getWordFrequencies(
+          readingWordListArchive[corpus]
+        );
+        readingUsedText[corpus] = readingCorpusArchive[corpus];
+      }
     }
   }
 };

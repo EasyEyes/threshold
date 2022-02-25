@@ -217,7 +217,7 @@ const paramReaderInitialized = async (reader) => {
   simulated = checkIfSimulated(reader);
 
   // ! Load reading corpus and preprocess
-  loadReadingCorpus(reader);
+  await loadReadingCorpus(reader);
   logger("READ readingCorpusArchive", readingCorpusArchive);
   logger("READ readingWordListArchive", readingWordListArchive);
   logger("READ readingWOrdFrequencyArchive", readingWOrdFrequencyArchive);
