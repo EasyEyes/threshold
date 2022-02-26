@@ -32,7 +32,7 @@ const config = {
   },
 };
 
-const plugins = [new webpack.ProgressPlugin(), new CleanWebpackPlugin()];
+const plugins = [new CleanWebpackPlugin()];
 
 module.exports = (env, options) => {
   const extra = {};
@@ -66,6 +66,7 @@ module.exports = (env, options) => {
       },
       plugins: [
         ...plugins,
+        new webpack.ProgressPlugin(),
         new webpack.DefinePlugin({
           "process.env.debug": true,
         }),
