@@ -41,3 +41,7 @@ export const getResponseType = (click, type, keypad, speak) => {
 export const canType = (responseType) => {
   return _responseTypes[responseType][1];
 };
+
+export const canClick = (responseType) => {
+  return _responseTypes[responseType][0];
+};
