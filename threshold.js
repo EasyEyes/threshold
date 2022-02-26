@@ -30,7 +30,7 @@ import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
-import "./components/css/trialBreak.css";
+import "./components/css/takeABreak.css";
 import "./components/css/psychojsExtra.css";
 
 ////
@@ -59,7 +59,7 @@ import {
   useCalibration,
 } from "./components/useCalibration.js";
 
-import { canType, getResponseType } from "./components/response.js";
+import { canClick, canType, getResponseType } from "./components/response.js";
 
 import { cleanFontName, loadFonts } from "./components/fonts.js";
 import {
@@ -124,14 +124,17 @@ import {
   readBookText,
   readingTaskFields,
 } from "./components/readingUtils.js";
+
 import {
-  hideTrialBreakProgressbar,
-  hideTrialBreakWidget,
-  hideTrialProceedButton,
-  showTrialBreakProgressbar,
-  showTrialBreakWidget,
-  showTrialProceedButton,
-} from "./components/trialBreak.js";
+  hideTrialBreakPopup,
+  hideTrialBreakProceed,
+  hideTrialBreakProgressBar,
+  prepareTrialBreakPopup,
+  prepareTrialBreakProgressBar,
+  showTrialBreakPopup,
+  showTrialBreakProceed,
+  showTrialBreakProgressBar,
+} from "./components/takeABreak.js";
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
 
 /* -------------------------------------------------------------------------- */
@@ -186,6 +189,19 @@ const paramReaderInitialized = async (reader) => {
 
   await sleep(50);
 
+  ////
+  const startExperiment = () => {
+    // ! Take a break
+    prepareTrialBreakPopup();
+    prepareTrialBreakProgressBar();
+
+    document.body.removeChild(document.querySelector("#rc-panel"));
+
+    // ! Start actual experiment
+    experiment(reader.blockCount);
+  };
+  ////
+
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
     rc.panel(
@@ -196,15 +212,11 @@ const paramReaderInitialized = async (reader) => {
       },
       () => {
         rc.removePanel();
-        document.body.removeChild(document.querySelector("#rc-panel"));
-        // ! Start actual experiment
-        experiment(reader.blockCount);
+        startExperiment();
       }
     );
   } else {
-    document.body.removeChild(document.querySelector("#rc-panel"));
-    // ! Start actual experiment
-    experiment(reader.blockCount);
+    startExperiment();
   }
 };
 
@@ -438,11 +450,6 @@ const experiment = (blockCount) => {
   var globalClock;
   var routineTimer, routineClock, blockClock;
   var initInstructionClock, eduInstructionClock, trialInstructionClock;
-
-  var currentBlockCredit;
-  var trialBreakStartTime = 0;
-  var trialBreakStatus;
-  var trialBreakButtonStatus;
 
   var displayOptions;
   var fixationXYPx;
@@ -1146,8 +1153,8 @@ const experiment = (blockCount) => {
       psychoJS.eventManager.clearKeys();
 
       // reset takeABreak state
-      currentBlockCredit = 0;
-      hideTrialBreakProgressbar();
+      currentBlockCreditForTrialBreak = 0;
+      hideTrialBreakProgressBar();
 
       trialInfoStr = getTrialInfoStr(
         rc.language.value,
@@ -1409,7 +1416,7 @@ const experiment = (blockCount) => {
   var condition;
 
   // Credit
-  var currentBlockCredit = 0;
+  var currentBlockCreditForTrialBreak = 0;
 
   var skipTrialOrBlock = {
     blockId: null,
@@ -1421,7 +1428,7 @@ const experiment = (blockCount) => {
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
       // Check fullscreen and if not, get fullscreen
-      if (!rc.isFullscreen.value) {
+      if (!rc.isFullscreen.value && !debug) {
         rc.getFullscreen();
         showCursor(); // TODO Show only when the cursor is strictly needed
         await sleep(1000);
@@ -1906,9 +1913,13 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       );
 
       if (condition["showTakeABreakCreditBool"]) {
-        showTrialBreakProgressbar(currentBlockCredit);
+        console.log(
+          "NEWWWWWWWWWWWWWWWWWWWWWW",
+          currentBlockCreditForTrialBreak
+        );
+        showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
       } else {
-        hideTrialBreakProgressbar();
+        hideTrialBreakProgressBar();
       }
 
       return Scheduler.Event.NEXT;
@@ -2408,9 +2419,12 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
   function trialRoutineEnd() {
     return async function () {
+      ////
       grid.hide(true);
+
       if (showTargetSpecs) targetSpecs.setAutoDraw(false);
       if (showConditionNameBool) conditionName.setAutoDraw(false);
+
       if (
         (skipTrialOrBlock.trialId == currentTrialIndex &&
           skipTrialOrBlock.blockId == currentBlockIndex &&
@@ -2432,148 +2446,121 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         key_resp.stop();
         return Scheduler.Event.NEXT;
       }
+
       // setTimeout(() => {
       //   rc.resumeNudger();
       // }, 700);
 
-      // if trialBreak is not ongoing
-      if (!trialBreakStatus) {
-        //------Ending Routine 'trial'-------
-        for (const thisComponent of trialComponents) {
-          if (typeof thisComponent.setAutoDraw === "function") {
-            thisComponent.setAutoDraw(false);
-          }
+      //------Ending Routine 'trial'-------
+      for (const thisComponent of trialComponents) {
+        if (typeof thisComponent.setAutoDraw === "function") {
+          thisComponent.setAutoDraw(false);
         }
-        // was no response the correct answer?!
-        if (key_resp.keys === undefined) {
-          console.error("[key_resp.keys] No response error.");
-        }
-        // store data for psychoJS.experiment (ExperimentHandler)
-        // update the trial handler
-        if (currentLoop instanceof MultiStairHandler) {
-          currentLoop.addResponse(key_resp.corr, level);
-          addTrialStaircaseSummariesToData(currentLoop, psychoJS);
-        } else {
-          console.error("currentLoop is not MultiStairHandler");
-        }
+      }
+      // was no response the correct answer?!
+      if (key_resp.keys === undefined) {
+        console.error("[key_resp.keys] No response error.");
+      }
+      // store data for psychoJS.experiment (ExperimentHandler)
+      // update the trial handler
+      if (currentLoop instanceof MultiStairHandler) {
+        currentLoop.addResponse(key_resp.corr, level);
+        // TODO Should it be placed outside of the if statement?
+        addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
+      } else {
+        console.error("currentLoop is not MultiStairHandler");
+      }
 
-        psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
-        psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
-        if (typeof key_resp.keys !== "undefined") {
-          // we had a response
-          psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
-          psychoJS.experiment.addData(
-            "trialRoutineDurationFromBeginSec",
-            trialClock.getTime()
-          );
-          psychoJS.experiment.addData(
-            "trialRoutineDurationFromPreviousEndSec",
-            routineClock.getTime()
-          );
+      psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
+      psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
+      if (typeof key_resp.keys !== "undefined") {
+        // we had a response
+        psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
+        psychoJS.experiment.addData(
+          "trialRoutineDurationFromBeginSec",
+          trialClock.getTime()
+        );
+        psychoJS.experiment.addData(
+          "trialRoutineDurationFromPreviousEndSec",
+          routineClock.getTime()
+        );
 
-          routineTimer.reset();
-          routineClock.reset();
-        }
-
-        key_resp.stop();
-        // the Routine "trial" was not non-slip safe, so reset the non-slip timer
         routineTimer.reset();
         routineClock.reset();
-
-        // increase takeABreakCredit
-        currentBlockCredit += condition["takeABreakTrialCredit"];
-
-        // toggle takeABreak credit progress-bar
-        if (condition["showTakeABreakCreditBool"]) {
-          showTrialBreakProgressbar(currentBlockCredit);
-        } else {
-          hideTrialBreakProgressbar();
-        }
-
-        // check if trialBreak should be triggered
-        if (currentBlockCredit >= 1) {
-          trialBreakStartTime = Date.now();
-          trialBreakStatus = true;
-          currentBlockCredit -= 1;
-
-          showTrialBreakWidget("");
-
-          hideTrialProceedButton();
-        }
       }
-      // if trialBreak is ongoing
-      const takeABreakMinimumDurationSec =
-        condition["takeABreakMinimumDurationSec"];
-      if (trialBreakStatus) {
-        const breakTimeElapsed = (Date.now() - trialBreakStartTime) / 1000;
-        if (
-          !trialBreakButtonStatus &&
-          breakTimeElapsed >= takeABreakMinimumDurationSec
-        ) {
-          // update trialbreak modal body text
-          const trialBreakBody = instructionsText.trialBreak(
-            rc.language.value,
-            responseType
-          );
-          showTrialBreakWidget(trialBreakBody);
 
-          // show proceed button
-          trialBreakButtonStatus = true;
+      key_resp.stop();
+      // the Routine "trial" was not non-slip safe, so reset the non-slip timer
+      routineTimer.reset();
+      routineClock.reset();
 
-          const resetTrialBreakWidgetState = () => {
-            trialBreakStatus = false;
-            trialBreakButtonStatus = false;
-            hideTrialBreakWidget();
-            hideTrialProceedButton();
+      // Increase takeABreakCredit
+      // TODO This way of using condition is BAD
+      currentBlockCreditForTrialBreak += condition["takeABreakTrialCredit"];
 
-            // the trialCredit value is updated on every iteration of this routine.
-            // while the routine is waiting for "proceed" during trialbreak, nothing happens.
-            // but when its time to move to next routine, one more iteration of current routine is needed.
-            // this last iteration will increase the trialcredit. To nullify the extra credit,
-            // the credit is decreased here.
-            currentBlockCredit -= condition["takeABreakTrialCredit"];
-          };
-
-          // responseType: 1,2 means click is allowed
-          if (responseType === 1 || responseType === 2) {
-            showTrialProceedButton();
-          }
-
-          // responseType: 0,2 means return key is allowed
-          const handleReturnKeyOnTrialBreakWidget = (evt) => {
-            if (evt.key === "Enter") {
-              resetTrialBreakWidgetState();
-
-              // remove self from document event listeners
-              document.removeEventListener(
-                "keypress",
-                handleReturnKeyOnTrialBreakWidget
-              );
-            }
-          };
-          if (responseType === 0 || responseType === 2) {
-            document.addEventListener(
-              "keypress",
-              handleReturnKeyOnTrialBreakWidget
-            );
-          }
-          document.getElementById("trial-proceed").onclick = () => {
-            resetTrialBreakWidgetState();
-
-            // remove enter key handler on document
-            document.removeEventListener(
-              "keypress",
-              handleReturnKeyOnTrialBreakWidget
-            );
-          };
-        }
-
-        return Scheduler.Event.FLIP_REPEAT;
+      // Toggle takeABreak credit progressBar
+      // TODO This way of using condition is BAD
+      if (condition["showTakeABreakCreditBool"]) {
+        showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
       } else {
-        if (currentTrialLength == currentTrialIndex)
-          hideTrialBreakProgressbar();
-        return Scheduler.Event.NEXT;
+        hideTrialBreakProgressBar();
       }
+
+      // Check if trialBreak should be triggered
+      if (currentBlockCreditForTrialBreak >= 1) {
+        currentBlockCreditForTrialBreak -= 1;
+
+        showTrialBreakPopup();
+        const takeABreakMinimumDurationSec =
+          condition["takeABreakMinimumDurationSec"];
+
+        return new Promise((resolve) => {
+          // After break time out...
+          setTimeout(() => {
+            // Show proceed hint and/or button
+            showTrialBreakProceed(
+              instructionsText.trialBreak(rc.language.value, responseType),
+              canClick(responseType)
+            );
+
+            const trialProceed = () => {
+              document.getElementById("trial-break-continue-button").onclick =
+                () => {
+                  /* nothing */
+                };
+              hideTrialBreakProceed();
+              hideTrialBreakPopup();
+
+              // currentBlockCreditForTrialBreak -=
+              //   condition["takeABreakTrialCredit"];
+
+              resolve(Scheduler.Event.NEXT);
+            };
+
+            const handleTrialBreakKeyResponse = (e) => {
+              e.preventDefault();
+              if (e.hey === "Enter") {
+                trialProceed();
+                document.removeEventListener(
+                  "keydown",
+                  handleTrialBreakKeyResponse
+                );
+              }
+            };
+
+            if (canClick(responseType))
+              document.getElementById("trial-break-continue-button").onclick =
+                trialProceed;
+            if (canType(responseType))
+              document.addEventListener("keydown", handleTrialBreakKeyResponse);
+          }, takeABreakMinimumDurationSec * 1000);
+        });
+      }
+
+      // if trialBreak is ongoing
+      else if (currentTrialLength === currentTrialIndex)
+        hideTrialBreakProgressBar();
+      return Scheduler.Event.NEXT;
     };
   }
 

@@ -2,7 +2,27 @@ import { phrases } from "./i18n.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { _responseTypes } from "./response.js";
 
-//
+export const responseHintByResponseType = (L, responseType, prev = "") => {
+  switch (responseType) {
+    case 0:
+      return prev + phrases.T_continueHitReturn[L];
+    case 1:
+      return prev + phrases.T_continueClickAnywhere[L];
+    default:
+      return prev + phrases.T_continueHitReturnOrClickAnywhere[L];
+  }
+};
+
+export const proceedHintByResponseType = (L, responseType, prev = "") => {
+  switch (responseType) {
+    case 0:
+      return prev + phrases.T_readyPressSpace[L];
+    case 1:
+      return prev + phrases.T_readyClickCrosshair[L];
+    default:
+      return prev + phrases.T_readyPressSpaceOrClickCrosshair[L];
+  }
+};
 
 export const instructionsText = {
   initial: (L, takeABreakTrialCreditsThisBlock = 0) => {
@@ -37,40 +57,19 @@ export const instructionsText = {
     let t = phrases.T_guessingGame[L] + " ";
     if (_onlyClick(responseType)) t += "\n\n" + phrases.T_whyClick[L] + "\n\n";
     t += phrases.T_escapeToQuit[L] + " ";
-    switch (responseType) {
-      case 0:
-        return t + phrases.T_continueHitReturn[L];
-      case 1:
-        return t + phrases.T_continueClickAnywhere[L];
-      default:
-        return t + phrases.T_continueHitReturnOrClickAnywhere[L];
-    }
+    return responseHintByResponseType(L, responseType, t);
   },
   edu: (L) => {
     return phrases.T_middleLetterDemo[L];
   },
   eduBelow: (L, responseType = 2) => {
     let t = phrases.T_middleLetterBrief[L];
-    switch (responseType) {
-      case 0:
-        return t + phrases.T_continueHitReturn[L];
-      case 1:
-        return t + phrases.T_continueClickAnywhere[L];
-      default:
-        return t + phrases.T_continueHitReturnOrClickAnywhere[L];
-    }
+    return responseHintByResponseType(L, responseType, t);
   },
   trial: {
     fixate: {
       spacing: (L, responseType = 2) => {
-        switch (responseType) {
-          case 0:
-            return phrases.T_readyPressSpace[L];
-          case 1:
-            return phrases.T_readyClickCrosshair[L];
-          default:
-            return phrases.T_readyPressSpaceOrClickCrosshair[L];
-        }
+        return proceedHintByResponseType(L, responseType, "");
       },
     },
     respond: {
@@ -87,14 +86,7 @@ export const instructionsText = {
     },
   },
   trialBreak: (L, responseType = 2) => {
-    switch (responseType) {
-      case 0:
-        return phrases.T_continueHitReturn[L];
-      case 1:
-        return phrases.T_continueClickProceed[L];
-      default:
-        return phrases.T_continueHitReturnOrClickProceed[L];
-    }
+    return responseHintByResponseType(L, responseType, "");
   },
 };
 
