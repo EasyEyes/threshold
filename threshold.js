@@ -1798,13 +1798,13 @@ const experiment = (blockCount) => {
       // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
       if (showTargetSpecs) {
-        const spacing =
-          Math.round((Math.pow(10, level) + Number.EPSILON) * 1000) / 1000;
-        const size =
-          Math.round((spacing / spacingOverSizeRatio + Number.EPSILON) * 1000) /
-          1000;
-        let targetSpecsString = `size: ${size} deg
-spacing: ${spacing} deg
+        let targetSpecsString = `size: ${stimulusParameters.sizeDeg} deg
+${
+  stimulusParameters.spacingDeg
+    ? `spacing: ${stimulusParameters.spacingDeg} deg`
+    : ""
+}
+heightDeg: ${stimulusParameters.heightDeg} deg,
 targetFont: ${targetFont}
 spacingRelationToSize: ${spacingRelationToSize}
 spacingOverSizeRatio: ${spacingOverSizeRatio}
@@ -2308,6 +2308,13 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         // keep track of start time/frame for later
         target.tStart = t; // (not accounting for frame time here)
         target.frameNStart = frameN; // exact frame index
+
+        // NOTE these two values are not equivalent
+        logger("target bb.x, bb.y", [
+          target.getBoundingBox(true).x,
+          target.getBoundingBox(true).y,
+        ]);
+        logger("target pos", target.getPos());
 
         target.setAutoDraw(true);
       }
