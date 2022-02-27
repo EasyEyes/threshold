@@ -82,7 +82,17 @@ export const prepareExperimentFileForThreshold = async (
       (i: string[]) => i[0] == "_participantRecruitmentService"
     )?.[1];
   }
-
+  if (
+    parsed.data.find(
+      (i: string[]) => i[0] == "_pavloviaOfferPilotingOptionBool"
+    )
+  ) {
+    if (!user.currentExperiment) user.currentExperiment = {};
+    user.currentExperiment.pavloviaOfferPilotingOptionBool =
+      parsed.data.find(
+        (i: string[]) => i[0] == "_pavloviaOfferPilotingOptionBool"
+      )?.[1] == "TRUE";
+  }
   // Validate requested fonts
   const requestedFontList: string[] = getFontNameListBySource(parsed, "file");
   const requestedFontListWeb: string[] = getFontNameListBySource(
