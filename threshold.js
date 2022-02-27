@@ -60,7 +60,12 @@ import {
   useCalibration,
 } from "./components/useCalibration.js";
 
-import { canClick, canType, getResponseType } from "./components/response.js";
+import {
+  canClick,
+  canType,
+  getResponseType,
+  resetResponseType,
+} from "./components/response.js";
 
 import { cleanFontName, loadFonts } from "./components/fonts.js";
 import {
@@ -726,6 +731,7 @@ const experiment = (blockCount) => {
   var clickedContinue;
 
   var responseType = 2;
+  var originalResponseType = 2;
 
   var continueRoutine;
   var consentComponents;
@@ -1475,22 +1481,16 @@ const experiment = (blockCount) => {
         }
       }
       const block_condition = condition["block_condition"];
-      if (
-        paramReader.has("responseMustClickCrosshairBool") &&
-        paramReader.read("responseMustClickCrosshairBool", block_condition) ==
-          true
-      ) {
-        responseType = 1;
-      } else {
-        // ! responseType
-        responseType = getResponseType(
-          paramReader.read("responseClickedBool", block_condition),
-          paramReader.read("responseTypedBool", block_condition),
-          paramReader.read("responseTypedEasyEyesKeypadBool", block_condition),
-          paramReader.read("responseSpokenBool", block_condition)
-        );
-      }
 
+      // ! responseType
+      originalResponseType = responseType;
+      responseType = getResponseType(
+        paramReader.read("responseClickedBool", block_condition),
+        paramReader.read("responseTypedBool", block_condition),
+        paramReader.read("responseTypedEasyEyesKeypadBool", block_condition),
+        paramReader.read("responseSpokenBool", block_condition),
+        paramReader.read("responseMustClickCrosshairBool", block_condition)
+      );
       logger("responseType", responseType);
 
       // update trial/block count
@@ -2038,6 +2038,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       return Scheduler.Event.NEXT;
     };
   }
+
   function trialRoutineBegin(snapshot) {
     return async function () {
       // rc.pauseNudger();
@@ -2071,13 +2072,12 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       logger("Index", snapshot.thisIndex);
 
       const block_condition = condition["block_condition"];
-      if (paramReader.has("responseMustClickCrosshairBool")) {
-        if (
-          paramReader.read("responseMustClickCrosshairBool", block_condition) ==
-          true
-        )
-          responseType = 2;
-      }
+
+      responseType = resetResponseType(
+        originalResponseType,
+        responseType,
+        paramReader.read("responseMustClickCrosshairBool", block_condition)
+      );
 
       //------Prepare to start Routine 'trial'-------
       t = 0;
