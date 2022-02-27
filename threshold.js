@@ -31,6 +31,7 @@ import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
 import "./components/css/takeABreak.css";
+import "./components/css/proportionCorrect.css";
 import "./components/css/psychojsExtra.css";
 
 ////
@@ -133,6 +134,13 @@ import {
   showTrialBreakProceed,
   showTrialBreakProgressBar,
 } from "./components/takeABreak.js";
+
+import {
+  hideProportionCorrectPopup,
+  prepareProportionCorrectPopup,
+  showProportionCorrectPopup,
+} from "./components/proportionCorrect.js";
+
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
 
 /* -------------------------------------------------------------------------- */
@@ -192,6 +200,7 @@ const paramReaderInitialized = async (reader) => {
     // ! Take a break
     prepareTrialBreakPopup();
     prepareTrialBreakProgressBar();
+    prepareProportionCorrectPopup();
 
     document.body.removeChild(document.querySelector("#rc-panel"));
 
@@ -259,6 +268,7 @@ var currentTrialIndex = 0;
 var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
+var totalCorrect = 0;
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
@@ -984,6 +994,22 @@ const experiment = (blockCount) => {
   }
 
   async function trialsLoopEnd() {
+    /* -------------------------------proportion correct popup------------------------------------------- */
+    var proportion = (totalCorrect / currentTrialLength).toFixed(2);
+    showProportionCorrectPopup(proportion);
+
+    const blockProceed = () => {
+      document.getElementById("proportion-correct-continue-button").onclick =
+        () => {
+          /* nothing */
+        };
+      hideProportionCorrectPopup();
+    };
+
+    document.getElementById("proportion-correct-continue-button").onclick =
+      blockProceed;
+    /* -------------------------------proportion correct popup------------------------------------------- */
+
     addBlockStaircaseSummariesToData(currentLoop, psychoJS);
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
@@ -2185,6 +2211,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             // was this correct?
             if (key_resp.keys == correctAns) {
               // Play correct audio
+              totalCorrect += 1;
               correctSynth.play();
               key_resp.corr = 1;
             } else {
@@ -2206,6 +2233,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           1000;
         if (showCharacterSetResponse.current == correctAns) {
           // Play correct audio
+          totalCorrect += 1;
           correctSynth.play();
           key_resp.corr = 1;
         } else {
