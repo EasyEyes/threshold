@@ -90,7 +90,13 @@ import {
   showExperimentEnding,
 } from "./components/forms.js";
 
+// Display extra information for the TRIAL
+import {
+  showConditionName,
+  updateConditionNameConfig,
+} from "./components/showTrialInformation.js";
 import { getTrialInfoStr } from "./components/trialCounter.js";
+////
 
 import {
   getCharacterSetBoundingBox,
@@ -117,14 +123,6 @@ import {
   updateBoundingBoxPolies,
 } from "./components/boundingBoxes.js";
 
-// READING
-import {
-  getPageData,
-  prepareForReading,
-  readBookText,
-  readingTaskFields,
-} from "./components/readingUtils.js";
-
 import {
   hideTrialBreakPopup,
   hideTrialBreakProceed,
@@ -136,10 +134,6 @@ import {
   showTrialBreakProgressBar,
 } from "./components/takeABreak.js";
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
-import {
-  showConditionName,
-  updateConditionNameConfig,
-} from "./components/showTrialInformation.js";
 
 /* -------------------------------------------------------------------------- */
 
