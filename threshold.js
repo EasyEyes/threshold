@@ -136,6 +136,10 @@ import {
   showTrialBreakProgressBar,
 } from "./components/takeABreak.js";
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
+import {
+  showConditionName,
+  updateConditionNameConfig,
+} from "./components/showTrialInformation.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -1377,9 +1381,9 @@ const experiment = (blockCount) => {
   var showCharacterSetWhere;
   var showCharacterSetElement;
   var showCounterBool;
-  var showTargetSpecs;
+  var showTargetSpecsBool;
   var showConditionNameBool;
-  var condName;
+  var conditionNameToShow;
   var showViewingDistanceBool;
   const showCharacterSetResponse = {
     current: null,
@@ -1567,14 +1571,14 @@ const experiment = (blockCount) => {
         block_condition
       );
       showCounterBool = reader.read("showCounterBool", block_condition);
+
       showConditionNameBool = paramReader.read(
         "showConditionNameBool",
         block_condition
       );
+      conditionNameToShow = paramReader.read("conditionName", block_condition);
 
-      condName = paramReader.read("conditionName", block_condition);
-
-      showTargetSpecs = paramReader.read(
+      showTargetSpecsBool = paramReader.read(
         "showTargetSpecsBool",
         block_condition
       );
@@ -1797,7 +1801,7 @@ const experiment = (blockCount) => {
       showCharacterSet.setText("");
       // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
-      if (showTargetSpecs) {
+      if (showTargetSpecsBool) {
         let targetSpecsString = `size: ${stimulusParameters.sizeDeg} deg
 ${
   stimulusParameters.spacingDeg
@@ -1817,23 +1821,13 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         targetSpecs.setAutoDraw(true);
       }
 
-      if (showConditionNameBool) {
-        let conditionNameString = `${condName}`;
-        conditionName.setText(conditionNameString);
-        if (showTargetSpecs) {
-          conditionName.setPos([
-            -window.innerWidth / 2,
-            targetSpecs.getBoundingBox(true).height,
-          ]);
-        } else {
-          conditionName.setPos([
-            -window.innerWidth / 2,
-            -window.innerHeight / 2,
-          ]);
-        }
-
-        conditionName.setAutoDraw(true);
-      }
+      showConditionName(
+        showConditionNameBool,
+        showTargetSpecsBool,
+        conditionName,
+        targetSpecs,
+        conditionNameToShow
+      );
 
       trialInfoStr = getTrialInfoStr(
         rc.language.value,
@@ -1861,7 +1855,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
       trialComponents.push(showCharacterSet);
       // trialComponents.push(totalTrial);
-      // if (showTargetSpecs) trialComponents.push(targetSpecs);
+      // if (showTargetSpecsBool) trialComponents.push(targetSpecs);
       // /* --- BOUNDING BOX --- */
       addBoundingBoxesToComponents(
         showBoundingBox,
@@ -1944,7 +1938,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       t = instructionsClock.getTime();
       frameN = frameN + 1;
 
-      if (showTargetSpecs) {
+      if (showTargetSpecsBool) {
         targetSpecsConfig.x = -window.innerWidth / 2;
         targetSpecsConfig.y = -window.innerHeight / 2;
         if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
@@ -1956,12 +1950,10 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       }
 
       if (showConditionNameBool) {
-        conditionNameConfig.x = -window.innerWidth / 2;
-        conditionNameConfig.y = -window.innerHeight / 2;
+        updateConditionNameConfig(conditionNameConfig, false);
         if (conditionName.status === PsychoJS.Status.NOT_STARTED) {
-          // keep track of start time/frame for later
-          conditionName.tStart = t; // (not accounting for frame time here)
-          conditionName.frameNStart = frameN; // exact frame index
+          conditionName.tStart = t;
+          conditionName.frameNStart = frameN;
         }
         conditionName.setAutoDraw(true);
       }
@@ -2244,7 +2236,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         totalTrial.setAutoDraw(true);
       }
 
-      if (showTargetSpecs) {
+      if (showTargetSpecsBool) {
         targetSpecsConfig.x = -window.innerWidth / 2;
         targetSpecsConfig.y = -window.innerHeight / 2;
         // *targetSpecs* updates
@@ -2255,13 +2247,11 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       }
 
       if (showConditionNameBool) {
-        if (showTargetSpecs) {
-          conditionNameConfig.x = -window.innerWidth / 2;
-          conditionNameConfig.y = targetSpecs.getBoundingBox(true).height;
-        } else {
-          conditionNameConfig.x = -window.innerWidth / 2;
-          conditionNameConfig.y = -window.innerHeight / 2;
-        }
+        updateConditionNameConfig(
+          conditionNameConfig,
+          showTargetSpecsBool,
+          targetSpecs
+        );
         // *targetSpecs* updates
         if (t >= 0.0) {
           conditionName.setPos([conditionNameConfig.x, conditionNameConfig.y]);
@@ -2429,7 +2419,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       ////
       grid.hide(true);
 
-      if (showTargetSpecs) targetSpecs.setAutoDraw(false);
+      if (showTargetSpecsBool) targetSpecs.setAutoDraw(false);
       if (showConditionNameBool) conditionName.setAutoDraw(false);
 
       if (
