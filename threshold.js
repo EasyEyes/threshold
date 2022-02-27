@@ -4,12 +4,7 @@
  * Crowding Test *
  *****************/
 
-import {
-  debug,
-  getTripletCharacters,
-  sleep,
-  toShowCursor,
-} from "./components/utils.js";
+import { debug, getTripletCharacters, sleep } from "./components/utils.js";
 
 import * as core from "./psychojs/src/core/index.js";
 import * as data from "./psychojs/src/data/index.js";
@@ -62,6 +57,7 @@ import {
   loggerText,
   hideCursor,
   showCursor,
+  toShowCursor,
   XYPixOfXYDeg,
   addConditionToData,
   addTrialStaircaseSummariesToData,
