@@ -11,6 +11,7 @@ import {
   norm,
   Rectangle,
   validateRectPoints,
+  displacementBetweenXY,
 } from "./utils.js";
 
 import { Permutation } from "js-combinatorics";
@@ -44,6 +45,8 @@ export const getCharacterSetBoundingBox = (
     autoLog: false,
   });
   const [centers, boundingRectPoints] = [{}, {}];
+  let setAscent = -Infinity;
+  let setDescent = -Infinity;
   // Create a list of all possible text strings that could be used as stimuli
   const texts = [...new Permutation(characterSet, repeats)].map((a) =>
     "".concat(...a)
@@ -64,6 +67,8 @@ export const getCharacterSetBoundingBox = (
     const descent = thisMetrics.boundingBox.actualBoundingBoxDescent;
     const left = thisMetrics.boundingBox.actualBoundingBoxLeft;
     const right = thisMetrics.boundingBox.actualBoundingBoxRight;
+    setAscent = Math.max(setAscent, ascent);
+    setDescent = Math.max(setDescent, descent);
 
     // Get the bounding points around this specific text stim
     const thisBoundingRectPoints = [
@@ -102,6 +107,15 @@ export const getCharacterSetBoundingBox = (
       characterSetBoundingRectPoints[1][1] / height,
     ],
   ];
+
+  const normalizedAscent = setAscent / height;
+  const normalizedDescent = setDescent / height;
+  const ascentToDescent =
+    normalizedAscent / (normalizedDescent + normalizedAscent);
+  logger("ascentToDescent", ascentToDescent);
+  logger("normalizedAscent", normalizedAscent);
+  logger("normalizedDescent", normalizedDescent);
+
   // Get the center of this (ie global over the character set) bounding points
   const normalizedCenter = [
     (normalizedCharacterSetBoundingPoints[0][0] +
@@ -121,7 +135,8 @@ export const getCharacterSetBoundingBox = (
     normalizedCharacterSetBoundingPoints[1],
     "pix",
     characterSet,
-    centers
+    centers,
+    ascentToDescent
   );
   return normalizedCharacterSetBoundingRect;
 };
@@ -254,6 +269,8 @@ export const restrictSizeDeg = (
         {
           heightPx: heightPx,
           targetAndFlankersXYPx: [targetXYPx],
+          sizeDeg: targetSizeDeg,
+          heightDeg: heightDeg,
         },
       ];
     }
@@ -390,10 +407,27 @@ export const restrictSpacingDeg = (
           [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
           displayOptions
         );
-        const [, bottomPx] = XYPixOfXYDeg(
+        [, bottomPx] = XYPixOfXYDeg(
           [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
           displayOptions
         );
+        // I think that this is how we should do things, ie the above code assumes that
+        // ascent == descent, ie that the center of the character is [x,y] with the top h/2 above
+        // [, topPx] = XYPixOfXYDeg(
+        //   [
+        //     targetXYDeg[0],
+        //     targetXYDeg[1] + heightDeg * characterSetRectPx.ascentToDescent,
+        //   ],
+        //   displayOptions
+        // );
+        // [, bottomPx] = XYPixOfXYDeg(
+        //   [
+        //     targetXYDeg[0],
+        //     targetXYDeg[1] -
+        //       heightDeg * (1 - characterSetRectPx.ascentToDescent),
+        //   ],
+        //   displayOptions
+        // );
         heightPx = topPx - bottomPx;
         widthPx =
           (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
@@ -449,6 +483,25 @@ export const restrictSpacingDeg = (
                   flanker1XYPx[0] - targetXYPx[0],
                   flanker1XYPx[1] - targetXYPx[1],
                 ];
+                // logger("screen norm(delatXYPx)", norm(deltaXYPx));
+                // logger("screen heightPx", heightPx);
+                // logger("screen deltaXYPx", deltaXYPx);
+                // logger(
+                //   "w/h",
+                //   characterSetRectPx.width / characterSetRectPx.height
+                // );
+                // logger("characterSet", characterSetRectPx.characterSet);
+
+                const oldHeightPx = heightPx;
+                heightPx = targetSizeIsHeightBool
+                  ? norm(deltaXYPx)
+                  : (norm(deltaXYPx) * characterSetRectPx.height) /
+                    characterSetRectPx.width;
+                // logger("old-new heightPx", oldHeightPx - heightPx);
+                widthPx =
+                  heightPx *
+                  (characterSetRectPx.width / characterSetRectPx.height);
+
                 flanker2XYPx = [
                   targetXYPx[0] - deltaXYPx[0],
                   targetXYPx[1] - deltaXYPx[1],
@@ -551,6 +604,9 @@ export const restrictSpacingDeg = (
       const stimulusParameters = {
         heightPx: heightPx,
         targetAndFlankersXYPx: targetAndFlankerLocationsPx,
+        sizeDeg: sizeDeg,
+        spacingDeg: spacingDeg,
+        heightDeg: heightDeg,
       };
       return [spacingDeg, stimulusParameters];
     }

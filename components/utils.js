@@ -502,7 +502,8 @@ export class Rectangle {
     upperRight,
     units = undefined,
     characterSet = undefined,
-    centers = undefined
+    centers = undefined,
+    ascentToDescent = undefined
   ) {
     this.units = units;
     this.left = lowerLeft[0];
@@ -515,6 +516,7 @@ export class Rectangle {
 
     this.characterSet = characterSet;
     this.centers = centers;
+    this.ascentToDescent = ascentToDescent;
   }
   getUnits() {
     return this.units;
