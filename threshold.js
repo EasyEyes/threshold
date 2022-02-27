@@ -1901,10 +1901,6 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       );
 
       if (condition["showTakeABreakCreditBool"]) {
-        console.log(
-          "NEWWWWWWWWWWWWWWWWWWWWWW",
-          currentBlockCreditForTrialBreak
-        );
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
       } else {
         hideTrialBreakProgressBar();
@@ -2668,8 +2664,8 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         quitSurvey: true,
       };
     }
+
     function logKey(e) {
-      console.log(` ${e.code}`);
       switch (e.code) {
         case "Escape":
           modalButtonTriggeredViaKeyboard = true;
@@ -2685,6 +2681,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           break;
       }
     }
+
     document.addEventListener("keydown", logKey);
     document.getElementById("skip-trial-btn").disabled = false;
     document.getElementById("skip-block-btn").disabled = false;
@@ -2716,26 +2713,26 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       document
         .getElementById("skip-trial-btn")
         .addEventListener("click", (event) => {
-          console.log("Skip Trial");
+          loggerText("--- SKIP TRIAL ---");
           event.preventDefault();
           skipTrialOrBlock.skipTrial = true;
           skipTrialOrBlock.trialId = currentTrialIndex;
           skipTrialOrBlock.blockId = currentBlockIndex;
           action.skipTrial = true;
           dialog.hide();
-          console.log("Skip Trial Ends");
+          loggerText("--- SKIP TRIAL ENDS ---");
           resolve();
         });
       document
         .getElementById("skip-block-btn")
         .addEventListener("click", (event) => {
-          console.log("Skip Block");
+          loggerText("--- SKIP BLOCK ---");
           event.preventDefault();
           skipTrialOrBlock.skipBlock = true;
           skipTrialOrBlock.blockId = currentBlockIndex;
           action.skipBlock = true;
           dialog.hide();
-          console.log("Skip Block Ends");
+          loggerText("--- SKIP BLOCK ENDS ---");
           resolve();
         });
       dialog.show();
