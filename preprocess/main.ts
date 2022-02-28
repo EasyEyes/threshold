@@ -18,6 +18,7 @@ import {
   getFontNameListBySource,
   getFormNames,
   getTextList,
+  addNewUnderscoreParam,
 } from "./utils";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
@@ -37,7 +38,8 @@ export const preprocessExperimentFile = async (
       errors,
       easyeyesResources,
       callback,
-      "web"
+      "web",
+      file.name
     );
   };
 
@@ -72,7 +74,8 @@ export const prepareExperimentFileForThreshold = async (
   errors: any[],
   easyeyesResources: any,
   callback: any,
-  space: string
+  space: string,
+  filename?: string
 ) => {
   parsed.data = discardCommentedLines(parsed);
   // Recruitment
@@ -138,6 +141,15 @@ export const prepareExperimentFileForThreshold = async (
     if (unbalancedCommasError) errors.push(unbalancedCommasError);
   }
 
+  if (filename) {
+    const extensionOmitted = /(.*\/)*(.*)(\.csv|\.xlsx)/g;
+    const experimentNameMatches = [...filename.matchAll(extensionOmitted)][0];
+    const _experimentName = experimentNameMatches
+      ? experimentNameMatches[experimentNameMatches.length - 2]
+      : "";
+    df = addNewUnderscoreParam(df, "_experimentName", _experimentName);
+    df = addNewUnderscoreParam(df, "_experimentFilename", filename);
+  }
   df = addUniqueLabelsToDf(df);
   df = populateUnderscoreValues(df);
 

@@ -45,7 +45,8 @@ const preprocessExperimentFileLocal = async (
         forms: [],
       },
       callback,
-      "node"
+      "node",
+      file
     );
   };
 
