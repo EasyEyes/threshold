@@ -430,9 +430,6 @@ const experiment = (blockCount) => {
     return Scheduler.Event.NEXT;
   }
 
-  var debriefClock;
-  var debrief_form_content;
-
   var fileClock;
   var filterClock;
   var instructionsClock;
@@ -1460,11 +1457,9 @@ const experiment = (blockCount) => {
       // Check fullscreen and if not, get fullscreen
       if (!rc.isFullscreen.value && !debug) {
         rc.getFullscreen();
-        showCursor(); // TODO Show only when the cursor is strictly needed
         await sleep(1000);
       }
 
-      // showCursor();
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
@@ -1492,6 +1487,7 @@ const experiment = (blockCount) => {
         paramReader.read("responseMustClickCrosshairBool", block_condition)
       );
       logger("responseType", responseType);
+      if (canClick) showCursor();
 
       // update trial/block count
       currentTrialIndex = snapshot.thisN + 1;
