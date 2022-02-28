@@ -162,6 +162,7 @@ rc.init();
 // store info about the experiment session:
 let expName = "threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
+let experimentFileName, experimentName;
 
 const fontsRequired = {};
 var simulated;
@@ -293,6 +294,12 @@ const experiment = (blockCount) => {
     });
   }
   logger("fontsRequired", fontsRequired);
+
+  experimentFileName = paramReader.read(
+    "_experimentFilename",
+    "__ALL_BLOCKS__"
+  )[0];
+  experimentName = paramReader.read("_experimentName", "__ALL_BLOCKS__")[0];
 
   for (let i in fontsRequired) {
     logger(i, fontsRequired[i]);
@@ -1828,6 +1835,7 @@ ${
     : ""
 }
 heightDeg: ${Math.round(10 * stimulusParameters.heightDeg) / 10}
+filename: ${experimentFileName}
 targetFont: ${targetFont}
 spacingRelationToSize: ${spacingRelationToSize}
 spacingOverSizeRatio: ${spacingOverSizeRatio}

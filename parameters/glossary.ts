@@ -125,6 +125,14 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "",
   },
+  _experimentFilename: {
+    name: "_experimentFilename",
+    availability: "now",
+    example: "crowding.csv",
+    explanation: "Filename of the table file. ",
+    type: "text",
+    default: "",
+  },
   _experimentName: {
     name: "_experimentName",
     availability: "now",
@@ -1233,7 +1241,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "letter",
     explanation:
-      "• letter On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is diplayed at the target eccentricity with the target size.",
+      "• letter On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is diplayed at the target eccentricity with the target size.\n• reading A paragraph of text is displayed at each trial, to test the reading speed.",
     type: "categorical",
     default: "letter",
     categories: ["letter", "gabor", "image", "reading"],
@@ -1325,7 +1333,7 @@ export const GLOSSARY: Glossary = {
       'Can be one or multiple of the following categories. If there are multiple tasks in one trial, use comma to divide them, e.g., "identify,targetQuestion1". The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• targetQuestion@ (e.g., targetQuestion1) uses the question and answers provided by parameter targetQuestion@. The participant must click on one of the answers.\n• detect might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
-    categories: ["identify", "read", "categorize", "targetQuestion@"],
+    categories: ["identify", "categorize", "targetQuestion@"],
   },
   thresholdBeta: {
     name: "thresholdBeta",

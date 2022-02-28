@@ -292,6 +292,18 @@ export const isExpTableFile = (file: File): boolean => {
   return file.name.includes("xlsx") || file.name.includes("csv");
 };
 
+export const addNewUnderscoreParam = (
+  df: any,
+  paramName: string,
+  paramValue: any
+): any => {
+  const columnName = paramName[0] !== "_" ? "_" + paramName : paramName;
+  if (df.listColumns().includes(columnName)) return df;
+  return df.withColumn(columnName, (_: any, i: number) =>
+    i === 0 ? paramValue : ""
+  );
+};
+
 /**
  * Return a new dataframe in which, for each parameter starting with an underscore, the first value is copied to every column
  * @param {dfjs.DataFrame} df Dataframe describing the experiment
