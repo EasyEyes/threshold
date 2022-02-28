@@ -483,6 +483,7 @@ export class Grid {
     let rMm = 0,
       mostRecentLabel = fixation[0];
     while (moreCirclesNeeded) {
+      const labeled = rMm % 5 === 0 ? true : false;
       // Find new r, aka norm(xy). See [5] above.
       const r = Math.pow(10, rMm / 38) * 0.15 - 0.15;
       const rPix = XYPixOfXYDeg(
@@ -503,7 +504,7 @@ export class Grid {
           radius: rPix,
           ori: 0,
           pos: fixation,
-          lineWidth: 1,
+          lineWidth: labeled ? 4 : 1,
           lineColor: new util.Color("plum"),
           opacity: 1,
           depth: -999999,
@@ -511,7 +512,7 @@ export class Grid {
         })
       );
 
-      if (rPix - mostRecentLabel > 50) {
+      if (labeled) {
         // Create label
         const pos = XYPixOfXYDeg(
           [fixationDeg[0] + r, fixationDeg[1]],
@@ -524,6 +525,7 @@ export class Grid {
             text: `${rMm} mm`,
             font: "Arial",
             units: "pix",
+            alignHoriz: "left",
             pos: pos,
             height: 15,
             ori: 0.0,

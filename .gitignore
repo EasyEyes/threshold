@@ -1,13 +1,10 @@
 # lib
 js
 
-###
-# examples
-
-examples/*/*
-examples/tables/*
-examples/fonts/*
-examples/forms/*
+examples/*/**
+# !examples/fonts
+# !examples/forms
+# !examples/tables
 
 !examples/fonts/Auckland Optotype.woff2
 !examples/fonts/Douglass Pen.woff2
@@ -18,6 +15,8 @@ examples/forms/*
 
 !examples/forms/Demo consent form.pdf
 !examples/forms/Demo debrief form.pdf
+
+!examples/texts/the-phantom-tollbooth.txt
 
 !examples/tables/demoExperiment.xlsx
 !examples/tables/minimalExperiment.csv

@@ -1127,6 +1127,10 @@ const experiment = (blockCount) => {
     );
     await addPopupLogic(expName, responseType, null);
 
+    // Reset trial counter
+    totalCorrectTrials = 0;
+    totalCompletedTrials = 0;
+
     if (currentLoop instanceof MultiStairHandler)
       addBlockStaircaseSummariesToData(currentLoop, psychoJS);
 
@@ -2148,13 +2152,15 @@ const experiment = (blockCount) => {
           // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
           if (showTargetSpecsBool) {
-            let targetSpecsString = `size: ${stimulusParameters.sizeDeg} deg
+            let targetSpecsString = `sizeDeg: ${
+              Math.round(10 * stimulusParameters.sizeDeg) / 10
+            }
 ${
   stimulusParameters.spacingDeg
-    ? `spacing: ${stimulusParameters.spacingDeg} deg`
+    ? `spacingDeg: ${Math.round(10 * stimulusParameters.spacingDeg) / 10}`
     : ""
 }
-heightDeg: ${stimulusParameters.heightDeg} deg,
+heightDeg: ${Math.round(10 * stimulusParameters.heightDeg) / 10}
 targetFont: ${targetFont}
 spacingRelationToSize: ${spacingRelationToSize}
 spacingOverSizeRatio: ${spacingOverSizeRatio}
