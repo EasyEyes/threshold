@@ -26,7 +26,17 @@ export const _responseTypes = {
   2: [true, true, false, false],
 };
 
-export const getResponseType = (click, type, keypad, speak) => {
+export const getResponseType = (
+  click,
+  type,
+  keypad,
+  speak,
+  mustClickCrosshairForResponse
+) => {
+  // responseMustClickCrosshairBool
+  if (mustClickCrosshairForResponse) return 1;
+
+  // Default routine
   const c = click,
     t = type,
     k = keypad,
@@ -37,6 +47,17 @@ export const getResponseType = (click, type, keypad, speak) => {
   else return 1;
   // TODO finish other situations
 };
+
+export const resetResponseType = (
+  originalResponseType,
+  responseType,
+  mustClickCrosshairForResponse
+) => {
+  if (mustClickCrosshairForResponse) return originalResponseType;
+  else return responseType;
+};
+
+/* -------------------------------------------------------------------------- */
 
 export const canType = (responseType) => {
   return _responseTypes[responseType][1];

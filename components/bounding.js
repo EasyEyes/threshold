@@ -494,10 +494,11 @@ export const restrictSpacingDeg = (
 
                 const oldHeightPx = heightPx;
                 heightPx = targetSizeIsHeightBool
-                  ? norm(deltaXYPx)
+                  ? norm(deltaXYPx) / spacingOverSizeRatio
                   : (norm(deltaXYPx) * characterSetRectPx.height) /
-                    characterSetRectPx.width;
-                // logger("old-new heightPx", oldHeightPx - heightPx);
+                    (characterSetRectPx.width * spacingOverSizeRatio);
+                logger("old heightPx", oldHeightPx);
+                logger("new heightpx", heightPx);
                 widthPx =
                   heightPx *
                   (characterSetRectPx.width / characterSetRectPx.height);

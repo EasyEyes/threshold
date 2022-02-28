@@ -29,6 +29,7 @@ import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
 import "./components/css/takeABreak.css";
+import "./components/css/proportionCorrect.css";
 import "./components/css/psychojsExtra.css";
 
 ////
@@ -73,7 +74,12 @@ import {
   useCalibration,
 } from "./components/useCalibration.js";
 
-import { canClick, canType, getResponseType } from "./components/response.js";
+import {
+  canClick,
+  canType,
+  getResponseType,
+  resetResponseType,
+} from "./components/response.js";
 
 import { cleanFontName, loadFonts } from "./components/fonts.js";
 import {
@@ -159,6 +165,13 @@ import {
   showTrialBreakProceed,
   showTrialBreakProgressBar,
 } from "./components/takeABreak.js";
+
+import {
+  hideProportionCorrectPopup,
+  prepareProportionCorrectPopup,
+  showProportionCorrectPopup,
+} from "./components/proportionCorrect.js";
+
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
 
 /* ---------------------------------- */
@@ -231,6 +244,7 @@ const paramReaderInitialized = async (reader) => {
     // ! Take a break
     prepareTrialBreakPopup();
     prepareTrialBreakProgressBar();
+    prepareProportionCorrectPopup();
 
     document.body.removeChild(document.querySelector("#rc-panel"));
 
@@ -298,6 +312,7 @@ var currentTrialIndex = 0;
 var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
+var totalCorrect = 0;
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
@@ -781,6 +796,7 @@ const experiment = (blockCount) => {
   var clickedContinue = false;
 
   var responseType = 2;
+  var originalResponseType = 2;
 
   var continueRoutine;
   var consentComponents;
@@ -1105,8 +1121,25 @@ const experiment = (blockCount) => {
   }
 
   async function trialsLoopEnd() {
+    /* -------------------------------proportion correct popup------------------------------------------- */
+    var proportion = (totalCorrect / currentTrialLength).toFixed(2);
+    showProportionCorrectPopup(proportion);
+
+    const blockProceed = () => {
+      document.getElementById("proportion-correct-continue-button").onclick =
+        () => {
+          /* nothing */
+        };
+      hideProportionCorrectPopup();
+    };
+
+    document.getElementById("proportion-correct-continue-button").onclick =
+      blockProceed;
+    /* -------------------------------proportion correct popup------------------------------------------- */
+
     if (currentLoop instanceof MultiStairHandler)
       addBlockStaircaseSummariesToData(currentLoop, psychoJS);
+
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
     return Scheduler.Event.NEXT;
@@ -1721,7 +1754,6 @@ const experiment = (blockCount) => {
       const parametersToExcludeFromData = [];
 
       let block_condition;
-
       switchKind(targetKind.current, {
         reading: () => {
           block_condition = trials.thisTrial.block_condition;
@@ -1741,26 +1773,19 @@ const experiment = (blockCount) => {
 
           block_condition = condition["block_condition"];
 
-          if (
-            paramReader.has("responseMustClickCrosshairBool") &&
+          // ! responseType
+          originalResponseType = responseType;
+          responseType = getResponseType(
+            paramReader.read("responseClickedBool", block_condition),
+            paramReader.read("responseTypedBool", block_condition),
             paramReader.read(
-              "responseMustClickCrosshairBool",
+              "responseTypedEasyEyesKeypadBool",
               block_condition
-            ) == true
-          ) {
-            responseType = 1;
-          } else {
-            // ! responseType
-            responseType = getResponseType(
-              paramReader.read("responseClickedBool", block_condition),
-              paramReader.read("responseTypedBool", block_condition),
-              paramReader.read(
-                "responseTypedEasyEyesKeypadBool",
-                block_condition
-              ),
-              paramReader.read("responseSpokenBool", block_condition)
-            );
-          }
+            ),
+            paramReader.read("responseSpokenBool", block_condition),
+            paramReader.read("responseMustClickCrosshairBool", block_condition)
+          );
+          logger("responseType", responseType);
         },
       });
 
@@ -2417,17 +2442,15 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         },
         letter: () => {
           block_condition = condition["block_condition"];
+
+          responseType = resetResponseType(
+            originalResponseType,
+            responseType,
+            paramReader.read("responseMustClickCrosshairBool", block_condition)
+          );
         },
       });
       ////
-
-      if (paramReader.has("responseMustClickCrosshairBool")) {
-        if (
-          paramReader.read("responseMustClickCrosshairBool", block_condition) ==
-          true
-        )
-          responseType = 2;
-      }
 
       //------Prepare to start Routine 'trial'-------
       t = 0;
@@ -2584,6 +2607,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
               (targetKind.current === "reading" && key_resp.keys === "space")
             ) {
               // Play correct audio
+              totalCorrect += 1;
               correctSynth.play();
               key_resp.corr = 1;
             } else {
@@ -2605,6 +2629,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           1000;
         if (showCharacterSetResponse.current == correctAns) {
           // Play correct audio
+          totalCorrect += 1;
           correctSynth.play();
           key_resp.corr = 1;
         } else {
