@@ -25,9 +25,10 @@ import {
   FORM_FILES_MISSING,
   FONT_FILES_MISSING,
   INCONSISTENT_VIEWING_DISTANCES,
+  TEXT_FILES_MISSING,
 } from "./errorMessages";
 import { GLOSSARY } from "../parameters/glossary";
-import { isNumeric, levDist, arraysEqual } from "./utilities";
+import { isNumeric, levDist, arraysEqual } from "./utils";
 // import { Modal } from "bootstrap";
 
 let zeroIndexed: boolean;
@@ -508,6 +509,29 @@ export const isFontMissing = (
   }
   if (missingFontList.length > 0) {
     errorList.push(FONT_FILES_MISSING("targetFont", missingFontList));
+  }
+
+  return errorList;
+};
+
+export const isTextMissing = (
+  requestedTextList: string[],
+  existingTextList: string[]
+): EasyEyesError[] => {
+  const errorList: EasyEyesError[] = [];
+  const missingText = new Set();
+
+  for (const requested of requestedTextList) {
+    if (!existingTextList.includes(requested)) missingText.add(requested);
+  }
+
+  if (missingText.size > 0) {
+    errorList.push(
+      TEXT_FILES_MISSING(
+        "readingCorpusSource",
+        Array.from(missingText) as string[]
+      )
+    );
   }
 
   return errorList;

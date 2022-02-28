@@ -76,11 +76,13 @@ const constructForEXperiment = async (d: string) => {
     (
       forms: any,
       fonts: string[],
+      texts: string[],
       fileStringList: string[][],
       errorList: any[]
     ) => {
       console.log("Requested FORMS", forms);
       console.log("Requested FONTS", fonts);
+      console.log("Requested TEXTS", texts);
 
       if (errorList.length) {
         errorList.forEach((err) => console.log(err));
@@ -114,6 +116,7 @@ const constructForEXperiment = async (d: string) => {
 
       copyFolder("fonts", dir);
       copyFolder("forms", dir);
+      copyFolder("texts", dir);
 
       mkdirSync(`${dir}/js`);
       copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);

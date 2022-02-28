@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Papa from "papaparse";
-import { transpose } from "./utilities";
+import { transpose } from "./utils";
 
 export const splitIntoBlockFiles = (df: any, space = "web") => {
   const getFile = space === "web" ? getFileOnWeb : getFileNode;

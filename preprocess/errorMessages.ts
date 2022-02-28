@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GLOSSARY } from "../parameters/glossary";
-import { getNumericalSuffix, verballyEnumerate } from "./utilities";
+import { getNumericalSuffix, verballyEnumerate } from "./utils";
 
 export interface EasyEyesError {
   name: string;
@@ -106,6 +106,7 @@ export const TOO_MANY_CSV_FILES_FOUND: EasyEyesError = {
   parameters: ["FILE"],
 };
 
+// TODO Too much duplicated code for similar file missing errors!
 export const FONT_FILES_MISSING = (
   parameter: string,
   missingFileNameList: string[]
@@ -152,6 +153,24 @@ export const FORM_FILES_MISSING = (
   });
   return {
     name: "Form file is missing",
+    message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const TEXT_FILES_MISSING = (
+  parameter: string,
+  missingFileNameList: string[]
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList.map((fileName: string) => {
+    htmlList += `<li>${fileName}</li>`;
+  });
+  return {
+    name: "Text file is missing",
     message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
     hint: `Submit the file(s) to the drop box above ↑`,
     context: "preprocessor",

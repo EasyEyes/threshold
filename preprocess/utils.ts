@@ -5,9 +5,9 @@ import { DataFrame } from "dataframe-js";
 import { GLOSSARY } from "../parameters/glossary";
 
 /**
- * get requested consentForm and debreifForms
+ * Get requested consentForm and debriefForm
  * @param {Papa.ParseResult<string[]>} parsed
- * @returns {consentForm: string, debreifForm: string}
+ * @returns {consentForm: string, debriefForm: string}
  */
 export const getFormNames = (parsed: any): any => {
   let consentFormRow: string[] = [];
@@ -29,7 +29,7 @@ export const getFormNames = (parsed: any): any => {
 };
 
 /**
- * get list of fonts required with given font source
+ * Get list of fonts required with given font source
  * @param {Papa.ParseResult<string[]>} parsed
  * @param {string} fontSource
  * @returns {string[]}
@@ -70,6 +70,20 @@ export const getFontNameListBySource = (
   }
 
   return fontList;
+};
+
+/**
+ *
+ * @param { Papa.ParseResult<string[]> } parsed
+ * @returns { string[] }
+ */
+export const getTextList = (parsed: any) => {
+  const textList = new Set();
+  for (const parsedRow of parsed.data) {
+    if (parsedRow[0] == "readingCorpusSource")
+      for (const source of parsedRow.slice(1)) textList.add(source.trim());
+  }
+  return [...textList];
 };
 
 /**
@@ -269,12 +283,12 @@ export const getNumericalSuffix = (n: number): string => {
 };
 
 /**
- * Robust check for whether a file is a CSV file
+ * Robust check for whether a file is a CSV/XLSX file
  * https://developer.mozilla.org/en-US/docs/Web/API/File
  * @param {File} file File object to be checked
  * @returns {Boolean}
  */
-export const isCsvFile = (file: File): boolean => {
+export const isExpTableFile = (file: File): boolean => {
   return file.name.includes("xlsx") || file.name.includes("csv");
 };
 

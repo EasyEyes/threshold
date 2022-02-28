@@ -7,6 +7,7 @@ import {
   isFontMissing,
   validatedCommas,
   validateExperimentDf,
+  isTextMissing,
 } from "./experimentFileChecks";
 
 import { FONT_FILES_MISSING_WEB } from "./errorMessages";
@@ -16,7 +17,8 @@ import {
   dataframeFromPapaParsed,
   getFontNameListBySource,
   getFormNames,
-} from "./utilities";
+  getTextList,
+} from "./utils";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import { webFontChecker } from "./fontCheck";
@@ -114,6 +116,10 @@ export const prepareExperimentFileForThreshold = async (
       )
     );
 
+  const requestedTextList: any[] = getTextList(parsed);
+  if (space === "web")
+    errors.push(...isTextMissing(requestedTextList, easyeyesResources.texts));
+
   // Check that every row has the same number of values
   const unbalancedCommasError = validatedCommas(parsed);
 
@@ -138,11 +144,12 @@ export const prepareExperimentFileForThreshold = async (
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
     // console.log("ERRORS", errors);
-    callback(requestedForms, requestedFontList, [], errors);
+    callback(requestedForms, requestedFontList, requestedTextList, [], errors);
   } else {
     callback(
       requestedForms,
       requestedFontList,
+      requestedTextList,
       splitIntoBlockFiles(df, space),
       []
     );
