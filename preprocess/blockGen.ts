@@ -7,7 +7,10 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
   const resultFileList = [];
 
   // Split up into block files
-  const blockIndices: any = { block: [] };
+  const blockIndices: { block: number[]; targetKind: string[] } = {
+    block: [],
+    targetKind: [],
+  };
   const uniqueBlock = df.unique("block").toDict()["block"];
 
   uniqueBlock.forEach((blockId: string, index: number) => {
@@ -19,6 +22,13 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
       const blockDf = df.filter((row: any) => row.get("block") === blockId);
       const blockDict = blockDf.toDict();
       const columns = Object.keys(blockDict);
+
+      // Add an index to our blockCount file (see below) for this block
+      // blockIndices.block.push(index);
+
+      if (blockDict["targetKind"])
+        blockIndices.targetKind.push(blockDict["targetKind"][0]);
+      else blockIndices.targetKind.push("letter");
 
       const data = transpose(columns.map((column) => blockDict[column]));
       // ... and use them to create a csv file for this block.
@@ -35,8 +45,11 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
 
   // Create a "blockCount" file, just one column with the the indices of the blocks
   const blockCountCsvString = Papa.unparse({
-    fields: ["block"],
-    data: blockIndices.block.map((x: any) => [x]),
+    fields: ["block", "targetTask"],
+    data: blockIndices.block.map((x: any, index: number) => [
+      x,
+      blockIndices.targetKind[index],
+    ]),
   });
 
   // store blockCount file

@@ -7,16 +7,18 @@ export const loadFonts = (reader, fontList) => {
 
   for (let condition of reader.conditions) {
     const conditionName = condition.block_condition;
-    _loadNameFromSource(
-      reader,
-      fontList,
-      "targetFont",
-      "targetFontSource",
-      conditionName,
-      fileFonts,
-      webFonts,
-      googleFonts
-    );
+    if (reader.has("targetFont", conditionName))
+      _loadNameFromSource(
+        reader,
+        fontList,
+        "targetFont",
+        "targetFontSource",
+        conditionName,
+        fileFonts,
+        webFonts,
+        googleFonts
+      );
+
     _loadNameFromSource(
       reader,
       fontList,
@@ -27,16 +29,18 @@ export const loadFonts = (reader, fontList) => {
       webFonts,
       googleFonts
     );
-    _loadNameFromSource(
-      reader,
-      fontList,
-      "readingFont",
-      "readingFontSource",
-      conditionName,
-      fileFonts,
-      webFonts,
-      googleFonts
-    );
+
+    if (reader.has("readingFont", conditionName))
+      _loadNameFromSource(
+        reader,
+        fontList,
+        "readingFont",
+        "readingFontSource",
+        conditionName,
+        fileFonts,
+        webFonts,
+        googleFonts
+      );
   }
 
   if (googleFonts.length) {
@@ -77,6 +81,7 @@ const _loadNameFromSource = (
   } else if (sourceType === "browser") {
     // Don't need to do ny preloading...
   } else if (sourceType === "server") {
+    // ?
   } else if (sourceType === "google") {
     if (!googleFonts.includes(name)) googleFonts.push(name);
   }

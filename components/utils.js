@@ -68,6 +68,21 @@ export const shuffle = (array) => {
   return a;
 };
 
+////
+export const toShowCursor = (
+  skipTrialOrBlock,
+  currentTrialIndex,
+  currentBlockIndex
+) => {
+  return (
+    (skipTrialOrBlock.trialId == currentTrialIndex &&
+      skipTrialOrBlock.blockId == currentBlockIndex &&
+      skipTrialOrBlock.skipTrial) ||
+    (skipTrialOrBlock.blockId == currentBlockIndex &&
+      skipTrialOrBlock.skipBlock)
+  );
+};
+
 export const hideCursor = () => {
   document.body.classList.add("hide-cursor");
 };

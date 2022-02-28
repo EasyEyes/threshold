@@ -20,6 +20,9 @@ examples/*/**
 
 !examples/tables/demoExperiment.xlsx
 !examples/tables/minimalExperiment.csv
+!examples/tables/readingExperiment.csv
+
+###
 
 node_modules
 

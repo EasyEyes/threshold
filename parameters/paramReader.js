@@ -63,8 +63,10 @@ export class ParamReader {
         // __ALL_BLOCKS__
         const returner = [];
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (let _i in this._experiment)
+        for (let _i in this._experiment) {
           returner.push(this.parse(GLOSSARY[name].default));
+        }
+
         return returner;
       }
     }
