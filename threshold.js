@@ -1010,6 +1010,10 @@ const experiment = (blockCount) => {
     );
     await addPopupLogic(expName, responseType, null);
 
+    // Reset trial counter
+    totalCorrectTrials = 0;
+    totalCompletedTrials = 0;
+
     addBlockStaircaseSummariesToData(currentLoop, psychoJS);
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
