@@ -8,6 +8,12 @@ export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export function safeExecuteFunc(f, ...a) {
+  if (f && typeof f === "function")
+    if (a.length) return f(...a);
+    else return f();
+}
+
 /**
  * Create a mapping between an arbitrary set of strings, ie `possibleResponses`,
  * and a set of ascii-supported keys, ie [0,1,...,9,A,B,...Z].

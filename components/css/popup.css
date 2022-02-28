@@ -1,4 +1,4 @@
-#proportion-correct-container {
+.popup-container {
   display: none;
   position: absolute;
   width: 100%;
@@ -10,7 +10,7 @@
   z-index: 1000007;
 }
 
-#proportion-correct-background {
+.popup-background {
   position: fixed;
   top: 0;
   left: 0;
@@ -20,7 +20,7 @@
   z-index: -1;
 }
 
-#proportion-correct-popup {
+.popup {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -33,12 +33,18 @@
   z-index: 1;
 }
 
-#proportion-correct-title {
+.popup-title {
   position: relative;
   font-size: 1.6rem;
 }
 
-#proportion-correct-continue-button {
+.popup-sub-text {
+  position: relative;
+  display: none;
+  font-size: 1rem;
+}
+
+.popup-continue-button {
   position: absolute;
   display: none;
   left: 1rem;
@@ -49,9 +55,13 @@
   color: #fff;
   outline: none;
   border: none;
+  cursor: pointer;
 }
 
-#proportion-correct-continue-button:hover {
-  cursor: pointer;
+.popup-continue-button:hover {
   background-color: #444;
+}
+
+.popup-continue-button:active {
+  background-color: #111;
 }

@@ -30,8 +30,8 @@ import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
+import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
-import "./components/css/proportionCorrect.css";
 import "./components/css/psychojsExtra.css";
 
 ////
@@ -115,13 +115,16 @@ import {
   SimulatedObserver,
   simulateObserverResponse,
 } from "./components/simulatedObserver.js";
-import {
-  getCanvasContext,
-  getPixelRGBA,
-  initPixelsArray,
-  readPixels,
-} from "./components/canvasContext.js";
+
+// import {
+//   getCanvasContext,
+//   getPixelRGBA,
+//   initPixelsArray,
+//   readPixels,
+// } from "./components/canvasContext.js";
+
 import { populateQuestDefaults } from "./components/questValues.js";
+
 import {
   generateBoundingBoxPolies,
   addBoundingBoxesToComponents,
@@ -129,24 +132,23 @@ import {
   updateBoundingBoxPolies,
 } from "./components/boundingBoxes.js";
 
+// POPUP
 import {
-  hideTrialBreakPopup,
-  hideTrialBreakProceed,
+  preparePopup,
+  showPopup,
+  hidePopup,
+  showPopupProceed,
+  hidePopupProceed,
+} from "./components/popup.js";
+// Take a break
+import {
   hideTrialBreakProgressBar,
-  prepareTrialBreakPopup,
   prepareTrialBreakProgressBar,
-  showTrialBreakPopup,
-  showTrialBreakProceed,
   showTrialBreakProgressBar,
 } from "./components/takeABreak.js";
 
-import {
-  hideProportionCorrectPopup,
-  prepareProportionCorrectPopup,
-  showProportionCorrectPopup,
-} from "./components/proportionCorrect.js";
-
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
+import { addPopupLogic } from "./components/popup.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -160,7 +162,7 @@ const rc = RemoteCalibrator;
 rc.init();
 
 // store info about the experiment session:
-let expName = "Threshold"; // from the Builder filename that created this script
+let expName = "threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
@@ -202,10 +204,9 @@ const paramReaderInitialized = async (reader) => {
 
   ////
   const startExperiment = () => {
-    // ! Take a break
-    prepareTrialBreakPopup();
+    // ! POPUPS for take a break & proportion correct
+    preparePopup(expName); // Try to use only one popup ele for both (or even more) popup features
     prepareTrialBreakProgressBar();
-    prepareProportionCorrectPopup();
 
     document.body.removeChild(document.querySelector("#rc-panel"));
 
@@ -997,21 +998,15 @@ const experiment = (blockCount) => {
   }
 
   async function trialsLoopEnd() {
-    /* -------------------------------proportion correct popup------------------------------------------- */
+    // Proportion correct
     var proportion = (totalCorrect / currentTrialLength).toFixed(2);
-    showProportionCorrectPopup(proportion);
-
-    const blockProceed = () => {
-      document.getElementById("proportion-correct-continue-button").onclick =
-        () => {
-          /* nothing */
-        };
-      hideProportionCorrectPopup();
-    };
-
-    document.getElementById("proportion-correct-continue-button").onclick =
-      blockProceed;
-    /* -------------------------------proportion correct popup------------------------------------------- */
+    showPopup(
+      expName,
+      `Nice Work! Here is your proportion correct: ${proportion}`,
+      "",
+      false
+    );
+    addPopupLogic(expName, responseType, null);
 
     addBlockStaircaseSummariesToData(currentLoop, psychoJS);
     // terminate loop
@@ -2521,7 +2516,12 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       if (currentBlockCreditForTrialBreak >= 1) {
         currentBlockCreditForTrialBreak -= 1;
 
-        showTrialBreakPopup();
+        showPopup(
+          expName,
+          "Good work! Please take a brief break to relax and blink.",
+          "",
+          true
+        );
         const takeABreakMinimumDurationSec =
           condition["takeABreakMinimumDurationSec"];
 
@@ -2529,41 +2529,14 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           // After break time out...
           setTimeout(() => {
             // Show proceed hint and/or button
-            showTrialBreakProceed(
+            showPopupProceed(
+              expName,
               instructionsText.trialBreak(rc.language.value, responseType),
               canClick(responseType)
             );
-
-            const trialProceed = () => {
-              document.getElementById("trial-break-continue-button").onclick =
-                () => {
-                  /* nothing */
-                };
-              hideTrialBreakProceed();
-              hideTrialBreakPopup();
-
-              // currentBlockCreditForTrialBreak -=
-              //   condition["takeABreakTrialCredit"];
-
+            addPopupLogic(expName, responseType, () => {
               resolve(Scheduler.Event.NEXT);
-            };
-
-            const handleTrialBreakKeyResponse = (e) => {
-              e.preventDefault();
-              if (e.hey === "Enter") {
-                trialProceed();
-                document.removeEventListener(
-                  "keydown",
-                  handleTrialBreakKeyResponse
-                );
-              }
-            };
-
-            if (canClick(responseType))
-              document.getElementById("trial-break-continue-button").onclick =
-                trialProceed;
-            if (canType(responseType))
-              document.addEventListener("keydown", handleTrialBreakKeyResponse);
+            });
           }, takeABreakMinimumDurationSec * 1000);
         });
       }
