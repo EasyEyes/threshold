@@ -1115,21 +1115,23 @@ const experiment = (blockCount) => {
   }
 
   async function trialsLoopEnd() {
-    // Proportion correct
-    showPopup(
-      expName,
-      phrases.T_proportionCorrectPopup[rc.language.value].replace(
-        "xxx",
-        `${(totalCorrectTrials / totalCompletedTrials).toFixed(2) * 100}`
-      ),
-      instructionsText.trialBreak(rc.language.value, responseType),
-      false
-    );
-    await addPopupLogic(expName, responseType, null);
+    if (targetKind.current === "letter") {
+      // Proportion correct
+      showPopup(
+        expName,
+        phrases.T_proportionCorrectPopup[rc.language.value].replace(
+          "xxx",
+          `${(totalCorrectTrials / totalCompletedTrials).toFixed(2) * 100}`
+        ),
+        instructionsText.trialBreak(rc.language.value, responseType),
+        false
+      );
+      await addPopupLogic(expName, responseType, null);
 
-    // Reset trial counter
-    totalCorrectTrials = 0;
-    totalCompletedTrials = 0;
+      // Reset trial counter
+      totalCorrectTrials = 0;
+      totalCompletedTrials = 0;
+    }
 
     if (currentLoop instanceof MultiStairHandler)
       addBlockStaircaseSummariesToData(currentLoop, psychoJS);
