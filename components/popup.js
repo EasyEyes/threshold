@@ -1,9 +1,10 @@
 // Prepare and show/hide popups for takeABreak, proportionCorrect, etc.
 
+import { phrases } from "./i18n";
 import { canClick, canType } from "./response";
-import { safeExecuteFunc } from "./utils";
+import { safeExecuteFunc, showCursor } from "./utils";
 
-export const preparePopup = (keyName) => {
+export const preparePopup = (L, keyName) => {
   // keyName can be 'trial-break' or 'proportion-correct'
   const wrapperEle = document.createElement("div");
   wrapperEle.id = `${keyName}-container`;
@@ -33,7 +34,7 @@ export const preparePopup = (keyName) => {
   const continueButtonEle = document.createElement("button");
   continueButtonEle.id = `${keyName}-continue-button`;
   continueButtonEle.className = "popup-continue-button";
-  continueButtonEle.innerHTML = "Proceed";
+  continueButtonEle.innerHTML = phrases.T_proceed[L];
   popupEle.appendChild(continueButtonEle);
 
   wrapperEle.appendChild(popupEle);
@@ -73,34 +74,38 @@ export const showPopupProceed = (keyName, subText, canClick) => {
 };
 
 export const hidePopupProceed = (keyName) => {
-  console.log(keyName);
   document.getElementById(`${keyName}-sub-text`).style.display = "none";
   document.getElementById(`${keyName}-continue-button`).style.display = "none";
 };
 
 /* -------------------------------------------------------------------------- */
 
-export const addPopupLogic = (keyName, responseType, func = null) => {
-  const proceed = () => {
-    document.getElementById(`${keyName}-continue-button`).onclick = () => {
-      /* nothing */
+export const addPopupLogic = async (keyName, responseType, func = null) => {
+  return new Promise((resolve) => {
+    const proceed = () => {
+      document.getElementById(`${keyName}-continue-button`).onclick = () => {
+        /* nothing */
+      };
+      hidePopupProceed(keyName);
+      hidePopup(keyName);
+
+      safeExecuteFunc(func);
+      resolve();
     };
-    hidePopupProceed(keyName);
-    hidePopup(keyName);
 
-    safeExecuteFunc(func);
-  };
+    const handleKeyResponse = (e) => {
+      e.preventDefault();
+      if (e.key === "Enter") {
+        proceed();
+        document.removeEventListener("keydown", handleKeyResponse);
+      }
+    };
 
-  const handleKeyResponse = (e) => {
-    e.preventDefault();
-    if (e.key === "Enter") {
-      proceed();
-      document.removeEventListener("keydown", handleKeyResponse);
+    if (canClick(responseType)) {
+      showCursor();
+      document.getElementById(`${keyName}-continue-button`).onclick = proceed;
     }
-  };
-
-  if (canClick(responseType))
-    document.getElementById(`${keyName}-continue-button`).onclick = proceed;
-  if (canType(responseType))
-    document.addEventListener("keydown", handleKeyResponse);
+    if (canType(responseType))
+      document.addEventListener("keydown", handleKeyResponse);
+  });
 };

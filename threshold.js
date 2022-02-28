@@ -38,6 +38,7 @@ import "./components/css/psychojsExtra.css";
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
+import { phrases } from "./components/i18n.js";
 
 import {
   logger,
@@ -72,7 +73,6 @@ import {
   loadRecruitmentServiceConfig,
   recruitmentServiceData,
 } from "./components/recruitmentService.js";
-import { phrases } from "./components/i18n.js";
 
 import {
   addBeepButton,
@@ -136,9 +136,7 @@ import {
 import {
   preparePopup,
   showPopup,
-  hidePopup,
   showPopupProceed,
-  hidePopupProceed,
 } from "./components/popup.js";
 // Take a break
 import {
@@ -205,7 +203,7 @@ const paramReaderInitialized = async (reader) => {
   ////
   const startExperiment = () => {
     // ! POPUPS for take a break & proportion correct
-    preparePopup(expName); // Try to use only one popup ele for both (or even more) popup features
+    preparePopup(rc.language.value, expName); // Try to use only one popup ele for both (or even more) popup features
     prepareTrialBreakProgressBar();
 
     document.body.removeChild(document.querySelector("#rc-panel"));
@@ -274,7 +272,9 @@ var currentTrialIndex = 0;
 var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
-var totalCorrect = 0;
+
+var totalCorrectTrials = 0;
+var totalCompletedTrials = 0;
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
@@ -999,14 +999,16 @@ const experiment = (blockCount) => {
 
   async function trialsLoopEnd() {
     // Proportion correct
-    var proportion = (totalCorrect / currentTrialLength).toFixed(2);
     showPopup(
       expName,
-      `Nice Work! Here is your proportion correct: ${proportion}`,
-      "",
+      phrases.T_proportionCorrectPopup[rc.language.value].replace(
+        "xxx",
+        `${(totalCorrectTrials / totalCompletedTrials).toFixed(2) * 100}`
+      ),
+      instructionsText.trialBreak(rc.language.value, responseType),
       false
     );
-    addPopupLogic(expName, responseType, null);
+    await addPopupLogic(expName, responseType, null);
 
     addBlockStaircaseSummariesToData(currentLoop, psychoJS);
     // terminate loop
@@ -2202,12 +2204,14 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             // was this correct?
             if (key_resp.keys == correctAns) {
               // Play correct audio
-              totalCorrect += 1;
               correctSynth.play();
+              totalCorrectTrials += 1;
+              totalCompletedTrials += 1;
               key_resp.corr = 1;
             } else {
               // Play wrong audio
               key_resp.corr = 0;
+              totalCompletedTrials += 1;
             }
             // a response ends the routine
             continueRoutine = false;
@@ -2224,12 +2228,14 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           1000;
         if (showCharacterSetResponse.current == correctAns) {
           // Play correct audio
-          totalCorrect += 1;
           correctSynth.play();
+          totalCorrectTrials += 1;
+          totalCompletedTrials += 1;
           key_resp.corr = 1;
         } else {
           // Play wrong audio
           key_resp.corr = 0;
+          totalCompletedTrials += 1;
         }
         showCharacterSetResponse.current = null;
         removeClickableCharacterSet();
@@ -2518,7 +2524,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
         showPopup(
           expName,
-          "Good work! Please take a brief break to relax and blink.",
+          phrases.T_takeABreakPopup[rc.language.value],
           "",
           true
         );

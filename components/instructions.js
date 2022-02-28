@@ -24,6 +24,17 @@ export const proceedHintByResponseType = (L, responseType, prev = "") => {
   }
 };
 
+export const proceedButtonHintByResponseType = (L, responseType, prev = "") => {
+  switch (responseType) {
+    case 0:
+      return prev + phrases.T_continueHitReturn[L];
+    case 1:
+      return prev + phrases.T_continueClickProceed[L];
+    default:
+      return prev + phrases.T_continueHitReturnOrClickProceed[L];
+  }
+};
+
 export const instructionsText = {
   initial: (L, takeABreakTrialCreditsThisBlock = 0) => {
     const t1 = phrases.T_thresholdSoundCheck[L] + `\n\n`;
@@ -86,7 +97,7 @@ export const instructionsText = {
     },
   },
   trialBreak: (L, responseType = 2) => {
-    return responseHintByResponseType(L, responseType, "");
+    return proceedButtonHintByResponseType(L, responseType, "");
   },
 };
 
