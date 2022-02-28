@@ -4,14 +4,14 @@ export const debug = process.env.debug;
 import { GLOSSARY } from "../parameters/glossary.ts";
 import { ParamReader } from "../parameters/paramReader";
 
+export function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export function safeExecuteFunc(f, ...a) {
   if (f && typeof f === "function")
     if (a.length) return f(...a);
     else return f();
-}
-
-export function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**

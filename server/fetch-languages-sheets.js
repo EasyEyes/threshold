@@ -37,8 +37,8 @@ async function processLanguageSheet() {
     for (let lang in data[phrase]) {
       if (data[phrase][lang].includes("XX"))
         data[phrase][lang] = data[phrase][lang]
-          .replace("XXX", "xxx")
-          .replace("XX", "xx");
+          .replace(/XXX/g, "xxx")
+          .replace(/XX/g, "xx");
     }
   }
 

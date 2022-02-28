@@ -28,8 +28,8 @@ import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
 import "./components/css/forms.css";
+import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
-import "./components/css/proportionCorrect.css";
 import "./components/css/psychojsExtra.css";
 
 ////
@@ -52,6 +52,7 @@ import {
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
+import { phrases } from "./components/i18n.js";
 
 import {
   logger,
@@ -86,7 +87,6 @@ import {
   loadRecruitmentServiceConfig,
   recruitmentServiceData,
 } from "./components/recruitmentService.js";
-import { phrases } from "./components/i18n.js";
 
 import {
   addBeepButton,
@@ -154,25 +154,21 @@ import {
   loadReadingCorpus,
 } from "./components/readingAddons.js";
 
+// POPUP
+import {
+  preparePopup,
+  showPopup,
+  showPopupProceed,
+} from "./components/popup.js";
 // Take a break
 import {
-  hideTrialBreakPopup,
-  hideTrialBreakProceed,
   hideTrialBreakProgressBar,
-  prepareTrialBreakPopup,
   prepareTrialBreakProgressBar,
-  showTrialBreakPopup,
-  showTrialBreakProceed,
   showTrialBreakProgressBar,
 } from "./components/takeABreak.js";
 
-import {
-  hideProportionCorrectPopup,
-  prepareProportionCorrectPopup,
-  showProportionCorrectPopup,
-} from "./components/proportionCorrect.js";
-
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
+import { addPopupLogic } from "./components/popup.js";
 
 /* ---------------------------------- */
 // * TRIAL ROUTINES
@@ -195,7 +191,7 @@ var conditionTrials;
 let correctAns;
 
 // store info about the experiment session:
-let expName = "Threshold"; // from the Builder filename that created this script
+let expName = "threshold"; // from the Builder filename that created this script
 let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
 
 const fontsRequired = {};
@@ -241,10 +237,9 @@ const paramReaderInitialized = async (reader) => {
 
   ////
   const startExperiment = () => {
-    // ! Take a break
-    prepareTrialBreakPopup();
+    // ! POPUPS for take a break & proportion correct
+    preparePopup(rc.language.value, expName); // Try to use only one popup ele for both (or even more) popup features
     prepareTrialBreakProgressBar();
-    prepareProportionCorrectPopup();
 
     document.body.removeChild(document.querySelector("#rc-panel"));
 
@@ -312,7 +307,9 @@ var currentTrialIndex = 0;
 var currentTrialLength = 0;
 var currentBlockIndex = 0;
 var totalBlockCount = 0;
-var totalCorrect = 0;
+
+var totalCorrectTrials = 0;
+var totalCompletedTrials = 0;
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
@@ -468,9 +465,6 @@ const experiment = (blockCount) => {
 
     return Scheduler.Event.NEXT;
   }
-
-  var debriefClock;
-  var debrief_form_content;
 
   var fileClock;
   var filterClock;
@@ -1121,21 +1115,17 @@ const experiment = (blockCount) => {
   }
 
   async function trialsLoopEnd() {
-    /* -------------------------------proportion correct popup------------------------------------------- */
-    var proportion = (totalCorrect / currentTrialLength).toFixed(2);
-    showProportionCorrectPopup(proportion);
-
-    const blockProceed = () => {
-      document.getElementById("proportion-correct-continue-button").onclick =
-        () => {
-          /* nothing */
-        };
-      hideProportionCorrectPopup();
-    };
-
-    document.getElementById("proportion-correct-continue-button").onclick =
-      blockProceed;
-    /* -------------------------------proportion correct popup------------------------------------------- */
+    // Proportion correct
+    showPopup(
+      expName,
+      phrases.T_proportionCorrectPopup[rc.language.value].replace(
+        "xxx",
+        `${(totalCorrectTrials / totalCompletedTrials).toFixed(2) * 100}`
+      ),
+      instructionsText.trialBreak(rc.language.value, responseType),
+      false
+    );
+    await addPopupLogic(expName, responseType, null);
 
     if (currentLoop instanceof MultiStairHandler)
       addBlockStaircaseSummariesToData(currentLoop, psychoJS);
@@ -1743,11 +1733,9 @@ const experiment = (blockCount) => {
       // Check fullscreen and if not, get fullscreen
       if (!rc.isFullscreen.value && !debug) {
         rc.getFullscreen();
-        showCursor(); // TODO Show only when the cursor is strictly needed
         await sleep(1000);
       }
 
-      // showCursor();
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
@@ -1786,10 +1774,9 @@ const experiment = (blockCount) => {
             paramReader.read("responseMustClickCrosshairBool", block_condition)
           );
           logger("responseType", responseType);
+          if (canClick) showCursor();
         },
       });
-
-      logger("responseType", responseType);
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -2607,12 +2594,14 @@ viewingDistanceCm: ${viewingDistanceCm}`;
               (targetKind.current === "reading" && key_resp.keys === "space")
             ) {
               // Play correct audio
-              totalCorrect += 1;
               correctSynth.play();
+              totalCorrectTrials += 1;
+              totalCompletedTrials += 1;
               key_resp.corr = 1;
             } else {
               // Play wrong audio
               key_resp.corr = 0;
+              totalCompletedTrials += 1;
             }
             // a response ends the routine
             continueRoutine = false;
@@ -2629,12 +2618,14 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           1000;
         if (showCharacterSetResponse.current == correctAns) {
           // Play correct audio
-          totalCorrect += 1;
           correctSynth.play();
+          totalCorrectTrials += 1;
+          totalCompletedTrials += 1;
           key_resp.corr = 1;
         } else {
           // Play wrong audio
           key_resp.corr = 0;
+          totalCompletedTrials += 1;
         }
         showCharacterSetResponse.current = null;
         removeClickableCharacterSet();
@@ -2919,7 +2910,12 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       if (currentBlockCreditForTrialBreak >= 1) {
         currentBlockCreditForTrialBreak -= 1;
 
-        showTrialBreakPopup();
+        showPopup(
+          expName,
+          phrases.T_takeABreakPopup[rc.language.value],
+          "",
+          true
+        );
         const takeABreakMinimumDurationSec =
           condition["takeABreakMinimumDurationSec"];
 
@@ -2927,41 +2923,14 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           // After break time out...
           setTimeout(() => {
             // Show proceed hint and/or button
-            showTrialBreakProceed(
+            showPopupProceed(
+              expName,
               instructionsText.trialBreak(rc.language.value, responseType),
               canClick(responseType)
             );
-
-            const trialProceed = () => {
-              document.getElementById("trial-break-continue-button").onclick =
-                () => {
-                  /* nothing */
-                };
-              hideTrialBreakProceed();
-              hideTrialBreakPopup();
-
-              // currentBlockCreditForTrialBreak -=
-              //   condition["takeABreakTrialCredit"];
-
+            addPopupLogic(expName, responseType, () => {
               resolve(Scheduler.Event.NEXT);
-            };
-
-            const handleTrialBreakKeyResponse = (e) => {
-              e.preventDefault();
-              if (e.hey === "Enter") {
-                trialProceed();
-                document.removeEventListener(
-                  "keydown",
-                  handleTrialBreakKeyResponse
-                );
-              }
-            };
-
-            if (canClick(responseType))
-              document.getElementById("trial-break-continue-button").onclick =
-                trialProceed;
-            if (canType(responseType))
-              document.addEventListener("keydown", handleTrialBreakKeyResponse);
+            });
           }, takeABreakMinimumDurationSec * 1000);
         });
       }
