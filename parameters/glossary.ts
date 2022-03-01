@@ -615,8 +615,8 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  questionAndAnswer: {
-    name: "questionAndAnswer",
+  questionAndAnswer1: {
+    name: "questionAndAnswer1",
     availability: "now",
     example: "",
     explanation:
@@ -629,18 +629,45 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "",
     explanation:
-      "Same purpose, with a different name, so that you can have two questions in one trial. ",
+      "Same purpose, with a different name, so that you can have several questions in one trial. ",
     type: "",
     default: "",
   },
-  readingCorpusSource: {
-    name: "readingCorpusSource",
+  questionAndAnswer3: {
+    name: "questionAndAnswer3",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same purpose, with a different name, so that you can have several questions in one trial. ",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer4: {
+    name: "questionAndAnswer4",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same purpose, with a different name, so that you can have several questions in one trial. ",
+    type: "",
+    default: "",
+  },
+  readingCorpus: {
+    name: "readingCorpus",
     availability: "now",
     example: "the-phantom-tollbooth.txt",
     explanation:
-      'Book of readable text. We typically use "The phantom tollbooth" a popular American children\'s book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. Every passage selection begins and ends at a sentence break.',
+      "The filename of a text file that has already be uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \nIT IS A GOAL THAT: Every passage selection begins and ends at a sentence break.",
     type: "text",
     default: "",
+  },
+  readingCorpusSkipWords: {
+    name: "readingCorpusSkipWords",
+    availability: "now",
+    example: "1521",
+    explanation:
+      "readingCorpusSkipWords. The passage to be read will begin after skipping that number of words from the beginning of the corpus. To count words, we treat punctuation as letters, so whitespace is the only word separator. A run of whitespace counts as one separator. [Note that word frequency in the whole corpus still uses the whole corpus; nothing is skipped.] We recommend, but currently do not enforce, that the value of readingCorpusSkipWords be such that the passage to be read begins with the first word of a sentence. ",
+    type: "integer",
+    default: "0",
   },
   readingDefineSingleLineSpacingAs: {
     name: "readingDefineSingleLineSpacingAs",

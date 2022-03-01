@@ -403,31 +403,31 @@ export const restrictSpacingDeg = (
         heightDeg = targetSizeIsHeightBool
           ? sizeDeg
           : (sizeDeg * characterSetRectPx.height) / characterSetRectPx.width;
-        // [, topPx] = XYPixOfXYDeg(
-        //   [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
-        //   displayOptions
-        // );
-        // [, bottomPx] = XYPixOfXYDeg(
-        //   [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
-        //   displayOptions
-        // );
-        // I think that this is how we should do things, ie the above code assumes that
-        // ascent == descent, ie that the center of the character is [x,y] with the top h/2 above
         [, topPx] = XYPixOfXYDeg(
-          [
-            targetXYDeg[0],
-            targetXYDeg[1] + heightDeg * characterSetRectPx.ascentToDescent,
-          ],
+          [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
           displayOptions
         );
         [, bottomPx] = XYPixOfXYDeg(
-          [
-            targetXYDeg[0],
-            targetXYDeg[1] -
-              heightDeg * (1 - characterSetRectPx.ascentToDescent),
-          ],
+          [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
           displayOptions
         );
+        // I think that this is how we should do things, ie the above code assumes that
+        // ascent == descent, ie that the center of the character is [x,y] with the top h/2 above
+        // [, topPx] = XYPixOfXYDeg(
+        //   [
+        //     targetXYDeg[0],
+        //     targetXYDeg[1] + heightDeg * characterSetRectPx.ascentToDescent,
+        //   ],
+        //   displayOptions
+        // );
+        // [, bottomPx] = XYPixOfXYDeg(
+        //   [
+        //     targetXYDeg[0],
+        //     targetXYDeg[1] -
+        //       heightDeg * (1 - characterSetRectPx.ascentToDescent),
+        //   ],
+        //   displayOptions
+        // );
         heightPx = topPx - bottomPx;
         widthPx =
           (heightPx * characterSetRectPx.width) / characterSetRectPx.height;

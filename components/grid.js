@@ -176,13 +176,37 @@ export class Grid {
       )[1],
     ];
     // VERIFY why isn't this equivalent?
-    // const oneCallDimensionsDeg = XYDegOfXYPix([this.dimensions[0]/2, this.dimensions[1]/2], this.displayOptions);
+    // this.dimensionsDeg = XYDegOfXYPix([this.dimensions[0]/2, this.dimensions[1]/2], this.displayOptions);
+
     switch (units) {
       case "px":
         return this.dimensions.map((dim) => Math.floor(dim / 100) + 1);
       case "cm":
         return this.dimensionsCm.map((dim) => Math.floor(dim / 1) + 1);
       case "deg":
+        // logger("dim [origin[0], height/2]", XYDegOfXYPix([this.displayOptions.fixationXYPix[0], this.dimensions[1]/2], this.displayOptions))
+        // logger("this.dimensionsDeg", this.dimensionsDeg)
+        // const labels = ["xDeg", "yDeg", "xPx", "yPx", "orientation"]
+        // const rows = [labels]
+        // logger("this.displayOptions.fixationXYDeg", this.displayOptions.fixationXYPix)
+        // for (let x=this.displayOptions.fixationXYPix[0]; x<this.dimensionsDeg[0]; x++){
+        //   // if (i % 100 === 0) logger(`dim i=${i}`, XYDegOfXYPix([this.displayOptions.fixationXYPix[0] + i, this.dimensions[1]/2], this.displayOptions))
+        //   for (let ydeg=1; ydeg<25; ydeg++){
+        //     const point = XYPixOfXYDeg([x, ydeg], this.displayOptions)
+        //     rows.push([x, ydeg, ...point, "vertical"])
+        //   }
+        // }
+        // for (let y=this.displayOptions.fixationXYPix[1]; y<this.dimensionsDeg[1]; y++){
+        //   for (let deg=1; deg<25; deg++){
+        //     const point = XYPixOfXYDeg([deg, y], this.displayOptions)
+        //     rows.push([deg, y, ...point, "horizontal"])
+        //   }
+        // }
+        // // https://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
+        // let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n")
+        // var encodedUri = encodeURI(csvContent)
+        // window.open(encodedUri)
+
         return this.dimensionsDeg.map((dim) => Math.floor(dim / 1) + 1);
     }
   };
@@ -377,26 +401,44 @@ export class Grid {
         switch (region) {
           case "right":
             x = XYPixOfXYDeg([i, origin[1]], this.displayOptions)[0];
+            logger("1dim x", x);
+            const [x2d, y2d] = XYPixOfXYDeg(
+              [i, this.dimensionsDeg[1]],
+              this.displayOptions
+            );
+            logger("2dim x", x2d);
             verticies = [
-              [x, hPx / 2],
-              [x, -hPx / 2],
+              XYPixOfXYDeg([i, this.dimensionsDeg[1]], this.displayOptions),
+              XYPixOfXYDeg([i, -this.dimensionsDeg[1]], this.displayOptions),
             ];
+            // verticies = [
+            //   [x, hPx / 2],
+            //   [x, -hPx / 2],
+            // ];
             pos = [x + xPadding, -hPx / 2 + yPadding];
             break;
           case "left":
             if (i === 0) continue;
             x = XYPixOfXYDeg([-i, origin[1]], this.displayOptions)[0];
+            // verticies = [
+            //   [x, hPx / 2],
+            //   [x, -hPx / 2],
+            // ];
             verticies = [
-              [x, hPx / 2],
-              [x, -hPx / 2],
+              XYPixOfXYDeg([-i, this.dimensionsDeg[1]], this.displayOptions),
+              XYPixOfXYDeg([-i, -this.dimensionsDeg[1]], this.displayOptions),
             ];
             pos = [x + xPadding, -hPx / 2 + yPadding];
             break;
           case "upper":
             y = XYPixOfXYDeg([origin[0], i], this.displayOptions)[1];
+            // verticies = [
+            //   [-wPx / 2, y],
+            //   [wPx / 2, y],
+            // ];
             verticies = [
-              [-wPx / 2, y],
-              [wPx / 2, y],
+              XYPixOfXYDeg([this.dimensionsDeg[0], i], this.displayOptions),
+              XYPixOfXYDeg([-this.dimensionsDeg[0], i], this.displayOptions),
             ];
             pos = [-wPx / 2 + xPadding, y + yPadding];
             break;
@@ -404,9 +446,13 @@ export class Grid {
             if (i === 0) continue;
             y = XYPixOfXYDeg([origin[0], -i], this.displayOptions)[1];
             verticies = [
-              [-wPx / 2, y],
-              [wPx / 2, y],
+              XYPixOfXYDeg([this.dimensionsDeg[0], -i], this.displayOptions),
+              XYPixOfXYDeg([-this.dimensionsDeg[0], -i], this.displayOptions),
             ];
+            // verticies = [
+            //   [-wPx / 2, y],
+            //   [wPx / 2, y],
+            // ];
             pos = [-wPx / 2 + xPadding, y + yPadding];
             break;
         }
