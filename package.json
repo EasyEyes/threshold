@@ -40,6 +40,7 @@
     "css-loader": "^6.6.0",
     "dataframe-js": "^1.4.4",
     "eslint": "^8.10.0",
+    "file-loader": "^6.2.0",
     "googleapis": "^95.0.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.3.4",

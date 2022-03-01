@@ -64,7 +64,7 @@ import {
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
-  // spacingPixelsFromLevel,
+  degreesToPixels,
 } from "./components/utils.js";
 
 import {
@@ -96,8 +96,9 @@ import {
 
 import {
   getCorrectSynth,
-  getWrongSynth,
+  // getWrongSynth,
   getPurrSynth,
+  getReadingSound,
 } from "./components/sound.js";
 import {
   removeClickableCharacterSet,
@@ -152,6 +153,7 @@ import { prepareReadingQuestions } from "./components/reading.ts";
 import {
   getThisBlockPages,
   loadReadingCorpus,
+  prepareThisBlockPageForDisplay,
 } from "./components/readingAddons.js";
 
 // POPUP
@@ -351,6 +353,7 @@ const experiment = (blockCount) => {
   const correctSynth = getCorrectSynth(psychoJS);
   // const wrongSynth = getWrongSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
+  const readingSound = getReadingSound();
 
   // open window:
   psychoJS.openWindow({
@@ -504,7 +507,7 @@ const experiment = (blockCount) => {
   var showCharacterSet;
 
   var globalClock;
-  var routineTimer, routineClock, blockClock;
+  var routineTimer, routineClock;
   var initInstructionClock,
     eduInstructionClock,
     trialInstructionClock,
@@ -732,23 +735,24 @@ const experiment = (blockCount) => {
       text: "",
       font: "Arial",
       units: "pix",
-      pos: [-window.innerWidth * 0.4, 0],
-      height: targetSpecsConfig.fontSize,
-      wrapWidth: window.innerWidth * 0.8,
+      pos: [0, 0],
+      height: undefined,
+      wrapWidth: 3 * window.innerWidth, // nowrap
       ori: 0.0,
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -7.0,
       isInstruction: false,
-      alignHoriz: "left",
+      alignHoriz: "center",
+      alignVert: "center",
       autoDraw: false,
     });
+    /* -------------------------------------------------------------------------- */
 
     // Create some handy timers
     globalClock = new util.Clock(); // to track the time since experiment started
     routineTimer = new util.CountdownTimer(); // to track time remaining of each (non-slip) routine
     routineClock = new util.Clock();
-    blockClock = new util.Clock();
 
     // Extra clocks for clear timing
     initInstructionClock = new util.Clock();
@@ -773,10 +777,7 @@ const experiment = (blockCount) => {
     windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
     windowWidthPx = rc.displayWidthPx.value;
     pixPerCm = windowWidthPx / windowWidthCm;
-    // NOTE viewingDistanceCm is not necessarily correct, as the first trial could be from any condition in the first block
-    // viewingDistanceCm = rc.viewingDistanceCm
-    //   ? rc.viewingDistanceCm.value
-    //   : reader.read("viewingDistanceDesiredCm", "__ALL_BLOCKS__")[0];
+
     displayOptions = {
       pixPerCm: pixPerCm,
       // viewingDistanceCm: viewingDistanceCm,
@@ -1102,11 +1103,9 @@ const experiment = (blockCount) => {
 
         trialsLoopScheduler.add(importConditions(snapshot));
         // Instructions
-        if (targetKind.current === "letter") {
-          trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
-          trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
-          trialsLoopScheduler.add(trialInstructionRoutineEnd());
-        }
+        trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
+        trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
+        trialsLoopScheduler.add(trialInstructionRoutineEnd());
         // Trials
         trialsLoopScheduler.add(trialRoutineBegin(snapshot));
         trialsLoopScheduler.add(trialRoutineEachFrame(snapshot));
@@ -1691,7 +1690,7 @@ const experiment = (blockCount) => {
   var spacingDirection;
   var targetFont;
   var targetCharacterSet;
-  var validAns;
+  var validAns = [];
   var showCharacterSetWhere;
   var showCharacterSetElement;
   var showCounterBool;
@@ -1791,6 +1790,24 @@ const experiment = (blockCount) => {
         },
       });
 
+      /* --------------------------------- PUBLIC --------------------------------- */
+
+      // ! Viewing distance
+      viewingDistanceDesiredCm = paramReader.read(
+        "viewingDistanceDesiredCm",
+        block_condition
+      );
+
+      viewingDistanceCm = rc.viewingDistanceCm
+        ? rc.viewingDistanceCm.value
+        : viewingDistanceDesiredCm;
+      if (!rc.viewingDistanceCm)
+        console.warn(
+          "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
+        );
+
+      /* --------------------------------- /PUBLIC -------------------------------- */
+
       switchKind(targetKind.current, {
         reading: () => {
           loggerText("READING TASK INSTRUCTIONS BEGIN");
@@ -1799,14 +1816,9 @@ const experiment = (blockCount) => {
           frameN = -1;
           continueRoutine = true;
 
-          const wrapWidth = window.innerWidth / 4;
-          instructions.setWrapWidth(wrapWidth);
-          instructions.setPos([
-            -window.innerWidth / 2 + 5,
-            window.innerHeight / 2 - 5,
-          ]);
-          instructions.setText("Hit RETURN when ready!");
-          instructions.setAutoDraw(true);
+          trialComponents = [];
+          trialComponents.push(key_resp);
+          trialComponents.push(readingParagraph);
         },
         letter: () => {
           /* -------------------------------------------------------------------------- */
@@ -1852,7 +1864,6 @@ const experiment = (blockCount) => {
           document.addEventListener("click", _takeFixationClick);
           document.addEventListener("touchend", _takeFixationClick);
 
-          /* PRECOMPUTE STIMULI FOR THE UPCOMING TRIAL */
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
           const reader = paramReader;
 
@@ -1875,19 +1886,6 @@ const experiment = (blockCount) => {
           if (!rc.screenWidthCm)
             console.warn(
               "[Screen Width] Using arbitrary screen width. Enable RC."
-            );
-
-          viewingDistanceDesiredCm = reader.read(
-            "viewingDistanceDesiredCm",
-            block_condition
-          );
-          // viewingDistanceDesiredCm = 10;
-          viewingDistanceCm = rc.viewingDistanceCm
-            ? rc.viewingDistanceCm.value
-            : viewingDistanceDesiredCm;
-          if (!rc.viewingDistanceCm)
-            console.warn(
-              "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
             );
 
           block = condition["block"];
@@ -2208,9 +2206,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           totalTrial.setFont(instructionFont);
           totalTrial.setHeight(totalTrialConfig.fontSize);
           totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-          // // totalTrialIndex = nextTrialInfo.trial;
-          // // totalBlockIndex = nextTrialInfo.block
-          // // keep track of which components have finished
+
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(fixation);
@@ -2256,6 +2252,11 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           }
           // /* --- /SIMULATED --- */
 
+          psychoJS.experiment.addData(
+            "trialInstructionBeginDurationSec",
+            trialInstructionClock.getTime()
+          );
+
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
@@ -2270,22 +2271,11 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
 
-      // update trial index
-      // totalTrialIndex = totalTrialIndex + 1;
-      /* /PRE-COMPUTE STIMULI FOR THE UPCOMING TRIAL */
-
       psychoJS.eventManager.clearKeys();
 
-      psychoJS.experiment.addData(
-        "trialInstructionBeginDurationSec",
-        trialInstructionClock.getTime()
-      );
-
-      if (condition["showTakeABreakCreditBool"]) {
+      if (paramReader.read("showTakeABreakCreditBool", block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
-      } else {
-        hideTrialBreakProgressBar();
-      }
+      else hideTrialBreakProgressBar();
 
       return Scheduler.Event.NEXT;
     };
@@ -2303,6 +2293,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       switchKind(targetKind.current, {
         reading: () => {
           // READING
+          return Scheduler.Event.NEXT;
         },
         letter: () => {
           // IDENTIFY
@@ -2381,6 +2372,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       switchKind(targetKind.current, {
         reading: () => {
           // READING
+          return Scheduler.Event.NEXT;
         },
         letter: () => {
           _identify_trialInstructionRoutineEnd(
@@ -2490,15 +2482,29 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
       switchKind(targetKind.current, {
         reading: () => {
-          trialComponents = [];
-          trialComponents.push(key_resp);
-          trialComponents.push(readingParagraph);
-
           readingParagraph.setText(readingThisBlockPages[readingIndex]);
           readingParagraph.setFont(
             paramReader.read("readingFont", block_condition)
           );
-          // readingParagraph.setAlignHoriz('left')
+
+          switch (paramReader.read("readingSetSizeBy", block_condition)) {
+            case "nominal":
+              console.log(viewingDistanceCm);
+              readingParagraph.setHeight(
+                paramReader.read(
+                  "readingMultipleOfSingleLineSpacing",
+                  block_condition
+                ) *
+                  degreesToPixels(1, {
+                    pixPerCm: pixPerCm,
+                    viewingDistanceCm: viewingDistanceCm,
+                  })
+              );
+              break;
+            default:
+              break;
+          }
+
           readingParagraph.setAutoDraw(true);
 
           readingIndex++;
@@ -2595,6 +2601,15 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             );
           }
           /* --- /SIMULATED --- */
+
+          // READING Only accepts SPACE
+          switchKind(targetKind.current, {
+            reading: () => {
+              if (!validAns.length) validAns = ["space"];
+              if (!correctAns) correctAns = "space";
+            },
+          });
+
           let theseKeys = key_resp.getKeys({
             keyList: validAns,
             waitRelease: false,
@@ -2604,20 +2619,28 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             key_resp.keys =
               _key_resp_allKeys[_key_resp_allKeys.length - 1].name; // just the last key pressed
             key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
-            // was this correct?
-            if (
-              key_resp.keys == correctAns ||
-              (targetKind.current === "reading" && key_resp.keys === "space")
-            ) {
+
+            // Was this correct?
+            if (key_resp.keys == correctAns) {
               // Play correct audio
-              correctSynth.play();
-              totalCorrectTrials += 1;
-              totalCompletedTrials += 1;
+              switchKind(targetKind.current, {
+                letter: () => {
+                  correctSynth.play();
+                  totalCorrectTrials += 1;
+                  totalCompletedTrials += 1;
+                },
+                reading: () => {
+                  readingSound.play();
+                },
+              });
+              // CORRECT
               key_resp.corr = 1;
             } else {
               // Play wrong audio
-              key_resp.corr = 0;
+              // wrongSynth.play();
               totalCompletedTrials += 1;
+              // INCORRECT
+              key_resp.corr = 0;
             }
             // a response ends the routine
             continueRoutine = false;
@@ -2873,19 +2896,23 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           thisComponent.setAutoDraw(false);
         }
       }
+
       // was no response the correct answer?!
       if (key_resp.keys === undefined) {
         console.error("[key_resp.keys] No response error.");
       }
+
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
-      if (currentLoop instanceof MultiStairHandler) {
-        currentLoop.addResponse(key_resp.corr, level);
-        // TODO Should it be placed outside of the if statement?
-        addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
-      } else {
-        console.error("currentLoop is not MultiStairHandler");
-      }
+      switchKind(targetKind.current, {
+        letter: () => {
+          if (currentLoop instanceof MultiStairHandler) {
+            currentLoop.addResponse(key_resp.corr, level);
+            // TODO Should it be placed outside of the if statement?
+            addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
+          }
+        },
+      });
 
       psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
       psychoJS.experiment.addData("key_resp.corr", key_resp.corr);

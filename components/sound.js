@@ -1,4 +1,5 @@
 import * as sound from "../psychojs/src/sound/index.js";
+import ReadingPageFlip from "./sounds/reading-page-flip.mp3";
 
 const { TonePlayer } = sound;
 
@@ -43,4 +44,11 @@ export const getPurrSynth = (psychoJS) => {
     wave: "sine",
     envelope: default_env,
   });
+};
+
+/* -------------------------------------------------------------------------- */
+
+export const getReadingSound = () => {
+  const sound = new Audio(ReadingPageFlip);
+  return sound;
 };

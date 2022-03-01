@@ -54,14 +54,11 @@ export const loadReadingCorpus = async (paramReader) => {
 export const getThisBlockPages = (paramReader, block_condition) => {
   if (paramReader.has("readingCorpusSource", block_condition)) {
     const thisURL = paramReader.read("readingCorpusSource", block_condition);
-    const pageBuffer =
-      paramReader.read("readingLinesPerPage", block_condition) *
-      paramReader.read("readingMaxCharactersPerLine", block_condition);
-
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL],
       readingCorpusArchive[thisURL],
-      pageBuffer,
+      paramReader.read("readingMaxCharactersPerLine", block_condition),
+      paramReader.read("readingLinesPerPage", block_condition),
       paramReader.read("readingPages", block_condition)
     );
     readingUsedText[thisURL] = preparedSentences.readingUsedText;

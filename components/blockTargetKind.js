@@ -15,7 +15,6 @@ export const switchKind = (targetKind, { reading, letter, gabor, image }) => {
       safeExecuteFunc(image);
       break;
     default:
-      safeExecuteFunc(letter);
       break;
   }
 };

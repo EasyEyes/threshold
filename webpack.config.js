@@ -22,11 +22,19 @@ const config = {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
       },
+      {
+        test: /\.mp3$/,
+        loader: "file-loader",
+        options: {
+          name: "[name].[ext]",
+        },
+      },
     ],
   },
   devtool: "source-map",
   output: {
     path: __dirname + "/js",
+    publicPath: "js/",
     filename: "threshold.min.js",
     sourceMapFilename: "threshold.min.js.map",
   },
@@ -52,6 +60,7 @@ module.exports = (env, options) => {
 `);
     extra.output = {
       path: __dirname + `/examples/${options.name}/js`,
+      publicPath: "js/",
       filename: "threshold.min.js",
       sourceMapFilename: "threshold.min.js.map",
     };
