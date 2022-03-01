@@ -427,8 +427,11 @@ export const restrictSpacingDeg = (
       case "typographic":
         // Use spacingDeg to set size.
         widthDeg = 3 * spacingDeg;
-        // heightDeg =
-        //   widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
+        sizeDeg = targetSizeIsHeightBool
+          ? widthDeg * (characterSetRectPx.height / characterSetRectPx.width)
+          : widthDeg;
+        heightDeg =
+          widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
         const [leftPx] = XYPixOfXYDeg(
           [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
           displayOptions
