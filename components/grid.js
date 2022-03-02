@@ -9,6 +9,7 @@ import {
   logger,
   XYPixOfXYDeg,
   XYDegOfXYPix,
+  isInRect,
 } from "./utils.js";
 
 /*
@@ -175,8 +176,6 @@ export class Grid {
         this.displayOptions
       )[1],
     ];
-    // VERIFY why isn't this equivalent?
-    // this.dimensionsDeg = XYDegOfXYPix([this.dimensions[0]/2, this.dimensions[1]/2], this.displayOptions);
 
     switch (units) {
       case "px":
@@ -385,87 +384,15 @@ export class Grid {
   };
 
   _getDegGridStims = () => {
-    const origin = this.displayOptions.fixationXYPix;
     const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg");
     const [lines, labels] = [[], []];
-    const wPx = this.dimensions[0];
-    const hPx = this.dimensions[1];
-    const xPadding = 3;
-    const yPadding = 0;
     for (const region of ["right", "left", "upper", "lower"]) {
       const nGridlines = ["right", "left"].includes(region)
         ? numberOfGridLinesPerSide[0]
         : numberOfGridLinesPerSide[1];
       for (let i = 0; i < nGridlines; i++) {
-        let verticies, pos, x, y;
-        switch (region) {
-          case "right":
-            x = XYPixOfXYDeg([i, origin[1]], this.displayOptions)[0];
-            logger("1dim x", x);
-            const [x2d, y2d] = XYPixOfXYDeg(
-              [i, this.dimensionsDeg[1]],
-              this.displayOptions
-            );
-            logger("2dim x", x2d);
-            verticies = [
-              XYPixOfXYDeg([i, this.dimensionsDeg[1]], this.displayOptions),
-              XYPixOfXYDeg([i, this.dimensionsDeg[1] / 2], this.displayOptions),
-              XYPixOfXYDeg([i, this.dimensionsDeg[1] / 8], this.displayOptions),
-              XYPixOfXYDeg(
-                [i, -this.dimensionsDeg[1] / 8],
-                this.displayOptions
-              ),
-              XYPixOfXYDeg(
-                [i, -this.dimensionsDeg[1] / 2],
-                this.displayOptions
-              ),
-              XYPixOfXYDeg([i, -this.dimensionsDeg[1]], this.displayOptions),
-            ];
-            // verticies = [
-            //   [x, hPx / 2],
-            //   [x, -hPx / 2],
-            // ];
-            pos = [x + xPadding, -hPx / 2 + yPadding];
-            break;
-          case "left":
-            if (i === 0) continue;
-            x = XYPixOfXYDeg([-i, origin[1]], this.displayOptions)[0];
-            // verticies = [
-            //   [x, hPx / 2],
-            //   [x, -hPx / 2],
-            // ];
-            verticies = [
-              XYPixOfXYDeg([-i, this.dimensionsDeg[1]], this.displayOptions),
-              XYPixOfXYDeg([-i, -this.dimensionsDeg[1]], this.displayOptions),
-            ];
-            pos = [x + xPadding, -hPx / 2 + yPadding];
-            break;
-          case "upper":
-            y = XYPixOfXYDeg([origin[0], i], this.displayOptions)[1];
-            // verticies = [
-            //   [-wPx / 2, y],
-            //   [wPx / 2, y],
-            // ];
-            verticies = [
-              XYPixOfXYDeg([this.dimensionsDeg[0], i], this.displayOptions),
-              XYPixOfXYDeg([-this.dimensionsDeg[0], i], this.displayOptions),
-            ];
-            pos = [-wPx / 2 + xPadding, y + yPadding];
-            break;
-          case "lower":
-            if (i === 0) continue;
-            y = XYPixOfXYDeg([origin[0], -i], this.displayOptions)[1];
-            verticies = [
-              XYPixOfXYDeg([this.dimensionsDeg[0], -i], this.displayOptions),
-              XYPixOfXYDeg([-this.dimensionsDeg[0], -i], this.displayOptions),
-            ];
-            // verticies = [
-            //   [-wPx / 2, y],
-            //   [wPx / 2, y],
-            // ];
-            pos = [-wPx / 2 + xPadding, y + yPadding];
-            break;
-        }
+        if (["left", "lower"].includes(region) && i === 0) continue;
+        let [verticies, pos] = this._getDegGridPathVerticies(i, region);
         lines.push(
           new visual.ShapeStim({
             name: `${region}-grid-line-${i}`,
@@ -473,7 +400,8 @@ export class Grid {
             units: "pix",
             lineWidth: i % 5 === 0 ? 5 : 2,
             lineColor: new util.Color("crimson"),
-            fillColor: new util.Color("crimson"),
+            // fillColor: new util.Color("crimson"),
+            closeShape: false,
             opacity: this.opacity,
             vertices: verticies,
             depth: -999999,
@@ -506,6 +434,51 @@ export class Grid {
       }
     }
     return [lines, labels];
+  };
+
+  _getDegGridPathVerticies = (lineId, region) => {
+    const origin = this.displayOptions.fixationXYPix;
+    const verticies = [];
+    let pos = [];
+    // VERIFY correctness given origin aka fixation != [0,0]
+    const screenRect = {
+      left: origin[0] - this.dimensions[0] / 2,
+      right: origin[0] + this.dimensions[0] / 2,
+      top: origin[1] + this.dimensions[1] / 2,
+      bottom: origin[1] - this.dimensions[1] / 2,
+    };
+    let pointOnScreen = true;
+    let e = ["left", "right"].includes(region) ? origin[0] : origin[1];
+    while (pointOnScreen) {
+      let posPoint, negPoint;
+      switch (region) {
+        case "left":
+          posPoint = XYPixOfXYDeg([-lineId, e], this.displayOptions);
+          negPoint = XYPixOfXYDeg([-lineId, -e], this.displayOptions);
+          break;
+        case "right":
+          posPoint = XYPixOfXYDeg([lineId, e], this.displayOptions);
+          negPoint = XYPixOfXYDeg([lineId, -e], this.displayOptions);
+          break;
+        case "upper":
+          posPoint = XYPixOfXYDeg([e, lineId], this.displayOptions);
+          negPoint = XYPixOfXYDeg([-e, lineId], this.displayOptions);
+          break;
+        case "lower":
+          posPoint = XYPixOfXYDeg([e, -lineId], this.displayOptions);
+          negPoint = XYPixOfXYDeg([-e, -lineId], this.displayOptions);
+          break;
+      }
+      pointOnScreen =
+        isInRect(...posPoint, screenRect) && isInRect(...negPoint, screenRect);
+      if (pointOnScreen) e += 0.1;
+      verticies.unshift(negPoint);
+      verticies.push(posPoint);
+    }
+    pos = ["left", "right"].includes(region)
+      ? [verticies[verticies.length - 10][0], screenRect.bottom + 5]
+      : [screenRect.left + 5, verticies[verticies.length - 10][1]];
+    return [verticies, pos];
   };
 
   /**
