@@ -409,6 +409,16 @@ export class Grid {
             logger("2dim x", x2d);
             verticies = [
               XYPixOfXYDeg([i, this.dimensionsDeg[1]], this.displayOptions),
+              XYPixOfXYDeg([i, this.dimensionsDeg[1] / 2], this.displayOptions),
+              XYPixOfXYDeg([i, this.dimensionsDeg[1] / 8], this.displayOptions),
+              XYPixOfXYDeg(
+                [i, -this.dimensionsDeg[1] / 8],
+                this.displayOptions
+              ),
+              XYPixOfXYDeg(
+                [i, -this.dimensionsDeg[1] / 2],
+                this.displayOptions
+              ),
               XYPixOfXYDeg([i, -this.dimensionsDeg[1]], this.displayOptions),
             ];
             // verticies = [

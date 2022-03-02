@@ -14,8 +14,6 @@ import {
   displacementBetweenXY,
 } from "./utils.js";
 
-import { Permutation } from "js-combinatorics";
-
 export const getCharacterSetBoundingBox = (
   characterSet,
   targetFont,
@@ -47,13 +45,10 @@ export const getCharacterSetBoundingBox = (
   const [centers, boundingRectPoints] = [{}, {}];
   let setAscent = -Infinity;
   let setDescent = -Infinity;
-  // Create a list of all possible text strings that could be used as stimuli
-  const texts = [...new Permutation(characterSet, repeats)].map((a) =>
-    "".concat(...a)
-  );
+  const texts = [...characterSet.map((character) => character.repeat(repeats))];
   // Also add the individual characters, to show display charSet bounding boxes in typographic mode
   if (repeats > 1) texts.push(...characterSet);
-  // For each possible stimuli text...
+  // For (simplified assumption of) each possible stimuli text...
   for (const textToSet of texts) {
     //... set our testStim to reflect that, so we can measure.
     const xy = [0, 0];
@@ -112,9 +107,6 @@ export const getCharacterSetBoundingBox = (
   const normalizedDescent = setDescent / height;
   const ascentToDescent =
     normalizedAscent / (normalizedDescent + normalizedAscent);
-  logger("ascentToDescent", ascentToDescent);
-  logger("normalizedAscent", normalizedAscent);
-  logger("normalizedDescent", normalizedDescent);
 
   // Get the center of this (ie global over the character set) bounding points
   const normalizedCenter = [
@@ -435,8 +427,11 @@ export const restrictSpacingDeg = (
       case "typographic":
         // Use spacingDeg to set size.
         widthDeg = 3 * spacingDeg;
-        // heightDeg =
-        //   widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
+        sizeDeg = targetSizeIsHeightBool
+          ? widthDeg * (characterSetRectPx.height / characterSetRectPx.width)
+          : widthDeg;
+        heightDeg =
+          widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
         const [leftPx] = XYPixOfXYDeg(
           [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
           displayOptions

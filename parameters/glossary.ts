@@ -839,7 +839,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Overrules other response boolean parameters to enable clicking, and ONLY clicking, to request the next trial by clicking the crosshair. The hope is that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) This is our response to frequent requests from our participants that they prefer to use the keyboard to choose the letter, even if they're required to click on the crosshair to begin each trial. ",
+      "REQUESTED BY MANY PARTICIPANTS (This grants the frequent request from our participants that they prefer to type the letter, even if they're required to click on the crosshair to begin each trial.) Overrules other response boolean parameters to enable clicking, and ONLY clicking of the crosshair, to request the next trial. The hope is that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) ",
     type: "boolean",
     default: "TRUE",
   },
@@ -966,7 +966,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "deg",
     explanation:
-      "Show a full-screen grid that aids visual checking of location and size. Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', pressing the backquote key (below ESCAPE) repeatedly cyles through the four states: px, cm, deg, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' grid has its origin at fixation. ",
+      "Show a full-screen grid that aids visual checking of location and size. Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. ",
     type: "categorical",
     default: "disabled",
     categories: ["px", "cm", "deg", "mm", "none", "disabled"],
@@ -980,6 +980,15 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "topLeft",
     categories: ["none", "topLeft", "bottomLeft"],
+  },
+  showPercentCorrectBool: {
+    name: "showPercentCorrectBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "REQUESTED BY MANY PARTICIPANTS. If TRUE for any condition in this block, then at the end of the block EasyEyes presents a pop-up window reporting the overall percent correct (acrosss all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who wrote comments, when invited to.",
+    type: "boolean",
+    default: "TRUE",
   },
   showProgressBarWhere: {
     name: "showProgressBarWhere",
@@ -1140,7 +1149,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.05",
     explanation:
-      'Intended for long blocks, over 50 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don\'t do that within a long block, and later complain that they feel stressed and that their eyes sting (because they didn\'t blink during the block), so we added this feature to force a break every so often. takeABreakTrialCredit sets the value that accrues from performing each trial of this condition. Set it to zero for no breaks. The block\'s running total, regardless of condition, is kept in the internal parameter takeABreakCredit, which is zero at the beginning of each block. When takeABreakCredit exceeds 1, EasyEyes immediately subtracts 1 and takes a break. \nTHE BREAK\nEasyEyes displays a pop-up window with a dark surround, "Good work! Please take a brief break to relax and blink." Responses (except ESCAPE) and viewing-distance nudging are suspended for the time specified by takeABreakMinimumDurationSec. Then EasyEyes reenables responses, adds a Proceed button, and adds text, "To continue hit Proceed or RETURN." The participant can take as long as they need. When they hit Proceed (or RETURN), EasyEyes closes the pop up window, reenables the nudger (if it was formerly active), and resumes testing. ',
+      'REQUESTED BY MANY PARTICIPANTS. Intended for long blocks, over 50 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don\'t do that within a long block, and later complain that they feel stressed and that their eyes sting (because they didn\'t blink during the block), so we added this feature to force a break every so often. takeABreakTrialCredit sets the value that accrues from performing each trial of this condition. Set it to zero for no breaks. The block\'s running total, regardless of condition, is kept in the internal parameter takeABreakCredit, which is zero at the beginning of each block. When takeABreakCredit exceeds 1, EasyEyes immediately subtracts 1 and takes a break. \nTHE BREAK\nEasyEyes displays a pop-up window with a dark surround, "Good work! Please take a brief break to relax and blink." Responses (except ESCAPE) and viewing-distance nudging are suspended for the time specified by takeABreakMinimumDurationSec. Then EasyEyes reenables responses, adds a Proceed button, and adds text, "To continue hit Proceed or RETURN." The participant can take as long as they need. When they hit Proceed (or RETURN), EasyEyes closes the pop up window, reenables the nudger (if it was formerly active), and resumes testing. ',
     type: "numerical",
     default: "0.05",
   },

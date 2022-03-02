@@ -500,8 +500,14 @@ export const getRelativePosition = (
   text,
   height
 ) => {
+  const character =
+    text.length > 1
+      ? text[Math.floor(text.length / 2)].repeat(text.length)
+      : text;
   return [
-    stimBoundingBoxXY[0] + normalizedCharacterSetRect.centers[text][0] * height,
-    stimBoundingBoxXY[1] + normalizedCharacterSetRect.centers[text][1] * height,
+    stimBoundingBoxXY[0] +
+      normalizedCharacterSetRect.centers[character][0] * height,
+    stimBoundingBoxXY[1] +
+      normalizedCharacterSetRect.centers[character][1] * height,
   ];
 };
