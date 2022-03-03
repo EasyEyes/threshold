@@ -486,7 +486,6 @@ export const restrictSpacingDeg = (
                 //   characterSetRectPx.width / characterSetRectPx.height
                 // );
                 // logger("characterSet", characterSetRectPx.characterSet);
-
                 const oldHeightPx = heightPx;
                 heightPx = targetSizeIsHeightBool
                   ? norm(deltaXYPx) / spacingOverSizeRatio
@@ -514,8 +513,9 @@ export const restrictSpacingDeg = (
                 const cortical =
                   Math.log10(eccDeg + spacingOuterDeg + 0.15) -
                   Math.log10(eccDeg + 0.15);
-                spacingInnerDeg =
+                const innerEccDeg =
                   Math.pow(10, Math.log10(eccDeg + 0.15) - cortical) - 0.15;
+                spacingInnerDeg = eccDeg - innerEccDeg;
                 break;
             }
             v1XY = radialXY.map((z) => z * spacingOuterDeg);
