@@ -39,7 +39,9 @@ export const instructionsText = {
   initial: (L, takeABreakTrialCreditsThisBlock = 0) => {
     const t1 = phrases.T_thresholdSoundCheck[L] + `\n\n`;
     const t2 =
-      takeABreakTrialCreditsThisBlock == 0 ? "" : phrases.T_letterPopularDemandFeatures[L];
+      takeABreakTrialCreditsThisBlock == 0
+        ? ""
+        : phrases.T_letterPopularDemandFeatures[L];
     return t1 + t2 + `\n\n`;
   },
   initialByThresholdParameter: {
