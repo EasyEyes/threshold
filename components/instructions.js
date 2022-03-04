@@ -41,7 +41,7 @@ export const instructionsText = {
     return phrases.T_thresholdSoundCheck[L] + `\n\n`;
   },
   popularFeatures: (L, takeABreakTrialCreditsThisBlock = 0) => {
-    return takeABreakTrialCreditsThisBlock == 0
+    return takeABreakTrialCreditsThisBlock === 0
       ? ""
       : phrases.T_letterPopularDemandFeatures[L] + "\n\n";
   },
