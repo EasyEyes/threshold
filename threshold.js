@@ -42,7 +42,7 @@ import {
   targetKind,
   readingCorpusArchive,
   readingWordListArchive,
-  readingWOrdFrequencyArchive,
+  readingWordFrequencyArchive,
   readingThisBlockPages,
   readingQuestions,
   readingCurrentQuestionIndex,
@@ -52,6 +52,9 @@ import {
   totalTrialsThisBlock,
   totalBlocks,
   modalButtonTriggeredViaKeyboard,
+  readingHeight,
+  viewingDistanceDesiredCm,
+  viewingDistanceCm,
 } from "./components/global.js";
 
 ////
@@ -159,7 +162,6 @@ import { prepareReadingQuestions } from "./components/reading.ts";
 import {
   getThisBlockPages,
   loadReadingCorpus,
-  prepareThisBlockPageForDisplay,
 } from "./components/readingAddons.js";
 
 // POPUP
@@ -243,7 +245,7 @@ const paramReaderInitialized = async (reader) => {
   await loadReadingCorpus(reader);
   logger("READ readingCorpusArchive", readingCorpusArchive);
   logger("READ readingWordListArchive", readingWordListArchive);
-  logger("READ readingWOrdFrequencyArchive", readingWOrdFrequencyArchive);
+  logger("READ readingWordFrequencyArchive", readingWordFrequencyArchive);
 
   ////
   const startExperiment = () => {
@@ -734,13 +736,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       units: "pix",
       pos: [0, 0],
       height: undefined,
-      wrapWidth: 3 * window.innerWidth, // nowrap
+      wrapWidth: window.innerWidth, // nowrap
       ori: 0.0,
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -7.0,
       isInstruction: false,
-      alignHoriz: "center",
+      alignHoriz: "left",
       alignVert: "center",
       autoDraw: false,
     });
@@ -777,7 +779,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     displayOptions = {
       pixPerCm: pixPerCm,
-      // viewingDistanceCm: viewingDistanceCm,
+      // viewingDistanceCm: viewingDistanceCm.current,
       nearPointXYDeg: nearPointXYDeg,
       nearPointXYPix: nearPointXYPix,
       fixationXYPix: fixationXYPx,
@@ -798,8 +800,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var originalResponseType = 2;
 
   var continueRoutine;
-  var consentComponents;
-  var debriefComponents;
   var frameRemains;
 
   function fileRoutineBegin(snapshot) {
@@ -1055,9 +1055,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             method: TrialHandler.Method.SEQUENTIAL,
             seed: undefined,
           });
-
-          // Construct this block pages
-          getThisBlockPages(paramReader, trialsConditions[0].block_condition);
         },
         letter: () => {
           trialsConditions = populateQuestDefaults(
@@ -1172,8 +1169,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("readingNumberOfQuestions", status.block)[0],
         paramReader.read("readingNumberOfPossibleAnswers", status.block)[0],
         readingThisBlockPages,
-        readingWOrdFrequencyArchive[
-          paramReader.read("readingCorpusSource", status.block)[0]
+        readingWordFrequencyArchive[
+          paramReader.read("readingCorpus", status.block)[0]
         ]
       );
       readingCurrentQuestionIndex.current = 0;
@@ -1310,6 +1307,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "color: purple"
         );
 
+      /* -------------------------------------------------------------------------- */
+      // ! Viewing distance
+      viewingDistanceDesiredCm.current = paramReader.read(
+        "viewingDistanceDesiredCm",
+        status.block
+      )[0];
+
+      viewingDistanceCm.current = rc.viewingDistanceCm
+        ? rc.viewingDistanceCm.value
+        : viewingDistanceDesiredCm.current;
+      if (!rc.viewingDistanceCm)
+        console.warn(
+          "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
+        );
+      /* -------------------------------------------------------------------------- */
+
       // Get total trials for this block
       switchKind(targetKind.current, {
         reading: () => {
@@ -1317,6 +1330,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "readingPages",
             status.block
           )[0];
+
+          switch (paramReader.read("readingSetSizeBy", status.block)[0]) {
+            case "nominal":
+              readingHeight.current =
+                paramReader.read("readingNominalSizeDeg", status.block)[0] *
+                degreesToPixels(1, {
+                  pixPerCm: pixPerCm,
+                  viewingDistanceCm: viewingDistanceCm.current,
+                });
+              break;
+            default:
+              break;
+          }
+
+          // Construct this block pages
+          readingParagraph.setHeight(readingHeight.current);
+          getThisBlockPages(paramReader, status.block, readingParagraph);
         },
         letter: () => {
           const possibleTrials = paramReader.read(
@@ -1470,7 +1500,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         undefined,
         status.block,
         totalBlocks.current,
-        viewingDistanceCm
+        viewingDistanceCm.current
       );
       totalTrial.setText(trialInfoStr);
       totalTrial.setAutoDraw(true);
@@ -1699,8 +1729,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   };
 
   var level;
-  var viewingDistanceDesiredCm;
-  var viewingDistanceCm;
 
   var spacingDirection;
   var targetFont;
@@ -1800,19 +1828,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* --------------------------------- PUBLIC --------------------------------- */
 
-      // ! Viewing distance
-      viewingDistanceDesiredCm = paramReader.read(
-        "viewingDistanceDesiredCm",
-        status.block_condition
-      );
-
-      viewingDistanceCm = rc.viewingDistanceCm
-        ? rc.viewingDistanceCm.value
-        : viewingDistanceDesiredCm;
-      if (!rc.viewingDistanceCm)
-        console.warn(
-          "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
-        );
+      // nothing
 
       /* --------------------------------- /PUBLIC -------------------------------- */
 
@@ -1839,7 +1855,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // update trial/block count
           status.trial = snapshot.thisN + 1;
           // totalTrialsThisBlock.current = snapshot.nTotal;
-          console.log(snapshot.nTotal);
           trialInfoStr = getTrialInfoStr(
             rc.language.value,
             showCounterBool,
@@ -1848,7 +1863,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             totalTrialsThisBlock.current,
             status.block,
             totalBlocks.current,
-            viewingDistanceCm
+            viewingDistanceCm.current
           );
           totalTrial.setText(trialInfoStr);
           totalTrial.setFont(instructionFont);
@@ -1986,7 +2001,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // !
           displayOptions = {
             pixPerCm: pixPerCm,
-            viewingDistanceCm: viewingDistanceCm,
+            viewingDistanceCm: viewingDistanceCm.current,
             nearPointXYDeg: nearPointXYDeg,
             nearPointXYPix: nearPointXYPix,
             fixationXYPix: fixationXYPx,
@@ -2140,7 +2155,7 @@ spacingOverSizeRatio: ${spacingOverSizeRatio}
 spacingSymmetry: ${spacingSymmetry}
 targetSizeIsHeightBool: ${targetSizeIsHeightBool}
 targetEccentricityXYDeg: ${targetEccentricityXYDeg}
-viewingDistanceCm: ${viewingDistanceCm}`;
+viewingDistanceCm: ${viewingDistanceCm.current}`;
             targetSpecs.setText(targetSpecsString);
             targetSpecs.setPos([
               -window.innerWidth / 2,
@@ -2165,7 +2180,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             totalTrialsThisBlock.current,
             status.block,
             totalBlocks.current,
-            viewingDistanceCm
+            viewingDistanceCm.current
           );
           totalTrial.setText(trialInfoStr);
           totalTrial.setFont(instructionFont);
@@ -2438,30 +2453,25 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           readingParagraph.setFont(
             paramReader.read("readingFont", status.block_condition)
           );
+          readingParagraph.setHeight(readingHeight.current);
 
-          switch (
-            paramReader.read("readingSetSizeBy", status.block_condition)
+          readingParagraph.setWrapWidth(window.innerWidth);
+          let lastHeight = readingParagraph.getBoundingBox().height;
+          let lastWidth = window.innerWidth;
+          for (
+            let testWidth = window.innerWidth;
+            testWidth > window.innerWidth * 0.7;
+            testWidth -= 10
           ) {
-            case "nominal":
-              readingParagraph.setHeight(
-                paramReader.read(
-                  "readingMultipleOfSingleLineSpacing",
-                  status.block_condition
-                ) *
-                  degreesToPixels(1, {
-                    pixPerCm: pixPerCm,
-                    viewingDistanceCm: viewingDistanceCm,
-                  })
-              );
-              break;
-            default:
-              break;
+            readingParagraph.setWrapWidth(testWidth);
+            const thisHeight = readingParagraph.getBoundingBox().height;
+            if (lastHeight === thisHeight) lastWidth = testWidth;
+            else break;
           }
+          readingParagraph.setWrapWidth(lastWidth);
+          readingParagraph.setPos([-lastWidth * 0.5, 0]);
 
           readingParagraph.setAutoDraw(true);
-
-          const readingBoundingBox = readingParagraph.getBoundingBox();
-          logger("readingBoundingBox", readingBoundingBox);
 
           readingIndex++;
         },

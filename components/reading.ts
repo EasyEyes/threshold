@@ -93,48 +93,6 @@ export const preprocessCorpusToWordList = (text: string) => {
     .filter((w) => w.length > 0);
 };
 
-export const preprocessCorpusToSentenceList = (
-  usedText: string,
-  originalText: string,
-  lineBuffer: number,
-  lineNumber: number,
-  numberOfPages: number
-) => {
-  if (usedText.length < lineBuffer * (lineNumber + 1) * (numberOfPages + 1))
-    usedText += " " + originalText;
-  const usedTextList = usedText.split(" ").filter((w) => w.length > 0);
-
-  const sentences: string[] = [];
-
-  for (let i = 0; i < numberOfPages; i++) {
-    let thisPageText = "";
-
-    for (let line = 1; line <= lineNumber; line++) {
-      let thisLineCharCount = lineBuffer;
-
-      while (thisLineCharCount > 0 && usedTextList.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const newWord = usedTextList.shift()!;
-        thisLineCharCount -= newWord.length + 1;
-
-        if (thisLineCharCount > 0) {
-          thisPageText += `${newWord} `;
-        } else if (thisLineCharCount <= 0 && lineNumber > line) {
-          // Not the last line
-          thisPageText += `${newWord}\n`;
-        } else {
-          thisPageText += newWord;
-        }
-      }
-    }
-
-    sentences.push(thisPageText);
-  }
-
-  usedText = usedTextList.join(" ");
-  return { usedText, sentences };
-};
-
 /* -------------------------------------------------------------------------- */
 
 export const getCorrectAnswer = (

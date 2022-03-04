@@ -4,14 +4,14 @@ _consentForm,Demo consent form.pdf
 block,1
 calibrateBlindSpotBool,FALSE
 calibrateScreenSizeBool,FALSE
-readingCorpusSource,the-phantom-tollbooth.txt
+readingCorpus,the-phantom-tollbooth.txt
 readingDefineSingleLineSpacingAs,nominalSize
 readingFont,Roboto Mono
 readingFontSource,google
 readingLinesPerPage,12
 readingMaxCharactersPerLine,57
 readingMultipleOfSingleLineSpacing,0.8
-readingNominalSizeDeg,0.5
+readingNominalSizeDeg,1
 readingNumberOfPossibleAnswers,4
 readingNumberOfQuestions,3
 readingPages,4

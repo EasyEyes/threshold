@@ -80,7 +80,7 @@ export const getFontNameListBySource = (
 export const getTextList = (parsed: any) => {
   const textList = new Set();
   for (const parsedRow of parsed.data) {
-    if (parsedRow[0] == "readingCorpusSource")
+    if (parsedRow[0] == "readingCorpus")
       for (const source of parsedRow.slice(1)) textList.add(source.trim());
   }
   return [...textList];

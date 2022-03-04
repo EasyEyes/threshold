@@ -527,10 +527,7 @@ export const isTextMissing = (
 
   if (missingText.size > 0) {
     errorList.push(
-      TEXT_FILES_MISSING(
-        "readingCorpusSource",
-        Array.from(missingText) as string[]
-      )
+      TEXT_FILES_MISSING("readingCorpus", Array.from(missingText) as string[])
     );
   }
 

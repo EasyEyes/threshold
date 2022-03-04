@@ -30,6 +30,14 @@ export const skipTrialOrBlock = {
   skipBlock: false,
 };
 
+/* --------------------------- Participant Config --------------------------- */
+
+export const viewingDistanceDesiredCm = { current: undefined };
+
+/* --------------------------- Participant Status --------------------------- */
+
+export const viewingDistanceCm = { current: undefined };
+
 /* ------------------------------ Interactions ------------------------------ */
 
 export const modalButtonTriggeredViaKeyboard = { current: false };
@@ -37,7 +45,7 @@ export const modalButtonTriggeredViaKeyboard = { current: false };
 /* --------------------------------- Reading -------------------------------- */
 export const readingCorpusArchive = {};
 export const readingWordListArchive = {};
-export const readingWOrdFrequencyArchive = {};
+export const readingWordFrequencyArchive = {};
 
 export const readingUsedText = {};
 export const readingThisBlockPages = []; // string[]
@@ -47,3 +55,5 @@ export const readingCurrentQuestionIndex = { current: 0 };
 
 export const readingClickableAnswersSetup = { current: false };
 export const readingClickableAnswersUpdate = { current: false };
+
+export const readingHeight = { current: undefined };
