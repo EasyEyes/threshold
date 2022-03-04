@@ -2054,7 +2054,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
-          target.setHeight(stimulusParameters.heightPx);
+          target.scaleToHeightPx(stimulusParameters.heightPx);
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
           psychoJS.experiment.addData(
             "targetLocationPx",
@@ -2076,8 +2076,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
                   flanker1.setFont(targetFont);
                   flanker2.setFont(targetFont);
-                  flanker1.setHeight(stimulusParameters.heightPx);
-                  flanker2.setHeight(stimulusParameters.heightPx);
+                  flanker1.scaleToHeightPx(stimulusParameters.heightPx);
+                  flanker2.scaleToHeightPx(stimulusParameters.heightPx);
                   psychoJS.experiment.addData("flankerLocationsPx", [
                     stimulusParameters.targetAndFlankersXYPx[1],
                     stimulusParameters.targetAndFlankersXYPx[2],
@@ -2148,6 +2148,7 @@ ${
     : ""
 }
 heightDeg: ${Math.round(10 * stimulusParameters.heightDeg) / 10}
+heightPx: ${Math.round(stimulusParameters.heightPx)}
 filename: ${experimentFileName}
 targetFont: ${targetFont}
 spacingRelationToSize: ${spacingRelationToSize}
@@ -2708,11 +2709,11 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         target.frameNStart = frameN; // exact frame index
 
         // NOTE these two values are not equivalent
-        logger("target bb.x, bb.y", [
-          target.getBoundingBox(true).x,
-          target.getBoundingBox(true).y,
-        ]);
-        logger("target pos", target.getPos());
+        // logger("target bb.x, bb.y", [
+        //   target.getBoundingBox(true).x,
+        //   target.getBoundingBox(true).y,
+        // ]);
+        // logger("target pos", target.getPos());
 
         target.setAutoDraw(true);
       }

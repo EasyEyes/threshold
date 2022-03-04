@@ -395,9 +395,12 @@ const sizeAndPositionTripletBoundingBoxes = (
           heightPx
         );
     const characterSetBoundingStims = [characterSetBoundingBoxPolies.target];
+    // ASSUMES triplet is sized with scaleToHeightPx
     const characterSetBounds = [
-      normalizedCharacterSetBoundingRect.width * heightPx,
-      normalizedCharacterSetBoundingRect.height * heightPx,
+      heightPx *
+        (normalizedCharacterSetBoundingRect.width /
+          normalizedCharacterSetBoundingRect.height),
+      heightPx,
     ];
     characterSetBoundingBoxPolies.target.setPos(
       tripletCharacterSetBoundingBoxPositions[0]
@@ -431,9 +434,12 @@ const sizeAndPositionDisplayCharacterSet = (
   windowDims
 ) => {
   const heightPx = 150;
+  // ASSUMES display characters are sized with .setHeight()
   const characterSetBounds = [
-    normalizedCharacterSetBoundingRect.width * heightPx,
-    normalizedCharacterSetBoundingRect.height * heightPx,
+    // heightPx * (normalizedCharacterSetBoundingRect.width/normalizedCharacterSetBoundingRect.height),
+    // heightPx,
+    heightPx * normalizedCharacterSetBoundingRect.width,
+    heightPx * normalizedCharacterSetBoundingRect.height,
   ];
   const paddedWidthOfCharacter = characterSetBounds[0] * 1.2;
   const indicies = [...displayCharacterSetStimuli.polies.keys()];
