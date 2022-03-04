@@ -1266,10 +1266,10 @@ export const GLOSSARY: Glossary = {
   targetImageFolder: {
     name: "targetImageFolder",
     availability: "now",
-    example: "myImages",
+    example: "faces",
     explanation:
-      "The name of a folder of images, to be used when targetKind==image. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder.",
-    type: "",
+      "The name of a folder of images, to be used when targetKind==image. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+    type: "text",
     default: "",
   },
   targetKind: {
@@ -1277,7 +1277,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "letter",
     explanation:
-      "• letter On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is diplayed at the target eccentricity with the target size.\n• reading A paragraph of text is displayed at each trial, to test the reading speed.",
+      "• letter On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The sound is played for its full duration at targetSoundVolume and with targetSoundNoise\n• reading Measure reading speed and retention. Should be reclassified as a targetTask.",
     type: "categorical",
     default: "letter",
     categories: ["letter", "gabor", "image", "reading"],
@@ -1361,6 +1361,64 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  targetSoundFolder: {
+    name: "targetSoundFolder",
+    availability: "now",
+    example: "sounds",
+    explanation:
+      "The name of a folder of sound files, to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+    type: "text",
+    default: "",
+  },
+  targetSoundVolumeDBSPL: {
+    name: "targetSoundVolumeDBSPL",
+    availability: "now",
+    example: "20",
+    explanation: 'If targetKind is "sound", this specifies target volume.',
+    type: "numerical",
+    default: "20",
+  },
+  targetSoundNoiseBool: {
+    name: "targetSoundNoiseBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "If targetKind is \"sound\", and targetSoundNoiseBool is TRUE, then add noise to the target. The noise is zero mean Gaussian white noise, clipped at ±2 SD. Any reported SD is after clipping. We could add a parameter to request leaving the noise on continuously. We'll need to specify onset and offset ramps. I don't know what's conventional.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  targetSoundNoiseHz: {
+    name: "targetSoundNoiseHz",
+    availability: "now",
+    example: "20000",
+    explanation: "The clock rate of the noise.",
+    type: "numerical",
+    default: "20000",
+  },
+  targetSoundNoiseDBSPL: {
+    name: "targetSoundNoiseDBSPL",
+    availability: "now",
+    example: "20",
+    explanation: "The noise volume.",
+    type: "numerical",
+    default: "0",
+  },
+  targetSoundNoiseOnsetReTargetSec: {
+    name: "targetSoundNoiseOnsetReTargetSec",
+    availability: "now",
+    example: "-0.5",
+    explanation: "Negative when noise starts before the target starts.",
+    type: "numerical",
+    default: "-0.3",
+  },
+  targetSoundNoiseOffsetReTargetSec: {
+    name: "targetSoundNoiseOffsetReTargetSec",
+    availability: "now",
+    example: "0.5",
+    explanation: "Positive when noise ends after the target ends.",
+    type: "numerical",
+    default: "0.3",
+  },
   targetTask: {
     name: "targetTask",
     availability: "now",
@@ -1412,10 +1470,10 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "spacing",
     explanation:
-      'The designated parameter (e.g. size or spacing) will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacing" to vary center-to-center spacing of target and neighboring flankers. \n• "size" to vary target size. \n• "contrast" to be added in September.\n• "eccentricity"  to be added in September.',
+      'The designated parameter (e.g. size or spacing) will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacing" to vary center-to-center spacing of target and neighboring flankers. \n• "size" to vary target size. \n• "contrast" awaits HDR10 support.\n• "eccentricity"  to be added soon.\n• "soundVolume" awaits sound support.\n• "soundNoise" awaits sound support.',
     type: "categorical",
     default: "spacing",
-    categories: ["spacing", "size"],
+    categories: ["spacing", "size", "soundVolume", "soundNoise"],
   },
   thresholdProcedure: {
     name: "thresholdProcedure",

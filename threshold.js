@@ -33,7 +33,9 @@ import "./components/css/takeABreak.css";
 import "./components/css/psychojsExtra.css";
 
 ////
+/* -------------------------------------------------------------------------- */
 /* --------------------------------- Global --------------------------------- */
+/* -------------------------------------------------------------------------- */
 import {
   useRC,
   rc,
@@ -46,6 +48,10 @@ import {
   readingCurrentQuestionIndex,
   readingClickableAnswersSetup,
   readingClickableAnswersUpdate,
+  status,
+  totalTrialsThisBlock,
+  totalBlocks,
+  modalButtonTriggeredViaKeyboard,
 } from "./components/global.js";
 
 ////
@@ -184,6 +190,7 @@ import {
   isProlificPreviewExperiment,
 } from "./components/externalServices.js";
 import { switchKind } from "./components/blockTargetKind.js";
+import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -303,22 +310,13 @@ var conditionNameConfig = {
 var conditionName;
 
 var trialInfoStr = "";
-var totalTrial, // TextSim object
-  totalTrialCount = 0;
-
-var currentTrialIndex = 0;
-var currentTrialLength = 0;
-var currentBlockIndex = 0;
-var totalBlockCount = 0;
-
-var totalCorrectTrials = 0;
-var totalCompletedTrials = 0;
+var totalTrial; // TextSim object
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
 
-const experiment = (blockCount) => {
+const experiment = (howManyBlocksAreThereInTotal) => {
   ////
   // Resources
   initializeEscHandlingDiv();
@@ -486,7 +484,6 @@ const experiment = (blockCount) => {
   var displayCharacterSetBoundingBoxPolies;
   /* --- /BOUNDING BOX --- */
 
-  var thisLoopNumber; // ! BLOCK COUNTER
   var thisConditionsFile;
   var trialClock;
 
@@ -531,8 +528,8 @@ const experiment = (blockCount) => {
     filterClock = new util.Clock();
     instructionsClock = new util.Clock();
 
-    thisLoopNumber = 0;
-    thisConditionsFile = `conditions/block_${thisLoopNumber + 1}.csv`;
+    status.block = 0; // +1 at the beginning of each block
+    thisConditionsFile = `conditions/block_${status.block + 1}.csv`;
 
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
@@ -919,7 +916,7 @@ const experiment = (blockCount) => {
 
   async function _instructionRoutineEachFrame() {
     /* --- SIMULATED --- */
-    if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+    if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
     /* --- /SIMULATED --- */
 
     t = instructionsClock.getTime();
@@ -1044,21 +1041,16 @@ const experiment = (blockCount) => {
       );
 
       // nTrialsTotal
-      const nTrialsTotal = trialsConditions
-        .map((c) =>
-          Number(paramReader.read("conditionTrials", c.block_condition))
-        )
-        .reduce((runningSum, ntrials) => runningSum + ntrials, 0);
+      // totalTrialsThisBlock.current = trialsConditions
+      //   .map((c) => paramReader.read("conditionTrials", c.block_condition))
+      //   .reduce((a, b) => a + b, 0);
 
       switchKind(targetKind.current, {
         reading: () => {
           trials = new data.TrialHandler({
             psychoJS: psychoJS,
             name: "trials",
-            nReps: paramReader.read(
-              "readingPages",
-              trialsConditions[0].block_condition
-            ),
+            nReps: totalTrialsThisBlock.current,
             trialList: trialsConditions,
             method: TrialHandler.Method.SEQUENTIAL,
             seed: undefined,
@@ -1078,7 +1070,7 @@ const experiment = (blockCount) => {
             psychoJS: psychoJS,
             name: "trials",
             varName: "trialsVal",
-            nTrials: nTrialsTotal,
+            nTrials: totalTrialsThisBlock.current,
             conditions: trialsConditions,
             method: TrialHandler.Method.FULLRANDOM,
           });
@@ -1127,7 +1119,11 @@ const experiment = (blockCount) => {
         expName,
         phrases.T_proportionCorrectPopup[rc.language.value].replace(
           "xxx",
-          `${(totalCorrectTrials / totalCompletedTrials).toFixed(2) * 100}`
+          `${
+            (
+              status.trialCorrect_thisBlock / status.trialCompleted_thisBlock
+            ).toFixed(2) * 100
+          }`
         ),
         instructionsText.trialBreak(rc.language.value, responseType),
         false
@@ -1135,8 +1131,8 @@ const experiment = (blockCount) => {
       await addPopupLogic(expName, responseType, null);
 
       // Reset trial counter
-      totalCorrectTrials = 0;
-      totalCompletedTrials = 0;
+      status.trialCorrect_thisBlock = 0;
+      status.trialCompleted_thisBlock = 0;
     }
 
     if (currentLoop instanceof MultiStairHandler)
@@ -1172,14 +1168,12 @@ const experiment = (blockCount) => {
       frameN = -1;
       continueRoutine = true;
 
-      const blockCount = snapshot.block + 1;
-
       readingQuestions.current = prepareReadingQuestions(
-        paramReader.read("readingNumberOfQuestions", blockCount)[0],
-        paramReader.read("readingNumberOfPossibleAnswers", blockCount)[0],
+        paramReader.read("readingNumberOfQuestions", status.block)[0],
+        paramReader.read("readingNumberOfPossibleAnswers", status.block)[0],
         readingThisBlockPages,
         readingWOrdFrequencyArchive[
-          paramReader.read("readingCorpusSource", blockCount)[0]
+          paramReader.read("readingCorpusSource", status.block)[0]
         ]
       );
       readingCurrentQuestionIndex.current = 0;
@@ -1296,8 +1290,9 @@ const experiment = (blockCount) => {
   function filterRoutineBegin(snapshot) {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-      currentBlockIndex = snapshot.block + 1;
-      totalBlockCount = snapshot.nTotal;
+
+      status.block = snapshot.block + 1;
+      totalBlocks.current = snapshot.nTotal;
 
       //------Prepare to start Routine 'filter'-------
       t = 0;
@@ -1306,8 +1301,8 @@ const experiment = (blockCount) => {
       continueRoutine = true; // until we're told otherwise
 
       // update component parameters for each repeat
-      thisLoopNumber += 1;
-      thisConditionsFile = `conditions/block_${thisLoopNumber}.csv`;
+      // status.block++
+      thisConditionsFile = `conditions/block_${status.block}.csv`;
 
       if (debug)
         console.log(
@@ -1315,14 +1310,26 @@ const experiment = (blockCount) => {
           "color: purple"
         );
 
-      const possibleTrials = paramReader.read(
-        "conditionTrials",
-        thisLoopNumber
-      );
-
-      logger("possibleTrials", possibleTrials);
-      totalTrialCount = possibleTrials.reduce((a, b) => a + b, 0); // sum of possible trials
-      conditionTrials = Math.max(...possibleTrials);
+      // Get total trials for this block
+      switchKind(targetKind.current, {
+        reading: () => {
+          totalTrialsThisBlock.current = paramReader.read(
+            "readingPages",
+            status.block
+          )[0];
+        },
+        letter: () => {
+          const possibleTrials = paramReader.read(
+            "conditionTrials",
+            status.block
+          );
+          logger("possibleTrials", possibleTrials);
+          totalTrialsThisBlock.current = possibleTrials.reduce(
+            (a, b) => a + b,
+            0
+          );
+        },
+      });
 
       // keep track of which components have finished
       filterComponents = [];
@@ -1339,7 +1346,7 @@ const experiment = (blockCount) => {
   function filterRoutineEachFrame() {
     return async function () {
       /* --- SIMULATED --- */
-      if (simulated && simulated[thisLoopNumber]) return Scheduler.Event.NEXT;
+      if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
 
       //------Loop for each frame of Routine 'filter'-------
@@ -1409,29 +1416,37 @@ const experiment = (blockCount) => {
       frameN = -1;
       continueRoutine = true;
 
-      const blockCount = snapshot.block + 1;
+      const L = rc.language.value;
 
       responseType = getResponseType(
-        paramReader.read("responseClickedBool", blockCount)[0],
-        paramReader.read("responseTypedBool", blockCount)[0],
-        paramReader.read("responseTypedEasyEyesKeypadBool", blockCount)[0],
-        paramReader.read("responseSpokenBool", blockCount)[0]
+        paramReader.read("responseClickedBool", status.block)[0],
+        paramReader.read("responseTypedBool", status.block)[0],
+        paramReader.read("responseTypedEasyEyesKeypadBool", status.block)[0],
+        paramReader.read("responseSpokenBool", status.block)[0]
       );
 
-      _instructionSetup(
-        (snapshot.block === 0
-          ? instructionsText.initial(
-              rc.language.value,
-              paramReader.read("takeABreakTrialCredit", blockCount)[0]
-            )
-          : "") +
-          instructionsText.initialByThresholdParameter["spacing"](
-            rc.language.value,
-            responseType,
-            totalTrialCount
-          ) +
-          instructionsText.initialEnd(rc.language.value, responseType)
-      );
+      switchKind(targetKind.current, {
+        letter: () => {
+          _instructionSetup(
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+              instructionsText.popularFeatures(
+                L,
+                paramReader.read("takeABreakTrialCredit", status.block)[0]
+              ) +
+              instructionsText.initialByThresholdParameter["spacing"](
+                L,
+                responseType,
+                totalTrialsThisBlock.current
+              ) +
+              instructionsText.initialEnd(L, responseType)
+          );
+        },
+        reading: () => {
+          _instructionSetup(
+            snapshot.block === 0 ? instructionsText.initial(L) : ""
+          );
+        },
+      });
 
       clickedContinue = false;
       setTimeout(() => {
@@ -1439,7 +1454,7 @@ const experiment = (blockCount) => {
         document.addEventListener("touchend", _clickContinue);
       }, 500);
 
-      _beepButton = addBeepButton(rc.language.value, correctSynth);
+      _beepButton = addBeepButton(L, correctSynth);
 
       psychoJS.eventManager.clearKeys();
 
@@ -1448,13 +1463,13 @@ const experiment = (blockCount) => {
       hideTrialBreakProgressBar();
 
       trialInfoStr = getTrialInfoStr(
-        rc.language.value,
-        paramReader.read("showCounterBool", blockCount)[0],
-        paramReader.read("showViewingDistanceBool", blockCount)[0],
+        L,
+        paramReader.read("showCounterBool", status.block)[0],
+        paramReader.read("showViewingDistanceBool", status.block)[0],
         undefined,
         undefined,
-        blockCount,
-        totalBlockCount,
+        status.block,
+        totalBlocks.current,
         viewingDistanceCm
       );
       totalTrial.setText(trialInfoStr);
@@ -1521,7 +1536,10 @@ const experiment = (blockCount) => {
         reading: () => {
           // READING
           _instructionSetup(
-            "This block is READING TASK. Please read the text as fast as you can, and hit SPACE when you finish. To continue, click anywhere."
+            instructionsText.readingEdu(
+              rc.language.value,
+              paramReader.read("readingPages")[0]
+            )
           );
           instructions2.setAutoDraw(false);
           fixation.setAutoDraw(false);
@@ -1642,12 +1660,10 @@ const experiment = (blockCount) => {
   //   return _instructionRoutineEnd;
   // }
 
-  let modalButtonTriggeredViaKeyboard = false;
-
   const _takeFixationClick = (e) => {
-    if (modalButtonTriggeredViaKeyboard) {
+    if (modalButtonTriggeredViaKeyboard.current) {
       // modal button click event triggered by jquery
-      modalButtonTriggeredViaKeyboard = false;
+      modalButtonTriggeredViaKeyboard.current = false;
       return;
     }
     let cX, cY;
@@ -1686,13 +1702,11 @@ const experiment = (blockCount) => {
   var viewingDistanceDesiredCm;
   var viewingDistanceCm;
 
-  var block;
   var spacingDirection;
   var targetFont;
   var targetCharacterSet;
   var validAns = [];
   var showCharacterSetWhere;
-  var showCharacterSetElement;
   var showCounterBool;
   var showTargetSpecsBool;
   var showConditionNameBool;
@@ -1727,18 +1741,10 @@ const experiment = (blockCount) => {
   var simulatedObserver = {};
   /* --- /SIMULATED --- */
 
-  var condition;
   // var targetTask;
 
   // Credit
   var currentBlockCreditForTrialBreak = 0;
-
-  var skipTrialOrBlock = {
-    blockId: null,
-    trialId: null,
-    skipTrial: false,
-    skipBlock: false,
-  };
 
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
@@ -1753,37 +1759,39 @@ const experiment = (blockCount) => {
 
       const parametersToExcludeFromData = [];
 
-      let block_condition;
       switchKind(targetKind.current, {
         reading: () => {
-          block_condition = trials.thisTrial.block_condition;
+          status.condition = snapshot.getCurrentTrial();
+          status.block_condition = trials.thisTrial.block_condition;
         },
         letter: () => {
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
-              condition = c;
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
               addConditionToData(
                 paramReader,
-                condition["block_condition"],
+                status.block_condition,
                 psychoJS.experiment,
                 parametersToExcludeFromData
               );
             }
           }
 
-          block_condition = condition["block_condition"];
-
           // ! responseType
           originalResponseType = responseType;
           responseType = getResponseType(
-            paramReader.read("responseClickedBool", block_condition),
-            paramReader.read("responseTypedBool", block_condition),
+            paramReader.read("responseClickedBool", status.block_condition),
+            paramReader.read("responseTypedBool", status.block_condition),
             paramReader.read(
               "responseTypedEasyEyesKeypadBool",
-              block_condition
+              status.block_condition
             ),
-            paramReader.read("responseSpokenBool", block_condition),
-            paramReader.read("responseMustClickCrosshairBool", block_condition)
+            paramReader.read("responseSpokenBool", status.block_condition),
+            paramReader.read(
+              "responseMustClickCrosshairBool",
+              status.block_condition
+            )
           );
           logger("responseType", responseType);
           if (canClick) showCursor();
@@ -1795,7 +1803,7 @@ const experiment = (blockCount) => {
       // ! Viewing distance
       viewingDistanceDesiredCm = paramReader.read(
         "viewingDistanceDesiredCm",
-        block_condition
+        status.block_condition
       );
 
       viewingDistanceCm = rc.viewingDistanceCm
@@ -1829,16 +1837,17 @@ const experiment = (blockCount) => {
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
           // update trial/block count
-          currentTrialIndex = snapshot.thisN + 1;
-          currentTrialLength = snapshot.nTotal;
+          status.trial = snapshot.thisN + 1;
+          // totalTrialsThisBlock.current = snapshot.nTotal;
+          console.log(snapshot.nTotal);
           trialInfoStr = getTrialInfoStr(
             rc.language.value,
             showCounterBool,
             showViewingDistanceBool,
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            totalBlockCount,
+            status.trial,
+            totalTrialsThisBlock.current,
+            status.block,
+            totalBlocks.current,
             viewingDistanceCm
           );
           totalTrial.setText(trialInfoStr);
@@ -1865,19 +1874,21 @@ const experiment = (blockCount) => {
           document.addEventListener("touchend", _takeFixationClick);
 
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-          const reader = paramReader;
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-          psychoJS.experiment.addData("block_condition", block_condition);
+          const reader = paramReader;
+          const BC = status.block_condition;
+
+          psychoJS.experiment.addData("block_condition", BC);
           psychoJS.experiment.addData(
             "flankerOrientation",
-            reader.read("spacingDirection", block_condition)
+            reader.read("spacingDirection", BC)
           );
           psychoJS.experiment.addData(
             "targetFont",
-            reader.read("targetFont", block_condition)
+            reader.read("targetFont", BC)
           );
           // update component parameters for each repeat
           windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
@@ -1888,95 +1899,55 @@ const experiment = (blockCount) => {
               "[Screen Width] Using arbitrary screen width. Enable RC."
             );
 
-          block = condition["block"];
-
           // TODO check that we are actually trying to test for "spacing", not "size"
 
-          spacingDirection = reader.read("spacingDirection", block_condition);
-          spacingSymmetry = reader.read("spacingSymmetry", block_condition);
-          let targetFontSource = reader.read(
-            "targetFontSource",
-            block_condition
-          );
-          targetFont = reader.read("targetFont", block_condition);
+          spacingDirection = reader.read("spacingDirection", BC);
+          spacingSymmetry = reader.read("spacingSymmetry", BC);
+          let targetFontSource = reader.read("targetFontSource", BC);
+          targetFont = reader.read("targetFont", BC);
           if (targetFontSource === "file")
             targetFont = cleanFontName(targetFont);
 
           targetCharacterSet = String(
-            reader.read("targetCharacterSet", block_condition)
+            reader.read("targetCharacterSet", BC)
           ).split("");
-          validAns = String(reader.read("targetCharacterSet", block_condition))
+          validAns = String(reader.read("targetCharacterSet", BC))
             .toLowerCase()
             .split("");
 
-          showCharacterSetWhere = reader.read(
-            "showCharacterSetWhere",
-            block_condition
-          );
-          showViewingDistanceBool = reader.read(
-            "showViewingDistanceBool",
-            block_condition
-          );
-          showCounterBool = reader.read("showCounterBool", block_condition);
+          showCharacterSetWhere = reader.read("showCharacterSetWhere", BC);
+          showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
+          showCounterBool = reader.read("showCounterBool", BC);
 
-          showConditionNameBool = paramReader.read(
-            "showConditionNameBool",
-            block_condition
-          );
-          conditionNameToShow = paramReader.read(
-            "conditionName",
-            block_condition
-          );
+          showConditionNameBool = paramReader.read("showConditionNameBool", BC);
+          conditionNameToShow = paramReader.read("conditionName", BC);
 
-          showTargetSpecsBool = paramReader.read(
-            "showTargetSpecsBool",
-            block_condition
-          );
+          showTargetSpecsBool = paramReader.read("showTargetSpecsBool", BC);
 
-          conditionTrials = reader.read("conditionTrials", block_condition);
-          targetDurationSec = reader.read("targetDurationSec", block_condition);
+          targetDurationSec = reader.read("targetDurationSec", BC);
 
           fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
-          showFixation = reader.read("markTheFixationBool", block_condition);
+          showFixation = reader.read("markTheFixationBool", BC);
 
-          targetSizeDeg = reader.read("targetSizeDeg", block_condition);
-          targetSizeIsHeightBool = reader.read(
-            "targetSizeIsHeightBool",
-            block_condition
-          );
-          thresholdParameter = reader.read(
-            "thresholdParameter",
-            block_condition
-          );
-          targetMinimumPix = reader.read("targetMinimumPix", block_condition);
-          spacingOverSizeRatio = reader.read(
-            "spacingOverSizeRatio",
-            block_condition
-          );
-          spacingRelationToSize = reader.read(
-            "spacingRelationToSize",
-            block_condition
-          );
-          showBoundingBox =
-            reader.read("showBoundingBoxBool", block_condition) || false;
+          targetSizeDeg = reader.read("targetSizeDeg", BC);
+          targetSizeIsHeightBool = reader.read("targetSizeIsHeightBool", BC);
+          thresholdParameter = reader.read("thresholdParameter", BC);
+          targetMinimumPix = reader.read("targetMinimumPix", BC);
+          spacingOverSizeRatio = reader.read("spacingOverSizeRatio", BC);
+          spacingRelationToSize = reader.read("spacingRelationToSize", BC);
+          showBoundingBox = reader.read("showBoundingBoxBool", BC) || false;
           showCharacterSetBoundingBox = reader.read(
             "showCharacterSetBoundingBoxBool",
-            block_condition
+            BC
           );
 
-          targetMinimumPix = reader.read("targetMinimumPix", block_condition);
-          targetEccentricityXDeg = reader.read(
-            "targetEccentricityXDeg",
-            block_condition
-          );
+          targetMinimumPix = reader.read("targetMinimumPix", BC);
+          targetEccentricityXDeg = reader.read("targetEccentricityXDeg", BC);
           psychoJS.experiment.addData(
             "targetEccentricityXDeg",
             targetEccentricityXDeg
           );
-          targetEccentricityYDeg = reader.read(
-            "targetEccentricityYDeg",
-            block_condition
-          );
+          targetEccentricityYDeg = reader.read("targetEccentricityYDeg", BC);
           psychoJS.experiment.addData(
             "targetEccentricityYDeg",
             targetEccentricityYDeg
@@ -1985,16 +1956,13 @@ const experiment = (blockCount) => {
             targetEccentricityXDeg,
             targetEccentricityYDeg,
           ];
-          targetSafetyMarginSec = paramReader.read(
-            "targetSafetyMarginSec",
-            block_condition
-          );
+          targetSafetyMarginSec = paramReader.read("targetSafetyMarginSec", BC);
 
-          // trackGazeYes = reader.read("trackGazeYes", block_condition);
-          // trackHeadYes = reader.read("trackHeadYes", block_condition);
+          // trackGazeYes = reader.read("trackGazeYes", BC);
+          // trackHeadYes = reader.read("trackHeadYes", BC);
           wirelessKeyboardNeededYes = reader.read(
             "wirelessKeyboardNeededYes",
-            block_condition
+            BC
           );
 
           var characterSet = targetCharacterSet;
@@ -2035,10 +2003,7 @@ const experiment = (blockCount) => {
             targetKind: targetKind.current,
           };
 
-          grid.update(
-            paramReader.read("showGrid", block_condition),
-            displayOptions
-          );
+          grid.update(paramReader.read("showGrid", BC), displayOptions);
 
           // Fixation placement does not depend on the value of "spacingRelationToSize"...
           fixation.setPos(fixationXYPx);
@@ -2064,7 +2029,7 @@ const experiment = (blockCount) => {
           [level, stimulusParameters] = restrictLevel(
             proposedLevel,
             thresholdParameter,
-            characterSetBoundingRects[block_condition],
+            characterSetBoundingRects[BC],
             spacingDirection,
             spacingRelationToSize,
             spacingSymmetry,
@@ -2143,9 +2108,9 @@ const experiment = (blockCount) => {
               stimulus: boundingBoxPolies,
               characterSet: characterSetBoundingBoxPolies,
             },
-            displayCharacterSetBoundingBoxPolies[block_condition],
+            displayCharacterSetBoundingBoxPolies[BC],
             tripletStims,
-            characterSetBoundingRects[block_condition],
+            characterSetBoundingRects[BC],
             {
               heightPx: stimulusParameters.heightPx,
               spacingRelationToSize: spacingRelationToSize,
@@ -2196,10 +2161,10 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             rc.language.value,
             showCounterBool,
             showViewingDistanceBool,
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            totalBlockCount,
+            status.trial,
+            totalTrialsThisBlock.current,
+            status.block,
+            totalBlocks.current,
             viewingDistanceCm
           );
           totalTrial.setText(trialInfoStr);
@@ -2223,27 +2188,27 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             showCharacterSetBoundingBox,
             boundingBoxPolies,
             characterSetBoundingBoxPolies,
-            displayCharacterSetBoundingBoxPolies[block_condition],
+            displayCharacterSetBoundingBoxPolies[BC],
             spacingRelationToSize,
             thresholdParameter,
             trialComponents
           );
           // /* --- /BOUNDING BOX --- */
           // /* --- SIMULATED --- */
-          if (simulated && simulated[block]) {
-            if (!simulatedObserver[block_condition]) {
-              simulatedObserver[block_condition] = new SimulatedObserver(
-                simulated[block][block_condition],
+          if (simulated && simulated[status.block]) {
+            if (!simulatedObserver[BC]) {
+              simulatedObserver[BC] = new SimulatedObserver(
+                simulated[status.block][BC],
                 level,
                 characterSet,
                 targetCharacter,
-                paramReader.read("thresholdProportionCorrect", block_condition),
-                paramReader.read("simulationBeta", block_condition),
-                paramReader.read("simulationDelta", block_condition),
-                paramReader.read("simulationThreshold", block_condition)
+                paramReader.read("thresholdProportionCorrect", BC),
+                paramReader.read("simulationBeta", BC),
+                paramReader.read("simulationDelta", BC),
+                paramReader.read("simulationThreshold", BC)
               );
             } else {
-              simulatedObserver[block_condition].updateTrial(
+              simulatedObserver[BC].updateTrial(
                 level,
                 characterSet,
                 targetCharacter
@@ -2273,7 +2238,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
       psychoJS.eventManager.clearKeys();
 
-      if (paramReader.read("showTakeABreakCreditBool", block_condition))
+      if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
       else hideTrialBreakProgressBar();
 
@@ -2283,9 +2248,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
   function trialInstructionRoutineEachFrame() {
     return async function () {
-      if (
-        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
-      ) {
+      if (toShowCursor()) {
         showCursor();
         return Scheduler.Event.NEXT;
       }
@@ -2298,8 +2261,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         letter: () => {
           // IDENTIFY
           /* --- SIMULATED --- */
-          if (simulated && simulated[thisLoopNumber])
-            return Scheduler.Event.NEXT;
+          if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
           /* --- /SIMULATED --- */
           t = instructionsClock.getTime();
           frameN = frameN + 1;
@@ -2362,9 +2324,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
   function trialInstructionRoutineEnd() {
     return async function () {
       loggerText("trialInstructionRoutineEnd");
-      if (
-        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
-      ) {
+      if (toShowCursor()) {
         showCursor();
         return Scheduler.Event.NEXT;
       }
@@ -2402,9 +2362,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       // rc.pauseNudger();
       // await sleep(100);
 
-      if (
-        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
-      ) {
+      if (toShowCursor()) {
         showCursor();
         return Scheduler.Event.NEXT;
       }
@@ -2427,21 +2385,15 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       logger("Index", snapshot.thisIndex);
 
       ////
-      let block_condition;
       switchKind(targetKind.current, {
-        reading: () => {
-          const currentTrial = snapshot.getCurrentTrial();
-          // ! Is it correct?
-          condition = currentTrial; // ?
-          block_condition = currentTrial.block_condition;
-        },
         letter: () => {
-          block_condition = condition["block_condition"];
-
           responseType = resetResponseType(
             originalResponseType,
             responseType,
-            paramReader.read("responseMustClickCrosshairBool", block_condition)
+            paramReader.read(
+              "responseMustClickCrosshairBool",
+              status.block_condition
+            )
           );
         },
       });
@@ -2484,16 +2436,17 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         reading: () => {
           readingParagraph.setText(readingThisBlockPages[readingIndex]);
           readingParagraph.setFont(
-            paramReader.read("readingFont", block_condition)
+            paramReader.read("readingFont", status.block_condition)
           );
 
-          switch (paramReader.read("readingSetSizeBy", block_condition)) {
+          switch (
+            paramReader.read("readingSetSizeBy", status.block_condition)
+          ) {
             case "nominal":
-              console.log(viewingDistanceCm);
               readingParagraph.setHeight(
                 paramReader.read(
                   "readingMultipleOfSingleLineSpacing",
-                  block_condition
+                  status.block_condition
                 ) *
                   degreesToPixels(1, {
                     pixPerCm: pixPerCm,
@@ -2507,6 +2460,9 @@ viewingDistanceCm: ${viewingDistanceCm}`;
 
           readingParagraph.setAutoDraw(true);
 
+          const readingBoundingBox = readingParagraph.getBoundingBox();
+          logger("readingBoundingBox", readingBoundingBox);
+
           readingIndex++;
         },
       });
@@ -2519,9 +2475,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
   var frameRemains;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
-      if (
-        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
-      ) {
+      if (toShowCursor()) {
         showCursor();
         removeClickableCharacterSet();
         return Scheduler.Event.NEXT;
@@ -2564,8 +2518,8 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         targetKind.current === "reading" ||
         canType(responseType) ||
         (simulated &&
-          simulated[thisLoopNumber] &&
-          simulated[thisLoopNumber][condition.block_condition])
+          simulated[status.block] &&
+          simulated[status.block][status.block_condition])
       ) {
         if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
           // keep track of start time/frame for later
@@ -2591,11 +2545,11 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           /* --- SIMULATED --- */
           if (
             simulated &&
-            simulated[thisLoopNumber] &&
-            simulated[thisLoopNumber][condition.block_condition]
+            simulated[status.block] &&
+            simulated[status.block][status.block_condition]
           ) {
             return simulateObserverResponse(
-              simulatedObserver[condition.block_condition],
+              simulatedObserver[status.block_condition],
               key_resp,
               psychoJS
             );
@@ -2626,8 +2580,8 @@ viewingDistanceCm: ${viewingDistanceCm}`;
               switchKind(targetKind.current, {
                 letter: () => {
                   correctSynth.play();
-                  totalCorrectTrials += 1;
-                  totalCompletedTrials += 1;
+                  status.trialCorrect_thisBlock++;
+                  status.trialCompleted_thisBlock++;
                 },
                 reading: () => {
                   readingSound.play();
@@ -2638,7 +2592,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
             } else {
               // Play wrong audio
               // wrongSynth.play();
-              totalCompletedTrials += 1;
+              status.trialCompleted_thisBlock++;
               // INCORRECT
               key_resp.corr = 0;
             }
@@ -2658,13 +2612,13 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         if (showCharacterSetResponse.current == correctAns) {
           // Play correct audio
           correctSynth.play();
-          totalCorrectTrials += 1;
-          totalCompletedTrials += 1;
+          status.trialCorrect_thisBlock++;
+          status.trialCompleted_thisBlock++;
           key_resp.corr = 1;
         } else {
           // Play wrong audio
           key_resp.corr = 0;
-          totalCompletedTrials += 1;
+          status.trialCompleted_thisBlock++;
         }
         showCharacterSetResponse.current = null;
         removeClickableCharacterSet();
@@ -2803,7 +2757,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
         showCharacterSetBoundingBox,
         boundingBoxPolies,
         characterSetBoundingBoxPolies,
-        displayCharacterSetBoundingBoxPolies[condition.block_condition],
+        displayCharacterSetBoundingBoxPolies[status.block_condition],
         spacingRelationToSize,
         timeWhenRespondable,
         thresholdParameter
@@ -2868,9 +2822,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       if (showTargetSpecsBool) targetSpecs.setAutoDraw(false);
       if (showConditionNameBool) conditionName.setAutoDraw(false);
 
-      if (
-        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
-      ) {
+      if (toShowCursor()) {
         showCursor();
         for (const thisComponent of trialComponents) {
           if (typeof thisComponent.setAutoDraw === "function") {
@@ -2938,16 +2890,15 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       routineClock.reset();
 
       // Increase takeABreakCredit
-      // TODO This way of using condition is BAD
-      currentBlockCreditForTrialBreak += condition["takeABreakTrialCredit"];
+      currentBlockCreditForTrialBreak += paramReader.read(
+        "takeABreakTrialCredit",
+        status.block_condition
+      );
 
       // Toggle takeABreak credit progressBar
-      // TODO This way of using condition is BAD
-      if (condition["showTakeABreakCreditBool"]) {
+      if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
-      } else {
-        hideTrialBreakProgressBar();
-      }
+      else hideTrialBreakProgressBar();
 
       // Check if trialBreak should be triggered
       if (currentBlockCreditForTrialBreak >= 1) {
@@ -2959,8 +2910,10 @@ viewingDistanceCm: ${viewingDistanceCm}`;
           "",
           true
         );
-        const takeABreakMinimumDurationSec =
-          condition["takeABreakMinimumDurationSec"];
+        const takeABreakMinimumDurationSec = paramReader.read(
+          "takeABreakMinimumDurationSec",
+          status.block_condition
+        );
 
         return new Promise((resolve) => {
           // After break time out...
@@ -2979,7 +2932,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
       }
 
       // if trialBreak is ongoing
-      else if (currentTrialLength === currentTrialIndex)
+      else if (totalTrialsThisBlock.current === status.trial)
         hideTrialBreakProgressBar();
       return Scheduler.Event.NEXT;
     };
@@ -2988,9 +2941,7 @@ viewingDistanceCm: ${viewingDistanceCm}`;
   function endLoopIteration(scheduler, snapshot) {
     // ------Prepare for next entry------
     return async function () {
-      if (
-        toShowCursor(skipTrialOrBlock, currentTrialIndex, currentBlockIndex)
-      ) {
+      if (toShowCursor()) {
         showCursor();
         psychoJS.experiment.nextEntry(snapshot);
         return Scheduler.Event.NEXT;
@@ -3077,110 +3028,5 @@ viewingDistanceCm: ${viewingDistanceCm}`;
     }
 
     return Scheduler.Event.QUIT;
-  }
-
-  async function handleEscapeKey() {
-    // check if esc handling enabled for this condition, if not, quit
-    if (
-      !(
-        condition.responseEscapeOptionsBool &&
-        condition.responseEscapeOptionsBool.toString().toLowerCase() === "true"
-      )
-    ) {
-      showCursor();
-      return {
-        skipTrial: false,
-        skipBlock: false,
-        quitSurvey: true,
-      };
-    }
-
-    function logKey(e) {
-      switch (e.code) {
-        case "Escape":
-          modalButtonTriggeredViaKeyboard = true;
-          document.getElementById("quit-btn").click();
-          break;
-        case "Enter":
-          modalButtonTriggeredViaKeyboard = true;
-          document.getElementById("skip-block-btn").click();
-          break;
-        case "Space":
-          modalButtonTriggeredViaKeyboard = true;
-          document.getElementById("skip-trial-btn").click();
-          break;
-      }
-    }
-
-    document.addEventListener("keydown", logKey);
-    document.getElementById("skip-trial-btn").disabled = false;
-    document.getElementById("skip-block-btn").disabled = false;
-    document.getElementById("quit-btn").disabled = false;
-    if (!(isProlificPreviewExperiment() || isPavloviaExperiment())) {
-      // hide skipBlock Btn
-      document.getElementById("skip-block-btn").style.visibility = "hidden";
-      document.getElementById("skip-block-btn").disabled = true;
-      document.getElementById("skip-block-div").style.visibility = "hidden";
-    }
-    let action = {
-      skipTrial: false,
-      skipBlock: false,
-      quitSurvey: false,
-    };
-    const escapeKeyHandling = new Promise((resolve) => {
-      // ! Maybe switch to import?
-      // eslint-disable-next-line no-undef
-      let dialog = new bootstrap.Modal(
-        document.getElementById("exampleModal"),
-        { backdrop: "static", keyboard: false }
-      );
-      document.getElementById("quit-btn").addEventListener("click", (event) => {
-        event.preventDefault();
-        action.quitSurvey = true;
-        dialog.hide();
-        resolve();
-      });
-      document
-        .getElementById("skip-trial-btn")
-        .addEventListener("click", (event) => {
-          loggerText("--- SKIP TRIAL ---");
-          event.preventDefault();
-          skipTrialOrBlock.skipTrial = true;
-          skipTrialOrBlock.trialId = currentTrialIndex;
-          skipTrialOrBlock.blockId = currentBlockIndex;
-          action.skipTrial = true;
-          dialog.hide();
-          loggerText("--- SKIP TRIAL ENDS ---");
-          resolve();
-        });
-      document
-        .getElementById("skip-block-btn")
-        .addEventListener("click", (event) => {
-          loggerText("--- SKIP BLOCK ---");
-          event.preventDefault();
-          skipTrialOrBlock.skipBlock = true;
-          skipTrialOrBlock.blockId = currentBlockIndex;
-          action.skipBlock = true;
-          dialog.hide();
-          loggerText("--- SKIP BLOCK ENDS ---");
-          resolve();
-        });
-      dialog.show();
-    });
-    await escapeKeyHandling;
-    document.getElementById("skip-trial-btn").disabled = true;
-    document.getElementById("quit-btn").disabled = true;
-    document.getElementById("skip-block-btn").disabled = true;
-    // adding following lines to remove listeners
-    // TODO Bad code
-    document.getElementById("skip-trial-btn").outerHTML =
-      document.getElementById("skip-trial-btn").outerHTML;
-    document.getElementById("skip-block-btn").outerHTML =
-      document.getElementById("skip-block-btn").outerHTML;
-    document.getElementById("quit-btn").outerHTML =
-      document.getElementById("quit-btn").outerHTML;
-
-    document.removeEventListener("keydown", logKey);
-    return action;
   }
 };

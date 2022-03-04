@@ -1,4 +1,5 @@
 import { phrases } from "./i18n.js";
+import { targetKind } from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { _responseTypes } from "./response.js";
 
@@ -36,11 +37,13 @@ export const proceedButtonHintByResponseType = (L, responseType, prev = "") => {
 };
 
 export const instructionsText = {
-  initial: (L, takeABreakTrialCreditsThisBlock = 0) => {
-    const t1 = phrases.T_thresholdSoundCheck[L] + `\n\n`;
-    const t2 =
-      takeABreakTrialCreditsThisBlock == 0 ? "" : phrases.T_takingBreaks[L];
-    return t1 + t2 + `\n\n`;
+  initial: (L) => {
+    return phrases.T_thresholdSoundCheck[L] + `\n\n`;
+  },
+  popularFeatures: (L, takeABreakTrialCreditsThisBlock = 0) => {
+    return takeABreakTrialCreditsThisBlock == 0
+      ? ""
+      : phrases.T_letterPopularDemandFeatures[L] + "\n\n";
   },
   initialByThresholdParameter: {
     spacing: (L, responseType = 2, trialsThisBlock = 0) => {
@@ -98,6 +101,10 @@ export const instructionsText = {
   },
   trialBreak: (L, responseType = 2) => {
     return proceedButtonHintByResponseType(L, responseType, "");
+  },
+  /* -------------------------------------------------------------------------- */
+  readingEdu: (L, pages) => {
+    return phrases.T_readingTask[L].replace("111", pages);
   },
 };
 

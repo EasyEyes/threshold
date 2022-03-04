@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const process = require("process");
 const fs = require("fs");
 const XLSX = require("xlsx");

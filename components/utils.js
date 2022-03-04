@@ -1,6 +1,8 @@
 // eslint-disable-next-line no-undef
 export const debug = process.env.debug;
 // export const debug = true;
+
+import { skipTrialOrBlock, status } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import { ParamReader } from "../parameters/paramReader";
 
@@ -69,17 +71,12 @@ export const shuffle = (array) => {
 };
 
 ////
-export const toShowCursor = (
-  skipTrialOrBlock,
-  currentTrialIndex,
-  currentBlockIndex
-) => {
+export const toShowCursor = () => {
   return (
-    (skipTrialOrBlock.trialId == currentTrialIndex &&
-      skipTrialOrBlock.blockId == currentBlockIndex &&
+    (skipTrialOrBlock.trialId == status.trial &&
+      skipTrialOrBlock.blockId == status.block &&
       skipTrialOrBlock.skipTrial) ||
-    (skipTrialOrBlock.blockId == currentBlockIndex &&
-      skipTrialOrBlock.skipBlock)
+    (skipTrialOrBlock.blockId == status.block && skipTrialOrBlock.skipBlock)
   );
 };
 
