@@ -4,6 +4,10 @@ export const useRC = true;
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
 rc.init();
 
+/* ---------------------------------- Grid ---------------------------------- */
+
+export const grid = { current: undefined };
+
 /* ------------------------------- Exp Configs ------------------------------ */
 export const totalBlocks = { current: undefined };
 export const totalTrialsThisBlock = { current: undefined };

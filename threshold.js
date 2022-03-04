@@ -55,6 +55,7 @@ import {
   readingHeight,
   viewingDistanceDesiredCm,
   viewingDistanceCm,
+  grid,
 } from "./components/global.js";
 
 ////
@@ -518,7 +519,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var windowWidthCm;
   var windowWidthPx;
   var pixPerCm;
-  var grid;
 
   async function experimentInit() {
     // Initialize components for Routine "file"
@@ -782,7 +782,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       fixationXYPix: fixationXYPx,
       window: psychoJS.window,
     };
-    grid = new Grid("none", displayOptions, psychoJS);
+
+    grid.current = new Grid("none", displayOptions, psychoJS);
+
     return Scheduler.Event.NEXT;
   }
 
@@ -2000,8 +2002,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetKind: targetKind.current,
           };
 
-          grid.update(paramReader.read("showGrid", BC), displayOptions);
-
           // Fixation placement does not depend on the value of "spacingRelationToSize"...
           fixation.setPos(fixationXYPx);
           fixation.setHeight(fixationSize);
@@ -2214,6 +2214,11 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           /* -------------------------------------------------------------------------- */
         },
       });
+
+      grid.current.update(
+        paramReader.read("showGrid", status.block_condition),
+        displayOptions
+      );
 
       // totalTrialsThisBlock.current = snapshot.nTotal;
       trialInfoStr = getTrialInfoStr(
@@ -2814,7 +2819,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
   function trialRoutineEnd(snapshot) {
     return async function () {
       ////
-      grid.hide(true);
+      grid.current.hide(true);
 
       if (showTargetSpecsBool) targetSpecs.setAutoDraw(false);
       if (showConditionNameBool) conditionName.setAutoDraw(false);
