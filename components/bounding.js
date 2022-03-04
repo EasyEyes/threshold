@@ -478,22 +478,6 @@ export const restrictSpacingDeg = (
                   flanker1XYPx[0] - targetXYPx[0],
                   flanker1XYPx[1] - targetXYPx[1],
                 ];
-                // logger("screen norm(delatXYPx)", norm(deltaXYPx));
-                // logger("screen heightPx", heightPx);
-                // logger("screen deltaXYPx", deltaXYPx);
-                // logger(
-                //   "w/h",
-                //   characterSetRectPx.width / characterSetRectPx.height
-                // );
-                // logger("characterSet", characterSetRectPx.characterSet);
-                const oldHeightPx = heightPx;
-                heightPx = targetSizeIsHeightBool
-                  ? norm(deltaXYPx) / spacingOverSizeRatio
-                  : (norm(deltaXYPx) * characterSetRectPx.height) /
-                    (characterSetRectPx.width * spacingOverSizeRatio);
-                widthPx =
-                  heightPx *
-                  (characterSetRectPx.width / characterSetRectPx.height);
                 flanker2XYPx = [
                   targetXYPx[0] - deltaXYPx[0],
                   targetXYPx[1] - deltaXYPx[1],
@@ -594,8 +578,9 @@ export const restrictSpacingDeg = (
       const targetAndFlankerLocationsPx = [targetXYPx];
       if (spacingRelationToSize === "ratio")
         targetAndFlankerLocationsPx.push(flanker1XYPx, flanker2XYPx);
+      const characterSetUnitHeightScalar = 1 / characterSetRectPx.height;
       const stimulusParameters = {
-        heightPx: heightPx,
+        heightPx: heightPx * characterSetUnitHeightScalar,
         targetAndFlankersXYPx: targetAndFlankerLocationsPx,
         sizeDeg: sizeDeg,
         spacingDeg: spacingDeg,
