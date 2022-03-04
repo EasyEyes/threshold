@@ -392,9 +392,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   flowScheduler.add(fileRoutineBegin());
   flowScheduler.add(fileRoutineEachFrame());
   flowScheduler.add(fileRoutineEnd());
-  // flowScheduler.add(initInstructionRoutineBegin());
-  // flowScheduler.add(initInstructionRoutineEachFrame());
-  // flowScheduler.add(initInstructionRoutineEnd());
   const blocksLoopScheduler = new Scheduler(psychoJS);
   flowScheduler.add(blocksLoopBegin(blocksLoopScheduler));
   flowScheduler.add(blocksLoopScheduler);
@@ -918,6 +915,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     /* --- SIMULATED --- */
     if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
     /* --- /SIMULATED --- */
+
+    totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
     t = instructionsClock.getTime();
     frameN = frameN + 1;
@@ -1828,7 +1827,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* --------------------------------- PUBLIC --------------------------------- */
 
-      // nothing
+      // update trial/block count
+      status.trial = snapshot.thisN + 1;
 
       /* --------------------------------- /PUBLIC -------------------------------- */
 
@@ -1852,24 +1852,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
-          // update trial/block count
-          status.trial = snapshot.thisN + 1;
-          // totalTrialsThisBlock.current = snapshot.nTotal;
-          trialInfoStr = getTrialInfoStr(
-            rc.language.value,
-            showCounterBool,
-            showViewingDistanceBool,
-            status.trial,
-            totalTrialsThisBlock.current,
-            status.block,
-            totalBlocks.current,
-            viewingDistanceCm.current
-          );
-          totalTrial.setText(trialInfoStr);
-          totalTrial.setFont(instructionFont);
-          totalTrial.setHeight(totalTrialConfig.fontSize);
-          totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-          totalTrial.setAutoDraw(true);
 
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacing"](
@@ -2173,21 +2155,6 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
             conditionNameToShow
           );
 
-          trialInfoStr = getTrialInfoStr(
-            rc.language.value,
-            showCounterBool,
-            showViewingDistanceBool,
-            status.trial,
-            totalTrialsThisBlock.current,
-            status.block,
-            totalBlocks.current,
-            viewingDistanceCm.current
-          );
-          totalTrial.setText(trialInfoStr);
-          totalTrial.setFont(instructionFont);
-          totalTrial.setHeight(totalTrialConfig.fontSize);
-          totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(fixation);
@@ -2196,8 +2163,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           trialComponents.push(flanker2);
 
           trialComponents.push(showCharacterSet);
-          // trialComponents.push(totalTrial);
-          // if (showTargetSpecsBool) trialComponents.push(targetSpecs);
+          trialComponents.push(totalTrial);
+
           // /* --- BOUNDING BOX --- */
           addBoundingBoxesToComponents(
             showBoundingBox,
@@ -2248,6 +2215,23 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         },
       });
 
+      // totalTrialsThisBlock.current = snapshot.nTotal;
+      trialInfoStr = getTrialInfoStr(
+        rc.language.value,
+        showCounterBool,
+        showViewingDistanceBool,
+        status.trial,
+        totalTrialsThisBlock.current,
+        status.block,
+        totalBlocks.current,
+        viewingDistanceCm.current
+      );
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setFont(instructionFont);
+      totalTrial.setHeight(totalTrialConfig.fontSize);
+      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      totalTrial.setAutoDraw(true);
+
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
@@ -2268,6 +2252,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         showCursor();
         return Scheduler.Event.NEXT;
       }
+
+      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -2641,9 +2627,9 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         // keep track of start time/frame for later
         totalTrial.tStart = t; // (not accounting for frame time here)
         totalTrial.frameNStart = frameN; // exact frame index
-
         totalTrial.setAutoDraw(true);
       }
+      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
       if (showTargetSpecsBool) {
         targetSpecsConfig.x = -window.innerWidth / 2;
