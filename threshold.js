@@ -994,7 +994,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
 
       // Schedule all the trials in the trialList:
-      for (const thisBlock of blocks) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for (const _thisBlock of blocks) {
         const snapshot = blocks.getSnapshot();
         blocksLoopScheduler.add(importConditions(snapshot));
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
@@ -1003,9 +1004,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
         blocksLoopScheduler.add(initInstructionRoutineEachFrame());
         blocksLoopScheduler.add(initInstructionRoutineEnd());
-        blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
-        blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
-        blocksLoopScheduler.add(eduInstructionRoutineEnd(snapshot));
+        switchKind(targetKind.current, {
+          letter: () => {
+            blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
+            blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
+            blocksLoopScheduler.add(eduInstructionRoutineEnd(snapshot));
+          },
+        });
         const trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
@@ -1474,8 +1479,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         reading: () => {
           _instructionSetup(
-            snapshot.block === 0 ? instructionsText.initial(L) : ""
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+              instructionsText.readingEdu(
+                L,
+                paramReader.read("readingPages", status.block)[0]
+              )
           );
+
+          // instructions.setAutoDraw(false)
+          instructions2.setAutoDraw(false);
+          fixation.setAutoDraw(false);
+          target.setAutoDraw(false);
+          flanker1.setAutoDraw(false);
+          flanker2.setAutoDraw(false);
         },
       });
 
@@ -1566,17 +1582,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         reading: () => {
           // READING
-          _instructionSetup(
-            instructionsText.readingEdu(
-              rc.language.value,
-              paramReader.read("readingPages")[0]
-            )
-          );
-          instructions2.setAutoDraw(false);
-          fixation.setAutoDraw(false);
-          target.setAutoDraw(false);
-          flanker1.setAutoDraw(false);
-          flanker2.setAutoDraw(false);
+          // _instructionSetup('');
         },
         letter: () => {
           // IDENTIFY
@@ -2215,6 +2221,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         },
       });
 
+      // Grid for both target kinds
       grid.current.update(
         paramReader.read("showGrid", status.block_condition),
         displayOptions
