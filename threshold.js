@@ -51,11 +51,13 @@ import {
   status,
   totalTrialsThisBlock,
   totalBlocks,
-  modalButtonTriggeredViaKeyboard,
   readingHeight,
   viewingDistanceDesiredCm,
   viewingDistanceCm,
   grid,
+  clickedContinue,
+  responseType,
+  fixationSize,
 } from "./components/global.js";
 
 ////
@@ -100,8 +102,11 @@ import {
 
 import {
   addBeepButton,
+  addProceedButton,
   instructionsText,
   removeBeepButton,
+  removeProceedButton,
+  _takeFixationClick,
 } from "./components/instructions.js";
 
 import {
@@ -512,7 +517,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   var displayOptions;
   var fixationXYPx;
-  var fixationSize = 45.0;
   var nearPointXYDeg;
   var nearPointXYPix;
   var showFixation;
@@ -675,7 +679,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       text: "",
       font: instructionFont,
       units: "pix",
-      height: 27.0,
+      height: 25.0,
       wrapWidth: window.innerWidth * 0.8,
       ori: 0.0,
       color: new util.Color("black"),
@@ -768,7 +772,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     nearPointXYPix = [0, 0]; // TEMP
     fixationXYPx = [0, 0];
     // TODO set fixation from the actual parameter
-    fixationSize = 45;
+    fixationSize.current = 45;
     showFixation = true;
     windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
     windowWidthPx = rc.displayWidthPx.value;
@@ -792,11 +796,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var frameN;
   var continueRoutine;
   var fileComponents;
-
-  var clickedContinue = false;
-
-  var responseType = 2;
-  var originalResponseType = 2;
 
   var continueRoutine;
   var frameRemains;
@@ -880,8 +879,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
   }
 
-  var _beepButton;
-
   function _instructionSetup(text) {
     t = 0;
     instructionsClock.reset(); // clock
@@ -909,10 +906,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructions.setAutoDraw(true);
   }
 
-  function _clickContinue(e) {
-    if (e.target.id !== "threshold-beep-button") clickedContinue = true;
-  }
-
   async function _instructionRoutineEachFrame() {
     /* --- SIMULATED --- */
     if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
@@ -927,9 +920,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.experiment.experimentEnded ||
       psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
     ) {
-      document.removeEventListener("click", _clickContinue);
-      document.removeEventListener("touchend", _clickContinue);
-      removeBeepButton(_beepButton);
+      removeBeepButton();
 
       return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
     }
@@ -940,13 +931,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     continueRoutine = true;
     if (
-      canType(responseType) &&
+      canType(responseType.current) &&
       psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
     ) {
       continueRoutine = false;
+      removeProceedButton();
     }
 
-    if (continueRoutine && !clickedContinue) {
+    if (continueRoutine && !clickedContinue.current) {
       return Scheduler.Event.FLIP_REPEAT;
     } else {
       return Scheduler.Event.NEXT;
@@ -1080,14 +1072,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // TODO set fixation from the actual parameter
           fixationXYPx = [0, 0];
-          fixationSize = 45;
+          fixationSize.current = 45;
           showFixation = true;
-
-          trialInfoStr = "";
-          totalTrial.setText(trialInfoStr);
-          totalTrial.setAutoDraw(false);
         },
       });
+
+      trialInfoStr = "";
+      totalTrial.setText(trialInfoStr);
+      totalTrial.setAutoDraw(false);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials;
@@ -1128,10 +1120,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ).toFixed(2) * 100
           }`
         ),
-        instructionsText.trialBreak(rc.language.value, responseType),
+        instructionsText.trialBreak(rc.language.value, responseType.current),
         false
       );
-      await addPopupLogic(expName, responseType, null);
+      await addPopupLogic(expName, responseType.current, null);
 
       // Reset trial counter
       status.trialCorrect_thisBlock = 0;
@@ -1454,7 +1446,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       const L = rc.language.value;
 
-      responseType = getResponseType(
+      responseType.current = getResponseType(
         paramReader.read("responseClickedBool", status.block)[0],
         paramReader.read("responseTypedBool", status.block)[0],
         paramReader.read("responseTypedEasyEyesKeypadBool", status.block)[0],
@@ -1471,10 +1463,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ) +
               instructionsText.initialByThresholdParameter["spacing"](
                 L,
-                responseType,
+                responseType.current,
                 totalTrialsThisBlock.current
               ) +
-              instructionsText.initialEnd(L, responseType)
+              instructionsText.initialEnd(L, responseType.current)
           );
         },
         reading: () => {
@@ -1495,13 +1487,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
-      clickedContinue = false;
-      setTimeout(() => {
-        document.addEventListener("click", _clickContinue);
-        document.addEventListener("touchend", _clickContinue);
-      }, 500);
+      clickedContinue.current = false;
+      if (canClick(responseType.current)) addProceedButton(rc.language.value);
 
-      _beepButton = addBeepButton(L, correctSynth);
+      addBeepButton(L, correctSynth);
 
       psychoJS.eventManager.clearKeys();
 
@@ -1534,10 +1523,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       instructions.setAutoDraw(false);
 
-      document.removeEventListener("click", _clickContinue);
-      document.removeEventListener("touchend", _clickContinue);
-
-      removeBeepButton(_beepButton);
+      removeBeepButton();
 
       psychoJS.experiment.addData(
         "initInstructionRoutineDurationFromBeginSec",
@@ -1573,11 +1559,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       TrialHandler.fromSnapshot(snapshot);
 
-      clickedContinue = false;
-      setTimeout(() => {
-        document.addEventListener("click", _clickContinue);
-        document.addEventListener("touchend", _clickContinue);
-      }, 1000);
+      clickedContinue.current = false;
+      if (canClick(responseType.current)) addProceedButton(rc.language.value);
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -1589,7 +1572,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionSetup(instructionsText.edu(rc.language.value));
 
           instructions2.setText(
-            instructionsText.eduBelow(rc.language.value, responseType)
+            instructionsText.eduBelow(rc.language.value, responseType.current)
           );
           instructions2.setWrapWidth(window.innerWidth * 0.8);
           instructions2.setPos([
@@ -1617,7 +1600,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker2.setText("C");
           flanker2.setHeight(h);
 
-          fixation.setHeight(fixationSize);
+          fixation.setHeight(fixationSize.current);
           fixation.setPos([0, 0]);
 
           fixation.setAutoDraw(true);
@@ -1642,9 +1625,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // rc.pauseDistance();
 
       instructions.setAutoDraw(false);
-
-      document.removeEventListener("click", _clickContinue);
-      document.removeEventListener("touchend", _clickContinue);
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -1681,7 +1661,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   //     TrialHandler.fromSnapshot(snapshot);
   //     _instructionSetup(instructionsText.block(snapshot.block + 1));
 
-  //     clickedContinue = false;
+  //     clickedContinue.current = false;
   //     document.addEventListener("click", _clickContinue);
   //     document.addEventListener("touchend", _clickContinue);
 
@@ -1696,44 +1676,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // function blockInstructionRoutineEnd() {
   //   return _instructionRoutineEnd;
   // }
-
-  const _takeFixationClick = (e) => {
-    if (modalButtonTriggeredViaKeyboard.current) {
-      // modal button click event triggered by jquery
-      modalButtonTriggeredViaKeyboard.current = false;
-      return;
-    }
-    let cX, cY;
-    if (e.clientX) {
-      cX = e.clientX;
-      cY = e.clientY;
-    } else {
-      const t = e.changedTouches[0];
-      if (t.clientX) {
-        cX = t.clientX;
-        cY = t.clientY;
-      } else {
-        clickedContinue = false;
-        return;
-      }
-    }
-
-    if (
-      Math.hypot(
-        cX - (window.innerWidth >> 1),
-        cY - (window.innerHeight >> 1)
-      ) < fixationSize
-    ) {
-      // Clicked on fixation
-      hideCursor();
-      setTimeout(() => {
-        clickedContinue = true;
-      }, 17);
-    } else {
-      // wrongSynth.play();
-      clickedContinue = false;
-    }
-  };
 
   var level;
 
@@ -1814,8 +1756,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
 
           // ! responseType
-          originalResponseType = responseType;
-          responseType = getResponseType(
+          responseType.original = responseType.current;
+          responseType.current = getResponseType(
             paramReader.read("responseClickedBool", status.block_condition),
             paramReader.read("responseTypedBool", status.block_condition),
             paramReader.read(
@@ -1829,7 +1771,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
           logger("responseType", responseType);
-          if (canClick) showCursor();
+          if (canClick(responseType.current)) showCursor();
         },
       });
 
@@ -1864,17 +1806,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacing"](
               rc.language.value,
-              responseType
+              responseType.current
             )
           );
 
-          fixation.setHeight(fixationSize);
+          fixation.setHeight(fixationSize.current);
           fixation.setPos(fixationXYPx);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           fixation.setAutoDraw(true);
 
-          clickedContinue = false;
+          clickedContinue.current = false;
           document.addEventListener("click", _takeFixationClick);
           document.addEventListener("touchend", _takeFixationClick);
 
@@ -1931,7 +1873,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           targetDurationSec = reader.read("targetDurationSec", BC);
 
-          fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
+          fixationSize.current = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
           showFixation = reader.read("markTheFixationBool", BC);
 
           targetSizeDeg = reader.read("targetSizeDeg", BC);
@@ -2010,7 +1952,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // Fixation placement does not depend on the value of "spacingRelationToSize"...
           fixation.setPos(fixationXYPx);
-          fixation.setHeight(fixationSize);
+          fixation.setHeight(fixationSize.current);
           // ... neither does target location...
           targetEccentricityXYPx = XYPixOfXYDeg(
             targetEccentricityXYDeg,
@@ -2321,13 +2263,14 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
 
       continueRoutine = true;
       if (
-        canType(responseType) &&
+        canType(responseType.current) &&
         psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
       ) {
+        loggerText("trialInstructionRoutineEachFrame SPACE HIT");
         continueRoutine = false;
       }
 
-      if (continueRoutine && !clickedContinue) {
+      if (continueRoutine && !clickedContinue.current) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
         return Scheduler.Event.NEXT;
@@ -2401,9 +2344,9 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       ////
       switchKind(targetKind.current, {
         letter: () => {
-          responseType = resetResponseType(
-            originalResponseType,
-            responseType,
+          responseType.current = resetResponseType(
+            responseType.original,
+            responseType.current,
             paramReader.read(
               "responseMustClickCrosshairBool",
               status.block_condition
@@ -2431,13 +2374,13 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       _instructionSetup(
         instructionsText.trial.respond["spacing"](
           rc.language.value,
-          responseType
+          responseType.current
         )
       );
       instructions.setText(
         instructionsText.trial.respond["spacing"](
           rc.language.value,
-          responseType
+          responseType.current
         )
       );
       instructions.setAutoDraw(false);
@@ -2525,7 +2468,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       // response type more independent
       if (
         targetKind.current === "reading" ||
-        canType(responseType) ||
+        canType(responseType.current) ||
         (simulated &&
           simulated[status.block] &&
           simulated[status.block][status.block_condition])
@@ -2930,10 +2873,13 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
             // Show proceed hint and/or button
             showPopupProceed(
               expName,
-              instructionsText.trialBreak(rc.language.value, responseType),
-              canClick(responseType)
+              instructionsText.trialBreak(
+                rc.language.value,
+                responseType.current
+              ),
+              canClick(responseType.current)
             );
-            addPopupLogic(expName, responseType, () => {
+            addPopupLogic(expName, responseType.current, () => {
               resolve(Scheduler.Event.NEXT);
             });
           }, takeABreakMinimumDurationSec * 1000);

@@ -11,7 +11,7 @@
 #characterSet-holder .characterSet {
   display: inline-block;
   padding: 0.5rem 1rem;
-  border-radius: 5px;
+  border-radius: 7px;
   box-sizing: border-box;
   border: 2px solid rgba(0, 0, 0, 0);
 }

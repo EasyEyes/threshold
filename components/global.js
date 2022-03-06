@@ -14,6 +14,9 @@ export const totalTrialsThisBlock = { current: undefined };
 
 export const targetKind = { current: undefined };
 
+// Renders
+export const fixationSize = { current: undefined };
+
 /* --------------------------- Exp Current Status --------------------------- */
 
 export const status = {
@@ -44,6 +47,8 @@ export const viewingDistanceCm = { current: undefined };
 
 /* ------------------------------ Interactions ------------------------------ */
 
+export const responseType = { current: 2, original: 2 };
+export const clickedContinue = { current: false };
 export const modalButtonTriggeredViaKeyboard = { current: false };
 
 /* --------------------------------- Reading -------------------------------- */

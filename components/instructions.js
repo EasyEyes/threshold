@@ -1,31 +1,14 @@
 import { phrases } from "./i18n.js";
-import { targetKind } from "./global.js";
+import {
+  clickedContinue,
+  fixationSize,
+  modalButtonTriggeredViaKeyboard,
+} from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
-import { _responseTypes } from "./response.js";
+import { _onlyClick } from "./response.js";
+import { hideCursor } from "./utils.js";
 
-export const responseHintByResponseType = (L, responseType, prev = "") => {
-  switch (responseType) {
-    case 0:
-      return prev + phrases.T_continueHitReturn[L];
-    case 1:
-      return prev + phrases.T_continueClickAnywhere[L];
-    default:
-      return prev + phrases.T_continueHitReturnOrClickAnywhere[L];
-  }
-};
-
-export const proceedHintByResponseType = (L, responseType, prev = "") => {
-  switch (responseType) {
-    case 0:
-      return prev + phrases.T_readyPressSpace[L];
-    case 1:
-      return prev + phrases.T_readyClickCrosshair[L];
-    default:
-      return prev + phrases.T_readyPressSpaceOrClickCrosshair[L];
-  }
-};
-
-export const proceedButtonHintByResponseType = (L, responseType, prev = "") => {
+export const returnOrClickProceed = (L, responseType, prev = "") => {
   switch (responseType) {
     case 0:
       return prev + phrases.T_continueHitReturn[L];
@@ -33,6 +16,17 @@ export const proceedButtonHintByResponseType = (L, responseType, prev = "") => {
       return prev + phrases.T_continueClickProceed[L];
     default:
       return prev + phrases.T_continueHitReturnOrClickProceed[L];
+  }
+};
+
+export const spaceOrCrosshair = (L, responseType, prev = "") => {
+  switch (responseType) {
+    case 0:
+      return prev + phrases.T_readyPressSpace[L];
+    case 1:
+      return prev + phrases.T_readyClickCrosshair[L];
+    default:
+      return prev + phrases.T_readyPressSpaceOrClickCrosshair[L];
   }
 };
 
@@ -71,19 +65,19 @@ export const instructionsText = {
     let t = phrases.T_guessingGame[L] + " ";
     if (_onlyClick(responseType)) t += "\n\n" + phrases.T_whyClick[L] + "\n\n";
     t += phrases.T_escapeToQuit[L] + " ";
-    return responseHintByResponseType(L, responseType, t);
+    return returnOrClickProceed(L, responseType, t);
   },
   edu: (L) => {
     return phrases.T_middleLetterDemo[L];
   },
   eduBelow: (L, responseType = 2) => {
     let t = phrases.T_middleLetterBrief[L];
-    return responseHintByResponseType(L, responseType, t);
+    return returnOrClickProceed(L, responseType, t);
   },
   trial: {
     fixate: {
       spacing: (L, responseType = 2) => {
-        return proceedHintByResponseType(L, responseType, "");
+        return spaceOrCrosshair(L, responseType, "");
       },
     },
     respond: {
@@ -100,13 +94,16 @@ export const instructionsText = {
     },
   },
   trialBreak: (L, responseType = 2) => {
-    return proceedButtonHintByResponseType(L, responseType, "");
+    return returnOrClickProceed(L, responseType, "");
   },
   /* -------------------------------------------------------------------------- */
+  // READING
   readingEdu: (L, pages) => {
     return phrases.T_readingTask[L].replace("111", pages);
   },
 };
+
+/* -------------------------------------------------------------------------- */
 
 export const addBeepButton = (L, synth) => {
   const b = document.createElement("button");
@@ -118,7 +115,7 @@ export const addBeepButton = (L, synth) => {
     synth.play();
     b.blur();
   };
-  b.className = "threshold-beep-button";
+  b.className = "threshold-button threshold-beep-button";
   b.id = "threshold-beep-button";
 
   document.body.appendChild(b);
@@ -126,13 +123,71 @@ export const addBeepButton = (L, synth) => {
   return b;
 };
 
-export const removeBeepButton = (button) => {
-  document.body.removeChild(button);
+export const removeBeepButton = () => {
+  const beepButton = document.getElementById("threshold-beep-button");
+  if (beepButton) beepButton.remove();
 };
 
 /* -------------------------------------------------------------------------- */
 
-const _onlyClick = (responseType) => {
-  const types = _responseTypes[responseType];
-  return types[0] && !types[1] && !types[2] && !types[3];
+export const addProceedButton = (L) => {
+  const b = document.createElement("button");
+  b.innerText = phrases.T_proceed[L];
+  b.onclick = (e) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    b.remove();
+
+    clickedContinue.current = true;
+  };
+  b.className = "threshold-button threshold-proceed-button";
+  b.id = "threshold-proceed-button";
+
+  document.body.appendChild(b);
+
+  return b;
+};
+
+export const removeProceedButton = () => {
+  const proceedButton = document.getElementById("threshold-proceed-button");
+  if (proceedButton) proceedButton.remove();
+};
+
+/* ----------------------------- CLICK FIXATION ----------------------------- */
+// On LETTER trial instructions
+export const _takeFixationClick = (e) => {
+  if (modalButtonTriggeredViaKeyboard.current) {
+    // modal button click event triggered by jquery
+    modalButtonTriggeredViaKeyboard.current = false;
+    return;
+  }
+  let cX, cY;
+  if (e.clientX) {
+    cX = e.clientX;
+    cY = e.clientY;
+  } else {
+    const t = e.changedTouches[0];
+    if (t.clientX) {
+      cX = t.clientX;
+      cY = t.clientY;
+    } else {
+      clickedContinue.current = false;
+      return;
+    }
+  }
+
+  if (
+    Math.hypot(cX - (window.innerWidth >> 1), cY - (window.innerHeight >> 1)) <
+    fixationSize.current
+  ) {
+    // Clicked on fixation
+    hideCursor();
+    setTimeout(() => {
+      clickedContinue.current = true;
+    }, 17);
+  } else {
+    // wrongSynth.play();
+    clickedContinue.current = false;
+  }
 };

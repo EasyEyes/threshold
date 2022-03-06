@@ -1085,7 +1085,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "",
     explanation:
-      "Specifies the spacing, in degrees, center-to-center from target to inner flanker. This parameter is ignored if you're using Quest to measure the spacing threshold.",
+      "Specifies the spacing, in degrees, center-to-center from target to outer flanker. This input value is ignored when you use Quest to measure the spacing threshold.",
     type: "numerical",
     default: "2",
   },
@@ -1120,7 +1120,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "ratio",
     explanation:
-      'spacingRelationToSize can be none, ratio, or typographic. \nWhen thresholdParameter is "spacing", spacingRelationToSize specifies how size depend on center-to-center target-flanker spacing. And when thresholdParameter is "size", spacingRelationToSize specifies how spacing depend on size. Can be none, ratio, or typographic. \n"none" means no dependence; they are set independently. \n"ratio" means accept the thresholdParameter (which is either size or spacing) and adjusts the other parameter to satisfy the specified "spacingOverSizeRatio". \n"typographic" prints the triplet (flanker, target, flanker) as a (horizontal) string (horizontally) centered on the specified target eccentricity. By "horizontal" and "vertical", we just mean the orientation of the baseline, and orthogonal to it. ("Vertically," the characterSet bounding box is centered on the eccentric location, and all letters in the string are on same baseline.) If thresholdParameter is "size" then EasyEyes adjusts the font size of the string to achieve the specified target size. If thresholdParameter is "spacing" then the font size of string is adjusted so that the width of the string is 3× specified spacing. Works with both left-to-right and right-to-left characterSets. ',
+      'spacingRelationToSize can be none, ratio, or typographic. When thresholdParameter is "spacing", spacingRelationToSize specifies how size depend on center-to-center target-flanker spacing. And when thresholdParameter is "size", spacingRelationToSize specifies how spacing depend on size. Can be none, ratio, or typographic. \n"none" means no dependence. Size and spacing are set independently. \n"ratio" means accept the thresholdParameter (which is either size or spacing) and adjust the other parameter to satisfy the specified "spacingOverSizeRatio". \n"typographic" prints the triplet (flanker, target, flanker) as a (horizontal) string (horizontally) centered on the specified target eccentricity. By "horizontal" and "vertical", we just mean the orientation of the baseline, and orthogonal to it. ("Vertically," the characterSet bounding box is centered on the eccentric location, and all letters in the string are on same baseline.) If thresholdParameter is "spacing" then the font size of string is adjusted so that the width of the string is 3× specified spacing. Works with both left-to-right and right-to-left fonts. [If thresholdParameter is "size" then EasyEyes adjusts the font size of the string to achieve the specified target size.] ',
     type: "categorical",
     default: "ratio",
     categories: ["none", "ratio", "typographic"],
@@ -1130,7 +1130,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "screen",
     explanation:
-      "spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity eccDeg is nonzero and spacingDirection is radial. The inner flanker will have the specified spacingDeg. This only affects the spacing of the outer flanker, which is adjusted to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e. equal in log(eccDeg + 0.15), where eccDeg is the radial eccentricity in deg.",
+      'spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity eccDeg is nonzero and spacingDirection is radial. The outer flanker will have the specified spacingDeg. This only affects the spacing of the inner flanker, which is adjusted to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e.  log(outer+eccDeg + 0.15)-log(eccDeg + 0.15)=log(eccDeg + 0.15)-log(eccDeg-inner + 0.15), where eccDeg is the target\'s radial eccentricity in deg. For checking, you may want to show a corresponding grid by setting parameter showGrid to px or cm (for "screen"), deg (for "retina"), and mm (for "cortex").',
     type: "categorical",
     default: "retina",
     categories: ["screen", "retina", "cortex"],

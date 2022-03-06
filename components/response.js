@@ -66,3 +66,10 @@ export const canType = (responseType) => {
 export const canClick = (responseType) => {
   return _responseTypes[responseType][0];
 };
+
+/* -------------------------------------------------------------------------- */
+
+export const _onlyClick = (responseType) => {
+  const types = _responseTypes[responseType];
+  return types[0] && !types[1] && !types[2] && !types[3];
+};
