@@ -3013,6 +3013,12 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       globalClock.getTime()
     );
 
+    // QUIT FULLSCREEN
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+    else if (document.msExitFullscreen) document.msExitFullscreen();
+
     if (recruitmentServiceData.name == "Prolific" && isCompleted) {
       let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
       psychoJS.quit({
