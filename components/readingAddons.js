@@ -32,18 +32,18 @@ export const loadReadingCorpus = async (paramReader) => {
         console.error(`Error loading text from this source (./texts/${url})!`);
 
       readingCorpusArchive[url] = preprocessRawCorpus(response.data);
+    }
 
-      ////
-      // Preprocess & Frequencies
-      for (let corpus in readingCorpusArchive) {
-        readingWordListArchive[corpus] = preprocessCorpusToWordList(
-          readingCorpusArchive[corpus]
-        );
-        readingWordFrequencyArchive[corpus] = getWordFrequencies(
-          readingWordListArchive[corpus]
-        );
-        readingUsedText[corpus] = readingCorpusArchive[corpus];
-      }
+    ////
+    // Preprocess & Frequencies
+    for (let corpus in readingCorpusArchive) {
+      readingWordListArchive[corpus] = preprocessCorpusToWordList(
+        readingCorpusArchive[corpus]
+      );
+      readingWordFrequencyArchive[corpus] = getWordFrequencies(
+        readingWordListArchive[corpus]
+      );
+      readingUsedText[corpus] = readingCorpusArchive[corpus];
     }
   }
 };
@@ -51,6 +51,12 @@ export const loadReadingCorpus = async (paramReader) => {
 export const getThisBlockPages = (paramReader, block, readingParagraph) => {
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block)[0];
+    ////
+    readingUsedText[thisURL] = readingCorpusArchive[thisURL]
+      .split(" ")
+      .slice(paramReader.read("readingCorpusSkipWords", block)[0])
+      .join(" ");
+    ////
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL],
       readingCorpusArchive[thisURL],

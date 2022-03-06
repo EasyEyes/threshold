@@ -1169,7 +1169,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Display
       instructions.setText(
-        phrases.T_readingTaskQuestionPrompt[rc.language.value]
+        phrases.T_readingTheEnd[rc.language.value] +
+          "\n\n\n" +
+          phrases.T_readingTaskQuestionPrompt[rc.language.value]
       );
       instructions.setAutoDraw(true);
 
@@ -1255,6 +1257,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         trialCounter.setText(trialInfoStr);
         trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
         trialCounter.setAutoDraw(showCounterBool);
+
+        instructions.setText(
+          phrases.T_readingTaskQuestionPrompt[rc.language.value]
+        );
 
         updateClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
@@ -2988,10 +2994,12 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
     );
 
     // QUIT FULLSCREEN
-    if (document.exitFullscreen) document.exitFullscreen();
-    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
-    else if (document.msExitFullscreen) document.msExitFullscreen();
+    if (rc.isFullscreen.value) {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
+    }
 
     if (recruitmentServiceData.name == "Prolific" && isCompleted) {
       let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
