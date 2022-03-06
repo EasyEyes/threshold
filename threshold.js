@@ -314,7 +314,7 @@ var conditionNameConfig = {
 var conditionName;
 
 var trialInfoStr = "";
-var trialBlockDistanceCounter; // TextSim object
+var trialCounter; // TextSim object
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
@@ -614,9 +614,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       depth: -5.0,
     });
 
-    trialBlockDistanceCounter = new visual.TextStim({
+    trialCounter = new visual.TextStim({
       win: psychoJS.window,
-      name: "trialBlockDistanceCounter",
+      name: "trialCounter",
       text: "",
       font: instructionFont,
       units: "pix",
@@ -909,10 +909,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
     /* --- /SIMULATED --- */
 
-    trialBlockDistanceCounter.setPos([
-      window.innerWidth / 2,
-      -window.innerHeight / 2,
-    ]);
+    trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
     t = instructionsClock.getTime();
     frameN = frameN + 1;
@@ -1088,8 +1085,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
 
       trialInfoStr = "";
-      trialBlockDistanceCounter.setText(trialInfoStr);
-      trialBlockDistanceCounter.setAutoDraw(false);
+      trialCounter.setText(trialInfoStr);
+      trialCounter.setAutoDraw(false);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials;
@@ -1225,12 +1222,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           viewingDistanceCm.current,
           targetKind.current === "reading" ? "letter" : targetKind.current
         );
-        trialBlockDistanceCounter.setText(trialInfoStr);
-        trialBlockDistanceCounter.setPos([
-          window.innerWidth / 2,
-          -window.innerHeight / 2,
-        ]);
-        trialBlockDistanceCounter.setAutoDraw(showCounterBool);
+        trialCounter.setText(trialInfoStr);
+        trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+        trialCounter.setAutoDraw(showCounterBool);
 
         setupClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
@@ -1274,12 +1268,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           viewingDistanceCm.current,
           targetKind.current === "reading" ? "letter" : targetKind.current
         );
-        trialBlockDistanceCounter.setText(trialInfoStr);
-        trialBlockDistanceCounter.setPos([
-          window.innerWidth / 2,
-          -window.innerHeight / 2,
-        ]);
-        trialBlockDistanceCounter.setAutoDraw(showCounterBool);
+        trialCounter.setText(trialInfoStr);
+        trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+        trialCounter.setAutoDraw(showCounterBool);
 
         updateClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
@@ -1557,8 +1548,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         viewingDistanceCm.current,
         targetKind.current
       );
-      trialBlockDistanceCounter.setText(trialInfoStr);
-      trialBlockDistanceCounter.setAutoDraw(true);
+      trialCounter.setText(trialInfoStr);
+      trialCounter.setAutoDraw(true);
 
       return Scheduler.Event.NEXT;
     };
@@ -2086,7 +2077,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             flanker2,
             fixation,
             showCharacterSet,
-            trialBlockDistanceCounter,
+            trialCounter,
           ].forEach((c) => c._updateIfNeeded());
 
           const tripletStims = {
@@ -2161,7 +2152,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           trialComponents.push(flanker2);
 
           trialComponents.push(showCharacterSet);
-          trialComponents.push(trialBlockDistanceCounter);
+          trialComponents.push(trialCounter);
 
           // /* --- BOUNDING BOX --- */
           addBoundingBoxesToComponents(
@@ -2230,14 +2221,11 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         viewingDistanceCm.current,
         targetKind.current
       );
-      trialBlockDistanceCounter.setText(trialInfoStr);
-      trialBlockDistanceCounter.setFont(instructionFont);
-      trialBlockDistanceCounter.setHeight(totalTrialConfig.fontSize);
-      trialBlockDistanceCounter.setPos([
-        window.innerWidth / 2,
-        -window.innerHeight / 2,
-      ]);
-      trialBlockDistanceCounter.setAutoDraw(showCounterBool);
+      trialCounter.setText(trialInfoStr);
+      trialCounter.setFont(instructionFont);
+      trialCounter.setHeight(totalTrialConfig.fontSize);
+      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      trialCounter.setAutoDraw(showCounterBool);
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -2262,10 +2250,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         return Scheduler.Event.NEXT;
       }
 
-      trialBlockDistanceCounter.setPos([
-        window.innerWidth / 2,
-        -window.innerHeight / 2,
-      ]);
+      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -2631,20 +2616,14 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         continueRoutine = false;
       }
 
-      // *trialBlockDistanceCounter* updates
-      if (
-        t >= 0.0 &&
-        trialBlockDistanceCounter.status === PsychoJS.Status.NOT_STARTED
-      ) {
+      // *trialCounter* updates
+      if (t >= 0.0 && trialCounter.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
-        trialBlockDistanceCounter.tStart = t; // (not accounting for frame time here)
-        trialBlockDistanceCounter.frameNStart = frameN; // exact frame index
-        trialBlockDistanceCounter.setAutoDraw(true);
+        trialCounter.tStart = t; // (not accounting for frame time here)
+        trialCounter.frameNStart = frameN; // exact frame index
+        trialCounter.setAutoDraw(true);
       }
-      trialBlockDistanceCounter.setPos([
-        window.innerWidth / 2,
-        -window.innerHeight / 2,
-      ]);
+      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
       if (showTargetSpecsBool) {
         targetSpecsConfig.x = -window.innerWidth / 2;
