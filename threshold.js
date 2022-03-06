@@ -51,11 +51,13 @@ import {
   status,
   totalTrialsThisBlock,
   totalBlocks,
-  modalButtonTriggeredViaKeyboard,
   readingHeight,
   viewingDistanceDesiredCm,
   viewingDistanceCm,
   grid,
+  clickedContinue,
+  responseType,
+  fixationSize,
 } from "./components/global.js";
 
 ////
@@ -100,8 +102,11 @@ import {
 
 import {
   addBeepButton,
+  addProceedButton,
   instructionsText,
   removeBeepButton,
+  removeProceedButton,
+  _takeFixationClick,
 } from "./components/instructions.js";
 
 import {
@@ -188,18 +193,14 @@ import { _identify_trialInstructionRoutineEnd } from "./components/trialRoutines
 
 /* ---------------------------------- */
 
-import {
-  isPavloviaExperiment,
-  isProlificPreviewExperiment,
-} from "./components/externalServices.js";
 import { switchKind } from "./components/blockTargetKind.js";
 import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
+import { replacePlaceholders } from "./components/multiLang.js";
 
 /* -------------------------------------------------------------------------- */
 
 window.jsQUEST = jsQUEST;
 
-var conditionTrials;
 let correctAns;
 
 // store info about the experiment session:
@@ -313,7 +314,7 @@ var conditionNameConfig = {
 var conditionName;
 
 var trialInfoStr = "";
-var totalTrial; // TextSim object
+var trialCounter; // TextSim object
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
@@ -512,7 +513,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   var displayOptions;
   var fixationXYPx;
-  var fixationSize = 45.0;
   var nearPointXYDeg;
   var nearPointXYPix;
   var showFixation;
@@ -614,9 +614,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       depth: -5.0,
     });
 
-    totalTrial = new visual.TextStim({
+    trialCounter = new visual.TextStim({
       win: psychoJS.window,
-      name: "totalTrial",
+      name: "trialCounter",
       text: "",
       font: instructionFont,
       units: "pix",
@@ -675,7 +675,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       text: "",
       font: instructionFont,
       units: "pix",
-      height: 27.0,
+      height: 25.0,
       wrapWidth: window.innerWidth * 0.8,
       ori: 0.0,
       color: new util.Color("black"),
@@ -768,7 +768,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     nearPointXYPix = [0, 0]; // TEMP
     fixationXYPx = [0, 0];
     // TODO set fixation from the actual parameter
-    fixationSize = 45;
+    fixationSize.current = 45;
     showFixation = true;
     windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
     windowWidthPx = rc.displayWidthPx.value;
@@ -792,11 +792,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var frameN;
   var continueRoutine;
   var fileComponents;
-
-  var clickedContinue = false;
-
-  var responseType = 2;
-  var originalResponseType = 2;
 
   var continueRoutine;
   var frameRemains;
@@ -842,6 +837,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
 
@@ -859,6 +855,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (continueRoutine) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
     };
@@ -879,8 +876,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       return Scheduler.Event.NEXT;
     };
   }
-
-  var _beepButton;
 
   function _instructionSetup(text) {
     t = 0;
@@ -909,16 +904,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructions.setAutoDraw(true);
   }
 
-  function _clickContinue(e) {
-    if (e.target.id !== "threshold-beep-button") clickedContinue = true;
-  }
-
   async function _instructionRoutineEachFrame() {
     /* --- SIMULATED --- */
     if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
     /* --- /SIMULATED --- */
 
-    totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+    trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
     t = instructionsClock.getTime();
     frameN = frameN + 1;
@@ -927,30 +918,38 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.experiment.experimentEnded ||
       psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
     ) {
-      document.removeEventListener("click", _clickContinue);
-      document.removeEventListener("touchend", _clickContinue);
-      removeBeepButton(_beepButton);
+      removeBeepButton();
 
       return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
     }
 
-    if (!continueRoutine) {
+    if (!continueRoutine || clickedContinue.current) {
+      continueRoutine = true;
+      clickedContinue.current = false;
       return Scheduler.Event.NEXT;
     }
 
     continueRoutine = true;
-    if (
-      canType(responseType) &&
-      psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
-    ) {
-      continueRoutine = false;
-    }
 
-    if (continueRoutine && !clickedContinue) {
-      return Scheduler.Event.FLIP_REPEAT;
-    } else {
-      return Scheduler.Event.NEXT;
-    }
+    switchKind(targetKind.current, {
+      letter: () => {
+        if (
+          canType(responseType.current) &&
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+        ) {
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
+      reading: () => {
+        if (psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) {
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
+    });
+
+    return Scheduler.Event.FLIP_REPEAT;
   }
 
   // async function _instructionRoutineEnd() {
@@ -1080,20 +1079,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // TODO set fixation from the actual parameter
           fixationXYPx = [0, 0];
-          fixationSize = 45;
+          fixationSize.current = 45;
           showFixation = true;
-
-          trialInfoStr = "";
-          totalTrial.setText(trialInfoStr);
-          totalTrial.setAutoDraw(false);
         },
       });
+
+      trialInfoStr = "";
+      trialCounter.setText(trialInfoStr);
+      trialCounter.setAutoDraw(false);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials;
 
       // Schedule all the trials in the trialList:
-      for (const _ of trials) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for (const _trial of trials) {
         const snapshot = trials.getSnapshot();
 
         trialsLoopScheduler.add(importConditions(snapshot));
@@ -1120,18 +1120,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Proportion correct
       showPopup(
         expName,
-        phrases.T_proportionCorrectPopup[rc.language.value].replace(
-          "xxx",
+        replacePlaceholders(
+          phrases.T_proportionCorrectPopup[rc.language.value],
           `${
             (
               status.trialCorrect_thisBlock / status.trialCompleted_thisBlock
             ).toFixed(2) * 100
           }`
         ),
-        instructionsText.trialBreak(rc.language.value, responseType),
+        instructionsText.trialBreak(rc.language.value, responseType.current),
         false
       );
-      await addPopupLogic(expName, responseType, null);
+      await addPopupLogic(expName, responseType.current, null);
 
       // Reset trial counter
       status.trialCorrect_thisBlock = 0;
@@ -1185,7 +1185,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Display
       instructions.setText(
-        "Which of the following words appeared in the passage that you just read?"
+        phrases.T_readingTaskQuestionPrompt[rc.language.value]
       );
       instructions.setAutoDraw(true);
 
@@ -1209,6 +1209,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           `%c${thisQuestion.correctAnswer}`,
           "color: red; font-size: 1.5rem"
         );
+
+        // trialCounter
+        trialInfoStr = getTrialInfoStr(
+          rc.language.value,
+          showCounterBool,
+          showViewingDistanceBool,
+          readingCurrentQuestionIndex.current + 1,
+          paramReader.read("readingNumberOfQuestions", status.block)[0],
+          status.block,
+          totalBlocks.current,
+          viewingDistanceCm.current,
+          targetKind.current === "reading" ? "letter" : targetKind.current
+        );
+        trialCounter.setText(trialInfoStr);
+        trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+        trialCounter.setAutoDraw(showCounterBool);
 
         setupClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
@@ -1240,6 +1256,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "color: red; font-size: 1.5rem"
         );
 
+        // trialCounter
+        trialInfoStr = getTrialInfoStr(
+          rc.language.value,
+          showCounterBool,
+          showViewingDistanceBool,
+          readingCurrentQuestionIndex.current + 1,
+          paramReader.read("readingNumberOfQuestions", status.block)[0],
+          status.block,
+          totalBlocks.current,
+          viewingDistanceCm.current,
+          targetKind.current === "reading" ? "letter" : targetKind.current
+        );
+        trialCounter.setText(trialInfoStr);
+        trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+        trialCounter.setAutoDraw(showCounterBool);
+
         updateClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
           showCharacterSetResponse,
@@ -1261,6 +1293,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Continue?
       if (!continueRoutine) {
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
       continueRoutine = true;
@@ -1268,11 +1301,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //   readingCurrentQuestionIndex.current >= readingQuestions.current.length
       // )
       //   continueRoutine = false;
-      if (continueRoutine) {
-        return Scheduler.Event.FLIP_REPEAT;
-      } else {
-        return Scheduler.Event.NEXT;
-      }
+      return Scheduler.Event.FLIP_REPEAT;
     };
   }
 
@@ -1401,6 +1430,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
 
@@ -1440,7 +1470,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   /* ------------------------- Block Init Instructions ------------------------ */
-
+  // BLOCK 1st INSTRUCTION
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
       loggerText("initInstructionRoutineBegin");
@@ -1454,7 +1484,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       const L = rc.language.value;
 
-      responseType = getResponseType(
+      responseType.current = getResponseType(
         paramReader.read("responseClickedBool", status.block)[0],
         paramReader.read("responseTypedBool", status.block)[0],
         paramReader.read("responseTypedEasyEyesKeypadBool", status.block)[0],
@@ -1471,10 +1501,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ) +
               instructionsText.initialByThresholdParameter["spacing"](
                 L,
-                responseType,
+                responseType.current,
                 totalTrialsThisBlock.current
               ) +
-              instructionsText.initialEnd(L, responseType)
+              instructionsText.initialEnd(L, responseType.current)
           );
         },
         reading: () => {
@@ -1495,13 +1525,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
-      clickedContinue = false;
-      setTimeout(() => {
-        document.addEventListener("click", _clickContinue);
-        document.addEventListener("touchend", _clickContinue);
-      }, 500);
+      clickedContinue.current = false;
+      if (canClick(responseType.current) && targetKind.current !== "reading")
+        addProceedButton(rc.language.value);
 
-      _beepButton = addBeepButton(L, correctSynth);
+      addBeepButton(L, correctSynth);
 
       psychoJS.eventManager.clearKeys();
 
@@ -1517,10 +1545,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         undefined,
         status.block,
         totalBlocks.current,
-        viewingDistanceCm.current
+        viewingDistanceCm.current,
+        targetKind.current
       );
-      totalTrial.setText(trialInfoStr);
-      totalTrial.setAutoDraw(true);
+      trialCounter.setText(trialInfoStr);
+      trialCounter.setAutoDraw(true);
 
       return Scheduler.Event.NEXT;
     };
@@ -1534,10 +1563,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       instructions.setAutoDraw(false);
 
-      document.removeEventListener("click", _clickContinue);
-      document.removeEventListener("touchend", _clickContinue);
-
-      removeBeepButton(_beepButton);
+      removeBeepButton();
 
       psychoJS.experiment.addData(
         "initInstructionRoutineDurationFromBeginSec",
@@ -1573,11 +1599,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       TrialHandler.fromSnapshot(snapshot);
 
-      clickedContinue = false;
-      setTimeout(() => {
-        document.addEventListener("click", _clickContinue);
-        document.addEventListener("touchend", _clickContinue);
-      }, 1000);
+      clickedContinue.current = false;
+      if (canClick(responseType.current)) addProceedButton(rc.language.value);
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -1589,7 +1612,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionSetup(instructionsText.edu(rc.language.value));
 
           instructions2.setText(
-            instructionsText.eduBelow(rc.language.value, responseType)
+            instructionsText.eduBelow(rc.language.value, responseType.current)
           );
           instructions2.setWrapWidth(window.innerWidth * 0.8);
           instructions2.setPos([
@@ -1617,7 +1640,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker2.setText("C");
           flanker2.setHeight(h);
 
-          fixation.setHeight(fixationSize);
+          fixation.setHeight(fixationSize.current);
           fixation.setPos([0, 0]);
 
           fixation.setAutoDraw(true);
@@ -1642,9 +1665,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // rc.pauseDistance();
 
       instructions.setAutoDraw(false);
-
-      document.removeEventListener("click", _clickContinue);
-      document.removeEventListener("touchend", _clickContinue);
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -1681,7 +1701,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   //     TrialHandler.fromSnapshot(snapshot);
   //     _instructionSetup(instructionsText.block(snapshot.block + 1));
 
-  //     clickedContinue = false;
+  //     clickedContinue.current = false;
   //     document.addEventListener("click", _clickContinue);
   //     document.addEventListener("touchend", _clickContinue);
 
@@ -1696,44 +1716,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // function blockInstructionRoutineEnd() {
   //   return _instructionRoutineEnd;
   // }
-
-  const _takeFixationClick = (e) => {
-    if (modalButtonTriggeredViaKeyboard.current) {
-      // modal button click event triggered by jquery
-      modalButtonTriggeredViaKeyboard.current = false;
-      return;
-    }
-    let cX, cY;
-    if (e.clientX) {
-      cX = e.clientX;
-      cY = e.clientY;
-    } else {
-      const t = e.changedTouches[0];
-      if (t.clientX) {
-        cX = t.clientX;
-        cY = t.clientY;
-      } else {
-        clickedContinue = false;
-        return;
-      }
-    }
-
-    if (
-      Math.hypot(
-        cX - (window.innerWidth >> 1),
-        cY - (window.innerHeight >> 1)
-      ) < fixationSize
-    ) {
-      // Clicked on fixation
-      hideCursor();
-      setTimeout(() => {
-        clickedContinue = true;
-      }, 17);
-    } else {
-      // wrongSynth.play();
-      clickedContinue = false;
-    }
-  };
 
   var level;
 
@@ -1814,8 +1796,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
 
           // ! responseType
-          originalResponseType = responseType;
-          responseType = getResponseType(
+          responseType.original = responseType.current;
+          responseType.current = getResponseType(
             paramReader.read("responseClickedBool", status.block_condition),
             paramReader.read("responseTypedBool", status.block_condition),
             paramReader.read(
@@ -1829,7 +1811,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
           logger("responseType", responseType);
-          if (canClick) showCursor();
+          if (canClick(responseType.current)) showCursor();
         },
       });
 
@@ -1837,6 +1819,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // update trial/block count
       status.trial = snapshot.thisN + 1;
+
+      const reader = paramReader;
+      const BC = status.block_condition;
+
+      showCounterBool = reader.read("showCounterBool", BC);
+      showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
 
       /* --------------------------------- /PUBLIC -------------------------------- */
 
@@ -1846,7 +1834,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           t = 0;
           instructionsClock.reset(); // clock
           frameN = -1;
-          continueRoutine = true;
+          // continueRoutine = true;
 
           trialComponents = [];
           trialComponents.push(key_resp);
@@ -1864,17 +1852,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacing"](
               rc.language.value,
-              responseType
+              responseType.current
             )
           );
 
-          fixation.setHeight(fixationSize);
+          fixation.setHeight(fixationSize.current);
           fixation.setPos(fixationXYPx);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           fixation.setAutoDraw(true);
 
-          clickedContinue = false;
+          clickedContinue.current = false;
           document.addEventListener("click", _takeFixationClick);
           document.addEventListener("touchend", _takeFixationClick);
 
@@ -1882,9 +1870,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-
-          const reader = paramReader;
-          const BC = status.block_condition;
 
           psychoJS.experiment.addData("block_condition", BC);
           psychoJS.experiment.addData(
@@ -1921,8 +1906,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             .split("");
 
           showCharacterSetWhere = reader.read("showCharacterSetWhere", BC);
-          showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
-          showCounterBool = reader.read("showCounterBool", BC);
 
           showConditionNameBool = paramReader.read("showConditionNameBool", BC);
           conditionNameToShow = paramReader.read("conditionName", BC);
@@ -1931,7 +1914,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           targetDurationSec = reader.read("targetDurationSec", BC);
 
-          fixationSize = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
+          fixationSize.current = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
           showFixation = reader.read("markTheFixationBool", BC);
 
           targetSizeDeg = reader.read("targetSizeDeg", BC);
@@ -2010,7 +1993,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // Fixation placement does not depend on the value of "spacingRelationToSize"...
           fixation.setPos(fixationXYPx);
-          fixation.setHeight(fixationSize);
+          fixation.setHeight(fixationSize.current);
           // ... neither does target location...
           targetEccentricityXYPx = XYPixOfXYDeg(
             targetEccentricityXYDeg,
@@ -2095,7 +2078,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             flanker2,
             fixation,
             showCharacterSet,
-            totalTrial,
+            trialCounter,
           ].forEach((c) => c._updateIfNeeded());
 
           const tripletStims = {
@@ -2170,7 +2153,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           trialComponents.push(flanker2);
 
           trialComponents.push(showCharacterSet);
-          trialComponents.push(totalTrial);
+          trialComponents.push(trialCounter);
 
           // /* --- BOUNDING BOX --- */
           addBoundingBoxesToComponents(
@@ -2222,11 +2205,10 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         },
       });
 
+      /* --------------------------------- PUBLIC --------------------------------- */
+
       // Grid for both target kinds
-      grid.current.update(
-        paramReader.read("showGrid", status.block_condition),
-        displayOptions
-      );
+      grid.current.update(reader.read("showGrid", BC), displayOptions);
 
       // totalTrialsThisBlock.current = snapshot.nTotal;
       trialInfoStr = getTrialInfoStr(
@@ -2237,13 +2219,14 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         totalTrialsThisBlock.current,
         status.block,
         totalBlocks.current,
-        viewingDistanceCm.current
+        viewingDistanceCm.current,
+        targetKind.current
       );
-      totalTrial.setText(trialInfoStr);
-      totalTrial.setFont(instructionFont);
-      totalTrial.setHeight(totalTrialConfig.fontSize);
-      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-      totalTrial.setAutoDraw(true);
+      trialCounter.setText(trialInfoStr);
+      trialCounter.setFont(instructionFont);
+      trialCounter.setHeight(totalTrialConfig.fontSize);
+      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      trialCounter.setAutoDraw(showCounterBool);
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -2254,6 +2237,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
       else hideTrialBreakProgressBar();
+
+      /* --------------------------------- \PUBLIC -------------------------------- */
 
       return Scheduler.Event.NEXT;
     };
@@ -2266,12 +2251,11 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         return Scheduler.Event.NEXT;
       }
 
-      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
       switchKind(targetKind.current, {
         reading: () => {
-          // READING
-          return Scheduler.Event.NEXT;
+          continueRoutine = false;
         },
         letter: () => {
           // IDENTIFY
@@ -2316,23 +2300,22 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         }
       }
 
-      if (!continueRoutine) {
+      if (!continueRoutine || clickedContinue.current) {
+        continueRoutine = true;
+        clickedContinue.current = false;
         return Scheduler.Event.NEXT;
       }
 
       continueRoutine = true;
-      if (
-        canType(responseType) &&
-        psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
-      ) {
-        continueRoutine = false;
-      }
+      // if (
+      //   canType(responseType.current) &&
+      //   psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
+      // ) {
+      //   loggerText("trialInstructionRoutineEachFrame SPACE HIT");
+      //   continueRoutine = false;
+      // }
 
-      if (continueRoutine && !clickedContinue) {
-        return Scheduler.Event.FLIP_REPEAT;
-      } else {
-        return Scheduler.Event.NEXT;
-      }
+      return Scheduler.Event.FLIP_REPEAT;
     };
   }
 
@@ -2399,12 +2382,14 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
 
+      if (targetKind.current === "reading") readingSound.play();
+
       ////
       switchKind(targetKind.current, {
         letter: () => {
-          responseType = resetResponseType(
-            originalResponseType,
-            responseType,
+          responseType.current = resetResponseType(
+            responseType.original,
+            responseType.current,
             paramReader.read(
               "responseMustClickCrosshairBool",
               status.block_condition
@@ -2432,13 +2417,13 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       _instructionSetup(
         instructionsText.trial.respond["spacing"](
           rc.language.value,
-          responseType
+          responseType.current
         )
       );
       instructions.setText(
         instructionsText.trial.respond["spacing"](
           rc.language.value,
-          responseType
+          responseType.current
         )
       );
       instructions.setAutoDraw(false);
@@ -2526,7 +2511,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       // response type more independent
       if (
         targetKind.current === "reading" ||
-        canType(responseType) ||
+        canType(responseType.current) ||
         (simulated &&
           simulated[status.block] &&
           simulated[status.block][status.block_condition])
@@ -2593,9 +2578,6 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
                   status.trialCorrect_thisBlock++;
                   status.trialCompleted_thisBlock++;
                 },
-                reading: () => {
-                  readingSound.play();
-                },
               });
               // CORRECT
               key_resp.corr = 1;
@@ -2635,14 +2617,14 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         continueRoutine = false;
       }
 
-      // *totalTrial* updates
-      if (t >= 0.0 && totalTrial.status === PsychoJS.Status.NOT_STARTED) {
+      // *trialCounter* updates
+      if (t >= 0.0 && trialCounter.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
-        totalTrial.tStart = t; // (not accounting for frame time here)
-        totalTrial.frameNStart = frameN; // exact frame index
-        totalTrial.setAutoDraw(true);
+        trialCounter.tStart = t; // (not accounting for frame time here)
+        trialCounter.frameNStart = frameN; // exact frame index
+        trialCounter.setAutoDraw(true);
       }
-      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
       if (showTargetSpecsBool) {
         targetSpecsConfig.x = -window.innerWidth / 2;
@@ -2800,6 +2782,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
         removeClickableCharacterSet();
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
 
@@ -2819,6 +2802,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       if (continueRoutine) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
     };
@@ -2931,10 +2915,13 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
             // Show proceed hint and/or button
             showPopupProceed(
               expName,
-              instructionsText.trialBreak(rc.language.value, responseType),
-              canClick(responseType)
+              instructionsText.trialBreak(
+                rc.language.value,
+                responseType.current
+              ),
+              canClick(responseType.current)
             );
-            addPopupLogic(expName, responseType, () => {
+            addPopupLogic(expName, responseType.current, () => {
               resolve(Scheduler.Event.NEXT);
             });
           }, takeABreakMinimumDurationSec * 1000);
@@ -3026,6 +3013,12 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       "durationOfExperimentSec",
       globalClock.getTime()
     );
+
+    // QUIT FULLSCREEN
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+    else if (document.msExitFullscreen) document.msExitFullscreen();
 
     if (recruitmentServiceData.name == "Prolific" && isCompleted) {
       let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
