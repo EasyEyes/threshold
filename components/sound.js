@@ -1,5 +1,5 @@
 import * as sound from "../psychojs/src/sound/index.js";
-import ReadingPageFlip from "./sounds/reading-page-flip.mp3";
+import ReadingPageFlip from "./sounds/page-flip.mp3";
 
 const { TonePlayer } = sound;
 

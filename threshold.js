@@ -193,18 +193,14 @@ import { _identify_trialInstructionRoutineEnd } from "./components/trialRoutines
 
 /* ---------------------------------- */
 
-import {
-  isPavloviaExperiment,
-  isProlificPreviewExperiment,
-} from "./components/externalServices.js";
 import { switchKind } from "./components/blockTargetKind.js";
 import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
+import { replacePlaceholders } from "./components/multiLang.js";
 
 /* -------------------------------------------------------------------------- */
 
 window.jsQUEST = jsQUEST;
 
-var conditionTrials;
 let correctAns;
 
 // store info about the experiment session:
@@ -841,6 +837,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
 
@@ -858,6 +855,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (continueRoutine) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
     };
@@ -925,24 +923,33 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
     }
 
-    if (!continueRoutine) {
+    if (!continueRoutine || clickedContinue.current) {
+      continueRoutine = true;
+      clickedContinue.current = false;
       return Scheduler.Event.NEXT;
     }
 
     continueRoutine = true;
-    if (
-      canType(responseType.current) &&
-      psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
-    ) {
-      continueRoutine = false;
-      removeProceedButton();
-    }
 
-    if (continueRoutine && !clickedContinue.current) {
-      return Scheduler.Event.FLIP_REPEAT;
-    } else {
-      return Scheduler.Event.NEXT;
-    }
+    switchKind(targetKind.current, {
+      letter: () => {
+        if (
+          canType(responseType.current) &&
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+        ) {
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
+      reading: () => {
+        if (psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) {
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
+    });
+
+    return Scheduler.Event.FLIP_REPEAT;
   }
 
   // async function _instructionRoutineEnd() {
@@ -1085,7 +1092,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       currentLoop = trials;
 
       // Schedule all the trials in the trialList:
-      for (const _ of trials) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for (const _trial of trials) {
         const snapshot = trials.getSnapshot();
 
         trialsLoopScheduler.add(importConditions(snapshot));
@@ -1112,8 +1120,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Proportion correct
       showPopup(
         expName,
-        phrases.T_proportionCorrectPopup[rc.language.value].replace(
-          "xxx",
+        replacePlaceholders(
+          phrases.T_proportionCorrectPopup[rc.language.value],
           `${
             (
               status.trialCorrect_thisBlock / status.trialCompleted_thisBlock
@@ -1253,6 +1261,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Continue?
       if (!continueRoutine) {
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
       continueRoutine = true;
@@ -1260,11 +1269,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //   readingCurrentQuestionIndex.current >= readingQuestions.current.length
       // )
       //   continueRoutine = false;
-      if (continueRoutine) {
-        return Scheduler.Event.FLIP_REPEAT;
-      } else {
-        return Scheduler.Event.NEXT;
-      }
+      return Scheduler.Event.FLIP_REPEAT;
     };
   }
 
@@ -1393,6 +1398,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
 
@@ -1432,7 +1438,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   /* ------------------------- Block Init Instructions ------------------------ */
-
+  // BLOCK 1st INSTRUCTION
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
       loggerText("initInstructionRoutineBegin");
@@ -1488,7 +1494,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
 
       clickedContinue.current = false;
-      if (canClick(responseType.current)) addProceedButton(rc.language.value);
+      if (canClick(responseType.current) && targetKind.current !== "reading")
+        addProceedButton(rc.language.value);
 
       addBeepButton(L, correctSynth);
 
@@ -2207,12 +2214,18 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         return Scheduler.Event.NEXT;
       }
 
+      console.log(
+        "kkkk",
+        targetKind.current,
+        continueRoutine,
+        clickedContinue.current
+      );
+
       totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
 
       switchKind(targetKind.current, {
         reading: () => {
-          // READING
-          return Scheduler.Event.NEXT;
+          continueRoutine = false;
         },
         letter: () => {
           // IDENTIFY
@@ -2257,24 +2270,22 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         }
       }
 
-      if (!continueRoutine) {
+      if (!continueRoutine || clickedContinue.current) {
+        continueRoutine = true;
+        clickedContinue.current = false;
         return Scheduler.Event.NEXT;
       }
 
       continueRoutine = true;
-      if (
-        canType(responseType.current) &&
-        psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
-      ) {
-        loggerText("trialInstructionRoutineEachFrame SPACE HIT");
-        continueRoutine = false;
-      }
+      // if (
+      //   canType(responseType.current) &&
+      //   psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
+      // ) {
+      //   loggerText("trialInstructionRoutineEachFrame SPACE HIT");
+      //   continueRoutine = false;
+      // }
 
-      if (continueRoutine && !clickedContinue.current) {
-        return Scheduler.Event.FLIP_REPEAT;
-      } else {
-        return Scheduler.Event.NEXT;
-      }
+      return Scheduler.Event.FLIP_REPEAT;
     };
   }
 
@@ -2742,6 +2753,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
         removeClickableCharacterSet();
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
 
@@ -2761,6 +2773,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       if (continueRoutine) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
+        continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
     };
