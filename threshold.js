@@ -2065,6 +2065,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       targetCharacter +
                       secondFlankerCharacter
                   );
+                  target.setHeight(stimulusParameters.heightPx);
                   flanker1.setAutoDraw(false);
                   flanker2.setAutoDraw(false);
                   break;
