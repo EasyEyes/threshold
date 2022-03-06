@@ -1,7 +1,7 @@
 import { phrases } from "./i18n.js";
 import {
   clickedContinue,
-  fixationSize,
+  fixationConfig,
   modalButtonTriggeredViaKeyboard,
 } from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
@@ -179,7 +179,7 @@ export const _takeFixationClick = (e) => {
 
   if (
     Math.hypot(cX - (window.innerWidth >> 1), cY - (window.innerHeight >> 1)) <
-    fixationSize.current
+    fixationConfig.size
   ) {
     // Clicked on fixation
     hideCursor();

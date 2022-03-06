@@ -1,10 +1,25 @@
+import { PsychoJS } from "../psychojs/src/core/index.js";
+
+export const psychoJS = new PsychoJS({
+  debug: false,
+});
+
 /* ---------------------------- Remote Calibrator --------------------------- */
 export const useRC = true;
 // eslint-disable-next-line no-undef
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
 rc.init();
 
-/* ---------------------------------- Grid ---------------------------------- */
+/* ------------------------- Grid / Display Options ------------------------- */
+
+export const displayOptions = Object.seal({
+  window: undefined,
+  windowWidthCm: undefined,
+  windowWidthPx: undefined,
+  pixPerCm: undefined,
+  nearPointXYDeg: [undefined, undefined],
+  nearPointXYPix: [undefined, undefined],
+});
 
 export const grid = { current: undefined };
 
@@ -15,7 +30,26 @@ export const totalTrialsThisBlock = { current: undefined };
 export const targetKind = { current: undefined };
 
 // Renders
-export const fixationSize = { current: undefined };
+export const fixationConfig = {
+  size: 45,
+  pos: [0, 0],
+  show: true,
+};
+
+export const letterConfig = Object.seal({
+  targetSizeIsHeightBool: undefined,
+  targetMinimumPix: undefined,
+  targetSizeDeg: undefined,
+  targetCharacter: undefined,
+  targetEccentricityXYDeg: [undefined, undefined],
+  spacingDirection: undefined,
+  spacingSymmetry: undefined,
+  spacingOverSizeRatio: undefined,
+  spacingRelationToSize: undefined,
+  flankerCharacters: [undefined, undefined],
+  targetFont: undefined,
+  targetSafetyMarginSec: undefined,
+});
 
 /* --------------------------- Exp Current Status --------------------------- */
 
@@ -39,17 +73,21 @@ export const skipTrialOrBlock = {
 
 /* --------------------------- Participant Config --------------------------- */
 
-export const viewingDistanceDesiredCm = { current: undefined };
+export const viewingDistanceDesiredCm = { current: 40 };
 
 /* --------------------------- Participant Status --------------------------- */
 
-export const viewingDistanceCm = { current: undefined };
+export const viewingDistanceCm = { current: 40 };
 
 /* ------------------------------ Interactions ------------------------------ */
 
 export const responseType = { current: 2, original: 2 };
 export const clickedContinue = { current: false };
 export const modalButtonTriggeredViaKeyboard = { current: false };
+
+/* ------------------------------- SIMULATION ------------------------------- */
+
+export const simulatedObserver = {};
 
 /* --------------------------------- Reading -------------------------------- */
 export const readingCorpusArchive = {};

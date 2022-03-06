@@ -2,7 +2,7 @@
 export const debug = process.env.debug;
 // export const debug = true;
 
-import { skipTrialOrBlock, status } from "./global";
+import { skipTrialOrBlock, status, viewingDistanceCm } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import { ParamReader } from "../parameters/paramReader";
 
@@ -102,7 +102,6 @@ export const loggerText = (text) => {
  * @param {Number} degrees Scalar, in degrees
  * @param {Object} displayOptions Parameters about the stimulus presentation
  * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
- * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
  * @returns {Number}
  */
 export const degreesToPixels = (degrees, displayOptions) => {
@@ -112,9 +111,7 @@ export const degreesToPixels = (degrees, displayOptions) => {
     );
   const radians = Math.abs(degrees) * (Math.PI / 180);
   const pixels =
-    displayOptions.pixPerCm *
-    displayOptions.viewingDistanceCm *
-    Math.tan(radians);
+    displayOptions.pixPerCm * viewingDistanceCm.current * Math.tan(radians);
   return pixels;
 };
 /**
@@ -123,21 +120,28 @@ export const degreesToPixels = (degrees, displayOptions) => {
  * @param {Number} pixels Scalar, in pixels
  * @param {Object} displayOptions Parameters about the stimulus presentation
  * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
- * @param {Number} displayOptions.viewingDistanceCm Distance (in cm) of participant from screen
  * @returns {Number}
  */
 export const pixelsToDegrees = (pixels, displayOptions) => {
   const radians = Math.atan(
-    Math.abs(pixels) /
-      displayOptions.pixPerCm /
-      displayOptions.viewingDistanceCm
+    Math.abs(pixels) / displayOptions.pixPerCm / viewingDistanceCm.current
   );
   const degrees = radians / (Math.PI / 180);
   return degrees;
 };
 
 export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
-  // TODO verify displayOptions has the correct parameters
+  if (
+    !(
+      displayOptions.nearPointXYDeg &&
+      displayOptions.nearPointXYDeg.length == 2 &&
+      displayOptions.nearPointXYPix &&
+      displayOptions.nearPointXYPix.length == 2 &&
+      displayOptions.pixPerCm
+    )
+  )
+    throw "displayOptions doesn't have correct parameters";
+
   const degPosition = [];
   let pixelPosition = [];
   degPosition[0] = xyDeg[0] - displayOptions.nearPointXYDeg[0];
@@ -155,7 +159,7 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   }
   const rPix =
     displayOptions.pixPerCm *
-    displayOptions.viewingDistanceCm *
+    viewingDistanceCm.current *
     Math.tan(rDeg * (Math.PI / 180));
   if (rDeg > 0) {
     pixelPosition = [
@@ -209,7 +213,7 @@ export const XYDegOfXYPix = (xyPix, displayOptions) => {
   // ASSUMES equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB
   const rRad = Math.atan2(
     rPix / displayOptions.pixPerCm,
-    displayOptions.viewingDistanceCm
+    viewingDistanceCm.current
   );
   const rDeg = rRad * (180 / Math.PI);
   let xyDeg =
@@ -291,14 +295,12 @@ export const addBlockStaircaseSummariesToData = (loop, psychoJS) => {
  * @todo add tests
  * @param {*} level
  * @param {*} pixPerCm
- * @param {*} viewingDistanceCm
  * @returns
  */
-export const spacingPixelsFromLevel = (level, pixPerCm, viewingDistanceCm) => {
+export const spacingPixelsFromLevel = (level, pixPerCm) => {
   const spacingDeg = Math.pow(10, level);
   const spacingPx = degreesToPixels(spacingDeg, {
     pixPerCm: pixPerCm,
-    viewingDistanceCm: viewingDistanceCm,
   });
   return spacingPx;
 };

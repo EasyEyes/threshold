@@ -656,7 +656,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "the-phantom-tollbooth.txt",
     explanation:
-      "The filename of a text file that has already be uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \nIT IS A GOAL THAT: Every passage selection begins and ends at a sentence break.",
+      "The filename of a text file that has already been uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table should be sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-white characters.\n     RECOMMENDATION: Every passage selection begins and ends at a sentence break.\n",
     type: "text",
     default: "",
   },
@@ -665,7 +665,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "1521",
     explanation:
-      "readingCorpusSkipWords. The passage to be read will begin after skipping that number of words from the beginning of the corpus. To count words, we treat punctuation as letters, so whitespace is the only word separator. A run of whitespace counts as one separator. [Note that word frequency in the whole corpus still uses the whole corpus; nothing is skipped.] We recommend, but currently do not enforce, that the value of readingCorpusSkipWords be such that the passage to be read begins with the first word of a sentence. ",
+      "readingCorpusSkipWords. The passage to be read will begin after skipping that number of words from the beginning of the corpus. This is easy, using the word index table computed when EasyEyes read in the readingCorpus.",
     type: "integer",
     default: "0",
   },
@@ -678,6 +678,15 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "nominalSize",
     categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
+  },
+  readingFoilToTargetFrequencyMaxRatio: {
+    name: "readingFoilToTargetFrequencyMaxRatio",
+    availability: "now",
+    example: "2",
+    explanation:
+      "Each retention questions offers several words and asks the participant which word (the target) was in the passage just read. The  other words (foils) were not in that passage but do appear in the corpus,. The parameter readingFoilToTargetFrequencyMaxRatio specifies, for each foil, how similar the foil's corpus frequency must be to the target's. Each tentative target is accepted if it hasn't already been used in this block and the corpus has readingNumberOfPossibleAnswers minus one foils with similar frequency. To be sufficiently similar, each foil's frequency in the corpus must be in the range \ntargetFrequency / readingFoilToTargetFrequencyMaxRatio \nto \ntargetFrequency * readingFoilToTargetFrequencyMaxRatio. \nWe take as foils the readingNumberOfPossibleAnswers-1 words that are closest in log frequency to the target frequency in the corpus. If we can't find enough foils for a given target, then we reject that target and pick another. The read passage will typically have hundreds of words, so there are lots of candidate targets for the retention questions.",
+    type: "numerical",
+    default: "2",
   },
   readingFont: {
     name: "readingFont",
@@ -757,7 +766,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "4",
     explanation:
-      'Number of recall questions posed after each reading. Each question asks "Which of the following words appeared in the passage that you just read?" Below are several words. The number of words, N, is set by readingNumberOfPossibleAnswers. The actual word is a random sample from the passage read, omitting the first and last pages. The foils (wrong answers) are taken from the corpus, and are selected to have approximately the same frequency in the corpus as the correct answer. We will, once, compute the word frequency in the corpus of every word in the corpus. We can save this as a two column table (word and number of instances in the corpus), sorted by frequency. Once EasyEyes randomly selects the word that will be the correct answer, EasyEyes will look in the word-frequency table and take, as foils, the N-1 words with frequency most similar to that of the correct answer. Then the N words are arranged in characterSetical order below the question. The participant responds by clicking on the chosen word. It\'s "forced choice"; the participant must click a word. We give a "correct" beep if the answer is right. We repeat this several times, as specified by readingNumberOfQuestions.',
+      "After the participant reads a passage, EasyEyes will ask readingNumberOfQuestions, each on a new screen, to assess retention. Each retention question offers several words and asks the participant which word (the target) was in the passage just read. The  other words (foils) were not in that passage but do appear in the corpus. The target word is presented with enough foils to offer readingNumberOfPossibleAnswers. The words are arranged in alphabetical order below the question. The participant responds by clicking on the chosen word. It's \"forced choice\"; the participant must click a word. We give a \"correct\" beep if the answer is right. We repeat this several times, as specified by readingNumberOfQuestions.\n     The first and last pages might not be representative because timing of the space bar press might be more irregular, and primacy and recency would make words on those pages more memorable. So we analyze only the middle pages, excluding the first and last from both from the estimate of reading speed and the retention test. \n     For a given passage, each question uses a different target word. We pick candidate target words randomly from the passage just read  (in which many words appear more than once), and check each for suitability. We reject some candidates, so we keep picking candidates until we have accepted the desired number, readingNumberOfQuestions. \n     The parameter readingFoilToTargetFrequencyMaxRatio specifies, for each foil, how similar to that of the target, the foil's corpus frequency must be. Each tentative target is accepted if, firstly, it hasn't already been used in this block and, secondly, the corpus has readingNumberOfPossibleAnswers minus one foils with similar frequency. To be sufficiently similar, each foil's corpus frequency must be in the range targetFrequency*[1/r, r] where r=readingFoilToTargetFrequencyMaxRatio. \nWe take as foils the readingNumberOfPossibleAnswers-1 words that are closest in log frequency to the target frequency in the corpus. If we can't find enough foils for a given target, then we reject that target and pick another. The read passage will typically have hundreds of words, so there are lots of candidate targets for the retention questions.\n      \n\nWe will, once, compute the word frequency in the corpus of every word in the corpus. We can save this as a two column table (word and number of instances in the corpus), sorted by frequency. Once EasyEyes randomly selects the word that will be the correct answer, EasyEyes will look in the word-frequency table and take, as foils, the N-1 words with frequency most similar to that of the correct answer. \n\n",
     type: "integer",
     default: "3",
   },

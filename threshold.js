@@ -57,7 +57,11 @@ import {
   grid,
   clickedContinue,
   responseType,
-  fixationSize,
+  displayOptions,
+  letterConfig,
+  fixationConfig,
+  psychoJS,
+  simulatedObserver,
 } from "./components/global.js";
 
 ////
@@ -345,12 +349,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     _resources.push({ name: i, path: fontsRequired[i] });
   }
 
-  // Start code blocks for 'Before Experiment'
-  // init psychoJS:
-  const psychoJS = new PsychoJS({
-    debug: false,
-  });
-
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
   // const wrongSynth = getWrongSynth(psychoJS);
@@ -510,15 +508,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     eduInstructionClock,
     trialInstructionClock,
     blockScheduleFinalClock;
-
-  var displayOptions;
-  var fixationXYPx;
-  var nearPointXYDeg;
-  var nearPointXYPix;
-  var showFixation;
-  var windowWidthCm;
-  var windowWidthPx;
-  var pixPerCm;
 
   async function experimentInit() {
     // Initialize components for Routine "file"
@@ -764,24 +753,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     // TODO use actual nearPoint, from RC
-    nearPointXYDeg = [0, 0]; // TEMP
-    nearPointXYPix = [0, 0]; // TEMP
-    fixationXYPx = [0, 0];
+    displayOptions.nearPointXYDeg = [0, 0]; // TEMP
+    displayOptions.nearPointXYPix = [0, 0]; // TEMP
     // TODO set fixation from the actual parameter
-    fixationSize.current = 45;
-    showFixation = true;
-    windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
-    windowWidthPx = rc.displayWidthPx.value;
-    pixPerCm = windowWidthPx / windowWidthCm;
+    fixationConfig.pos = [0, 0];
 
-    displayOptions = {
-      pixPerCm: pixPerCm,
-      // viewingDistanceCm: viewingDistanceCm.current,
-      nearPointXYDeg: nearPointXYDeg,
-      nearPointXYPix: nearPointXYPix,
-      fixationXYPix: fixationXYPx,
-      window: psychoJS.window,
-    };
+    displayOptions.windowWidthCm = rc.screenWidthCm
+      ? rc.screenWidthCm.value
+      : 30;
+    displayOptions.windowWidthPx = rc.displayWidthPx.value;
+    displayOptions.pixPerCm =
+      displayOptions.windowWidthPx / displayOptions.windowWidthCm;
+
+    displayOptions.window = psychoJS.window;
 
     grid.current = new Grid("none", displayOptions, psychoJS);
 
@@ -1078,9 +1062,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           });
 
           // TODO set fixation from the actual parameter
-          fixationXYPx = [0, 0];
-          fixationSize.current = 45;
-          showFixation = true;
+          fixationConfig.pos = [0, 0];
+          fixationConfig.size = 45;
+          fixationConfig.show = true;
         },
       });
 
@@ -1371,8 +1355,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               readingHeight.current =
                 paramReader.read("readingNominalSizeDeg", status.block)[0] *
                 degreesToPixels(1, {
-                  pixPerCm: pixPerCm,
-                  viewingDistanceCm: viewingDistanceCm.current,
+                  pixPerCm: displayOptions.pixPerCm,
                 });
               break;
             default:
@@ -1640,7 +1623,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker2.setText("C");
           flanker2.setHeight(h);
 
-          fixation.setHeight(fixationSize.current);
+          fixation.setHeight(fixationConfig.size);
           fixation.setPos([0, 0]);
 
           fixation.setAutoDraw(true);
@@ -1719,8 +1702,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   var level;
 
-  var spacingDirection;
-  var targetFont;
   var targetCharacterSet;
   var validAns = [];
   var showCharacterSetWhere;
@@ -1729,34 +1710,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var showConditionNameBool;
   var conditionNameToShow;
   var showViewingDistanceBool;
+
   const showCharacterSetResponse = {
     current: null,
     onsetTime: 0,
     clickTime: 0,
   };
+
   var showBoundingBox;
   var showCharacterSetBoundingBox;
   var stimulusParameters;
   var targetDurationSec;
-  var targetMinimumPix;
-  var targetSizeDeg;
-  var targetSizeIsHeightBool;
+
   var thresholdParameter;
-  var spacingSymmetry;
-  var spacingOverSizeRatio;
-  var spacingRelationToSize;
-  var targetEccentricityXDeg;
-  var targetEccentricityYDeg;
-  var targetEccentricityXYDeg;
-  var targetSafetyMarginSec;
+
   var wirelessKeyboardNeededYes;
 
   var _key_resp_allKeys;
   var trialComponents;
-
-  /* --- SIMULATED --- */
-  var simulatedObserver = {};
-  /* --- /SIMULATED --- */
 
   // var targetTask;
 
@@ -1856,8 +1827,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
 
-          fixation.setHeight(fixationSize.current);
-          fixation.setPos(fixationXYPx);
+          fixation.setHeight(fixationConfig.size);
+          fixation.setPos(fixationConfig.pos);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           fixation.setAutoDraw(true);
@@ -1881,9 +1852,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             reader.read("targetFont", BC)
           );
           // update component parameters for each repeat
-          windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
-          windowWidthPx = rc.displayWidthPx.value;
-          pixPerCm = windowWidthPx / windowWidthCm;
+          displayOptions.windowWidthCm = rc.screenWidthCm
+            ? rc.screenWidthCm.value
+            : 30;
+          displayOptions.windowWidthPx = rc.displayWidthPx.value;
+          displayOptions.pixPerCm =
+            displayOptions.windowWidthPx / displayOptions.windowWidthCm;
           if (!rc.screenWidthCm)
             console.warn(
               "[Screen Width] Using arbitrary screen width. Enable RC."
@@ -1891,12 +1865,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // TODO check that we are actually trying to test for "spacing", not "size"
 
-          spacingDirection = reader.read("spacingDirection", BC);
-          spacingSymmetry = reader.read("spacingSymmetry", BC);
+          letterConfig.spacingDirection = reader.read("spacingDirection", BC);
+          letterConfig.spacingSymmetry = reader.read("spacingSymmetry", BC);
           let targetFontSource = reader.read("targetFontSource", BC);
-          targetFont = reader.read("targetFont", BC);
+          letterConfig.targetFont = reader.read("targetFont", BC);
           if (targetFontSource === "file")
-            targetFont = cleanFontName(targetFont);
+            letterConfig.targetFont = cleanFontName(letterConfig.targetFont);
 
           targetCharacterSet = String(
             reader.read("targetCharacterSet", BC)
@@ -1914,37 +1888,56 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           targetDurationSec = reader.read("targetDurationSec", BC);
 
-          fixationSize.current = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
-          showFixation = reader.read("markTheFixationBool", BC);
+          fixationConfig.size = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
+          fixationConfig.show = reader.read("markTheFixationBool", BC);
 
-          targetSizeDeg = reader.read("targetSizeDeg", BC);
-          targetSizeIsHeightBool = reader.read("targetSizeIsHeightBool", BC);
+          letterConfig.targetSizeIsHeightBool = reader.read(
+            "targetSizeIsHeightBool",
+            BC
+          );
           thresholdParameter = reader.read("thresholdParameter", BC);
-          targetMinimumPix = reader.read("targetMinimumPix", BC);
-          spacingOverSizeRatio = reader.read("spacingOverSizeRatio", BC);
-          spacingRelationToSize = reader.read("spacingRelationToSize", BC);
+          letterConfig.targetMinimumPix = reader.read("targetMinimumPix", BC);
+          letterConfig.spacingOverSizeRatio = reader.read(
+            "spacingOverSizeRatio",
+            BC
+          );
+          letterConfig.spacingRelationToSize = reader.read(
+            "spacingRelationToSize",
+            BC
+          );
           showBoundingBox = reader.read("showBoundingBoxBool", BC) || false;
           showCharacterSetBoundingBox = reader.read(
             "showCharacterSetBoundingBoxBool",
             BC
           );
 
-          targetMinimumPix = reader.read("targetMinimumPix", BC);
-          targetEccentricityXDeg = reader.read("targetEccentricityXDeg", BC);
+          letterConfig.targetMinimumPix = reader.read("targetMinimumPix", BC);
+
+          const targetEccentricityXDeg = reader.read(
+            "targetEccentricityXDeg",
+            BC
+          );
           psychoJS.experiment.addData(
             "targetEccentricityXDeg",
             targetEccentricityXDeg
           );
-          targetEccentricityYDeg = reader.read("targetEccentricityYDeg", BC);
+          const targetEccentricityYDeg = reader.read(
+            "targetEccentricityYDeg",
+            BC
+          );
           psychoJS.experiment.addData(
             "targetEccentricityYDeg",
             targetEccentricityYDeg
           );
-          targetEccentricityXYDeg = [
+          letterConfig.targetEccentricityXYDeg = [
             targetEccentricityXDeg,
             targetEccentricityYDeg,
           ];
-          targetSafetyMarginSec = paramReader.read("targetSafetyMarginSec", BC);
+
+          letterConfig.targetSafetyMarginSec = paramReader.read(
+            "targetSafetyMarginSec",
+            BC
+          );
 
           // trackGazeYes = reader.read("trackGazeYes", BC);
           // trackHeadYes = reader.read("trackHeadYes", BC);
@@ -1968,35 +1961,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           correctAns = targetCharacter.toLowerCase();
           /* -------------------------------------------------------------------------- */
 
-          var targetEccentricityXYPx;
-
-          ////
-          // !
-          displayOptions = {
-            pixPerCm: pixPerCm,
-            viewingDistanceCm: viewingDistanceCm.current,
-            nearPointXYDeg: nearPointXYDeg,
-            nearPointXYPix: nearPointXYPix,
-            fixationXYPix: fixationXYPx,
-            spacingOverSizeRatio: spacingOverSizeRatio,
-            targetMinimumPix: targetMinimumPix,
-            fontFamily: targetFont,
-            window: psychoJS.window,
-            spacingRelationToSize: spacingRelationToSize,
-            targetEccentricityXYDeg: targetEccentricityXYDeg,
-            spacingDirection: spacingDirection,
-            flankerCharacters: [firstFlankerCharacter, secondFlankerCharacter],
-            targetCharacter: targetCharacter,
-            targetSizeDeg: targetSizeDeg,
-            targetKind: targetKind.current,
-          };
+          // DISPLAY OPTIONS
+          displayOptions.window = psychoJS.window;
 
           // Fixation placement does not depend on the value of "spacingRelationToSize"...
-          fixation.setPos(fixationXYPx);
-          fixation.setHeight(fixationSize.current);
+          fixation.setPos(fixationConfig.pos);
+          fixation.setHeight(fixationConfig.size);
           // ... neither does target location...
-          targetEccentricityXYPx = XYPixOfXYDeg(
-            targetEccentricityXYDeg,
+          const targetEccentricityXYPx = XYPixOfXYDeg(
+            letterConfig.targetEccentricityXYDeg,
             displayOptions
           );
           // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
@@ -2005,23 +1978,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetEccentricityXYPx
           );
           target.setPos(targetEccentricityXYPx);
-          target.setFont(targetFont);
+          target.setFont(letterConfig.targetFont);
 
           // ...but size, and content of the target(& flankers) does.
           psychoJS.experiment.addData(
             "spacingRelationToSize",
-            spacingRelationToSize
+            letterConfig.spacingRelationToSize
           );
           [level, stimulusParameters] = restrictLevel(
             proposedLevel,
             thresholdParameter,
             characterSetBoundingRects[BC],
-            spacingDirection,
-            spacingRelationToSize,
-            spacingSymmetry,
-            spacingOverSizeRatio,
-            targetSizeIsHeightBool,
-            displayOptions
+            letterConfig.spacingDirection,
+            letterConfig.spacingRelationToSize,
+            letterConfig.spacingSymmetry,
+            letterConfig.spacingOverSizeRatio,
+            letterConfig.targetSizeIsHeightBool
           );
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
@@ -2037,7 +2009,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               flanker2.setAutoDraw(false);
               break;
             case "spacing":
-              switch (spacingRelationToSize) {
+              switch (letterConfig.spacingRelationToSize) {
                 case "none":
                 case "ratio":
                   target.setText(targetCharacter);
@@ -2045,8 +2017,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   flanker2.setText(secondFlankerCharacter);
                   flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
                   flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
-                  flanker1.setFont(targetFont);
-                  flanker2.setFont(targetFont);
+                  flanker1.setFont(letterConfig.targetFont);
+                  flanker2.setFont(letterConfig.targetFont);
                   flanker1.scaleToHeightPx(stimulusParameters.heightPx);
                   flanker2.scaleToHeightPx(stimulusParameters.heightPx);
                   psychoJS.experiment.addData("flankerLocationsPx", [
@@ -2100,10 +2072,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             characterSetBoundingRects[BC],
             {
               heightPx: stimulusParameters.heightPx,
-              spacingRelationToSize: spacingRelationToSize,
+              spacingRelationToSize: letterConfig.spacingRelationToSize,
               thresholdParameter: thresholdParameter,
               windowSize: psychoJS.window._size,
-              targetFont: targetFont,
+              targetFont: letterConfig.targetFont,
             }
           );
           showCharacterSet.setPos([0, 0]);
@@ -2122,12 +2094,12 @@ ${
 heightDeg: ${Math.round(10 * stimulusParameters.heightDeg) / 10}
 heightPx: ${Math.round(stimulusParameters.heightPx)}
 filename: ${experimentFileName}
-targetFont: ${targetFont}
-spacingRelationToSize: ${spacingRelationToSize}
-spacingOverSizeRatio: ${spacingOverSizeRatio}
-spacingSymmetry: ${spacingSymmetry}
-targetSizeIsHeightBool: ${targetSizeIsHeightBool}
-targetEccentricityXYDeg: ${targetEccentricityXYDeg}
+targetFont: ${letterConfig.targetFont}
+spacingRelationToSize: ${letterConfig.spacingRelationToSize}
+spacingOverSizeRatio: ${letterConfig.spacingOverSizeRatio}
+spacingSymmetry: ${letterConfig.spacingSymmetry}
+targetSizeIsHeightBool: ${letterConfig.targetSizeIsHeightBool}
+targetEccentricityXYDeg: ${letterConfig.targetEccentricityXYDeg}
 viewingDistanceCm: ${viewingDistanceCm.current}`;
             targetSpecs.setText(targetSpecsString);
             targetSpecs.setPos([
@@ -2162,7 +2134,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
             boundingBoxPolies,
             characterSetBoundingBoxPolies,
             displayCharacterSetBoundingBoxPolies[BC],
-            spacingRelationToSize,
+            letterConfig.spacingRelationToSize,
             thresholdParameter,
             trialComponents
           );
@@ -2490,7 +2462,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           "targetBoundingBox",
           String(target.getBoundingBox(true))
         );
-        if (spacingRelationToSize === "ratio") {
+        if (letterConfig.spacingRelationToSize === "ratio") {
           psychoJS.experiment.addData(
             "flanker1BoundingBox",
             String(flanker1.getBoundingBox(true))
@@ -2653,7 +2625,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       if (
         t >= 0.0 &&
         fixation.status === PsychoJS.Status.NOT_STARTED &&
-        showFixation
+        fixationConfig.show
       ) {
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
@@ -2668,7 +2640,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         flanker1.tStart = t; // (not accounting for frame time here)
         flanker1.frameNStart = frameN; // exact frame index
 
-        if (spacingRelationToSize === "typographic") {
+        if (letterConfig.spacingRelationToSize === "typographic") {
           flanker1.setAutoDraw(false);
         } else {
           flanker1.setAutoDraw(true);
@@ -2717,7 +2689,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         flanker2.tStart = t; // (not accounting for frame time here)
         flanker2.frameNStart = frameN; // exact frame index
 
-        if (spacingRelationToSize === "typographic") {
+        if (letterConfig.spacingRelationToSize === "typographic") {
           flanker2.setAutoDraw(false);
         } else {
           flanker2.setAutoDraw(true);
@@ -2740,7 +2712,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       }
 
       const timeWhenRespondable =
-        uniDelay + targetSafetyMarginSec + targetDurationSec;
+        uniDelay + letterConfig.targetSafetyMarginSec + targetDurationSec;
       updateBoundingBoxPolies(
         t,
         frameRemains,
@@ -2750,7 +2722,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         boundingBoxPolies,
         characterSetBoundingBoxPolies,
         displayCharacterSetBoundingBoxPolies[status.block_condition],
-        spacingRelationToSize,
+        letterConfig.spacingRelationToSize,
         timeWhenRespondable,
         thresholdParameter
       );
@@ -2758,7 +2730,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       // SHOW CharacterSet AND INSTRUCTIONS
       // *showCharacterSet* updates
       if (
-        t >= uniDelay + targetSafetyMarginSec + targetDurationSec &&
+        t >=
+          uniDelay + letterConfig.targetSafetyMarginSec + targetDurationSec &&
         showCharacterSet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
@@ -2767,7 +2740,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         showCharacterSet.setAutoDraw(true);
         setupClickableCharacterSet(
           targetCharacterSet,
-          targetFont,
+          letterConfig.targetFont,
           showCharacterSetWhere,
           showCharacterSetResponse
         );

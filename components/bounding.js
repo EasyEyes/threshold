@@ -1,5 +1,6 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
+import { displayOptions, letterConfig, targetKind } from "./global.js";
 
 import {
   logger,
@@ -146,8 +147,7 @@ export const restrictLevel = (
   spacingRelationToSize,
   spacingSymmetry,
   spacingOverSizeRatio,
-  targetSizeIsHeightBool,
-  displayOptions
+  targetSizeIsHeightBool
 ) => {
   if (
     !["radial", "tangential", "horizontal", "vertical"].includes(
@@ -175,8 +175,8 @@ export const restrictLevel = (
   switch (thresholdParameter) {
     case "size":
       [sizeDeg, stimulusParameters] = restrictSizeDeg(
-        displayOptions.targetEccentricityXYDeg,
-        displayOptions.targetKind,
+        letterConfig.targetEccentricityXYDeg,
+        targetKind.current,
         screenRectPx,
         spacingRelationToSize,
         targetSizeIsHeightBool,
@@ -190,7 +190,7 @@ export const restrictLevel = (
       [spacingDeg, stimulusParameters] = restrictSpacingDeg(
         proposedLevel,
         displayOptions.targetEccentricityXYDeg,
-        displayOptions.targetKind,
+        targetKind.current,
         screenRectPx,
         spacingRelationToSize,
         targetSizeIsHeightBool,
@@ -225,7 +225,7 @@ export const restrictSizeDeg = (
   const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
   const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
   let heightDeg, heightPx, topPx, bottomPx;
-  let targetSizeDeg = displayOptions.targetSizeDeg;
+  let targetSizeDeg = letterConfig.targetSizeDeg;
 
   // We scale the alphabet bounding box to have the specified heightPx.
   // widthPx = width of scaled alphabet bounding box.
@@ -285,6 +285,7 @@ export const restrictSizeDeg = (
     targetSizeDeg = targetSizeDeg / largestBoundsRatio;
   }
 };
+
 /**
  *
  * @returns {[Number, Object]} [spacingDeg, stimulusParameters]
@@ -299,8 +300,7 @@ export const restrictSpacingDeg = (
   characterSetRectPx,
   spacingOverSizeRatio,
   spacingSymmetry,
-  thresholdParameter,
-  displayOptions
+  thresholdParameter
 ) => {
   // TODO make sure rects are valid, ie height&width are nonnegative
   /* 
@@ -342,10 +342,7 @@ export const restrictSpacingDeg = (
       throw "At this point targetKind must be letter. gabor is coming.";
   }
 
-  if (
-    spacingRelationToSize === "none" &&
-    !displayOptions.hasOwnProperty(targetSizeDeg)
-  )
+  if (spacingRelationToSize === "none" && !letterConfig.targetSizeDeg)
     throw "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'";
   const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
   const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
@@ -373,7 +370,7 @@ export const restrictSpacingDeg = (
     switch (spacingRelationToSize) {
       case "none":
         // Use specified targetSizeDeg
-        sizeDeg = displayOptions.targetSizeDeg;
+        sizeDeg = letterConfig.targetSizeDeg;
         if (targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
           [, topPx] = XYPixOfXYDeg(
@@ -493,8 +490,8 @@ export const restrictSpacingDeg = (
     }
 
     // Compute lower bound
-    if (heightPx < displayOptions.targetMinimumPix) {
-      spacingDeg = spacingDeg * (displayOptions.targetMinimumPix / heightPx);
+    if (heightPx < letterConfig.targetMinimumPix) {
+      spacingDeg = spacingDeg * (letterConfig.targetMinimumPix / heightPx);
       continue;
     }
 
@@ -507,7 +504,7 @@ export const restrictSpacingDeg = (
         break;
       case "none": // 'none' and 'ratio' should behave the same; intentional fall-through
       case "ratio":
-        switch (displayOptions.spacingDirection) {
+        switch (letterConfig.spacingDirection) {
           case "radial":
             if (targetIsFoveal) throw "Radial flankers are undefined at fovea.";
             spacingOuterDeg = spacingDeg;
@@ -614,7 +611,7 @@ export const restrictSpacingDeg = (
       if (
         !(
           (spacingDeg > Math.pow(10, proposedLevel) &&
-            Math.round(heightPx) === displayOptions.targetMinimumPix) ||
+            Math.round(heightPx) === letterConfig.targetMinimumPix) ||
           spacingDeg === Math.pow(10, proposedLevel) ||
           (spacingDeg < Math.pow(10, proposedLevel) &&
             0.99 < largestBoundsRatio)
@@ -646,7 +643,7 @@ export const restrictSpacingDeg = (
     // REDUCE SPACINGDEG TO MAKE STIMULUS FIT, AND TRY AGAIN
     spacingDeg = maxSpacingDeg;
   }
-  throw `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${displayOptions.targetMinimumPix}`;
+  throw `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${letterConfig.targetMinimumPix}`;
 };
 
 const getLargestBoundsRatio = (

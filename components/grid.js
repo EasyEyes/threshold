@@ -1,12 +1,11 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
+import { fixationConfig } from "./global.js";
 
 import {
   degreesToPixels,
   pixelsToDegrees,
   getPixPerCm,
-  getViewingDistanceCm,
-  logger,
   XYPixOfXYDeg,
   XYDegOfXYPix,
   isInRect,
@@ -41,7 +40,7 @@ export class Grid {
     this.dimensions = this.psychoJS.window._size;
     this.gridkey = { key: ["`", "~"], code: "Backquote", keyCode: 192 };
 
-    // this.spawnGridStims();
+    this.spawnGridStims();
 
     window.onkeydown = (e) => {
       if (
@@ -74,7 +73,7 @@ export class Grid {
 
   /**
    * Grid ought to be shown.
-   * Set `visibile` to reflect this desire, and call `_draw()` to draw the stims.
+   * Set `visible` to reflect this desire, and call `_draw()` to draw the stims.
    */
   show() {
     this.visible = true;
@@ -83,7 +82,7 @@ export class Grid {
 
   /**
    * Grid ought not be shown.
-   * Set `visibile` to reflect this desire, and call `_undraw()` to remove the stims.
+   * Set `visible` to reflect this desire, and call `_undraw()` to remove the stims.
    */
   hide() {
     this.visible = false;
@@ -135,7 +134,7 @@ export class Grid {
   }
 
   /**
-   * Set autoDraw of all stims ot the current value of `visibile`,
+   * Set autoDraw of all stims ot the current value of `visible`,
    * ie `_draw` if `visible===true`, else `_undraw`
    */
   _reflectVisibility() {
@@ -144,6 +143,7 @@ export class Grid {
       if (s) s.setAutoDraw(this.visible);
     });
   }
+
   _getGridStims(units) {
     switch (units) {
       case "px":
@@ -168,11 +168,11 @@ export class Grid {
     // TODO generalize to fixation != [0,0]
     this.dimensionsDeg = [
       XYDegOfXYPix(
-        [this.dimensions[0] / 2, this.displayOptions.fixationXYPix[1]],
+        [this.dimensions[0] / 2, fixationConfig.pos[1]],
         this.displayOptions
       )[0],
       XYDegOfXYPix(
-        [this.displayOptions.fixationXYPix[0], this.dimensions[1] / 2],
+        [fixationConfig.pos[0], this.dimensions[1] / 2],
         this.displayOptions
       )[1],
     ];
@@ -183,19 +183,19 @@ export class Grid {
       case "cm":
         return this.dimensionsCm.map((dim) => Math.floor(dim / 1) + 1);
       case "deg":
-        // logger("dim [origin[0], height/2]", XYDegOfXYPix([this.displayOptions.fixationXYPix[0], this.dimensions[1]/2], this.displayOptions))
+        // logger("dim [origin[0], height/2]", XYDegOfXYPix([fixationConfig.pos[0], this.dimensions[1]/2], this.displayOptions))
         // logger("this.dimensionsDeg", this.dimensionsDeg)
         // const labels = ["xDeg", "yDeg", "xPx", "yPx", "orientation"]
         // const rows = [labels]
-        // logger("this.displayOptions.fixationXYDeg", this.displayOptions.fixationXYPix)
-        // for (let x=this.displayOptions.fixationXYPix[0]; x<this.dimensionsDeg[0]; x++){
-        //   // if (i % 100 === 0) logger(`dim i=${i}`, XYDegOfXYPix([this.displayOptions.fixationXYPix[0] + i, this.dimensions[1]/2], this.displayOptions))
+        // logger("this.displayOptions.fixationXYDeg", fixationConfig.pos)
+        // for (let x=fixationConfig.pos[0]; x<this.dimensionsDeg[0]; x++){
+        //   // if (i % 100 === 0) logger(`dim i=${i}`, XYDegOfXYPix([fixationConfig.pos[0] + i, this.dimensions[1]/2], this.displayOptions))
         //   for (let ydeg=1; ydeg<25; ydeg++){
         //     const point = XYPixOfXYDeg([x, ydeg], this.displayOptions)
         //     rows.push([x, ydeg, ...point, "vertical"])
         //   }
         // }
-        // for (let y=this.displayOptions.fixationXYPix[1]; y<this.dimensionsDeg[1]; y++){
+        // for (let y=fixationConfig.pos[1]; y<this.dimensionsDeg[1]; y++){
         //   for (let deg=1; deg<25; deg++){
         //     const point = XYPixOfXYDeg([deg, y], this.displayOptions)
         //     rows.push([deg, y, ...point, "horizontal"])
@@ -410,7 +410,7 @@ export class Grid {
             size: 1,
           })
         );
-        if (i % 5 === 0)
+        if (i % 5 === 0) {
           labels.push(
             new visual.TextStim({
               name: `${region}-grid-line-label-${i}`,
@@ -431,13 +431,14 @@ export class Grid {
               depth: 0.0,
             })
           );
+        }
       }
     }
     return [lines, labels];
   };
 
   _getDegGridPathVerticies = (lineId, region) => {
-    const origin = this.displayOptions.fixationXYPix;
+    const origin = fixationConfig.pos;
     const verticies = [];
     let pos = [];
     // VERIFY correctness given origin aka fixation != [0,0]
@@ -489,7 +490,7 @@ export class Grid {
    * 10**(rMm/38)*0.15 - 0.15 = r         [5]
    */
   _getMmGridStims = () => {
-    const fixation = this.displayOptions.fixationXYPix;
+    const fixation = fixationConfig.pos;
     const fixationDeg = XYDegOfXYPix(fixation, this.displayOptions);
     const screen = {
       top: this.dimensions[1] / 2,
