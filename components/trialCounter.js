@@ -1,5 +1,4 @@
 import { switchKind } from "./blockTargetKind.js";
-import { targetKind } from "./global.js";
 import { phrases } from "./i18n.js";
 import { replacePlaceholders } from "./multiLang.js";
 
@@ -11,13 +10,14 @@ export function getTrialInfoStr(
   currentTrialLength,
   currentBlockIndex,
   blockCount,
-  viewingDistanceCm
+  viewingDistanceCm,
+  taskKind
 ) {
   let res = "";
 
   if (showCounterBool) {
     if (currentTrialIndex && currentTrialLength) {
-      switchKind(targetKind.current, {
+      switchKind(taskKind, {
         reading: () => {
           res += replacePlaceholders(
             phrases.T_counterReadingPageBlock[L],

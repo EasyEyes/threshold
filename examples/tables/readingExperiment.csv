@@ -16,4 +16,5 @@ readingNumberOfPossibleAnswers,4
 readingNumberOfQuestions,3
 readingPages,4
 readingSetSizeBy,nominal
+showCounterBool,TRUE
 targetKind,reading

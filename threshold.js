@@ -314,7 +314,7 @@ var conditionNameConfig = {
 var conditionName;
 
 var trialInfoStr = "";
-var totalTrial; // TextSim object
+var trialBlockDistanceCounter; // TextSim object
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
@@ -614,9 +614,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       depth: -5.0,
     });
 
-    totalTrial = new visual.TextStim({
+    trialBlockDistanceCounter = new visual.TextStim({
       win: psychoJS.window,
-      name: "totalTrial",
+      name: "trialBlockDistanceCounter",
       text: "",
       font: instructionFont,
       units: "pix",
@@ -909,7 +909,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
     /* --- /SIMULATED --- */
 
-    totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+    trialBlockDistanceCounter.setPos([
+      window.innerWidth / 2,
+      -window.innerHeight / 2,
+    ]);
 
     t = instructionsClock.getTime();
     frameN = frameN + 1;
@@ -1085,8 +1088,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
 
       trialInfoStr = "";
-      totalTrial.setText(trialInfoStr);
-      totalTrial.setAutoDraw(false);
+      trialBlockDistanceCounter.setText(trialInfoStr);
+      trialBlockDistanceCounter.setAutoDraw(false);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials;
@@ -1185,7 +1188,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Display
       instructions.setText(
-        "Which of the following words appeared in the passage that you just read?"
+        phrases.T_readingTaskQuestionPrompt[rc.language.value]
       );
       instructions.setAutoDraw(true);
 
@@ -1209,6 +1212,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           `%c${thisQuestion.correctAnswer}`,
           "color: red; font-size: 1.5rem"
         );
+
+        // trialCounter
+        trialInfoStr = getTrialInfoStr(
+          rc.language.value,
+          showCounterBool,
+          showViewingDistanceBool,
+          readingCurrentQuestionIndex.current + 1,
+          paramReader.read("readingNumberOfQuestions", status.block)[0],
+          status.block,
+          totalBlocks.current,
+          viewingDistanceCm.current,
+          targetKind.current === "reading" ? "letter" : targetKind.current
+        );
+        trialBlockDistanceCounter.setText(trialInfoStr);
+        trialBlockDistanceCounter.setPos([
+          window.innerWidth / 2,
+          -window.innerHeight / 2,
+        ]);
+        trialBlockDistanceCounter.setAutoDraw(showCounterBool);
 
         setupClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
@@ -1239,6 +1261,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           `%c${thisQuestion.correctAnswer}`,
           "color: red; font-size: 1.5rem"
         );
+
+        // trialCounter
+        trialInfoStr = getTrialInfoStr(
+          rc.language.value,
+          showCounterBool,
+          showViewingDistanceBool,
+          readingCurrentQuestionIndex.current + 1,
+          paramReader.read("readingNumberOfQuestions", status.block)[0],
+          status.block,
+          totalBlocks.current,
+          viewingDistanceCm.current,
+          targetKind.current === "reading" ? "letter" : targetKind.current
+        );
+        trialBlockDistanceCounter.setText(trialInfoStr);
+        trialBlockDistanceCounter.setPos([
+          window.innerWidth / 2,
+          -window.innerHeight / 2,
+        ]);
+        trialBlockDistanceCounter.setAutoDraw(showCounterBool);
 
         updateClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
@@ -1513,10 +1554,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         undefined,
         status.block,
         totalBlocks.current,
-        viewingDistanceCm.current
+        viewingDistanceCm.current,
+        targetKind.current
       );
-      totalTrial.setText(trialInfoStr);
-      totalTrial.setAutoDraw(true);
+      trialBlockDistanceCounter.setText(trialInfoStr);
+      trialBlockDistanceCounter.setAutoDraw(true);
 
       return Scheduler.Event.NEXT;
     };
@@ -1787,6 +1829,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // update trial/block count
       status.trial = snapshot.thisN + 1;
 
+      const reader = paramReader;
+      const BC = status.block_condition;
+
+      showCounterBool = reader.read("showCounterBool", BC);
+      showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
+
       /* --------------------------------- /PUBLIC -------------------------------- */
 
       switchKind(targetKind.current, {
@@ -1795,7 +1843,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           t = 0;
           instructionsClock.reset(); // clock
           frameN = -1;
-          continueRoutine = true;
+          // continueRoutine = true;
 
           trialComponents = [];
           trialComponents.push(key_resp);
@@ -1832,9 +1880,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-          const reader = paramReader;
-          const BC = status.block_condition;
-
           psychoJS.experiment.addData("block_condition", BC);
           psychoJS.experiment.addData(
             "flankerOrientation",
@@ -1870,8 +1915,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             .split("");
 
           showCharacterSetWhere = reader.read("showCharacterSetWhere", BC);
-          showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
-          showCounterBool = reader.read("showCounterBool", BC);
 
           showConditionNameBool = paramReader.read("showConditionNameBool", BC);
           conditionNameToShow = paramReader.read("conditionName", BC);
@@ -2043,7 +2086,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             flanker2,
             fixation,
             showCharacterSet,
-            totalTrial,
+            trialBlockDistanceCounter,
           ].forEach((c) => c._updateIfNeeded());
 
           const tripletStims = {
@@ -2118,7 +2161,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           trialComponents.push(flanker2);
 
           trialComponents.push(showCharacterSet);
-          trialComponents.push(totalTrial);
+          trialComponents.push(trialBlockDistanceCounter);
 
           // /* --- BOUNDING BOX --- */
           addBoundingBoxesToComponents(
@@ -2170,11 +2213,10 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         },
       });
 
+      /* --------------------------------- PUBLIC --------------------------------- */
+
       // Grid for both target kinds
-      grid.current.update(
-        paramReader.read("showGrid", status.block_condition),
-        displayOptions
-      );
+      grid.current.update(reader.read("showGrid", BC), displayOptions);
 
       // totalTrialsThisBlock.current = snapshot.nTotal;
       trialInfoStr = getTrialInfoStr(
@@ -2185,13 +2227,17 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         totalTrialsThisBlock.current,
         status.block,
         totalBlocks.current,
-        viewingDistanceCm.current
+        viewingDistanceCm.current,
+        targetKind.current
       );
-      totalTrial.setText(trialInfoStr);
-      totalTrial.setFont(instructionFont);
-      totalTrial.setHeight(totalTrialConfig.fontSize);
-      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-      totalTrial.setAutoDraw(true);
+      trialBlockDistanceCounter.setText(trialInfoStr);
+      trialBlockDistanceCounter.setFont(instructionFont);
+      trialBlockDistanceCounter.setHeight(totalTrialConfig.fontSize);
+      trialBlockDistanceCounter.setPos([
+        window.innerWidth / 2,
+        -window.innerHeight / 2,
+      ]);
+      trialBlockDistanceCounter.setAutoDraw(showCounterBool);
 
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
@@ -2202,6 +2248,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
       else hideTrialBreakProgressBar();
+
+      /* --------------------------------- \PUBLIC -------------------------------- */
 
       return Scheduler.Event.NEXT;
     };
@@ -2214,14 +2262,10 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         return Scheduler.Event.NEXT;
       }
 
-      console.log(
-        "kkkk",
-        targetKind.current,
-        continueRoutine,
-        clickedContinue.current
-      );
-
-      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      trialBlockDistanceCounter.setPos([
+        window.innerWidth / 2,
+        -window.innerHeight / 2,
+      ]);
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -2351,6 +2395,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       if (snapshot.getCurrentTrial().trialsVal)
         logger("Level", snapshot.getCurrentTrial().trialsVal);
       logger("Index", snapshot.thisIndex);
+
+      if (targetKind.current === "reading") readingSound.play();
 
       ////
       switchKind(targetKind.current, {
@@ -2546,9 +2592,6 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
                   status.trialCorrect_thisBlock++;
                   status.trialCompleted_thisBlock++;
                 },
-                reading: () => {
-                  readingSound.play();
-                },
               });
               // CORRECT
               key_resp.corr = 1;
@@ -2588,14 +2631,20 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         continueRoutine = false;
       }
 
-      // *totalTrial* updates
-      if (t >= 0.0 && totalTrial.status === PsychoJS.Status.NOT_STARTED) {
+      // *trialBlockDistanceCounter* updates
+      if (
+        t >= 0.0 &&
+        trialBlockDistanceCounter.status === PsychoJS.Status.NOT_STARTED
+      ) {
         // keep track of start time/frame for later
-        totalTrial.tStart = t; // (not accounting for frame time here)
-        totalTrial.frameNStart = frameN; // exact frame index
-        totalTrial.setAutoDraw(true);
+        trialBlockDistanceCounter.tStart = t; // (not accounting for frame time here)
+        trialBlockDistanceCounter.frameNStart = frameN; // exact frame index
+        trialBlockDistanceCounter.setAutoDraw(true);
       }
-      totalTrial.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      trialBlockDistanceCounter.setPos([
+        window.innerWidth / 2,
+        -window.innerHeight / 2,
+      ]);
 
       if (showTargetSpecsBool) {
         targetSpecsConfig.x = -window.innerWidth / 2;
