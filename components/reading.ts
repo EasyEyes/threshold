@@ -15,9 +15,9 @@ export const prepareReadingQuestions = (
   // Get displayed words
   const displayedWords = new Set();
   for (const page of textPages) {
-    const pageList = page.split(" ");
+    const pageList = preprocessCorpusToWordList(preprocessRawCorpus(page));
     for (const word of pageList) {
-      if (word.length && /^[a-zA-Z]+$/.test(word))
+      if (word.length && onlyAlphabets(word))
         displayedWords.add(word.toLowerCase());
     }
   }
@@ -40,6 +40,7 @@ export const prepareReadingQuestions = (
     const maxFrequency = Math.max(...Object.keys(freqToWords).map(Number));
 
     let freqToTest = correctAnswerFreq;
+    let freqAdjustCounter = 1;
 
     const possibleFoils = new Set();
     const foilCount = numberOfA - 1;
@@ -50,10 +51,11 @@ export const prepareReadingQuestions = (
         if (possibleFoils.size === foilCount) break; // !
       }
 
-      freqToTest++;
+      freqToTest += freqAdjustCounter;
       while (freqToWords[freqToTest] === undefined) {
-        freqToTest++;
-        if (freqToTest > maxFrequency)
+        freqToTest += freqAdjustCounter;
+        if (freqToTest > maxFrequency) freqAdjustCounter = -freqAdjustCounter;
+        if (freqToTest < 1)
           throw "Failed to construct a new question. [no enough foils]";
       }
     }
@@ -63,7 +65,7 @@ export const prepareReadingQuestions = (
     questions.push(newQuestion);
   }
 
-  return questions;
+  return shuffle(questions);
 };
 
 interface WordFrequencies {
@@ -88,7 +90,7 @@ export const processWordFreqToFreqToWords = (
   const freqToWords: FrequencyToWords = {};
 
   for (const word in wordFrequencies) {
-    if (/^[a-zA-Z]+$/.test(word)) {
+    if (onlyAlphabets(word)) {
       const freq = wordFrequencies[word];
       if (!(freq in freqToWords)) freqToWords[freq] = [];
       freqToWords[freq].push(word);
@@ -101,15 +103,18 @@ export const processWordFreqToFreqToWords = (
 /* ------------------------------- Preprocess ------------------------------- */
 
 export const preprocessRawCorpus = (corpus: string) => {
-  corpus = corpus.replace(/“”/g, `"`).replace(/‘’/g, `'`);
-  corpus = corpus.replace(/(\r\n|\n|\r)/g, " ").replace(/_/g, "");
+  // Replace non-standard characters
+  corpus = corpus.replace(/“”/gm, `"`).replace(/‘’/gm, `'`);
+  corpus = corpus.replace(/—/gm, `-`).replace(/_/gm, "");
+  // Remove line breaks
+  corpus = corpus.replace(/(\r\n|\n|\r)/g, " ");
   return corpus;
 };
 
 // Take a long string and return an array of words without punctuation
 export const preprocessCorpusToWordList = (text: string) => {
   return text
-    .replace(/[^'\w\s]/g, "")
+    .replace(/[^\w\s'-]|-(?=[^a-zA-Z0-9])/g, "")
     .split(" ")
     .filter((w) => w.length > 0);
 };
@@ -124,9 +129,9 @@ export const getCorrectAnswer = (
   // Get usable words
   const usableWords = new Set();
   for (const page of usablePages) {
-    const pageList = page.split(" ");
+    const pageList = preprocessCorpusToWordList(preprocessRawCorpus(page));
     for (const word of pageList) {
-      if (word.length && /^[a-zA-Z]+$/.test(word))
+      if (word.length && onlyAlphabets(word))
         usableWords.add(word.toLowerCase());
     }
   }
@@ -136,7 +141,7 @@ export const getCorrectAnswer = (
   );
   for (const freq of frequencies) {
     const words = freqToWords[Number(freq)];
-    for (const word of words) {
+    for (const word of shuffle(words)) {
       if (
         word.length &&
         usableWords.has(word) &&
@@ -161,6 +166,8 @@ export const wordFreqCloseEnoughToTarget = (
   );
 };
 
+/* -------------------------------------------------------------------------- */
+
 // https://stackoverflow.com/a/2450976
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const shuffle = (array: any[]) => {
@@ -182,3 +189,5 @@ export const shuffle = (array: any[]) => {
 
   return a;
 };
+
+const onlyAlphabets = (str: string) => /^[a-zA-Z-]+$/.test(str);

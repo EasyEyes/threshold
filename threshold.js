@@ -61,10 +61,17 @@ import {
   displayOptions,
   letterConfig,
   fixationConfig,
-  psychoJS,
   simulatedObserver,
   instructionsConfig,
+  instructionFont,
+  readingPageIndex,
 } from "./components/global.js";
+
+import {
+  getTinyHint,
+  psychoJS,
+  renderObj,
+} from "./components/globalPsychoJS.js";
 
 ////
 /* ------------------------------- Components ------------------------------- */
@@ -320,7 +327,6 @@ var conditionNameConfig = {
 
 var conditionName;
 
-var trialInfoStr = "";
 var trialCounter; // TextSim object
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
@@ -491,12 +497,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   var instructions;
   var instructions2;
-  var instructionFont = paramReader.read("instructionFont")[0];
+
+  instructionFont.current = paramReader.read("instructionFont")[0];
   if (paramReader.read("instructionFontSource")[0] === "file")
-    instructionFont = cleanFontName(instructionFont);
+    instructionFont.current = cleanFontName(instructionFont.current);
 
   var readingParagraph;
-  var readingIndex = 0;
 
   var key_resp;
   var fixation; ////
@@ -610,7 +616,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       win: psychoJS.window,
       name: "trialCounter",
       text: "",
-      font: instructionFont,
+      font: instructionFont.current,
       units: "pix",
       pos: [trialCounterConfig.x, trialCounterConfig.y],
       alignHoriz: trialCounterConfig.alignHoriz,
@@ -628,7 +634,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       win: psychoJS.window,
       name: "targetSpecs",
       text: "",
-      font: instructionFont,
+      font: instructionFont.current,
       units: "pix",
       pos: [targetSpecsConfig.x, targetSpecsConfig.y],
       alignHoriz: targetSpecsConfig.alignHoriz,
@@ -647,7 +653,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       win: psychoJS.window,
       name: "conditionName",
       text: "",
-      font: instructionFont,
+      font: instructionFont.current,
       units: "pix",
       pos: [conditionNameConfig.x, conditionNameConfig.y],
       alignHoriz: conditionNameConfig.alignHoriz,
@@ -666,7 +672,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ...instructionsConfig,
       win: psychoJS.window,
       name: "instructions",
-      font: instructionFont,
+      font: instructionFont.current,
       color: new util.Color("black"),
       pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
       alignVert: "top",
@@ -676,7 +682,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ...instructionsConfig,
       win: psychoJS.window,
       name: "instructions2",
-      font: instructionFont,
+      font: instructionFont.current,
       color: new util.Color("black"),
       pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
       alignVert: "bottom",
@@ -700,6 +706,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         100
       );
     }
+
+    getTinyHint();
 
     /* --- BOUNDING BOX --- */
     // Generate the bounding boxes to be displayed superimposing...
@@ -773,8 +781,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var frameN;
   var continueRoutine;
   var fileComponents;
-
-  var continueRoutine;
   var frameRemains;
 
   function fileRoutineBegin(snapshot) {
@@ -892,6 +898,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     /* --- /SIMULATED --- */
 
     trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+    renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
     t = instructionsClock.getTime();
     frameN = frameN + 1;
@@ -1067,9 +1074,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
-      trialInfoStr = "";
-      trialCounter.setText(trialInfoStr);
+      trialCounter.setText("");
       trialCounter.setAutoDraw(false);
+
+      renderObj.tinyHint.setText("");
+      renderObj.tinyHint.setAutoDraw(false);
 
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials;
@@ -1183,7 +1192,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function blockSchedulerFinalRoutineEachFrame() {
     const updateTrialInfo = () => {
       // trialCounter
-      trialInfoStr = getTrialInfoStr(
+      let trialCounterStr = getTrialInfoStr(
         rc.language.value,
         showCounterBool,
         showViewingDistanceBool,
@@ -1194,9 +1203,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         viewingDistanceCm.current,
         targetKind.current === "reading" ? "letter" : targetKind.current
       );
-      trialCounter.setText(trialInfoStr);
+      trialCounter.setText(trialCounterStr);
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       trialCounter.setAutoDraw(showCounterBool);
+
+      // tinyHint
+      renderObj.tinyHint.setText("");
+      renderObj.tinyHint.setAutoDraw(false);
     };
 
     return async function () {
@@ -1291,7 +1304,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function blockSchedulerFinalRoutineEnd() {
     return async function () {
       loggerText("blockSchedulerFinalRoutineEnd");
-      removeClickableCharacterSet();
+      removeClickableCharacterSet(showCharacterSetResponse);
 
       return Scheduler.Event.NEXT;
     };
@@ -1463,6 +1476,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       initInstructionClock.reset(); // clock
       frameN = -1;
       continueRoutine = true;
+      clickedContinue.current = false;
 
       const L = rc.language.value;
 
@@ -1504,6 +1518,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.setAutoDraw(false);
           flanker1.setAutoDraw(false);
           flanker2.setAutoDraw(false);
+
+          // Reset reading status
+          readingPageIndex.current = 0;
         },
       });
 
@@ -1519,7 +1536,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       currentBlockCreditForTrialBreak = 0;
       hideTrialBreakProgressBar();
 
-      trialInfoStr = getTrialInfoStr(
+      let trialCounterStr = getTrialInfoStr(
         L,
         paramReader.read("showCounterBool", status.block)[0],
         paramReader.read("showViewingDistanceBool", status.block)[0],
@@ -1530,8 +1547,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         viewingDistanceCm.current,
         targetKind.current
       );
-      trialCounter.setText(trialInfoStr);
+      trialCounter.setText(trialCounterStr);
       trialCounter.setAutoDraw(true);
+
+      renderObj.tinyHint.setAutoDraw(false);
 
       return Scheduler.Event.NEXT;
     };
@@ -1611,17 +1630,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           var D = 200;
           var g = 60;
 
-          target.setFont(instructionFont);
+          target.setFont(instructionFont.current);
           target.setPos([D, 0]);
           target.setText("R");
           target.setHeight(h);
 
-          flanker1.setFont(instructionFont);
+          flanker1.setFont(instructionFont.current);
           flanker1.setPos([D - g, 0]);
           flanker1.setText("H");
           flanker1.setHeight(h);
 
-          flanker2.setFont(instructionFont);
+          flanker2.setFont(instructionFont.current);
           flanker2.setPos([D + g, 0]);
           flanker2.setText("C");
           flanker2.setHeight(h);
@@ -1810,9 +1829,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           frameN = -1;
           // continueRoutine = true;
 
+          // tinyHint
+          renderObj.tinyHint.setText(
+            phrases.T_readingNextPage[rc.language.value]
+          );
+          renderObj.tinyHint.setAutoDraw(true);
+
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(readingParagraph);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
         },
         letter: () => {
           /* -------------------------------------------------------------------------- */
@@ -2130,6 +2157,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
 
           trialComponents.push(showCharacterSet);
           trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
 
           // /* --- BOUNDING BOX --- */
           addBoundingBoxesToComponents(
@@ -2171,6 +2199,9 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
             trialInstructionClock.getTime()
           );
 
+          // tinyHint
+          renderObj.tinyHint.setAutoDraw(false);
+
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
@@ -2187,7 +2218,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       grid.current.update(reader.read("showGrid", BC), displayOptions);
 
       // totalTrialsThisBlock.current = snapshot.nTotal;
-      trialInfoStr = getTrialInfoStr(
+      let trialCounterStr = getTrialInfoStr(
         rc.language.value,
         showCounterBool,
         showViewingDistanceBool,
@@ -2198,8 +2229,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         viewingDistanceCm.current,
         targetKind.current
       );
-      trialCounter.setText(trialInfoStr);
-      trialCounter.setFont(instructionFont);
+      trialCounter.setText(trialCounterStr);
+      trialCounter.setFont(instructionFont.current);
       trialCounter.setHeight(trialCounterConfig.fontSize);
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       trialCounter.setAutoDraw(showCounterBool);
@@ -2228,6 +2259,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       }
 
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -2410,7 +2442,9 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
 
       switchKind(targetKind.current, {
         reading: () => {
-          readingParagraph.setText(readingThisBlockPages[readingIndex]);
+          readingParagraph.setText(
+            readingThisBlockPages[readingPageIndex.current]
+          );
           readingParagraph.setFont(
             paramReader.read("readingFont", status.block_condition)
           );
@@ -2434,7 +2468,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
 
           readingParagraph.setAutoDraw(true);
 
-          readingIndex++;
+          readingPageIndex.current++;
         },
       });
       /* -------------------------------------------------------------------------- */
@@ -2448,7 +2482,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
     return async function () {
       if (toShowCursor()) {
         showCursor();
-        removeClickableCharacterSet();
+        removeClickableCharacterSet(showCharacterSetResponse);
         return Scheduler.Event.NEXT;
       }
 
@@ -2588,8 +2622,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           key_resp.corr = 0;
           status.trialCompleted_thisBlock++;
         }
-        showCharacterSetResponse.current = null;
-        removeClickableCharacterSet();
+
+        removeClickableCharacterSet(showCharacterSetResponse);
         continueRoutine = false;
       }
 
@@ -2601,6 +2635,18 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         trialCounter.setAutoDraw(true);
       }
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+
+      // *tinyHint* updates
+      if (
+        t >= 0.0 &&
+        renderObj.tinyHint.status === PsychoJS.Status.NOT_STARTED
+      ) {
+        // keep track of start time/frame for later
+        renderObj.tinyHint.tStart = t; // (not accounting for frame time here)
+        renderObj.tinyHint.frameNStart = frameN; // exact frame index
+        renderObj.tinyHint.setAutoDraw(true);
+      }
+      renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
       if (showTargetSpecsBool) {
         targetSpecsConfig.x = -window.innerWidth / 2;
@@ -2758,7 +2804,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
-        removeClickableCharacterSet();
+        removeClickableCharacterSet(showCharacterSetResponse);
         continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
@@ -2953,7 +2999,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
   }
 
   async function quitPsychoJS(message, isCompleted) {
-    removeClickableCharacterSet();
+    removeClickableCharacterSet(showCharacterSetResponse);
     rc.endNudger();
     showCursor();
 

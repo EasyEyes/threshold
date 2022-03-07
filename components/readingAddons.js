@@ -72,7 +72,10 @@ export const getThisBlockPages = (paramReader, block, readingParagraph) => {
     );
     readingUsedText[thisURL] = preparedSentences.readingUsedText;
 
+    // Clear this block pages
+    while (readingThisBlockPages.length) readingThisBlockPages.pop();
     readingThisBlockPages.push(...preparedSentences.sentences);
+
     return preparedSentences.sentences;
   }
   return [];
@@ -93,39 +96,48 @@ export const preprocessCorpusToSentenceList = (
   const sentences = [];
 
   for (let i = 0; i < numberOfPages; i++) {
+    // PAGE
     let thisPageText = "";
     let thisLineText = "";
     let thisLineTempWordList = [];
     let line = 1;
 
     while (line <= lineNumber) {
+      // LINE
       let thisLineCharCount = lineBuffer;
       thisLineText = "";
       thisLineTempWordList = [];
 
       while (thisLineCharCount > 0 && usedTextList.length > 0) {
+        // WORD
         const newWord = usedTextList.shift();
         thisLineTempWordList.push(newWord);
-        thisLineCharCount -= newWord.length + 1;
+        thisLineCharCount -= newWord.length;
 
-        const tempLineText = thisLineText + " " + newWord;
+        const tempLineText = thisLineText + newWord;
         readingParagraphStimulus.setText(tempLineText);
         const testWidth = readingParagraphStimulus.getBoundingBox(true).width;
 
-        if (testWidth > window.innerWidth * 0.7) {
+        if (testWidth > window.innerWidth * 0.7 || thisLineCharCount < -5) {
           // Give up this word for this line
           // Go to the next line
           usedTextList.unshift(newWord);
           thisLineTempWordList.pop();
-          thisLineText += "\n";
+
+          if (lineNumber > line)
+            // Not the last line
+            thisLineText += "\n";
           break;
         } else {
           thisLineText += newWord;
-          if (thisLineCharCount > 0) {
+          if (thisLineCharCount > 3) {
+            // Continue on this line
             thisLineText += " ";
-          } else if (thisLineCharCount <= 0 && lineNumber > line) {
-            // Not the last line
-            thisLineText += "\n";
+            thisLineCharCount -= 1;
+          } else if (thisLineCharCount <= 3) {
+            // Got to the next line
+            if (lineNumber > line) thisLineText += "\n";
+            break;
           }
         }
       }

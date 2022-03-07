@@ -40,7 +40,11 @@ export function setupClickableCharacterSet(
   return characterSetHolder;
 }
 
-export function removeClickableCharacterSet() {
+export function removeClickableCharacterSet(responseRegister) {
+  responseRegister.current = null;
+  responseRegister.onsetTime = 0;
+  responseRegister.clickTime = 0;
+
   const ele = document.querySelectorAll(".characterSet-holder");
   ele.forEach((e) => {
     document.body.removeChild(e);

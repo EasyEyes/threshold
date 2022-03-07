@@ -1,9 +1,3 @@
-import { PsychoJS } from "../psychojs/src/core/index.js";
-
-export const psychoJS = new PsychoJS({
-  debug: false,
-});
-
 /* ---------------------------- Remote Calibrator --------------------------- */
 export const useRC = true;
 // eslint-disable-next-line no-undef
@@ -51,6 +45,8 @@ export const letterConfig = Object.seal({
   targetSafetyMarginSec: undefined,
 });
 
+export const instructionFont = { current: undefined };
+
 /* --------------------------- Exp Current Status --------------------------- */
 
 export const status = {
@@ -97,6 +93,8 @@ export const readingFrequencyToWordArchive = {};
 
 export const readingUsedText = {};
 export const readingThisBlockPages = []; // string[]
+
+export const readingPageIndex = { current: 0 };
 
 export const readingQuestions = { current: undefined };
 export const readingCurrentQuestionIndex = { current: 0 };
