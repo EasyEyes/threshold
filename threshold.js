@@ -1156,25 +1156,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       frameN = -1;
       continueRoutine = true;
 
-      readingQuestions.current = prepareReadingQuestions(
-        paramReader.read("readingNumberOfQuestions", status.block)[0],
-        paramReader.read("readingNumberOfPossibleAnswers", status.block)[0],
-        readingThisBlockPages,
-        readingFrequencyToWordArchive[
-          paramReader.read("readingCorpus", status.block)[0]
-        ]
-      );
-      readingCurrentQuestionIndex.current = 0;
-      readingClickableAnswersSetup.current = false;
-      readingClickableAnswersUpdate.current = false;
+      if (paramReader.read("readingNumberOfQuestions", status.block)[0] > 0) {
+        readingQuestions.current = prepareReadingQuestions(
+          paramReader.read("readingNumberOfQuestions", status.block)[0],
+          paramReader.read("readingNumberOfPossibleAnswers", status.block)[0],
+          readingThisBlockPages,
+          readingFrequencyToWordArchive[
+            paramReader.read("readingCorpus", status.block)[0]
+          ]
+        );
+        readingCurrentQuestionIndex.current = 0;
+        readingClickableAnswersSetup.current = false;
+        readingClickableAnswersUpdate.current = false;
 
-      // Display
-      instructions.setText(
-        phrases.T_readingTheEnd[rc.language.value] +
-          "\n\n\n" +
-          phrases.T_readingTaskQuestionPrompt[rc.language.value]
-      );
-      instructions.setAutoDraw(true);
+        // Display
+        instructions.setText(
+          phrases.T_readingTheEnd[rc.language.value] +
+            "\n\n\n" +
+            phrases.T_readingTaskQuestionPrompt[rc.language.value]
+        );
+        instructions.setAutoDraw(true);
+      }
 
       return Scheduler.Event.NEXT;
     };
@@ -1200,6 +1202,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
 
     return async function () {
+      if (paramReader.read("readingNumberOfQuestions", status.block)[0] <= 0)
+        return Scheduler.Event.NEXT;
+
       t = blockScheduleFinalClock.getTime();
       frameN = frameN + 1;
 
@@ -2413,8 +2418,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           let lastWidth = window.innerWidth;
           for (
             let testWidth = window.innerWidth;
-            testWidth > window.innerWidth * 0.7;
-            testWidth -= 10
+            testWidth > 0;
+            testWidth -= 5
           ) {
             readingParagraph.setWrapWidth(testWidth);
             const thisHeight = readingParagraph.getBoundingBox().height;
