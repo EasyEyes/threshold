@@ -9,8 +9,8 @@ export const prepareReadingQuestions = (
   freqToWords: FrequencyToWords
 ) => {
   const usablePages = [...textPages];
-  usablePages.pop();
-  usablePages.shift();
+  if (usablePages.length > 2) usablePages.shift();
+  if (usablePages.length > 1) usablePages.pop();
 
   // Get displayed words
   const displayedWords = new Set();
@@ -29,7 +29,8 @@ export const prepareReadingQuestions = (
       freqToWords,
       questions
     );
-    if (correctAnswerFreq === 0) throw "Failed to construct a new question.";
+    if (correctAnswerFreq === 0)
+      throw "Failed to construct a new question. [no correct answer]";
 
     const newQuestion: ReadingQuestionAnswers = {
       correctAnswer: correctAnswer,
@@ -53,7 +54,7 @@ export const prepareReadingQuestions = (
       while (freqToWords[freqToTest] === undefined) {
         freqToTest++;
         if (freqToTest > maxFrequency)
-          throw "Failed to construct a new question.";
+          throw "Failed to construct a new question. [no enough foils]";
       }
     }
 
