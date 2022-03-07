@@ -803,7 +803,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.5",
     explanation:
-      'If readingSetSizeBy is "x-height", then set point size to to achieve this specified x-height (the height of lowercase x). ',
+      'If readingSetSizeBy is "xHeight", then set point size to to achieve this specified x-height (the height of lowercase x). ',
     type: "numerical",
     default: "1",
   },

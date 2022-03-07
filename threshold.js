@@ -180,6 +180,7 @@ import {
 // READING
 import { prepareReadingQuestions } from "./components/reading.ts";
 import {
+  getSizeForXHeight,
   getThisBlockPages,
   loadReadingCorpus,
 } from "./components/readingAddons.js";
@@ -1361,22 +1362,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "readingPages",
             status.block
           )[0];
-
-          switch (paramReader.read("readingSetSizeBy", status.block)[0]) {
-            case "nominal":
-              readingHeight.current =
-                paramReader.read("readingNominalSizeDeg", status.block)[0] *
-                degreesToPixels(1, {
-                  pixPerCm: displayOptions.pixPerCm,
-                });
-              break;
-            default:
-              break;
-          }
-
-          // Construct this block pages
-          readingParagraph.setHeight(readingHeight.current);
-          getThisBlockPages(paramReader, status.block, readingParagraph);
         },
         letter: () => {
           const possibleTrials = paramReader.read(
@@ -1521,6 +1506,33 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // Reset reading status
           readingPageIndex.current = 0;
+
+          // FONT
+          readingParagraph.setFont(
+            paramReader.read("readingFont", status.block)[0]
+          );
+          // HEIGHT
+          switch (paramReader.read("readingSetSizeBy", status.block)[0]) {
+            case "nominal":
+              readingHeight.current =
+                paramReader.read("readingNominalSizeDeg", status.block)[0] *
+                degreesToPixels(1, {
+                  pixPerCm: displayOptions.pixPerCm,
+                });
+              break;
+            case "xHeight":
+              readingHeight.current = getSizeForXHeight(
+                readingParagraph,
+                paramReader.read("readingXHeightDeg", status.block)[0]
+              );
+              break;
+            default:
+              break;
+          }
+          readingParagraph.setHeight(readingHeight.current);
+
+          // Construct this block pages
+          getThisBlockPages(paramReader, status.block, readingParagraph);
         },
       });
 
@@ -2442,19 +2454,16 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
 
       switchKind(targetKind.current, {
         reading: () => {
+          // TEXT
           readingParagraph.setText(
             readingThisBlockPages[readingPageIndex.current]
           );
-          readingParagraph.setFont(
-            paramReader.read("readingFont", status.block_condition)
-          );
-          readingParagraph.setHeight(readingHeight.current);
-
-          readingParagraph.setWrapWidth(window.innerWidth);
+          // WRAP WIDTH
+          readingParagraph.setWrapWidth(1.2 * window.innerWidth);
           let lastHeight = readingParagraph.getBoundingBox().height;
           let lastWidth = window.innerWidth;
           for (
-            let testWidth = window.innerWidth;
+            let testWidth = 1.2 * window.innerWidth;
             testWidth > 0;
             testWidth -= 5
           ) {
@@ -2464,8 +2473,9 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
             else break;
           }
           readingParagraph.setWrapWidth(lastWidth);
+          // POS
           readingParagraph.setPos([-lastWidth * 0.5, 0]);
-
+          // AUTO DRAW
           readingParagraph.setAutoDraw(true);
 
           readingPageIndex.current++;

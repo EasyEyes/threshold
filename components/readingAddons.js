@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import {
+  displayOptions,
   readingCorpusArchive,
   readingFrequencyToWordArchive,
   readingThisBlockPages,
@@ -8,7 +9,7 @@ import {
   readingWordFrequencyArchive,
   readingWordListArchive,
 } from "./global";
-import { logger } from "./utils";
+import { degreesToPixels, logger } from "./utils";
 
 import {
   preprocessRawCorpus,
@@ -101,6 +102,7 @@ export const preprocessCorpusToSentenceList = (
     let thisLineText = "";
     let thisLineTempWordList = [];
     let line = 1;
+    let thisPageLineHeights = [];
 
     while (line <= lineNumber) {
       // LINE
@@ -118,7 +120,7 @@ export const preprocessCorpusToSentenceList = (
         readingParagraphStimulus.setText(tempLineText);
         const testWidth = readingParagraphStimulus.getBoundingBox(true).width;
 
-        if (testWidth > window.innerWidth * 0.7 || thisLineCharCount < -5) {
+        if (testWidth > window.innerWidth * 0.8 || thisLineCharCount < -5) {
           // Give up this word for this line
           // Go to the next line
           usedTextList.unshift(newWord);
@@ -126,7 +128,7 @@ export const preprocessCorpusToSentenceList = (
 
           if (lineNumber > line)
             // Not the last line
-            thisLineText += "\n";
+            thisLineText = removeLastSpace(thisLineText) + "\n";
           break;
         } else {
           thisLineText += newWord;
@@ -136,17 +138,21 @@ export const preprocessCorpusToSentenceList = (
             thisLineCharCount -= 1;
           } else if (thisLineCharCount <= 3) {
             // Got to the next line
-            if (lineNumber > line) thisLineText += "\n";
+            if (lineNumber > line)
+              thisLineText = removeLastSpace(thisLineText) + "\n";
             break;
           }
         }
       }
 
-      const tempPageText = thisPageText + thisLineText;
-      readingParagraphStimulus.setText(tempPageText);
-      const testHeight = readingParagraphStimulus.getBoundingBox(true).height;
+      readingParagraphStimulus.setText(thisLineText);
+      const newTestHeight =
+        readingParagraphStimulus.getBoundingBox(true).height;
 
-      if (testHeight > window.innerHeight * 0.9) {
+      if (
+        thisPageLineHeights.reduce((p, c) => p + c, 0) + newTestHeight >
+        window.innerHeight * 0.7
+      ) {
         // Give up this line
         // Go to the next page
         for (
@@ -159,12 +165,43 @@ export const preprocessCorpusToSentenceList = (
         break;
       } else {
         thisPageText += thisLineText;
+        thisPageLineHeights.push(newTestHeight);
       }
       line++;
     }
-    sentences.push(thisPageText);
+    sentences.push(removeLastLineBreak(thisPageText));
   }
 
   usedText = usedTextList.join(" ");
   return { usedText, sentences };
+};
+
+/* -------------------------------------------------------------------------- */
+
+export const getSizeForXHeight = (readingParagraph, targetDeg) => {
+  const targetPix = degreesToPixels(targetDeg, {
+    pixPerCm: displayOptions.pixPerCm,
+  });
+
+  readingParagraph.setText("x");
+
+  let height = 1;
+  while (height < window.innerHeight * 0.5) {
+    readingParagraph.setHeight(height);
+    const testHeight = readingParagraph.getBoundingBox(true).height;
+    if (testHeight > targetPix) return height;
+
+    height++;
+  }
+  return window.innerHeight * 0.5;
+};
+
+/* --------------------------------- HELPERS -------------------------------- */
+
+const removeLastSpace = (str) => {
+  return str.replace(/ $/, "");
+};
+
+const removeLastLineBreak = (text) => {
+  return text.replace(/\n$/, "");
 };

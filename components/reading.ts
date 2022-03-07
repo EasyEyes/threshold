@@ -46,7 +46,12 @@ export const prepareReadingQuestions = (
     const foilCount = numberOfA - 1;
     while (possibleFoils.size < foilCount) {
       for (const word of shuffle(freqToWords[freqToTest])) {
-        if (displayedWords.has(word) || word === correctAnswer) continue;
+        if (
+          displayedWords.has(word) ||
+          word === correctAnswer ||
+          word.length < 2
+        )
+          continue;
         possibleFoils.add(word);
         if (possibleFoils.size === foilCount) break; // !
       }
@@ -143,7 +148,7 @@ export const getCorrectAnswer = (
     const words = freqToWords[Number(freq)];
     for (const word of shuffle(words)) {
       if (
-        word.length &&
+        word.length > 1 &&
         usableWords.has(word) &&
         !questions.find((q) => q.correctAnswer === word)
       ) {

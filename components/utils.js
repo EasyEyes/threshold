@@ -107,7 +107,7 @@ export const loggerText = (text) => {
 export const degreesToPixels = (degrees, displayOptions) => {
   if (Math.abs(degrees) > 90)
     throw new Error(
-      "To large of an angle (ie > 90 deg) specified for this method of transfering between angles and pixels."
+      "To large of an angle (ie > 90 deg) specified for this method of transferring between angles and pixels."
     );
   const radians = Math.abs(degrees) * (Math.PI / 180);
   const pixels =
