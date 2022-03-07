@@ -18,7 +18,8 @@ export function setupClickableCharacterSet(
   font,
   where,
   responseRegister,
-  extraFunction = null
+  extraFunction = null,
+  extraCharClassName = ""
 ) {
   const characterSetHolder = document.createElement("div");
   characterSetHolder.id = "characterSet-holder";
@@ -26,7 +27,13 @@ export function setupClickableCharacterSet(
   characterSetHolder.style.fontFamily = `"${font}"`;
   getCharacterSetShowPos(characterSetHolder, where);
 
-  pushCharacterSet(ans, characterSetHolder, responseRegister, extraFunction);
+  pushCharacterSet(
+    ans,
+    characterSetHolder,
+    responseRegister,
+    extraFunction,
+    extraCharClassName
+  );
 
   document.body.appendChild(characterSetHolder);
 
@@ -43,14 +50,21 @@ export function removeClickableCharacterSet() {
 export function updateClickableCharacterSet(
   ans,
   responseRegister,
-  extraFunction
+  extraFunction = null,
+  extraCharClassName = ""
 ) {
   const characterSetHolder = document.querySelector(".characterSet-holder");
   while (characterSetHolder.firstChild) {
     characterSetHolder.removeChild(characterSetHolder.firstChild);
   }
 
-  pushCharacterSet(ans, characterSetHolder, responseRegister, extraFunction);
+  pushCharacterSet(
+    ans,
+    characterSetHolder,
+    responseRegister,
+    extraFunction,
+    extraCharClassName
+  );
   return characterSetHolder;
 }
 
@@ -60,11 +74,15 @@ const pushCharacterSet = (
   ans,
   characterSetHolder,
   responseRegister,
-  extraFunction
+  extraFunction = null,
+  extraCharClassName = ""
 ) => {
   for (let a of ans) {
     let characterSet = document.createElement("span");
     characterSet.className = "characterSet";
+    if (extraCharClassName.length)
+      characterSet.classList.add(extraCharClassName);
+
     characterSet.innerText = a;
     characterSet.onclick = () => {
       responseRegister.clickTime = performance.now();

@@ -679,15 +679,6 @@ export const GLOSSARY: Glossary = {
     default: "nominalSize",
     categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
   },
-  readingFoilToTargetFrequencyMaxRatio: {
-    name: "readingFoilToTargetFrequencyMaxRatio",
-    availability: "now",
-    example: "2",
-    explanation:
-      "Each retention questions offers several words and asks the participant which word (the target) was in the passage just read. The  other words (foils) were not in that passage but do appear in the corpus,. The parameter readingFoilToTargetFrequencyMaxRatio specifies, for each foil, how similar the foil's corpus frequency must be to the target's. Each tentative target is accepted if it hasn't already been used in this block and the corpus has readingNumberOfPossibleAnswers minus one foils with similar frequency. To be sufficiently similar, each foil's frequency in the corpus must be in the range \ntargetFrequency / readingFoilToTargetFrequencyMaxRatio \nto \ntargetFrequency * readingFoilToTargetFrequencyMaxRatio. \nWe take as foils the readingNumberOfPossibleAnswers-1 words that are closest in log frequency to the target frequency in the corpus. If we can't find enough foils for a given target, then we reject that target and pick another. The read passage will typically have hundreds of words, so there are lots of candidate targets for the retention questions.",
-    type: "numerical",
-    default: "2",
-  },
   readingFont: {
     name: "readingFont",
     availability: "now",
@@ -784,7 +775,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "spacing",
     explanation:
-      'How do you specify the size of the text to be read?\n• "nominal" will set the point size of the text to readingNominalSizeDeg*pixPerDeg,  \n• "x-height" will adjust text size to achieve the specified x-height (the height of lowercase x),  i.e. readingXHeightDeg. \n• "spacing" will adjust the text size to achieve the specified letter-to-letter readingSpacingDeg.',
+      'How do you specify the size of the text to be read?\n• "nominal" will set the point size of the text to readingNominalSizeDeg*pixPerDeg,  \n• "xHeight" will adjust text size to achieve the specified x-height (the height of lowercase x),  i.e. readingXHeightDeg. \n• "spacing" will adjust the text size to achieve the specified letter-to-letter readingSpacingDeg.',
     type: "categorical",
     default: "spacing",
     categories: ["nominal", "xHeight", "spacing"],
@@ -1094,7 +1085,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "",
     explanation:
-      "Specifies the spacing, in degrees, center-to-center from target to outer flanker. This input value is ignored when you use Quest to measure the spacing threshold.",
+      "spacingDeg specifies the spacing, in degrees, center-to-center from target to a flanker. This input value is ignored when you use Quest to measure the spacing threshold. If spacingDirection is radial then spacingDeg is the spacing from target to outer flanker. If spacingDirection is tangential then spacingDeg is spacing to each flanker, as the spacings are equal.",
     type: "numerical",
     default: "2",
   },
@@ -1103,7 +1094,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "radial",
     explanation:
-      'When eccentricity is nonzero then the direction can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then the direction can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is an error to request radial or tangential at eccentricity zero.',
+      'spacingDirection. When eccentricity is nonzero then spacingDirection can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then spacingDirection can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is an error to request radial or tangential at eccentricity zero.',
     type: "categorical",
     default: "radial",
     categories: [
@@ -1120,7 +1111,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "1.4",
     explanation:
-      "Specifies the ratio of spacing (in deg, center of target to center of inner flanker) to size (in deg, can be width or height as specified by targetSizeIsHeightBool). Ignored unless spacingRelationToSize is 'ratio'.",
+      "spacingOverSizeRatio specifies the ratio of spacing (in deg, center of target to center of inner flanker) to size (in deg, can be width or height as specified by targetSizeIsHeightBool). Ignored unless spacingRelationToSize is 'ratio'.",
     type: "numerical",
     default: "1.4",
   },
@@ -1139,7 +1130,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "screen",
     explanation:
-      'spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity eccDeg is nonzero and spacingDirection is radial. The outer flanker will have the specified spacingDeg. This only affects the spacing of the inner flanker, which is adjusted to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e.  log(outer+eccDeg + 0.15)-log(eccDeg + 0.15)=log(eccDeg + 0.15)-log(eccDeg-inner + 0.15), where eccDeg is the target\'s radial eccentricity in deg. For checking, you may want to show a corresponding grid by setting parameter showGrid to px or cm (for "screen"), deg (for "retina"), and mm (for "cortex").',
+      'spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity is nonzero and spacingDirection is radial. Assuming there is a target between two flankers, all on a radial line. The "inner" flanker is closer to fixation than the target. The "outer" flanker is farther than the target. We refer to the center-to-center spacing from target to inner and outer flankers as the inner and outer spacings. Parameter "spacingDeg" specifies the outer spacing. spacingSymmetry affects only the inner spacing, which is calculated to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e.  log(outer+eccDeg + 0.15)-log(eccDeg + 0.15)=log(eccDeg + 0.15)-log(eccDeg-inner + 0.15), where eccDeg is the target\'s radial eccentricity in deg. To check the spacing symmetry, you may want to show a corresponding grid by setting parameter showGrid to px or cm (for "screen"), deg (for "retina"), and mm (for "cortex").',
     type: "categorical",
     default: "retina",
     categories: ["screen", "retina", "cortex"],
@@ -1177,7 +1168,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "DHKNORSVZ",
     explanation:
-      "A string of unicode characters. On each trial, the target and flankers are randomly drawn from this characterSet, without replacement. Allowed responses are restricted to this characterSet. The other keys on the keyboard are dead. (If keyEscapeBool is true, then we also enable the escape key.) Letters may appear more than once in the string, to increase their probability of being drawn, but once one is drawn the rest are removed with it, so the drawn samples won't have any repeats.",
+      "targetCharacterSet is a string of unicode characters. On each trial, the target and flankers are randomly drawn from this character set, without replacement. Allowed responses are restricted to this character set. The other keys on the keyboard are dead. Letters may appear more than once in the string, to increase their probability of being drawn, but once one is drawn the rest are removed with it, so the drawn samples won't have any repeats.",
     type: "text",
     default: "acenorsuvxz",
   },
@@ -1204,7 +1195,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "10",
     explanation:
-      "The x location of the target center, relative to fixation. The target center is defined as the center of the bounding box for the letters in the targetCharacterSet. (See targetBoundingBoxHorizontalAlignment.)",
+      "targetEccentricityXDeg is the x location of the target center, relative to fixation. The target center is defined as the center of the bounding box for the letters in the targetCharacterSet. (See targetBoundingBoxHorizontalAlignment.)",
     type: "numerical",
     default: "0",
   },
@@ -1212,7 +1203,8 @@ export const GLOSSARY: Glossary = {
     name: "targetEccentricityYDeg",
     availability: "now",
     example: "0",
-    explanation: "The y location of the target center, relative to fixation.",
+    explanation:
+      "targetEccentricityYDeg is the y location of the target center, relative to fixation.",
     type: "numerical",
     default: "0",
   },
@@ -1259,7 +1251,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "",
     explanation:
-      'targetFontVariationSettings accepts a string to control a variable font. You can set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variable, and we can pick any value along each axis to control the font rendering. targetFontVariationSettings receives a string. The default is the empty string. A typical value is\n"wght" 625\nor\n"wght" 625”, wdth" 25\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. “wght” is weight, which allows you to select any weight from extra thin to regular to bold, to black. “wdth” is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. One must consult the documentation of each variable font to discover which axes it supports. Supported by all modern browsers, except Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
+      'targetFontVariationSettings accepts a string to control a variable font. You set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variable, and we can pick any value along each axis to control the font rendering. targetFontVariationSettings receives a string. The default is the empty string. A typical value is\n"wght" 625\nor\n"wght" 625”, wdth" 25\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. “wght” is weight, which allows you to select any weight from extra thin to regular to bold, to black. “wdth” is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. One must consult the documentation of each variable font to discover which axes it supports. Variable fonts are supported by all modern browsers, and not by Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
     type: "text",
     default: "",
   },
@@ -1300,13 +1292,30 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "8",
   },
-  "targetQuestion@": {
-    name: "targetQuestion@",
+  targetQuestion1: {
+    name: "targetQuestion1",
     availability: "later",
     example:
       "How much beauty do you get from this image right now?|1|2|3|4|5|6|7",
-    explanation: "",
+    explanation:
+      "Parameter targetQuestion is a string consisting of a multiple-choice question and the allowed answers, all separated by the | character.",
     type: "text",
+    default: "",
+  },
+  targetQuestion2: {
+    name: "targetQuestion2",
+    availability: "later",
+    example: '"',
+    explanation: '"',
+    type: "",
+    default: "",
+  },
+  targetQuestion3: {
+    name: "targetQuestion3",
+    availability: "later",
+    example: '"',
+    explanation: '"',
+    type: "",
     default: "",
   },
   targetRepeatsBool: {
@@ -1356,9 +1365,9 @@ export const GLOSSARY: Glossary = {
   targetSizeDeg: {
     name: "targetSizeDeg",
     availability: "now",
-    example: "NaN",
+    example: "5",
     explanation:
-      "Ignored unless needed. Size is either height or width, as defined below. Height and width are based on the union of the bounding boxes of all the letters in the characterSet. ",
+      "Ignored unless needed. Size is either height or width, as specified by targetSizeIsHeightBool. Height and width are based on the union of the bounding boxes of all the letters in targetCharacterSet. ",
     type: "numerical",
     default: "2",
   },
@@ -1433,7 +1442,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "identify",
     explanation:
-      'Can be one or multiple of the following categories. If there are multiple tasks in one trial, use comma to divide them, e.g., "identify,targetQuestion1". The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• targetQuestion@ (e.g., targetQuestion1) uses the question and answers provided by parameter targetQuestion@. The participant must click on one of the answers.\n• detect might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'Can be one or multiple of the following categories. If there are multiple tasks in one trial, use comma to divide them, e.g., "identify,targetQuestion1". The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• targetQuestion1 (and targetQuestion2, etc.) uses the question and answers provided by parameter targetQuestion1. The participant must click on one of the answers.\n• detect might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
     categories: ["identify", "categorize", "targetQuestion@"],
@@ -1479,7 +1488,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "spacing",
     explanation:
-      'The designated parameter (e.g. size or spacing) will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacing" to vary center-to-center spacing of target and neighboring flankers. \n• "size" to vary target size. \n• "contrast" awaits HDR10 support.\n• "eccentricity"  to be added soon.\n• "soundVolume" awaits sound support.\n• "soundNoise" awaits sound support.',
+      'thresholdParameter designates that a parameter (e.g. size or spacing) will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacing" to vary center-to-center spacing of target and neighboring flankers. \n• "size" to vary target size. \n• "contrast" awaits HDR10 support.\n• "eccentricity"  to be added soon.\n• "soundVolume" awaits sound support.\n• "soundNoise" awaits sound support.',
     type: "categorical",
     default: "spacing",
     categories: ["spacing", "size", "soundVolume", "soundNoise"],
@@ -1526,7 +1535,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "45",
     explanation:
-      "At the beginning of the block, we encourage the participant to adjust their viewing distance (moving head or display) to approximate the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. All conditions within a block must have the same desired viewing distance.\n     The viewing-distance nudger (Closer! Farther!) is working fine at getting the participant to the right distance, but we need to cancel any trials in which the stimulus was obscured by nudging. We have a three-period solution, that is being introduced in two stages. First we describe the ideal scheme that is our goal. Period A. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging and the rest of our software ignores it. Period B. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus we also allow nudging, but any nudge cancels the trial. Period C. From the end of the stimulus until the observer responds we suspend nudging (so the nudge won't interfere with remembering the target). Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. I'm not sure that the current version of MultistairHandler will cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during period A, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during period B we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. ",
+      "viewingDistanceDesiredCm. At the beginning of the block, we encourage the participant to adjust their viewing distance (moving head or display) to approximate the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. All conditions within a block must have the same desired viewing distance.\n     The viewing-distance nudger (Closer! Farther!) is working fine at getting the participant to the right distance, but we need to cancel any trials in which the stimulus was obscured by nudging. We have a three-period solution, that is being introduced in two stages. First we describe the ideal scheme that is our goal. Period A. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging and the rest of our software ignores it. Period B. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus we also allow nudging, but any nudge cancels the trial. Period C. From the end of the stimulus until the observer responds we suspend nudging (so the nudge won't interfere with remembering the target). Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. I'm not sure that the current version of MultistairHandler will cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during period A, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during period B we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. ",
     type: "numerical",
     default: "40",
   },

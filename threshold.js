@@ -43,6 +43,7 @@ import {
   readingCorpusArchive,
   readingWordListArchive,
   readingWordFrequencyArchive,
+  readingFrequencyToWordArchive,
   readingThisBlockPages,
   readingQuestions,
   readingCurrentQuestionIndex,
@@ -1159,7 +1160,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("readingNumberOfQuestions", status.block)[0],
         paramReader.read("readingNumberOfPossibleAnswers", status.block)[0],
         readingThisBlockPages,
-        readingWordFrequencyArchive[
+        readingFrequencyToWordArchive[
           paramReader.read("readingCorpus", status.block)[0]
         ]
       );
@@ -1180,6 +1181,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   function blockSchedulerFinalRoutineEachFrame() {
+    const updateTrialInfo = () => {
+      // trialCounter
+      trialInfoStr = getTrialInfoStr(
+        rc.language.value,
+        showCounterBool,
+        showViewingDistanceBool,
+        readingCurrentQuestionIndex.current + 1,
+        paramReader.read("readingNumberOfQuestions", status.block)[0],
+        status.block,
+        totalBlocks.current,
+        viewingDistanceCm.current,
+        targetKind.current === "reading" ? "letter" : targetKind.current
+      );
+      trialCounter.setText(trialInfoStr);
+      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      trialCounter.setAutoDraw(showCounterBool);
+    };
+
     return async function () {
       t = blockScheduleFinalClock.getTime();
       frameN = frameN + 1;
@@ -1196,22 +1215,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "color: red; font-size: 1.5rem"
         );
 
-        // trialCounter
-        trialInfoStr = getTrialInfoStr(
-          rc.language.value,
-          showCounterBool,
-          showViewingDistanceBool,
-          readingCurrentQuestionIndex.current + 1,
-          paramReader.read("readingNumberOfQuestions", status.block)[0],
-          status.block,
-          totalBlocks.current,
-          viewingDistanceCm.current,
-          targetKind.current === "reading" ? "letter" : targetKind.current
-        );
-        trialCounter.setText(trialInfoStr);
-        trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-        trialCounter.setAutoDraw(showCounterBool);
-
+        updateTrialInfo();
         setupClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
           paramReader.read("readingFont")[0],
@@ -1220,7 +1224,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           (clickedWord) => {
             readingClickableAnswersUpdate.current = true;
             if (clickedWord === thisQuestion.correctAnswer) correctSynth.play();
-          }
+          },
+          "readingAnswer"
         );
 
         readingCurrentQuestionIndex.current++;
@@ -1242,33 +1247,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "color: red; font-size: 1.5rem"
         );
 
-        // trialCounter
-        trialInfoStr = getTrialInfoStr(
-          rc.language.value,
-          showCounterBool,
-          showViewingDistanceBool,
-          readingCurrentQuestionIndex.current + 1,
-          paramReader.read("readingNumberOfQuestions", status.block)[0],
-          status.block,
-          totalBlocks.current,
-          viewingDistanceCm.current,
-          targetKind.current === "reading" ? "letter" : targetKind.current
-        );
-        trialCounter.setText(trialInfoStr);
-        trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-        trialCounter.setAutoDraw(showCounterBool);
-
+        updateTrialInfo();
         instructions.setText(
           phrases.T_readingTaskQuestionPrompt[rc.language.value]
         );
-
         updateClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
           showCharacterSetResponse,
           (clickedWord) => {
             readingClickableAnswersUpdate.current = true;
             if (clickedWord === thisQuestion.correctAnswer) correctSynth.play();
-          }
+          },
+          "readingAnswer"
         );
 
         readingCurrentQuestionIndex.current++;

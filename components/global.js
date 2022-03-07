@@ -93,6 +93,7 @@ export const simulatedObserver = {};
 export const readingCorpusArchive = {};
 export const readingWordListArchive = {};
 export const readingWordFrequencyArchive = {};
+export const readingFrequencyToWordArchive = {};
 
 export const readingUsedText = {};
 export const readingThisBlockPages = []; // string[]

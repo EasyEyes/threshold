@@ -6,58 +6,59 @@ export const prepareReadingQuestions = (
   numberOfQ: number,
   numberOfA: number,
   textPages: string[],
-  wordFrequencies: WordFrequencies
+  freqToWords: FrequencyToWords
 ) => {
   const usablePages = [...textPages];
   usablePages.pop();
   usablePages.shift();
 
-  const textWordList = [];
+  // Get displayed words
+  const displayedWords = new Set();
   for (const page of textPages) {
-    textWordList.push(...preprocessCorpusToWordList(page));
+    const pageList = page.split(" ");
+    for (const word of pageList) {
+      if (word.length && /^[a-zA-Z]+$/.test(word))
+        displayedWords.add(word.toLowerCase());
+    }
   }
 
   const questions: ReadingQuestionAnswers[] = [];
   for (let i = 0; i < numberOfQ; i++) {
+    const [correctAnswer, correctAnswerFreq] = getCorrectAnswer(
+      usablePages,
+      freqToWords,
+      questions
+    );
+    if (correctAnswerFreq === 0) throw "Failed to construct a new question.";
+
     const newQuestion: ReadingQuestionAnswers = {
-      correctAnswer: getCorrectAnswer(usablePages, wordFrequencies),
+      correctAnswer: correctAnswer,
       foils: [],
     };
 
-    const corpusFreqOfAnswer = wordFrequencies[newQuestion.correctAnswer];
+    const maxFrequency = Math.max(...Object.keys(freqToWords).map(Number));
 
+    let freqToTest = correctAnswerFreq;
+
+    const possibleFoils = new Set();
     const foilCount = numberOfA - 1;
-    let possibleFoils = [];
-
-    // ! Should foils not appear in the textPages?
-    let roundFetchingFoils = 0;
-    while (possibleFoils.length < foilCount) {
-      for (const word in wordFrequencies) {
-        if (
-          wordFreqCloseEnoughToTarget(
-            wordFrequencies[word],
-            corpusFreqOfAnswer,
-            roundFetchingFoils
-          )
-        ) {
-          possibleFoils.push(word);
-        }
+    while (possibleFoils.size < foilCount) {
+      for (const word of shuffle(freqToWords[freqToTest])) {
+        if (displayedWords.has(word) || word === correctAnswer) continue;
+        possibleFoils.add(word);
+        if (possibleFoils.size === foilCount) break; // !
       }
-      roundFetchingFoils++;
+
+      freqToTest++;
+      while (freqToWords[freqToTest] === undefined) {
+        freqToTest++;
+        if (freqToTest > maxFrequency)
+          throw "Failed to construct a new question.";
+      }
     }
 
-    possibleFoils = shuffle(possibleFoils);
-
-    while (newQuestion.foils.length < foilCount && possibleFoils.length) {
-      const pickedFoil = possibleFoils.pop();
-      // if (newQuestion.correctAnswer !== pickedFoil && !textWordList.includes(pickedFoil))
-      if (
-        newQuestion.correctAnswer !== pickedFoil &&
-        !newQuestion.foils.includes(pickedFoil)
-      )
-        newQuestion.foils.push(pickedFoil);
-    }
-
+    const possibleFoilsList = shuffle([...possibleFoils]);
+    newQuestion.foils.push(...possibleFoilsList);
     questions.push(newQuestion);
   }
 
@@ -77,10 +78,29 @@ export const getWordFrequencies = (words: string[]) => {
   return frequencies;
 };
 
+interface FrequencyToWords {
+  [key: number]: string[];
+}
+export const processWordFreqToFreqToWords = (
+  wordFrequencies: WordFrequencies
+): FrequencyToWords => {
+  const freqToWords: FrequencyToWords = {};
+
+  for (const word in wordFrequencies) {
+    if (/^[a-zA-Z]+$/.test(word)) {
+      const freq = wordFrequencies[word];
+      if (!(freq in freqToWords)) freqToWords[freq] = [];
+      freqToWords[freq].push(word);
+    }
+  }
+
+  return freqToWords;
+};
+
 /* ------------------------------- Preprocess ------------------------------- */
 
 export const preprocessRawCorpus = (corpus: string) => {
-  corpus = corpus.replace(/“”/g, `"`).replace(/‘’/, `'`);
+  corpus = corpus.replace(/“”/g, `"`).replace(/‘’/g, `'`);
   corpus = corpus.replace(/(\r\n|\n|\r)/g, " ").replace(/_/g, "");
   return corpus;
 };
@@ -97,14 +117,36 @@ export const preprocessCorpusToWordList = (text: string) => {
 
 export const getCorrectAnswer = (
   usablePages: string[],
-  wordFrequencies: WordFrequencies
-) => {
-  let confirmedAnswer = "";
-  while (!confirmedAnswer.length) {
-    const a = shuffle(shuffle(usablePages)[0].split(" "))[0];
-    if (wordFrequencies[a]) confirmedAnswer = a;
+  freqToWords: FrequencyToWords,
+  questions: ReadingQuestionAnswers[]
+): [string, number] => {
+  // Get usable words
+  const usableWords = new Set();
+  for (const page of usablePages) {
+    const pageList = page.split(" ");
+    for (const word of pageList) {
+      if (word.length && /^[a-zA-Z]+$/.test(word))
+        usableWords.add(word.toLowerCase());
+    }
   }
-  return confirmedAnswer;
+
+  const frequencies = Object.keys(freqToWords).sort(
+    (a: string, b: string) => Number(a) - Number(b)
+  );
+  for (const freq of frequencies) {
+    const words = freqToWords[Number(freq)];
+    for (const word of words) {
+      if (
+        word.length &&
+        usableWords.has(word) &&
+        !questions.find((q) => q.correctAnswer === word)
+      ) {
+        return [word, Number(freq)];
+      }
+    }
+  }
+
+  return ["a", 0];
 };
 
 export const wordFreqCloseEnoughToTarget = (

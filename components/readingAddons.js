@@ -2,6 +2,7 @@ import axios from "axios";
 
 import {
   readingCorpusArchive,
+  readingFrequencyToWordArchive,
   readingThisBlockPages,
   readingUsedText,
   readingWordFrequencyArchive,
@@ -13,6 +14,7 @@ import {
   preprocessRawCorpus,
   preprocessCorpusToWordList,
   getWordFrequencies,
+  processWordFreqToFreqToWords,
 } from "./reading.ts";
 
 export const loadReadingCorpus = async (paramReader) => {
@@ -42,6 +44,9 @@ export const loadReadingCorpus = async (paramReader) => {
       );
       readingWordFrequencyArchive[corpus] = getWordFrequencies(
         readingWordListArchive[corpus]
+      );
+      readingFrequencyToWordArchive[corpus] = processWordFreqToFreqToWords(
+        readingWordFrequencyArchive[corpus]
       );
       readingUsedText[corpus] = readingCorpusArchive[corpus];
     }

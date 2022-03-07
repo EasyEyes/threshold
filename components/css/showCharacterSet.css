@@ -20,3 +20,9 @@
   border-color: black;
   cursor: pointer;
 }
+
+/* -------------------------------------------------------------------------- */
+
+.readingAnswer {
+  font-size: 2rem !important;
+}
