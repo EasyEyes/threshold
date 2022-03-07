@@ -2001,6 +2001,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
           target.scaleToHeightPx(stimulusParameters.heightPx);
+          const flankersHeightPx = target.getHeight();
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
           psychoJS.experiment.addData(
             "targetLocationPx",
@@ -2018,12 +2019,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   target.setText(targetCharacter);
                   flanker1.setText(firstFlankerCharacter);
                   flanker2.setText(secondFlankerCharacter);
-                  flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
-                  flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
                   flanker1.setFont(letterConfig.targetFont);
                   flanker2.setFont(letterConfig.targetFont);
-                  flanker1.scaleToHeightPx(stimulusParameters.heightPx);
-                  flanker2.scaleToHeightPx(stimulusParameters.heightPx);
+                  flanker1.setHeight(flankersHeightPx);
+                  flanker2.setHeight(flankersHeightPx);
+                  flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
+                  flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
                   psychoJS.experiment.addData("flankerLocationsPx", [
                     stimulusParameters.targetAndFlankersXYPx[1],
                     stimulusParameters.targetAndFlankersXYPx[2],
