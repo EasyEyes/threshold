@@ -1179,9 +1179,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         // Display
         instructions.setText(
-          phrases.T_readingTheEnd[rc.language.value] +
-            "\n\n\n" +
-            phrases.T_readingTaskQuestionPrompt[rc.language.value]
+          phrases.T_readingTaskQuestionPrompt[rc.language.value]
         );
         instructions.setAutoDraw(true);
       }
@@ -1265,9 +1263,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
 
         updateTrialInfo();
-        instructions.setText(
-          phrases.T_readingTaskQuestionPrompt[rc.language.value]
-        );
         updateClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
           showCharacterSetResponse,
