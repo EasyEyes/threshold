@@ -965,7 +965,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         extraInfo: expInfo,
         originPath: undefined,
         trialList: "conditions/blockCount.csv",
-        seed: undefined,
+        seed: Math.round(performance.now()),
         name: "blocks",
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
@@ -1043,7 +1043,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             nReps: totalTrialsThisBlock.current,
             trialList: trialsConditions,
             method: TrialHandler.Method.SEQUENTIAL,
-            seed: undefined,
+            seed: Math.round(performance.now()),
           });
         },
         letter: () => {
@@ -1060,6 +1060,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             nTrials: totalTrialsThisBlock.current,
             conditions: trialsConditions,
             method: TrialHandler.Method.FULLRANDOM,
+            seed: Math.round(performance.now()),
           });
 
           // TODO set fixation from the actual parameter

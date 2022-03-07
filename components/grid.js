@@ -390,6 +390,7 @@ export class Grid {
       const nGridlines = ["right", "left"].includes(region)
         ? numberOfGridLinesPerSide[0]
         : numberOfGridLinesPerSide[1];
+
       for (let i = 0; i < nGridlines; i++) {
         if (["left", "lower"].includes(region) && i === 0) continue;
         let [verticies, pos] = this._getDegGridPathVerticies(i, region);
@@ -533,6 +534,7 @@ export class Grid {
           edges: 360,
           radius: rPix,
           ori: 0,
+          size: 1,
           pos: fixation,
           lineWidth: labeled ? 4 : 1,
           lineColor: new util.Color("plum"),

@@ -189,7 +189,7 @@ export const restrictLevel = (
     case "spacing":
       [spacingDeg, stimulusParameters] = restrictSpacingDeg(
         proposedLevel,
-        displayOptions.targetEccentricityXYDeg,
+        letterConfig.targetEccentricityXYDeg,
         targetKind.current,
         screenRectPx,
         spacingRelationToSize,
@@ -249,7 +249,7 @@ export const restrictSizeDeg = (
       displayOptions
     );
     heightPx = topPx - bottomPx;
-    stimulusRectPx = characterSetRectPx.scale(
+    let stimulusRectPx = characterSetRectPx.scale(
       widthDeg / characterSetRectPx.width
     );
     stimulusRectPx = stimulusRectPx.offset(targetXYPx);
@@ -475,11 +475,11 @@ export const restrictSpacingDeg = (
           : widthDeg;
         heightDeg =
           widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
-        const [leftPx] = XYPixOfXYDeg(
+        var [leftPx] = XYPixOfXYDeg(
           [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
           displayOptions
         );
-        const [rightPx] = XYPixOfXYDeg(
+        var [rightPx] = XYPixOfXYDeg(
           [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
           displayOptions
         );
@@ -498,7 +498,7 @@ export const restrictSpacingDeg = (
     // COMPUTE STIMULUS RECT
     switch (spacingRelationToSize) {
       case "typographic":
-        const widthFactor = widthPx / characterSetRectPx.width;
+        var widthFactor = widthPx / characterSetRectPx.width;
         stimulusRectPx = characterSetRectPx.scale(widthFactor);
         stimulusRectPx = stimulusRectPx.offset(targetXYPx);
         break;
@@ -517,7 +517,7 @@ export const restrictSpacingDeg = (
                   targetXYDeg[1] + spacingDeg * radialXY[1],
                 ];
                 flanker1XYPx = XYPixOfXYDeg(flanker1XYDeg, displayOptions);
-                const deltaXYPx = [
+                var deltaXYPx = [
                   flanker1XYPx[0] - targetXYPx[0],
                   flanker1XYPx[1] - targetXYPx[1],
                 ];
@@ -534,7 +534,7 @@ export const restrictSpacingDeg = (
                   targetXYPx[1] - deltaXYPx[1],
                 ];
                 flanker2XYDeg = XYDegOfXYPix(flanker2XYPx, displayOptions);
-                const deltaXYDeg = [
+                var deltaXYDeg = [
                   flanker2XYDeg[0] - targetXYDeg[0],
                   flanker2XYDeg[1] - targetXYDeg[1],
                 ];
@@ -544,11 +544,11 @@ export const restrictSpacingDeg = (
                 spacingInnerDeg = spacingOuterDeg;
                 break;
               case "cortex":
-                const eccDeg = norm(targetXYDeg);
-                const cortical =
+                var eccDeg = norm(targetXYDeg);
+                var cortical =
                   Math.log10(eccDeg + spacingOuterDeg + 0.15) -
                   Math.log10(eccDeg + 0.15);
-                const innerEccDeg =
+                var innerEccDeg =
                   Math.pow(10, Math.log10(eccDeg + 0.15) - cortical) - 0.15;
                 spacingInnerDeg = eccDeg - innerEccDeg;
                 break;
