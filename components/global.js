@@ -105,3 +105,19 @@ export const readingClickableAnswersSetup = { current: false };
 export const readingClickableAnswersUpdate = { current: false };
 
 export const readingHeight = { current: undefined };
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------------- COMPONENTS ------------------------------- */
+/* -------------------------------------------------------------------------- */
+
+export const instructionsConfig = {
+  text: "",
+  units: "pix",
+  height: 25.0,
+  wrapWidth: window.innerWidth * 0.8,
+  ori: 0.0,
+  opacity: 1.0,
+  depth: -12.0,
+  alignHoriz: "left",
+  isInstruction: true, // !
+};

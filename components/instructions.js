@@ -191,3 +191,27 @@ export const _takeFixationClick = (e) => {
     clickedContinue.current = false;
   }
 };
+
+/* -------------------------------------------------------------------------- */
+
+// Dynamically adjust instruction SIZE
+
+export const dynamicSetSize = (instructionList, initHeight) => {
+  let reducedHeight = 1;
+  while (
+    getSumHeight(instructionList) >
+    window.innerHeight * (1 - 0.2 * instructionList.length)
+  ) {
+    instructionList.forEach((e) => {
+      e.setHeight(initHeight - reducedHeight);
+    });
+    reducedHeight++;
+  }
+};
+
+const getSumHeight = (instructionList) => {
+  let total = 0;
+  for (const instruction of instructionList)
+    total += instruction.getBoundingBox().height;
+  return total;
+};

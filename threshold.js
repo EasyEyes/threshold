@@ -63,6 +63,7 @@ import {
   fixationConfig,
   psychoJS,
   simulatedObserver,
+  instructionsConfig,
 } from "./components/global.js";
 
 ////
@@ -108,6 +109,7 @@ import {
 import {
   addBeepButton,
   addProceedButton,
+  dynamicSetSize,
   instructionsText,
   removeBeepButton,
   removeProceedButton,
@@ -289,7 +291,7 @@ const paramReader = new ParamReader("conditions", paramReaderInitialized);
 
 /* -------------------------------------------------------------------------- */
 
-var totalTrialConfig = {
+var trialCounterConfig = {
   initialVal: 0,
   fontSize: 20,
   x: window.innerWidth / 2,
@@ -610,10 +612,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       text: "",
       font: instructionFont,
       units: "pix",
-      pos: [totalTrialConfig.x, totalTrialConfig.y],
-      alignHoriz: totalTrialConfig.alignHoriz,
-      alignVert: totalTrialConfig.alignVert,
-      height: totalTrialConfig.fontSize,
+      pos: [trialCounterConfig.x, trialCounterConfig.y],
+      alignHoriz: trialCounterConfig.alignHoriz,
+      alignVert: trialCounterConfig.alignVert,
+      height: trialCounterConfig.fontSize,
       wrapWidth: window.innerWidth,
       ori: 0.0,
       color: new util.Color("black"),
@@ -660,29 +662,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       autoDraw: false,
     });
 
-    const instructionsConfig = {
-      win: psychoJS.window,
-      text: "",
-      font: instructionFont,
-      units: "pix",
-      height: 25.0,
-      wrapWidth: window.innerWidth * 0.8,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -12.0,
-      alignHoriz: "left",
-      isInstruction: true, // !
-    };
     instructions = new visual.TextStim({
       ...instructionsConfig,
+      win: psychoJS.window,
       name: "instructions",
+      font: instructionFont,
+      color: new util.Color("black"),
       pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
       alignVert: "top",
     });
+
     instructions2 = new visual.TextStim({
       ...instructionsConfig,
+      win: psychoJS.window,
       name: "instructions2",
+      font: instructionFont,
+      color: new util.Color("black"),
       pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
       alignVert: "bottom",
     });
@@ -705,6 +700,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         100
       );
     }
+
     /* --- BOUNDING BOX --- */
     // Generate the bounding boxes to be displayed superimposing...
     [
@@ -871,6 +867,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
     instructions.setText(text);
     instructions.setAutoDraw(true);
+    dynamicSetSize([instructions], instructionsConfig.height);
   }
 
   function _instructionBeforeStimulusSetup(text) {
@@ -1605,10 +1602,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             -window.innerHeight * 0.4,
           ]);
           instructions2.setAutoDraw(true);
+          dynamicSetSize(
+            [instructions, instructions2],
+            instructionsConfig.height
+          );
 
           var h = 50;
           var D = 200;
-          var g = 100;
+          var g = 60;
 
           target.setFont(instructionFont);
           target.setPos([D, 0]);
@@ -2198,7 +2199,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       );
       trialCounter.setText(trialInfoStr);
       trialCounter.setFont(instructionFont);
-      trialCounter.setHeight(totalTrialConfig.fontSize);
+      trialCounter.setHeight(trialCounterConfig.fontSize);
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       trialCounter.setAutoDraw(showCounterBool);
 
