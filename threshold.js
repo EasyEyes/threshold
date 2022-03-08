@@ -67,6 +67,7 @@ import {
   readingPageIndex,
   showConditionNameConfig,
   targetCharacterSet,
+  font,
 } from "./components/global.js";
 
 import {
@@ -350,7 +351,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       path: `conditions/block_${i}.csv`,
     });
   }
-  logger("fontsRequired", fontsRequired);
 
   experimentFileName = paramReader.read(
     "_experimentFilename",
@@ -358,6 +358,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   )[0];
   experimentName = paramReader.read("_experimentName", "__ALL_BLOCKS__")[0];
 
+  logger("fontsRequired", fontsRequired);
   for (let i in fontsRequired) {
     logger(i, fontsRequired[i]);
     _resources.push({ name: i, path: fontsRequired[i] });
@@ -1237,7 +1238,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         updateTrialInfo();
         setupClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
-          readingConfig.font,
+          font.name,
           "bottom",
           showCharacterSetResponse,
           (clickedWord) => {
@@ -1507,14 +1508,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingPageIndex.current = 0;
 
           // FONT
-          readingConfig.font = paramReader.read("readingFont", status.block)[0];
-          readingConfig.fontSource = paramReader.read(
-            "readingFontSource",
-            status.block
-          )[0];
-          if (readingConfig.fontSource === "file")
-            readingConfig.font = cleanFontName(readingConfig.font);
-          readingParagraph.setFont(readingConfig.font);
+          font.name = paramReader.read("targetFont", status.block)[0];
+          font.source = paramReader.read("targetFontSource", status.block)[0];
+          if (font.source === "file") font.name = cleanFontName(font.name);
+          readingParagraph.setFont(font.name);
 
           targetCharacterSet.current = String(
             paramReader.read("targetCharacterSet", status.block)[0]
@@ -1867,6 +1864,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const reader = paramReader;
       const BC = status.block_condition;
 
+      font.source = reader.read("targetFontSource", BC);
+      font.name = reader.read("targetFont", BC);
+      if (font.source === "file") font.name = cleanFontName(font.name);
+
       showCounterBool = reader.read("showCounterBool", BC);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
 
@@ -1965,10 +1966,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           letterConfig.spacingDirection = reader.read("spacingDirection", BC);
           letterConfig.spacingSymmetry = reader.read("spacingSymmetry", BC);
-          let targetFontSource = reader.read("targetFontSource", BC);
-          letterConfig.targetFont = reader.read("targetFont", BC);
-          if (targetFontSource === "file")
-            letterConfig.targetFont = cleanFontName(letterConfig.targetFont);
 
           validAns = String(reader.read("targetCharacterSet", BC))
             .toLowerCase()
@@ -2066,7 +2063,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetEccentricityXYPx
           );
           target.setPos(targetEccentricityXYPx);
-          target.setFont(letterConfig.targetFont);
+          target.setFont(font.name);
 
           // ...but size, and content of the target(& flankers) does.
           psychoJS.experiment.addData(
@@ -2104,8 +2101,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   target.setText(targetCharacter);
                   flanker1.setText(firstFlankerCharacter);
                   flanker2.setText(secondFlankerCharacter);
-                  flanker1.setFont(letterConfig.targetFont);
-                  flanker2.setFont(letterConfig.targetFont);
+                  flanker1.setFont(font.name);
+                  flanker2.setFont(font.name);
                   flanker1.setHeight(flankersHeightPx);
                   flanker2.setHeight(flankersHeightPx);
                   flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
@@ -2164,7 +2161,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               spacingRelationToSize: letterConfig.spacingRelationToSize,
               thresholdParameter: thresholdParameter,
               windowSize: psychoJS.window._size,
-              targetFont: letterConfig.targetFont,
+              targetFont: font.name,
             }
           );
           showCharacterSet.setPos([0, 0]);
@@ -2186,7 +2183,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }\nheightPx: ${Math.round(
               stimulusParameters.heightPx
             )}\nfilename: ${experimentFileName}\ntargetFont: ${
-              letterConfig.targetFont
+              font.name
             }\nspacingRelationToSize: ${
               letterConfig.spacingRelationToSize
             }\nspacingOverSizeRatio: ${
@@ -2832,7 +2829,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCharacterSet.setAutoDraw(true);
         setupClickableCharacterSet(
           targetCharacterSet.current,
-          letterConfig.targetFont,
+          font.name,
           targetCharacterSet.where,
           showCharacterSetResponse
         );

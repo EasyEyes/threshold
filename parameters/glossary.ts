@@ -679,35 +679,6 @@ export const GLOSSARY: Glossary = {
     default: "nominalSize",
     categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
   },
-  readingFont: {
-    name: "readingFont",
-    availability: "now",
-    example: "Arial",
-    explanation:
-      "Font name, taken from the name of font file, which may include a style. See targetFont for details. Note that if your text is not English, then you should specify an appropriate targetCharacterSet since the default a-z string won't be appropriate. When the task is reading, targetCharacterSet is used solely to set the point size to achieve a specified readingSpacingDeg when readingSetSizeBy is spacing.",
-    type: "text",
-    default: "Verdana",
-  },
-  readingFontSource: {
-    name: "readingFontSource",
-    availability: "now",
-    example: "",
-    explanation:
-      'Must be file, google, server, or browser. ("server" support is coming.) See targetFontSource for details.',
-    type: "categorical",
-    default: "browser",
-    categories: ["file", "google", "browser"],
-  },
-  readingFontStyle: {
-    name: "readingFontStyle",
-    availability: "now",
-    example: "bold",
-    explanation:
-      "Font style: regular, bold, italic, or boldItalic. See targetFontStyle for details.",
-    type: "categorical",
-    default: "regular",
-    categories: ["regular", "bold", "italic", "boldItalic"],
-  },
   readingLinesPerPage: {
     name: "readingLinesPerPage",
     availability: "now",
@@ -1215,7 +1186,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       'targetFont specified what font you want. How you do that depends on targetFontSource:\n\nfile: targetFont is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The compiler will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  targetFont is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: targetFont is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". ("server" support is coming.)\n\nbrowser: The experiment will pass the font preference string that you place in targetFont to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "targetFontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
     type: "text",
-    default: "RobotoMono-Regular.woff2",
+    default: "Roboto Mono",
   },
   targetFontFeatureSettings: {
     name: "targetFontFeatureSettings",
@@ -1233,7 +1204,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       'targetFontSource must be file, google, server, or browser. Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has targetFontSource "file", the compiler checks for presence of the targetFont in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: targetFont contains the filename (with extension) of a file in the Fonts folder in the EasyEyesResources repository in your Pavlovia account. This is checked by the compiler, to avoid runtime surprises. \n\ngoogle: targetFont contains the font name as recognized by the Google Fonts server.\n\nserver: targetFont contains the URL of the font on a font server. ("server" support is coming.)\n\nbrowser: targetFont is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) ',
     type: "categorical",
-    default: "file",
+    default: "google",
     categories: ["file", "google", "browser"],
   },
   targetFontStyle: {

@@ -7,18 +7,19 @@ export const loadFonts = (reader, fontList) => {
 
   for (let condition of reader.conditions) {
     const conditionName = condition.block_condition;
-    if (reader.has("targetFont"))
-      _loadNameFromSource(
-        reader,
-        fontList,
-        "targetFont",
-        "targetFontSource",
-        conditionName,
-        fileFonts,
-        webFonts,
-        googleFonts
-      );
+    // if (reader.has("targetFont"))
+    _loadNameFromSource(
+      reader,
+      fontList,
+      "targetFont",
+      "targetFontSource",
+      conditionName,
+      fileFonts,
+      webFonts,
+      googleFonts
+    );
 
+    // if (reader.has("instructionFont"))
     _loadNameFromSource(
       reader,
       fontList,
@@ -29,18 +30,6 @@ export const loadFonts = (reader, fontList) => {
       webFonts,
       googleFonts
     );
-
-    if (reader.has("readingFont"))
-      _loadNameFromSource(
-        reader,
-        fontList,
-        "readingFont",
-        "readingFontSource",
-        conditionName,
-        fileFonts,
-        webFonts,
-        googleFonts
-      );
   }
 
   if (googleFonts.length) {

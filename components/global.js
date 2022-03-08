@@ -25,6 +25,14 @@ export const targetKind = { current: undefined };
 export const targetCharacterSet = { current: undefined, where: undefined };
 
 // Renders
+export const font = {
+  name: undefined,
+  source: undefined,
+  style: undefined,
+  instructionFont: undefined,
+  instructionFontSource: undefined,
+};
+
 export const fixationConfig = {
   size: 45,
   pos: [0, 0],
@@ -49,7 +57,6 @@ export const letterConfig = Object.seal({
   spacingOverSizeRatio: undefined,
   spacingRelationToSize: undefined,
   flankerCharacters: [undefined, undefined],
-  targetFont: undefined,
   targetSafetyMarginSec: undefined,
 });
 
@@ -112,8 +119,6 @@ export const readingClickableAnswersUpdate = { current: false };
 
 export const readingConfig = {
   height: undefined,
-  font: undefined,
-  fontSource: undefined,
 };
 
 /* -------------------------------------------------------------------------- */

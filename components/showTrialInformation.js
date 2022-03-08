@@ -44,8 +44,8 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
   )}\nreadingDefineSingleLineSpacingAs: ${reader.read(
     "readingDefineSingleLineSpacingAs",
     BC
-  )}\nreadingFont: ${reader.read(
-    "readingFont",
+  )}\ntargetFont: ${reader.read(
+    "targetFont",
     BC
   )}\nreadingLinesPerPage: ${reader.read(
     "readingLinesPerPage",
