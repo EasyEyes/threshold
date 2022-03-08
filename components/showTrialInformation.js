@@ -35,49 +35,49 @@ export const updateConditionNameConfig = (
 /* -------------------------------------------------------------------------- */
 
 export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
-  showConditionNameConfig.targetSpecs = `filename: ${experimentFileName}\nreadingCorpus:${reader.read(
+  showConditionNameConfig.targetSpecs = `filename: ${experimentFileName}\nreadingCorpus: ${reader.read(
     "readingCorpus",
     BC
-  )}\nreadingCorpusSkipWords:${reader.read(
+  )}\nreadingCorpusSkipWords: ${reader.read(
     "readingCorpusSkipWords",
     BC
-  )}\nreadingDefineSingleLineSpacingAs:${reader.read(
+  )}\nreadingDefineSingleLineSpacingAs: ${reader.read(
     "readingDefineSingleLineSpacingAs",
     BC
-  )}\nreadingFont:${reader.read(
+  )}\nreadingFont: ${reader.read(
     "readingFont",
     BC
-  )}\nreadingLinesPerPage:${reader.read(
+  )}\nreadingLinesPerPage: ${reader.read(
     "readingLinesPerPage",
     BC
-  )}\nreadingMaxCharactersPerLine:${reader.read(
+  )}\nreadingMaxCharactersPerLine: ${reader.read(
     "readingMaxCharactersPerLine",
     BC
-  )}\nreadingMultipleOfSingleLineSpacing:${reader.read(
+  )}\nreadingMultipleOfSingleLineSpacing: ${reader.read(
     "readingMultipleOfSingleLineSpacing",
     BC
-  )}\nreadingNominalSizeDeg:${reader.read(
+  )}\nreadingNominalSizeDeg: ${reader.read(
     "readingNominalSizeDeg",
     BC
-  )}\nreadingNumberOfPossibleAnswers:${reader.read(
+  )}\nreadingNumberOfPossibleAnswers: ${reader.read(
     "readingNumberOfPossibleAnswers",
     BC
-  )}\nreadingNumberOfQuestions:${reader.read(
+  )}\nreadingNumberOfQuestions: ${reader.read(
     "readingNumberOfQuestions",
     BC
-  )}\nreadingPages:${reader.read(
+  )}\nreadingPages: ${reader.read(
     "readingPages",
     BC
-  )}\nreadingSetSizeBy:${reader.read(
+  )}\nreadingSetSizeBy: ${reader.read(
     "readingSetSizeBy",
     BC
-  )}\nreadingSingleLineSpacingDeg:${reader.read(
+  )}\nreadingSingleLineSpacingDeg: ${reader.read(
     "readingSingleLineSpacingDeg",
     BC
-  )}\nreadingSpacingDeg:${reader.read(
+  )}\nreadingSpacingDeg: ${reader.read(
     "readingSpacingDeg",
     BC
-  )}\nreadingXHeightDeg:${reader.read(
+  )}\nreadingXHeightDeg: ${reader.read(
     "readingXHeightDeg",
     BC
   )}\nviewingDistanceCm: ${viewingDistanceCm.current}`;
