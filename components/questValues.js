@@ -2,6 +2,7 @@ export const populateQuestDefaults = (conditionsList, reader) => {
   for (let i = 0; i < conditionsList.length; i++) {
     const condition = conditionsList[i];
     const cName = condition["block_condition"];
+
     const questValues = {
       startVal: Math.log10(reader.read("thresholdGuess", cName)),
       startValSd: reader.read("thresholdGuessLogSd", cName),

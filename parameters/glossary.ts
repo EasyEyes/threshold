@@ -1443,7 +1443,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Used to prime QUEST by providing a prior PDF, which is specified as a Gaussian as a function of the log threshold parameter. Its mean is the log of your guess, and its SD (in log units) is specifed below . We typically take our guess from our standard formulas for size and spacing threshold as a function of eccentricity.",
     type: "numerical",
-    default: "NaN",
+    default: "2",
   },
   thresholdGuessLogSd: {
     name: "thresholdGuessLogSd",

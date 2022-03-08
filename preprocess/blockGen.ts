@@ -45,7 +45,7 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
 
   // Create a "blockCount" file, just one column with the the indices of the blocks
   const blockCountCsvString = Papa.unparse({
-    fields: ["block", "targetTask"],
+    fields: ["block", "targetKind"],
     data: blockIndices.block.map((x: any, index: number) => [
       x,
       blockIndices.targetKind[index],

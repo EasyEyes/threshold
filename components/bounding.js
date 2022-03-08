@@ -680,14 +680,14 @@ const getLargestBoundsRatio = (
   screen = screen.inset(1, 1); // Give a 1 pixel margin
 
   // Check assumptions
-  if (!(stim.width >= 0)) throw "Stimulus width is less than 0";
-  if (!(stim.height >= 0)) throw "Stimulus height is less than 0";
-  if (!(screen.width > 0)) throw "Screen width is less than or equal to 0";
-  if (!(screen.height > 0)) throw "Screen height is less than or equal to 0";
+  if (!(stim.width >= 0)) throw "stimulus width < 0";
+  if (!(stim.height >= 0)) throw "stimulus height < 0";
+  if (!(screen.width > 0)) throw "screen width <= 0";
+  if (!(screen.height > 0)) throw "screen height <= 0";
   if (!(stim.width <= screen.width))
-    console.error("Stimulus is wider than the screen");
+    console.error("stimulus WIDER than screen");
   if (!(stim.height <= screen.height))
-    console.error("Stimulus is taller than the screen");
+    console.error("stimulus TALLER than screen");
 
   switch (thresholdParameter) {
     case "spacing":

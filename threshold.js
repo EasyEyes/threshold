@@ -984,11 +984,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
       // Preset params
       // ! Set current targetKind for the block
-      targetKind.current = paramReader.read("targetKind")[0];
+      targetKind.current = paramReader.read("targetKind", 1)[0];
       /* -------------------------------------------------------------------------- */
 
       // Schedule all the trials in the trialList:
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for (const _thisBlock of blocks) {
         const snapshot = blocks.getSnapshot();
         blocksLoopScheduler.add(importConditions(snapshot));
@@ -998,7 +997,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
         blocksLoopScheduler.add(initInstructionRoutineEachFrame());
         blocksLoopScheduler.add(initInstructionRoutineEnd());
-        switchKind(targetKind.current, {
+        switchKind(_thisBlock.targetKind, {
           letter: () => {
             blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
             blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
@@ -1010,7 +1009,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         blocksLoopScheduler.add(trialsLoopScheduler);
         blocksLoopScheduler.add(trialsLoopEnd);
 
-        switchKind(targetKind.current, {
+        switchKind(_thisBlock.targetKind, {
           reading: () => {
             blocksLoopScheduler.add(blockSchedulerFinalRoutineBegin(snapshot));
             blocksLoopScheduler.add(blockSchedulerFinalRoutineEachFrame());
@@ -1323,6 +1322,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       status.block = snapshot.block + 1;
       totalBlocks.current = snapshot.nTotal;
 
+      // PRESETS
+      targetKind.current = paramReader.read("targetKind", status.block)[0];
+      ////
+
       //------Prepare to start Routine 'filter'-------
       t = 0;
       filterClock.reset(); // clock
@@ -1453,7 +1456,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // BLOCK 1st INSTRUCTION
   function initInstructionRoutineBegin(snapshot) {
     return async function () {
-      loggerText("initInstructionRoutineBegin");
+      loggerText(
+        `initInstructionRoutineBegin targetKind ${targetKind.current}`
+      );
       // ! Distance
       // rc.resumeDistance();
 
@@ -1798,8 +1803,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   var _key_resp_allKeys;
   var trialComponents;
-
-  // var targetTask;
 
   // Credit
   var currentBlockCreditForTrialBreak = 0;
@@ -2602,8 +2605,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // READING Only accepts SPACE
           switchKind(targetKind.current, {
             reading: () => {
-              if (!validAns.length) validAns = ["space"];
-              if (!correctAns) correctAns = "space";
+              if (!validAns.length || validAns[0] !== "space")
+                validAns = ["space"];
+              if (!correctAns || correctAns !== "space") correctAns = "space";
             },
           });
 

@@ -166,7 +166,7 @@ export const _takeFixationClick = (e) => {
   if (e.clientX) {
     cX = e.clientX;
     cY = e.clientY;
-  } else {
+  } else if (e.changedTouches) {
     const t = e.changedTouches[0];
     if (t.clientX) {
       cX = t.clientX;
@@ -175,6 +175,12 @@ export const _takeFixationClick = (e) => {
       clickedContinue.current = false;
       return;
     }
+  } else if (e.x) {
+    cX = e.x;
+    cY = e.y;
+  } else {
+    clickedContinue.current = false;
+    return;
   }
 
   if (
