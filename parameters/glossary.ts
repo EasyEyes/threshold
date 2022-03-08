@@ -674,7 +674,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "nominalSize",
     explanation:
-      'What shall we say is the "single" line spacing of the text to be read? \n• "nominalSize" is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. \n• "font" defines single line spacing as the font\'s built-in line spacing, which can be enormous in fonts with large flourishes. \n• "twice x-height" defines single line spacing as twice the font\'s x-height.',
+      "What shall we say is the \"single\" line spacing of the text to be read? \n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. \n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \n• twiceXHeight defines single line spacing as twice the font's x-height.\n• explicit defines single line spacing as xxx.",
     type: "categorical",
     default: "nominalSize",
     categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
@@ -684,7 +684,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "Arial",
     explanation:
-      "Font name, taken from the name of font file, which may include a style. See targetFont for details.",
+      "Font name, taken from the name of font file, which may include a style. See targetFont for details. Note that if your text is not English, then you should specify an appropriate targetCharacterSet since the default a-z string won't be appropriate. When the task is reading, targetCharacterSet is used solely to set the point size to achieve a specified readingSpacingDeg when readingSetSizeBy is spacing.",
     type: "text",
     default: "Verdana",
   },
@@ -775,7 +775,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "spacing",
     explanation:
-      'How do you specify the size of the text to be read?\n• "nominal" will set the point size of the text to readingNominalSizeDeg*pixPerDeg,  \n• "xHeight" will adjust text size to achieve the specified x-height (the height of lowercase x),  i.e. readingXHeightDeg. \n• "spacing" will adjust the text size to achieve the specified letter-to-letter readingSpacingDeg.',
+      "How do you specify the size of the text to be read?\n• nominal will set the point size of the text to readingNominalSizeDeg*pixPerDeg,  \n• xHeight will adjust text size to achieve the specified x-height (the height of lowercase x),  i.e. readingXHeightDeg. \n• spacing will adjust the text size to achieve the specified letter-to-letter readingSpacingDeg.",
     type: "categorical",
     default: "spacing",
     categories: ["nominal", "xHeight", "spacing"],
@@ -785,7 +785,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "2",
     explanation:
-      'Explicit value of "single" line spacing. This is ignored unless readingDefineSingleLineSpacingAs is "explicit".',
+      "Explicit value of single line spacing. This is ignored unless readingDefineSingleLineSpacingAs is explicit.",
     type: "numerical",
     default: "1",
   },
@@ -794,7 +794,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.5",
     explanation:
-      'If readingSetSizeBy is "spacing", the point size of the text to be read is adjusted to make this the average center-to-center spacing (deg) of neighboring characters in words displayed. Text is displayed with the font\'s default spacing, and the point size is adjusted to achieve the requested average letter spacing.',
+      "If readingSetSizeBy is spacing, the point size of the text to be read is adjusted to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. For the proportionality of spacing to point size, I suggest we measure the width of the targetCharacterSet string, and divide by the number of numbers in the string.",
     type: "numerical",
     default: "1",
   },
@@ -1170,7 +1170,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "targetCharacterSet is a string of unicode characters. On each trial, the target and flankers are randomly drawn from this character set, without replacement. Allowed responses are restricted to this character set. The other keys on the keyboard are dead. Letters may appear more than once in the string, to increase their probability of being drawn, but once one is drawn the rest are removed with it, so the drawn samples won't have any repeats.",
     type: "text",
-    default: "acenorsuvxz",
+    default: "abcdefghijklmnopqrstuvwxyz",
   },
   targetContrast: {
     name: "targetContrast",

@@ -109,7 +109,11 @@ export const readingCurrentQuestionIndex = { current: 0 };
 export const readingClickableAnswersSetup = { current: false };
 export const readingClickableAnswersUpdate = { current: false };
 
-export const readingHeight = { current: undefined };
+export const readingConfig = {
+  height: undefined,
+  font: undefined,
+  fontSource: undefined,
+};
 
 /* -------------------------------------------------------------------------- */
 /* ------------------------------- COMPONENTS ------------------------------- */

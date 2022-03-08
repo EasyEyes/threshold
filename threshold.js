@@ -49,10 +49,10 @@ import {
   readingCurrentQuestionIndex,
   readingClickableAnswersSetup,
   readingClickableAnswersUpdate,
+  readingConfig,
   status,
   totalTrialsThisBlock,
   totalBlocks,
-  readingHeight,
   viewingDistanceDesiredCm,
   viewingDistanceCm,
   grid,
@@ -1235,7 +1235,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         updateTrialInfo();
         setupClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
-          paramReader.read("readingFont")[0],
+          readingConfig.font,
           "bottom",
           showCharacterSetResponse,
           (clickedWord) => {
@@ -1505,20 +1505,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingPageIndex.current = 0;
 
           // FONT
-          readingParagraph.setFont(
-            paramReader.read("readingFont", status.block)[0]
-          );
+          readingConfig.font = paramReader.read("readingFont", status.block)[0];
+          readingConfig.fontSource = paramReader.read(
+            "readingFontSource",
+            status.block
+          )[0];
+          if (readingConfig.fontSource === "file")
+            readingConfig.font = cleanFontName(readingConfig.font);
+          readingParagraph.setFont(readingConfig.font);
+
           // HEIGHT
           switch (paramReader.read("readingSetSizeBy", status.block)[0]) {
             case "nominal":
-              readingHeight.current =
+              readingConfig.height =
                 paramReader.read("readingNominalSizeDeg", status.block)[0] *
                 degreesToPixels(1, {
                   pixPerCm: displayOptions.pixPerCm,
                 });
               break;
             case "xHeight":
-              readingHeight.current = getSizeForXHeight(
+              readingConfig.height = getSizeForXHeight(
                 readingParagraph,
                 paramReader.read("readingXHeightDeg", status.block)[0]
               );
@@ -1529,7 +1535,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             default:
               break;
           }
-          readingParagraph.setHeight(readingHeight.current);
+          readingParagraph.setHeight(readingConfig.height);
 
           // Construct this block pages
           getThisBlockPages(paramReader, status.block, readingParagraph);

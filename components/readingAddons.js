@@ -96,6 +96,8 @@ export const preprocessCorpusToSentenceList = (
 
   const sentences = [];
 
+  let maxLinePerPageSoFar = undefined;
+
   for (let i = 0; i < numberOfPages; i++) {
     // PAGE
     let thisPageText = "";
@@ -153,8 +155,10 @@ export const preprocessCorpusToSentenceList = (
         readingParagraphStimulus.getBoundingBox(true).height;
 
       if (
-        thisPageLineHeights.reduce((p, c) => p + c, 0) + newTestHeight >
-        window.innerHeight * 0.8
+        (thisPageLineHeights.reduce((p, c) => p + c, 0) + newTestHeight >
+          window.innerHeight * 0.7 ||
+          (maxLinePerPageSoFar && line > maxLinePerPageSoFar)) &&
+        !(maxLinePerPageSoFar && line <= maxLinePerPageSoFar)
       ) {
         // Give up this line
         // Go to the next page
@@ -164,14 +168,16 @@ export const preprocessCorpusToSentenceList = (
           wordInd--
         )
           usedTextList.unshift(thisLineTempWordList[wordInd]);
-
+        line--;
         break;
       } else {
         thisPageText += thisLineText;
         thisPageLineHeights.push(newTestHeight);
+        line++;
       }
-      line++;
     }
+    if (!maxLinePerPageSoFar) maxLinePerPageSoFar = line;
+
     sentences.push(removeLastLineBreak(thisPageText));
   }
 
