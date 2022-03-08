@@ -65,6 +65,7 @@ import {
   instructionsConfig,
   instructionFont,
   readingPageIndex,
+  showConditionNameConfig,
 } from "./components/global.js";
 
 import {
@@ -145,6 +146,7 @@ import {
 import {
   showConditionName,
   updateConditionNameConfig,
+  updateTargetSpecsForReading,
 } from "./components/showTrialInformation.js";
 import { getTrialInfoStr } from "./components/trialCounter.js";
 ////
@@ -1521,6 +1523,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader.read("readingXHeightDeg", status.block)[0]
               );
               break;
+            // case "spacing":
+            //   readingHeight.current =
+            //   break
             default:
               break;
           }
@@ -1528,6 +1533,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // Construct this block pages
           getThisBlockPages(paramReader, status.block, readingParagraph);
+
+          // WRAP WIDTH
+          readingParagraph.setAutoDraw(false);
+          let thisBlockWrapWidth = 0;
+          for (let page of readingThisBlockPages) {
+            readingParagraph.setText(page);
+            readingParagraph.setWrapWidth(1.2 * window.innerWidth);
+            let lastHeight = readingParagraph.getBoundingBox().height;
+            let lastWidth = window.innerWidth;
+            for (
+              let testWidth = 1.2 * window.innerWidth;
+              testWidth > 0;
+              testWidth -= 5
+            ) {
+              readingParagraph.setWrapWidth(testWidth);
+              const thisHeight = readingParagraph.getBoundingBox().height;
+              if (lastHeight === thisHeight) lastWidth = testWidth;
+              else {
+                if (lastWidth > thisBlockWrapWidth)
+                  thisBlockWrapWidth = lastWidth;
+                break;
+              }
+            }
+          }
+          readingParagraph.setWrapWidth(thisBlockWrapWidth);
+
+          // POS
+          readingParagraph.setPos([-thisBlockWrapWidth * 0.5, 0]);
         },
       });
 
@@ -1735,9 +1768,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var validAns = [];
   var showCharacterSetWhere;
   var showCounterBool;
-  var showTargetSpecsBool;
-  var showConditionNameBool;
-  var conditionNameToShow;
+
   var showViewingDistanceBool;
 
   const showCharacterSetResponse = {
@@ -1826,6 +1857,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       showCounterBool = reader.read("showCounterBool", BC);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
 
+      showConditionNameConfig.show = paramReader.read(
+        "showConditionNameBool",
+        BC
+      );
+      showConditionNameConfig.name = paramReader.read("conditionName", BC);
+      showConditionNameConfig.showTargetSpecs = paramReader.read(
+        "showTargetSpecsBool",
+        BC
+      );
+
       /* --------------------------------- /PUBLIC -------------------------------- */
 
       switchKind(targetKind.current, {
@@ -1841,6 +1882,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             phrases.T_readingNextPage[rc.language.value]
           );
           renderObj.tinyHint.setAutoDraw(true);
+
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecsForReading(reader, BC, experimentFileName);
 
           trialComponents = [];
           trialComponents.push(key_resp);
@@ -1917,11 +1961,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             .split("");
 
           showCharacterSetWhere = reader.read("showCharacterSetWhere", BC);
-
-          showConditionNameBool = paramReader.read("showConditionNameBool", BC);
-          conditionNameToShow = paramReader.read("conditionName", BC);
-
-          showTargetSpecsBool = paramReader.read("showTargetSpecsBool", BC);
 
           targetDurationSec = reader.read("targetDurationSec", BC);
 
@@ -2120,40 +2159,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showCharacterSet.setText("");
           // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
-          if (showTargetSpecsBool) {
-            let targetSpecsString = `sizeDeg: ${
+          if (showConditionNameConfig.showTargetSpecs) {
+            // TODO Move to showTrialInformation.js
+            showConditionNameConfig.targetSpecs = `sizeDeg: ${
               Math.round(10 * stimulusParameters.sizeDeg) / 10
-            }
-${
-  stimulusParameters.spacingDeg
-    ? `spacingDeg: ${Math.round(10 * stimulusParameters.spacingDeg) / 10}`
-    : ""
-}
-heightDeg: ${Math.round(10 * stimulusParameters.heightDeg) / 10}
-heightPx: ${Math.round(stimulusParameters.heightPx)}
-filename: ${experimentFileName}
-targetFont: ${letterConfig.targetFont}
-spacingRelationToSize: ${letterConfig.spacingRelationToSize}
-spacingOverSizeRatio: ${letterConfig.spacingOverSizeRatio}
-spacingSymmetry: ${letterConfig.spacingSymmetry}
-targetSizeIsHeightBool: ${letterConfig.targetSizeIsHeightBool}
-targetEccentricityXYDeg: ${letterConfig.targetEccentricityXYDeg}
-viewingDistanceCm: ${viewingDistanceCm.current}`;
-            targetSpecs.setText(targetSpecsString);
-            targetSpecs.setPos([
-              -window.innerWidth / 2,
-              -window.innerHeight / 2,
-            ]);
-            targetSpecs.setAutoDraw(true);
+            }\n${
+              stimulusParameters.spacingDeg
+                ? `spacingDeg: ${
+                    Math.round(10 * stimulusParameters.spacingDeg) / 10
+                  }`
+                : ""
+            }\nheightDeg: ${
+              Math.round(10 * stimulusParameters.heightDeg) / 10
+            }\nheightPx: ${Math.round(
+              stimulusParameters.heightPx
+            )}\nfilename: ${experimentFileName}\ntargetFont: ${
+              letterConfig.targetFont
+            }\nspacingRelationToSize: ${
+              letterConfig.spacingRelationToSize
+            }\nspacingOverSizeRatio: ${
+              letterConfig.spacingOverSizeRatio
+            }\nspacingSymmetry: ${
+              letterConfig.spacingSymmetry
+            }\ntargetSizeIsHeightBool: ${
+              letterConfig.targetSizeIsHeightBool
+            }\ntargetEccentricityXYDeg: ${
+              letterConfig.targetEccentricityXYDeg
+            }\nviewingDistanceCm: ${viewingDistanceCm.current}`;
           }
-
-          showConditionName(
-            showConditionNameBool,
-            showTargetSpecsBool,
-            conditionName,
-            targetSpecs,
-            conditionNameToShow
-          );
 
           trialComponents = [];
           trialComponents.push(key_resp);
@@ -2224,6 +2257,14 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       // Grid for both target kinds
       grid.current.update(reader.read("showGrid", BC), displayOptions);
 
+      // Condition Name and Specs
+      if (showConditionNameConfig.showTargetSpecs) {
+        targetSpecs.setText(showConditionNameConfig.targetSpecs);
+        targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
+        targetSpecs.setAutoDraw(true);
+      }
+      showConditionName(conditionName, targetSpecs);
+
       // totalTrialsThisBlock.current = snapshot.nTotal;
       let trialCounterStr = getTrialInfoStr(
         rc.language.value,
@@ -2280,7 +2321,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           t = instructionsClock.getTime();
           frameN = frameN + 1;
 
-          if (showTargetSpecsBool) {
+          if (showConditionNameConfig.showTargetSpecs) {
             targetSpecsConfig.x = -window.innerWidth / 2;
             targetSpecsConfig.y = -window.innerHeight / 2;
             if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
@@ -2293,7 +2334,7 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         },
       });
 
-      if (showConditionNameBool) {
+      if (showConditionNameConfig.show) {
         updateConditionNameConfig(conditionNameConfig, false);
         if (conditionName.status === PsychoJS.Status.NOT_STARTED) {
           conditionName.tStart = t;
@@ -2453,23 +2494,6 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
           readingParagraph.setText(
             readingThisBlockPages[readingPageIndex.current]
           );
-          // WRAP WIDTH
-          readingParagraph.setWrapWidth(1.2 * window.innerWidth);
-          let lastHeight = readingParagraph.getBoundingBox().height;
-          let lastWidth = window.innerWidth;
-          for (
-            let testWidth = 1.2 * window.innerWidth;
-            testWidth > 0;
-            testWidth -= 5
-          ) {
-            readingParagraph.setWrapWidth(testWidth);
-            const thisHeight = readingParagraph.getBoundingBox().height;
-            if (lastHeight === thisHeight) lastWidth = testWidth;
-            else break;
-          }
-          readingParagraph.setWrapWidth(lastWidth);
-          // POS
-          readingParagraph.setPos([-lastWidth * 0.5, 0]);
           // AUTO DRAW
           readingParagraph.setAutoDraw(true);
 
@@ -2653,7 +2677,8 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       }
       renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
-      if (showTargetSpecsBool) {
+      // TODO improve code style/logic
+      if (showConditionNameConfig.showTargetSpecs) {
         targetSpecsConfig.x = -window.innerWidth / 2;
         targetSpecsConfig.y = -window.innerHeight / 2;
         // *targetSpecs* updates
@@ -2663,10 +2688,10 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
         }
       }
 
-      if (showConditionNameBool) {
+      if (showConditionNameConfig.show) {
         updateConditionNameConfig(
           conditionNameConfig,
-          showTargetSpecsBool,
+          showConditionNameConfig.showTargetSpecs,
           targetSpecs
         );
         // *targetSpecs* updates
@@ -2841,8 +2866,9 @@ viewingDistanceCm: ${viewingDistanceCm.current}`;
       ////
       grid.current.hide(true);
 
-      if (showTargetSpecsBool) targetSpecs.setAutoDraw(false);
-      if (showConditionNameBool) conditionName.setAutoDraw(false);
+      if (showConditionNameConfig.showTargetSpecs)
+        targetSpecs.setAutoDraw(false);
+      if (showConditionNameConfig.show) conditionName.setAutoDraw(false);
 
       if (toShowCursor()) {
         showCursor();

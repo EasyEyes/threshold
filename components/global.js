@@ -30,6 +30,13 @@ export const fixationConfig = {
   show: true,
 };
 
+export const showConditionNameConfig = {
+  name: undefined,
+  show: false,
+  targetSpecs: undefined,
+  showTargetSpecs: false,
+};
+
 export const letterConfig = Object.seal({
   targetSizeIsHeightBool: undefined,
   targetMinimumPix: undefined,
