@@ -194,15 +194,39 @@ export const getSizeForXHeight = (readingParagraph, targetDeg) => {
 
   readingParagraph.setText("x");
 
-  let height = 1;
+  let height = 0.5;
   while (height < window.innerHeight * 0.5) {
     readingParagraph.setHeight(height);
     const testHeight = readingParagraph.getBoundingBox(true).height;
     if (testHeight > targetPix) return height;
 
-    height++;
+    height += 0.5;
   }
-  return window.innerHeight * 0.5;
+  throw "Failed to set reading paragraph height using [xHeight]";
+};
+
+export const getSizeForSpacing = (
+  readingParagraph,
+  targetDeg,
+  testingString
+) => {
+  const targetPix = degreesToPixels(targetDeg, {
+    pixPerCm: displayOptions.pixPerCm,
+  });
+
+  readingParagraph.setWrapWidth(999999);
+  readingParagraph.setText(testingString);
+
+  let height = 0.5;
+  while (height < window.innerHeight * 0.5) {
+    readingParagraph.setHeight(height);
+    const testWidth =
+      readingParagraph.getBoundingBox(true).width / testingString.length;
+    if (testWidth > targetPix) return height;
+
+    height += 0.5;
+  }
+  throw "Failed to set reading paragraph height using [spacing]";
 };
 
 /* --------------------------------- HELPERS -------------------------------- */

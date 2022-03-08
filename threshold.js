@@ -66,6 +66,7 @@ import {
   instructionFont,
   readingPageIndex,
   showConditionNameConfig,
+  targetCharacterSet,
 } from "./components/global.js";
 
 import {
@@ -182,6 +183,7 @@ import {
 // READING
 import { prepareReadingQuestions } from "./components/reading.ts";
 import {
+  getSizeForSpacing,
   getSizeForXHeight,
   getThisBlockPages,
   loadReadingCorpus,
@@ -1514,6 +1516,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             readingConfig.font = cleanFontName(readingConfig.font);
           readingParagraph.setFont(readingConfig.font);
 
+          targetCharacterSet.current = String(
+            paramReader.read("targetCharacterSet", status.block)[0]
+          ).split("");
+
           // HEIGHT
           switch (paramReader.read("readingSetSizeBy", status.block)[0]) {
             case "nominal":
@@ -1529,9 +1535,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader.read("readingXHeightDeg", status.block)[0]
               );
               break;
-            // case "spacing":
-            //   readingHeight.current =
-            //   break
+            case "spacing":
+              readingConfig.height = getSizeForSpacing(
+                readingParagraph,
+                paramReader.read("readingSpacingDeg", status.block)[0],
+                targetCharacterSet.current.join("")
+              );
+              break;
             default:
               break;
           }
@@ -1770,11 +1780,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   var level;
 
-  var targetCharacterSet;
   var validAns = [];
-  var showCharacterSetWhere;
   var showCounterBool;
-
   var showViewingDistanceBool;
 
   const showCharacterSetResponse = {
@@ -1862,6 +1869,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       showCounterBool = reader.read("showCounterBool", BC);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
+
+      targetCharacterSet.current = String(
+        reader.read("targetCharacterSet", BC)
+      ).split("");
 
       showConditionNameConfig.show = paramReader.read(
         "showConditionNameBool",
@@ -1959,14 +1970,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (targetFontSource === "file")
             letterConfig.targetFont = cleanFontName(letterConfig.targetFont);
 
-          targetCharacterSet = String(
-            reader.read("targetCharacterSet", BC)
-          ).split("");
           validAns = String(reader.read("targetCharacterSet", BC))
             .toLowerCase()
             .split("");
 
-          showCharacterSetWhere = reader.read("showCharacterSetWhere", BC);
+          targetCharacterSet.where = reader.read("showCharacterSetWhere", BC);
 
           targetDurationSec = reader.read("targetDurationSec", BC);
 
@@ -2028,13 +2036,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             BC
           );
 
-          var characterSet = targetCharacterSet;
-
           /* ------------------------------ Pick triplets ----------------------------- */
-          if (characterSet.length < 3)
-            throw `[EasyEyes experiment configuration error] You must have 3 characters in your character set for this block_condition, however, the researcher only put ${characterSet.length}.`;
+          if (targetCharacterSet.current.length < 3)
+            throw `[EasyEyes experiment configuration error] You must have 3 characters in your character set for this block_condition, however, the researcher only put ${targetCharacterSet.current.length}.`;
           var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
-            getTripletCharacters(characterSet);
+            getTripletCharacters(targetCharacterSet.current);
           if (debug)
             console.log(
               `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
@@ -2223,7 +2229,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               simulatedObserver[BC] = new SimulatedObserver(
                 simulated[status.block][BC],
                 level,
-                characterSet,
+                targetCharacterSet.current,
                 targetCharacter,
                 paramReader.read("thresholdProportionCorrect", BC),
                 paramReader.read("simulationBeta", BC),
@@ -2233,7 +2239,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             } else {
               simulatedObserver[BC].updateTrial(
                 level,
-                characterSet,
+                targetCharacterSet.current,
                 targetCharacter
               );
             }
@@ -2825,9 +2831,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCharacterSet.frameNStart = frameN; // exact frame index
         showCharacterSet.setAutoDraw(true);
         setupClickableCharacterSet(
-          targetCharacterSet,
+          targetCharacterSet.current,
           letterConfig.targetFont,
-          showCharacterSetWhere,
+          targetCharacterSet.where,
           showCharacterSetResponse
         );
 
