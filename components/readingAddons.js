@@ -120,7 +120,10 @@ export const preprocessCorpusToSentenceList = (
         readingParagraphStimulus.setText(tempLineText);
         const testWidth = readingParagraphStimulus.getBoundingBox(true).width;
 
-        if (testWidth > window.innerWidth * 0.8 || thisLineCharCount < -5) {
+        if (
+          (testWidth > window.innerWidth * 0.8 || thisLineCharCount < -5) &&
+          thisLineTempWordList.length > 1 /* allow at least one word */
+        ) {
           // Give up this word for this line
           // Go to the next line
           usedTextList.unshift(newWord);
@@ -132,11 +135,11 @@ export const preprocessCorpusToSentenceList = (
           break;
         } else {
           thisLineText += newWord;
-          if (thisLineCharCount > 3) {
+          if (thisLineCharCount > 3 && testWidth <= window.innerWidth * 0.8) {
             // Continue on this line
             thisLineText += " ";
             thisLineCharCount -= 1;
-          } else if (thisLineCharCount <= 3) {
+          } else {
             // Got to the next line
             if (lineNumber > line)
               thisLineText = removeLastSpace(thisLineText) + "\n";
@@ -151,7 +154,7 @@ export const preprocessCorpusToSentenceList = (
 
       if (
         thisPageLineHeights.reduce((p, c) => p + c, 0) + newTestHeight >
-        window.innerHeight * 0.7
+        window.innerHeight * 0.8
       ) {
         // Give up this line
         // Go to the next page
