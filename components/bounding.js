@@ -59,6 +59,7 @@ export const getCharacterSetBoundingBox = (
 
     // Get measurements of how far the text stim extends in each direction
     const thisMetrics = testStim.getTextMetrics();
+    const thisBB = testStim.getBoundingBox(true);
     const ascent = thisMetrics.boundingBox.actualBoundingBoxAscent;
     const descent = thisMetrics.boundingBox.actualBoundingBoxDescent;
     const left = thisMetrics.boundingBox.actualBoundingBoxLeft;
@@ -67,10 +68,17 @@ export const getCharacterSetBoundingBox = (
     setDescent = Math.max(setDescent, descent);
 
     // Get the bounding points around this specific text stim
-    const thisBoundingRectPoints = [
-      [-left + xy[0], -descent + xy[1]],
-      [right + xy[0], ascent + xy[1]],
-    ];
+    const thisBoundingRectPoints =
+      textToSet.length === 1
+        ? [
+            [-left + xy[0], -descent + xy[1]],
+            [right + xy[0], ascent + xy[1]],
+          ]
+        : [
+            [xy[0] - thisBB.width / 2, xy[1] - thisBB.height / 2],
+            [xy[0] + thisBB.width / 2, xy[1] + thisBB.height / 2],
+          ];
+
     validateRectPoints(thisBoundingRectPoints);
     boundingRectPoints[textToSet] = thisBoundingRectPoints;
 
@@ -483,6 +491,9 @@ export const restrictSpacingDeg = (
           [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
           displayOptions
         );
+        // [,topPx] = XYPixOfXYDeg([targetXYDeg[0], targetXYDeg[1] + heightDeg/2], displayOptions);
+        // [,bottomPx] = XYPixOfXYDeg([targetXYDeg[0], targetXYDeg[1] - heightDeg/2], displayOptions);
+        // heightPx = topPx - bottomPx;
         widthPx = rightPx - leftPx;
         heightPx =
           (widthPx * characterSetRectPx.height) / characterSetRectPx.width;

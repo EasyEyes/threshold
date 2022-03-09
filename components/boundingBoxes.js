@@ -397,11 +397,13 @@ const sizeAndPositionTripletBoundingBoxes = (
     const characterSetBoundingStims = [characterSetBoundingBoxPolies.target];
     // ASSUMES triplet is sized with scaleToHeightPx
     const characterSetBounds = [
-      heightPx *
-        (normalizedCharacterSetBoundingRect.width /
-          normalizedCharacterSetBoundingRect.height),
-      heightPx,
+      heightPx * normalizedCharacterSetBoundingRect.width,
+      heightPx * normalizedCharacterSetBoundingRect.height,
     ];
+    // heightPx *
+    //   (normalizedCharacterSetBoundingRect.width /
+    //     normalizedCharacterSetBoundingRect.height),
+    // heightPx,
     characterSetBoundingBoxPolies.target.setPos(
       tripletCharacterSetBoundingBoxPositions[0]
     );

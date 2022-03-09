@@ -517,6 +517,7 @@ export class Rectangle {
 
     this.characterSet = characterSet;
     this.centers = centers;
+    logger("orig centers", this.centers);
     this.ascentToDescent = ascentToDescent;
   }
   getUnits() {
@@ -536,20 +537,45 @@ export class Rectangle {
   scale(scalar) {
     const lowerLeft = [this.left * scalar, this.bottom * scalar];
     const upperRight = [this.right * scalar, this.top * scalar];
-    const scaled = new Rectangle(lowerLeft, upperRight);
+    let newCenters = this.centers;
+    if (this.centers) {
+      newCenters = {};
+      Object.entries(this.centers).forEach(
+        ([key, xy]) => (newCenters[key] = [xy[0] * scalar, xy[1] * scalar])
+      );
+    }
+    const scaled = new Rectangle(
+      lowerLeft,
+      upperRight,
+      this.units,
+      this.characterSet,
+      newCenters
+    );
     return scaled;
   }
   offset(positionXY) {
     const lowerLeft = [this.left + positionXY[0], this.bottom + positionXY[1]];
     const upperRight = [this.right + positionXY[0], this.top + positionXY[1]];
-    const offsetted = new Rectangle(lowerLeft, upperRight);
+    const offsetted = new Rectangle(
+      lowerLeft,
+      upperRight,
+      this.units,
+      this.characterSet,
+      this.centers
+    );
     return offsetted;
   }
   inset(x, y) {
     // aka shrink
     const lowerLeft = [this.left + x, this.bottom + y];
     const upperRight = [this.right - x, this.top - y];
-    return new Rectangle(lowerLeft, upperRight);
+    return new Rectangle(
+      lowerLeft,
+      upperRight,
+      this.units,
+      this.characterSet,
+      this.centers
+    );
   }
 }
 

@@ -2141,15 +2141,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       targetCharacter +
                       secondFlankerCharacter
                   );
-
-                  if (letterConfig.targetSizeIsHeightBool)
-                    target.setHeight(stimulusParameters.heightPx);
-                  else {
-                    target.scaleToWidthPx(
-                      stimulusParameters.heightPx,
-                      stimulusParameters.widthPx
-                    );
-                  }
+                  // target.setHeight(stimulusParameters.heightPx);
+                  target.scaleToWidthPx(stimulusParameters.widthPx);
                   flanker1.setAutoDraw(false);
                   flanker2.setAutoDraw(false);
                   break;
@@ -2183,7 +2176,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             tripletStims,
             characterSetBoundingRects[BC],
             {
-              heightPx: stimulusParameters.heightPx,
+              heightPx:
+                letterConfig.spacingRelationToSize === "ratio"
+                  ? flankersHeightPx
+                  : stimulusParameters.heightPx,
               spacingRelationToSize: letterConfig.spacingRelationToSize,
               thresholdParameter: thresholdParameter,
               windowSize: psychoJS.window._size,
@@ -2554,7 +2550,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // get current time
       t = trialClock.getTime();
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
-      if (frameN === 0) {
+      if (frameN === 1) {
+        logger("target bounding box", target.getBoundingBox(true));
         psychoJS.experiment.addData(
           "clickToStimulusOnsetSec",
           routineClock.getTime()
