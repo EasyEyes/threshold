@@ -195,4 +195,4 @@ export const shuffle = (array: any[]) => {
   return a;
 };
 
-const onlyAlphabets = (str: string) => /^[a-zA-Z-]+$/.test(str);
+const onlyAlphabets = (str: string) => /^[a-zA-Z]+$/.test(str);
