@@ -91,50 +91,6 @@ when your experiment is tested and ready to be run by participants, use the seco
    [creating a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
    to share your work.
 
-## Example CSV File
-
-```
-about,Effect of font on crowding.,Effect of font on crowding.,Effect of font on crowding.,Effect of font on crowding.
-aboutDateCreated,8/1/21,8/1/21,8/1/21,8/1/21
-aboutDateModified,8/15/21,8/15/21,8/15/21,8/15/21
-author,Denis Pelli,Denis Pelli,Denis Pelli,Denis Pelli
-authorEmail,dp3@nyu.edu,dp3@nyu.edu,dp3@nyu.edu,dp3@nyu.edu
-blockOrder,1,1,2,2
-conditionName,crowding,crowding,crowding,crowding
-conditionTrials,40,40,40,40
-markingFixationStrokeLengthDeg,1,1,1,1
-markingFixationStrokeThicknessDeg,0.03,0.03,0.03,0.03
-markTheFixationYes,TRUE,TRUE,TRUE,TRUE
-showCharacterSetWhere,bottom,bottom,bottom,bottom
-showCounterWhere,bottomRight,bottomRight,bottomRight,bottomRight
-showInstructionsWhere,topLeft,topLeft,topLeft,topLeft
-simulateParticipantYes,FALSE,FALSE,FALSE,FALSE
-simulationModel,blind,blind,blind,blind
-spacingDirection,radial,radial,radial,radial
-spacingOverSizeRatio,1.4,1.4,1.4,1.4
-targetCharacterSet,DHKNORSVZ,DHKNORSVZ,acenorsuvxz,acenorsuvxz
-targetDurationSec,0.15,0.15,0.15,0.15
-targetEccentricityXDeg,10,-10,10,-10
-targetEccentricityYDeg,0,0,0,0
-targetFont,Sloan,Sloan,Verdana,Verdana
-targetFontStyle,,,,
-targetKind,letter,letter,letter,letter
-targetMinimumPix,8,8,8,8
-targetTask,identify,identify,identify,identify
-thresholdBeta,2.3,2.3,2.3,2.3
-thresholdDelta,0.01,0.01,0.01,0.01
-thresholdGuess,2,2,2,2
-thresholdGuessLogSd,3,3,3,3
-thresholdParameter,spacing,spacing,spacing,spacing
-thresholdProbability,0.7,0.7,0.7,0.7
-trackGazeYes,TRUE,TRUE,TRUE,TRUE
-trackHeadYes,TRUE,TRUE,TRUE,TRUE
-viewingDistanceDesiredCm,40,40,40,40
-wirelessKeyboardNeededYes,FALSE,FALSE,FALSE,FALSE
-```
-
-A **CSV file** named `experiment.csv` must be placed at the same directory as the PsychoPy file. The program will take care of the rest. We use a transposed CSV as the input file so that it's easier to read and edit. The program is designed to handle this transposed style and will help you transpose back for PsychoPy to use.
-
 ## Using custom fonts
 
 [Some fonts](https://www.w3schools.com/cssref/css_websafe_fonts.asp) are natively supported by web-browsers;
@@ -145,69 +101,20 @@ To use other fonts, such as one you created or purchased from a third-party, sta
 by creating a /fonts folder in your local copy of this repo. Inside this folder you
 can include any .woff font files that you would like to make accessible to to your
 study.
-Within your experiment csv file, simply use the same string for the targetFont
+Within your experiment csv file, simply use the same string for the font
 parameter as the name of the corresponding .woff file.
 For example, given Pelli-EyeChart.woff in your /fonts folder, use
-"Pelli-EyeChart" as the value for targetFont.
+"Pelli-EyeChart" as the value for font.
 During the development process, open the javascript console in your browser to
 monitor any failures to load assets like font files.
 
 By default, PsychoJS also supports using finding fonts from [Google Fonts](https://fonts.google.com). Searching Google Fonts for a font of the requested name will therefore be the
-fallback behavior of an experiment, if a `targetFont` parameter does not correspond to
+fallback behavior of an experiment, if a `font` parameter does not correspond to
 a default web font, or a `.woff` file your `./fonts` directory.
 
 Most importantly,
 **always test your experiment, and verify for yourself that stimuli are being presented correctly**.
 
-🚨 Things worth noting:
-
-1. Due to a PsychoPy limitation, `conditionTrials` must be the same for each condition within one block.
-
 ## PsychoPy Version
 
-`2021.3.0`.
-
-## TODO
-
-- [ ] Check parameter spelling and give fatal error when detect any.
-
-Working parameters:
-
-(Needs to be updated!)
-
-```
-x   blockOrder
-    conditionName
-x   conditionTrials
-    fixationStrokeLengthDeg
-    fixationStrokeThicknessDeg
-x   fixationYes
-    showCharacterSetWhere
-    showCounterWhere
-    showInstructionsWhere
-    simulateParticipantYes
-    simulationModel
-x   spacingDirection
-x   spacingOverSizeRatio
-!   targetCharacterSet => (Allowed keys) not supported when export to JS
-x   targetDurationSec
-x   targetEccentricityXDeg
-x   targetEccentricityYDeg
-x   targetFont
-    targetFontStyle
-    targetKind
-x   targetMinimumPix
-    targetTask
-x   thresholdBeta
-x   thresholdDelta
-x   thresholdGuess
-x   thresholdGuessLogSd
-    thresholdParameter
-x   thresholdProbability
-    trackGazeYes
-    trackHeadYes
-x   viewingDistanceDesiredCm
-    wirelessKeyboardNeededYes
-```
-
-`x` means working.
+`2022.1.1`.

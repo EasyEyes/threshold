@@ -13,8 +13,7 @@ export const webFontChecker = async (
     }
   }
 
-  if (errorList.length > 0)
-    return FONT_FILES_MISSING_WEB("targetFont", errorList);
+  if (errorList.length > 0) return FONT_FILES_MISSING_WEB("font", errorList);
   else return errorList;
 };
 

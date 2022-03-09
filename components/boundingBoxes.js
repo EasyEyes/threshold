@@ -42,10 +42,10 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
     lineColor: new util.Color("blue"),
     name: "flanker2BoundingPoly",
   });
-  const targetCharacterSetBoundingPoly = new visual.Rect({
+  const fontCharacterSetBoundingPoly = new visual.Rect({
     ...boundingConfig,
     lineColor: new util.Color("red"),
-    name: "targetCharacterSetBoundingPoly",
+    name: "fontCharacterSetBoundingPoly",
   });
   const flanker1CharacterSetBoundingPoly = new visual.Rect({
     ...boundingConfig,
@@ -63,13 +63,13 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
     flanker2: flanker2BoundingPoly,
   };
   const characterSetBoundingBoxPolies = {
-    target: targetCharacterSetBoundingPoly,
+    target: fontCharacterSetBoundingPoly,
     flanker1: flanker1CharacterSetBoundingPoly,
     flanker2: flanker2CharacterSetBoundingPoly,
   };
   const displayCharacterSetBoundingBoxPolies = {};
   for (const cond of reader.read("block_condition", "__ALL_BLOCKS__")) {
-    const characterSet = String(reader.read("targetCharacterSet", cond)).split(
+    const characterSet = String(reader.read("fontCharacterSet", cond)).split(
       ""
     );
     if (reader.read("showCharacterSetBoundingBoxBool", cond)) {
@@ -315,7 +315,7 @@ const updateDisplayCharacterSetBoundingBoxStims = (
  * @param {number} trialParameters.heightPx The value used to set the height of the target stim
  * @param {string} trialParameters.spacingRelationToSize Experiment parameter of the same name
  * @param {string} trialParameters.thresholdParameter Experiment parameter of the same name
- * @param {string} trialParameters.targetFont (Correctly escaped) Experiment parameter of the same name
+ * @param {string} trialParameters.font (Correctly escaped) Experiment parameter of the same name
  * @param {[number, number]} trialParameters.windowSize Current dimensions of the window, ie `psychoJS.window._size`
  */
 export const sizeAndPositionBoundingBoxes = (
@@ -341,7 +341,7 @@ export const sizeAndPositionBoundingBoxes = (
     sizeAndPositionDisplayCharacterSet(
       displayCharacterSetBoundingStimuli,
       normalizedCharacterSetBoundingRect,
-      trialParameters.targetFont,
+      trialParameters.font,
       trialParameters.windowSize
     );
 };

@@ -39,34 +39,30 @@ export const getFontNameListBySource = (
   fontSource: string
 ): string[] => {
   const fontList: string[] = [];
-  let targetFontRow: string[] = [];
-  let targetFontSourceRow: string[] = [];
-  let foundTargetFontSourceRow = false;
+  let fontRow: string[] = [];
+  let fontSourceRow: string[] = [];
+  let foundFontSourceRow = false;
 
   for (let i = 0; i < parsed.data.length; i++) {
-    if (parsed.data[i][0] == "targetFont") {
-      targetFontRow = parsed.data[i];
-    } else if (parsed.data[i][0] == "targetFontSource") {
-      targetFontSourceRow = parsed.data[i];
-      foundTargetFontSourceRow = true;
+    if (parsed.data[i][0] == "font") {
+      fontRow = parsed.data[i];
+    } else if (parsed.data[i][0] == "fontSource") {
+      fontSourceRow = parsed.data[i];
+      foundFontSourceRow = true;
     }
   }
 
   // read default value if it is absent
-  if (!foundTargetFontSourceRow) {
-    let defaultValue = GLOSSARY["targetFontSource"].default;
+  if (!foundFontSourceRow) {
+    let defaultValue = GLOSSARY["fontSource"].default;
     if (Array.isArray(defaultValue)) defaultValue = defaultValue[0];
-    for (let i = 0; i < targetFontRow.length; i++)
-      targetFontSourceRow[i] = defaultValue;
-    targetFontSourceRow[0] = "";
+    for (let i = 0; i < fontRow.length; i++) fontSourceRow[i] = defaultValue;
+    fontSourceRow[0] = "";
   }
 
-  for (let i = 0; i < targetFontRow.length; i++) {
-    if (
-      targetFontSourceRow[i].trim() == fontSource &&
-      !fontList.includes(targetFontRow[i])
-    )
-      fontList.push(targetFontRow[i]);
+  for (let i = 0; i < fontRow.length; i++) {
+    if (fontSourceRow[i].trim() == fontSource && !fontList.includes(fontRow[i]))
+      fontList.push(fontRow[i]);
   }
 
   return fontList;

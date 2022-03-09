@@ -22,7 +22,6 @@ export const totalBlocks = { current: undefined };
 export const totalTrialsThisBlock = { current: undefined };
 
 export const targetKind = { current: undefined };
-export const targetCharacterSet = { current: undefined, where: undefined };
 
 // Renders
 export const font = {
@@ -32,6 +31,7 @@ export const font = {
   instructionFont: undefined,
   instructionFontSource: undefined,
 };
+export const fontCharacterSet = { current: undefined, where: undefined };
 
 export const fixationConfig = {
   size: 45,

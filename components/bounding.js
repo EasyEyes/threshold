@@ -17,7 +17,7 @@ import {
 
 export const getCharacterSetBoundingBox = (
   characterSet,
-  targetFont,
+  font,
   window,
   repeats = 1,
   height = 50
@@ -31,7 +31,7 @@ export const getCharacterSetBoundingBox = (
     win: window,
     name: "characterSetBoundingBoxStim",
     text: "",
-    font: targetFont,
+    font: font,
     units: "pix",
     pos: [0, 0],
     height: height,

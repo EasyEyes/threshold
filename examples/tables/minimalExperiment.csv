@@ -11,12 +11,12 @@ showTargetSpecsBool,TRUE
 spacingDirection,radial
 spacingOverSizeRatio,1.4
 spacingRelationToSize,typographic
-targetCharacterSet,abcdefghijklmnopqrstuvwxyz
+fontCharacterSet,abcdefghijklmnopqrstuvwxyz
 targetDurationSec,0.3
 targetEccentricityXDeg,-10
 targetEccentricityYDeg,0
-targetFont,Roboto Mono
-targetFontSource,google
+font,Roboto Mono
+fontSource,google
 targetMinimumPix,8
 targetTask,identify
 thresholdBeta,2.3

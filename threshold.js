@@ -66,7 +66,7 @@ import {
   instructionFont,
   readingPageIndex,
   showConditionNameConfig,
-  targetCharacterSet,
+  fontCharacterSet,
   font,
 } from "./components/global.js";
 
@@ -697,10 +697,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     characterSetBoundingRects = {};
     for (const cond of paramReader.read("block_condition", "__ALL_BLOCKS__")) {
       const characterSet = String(
-        paramReader.read("targetCharacterSet", cond)
+        paramReader.read("fontCharacterSet", cond)
       ).split("");
-      let font = paramReader.read("targetFont", cond);
-      if (paramReader.read("targetFontSource", cond) === "file")
+      let font = paramReader.read("font", cond);
+      if (paramReader.read("fontSource", cond) === "file")
         font = cleanFontName(font);
       const letterRepeats =
         paramReader.read("spacingRelationToSize", cond) === "ratio" ? 1 : 3;
@@ -1513,13 +1513,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingPageIndex.current = 0;
 
           // FONT
-          font.name = paramReader.read("targetFont", status.block)[0];
-          font.source = paramReader.read("targetFontSource", status.block)[0];
+          font.name = paramReader.read("font", status.block)[0];
+          font.source = paramReader.read("fontSource", status.block)[0];
           if (font.source === "file") font.name = cleanFontName(font.name);
           readingParagraph.setFont(font.name);
 
-          targetCharacterSet.current = String(
-            paramReader.read("targetCharacterSet", status.block)[0]
+          fontCharacterSet.current = String(
+            paramReader.read("fontCharacterSet", status.block)[0]
           ).split("");
 
           // HEIGHT
@@ -1541,7 +1541,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               readingConfig.height = getSizeForSpacing(
                 readingParagraph,
                 paramReader.read("readingSpacingDeg", status.block)[0],
-                targetCharacterSet.current.join("")
+                fontCharacterSet.current.join("")
               );
               break;
             default:
@@ -1867,15 +1867,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const reader = paramReader;
       const BC = status.block_condition;
 
-      font.source = reader.read("targetFontSource", BC);
-      font.name = reader.read("targetFont", BC);
+      font.source = reader.read("fontSource", BC);
+      font.name = reader.read("font", BC);
       if (font.source === "file") font.name = cleanFontName(font.name);
 
       showCounterBool = reader.read("showCounterBool", BC);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
 
-      targetCharacterSet.current = String(
-        reader.read("targetCharacterSet", BC)
+      fontCharacterSet.current = String(
+        reader.read("fontCharacterSet", BC)
       ).split("");
 
       showConditionNameConfig.show = paramReader.read(
@@ -1949,10 +1949,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "flankerOrientation",
             reader.read("spacingDirection", BC)
           );
-          psychoJS.experiment.addData(
-            "targetFont",
-            reader.read("targetFont", BC)
-          );
+          psychoJS.experiment.addData("font", reader.read("font", BC));
           // update component parameters for each repeat
           displayOptions.windowWidthCm = rc.screenWidthCm
             ? rc.screenWidthCm.value
@@ -1970,11 +1967,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterConfig.spacingDirection = reader.read("spacingDirection", BC);
           letterConfig.spacingSymmetry = reader.read("spacingSymmetry", BC);
 
-          validAns = String(reader.read("targetCharacterSet", BC))
+          validAns = String(reader.read("fontCharacterSet", BC))
             .toLowerCase()
             .split("");
 
-          targetCharacterSet.where = reader.read("showCharacterSetWhere", BC);
+          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
 
           targetDurationSec = reader.read("targetDurationSec", BC);
 
@@ -2037,10 +2034,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           /* ------------------------------ Pick triplets ----------------------------- */
-          if (targetCharacterSet.current.length < 3)
-            throw `[EasyEyes experiment configuration error] You must have 3 characters in your character set for this block_condition, however, the researcher only put ${targetCharacterSet.current.length}.`;
+          if (fontCharacterSet.current.length < 3)
+            throw `[EasyEyes experiment configuration error] You must have 3 characters in your character set for this block_condition, however, the researcher only put ${fontCharacterSet.current.length}.`;
           var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
-            getTripletCharacters(targetCharacterSet.current);
+            getTripletCharacters(fontCharacterSet.current);
           if (debug)
             console.log(
               `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
@@ -2190,7 +2187,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               spacingRelationToSize: letterConfig.spacingRelationToSize,
               thresholdParameter: thresholdParameter,
               windowSize: psychoJS.window._size,
-              targetFont: font.name,
+              font: font.name,
             }
           );
           showCharacterSet.setPos([0, 0]);
@@ -2211,7 +2208,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               Math.round(10 * stimulusParameters.heightDeg) / 10
             }\nheightPx: ${Math.round(
               stimulusParameters.heightPx
-            )}\nfilename: ${experimentFileName}\ntargetFont: ${
+            )}\nfilename: ${experimentFileName}\nfont: ${
               font.name
             }\nspacingRelationToSize: ${
               letterConfig.spacingRelationToSize
@@ -2255,7 +2252,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               simulatedObserver[BC] = new SimulatedObserver(
                 simulated[status.block][BC],
                 level,
-                targetCharacterSet.current,
+                fontCharacterSet.current,
                 targetCharacter,
                 paramReader.read("thresholdProportionCorrect", BC),
                 paramReader.read("simulationBeta", BC),
@@ -2265,7 +2262,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             } else {
               simulatedObserver[BC].updateTrial(
                 level,
-                targetCharacterSet.current,
+                fontCharacterSet.current,
                 targetCharacter
               );
             }
@@ -2858,9 +2855,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCharacterSet.frameNStart = frameN; // exact frame index
         showCharacterSet.setAutoDraw(true);
         setupClickableCharacterSet(
-          targetCharacterSet.current,
+          fontCharacterSet.current,
           font.name,
-          targetCharacterSet.where,
+          fontCharacterSet.where,
           showCharacterSetResponse
         );
 

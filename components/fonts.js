@@ -7,12 +7,12 @@ export const loadFonts = (reader, fontList) => {
 
   for (let condition of reader.conditions) {
     const conditionName = condition.block_condition;
-    // if (reader.has("targetFont"))
+    // if (reader.has("font"))
     _loadNameFromSource(
       reader,
       fontList,
-      "targetFont",
-      "targetFontSource",
+      "font",
+      "fontSource",
       conditionName,
       fileFonts,
       webFonts,
