@@ -13,12 +13,12 @@ examples/*/**
 !examples/fonts/Roboto Mono.woff2
 !examples/fonts/Sloan.woff2
 
-!examples/forms/Demo consent form.pdf
-!examples/forms/Demo debrief form.pdf
+!examples/forms/demo-consent-form.pdf
+!examples/forms/demo-debrief-form.pdf
 
 !examples/texts/the-phantom-tollbooth.txt
 
-!examples/tables/demoExperiment.xlsx
+!examples/tables/demoExperiment.csv
 !examples/tables/minimalExperiment.csv
 !examples/tables/readingExperiment.csv
 

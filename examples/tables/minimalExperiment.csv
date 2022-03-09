@@ -3,6 +3,9 @@ block,1
 calibrateTrackDistanceBool,FALSE
 conditionName,triplet
 conditionTrials,4
+font,Roboto Mono
+fontCharacterSet,abcdefghijklmnopqrstuvwxyz
+fontSource,google
 responseEscapeOptionsBool,TRUE
 showConditionNameBool,TRUE
 showCounterBool,TRUE
@@ -11,12 +14,9 @@ showTargetSpecsBool,TRUE
 spacingDirection,radial
 spacingOverSizeRatio,1.4
 spacingRelationToSize,typographic
-fontCharacterSet,abcdefghijklmnopqrstuvwxyz
 targetDurationSec,0.3
 targetEccentricityXDeg,-10
 targetEccentricityYDeg,0
-font,Roboto Mono
-fontSource,google
 targetMinimumPix,8
 targetTask,identify
 thresholdBeta,2.3

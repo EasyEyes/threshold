@@ -1,0 +1,31 @@
+_about,"Demo of EasyEyes. Three blocks, two conditions per block, 6 trials per block, 5 fonts, including a children's optotype and Arabic.",,,,,
+_authorEmails,dp3@nyu.edu,,,,,
+_authors,Denis Pelli,,,,,
+_consentForm,demo-consent-form.pdf,,,,,
+_debriefForm,demo-debrief-form.pdf,,,,,
+block,1,1,2,2,3,3
+calibrateTrackDistanceBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+conditionName,printLetters,printString,scriptLetters,scriptString,arabicLetters,arabicString
+conditionTrials,3,3,3,3,3,3
+font,Sloan.woff2,Auckland Optotype.woff2,Roboto Mono,Fruktur,Noto Sans Arabic Regular,Noto Sans Arabic Regular
+fontCharacterSet,DHKNORSVZ,123456789,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ابتثجحخدذرزسشصضطظعغفقكلمنهوي,ابتثجحخدذرزسشصضطظعغفقكلمنهوي
+fontSource,file,file,google,google,google,google
+responseClickedBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+responseMustClickCrosshairBool,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
+responseTypedBool,TRUE,FALSE,TRUE,TRUE,TRUE,FALSE
+showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+showGrid,none,none,none,none,none,none
+spacingDirection,radial,radial,radial,radial,radial,radial
+spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4,1.4
+spacingRelationToSize,ratio,typographic,ratio,typographic,ratio,typographic
+targetDurationSec,1,1,1,1,1,1
+targetEccentricityXDeg,-10,10,-10,10,-10,10
+targetEccentricityYDeg,0,0,0,0,0,0
+targetMinimumPix,8,8,8,8,8,8
+targetTask,identify,identify,identify,identify,identify,identify
+thresholdBeta,2.3,2.3,2.3,2.3,2.3,2.3
+thresholdDelta,0.01,0.01,0.01,0.01,0.01,0.01
+thresholdGuess,2,2,2,2,2,2
+thresholdGuessLogSd,3,3,3,3,3,3
+thresholdParameter,spacing,spacing,spacing,spacing,spacing,spacing
+viewingDistanceDesiredCm,50,50,50,50,50,50

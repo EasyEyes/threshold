@@ -1,6 +1,6 @@
-_about,reading experiment to aid Peiling's development
+_about,"example reading experiment, one block, one font"
 _authors,Denis Pelli
-_consentForm,Demo consent form.pdf
+_consentForm,demo-consent-form.pdf
 block,1
 calibrateBlindSpotBool,FALSE
 calibrateScreenSizeBool,FALSE
