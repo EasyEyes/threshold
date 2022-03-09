@@ -2086,16 +2086,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
 
-          if (letterConfig.targetSizeIsHeightBool)
-            target.scaleToHeightPx(stimulusParameters.heightPx);
-          else {
-            target.scaleToWidthPx(
-              stimulusParameters.heightPx,
-              stimulusParameters.widthPx
-            );
-          }
-
-          const flankersHeightPx = target.getHeight();
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
           psychoJS.experiment.addData(
             "targetLocationPx",
@@ -2103,6 +2093,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           switch (thresholdParameter) {
             case "size":
+              if (letterConfig.targetSizeIsHeightBool)
+                target.scaleToHeightPx(stimulusParameters.heightPx);
+              else {
+                target.scaleToWidthPx(
+                  stimulusParameters.heightPx,
+                  stimulusParameters.widthPx
+                );
+              }
               flanker1.setAutoDraw(false);
               flanker2.setAutoDraw(false);
               break;
@@ -2111,6 +2109,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 case "none":
                 case "ratio":
                   target.setText(targetCharacter);
+                  if (letterConfig.targetSizeIsHeightBool)
+                    target.scaleToHeightPx(stimulusParameters.heightPx);
+                  else {
+                    target.scaleToWidthPx(
+                      stimulusParameters.heightPx,
+                      stimulusParameters.widthPx
+                    );
+                  }
+
+                  const flankersHeightPx = target.getHeight();
                   flanker1.setText(firstFlankerCharacter);
                   flanker2.setText(secondFlankerCharacter);
                   flanker1.setFont(font.name);
