@@ -4,10 +4,10 @@ _consentForm,demo-consent-form.pdf
 block,1
 calibrateBlindSpotBool,FALSE
 calibrateScreenSizeBool,FALSE
+font,Roboto Mono
+fontSource,google
 readingCorpus,the-phantom-tollbooth.txt
 readingDefineSingleLineSpacingAs,nominalSize
-readingFont,Roboto Mono
-readingFontSource,google
 readingLinesPerPage,12
 readingMaxCharactersPerLine,57
 readingMultipleOfSingleLineSpacing,0.8
