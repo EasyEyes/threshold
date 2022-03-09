@@ -631,6 +631,7 @@ export const restrictSpacingDeg = (
         targetAndFlankerLocationsPx.push(flanker1XYPx, flanker2XYPx);
       // const characterSetUnitHeightScalar = 1 / characterSetRectPx.height;
       const stimulusParameters = {
+        widthPx: Math.round(widthPx),
         heightPx: Math.round(heightPx), // * characterSetUnitHeightScalar,
         targetAndFlankersXYPx: targetAndFlankerLocationsPx,
         sizeDeg: sizeDeg,

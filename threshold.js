@@ -2085,7 +2085,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
-          target.scaleToHeightPx(stimulusParameters.heightPx);
+
+          if (letterConfig.targetSizeIsHeightBool)
+            target.scaleToHeightPx(stimulusParameters.heightPx);
+          else {
+            target.scaleToWidthPx(
+              stimulusParameters.heightPx,
+              stimulusParameters.widthPx
+            );
+          }
+
           const flankersHeightPx = target.getHeight();
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
           psychoJS.experiment.addData(
@@ -2126,7 +2135,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       targetCharacter +
                       secondFlankerCharacter
                   );
-                  target.setHeight(stimulusParameters.heightPx);
+
+                  if (letterConfig.targetSizeIsHeightBool)
+                    target.setHeight(stimulusParameters.heightPx);
+                  else {
+                    target.scaleToWidthPx(
+                      stimulusParameters.heightPx,
+                      stimulusParameters.widthPx
+                    );
+                  }
                   flanker1.setAutoDraw(false);
                   flanker2.setAutoDraw(false);
                   break;
