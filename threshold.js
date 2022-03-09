@@ -2107,6 +2107,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             case "spacing":
               switch (letterConfig.spacingRelationToSize) {
                 case "none":
+                  break;
                 case "ratio":
                   target.setText(targetCharacter);
                   if (letterConfig.targetSizeIsHeightBool)
@@ -2118,7 +2119,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     );
                   }
 
-                  const flankersHeightPx = target.getHeight();
+                  var flankersHeightPx = target.getHeight();
                   flanker1.setText(firstFlankerCharacter);
                   flanker2.setText(secondFlankerCharacter);
                   flanker1.setFont(font.name);

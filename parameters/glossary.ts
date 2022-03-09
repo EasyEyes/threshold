@@ -17,15 +17,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  _authorEmails: {
-    name: "_authorEmails",
-    availability: "now",
-    example: "dp3@nyu.edu",
-    explanation:
-      "Optional, semicolon-separated email addresses of the authors.  The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
-    type: "text",
-    default: "",
-  },
   _allowedBrowsers: {
     name: "_allowedBrowsers",
     availability: "now",
@@ -42,6 +33,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "A comma separated list of allowed operating systems. If not allowed, we reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all operating systems. ",
     type: "multicategorical",
+    default: "",
+  },
+  _authorEmails: {
+    name: "_authorEmails",
+    availability: "now",
+    example: "dp3@nyu.edu",
+    explanation:
+      "Optional, semicolon-separated email addresses of the authors.  The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+    type: "text",
     default: "",
   },
   _authors: {
@@ -419,6 +419,71 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  font: {
+    name: "font",
+    availability: "now",
+    example: "Sloan.woff2",
+    explanation:
+      'font specified what font you want. How you do that depends on fontSource:\n\nfile: font is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The compiler will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  font is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: font is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". ("server" support is coming.)\n\nbrowser: The experiment will pass the font preference string that you place in font to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "fontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
+    type: "text",
+    default: "Roboto Mono",
+  },
+  fontCharacterSet: {
+    name: "fontCharacterSet",
+    availability: "now",
+    example: "DHKNORSVZ",
+    explanation:
+      "fontCharacterSet is a string of unicode characters. On each trial, the target and flankers are randomly drawn from this character set, without replacement. Allowed responses are restricted to this character set. The other keys on the keyboard are dead. Letters may appear more than once in the string, to increase their probability of being drawn, but once one is drawn the rest are removed with it, so the drawn samples won't have any repeats.",
+    type: "text",
+    default: "abcdefghijklmnopqrstuvwxyz",
+  },
+  fontFeatureSettings: {
+    name: "fontFeatureSettings",
+    availability: "now",
+    example: "",
+    explanation:
+      'Font features provide information about how to use the glyphs in a font to render a script or language. fontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. “calt” enables the font’s “contextual alternates”, especially connections between adjacent letters in a script font. “smcp” enables small caps. “zero” requests a slash through the zero character to distinguish it from O. Most font features are Boolean and accept an argument of 0 for off, and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, including Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\n',
+    type: "text",
+    default: "",
+  },
+  fontSource: {
+    name: "fontSource",
+    availability: "now",
+    example: "file",
+    explanation:
+      'fontSource must be file, google, server, or browser. Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has fontSource "file", the compiler checks for presence of the font in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: font contains the filename (with extension) of a file in the Fonts folder in the EasyEyesResources repository in your Pavlovia account. This is checked by the compiler, to avoid runtime surprises. \n\ngoogle: font contains the font name as recognized by the Google Fonts server.\n\nserver: font contains the URL of the font on a font server. ("server" support is coming.)\n\nbrowser: font is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) ',
+    type: "categorical",
+    default: "google",
+    categories: ["file", "google", "browser"],
+  },
+  fontStyle: {
+    name: "fontStyle",
+    availability: "later",
+    example: "bold",
+    explanation:
+      'Can be regular (default), bold, italic, or bold-italic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
+    type: "categorical",
+    default: "regular",
+    categories: ["regular", "bold", "italic", "boldItalic"],
+  },
+  fontVariationSettings: {
+    name: "fontVariationSettings",
+    availability: "now",
+    example: "",
+    explanation:
+      'fontVariationSettings accepts a string to control a variable font. You set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variable, and we can pick any value along each axis to control the font rendering. fontVariationSettings receives a string. The default is the empty string. A typical value is\n"wght" 625\nor\n"wght" 625”, wdth" 25\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. “wght” is weight, which allows you to select any weight from extra thin to regular to bold, to black. “wdth” is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. One must consult the documentation of each variable font to discover which axes it supports. Variable fonts are supported by all modern browsers, and not by Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
+    type: "text",
+    default: "",
+  },
+  fontWeight: {
+    name: "fontWeight",
+    availability: "later",
+    example: "550",
+    explanation:
+      "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = fontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
+    type: "numerical",
+    default: "NaN",
+  },
   instructionFont: {
     name: "instructionFont",
     availability: "now",
@@ -433,7 +498,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "browser",
     explanation:
-      'instructionFontSource must be file, google, server, or browser. "server" support is coming. See targetFontSource for explanation.',
+      'instructionFontSource must be file, google, server, or browser. "server" support is coming. See fontSource for explanation.',
     type: "categorical",
     default: "browser",
     categories: ["file", "google", "browser"],
@@ -765,7 +830,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.5",
     explanation:
-      "If readingSetSizeBy is spacing, the point size of the text to be read is adjusted to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. For the proportionality of spacing to point size, I suggest we measure the width of the targetCharacterSet string, and divide by the number of numbers in the string.",
+      "If readingSetSizeBy is spacing, the point size of the text to be read is adjusted to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. For the proportionality of spacing to point size, I suggest we measure the width of the fontCharacterSet string, and divide by the number of numbers in the string.",
     type: "numerical",
     default: "1",
   },
@@ -863,7 +928,7 @@ export const GLOSSARY: Glossary = {
     name: "showCharacterSetBoundingBoxBool",
     availability: "now",
     example: "TRUE",
-    explanation: "Shows the bounding box of the whole targetCharacterSet.",
+    explanation: "Shows the bounding box of the whole fontCharacterSet.",
     type: "boolean",
     default: "FALSE",
   },
@@ -1134,15 +1199,6 @@ export const GLOSSARY: Glossary = {
     default: "center",
     categories: ["center", "origin"],
   },
-  targetCharacterSet: {
-    name: "targetCharacterSet",
-    availability: "now",
-    example: "DHKNORSVZ",
-    explanation:
-      "targetCharacterSet is a string of unicode characters. On each trial, the target and flankers are randomly drawn from this character set, without replacement. Allowed responses are restricted to this character set. The other keys on the keyboard are dead. Letters may appear more than once in the string, to increase their probability of being drawn, but once one is drawn the rest are removed with it, so the drawn samples won't have any repeats.",
-    type: "text",
-    default: "abcdefghijklmnopqrstuvwxyz",
-  },
   targetContrast: {
     name: "targetContrast",
     availability: "soon",
@@ -1166,7 +1222,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "10",
     explanation:
-      "targetEccentricityXDeg is the x location of the target center, relative to fixation. The target center is defined as the center of the bounding box for the letters in the targetCharacterSet. (See targetBoundingBoxHorizontalAlignment.)",
+      "targetEccentricityXDeg is the x location of the target center, relative to fixation. The target center is defined as the center of the bounding box for the letters in the fontCharacterSet. (See targetBoundingBoxHorizontalAlignment.)",
     type: "numerical",
     default: "0",
   },
@@ -1178,62 +1234,6 @@ export const GLOSSARY: Glossary = {
       "targetEccentricityYDeg is the y location of the target center, relative to fixation.",
     type: "numerical",
     default: "0",
-  },
-  targetFont: {
-    name: "targetFont",
-    availability: "now",
-    example: "Sloan.woff2",
-    explanation:
-      'targetFont specified what font you want. How you do that depends on targetFontSource:\n\nfile: targetFont is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The compiler will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  targetFont is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: targetFont is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". ("server" support is coming.)\n\nbrowser: The experiment will pass the font preference string that you place in targetFont to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "targetFontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
-    type: "text",
-    default: "Roboto Mono",
-  },
-  targetFontFeatureSettings: {
-    name: "targetFontFeatureSettings",
-    availability: "now",
-    example: "",
-    explanation:
-      'Font features provide information about how to use the glyphs in a font to render a script or language. targetFontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. “calt” enables the font’s “contextual alternates”, especially connections between adjacent letters in a script font. “smcp” enables small caps. “zero” requests a slash through the zero character to distinguish it from O. Most font features are Boolean and accept an argument of 0 for off, and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, including Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\n',
-    type: "text",
-    default: "",
-  },
-  targetFontSource: {
-    name: "targetFontSource",
-    availability: "now",
-    example: "file",
-    explanation:
-      'targetFontSource must be file, google, server, or browser. Browsers happily substitute for unavailable fonts. That\'s great for the web, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has targetFontSource "file", the compiler checks for presence of the targetFont in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app/threshold page. Any popular font format will work, but to minimize transmission time, we recommend minimizing file size by using a highly compressed webfont file format, indicated by the extension woff2. \n\nfile: targetFont contains the filename (with extension) of a file in the Fonts folder in the EasyEyesResources repository in your Pavlovia account. This is checked by the compiler, to avoid runtime surprises. \n\ngoogle: targetFont contains the font name as recognized by the Google Fonts server.\n\nserver: targetFont contains the URL of the font on a font server. ("server" support is coming.)\n\nbrowser: targetFont is a font-preference string that is passed to the participant\'s browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don\'t know any quick way to discover what font the browser chose, so the scientist will never know.) ',
-    type: "categorical",
-    default: "google",
-    categories: ["file", "google", "browser"],
-  },
-  targetFontStyle: {
-    name: "targetFontStyle",
-    availability: "later",
-    example: "bold",
-    explanation:
-      'Can be regular (default), bold, italic, or bold-italic. \n• If targetFont is a file name that already specifies the style you want, then don\'t specify a style here. Just leave targetFontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if targetFontSource is "browser", and targetFont specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use targetFontStyle to select among the four standard styles.',
-    type: "categorical",
-    default: "regular",
-    categories: ["regular", "bold", "italic", "boldItalic"],
-  },
-  targetFontVariationSettings: {
-    name: "targetFontVariationSettings",
-    availability: "now",
-    example: "",
-    explanation:
-      'targetFontVariationSettings accepts a string to control a variable font. You set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variable, and we can pick any value along each axis to control the font rendering. targetFontVariationSettings receives a string. The default is the empty string. A typical value is\n"wght" 625\nor\n"wght" 625”, wdth" 25\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. “wght” is weight, which allows you to select any weight from extra thin to regular to bold, to black. “wdth” is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. One must consult the documentation of each variable font to discover which axes it supports. Variable fonts are supported by all modern browsers, and not by Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
-    type: "text",
-    default: "",
-  },
-  targetFontWeight: {
-    name: "targetFontWeight",
-    availability: "later",
-    example: "550",
-    explanation:
-      "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = targetFontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
-    type: "numerical",
-    default: "NaN",
   },
   targetImageFolder: {
     name: "targetImageFolder",
@@ -1249,7 +1249,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "letter",
     explanation:
-      "• letter On each trial, the target is a randomly selected character from the targetCharacterSet displayed in the specified targetFont and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The sound is played for its full duration at targetSoundVolume and with targetSoundNoise\n• reading Measure reading speed and retention. Should be reclassified as a targetTask.",
+      "• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The sound is played for its full duration at targetSoundVolume and with targetSoundNoise\n• reading Measure reading speed and retention. Should be reclassified as a targetTask.",
     type: "categorical",
     default: "letter",
     categories: ["letter", "gabor", "image", "reading"],
@@ -1278,7 +1278,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: '"',
     explanation: '"',
-    type: "",
+    type: "text",
     default: "",
   },
   targetQuestion3: {
@@ -1286,7 +1286,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: '"',
     explanation: '"',
-    type: "",
+    type: "text",
     default: "",
   },
   targetRepeatsBool: {
@@ -1338,7 +1338,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "5",
     explanation:
-      "Ignored unless needed. Size is either height or width, as specified by targetSizeIsHeightBool. Height and width are based on the union of the bounding boxes of all the letters in targetCharacterSet. ",
+      "Ignored unless needed. Size is either height or width, as specified by targetSizeIsHeightBool. Height and width are based on the union of the bounding boxes of all the letters in fontCharacterSet. ",
     type: "numerical",
     default: "2",
   },
@@ -1359,14 +1359,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  targetSoundVolumeDBSPL: {
-    name: "targetSoundVolumeDBSPL",
-    availability: "now",
-    example: "20",
-    explanation: 'If targetKind is "sound", this specifies target volume.',
-    type: "numerical",
-    default: "20",
-  },
   targetSoundNoiseBool: {
     name: "targetSoundNoiseBool",
     availability: "now",
@@ -1376,6 +1368,14 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  targetSoundNoiseDBSPL: {
+    name: "targetSoundNoiseDBSPL",
+    availability: "now",
+    example: "20",
+    explanation: "The noise volume in dB SPL.",
+    type: "numerical",
+    default: "0",
+  },
   targetSoundNoiseHz: {
     name: "targetSoundNoiseHz",
     availability: "now",
@@ -1384,13 +1384,13 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "20000",
   },
-  targetSoundNoiseDBSPL: {
-    name: "targetSoundNoiseDBSPL",
+  targetSoundNoiseOffsetReTargetSec: {
+    name: "targetSoundNoiseOffsetReTargetSec",
     availability: "now",
-    example: "20",
-    explanation: "The noise volume in dB SPL.",
+    example: "0.5",
+    explanation: "Positive when noise ends after the target ends.",
     type: "numerical",
-    default: "0",
+    default: "0.3",
   },
   targetSoundNoiseOnsetReTargetSec: {
     name: "targetSoundNoiseOnsetReTargetSec",
@@ -1400,13 +1400,13 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "-0.3",
   },
-  targetSoundNoiseOffsetReTargetSec: {
-    name: "targetSoundNoiseOffsetReTargetSec",
+  targetSoundVolumeDBSPL: {
+    name: "targetSoundVolumeDBSPL",
     availability: "now",
-    example: "0.5",
-    explanation: "Positive when noise ends after the target ends.",
+    example: "20",
+    explanation: 'If targetKind is "sound", this specifies target volume.',
     type: "numerical",
-    default: "0.3",
+    default: "20",
   },
   targetTask: {
     name: "targetTask",
@@ -1516,8 +1516,8 @@ export const GLOSSARY: Glossary = {
     example: "TRUE",
     explanation:
       "Set TRUE to enable the nudger. The nudger compares measured viewing distance to viewingDistanceDesiredCm, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range.\nPROTECTING THE STIMULUS FROM NUDGING. The nudger will never occlude (or forward or backward mask) the stimulus. Think of the trial as beginning at the participant's click (or keypress) requesting the stimulus and ending at the click (or keypress) response. This leaves a dead time from the response until the click requesting the next trial. EasyEyes nudges only in the dead time. Furthermore, to prevent forward masking, the nudge must end at least 700 ms before the click requesting a trial even though the participant's timing may be unpredictable.  EasyEyes achieves that by ignoring attempts to click (or respond) during nudging and until 700 ms after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n",
-    type: "",
-    default: "",
+    type: "boolean",
+    default: "FALSE",
   },
   wirelessKeyboardNeededBool: {
     name: "wirelessKeyboardNeededBool",
