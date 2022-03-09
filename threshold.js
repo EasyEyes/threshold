@@ -1120,9 +1120,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         replacePlaceholders(
           phrases.T_proportionCorrectPopup[rc.language.value],
           `${
-            (
-              status.trialCorrect_thisBlock / status.trialCompleted_thisBlock
-            ).toFixed(2) * 100
+            Math.round(
+              (status.trialCorrect_thisBlock / status.trialCompleted_thisBlock +
+                Number.EPSILON) *
+                100
+            ) / 100
           }`
         ),
         instructionsText.trialBreak(rc.language.value, responseType.current),
