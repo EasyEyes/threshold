@@ -2078,7 +2078,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       secondFlankerCharacter
                   );
                   // target.setHeight(stimulusParameters.heightPx);
-                  target.scaleToWidthPx(stimulusParameters.widthPx);
+                  target.scaleToWidthPx(
+                    stimulusParameters.heightPx,
+                    stimulusParameters.widthPx
+                  );
                   flanker1.setAutoDraw(false);
                   flanker2.setAutoDraw(false);
                   break;
