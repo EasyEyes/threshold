@@ -41,7 +41,7 @@
     "dataframe-js": "^1.4.4",
     "eslint": "^8.10.0",
     "file-loader": "^6.2.0",
-    "googleapis": "^95.0.0",
+    "googleapis": "^96.0.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.3.5",
     "prettier": "^2.5.1",
@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@types/webfontloader": "^1.6.34",
-    "axios": "^0.26.0",
+    "axios": "^0.26.1",
     "papaparse": "^5.3.1",
     "webfontloader": "^1.6.28"
   }

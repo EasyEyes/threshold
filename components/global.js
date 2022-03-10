@@ -1,3 +1,5 @@
+// ! AVOID IMPORTS HERE
+
 /* ---------------------------- Remote Calibrator --------------------------- */
 export const useRC = true;
 // eslint-disable-next-line no-undef
@@ -47,6 +49,7 @@ export const showConditionNameConfig = {
 };
 
 export const letterConfig = Object.seal({
+  targetDurationSec: undefined,
   targetSizeIsHeightBool: undefined,
   targetMinimumPix: undefined,
   targetSizeDeg: undefined,
@@ -81,6 +84,16 @@ export const skipTrialOrBlock = {
   skipTrial: false,
   skipBlock: false,
 };
+
+export const timing = Object.seal({
+  clickToStimulusOnsetSec: undefined,
+});
+
+export const letterTiming = Object.seal({
+  trialFirstFrameSec: undefined,
+  targetStartSec: undefined,
+  targetFinishSec: undefined,
+});
 
 /* --------------------------- Participant Config --------------------------- */
 
@@ -125,14 +138,53 @@ export const readingConfig = {
 /* ------------------------------- COMPONENTS ------------------------------- */
 /* -------------------------------------------------------------------------- */
 
-export const instructionsConfig = {
+export const uniComponentConfig = {
   text: "",
   units: "pix",
-  height: 25.0,
-  wrapWidth: window.innerWidth * 0.8,
+  alignHoriz: "left",
   ori: 0.0,
   opacity: 1.0,
+  isInstruction: false,
+};
+
+export const instructionsConfig = {
+  ...uniComponentConfig,
+  height: 25.0,
+  wrapWidth: window.innerWidth * 0.8,
   depth: -12.0,
-  alignHoriz: "left",
   isInstruction: true, // !
+};
+
+export const conditionNameConfig = {
+  ...uniComponentConfig,
+  height: 30,
+  wrapWidth: window.innerWidth,
+  depth: -20.0,
+  name: "conditionName",
+  alignVert: "bottom",
+  pos: [-window.innerWidth / 2, -window.innerHeight / 2],
+  autoDraw: false,
+};
+
+export const targetSpecsConfig = {
+  ...uniComponentConfig,
+  height: 20,
+  wrapWidth: window.innerWidth,
+  depth: -21.0,
+  name: "targetSpecs",
+  alignVert: "bottom",
+  pos: [-window.innerWidth / 2, -window.innerHeight / 2],
+  autoDraw: false,
+};
+
+export const trialCounterConfig = {
+  ...uniComponentConfig,
+  height: 20,
+  wrapWidth: window.innerWidth,
+  depth: -22.0,
+  name: "trialCounter",
+  alignVert: "bottom",
+  alignHoriz: "right",
+  pos: [window.innerWidth / 2, -window.innerHeight / 2],
+  autoDraw: false,
 };

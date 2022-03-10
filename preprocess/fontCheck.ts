@@ -18,7 +18,7 @@ export const webFontChecker = async (
 };
 
 const fetchWebFont = async (font: string) => {
-  const url: string = `https://fonts.googleapis.com/css?family=${font}`;
+  const url = `https://fonts.googleapis.com/css?family=${font}`;
   return await fetch(url)
     .then((response) => {
       return true;

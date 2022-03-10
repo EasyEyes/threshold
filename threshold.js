@@ -68,6 +68,11 @@ import {
   showConditionNameConfig,
   fontCharacterSet,
   font,
+  conditionNameConfig,
+  targetSpecsConfig,
+  trialCounterConfig,
+  timing,
+  letterTiming,
 } from "./components/global.js";
 
 import {
@@ -148,6 +153,7 @@ import {
 import {
   showConditionName,
   updateConditionNameConfig,
+  updateTargetSpecsForLetter,
   updateTargetSpecsForReading,
 } from "./components/showTrialInformation.js";
 import { getTrialInfoStr } from "./components/trialCounter.js";
@@ -304,34 +310,8 @@ const paramReader = new ParamReader("conditions", paramReaderInitialized);
 
 /* -------------------------------------------------------------------------- */
 
-var trialCounterConfig = {
-  initialVal: 0,
-  fontSize: 20,
-  x: window.innerWidth / 2,
-  y: -window.innerHeight / 2,
-  alignHoriz: "right",
-  alignVert: "bottom",
-};
-
-var targetSpecsConfig = {
-  fontSize: 20,
-  x: -window.innerWidth / 2,
-  y: -window.innerHeight / 2,
-  alignHoriz: "left",
-  alignVert: "bottom",
-};
-
-var targetSpecs; // TextStim object
-
-var conditionNameConfig = {
-  fontSize: 28,
-  x: -window.innerWidth / 2,
-  y: -window.innerHeight / 2,
-  alignHoriz: "left",
-  alignVert: "bottom",
-};
-
 var conditionName;
+var targetSpecs; // TextStim object
 
 var trialCounter; // TextSim object
 
@@ -619,59 +599,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     });
 
     trialCounter = new visual.TextStim({
+      ...trialCounterConfig,
       win: psychoJS.window,
-      name: "trialCounter",
-      text: "",
       font: instructionFont.current,
-      units: "pix",
-      pos: [trialCounterConfig.x, trialCounterConfig.y],
-      alignHoriz: trialCounterConfig.alignHoriz,
-      alignVert: trialCounterConfig.alignVert,
-      height: trialCounterConfig.fontSize,
-      wrapWidth: window.innerWidth,
-      ori: 0.0,
       color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -20.0,
-      isInstruction: false,
     });
 
     targetSpecs = new visual.TextStim({
+      ...targetSpecsConfig,
       win: psychoJS.window,
-      name: "targetSpecs",
-      text: "",
       font: instructionFont.current,
-      units: "pix",
-      pos: [targetSpecsConfig.x, targetSpecsConfig.y],
-      alignHoriz: targetSpecsConfig.alignHoriz,
-      alignVert: targetSpecsConfig.alignVert,
-      height: targetSpecsConfig.fontSize,
-      wrapWidth: window.innerWidth,
-      ori: 0.0,
       color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -20.0,
-      isInstruction: false,
-      autoDraw: false,
     });
 
     conditionName = new visual.TextStim({
+      ...conditionNameConfig,
       win: psychoJS.window,
-      name: "conditionName",
-      text: "",
       font: instructionFont.current,
-      units: "pix",
-      pos: [conditionNameConfig.x, conditionNameConfig.y],
-      alignHoriz: conditionNameConfig.alignHoriz,
-      alignVert: conditionNameConfig.alignVert,
-      height: conditionNameConfig.fontSize,
-      wrapWidth: window.innerWidth,
-      ori: 0.0,
       color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -20.0,
-      isInstruction: false,
-      autoDraw: false,
     });
 
     instructions = new visual.TextStim({
@@ -824,7 +769,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        return quitPsychoJS(undefined, false);
       }
 
       // check if the Routine should terminate
@@ -915,7 +860,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     ) {
       removeBeepButton();
 
-      return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+      return quitPsychoJS(undefined, false);
     }
 
     if (!continueRoutine || clickedContinue.current) {
@@ -990,7 +935,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Schedule all the trials in the trialList:
       for (const _thisBlock of blocks) {
         const snapshot = blocks.getSnapshot();
-        blocksLoopScheduler.add(importConditions(snapshot));
+        blocksLoopScheduler.add(importConditions(snapshot, "block"));
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
@@ -1093,7 +1038,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       for (const _trial of trials) {
         const snapshot = trials.getSnapshot();
 
-        trialsLoopScheduler.add(importConditions(snapshot));
+        trialsLoopScheduler.add(importConditions(snapshot, "trial"));
         // Instructions
         trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
         trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
@@ -1284,7 +1229,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        return quitPsychoJS(undefined, false);
       }
 
       // Continue?
@@ -1335,12 +1280,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // update component parameters for each repeat
       // status.block++
       thisConditionsFile = `conditions/block_${status.block}.csv`;
-
-      if (debug)
-        console.log(
-          "%c=======================\n====== New Block ======\n=======================",
-          "color: purple"
-        );
 
       /* -------------------------------------------------------------------------- */
       // ! Viewing distance
@@ -1407,7 +1346,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+        return quitPsychoJS(undefined, false);
       }
 
       // check if the Routine should terminate
@@ -1795,8 +1734,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var showBoundingBox;
   var showCharacterSetBoundingBox;
   var stimulusParameters;
-  var targetDurationSec;
-
   var thresholdParameter;
 
   var wirelessKeyboardNeededYes;
@@ -1964,6 +1901,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // TODO check that we are actually trying to test for "spacing", not "size"
 
+          letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
           letterConfig.spacingDirection = reader.read("spacingDirection", BC);
           letterConfig.spacingSymmetry = reader.read("spacingSymmetry", BC);
 
@@ -1972,8 +1910,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             .split("");
 
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
-
-          targetDurationSec = reader.read("targetDurationSec", BC);
 
           fixationConfig.size = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
           fixationConfig.show = reader.read("markTheFixationBool", BC);
@@ -2190,34 +2126,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showCharacterSet.setText("");
           // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
-          if (showConditionNameConfig.showTargetSpecs) {
-            // TODO Move to showTrialInformation.js
-            showConditionNameConfig.targetSpecs = `sizeDeg: ${
-              Math.round(10 * stimulusParameters.sizeDeg) / 10
-            }\n${
-              stimulusParameters.spacingDeg
-                ? `spacingDeg: ${
-                    Math.round(10 * stimulusParameters.spacingDeg) / 10
-                  }`
-                : ""
-            }\nheightDeg: ${
-              Math.round(10 * stimulusParameters.heightDeg) / 10
-            }\nheightPx: ${Math.round(
-              stimulusParameters.heightPx
-            )}\nfilename: ${experimentFileName}\nfont: ${
-              font.name
-            }\nspacingRelationToSize: ${
-              letterConfig.spacingRelationToSize
-            }\nspacingOverSizeRatio: ${
-              letterConfig.spacingOverSizeRatio
-            }\nspacingSymmetry: ${
-              letterConfig.spacingSymmetry
-            }\ntargetSizeIsHeightBool: ${
-              letterConfig.targetSizeIsHeightBool
-            }\ntargetEccentricityXYDeg: ${
-              letterConfig.targetEccentricityXYDeg
-            }\nviewingDistanceCm: ${viewingDistanceCm.current}`;
-          }
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecsForLetter(stimulusParameters, experimentFileName);
 
           trialComponents = [];
           trialComponents.push(key_resp);
@@ -2310,7 +2220,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       trialCounter.setText(trialCounterStr);
       trialCounter.setFont(instructionFont.current);
-      trialCounter.setHeight(trialCounterConfig.fontSize);
+      trialCounter.setHeight(trialCounterConfig.height);
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       trialCounter.setAutoDraw(showCounterBool);
 
@@ -2353,8 +2263,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           frameN = frameN + 1;
 
           if (showConditionNameConfig.showTargetSpecs) {
-            targetSpecsConfig.x = -window.innerWidth / 2;
-            targetSpecsConfig.y = -window.innerHeight / 2;
+            targetSpecsConfig.pos[0] = -window.innerWidth / 2;
+            targetSpecsConfig.pos[1] = -window.innerHeight / 2;
             if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
               // keep track of start time/frame for later
               targetSpecs.tStart = t; // (not accounting for frame time here)
@@ -2380,7 +2290,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         let action = await handleEscapeKey();
         if (action.quitSurvey) {
-          return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+          return quitPsychoJS(undefined, false);
         }
         if (action.skipTrial || action.skipBlock) {
           return Scheduler.Event.NEXT;
@@ -2452,28 +2362,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         return Scheduler.Event.NEXT;
       }
 
-      psychoJS.experiment.addData(
-        "clickToTrialPreparationDelaySec",
-        routineClock.getTime()
-      );
-      trialClock.reset(); // clock
-
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       hideCursor();
 
-      ////
-      if (debug)
-        console.log("%c\n\n====== New Trial ======\n\n", "color: purple");
-      if (snapshot.getCurrentTrial().trialsVal)
-        logger("Level", snapshot.getCurrentTrial().trialsVal);
-      logger("Index", snapshot.thisIndex);
-
-      if (targetKind.current === "reading") readingSound.play();
-
-      ////
       switchKind(targetKind.current, {
+        reading: () => {
+          readingSound.play();
+        },
         letter: () => {
+          if (snapshot.getCurrentTrial().trialsVal)
+            logger("Level", snapshot.getCurrentTrial().trialsVal);
+          logger("Index", snapshot.thisIndex);
+
           responseType.current = resetResponseType(
             responseType.original,
             responseType.current,
@@ -2533,6 +2434,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
       /* -------------------------------------------------------------------------- */
 
+      psychoJS.experiment.addData(
+        "clickToTrialPreparationDelaySec",
+        routineClock.getTime()
+      );
+      trialClock.reset(); // clock
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -2550,32 +2457,59 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // get current time
       t = trialClock.getTime();
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
-      if (frameN === 1) {
-        logger("target bounding box", target.getBoundingBox(true));
-        psychoJS.experiment.addData(
-          "clickToStimulusOnsetSec",
-          routineClock.getTime()
-        );
-        /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
-        psychoJS.experiment.addData(
-          "targetBoundingBox",
-          String(target.getBoundingBox(true))
-        );
-        if (letterConfig.spacingRelationToSize === "ratio") {
-          psychoJS.experiment.addData(
-            "flanker1BoundingBox",
-            String(flanker1.getBoundingBox(true))
-          );
-          psychoJS.experiment.addData(
-            "flanker2BoundingBox",
-            String(flanker2.getBoundingBox(true))
-          );
-        }
-        /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
-      }
-      // update/draw components on each frame
 
       const uniDelay = 0;
+      /* -------------------------------------------------------------------------- */
+      if (frameN === 0) {
+        frameRemains =
+          uniDelay +
+          letterConfig.targetDurationSec -
+          psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+
+        // !
+        psychoJS.experiment.addData(
+          "clickToStimulusOnsetSec",
+          (timing.clickToStimulusOnsetSec = routineClock.getTime())
+        );
+        letterTiming.trialFirstFrameSec = t;
+
+        switchKind(targetKind.current, {
+          reading: () => {
+            // READING Only accepts SPACE
+            if (!validAns.length || validAns[0] !== "space")
+              validAns = ["space"];
+            if (!correctAns || correctAns !== "space") correctAns = "space";
+          },
+          letter: () => {
+            logger("target bounding box", target.getBoundingBox(true));
+            /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
+            psychoJS.experiment.addData(
+              "targetBoundingBox",
+              String(target.getBoundingBox(true))
+            );
+            if (letterConfig.spacingRelationToSize === "ratio") {
+              psychoJS.experiment.addData(
+                "flanker1BoundingBox",
+                String(flanker1.getBoundingBox(true))
+              );
+              psychoJS.experiment.addData(
+                "flanker2BoundingBox",
+                String(flanker2.getBoundingBox(true))
+              );
+            }
+            /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
+
+            // ? Should allow for reading?
+            if (timing.clickToStimulusOnsetSec)
+              if (showConditionNameConfig.showTargetSpecs) {
+                showConditionNameConfig.targetSpecs += `\nclickToStimulusOnsetSec: ${timing.clickToStimulusOnsetSec}`;
+                targetSpecs.setText(showConditionNameConfig.targetSpecs);
+                showConditionName(conditionName, targetSpecs);
+              }
+          },
+        });
+      }
+      /* -------------------------------------------------------------------------- */
 
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
@@ -2621,15 +2555,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
           }
           /* --- /SIMULATED --- */
-
-          // READING Only accepts SPACE
-          switchKind(targetKind.current, {
-            reading: () => {
-              if (!validAns.length || validAns[0] !== "space")
-                validAns = ["space"];
-              if (!correctAns || correctAns !== "space") correctAns = "space";
-            },
-          });
 
           let theseKeys = key_resp.getKeys({
             keyList: validAns,
@@ -2712,11 +2637,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // TODO improve code style/logic
       if (showConditionNameConfig.showTargetSpecs) {
-        targetSpecsConfig.x = -window.innerWidth / 2;
-        targetSpecsConfig.y = -window.innerHeight / 2;
+        targetSpecsConfig.pos[0] = -window.innerWidth / 2;
+        targetSpecsConfig.pos[1] = -window.innerHeight / 2;
         // *targetSpecs* updates
         if (t >= 0.0) {
-          targetSpecs.setPos([targetSpecsConfig.x, targetSpecsConfig.y]);
+          targetSpecs.setPos(targetSpecsConfig.pos);
           targetSpecs.setAutoDraw(true);
         }
       }
@@ -2729,7 +2654,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         // *targetSpecs* updates
         if (t >= 0.0) {
-          conditionName.setPos([conditionNameConfig.x, conditionNameConfig.y]);
+          conditionName.setPos(conditionNameConfig.pos);
           conditionName.setAutoDraw(true);
         }
       }
@@ -2759,16 +2684,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker1.setAutoDraw(true);
         }
       }
-
-      frameRemains =
-        uniDelay +
-        targetDurationSec -
-        psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
       if (flanker1.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         flanker1.setAutoDraw(false);
       }
 
       // *target* updates
+      if (
+        target.status === PsychoJS.Status.STARTED &&
+        !letterTiming.targetStartSec
+      ) {
+        letterTiming.targetStartSec = t;
+        logger("targetStartSec", letterTiming.targetStartSec);
+      }
       if (t >= uniDelay && target.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         target.tStart = t; // (not accounting for frame time here)
@@ -2783,7 +2710,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         target.setAutoDraw(true);
       }
+      if (
+        target.status === PsychoJS.Status.FINISHED &&
+        !letterTiming.targetFinishSec
+      ) {
+        letterTiming.targetFinishSec = t;
+        logger("targetFinishSec", letterTiming.targetFinishSec);
 
+        if (showConditionNameConfig.showTargetSpecs) {
+          showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
+            letterTiming.targetFinishSec - letterTiming.targetStartSec
+          }`;
+          targetSpecs.setText(showConditionNameConfig.targetSpecs);
+          showConditionName(conditionName, targetSpecs);
+        }
+      }
       if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         target.setAutoDraw(false);
         // Play purr sound
@@ -2820,12 +2761,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         let action = await handleEscapeKey();
         if (action.quitSurvey) {
-          return quitPsychoJS("The [Escape] key was pressed. Goodbye!", false);
+          return quitPsychoJS(undefined, false);
         }
       }
 
       const timeWhenRespondable =
-        uniDelay + letterConfig.targetSafetyMarginSec + targetDurationSec;
+        uniDelay +
+        letterConfig.targetSafetyMarginSec +
+        letterConfig.targetDurationSec;
       updateBoundingBoxPolies(
         t,
         frameRemains,
@@ -2844,7 +2787,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // *showCharacterSet* updates
       if (
         t >=
-          uniDelay + letterConfig.targetSafetyMarginSec + targetDurationSec &&
+          uniDelay +
+            letterConfig.targetSafetyMarginSec +
+            letterConfig.targetDurationSec &&
         showCharacterSet.status === PsychoJS.Status.NOT_STARTED
       ) {
         // keep track of start time/frame for later
@@ -2939,6 +2884,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // update the trial handler
       switchKind(targetKind.current, {
         letter: () => {
+          // Add trial timing data
+          psychoJS.experiment.addData(
+            "trialFirstFrameSec",
+            letterTiming.trialFirstFrameSec
+          );
+          psychoJS.experiment.addData(
+            "targetStartSec",
+            letterTiming.targetStartSec
+          );
+          psychoJS.experiment.addData(
+            "targetFinishSec",
+            letterTiming.targetFinishSec
+          );
+          letterTiming.trialFirstFrameSec = undefined;
+          letterTiming.targetStartSec = undefined;
+          letterTiming.targetFinishSec = undefined;
+
           if (currentLoop instanceof MultiStairHandler) {
             currentLoop.addResponse(key_resp.corr, level);
             // TODO Should it be placed outside of the if statement?
@@ -3054,9 +3016,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
   }
 
-  function importConditions(currentLoopSnapshot) {
+  function importConditions(currentLoopSnapshot, snapshotType) {
     return async function () {
-      logger("current trial", currentLoopSnapshot.getCurrentTrial());
+      if (debug) {
+        if (snapshotType === "block") {
+          console.log(
+            "%c====== New Block ======",
+            "background: orange; color: white; padding: 1rem"
+          );
+        } else if (snapshotType === "trial") {
+          console.log(
+            "%c====== New Trial ======",
+            "background: purple; color: white; padding: 1rem"
+          );
+        } else {
+          console.log(
+            "%c====== Unknown Snapshot ======",
+            "background: red; color: white; padding: 1rem"
+          );
+        }
+      }
+
+      logger(`this ${snapshotType}`, currentLoopSnapshot.getCurrentTrial());
       psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());
       return Scheduler.Event.NEXT;
     };

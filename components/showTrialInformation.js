@@ -1,18 +1,23 @@
 /* ----------------------------- Condition Name ----------------------------- */
 
-import { showConditionNameConfig, viewingDistanceCm } from "./global";
+import {
+  conditionNameConfig,
+  font,
+  letterConfig,
+  showConditionNameConfig,
+  viewingDistanceCm,
+} from "./global";
 
 export const showConditionName = (conditionName, targetSpecs) => {
   if (showConditionNameConfig.show) {
     conditionName.setText(showConditionNameConfig.name);
-    if (showConditionNameConfig.showTargetSpecs) {
-      conditionName.setPos([
-        -window.innerWidth / 2,
-        targetSpecs.getBoundingBox(true).height,
-      ]);
-    } else {
-      conditionName.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
-    }
+
+    updateConditionNameConfig(
+      conditionNameConfig,
+      showConditionNameConfig.showTargetSpecs,
+      targetSpecs
+    );
+    conditionName.setPos(conditionNameConfig.pos);
 
     conditionName.setAutoDraw(true);
   }
@@ -24,15 +29,45 @@ export const updateConditionNameConfig = (
   targetSpecs = null
 ) => {
   if (updateForTargetSpecs && targetSpecs) {
-    conditionNameConfig.x = -window.innerWidth / 2;
-    conditionNameConfig.y = targetSpecs.getBoundingBox(true).height;
+    conditionNameConfig.pos[0] = -window.innerWidth / 2;
+    conditionNameConfig.pos[1] =
+      -window.innerHeight / 2 + targetSpecs.getBoundingBox().height;
   } else {
-    conditionNameConfig.x = -window.innerWidth / 2;
-    conditionNameConfig.y = -window.innerHeight / 2;
+    conditionNameConfig.pos[0] = -window.innerWidth / 2;
+    conditionNameConfig.pos[1] = -window.innerHeight / 2;
   }
 };
 
 /* -------------------------------------------------------------------------- */
+
+export const updateTargetSpecsForLetter = (
+  stimulusParameters,
+  experimentFileName
+) => {
+  showConditionNameConfig.targetSpecs = `sizeDeg: ${
+    Math.round(10 * stimulusParameters.sizeDeg) / 10
+  }\n${
+    stimulusParameters.spacingDeg
+      ? `spacingDeg: ${Math.round(10 * stimulusParameters.spacingDeg) / 10}`
+      : ""
+  }\nheightDeg: ${
+    Math.round(10 * stimulusParameters.heightDeg) / 10
+  }\nheightPx: ${Math.round(
+    stimulusParameters.heightPx
+  )}\nfilename: ${experimentFileName}\nfont: ${
+    font.name
+  }\nspacingRelationToSize: ${
+    letterConfig.spacingRelationToSize
+  }\nspacingOverSizeRatio: ${
+    letterConfig.spacingOverSizeRatio
+  }\nspacingSymmetry: ${letterConfig.spacingSymmetry}\ntargetDurationSec: ${
+    letterConfig.targetDurationSec
+  }\ntargetSizeIsHeightBool: ${
+    letterConfig.targetSizeIsHeightBool
+  }\ntargetEccentricityXYDeg: ${
+    letterConfig.targetEccentricityXYDeg
+  }\nviewingDistanceCm: ${viewingDistanceCm.current}`;
+};
 
 export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
   showConditionNameConfig.targetSpecs = `filename: ${experimentFileName}\nreadingCorpus: ${reader.read(

@@ -517,7 +517,7 @@ export class Rectangle {
 
     this.characterSet = characterSet;
     this.centers = centers;
-    logger("orig centers", this.centers);
+    // logger("orig centers", this.centers);
     this.ascentToDescent = ascentToDescent;
   }
   getUnits() {
