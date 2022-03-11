@@ -997,6 +997,14 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  showFPSBool: {
+    name: "showFPSBool",
+    availability: "now",
+    example: "TRUE",
+    explanation: "Show the Frame Per Second.",
+    type: "boolean",
+    default: "FALSE",
+  },
   showGrid: {
     name: "showGrid",
     availability: "now",

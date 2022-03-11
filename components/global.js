@@ -1,10 +1,14 @@
 // ! AVOID IMPORTS HERE
 
+/* -------------------------------- EXTERNALS ------------------------------- */
 /* ---------------------------- Remote Calibrator --------------------------- */
 export const useRC = true;
 // eslint-disable-next-line no-undef
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
 rc.init();
+
+// stats.js
+export const stats = { current: undefined, on: false };
 
 /* ------------------------- Grid / Display Options ------------------------- */
 

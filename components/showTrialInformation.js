@@ -114,3 +114,7 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
     BC
   )}\nviewingDistanceCm: ${viewingDistanceCm.current}`;
 };
+
+export const isTimingOK = (measured, target) => {
+  return measured < target ? "OK" : "BAD";
+};

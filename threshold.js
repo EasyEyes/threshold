@@ -4,7 +4,12 @@
  * Crowding Test *
  *****************/
 
-import { debug, getTripletCharacters, sleep } from "./components/utils.js";
+import {
+  debug,
+  getTripletCharacters,
+  ifTrue,
+  sleep,
+} from "./components/utils.js";
 
 import * as core from "./psychojs/src/core/index.js";
 import * as data from "./psychojs/src/data/index.js";
@@ -18,6 +23,7 @@ const { Scheduler } = util;
 ////
 /* -------------------------------- External -------------------------------- */
 import * as jsQUEST from "./components/addons/jsQUEST.module.js";
+import Stats from "stats.js";
 
 ////
 /* ----------------------------------- CSS ---------------------------------- */
@@ -73,6 +79,7 @@ import {
   trialCounterConfig,
   timing,
   letterTiming,
+  stats,
 } from "./components/global.js";
 
 import {
@@ -151,6 +158,7 @@ import {
 
 // Display extra information for the TRIAL
 import {
+  isTimingOK,
   showConditionName,
   updateConditionNameConfig,
   updateTargetSpecsForLetter,
@@ -287,6 +295,15 @@ const paramReaderInitialized = async (reader) => {
     experiment(reader.blockCount);
   };
   ////
+
+  // stats.js
+  if (ifTrue(reader.read("showFPSBool", "__ALL_BLOCKS__"))) {
+    stats.current = new Stats();
+    stats.current.showPanel(0);
+    document.body.appendChild(stats.current.dom);
+    stats.current.dom.style.display = "none";
+    stats.on = false;
+  }
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
@@ -1322,6 +1339,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       filterComponents = [];
 
       // ! Set block params
+      // stats.js
+      if (ifTrue(paramReader.read("showFPSBool", status.block))) {
+        stats.current.dom.style.display = "block";
+        stats.on = true;
+      } else {
+        stats.current.dom.style.display = "none";
+        stats.on = false;
+      }
+
+      // RC
+      if (ifTrue(paramReader.read("calibrateTrackGazeBool", status.block))) {
+        rc.resumeGaze();
+        loggerText("[RC] resuming gaze");
+      } else {
+        rc.pauseGaze();
+        loggerText("[RC] pausing gaze");
+      }
+      if (
+        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
+      ) {
+        rc.resumeDistance();
+        loggerText("[RC] resuming distance");
+      } else {
+        rc.pauseDistance();
+        loggerText("[RC] pausing distance");
+      }
 
       for (const thisComponent of filterComponents)
         if ("status" in thisComponent)
@@ -1962,8 +2005,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             BC
           );
 
-          // trackGazeYes = reader.read("trackGazeYes", BC);
-          // trackHeadYes = reader.read("trackHeadYes", BC);
           wirelessKeyboardNeededYes = reader.read(
             "wirelessKeyboardNeededYes",
             BC
@@ -2450,6 +2491,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var frameRemains;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
+      ////
+      if (stats.on) stats.current.begin();
+      ////
+
       if (toShowCursor()) {
         showCursor();
         removeClickableCharacterSet(showCharacterSetResponse);
@@ -2505,7 +2550,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // ? Should allow for reading?
             if (timing.clickToStimulusOnsetSec)
               if (showConditionNameConfig.showTargetSpecs) {
-                showConditionNameConfig.targetSpecs += `\nclickToStimulusOnsetSec: ${timing.clickToStimulusOnsetSec}`;
+                showConditionNameConfig.targetSpecs += `\nclickToStimulusOnsetSec: ${
+                  Math.round(timing.clickToStimulusOnsetSec * 100000.0) / 100000
+                } [${isTimingOK(timing.clickToStimulusOnsetSec, 0.1)}]`;
                 targetSpecs.setText(showConditionNameConfig.targetSpecs);
                 showConditionName(conditionName, targetSpecs);
               }
@@ -2721,9 +2768,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         logger("targetFinishSec", letterTiming.targetFinishSec);
 
         if (showConditionNameConfig.showTargetSpecs) {
+          const thisDuration =
+            letterTiming.targetFinishSec - letterTiming.targetStartSec;
           showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
-            letterTiming.targetFinishSec - letterTiming.targetStartSec
-          }`;
+            Math.round(thisDuration * 100000.0) / 100000
+          } [${isTimingOK(
+            Math.abs(thisDuration - letterConfig.targetDurationSec),
+            0.02
+          )}]`;
           targetSpecs.setText(showConditionNameConfig.targetSpecs);
           showConditionName(conditionName, targetSpecs);
         }
@@ -2832,6 +2884,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             break;
           }
 
+      ////
+      if (stats.on) stats.current.end();
+      ////
+
       // refresh the screen if continuing
       if (continueRoutine) {
         return Scheduler.Event.FLIP_REPEAT;
@@ -2904,7 +2960,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterTiming.targetStartSec = undefined;
           letterTiming.targetFinishSec = undefined;
 
-          if (currentLoop instanceof MultiStairHandler) {
+          if (
+            currentLoop instanceof MultiStairHandler &&
+            currentLoop.nRemaining !== 0
+          ) {
             currentLoop.addResponse(key_resp.corr, level);
             // TODO Should it be placed outside of the if statement?
             addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
@@ -3048,7 +3107,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   async function quitPsychoJS(message, isCompleted) {
     removeClickableCharacterSet(showCharacterSetResponse);
+
+    // RC
+    rc.endGaze();
     rc.endNudger();
+    rc.endDistance();
+
     showCursor();
 
     // Check for and save orphaned data

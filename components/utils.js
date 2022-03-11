@@ -16,6 +16,11 @@ export function safeExecuteFunc(f, ...a) {
     else return f();
 }
 
+export function ifTrue(arr) {
+  for (let a of arr) if (a) return true;
+  return false;
+}
+
 /**
  * Create a mapping between an arbitrary set of strings, ie `possibleResponses`,
  * and a set of ascii-supported keys, ie [0,1,...,9,A,B,...Z].
@@ -267,7 +272,7 @@ export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
       )
     );
   } else {
-    console.error("undefined currentLoop._currentStaircase [utils.js 222]");
+    throw "undefined currentLoop._currentStaircase [add TRIAL data failed]";
   }
 };
 
@@ -287,7 +292,7 @@ export const addBlockStaircaseSummariesToData = (loop, psychoJS) => {
       );
       if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
     } else {
-      console.error("undefined staircase [utils.js 248]");
+      throw "undefined staircase [add BLOCK data failed]";
     }
   });
 };

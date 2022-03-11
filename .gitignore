@@ -21,6 +21,7 @@ examples/*/**
 !examples/tables/demoExperiment.csv
 !examples/tables/minimalExperiment.csv
 !examples/tables/readingExperiment.csv
+!examples/tables/testTiming.csv
 
 ###
 

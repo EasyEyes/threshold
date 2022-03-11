@@ -33,6 +33,7 @@
   "devDependencies": {
     "@babel/core": "^7.17.5",
     "@types/papaparse": "^5.3.2",
+    "@types/webfontloader": "^1.6.34",
     "@typescript-eslint/eslint-plugin": "^5.14.0",
     "@typescript-eslint/parser": "^5.14.0",
     "babel-loader": "^8.2.3",
@@ -46,7 +47,7 @@
     "lint-staged": "^12.3.5",
     "prettier": "^2.5.1",
     "style-loader": "^3.3.1",
-    "ts-loader": "^9.2.7",
+    "ts-loader": "^9.2.8",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.2",
     "webpack": "^5.70.0",
@@ -57,9 +58,9 @@
     "*.{js,css,html,md,ts}": "prettier --write"
   },
   "dependencies": {
-    "@types/webfontloader": "^1.6.34",
     "axios": "^0.26.1",
     "papaparse": "^5.3.1",
+    "stats.js": "^0.17.0",
     "webfontloader": "^1.6.28"
   }
 }

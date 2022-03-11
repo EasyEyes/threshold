@@ -1,4 +1,4 @@
-import { debug } from "./utils";
+import { debug, ifTrue } from "./utils";
 
 export const useCalibration = (reader) => {
   return ifTrue([
@@ -9,11 +9,6 @@ export const useCalibration = (reader) => {
     ...reader.read("calibrateTrackNearPointBool", "__ALL_BLOCKS__"),
   ]);
 };
-
-function ifTrue(arr) {
-  for (let a of arr) if (a) return true;
-  return false;
-}
 
 /* -------------------------------------------------------------------------- */
 

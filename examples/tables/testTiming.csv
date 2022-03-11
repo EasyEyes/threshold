@@ -1,0 +1,27 @@
+_about,"test timing with camera on, gaze tracking on, distance tracking on, and both on",,,,,,,
+block,1,1,2,2,3,3,4,4
+calibrateTrackDistanceBool,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE
+calibrateTrackGazeBool,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE
+conditionName,cameraFast,cameraSlow,gazeFast,gazeSlow,distanceFast,distanceSlow,bothFast,bothSlow
+conditionTrials,2,2,2,2,2,2,2,2
+font,Roboto Mono,Roboto Mono,BhuTuka Expanded One,BhuTuka Expanded One,Roboto Mono,Roboto Mono,BhuTuka Expanded One,BhuTuka Expanded One
+fontCharacterSet,defghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz
+fontSource,google,google,google,google,google,google,google,google
+responseEscapeOptionsBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+showConditionNameBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+showFPSBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+showTargetSpecsBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+spacingDirection,radial,radial,radial,radial,radial,radial,radial,radial
+spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4
+spacingRelationToSize,typographic,typographic,typographic,typographic,typographic,typographic,typographic,typographic
+targetDurationSec,0.1,0.5,0.1,0.5,0.1,0.5,0.1,0.5
+targetEccentricityXDeg,-10,10,-10,10,-10,10,-10,10
+targetEccentricityYDeg,0,0,0,0,0,0,0,0
+targetMinimumPix,8,8,8,8,8,8,8,8
+targetTask,identify,identify,identify,identify,identify,identify,identify,identify
+thresholdBeta,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3
+thresholdDelta,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01
+thresholdGuess,2,2,2,2,2,2,2,2
+thresholdGuessLogSd,3,3,3,3,3,3,3,3
+thresholdParameter,spacing,spacing,spacing,spacing,spacing,spacing,spacing,spacing
