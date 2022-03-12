@@ -1343,7 +1343,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (ifTrue(paramReader.read("showFPSBool", status.block))) {
         stats.current.dom.style.display = "block";
         stats.on = true;
-      } else {
+      } else if (stats.current && stats.current.dom) {
         stats.current.dom.style.display = "none";
         stats.on = false;
       }
