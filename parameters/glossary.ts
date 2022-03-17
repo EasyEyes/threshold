@@ -363,10 +363,10 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationStrategy: {
     name: "fixationLocationStrategy",
-    availability: "soon",
+    availability: "now",
     example: "centerFixation",
     explanation:
-      'Choose the strategy by which EasyEyes should place the point of fixation, which is the origin of the visual coordinate system. This is complicated. Most experimenters will choose "centerFixation", which simply places fixation at the center of the screen. But for peripheral testing you might want to put fixation near one edge to maximize the eccentricity of a target at the other edge. To test even farther into the periphery, you might want to put fixation off-screen by putting tape on a bottle or a box and drawing a fixation cross on it. Those cases and others are handled by choosing other strategies. Fixation, whether, on- or off-screen, is always specified as a point in (x,y) pixel coordinates in the plane of the display. We never change fixation within a block, so all conditions in a block must have the same fixation point and fixationLocationStrategy. This is checked by the pre-processor. If the strategy refers to targets, we consider all possible targets across all conditions within the block.  \n• "asSpecifed" indicates that fixation is specified by (fixationLocationXScreen,  fixationLocationYScreen). \n• "centerFixation" places fixation at the center of the screen. \n• "centerTargets" sets the (possibly offscreen) fixation location so as to maximize the screen margin around the edges of all the possible targets.  \n• "centerFixationAndTargets" places fixation so as to maximize the screen margin around the fixation and the edges of all the possible targets within the block. It may be impossible to satisfy the strategies that mention targets without reducing viewing distance. Ideally, the pre-processor would flag this error before we start running the experiment.',
+      'Choose the strategy by which EasyEyes should place the point of fixation, which is the origin of the visual coordinate system. This is complicated. Most experimenters will choose "centerFixation", which simply places fixation at the center of the screen. But for peripheral testing you might want to put fixation near one edge to maximize the eccentricity of a target at the other edge. To test even farther into the periphery, you might want to put fixation off-screen by putting tape on a bottle or a box and drawing a fixation cross on it. Those cases and others are handled by choosing other strategies. Fixation, whether, on- or off-screen, is always specified as a point in (x,y) pixel coordinates in the plane of the display. We never change fixation within a block, so all conditions in a block must have the same fixation point and fixationLocationStrategy. This is checked by the pre-processor. If the strategy refers to targets, we consider all possible targets across all conditions within the block.  \n• "asSpecified" indicates that fixation is specified by (fixationLocationXScreen,  fixationLocationYScreen). \n• "centerFixation" places fixation at the center of the screen. \n• "centerTargets" sets the (possibly offscreen) fixation location so as to maximize the screen margin around the edges of all the possible targets.  \n• "centerFixationAndTargets" places fixation so as to maximize the screen margin around the fixation and the edges of all the possible targets within the block. It may be impossible to satisfy the strategies that mention targets without reducing viewing distance. Ideally, the pre-processor would estimate screen size to flag this error before we start running the experiment.',
     type: "categorical",
     default: "centerFixation",
     categories: [
@@ -378,7 +378,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationXScreen: {
     name: "fixationLocationXScreen",
-    availability: "soon",
+    availability: "now",
     example: "0.5",
     explanation:
       'If fixationLocationStrategy is "asSpecified" then this specifies fixation\'s X coordinate in the screen plane, normalized by screen width and height. Origin is lower left.',
@@ -387,7 +387,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationYScreen: {
     name: "fixationLocationYScreen",
-    availability: "soon",
+    availability: "now",
     example: "0.5",
     explanation: "As above. The Y coordinate.",
     type: "numerical",
@@ -407,7 +407,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "4",
     explanation:
-      "We save all trials in trialData, but when the fixation error exceeds tolerance, we don't feed it to QUEST, and we run it again by adding a trial of this condition to the list of conditions yet to be run in this block, and reshuffle that list. Excel treats 'inf' as a string, not the number infinity, so use a large number instead of 'inf'. Note that the typical error of gaze tracking using the built-in web cam is roughly 4 deg at 50 cm, so, in that case, we suggest setting tolerance no lower than 4 deg. Since accuracy is determined by webcam resolution, halving or doubling the viewing distance should proportionally change the error in estimated gaze angle.",
+      "OBSOLETE. USE thresholdAllowedFixationErroDeg INSTEAD. We save all trials in trialData, but when the fixation error exceeds tolerance, we don't feed it to QUEST, and we run it again by adding a trial of this condition to the list of conditions yet to be run in this block, and reshuffle that list. Excel treats 'inf' as a string, not the number infinity, so use a large number instead of 'inf'. Note that the typical error of gaze tracking using the built-in web cam is roughly 4 deg at 50 cm, so, in that case, we suggest setting tolerance no lower than 4 deg. Since accuracy is determined by webcam resolution, halving or doubling the viewing distance should proportionally change the error in estimated gaze angle.",
     type: "numerical",
     default: "1000",
   },
@@ -424,7 +424,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "Sloan.woff2",
     explanation:
-      'font specified what font you want for the target and for reading. How you do that depends on fontSource:\n\nfile: font is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The compiler will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  font is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: font is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". ("server" support is coming.)\n\nbrowser: The experiment will pass the font preference string that you place in font to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "fontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
+      'font specified what font you want for the target and for reading. How you specify depends on fontSource:\n\nfile: font is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your Fonts folder in your Pavlovia account. The compiler will download this file from your Fonts folder to your temporary local Experiment folder, which is later uploaded to a new project repo for this new experiment. (I think we use the javascript version of the @font-face command. The Mozilla page on the @font-face command seems to say that it supports only: woff2, woff, otf, ttf, or svg. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  font is the filename (including extension) of a font file provided by the free Google Font server. We use their API to discover the URL.\n\nserver: font is a URL pointing to the desired font on a font server. Many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". ("server" support is coming.)\n\nbrowser: The experiment will pass the font preference string that you place in font to the participant\'s browser and accept whatever it provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "fontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nFonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. ',
     type: "text",
     default: "Roboto Mono",
   },
@@ -739,7 +739,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "nominalSize",
     explanation:
-      "What shall we say is the \"single\" line spacing of the text to be read? \n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. \n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \n• twiceXHeight defines single line spacing as twice the font's x-height.\n• explicit defines single line spacing as xxx.",
+      "What shall we say is the \"single\" line spacing (baseline to baseline) of the text to be read? The actual spacing will be a multiple of that: readingMultipleOfSingleLineSpacing. \n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. So single spacing of 12 pt Times would be 12 pt line spacing.\n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \n• twiceXHeight defines single line spacing as twice the font's x-height.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.",
     type: "categorical",
     default: "nominalSize",
     categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
@@ -757,9 +757,9 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "57",
     explanation:
-      "Used for line breaking. Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters, so, counting the space between words, that's (8 to 10) *6=(48 to 60) spacings per line. Line breaking without hyphenation will produce an average line length maybe half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 spacings.",
+      "readingMaxCharactersPerLine is used to set the maximum line length, in pixels, for line breaking. We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine. Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters, so, counting the space between words, we multiply by 6 to get 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.",
     type: "numerical",
-    default: "55",
+    default: "57",
   },
   readingMultipleOfSingleLineSpacing: {
     name: "readingMultipleOfSingleLineSpacing",
@@ -784,7 +784,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "3",
     explanation:
-      "Number of possible answers for each question. Only one of the possible answers is right.",
+      'Number of possible answers for each question. Only one of the possible answers is right. The rest are "foils".',
     type: "integer",
     default: "3",
   },
@@ -793,7 +793,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "4",
     explanation:
-      "After the participant reads a passage, EasyEyes will ask readingNumberOfQuestions, each on a new screen, to assess retention. Each retention question offers several words and asks the participant which word (the target) was in the passage just read. The  other words (foils) were not in that passage but do appear in the corpus. The target word is presented with enough foils to offer readingNumberOfPossibleAnswers. The words are arranged in alphabetical order below the question. The participant responds by clicking on the chosen word. It's \"forced choice\"; the participant must click a word. We give a \"correct\" beep if the answer is right. We repeat this several times, as specified by readingNumberOfQuestions.\n     The first and last pages might not be representative because timing of the space bar press might be more irregular, and primacy and recency would make words on those pages more memorable. So we analyze only the middle pages, excluding the first and last from both from the estimate of reading speed and the retention test. \n     For a given passage, each question uses a different target word. We pick candidate target words randomly from the passage just read  (in which many words appear more than once), and check each for suitability. We reject some candidates, so we keep picking candidates until we have accepted the desired number, readingNumberOfQuestions. \n     The parameter readingFoilToTargetFrequencyMaxRatio specifies, for each foil, how similar to that of the target, the foil's corpus frequency must be. Each tentative target is accepted if, firstly, it hasn't already been used in this block and, secondly, the corpus has readingNumberOfPossibleAnswers minus one foils with similar frequency. To be sufficiently similar, each foil's corpus frequency must be in the range targetFrequency*[1/r, r] where r=readingFoilToTargetFrequencyMaxRatio. \nWe take as foils the readingNumberOfPossibleAnswers-1 words that are closest in log frequency to the target frequency in the corpus. If we can't find enough foils for a given target, then we reject that target and pick another. The read passage will typically have hundreds of words, so there are lots of candidate targets for the retention questions.\n      \n\nWe will, once, compute the word frequency in the corpus of every word in the corpus. We can save this as a two column table (word and number of instances in the corpus), sorted by frequency. Once EasyEyes randomly selects the word that will be the correct answer, EasyEyes will look in the word-frequency table and take, as foils, the N-1 words with frequency most similar to that of the correct answer. \n\n",
+      'After the participant reads a passage, EasyEyes will ask readingNumberOfQuestions, each on a new screen, to assess retention. Each retention question offers several words and asks the participant which word (the target) was in the passage just read. The other words (foils) were not in that passage but do appear in the corpus. The target word is presented with enough foils to offer N=readingNumberOfPossibleAnswers. The words are arranged in alphabetical order below the question. The participant responds by clicking on the chosen word. It\'s "forced choice"; the participant must click a word. We give a "correct" beep if the answer is right. We repeat this several times, as specified by readingNumberOfQuestions.\n     IGNORE FIRST & LAST PAGES. Performance on the first and last pages of the passage might not be representative because timing of the space bar press might be less regular, and primacy and recency would make words on those pages more memorable. So we analyze only the middle pages, excluding the first and last both from the estimate of reading speed and the retention test. [Thus each word in the corpus is read and tested, read and not tested, or not read.]\n     CONCORDANCE. As explained in readingCorpus, we will, once, compute a concordance, the frequency of every word in the corpus. It is a two-column table (word and number of instances in the corpus), sorted by frequency. \n     CANDIDATES FOR TARGET. For a given passage, each question uses a different target word. We pick candidate target words randomly from the passage just read  (in which many words appear more than once), and check each for suitability. We reject some candidates, so we keep picking candidates until we have accepted the desired number, readingNumberOfQuestions. As potential target or foil words we reject any strings in the concordance that include a hyphen.\n     CHOOSE FOILS. We pick a random integer from 1 to N to determine the rank order frequency of the target among the foils. We reduce the concordance by striking out all the words that were read (whether to be tested or not), except the target, which remains. As our answer set, we take N consecutive words from the reduced concordance, including the target, chosen so that the target has the randomly specified frequency rank (1 to N). If the target frequency is so high or low that the reduced concordance lacks N successive words with the target at the designated rank order, then we reject that target and pick another, using the same random rank. The passage read will typically have hundreds of words, so there are lots of candidate targets for the retention questions.\n      \n\n\n',
     type: "integer",
     default: "3",
   },
@@ -848,7 +848,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "When TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. Note that enabling early response while clicked responses are allowed forces EasyEyes to show the characterSet early, since clicking requires something to click on. And if responseRequiresCharacterSetBool is TRUE then setting responseAllowedEarlyBool TRUE will force early display of the characterSet regardless of which response modalities are enabled.",
+      "When responseAllowedEarlyBool is TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. Note that enabling early response while clicked responses are allowed forces EasyEyes to show the characterSet early, since clicking requires something to click on. And if responseRequiresCharacterSetBool is TRUE then setting responseAllowedEarlyBool TRUE will force early display of the characterSet regardless of which response modalities are enabled.",
     type: "boolean",
     default: "TRUE",
   },
@@ -866,7 +866,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Once debugged this option will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest optiion is to continue from where the escape was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n\nIf responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
+      "Once debugged this option will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest optiion is to continue from where the escape was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
     type: "boolean",
     default: "FALSE",
   },
@@ -1427,6 +1427,33 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "identify",
     categories: ["identify", "categorize", "targetQuestion@"],
+  },
+  thresholdAllowedDurationRatio: {
+    name: "thresholdAllowedDurationRatio",
+    availability: "now",
+    example: "1.5",
+    explanation:
+      "thresholdAllowedDurationRatio. QUEST receives the trial's response only if measured duration is in the range [targetDurationSec/r targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1.",
+    type: "numerical",
+    default: "1.5",
+  },
+  thresholdAllowedGazeErrorDeg: {
+    name: "thresholdAllowedGazeErrorDeg",
+    availability: "now",
+    example: "4",
+    explanation:
+      "thresholdAllowedGazeErrorDeg. QUEST receives the trial's response only if measured gaze position during target presentation has a radial eccentricity rDeg=sqrt(xDeg^2+yDeg^s) that is less than or equal to thresholdAllowedGazeErrorDeg.",
+    type: "numerical",
+    default: "4",
+  },
+  thresholdAllowedLatencySec: {
+    name: "thresholdAllowedLatencySec",
+    availability: "now",
+    example: "0.1",
+    explanation:
+      "thresholdAllowedLatencySec. QUEST receives the trial's response only if measured target latency is less than or equal to thresholdAllowedLatencySec.",
+    type: "numerical",
+    default: "0.1",
   },
   thresholdBeta: {
     name: "thresholdBeta",
