@@ -80,6 +80,7 @@ import {
   timing,
   letterTiming,
   stats,
+  tolerances,
 } from "./components/global.js";
 
 import {
@@ -219,6 +220,11 @@ import {
 
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
 import { addPopupLogic } from "./components/popup.js";
+
+import {
+  calculateError,
+  addResponseIfTolerableError,
+} from "./components/faultTolerance.js";
 
 /* ---------------------------------- */
 // * TRIAL ROUTINES
@@ -2005,6 +2011,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             BC
           );
 
+          tolerances.allowed.thresholdAllowedDurationRatio = paramReader.read(
+            "thresholdAllowedDurationRatio",
+            BC
+          );
+          tolerances.allowed.thresholdAllowedGazeErrorDeg = paramReader.read(
+            "thresholdAllowedGazeErrorDeg",
+            BC
+          );
+          tolerances.allowed.thresholdAllowedLatencySec = paramReader.read(
+            "thresholdAllowedLatencySec",
+            BC
+          );
+
           wirelessKeyboardNeededYes = reader.read(
             "wirelessKeyboardNeededYes",
             BC
@@ -2915,7 +2934,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         }
         if (currentLoop instanceof MultiStairHandler) {
-          currentLoop.addResponse(0, level);
+          // TODO why are we counting this as a wrong answer? Skip trial instead?
+          currentLoop.skipTrial();
         }
         routineTimer.reset();
         routineClock.reset();
@@ -2943,6 +2963,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // update the trial handler
       switchKind(targetKind.current, {
         letter: () => {
+          calculateError(
+            letterTiming,
+            timing,
+            tolerances,
+            letterConfig.targetDurationSec,
+            rc
+          );
           // Add trial timing data
           psychoJS.experiment.addData(
             "trialFirstFrameSec",
@@ -2960,14 +2987,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterTiming.targetStartSec = undefined;
           letterTiming.targetFinishSec = undefined;
 
+          logger("currentLoop.nRemaining", currentLoop.nRemaining);
+          logger(
+            "currentLoop instanceof MultiStairHandler",
+            currentLoop instanceof MultiStairHandler
+          );
           if (
-            currentLoop instanceof MultiStairHandler &&
-            currentLoop.nRemaining !== 0
+            currentLoop instanceof MultiStairHandler
+            // currentLoop.nRemaining !== 0
           ) {
-            currentLoop.addResponse(key_resp.corr, level);
-            // TODO Should it be placed outside of the if statement?
-            addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
+            // currentLoop.addResponse(key_resp.corr, level);
+            addResponseIfTolerableError(
+              currentLoop,
+              key_resp.corr,
+              level,
+              tolerances
+            );
           }
+          addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
         },
       });
 

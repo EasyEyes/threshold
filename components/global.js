@@ -69,6 +69,20 @@ export const letterConfig = Object.seal({
 
 export const instructionFont = { current: undefined };
 
+export const tolerances = Object.seal({
+  allowed: {
+    thresholdAllowedDurationRatio: undefined,
+    thresholdAllowedGazeErrorDeg: undefined,
+    thresholdAllowedLatencySec: undefined,
+  },
+  measured: {
+    thresholdDurationRatio: undefined,
+    thresholdGazeErrorDeg: undefined,
+    thresholdLatencySec: undefined,
+    gazeXDeg: undefined,
+    gazeYDeg: undefined,
+  },
+});
 /* --------------------------- Exp Current Status --------------------------- */
 
 export const status = {

@@ -298,42 +298,6 @@ export const addBlockStaircaseSummariesToData = (loop, psychoJS) => {
 };
 
 /**
- *
- * @todo add tests
- * @param {*} level
- * @param {*} pixPerCm
- * @returns
- */
-export const spacingPixelsFromLevel = (level, pixPerCm) => {
-  const spacingDeg = Math.pow(10, level);
-  const spacingPx = degreesToPixels(spacingDeg, {
-    pixPerCm: pixPerCm,
-  });
-  return spacingPx;
-};
-
-/**
- *
- * @todo add tests
- * @param {*} spacingPx
- * @param {*} pixPerCm
- * @param {*} viewingDistanceCm
- * @returns
- */
-export const levelFromSpacingPixels = (
-  spacingPx,
-  pixPerCm,
-  viewingDistanceCm
-) => {
-  const spacingDeg = pixelsToDegrees(spacingPx, {
-    pixPerCm: pixPerCm,
-    viewingDistanceCm: viewingDistanceCm,
-  });
-  const level = Math.log10(spacingDeg);
-  return level;
-};
-
-/**
  * Element-wise check of whether two arrays are equal
  * @see https://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript/16430730
  * @param {any[]} a
