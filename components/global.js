@@ -77,10 +77,12 @@ export const tolerances = Object.seal({
   },
   measured: {
     thresholdDurationRatio: undefined,
-    thresholdGazeErrorDeg: undefined,
-    thresholdLatencySec: undefined,
-    gazeXDeg: undefined,
-    gazeYDeg: undefined,
+    gazeMeasuredXDeg: undefined,
+    gazeMeasuredYDeg: undefined,
+    gazeMeasuredRDeg: undefined,
+    gazeMeasurementLatencySec: undefined,
+    targetMeasuredLatencySec: undefined,
+    targetMeasuredDurationSec: undefined,
   },
 });
 /* --------------------------- Exp Current Status --------------------------- */
@@ -111,6 +113,8 @@ export const letterTiming = Object.seal({
   trialFirstFrameSec: undefined,
   targetStartSec: undefined,
   targetFinishSec: undefined,
+  targetDrawnConfirmedTimestamp: undefined,
+  crosshairClickedTimestamp: undefined,
 });
 
 /* --------------------------- Participant Config --------------------------- */
@@ -124,7 +128,7 @@ export const viewingDistanceCm = { current: 40 };
 /* ------------------------------ Interactions ------------------------------ */
 
 export const responseType = { current: 2, original: 2 };
-export const clickedContinue = { current: false };
+export const clickedContinue = { current: false, timestamps: [] };
 export const modalButtonTriggeredViaKeyboard = { current: false };
 
 /* ------------------------------- SIMULATION ------------------------------- */

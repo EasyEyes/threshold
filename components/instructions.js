@@ -189,6 +189,7 @@ export const _takeFixationClick = (e) => {
   ) {
     // Clicked on fixation
     hideCursor();
+    clickedContinue.timestamps.push(new Date());
     setTimeout(() => {
       clickedContinue.current = true;
     }, 17);

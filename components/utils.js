@@ -616,3 +616,20 @@ export const displacementBetweenXY = (a, b) => {
   const yDisplacement = a[1] - b[1];
   return [xDisplacement, yDisplacement];
 };
+
+export const psychojsUnitsFromWindowUnits = (
+  windowXYPx,
+  windowDimensions,
+  fixationXYPx
+) => {
+  // Convert form the origin being at the top left of the screen (pos x is right, pos y is down)...
+  const [screenX, screenY] = windowXYPx;
+  // ... to the center of the screen (pos x is right, pos y is down).
+  const [centeredX, centeredY] = [
+    screenX - windowDimensions[0] / 2,
+    -(screenY - windowDimensions[1] / 2),
+  ];
+  // And then find the position relative to fixation.
+  const [xPx, yPx] = [centeredX - fixationXYPx[0], centeredY - fixationXYPx[1]];
+  return [xPx, yPx];
+};

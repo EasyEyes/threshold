@@ -225,7 +225,7 @@ import {
   calculateError,
   addResponseIfTolerableError,
   measureGazeError,
-} from "./components/faultTolerance.js";
+} from "./components/errorMeasurement.js";
 
 /* ---------------------------------- */
 // * TRIAL ROUTINES
@@ -2535,6 +2535,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
 
         // !
+        // TODO this is misleading, ie in `letter` targetkind the stimulus onset isn't until the target is drawn
+        //     if `uniDelay !== 0` then this `clickToStimulusOnsetSec` would be `uniDelay` early to the stimulus
+        //     actually being drawn.
         psychoJS.experiment.addData(
           "clickToStimulusOnsetSec",
           (timing.clickToStimulusOnsetSec = routineClock.getTime())
@@ -2552,7 +2555,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (
               paramReader.read("calibrateTrackGazeBool", status.block_condition)
             )
-              measureGazeError(tolerances, displayOptions);
+              measureGazeError(
+                tolerances,
+                displayOptions,
+                clickedContinue.timestamps[
+                  clickedContinue.timestamps.length - 1
+                ]
+              );
             /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
             psychoJS.experiment.addData(
               "targetBoundingBox",
@@ -2767,20 +2776,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         !letterTiming.targetStartSec
       ) {
         letterTiming.targetStartSec = t;
-        logger("targetStartSec", letterTiming.targetStartSec);
+        target.frameNDrawnConfirmed = frameN;
+        letterTiming.targetDrawnConfirmedTimestamp = new Date();
+        letterTiming.crosshairClickedTimestamp =
+          clickedContinue.timestamps[clickedContinue.timestamps.length - 1];
       }
       if (t >= uniDelay && target.status === PsychoJS.Status.NOT_STARTED) {
         // keep track of start time/frame for later
         target.tStart = t; // (not accounting for frame time here)
         target.frameNStart = frameN; // exact frame index
-
-        // NOTE these two values are not equivalent
-        // logger("target bb.x, bb.y", [
-        //   target.getBoundingBox(true).x,
-        //   target.getBoundingBox(true).y,
-        // ]);
-        // logger("target pos", target.getPos());
-
         target.setAutoDraw(true);
       }
       if (
@@ -2788,7 +2792,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         !letterTiming.targetFinishSec
       ) {
         letterTiming.targetFinishSec = t;
-        logger("targetFinishSec", letterTiming.targetFinishSec);
+        target.frameNFinishConfirmed = frameN;
 
         if (showConditionNameConfig.showTargetSpecs) {
           const thisDuration =
@@ -2805,6 +2809,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
         target.setAutoDraw(false);
+        target.frameNEnd = frameN;
         // Play purr sound
         // Wait until next frame to play
         setTimeout(() => {
@@ -2969,10 +2974,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: () => {
           calculateError(
             letterTiming,
-            timing,
             tolerances,
             letterConfig.targetDurationSec,
-            rc
+            target
           );
           // Add trial timing data
           psychoJS.experiment.addData(
@@ -2997,15 +3001,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             currentLoop instanceof MultiStairHandler
           );
           if (
-            currentLoop instanceof MultiStairHandler
-            // currentLoop.nRemaining !== 0
+            currentLoop instanceof MultiStairHandler &&
+            currentLoop.nRemaining !== 0
           ) {
             // currentLoop.addResponse(key_resp.corr, level);
             addResponseIfTolerableError(
               currentLoop,
               key_resp.corr,
               level,
-              tolerances
+              tolerances,
+              paramReader.read(
+                "calibrateTrackGazeBool",
+                status.block_condition
+              ),
+              psychoJS
             );
           }
           addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
