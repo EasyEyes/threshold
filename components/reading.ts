@@ -118,8 +118,12 @@ export const preprocessRawCorpus = (corpus: string) => {
 
 // Take a long string and return an array of words without punctuation
 export const preprocessCorpusToWordList = (text: string) => {
+  /**
+   * Arabic \u0600-\u06ff
+   * Chinese \u4e00-\u9fff
+   */
   return text
-    .replace(/[^\w\s'-]|-(?=[^a-zA-Z0-9])/g, "")
+    .replace(/[^\u0600-\u06ff\u4e00-\u9fff\w\s'-]|-(?=[^a-zA-Z0-9])/g, "")
     .split(" ")
     .filter((w) => w.length > 0);
 };
@@ -195,4 +199,5 @@ export const shuffle = (array: any[]) => {
   return a;
 };
 
-const onlyAlphabets = (str: string) => /^[a-zA-Z]+$/.test(str);
+const onlyAlphabets = (str: string) =>
+  /^[a-zA-Z\u0600-\u06ff\u4e00-\u9fff]+$/.test(str);
