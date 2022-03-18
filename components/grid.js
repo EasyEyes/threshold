@@ -281,6 +281,7 @@ export class Grid {
             ori: 0.0,
             interpolate: false,
             size: 1,
+            autoLog: false,
           })
         );
         if (i % 5 === 0)
@@ -299,6 +300,7 @@ export class Grid {
               color: new util.Color("black"),
               opacity: 1.0,
               depth: 0.0,
+              autoLog: false,
             })
           );
       }
@@ -358,6 +360,7 @@ export class Grid {
             ori: 0.0,
             interpolate: false,
             size: 1,
+            autoLog: false,
           })
         );
         if (i % 5 === 0)
@@ -376,6 +379,7 @@ export class Grid {
               color: new util.Color("black"),
               opacity: 1.0,
               depth: 0.0,
+              autoLog: false,
             })
           );
       }
@@ -409,6 +413,7 @@ export class Grid {
             ori: 0.0,
             interpolate: false,
             size: 1,
+            autoLog: false,
           })
         );
         if (i % 5 === 0) {
@@ -430,6 +435,7 @@ export class Grid {
               color: new util.Color("black"),
               opacity: 1.0,
               depth: 0.0,
+              autoLog: false,
             })
           );
         }
@@ -541,6 +547,7 @@ export class Grid {
           opacity: 1,
           depth: -999999,
           interpolate: true,
+          autoLog: false,
         })
       );
 
@@ -564,6 +571,7 @@ export class Grid {
             color: new util.Color("black"),
             opacity: 1.0,
             depth: 0.0,
+            autoLog: false,
           })
         );
         mostRecentLabel = rPix;

@@ -620,6 +620,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -5.0,
+      autoLog: false,
     });
 
     trialCounter = new visual.TextStim({
@@ -627,6 +628,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       win: psychoJS.window,
       font: instructionFont.current,
       color: new util.Color("black"),
+      autoLog: false,
     });
 
     targetSpecs = new visual.TextStim({
@@ -634,6 +636,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       win: psychoJS.window,
       font: instructionFont.current,
       color: new util.Color("black"),
+      autoLog: false,
     });
 
     conditionName = new visual.TextStim({
@@ -641,6 +644,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       win: psychoJS.window,
       font: instructionFont.current,
       color: new util.Color("black"),
+      autoLog: false,
     });
 
     instructions = new visual.TextStim({
@@ -651,6 +655,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       color: new util.Color("black"),
       pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
       alignVert: "top",
+      autoLog: false,
     });
 
     instructions2 = new visual.TextStim({
@@ -661,6 +666,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       color: new util.Color("black"),
       pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
       alignVert: "bottom",
+      autoLog: false,
     });
 
     characterSetBoundingRects = {};
