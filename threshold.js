@@ -224,6 +224,7 @@ import { addPopupLogic } from "./components/popup.js";
 import {
   calculateError,
   addResponseIfTolerableError,
+  measureGazeError,
 } from "./components/faultTolerance.js";
 
 /* ---------------------------------- */
@@ -2548,7 +2549,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (!correctAns || correctAns !== "space") correctAns = "space";
           },
           letter: () => {
-            logger("target bounding box", target.getBoundingBox(true));
+            if (
+              paramReader.read("calibrateTrackGazeBool", status.block_condition)
+            )
+              measureGazeError(tolerances, displayOptions);
             /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
             psychoJS.experiment.addData(
               "targetBoundingBox",
