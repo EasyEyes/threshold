@@ -1028,9 +1028,26 @@ export const GLOSSARY: Glossary = {
     name: "showFPSBool",
     availability: "now",
     example: "TRUE",
-    explanation: "Show the Frame Per Second.",
+    explanation: "Show the frame rate in Hz.",
     type: "boolean",
     default: "FALSE",
+  },
+  showFrameRateBool: {
+    name: "showFrameRateBool",
+    availability: "now",
+    example: "TRUE",
+    explanation: "Show the frame rate in Hz.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  showGazeBool: {
+    name: "showGazeBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Show a red dot indicating currently estimated gaze position. (It is delayed by processing time.)",
+    type: "boolean",
+    default: "",
   },
   showGrid: {
     name: "showGrid",
