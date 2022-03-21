@@ -1206,7 +1206,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingQuestions.current[readingCurrentQuestionIndex.current];
         console.log(
           `%c${thisQuestion.correctAnswer}`,
-          "color: red; font-size: 1.5rem"
+          `color: red; font-size: 1.5rem; font-family: ${font.name}`
         );
 
         updateTrialInfo();
@@ -1238,7 +1238,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingQuestions.current[readingCurrentQuestionIndex.current];
         console.log(
           `%c${thisQuestion.correctAnswer}`,
-          "color: red; font-size: 1.5rem"
+          `color: red; font-size: 1.5rem; font-family: ${font.name}`
         );
 
         updateTrialInfo();
@@ -2044,7 +2044,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (debug)
             console.log(
               `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
-              "color: red; font-size: 1.5rem"
+              `color: red; font-size: 1.5rem; font-family: "${font.name}"`
             );
           correctAns = targetCharacter.toLowerCase();
           /* -------------------------------------------------------------------------- */

@@ -57,14 +57,17 @@ export class ParamReader {
     // String
     if (typeof blockOrConditionName === "string") {
       if (blockOrConditionName !== "__ALL_BLOCKS__") {
-        if (name in GLOSSARY) return this.parse(GLOSSARY[name].default);
-        else return undefined;
+        if (name in GLOSSARY) {
+          if (this._nameInGlossary(name))
+            return this.parse(GLOSSARY[name].default);
+        } else return undefined;
       } else {
         // __ALL_BLOCKS__
         const returner = [];
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (let _i in this._experiment) {
-          returner.push(this.parse(GLOSSARY[name].default));
+          if (this._nameInGlossary(name))
+            returner.push(this.parse(GLOSSARY[name].default));
         }
 
         return returner;
@@ -77,7 +80,7 @@ export class ParamReader {
       if (Number(b.block) === blockOrConditionName) counter++;
     }
 
-    if (name in GLOSSARY)
+    if (this._nameInGlossary(name))
       return Array(counter).fill(this.parse(GLOSSARY[name].default));
     else return Array(counter).fill(undefined);
   }
@@ -121,6 +124,11 @@ export class ParamReader {
         }
       },
     });
+  }
+
+  _nameInGlossary(name) {
+    if (name in GLOSSARY) return true;
+    throw `[paramReader] Invalid parameter name ${name}`;
   }
 
   parse(s) {
