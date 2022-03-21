@@ -1047,7 +1047,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "Show a red dot indicating currently estimated gaze position. (It is delayed by processing time.)",
     type: "boolean",
-    default: "",
+    default: "FALSE",
   },
   showGrid: {
     name: "showGrid",

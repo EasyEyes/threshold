@@ -67,7 +67,7 @@ export const formCalibrationList = (reader) => {
     tasks.push({
       name: "trackGaze",
       options: {
-        showGazer: ifTrue(reader.read("showGazerBool", "__ALL_BLOCKS__")),
+        showGazer: ifTrue(reader.read("showGazeBool", "__ALL_BLOCKS__")),
         showVideo: false,
         calibrationCount: 3,
         fullscreen: !debug,
