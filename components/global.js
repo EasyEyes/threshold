@@ -83,6 +83,7 @@ export const tolerances = Object.seal({
     gazeMeasurementLatencySec: undefined,
     targetMeasuredLatencySec: undefined,
     targetMeasuredDurationSec: undefined,
+    targetMeasuredDurationFrames: undefined,
   },
 });
 /* --------------------------- Exp Current Status --------------------------- */

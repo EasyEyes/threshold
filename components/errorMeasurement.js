@@ -1,10 +1,5 @@
 import { rc, fixationConfig } from "./global";
-import {
-  logger,
-  XYDegOfXYPix,
-  norm,
-  psychojsUnitsFromWindowUnits,
-} from "./utils";
+import { XYDegOfXYPix, norm, psychojsUnitsFromWindowUnits } from "./utils";
 
 export const measureGazeError = (
   tolerances,
@@ -43,10 +38,11 @@ export const calculateError = async (
   targetStim
 ) => {
   const targetFrameTimingReport = _reportTargetTimingFrames(targetStim);
-  logger("targetFrameTiming", targetFrameTimingReport);
   const measuredTargetDurationSec =
     letterTiming.targetFinishSec - letterTiming.targetStartSec;
   tolerances.measured.targetMeasuredDurationSec = measuredTargetDurationSec;
+  tolerances.measured.targetMeasuredDurationFrames =
+    targetFrameTimingReport.recordedEnd - targetFrameTimingReport.recordedStart;
   tolerances.measured.thresholdDurationRatio =
     measuredTargetDurationSec < targetDurationSec
       ? targetDurationSec / measuredTargetDurationSec
@@ -98,6 +94,7 @@ const addMeasuredErrorToOutput = (psychoJS, tolerances) => {
     "gazeMeasurementLatencySec",
     "targetMeasuredLatencySec",
     "targetMeasuredDurationSec",
+    "targetMeasuredDurationFrames",
   ];
   outputParams.forEach((parameter) =>
     psychoJS.experiment.addData(parameter, tolerances.measured[parameter])
