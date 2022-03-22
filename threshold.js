@@ -2821,7 +2821,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         target.setAutoDraw(false);
         target.frameNEnd = frameN;
         // Play purr sound
-        purrSynth.play();
+        // purrSynth.play();
 
         setTimeout(() => {
           showCursor();
