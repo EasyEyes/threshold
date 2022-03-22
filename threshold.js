@@ -2783,7 +2783,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         letterTiming.targetStartSec = t;
         target.frameNDrawnConfirmed = frameN;
-        letterTiming.targetDrawnConfirmedTimestamp = new Date();
+        letterTiming.targetDrawnConfirmedTimestamp = performance.now();
         letterTiming.crosshairClickedTimestamp =
           clickedContinue.timestamps[clickedContinue.timestamps.length - 1];
       }

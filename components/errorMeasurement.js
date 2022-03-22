@@ -15,9 +15,7 @@ export const measureGazeError = (
   rc.pauseGaze();
   rc.getGazeNow((r) => {
     tolerances.measured.gazeMeasurementLatencySec =
-      (r.timestamp.getTime() -
-        r.value.latencyMs -
-        crosshairClickTimestamp.getTime()) /
+      (r.timestamp - r.value.latencyMs - crosshairClickTimestamp.getTime()) /
       1000;
     // TODO remove this in future, if we don't need gaze going continually
     rc.resumeGaze();
@@ -55,8 +53,8 @@ export const calculateError = async (
       ? targetDurationSec / measuredTargetDurationSec
       : measuredTargetDurationSec / targetDurationSec;
   tolerances.measured.targetMeasuredLatencySec =
-    (letterTiming.targetDrawnConfirmedTimestamp.getTime() -
-      letterTiming.crosshairClickedTimestamp.getTime()) /
+    (letterTiming.targetDrawnConfirmedTimestamp -
+      letterTiming.crosshairClickedTimestamp) /
     1000;
 };
 
