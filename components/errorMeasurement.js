@@ -15,8 +15,7 @@ export const measureGazeError = (
   rc.pauseGaze();
   rc.getGazeNow((r) => {
     tolerances.measured.gazeMeasurementLatencySec =
-      (r.timestamp - r.value.latencyMs - crosshairClickTimestamp.getTime()) /
-      1000;
+      (r.timestamp - r.value.latencyMs - crosshairClickTimestamp) / 1000;
     // TODO remove this in future, if we don't need gaze going continually
     rc.resumeGaze();
     // Convert to psychoJS units pixels

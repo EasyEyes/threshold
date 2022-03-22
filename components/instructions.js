@@ -189,10 +189,8 @@ export const _takeFixationClick = (e) => {
   ) {
     // Clicked on fixation
     hideCursor();
-    clickedContinue.timestamps.push(new Date());
-    setTimeout(() => {
-      clickedContinue.current = true;
-    }, 17);
+    clickedContinue.current = true;
+    clickedContinue.timestamps.push(performance.now());
   } else {
     // wrongSynth.play();
     clickedContinue.current = false;
