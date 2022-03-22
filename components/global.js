@@ -72,6 +72,8 @@ export const instructionFont = { current: undefined };
 export const tolerances = Object.seal({
   allowed: {
     thresholdAllowedDurationRatio: undefined,
+    thresholdAllowedGazeXErrorDeg: undefined,
+    thresholdAllowedGazeYErrorDeg: undefined,
     thresholdAllowedGazeErrorDeg: undefined,
     thresholdAllowedLatencySec: undefined,
   },

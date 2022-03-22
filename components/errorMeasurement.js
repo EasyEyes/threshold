@@ -67,8 +67,8 @@ export const addResponseIfTolerableError = (
     tolerances.allowed.thresholdAllowedDurationRatio
   );
   const gazeAcceptable = _gazeErrorAcceptable(
-    tolerances.measured.gazeMeasuredRDeg,
-    tolerances.allowed.thresholdAllowedGazeErrorDeg
+    tolerances.measured,
+    tolerances.allowed
   );
   const latencyAcceptable = _targetLatencyAcceptable(
     tolerances.measured.targetMeasuredLatencySec,
@@ -109,8 +109,19 @@ const _targetDurationAcceptable = (
   // return (measuredDurationSec >= (targetDurationSec/allowedDurationRatio) && measuredDurationSec <= (targetDurationSec*allowedDurationRatio))
 };
 
-const _gazeErrorAcceptable = (gazeMeasuredEccentricityDeg, allowedErrorDeg) => {
-  return gazeMeasuredEccentricityDeg <= allowedErrorDeg;
+const _gazeErrorAcceptable = (measured, allowed) => {
+  const { gazeMeasuredXDeg, gazeMeasuredYDeg, gazeMeasuredRDeg } = measured;
+  const {
+    thresholdAllowedGazeXErrorDeg,
+    thresholdAllowedGazeYErrorDeg,
+    thresholdAllowedGazeErrorDeg,
+  } = allowed;
+
+  return (
+    Math.abs(gazeMeasuredXDeg) <= Math.abs(thresholdAllowedGazeXErrorDeg) &&
+    Math.abs(gazeMeasuredYDeg) <= Math.abs(thresholdAllowedGazeYErrorDeg) &&
+    gazeMeasuredRDeg <= thresholdAllowedGazeErrorDeg
+  );
 };
 
 const _targetLatencyAcceptable = (measuredTargetLatency, allowedLatency) => {

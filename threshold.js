@@ -2030,6 +2030,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "thresholdAllowedGazeErrorDeg",
             BC
           );
+          tolerances.allowed.thresholdAllowedGazeXErrorDeg = paramReader.read(
+            "thresholdAllowedGazeXErrorDeg",
+            BC
+          );
+          tolerances.allowed.thresholdAllowedGazeYErrorDeg = paramReader.read(
+            "thresholdAllowedGazeYErrorDeg",
+            BC
+          );
           tolerances.allowed.thresholdAllowedLatencySec = paramReader.read(
             "thresholdAllowedLatencySec",
             BC

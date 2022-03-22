@@ -1486,9 +1486,27 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "4",
     explanation:
-      "thresholdAllowedGazeErrorDeg. QUEST receives the trial's response only if measured gaze position during target presentation has a radial eccentricity rDeg=sqrt(xDeg^2+yDeg^s) that is less than or equal to thresholdAllowedGazeErrorDeg.",
+      "thresholdAllowedGazeErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a radial eccentricity rDeg=sqrt(xDeg^2+yDeg^s) that is less than or equal to thresholdAllowedGazeErrorDeg.",
     type: "numerical",
-    default: "4",
+    default: "8",
+  },
+  thresholdAllowedGazeXErrorDeg: {
+    name: "thresholdAllowedGazeXErrorDeg",
+    availability: "now",
+    example: "4",
+    explanation:
+      "thresholdAllowedGazeXErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg.",
+    type: "numerical",
+    default: "8",
+  },
+  thresholdAllowedGazeYErrorDeg: {
+    name: "thresholdAllowedGazeYErrorDeg",
+    availability: "now",
+    example: "4",
+    explanation:
+      "thresholdAllowedGazeYErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.",
+    type: "numerical",
+    default: "8",
   },
   thresholdAllowedLatencySec: {
     name: "thresholdAllowedLatencySec",
