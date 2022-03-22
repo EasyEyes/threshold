@@ -482,6 +482,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // store frame rate of monitor if we can measure it successfully
     expInfo["frameRate"] = psychoJS.window.getActualFrameRate();
+    psychoJS.experiment.addData(
+      "frameRateReportedByPsychoJS",
+      expInfo["frameRate"]
+    );
     // if (typeof expInfo["frameRate"] !== "undefined")
     //   frameDur = 1.0 / Math.round(expInfo["frameRate"]);
     // else frameDur = 1.0 / 60.0; // couldn't get a reliable measure so guess
