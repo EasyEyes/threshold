@@ -4,6 +4,8 @@ import {
   displayOptions,
   readingCorpusArchive,
   readingFrequencyToWordArchive,
+  readingPageStats,
+  readingTiming,
   readingThisBlockPages,
   readingUsedText,
   readingWordFrequencyArchive,
@@ -60,10 +62,15 @@ export const getThisBlockPages = (paramReader, block, readingParagraph) => {
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block)[0];
     ////
+    logger("readingCorpusArchive[thisURL]", readingCorpusArchive[thisURL]);
     readingUsedText[thisURL] = readingCorpusArchive[thisURL]
       .split(" ")
       .slice(paramReader.read("readingCorpusSkipWords", block)[0])
       .join(" ");
+    logger("readingUsedText[thisURL]", readingUsedText[thisURL]);
+    readingPageStats.readingPageSkipCorpusWords.push(
+      paramReader.read("readingCorpusSkipWords", block)[0]
+    );
     ////
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL],
@@ -180,9 +187,23 @@ export const preprocessCorpusToSentenceList = (
     }
     if (!maxLinePerPageSoFar) maxLinePerPageSoFar = line;
 
+    const numberWordsThisPage = [...thisPageText.split("")].length;
+    const previousStartingIndex =
+      readingPageStats.readingPageSkipCorpusWords[
+        readingPageStats.readingPageSkipCorpusWords.length - 1
+      ];
+    readingPageStats.readingPageSkipCorpusWords.push(
+      previousStartingIndex + numberWordsThisPage
+    );
+    readingPageStats.readingPageLines.push(lineNumber);
+    readingPageStats.readingPageWords.push(numberWordsThisPage);
+    readingPageStats.readingPageNonblankCharacters.push(
+      thisPageText.replace(/\s/g, "").length
+    );
     sentences.push(removeLastLineBreak(thisPageText));
   }
 
+  readingPageStats.readingPageSkipCorpusWords.pop();
   usedText = usedTextList.join(" ");
   return { usedText, sentences };
 };
@@ -229,6 +250,30 @@ export const getSizeForSpacing = (
     height += 0.5;
   }
   throw "Failed to set reading paragraph height using [spacing]";
+};
+
+export const addReadingStatsToOutput = (pageN, psychoJS) => {
+  psychoJS.experiment.addData(
+    "readingPageSkipCorpusWords",
+    readingPageStats.readingPageSkipCorpusWords[pageN]
+  );
+  psychoJS.experiment.addData(
+    "readingPageLines",
+    readingPageStats.readingPageLines[pageN]
+  );
+  psychoJS.experiment.addData(
+    "readingPageWords",
+    readingPageStats.readingPageWords[pageN]
+  );
+  psychoJS.experiment.addData(
+    "readingPageNonBlankCharacters",
+    readingPageStats.readingPageNonblankCharacters[pageN]
+  );
+  // if (readingTiming.onsets.length > 1) {
+  //   const previousPageDuration = readingTiming.onsets[readingTiming.onsets.length - 1] - readingTiming.onsets[readingTiming.onsets.length - 2];
+  //   readingPageStats.readingPageDurationSec.push(previousPageDuration);
+  //   psychoJS.experiment.addDataToPreviousTrial("readingPageDurationSec", previousPageDuration);
+  // }
 };
 
 /* --------------------------------- HELPERS -------------------------------- */

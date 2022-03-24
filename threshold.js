@@ -81,6 +81,7 @@ import {
   letterTiming,
   stats,
   tolerances,
+  readingTiming,
 } from "./components/global.js";
 
 import {
@@ -203,6 +204,7 @@ import {
   getSizeForXHeight,
   getThisBlockPages,
   loadReadingCorpus,
+  addReadingStatsToOutput,
 } from "./components/readingAddons.js";
 
 // POPUP
@@ -2794,6 +2796,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         !letterTiming.targetStartSec
       ) {
         letterTiming.targetStartSec = t;
+        readingTiming.onsets.push(globalClock.getTime());
         target.frameNDrawnConfirmed = frameN;
         letterTiming.targetDrawnConfirmedTimestamp = performance.now();
         letterTiming.crosshairClickedTimestamp =
@@ -2987,6 +2990,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
       switchKind(targetKind.current, {
+        reading: () => {
+          addReadingStatsToOutput(trials.thisRepN, psychoJS);
+        },
         letter: () => {
           calculateError(
             letterTiming,
