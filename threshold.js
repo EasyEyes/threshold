@@ -2963,7 +2963,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
         if (currentLoop instanceof MultiStairHandler) {
           // TODO why are we counting this as a wrong answer? Skip trial instead?
-          currentLoop.skipTrial();
+          currentLoop._nextTrial();
         }
         routineTimer.reset();
         routineClock.reset();
