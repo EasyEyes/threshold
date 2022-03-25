@@ -2962,8 +2962,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         }
         if (currentLoop instanceof MultiStairHandler) {
-          // TODO why are we counting this as a wrong answer? Skip trial instead?
-          currentLoop.skipTrial();
+          currentLoop._nextTrial();
         }
         routineTimer.reset();
         routineClock.reset();
@@ -2986,6 +2985,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (key_resp.keys === undefined) {
         console.error("[key_resp.keys] No response error.");
       }
+
+      // NOTE Only means what it's called in `reading` mode
+      timing.stimulusOnsetToOffset =
+        timing.clickToStimulusOnsetSec - routineClock.getTime();
 
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler

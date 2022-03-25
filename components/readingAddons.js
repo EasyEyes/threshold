@@ -10,6 +10,8 @@ import {
   readingUsedText,
   readingWordFrequencyArchive,
   readingWordListArchive,
+  timing,
+  letterTiming,
 } from "./global";
 import { degreesToPixels, logger } from "./utils";
 
@@ -269,6 +271,12 @@ export const addReadingStatsToOutput = (pageN, psychoJS) => {
     "readingPageNonBlankCharacters",
     readingPageStats.readingPageNonblankCharacters[pageN]
   );
+  psychoJS.experiment.addData(
+    "readingPageDurationSec",
+    timing.clickToStimulusOnsetSec + timing.stimulusOnsetToOffset
+  );
+  logger("timing", timing);
+  logger("letterTiming", letterTiming);
   // if (readingTiming.onsets.length > 1) {
   //   const previousPageDuration = readingTiming.onsets[readingTiming.onsets.length - 1] - readingTiming.onsets[readingTiming.onsets.length - 2];
   //   readingPageStats.readingPageDurationSec.push(previousPageDuration);
