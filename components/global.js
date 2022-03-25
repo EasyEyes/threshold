@@ -167,6 +167,15 @@ export const readingConfig = {
   height: undefined,
 };
 
+export const readingTiming = Object.seal({ onsets: [] });
+export const readingPageStats = Object.seal({
+  readingPageSkipCorpusWords: [],
+  readingPageDurationSec: [],
+  readingPageLines: [],
+  readingPageWords: [],
+  readingPageNonblankCharacters: [],
+});
+
 /* -------------------------------------------------------------------------- */
 /* ------------------------------- COMPONENTS ------------------------------- */
 /* -------------------------------------------------------------------------- */

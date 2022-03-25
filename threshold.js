@@ -83,6 +83,7 @@ import {
   tolerances,
   showCharacterSetResponse,
   correctAns,
+  readingTiming,
 } from "./components/global.js";
 
 import {
@@ -207,6 +208,7 @@ import {
   getSizeForXHeight,
   getThisBlockPages,
   loadReadingCorpus,
+  addReadingStatsToOutput,
 } from "./components/readingAddons.js";
 
 // POPUP
@@ -2792,6 +2794,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         !letterTiming.targetStartSec
       ) {
         letterTiming.targetStartSec = t;
+        readingTiming.onsets.push(clock.global.getTime());
         target.frameNDrawnConfirmed = frameN;
         letterTiming.targetDrawnConfirmedTimestamp = performance.now();
         letterTiming.crosshairClickedTimestamp =
@@ -2958,7 +2961,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
         if (currentLoop instanceof MultiStairHandler) {
           // TODO why are we counting this as a wrong answer? Skip trial instead?
-          currentLoop.skipTrial();
+          currentLoop._nextTrial();
         }
         routineTimer.reset();
         routineClock.reset();
@@ -2985,6 +2988,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
       switchKind(targetKind.current, {
+        reading: () => {
+          addReadingStatsToOutput(trials.thisRepN, psychoJS);
+        },
         letter: () => {
           calculateError(
             letterTiming,
