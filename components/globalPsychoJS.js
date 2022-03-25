@@ -10,6 +10,10 @@ export const psychoJS = new PsychoJS({
   debug: false,
 });
 
+export const clock = Object.seal({
+  global: undefined,
+});
+
 export const renderObj = Object.seal({
   tinyHint: undefined,
 });

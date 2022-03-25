@@ -81,10 +81,13 @@ import {
   letterTiming,
   stats,
   tolerances,
+  showCharacterSetResponse,
+  correctAns,
   readingTiming,
 } from "./components/global.js";
 
 import {
+  clock,
   getTinyHint,
   psychoJS,
   renderObj,
@@ -108,6 +111,7 @@ import {
   addBlockStaircaseSummariesToData,
   degreesToPixels,
 } from "./components/utils.js";
+import { buildWindowErrorHandling } from "./components/errorHandling.js";
 
 import {
   formCalibrationList,
@@ -239,12 +243,11 @@ import { _identify_trialInstructionRoutineEnd } from "./components/trialRoutines
 import { switchKind } from "./components/blockTargetKind.js";
 import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
+import { quitPsychoJS } from "./components/lifetime.js";
 
 /* -------------------------------------------------------------------------- */
 
 window.jsQUEST = jsQUEST;
-
-let correctAns;
 
 // store info about the experiment session:
 let expName = "threshold"; // from the Builder filename that created this script
@@ -256,6 +259,7 @@ var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
+  buildWindowErrorHandling(reader);
   await sleep(250);
 
   // show screens before actual experiment begins
@@ -422,10 +426,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // flowScheduler.add(debriefRoutineEachFrame());
   // flowScheduler.add(debriefRoutineEnd());
 
-  flowScheduler.add(quitPsychoJS, "", true);
+  flowScheduler.add(quitPsychoJS, "", true, paramReader);
 
   // quit if user presses Cancel in dialog box:
-  dialogCancelScheduler.add(quitPsychoJS, "", false);
+  dialogCancelScheduler.add(quitPsychoJS, "", false, paramReader);
 
   if (useRC) {
     expInfo["participant"] = rc.id.value;
@@ -527,7 +531,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var flanker2;
   var showCharacterSet;
 
-  var globalClock;
   var routineTimer, routineClock;
   var initInstructionClock,
     eduInstructionClock,
@@ -727,7 +730,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     /* -------------------------------------------------------------------------- */
 
     // Create some handy timers
-    globalClock = new util.Clock(); // to track the time since experiment started
+    clock.global = new util.Clock(); // to track the time since experiment started
     routineTimer = new util.CountdownTimer(); // to track time remaining of each (non-slip) routine
     routineClock = new util.Clock();
 
@@ -805,7 +808,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS(undefined, false);
+        return quitPsychoJS(undefined, false, paramReader);
       }
 
       // check if the Routine should terminate
@@ -896,7 +899,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     ) {
       removeBeepButton();
 
-      return quitPsychoJS(undefined, false);
+      return quitPsychoJS(undefined, false, paramReader);
     }
 
     if (!continueRoutine || clickedContinue.current) {
@@ -1265,7 +1268,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS(undefined, false);
+        return quitPsychoJS(undefined, false, paramReader);
       }
 
       // Continue?
@@ -1408,7 +1411,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS(undefined, false);
+        return quitPsychoJS(undefined, false, paramReader);
       }
 
       // check if the Routine should terminate
@@ -1787,12 +1790,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var showCounterBool;
   var showViewingDistanceBool;
 
-  const showCharacterSetResponse = {
-    current: null,
-    onsetTime: 0,
-    clickTime: 0,
-  };
-
   var showBoundingBox;
   var showCharacterSetBoundingBox;
   var stimulusParameters;
@@ -2019,28 +2016,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetEccentricityYDeg,
           ];
 
-          letterConfig.targetSafetyMarginSec = paramReader.read(
+          letterConfig.targetSafetyMarginSec = reader.read(
             "targetSafetyMarginSec",
             BC
           );
 
-          tolerances.allowed.thresholdAllowedDurationRatio = paramReader.read(
+          tolerances.allowed.thresholdAllowedDurationRatio = reader.read(
             "thresholdAllowedDurationRatio",
             BC
           );
-          tolerances.allowed.thresholdAllowedGazeErrorDeg = paramReader.read(
+          tolerances.allowed.thresholdAllowedGazeErrorDeg = reader.read(
             "thresholdAllowedGazeErrorDeg",
             BC
           );
-          tolerances.allowed.thresholdAllowedGazeXErrorDeg = paramReader.read(
+          tolerances.allowed.thresholdAllowedGazeXErrorDeg = reader.read(
             "thresholdAllowedGazeXErrorDeg",
             BC
           );
-          tolerances.allowed.thresholdAllowedGazeYErrorDeg = paramReader.read(
+          tolerances.allowed.thresholdAllowedGazeYErrorDeg = reader.read(
             "thresholdAllowedGazeYErrorDeg",
             BC
           );
-          tolerances.allowed.thresholdAllowedLatencySec = paramReader.read(
+          tolerances.allowed.thresholdAllowedLatencySec = reader.read(
             "thresholdAllowedLatencySec",
             BC
           );
@@ -2060,7 +2057,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
               `color: red; font-size: 1.5rem; font-family: "${font.name}"`
             );
-          correctAns = targetCharacter.toLowerCase();
+          correctAns.current = targetCharacter.toLowerCase();
           /* -------------------------------------------------------------------------- */
 
           // DISPLAY OPTIONS
@@ -2374,7 +2371,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         let action = await handleEscapeKey();
         if (action.quitSurvey) {
-          return quitPsychoJS(undefined, false);
+          return quitPsychoJS(undefined, false, paramReader);
         }
         if (action.skipTrial || action.skipBlock) {
           return Scheduler.Event.NEXT;
@@ -2571,7 +2568,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // READING Only accepts SPACE
             if (!validAns.length || validAns[0] !== "space")
               validAns = ["space"];
-            if (!correctAns || correctAns !== "space") correctAns = "space";
+            if (!correctAns.current || correctAns.current !== "space")
+              correctAns.current = "space";
           },
           letter: () => {
             if (
@@ -2671,7 +2669,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
 
             // Was this correct?
-            if (key_resp.keys == correctAns) {
+            if (key_resp.keys == correctAns.current) {
               // Play correct audio
               switchKind(targetKind.current, {
                 letter: () => {
@@ -2702,7 +2700,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           (showCharacterSetResponse.clickTime -
             showCharacterSetResponse.onsetTime) /
           1000;
-        if (showCharacterSetResponse.current == correctAns) {
+        if (showCharacterSetResponse.current == correctAns.current) {
           // Play correct audio
           correctSynth.play();
           status.trialCorrect_thisBlock++;
@@ -2798,7 +2796,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         !letterTiming.targetStartSec
       ) {
         letterTiming.targetStartSec = t;
-        readingTiming.onsets.push(globalClock.getTime());
+        readingTiming.onsets.push(clock.global.getTime());
         target.frameNDrawnConfirmed = frameN;
         letterTiming.targetDrawnConfirmedTimestamp = performance.now();
         letterTiming.crosshairClickedTimestamp =
@@ -2865,7 +2863,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         let action = await handleEscapeKey();
         if (action.quitSurvey) {
-          return quitPsychoJS(undefined, false);
+          return quitPsychoJS(undefined, false, paramReader);
         }
       }
 
@@ -3179,70 +3177,5 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());
       return Scheduler.Event.NEXT;
     };
-  }
-
-  async function quitPsychoJS(message, isCompleted) {
-    removeClickableCharacterSet(showCharacterSetResponse);
-
-    // RC
-    rc.endGaze();
-    rc.endNudger();
-    rc.endDistance();
-
-    showCursor();
-
-    // Check for and save orphaned data
-    if (psychoJS.experiment.isEntryEmpty()) {
-      psychoJS.experiment.nextEntry();
-    }
-    psychoJS.window.close();
-
-    const timeBeforeDebriefDisplay = globalClock.getTime();
-    const debriefScreen = new Promise((resolve) => {
-      if (paramReader.read("_debriefForm")[0]) {
-        showForm(paramReader.read("_debriefForm")[0]);
-        document.getElementById("form-yes").addEventListener("click", () => {
-          hideForm();
-          resolve();
-        });
-
-        document.getElementById("form-no").addEventListener("click", () => {
-          hideForm();
-          resolve();
-        });
-      } else {
-        resolve();
-      }
-    });
-    await debriefScreen;
-
-    psychoJS.experiment.addData(
-      "debriefDurationSec",
-      globalClock.getTime() - timeBeforeDebriefDisplay
-    );
-    psychoJS.experiment.addData(
-      "durationOfExperimentSec",
-      globalClock.getTime()
-    );
-
-    // QUIT FULLSCREEN
-    if (rc.isFullscreen.value) {
-      if (document.exitFullscreen) document.exitFullscreen();
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-      else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
-      else if (document.msExitFullscreen) document.msExitFullscreen();
-    }
-
-    if (recruitmentServiceData.name == "Prolific" && isCompleted) {
-      let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
-      psychoJS.quit({
-        message: message + additionalMessage,
-        isCompleted: isCompleted,
-      });
-    } else {
-      psychoJS.quit({ message: message, isCompleted: isCompleted });
-    }
-
-    return Scheduler.Event.QUIT;
   }
 };

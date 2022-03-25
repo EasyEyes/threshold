@@ -29,6 +29,8 @@ export const totalTrialsThisBlock = { current: undefined };
 
 export const targetKind = { current: undefined };
 
+export const correctAns = { current: undefined }; // for keyboard ans
+
 // Renders
 export const font = {
   name: undefined,
@@ -134,6 +136,12 @@ export const viewingDistanceCm = { current: 40 };
 export const responseType = { current: 2, original: 2 };
 export const clickedContinue = { current: false, timestamps: [] };
 export const modalButtonTriggeredViaKeyboard = { current: false };
+
+export const showCharacterSetResponse = {
+  current: null,
+  onsetTime: 0,
+  clickTime: 0,
+};
 
 /* ------------------------------- SIMULATION ------------------------------- */
 
