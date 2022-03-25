@@ -110,6 +110,7 @@ export const skipTrialOrBlock = {
 
 export const timing = Object.seal({
   clickToStimulusOnsetSec: undefined,
+  stimulusOnsetToOffset: undefined,
 });
 
 export const letterTiming = Object.seal({

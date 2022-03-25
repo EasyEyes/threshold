@@ -189,7 +189,9 @@ export const preprocessCorpusToSentenceList = (
     }
     if (!maxLinePerPageSoFar) maxLinePerPageSoFar = line;
 
-    const numberWordsThisPage = [...thisPageText.split("")].length;
+    const numberWordsThisPage = [
+      ...thisPageText.split(/\s|--/g).filter((w) => w.length > 0),
+    ].length;
     const previousStartingIndex =
       readingPageStats.readingPageSkipCorpusWords[
         readingPageStats.readingPageSkipCorpusWords.length - 1
@@ -272,16 +274,9 @@ export const addReadingStatsToOutput = (pageN, psychoJS) => {
     readingPageStats.readingPageNonblankCharacters[pageN]
   );
   psychoJS.experiment.addData(
-    "readingPageDurationSec",
-    timing.clickToStimulusOnsetSec + timing.stimulusOnsetToOffset
+    "readingPageDurationOnsetToOffsetSec",
+    timing.stimulusOnsetToOffset
   );
-  logger("timing", timing);
-  logger("letterTiming", letterTiming);
-  // if (readingTiming.onsets.length > 1) {
-  //   const previousPageDuration = readingTiming.onsets[readingTiming.onsets.length - 1] - readingTiming.onsets[readingTiming.onsets.length - 2];
-  //   readingPageStats.readingPageDurationSec.push(previousPageDuration);
-  //   psychoJS.experiment.addDataToPreviousTrial("readingPageDurationSec", previousPageDuration);
-  // }
 };
 
 /* --------------------------------- HELPERS -------------------------------- */

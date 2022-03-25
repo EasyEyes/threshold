@@ -2438,6 +2438,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function trialRoutineBegin(snapshot) {
     return async function () {
+      trialClock.reset(); // clock
+      // ie time from the user clicking/pressing space (actually, the end of the previous `trialRoutineEnd`), to the start of `trialRoutineBegin`
+      psychoJS.experiment.addData(
+        "clickToTrialPreparationDelaySec",
+        routineClock.getTime()
+      );
       // rc.pauseNudger();
       // await sleep(100);
 
@@ -2481,11 +2487,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       key_resp.rt = undefined;
       _key_resp_allKeys = [];
 
-      psychoJS.experiment.addData(
-        "trialBeginDurationSec",
-        trialClock.getTime()
-      );
-
       _instructionSetup(
         instructionsText.trial.respond["spacing"](
           rc.language.value,
@@ -2518,9 +2519,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
       /* -------------------------------------------------------------------------- */
 
+      // ie time spent in `trialRoutineBegin`
       psychoJS.experiment.addData(
-        "clickToTrialPreparationDelaySec",
-        routineClock.getTime()
+        "trialBeginDurationSec",
+        trialClock.getTime()
       );
       trialClock.reset(); // clock
 
@@ -2988,7 +2990,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // NOTE Only means what it's called in `reading` mode
       timing.stimulusOnsetToOffset =
-        timing.clickToStimulusOnsetSec - routineClock.getTime();
+        routineClock.getTime() - timing.clickToStimulusOnsetSec;
 
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
@@ -3051,17 +3053,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (typeof key_resp.keys !== "undefined") {
         // we had a response
         psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
+        // ie time from the end to `trialRoutineBegin` to the start of `trialRoutineEnd`
         psychoJS.experiment.addData(
           "trialRoutineDurationFromBeginSec",
           trialClock.getTime()
         );
+        // ie time from the end of the previous trial to the end of this trial
         psychoJS.experiment.addData(
           "trialRoutineDurationFromPreviousEndSec",
           routineClock.getTime()
         );
-
-        routineTimer.reset();
-        routineClock.reset();
       }
 
       key_resp.stop();
