@@ -1,120 +1,35 @@
 # EasyEyes Threshold
 
-📖 [**Read the Manual**](https://docs.google.com/spreadsheets/d/1x65NjykMm-XUOz98Eu_oo6ON2xspm_h0Q0M2u6UGtug/edit?usp=sharing) (shared via Google Sheets)
+📖 [**Manual**](https://docs.google.com/document/d/e/2PACX-1vTTrqaSyva2afVupLchBjfTHc_YW5jAbEexGbudXMJ9xMKPBDA3nxQmHXa4wjnAoSVabeEA8T9CGIMa/pub)<br />
+📝 [**Parameter Glossary**](https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8QswX_5h_oNS2Ly6VgoONGIxJHqDFjdZqWY_HUxH2Nr_LNkGDBL8FXz74l9BxVNR2AIXGhHir9GAd/pub?gid=1287694458&single=true&output=pdf)<br />
+🌏 [**Webapp**](https://easyeyes.app/threshold/) (beta)
 
-A PsychoJS-based experiment generator for the measuring various psychometric thresholds, e.g., crowding.
+A PsychoJS-based experiment generator for the measuring various psychometric thresholds, e.g., crowding. Please visit [easyeyes.app/threshold](https://easyeyes.app/threshold/) for more instructions.
 
-## UPDATE
+## Development
 
-What's below is out of date in some ways. It mentions that we replaced the Python preprocessor.py by javascript code,
-but the instructions still use the Python version. Instructions below explain how to put files on a server and run them.
-This will soon be done for us by the https://easyeyes.app/threshold web page, which also allows uploading of fonts and consent forms directly to the Fonts and ConsentForms folders in EasyEyesResources/ on the scientist's Pavlovia account.
-The manual is up to date.
-https://docs.google.com/spreadsheets/d/1x65NjykMm-XUOz98Eu_oo6ON2xspm_h0Q0M2u6UGtug/edit#gid=2021552264
+To clone this repo, use
 
-- Denis, Sept 23, 2021.
+```shell
+git clone --recurse-submodules https://github.com/EasyEyes/threshold.git
+```
 
-## Installation Instructions
+Then, run the following for the initial setup
 
-Note: We've moved `preprocessor.py` to `lib/legacy/` and future updates of the preprocessor will happen in the [control-panel](https://github.com/EasyEyes/control-panel) repository.
+```shell
+npm install
+npm run build
+```
 
-1. Clone this repository.
+To develop based on a specific experiment table, use
 
-You will need a copy of the files locally to work with.
-Running `git clone https://github.com/EasyEyes/threshold.git` in a
-terminal window should do the trick.
+```shell
+npm run examples [tableName].[xlsx] # you may also run `npm run examples` to prepare for all tables in your examples/tables folder
+npm start -- --name=[tableName] # start hot-reload development
+```
 
-2. Run `preprocessor.py` on your experiment's csv file.
+You may then open Live Server (a VSCode extension) to preview lively. You need to rerun `npm run examples [your table name]` every time you edit the HTML file.
 
-Assume we have a csv configuration file for our experiment called `myExperiment.csv`,
-which we've placed in the same directory as `preprocessor.py` and `threshold.js`.
-From a shell open in the same directory, run `python preprocessor.py myExperiment.csv`.
-If successful, this will create a `/conditions` directory, which contains
-the properly formatted csv files needed (_ie_ by `threshold.js`) to create your experiment.
+## PsychoJS Version
 
-- If you don't have python available on your computer, [install it](https://www.python.org/downloads/).
-
-3. Run `index.html` to run the experiment\*.
-
-`index.html` is the entrypoint to the actually experiment.
-From here the necessary [psychojs modules](https://github.com/psychopy/psychojs),
-the EasyEyes Threshold experiment (_ie_ threshold.js),
-and the parameters specific to your experiment
-(_ie_ the files in `/conditions` you just produced by running `preprocessor.py`)
-
-In this case, "run index.html" means "host index.html from a server, and visit the page from a web-browser".
-While you could just double-click `index.html` to open it, this will result in experiment-breaking
-errors.
-In short, browsers only trusts resources drawn from a single source. This mechanism is a vital safety feature, but in this case means that if we try to run our experiment’s index.html file by double clicking on it, the browser will prevent the experiment from loading the resources it needs as it treats other files on our computer as separate sources.
-To get around this, we can either start our own local server instance,
-or use a hosting service like Pavlovia.
-
-For testing your experiment while developing it, use the first solution below;
-when your experiment is tested and ready to be run by participants, use the second.
-
-- A. Start a server for testing locally.
-
-  We need to [start up a local server](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server).
-  In essence, this is a program running on
-  our computer which properly sends all the required files for our experiment
-  to the web-browser when we run the experiment.
-
-  From a shell open in the same directory as `threshold.js` and `index.html`, simply run
-  `python3 -m http.server`.
-  This is a quick, one-line way to start a server instance in the current
-  directory, which is built-in to python.
-  (Note: Other servers, such as with [Node.js](https://stackoverflow.com/questions/6084360/using-node-js-as-a-simple-web-server)
-  or [PHP](https://stackoverflow.com/questions/1678010/php-server-on-local-machine),
-  would also work for this purpose, though we recommend
-  using the Python server, as Python is already a dependency of the preprocessor.)
-
-  We can then open the experiment by visiting
-  the URL which the program provides, eg
-  [http://0.0.0.0:8000/](http://0.0.0.0:8000/),
-  from a web-browser on the same computer.
-
-- B. Deploy your experiment by uploading to an experiment hosting service.
-
-  Once your experiment is ready for participants, it should be hosted online.
-  We recommend doing this safely and quickly by using a hosting service,
-  such as [Pavlovia](https://pavlovia.org). In the case of Pavlovia,
-  this looks like
-  [importing your directory to a new project on Pavlovia's Gitlab.](https://gitlab.pavlovia.org/projects/new).
-
-  Alternatively, you can manage your own server, running a program such as [JATOS](jatos.org),
-  to host your experiment online.
-
-4. Developers: Edit `threshold.js` to extend functionality
-   Interested developers can expand upon the currently supported parameters by directly
-   editing the `threshold.js` or `preprocessor.py` files.
-   If you have a contribution that you think would be valuable for other EasyEyes Crowding users, consider
-   [creating a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
-   to share your work.
-
-## Using custom fonts
-
-[Some fonts](https://www.w3schools.com/cssref/css_websafe_fonts.asp) are natively supported by web-browsers;
-these can be used in an experiment without
-having to include any addition font files with your experiment.
-
-To use other fonts, such as one you created or purchased from a third-party, start
-by creating a /fonts folder in your local copy of this repo. Inside this folder you
-can include any .woff font files that you would like to make accessible to to your
-study.
-Within your experiment csv file, simply use the same string for the font
-parameter as the name of the corresponding .woff file.
-For example, given Pelli-EyeChart.woff in your /fonts folder, use
-"Pelli-EyeChart" as the value for font.
-During the development process, open the javascript console in your browser to
-monitor any failures to load assets like font files.
-
-By default, PsychoJS also supports using finding fonts from [Google Fonts](https://fonts.google.com). Searching Google Fonts for a font of the requested name will therefore be the
-fallback behavior of an experiment, if a `font` parameter does not correspond to
-a default web font, or a `.woff` file your `./fonts` directory.
-
-Most importantly,
-**always test your experiment, and verify for yourself that stimuli are being presented correctly**.
-
-## PsychoPy Version
-
-`2022.1.1`.
+We build EasyEyes Threshold with PsychoJS `2022.1.1`.
