@@ -69,7 +69,7 @@ export const formCalibrationList = (reader) => {
       options: {
         showGazer: ifTrue(reader.read("showGazeBool", "__ALL_BLOCKS__")),
         showVideo: false,
-        calibrationCount: 3,
+        calibrationCount: debug ? 3 : 3,
         fullscreen: !debug,
       },
     });

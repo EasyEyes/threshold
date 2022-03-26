@@ -302,7 +302,8 @@ const paramReaderInitialized = async (reader) => {
     preparePopup(rc.language.value, expName); // Try to use only one popup ele for both (or even more) popup features
     prepareTrialBreakProgressBar();
 
-    document.body.removeChild(document.querySelector("#rc-panel"));
+    if (document.querySelector("#rc-panel-holder"))
+      document.querySelector("#rc-panel-holder").remove();
 
     // ! Start actual experiment
     experiment(reader.blockCount);
@@ -322,12 +323,16 @@ const paramReaderInitialized = async (reader) => {
   if (useRC && useCalibration(reader)) {
     rc.panel(
       formCalibrationList(reader),
-      "#rc-panel",
+      "#rc-panel-holder",
       {
         debug: debug,
       },
       () => {
         rc.removePanel();
+
+        rc.pauseGaze();
+        // rc.pauseDistance();
+
         startExperiment();
       }
     );
@@ -1129,9 +1134,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   async function blocksLoopEnd() {
     psychoJS.experiment.removeLoop(blocks);
-
-    // ! Distance ?
-
     return Scheduler.Event.NEXT;
   }
 
@@ -1371,22 +1373,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       // RC
-      if (ifTrue(paramReader.read("calibrateTrackGazeBool", status.block))) {
-        rc.resumeGaze();
-        loggerText("[RC] resuming gaze");
-      } else {
-        rc.pauseGaze();
-        loggerText("[RC] pausing gaze");
-      }
-      if (
-        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
-      ) {
-        rc.resumeDistance();
-        loggerText("[RC] resuming distance");
-      } else {
-        rc.pauseDistance();
-        loggerText("[RC] pausing distance");
-      }
+      // if (ifTrue(paramReader.read("calibrateTrackGazeBool", status.block))) {
+      //   rc.resumeGaze();
+      //   loggerText("[RC] resuming gaze");
+      // } else {
+      //   rc.pauseGaze();
+      //   loggerText("[RC] pausing gaze");
+      // }
 
       for (const thisComponent of filterComponents)
         if ("status" in thisComponent)
@@ -1463,8 +1456,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       loggerText(
         `initInstructionRoutineBegin targetKind ${targetKind.current}`
       );
-      // ! Distance
-      // rc.resumeDistance();
 
       TrialHandler.fromSnapshot(snapshot);
       initInstructionClock.reset(); // clock
@@ -1654,10 +1645,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function eduInstructionRoutineBegin(snapshot) {
     return async function () {
-      ////
-      // End distance once the exp begins
-      rc.endDistance();
-      ////
       eduInstructionClock.reset();
 
       TrialHandler.fromSnapshot(snapshot);
@@ -1728,9 +1715,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function eduInstructionRoutineEnd() {
     return async function () {
-      // ! Distance
-      // rc.pauseDistance();
-
       instructions.setAutoDraw(false);
 
       switchKind(targetKind.current, {
@@ -1856,6 +1840,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
 
       /* --------------------------------- PUBLIC --------------------------------- */
+
+      // ! distance
+      if (
+        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
+      ) {
+        rc.resumeDistance();
+        loggerText("[RC] resuming distance");
+      }
 
       // update trial/block count
       status.trial = snapshot.thisN + 1;
@@ -2400,6 +2392,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialInstructionRoutineEnd() {
     return async function () {
       loggerText("trialInstructionRoutineEnd");
+
+      rc.pauseDistance();
+
       if (toShowCursor()) {
         showCursor();
         return Scheduler.Event.NEXT;
@@ -2554,7 +2549,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
 
         // !
-        // TODO this is misleading, ie in `letter` targetkind the stimulus onset isn't until the target is drawn
+        // TODO this is misleading, ie in `letter` targetKind the stimulus onset isn't until the target is drawn
         //     if `uniDelay !== 0` then this `clickToStimulusOnsetSec` would be `uniDelay` early to the stimulus
         //     actually being drawn.
         psychoJS.experiment.addData(

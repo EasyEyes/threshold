@@ -2,7 +2,7 @@
   z-index: 1000000 !important;
 }
 
-#rc-panel {
+#rc-panel-holder {
   z-index: 1;
   width: calc(100% - 2rem);
   margin: 0 1rem;
