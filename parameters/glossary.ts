@@ -644,6 +644,32 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  maskerBaseFrequencyMultiplier: {
+    name: "maskerBaseFrequencyMultiplier",
+    availability: "now",
+    example: "",
+    explanation:
+      "Compute base frequency of a mask melody by multiplying the target frequency by this factor. If there are two melodies then the second melody has base frequency given by target frequency divided by this factor.",
+    type: "numerical",
+    default: "2",
+  },
+  maskerVolumeDBSPL: {
+    name: "maskerVolumeDBSPL",
+    availability: "now",
+    example: "",
+    explanation: "Sound volume of the masker, in dB SPL.",
+    type: "numerical",
+    default: "50",
+  },
+  maskerSoundFolder: {
+    name: "maskerSoundFolder",
+    availability: "now",
+    example: "sounds",
+    explanation:
+      "The name of a folder of sound files, to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of maskSoundFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+    type: "text",
+    default: "",
+  },
   notes: {
     name: "notes",
     availability: "now",
@@ -743,6 +769,15 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "nominalSize",
     categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
+  },
+  readingLeftToRightBool: {
+    name: "readingLeftToRightBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "readingLeftToRightBool should be set to TRUE for most languages, including English, and should be set to FALSE for Arabic, Hebrew, Chinese, Japanese, and any other right-to-left languages.",
+    type: "boolean",
+    default: "TRUE",
   },
   readingLinesPerPage: {
     name: "readingLinesPerPage",
@@ -866,7 +901,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Allow participant to respond at every occasion by clicking (e.g. clickingthe target letter in the characterSet). When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too.",
+      "Allow participant to respond at every occasion by clicking (e.g. clicking the target letter in the fontCharacterSet). When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too.",
     type: "boolean",
     default: "TRUE",
   },
@@ -1301,10 +1336,16 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "letter",
     explanation:
-      "• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The sound is played for its full duration at targetSoundVolume and with targetSoundNoise\n• reading Measure reading speed and retention. Should be reclassified as a targetTask.",
+      "• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The sound is played for its full duration at targetSoundVolume and with targetSoundNoise\n• toneInMelody The target is eight bursts of a 1 kHZ tone. The mask is a pair of melodies at higher and lower frequency.\n• toneInMelodylikeNoise The target is eight bursts of a 1 kHZ tone. The mask is a pair of noises that are similar to melodies at higher and lower frequency.\n• vocoderSpeechInSpeech\n• vocoderSpeechInSpeechlikeNoise\n• vocoderSpeechInNoise\n• reading Measure reading speed and retention. Should be reclassified as a targetTask.\n",
     type: "categorical",
     default: "letter",
-    categories: ["letter", "gabor", "image", "reading"],
+    categories: [
+      "letter",
+      "gabor",
+      "image",
+      "reading",
+      "vocoderSpeechInSpeech\nvocoderSpeechInSpeechlikeNoise\nvocoderSpeechInNoise\ntoneInMelody",
+    ],
   },
   targetMinimumPix: {
     name: "targetMinimumPix",
@@ -1421,6 +1462,14 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  targetSoundNoiseClockHz: {
+    name: "targetSoundNoiseClockHz",
+    availability: "now",
+    example: "20000",
+    explanation: "The clock rate of the auditory noise.",
+    type: "numerical",
+    default: "20000",
+  },
   targetSoundNoiseDBSPL: {
     name: "targetSoundNoiseDBSPL",
     availability: "now",
@@ -1428,14 +1477,6 @@ export const GLOSSARY: Glossary = {
     explanation: "The noise volume in dB SPL.",
     type: "numerical",
     default: "0",
-  },
-  targetSoundNoiseHz: {
-    name: "targetSoundNoiseHz",
-    availability: "now",
-    example: "20000",
-    explanation: "The clock rate of the auditory noise.",
-    type: "numerical",
-    default: "20000",
   },
   targetSoundNoiseOffsetReTargetSec: {
     name: "targetSoundNoiseOffsetReTargetSec",
@@ -1467,10 +1508,10 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "identify",
     explanation:
-      'Can be one or multiple of the following categories. If there are multiple tasks in one trial, use comma to divide them, e.g., "identify,targetQuestion1". The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• targetQuestion1 (and targetQuestion2, etc.) uses the question and answers provided by parameter targetQuestion1. The participant must click on one of the answers.\n• detect might be added later. In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'Can be one or multiple of the following categories. If there are multiple tasks in one trial, use comma to divide them, e.g., "identify,targetQuestion1". The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• targetQuestion1 (and targetQuestion2, etc.) uses the question and answers provided by parameter targetQuestion1. The participant must click on one of the answers.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
-    categories: ["identify", "categorize", "targetQuestion@"],
+    categories: ["identify", "detect", "targetQuestion@"],
   },
   thresholdAllowedDurationRatio: {
     name: "thresholdAllowedDurationRatio",

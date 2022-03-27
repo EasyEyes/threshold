@@ -157,6 +157,8 @@ export const removeProceedButton = () => {
 /* ----------------------------- CLICK FIXATION ----------------------------- */
 // On LETTER trial instructions
 export const _takeFixationClick = (e) => {
+  if (String(e.target.tagName).toLowerCase() !== "canvas") return;
+
   if (modalButtonTriggeredViaKeyboard.current) {
     // modal button click event triggered by jquery
     modalButtonTriggeredViaKeyboard.current = false;
