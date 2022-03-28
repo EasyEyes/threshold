@@ -19,6 +19,7 @@ import {
   getFormNames,
   getTextList,
   addNewUnderscoreParam,
+  getFolderNames,
 } from "./utils";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
@@ -133,6 +134,8 @@ export const prepareExperimentFileForThreshold = async (
   if (space === "web")
     errors.push(...isTextMissing(requestedTextList, easyeyesResources.texts));
 
+  //validate requested Folders;
+  const requestedFolderList: string[] = getFolderNames(parsed);
   // Check that every row has the same number of values
   const unbalancedCommasError = validatedCommas(parsed);
 
@@ -166,12 +169,20 @@ export const prepareExperimentFileForThreshold = async (
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
     // console.log("ERRORS", errors);
-    callback(requestedForms, requestedFontList, requestedTextList, [], errors);
+    callback(
+      requestedForms,
+      requestedFontList,
+      requestedTextList,
+      requestedFolderList,
+      [],
+      errors
+    );
   } else {
     callback(
       requestedForms,
       requestedFontList,
       requestedTextList,
+      requestedFolderList,
       splitIntoBlockFiles(df, space),
       []
     );
