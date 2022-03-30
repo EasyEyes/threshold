@@ -14,7 +14,7 @@ export const getFolderNames = (parsed: any): any => {
   let maskedfolderList: string[] = [];
   let targetfolderList: string[] = [];
   for (let i = 0; i < parsed.data.length; i++) {
-    if (parsed.data[i][0] == "maskSoundFolder") {
+    if (parsed.data[i][0] == "maskerSoundFolder") {
       maskedfolderList = [...parsed.data[i]];
     } else if (parsed.data[i][0] == "targetSoundFolder") {
       targetfolderList = [...parsed.data[i]];
