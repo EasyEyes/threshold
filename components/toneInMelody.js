@@ -60,16 +60,20 @@ const getAudioBufferFromArrayBuffer = (arrayBuffer) => {
 };
 
 const setWaveFormToZeroDbSPL = (arr) => {
+  console.log(arr);
   const rms = getRMSOfWaveForm(arr);
   //normalize to 0 db spl
   //by convention sound with a mean square of 1 is at 0 db
   arr = arr.map((elem) => elem / rms);
+  console.log("rms");
   return arr;
 };
 
 const getRMSOfWaveForm = (arr) => {
-  arr.forEach((val) => val * val);
-  const Sum = arr.reduce((acum, val) => acum + val);
+  const Squares = arr.map((val) => val * val);
+  console.log(arr);
+  console.log(Squares);
+  const Sum = Squares.reduce((acum, val) => acum + val);
   const Mean = Sum / arr.length;
   return Math.sqrt(Mean);
 };
