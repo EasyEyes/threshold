@@ -1534,7 +1534,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         toneInMelody: async () => {
           await initSoundFiles(["maskerSounds"], "targetSound");
-          var trialSoundBuffer = await getTrialData("maskerSounds", true, 0, 0);
+          var trialSoundBuffer = await getTrialData(
+            "maskerSounds",
+            true,
+            10,
+            0
+          );
           playAudioBuffer(trialSoundBuffer);
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
