@@ -775,7 +775,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "readingLeftToRightBool should be set to TRUE for most languages, including English, and should be set to FALSE for Arabic, Hebrew, Chinese, Japanese, and any other right-to-left languages.",
+      "readingLeftToRightBool should be set to TRUE for most languages, including English, and should be set to FALSE for Arabic, Hebrew, Chinese, Japanese, and any other right-to-left languages. The default value is TRUE.",
     type: "boolean",
     default: "TRUE",
   },
@@ -1336,7 +1336,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "letter",
     explanation:
-      "• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The sound is played for its full duration at targetSoundVolume and with targetSoundNoise\n• toneInMelody The target is eight bursts of a 1 kHZ tone. The mask is a pair of melodies at higher and lower frequency.\n• toneInMelodylikeNoise The target is eight bursts of a 1 kHZ tone. The mask is a pair of noises that are similar to melodies at higher and lower frequency.\n• vocoderSpeechInSpeech\n• vocoderSpeechInSpeechlikeNoise\n• vocoderSpeechInNoise\n• reading Measure reading speed and retention. Should be reclassified as a targetTask.\n",
+      "• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The sound is played for its full duration at targetSoundVolumeDBSPL with a masker randomly selected from the maskerSoundFolder and with targetSoundNoise.\n• reading Measure reading speed and retention. Should be reclassified as a targetTask.\n",
     type: "categorical",
     default: "letter",
     categories: [
@@ -1344,7 +1344,10 @@ export const GLOSSARY: Glossary = {
       "gabor",
       "image",
       "reading",
-      "vocoderSpeechInSpeech\nvocoderSpeechInSpeechlikeNoise\nvocoderSpeechInNoise\ntoneInMelody",
+      "vocoderSpeechInSpeech",
+      "vocoderSpeechInSpeechlikeNoise",
+      "vocoderSpeechInNoise",
+      "toneInMelody",
     ],
   },
   targetMinimumPix: {
@@ -1458,7 +1461,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "If targetKind is \"sound\", and targetSoundNoiseBool is TRUE, then add noise to the target. The noise is zero mean Gaussian white noise, clipped at ±2 SD. Any reported SD is after clipping. We could add a parameter to request leaving the noise on continuously. We'll need to specify onset and offset ramps. I don't know what's conventional.",
+      'If targetKind is "sound", and targetSoundNoiseBool is TRUE, then add noise to the target. The noise is zero mean Gaussian white noise, clipped at ±2 SD. Any reported SD is after clipping. Use a 10 ms squared sine ramp at onset and a 10 ms squared cosine ramp at offset. We could add a parameter to request leaving the noise on continuously. ',
     type: "boolean",
     default: "FALSE",
   },
@@ -1470,8 +1473,8 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "20000",
   },
-  targetSoundNoiseDBSPL: {
-    name: "targetSoundNoiseDBSPL",
+  targetSoundNoiseVolumeDBSPL: {
+    name: "targetSoundNoiseVolumeDBSPL",
     availability: "now",
     example: "20",
     explanation: "The noise volume in dB SPL.",

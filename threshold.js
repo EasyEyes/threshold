@@ -24,7 +24,7 @@ const { Scheduler } = util;
 /* -------------------------------- External -------------------------------- */
 import * as jsQUEST from "./components/addons/jsQUEST.module.js";
 import Stats from "stats.js";
-
+import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 ////
 /* ----------------------------------- CSS ---------------------------------- */
 import "./psychojs/src/index.css";
@@ -244,6 +244,11 @@ import { switchKind } from "./components/blockTargetKind.js";
 import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
 import { quitPsychoJS } from "./components/lifetime.js";
+import {
+  getTrialData,
+  initSoundFiles,
+  playAudioBuffer,
+} from "./components/toneInMelody.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -931,6 +936,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
+      toneInMelody: () => {
+        if (psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) {
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
     });
 
     return Scheduler.Event.FLIP_REPEAT;
@@ -1065,6 +1076,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixationConfig.pos = [0, 0];
           fixationConfig.size = 45;
           fixationConfig.show = true;
+        },
+        toneInMelody: () => {
+          trialsConditions = populateQuestDefaults(
+            trialsConditions,
+            paramReader
+          );
+
+          trials = new data.MultiStairHandler({
+            stairType: MultiStairHandler.StaircaseType.QUEST,
+            psychoJS: psychoJS,
+            name: "trials",
+            varName: "trialsVal",
+            nTrials: totalTrialsThisBlock.current,
+            conditions: trialsConditions,
+            method: TrialHandler.Method.FULLRANDOM,
+            seed: Math.round(performance.now()),
+          });
         },
       });
 
@@ -1473,6 +1501,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
 
       switchKind(targetKind.current, {
+        toneInMelody: async () => {
+          await initSoundFiles(["maskerSounds"], "targetSound");
+          var trialSoundBuffer = await getTrialData("maskerSounds", true, 0, 0);
+          playAudioBuffer(trialSoundBuffer);
+          _instructionSetup(
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+              " Instruction Placeholder"
+          );
+        },
         letter: () => {
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
