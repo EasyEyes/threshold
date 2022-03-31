@@ -1228,7 +1228,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showCharacterSetResponse,
           (clickedWord) => {
             readingClickableAnswersUpdate.current = true;
-            if (clickedWord === thisQuestion.correctAnswer) correctSynth.play();
+            const correct = clickedWord === thisQuestion.correctAnswer;
+            psychoJS.experiment.addData(
+              "readWordIdentifiedBool",
+              correct ? "TRUE" : "FALSE"
+            );
+            psychoJS.experiment.nextEntry();
+            if (correct) correctSynth.play();
           },
           "readingAnswer"
         );
@@ -1258,7 +1264,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showCharacterSetResponse,
           (clickedWord) => {
             readingClickableAnswersUpdate.current = true;
-            if (clickedWord === thisQuestion.correctAnswer) correctSynth.play();
+            const correct = clickedWord === thisQuestion.correctAnswer;
+            psychoJS.experiment.addData(
+              "readWordIdentifiedBool",
+              correct ? "TRUE" : "FALSE"
+            );
+            // TODO don't call nextEntry() on the last question
+            psychoJS.experiment.nextEntry();
+            if (correct) correctSynth.play();
           },
           "readingAnswer"
         );
