@@ -87,6 +87,7 @@ import {
   targetIsPresentBool,
   ProposedVolumeLevelFromQuest,
   volumeDbSPL,
+  maskervolumeDbSPL,
 } from "./components/global.js";
 
 import {
@@ -1868,12 +1869,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         toneInMelody: () => {
           for (let c of snapshot.handler.getConditions()) {
-            console.log("c:", c);
-            console.log(trials._currentStaircase._name);
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
-              console.log("stat:", status.block_condition);
               addConditionToData(
                 paramReader,
                 status.block_condition,
@@ -1889,12 +1887,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         letter: () => {
           for (let c of snapshot.handler.getConditions()) {
-            console.log("c:", c);
-            console.log(trials._currentStaircase._name);
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
-              console.log("stat:", status.block_condition);
               addConditionToData(
                 paramReader,
                 status.block_condition,
@@ -1975,6 +1970,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
           ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
+          maskervolumeDbSPL.current = paramReader.read(
+            "maskerVolumeDBSPL",
+            status.block_condition
+          );
+
           //correctAns.current = targetIsPresentBoolValues[snapshot.getCurrentTrial()]
           //get trial data
           // get quest values
@@ -2574,14 +2574,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader.read("maskerSoundFolder", status.block_condition),
             targetIsPresentBool.current,
             ProposedVolumeLevelFromQuest.current,
-            0 //volumeDbSPL.current
+            maskervolumeDbSPL.current
           );
+          console.log("maskerVolume:", maskervolumeDbSPL.current);
           console.log("questVolume:", ProposedVolumeLevelFromQuest);
           console.log(
-            "condition:::",
+            "maskerType:",
             paramReader.read("maskerSoundFolder", status.block_condition)
           );
-          console.log(status.block_condition);
+          console.log("condition:", status.block_condition);
+          console.log("targetIsPresent:", targetIsPresentBool.current);
           playAudioBuffer(trialSoundBuffer);
         },
         reading: () => {
@@ -2626,6 +2628,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           responseType.current
         )
       );
+
+      //use google sheets phrases for instructions
+      switchKind(targetKind.current, {
+        toneInMelody: () => {
+          _instructionSetup("Was target Present? y/n");
+          instructions.setText("Was target Present? y/n");
+        },
+      });
       instructions.setAutoDraw(false);
 
       /* -------------------------------------------------------------------------- */
@@ -3050,6 +3060,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         instructions.frameNStart = frameN;
         instructions.setAutoDraw(true);
       }
+
+      switchKind(targetKind.current, {
+        toneInMelody: () => {
+          instructions.setAutoDraw(true);
+        },
+      });
       /* -------------------------------------------------------------------------- */
 
       // check if the Routine should terminate
