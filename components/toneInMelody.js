@@ -1,14 +1,12 @@
 import JSZip from "jszip";
 import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 import mergeBuffers from "merge-audio-buffers";
-import { Buffer } from "buffer";
+
 var maskerList = {};
 
 var targetSound = undefined;
 var Zip = new JSZip();
 var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-var source = audioCtx.createBufferSource();
-var gainNode = audioCtx.createGain();
 
 export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
   maskerList = {};
@@ -26,7 +24,7 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
           zip.forEach((relativePath, zipEntry) => {
             maskerList[name].push(
               zipEntry.async("arraybuffer").then((data) => {
-                return data;
+                return getAudioBufferFromArrayBuffer(data);
               })
             );
           });
@@ -44,13 +42,14 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
         var TargetSound = 2;
         zip.forEach((relativePath, zipEntry) => {
           TargetSound = zipEntry.async("arraybuffer").then((data) => {
-            return data;
+            return getAudioBufferFromArrayBuffer(data);
           });
         });
-        //console.log("here:",TargetSound);
         return TargetSound;
       });
     });
+
+  //console.log("target:", targetSound);
 };
 
 const getAudioBufferFromArrayBuffer = (arrayBuffer) => {
@@ -60,19 +59,15 @@ const getAudioBufferFromArrayBuffer = (arrayBuffer) => {
 };
 
 const setWaveFormToZeroDbSPL = (arr) => {
-  console.log(arr);
   const rms = getRMSOfWaveForm(arr);
   //normalize to 0 db spl
   //by convention sound with a mean square of 1 is at 0 db
   arr = arr.map((elem) => elem / rms);
-  console.log("rms");
   return arr;
 };
 
 const getRMSOfWaveForm = (arr) => {
   const Squares = arr.map((val) => val * val);
-  console.log(arr);
-  console.log(Squares);
   const Sum = Squares.reduce((acum, val) => acum + val);
   const Mean = Sum / arr.length;
   return Math.sqrt(Mean);
@@ -97,7 +92,8 @@ export const getTrialData = async (
   var trialMasker = await maskerList[maskerFolderName][randomIndex];
 
   //modify masker
-  trialMasker = await getAudioBufferFromArrayBuffer(trialMasker);
+  //console.log(trialMasker);
+  //trialMasker = await getAudioBufferFromArrayBuffer(trialMasker);
   var trialMaskerData = new Float32Array(trialMasker.length);
   trialMasker.copyFromChannel(trialMaskerData, 0, 0);
   trialMaskerData = setWaveFormToZeroDbSPL(trialMaskerData);
@@ -111,7 +107,10 @@ export const getTrialData = async (
 
   var trialTarget;
   if (targetIsPresentBool) {
-    trialTarget = await getAudioBufferFromArrayBuffer(await targetSound);
+    //pick and modify target
+    //console.log(await targetSound);
+    //trialTarget = await getAudioBufferFromArrayBuffer(await targetSound);
+    trialTarget = await targetSound;
     var trialTargetData = new Float32Array(trialTarget.length);
     trialTarget.copyFromChannel(trialTargetData, 0, 0);
     trialTargetData = setWaveFormToZeroDbSPL(trialTargetData);
@@ -133,14 +132,7 @@ export const getTrialData = async (
 };
 
 export const playAudioBuffer = (audioBuffer) => {
-  //getAudioBufferData(audioBuffer);
-  //console.log(audioBuffer);
-  //const seconds = 1;
-  //const channelData = new Float32Array(Math.round(audioBuffer.sampleRate * seconds));
-
-  //audioBuffer.copyFromChannel(channelData, 0, 0);
-  //console.log(channelData);
-  //console.log("sampleRate: ",audioBuffer.sampleRate);
+  var source = audioCtx.createBufferSource();
   source.buffer = audioBuffer;
   source.connect(audioCtx.destination);
   source.start();
