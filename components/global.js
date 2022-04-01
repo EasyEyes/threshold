@@ -237,4 +237,4 @@ export const trialCounterConfig = {
 /* -------------------------------------------------------------------------- */
 export const targetIsPresentBool = { current: undefined };
 export const ProposedVolumeLevelFromQuest = { current: undefined };
-export const volumeDbSPL = { current: undefined };
+export const maskervolumeDbSPL = { current: undefined };
