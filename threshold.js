@@ -84,6 +84,9 @@ import {
   showCharacterSetResponse,
   correctAns,
   readingTiming,
+  targetIsPresentBool,
+  ProposedVolumeLevelFromQuest,
+  volumeDbSPL,
 } from "./components/global.js";
 
 import {
@@ -566,6 +569,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       waitForStart: true,
     });
 
+    //initialize sound experiment files
+    //edit - use list of sound targetKinds instead of toneInMelody
+    if (
+      paramReader.read("targetKind", "__ALL_BLOCKS__").includes("toneInMelody")
+    ) {
+      var MaskerFolders = paramReader.read(
+        "maskerSoundFolder",
+        "__ALL_BLOCKS__"
+      );
+      //console.log(MaskerFolders);
+      var targetSoundFolder = paramReader.read(
+        "targetSoundFolder",
+        "__ALL_BLOCKS__"
+      );
+      await initSoundFiles(MaskerFolders, targetSoundFolder[0]);
+    }
+
     fixation = new visual.TextStim({
       win: psychoJS.window,
       name: "fixation",
@@ -876,18 +896,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     dynamicSetSize([instructions], instructionsConfig.height);
   }
 
-  function _instructionBeforeStimulusSetup(text) {
+  function _instructionBeforeStimulusSetup(
+    text,
+    wrapWidth = window.innerWidth / 4,
+    pos = [-window.innerWidth / 2 + 5, window.innerHeight / 2 - 5]
+  ) {
     t = 0;
     instructionsClock.reset(); // clock
     frameN = -1;
     continueRoutine = true;
     // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
-    const wrapWidth = window.innerWidth / 4;
+    //const wrapWidth = window.innerWidth / 4;
     instructions.setWrapWidth(wrapWidth);
-    instructions.setPos([
-      -window.innerWidth / 2 + 5,
-      window.innerHeight / 2 - 5,
-    ]);
+    instructions.setPos(pos);
     instructions.setText(text);
     instructions.setAutoDraw(true);
   }
@@ -1082,7 +1103,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             trialsConditions,
             paramReader
           );
-
+          console.log("conditionsHere:", trialsConditions);
           trials = new data.MultiStairHandler({
             stairType: MultiStairHandler.StaircaseType.QUEST,
             psychoJS: psychoJS,
@@ -1368,6 +1389,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Get total trials for this block
       switchKind(targetKind.current, {
+        toneInMelody: () => {
+          const possibleTrials = paramReader.read(
+            "conditionTrials",
+            status.block
+          );
+          totalTrialsThisBlock.current = possibleTrials.reduce(
+            (a, b) => a + b,
+            0
+          );
+        },
         reading: () => {
           totalTrialsThisBlock.current = paramReader.read(
             "readingPages",
@@ -1501,15 +1532,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
 
       switchKind(targetKind.current, {
-        toneInMelody: async () => {
-          await initSoundFiles(["maskerSounds"], "targetSound");
-          var trialSoundBuffer = await getTrialData(
-            "maskerSounds",
-            true,
-            10,
-            0
-          );
-          playAudioBuffer(trialSoundBuffer);
+        toneInMelody: () => {
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
               " Instruction Placeholder"
@@ -1843,15 +1866,35 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const parametersToExcludeFromData = [];
 
       switchKind(targetKind.current, {
+        toneInMelody: () => {
+          for (let c of snapshot.handler.getConditions()) {
+            console.log("c:", c);
+            console.log(trials._currentStaircase._name);
+            if (c.block_condition === trials._currentStaircase._name) {
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
+              console.log("stat:", status.block_condition);
+              addConditionToData(
+                paramReader,
+                status.block_condition,
+                psychoJS.experiment,
+                parametersToExcludeFromData
+              );
+            }
+          }
+        },
         reading: () => {
           status.condition = snapshot.getCurrentTrial();
           status.block_condition = trials.thisTrial.block_condition;
         },
         letter: () => {
           for (let c of snapshot.handler.getConditions()) {
+            console.log("c:", c);
+            console.log(trials._currentStaircase._name);
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
+              console.log("stat:", status.block_condition);
               addConditionToData(
                 paramReader,
                 status.block_condition,
@@ -1921,6 +1964,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* --------------------------------- /PUBLIC -------------------------------- */
 
       switchKind(targetKind.current, {
+        toneInMelody: () => {
+          //change to proper instruction setup from the google sheet
+          var w = window.innerWidth / 3;
+          _instructionBeforeStimulusSetup(
+            "Press Enter to listen to a melody",
+            w,
+            [-window.innerWidth / 2 + w * 1.1, 0]
+          );
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+          ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
+          //correctAns.current = targetIsPresentBoolValues[snapshot.getCurrentTrial()]
+          //get trial data
+          // get quest values
+          // decide if target is present or not
+          trialComponents = [];
+          trialComponents.push(key_resp);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
+        },
+
         reading: () => {
           loggerText("READING TASK INSTRUCTIONS BEGIN");
           t = 0;
@@ -2366,6 +2430,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
       switchKind(targetKind.current, {
+        toneInMelody: () => {
+          if (
+            psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+          ) {
+            loggerText("trialInstructionRoutineEachFrame enter HIT");
+            continueRoutine = false;
+          }
+        },
         reading: () => {
           continueRoutine = false;
         },
@@ -2443,6 +2515,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       switchKind(targetKind.current, {
+        toneInMelody: () => {
+          return Scheduler.Event.NEXT;
+        },
         reading: () => {
           // READING
           return Scheduler.Event.NEXT;
@@ -2491,6 +2566,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       hideCursor();
 
       switchKind(targetKind.current, {
+        toneInMelody: async () => {
+          //target is present half the time
+          targetIsPresentBool.current = Math.random() < 0.5;
+          correctAns.current = targetIsPresentBool.current ? "y" : "n";
+          var trialSoundBuffer = await getTrialData(
+            paramReader.read("maskerSoundFolder", status.block_condition),
+            targetIsPresentBool.current,
+            ProposedVolumeLevelFromQuest.current,
+            0 //volumeDbSPL.current
+          );
+          console.log("questVolume:", ProposedVolumeLevelFromQuest);
+          console.log(
+            "condition:::",
+            paramReader.read("maskerSoundFolder", status.block_condition)
+          );
+          console.log(status.block_condition);
+          playAudioBuffer(trialSoundBuffer);
+        },
         reading: () => {
           readingSound.play();
         },
@@ -2601,6 +2694,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letterTiming.trialFirstFrameSec = t;
 
         switchKind(targetKind.current, {
+          toneInMelody: () => {
+            //only accepts y or n
+            validAns = ["y", "n"];
+          },
           reading: () => {
             // READING Only accepts SPACE
             if (!validAns.length || validAns[0] !== "space")
@@ -2654,6 +2751,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
       // response type more independent
       if (
+        targetKind.current === "toneInMelody" ||
         targetKind.current === "reading" ||
         canType(responseType.current) ||
         (simulated &&
@@ -2709,6 +2807,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (key_resp.keys == correctAns.current) {
               // Play correct audio
               switchKind(targetKind.current, {
+                toneInMelody: () => {
+                  correctSynth.play();
+                  status.trialCorrect_thisBlock++;
+                  status.trialCompleted_thisBlock++;
+                },
                 letter: () => {
                   correctSynth.play();
                   status.trialCorrect_thisBlock++;
@@ -2802,7 +2905,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         t >= 0.0 &&
         fixation.status === PsychoJS.Status.NOT_STARTED &&
-        fixationConfig.show
+        fixationConfig.show &&
+        targetKind.current !== "toneInMelody"
       ) {
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
@@ -3030,6 +3134,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
       switchKind(targetKind.current, {
+        toneInMelody: () => {
+          //report values to quest
+          if (
+            currentLoop instanceof MultiStairHandler &&
+            currentLoop.nRemaining !== 0
+          ) {
+            currentLoop.addResponse(
+              key_resp.corr,
+              ProposedVolumeLevelFromQuest.current / 20
+            );
+          }
+          //psychoJS.experiment.addData("targetWasPresent", targetIsPresentBool.current);
+          //name of masker
+          //psychoJS.experiment.addData();
+        },
         reading: () => {
           addReadingStatsToOutput(trials.thisRepN, psychoJS);
         },

@@ -1094,6 +1094,15 @@ export const GLOSSARY: Glossary = {
     default: "disabled",
     categories: ["px", "cm", "deg", "mm", "none", "disabled"],
   },
+  showGazeNudgerBool: {
+    name: "showGazeNudgerBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      'After recording the participant\'s trial response, if showGazeNudgerBool is TRUE and abs(gazeMeasuredXDeg) > thresholdAllowedGazeXErrorDeg then EasyEyes displays a red arrow going from the recorded gaze position (gazeMeasuredXDeg, gazeMeasuredYDeg) to the crosshair and a popup window with the sentence, "Uh oh, it appears that your eye was too far from the crosshair." and an Ok button.',
+    type: "boolean",
+    default: "FALSE",
+  },
   showInstructionsWhere: {
     name: "showInstructionsWhere",
     availability: "now",
@@ -1534,6 +1543,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "8",
   },
+  thresholdAllowedGazeRErrorDeg: {
+    name: "thresholdAllowedGazeRErrorDeg",
+    availability: "now",
+    example: "4",
+    explanation:
+      "thresholdAllowedGazeRErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg.",
+    type: "numerical",
+    default: "8",
+  },
   thresholdAllowedGazeXErrorDeg: {
     name: "thresholdAllowedGazeXErrorDeg",
     availability: "now",
@@ -1649,7 +1667,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "45",
     explanation:
-      "viewingDistanceDesiredCm. At the beginning of the block, we encourage the participant to adjust their viewing distance (moving head or display) to approximate the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. All conditions within a block must have the same desired viewing distance.\n     The viewing-distance nudger (Closer! Farther!) is working fine at getting the participant to the right distance, but we need to cancel any trials in which the stimulus was obscured by nudging. We have a three-period solution, that is being introduced in two stages. First we describe the ideal scheme that is our goal. Period A. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging and the rest of our software ignores it. Period B. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus we also allow nudging, but any nudge cancels the trial. Period C. From the end of the stimulus until the observer responds we suspend nudging (so the nudge won't interfere with remembering the target). Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. I'm not sure that the current version of MultistairHandler will cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during period A, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during period B we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. ",
+      "viewingDistanceDesiredCm. At the beginning of the block, we encourage the participant to adjust their viewing distance (moving head or display) to approximate the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.\n     The viewing-distance nudger (Closer! Farther!) is working fine at getting the participant to the right distance, but we need to cancel any trials in which the stimulus was obscured by nudging. We have a three-period solution, that is being introduced in two stages. First we describe the ideal scheme that is our goal. Period A. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging and the rest of our software ignores it. Period B. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus we also allow nudging, but any nudge cancels the trial. Period C. From the end of the stimulus until the observer responds we suspend nudging (so the nudge won't interfere with remembering the target). Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. I'm not sure that the current version of MultistairHandler will cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during period A, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during period B we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. ",
     type: "numerical",
     default: "40",
   },
@@ -1658,7 +1676,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set TRUE to enable the nudger. The nudger compares measured viewing distance to viewingDistanceDesiredCm, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range.\nPROTECTING THE STIMULUS FROM NUDGING. The nudger will never occlude (or forward or backward mask) the stimulus. Think of the trial as beginning at the participant's click (or keypress) requesting the stimulus and ending at the click (or keypress) response. This leaves a dead time from the response until the click requesting the next trial. EasyEyes nudges only in the dead time. Furthermore, to prevent forward masking, the nudge must end at least 700 ms before the click requesting a trial even though the participant's timing may be unpredictable.  EasyEyes achieves that by ignoring attempts to click (or respond) during nudging and until 700 ms after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n",
+      "Setting viewingDistanceNudgingBool TRUE to enable the nudger. The nudger compares measured viewing distance to viewingDistanceDesiredCm, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range.\nPROTECTING THE STIMULUS FROM NUDGING. The nudger will never occlude (or forward or backward mask) the stimulus. Think of the trial as beginning at the participant's click (or keypress) requesting the stimulus and ending at the click (or keypress) response. This leaves a dead time from the response until the click requesting the next trial. EasyEyes nudges only in the dead time. Furthermore, to prevent forward masking, the nudge must end at least targetSafetyMarginSec before the click requesting a trial even though the participant's timing may be unpredictable.  EasyEyes achieves that by ignoring attempts to click (or key press) during nudging and until targetSafetyMarginSec after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n",
     type: "boolean",
     default: "FALSE",
   },
