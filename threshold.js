@@ -497,8 +497,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "frameRateReportedByPsychoJS",
       expInfo["frameRate"]
     );
-    if (rc.stressFps)
+    if (rc.stressFps) {
       psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
+      psychoJS.experiment.addData("computeRandomPerSec", rc.randomPerSec.value);
+    }
 
     // if (typeof expInfo["frameRate"] !== "undefined")
     //   frameDur = 1.0 / Math.round(expInfo["frameRate"]);

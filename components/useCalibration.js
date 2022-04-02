@@ -2,6 +2,7 @@ import { debug, ifTrue, loggerText } from "./utils";
 
 export const useCalibration = (reader) => {
   return ifTrue([
+    ...reader.read("calibrateTestPerformanceBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__"),
@@ -21,16 +22,17 @@ export const ifAnyCheck = (reader) => {
 };
 
 export const formCalibrationList = (reader) => {
-  const tasks = [
-    {
+  const tasks = [];
+
+  if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__")))
+    tasks.push({
       name: "performance",
       callback: (data) => {
         loggerText(
           `[rc] idealFps: ${data.value.idealFps}, stressFps: ${data.value.stressFps}`
         );
       },
-    },
-  ];
+    });
 
   if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__")))
     ////
