@@ -15,6 +15,7 @@ import * as core from "./psychojs/src/core/index.js";
 import * as data from "./psychojs/src/data/index.js";
 import * as util from "./psychojs/src/util/index.js";
 import * as visual from "./psychojs/src/visual/index.js";
+import psychoJSPackage from "./psychojs/package.json";
 
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
@@ -487,19 +488,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   async function updateInfo() {
     expInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     expInfo["expName"] = expName;
-    expInfo["psychopyVersion"] = "2021.3.1-threshold-prod";
-    expInfo["OS"] = rc.systemFamily.value;
+    expInfo["psychopyVersion"] = `${psychoJSPackage.version}-threshold-prod`;
+
+    expInfo["deviceType"] = rc.deviceType.value;
+    expInfo["deviceSystem"] = rc.system.value;
+    expInfo["deviceSystemFamily"] = rc.systemFamily.value;
+    expInfo["deviceBrowser"] = rc.browser.value;
+    expInfo["deviceBrowserVersion"] = rc.browserVersion.value;
+    expInfo["deviceLanguage"] = rc.userLanguage.value;
+
     expInfo["psychojsWindowDimensions"] = String(psychoJS._window._size);
 
     // store frame rate of monitor if we can measure it successfully
-    expInfo["frameRate"] = psychoJS.window.getActualFrameRate();
+    expInfo["monitorFrameRate"] = psychoJS.window.getActualFrameRate();
     psychoJS.experiment.addData(
       "frameRateReportedByPsychoJS",
-      expInfo["frameRate"]
+      expInfo["monitorFrameRate"]
     );
     if (rc.stressFps) {
       psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
-      psychoJS.experiment.addData("computeRandomPerSec", rc.randomPerSec.value);
+      psychoJS.experiment.addData(
+        "computeRandomMHz",
+        rc.computeRandomMHz.value
+      );
     }
 
     // if (typeof expInfo["frameRate"] !== "undefined")
