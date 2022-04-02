@@ -497,6 +497,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "frameRateReportedByPsychoJS",
       expInfo["frameRate"]
     );
+    if (rc.stressFps)
+      psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
+
     // if (typeof expInfo["frameRate"] !== "undefined")
     //   frameDur = 1.0 / Math.round(expInfo["frameRate"]);
     // else frameDur = 1.0 / 60.0; // couldn't get a reliable measure so guess

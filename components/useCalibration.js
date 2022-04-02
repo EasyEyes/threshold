@@ -1,4 +1,4 @@
-import { debug, ifTrue } from "./utils";
+import { debug, ifTrue, loggerText } from "./utils";
 
 export const useCalibration = (reader) => {
   return ifTrue([
@@ -21,7 +21,16 @@ export const ifAnyCheck = (reader) => {
 };
 
 export const formCalibrationList = (reader) => {
-  const tasks = [];
+  const tasks = [
+    {
+      name: "performance",
+      callback: (data) => {
+        loggerText(
+          `[rc] idealFps: ${data.value.idealFps}, stressFps: ${data.value.stressFps}`
+        );
+      },
+    },
+  ];
 
   if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__")))
     ////
