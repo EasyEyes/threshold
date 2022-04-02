@@ -1152,7 +1152,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function trialsLoopEnd() {
-    if (targetKind.current === "letter") {
+    if (
+      targetKind.current === "letter" ||
+      targetKind.current == "toneInMelody"
+    ) {
       // Proportion correct
       showPopup(
         expName,
@@ -3161,6 +3164,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ProposedVolumeLevelFromQuest.current / 20
             );
           }
+          addTrialStaircaseSummariesToData(currentLoop, psychoJS);
           //psychoJS.experiment.addData("targetWasPresent", targetIsPresentBool.current);
           //name of masker
           //psychoJS.experiment.addData();

@@ -298,6 +298,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  calibrateTestPerformanceBool: {
+    name: "calibrateTestPerformanceBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Test the performance of the machine using Remote Calibrator .performance() function.",
+    type: "boolean",
+    default: "FALSE",
+  },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
     availability: "now",
