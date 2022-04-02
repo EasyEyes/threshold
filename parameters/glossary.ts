@@ -298,6 +298,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+<<<<<<< HEAD
   calibrateSoundLevelBool: {
     name: "calibrateSoundLevelBool",
     availability: "now",
@@ -307,6 +308,8 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+=======
+>>>>>>> e19a83f (WIP:audio log questMean)
   calibrateTestPerformanceBool: {
     name: "calibrateTestPerformanceBool",
     availability: "now",

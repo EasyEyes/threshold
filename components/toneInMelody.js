@@ -33,17 +33,19 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
   });
 
   //load target
-  targetSound = await fetch(`folders/${targetFolderName}.zip`)
+  await fetch(`folders/${targetFolderName}.zip`)
     .then((response) => {
       return response.blob();
     })
     .then(async (data) => {
       return Zip.loadAsync(data).then((zip) => {
-        var TargetSound = 2;
+        var TargetSound;
         zip.forEach((relativePath, zipEntry) => {
-          TargetSound = zipEntry.async("arraybuffer").then((data) => {
-            return getAudioBufferFromArrayBuffer(data);
-          });
+          targetSound.push(
+            zipEntry.async("arraybuffer").then((data) => {
+              return getAudioBufferFromArrayBuffer(data);
+            })
+          );
         });
         return TargetSound;
       });
@@ -110,7 +112,8 @@ export const getTrialData = async (
     //pick and modify target
     //console.log(await targetSound);
     //trialTarget = await getAudioBufferFromArrayBuffer(await targetSound);
-    trialTarget = await targetSound;
+    randomIndex = Math.floor(Math.random() * targetSound.length);
+    trialTarget = await targetSound[randomIndex];
     var trialTargetData = new Float32Array(trialTarget.length);
     trialTarget.copyFromChannel(trialTargetData, 0, 0);
     trialTargetData = setWaveFormToZeroDbSPL(trialTargetData);
