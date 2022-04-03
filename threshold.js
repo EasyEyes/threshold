@@ -1100,7 +1100,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             trialsConditions,
             paramReader
           );
-
+          console.log("trialsConditions", trialsConditions);
           trials = new data.MultiStairHandler({
             stairType: MultiStairHandler.StaircaseType.QUEST,
             psychoJS: psychoJS,
@@ -1120,9 +1120,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         toneInMelody: () => {
           trialsConditions = populateQuestDefaults(
             trialsConditions,
-            paramReader
+            paramReader,
+            "toneInMelody"
           );
-
+          console.log("trialsConditions", trialsConditions);
           trials = new data.MultiStairHandler({
             stairType: MultiStairHandler.StaircaseType.QUEST,
             psychoJS: psychoJS,
