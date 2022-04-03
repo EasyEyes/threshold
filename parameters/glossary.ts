@@ -1221,6 +1221,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
   },
+  soundGainDBSPL: {
+    name: "soundGainDBSPL",
+    availability: "now",
+    example: "13",
+    explanation:
+      "The \"gain\" (in dB) of the the participant's sound system. For a sound vector with level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a vector is 10*log(P) dB, where P is the power, P=mean(S^2), where S is the sound vector. Currently the scientist sets soundGainDBSPL. Our plan is for EasyEyes to measure it on the participant's computer.",
+    type: "numerical",
+    default: "0",
+  },
   spacingDeg: {
     name: "spacingDeg",
     availability: "now",
@@ -1605,6 +1614,15 @@ export const GLOSSARY: Glossary = {
       "Used by QUEST. Set the asymptote of the Weibull psychometric function to 1-delta.",
     type: "numerical",
     default: "0.01",
+  },
+  thresholdGamma: {
+    name: "thresholdGamma",
+    availability: "now",
+    example: "0.5",
+    explanation:
+      "Used by QUEST. Sets the probability of correct/yes response when target is at zero strength. In an identification task, we typically set gamma to 1/n, where n is the number of equal-probability possible targets. When the target is a letter, n=length(fontCharacterSet). In two-alternative forced choice we typically set gamma to 0.5. The various targetTasks each have different default values of gamma. If you leave thresholdGamma empty then you'll get that default. If you set thresholdGamma then the value you provide will overrule the default.",
+    type: "numerical",
+    default: "",
   },
   thresholdGuess: {
     name: "thresholdGuess",
