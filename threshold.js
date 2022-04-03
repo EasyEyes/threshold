@@ -1122,7 +1122,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             trialsConditions,
             paramReader
           );
-          console.log("conditionsHere:", trialsConditions);
+
           trials = new data.MultiStairHandler({
             stairType: MultiStairHandler.StaircaseType.QUEST,
             psychoJS: psychoJS,
@@ -2604,20 +2604,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //target is present half the time
           targetIsPresentBool.current = Math.random() < 0.5;
           correctAns.current = targetIsPresentBool.current ? "y" : "n";
+          var SoundGainDBSPL = paramReader.read(
+            "soundGainDBSPL",
+            status.block_condition
+          );
           var trialSoundBuffer = await getTrialData(
             paramReader.read("maskerSoundFolder", status.block_condition),
             targetIsPresentBool.current,
-            ProposedVolumeLevelFromQuest.current,
+            ProposedVolumeLevelFromQuest.current - SoundGainDBSPL,
             maskervolumeDbSPL.current
           );
-          console.log("maskerVolume:", maskervolumeDbSPL.current);
-          console.log("questVolume:", ProposedVolumeLevelFromQuest);
-          console.log(
-            "maskerType:",
-            paramReader.read("maskerSoundFolder", status.block_condition)
-          );
-          console.log("condition:", status.block_condition);
-          console.log("targetIsPresent:", targetIsPresentBool.current);
           playAudioBuffer(trialSoundBuffer);
         },
         reading: () => {
