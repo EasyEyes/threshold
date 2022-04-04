@@ -2607,7 +2607,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader.read("maskerSoundFolder", status.block_condition),
             targetIsPresentBool.current,
             ProposedVolumeLevelFromQuest.current - SoundGainDBSPL,
-            maskervolumeDbSPL.current
+            maskervolumeDbSPL.current - SoundGainDBSPL
           );
           playAudioBuffer(trialSoundBuffer);
         },
