@@ -3,10 +3,10 @@ import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 import mergeBuffers from "merge-audio-buffers";
 
 var maskerList = {};
-
-var targetSound = undefined;
+var targetSound;
 var Zip = new JSZip();
 var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+var whiteNoise;
 
 export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
   maskerList = {};
@@ -33,7 +33,7 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
   });
 
   //load target
-  await fetch(`folders/${targetFolderName}.zip`)
+  var t = await fetch(`folders/${targetFolderName}.zip`)
     .then((response) => {
       return response.blob();
     })
@@ -47,11 +47,21 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
             })
           );
         });
-        return TargetSound;
+        return targetSound;
       });
     });
 
   //console.log("target:", targetSound);
+
+  //white noise
+  t = await t[0];
+  whiteNoise = audioCtx.createBuffer(1, t.length, audioCtx.sampleRate);
+  var whiteNoiseData = whiteNoise.getChannelData(0);
+  for (var i = 0; i < whiteNoiseData.length; i++) {
+    whiteNoiseData[i] = Math.random() * 2 - 1;
+  }
+  setWaveFormToZeroDbSPL(whiteNoiseData);
+  adjustSoundDbSPL(whiteNoiseData, 15);
 };
 
 const getAudioBufferFromArrayBuffer = (arrayBuffer) => {
@@ -64,7 +74,11 @@ const setWaveFormToZeroDbSPL = (arr) => {
   const rms = getRMSOfWaveForm(arr);
   //normalize to 0 db spl
   //by convention sound with a mean square of 1 is at 0 db
-  arr = arr.map((elem) => elem / rms);
+  for (var i = 0; i < arr.length; i++) {
+    arr[i] = arr[i] / rms;
+  }
+  //don't change to:
+  //arr.forEach((elem) => elem / rms);
   return arr;
 };
 
@@ -77,7 +91,11 @@ const getRMSOfWaveForm = (arr) => {
 
 const adjustSoundDbSPL = (arr, volumeDbSPL) => {
   const gain = 10 ** (volumeDbSPL / 20);
-  arr = arr.map((elem) => elem * gain);
+  for (var i = 0; i < arr.length; i++) {
+    arr[i] *= gain;
+  }
+  //don't change to:
+  //arr.forEach((elem) => elem * gain);
   return arr;
 };
 
@@ -96,16 +114,23 @@ export const getTrialData = async (
   //modify masker
   //console.log(trialMasker);
   //trialMasker = await getAudioBufferFromArrayBuffer(trialMasker);
-  var trialMaskerData = new Float32Array(trialMasker.length);
-  trialMasker.copyFromChannel(trialMaskerData, 0, 0);
+
+  //this implementation works as well
+  // var trialMaskerData = new Float32Array(trialMasker.length);
+  // trialMasker.copyFromChannel(trialMaskerData, 0, 0);
+  // trialMaskerData = setWaveFormToZeroDbSPL(trialMaskerData);
+  // trialMaskerData = adjustSoundDbSPL(trialMaskerData, maskerVolumDbSPL);
+  // trialMasker = audioCtx.createBuffer(
+  //   1,
+  //   trialMaskerData.length,
+  //   audioCtx.sampleRate
+  // );
+  // trialMasker.copyToChannel(trialMaskerData, 0, 0);
+
+  //better implementation
+  var trialMaskerData = trialMasker.getChannelData(0);
   trialMaskerData = setWaveFormToZeroDbSPL(trialMaskerData);
   trialMaskerData = adjustSoundDbSPL(trialMaskerData, maskerVolumDbSPL);
-  trialMasker = audioCtx.createBuffer(
-    1,
-    trialMaskerData.length,
-    audioCtx.sampleRate
-  );
-  trialMasker.copyToChannel(trialMaskerData, 0, 0);
 
   var trialTarget;
   if (targetIsPresentBool) {
@@ -114,24 +139,32 @@ export const getTrialData = async (
     //trialTarget = await getAudioBufferFromArrayBuffer(await targetSound);
     randomIndex = Math.floor(Math.random() * targetSound.length);
     trialTarget = await targetSound[randomIndex];
-    var trialTargetData = new Float32Array(trialTarget.length);
-    trialTarget.copyFromChannel(trialTargetData, 0, 0);
-    trialTargetData = setWaveFormToZeroDbSPL(trialTargetData);
-    trialTargetData = adjustSoundDbSPL(
-      trialTargetData,
-      targetVolumeDbSPLFromQuest
-    );
-    trialTarget = audioCtx.createBuffer(
-      1,
-      trialTargetData.length,
-      audioCtx.sampleRate
-    );
-    trialTarget.copyToChannel(trialTargetData, 0, 0);
+
+    //this implementation works as well
+    // var trialTargetData = new Float32Array(trialTarget.length);
+    // trialTarget.copyFromChannel(trialTargetData, 0, 0);
+    // trialTargetData = setWaveFormToZeroDbSPL(trialTargetData);
+    // trialTargetData = adjustSoundDbSPL(
+    //   trialTargetData,
+    //   targetVolumeDbSPLFromQuest
+    // );
+    // trialTarget = audioCtx.createBuffer(
+    //   1,
+    //   trialTargetData.length,
+    //   audioCtx.sampleRate
+    // );
+    // trialTarget.copyToChannel(trialTargetData, 0, 0);
+
+    //better implementation
+    var trialTargetData = trialTarget.getChannelData(0);
+    setWaveFormToZeroDbSPL(trialTargetData);
+    console.log(getRMSOfWaveForm(trialTargetData));
+    adjustSoundDbSPL(trialTargetData, targetVolumeDbSPLFromQuest);
   }
 
   return targetIsPresentBool
-    ? mergeBuffers([trialMasker, trialTarget], audioCtx)
-    : trialMasker;
+    ? mergeBuffers([trialMasker, trialTarget, whiteNoise], audioCtx)
+    : mergeBuffers([trialMasker, whiteNoise], audioCtx);
 };
 
 export const playAudioBuffer = (audioBuffer) => {

@@ -1501,8 +1501,8 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "20000",
   },
-  targetSoundNoiseVolumeDBSPL: {
-    name: "targetSoundNoiseVolumeDBSPL",
+  targetSoundNoiseDBSPL: {
+    name: "targetSoundNoiseDBSPL",
     availability: "now",
     example: "20",
     explanation: "The noise level in dB SPL.",
