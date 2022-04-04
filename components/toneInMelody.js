@@ -7,7 +7,7 @@ var targetSound;
 var Zip = new JSZip();
 var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 var whiteNoise;
-
+var whiteNoiseData;
 export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
   maskerList = {};
   targetSound = [];
@@ -56,12 +56,11 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
   //white noise
   t = await t[0];
   whiteNoise = audioCtx.createBuffer(1, t.length, audioCtx.sampleRate);
-  var whiteNoiseData = whiteNoise.getChannelData(0);
+  whiteNoiseData = whiteNoise.getChannelData(0);
   for (var i = 0; i < whiteNoiseData.length; i++) {
     whiteNoiseData[i] = Math.random() * 2 - 1;
   }
   setWaveFormToZeroDbSPL(whiteNoiseData);
-  adjustSoundDbSPL(whiteNoiseData, 15);
 };
 
 const getAudioBufferFromArrayBuffer = (arrayBuffer) => {
@@ -103,7 +102,8 @@ export const getTrialData = async (
   maskerFolderName,
   targetIsPresentBool,
   targetVolumeDbSPLFromQuest,
-  maskerVolumDbSPL
+  maskerVolumDbSPL,
+  soundGainDBSPL
 ) => {
   //pick random masker
   var randomIndex = Math.floor(
@@ -130,7 +130,10 @@ export const getTrialData = async (
   //better implementation
   var trialMaskerData = trialMasker.getChannelData(0);
   trialMaskerData = setWaveFormToZeroDbSPL(trialMaskerData);
-  trialMaskerData = adjustSoundDbSPL(trialMaskerData, maskerVolumDbSPL);
+  trialMaskerData = adjustSoundDbSPL(
+    trialMaskerData,
+    maskerVolumDbSPL - soundGainDBSPL
+  );
 
   var trialTarget;
   if (targetIsPresentBool) {
@@ -159,8 +162,13 @@ export const getTrialData = async (
     var trialTargetData = trialTarget.getChannelData(0);
     setWaveFormToZeroDbSPL(trialTargetData);
     console.log(getRMSOfWaveForm(trialTargetData));
-    adjustSoundDbSPL(trialTargetData, targetVolumeDbSPLFromQuest);
+    adjustSoundDbSPL(
+      trialTargetData,
+      targetVolumeDbSPLFromQuest - soundGainDBSPL
+    );
   }
+
+  adjustSoundDbSPL(whiteNoiseData, 15 - soundGainDBSPL);
 
   return targetIsPresentBool
     ? mergeBuffers([trialMasker, trialTarget, whiteNoise], audioCtx)
