@@ -18,7 +18,7 @@ export function getTrialInfoStr(
   if (showCounterBool) {
     if (currentTrialIndex && currentTrialLength) {
       switchKind(taskKind, {
-        toneInMelody: () => {
+        sound: () => {
           res = replacePlaceholders(
             phrases.T_counterTrialBlock[L],
             currentTrialIndex,

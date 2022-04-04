@@ -571,10 +571,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     });
 
     //initialize sound experiment files
-    //edit - use list of sound targetKinds instead of toneInMelody
-    if (
-      paramReader.read("targetKind", "__ALL_BLOCKS__").includes("toneInMelody")
-    ) {
+    //edit - use list of sound targetKinds instead of sound
+    if (paramReader.read("targetKind", "__ALL_BLOCKS__").includes("sound")) {
       var MaskerFolders = paramReader.read(
         "maskerSoundFolder",
         "__ALL_BLOCKS__"
@@ -958,7 +956,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
-      toneInMelody: () => {
+      sound: () => {
         if (psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) {
           continueRoutine = false;
           removeProceedButton();
@@ -1099,11 +1097,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixationConfig.size = 45;
           fixationConfig.show = true;
         },
-        toneInMelody: () => {
+        sound: () => {
           trialsConditions = populateQuestDefaults(
             trialsConditions,
             paramReader,
-            "toneInMelody"
+            "sound"
           );
           console.log("trialsConditions", trialsConditions);
           trials = new data.MultiStairHandler({
@@ -1153,10 +1151,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function trialsLoopEnd() {
-    if (
-      targetKind.current === "letter" ||
-      targetKind.current == "toneInMelody"
-    ) {
+    if (targetKind.current === "letter" || targetKind.current == "sound") {
       // Proportion correct
       showPopup(
         expName,
@@ -1394,7 +1389,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Get total trials for this block
       switchKind(targetKind.current, {
-        toneInMelody: () => {
+        sound: () => {
           const possibleTrials = paramReader.read(
             "conditionTrials",
             status.block
@@ -1537,7 +1532,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
 
       switchKind(targetKind.current, {
-        toneInMelody: () => {
+        sound: () => {
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
               " Instruction Placeholder"
@@ -1871,7 +1866,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const parametersToExcludeFromData = [];
 
       switchKind(targetKind.current, {
-        toneInMelody: () => {
+        sound: () => {
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
@@ -1963,7 +1958,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* --------------------------------- /PUBLIC -------------------------------- */
 
       switchKind(targetKind.current, {
-        toneInMelody: () => {
+        sound: () => {
           //change to proper instruction setup from the google sheet
           var w = window.innerWidth / 3;
           _instructionBeforeStimulusSetup(
@@ -1975,7 +1970,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
           ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
           maskervolumeDbSPL.current = paramReader.read(
-            "maskerVolumeDBSPL",
+            "maskerDBSPL",
             status.block_condition
           );
 
@@ -2434,7 +2429,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
       switchKind(targetKind.current, {
-        toneInMelody: () => {
+        sound: () => {
           if (
             psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
           ) {
@@ -2519,7 +2514,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       switchKind(targetKind.current, {
-        toneInMelody: () => {
+        sound: () => {
           return Scheduler.Event.NEXT;
         },
         reading: () => {
@@ -2570,7 +2565,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       hideCursor();
 
       switchKind(targetKind.current, {
-        toneInMelody: async () => {
+        sound: async () => {
           //target is present half the time
           targetIsPresentBool.current = Math.random() < 0.5;
           correctAns.current = targetIsPresentBool.current ? "y" : "n";
@@ -2631,7 +2626,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       //use google sheets phrases for instructions
       switchKind(targetKind.current, {
-        toneInMelody: () => {
+        sound: () => {
           _instructionSetup("Was target Present? y/n");
           instructions.setText("Was target Present? y/n");
         },
@@ -2704,7 +2699,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letterTiming.trialFirstFrameSec = t;
 
         switchKind(targetKind.current, {
-          toneInMelody: () => {
+          sound: () => {
             //only accepts y or n
             validAns = ["y", "n"];
           },
@@ -2761,7 +2756,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
       // response type more independent
       if (
-        targetKind.current === "toneInMelody" ||
+        targetKind.current === "sound" ||
         targetKind.current === "reading" ||
         canType(responseType.current) ||
         (simulated &&
@@ -2817,7 +2812,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (key_resp.keys == correctAns.current) {
               // Play correct audio
               switchKind(targetKind.current, {
-                toneInMelody: () => {
+                sound: () => {
                   correctSynth.play();
                   status.trialCorrect_thisBlock++;
                   status.trialCompleted_thisBlock++;
@@ -2916,7 +2911,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         t >= 0.0 &&
         fixation.status === PsychoJS.Status.NOT_STARTED &&
         fixationConfig.show &&
-        targetKind.current !== "toneInMelody"
+        targetKind.current !== "sound"
       ) {
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
@@ -3062,7 +3057,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       switchKind(targetKind.current, {
-        toneInMelody: () => {
+        sound: () => {
           instructions.setAutoDraw(true);
         },
       });
@@ -3150,7 +3145,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // store data for psychoJS.experiment (ExperimentHandler)
       // update the trial handler
       switchKind(targetKind.current, {
-        toneInMelody: () => {
+        sound: () => {
           //report values to quest
           if (
             currentLoop instanceof MultiStairHandler &&
