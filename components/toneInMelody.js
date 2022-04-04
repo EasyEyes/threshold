@@ -33,7 +33,7 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
   });
 
   //load target
-  var t = await fetch(`folders/${targetFolderName}.zip`)
+  await fetch(`folders/${targetFolderName}.zip`)
     .then((response) => {
       return response.blob();
     })
@@ -52,15 +52,6 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
     });
 
   //console.log("target:", targetSound);
-
-  //white noise
-  t = await t[0];
-  whiteNoise = audioCtx.createBuffer(1, t.length, audioCtx.sampleRate);
-  whiteNoiseData = whiteNoise.getChannelData(0);
-  for (var i = 0; i < whiteNoiseData.length; i++) {
-    whiteNoiseData[i] = Math.random() * 2 - 1;
-  }
-  setWaveFormToZeroDbSPL(whiteNoiseData);
 };
 
 const getAudioBufferFromArrayBuffer = (arrayBuffer) => {
@@ -164,13 +155,22 @@ export const getTrialData = async (
     //better implementation
     var trialTargetData = trialTarget.getChannelData(0);
     setWaveFormToZeroDbSPL(trialTargetData);
-    console.log(getRMSOfWaveForm(trialTargetData));
     adjustSoundDbSPL(
       trialTargetData,
       targetVolumeDbSPLFromQuest - soundGainDBSPL
     );
   }
 
+  whiteNoise = audioCtx.createBuffer(
+    1,
+    trialMaskerData.length,
+    audioCtx.sampleRate
+  );
+  whiteNoiseData = whiteNoise.getChannelData(0);
+  for (var i = 0; i < whiteNoiseData.length; i++) {
+    whiteNoiseData[i] = Math.random() * 2 - 1;
+  }
+  setWaveFormToZeroDbSPL(whiteNoiseData);
   adjustSoundDbSPL(whiteNoiseData, 15 - soundGainDBSPL);
 
   return targetIsPresentBool

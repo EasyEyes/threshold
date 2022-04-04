@@ -976,7 +976,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       },
       sound: () => {
-        if (psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) {
+        if (psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0) {
           continueRoutine = false;
           removeProceedButton();
         }
@@ -1567,7 +1567,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         sound: () => {
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
-              " Instruction Placeholder"
+              instructionsText.soundBegin(L)
           );
         },
         letter: () => {
@@ -2663,8 +2663,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //use google sheets phrases for instructions
       switchKind(targetKind.current, {
         sound: () => {
-          _instructionSetup("Was target Present? y/n");
-          instructions.setText("Was target Present? y/n");
+          _instructionSetup(
+            instructionsText.trial.respond["sound"](rc.language.value)
+          );
+          instructions.setText(
+            instructionsText.trial.respond["sound"](rc.language.value)
+          );
         },
       });
       instructions.setAutoDraw(false);

@@ -34,6 +34,9 @@ export const instructionsText = {
   initial: (L) => {
     return phrases.T_thresholdSoundCheck[L] + `\n\n`;
   },
+  soundBegin: (L) => {
+    return phrases.T_thresholdSoundBeginBlock[L] + "\n\n";
+  },
   popularFeatures: (L, takeABreakTrialCreditsThisBlock = 0) => {
     return takeABreakTrialCreditsThisBlock === 0
       ? ""
@@ -81,6 +84,9 @@ export const instructionsText = {
       },
     },
     respond: {
+      sound: (L) => {
+        return phrases.T_thresholdSoundResponse[L];
+      },
       spacing: (L, responseType = 2) => {
         switch (responseType) {
           case 0:
