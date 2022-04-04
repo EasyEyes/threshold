@@ -73,9 +73,12 @@ const setWaveFormToZeroDbSPL = (arr) => {
   const rms = getRMSOfWaveForm(arr);
   //normalize to 0 db spl
   //by convention sound with a mean square of 1 is at 0 db
-  for (var i = 0; i < arr.length; i++) {
-    arr[i] = arr[i] / rms;
+  if (rms != 0) {
+    for (var i = 0; i < arr.length; i++) {
+      arr[i] = arr[i] / rms;
+    }
   }
+
   //don't change to:
   //arr.forEach((elem) => elem / rms);
   return arr;
