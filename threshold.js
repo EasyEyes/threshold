@@ -88,6 +88,7 @@ import {
   targetIsPresentBool,
   ProposedVolumeLevelFromQuest,
   maskervolumeDbSPL,
+  soundGainDBSPL,
 } from "./components/global.js";
 
 import {
@@ -173,6 +174,7 @@ import {
   updateConditionNameConfig,
   updateTargetSpecsForLetter,
   updateTargetSpecsForReading,
+  updateTargetSpecsForSound,
 } from "./components/showTrialInformation.js";
 import { getTrialInfoStr } from "./components/trialCounter.js";
 ////
@@ -2004,10 +2006,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition
           );
 
-          //correctAns.current = targetIsPresentBoolValues[snapshot.getCurrentTrial()]
-          //get trial data
-          // get quest values
-          // decide if target is present or not
+          soundGainDBSPL.current = paramReader.read(
+            "soundGainDBSPL",
+            status.block_condition
+          );
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecsForSound(
+              ProposedVolumeLevelFromQuest.current,
+              maskervolumeDbSPL.current,
+              soundGainDBSPL.current
+            );
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
@@ -2599,16 +2607,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //target is present half the time
           targetIsPresentBool.current = Math.random() < 0.5;
           correctAns.current = targetIsPresentBool.current ? "y" : "n";
-          var SoundGainDBSPL = paramReader.read(
-            "soundGainDBSPL",
-            status.block_condition
-          );
+
           var trialSoundBuffer = await getTrialData(
             paramReader.read("maskerSoundFolder", status.block_condition),
             targetIsPresentBool.current,
             ProposedVolumeLevelFromQuest.current,
             maskervolumeDbSPL.current,
-            SoundGainDBSPL
+            soundGainDBSPL.current
           );
           playAudioBuffer(trialSoundBuffer);
         },
