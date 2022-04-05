@@ -490,6 +490,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     expInfo["expName"] = expName;
     expInfo["psychopyVersion"] = `${psychoJSPackage.version}-threshold-prod`;
 
+    expInfo["hardwareConcurrency"] = rc.concurrency.value;
+
     expInfo["deviceType"] = rc.deviceType.value;
     expInfo["deviceSystem"] = rc.system.value;
     expInfo["deviceSystemFamily"] = rc.systemFamily.value;

@@ -298,6 +298,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  calibrateSoundLevelBool: {
+    name: "calibrateSoundLevelBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Requests sound calibration, using the participant's iPhone. Early exit if no iPhone is available.",
+    type: "boolean",
+    default: "FALSE",
+  },
   calibrateTestPerformanceBool: {
     name: "calibrateTestPerformanceBool",
     availability: "now",
@@ -410,15 +419,6 @@ export const GLOSSARY: Glossary = {
       "To test the far periphery it may be worth the trouble of setting up an off-screen fixation mark, with help from the participant.",
     type: "boolean",
     default: "FALSE",
-  },
-  fixationToleranceDeg: {
-    name: "fixationToleranceDeg",
-    availability: "now",
-    example: "4",
-    explanation:
-      "OBSOLETE. USE thresholdAllowedFixationErroDeg INSTEAD. We save all trials in trialData, but when the fixation error exceeds tolerance, we don't feed it to QUEST, and we run it again by adding a trial of this condition to the list of conditions yet to be run in this block, and reshuffle that list. Excel treats 'inf' as a string, not the number infinity, so use a large number instead of 'inf'. Note that the typical error of gaze tracking using the built-in web cam is roughly 4 deg at 50 cm, so, in that case, we suggest setting tolerance no lower than 4 deg. Since accuracy is determined by webcam resolution, halving or doubling the viewing distance should proportionally change the error in estimated gaze angle.",
-    type: "numerical",
-    default: "1000",
   },
   flipScreenHorizontallyBool: {
     name: "flipScreenHorizontallyBool",
@@ -662,11 +662,11 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
   },
-  maskerVolumeDBSPL: {
-    name: "maskerVolumeDBSPL",
+  maskerDBSPL: {
+    name: "maskerDBSPL",
     availability: "now",
     example: "",
-    explanation: "Sound volume of the masker, in dB SPL.",
+    explanation: "Sound level of the masker, in dB SPL.",
     type: "numerical",
     default: "50",
   },
@@ -1221,6 +1221,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
   },
+  soundGainDBSPL: {
+    name: "soundGainDBSPL",
+    availability: "now",
+    example: "13",
+    explanation:
+      "The \"gain\" (in dB) of the the participant's sound system. For a sound vector with level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a vector is 10*log(P) dB, where P is the power, P=mean(S^2), where S is the sound vector. Currently the scientist sets soundGainDBSPL. Our plan is for EasyEyes to measure it on the participant's computer.",
+    type: "numerical",
+    default: "0",
+  },
   spacingDeg: {
     name: "spacingDeg",
     availability: "now",
@@ -1354,18 +1363,16 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "letter",
     explanation:
-      "• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The sound is played for its full duration at targetSoundVolumeDBSPL with a masker randomly selected from the maskerSoundFolder and with targetSoundNoise.\n• reading Measure reading speed and retention. Should be reclassified as a targetTask.\n",
+      "• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The target sound is played for its full duration at level targetSoundDBSPL with a masker sound randomly selected from the maskerSoundFolder played at level maskerDBSPL. Also we play targetSoundNoise at level targetSoundNoiseDBSPL.\n• 16ChannelSound A 16-channel sound file is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. We randomly select 9 of the 16 bands. They are played for its full duration at targetSoundDBSPL. Also, a 16-channel masker sound file is randomly selected from the maskerSoundFolder, and we select the unused 7 of the 16 bands not already playing the target, and play them at level maskerDBSPL. Also we play targetSoundNoise at level targetSoundNoiseDBSPL.\n• reading Measure reading speed and retention. Should be reclassified as a targetTask.\n",
     type: "categorical",
     default: "letter",
     categories: [
       "letter",
       "gabor",
       "image",
+      "sound",
+      "16ChannelSound",
       "reading",
-      "vocoderSpeechInSpeech",
-      "vocoderSpeechInSpeechlikeNoise",
-      "vocoderSpeechInNoise",
-      "toneInMelody",
     ],
   },
   targetMinimumPix: {
@@ -1491,11 +1498,11 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "20000",
   },
-  targetSoundNoiseVolumeDBSPL: {
-    name: "targetSoundNoiseVolumeDBSPL",
+  targetSoundNoiseDBSPL: {
+    name: "targetSoundNoiseDBSPL",
     availability: "now",
     example: "20",
-    explanation: "The noise volume in dB SPL.",
+    explanation: "The noise level in dB SPL.",
     type: "numerical",
     default: "0",
   },
@@ -1511,16 +1518,15 @@ export const GLOSSARY: Glossary = {
     name: "targetSoundNoiseOnsetReTargetSec",
     availability: "now",
     example: "-0.5",
-    explanation:
-      'If targetKind is "sound", this specifies target volume in dB SPL.',
+    explanation: "Positive when noise starts after the target starts.",
     type: "numerical",
     default: "-0.3",
   },
-  targetSoundVolumeDBSPL: {
-    name: "targetSoundVolumeDBSPL",
+  targetSoundDBSPL: {
+    name: "targetSoundDBSPL",
     availability: "now",
     example: "20",
-    explanation: 'If targetKind is "sound", this specifies target volume.',
+    explanation: 'If targetKind is "sound", this specifies target sound level.',
     type: "numerical",
     default: "20",
   },
@@ -1606,6 +1612,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.01",
   },
+  thresholdGamma: {
+    name: "thresholdGamma",
+    availability: "now",
+    example: "0.5",
+    explanation:
+      "Used by QUEST. Sets the probability of correct/yes response when target is at zero strength. In an identification task, we typically set gamma to 1/n, where n is the number of equal-probability possible targets. When the target is a letter, n=length(fontCharacterSet). In two-alternative forced choice we typically set gamma to 0.5. The various targetTasks each have different default values of gamma. If you leave thresholdGamma empty then you'll get that default. If you set thresholdGamma then the value you provide will overrule the default.",
+    type: "numerical",
+    default: "",
+  },
   thresholdGuess: {
     name: "thresholdGuess",
     availability: "now",
@@ -1629,10 +1644,10 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "spacing",
     explanation:
-      'thresholdParameter designates that a parameter (e.g. size or spacing) will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacing" to vary center-to-center spacing of target and neighboring flankers. \n• "size" to vary target size. \n• "contrast" awaits HDR10 support.\n• "eccentricity"  to be added soon.\n• "soundVolume" awaits sound support.\n• "soundNoise" awaits sound support.',
+      'thresholdParameter designates that a parameter (e.g. size or spacing) will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacing" to vary center-to-center spacing of target and neighboring flankers. \n• "size" to vary target size. \n• "contrast" awaits HDR10 support.\n• "eccentricity"  to be added soon.\n• "soundLevel" awaits sound support.\n• "soundNoiseLevel" awaits sound support.',
     type: "categorical",
     default: "spacing",
-    categories: ["spacing", "size", "soundVolume", "soundNoise"],
+    categories: ["spacing", "size", "soundLevel"],
   },
   thresholdProcedure: {
     name: "thresholdProcedure",
