@@ -231,3 +231,11 @@ export const trialCounterConfig = {
   pos: [window.innerWidth / 2, -window.innerHeight / 2],
   autoDraw: false,
 };
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------------- Sound ------------------------------------ */
+/* -------------------------------------------------------------------------- */
+export const targetIsPresentBool = { current: undefined };
+export const ProposedVolumeLevelFromQuest = { current: undefined };
+export const maskervolumeDbSPL = { current: undefined };
+export const soundGainDBSPL = { current: undefined };

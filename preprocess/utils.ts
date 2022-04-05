@@ -9,6 +9,27 @@ import { GLOSSARY } from "../parameters/glossary";
  * @param {Papa.ParseResult<string[]>} parsed
  * @returns {consentForm: string, debriefForm: string}
  */
+
+export const getFolderNames = (parsed: any): any => {
+  let maskedfolderList: string[] = [];
+  let targetfolderList: string[] = [];
+  for (let i = 0; i < parsed.data.length; i++) {
+    if (parsed.data[i][0] == "maskerSoundFolder") {
+      maskedfolderList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "targetSoundFolder") {
+      targetfolderList = [...parsed.data[i]];
+    }
+  }
+  maskedfolderList.shift();
+  targetfolderList.shift();
+  let folderList: string[] = maskedfolderList.concat(targetfolderList);
+  folderList = folderList.filter(
+    (item, pos) => folderList.indexOf(item) === pos
+  );
+  folderList = folderList.map((x) => x + ".zip");
+  return folderList;
+};
+
 export const getFormNames = (parsed: any): any => {
   let consentFormRow: string[] = [];
   let debriefFormRow: string[] = [];

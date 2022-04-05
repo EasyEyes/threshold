@@ -18,6 +18,15 @@ export function getTrialInfoStr(
   if (showCounterBool) {
     if (currentTrialIndex && currentTrialLength) {
       switchKind(taskKind, {
+        sound: () => {
+          res = replacePlaceholders(
+            phrases.T_counterTrialBlock[L],
+            currentTrialIndex,
+            currentTrialLength,
+            currentBlockIndex,
+            blockCount
+          );
+        },
         reading: () => {
           res += replacePlaceholders(
             phrases.T_counterReadingPageBlock[L],

@@ -115,6 +115,15 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
   )}\nviewingDistanceCm: ${viewingDistanceCm.current}`;
 };
 
+export const updateTargetSpecsForSound = (
+  targetLevel,
+  maskerLevel,
+  soundGain
+) => {
+  showConditionNameConfig.targetSpecs = `targetLevel: ${
+    Math.round(10 * targetLevel) / 10
+  }\nmaskerLevel: ${maskerLevel}\nsoundGainDBSPL: ${soundGain}`;
+};
 export const isTimingOK = (measured, target) => {
   return measured < target ? "OK" : "BAD";
 };

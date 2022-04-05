@@ -1,4 +1,8 @@
-export const populateQuestDefaults = (conditionsList, reader) => {
+export const populateQuestDefaults = (
+  conditionsList,
+  reader,
+  targetKind = "letter"
+) => {
   for (let i = 0; i < conditionsList.length; i++) {
     const condition = conditionsList[i];
     const cName = condition["block_condition"];
@@ -8,7 +12,10 @@ export const populateQuestDefaults = (conditionsList, reader) => {
       startValSd: reader.read("thresholdGuessLogSd", cName),
       beta: reader.read("thresholdBeta", cName),
       delta: reader.read("thresholdDelta", cName),
-      gamma: getGamma(reader.read("fontCharacterSet", cName)),
+      gamma:
+        targetKind == "letter"
+          ? getGamma(reader.read("fontCharacterSet", cName))
+          : 0.5,
       pThreshold: reader.read("thresholdProportionCorrect", cName),
       nTrials: reader.read("conditionTrials", cName),
     };
