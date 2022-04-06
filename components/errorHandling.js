@@ -43,10 +43,14 @@ export const buildWindowErrorHandling = (paramReader) => {
         "data-error",
         JSON.stringify(error?.reason?.stack)
       );
-      psychoJS.experiment.addData(
-        "error",
-        JSON.stringify(error?.reason?.stack)
-      );
+      try {
+        psychoJS.experiment.addData(
+          "error",
+          JSON.stringify(error?.reason?.stack)
+        );
+      } catch (e) {
+        console.error("No psychoJS.experiment to add error data to.", e);
+      }
     }
 
     // quit

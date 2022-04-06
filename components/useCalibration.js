@@ -149,6 +149,7 @@ export const saveCheckData = (rc, psychoJS) => {
   }
 };
 
+export const calibrateAudio = (reader) => {};
 /* -------------------------------------------------------------------------- */
 
 const getCmValue = (numericalValue, unit) => {

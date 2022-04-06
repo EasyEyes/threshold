@@ -293,6 +293,8 @@ const paramReaderInitialized = async (reader) => {
     }
   }
 
+  calibrateAudio(reader);
+
   // prepareForReading(reader);
 
   // ! Load fonts
