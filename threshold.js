@@ -1994,7 +1994,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //change to proper instruction setup from the google sheet
           var w = window.innerWidth / 3;
           _instructionBeforeStimulusSetup(
-            "Press Enter to listen to a melody",
+            instructionsText.trial.fixate["sound"](rc.language.value),
             w,
             [-window.innerWidth / 2 + w * 1.1, 0]
           );

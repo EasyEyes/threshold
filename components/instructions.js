@@ -79,6 +79,9 @@ export const instructionsText = {
   },
   trial: {
     fixate: {
+      sound: (L) => {
+        return phrases.T_thresholdSoundNewTrial[L];
+      },
       spacing: (L, responseType = 2) => {
         return spaceOrCrosshair(L, responseType, "");
       },
