@@ -89,6 +89,9 @@ import {
   ProposedVolumeLevelFromQuest,
   maskervolumeDbSPL,
   soundGainDBSPL,
+  whiteNoiseLevel,
+  targetSoundFolder,
+  maskerSoundFolder,
 } from "./components/global.js";
 
 import {
@@ -592,16 +595,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     //initialize sound experiment files
     //edit - use list of sound targetKinds instead of sound
     if (paramReader.read("targetKind", "__ALL_BLOCKS__").includes("sound")) {
+      //read masker andtarget sound folders
       var MaskerFolders = paramReader.read(
         "maskerSoundFolder",
         "__ALL_BLOCKS__"
       );
-      //console.log(MaskerFolders);
-      var targetSoundFolder = paramReader.read(
+
+      var targetFolders = paramReader.read(
         "targetSoundFolder",
         "__ALL_BLOCKS__"
       );
-      await initSoundFiles(MaskerFolders, targetSoundFolder[0]);
+
+      //only unique folders
+      MaskerFolders = [...new Set(MaskerFolders)];
+      targetFolders = [...new Set(targetFolders)];
+
+      await initSoundFiles(MaskerFolders, targetFolders);
     }
 
     fixation = new visual.TextStim({
@@ -2010,11 +2019,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "soundGainDBSPL",
             status.block_condition
           );
+          whiteNoiseLevel.current = paramReader.read(
+            "targetSoundNoiseDBSPL",
+            status.block_condition
+          );
+          targetSoundFolder.current = paramReader.read(
+            "targetSoundFolder",
+            status.block_condition
+          );
+          maskerSoundFolder.current = paramReader.read(
+            "maskerSoundFolder",
+            status.block_condition
+          );
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForSound(
               ProposedVolumeLevelFromQuest.current,
               maskervolumeDbSPL.current,
-              soundGainDBSPL.current
+              soundGainDBSPL.current,
+              whiteNoiseLevel.current,
+              targetSoundFolder.current,
+              maskerSoundFolder.current
             );
           trialComponents = [];
           trialComponents.push(key_resp);
@@ -2609,10 +2633,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           correctAns.current = targetIsPresentBool.current ? "y" : "n";
 
           var trialSoundBuffer = await getTrialData(
-            paramReader.read("maskerSoundFolder", status.block_condition),
+            maskerSoundFolder.current,
+            targetSoundFolder.current,
             targetIsPresentBool.current,
             ProposedVolumeLevelFromQuest.current,
             maskervolumeDbSPL.current,
+            whiteNoiseLevel.current,
             soundGainDBSPL.current
           );
           playAudioBuffer(trialSoundBuffer);

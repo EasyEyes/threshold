@@ -3,23 +3,23 @@ import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 import mergeBuffers from "merge-audio-buffers";
 
 var maskerList = {};
-var targetSound;
-var Zip = new JSZip();
+var targetList = {};
 var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 var whiteNoise;
 var whiteNoiseData;
-export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
+export const initSoundFiles = async (maskerFolderNames, targetFolderNames) => {
   maskerList = {};
-  targetSound = [];
-
+  targetList = {};
   //load maskers
-  maskerFolderNames.map(async (name) => {
+  await maskerFolderNames.map(async (name) => {
     maskerList[name] = [];
+    //console.log(name);
     await fetch(`folders/${name}.zip`)
       .then((response) => {
         return response.blob();
       })
       .then((data) => {
+        var Zip = new JSZip();
         Zip.loadAsync(data).then((zip) => {
           zip.forEach((relativePath, zipEntry) => {
             maskerList[name].push(
@@ -31,25 +31,46 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderName) => {
         });
       });
   });
-
+  //console.log(await maskerList["IM_Melody_Masker_Sounds"])
   //load target
-  await fetch(`folders/${targetFolderName}.zip`)
-    .then((response) => {
-      return response.blob();
-    })
-    .then(async (data) => {
-      return Zip.loadAsync(data).then((zip) => {
-        var TargetSound;
-        zip.forEach((relativePath, zipEntry) => {
-          targetSound.push(
-            zipEntry.async("arraybuffer").then((data) => {
-              return getAudioBufferFromArrayBuffer(data);
-            })
-          );
+  targetFolderNames.map(async (name) => {
+    targetList[name] = [];
+    console.log(name);
+    await fetch(`folders/${name}.zip`)
+      .then((response) => {
+        return response.blob();
+      })
+      .then((data) => {
+        var Zip = new JSZip();
+        Zip.loadAsync(data).then((zip) => {
+          zip.forEach((relativePath, zipEntry) => {
+            targetList[name].push(
+              zipEntry.async("arraybuffer").then((data) => {
+                return getAudioBufferFromArrayBuffer(data);
+              })
+            );
+          });
         });
-        return targetSound;
       });
-    });
+  });
+
+  // await fetch(`folders/${targetFolderName}.zip`)
+  //   .then((response) => {
+  //     return response.blob();
+  //   })
+  //   .then(async (data) => {
+  //     return Zip.loadAsync(data).then((zip) => {
+  //       var TargetSound;
+  //       zip.forEach((relativePath, zipEntry) => {
+  //         targetSound.push(
+  //           zipEntry.async("arraybuffer").then((data) => {
+  //             return getAudioBufferFromArrayBuffer(data);
+  //           })
+  //         );
+  //       });
+  //       return targetSound;
+  //     });
+  //   });
 
   //console.log("target:", targetSound);
 };
@@ -94,9 +115,11 @@ const adjustSoundDbSPL = (arr, volumeDbSPL) => {
 
 export const getTrialData = async (
   maskerFolderName,
+  targetFolderName,
   targetIsPresentBool,
   targetVolumeDbSPLFromQuest,
   maskerVolumDbSPL,
+  whiteNoiseLevel,
   soundGainDBSPL
 ) => {
   //pick random masker
@@ -134,8 +157,10 @@ export const getTrialData = async (
     //pick and modify target
     //console.log(await targetSound);
     //trialTarget = await getAudioBufferFromArrayBuffer(await targetSound);
-    randomIndex = Math.floor(Math.random() * targetSound.length);
-    trialTarget = await targetSound[randomIndex];
+    randomIndex = Math.floor(
+      Math.random() * targetList[targetFolderName].length
+    );
+    trialTarget = await targetList[targetFolderName][randomIndex];
 
     //this implementation works as well
     // var trialTargetData = new Float32Array(trialTarget.length);
@@ -171,7 +196,7 @@ export const getTrialData = async (
     whiteNoiseData[i] = Math.random() * 2 - 1;
   }
   setWaveFormToZeroDbSPL(whiteNoiseData);
-  adjustSoundDbSPL(whiteNoiseData, 15 - soundGainDBSPL);
+  adjustSoundDbSPL(whiteNoiseData, whiteNoiseLevel - soundGainDBSPL);
 
   return targetIsPresentBool
     ? mergeBuffers([trialMasker, trialTarget, whiteNoise], audioCtx)

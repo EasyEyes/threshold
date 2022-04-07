@@ -118,11 +118,14 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
 export const updateTargetSpecsForSound = (
   targetLevel,
   maskerLevel,
-  soundGain
+  soundGain,
+  noiseLevel,
+  targetSoundFolder,
+  maskerSoundFolder
 ) => {
   showConditionNameConfig.targetSpecs = `targetLevel: ${
     Math.round(10 * targetLevel) / 10
-  }\nmaskerLevel: ${maskerLevel}\nsoundGainDBSPL: ${soundGain}`;
+  }\nmaskerLevel: ${maskerLevel}\nsoundGainDBSPL: ${soundGain}\nnoiseLevel: ${noiseLevel}\ntargetSoundFolder: ${targetSoundFolder}\nmaskerSoundFolder ${maskerSoundFolder}`;
 };
 export const isTimingOK = (measured, target) => {
   return measured < target ? "OK" : "BAD";
