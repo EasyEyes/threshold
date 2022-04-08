@@ -30,7 +30,9 @@ export async function quitPsychoJS(message, isCompleted, paramReader) {
   }
 
   // debrief
-  const timeBeforeDebriefDisplay = clock.global.getTime();
+  const timeBeforeDebriefDisplay = clock.global
+    ? clock.global.getTime()
+    : undefined;
   const debriefScreen = new Promise((resolve) => {
     if (paramReader.read("_debriefForm")[0]) {
       showForm(paramReader.read("_debriefForm")[0]);
@@ -49,7 +51,7 @@ export async function quitPsychoJS(message, isCompleted, paramReader) {
   });
   await debriefScreen;
 
-  if (psychoJS.experiment) {
+  if (psychoJS.experiment && clock.global) {
     psychoJS.experiment.addData(
       "debriefDurationSec",
       clock.global.getTime() - timeBeforeDebriefDisplay

@@ -127,6 +127,7 @@ import {
   saveCalibratorData,
   saveCheckData,
   useCalibration,
+  calibrateAudio,
 } from "./components/useCalibration.js";
 
 import {
@@ -293,8 +294,6 @@ const paramReaderInitialized = async (reader) => {
     }
   }
 
-  calibrateAudio(reader);
-
   // prepareForReading(reader);
 
   // ! Load fonts
@@ -343,17 +342,25 @@ const paramReaderInitialized = async (reader) => {
       {
         debug: debug,
       },
-      () => {
+      async () => {
         rc.removePanel();
 
         rc.pauseGaze();
         // rc.pauseDistance();
 
-        startExperiment();
+        if (!(await calibrateAudio(reader))) {
+          quitPsychoJS("", "", reader);
+        } else {
+          startExperiment();
+        }
       }
     );
   } else {
-    startExperiment();
+    if (!(await calibrateAudio(reader))) {
+      quitPsychoJS("", "", reader);
+    } else {
+      startExperiment();
+    }
   }
 };
 

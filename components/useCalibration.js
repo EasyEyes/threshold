@@ -1,4 +1,6 @@
-import { debug, ifTrue, loggerText } from "./utils";
+import { phrases } from "./i18n";
+import { debug, ifTrue, logger, loggerText } from "./utils";
+import { soundGainDBSPL, rc } from "./global";
 
 export const useCalibration = (reader) => {
   return ifTrue([
@@ -149,7 +151,111 @@ export const saveCheckData = (rc, psychoJS) => {
   }
 };
 
-export const calibrateAudio = (reader) => {};
+export const calibrateAudio = async (reader) => {
+  if (!ifTrue(reader.read("calibrateSoundLevelBool", "__ALL_BLOCKS__")))
+    return true;
+  return new Promise(async (resolve) => {
+    const lang = rc.language.value;
+    const copy = {
+      title: phrases.RC_soundCalibrationTitle[lang],
+      soundCalibration: phrases.RC_soundCalibration[lang],
+      neediPhone: phrases.RC_soundCalibrationNeedsIPhone[lang],
+      yes: phrases.RC_soundCalibrationYes[lang],
+      no: phrases.RC_soundCalibrationNo[lang],
+      qr: phrases.RC_soundCalibrationQR[lang],
+      holdiPhoneOK: phrases.RC_soundCalibrationHoldIPhoneOk[lang],
+      clickToStart: phrases.RC_soundCalibrationClickToStart[lang],
+      done: phrases.RC_soundCalibrationDone[lang],
+    };
+    const elems = _addSoundCalibrationElems(copy);
+    document.querySelector("#soundYes").addEventListener("click", async (e) => {
+      const speakerParameters = {
+        siteUrl: "https://hqjq0u.deta.dev",
+        targetElementId: "soundDisplay",
+      };
+      const { Speaker, VolumeCalibration } = speakerCalibrator;
+      document.querySelector("#soundMessage").innerHTML = copy.qr;
+      document.querySelector("#soundYes").style.display = "none";
+      document.querySelector("#soundNo").style.display = "none";
+      soundGainDBSPL.current = await Speaker.startCalibration(
+        speakerParameters,
+        VolumeCalibration
+      );
+
+      elems.display.style.display = "none";
+      elems.message.innerHTML = copy.done;
+      elems.yes.innerHTML = "Continue to experiment.";
+      document.querySelector("#soundYes").style.display = "block";
+      elems.yes.addEventListener("click", async (e) => {
+        _removeSoundCalibrationElems(Object.values(elems));
+        resolve(true);
+      });
+    });
+    document.querySelector("#soundNo").addEventListener("click", (e) => {
+      _removeSoundCalibrationElems(Object.values(elems));
+      resolve(false);
+    });
+  });
+};
+
+const _addSoundCalibrationElems = (copy) => {
+  document.querySelector("#root").style.visibility = "hidden";
+  const titleElem = document.createElement("h1");
+  const messageElem = document.createElement("p");
+  const container = document.createElement("div");
+  const displayElem = document.createElement("div");
+  const yesButton = document.createElement("button");
+  const noButton = document.createElement("button");
+  const elems = {
+    title: titleElem,
+    message: messageElem,
+    display: displayElem,
+    yes: yesButton,
+    no: noButton,
+    container: container,
+  };
+
+  titleElem.setAttribute("id", "soundTitle");
+  messageElem.setAttribute("id", "soundMessage");
+  container.setAttribute("id", "soundContainer");
+  displayElem.setAttribute("id", "soundDisplay");
+  yesButton.setAttribute("id", "soundYes");
+  noButton.setAttribute("id", "soundNo");
+
+  titleElem.innerHTML =
+    "<p>" + copy.soundCalibration + "</p><p>" + copy.title + "</p>";
+  messageElem.innerHTML = copy.neediPhone;
+  yesButton.innerHTML = copy.yes;
+  noButton.innerHTML = copy.no;
+
+  container.classList.add("popup");
+
+  container.appendChild(titleElem);
+  container.appendChild(messageElem);
+  container.appendChild(displayElem);
+  container.appendChild(yesButton);
+  container.appendChild(noButton);
+  document.body.appendChild(container);
+
+  _addSoundCss();
+
+  return elems;
+};
+const _removeSoundCalibrationElems = (elems) => {
+  Object.values(elems).forEach((elem) => elem.remove());
+  document.querySelector("#root").style.visibility = "visible";
+};
+const _addSoundCss = () => {
+  const styles = `
+  #soundContainer {
+    width: 100% - 2rem;
+    height: 100%;
+    margin: auto;
+  } `;
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
+};
 /* -------------------------------------------------------------------------- */
 
 const getCmValue = (numericalValue, unit) => {

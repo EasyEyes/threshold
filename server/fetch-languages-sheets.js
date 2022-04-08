@@ -31,7 +31,11 @@ async function processLanguageSheet() {
   const data = {};
   for (let phrase of rowsJSON) {
     const { language, ...translations } = phrase;
-    if (language.includes("T_") || language.includes("EE_"))
+    if (
+      language.includes("T_") ||
+      language.includes("EE_") ||
+      language.includes("RC_")
+    )
       data[language] = translations;
   }
 
