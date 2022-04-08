@@ -48,8 +48,11 @@ export const buildWindowErrorHandling = (paramReader) => {
           "error",
           JSON.stringify(error?.reason?.stack)
         );
-      } catch (e) {
-        console.error("No psychoJS.experiment to add error data to.", e);
+      } catch (exception) {
+        console.error(
+          "Failed to add error to experiment data. Perhaps psychoJS.experiment is undefined.",
+          exception
+        );
       }
     }
 

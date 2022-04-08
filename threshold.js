@@ -2024,9 +2024,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition
           );
 
-          soundGainDBSPL.current = paramReader.read(
-            "soundGainDBSPL",
-            status.block_condition
+          // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
+          soundGainDBSPL.current =
+            typeof soundGainDBSPL.current !== "undefined"
+              ? soundGainDBSPL.current
+              : paramReader.read("soundGainDBSPL", status.block_condition);
+          psychoJS.experiment.addData(
+            "usedSoundGainDBSPL",
+            soundGainDBSPL.current
           );
           whiteNoiseLevel.current = paramReader.read(
             "targetSoundNoiseDBSPL",
