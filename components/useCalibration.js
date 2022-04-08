@@ -183,7 +183,10 @@ export const calibrateAudio = async (reader) => {
       );
 
       elems.display.style.display = "none";
-      elems.message.innerHTML = copy.done;
+      elems.message.innerHTML =
+        copy.done +
+        "\nMeasured soundGainDBSPL " +
+        String(soundGainDBSPL.current);
       elems.yes.innerHTML = "Continue to experiment.";
       document.querySelector("#soundYes").style.display = "block";
       elems.yes.addEventListener("click", async (e) => {
