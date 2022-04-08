@@ -237,8 +237,10 @@ export const trialCounterConfig = {
 /* -------------------------------------------------------------------------- */
 export const targetIsPresentBool = { current: undefined };
 export const ProposedVolumeLevelFromQuest = { current: undefined };
-export const maskervolumeDbSPL = { current: undefined };
+export const maskerVolumeDbSPL = { current: undefined };
 export const soundGainDBSPL = { current: undefined };
 export const whiteNoiseLevel = { current: undefined };
 export const maskerSoundFolder = { current: undefined };
 export const targetSoundFolder = { current: undefined };
+
+export const musicExpert = { current: undefined }; // TEMP

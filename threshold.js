@@ -87,11 +87,12 @@ import {
   readingTiming,
   targetIsPresentBool,
   ProposedVolumeLevelFromQuest,
-  maskervolumeDbSPL,
+  maskerVolumeDbSPL,
   soundGainDBSPL,
   whiteNoiseLevel,
   targetSoundFolder,
   maskerSoundFolder,
+  musicExpert,
 } from "./components/global.js";
 
 import {
@@ -1042,6 +1043,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Preset params
       // ! Set current targetKind for the block
       targetKind.current = paramReader.read("targetKind", 1)[0];
+      /* -------------------------------------------------------------------------- */
+
+      /* -------------------------------------------------------------------------- */
+      // TEMP
+      if (targetKind.current === "sound") {
+        // eslint-disable-next-line no-undef
+        const result = await Swal.fire({
+          title:
+            "Have you ever learned to play a musical instrument or sung in a vocal ensemble?",
+          showDenyButton: true,
+          showCancelButton: false,
+          confirmButtonText: "Yes",
+          denyButtonText: `No`,
+        });
+
+        if (result) {
+          if (result.isConfirmed) musicExpert.current = true;
+          else musicExpert.current = false;
+        }
+        psychoJS.experiment.addData("musicExpert", musicExpert.current);
+      }
       /* -------------------------------------------------------------------------- */
 
       // Schedule all the trials in the trialList:
@@ -2019,7 +2041,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
           ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
-          maskervolumeDbSPL.current = paramReader.read(
+          maskerVolumeDbSPL.current = paramReader.read(
             "maskerDBSPL",
             status.block_condition
           );
@@ -2048,7 +2070,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForSound(
               ProposedVolumeLevelFromQuest.current,
-              maskervolumeDbSPL.current,
+              maskerVolumeDbSPL.current,
               soundGainDBSPL.current,
               whiteNoiseLevel.current,
               targetSoundFolder.current,
@@ -2651,7 +2673,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetSoundFolder.current,
             targetIsPresentBool.current,
             ProposedVolumeLevelFromQuest.current,
-            maskervolumeDbSPL.current,
+            maskerVolumeDbSPL.current,
             whiteNoiseLevel.current,
             soundGainDBSPL.current
           );
