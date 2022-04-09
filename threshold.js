@@ -1052,10 +1052,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const result = await Swal.fire({
           title:
             "Have you ever learned to play a musical instrument or sung in a vocal ensemble?",
-          showDenyButton: true,
           showCancelButton: false,
+          showDenyButton: true,
           confirmButtonText: "Yes",
           denyButtonText: `No`,
+          confirmButtonColor: "#333333",
+          denyButtonColor: "#333333",
+          allowEnterKey: false,
         });
 
         if (result) {
