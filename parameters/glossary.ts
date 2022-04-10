@@ -1093,6 +1093,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  showGazeNudgerBool: {
+    name: "showGazeNudgerBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      'After recording the participant\'s trial response, if showGazeNudgerBool is TRUE and abs(gazeMeasuredXDeg) > thresholdAllowedGazeXErrorDeg then EasyEyes displays a red arrow going from the recorded gaze position (gazeMeasuredXDeg, gazeMeasuredYDeg) to the crosshair and a popup window with the sentence, "Uh oh, it appears that your eye was too far from the crosshair." and an Ok button.',
+    type: "boolean",
+    default: "FALSE",
+  },
   showGrid: {
     name: "showGrid",
     availability: "now",
@@ -1102,15 +1111,6 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "disabled",
     categories: ["px", "cm", "deg", "mm", "none", "disabled"],
-  },
-  showGazeNudgerBool: {
-    name: "showGazeNudgerBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      'After recording the participant\'s trial response, if showGazeNudgerBool is TRUE and abs(gazeMeasuredXDeg) > thresholdAllowedGazeXErrorDeg then EasyEyes displays a red arrow going from the recorded gaze position (gazeMeasuredXDeg, gazeMeasuredYDeg) to the crosshair and a popup window with the sentence, "Uh oh, it appears that your eye was too far from the crosshair." and an Ok button.',
-    type: "boolean",
-    default: "FALSE",
   },
   showInstructionsWhere: {
     name: "showInstructionsWhere",
@@ -1472,6 +1472,14 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  targetSoundDBSPL: {
+    name: "targetSoundDBSPL",
+    availability: "now",
+    example: "20",
+    explanation: 'If targetKind is "sound", this specifies target sound level.',
+    type: "numerical",
+    default: "20",
+  },
   targetSoundFolder: {
     name: "targetSoundFolder",
     availability: "now",
@@ -1521,14 +1529,6 @@ export const GLOSSARY: Glossary = {
     explanation: "Positive when noise starts after the target starts.",
     type: "numerical",
     default: "-0.3",
-  },
-  targetSoundDBSPL: {
-    name: "targetSoundDBSPL",
-    availability: "now",
-    example: "20",
-    explanation: 'If targetKind is "sound", this specifies target sound level.',
-    type: "numerical",
-    default: "20",
   },
   targetTask: {
     name: "targetTask",
