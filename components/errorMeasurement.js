@@ -4,30 +4,36 @@ import { XYDegOfXYPix, norm, psychojsUnitsFromWindowUnits } from "./utils";
 export const measureGazeError = (
   tolerances,
   displayOptions,
-  crosshairClickTimestamp
+  crosshairClickTimestamp,
+  targetDurationSec
 ) => {
   // TODO remove this in future, if we don't need gaze going continually
-  rc.pauseGaze();
-  rc.getGazeNow((r) => {
-    tolerances.measured.gazeMeasurementLatencySec =
-      (r.timestamp - r.value.latencyMs - crosshairClickTimestamp) / 1000;
+  // rc.pauseGaze();
+  rc.getGazeNow(
+    {
+      wait: 2 * targetDurationSec * 1000,
+    },
+    (r) => {
+      tolerances.measured.gazeMeasurementLatencySec =
+        (r.timestamp - r.value.latencyMs - crosshairClickTimestamp) / 1000;
 
-    // Convert to psychoJS units pixels
-    const [xPx, yPx] = psychojsUnitsFromWindowUnits(
-      [r.value.x, r.value.y],
-      [rc.windowWidthPx.value, rc.windowHeightPx.value],
-      fixationConfig.pos
-    );
-    // Convert to degrees.
-    [
-      tolerances.measured.gazeMeasuredXDeg,
-      tolerances.measured.gazeMeasuredYDeg,
-    ] = XYDegOfXYPix([xPx, yPx], displayOptions);
-    tolerances.measured.gazeMeasuredRDeg = norm([
-      tolerances.measured.gazeMeasuredXDeg,
-      tolerances.measured.gazeMeasuredYDeg,
-    ]);
-  });
+      // Convert to psychoJS units pixels
+      const [xPx, yPx] = psychojsUnitsFromWindowUnits(
+        [r.value.x, r.value.y],
+        [rc.windowWidthPx.value, rc.windowHeightPx.value],
+        fixationConfig.pos
+      );
+      // Convert to degrees.
+      [
+        tolerances.measured.gazeMeasuredXDeg,
+        tolerances.measured.gazeMeasuredYDeg,
+      ] = XYDegOfXYPix([xPx, yPx], displayOptions);
+      tolerances.measured.gazeMeasuredRDeg = norm([
+        tolerances.measured.gazeMeasuredXDeg,
+        tolerances.measured.gazeMeasuredYDeg,
+      ]);
+    }
+  );
 };
 
 export const calculateError = async (
@@ -76,12 +82,15 @@ export const addResponseIfTolerableError = (
   const relevantChecks = trackGaze
     ? [durationAcceptable, latencyAcceptable, gazeAcceptable]
     : [durationAcceptable, latencyAcceptable];
+
   if (relevantChecks.every((x) => x)) {
     psychoJS.experiment.addData("trialGivenToQuest", true);
     loop.addResponse(answerCorrect, level);
+    return true;
   } else {
     psychoJS.experiment.addData("trialGivenToQuest", false);
     loop._nextTrial();
+    return false;
   }
 };
 

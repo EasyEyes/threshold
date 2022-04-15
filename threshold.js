@@ -2824,7 +2824,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 displayOptions,
                 clickedContinue.timestamps[
                   clickedContinue.timestamps.length - 1
-                ]
+                ],
+                letterConfig.targetDurationSec
               );
             /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
             psychoJS.experiment.addData(
@@ -3270,6 +3271,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           addReadingStatsToOutput(trials.thisRepN, psychoJS);
         },
         letter: () => {
+          console.log(letterTiming, tolerances);
           calculateError(
             letterTiming,
             tolerances,
@@ -3303,17 +3305,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             currentLoop.nRemaining !== 0
           ) {
             // currentLoop.addResponse(key_resp.corr, level);
-            addResponseIfTolerableError(
-              currentLoop,
-              key_resp.corr,
-              level,
-              tolerances,
-              paramReader.read(
-                "calibrateTrackGazeBool",
-                status.block_condition
-              ),
-              psychoJS
+            const usingGaze = paramReader.read(
+              "calibrateTrackGazeBool",
+              status.block_condition
             );
+            if (
+              !addResponseIfTolerableError(
+                currentLoop,
+                key_resp.corr,
+                level,
+                tolerances,
+                usingGaze,
+                psychoJS
+              ) &&
+              usingGaze
+            ) {
+              // if not tolerable error, then nudge gaze
+              rc.nudgeGaze();
+            }
           }
           addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
         },

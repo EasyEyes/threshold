@@ -17,24 +17,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  _allowedBrowsers: {
-    name: "_allowedBrowsers",
-    availability: "now",
-    example: "Safari",
-    explanation:
-      "A comma separated list of allowed browsers. If not allowed, we reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all browsers.",
-    type: "multicategorical",
-    default: "",
-  },
-  _allowedOperatingSystems: {
-    name: "_allowedOperatingSystems",
-    availability: "now",
-    example: "iOS,Linux",
-    explanation:
-      "A comma separated list of allowed operating systems. If not allowed, we reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all operating systems. ",
-    type: "multicategorical",
-    default: "",
-  },
   _authorEmails: {
     name: "_authorEmails",
     availability: "now",
@@ -52,6 +34,60 @@ export const GLOSSARY: Glossary = {
       "Optional, names of all the authors, separated by semicolons. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty.",
     type: "text",
     default: "",
+  },
+  _compatibleBrowser: {
+    name: "_compatibleBrowser",
+    availability: "now",
+    example: "Chrome",
+    explanation:
+      'A comma separated list of compatible browsers. Anything not listed is deemed incompatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
+    type: "multicategorical",
+    default: "all",
+  },
+  _compatibleBrowserNot: {
+    name: "_compatibleBrowserNot",
+    availability: "now",
+    example: "Safari",
+    explanation:
+      'A comma separated list of incompatible browsers. Anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. It is an error to include both _compatibleBrowser and _compatibleBrowserNot in the same experiment table.',
+    type: "multicategorical",
+    default: "none",
+  },
+  _compatibleDevice: {
+    name: "_compatibleDevice",
+    availability: "now",
+    example: "desktop",
+    explanation:
+      'A comma separated list of compatible devices.  Anything not listed is deemed incompatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
+    type: "multicategorical",
+    default: "desktop",
+  },
+  _compatibleDeviceNot: {
+    name: "_compatibleDeviceNot",
+    availability: "now",
+    example: "mobile",
+    explanation:
+      'A comma separated list of incompatible devices.  Anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. It is an error to include both _compatibleDevice and _compatibleDeviceNot in the same experiment table.',
+    type: "multicategorical",
+    default: "none",
+  },
+  _compatibleOperatingSystem: {
+    name: "_compatibleOperatingSystem",
+    availability: "now",
+    example: "macOS,Windows",
+    explanation:
+      'A comma separated list of compatible OSes. Anything not listed is deemed incompatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
+    type: "multicategorical",
+    default: "all",
+  },
+  _compatibleOperatingSystemNot: {
+    name: "_compatibleOperatingSystemNot",
+    availability: "now",
+    example: "Windows",
+    explanation:
+      'A comma separated list of incompatible OSes. Anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. It is an error to include both _compatibleOperatingSystem and _compatibleOperatingSystemNot in the same experiment table.',
+    type: "multicategorical",
+    default: "none",
   },
   _consentForm: {
     name: "_consentForm",
@@ -76,7 +112,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "http://xyz?cc=123",
     explanation:
-      "A URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
+      "A URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), signaling the participant's eligibility for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Thanks to Becca Hirst at Open Science Tools for suggesting daisy chaining.",
     type: "text",
     default: "",
   },
@@ -105,24 +141,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
-    default: "",
-  },
-  _disallowedBrowsers: {
-    name: "_disallowedBrowsers",
-    availability: "now",
-    example: "Safari",
-    explanation:
-      "A comma separated list of browsers to be rejected. We reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all browsers. It is an error to include the parameter _disallowedBrowsers when _allowedBrowsers is already present.",
-    type: "multicategorical",
-    default: "",
-  },
-  _disallowedOperatingSystems: {
-    name: "_disallowedOperatingSystems",
-    availability: "now",
-    example: "iOS,Android",
-    explanation:
-      "A comma separated list of operating systems to be rejected. We reject by issuing a fatal explanatory error message to the participant, which ends the session before asking for Consent. Default allows all operating systems. It is an error to include the parameter _disallowedOperatingSystems when _allowedOperatingSystems is already present. ",
-    type: "multicategorical",
     default: "",
   },
   _experimentFilename: {
@@ -756,7 +774,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "the-phantom-tollbooth.txt",
     explanation:
-      "The filename of a text file that has already been uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table should be sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-white characters.\n     RECOMMENDATION: Every passage selection begins and ends at a sentence break.\n",
+      "The filename of a text file that has already been uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\n",
     type: "text",
     default: "",
   },
@@ -765,7 +783,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "1521",
     explanation:
-      "readingCorpusSkipWords. The passage to be read will begin after skipping that number of words from the beginning of the corpus. This is easy, using the word index table computed when EasyEyes read in the readingCorpus.",
+      "OBSOLETE. To be deleted once we implement readingFirstFewWords. ",
     type: "integer",
     default: "0",
   },
@@ -778,6 +796,15 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "nominalSize",
     categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
+  },
+  readingFirstFewWords: {
+    name: "readingFirstFewWords",
+    availability: "now",
+    example: "In the beginning was the word.",
+    explanation:
+      'Specifies the beginning of the reading in the corpus by its first few words, a string. The match must be exact, including case and punctuation. The EasyEyes compiler should flag an error if the string is not found in the corpus. If the string appears more than once, EasyEyes will randomly pick among the instances, independently for each reading. Thus one might reasonably set readingFirstFewWords to "The", to begin each reading at a randomly chosen sentence starting with "The...".',
+    type: "text",
+    default: "The",
   },
   readingLeftToRightBool: {
     name: "readingLeftToRightBool",
@@ -1549,15 +1576,6 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.5",
   },
-  thresholdAllowedGazeErrorDeg: {
-    name: "thresholdAllowedGazeErrorDeg",
-    availability: "now",
-    example: "4",
-    explanation:
-      "thresholdAllowedGazeErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a radial eccentricity rDeg=sqrt(xDeg^2+yDeg^s) that is less than or equal to thresholdAllowedGazeErrorDeg.",
-    type: "numerical",
-    default: "8",
-  },
   thresholdAllowedGazeRErrorDeg: {
     name: "thresholdAllowedGazeRErrorDeg",
     availability: "now",
@@ -1565,7 +1583,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "thresholdAllowedGazeRErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg.",
     type: "numerical",
-    default: "8",
+    default: "1.00E+10",
   },
   thresholdAllowedGazeXErrorDeg: {
     name: "thresholdAllowedGazeXErrorDeg",
@@ -1574,7 +1592,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "thresholdAllowedGazeXErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg.",
     type: "numerical",
-    default: "8",
+    default: "1.00E+10",
   },
   thresholdAllowedGazeYErrorDeg: {
     name: "thresholdAllowedGazeYErrorDeg",
@@ -1583,7 +1601,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "thresholdAllowedGazeYErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.",
     type: "numerical",
-    default: "8",
+    default: "1.00E+10",
   },
   thresholdAllowedLatencySec: {
     name: "thresholdAllowedLatencySec",
