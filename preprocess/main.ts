@@ -8,6 +8,7 @@ import {
   validatedCommas,
   validateExperimentDf,
   isTextMissing,
+  populateDefaultValues,
 } from "./experimentFileChecks";
 
 import { FONT_FILES_MISSING_WEB } from "./errorMessages";
@@ -78,6 +79,7 @@ export const prepareExperimentFileForThreshold = async (
   space: string,
   filename?: string
 ) => {
+  parsed.data = discardTrailingWhitespaceLines(parsed);
   parsed.data = discardCommentedLines(parsed);
   // Recruitment
   if (
@@ -165,6 +167,7 @@ export const prepareExperimentFileForThreshold = async (
   }
   df = addUniqueLabelsToDf(df);
   df = populateUnderscoreValues(df);
+  df = populateDefaultValues(df);
 
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
@@ -195,4 +198,13 @@ const discardCommentedLines = (parsed: Papa.ParseResult<any>): string[][] => {
     (row) => !commentRegex.test(row[0].trim())
   );
   return noncommentedRows;
+};
+
+const discardTrailingWhitespaceLines = (
+  parsed: Papa.ParseResult<any>
+): string[][] => {
+  const nonwhitespaceRows = parsed.data.filter((row) =>
+    row.some((x: any) => x)
+  );
+  return nonwhitespaceRows;
 };

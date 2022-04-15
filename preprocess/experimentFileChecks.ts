@@ -116,6 +116,11 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
     checkAndCorrectUnderscoreParams(experimentDf);
   errors.push(...underscoreErrors);
 
+  console.log("before populating", experimentDf.toDict());
+  // Populate missing (non-underscore) values with defaults
+  experimentDf = populateDefaultValues(experimentDf);
+  console.log("after populating", experimentDf.toDict());
+
   // Check parameter values
   errors.push(...areParametersOfTheCorrectType(experimentDf));
 
@@ -301,6 +306,43 @@ const _valueOnlyInFirstPosition = (a: any[], parameter: string): boolean => {
   return !a.some(
     (value: any, i: number) => (i === 0 && !value) || (i !== 0 && value)
   );
+};
+
+export const populateDefaultValues = (df: any): any => {
+  let populatedDf = df;
+  df.listColumns().forEach((columnName: string) => {
+    if (GLOSSARY.hasOwnProperty(columnName)) {
+      if (
+        !arraysEqual(
+          df
+            .select(columnName)
+            .toArray()
+            .map((x: any[]): any => x[0]),
+          df
+            .select(columnName)
+            .toArray()
+            .map((x: any[]): any => x[0])
+            .filter((x: any) => x)
+        )
+      ) {
+        console.error(
+          `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
+        );
+      }
+      const column: string[] = df
+        .select(columnName)
+        .toArray()
+        .map((x: any[]): any => x[0]);
+      const populatedColumn = column.map((x) =>
+        x === "" ? GLOSSARY[columnName].default : x
+      );
+      populatedDf = populatedDf.withColumn(
+        columnName,
+        (r: any, i: number) => populatedColumn[i]
+      );
+    }
+  });
+  return populatedDf;
 };
 
 const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
