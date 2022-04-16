@@ -38,7 +38,7 @@ export const getSpeechInNoiseTrialData = async (
 
   whiteNoise = audioCtx.createBuffer(
     1,
-    trialMaskerData.length,
+    trialTargetData.length,
     audioCtx.sampleRate
   );
 
