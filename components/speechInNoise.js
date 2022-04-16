@@ -1,8 +1,5 @@
-import JSZip from "jszip";
-
 import mergeBuffers from "merge-audio-buffers";
 import {
-  getAudioBufferFromArrayBuffer,
   setWaveFormToZeroDbSPL,
   adjustSoundDbSPL,
   audioCtx,
@@ -13,33 +10,13 @@ var targetList = {};
 var whiteNoise;
 var whiteNoiseData;
 
-export const initSpeechInNoiseSoundFiles = async (targetFolderNames) => {
-  targetList = {};
-  //load target
-  targetFolderNames.map(async (name) => {
-    targetList[name] = [];
-    console.log(name);
-    await fetch(`folders/${name}.zip`)
-      .then((response) => {
-        return response.blob();
-      })
-      .then((data) => {
-        var Zip = new JSZip();
-        Zip.loadAsync(data).then((zip) => {
-          zip.forEach((relativePath, zipEntry) => {
-            targetList[name].push(
-              zipEntry.async("arraybuffer").then((data) => {
-                return getAudioBufferFromArrayBuffer(data);
-              })
-            );
-          });
-        });
-      });
-  });
+export const initSpeechInNoiseSoundFiles = async (trialsConditions) => {
+  const blockFiles = await initSoundFiles(trialsConditions);
+  targetList = blockFiles["target"];
 };
 
 export const getSpeechInNoiseTrialData = async (
-  targetFolderName,
+  blockCondition,
   targetVolumeDbSPLFromQuest,
   whiteNoiseLevel,
   soundGainDBSPL
@@ -48,9 +25,9 @@ export const getSpeechInNoiseTrialData = async (
 
   //pick and modify target
   var randomIndex = Math.floor(
-    Math.random() * targetList[targetFolderName].length
+    Math.random() * targetList[blockCondition].length
   );
-  trialTarget = await targetList[targetFolderName][randomIndex];
+  trialTarget = await targetList[blockCondition][randomIndex];
 
   var trialTargetData = trialTarget.getChannelData(0);
   setWaveFormToZeroDbSPL(trialTargetData);

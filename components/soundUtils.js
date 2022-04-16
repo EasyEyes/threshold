@@ -1,4 +1,5 @@
 import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
+import JSZip from "jszip";
 
 export var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -45,4 +46,56 @@ export const playAudioBuffer = (audioBuffer) => {
   source.buffer = audioBuffer;
   source.connect(audioCtx.destination);
   source.start();
+};
+
+export const initSoundFiles = async (trialsConditions) => {
+  var maskerList = {};
+  var targetList = {};
+
+  trialsConditions.map(async (condition) => {
+    //console.log(condition)
+    maskerList[condition["block_condition"]] = [];
+    targetList[condition["block_condition"]] = [];
+    //load maskers
+    if (condition["maskerSoundFolder"] != "") {
+      await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
+        .then((response) => {
+          return response.blob();
+        })
+        .then((data) => {
+          var Zip = new JSZip();
+          Zip.loadAsync(data).then((zip) => {
+            zip.forEach((relativePath, zipEntry) => {
+              maskerList[condition["block_condition"]].push(
+                zipEntry.async("arraybuffer").then((data) => {
+                  return getAudioBufferFromArrayBuffer(data);
+                })
+              );
+            });
+          });
+        });
+    }
+
+    // load targeta
+    if (condition["targetSoundFolder"] != "") {
+      await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
+        .then((response) => {
+          return response.blob();
+        })
+        .then((data) => {
+          var Zip = new JSZip();
+          Zip.loadAsync(data).then((zip) => {
+            zip.forEach((relativePath, zipEntry) => {
+              targetList[condition["block_condition"]].push(
+                zipEntry.async("arraybuffer").then((data) => {
+                  return getAudioBufferFromArrayBuffer(data);
+                })
+              );
+            });
+          });
+        });
+    }
+  });
+
+  return { maskers: maskerList, target: targetList };
 };

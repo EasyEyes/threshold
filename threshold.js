@@ -260,6 +260,7 @@ import {
   initToneInMelodySoundFiles,
 } from "./components/toneInMelody.js";
 import { playAudioBuffer } from "./components/soundUtils.js";
+import { initSpeechInNoiseSoundFiles } from "./components/speechInNoise.js";
 /* -------------------------------------------------------------------------- */
 
 window.jsQUEST = jsQUEST;
@@ -600,28 +601,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       clock: new util.Clock(),
       waitForStart: true,
     });
-
-    //initialize sound experiment files
-    //edit - use list of sound targetKinds instead of sound
-    if (paramReader.read("targetKind", "__ALL_BLOCKS__").includes("sound")) {
-      //read masker andtarget sound folders
-      var MaskerFolders = paramReader.read(
-        "maskerSoundFolder",
-        "__ALL_BLOCKS__"
-      );
-
-      var targetFolders = paramReader.read(
-        "targetSoundFolder",
-        "__ALL_BLOCKS__"
-      );
-
-      //only unique folders
-      MaskerFolders = [...new Set(MaskerFolders)];
-      targetFolders = [...new Set(targetFolders)];
-
-      await initToneInMelodySoundFiles(MaskerFolders, targetFolders);
-    }
-    console.log(paramReader.read("targetTask", "__ALL_Blocks__"));
 
     fixation = new visual.TextStim({
       win: psychoJS.window,
@@ -1165,7 +1144,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             "sound"
           );
+
           console.log("trialsConditions", trialsConditions);
+          //init trial sound data
+          var toneInMelodyConditions = trialsConditions.filter(
+            (condition) => condition["targetTask"] == "detect"
+          );
+          var speechInNoiseConditions = trialsConditions.filter(
+            (condition) => condition["targetTask"] == "identify"
+          );
+          initToneInMelodySoundFiles(toneInMelodyConditions);
+          initSpeechInNoiseSoundFiles(speechInNoiseConditions);
           trials = new data.MultiStairHandler({
             stairType: MultiStairHandler.StaircaseType.QUEST,
             psychoJS: psychoJS,
@@ -2672,8 +2661,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           correctAns.current = targetIsPresentBool.current ? "y" : "n";
 
           var trialSoundBuffer = await getToneInMelodyTrialData(
-            maskerSoundFolder.current,
-            targetSoundFolder.current,
+            status.block_condition,
             targetIsPresentBool.current,
             ProposedVolumeLevelFromQuest.current,
             maskerVolumeDbSPL.current,
