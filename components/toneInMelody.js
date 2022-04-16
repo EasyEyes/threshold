@@ -1,13 +1,21 @@
 import JSZip from "jszip";
-import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
-import mergeBuffers from "merge-audio-buffers";
 
+import mergeBuffers from "merge-audio-buffers";
+import {
+  getAudioBufferFromArrayBuffer,
+  setWaveFormToZeroDbSPL,
+  adjustSoundDbSPL,
+  audioCtx,
+} from "./soundUtils";
 var maskerList = {};
 var targetList = {};
-var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
 var whiteNoise;
 var whiteNoiseData;
-export const initSoundFiles = async (maskerFolderNames, targetFolderNames) => {
+export const initToneInMelodySoundFiles = async (
+  maskerFolderNames,
+  targetFolderNames
+) => {
   maskerList = {};
   targetList = {};
   //load maskers
@@ -35,7 +43,6 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderNames) => {
   //load target
   targetFolderNames.map(async (name) => {
     targetList[name] = [];
-    console.log(name);
     await fetch(`folders/${name}.zip`)
       .then((response) => {
         return response.blob();
@@ -75,45 +82,7 @@ export const initSoundFiles = async (maskerFolderNames, targetFolderNames) => {
   //console.log("target:", targetSound);
 };
 
-const getAudioBufferFromArrayBuffer = (arrayBuffer) => {
-  return arrayBufferToAudioBuffer(arrayBuffer, audioCtx).then((audioBuffer) => {
-    return audioBuffer;
-  });
-};
-
-const setWaveFormToZeroDbSPL = (arr) => {
-  const rms = getRMSOfWaveForm(arr);
-  //normalize to 0 db spl
-  //by convention sound with a mean square of 1 is at 0 db
-  if (rms != 0) {
-    for (var i = 0; i < arr.length; i++) {
-      arr[i] = arr[i] / rms;
-    }
-  }
-
-  //don't change to:
-  //arr.forEach((elem) => elem / rms);
-  return arr;
-};
-
-const getRMSOfWaveForm = (arr) => {
-  const Squares = arr.map((val) => val * val);
-  const Sum = Squares.reduce((acum, val) => acum + val);
-  const Mean = Sum / arr.length;
-  return Math.sqrt(Mean);
-};
-
-const adjustSoundDbSPL = (arr, volumeDbSPL) => {
-  const gain = 10 ** (volumeDbSPL / 20);
-  for (var i = 0; i < arr.length; i++) {
-    arr[i] *= gain;
-  }
-  //don't change to:
-  //arr.forEach((elem) => elem * gain);
-  return arr;
-};
-
-export const getTrialData = async (
+export const getToneInMelodyTrialData = async (
   maskerFolderName,
   targetFolderName,
   targetIsPresentBool,
@@ -201,11 +170,4 @@ export const getTrialData = async (
   return targetIsPresentBool
     ? mergeBuffers([trialMasker, trialTarget, whiteNoise], audioCtx)
     : mergeBuffers([trialMasker, whiteNoise], audioCtx);
-};
-
-export const playAudioBuffer = (audioBuffer) => {
-  var source = audioCtx.createBufferSource();
-  source.buffer = audioBuffer;
-  source.connect(audioCtx.destination);
-  source.start();
 };

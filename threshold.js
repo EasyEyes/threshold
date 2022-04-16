@@ -256,11 +256,10 @@ import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
 import { quitPsychoJS } from "./components/lifetime.js";
 import {
-  getTrialData,
-  initSoundFiles,
-  playAudioBuffer,
+  getToneInMelodyTrialData,
+  initToneInMelodySoundFiles,
 } from "./components/toneInMelody.js";
-
+import { playAudioBuffer } from "./components/soundUtils.js";
 /* -------------------------------------------------------------------------- */
 
 window.jsQUEST = jsQUEST;
@@ -620,8 +619,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       MaskerFolders = [...new Set(MaskerFolders)];
       targetFolders = [...new Set(targetFolders)];
 
-      await initSoundFiles(MaskerFolders, targetFolders);
+      await initToneInMelodySoundFiles(MaskerFolders, targetFolders);
     }
+    console.log(paramReader.read("targetTask", "__ALL_Blocks__"));
 
     fixation = new visual.TextStim({
       win: psychoJS.window,
@@ -2671,7 +2671,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetIsPresentBool.current = Math.random() < 0.5;
           correctAns.current = targetIsPresentBool.current ? "y" : "n";
 
-          var trialSoundBuffer = await getTrialData(
+          var trialSoundBuffer = await getToneInMelodyTrialData(
             maskerSoundFolder.current,
             targetSoundFolder.current,
             targetIsPresentBool.current,
@@ -2680,6 +2680,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             whiteNoiseLevel.current,
             soundGainDBSPL.current
           );
+
           playAudioBuffer(trialSoundBuffer);
         },
         reading: () => {
