@@ -116,10 +116,8 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
     checkAndCorrectUnderscoreParams(experimentDf);
   errors.push(...underscoreErrors);
 
-  console.log("before populating", experimentDf.toDict());
   // Populate missing (non-underscore) values with defaults
   experimentDf = populateDefaultValues(experimentDf);
-  console.log("after populating", experimentDf.toDict());
 
   // Check parameter values
   errors.push(...areParametersOfTheCorrectType(experimentDf));

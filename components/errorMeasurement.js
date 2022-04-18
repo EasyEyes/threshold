@@ -7,8 +7,6 @@ export const measureGazeError = (
   crosshairClickTimestamp,
   targetDurationSec
 ) => {
-  // TODO remove this in future, if we don't need gaze going continually
-  // rc.pauseGaze();
   rc.getGazeNow(
     {
       wait: 2 * targetDurationSec * 1000,
@@ -122,13 +120,13 @@ const _gazeErrorAcceptable = (measured, allowed) => {
   const {
     thresholdAllowedGazeXErrorDeg,
     thresholdAllowedGazeYErrorDeg,
-    thresholdAllowedGazeErrorDeg,
+    thresholdAllowedGazeRErrorDeg,
   } = allowed;
 
   return (
     Math.abs(gazeMeasuredXDeg) <= Math.abs(thresholdAllowedGazeXErrorDeg) &&
     Math.abs(gazeMeasuredYDeg) <= Math.abs(thresholdAllowedGazeYErrorDeg) &&
-    gazeMeasuredRDeg <= thresholdAllowedGazeErrorDeg
+    gazeMeasuredRDeg <= thresholdAllowedGazeRErrorDeg
   );
 };
 

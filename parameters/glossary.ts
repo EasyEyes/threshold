@@ -802,9 +802,9 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "In the beginning was the word.",
     explanation:
-      'Specifies the beginning of the reading in the corpus by its first few words, a string. The match must be exact, including case and punctuation. The EasyEyes compiler should flag an error if the string is not found in the corpus. If the string appears more than once, EasyEyes will randomly pick among the instances, independently for each reading. Thus one might reasonably set readingFirstFewWords to "The", to begin each reading at a randomly chosen sentence starting with "The...".',
+      'Specifies the beginning of the reading in the corpus by its first few words, a string. The matching is exact, including case and punctuation. Default is the empty string, in which case we read from the beginning of the corpus. The EasyEyes compiler flags an error if a nonempty string is not found in the corpus. If the (nonempty) string appears more than once in the corpus, EasyEyes will randomly pick among the instances, independently for each reading. Thus, for an English-language corpus, one might reasonably set readingFirstFewWords to "The ", to begin each reading at a randomly chosen sentence that begins with "The ".',
     type: "text",
-    default: "The",
+    default: "",
   },
   readingLeftToRightBool: {
     name: "readingLeftToRightBool",

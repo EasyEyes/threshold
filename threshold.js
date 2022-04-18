@@ -2223,8 +2223,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "thresholdAllowedDurationRatio",
             BC
           );
-          tolerances.allowed.thresholdAllowedGazeErrorDeg = reader.read(
-            "thresholdAllowedGazeErrorDeg",
+          tolerances.allowed.thresholdAllowedGazeRErrorDeg = reader.read(
+            "thresholdAllowedGazeRErrorDeg",
             BC
           );
           tolerances.allowed.thresholdAllowedGazeXErrorDeg = reader.read(
