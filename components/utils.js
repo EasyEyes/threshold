@@ -583,7 +583,7 @@ export const getCharSetBaselineOffsetPosition = (
  * @returns Object enumerating the value of `parameter` for each `block_condition`
  */
 export const surveyParameter = (reader, parameter) => {
-  const conditionIds = reader.read("block_condition", "__ALL_BLOCKS__");
+  const conditionIds = reader.block_conditions;
   const parameterValues = reader.read(parameter, "__ALL_BLOCKS__");
   // Create a mapping of {block_condition -> value}
   // see: https://www.geeksforgeeks.org/how-to-create-an-object-from-two-arrays-in-javascript/

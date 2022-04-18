@@ -746,7 +746,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     });
 
     characterSetBoundingRects = {};
-    for (const cond of paramReader.read("block_condition", "__ALL_BLOCKS__")) {
+    for (const cond of paramReader.block_conditions) {
       const characterSet = String(
         paramReader.read("fontCharacterSet", cond)
       ).split("");
@@ -1919,7 +1919,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var stimulusParameters;
   var thresholdParameter;
 
-  var wirelessKeyboardNeededYes;
+  var wirelessKeyboardNeededBool;
 
   var _key_resp_allKeys;
   var trialComponents;
@@ -2240,8 +2240,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             BC
           );
 
-          wirelessKeyboardNeededYes = reader.read(
-            "wirelessKeyboardNeededYes",
+          wirelessKeyboardNeededBool = reader.read(
+            "wirelessKeyboardNeededBool",
             BC
           );
 
