@@ -3,6 +3,7 @@ import {
   setWaveFormToZeroDbSPL,
   adjustSoundDbSPL,
   audioCtx,
+  initSoundFiles,
 } from "./soundUtils";
 //var maskerList = {};
 var targetList = {};
@@ -27,8 +28,7 @@ export const getSpeechInNoiseTrialData = async (
   var randomIndex = Math.floor(
     Math.random() * targetList[blockCondition].length
   );
-  trialTarget = await targetList[blockCondition][randomIndex];
-
+  trialTarget = await targetList[blockCondition][randomIndex]["file"];
   var trialTargetData = trialTarget.getChannelData(0);
   setWaveFormToZeroDbSPL(trialTargetData);
   adjustSoundDbSPL(
@@ -49,5 +49,10 @@ export const getSpeechInNoiseTrialData = async (
   setWaveFormToZeroDbSPL(whiteNoiseData);
   adjustSoundDbSPL(whiteNoiseData, whiteNoiseLevel - soundGainDBSPL);
 
-  return mergeBuffers([trialTarget, whiteNoise], audioCtx);
+  return {
+    targetList: targetList[blockCondition],
+    trialSound: mergeBuffers([trialTarget, whiteNoise], audioCtx),
+    correctAnsIndex: randomIndex,
+  };
+  //return mergeBuffers([trialTarget, whiteNoise], audioCtx);
 };

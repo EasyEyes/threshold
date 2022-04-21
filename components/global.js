@@ -242,5 +242,7 @@ export const soundGainDBSPL = { current: undefined };
 export const whiteNoiseLevel = { current: undefined };
 export const maskerSoundFolder = { current: undefined };
 export const targetSoundFolder = { current: undefined };
-
+export const targetTask = { current: undefined };
+export const speechInNoiseTargetList = { current: undefined };
 export const musicExpert = { current: undefined }; // TEMP
+export const speechInNoiseShowClickable = { current: true };

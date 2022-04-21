@@ -93,6 +93,9 @@ import {
   targetSoundFolder,
   maskerSoundFolder,
   musicExpert,
+  speechInNoiseTargetList,
+  targetTask,
+  speechInNoiseShowClickable,
 } from "./components/global.js";
 
 import {
@@ -260,7 +263,10 @@ import {
   initToneInMelodySoundFiles,
 } from "./components/toneInMelody.js";
 import { playAudioBuffer } from "./components/soundUtils.js";
-import { initSpeechInNoiseSoundFiles } from "./components/speechInNoise.js";
+import {
+  getSpeechInNoiseTrialData,
+  initSpeechInNoiseSoundFiles,
+} from "./components/speechInNoise.js";
 /* -------------------------------------------------------------------------- */
 
 window.jsQUEST = jsQUEST;
@@ -2023,7 +2029,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       switchKind(targetKind.current, {
         sound: () => {
-          //change to proper instruction setup from the google sheet
           var w = window.innerWidth / 3;
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["sound"](rc.language.value),
@@ -2636,6 +2641,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function trialRoutineBegin(snapshot) {
     return async function () {
+      speechInNoiseShowClickable.current = true;
       trialClock.reset(); // clock
       // ie time from the user clicking/pressing space (actually, the end of the previous `trialRoutineEnd`), to the start of `trialRoutineBegin`
       psychoJS.experiment.addData(
@@ -2656,19 +2662,43 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       switchKind(targetKind.current, {
         sound: async () => {
-          //target is present half the time
-          targetIsPresentBool.current = Math.random() < 0.5;
-          correctAns.current = targetIsPresentBool.current ? "y" : "n";
-
-          var trialSoundBuffer = await getToneInMelodyTrialData(
-            status.block_condition,
-            targetIsPresentBool.current,
-            ProposedVolumeLevelFromQuest.current,
-            maskerVolumeDbSPL.current,
-            whiteNoiseLevel.current,
-            soundGainDBSPL.current
+          var trialSoundBuffer;
+          targetTask.current = paramReader.read(
+            "targetTask",
+            status.block_condition
           );
+          if (targetTask.current == "identify") {
+            const { targetList, trialSound, correctAnsIndex } =
+              await getSpeechInNoiseTrialData(
+                status.block_condition,
+                ProposedVolumeLevelFromQuest.current,
+                whiteNoiseLevel.current,
+                soundGainDBSPL.current
+              );
 
+            trialSoundBuffer = trialSound;
+            correctAns.current =
+              targetList[correctAnsIndex]["name"].toLowerCase();
+            speechInNoiseTargetList.current = targetList.map(
+              (target) => target["name"]
+            );
+            //console.log(speechInNoiseTargetList.current)
+            //console.log("correctAns", correctAns.current);
+            //console.log("targetList",targetList);
+          } else {
+            //target is present half the time
+            targetIsPresentBool.current = Math.random() < 0.5;
+            correctAns.current = targetIsPresentBool.current ? "y" : "n";
+
+            trialSoundBuffer = await getToneInMelodyTrialData(
+              status.block_condition,
+              targetIsPresentBool.current,
+              ProposedVolumeLevelFromQuest.current,
+              maskerVolumeDbSPL.current,
+              whiteNoiseLevel.current,
+              soundGainDBSPL.current
+            );
+          }
           playAudioBuffer(trialSoundBuffer);
         },
         reading: () => {
@@ -2794,8 +2824,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         switchKind(targetKind.current, {
           sound: () => {
-            //only accepts y or n
-            validAns = ["y", "n"];
+            if (targetTask.current == "detect") {
+              //only accepts y or n
+              validAns = ["y", "n"];
+            } else if (
+              targetTask.current == "identify" &&
+              speechInNoiseTargetList.current &&
+              speechInNoiseShowClickable.current
+            ) {
+              validAns = [""];
+              speechInNoiseShowClickable.current = false;
+              //console.log(speechInNoiseTargetList)
+              setupClickableCharacterSet(
+                speechInNoiseTargetList.current,
+                font.name,
+                "bottom",
+                showCharacterSetResponse,
+                null,
+                "",
+                "sound"
+              );
+            }
           },
           reading: () => {
             // READING Only accepts SPACE
@@ -3195,6 +3244,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialRoutineEnd(snapshot) {
     return async function () {
       ////
+      speechInNoiseShowClickable.current = true;
       grid.current.hide(true);
 
       if (showConditionNameConfig.showTargetSpecs)

@@ -19,12 +19,18 @@ export function setupClickableCharacterSet(
   where,
   responseRegister,
   extraFunction = null,
-  extraCharClassName = ""
+  extraCharClassName = "",
+  targetKind = ""
 ) {
   const characterSetHolder = document.createElement("div");
   characterSetHolder.id = "characterSet-holder";
   characterSetHolder.className = "characterSet-holder";
   characterSetHolder.style.fontFamily = `"${font}"`;
+  if (targetKind == "sound") {
+    characterSetHolder.style.display = "flex";
+    characterSetHolder.style.flexWrap = "wrap";
+  }
+
   getCharacterSetShowPos(characterSetHolder, where);
 
   pushCharacterSet(
@@ -32,7 +38,8 @@ export function setupClickableCharacterSet(
     characterSetHolder,
     responseRegister,
     extraFunction,
-    extraCharClassName
+    extraCharClassName,
+    targetKind
   );
 
   document.body.appendChild(characterSetHolder);
@@ -79,11 +86,18 @@ const pushCharacterSet = (
   characterSetHolder,
   responseRegister,
   extraFunction = null,
-  extraCharClassName = ""
+  extraCharClassName = "",
+  targetKind = ""
 ) => {
   for (let a of ans) {
     let characterSet = document.createElement("span");
+    if (targetKind == "sound") {
+      characterSet.style.fontSize = "15px";
+      characterSet.style.flex = "25%";
+      characterSet.style.textAlign = "left";
+    }
     characterSet.className = "characterSet";
+
     if (extraCharClassName.length)
       characterSet.classList.add(extraCharClassName);
 

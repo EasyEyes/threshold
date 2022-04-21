@@ -66,11 +66,14 @@ export const initSoundFiles = async (trialsConditions) => {
           var Zip = new JSZip();
           Zip.loadAsync(data).then((zip) => {
             zip.forEach((relativePath, zipEntry) => {
-              maskerList[condition["block_condition"]].push(
-                zipEntry.async("arraybuffer").then((data) => {
+              var name = zipEntry.name;
+              name = name.substring(0, name.lastIndexOf("."));
+              maskerList[condition["block_condition"]].push({
+                name: name,
+                file: zipEntry.async("arraybuffer").then((data) => {
                   return getAudioBufferFromArrayBuffer(data);
-                })
-              );
+                }),
+              });
             });
           });
         });
@@ -86,11 +89,14 @@ export const initSoundFiles = async (trialsConditions) => {
           var Zip = new JSZip();
           Zip.loadAsync(data).then((zip) => {
             zip.forEach((relativePath, zipEntry) => {
-              targetList[condition["block_condition"]].push(
-                zipEntry.async("arraybuffer").then((data) => {
+              var name = zipEntry.name;
+              name = name.substring(0, name.lastIndexOf("."));
+              targetList[condition["block_condition"]].push({
+                name: name,
+                file: zipEntry.async("arraybuffer").then((data) => {
                   return getAudioBufferFromArrayBuffer(data);
-                })
-              );
+                }),
+              });
             });
           });
         });

@@ -30,7 +30,7 @@ export const getToneInMelodyTrialData = async (
   var randomIndex = Math.floor(
     Math.random() * maskerList[blockCondition].length
   );
-  var trialMasker = await maskerList[blockCondition][randomIndex];
+  var trialMasker = await maskerList[blockCondition][randomIndex]["file"];
 
   //modify masker
   //console.log(trialMasker);
@@ -62,7 +62,7 @@ export const getToneInMelodyTrialData = async (
     //console.log(await targetSound);
     //trialTarget = await getAudioBufferFromArrayBuffer(await targetSound);
     randomIndex = Math.floor(Math.random() * targetList[blockCondition].length);
-    trialTarget = await targetList[blockCondition][randomIndex];
+    trialTarget = await targetList[blockCondition][randomIndex]["file"];
 
     //this implementation works as well
     // var trialTargetData = new Float32Array(trialTarget.length);
