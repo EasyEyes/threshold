@@ -1603,9 +1603,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       switchKind(targetKind.current, {
         sound: () => {
+          targetTask.current = paramReader.read("targetTask", status.block)[0];
+          console.log("targetTask:", targetTask.current);
+          const instr =
+            targetTask.current == "identify"
+              ? instructionsText.speechInNoiseBegin(L)
+              : instructionsText.soundBegin(L);
           _instructionSetup(
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
-              instructionsText.soundBegin(L)
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr
           );
         },
         letter: () => {
@@ -2753,15 +2758,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         )
       );
 
-      //use google sheets phrases for instructions
       switchKind(targetKind.current, {
         sound: () => {
-          _instructionSetup(
-            instructionsText.trial.respond["sound"](rc.language.value)
-          );
-          instructions.setText(
-            instructionsText.trial.respond["sound"](rc.language.value)
-          );
+          const instr =
+            targetTask.current == "identify"
+              ? instructionsText.trial.respond["speechInNoise"](
+                  rc.language.value
+                )
+              : instructionsText.trial.respond["sound"](rc.language.value);
+          _instructionSetup(instr);
+          instructions.setText(instr);
         },
       });
       instructions.setAutoDraw(false);
@@ -2836,23 +2842,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (targetTask.current == "detect") {
               //only accepts y or n
               validAns = ["y", "n"];
-            } else if (
-              targetTask.current == "identify" &&
-              speechInNoiseTargetList.current &&
-              speechInNoiseShowClickable.current
-            ) {
-              validAns = [""];
-              speechInNoiseShowClickable.current = false;
-              //console.log(speechInNoiseTargetList)
-              setupClickableCharacterSet(
-                speechInNoiseTargetList.current,
-                font.name,
-                "bottom",
-                showCharacterSetResponse,
-                null,
-                "",
-                "sound"
-              );
             }
           },
           reading: () => {
@@ -2904,7 +2893,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
       /* -------------------------------------------------------------------------- */
-
+      //speech in noise setup clickable characters
+      if (
+        targetKind.current == "sound" &&
+        targetTask.current == "identify" &&
+        speechInNoiseTargetList.current &&
+        speechInNoiseShowClickable.current
+      ) {
+        validAns = [""];
+        speechInNoiseShowClickable.current = false;
+        //console.log(speechInNoiseTargetList)
+        setupClickableCharacterSet(
+          speechInNoiseTargetList.current,
+          font.name,
+          "bottom",
+          showCharacterSetResponse,
+          null,
+          "",
+          "sound"
+        );
+      }
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
       // response type more independent
