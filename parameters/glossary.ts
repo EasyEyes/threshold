@@ -802,7 +802,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "readingLeftToRightBool should be set to TRUE for most languages, including English, and should be set to FALSE for Arabic, Hebrew, Chinese, Japanese, and any other right-to-left languages. The default value is TRUE.",
+      "readingLeftToRightBool should be set to TRUE for most languages, including English, and should be set to FALSE for Arabic, Hebrew, and any other right-to-left languages. The default value is TRUE.",
     type: "boolean",
     default: "TRUE",
   },

@@ -1684,6 +1684,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
           readingParagraph.setHeight(readingConfig.height);
 
+          // LTR or RTL
+          let readingDirectionLTR = paramReader.read(
+            "readingLeftToRightBool",
+            status.block
+          )[0];
+          if (!readingDirectionLTR) readingParagraph.setAlignHoriz("right");
+
           // Construct this block pages
           getThisBlockPages(paramReader, status.block, readingParagraph);
 
@@ -1713,7 +1720,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setWrapWidth(thisBlockWrapWidth);
 
           // POS
-          readingParagraph.setPos([-thisBlockWrapWidth * 0.5, 0]);
+          if (readingDirectionLTR)
+            readingParagraph.setPos([-thisBlockWrapWidth * 0.5, 0]);
+          else readingParagraph.setPos([thisBlockWrapWidth * 0.5, 0]);
         },
       });
 

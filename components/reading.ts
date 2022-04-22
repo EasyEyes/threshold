@@ -122,6 +122,7 @@ export const preprocessCorpusToWordList = (text: string) => {
    * Arabic \u0600-\u06ff
    * Chinese \u4e00-\u9fff
    */
+  if (text === "") return [];
   return text
     .replace(/[^\u0600-\u06ff\u4e00-\u9fff\w\s'-]|-(?=[^a-zA-Z0-9])/g, "")
     .split(" ")

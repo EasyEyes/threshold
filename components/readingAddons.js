@@ -5,15 +5,13 @@ import {
   readingCorpusArchive,
   readingFrequencyToWordArchive,
   readingPageStats,
-  readingTiming,
   readingThisBlockPages,
   readingUsedText,
   readingWordFrequencyArchive,
   readingWordListArchive,
   timing,
-  letterTiming,
 } from "./global";
-import { degreesToPixels, logger } from "./utils";
+import { degreesToPixels, getRandomInt, logger } from "./utils";
 
 import {
   preprocessRawCorpus,
@@ -69,11 +67,22 @@ export const getThisBlockPages = (paramReader, block, readingParagraph) => {
     //   .split(" ")
     //   .slice(paramReader.read("readingCorpusSkipWords", block)[0])
     //   .join(" ");
-    let skippedWordsNum;
-    [readingUsedText[thisURL], skippedWordsNum] = getReadingUsedText(
-      readingCorpusArchive[thisURL],
-      paramReader.read("readingFirstFewWords", block)[0]
-    );
+
+    const targetFewWordsToSplit = paramReader.read(
+      "readingFirstFewWords",
+      block
+    )[0];
+    let skippedWordsNum = 0;
+    if (targetFewWordsToSplit !== "") {
+      [readingUsedText[thisURL], skippedWordsNum] = getReadingUsedText(
+        readingCorpusArchive[thisURL],
+        paramReader.read("readingFirstFewWords", block)[0]
+      );
+    } else {
+      readingUsedText[thisURL] = readingCorpusArchive[thisURL];
+      skippedWordsNum = 0;
+    }
+
     // logger("readingUsedText[thisURL]", readingUsedText[thisURL]);
     readingPageStats.readingPageSkipCorpusWords.push(skippedWordsNum);
     ////
@@ -104,8 +113,22 @@ export const getThisBlockPages = (paramReader, block, readingParagraph) => {
  */
 const getReadingUsedText = (allCorpus, firstFewWords) => {
   const splitCorpusArray = allCorpus.split(firstFewWords);
+
   if (splitCorpusArray.length === 1)
     throw `[READ] Cannot find readingFirstFewWords [${firstFewWords}] in the given corpus`;
+  else if (splitCorpusArray.length > 2) {
+    const possibleInserts = splitCorpusArray.length - 1;
+    const randomInsert = getRandomInt(1, possibleInserts);
+    const readingUsedText = splitCorpusArray
+      .slice(randomInsert)
+      .join(firstFewWords);
+    return [
+      firstFewWords + readingUsedText,
+      preprocessCorpusToWordList(
+        splitCorpusArray.slice(0, randomInsert).join(firstFewWords)
+      ).length,
+    ];
+  }
   return [
     firstFewWords + splitCorpusArray[1],
     preprocessCorpusToWordList(splitCorpusArray[0]).length,

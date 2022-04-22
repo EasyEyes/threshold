@@ -11,7 +11,7 @@
     "glossary": "node server/prepare-glossary.js && prettier --write parameters/glossary.ts && git add parameters/glossary.ts",
     "fetch": "npm run phrases && npm run glossary",
     "prepare": "husky install && npm run setup:psychojs",
-    "start": "webpack --env=development",
+    "start": "webpack serve --env=development",
     "build": "webpack --env=production",
     "examples": "sh server/examples.sh",
     "netlify": "git submodule update --init --recursive && npm run setup:psychojs && npm run build && npm run examples",
@@ -52,6 +52,7 @@
     "typescript": "^4.6.3",
     "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.8.1",
     "xlsx": "^0.18.5"
   },
   "lint-staged": {

@@ -140,7 +140,7 @@ export class ParamReader {
     if (s.toLowerCase() === "TRUE".toLowerCase()) return true;
     else if (s.toLowerCase() === "FALSE".toLowerCase()) return false;
 
-    if (!isNaN(s)) return Number(s);
+    if (!isNaN(s) && s !== "") return Number(s);
 
     return s;
   }

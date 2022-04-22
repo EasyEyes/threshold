@@ -3,6 +3,7 @@
 
 const webpack = require("webpack");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const path = require("path");
 
 const config = {
   entry: "./threshold.js",
@@ -44,26 +45,32 @@ const plugins = [new CleanWebpackPlugin()];
 
 module.exports = (env, options) => {
   const extra = {};
+
   if (options.name) {
     // prettier-ignore
     console.log(`
-      ==- \x1b[32m\x1b[1mEasyEyes Threshold Example Dev\x1b[22m\x1b[0m -===========================${'='.repeat(options.name.length)}======
-      ===============================================================${'='.repeat(options.name.length)}======
+        ==- \x1b[32m\x1b[1mEasyEyes Threshold Example Dev\x1b[22m\x1b[0m -=========================
+        =============================================================
 
-      Go to >>>   \x1b[36mhttp://localhost:5500/threshold/threshold/examples/${options.name}   \x1b[0m<<<
+        Start developing \x1b[1m\x1b[32m\x1b[1m${options.name}\x1b[22m\x1b[0m.
+        Threshold participant development now uses Webpack DevServer.
+        (No need to start VSCode Live Server.)
 
-      OR (If your ROOT is at \`participant\` threshold)
-            >>>   \x1b[36mhttp://localhost:5500/examples/${options.name}                       \x1b[0m<<<
+        Go to \x1b[36mhttp://localhost:5500\x1b[0m directly.
 
-      ===============================================================${'='.repeat(options.name.length)}======
+        =============================================================
 
 `);
     extra.output = {
-      path: __dirname + `/examples/${options.name}/js`,
-      publicPath: "js/",
+      path: path.join(__dirname, `examples/${options.name}/js`),
+      publicPath: `/js/`,
       filename: "threshold.min.js",
-      sourceMapFilename: "threshold.min.js.map",
+      sourceMapFilename: "threshold.[contenthash].min.js.map",
     };
+  } else if (env.development) {
+    throw new Error(
+      "You have to specify a name for the build, e.g., `npm start -- --name=demoExperiment`."
+    );
   }
 
   if (env.development) {
@@ -80,8 +87,15 @@ module.exports = (env, options) => {
           "process.env.debug": true,
         }),
       ],
-      watch: true,
+      // watch: true,
       devtool: "source-map",
+      devServer: {
+        port: 5500,
+        static: {
+          directory: path.join(__dirname, `examples/${options.name}`),
+          publicPath: `/`,
+        },
+      },
     });
   } else if (env.production) {
     return Object.assign({}, config, {
