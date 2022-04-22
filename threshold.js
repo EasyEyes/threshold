@@ -1637,6 +1637,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               )
           );
 
+          renderObj.tinyHint.setText(
+            phrases.T_readingNextPage[rc.language.value]
+          );
+          renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
+          renderObj.tinyHint.setAutoDraw(true);
+
           // instructions.setAutoDraw(false)
           instructions2.setAutoDraw(false);
           fixation.setAutoDraw(false);
@@ -1752,8 +1758,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialCounter.setText(trialCounterStr);
       trialCounter.setAutoDraw(true);
 
-      renderObj.tinyHint.setAutoDraw(false);
-
       return Scheduler.Event.NEXT;
     };
   }
@@ -1802,10 +1806,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (canClick(responseType.current)) addProceedButton(rc.language.value);
 
       switchKind(targetKind.current, {
-        reading: () => {
-          // READING
-          // _instructionSetup('');
-        },
         letter: () => {
           // IDENTIFY
           _instructionSetup(instructionsText.edu(rc.language.value));

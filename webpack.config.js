@@ -91,6 +91,7 @@ module.exports = (env, options) => {
       devtool: "source-map",
       devServer: {
         port: 5500,
+        open: true,
         static: {
           directory: path.join(__dirname, `examples/${options.name}`),
           publicPath: `/`,
