@@ -17,6 +17,9 @@ export class ParamReader {
     )
       throw "[READER] Invalid Block Number";
 
+    if (!(name in GLOSSARY))
+      throw `[paramReader.read] Invalid parameter name ${name}`;
+
     if (this.has(name)) return this._getParam(name, blockOrConditionName);
     else return this._getParamGlossary(name, blockOrConditionName);
   }
@@ -137,7 +140,7 @@ export class ParamReader {
     if (s.toLowerCase() === "TRUE".toLowerCase()) return true;
     else if (s.toLowerCase() === "FALSE".toLowerCase()) return false;
 
-    if (!isNaN(s)) return Number(s);
+    if (!isNaN(s) && s !== "") return Number(s);
 
     return s;
   }
@@ -148,5 +151,9 @@ export class ParamReader {
 
   get conditions() {
     return this._experiment;
+  }
+
+  get block_conditions() {
+    return this._experiment.map((o) => o.block_condition);
   }
 }

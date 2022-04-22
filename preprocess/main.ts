@@ -80,6 +80,7 @@ export const prepareExperimentFileForThreshold = async (
   filename?: string
 ) => {
   parsed.data = discardTrailingWhitespaceLines(parsed);
+  parsed.data = discardTrailingWhitespaceColumns(parsed);
   parsed.data = discardCommentedLines(parsed);
   // Recruitment
   if (
@@ -207,4 +208,22 @@ const discardTrailingWhitespaceLines = (
     row.some((x: any) => x)
   );
   return nonwhitespaceRows;
+};
+
+const discardTrailingWhitespaceColumns = (
+  parsed: Papa.ParseResult<any>
+): string[][] => {
+  const _numTrailingWhitespaces = (r: string[]) => {
+    let v = [...r];
+    let n = 0;
+    while (v.pop() === "") n++;
+    return n;
+  };
+  const trailingEmptyValues = parsed.data.map(_numTrailingWhitespaces);
+  const fewestTrailingEmptyValues = Math.min(...trailingEmptyValues);
+  if (fewestTrailingEmptyValues > 0)
+    return parsed.data.map((row: string[]) =>
+      row.slice(0, -fewestTrailingEmptyValues)
+    );
+  return parsed.data;
 };

@@ -76,7 +76,7 @@ export const tolerances = Object.seal({
     thresholdAllowedDurationRatio: undefined,
     thresholdAllowedGazeXErrorDeg: undefined,
     thresholdAllowedGazeYErrorDeg: undefined,
-    thresholdAllowedGazeErrorDeg: undefined,
+    thresholdAllowedGazeRErrorDeg: undefined,
     thresholdAllowedLatencySec: undefined,
   },
   measured: {

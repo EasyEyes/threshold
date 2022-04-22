@@ -731,7 +731,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     });
 
     characterSetBoundingRects = {};
-    for (const cond of paramReader.read("block_condition", "__ALL_BLOCKS__")) {
+    for (const cond of paramReader.block_conditions) {
       const characterSet = String(
         paramReader.read("fontCharacterSet", cond)
       ).split("");
@@ -1632,6 +1632,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               )
           );
 
+          renderObj.tinyHint.setText(
+            phrases.T_readingNextPage[rc.language.value]
+          );
+          renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
+          renderObj.tinyHint.setAutoDraw(true);
+
           // instructions.setAutoDraw(false)
           instructions2.setAutoDraw(false);
           fixation.setAutoDraw(false);
@@ -1679,6 +1685,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
           readingParagraph.setHeight(readingConfig.height);
 
+          // LTR or RTL
+          let readingDirectionLTR = paramReader.read(
+            "readingLeftToRightBool",
+            status.block
+          )[0];
+          if (!readingDirectionLTR) readingParagraph.setAlignHoriz("right");
+
           // Construct this block pages
           getThisBlockPages(paramReader, status.block, readingParagraph);
 
@@ -1708,7 +1721,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setWrapWidth(thisBlockWrapWidth);
 
           // POS
-          readingParagraph.setPos([-thisBlockWrapWidth * 0.5, 0]);
+          if (readingDirectionLTR)
+            readingParagraph.setPos([-thisBlockWrapWidth * 0.5, 0]);
+          else readingParagraph.setPos([thisBlockWrapWidth * 0.5, 0]);
         },
       });
 
@@ -1737,8 +1752,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       trialCounter.setText(trialCounterStr);
       trialCounter.setAutoDraw(true);
-
-      renderObj.tinyHint.setAutoDraw(false);
 
       return Scheduler.Event.NEXT;
     };
@@ -1788,10 +1801,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (canClick(responseType.current)) addProceedButton(rc.language.value);
 
       switchKind(targetKind.current, {
-        reading: () => {
-          // READING
-          // _instructionSetup('');
-        },
         letter: () => {
           // IDENTIFY
           _instructionSetup(instructionsText.edu(rc.language.value));
@@ -1914,7 +1923,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var stimulusParameters;
   var thresholdParameter;
 
-  var wirelessKeyboardNeededYes;
+  var wirelessKeyboardNeededBool;
 
   var _key_resp_allKeys;
   var trialComponents;
@@ -2217,8 +2226,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "thresholdAllowedDurationRatio",
             BC
           );
-          tolerances.allowed.thresholdAllowedGazeErrorDeg = reader.read(
-            "thresholdAllowedGazeErrorDeg",
+          tolerances.allowed.thresholdAllowedGazeRErrorDeg = reader.read(
+            "thresholdAllowedGazeRErrorDeg",
             BC
           );
           tolerances.allowed.thresholdAllowedGazeXErrorDeg = reader.read(
@@ -2234,8 +2243,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             BC
           );
 
-          wirelessKeyboardNeededYes = reader.read(
-            "wirelessKeyboardNeededYes",
+          wirelessKeyboardNeededBool = reader.read(
+            "wirelessKeyboardNeededBool",
             BC
           );
 

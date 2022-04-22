@@ -4,6 +4,7 @@ import {
   conditionNameConfig,
   font,
   letterConfig,
+  readingPageStats,
   showConditionNameConfig,
   viewingDistanceCm,
 } from "./global";
@@ -73,10 +74,13 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
   showConditionNameConfig.targetSpecs = `filename: ${experimentFileName}\nreadingCorpus: ${reader.read(
     "readingCorpus",
     BC
-  )}\nreadingCorpusSkipWords: ${reader.read(
-    "readingCorpusSkipWords",
-    BC
-  )}\nreadingDefineSingleLineSpacingAs: ${reader.read(
+  )}\nreadingFirstFewWords: ${
+    readingPageStats.readingPageSkipCorpusWords.length
+      ? readingPageStats.readingPageSkipCorpusWords[
+          readingPageStats.readingPageSkipCorpusWords.length - 1
+        ]
+      : 0
+  }\nreadingDefineSingleLineSpacingAs: ${reader.read(
     "readingDefineSingleLineSpacingAs",
     BC
   )}\nfont: ${reader.read("font", BC)}\nreadingLinesPerPage: ${reader.read(

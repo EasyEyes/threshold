@@ -68,7 +68,7 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
     flanker2: flanker2CharacterSetBoundingPoly,
   };
   const displayCharacterSetBoundingBoxPolies = {};
-  for (const cond of reader.read("block_condition", "__ALL_BLOCKS__")) {
+  for (const cond of reader.block_conditions) {
     const characterSet = String(reader.read("fontCharacterSet", cond)).split(
       ""
     );

@@ -5,15 +5,13 @@ import {
   readingCorpusArchive,
   readingFrequencyToWordArchive,
   readingPageStats,
-  readingTiming,
   readingThisBlockPages,
   readingUsedText,
   readingWordFrequencyArchive,
   readingWordListArchive,
   timing,
-  letterTiming,
 } from "./global";
-import { degreesToPixels, logger } from "./utils";
+import { degreesToPixels, getRandomInt, logger } from "./utils";
 
 import {
   preprocessRawCorpus,
@@ -64,15 +62,29 @@ export const getThisBlockPages = (paramReader, block, readingParagraph) => {
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block)[0];
     ////
-    logger("readingCorpusArchive[thisURL]", readingCorpusArchive[thisURL]);
-    readingUsedText[thisURL] = readingCorpusArchive[thisURL]
-      .split(" ")
-      .slice(paramReader.read("readingCorpusSkipWords", block)[0])
-      .join(" ");
-    logger("readingUsedText[thisURL]", readingUsedText[thisURL]);
-    readingPageStats.readingPageSkipCorpusWords.push(
-      paramReader.read("readingCorpusSkipWords", block)[0]
-    );
+    // logger("readingCorpusArchive[thisURL]", readingCorpusArchive[thisURL]);
+    // readingUsedText[thisURL] = readingCorpusArchive[thisURL]
+    //   .split(" ")
+    //   .slice(paramReader.read("readingCorpusSkipWords", block)[0])
+    //   .join(" ");
+
+    const targetFewWordsToSplit = paramReader.read(
+      "readingFirstFewWords",
+      block
+    )[0];
+    let skippedWordsNum = 0;
+    if (targetFewWordsToSplit !== "") {
+      [readingUsedText[thisURL], skippedWordsNum] = getReadingUsedText(
+        readingCorpusArchive[thisURL],
+        paramReader.read("readingFirstFewWords", block)[0]
+      );
+    } else {
+      readingUsedText[thisURL] = readingCorpusArchive[thisURL];
+      skippedWordsNum = 0;
+    }
+
+    // logger("readingUsedText[thisURL]", readingUsedText[thisURL]);
+    readingPageStats.readingPageSkipCorpusWords.push(skippedWordsNum);
     ////
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL],
@@ -91,6 +103,36 @@ export const getThisBlockPages = (paramReader, block, readingParagraph) => {
     return preparedSentences.sentences;
   }
   return [];
+};
+
+/**
+ *
+ * @param {*} allCorpus
+ * @param {*} firstFewWords
+ * @returns [readingUsedText, skippedWordsNum]
+ */
+const getReadingUsedText = (allCorpus, firstFewWords) => {
+  const splitCorpusArray = allCorpus.split(firstFewWords);
+
+  if (splitCorpusArray.length === 1)
+    throw `[READ] Cannot find readingFirstFewWords [${firstFewWords}] in the given corpus`;
+  else if (splitCorpusArray.length > 2) {
+    const possibleInserts = splitCorpusArray.length - 1;
+    const randomInsert = getRandomInt(1, possibleInserts);
+    const readingUsedText = splitCorpusArray
+      .slice(randomInsert)
+      .join(firstFewWords);
+    return [
+      firstFewWords + readingUsedText,
+      preprocessCorpusToWordList(
+        splitCorpusArray.slice(0, randomInsert).join(firstFewWords)
+      ).length,
+    ];
+  }
+  return [
+    firstFewWords + splitCorpusArray[1],
+    preprocessCorpusToWordList(splitCorpusArray[0]).length,
+  ];
 };
 
 export const preprocessCorpusToSentenceList = (
@@ -189,9 +231,7 @@ export const preprocessCorpusToSentenceList = (
     }
     if (!maxLinePerPageSoFar) maxLinePerPageSoFar = line;
 
-    const numberWordsThisPage = [
-      ...thisPageText.split(/\s|--/g).filter((w) => w.length > 0),
-    ].length;
+    const numberWordsThisPage = preprocessCorpusToWordList(thisPageText).length;
     const previousStartingIndex =
       readingPageStats.readingPageSkipCorpusWords[
         readingPageStats.readingPageSkipCorpusWords.length - 1
