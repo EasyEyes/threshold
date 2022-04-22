@@ -100,7 +100,8 @@ export const getTextList = (parsed: any) => {
     if (parsedRow[0] == "readingCorpus")
       for (const source of parsedRow.slice(1)) textList.add(source.trim());
   }
-  return [...textList];
+  // Ignore empty strings
+  return [...textList].filter((x) => x);
 };
 
 /**
