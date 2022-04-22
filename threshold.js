@@ -182,7 +182,8 @@ import {
   updateConditionNameConfig,
   updateTargetSpecsForLetter,
   updateTargetSpecsForReading,
-  updateTargetSpecsForSound,
+  updateTargetSpecsForSoundDetect,
+  updateTargetSpecsForSoundIdentify,
 } from "./components/showTrialInformation.js";
 import { getTrialInfoStr } from "./components/trialCounter.js";
 ////
@@ -1604,7 +1605,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         sound: () => {
           targetTask.current = paramReader.read("targetTask", status.block)[0];
-          console.log("targetTask:", targetTask.current);
+          //console.log("targetTask:", targetTask.current);
           const instr =
             targetTask.current == "identify"
               ? instructionsText.speechInNoiseBegin(L)
@@ -2049,13 +2050,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             w,
             [-window.innerWidth / 2 + w * 1.1, 0]
           );
+
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
           ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
-          maskerVolumeDbSPL.current = paramReader.read(
-            "maskerDBSPL",
-            status.block_condition
-          );
 
           // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
           soundGainDBSPL.current =
@@ -2066,6 +2064,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "usedSoundGainDBSPL",
             soundGainDBSPL.current
           );
+
           whiteNoiseLevel.current = paramReader.read(
             "targetSoundNoiseDBSPL",
             status.block_condition
@@ -2074,19 +2073,35 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "targetSoundFolder",
             status.block_condition
           );
-          maskerSoundFolder.current = paramReader.read(
-            "maskerSoundFolder",
-            status.block_condition
-          );
-          if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForSound(
-              ProposedVolumeLevelFromQuest.current,
-              maskerVolumeDbSPL.current,
-              soundGainDBSPL.current,
-              whiteNoiseLevel.current,
-              targetSoundFolder.current,
-              maskerSoundFolder.current
+
+          if (targetTask.current == "detect") {
+            maskerVolumeDbSPL.current = paramReader.read(
+              "maskerDBSPL",
+              status.block_condition
             );
+            maskerSoundFolder.current = paramReader.read(
+              "maskerSoundFolder",
+              status.block_condition
+            );
+            if (showConditionNameConfig.showTargetSpecs)
+              updateTargetSpecsForSoundDetect(
+                ProposedVolumeLevelFromQuest.current,
+                maskerVolumeDbSPL.current,
+                soundGainDBSPL.current,
+                whiteNoiseLevel.current,
+                targetSoundFolder.current,
+                maskerSoundFolder.current
+              );
+          } else if (targetTask.current == "identify") {
+            if (showConditionNameConfig.showTargetSpecs)
+              updateTargetSpecsForSoundIdentify(
+                ProposedVolumeLevelFromQuest.current,
+                soundGainDBSPL.current,
+                whiteNoiseLevel.current,
+                targetSoundFolder.current
+              );
+          }
+
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
