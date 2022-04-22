@@ -778,15 +778,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  readingCorpusSkipWords: {
-    name: "readingCorpusSkipWords",
-    availability: "now",
-    example: "1521",
-    explanation:
-      "OBSOLETE. To be deleted once we implement readingFirstFewWords. ",
-    type: "integer",
-    default: "0",
-  },
   readingDefineSingleLineSpacingAs: {
     name: "readingDefineSingleLineSpacingAs",
     availability: "now",

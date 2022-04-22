@@ -64,15 +64,18 @@ export const getThisBlockPages = (paramReader, block, readingParagraph) => {
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block)[0];
     ////
-    logger("readingCorpusArchive[thisURL]", readingCorpusArchive[thisURL]);
-    readingUsedText[thisURL] = readingCorpusArchive[thisURL]
-      .split(" ")
-      .slice(paramReader.read("readingCorpusSkipWords", block)[0])
-      .join(" ");
-    logger("readingUsedText[thisURL]", readingUsedText[thisURL]);
-    readingPageStats.readingPageSkipCorpusWords.push(
-      paramReader.read("readingCorpusSkipWords", block)[0]
+    // logger("readingCorpusArchive[thisURL]", readingCorpusArchive[thisURL]);
+    // readingUsedText[thisURL] = readingCorpusArchive[thisURL]
+    //   .split(" ")
+    //   .slice(paramReader.read("readingCorpusSkipWords", block)[0])
+    //   .join(" ");
+    let skippedWordsNum;
+    [readingUsedText[thisURL], skippedWordsNum] = getReadingUsedText(
+      readingCorpusArchive[thisURL],
+      paramReader.read("readingFirstFewWords", block)[0]
     );
+    // logger("readingUsedText[thisURL]", readingUsedText[thisURL]);
+    readingPageStats.readingPageSkipCorpusWords.push(skippedWordsNum);
     ////
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL],
@@ -91,6 +94,22 @@ export const getThisBlockPages = (paramReader, block, readingParagraph) => {
     return preparedSentences.sentences;
   }
   return [];
+};
+
+/**
+ *
+ * @param {*} allCorpus
+ * @param {*} firstFewWords
+ * @returns [readingUsedText, skippedWordsNum]
+ */
+const getReadingUsedText = (allCorpus, firstFewWords) => {
+  const splitCorpusArray = allCorpus.split(firstFewWords);
+  if (splitCorpusArray.length === 1)
+    throw `[READ] Cannot find readingFirstFewWords [${firstFewWords}] in the given corpus`;
+  return [
+    firstFewWords + splitCorpusArray[1],
+    preprocessCorpusToWordList(splitCorpusArray[0]).length,
+  ];
 };
 
 export const preprocessCorpusToSentenceList = (
@@ -189,9 +208,7 @@ export const preprocessCorpusToSentenceList = (
     }
     if (!maxLinePerPageSoFar) maxLinePerPageSoFar = line;
 
-    const numberWordsThisPage = [
-      ...thisPageText.split(/\s|--/g).filter((w) => w.length > 0),
-    ].length;
+    const numberWordsThisPage = preprocessCorpusToWordList(thisPageText).length;
     const previousStartingIndex =
       readingPageStats.readingPageSkipCorpusWords[
         readingPageStats.readingPageSkipCorpusWords.length - 1
