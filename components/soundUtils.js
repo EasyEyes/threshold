@@ -51,13 +51,12 @@ export const playAudioBuffer = (audioBuffer) => {
 export const initSoundFiles = async (trialsConditions) => {
   var maskerList = {};
   var targetList = {};
-
   trialsConditions.map(async (condition) => {
-    //console.log(condition)
+    console.log(condition);
     maskerList[condition["block_condition"]] = [];
     targetList[condition["block_condition"]] = [];
     //load maskers
-    if (condition["maskerSoundFolder"] != "") {
+    if (condition["maskerSoundFolder"]) {
       await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
         .then((response) => {
           return response.blob();
@@ -80,7 +79,7 @@ export const initSoundFiles = async (trialsConditions) => {
     }
 
     // load targeta
-    if (condition["targetSoundFolder"] != "") {
+    if (condition["targetSoundFolder"]) {
       await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
         .then((response) => {
           return response.blob();

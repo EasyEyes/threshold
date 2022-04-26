@@ -1107,7 +1107,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Show a red dot indicating currently estimated gaze position. (It is delayed by processing time.)",
+      "showGazeBool shows a red dot indicating currently estimated gaze position. (It is delayed by processing time.)",
     type: "boolean",
     default: "FALSE",
   },
@@ -1125,7 +1125,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "deg",
     explanation:
-      "Show a full-screen grid that aids visual checking of location and size. Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. ",
+      "showGrid displays a full-screen grid that aids visual checking of location and size. Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. ",
     type: "categorical",
     default: "disabled",
     categories: ["px", "cm", "deg", "mm", "none", "disabled"],
@@ -1135,7 +1135,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "topLeft",
     explanation:
-      'Can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "While keeping your gaze on the fixation cross, type your best guess for what middle letter was just shown." ',
+      'showInstructionsWhere can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
     type: "categorical",
     default: "topLeft",
     categories: ["none", "topLeft", "bottomLeft"],
@@ -1145,7 +1145,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "REQUESTED BY MANY PARTICIPANTS. If TRUE for any condition in this block, then at the end of the block EasyEyes presents a pop-up window reporting the overall percent correct (acrosss all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who wrote comments, when invited to.",
+      "If showPercentCorrectBool is true for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (acrosss all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments.",
     type: "boolean",
     default: "TRUE",
   },
@@ -1164,7 +1164,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Displays the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, from the bottom up, with glowing green. Empty for zero and full for 1. The box is currently centered at bottom of screen, but we plan to make it contiguous to the trial counter display.",
+      "If showTakeABreakCreditBool then display the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, from the bottom up, with glowing green. Empty for zero and full for 1. The box is currently centered at bottom of screen, but we plan to make it contiguous to the trial counter display.",
     type: "boolean",
     default: "FALSE",
   },
@@ -1173,9 +1173,18 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "For debugging. If true, show target size and spacing in deg in lower left corner, similar to the trial/block counter. See showTitle.",
+      "For debugging. If true, showTargetSpecsBool displays various target parameters, including size and spacing, in lower left corner, similar to the trial/block counter. ",
     type: "boolean",
     default: "FALSE",
+  },
+  showText: {
+    name: "showText",
+    availability: "now",
+    example: "Click the crosshair.",
+    explanation:
+      "showText displays the provided text at bottom left of screen, aligned left, with line breaking to show multiple lines. This is static, unchanged before, during, and after the stimulus. Default is empty string, no text. Same point size as used by showConditionNameBool. If all three are present, then showText on top, then showConditionNameBool, then showTargetSpecsBool at bottom. [Do we need showTextBeforeStimulus or showTextAfterStimulus?]",
+    type: "text",
+    default: "",
   },
   showViewingDistanceBool: {
     name: "showViewingDistanceBool",
@@ -1528,9 +1537,10 @@ export const GLOSSARY: Glossary = {
     name: "targetSoundNoiseDBSPL",
     availability: "now",
     example: "20",
-    explanation: "The noise level in dB SPL.",
+    explanation:
+      "The desired noise level in dB SPL. The default (-999) is interpreted as no noise.",
     type: "numerical",
-    default: "0",
+    default: "-999",
   },
   targetSoundNoiseOffsetReTargetSec: {
     name: "targetSoundNoiseOffsetReTargetSec",
