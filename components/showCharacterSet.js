@@ -27,8 +27,11 @@ export function setupClickableCharacterSet(
   characterSetHolder.className = "characterSet-holder";
   characterSetHolder.style.fontFamily = `"${font}"`;
   if (targetKind == "sound") {
-    characterSetHolder.style.display = "flex";
-    characterSetHolder.style.flexWrap = "wrap";
+    characterSetHolder.style.display = "grid";
+    //characterSetHolder.style.flexWrap = "wrap";
+    characterSetHolder.style.gridTemplateColumns = "repeat(4,20vw)";
+    characterSetHolder.style.gridTemplateRows = "repeat(7,7vh)";
+    characterSetHolder.style.gridAutoFlow = "column";
   }
 
   getCharacterSetShowPos(characterSetHolder, where);
@@ -93,7 +96,6 @@ const pushCharacterSet = (
     let characterSet = document.createElement("span");
     if (targetKind == "sound") {
       characterSet.style.fontSize = "15px";
-      characterSet.style.flex = "25%";
       characterSet.style.textAlign = "left";
     }
     characterSet.className = "characterSet";
