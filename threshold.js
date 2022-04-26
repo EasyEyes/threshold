@@ -3330,7 +3330,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               usingGaze
             ) {
               // if not tolerable error, then nudge gaze
-              rc.nudgeGaze();
+              rc.nudgeGaze({
+                showOffset: true,
+              });
             }
           }
           addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
