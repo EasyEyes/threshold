@@ -31,6 +31,8 @@ export const loadReadingCorpus = async (paramReader) => {
       ...new Set(paramReader.read("readingCorpus", "__ALL_BLOCKS__")),
     ];
     for (let url of uniqueBookSources) {
+      if (!url.length) continue;
+
       // Load from URL
       logger("loading this text/book", url);
 

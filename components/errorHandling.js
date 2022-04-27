@@ -57,10 +57,13 @@ export const buildWindowErrorHandling = (paramReader) => {
     }
 
     // quit
-    psychoJS._gui.dialog({ error: error?.reason });
-    setTimeout(() => {
-      quitPsychoJS("", false, paramReader);
-    }, 5000);
+    psychoJS._gui.dialog({
+      error: error?.reason,
+      showOK: true,
+      onOK: () => {
+        quitPsychoJS("", false, paramReader);
+      },
+    });
 
     return true;
   };

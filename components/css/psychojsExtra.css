@@ -7,10 +7,44 @@
   background-color: #96ceb4 !important;
 }
 
-.ui-dialog-titlebar-close,
-.ui-dialog-buttonset,
+.ui-dialog {
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 7px !important;
+  overflow: hidden;
+  /* box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px !important; */
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
+    rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
+    rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px !important;
+}
+
+.ui-dialog-titlebar {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
 .ui-dialog-buttonpane {
-  display: none !important;
+  padding: 0.5rem !important;
+}
+
+.ui-dialog-buttonset button {
+  background-color: #999 !important;
+  padding: 0.5rem 1rem !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: 7px !important;
+  font-weight: bold !important;
+}
+
+.ui-dialog-buttonset button:hover {
+  outline: 2px solid #999 !important;
+  outline-offset: 0.2rem !important;
+}
+
+.ui-dialog-buttonset button:active {
+  outline: 2px solid #999 !important;
+  outline-offset: 0.2rem !important;
+  background-color: #bbb !important;
 }
 
 .ui-dialog-content {
