@@ -1,5 +1,10 @@
 import { rc, fixationConfig } from "./global";
-import { XYDegOfXYPix, norm, psychojsUnitsFromWindowUnits } from "./utils";
+import {
+  XYDegOfXYPix,
+  norm,
+  psychojsUnitsFromWindowUnits,
+  toFixedNumber,
+} from "./utils";
 
 export const measureGazeError = (
   tolerances,
@@ -9,7 +14,8 @@ export const measureGazeError = (
 ) => {
   rc.getGazeNow(
     {
-      wait: 2 * targetDurationSec * 1000,
+      wait: targetDurationSec * 1000,
+      frames: 9,
     },
     (r) => {
       tolerances.measured.gazeMeasurementLatencySec =
@@ -30,6 +36,22 @@ export const measureGazeError = (
         tolerances.measured.gazeMeasuredXDeg,
         tolerances.measured.gazeMeasuredYDeg,
       ]);
+
+      // again for raw measures
+      tolerances.measured.gazeMeasuredRawDeg = [];
+      for (let rawPoint of r.raw) {
+        const [rawX, rawY] = psychojsUnitsFromWindowUnits(
+          [rawPoint.x, rawPoint.y],
+          [rc.windowWidthPx.value, rc.windowHeightPx.value],
+          fixationConfig.pos
+        );
+
+        const [rawXDeg, rawYDeg] = XYDegOfXYPix([rawX, rawY], displayOptions);
+        tolerances.measured.gazeMeasuredRawDeg.push([
+          toFixedNumber(rawXDeg, 5),
+          toFixedNumber(rawYDeg, 5),
+        ]);
+      }
     }
   );
 };
@@ -97,6 +119,7 @@ const addMeasuredErrorToOutput = (psychoJS, tolerances) => {
     "gazeMeasuredXDeg",
     "gazeMeasuredYDeg",
     "gazeMeasuredRDeg",
+    "gazeMeasuredRawDeg",
     "gazeMeasurementLatencySec",
     "targetMeasuredLatencySec",
     "targetMeasuredDurationSec",

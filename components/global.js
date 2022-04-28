@@ -84,6 +84,7 @@ export const tolerances = Object.seal({
     gazeMeasuredXDeg: undefined,
     gazeMeasuredYDeg: undefined,
     gazeMeasuredRDeg: undefined,
+    gazeMeasuredRawDeg: [],
     gazeMeasurementLatencySec: undefined,
     targetMeasuredLatencySec: undefined,
     targetMeasuredDurationSec: undefined,
