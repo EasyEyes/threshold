@@ -53,14 +53,6 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "none",
   },
-  _compatibleMinimumProcessorCores: {
-    name: "_compatibleMinimumProcessorCores",
-    availability: "now",
-    example: "4",
-    explanation: "https://en.wikipedia.org/wiki/Multi-core_processor",
-    type: "integer",
-    default: "",
-  },
   _compatibleDevice: {
     name: "_compatibleDevice",
     availability: "now",
@@ -78,6 +70,14 @@ export const GLOSSARY: Glossary = {
       'A comma separated list of incompatible devices.  Anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. It is an error to include both _compatibleDevice and _compatibleDeviceNot in the same experiment table.',
     type: "multicategorical",
     default: "none",
+  },
+  _compatibleMinimumProcessorCores: {
+    name: "_compatibleMinimumProcessorCores",
+    availability: "now",
+    example: "4",
+    explanation: "https://en.wikipedia.org/wiki/Multi-core_processor",
+    type: "integer",
+    default: "",
   },
   _compatibleOperatingSystem: {
     name: "_compatibleOperatingSystem",
