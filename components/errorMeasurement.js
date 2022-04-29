@@ -63,8 +63,18 @@ export const calculateError = async (
   targetStim
 ) => {
   const targetFrameTimingReport = _reportTargetTimingFrames(targetStim);
+
+  if (
+    letterTiming.targetFinishSec === undefined ||
+    letterTiming.targetStartSec === undefined ||
+    letterTiming.targetStartSec === null ||
+    letterTiming.targetFinishSec === null
+  ) {
+    throw new Error("targetStartSec or targetFinishSec is missing");
+  }
   const measuredTargetDurationSec =
     letterTiming.targetFinishSec - letterTiming.targetStartSec;
+
   tolerances.measured.targetMeasuredDurationSec = measuredTargetDurationSec;
   tolerances.measured.targetMeasuredDurationFrames =
     targetFrameTimingReport.recordedEnd - targetFrameTimingReport.recordedStart;
