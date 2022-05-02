@@ -136,15 +136,21 @@ export const checkSystemCompatibility = (
 
   msg.forEach((item, idx, arr) => {
     // Incompatible with items connected by AND.
-    arr[idx] = item.replace(/bbb/g, StringOfNotItems(compatibleBrowser));
-    arr[idx] = item.replace(/ooo/g, StringOfNotItems(compatibleOS));
+    arr[idx] = arr[idx].replace(/bbb/g, StringOfNotItems(compatibleBrowser));
+    arr[idx] = arr[idx].replace(/ooo/g, StringOfNotItems(compatibleOS));
 
     //Compatible with items connected by OR.
-    arr[idx] = item.replace(/BBB/g, StringOfItems(compatibleBrowser));
-    arr[idx] = item.replace(/OOO/g, StringOfItems(compatibleOS));
-    arr[idx] = item.replace(/DDD/g, StringOfItems(compatibleDevice));
-    arr[idx] = item.replace(/111/g, compatibleBrowserVersionMinimum.toString());
-    arr[idx] = item.replace(/222/g, compatibleProcessorCoresMinimum.toString());
+    arr[idx] = arr[idx].replace(/BBB/g, StringOfItems(compatibleBrowser));
+    arr[idx] = arr[idx].replace(/OOO/g, StringOfItems(compatibleOS));
+    arr[idx] = arr[idx].replace(/DDD/g, StringOfItems(compatibleDevice));
+    arr[idx] = arr[idx].replace(
+      /111/g,
+      compatibleBrowserVersionMinimum.toString()
+    );
+    arr[idx] = arr[idx].replace(
+      /222/g,
+      compatibleProcessorCoresMinimum.toString()
+    );
   });
 
   const compatibilityRequirements = msg;
@@ -195,7 +201,7 @@ const StringOfNotItems = (items) => {
         notItemString += " and " + items[i].slice(3); //i-th item. Strip leading 'not'.
       }
   }
-
+  console.log(notItemString);
   return notItemString;
 };
 
@@ -213,6 +219,7 @@ const StringOfItems = (items) => {
         itemString += " or " + items[i];
       }
   }
+  //console.log(itemString);
   return itemString;
 };
 
