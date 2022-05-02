@@ -40,62 +40,44 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "Chrome",
     explanation:
-      'A comma separated list of compatible browsers. Anything not listed is deemed incompatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
+      'A comma separated list either of compatible browsers or of incompatible browsers. The list can be \'all\', or just compatible browsers by name, or just incompatible browsers each preceded by "not". No mixing allowed. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If the particiapant\'s device is incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
     type: "multicategorical",
     default: "all",
   },
-  _compatibleBrowserNot: {
-    name: "_compatibleBrowserNot",
+  _compatibleBrowserVersionMinimum: {
+    name: "_compatibleBrowserVersionMinimum",
     availability: "now",
-    example: "Safari",
+    example: "100",
     explanation:
-      'A comma separated list of incompatible browsers. Anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. It is an error to include both _compatibleBrowser and _compatibleBrowserNot in the same experiment table.',
-    type: "multicategorical",
-    default: "none",
+      "_compatibleBrowserMinimumVersion is the minimum integer version number of the browser for compatibility. The default is zero.",
+    type: "integer",
+    default: "0",
   },
-  _compatibleDevice: {
-    name: "_compatibleDevice",
+  _compatibleDeviceType: {
+    name: "_compatibleDeviceType",
     availability: "now",
     example: "desktop",
     explanation:
-      'A comma separated list of compatible devices.  Anything not listed is deemed incompatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
+      'A comma separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
     type: "multicategorical",
     default: "desktop",
-  },
-  _compatibleDeviceNot: {
-    name: "_compatibleDeviceNot",
-    availability: "now",
-    example: "mobile",
-    explanation:
-      'A comma separated list of incompatible devices.  Anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. It is an error to include both _compatibleDevice and _compatibleDeviceNot in the same experiment table.',
-    type: "multicategorical",
-    default: "none",
-  },
-  _compatibleMinimumProcessorCores: {
-    name: "_compatibleMinimumProcessorCores",
-    availability: "now",
-    example: "4",
-    explanation: "https://en.wikipedia.org/wiki/Multi-core_processor",
-    type: "integer",
-    default: "",
   },
   _compatibleOperatingSystem: {
     name: "_compatibleOperatingSystem",
     availability: "now",
     example: "macOS,Windows",
     explanation:
-      'A comma separated list of compatible OSes. Anything not listed is deemed incompatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
+      "A comma separated list either of compatible or incompatible operating systems. The list can be 'all', or compatible OSes by name, or incompatible OSes each preceded by \"not\". No mixing allowed. The default is 'all'. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to \"return\" this study), which ends the session before asking for consent. ",
     type: "multicategorical",
     default: "all",
   },
-  _compatibleOperatingSystemNot: {
-    name: "_compatibleOperatingSystemNot",
+  _compatibleProcessorCoresMinimum: {
+    name: "_compatibleProcessorCoresMinimum",
     availability: "now",
-    example: "Windows",
-    explanation:
-      'A comma separated list of incompatible OSes. Anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. It is an error to include both _compatibleOperatingSystem and _compatibleOperatingSystemNot in the same experiment table.',
-    type: "multicategorical",
-    default: "none",
+    example: "4",
+    explanation: "https://en.wikipedia.org/wiki/Multi-core_processor",
+    type: "integer",
+    default: "0",
   },
   _consentForm: {
     name: "_consentForm",
@@ -828,7 +810,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "57",
     explanation:
-      "readingMaxCharactersPerLine is used to set the maximum line length, in pixels, for line breaking. We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine. Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters, so, counting the space between words, we multiply by 6 to get 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.",
+      "readingMaxCharactersPerLine is used to set the maximum line length, notin pixels, notfor line breaking. We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine. Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters, notso, notcounting the space between words, notwe multiply by 6 to get 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, notso to get an average of 9, notwe could use a max of 9.5, notor 9.5*6=57 letter widths.",
     type: "numerical",
     default: "57",
   },
@@ -837,7 +819,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "1.2",
     explanation:
-      'Set the line spacing (measured baseline to baseline) as this multiple of "single" line spacing, which is defined by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
+      'Set the line spacing (measured baseline to baseline) as this multiple of "single" line spacing, notwhich is defined by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, notincluding Adobe inDesign.',
     type: "numerical",
     default: "1.2",
   },
@@ -846,7 +828,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "3",
     explanation:
-      'If readingSetSizeBy is "nominal", then set point size to readingNominalSizeDeg*pixPerDeg.',
+      'If readingSetSizeBy is "nominal", notthen set point size to readingNominalSizeDeg*pixPerDeg.',
     type: "numerical",
     default: "1",
   },
@@ -946,7 +928,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Once debugged this option will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest optiion is to continue from where the escape was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
+      "Once debugged, responseEscapeOptionsBool will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest optiion is to continue from where the escape was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
     type: "boolean",
     default: "FALSE",
   },
@@ -955,7 +937,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "REQUESTED BY MANY PARTICIPANTS (This grants the frequent request from our participants that they prefer to type the letter, even if they're required to click on the crosshair to begin each trial.) Overrules other response boolean parameters to enable clicking, and ONLY clicking of the crosshair, to request the next trial. The hope is that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) ",
+      "REQUESTED BY MANY PARTICIPANTS (This grants the frequent request from our participants that they prefer to type the letter, even if they're required to click on the crosshair to begin each trial.) Overrules all other response boolean parameters to enable clicking, and ONLY clicking of the crosshair, to request the next trial. The hope is that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) ",
     type: "boolean",
     default: "TRUE",
   },
@@ -964,7 +946,7 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     example: "FALSE",
     explanation:
-      "Allow participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
+      "responseSpokenBool allows participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
     type: "boolean",
     default: "FALSE",
   },
@@ -973,7 +955,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      'Allow participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. But responseMustClickCrosshairBool overrides all other settings while the crosshair is available for clicking.',
+      'responseTypedBool allows participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. But responseMustClickCrosshairBool overrides all other settings while the crosshair is available for clicking.',
     type: "boolean",
     default: "FALSE",
   },
@@ -982,7 +964,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "Allow participant to respond at every occasion by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
+      "responseTypedEasyEyesKeypadBool allows participant to respond at every occasion by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
     type: "boolean",
     default: "FALSE",
   },
@@ -991,7 +973,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      'Requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to illustrate the stimulus in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n\nCan we save these files to a "Screenshots" folder in the participant computer\'s Download folder or in the experiment repository on Pavlovia? ',
+      'screenshotBool requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to show the stimuli in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n     Can we save these files to a "Screenshots" folder in the participant computer\'s Download folder or in the experiment repository on Pavlovia? ',
     type: "boolean",
     default: "FALSE",
   },
@@ -1026,7 +1008,8 @@ export const GLOSSARY: Glossary = {
     name: "showCharacterSetBoundingBoxBool",
     availability: "now",
     example: "TRUE",
-    explanation: "Shows the bounding box of the whole fontCharacterSet.",
+    explanation:
+      "showCharacterSetBoundingBoxBool shows the bounding box of the whole fontCharacterSet.",
     type: "boolean",
     default: "FALSE",
   },
@@ -1035,7 +1018,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "It's obvious that identifying a letter by clicking requires display of a characterSet to click on. However, sometimes we show a foreign characterSet with Roman labels, to enable use of a Roman keyboard, or the scientist may just want the actual letter shapes to be visible while the participant types. This flag tells EasyEyes to display the characterSet whenever the participant is responding.",
+      "It's obvious that identifying a letter by clicking requires display of a character set to click on. However, sometimes we show a foreign characterSet with Roman labels, to enable use of a Roman keyboard, or the scientist may just want the actual letter shapes to be visible while the participant types. This flag tells EasyEyes to display the fontCharacterSet whenever the participant is responding.",
     type: "boolean",
     default: "FALSE",
   },
@@ -1044,7 +1027,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "bottom",
     explanation:
-      'Can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "characterSet". If the target is a gabor, the characterSet might display all the possible orientations, each labeled by a letter to be pressed.',
+      'showCharacterSetWhere can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "characterSet". If the target is a gabor, the characterSet might display all the possible orientations, each labeled by a letter to be pressed.',
     type: "categorical",
     default: "bottom",
     categories: ["none", "bottom", "top", "left", "right"],

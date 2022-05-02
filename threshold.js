@@ -260,6 +260,11 @@ import {
   initSoundFiles,
   playAudioBuffer,
 } from "./components/toneInMelody.js";
+import {
+  checkSystemCompatibility,
+  displayCompatibilityMessage,
+  hideCompatibilityMessage,
+} from "./components/compatibilityCheck.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -277,6 +282,37 @@ var simulated;
 const paramReaderInitialized = async (reader) => {
   buildWindowErrorHandling(reader);
   await sleep(250);
+
+  var browserV = rc.browserVersion.value.split(".");
+  if (browserV.length >= 2)
+    browserV = Number(browserV[0] + "." + Math.round(browserV[1] * 10) / 10);
+  else browserV = Number(browserV[0]);
+
+  console.log("rc:", rc?.computeRandomMHz?.value);
+  console.log(rc.stressFps);
+
+  const compMsg = checkSystemCompatibility(
+    reader.read("_compatibleBrowser"),
+    rc.browser.value,
+    reader.read("_compatibleBrowserVersionMinimum"),
+    browserV,
+    reader.read("_compatibleDeviceType"),
+    rc.deviceType.value,
+    reader.read("_compatibleOperatingSystem"),
+    rc.systemFamily.value,
+    reader.read("_compatibleProcessorCoresMinimum"),
+    rc.concurrency.value,
+    2.3, //rc.computeRandomMHz.value
+    rc.language.value
+  );
+
+  const proceed = await displayCompatibilityMessage(compMsg["msg"]);
+  hideCompatibilityMessage();
+
+  if (proceed && !compMsg["proceed"]) {
+    showExperimentEnding();
+    return;
+  }
 
   // show screens before actual experiment begins
   const continueExperiment = await showForm(reader.read("_consentForm")[0]);

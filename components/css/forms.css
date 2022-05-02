@@ -43,7 +43,7 @@
 .form-input-btn {
   font-size: 1.2rem;
   margin: 0 0.5rem;
-  width: 5rem !important;
+  width: 5rem;
   height: 3rem !important;
   outline: none;
   border: none !important;
