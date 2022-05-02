@@ -18,6 +18,15 @@ export const checkSystemCompatibility = (
   if (hardwareConcurrency <= 0)
     hardwareConcurrency = Math.round(2 * computeRandomMHz);
 
+  deviceBrowserVersion = deviceBrowserVersion.split(".");
+  if (deviceBrowserVersion.length >= 2)
+    deviceBrowserVersion = Number(
+      deviceBrowserVersion[0] +
+        "." +
+        Math.round(deviceBrowserVersion[1] * 10) / 10
+    );
+  else deviceBrowserVersion = Number(deviceBrowserVersion[0]);
+
   var deviceIsCompatibleBool = true;
   var msg = [];
   //compatibilityType ----> all, not, or a browser name
