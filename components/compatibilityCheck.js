@@ -30,8 +30,8 @@ export const checkSystemCompatibility = (
   var deviceIsCompatibleBool = true;
   var msg = [];
   //compatibilityType ----> all, not, or a browser name
-  const browserCompatibilityType = compatibleBrowser[0].slice(0, 3);
-  const OSCompatibilityType = compatibleOS[0].slice(0, 3);
+  const browserCompatibilityType = compatibleBrowser[0].trim().slice(0, 3);
+  const OSCompatibilityType = compatibleOS[0].trim().slice(0, 3);
 
   //COMPUTE deviceIsCompatibleBool and compatibilityRequirements
   switch (browserCompatibilityType) {
@@ -194,14 +194,13 @@ const StringOfNotItems = (items) => {
     case 0:
       notItemString = "";
     case 1:
-      notItemString = items[0].slice(3); //First item. Strip the leading 'not'.
+      notItemString = items[0].trim().slice(3); //First item. Strip the leading 'not'.
     default:
-      notItemString = items[0].slice(3);
+      notItemString = items[0].trim().slice(3);
       for (var i = 1; i < items.length; i++) {
-        notItemString += " and " + items[i].slice(3); //i-th item. Strip leading 'not'.
+        notItemString += " and " + items[i].trim().slice(3); //i-th item. Strip leading 'not'.
       }
   }
-  console.log(notItemString);
   return notItemString;
 };
 
@@ -212,14 +211,13 @@ const StringOfItems = (items) => {
     case 0:
       itemString = "";
     case 1:
-      itemString = items[0];
+      itemString = items[0].trim();
     default:
-      itemString = items[0];
+      itemString = items[0].trim();
       for (var i = 1; i < items.length; i++) {
-        itemString += " or " + items[i];
+        itemString += " or " + items[i].trim();
       }
   }
-  //console.log(itemString);
   return itemString;
 };
 

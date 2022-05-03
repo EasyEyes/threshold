@@ -286,16 +286,17 @@ const paramReaderInitialized = async (reader) => {
   if (rc.concurrency.value <= 0) {
     await rc.performance();
   }
+
   const compMsg = checkSystemCompatibility(
-    reader.read("_compatibleBrowser"),
+    reader.read("_compatibleBrowser")[0].split(","),
     rc.browser.value,
-    reader.read("_compatibleBrowserVersionMinimum"),
+    reader.read("_compatibleBrowserVersionMinimum")[0],
     rc.browserVersion.value,
-    reader.read("_compatibleDeviceType"),
+    reader.read("_compatibleDeviceType")[0].split(","),
     rc.deviceType.value,
-    reader.read("_compatibleOperatingSystem"),
+    reader.read("_compatibleOperatingSystem")[0].split(","),
     rc.systemFamily.value,
-    reader.read("_compatibleProcessorCoresMinimum"),
+    reader.read("_compatibleProcessorCoresMinimum")[0],
     rc.concurrency.value,
     rc.computeRandomMHz ? rc.computeRandomMHz.value : 0,
     rc.language.value

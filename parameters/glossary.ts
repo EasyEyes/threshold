@@ -561,25 +561,25 @@ export const GLOSSARY: Glossary = {
   },
   markingBlankedNearTargetBool: {
     name: "markingBlankedNearTargetBool",
-    availability: "later",
+    availability: "now",
     example: "TRUE",
     explanation:
-      'Suppress any parts of the fixation cross or target X that are too close to the possible targets in this conditionGroup. This enables both meanings of "too close": markingBlankingRadiusReEccentricity and markingBlankingRadiusReTargetHeight.',
+      'When TRUE, markingBlankedNearTargetBool suppresses any parts of the fixation cross or target X that are too close to the possible targets in this conditionGroup. This enables both meanings of "too close": markingBlankingRadiusReEccentricity and markingBlankingRadiusReTargetHeight.',
     type: "boolean",
     default: "TRUE",
   },
   markingBlankingRadiusReEccentricity: {
     name: "markingBlankingRadiusReEccentricity",
-    availability: "later",
+    availability: "now",
     example: "0.5",
     explanation:
-      'Considering crowding, define "too close" distance as a fraction of radial eccentricity.',
+      'Considering crowding, define "too close" distance as a fraction of the target\'s radial eccentricity.',
     type: "numerical",
     default: "0.5",
   },
   markingBlankingRadiusReTargetHeight: {
     name: "markingBlankingRadiusReTargetHeight",
-    availability: "later",
+    availability: "now",
     example: "2",
     explanation:
       'Considering masking, define "too close" distance as a fraction of target height.',
@@ -588,26 +588,44 @@ export const GLOSSARY: Glossary = {
   },
   markingClippedToStimulusRectBool: {
     name: "markingClippedToStimulusRectBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
-      'Fixation and target marking can be restricted (true), protecting the screen margins, or (false) allowed to extend to screen edges, a "full bleed".',
+      'Fixation and target marking can be restricted (TRUE), protecting the screen margins, or (FALSE) allowed to extend to screen edges, a "full bleed".',
     type: "boolean",
     default: "FALSE",
   },
+  markingFixationMotionRadiusDeg: {
+    name: "markingFixationMotionRadiusDeg",
+    availability: "now",
+    example: "",
+    explanation: "**markingFixationMotionRadiusDeg**",
+    type: "",
+    default: "",
+  },
+  "**markingFixationMotionPeriodSec**": {
+    name: "**markingFixationMotionPeriodSec**",
+    availability: "now",
+    example: "",
+    explanation: "**markingFixationMotionPeriodSec**",
+    type: "",
+    default: "",
+  },
   markingFixationStrokeLengthDeg: {
     name: "markingFixationStrokeLengthDeg",
-    availability: "later",
+    availability: "now",
     example: "1",
-    explanation: "Stroke length in the fixation cross.",
+    explanation:
+      "Stroke length in the fixation cross. The cross consists of four strokes radially from the origin.",
     type: "numerical",
     default: "1",
   },
   markingFixationStrokeThicknessDeg: {
     name: "markingFixationStrokeThicknessDeg",
-    availability: "later",
+    availability: "now",
     example: "0.03",
-    explanation: "Stroke thickness in the fixation cross.",
+    explanation:
+      "markingFixationStrokeThicknessDeg sets Stroke thickness in the fixation cross.",
     type: "numerical",
     default: "0.03",
   },
@@ -631,7 +649,7 @@ export const GLOSSARY: Glossary = {
   },
   markingTargetStrokeLengthDeg: {
     name: "markingTargetStrokeLengthDeg",
-    availability: "later",
+    availability: "now",
     example: "1",
     explanation: "Stroke length in the target X.",
     type: "numerical",
@@ -639,7 +657,7 @@ export const GLOSSARY: Glossary = {
   },
   markingTargetStrokeThicknessDeg: {
     name: "markingTargetStrokeThicknessDeg",
-    availability: "later",
+    availability: "now",
     example: "0.03",
     explanation: "Stroke thickness in the target X.",
     type: "numerical",
@@ -655,7 +673,7 @@ export const GLOSSARY: Glossary = {
   },
   markThePossibleTargetsBool: {
     name: "markThePossibleTargetsBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
       "If true, draw an X at every possible target location, considering all conditions in this conditionGroup. ",
@@ -1263,7 +1281,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "radial",
     explanation:
-      'spacingDirection. When eccentricity is nonzero then spacingDirection can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then spacingDirection can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is an error to request radial or tangential at eccentricity zero.',
+      'spacingDirection. When eccentricity is nonzero then spacingDirection can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then spacingDirection can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is an error to request radial or tangential spacingDirection at eccentricity zero.',
     type: "categorical",
     default: "radial",
     categories: [
