@@ -118,6 +118,7 @@ import {
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
+  addApparatusInfoToData,
   degreesToPixels,
 } from "./components/utils.js";
 import { buildWindowErrorHandling } from "./components/errorHandling.js";
@@ -2796,6 +2797,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
       /* -------------------------------------------------------------------------- */
+
+      addApparatusInfoToData(displayOptions, rc, psychoJS, stimulusParameters);
 
       // ie time spent in `trialRoutineBegin`
       psychoJS.experiment.addData(

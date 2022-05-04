@@ -308,6 +308,25 @@ export const addBlockStaircaseSummariesToData = (loop, psychoJS) => {
 };
 
 /**
+ * Add information about the general testing apparatus, ie the physical
+ * set-up of the computer and participant.
+ *
+ */
+export const addApparatusInfoToData = (
+  displayOptions,
+  rc,
+  psychoJS,
+  stimulusParameters = undefined
+) => {
+  const pxPerCm = Math.round(displayOptions.pixPerCm * 100) / 100;
+  psychoJS.experiment.addData("viewingDistanceCm", viewingDistanceCm.current);
+  psychoJS.experiment.addData("pxPerCm", pxPerCm);
+  psychoJS.experiment.addData("screenWidthPx", rc.windowWidthPx.value);
+  psychoJS.experiment.addData("screenHeightPx", rc.windowHeightPx.value);
+  // targetSpacingPx
+};
+
+/**
  * Element-wise check of whether two arrays are equal
  * @see https://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript/16430730
  * @param {any[]} a
@@ -372,21 +391,6 @@ export const rotate = (l) => {
   const rotated = [...l];
   rotated.push(rotated.shift());
   return rotated;
-};
-
-export const levelFromTargetHeight = (
-  targetHeightPx,
-  spacingOverSizeRatio,
-  pixPerCm,
-  viewingDistanceCm
-) => {
-  const spacingPx = Math.round(targetHeightPx * spacingOverSizeRatio);
-  const spacingDeg = pixelsToDegrees(spacingPx, {
-    pixPerCm: pixPerCm,
-    viewingDistanceCm: viewingDistanceCm,
-  });
-  const targetLevel = Math.log10(spacingDeg);
-  return targetLevel;
 };
 
 /** 

@@ -1724,6 +1724,24 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "40",
   },
+  viewingDistanceDesiredHeightDeg: {
+    name: "viewingDistanceDesiredHeightDeg",
+    availability: "now",
+    example: "30",
+    explanation:
+      "viewingDistanceDesiredHeightDeg sets the viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. If both viewingDistanceDesiredHeightDeg and viewingDistanceDesiredHeightDeg are nonzero then they are treated as minimum height and width and the desired viewing distance will be the maximum viewing distance that provides at least the requested height and width in deg. It is an error for both viewingDistanceDesiredHeightDeg and viewingDistanceDesiredCm to be nonzero.",
+    type: "numerical",
+    default: "0",
+  },
+  viewingDistanceDesiredWidthDeg: {
+    name: "viewingDistanceDesiredWidthDeg",
+    availability: "now",
+    example: "30",
+    explanation:
+      "viewingDistanceDesiredWidthDeg sets the viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. It is an error for both viewingDistanceDesiredWidthDeg and viewingDistanceDesiredCm to be nonzero.",
+    type: "numerical",
+    default: "0",
+  },
   viewingDistanceNudgingBool: {
     name: "viewingDistanceNudgingBool",
     availability: "now",
