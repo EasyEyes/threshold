@@ -10,6 +10,8 @@ rc.init();
 // stats.js
 export const stats = { current: undefined, on: false };
 
+export const usingGaze = { current: undefined };
+
 /* ------------------------- Grid / Display Options ------------------------- */
 
 export const displayOptions = Object.seal({
@@ -43,8 +45,14 @@ export const fontCharacterSet = { current: undefined, where: undefined };
 
 export const fixationConfig = {
   size: 45,
-  pos: [0, 0],
+  pos: [0, 0], // Nominal, scientist specified position
   show: true,
+  currentPos: [0, 0], // Actually, current position
+  strokeLength: 100,
+  strokeWidth: 10,
+  markingFixationMotionRadiusDeg: 0,
+  markingFixationMotionPeriodSec: 1,
+  stim: undefined,
 };
 
 export const showConditionNameConfig = {

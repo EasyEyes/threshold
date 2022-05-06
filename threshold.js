@@ -93,6 +93,7 @@ import {
   targetSoundFolder,
   maskerSoundFolder,
   musicExpert,
+  usingGaze,
 } from "./components/global.js";
 
 import {
@@ -100,6 +101,8 @@ import {
   getTinyHint,
   psychoJS,
   renderObj,
+  initMouse,
+  psychojsMouse,
 } from "./components/globalPsychoJS.js";
 
 ////
@@ -149,6 +152,7 @@ import {
   addBeepButton,
   addProceedButton,
   dynamicSetSize,
+  gyrateFixation,
   instructionsText,
   removeBeepButton,
   removeProceedButton,
@@ -266,6 +270,7 @@ import {
   displayCompatibilityMessage,
   hideCompatibilityMessage,
 } from "./components/compatibilityCheck.js";
+import { getFixationVerticies } from "./components/fixation.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -449,6 +454,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     units: "height",
     waitBlanking: true,
   });
+
+  initMouse();
+  logger("threshold.js/experiment psychojsMouse", psychojsMouse.getPos());
 
   // schedule the experiment:
   psychoJS.schedule(
@@ -656,20 +664,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       await initSoundFiles(MaskerFolders, targetFolders);
     }
 
-    fixation = new visual.TextStim({
+    fixation = new visual.ShapeStim({
       win: psychoJS.window,
       name: "fixation",
-      text: "+",
-      font: "Open Sans",
       units: "pix",
-      pos: [0, 0],
-      height: 45.0,
-      wrapWidth: undefined,
-      ori: 0.0,
+      vertices: getFixationVerticies(fixationConfig.strokeLength),
+      lineWidth: fixationConfig.strokeWidth,
+      closeShape: false,
       color: new util.Color("black"),
       opacity: undefined,
       depth: -6.0,
     });
+    fixationConfig.stim = fixation;
+    // fixation = new visual.TextStim({
+    //   win: psychoJS.window,
+    //   name: "fixation",
+    //   text: "+",
+    //   font: "Open Sans",
+    //   units: "pix",
+    //   pos: [0, 0],
+    //   height: 45.0,
+    //   wrapWidth: undefined,
+    //   ori: 0.0,
+    //   color: new util.Color("black"),
+    //   opacity: undefined,
+    //   depth: -6.0,
+    // });
 
     flanker1 = new visual.TextStim({
       win: psychoJS.window,
@@ -1876,7 +1896,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker2.setText("C");
           flanker2.setHeight(h);
 
-          fixation.setHeight(fixationConfig.size);
+          // fixation.setHeight(fixationConfig.size);
           fixation.setPos([0, 0]);
 
           fixation.setAutoDraw(true);
@@ -2074,6 +2094,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* --------------------------------- /PUBLIC -------------------------------- */
 
+      usingGaze.current = paramReader.read("calibrateTrackGazeBool", BC);
+
       switchKind(targetKind.current, {
         sound: () => {
           //change to proper instruction setup from the google sheet
@@ -2165,11 +2187,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
 
-          fixation.setHeight(fixationConfig.size);
+          // fixation.setHeight(fixationConfig.size);
           fixation.setPos(fixationConfig.pos);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           fixation.setAutoDraw(true);
+          fixationConfig.markingFixationMotionRadiusDeg = paramReader.read(
+            "markingFixationMotionRadiusDeg",
+            BC
+          );
+          fixationConfig.markingFixationMotionPeriodSec = paramReader.read(
+            "markingFixationMotionPeriodSec",
+            BC
+          );
+          logger(
+            "fixationConfig.markingFixationMotionRadiusDeg",
+            fixationConfig.markingFixationMotionRadiusDeg
+          );
 
           clickedContinue.current = false;
           document.addEventListener("click", _takeFixationClick);
@@ -2305,7 +2339,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // Fixation placement does not depend on the value of "spacingRelationToSize"...
           fixation.setPos(fixationConfig.pos);
-          fixation.setHeight(fixationConfig.size);
           // ... neither does target location...
           const targetEccentricityXYPx = XYPixOfXYDeg(
             letterConfig.targetEccentricityXYDeg,
@@ -2601,6 +2634,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
             targetSpecs.setAutoDraw(true);
           }
+          // gyrateFixation(fixation, 4, t, displayOptions);
+          gyrateFixation(fixation, t, displayOptions);
         },
       });
 
@@ -3349,10 +3384,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             currentLoop.nRemaining !== 0
           ) {
             // currentLoop.addResponse(key_resp.corr, level);
-            const usingGaze = paramReader.read(
-              "calibrateTrackGazeBool",
-              status.block_condition
-            );
             if (
               !addResponseIfTolerableError(
                 currentLoop,

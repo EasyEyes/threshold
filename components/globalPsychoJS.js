@@ -1,4 +1,4 @@
-import { PsychoJS } from "../psychojs/src/core/index.js";
+import { PsychoJS, Mouse } from "../psychojs/src/core/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
 import { instructionFont } from "./global.js";
@@ -38,3 +38,14 @@ export const getTinyHint = () => {
     autoDraw: false,
   });
 };
+
+export let psychojsMouse;
+export const initMouse = () => {
+  psychojsMouse = new Mouse({
+    name: "psychojsMouse",
+    win: psychoJS.window,
+    autoLog: false,
+  });
+};
+
+export const to_px = util.to_px;

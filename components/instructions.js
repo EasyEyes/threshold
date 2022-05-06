@@ -6,7 +6,8 @@ import {
 } from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { _onlyClick } from "./response.js";
-import { hideCursor } from "./utils.js";
+import { hideCursor, XYPixOfXYDeg, isInRect, logger } from "./utils.js";
+import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS.js";
 
 export const returnOrClickProceed = (L, responseType, prev = "") => {
   switch (responseType) {
@@ -193,13 +194,35 @@ export const _takeFixationClick = (e) => {
     clickedContinue.current = false;
     return;
   }
-
-  if (
-    Math.hypot(cX - (window.innerWidth >> 1), cY - (window.innerHeight >> 1)) <
-    fixationConfig.size
-  ) {
+  cX -= Math.round(psychoJS._window._size[0] / 2);
+  cY = -cY + Math.round(psychoJS._window._size[1] / 2);
+  // Analogs to [cX, cY], as determined by psychojs
+  const [pX, pY] = to_px(
+    psychojsMouse.getPos(),
+    "height",
+    psychoJS.window,
+    true
+  );
+  // Verify positions are consistent
+  if (cX !== pX || cY !== pY)
+    console.error(
+      `[cX,cY] are inconsistent with mouse position registered by psychoJS, [cX,cY] ${[
+        cX,
+        cY,
+      ]}, [pX, pY] ${[pX, pY]}`
+    );
+  const halfStroke = Math.round(fixationConfig.strokeLength / 2);
+  const fixationBounds = {
+    left: fixationConfig.currentPos[0] - halfStroke,
+    right: fixationConfig.currentPos[0] + halfStroke,
+    bottom: fixationConfig.currentPos[1] - halfStroke,
+    top: fixationConfig.currentPos[1] + halfStroke,
+  };
+  const clickingInFixation = isInRect(cX, cY, fixationBounds);
+  if (clickingInFixation) {
     // Clicked on fixation
     hideCursor();
+    if (fixationConfig.stim) fixationConfig.stim.setAutoDraw(false);
     clickedContinue.current = true;
     clickedContinue.timestamps.push(performance.now());
   } else {
@@ -230,4 +253,23 @@ const getSumHeight = (instructionList) => {
   for (const instruction of instructionList)
     total += instruction.getBoundingBox().height;
   return total;
+};
+
+export const gyrateFixation = (fixation, t, displayOptions) => {
+  const rPx = Math.abs(
+    XYPixOfXYDeg(fixationConfig.pos, displayOptions)[0] -
+      XYPixOfXYDeg(
+        [
+          fixationConfig.pos[0] + fixationConfig.markingFixationMotionRadiusDeg,
+          fixationConfig.pos[1],
+        ],
+        displayOptions
+      )[0]
+  );
+  const newFixationXY = [
+    fixationConfig.pos[0] + Math.cos(t) * rPx,
+    fixationConfig.pos[1] + Math.sin(t) * rPx,
+  ];
+  fixationConfig.currentPos = newFixationXY;
+  fixation.setPos(newFixationXY);
 };
