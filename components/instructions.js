@@ -266,9 +266,10 @@ export const gyrateFixation = (fixation, t, displayOptions) => {
         displayOptions
       )[0]
   );
+  const period = fixationConfig.markingFixationMotionPeriodSec;
   const newFixationXY = [
-    fixationConfig.pos[0] + Math.cos(t) * rPx,
-    fixationConfig.pos[1] + Math.sin(t) * rPx,
+    fixationConfig.pos[0] + Math.cos(t / (period / (2 * Math.PI))) * rPx,
+    fixationConfig.pos[1] + Math.sin(t / (period / (2 * Math.PI))) * rPx,
   ];
   fixationConfig.currentPos = newFixationXY;
   fixation.setPos(newFixationXY);
