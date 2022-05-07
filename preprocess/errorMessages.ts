@@ -54,7 +54,13 @@ export const ILL_FORMED_UNDERSCORE_PARAM = (
 export const INCORRECT_PARAMETER_TYPE = (
   offendingValues: { value: string; block: number }[],
   parameter: string,
-  correctType: "integer" | "numerical" | "text" | "boolean" | "categorical",
+  correctType:
+    | "integer"
+    | "numerical"
+    | "text"
+    | "boolean"
+    | "categorical"
+    | "multicategorical",
   categories?: string[]
 ): EasyEyesError => {
   const offendingMessage = offendingValues.map(

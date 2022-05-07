@@ -37,8 +37,11 @@ async function processLanguageSheet() {
       type: parameter["Type"],
       default: parameter["Default"],
     };
-    // Categories is only relevant for the "categorical" type
-    if (parameterInfo.type === "categorical")
+    // Categories is only relevant for the "categorical" and "multicategorica" types
+    if (
+      parameterInfo.type === "categorical" ||
+      parameterInfo.type === "multicategorical"
+    )
       parameterInfo.categories = parameter["Categories"].split(", ");
     // Exclude rows that Denis used for other notes
     // if (parameterInfo.name && parameterInfo.type)

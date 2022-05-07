@@ -3390,10 +3390,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 key_resp.corr,
                 level,
                 tolerances,
-                usingGaze,
+                usingGaze.current,
                 psychoJS
               ) &&
-              usingGaze
+              usingGaze.current
             ) {
               // if not tolerable error, then nudge gaze
               rc.nudgeGaze({

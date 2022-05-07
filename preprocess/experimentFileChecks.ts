@@ -349,16 +349,32 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
     column: string[],
     typeCheck: (s: string) => boolean,
     columnName: string,
-    correctType: "integer" | "numerical" | "text" | "boolean" | "categorical",
+    correctType:
+      | "integer"
+      | "numerical"
+      | "text"
+      | "boolean"
+      | "categorical"
+      | "multicategorical",
     categories?: string[]
   ): void => {
     const notType = (s: string): boolean => !typeCheck(s);
     if (column.some(notType)) {
-      const offendingValues = column
+      let offendingValues = column
         .map((e: string, i: number) => {
           return { value: e, block: i };
         })
         .filter((d: { value: string; block: number }) => notType(d.value));
+      if (correctType === "multicategorical")
+        offendingValues = offendingValues.map((x) => {
+          return {
+            value: x.value
+              .split(" ")
+              .filter((s) => !categories?.includes(s))
+              .join(" "),
+            block: x.block,
+          };
+        });
       errors.push(
         INCORRECT_PARAMETER_TYPE(
           offendingValues,
@@ -417,6 +433,20 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
           checkType(
             column,
             validCategory,
+            columnName,
+            correctType,
+            GLOSSARY[columnName]["categories"] as string[]
+          );
+          break;
+        case "multicategorical":
+          const validMulti = (s: string): boolean =>
+            s
+              .split(" ")
+              .filter((x) => x)
+              .every((s) => GLOSSARY[columnName]["categories"].includes(s));
+          checkType(
+            column,
+            validMulti,
             columnName,
             correctType,
             GLOSSARY[columnName]["categories"] as string[]
