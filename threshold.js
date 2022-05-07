@@ -294,13 +294,13 @@ const paramReaderInitialized = async (reader) => {
   }
 
   const compMsg = checkSystemCompatibility(
-    reader.read("_compatibleBrowser")[0].split(","),
+    reader.read("_compatibleBrowser")[0].split(" "),
     rc.browser.value,
     reader.read("_compatibleBrowserVersionMinimum")[0],
     rc.browserVersion.value,
-    reader.read("_compatibleDeviceType")[0].split(","),
+    reader.read("_compatibleDeviceType")[0].split(" "),
     rc.deviceType.value,
-    reader.read("_compatibleOperatingSystem")[0].split(","),
+    reader.read("_compatibleOperatingSystem")[0].split(" "),
     rc.systemFamily.value,
     reader.read("_compatibleProcessorCoresMinimum")[0],
     rc.concurrency.value,
@@ -308,7 +308,10 @@ const paramReaderInitialized = async (reader) => {
     rc.language.value
   );
 
-  const proceed = await displayCompatibilityMessage(compMsg["msg"]);
+  const proceed = await displayCompatibilityMessage(
+    compMsg["msg"],
+    rc.language.value
+  );
   hideCompatibilityMessage();
 
   if (proceed && !compMsg["proceed"]) {

@@ -172,6 +172,8 @@ export const checkSystemCompatibility = (
       ? hardwareConcurrency
       : Math.round(2 * computeRandomMHz)
   );
+  msg = msg.replace(/Mac/g, "macOS");
+  msg = msg.replace(/Microsoft Edge/g, "Edge");
 
   const describeDevice = msg;
 
@@ -221,7 +223,7 @@ const StringOfItems = (items) => {
   return itemString;
 };
 
-export const displayCompatibilityMessage = async (msg) => {
+export const displayCompatibilityMessage = async (msg, Language) => {
   return new Promise(async (resolve) => {
     //message wrapper
     const messageWrapper = document.createElement("div");
@@ -232,21 +234,40 @@ export const displayCompatibilityMessage = async (msg) => {
     messageWrapper.style.minWidth = "60vw";
     document.getElementById("root").style.display = "none";
 
+    // //create title msg
+    let titleMsg = document.createElement("h4");
+    titleMsg.innerHTML = phrases.EE_compatibilityTitle[Language];
+    let titleContainer = document.createElement("div");
+    titleContainer.style.textAlign = "center";
+    titleContainer.style.margin = "20px";
+    titleContainer.appendChild(titleMsg);
+    messageWrapper.appendChild(titleContainer);
+
     //create msg items
+
+    // msg.forEach((item) => {
+    //   let elem = document.createElement("span");
+    //   elem.innerHTML = item;
+    //   messageWrapper.appendChild(elem);
+    //   const sp = document.createElement("hr");
+    //   messageWrapper.appendChild(sp);
+    // });
+    var displayMsg = "";
     msg.forEach((item) => {
-      let elem = document.createElement("span");
-      elem.innerHTML = item;
-      messageWrapper.appendChild(elem);
-      const sp = document.createElement("hr");
-      messageWrapper.appendChild(sp);
+      displayMsg += item;
+      displayMsg += " ";
     });
+    let elem = document.createElement("span");
+    elem.innerHTML = displayMsg;
+    messageWrapper.appendChild(elem);
 
     //create proceed button
     const buttonWrapper = document.createElement("div");
     buttonWrapper.style.textAlign = "center";
     const proceedButton = document.createElement("button");
     proceedButton.classList.add("form-input-btn");
-    proceedButton.style.width = "6rem";
+    proceedButton.style.width = "7rem";
+    proceedButton.style.margin = "20px";
     proceedButton.id = "procced-btn";
     proceedButton.innerHTML = "Proceed";
     proceedButton.addEventListener("click", () => {
