@@ -289,9 +289,9 @@ const paramReaderInitialized = async (reader) => {
   buildWindowErrorHandling(reader);
   await sleep(250);
 
-  if (rc.concurrency.value <= 0) {
-    await rc.performance();
-  }
+  // if (rc.concurrency.value <= 0) {
+  //   await rc.performance();
+  // }
 
   const compMsg = checkSystemCompatibility(
     reader.read("_compatibleBrowser")[0].split(" "),

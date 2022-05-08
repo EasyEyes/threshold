@@ -27,6 +27,8 @@ export const checkSystemCompatibility = (
     );
   else deviceBrowserVersion = Number(deviceBrowserVersion[0]);
 
+  if (deviceSysFamily == "Mac") deviceSysFamily = "macOS";
+
   var deviceIsCompatibleBool = true;
   var msg = [];
   //compatibilityType ----> all, not, or a browser name
@@ -118,13 +120,11 @@ export const checkSystemCompatibility = (
       }
       break;
   }
-
   deviceIsCompatibleBool =
     deviceIsCompatibleBool && compatibleDevice.includes(deviceType);
   deviceIsCompatibleBool =
     deviceIsCompatibleBool &&
     hardwareConcurrency >= compatibleProcessorCoresMinimum;
-
   // Do substitutions to plug in the requirements.
   // BBB = allowed browser(s), separated by "or"
   // 111 = minimum version
