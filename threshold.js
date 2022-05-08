@@ -1198,7 +1198,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             trialsConditions,
             paramReader
           );
-          console.log("trialsConditions", trialsConditions);
           trials = new data.MultiStairHandler({
             stairType: MultiStairHandler.StaircaseType.QUEST,
             psychoJS: psychoJS,
@@ -1221,7 +1220,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             "sound"
           );
-          console.log("trialsConditions", trialsConditions);
           trials = new data.MultiStairHandler({
             stairType: MultiStairHandler.StaircaseType.QUEST,
             psychoJS: psychoJS,
@@ -3354,12 +3352,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         letter: () => {
           console.log(letterTiming, tolerances);
-          calculateError(
-            letterTiming,
-            tolerances,
-            letterConfig.targetDurationSec,
-            target
-          );
+
+          //check logic. letterTiming.targetFinishSec and letterTiming.targetStartSec are undefined for simulated observer
+          if (
+            !(
+              simulated &&
+              simulated[status.block] &&
+              simulated[status.block][status.block_condition]
+            )
+          ) {
+            calculateError(
+              letterTiming,
+              tolerances,
+              letterConfig.targetDurationSec,
+              target
+            );
+          }
+
           // Add trial timing data
           psychoJS.experiment.addData(
             "trialFirstFrameSec",
