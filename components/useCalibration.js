@@ -4,7 +4,7 @@ import { soundGainDBSPL, rc } from "./global";
 
 export const useCalibration = (reader) => {
   return ifTrue([
-    ...reader.read("calibrateTestPerformanceBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__"),
