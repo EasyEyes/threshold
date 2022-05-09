@@ -299,7 +299,7 @@ export const GLOSSARY: Glossary = {
   _participantsHowMany: {
     name: "_participantsHowMany",
     availability: "now",
-    example: "100",
+    example: "20",
     explanation:
       "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "integer",
@@ -308,9 +308,9 @@ export const GLOSSARY: Glossary = {
   _pavloviaOfferPilotingOptionBool: {
     name: "_pavloviaOfferPilotingOptionBool",
     availability: "now",
-    example: "PILOTING",
+    example: "TRUE",
     explanation:
-      "EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two ways of running your experiment, PILOTING and RUNNING. PILOTING mode is free, but your experiment can only be run directly from the Pavlovia dashboard and cannot be deployed. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), but you get a URL that you can deploy. It is our impression that most Pavlovia users belong to institutions that own site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaOfferPilotingOptionBool be FALSE (the default) to disable the PILOTING option, to streamline the EasyEyes scientist page.",
+      "_pavloviaOfferPilotingOptionBool allows you to use the Pavlovia PILOTING mode. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but your experiment can only be run directly from the Pavlovia dashboard and cannot be deployed to anywhere else. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can deploy to anyone. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaOfferPilotingOptionBool be FALSE (the default) to disable the PILOTING option, to streamline the EasyEyes scientist page. When _pavloviaOfferPilotingOptionBool is FALSE, you just submit your table to the EasyEyes compiiler to receive your study URL, with no extra clicks.",
     type: "boolean",
     default: "FALSE",
   },
