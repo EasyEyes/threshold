@@ -683,7 +683,7 @@ const getLargestBoundsRatio = (
 
   // Runtime is negligible.
 
-  // denis.pelli@nyu.edu December 20, 2021
+  // denis.pelli AT nyu.edu December 20, 2021
   // Translated ajb December 20, 2021
 
   // Shift origin to the target
