@@ -6,7 +6,7 @@ import {
 } from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { _onlyClick } from "./response.js";
-import { hideCursor, XYPixOfXYDeg, isInRect, logger } from "./utils.js";
+import { hideCursor, XYPixOfXYDeg, logger } from "./utils.js";
 import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS.js";
 
 export const returnOrClickProceed = (L, responseType, prev = "") => {
@@ -211,14 +211,12 @@ export const _takeFixationClick = (e) => {
         cY,
       ]}, [pX, pY] ${[pX, pY]}`
     );
-  const halfStroke = Math.round(fixationConfig.strokeLength / 2);
-  const fixationBounds = {
-    left: fixationConfig.currentPos[0] - halfStroke,
-    right: fixationConfig.currentPos[0] + halfStroke,
-    bottom: fixationConfig.currentPos[1] - halfStroke,
-    top: fixationConfig.currentPos[1] + halfStroke,
-  };
-  const clickingInFixation = isInRect(cX, cY, fixationBounds);
+  const clickDistanceFromFixation = Math.hypot(
+    cX - fixationConfig.currentPos[0],
+    cY - fixationConfig.currentPos[1]
+  );
+  const clickingInFixation =
+    clickDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx;
   if (clickingInFixation) {
     // Clicked on fixation
     hideCursor();

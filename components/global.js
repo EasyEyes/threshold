@@ -44,15 +44,18 @@ export const font = {
 export const fontCharacterSet = { current: undefined, where: undefined };
 
 export const fixationConfig = {
-  size: 45,
   pos: [0, 0], // Nominal, scientist specified position
-  show: true,
   currentPos: [0, 0], // Actually, current position
-  strokeLength: 100,
-  strokeWidth: 10,
-  markingFixationMotionRadiusDeg: 0,
-  markingFixationMotionPeriodSec: 1,
-  stim: undefined,
+  show: true,
+  strokeLength: 45, // aka fixationStrokeLengthPx
+  strokeWidth: 2, // aka fixationStrokeThicknessPx
+  markingFixationHotSpotRadiusDeg: undefined,
+  markingFixationHotSpotRadiusPx: undefined,
+  markingFixationMotionRadiusDeg: undefined,
+  markingFixationMotionPeriodSec: undefined,
+  markingFixationStrokeLengthDeg: undefined,
+  markingFixationStrokeThicknessDeg: undefined,
+  stim: undefined, // psychoJS shapeStim
 };
 
 export const showConditionNameConfig = {

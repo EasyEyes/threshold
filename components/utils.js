@@ -145,6 +145,15 @@ export const pixelsToDegrees = (pixels, displayOptions) => {
   return degrees;
 };
 
+/**
+ *
+ * @param {number[]} xyDeg
+ * @param {object} displayOptions
+ * @param {number} displayOptions.pixPerCm Pixels per centimeter on participant screen
+ * @param {number[]} displayOptions.nearPointXYDeg Nearpoint of participant, in deg
+ * @param {number[]} displayOptions.nearPointXYPix Nearpoint of participant, in px
+ * @returns
+ */
 export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   if (
     !(

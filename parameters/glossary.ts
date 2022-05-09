@@ -305,14 +305,14 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "1",
   },
-  _pavloviaOfferPilotingOptionBool: {
-    name: "_pavloviaOfferPilotingOptionBool",
+  _pavloviaPreferRunningModeBool: {
+    name: "_pavloviaPreferRunningModeBool",
     availability: "now",
-    example: "TRUE",
+    example: "FALSE",
     explanation:
-      "_pavloviaOfferPilotingOptionBool allows you to use the Pavlovia PILOTING mode. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but your experiment can only be run directly from the Pavlovia dashboard and cannot be deployed to anywhere else. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can deploy to anyone. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaOfferPilotingOptionBool be FALSE (the default) to disable the PILOTING option, to streamline the EasyEyes scientist page. When _pavloviaOfferPilotingOptionBool is FALSE, you just submit your table to the EasyEyes compiiler to receive your study URL, with no extra clicks.",
+      "_pavloviaPreferRunningModeBool streamlines the use of Pavlovia's RUNNING mode when TRUE and streamlines the use of Pavlovia's PILOTING mode when FALSE. _pavloviaPreferRunningModeBool (default TRUE) helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, and cannot be deployed to anywhere else. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can deploy to anyone. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. If your experiment is already in RUNNING mode you can still convert to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
     type: "boolean",
-    default: "FALSE",
+    default: "TRUE",
   },
   _prolificEligibilityRequirements: {
     name: "_prolificEligibilityRequirements",
@@ -378,12 +378,21 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  calbrateGraphicsSpeedBool: {
+    name: "calbrateGraphicsSpeedBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "calbrateGraphicsSpeedBool asks the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter xxx in the CSV data file.",
+    type: "boolean",
+    default: "FALSE",
+  },
   calibrateScreenSizeBool: {
     name: "calibrateScreenSizeBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      "Adjust the screen image of a common object of known size to match, to determine the size in cm of the participant's screen. Thanks to Li et al. 2020.",
+      "calibrateScreenSizeBool asks the Remote Calibrator (which runs at beginning of the experiment) to get the participant's help to measure the screen size. Adjust the screen image of a common object of known size to match, to determine the size in cm of the participant's screen. Thanks to Li et al. 2020.",
     type: "boolean",
     default: "TRUE",
   },
@@ -402,15 +411,6 @@ export const GLOSSARY: Glossary = {
     example: "TRUE",
     explanation:
       "Requests sound calibration, using the participant's iPhone. Early exit if no iPhone is available.",
-    type: "boolean",
-    default: "FALSE",
-  },
-  calibrateTestPerformanceBool: {
-    name: "calibrateTestPerformanceBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "Test the performance of the machine using Remote Calibrator .performance() function.",
     type: "boolean",
     default: "FALSE",
   },

@@ -270,7 +270,10 @@ import {
   displayCompatibilityMessage,
   hideCompatibilityMessage,
 } from "./components/compatibilityCheck.js";
-import { getFixationVerticies } from "./components/fixation.js";
+import {
+  getFixationVerticies,
+  updateFixationConfig,
+} from "./components/fixation.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -679,20 +682,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       depth: -6.0,
     });
     fixationConfig.stim = fixation;
-    // fixation = new visual.TextStim({
-    //   win: psychoJS.window,
-    //   name: "fixation",
-    //   text: "+",
-    //   font: "Open Sans",
-    //   units: "pix",
-    //   pos: [0, 0],
-    //   height: 45.0,
-    //   wrapWidth: undefined,
-    //   ori: 0.0,
-    //   color: new util.Color("black"),
-    //   opacity: undefined,
-    //   depth: -6.0,
-    // });
 
     flanker1 = new visual.TextStim({
       win: psychoJS.window,
@@ -873,8 +862,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // TODO use actual nearPoint, from RC
     displayOptions.nearPointXYDeg = [0, 0]; // TEMP
     displayOptions.nearPointXYPix = [0, 0]; // TEMP
-    // TODO set fixation from the actual parameter
-    fixationConfig.pos = [0, 0];
 
     displayOptions.windowWidthCm = rc.screenWidthCm
       ? rc.screenWidthCm.value
@@ -1209,9 +1196,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             seed: Math.round(performance.now()),
           });
 
-          // TODO set fixation from the actual parameter
-          fixationConfig.pos = [0, 0];
-          fixationConfig.size = 45;
           fixationConfig.show = true;
         },
         sound: () => {
@@ -1897,8 +1881,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker2.setText("C");
           flanker2.setHeight(h);
 
-          // fixation.setHeight(fixationConfig.size);
-          fixation.setPos([0, 0]);
+          fixation.setVertices(getFixationVerticies(h));
+          fixation.setLineWidth(5);
 
           fixation.setAutoDraw(true);
           target.setAutoDraw(true);
@@ -2188,23 +2172,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
 
-          // fixation.setHeight(fixationConfig.size);
-          fixation.setPos(fixationConfig.pos);
+          updateFixationConfig(paramReader, BC);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           fixation.setAutoDraw(true);
-          fixationConfig.markingFixationMotionRadiusDeg = paramReader.read(
-            "markingFixationMotionRadiusDeg",
-            BC
-          );
-          fixationConfig.markingFixationMotionPeriodSec = paramReader.read(
-            "markingFixationMotionPeriodSec",
-            BC
-          );
-          logger(
-            "fixationConfig.markingFixationMotionRadiusDeg",
-            fixationConfig.markingFixationMotionRadiusDeg
-          );
 
           clickedContinue.current = false;
           document.addEventListener("click", _takeFixationClick);
@@ -2244,9 +2215,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             .split("");
 
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
-
-          fixationConfig.size = 45; // TODO use .csv parameters, ie draw as 2 lines, not one letter
-          fixationConfig.show = reader.read("markTheFixationBool", BC);
 
           letterConfig.targetSizeIsHeightBool = reader.read(
             "targetSizeIsHeightBool",
