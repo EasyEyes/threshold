@@ -1,5 +1,5 @@
 import { phrases } from "./i18n";
-import { debug, ifTrue, logger, loggerText } from "./utils";
+import { debug, ifTrue, loggerText } from "./utils";
 import { soundGainDBSPL, rc } from "./global";
 
 export const useCalibration = (reader) => {
@@ -26,7 +26,9 @@ export const ifAnyCheck = (reader) => {
 export const formCalibrationList = (reader) => {
   const tasks = [];
 
-  if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__")))
+  if (
+    ifTrue(reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"))
+  )
     tasks.push({
       name: "performance",
       callback: (data) => {
