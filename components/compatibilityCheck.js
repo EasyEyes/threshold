@@ -186,6 +186,7 @@ export const checkSystemCompatibility = (
   if (deviceIsCompatibleBool && isProlificPreviewExperiment())
     msg.push(phrases.EE_incompatibleReturnToProlific[Language]);
 
+  msg.push(`[Study URL: ${window.location.toString()} ]`);
   return { msg: msg, proceed: deviceIsCompatibleBool };
 };
 
