@@ -5,7 +5,7 @@ import Papa from "papaparse";
 import {
   isFormMissing,
   isFontMissing,
-  validatedCommas,
+  // validatedCommas,
   validateExperimentDf,
   isTextMissing,
   populateDefaultValues,
@@ -140,7 +140,7 @@ export const prepareExperimentFileForThreshold = async (
   //validate requested Folders;
   const requestedFolderList: string[] = getFolderNames(parsed);
   // Check that every row has the same number of values
-  const unbalancedCommasError = validatedCommas(parsed);
+  // const unbalancedCommasError = validatedCommas(parsed);
 
   // Create a dataframe for easy data manipulation.
   let df = dataframeFromPapaParsed(parsed);
@@ -148,13 +148,14 @@ export const prepareExperimentFileForThreshold = async (
   // Run the compiler checks on our experiment
   try {
     errors.push(
-      ...(unbalancedCommasError
-        ? [unbalancedCommasError, ...validateExperimentDf(df)]
-        : validateExperimentDf(df))
+      validateExperimentDf(df)
+      // ...(unbalancedCommasError
+      //   ? [unbalancedCommasError, ...validateExperimentDf(df)]
+      //   : validateExperimentDf(df))
     );
   } catch (e) {
     console.error(e);
-    if (unbalancedCommasError) errors.push(unbalancedCommasError);
+    // if (unbalancedCommasError) errors.push(unbalancedCommasError);
   }
 
   if (filename) {

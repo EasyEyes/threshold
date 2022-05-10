@@ -310,23 +310,23 @@ export const populateDefaultValues = (df: any): any => {
   let populatedDf = df;
   df.listColumns().forEach((columnName: string) => {
     if (GLOSSARY.hasOwnProperty(columnName)) {
-      if (
-        !arraysEqual(
-          df
-            .select(columnName)
-            .toArray()
-            .map((x: any[]): any => x[0]),
-          df
-            .select(columnName)
-            .toArray()
-            .map((x: any[]): any => x[0])
-            .filter((x: any) => x)
-        )
-      ) {
-        console.error(
-          `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
-        );
-      }
+      // if (
+      //   !arraysEqual(
+      //     df
+      //       .select(columnName)
+      //       .toArray()
+      //       .map((x: any[]): any => x[0]),
+      //     df
+      //       .select(columnName)
+      //       .toArray()
+      //       .map((x: any[]): any => x[0])
+      //       .filter((x: any) => x)
+      //   )
+      // ) {
+      //   console.error(
+      //     `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
+      //   );
+      // }
       const column: string[] = df
         .select(columnName)
         .toArray()
@@ -387,23 +387,23 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
   };
   df.listColumns().forEach((columnName: string) => {
     if (GLOSSARY.hasOwnProperty(columnName) && GLOSSARY[columnName]["type"]) {
-      if (
-        !arraysEqual(
-          df
-            .select(columnName)
-            .toArray()
-            .map((x: any[]): any => x[0]),
-          df
-            .select(columnName)
-            .toArray()
-            .map((x: any[]): any => x[0])
-            .filter((x: any) => x)
-        )
-      ) {
-        console.error(
-          `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
-        );
-      }
+      // if (
+      //   !arraysEqual(
+      //     df
+      //       .select(columnName)
+      //       .toArray()
+      //       .map((x: any[]): any => x[0]),
+      //     df
+      //       .select(columnName)
+      //       .toArray()
+      //       .map((x: any[]): any => x[0])
+      //       .filter((x: any) => x)
+      //   )
+      // ) {
+      //   console.error(
+      //     `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
+      //   );
+      // }
       const column: string[] = df
         .select(columnName)
         .toArray()
