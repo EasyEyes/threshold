@@ -56,6 +56,8 @@ export const fixationConfig = {
   markingFixationMotionPeriodSec: undefined,
   markingFixationStrokeLengthDeg: undefined,
   markingFixationStrokeThicknessDeg: undefined,
+  markingOffsetBeforeTargetOnsetSecs: undefined,
+  markingOnsetAfterTargetOffsetSecs: undefined,
   stim: undefined, // psychoJS shapeStim
 };
 
@@ -78,6 +80,7 @@ export const letterConfig = Object.seal({
   spacingOverSizeRatio: undefined,
   spacingRelationToSize: undefined,
   flankerCharacters: [undefined, undefined],
+  delayBeforeStimOnsetSec: undefined,
   targetSafetyMarginSec: undefined,
 });
 

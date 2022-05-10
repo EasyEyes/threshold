@@ -2208,6 +2208,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // TODO check that we are actually trying to test for "spacing", not "size"
 
           letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
+          letterConfig.delayBeforeStimOnsetSec = reader.read(
+            "markingOffsetBeforeTargetOnsetSecs",
+            BC
+          );
           letterConfig.spacingDirection = reader.read("spacingDirection", BC);
           letterConfig.spacingSymmetry = reader.read("spacingSymmetry", BC);
 
@@ -2833,17 +2837,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       t = trialClock.getTime();
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
 
-      const uniDelay = 0;
+      const delayBeforeStimOnsetSec =
+        targetKind.current === "letter"
+          ? letterConfig.delayBeforeStimOnsetSec
+          : 0;
       /* -------------------------------------------------------------------------- */
       if (frameN === 0) {
         frameRemains =
-          uniDelay +
+          delayBeforeStimOnsetSec +
           letterConfig.targetDurationSec -
           psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
 
         // !
         // TODO this is misleading, ie in `letter` targetKind the stimulus onset isn't until the target is drawn
-        //     if `uniDelay !== 0` then this `clickToStimulusOnsetSec` would be `uniDelay` early to the stimulus
+        //     if `delayBeforeStimOnsetSec !== 0` then this `clickToStimulusOnsetSec` would be `delayBeforeStimOnsetSec` early to the stimulus
         //     actually being drawn.
         psychoJS.experiment.addData(
           "clickToStimulusOnsetSec",
@@ -2917,7 +2924,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           simulated[status.block] &&
           simulated[status.block][status.block_condition])
       ) {
-        if (t >= uniDelay && key_resp.status === PsychoJS.Status.NOT_STARTED) {
+        if (
+          t >= delayBeforeStimOnsetSec &&
+          key_resp.status === PsychoJS.Status.NOT_STARTED
+        ) {
           // keep track of start time/frame for later
           key_resp.tStart = t; // (not accounting for frame time here)
           key_resp.frameNStart = frameN; // exact frame index
@@ -3075,7 +3085,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       // *flanker1* updates
-      if (t >= uniDelay && flanker1.status === PsychoJS.Status.NOT_STARTED) {
+      if (
+        t >= delayBeforeStimOnsetSec &&
+        flanker1.status === PsychoJS.Status.NOT_STARTED
+      ) {
         // keep track of start time/frame for later
         flanker1.tStart = t; // (not accounting for frame time here)
         flanker1.frameNStart = frameN; // exact frame index
@@ -3102,7 +3115,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letterTiming.crosshairClickedTimestamp =
           clickedContinue.timestamps[clickedContinue.timestamps.length - 1];
       }
-      if (t >= uniDelay && target.status === PsychoJS.Status.NOT_STARTED) {
+      if (
+        t >= delayBeforeStimOnsetSec &&
+        target.status === PsychoJS.Status.NOT_STARTED
+      ) {
         // keep track of start time/frame for later
         target.tStart = t; // (not accounting for frame time here)
         target.frameNStart = frameN; // exact frame index
@@ -3140,7 +3156,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       // *flanker2* updates
-      if (t >= uniDelay && flanker2.status === PsychoJS.Status.NOT_STARTED) {
+      if (
+        t >= delayBeforeStimOnsetSec &&
+        flanker2.status === PsychoJS.Status.NOT_STARTED
+      ) {
         // keep track of start time/frame for later
         flanker2.tStart = t; // (not accounting for frame time here)
         flanker2.frameNStart = frameN; // exact frame index
@@ -3168,7 +3187,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       const timeWhenRespondable =
-        uniDelay +
+        delayBeforeStimOnsetSec +
         letterConfig.targetSafetyMarginSec +
         letterConfig.targetDurationSec;
       updateBoundingBoxPolies(
@@ -3189,7 +3208,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // *showCharacterSet* updates
       if (
         t >=
-          uniDelay +
+          delayBeforeStimOnsetSec +
             letterConfig.targetSafetyMarginSec +
             letterConfig.targetDurationSec &&
         showCharacterSet.status === PsychoJS.Status.NOT_STARTED

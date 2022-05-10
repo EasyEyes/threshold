@@ -1,59 +1,36 @@
 import { displayOptions, fixationConfig } from "./global";
 import { logger, XYPixOfXYDeg } from "./utils";
 
-export const updateFixationConfig = (reader, BC = undefined) => {
+export const updateFixationConfig = (reader, BC) => {
   // TODO implement support for fixationLocationStrategy
   fixationConfig.pos = [0, 0];
   logger("fixationConfig.offset", fixationConfig.offset);
 
-  if (BC) {
-    fixationConfig.markingFixationStrokeLengthDeg = reader.read(
-      "markingFixationStrokeLengthDeg",
-      BC
-    );
-    fixationConfig.markingFixationStrokeThicknessDeg = reader.read(
-      "markingFixationStrokeThicknessDeg",
-      BC
-    );
-    fixationConfig.markingFixationMotionPeriodSec = reader.read(
-      "markingFixationMotionPeriodSec",
-      BC
-    );
-    fixationConfig.markingFixationMotionRadiusDeg = reader.read(
-      "markingFixationMotionRadiusDeg",
-      BC
-    );
-    fixationConfig.markingFixationHotSpotRadiusDeg = reader.read(
-      "markingFixationHotSpotRadiusDeg",
-      BC
-    );
-    fixationConfig.show = reader.read("markTheFixationBool", BC);
-  } else {
-    fixationConfig.markingFixationStrokeLengthDeg = reader.read(
-      "markingFixationStrokeLengthDeg",
-      "__ALL_BLOCKS__"
-    )[0];
-    fixationConfig.markingFixationStrokeThicknessDeg = reader.read(
-      "markingFixationStrokeThicknessDeg",
-      "__ALL_BLOCKS__"
-    )[0];
-    fixationConfig.markingFixationMotionPeriodSec = reader.read(
-      "markingFixationMotionPeriodSec",
-      "__ALL_BLOCKS__"
-    )[0];
-    fixationConfig.markingFixationMotionRadiusDeg = reader.read(
-      "markingFixationMotionRadiusDeg",
-      "__ALL_BLOCKS__"
-    )[0];
-    fixationConfig.markingFixationHotSpotRadiusDeg = reader.read(
-      "markingFixationHotSpotRadiusDeg",
-      "__ALL_BLOCKS__"
-    )[0];
-    fixationConfig.show = reader.read(
-      "markTheFixationBool",
-      "__ALL_BLOCKS__"
-    )[0];
-  }
+  fixationConfig.markingFixationStrokeLengthDeg = reader.read(
+    "markingFixationStrokeLengthDeg",
+    BC
+  );
+  fixationConfig.markingFixationStrokeThicknessDeg = reader.read(
+    "markingFixationStrokeThicknessDeg",
+    BC
+  );
+  fixationConfig.markingFixationMotionPeriodSec = reader.read(
+    "markingFixationMotionPeriodSec",
+    BC
+  );
+  fixationConfig.markingFixationMotionRadiusDeg = reader.read(
+    "markingFixationMotionRadiusDeg",
+    BC
+  );
+  fixationConfig.markingFixationHotSpotRadiusDeg = reader.read(
+    "markingFixationHotSpotRadiusDeg",
+    BC
+  );
+  fixationConfig.show = reader.read("markTheFixationBool", BC);
+  fixationConfig.markingOffsetBeforeTargetOnsetSecs = reader.read(
+    "markingOffsetBeforeTargetOnsetSecs",
+    BC
+  );
   if (
     ["pixPerCm", "nearPointXYDeg", "nearPointXYPix"].every(
       (s) => displayOptions[s]
