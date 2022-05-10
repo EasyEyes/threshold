@@ -692,7 +692,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "markingFixationHotSpotRadiusDeg is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.",
     type: "numerical",
-    default: "0.05",
+    default: "0.3",
   },
   markingFixationMotionPeriodSec: {
     name: "markingFixationMotionPeriodSec",
@@ -717,18 +717,18 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "1",
     explanation:
-      "markingFixationStrokeLengthDeg specifies the stroke length in the fixation cross. The cross consists of four strokes radially from the origin.",
+      "markingFixationStrokeLengthDeg specifies the stroke length in the fixation cross. The cross consists of two strokes, one horizontal, one vertical. Thus this is a diameter, unless the other marking parameters, which are mostly radii. ",
     type: "numerical",
-    default: "1",
+    default: "2",
   },
   markingFixationStrokeThicknessDeg: {
     name: "markingFixationStrokeThicknessDeg",
     availability: "now",
     example: "0.03",
     explanation:
-      "markingFixationStrokeThicknessDeg sets Stroke thickness in the fixation cross.",
+      "markingFixationStrokeThicknessDeg sets stroke thickness in the fixation cross.",
     type: "numerical",
-    default: "0.03",
+    default: "0.05",
   },
   markingOffsetBeforeTargetOnsetSecs: {
     name: "markingOffsetBeforeTargetOnsetSecs",
