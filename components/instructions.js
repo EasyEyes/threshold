@@ -6,7 +6,7 @@ import {
 } from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { _onlyClick } from "./response.js";
-import { hideCursor, XYPixOfXYDeg, logger } from "./utils.js";
+import { hideCursor, logger } from "./utils.js";
 import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS.js";
 
 export const returnOrClickProceed = (L, responseType, prev = "") => {
@@ -251,24 +251,4 @@ const getSumHeight = (instructionList) => {
   for (const instruction of instructionList)
     total += instruction.getBoundingBox().height;
   return total;
-};
-
-export const gyrateFixation = (fixation, t, displayOptions) => {
-  const rPx = Math.abs(
-    XYPixOfXYDeg(fixationConfig.pos, displayOptions)[0] -
-      XYPixOfXYDeg(
-        [
-          fixationConfig.pos[0] + fixationConfig.markingFixationMotionRadiusDeg,
-          fixationConfig.pos[1],
-        ],
-        displayOptions
-      )[0]
-  );
-  const period = fixationConfig.markingFixationMotionPeriodSec;
-  const newFixationXY = [
-    fixationConfig.pos[0] + Math.cos(t / (period / (2 * Math.PI))) * rPx,
-    fixationConfig.pos[1] + Math.sin(t / (period / (2 * Math.PI))) * rPx,
-  ];
-  fixationConfig.currentPos = newFixationXY;
-  fixation.setPos(newFixationXY);
 };

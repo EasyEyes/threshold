@@ -152,7 +152,6 @@ import {
   addBeepButton,
   addProceedButton,
   dynamicSetSize,
-  gyrateFixation,
   instructionsText,
   removeBeepButton,
   removeProceedButton,
@@ -272,6 +271,7 @@ import {
 } from "./components/compatibilityCheck.js";
 import {
   getFixationVerticies,
+  gyrateFixation,
   updateFixationConfig,
 } from "./components/fixation.js";
 
@@ -1883,6 +1883,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           fixation.setVertices(getFixationVerticies(h));
           fixation.setLineWidth(5);
+          fixation.setPos([0, 0]);
 
           fixation.setAutoDraw(true);
           target.setAutoDraw(true);
@@ -2603,7 +2604,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
             targetSpecs.setAutoDraw(true);
           }
-          // gyrateFixation(fixation, 4, t, displayOptions);
           gyrateFixation(fixation, t, displayOptions);
         },
       });

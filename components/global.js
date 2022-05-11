@@ -46,6 +46,7 @@ export const fontCharacterSet = { current: undefined, where: undefined };
 export const fixationConfig = {
   pos: [0, 0], // Nominal, scientist specified position
   currentPos: [0, 0], // Actually, current position
+  offset: undefined, // Random starting offset
   show: true,
   strokeLength: 45, // aka fixationStrokeLengthPx
   strokeWidth: 2, // aka fixationStrokeThicknessPx

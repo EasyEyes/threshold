@@ -4,6 +4,7 @@ import { logger, XYPixOfXYDeg } from "./utils";
 export const updateFixationConfig = (reader, BC = undefined) => {
   // TODO implement support for fixationLocationStrategy
   fixationConfig.pos = [0, 0];
+  logger("fixationConfig.offset", fixationConfig.offset);
 
   if (BC) {
     fixationConfig.markingFixationStrokeLengthDeg = reader.read(
@@ -74,6 +75,8 @@ export const updateFixationConfig = (reader, BC = undefined) => {
         )[0]
     );
   }
+  fixationConfig.offset =
+    Math.random() * fixationConfig.markingFixationMotionPeriodSec;
 
   if (fixationConfig.stim) {
     fixationConfig.stim.setPos(fixationConfig.pos);
@@ -95,4 +98,26 @@ export const getFixationVerticies = (strokeLength) => {
     [0, 0],
     [0, half],
   ];
+};
+
+export const gyrateFixation = (fixation, t, displayOptions) => {
+  const rPx = Math.abs(
+    XYPixOfXYDeg(fixationConfig.pos, displayOptions)[0] -
+      XYPixOfXYDeg(
+        [
+          fixationConfig.pos[0] + fixationConfig.markingFixationMotionRadiusDeg,
+          fixationConfig.pos[1],
+        ],
+        displayOptions
+      )[0]
+  );
+  const period = fixationConfig.markingFixationMotionPeriodSec;
+  const newFixationXY = [
+    fixationConfig.pos[0] +
+      Math.cos((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
+    fixationConfig.pos[1] +
+      Math.sin((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
+  ];
+  fixationConfig.currentPos = newFixationXY;
+  fixation.setPos(newFixationXY);
 };

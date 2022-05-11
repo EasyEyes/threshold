@@ -165,7 +165,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "4",
     explanation:
-      "https://en.wikipedia.org/wiki/Multi-core_processor This positive integer is returned by all modern browsers except Safari. For Safari, we estimate a value by doubling and rounding the speed of generating random numbers (in MHz).",
+      "_compatibleProcessorCoresMinimum is a positive integer. It's value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the speed of generating random numbers (in MHz). https://en.wikipedia.org/wiki/Multi-core_processor ",
     type: "integer",
     default: "0",
   },
@@ -174,7 +174,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "adultConsent2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown with extension MD) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. When checking your experiment table, the compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Scientific Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "_consentForm is the file name of your PDF (or plain-text Markdown with extension MD) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. When checking your experiment table, the compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Scientific Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
   },
