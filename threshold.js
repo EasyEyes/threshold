@@ -270,9 +270,9 @@ import {
   hideCompatibilityMessage,
 } from "./components/compatibilityCheck.js";
 import {
+  Fixation,
   getFixationVerticies,
   gyrateFixation,
-  updateFixationConfig,
 } from "./components/fixation.js";
 
 /* -------------------------------------------------------------------------- */
@@ -670,18 +670,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       await initSoundFiles(MaskerFolders, targetFolders);
     }
 
-    fixation = new visual.ShapeStim({
-      win: psychoJS.window,
-      name: "fixation",
-      units: "pix",
-      vertices: getFixationVerticies(fixationConfig.strokeLength),
-      lineWidth: fixationConfig.strokeWidth,
-      closeShape: false,
-      color: new util.Color("black"),
-      opacity: undefined,
-      depth: -6.0,
-    });
-    fixationConfig.stim = fixation;
+    fixation = new Fixation();
+    // fixationConfig.stim = fixation;
 
     flanker1 = new visual.TextStim({
       win: psychoJS.window,
@@ -2173,7 +2163,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
 
-          updateFixationConfig(paramReader, BC);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           fixation.setAutoDraw(true);
@@ -2311,9 +2300,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // DISPLAY OPTIONS
           displayOptions.window = psychoJS.window;
 
-          // Fixation placement does not depend on the value of "spacingRelationToSize"...
           fixation.setPos(fixationConfig.pos);
-          // ... neither does target location...
           const targetEccentricityXYPx = XYPixOfXYDeg(
             letterConfig.targetEccentricityXYDeg,
             displayOptions
@@ -2326,7 +2313,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.setPos(targetEccentricityXYPx);
           target.setFont(font.name);
 
-          // ...but size, and content of the target(& flankers) does.
           psychoJS.experiment.addData(
             "spacingRelationToSize",
             letterConfig.spacingRelationToSize
@@ -2343,6 +2329,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
+
+          fixation.update(
+            paramReader,
+            BC,
+            stimulusParameters.heightPx,
+            stimulusParameters.targetAndFlankersXYPx[0]
+          );
+          fixation.update(
+            paramReader,
+            BC,
+            stimulusParameters.heightPx,
+            stimulusParameters.targetAndFlankersXYPx[0]
+          );
 
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
           psychoJS.experiment.addData(
@@ -2459,7 +2458,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           trialComponents = [];
           trialComponents.push(key_resp);
-          trialComponents.push(fixation);
+          trialComponents.push(...fixation.stims);
           trialComponents.push(flanker1);
           trialComponents.push(target);
           trialComponents.push(flanker2);
@@ -2805,7 +2804,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
       /* -------------------------------------------------------------------------- */
-
       addApparatusInfoToData(displayOptions, rc, psychoJS, stimulusParameters);
 
       // ie time spent in `trialRoutineBegin`
@@ -3071,12 +3069,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       // *fixation* updates
+      logger("fixation.status", fixation.status);
+      logger("fixationConfig.show", fixationConfig.show);
       if (
         t >= 0.0 &&
         fixation.status === PsychoJS.Status.NOT_STARTED &&
         fixationConfig.show &&
         targetKind.current !== "sound"
       ) {
+        logger("in *fixation* updates with stims", fixation.stims);
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
