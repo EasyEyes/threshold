@@ -8,9 +8,11 @@
 
 export const _identify_trialInstructionRoutineEnd = (
   instructions,
-  _takeFixationClick
+  _takeFixationClick,
+  fixation
 ) => {
   document.removeEventListener("click", _takeFixationClick);
   document.removeEventListener("touchend", _takeFixationClick);
   instructions.setAutoDraw(false);
+  fixation.setAutoDraw(false);
 };

@@ -115,7 +115,7 @@ export class Fixation {
         });
       }
     });
-    this.stims = this.stims.slice(0, vertices.length + 1);
+    this.stims = this.stims.slice(0, vertices.length);
   }
   setAutoDraw(bool) {
     this.stims.forEach((stim) => stim.setAutoDraw(bool));

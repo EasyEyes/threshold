@@ -1673,7 +1673,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // instructions.setAutoDraw(false)
           instructions2.setAutoDraw(false);
-          fixation.setAutoDraw(false);
+          // fixation.setAutoDraw(false);
           target.setAutoDraw(false);
           flanker1.setAutoDraw(false);
           flanker2.setAutoDraw(false);
@@ -1917,6 +1917,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
+      fixation.setAutoDraw(false);
       eduInstructionClock.reset();
       routineTimer.reset();
       routineClock.reset();
@@ -2165,7 +2166,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           fixation.tStart = t;
           fixation.frameNStart = frameN;
-          fixation.setAutoDraw(true);
+          // fixation.setAutoDraw(true);
 
           clickedContinue.current = false;
           document.addEventListener("click", _takeFixationClick);
@@ -2674,7 +2675,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: () => {
           _identify_trialInstructionRoutineEnd(
             instructions,
-            _takeFixationClick
+            _takeFixationClick,
+            fixation
           );
         },
       });
@@ -2747,6 +2749,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             )
           );
+          // Turn off fixation at the start of `trialRoutine`
+          // fixation.setAutoDraw(false);
         },
       });
       ////
@@ -3082,7 +3086,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
 
-        fixation.setAutoDraw(true);
+        // fixation.setAutoDraw(true);
       }
 
       // *flanker1* updates
@@ -3349,6 +3353,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               simulated[status.block][status.block_condition]
             )
           ) {
+            logger("tolerances before calculateError", tolerances);
             calculateError(
               letterTiming,
               tolerances,
