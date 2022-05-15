@@ -186,7 +186,7 @@ export const checkSystemCompatibility = (
   if (deviceIsCompatibleBool && isProlificPreviewExperiment())
     msg.push(phrases.EE_incompatibleReturnToProlific[Language]);
 
-  msg.push(`[Study URL: ${window.location.toString()} ]`);
+  msg.push(`\n [Study URL: ${window.location.toString()} ]`);
   return { msg: msg, proceed: deviceIsCompatibleBool };
 };
 
@@ -255,10 +255,13 @@ export const displayCompatibilityMessage = async (msg, Language) => {
     // });
     var displayMsg = "";
     msg.forEach((item) => {
+      // if(item.includes('Study URL'))
+      //   displayMsg+="\n";
       displayMsg += item;
       displayMsg += " ";
     });
     let elem = document.createElement("span");
+    elem.style.whiteSpace = "pre-line";
     elem.innerHTML = displayMsg;
     messageWrapper.appendChild(elem);
 
