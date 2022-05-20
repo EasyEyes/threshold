@@ -6,13 +6,11 @@ import {
   logger,
   XYPixOfXYDeg,
   XYDegOfXYPix,
-  // rectFromPixiRect,
   getUnionRect,
   isRectInRect,
   norm,
   Rectangle,
   validateRectPoints,
-  displacementBetweenXY,
 } from "./utils.js";
 
 export const getCharacterSetBoundingBox = (
@@ -49,12 +47,12 @@ export const getCharacterSetBoundingBox = (
   const texts = [...characterSet.map((character) => character.repeat(repeats))];
   // Also add the individual characters, to show display charSet bounding boxes in typographic mode
   if (repeats > 1) texts.push(...characterSet);
-  // For (simplified assumption of) each possible stimuli text...
+  // For (simplified approximation of) each possible stimuli text...
   for (const textToSet of texts) {
     //... set our testStim to reflect that, so we can measure.
     const xy = [0, 0];
     testStim.setText(textToSet);
-    testStim.setPos(xy);
+    // testStim.setPos(xy);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
 
     // Get measurements of how far the text stim extends in each direction
@@ -183,6 +181,7 @@ export const restrictLevel = (
   switch (thresholdParameter) {
     case "size":
       [sizeDeg, stimulusParameters] = restrictSizeDeg(
+        proposedLevel,
         letterConfig.targetEccentricityXYDeg,
         targetKind.current,
         screenRectPx,
@@ -190,7 +189,7 @@ export const restrictLevel = (
         targetSizeIsHeightBool,
         characterSetRectPx,
         spacingOverSizeRatio,
-        displayOptions
+        thresholdParameter
       );
       level = Math.log10(sizeDeg);
       break;
@@ -215,6 +214,7 @@ export const restrictLevel = (
 };
 
 export const restrictSizeDeg = (
+  proposedLevel,
   targetXYDeg,
   targetKind,
   screenRectPx,
@@ -222,7 +222,7 @@ export const restrictSizeDeg = (
   targetSizeIsHeightBool,
   characterSetRectPx,
   spacingOverSizeRatio,
-  displayOptions
+  thresholdParameter
 ) => {
   switch (targetKind) {
     case "letter":
@@ -233,7 +233,7 @@ export const restrictSizeDeg = (
   const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
   const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
   let heightDeg, heightPx, topPx, bottomPx;
-  let targetSizeDeg = letterConfig.targetSizeDeg;
+  let targetSizeDeg = Math.pow(10, proposedLevel);
 
   // We scale the alphabet bounding box to have the specified heightPx.
   // widthPx = width of scaled alphabet bounding box.
@@ -257,13 +257,16 @@ export const restrictSizeDeg = (
       displayOptions
     );
     heightPx = topPx - bottomPx;
+    const widthPx =
+      heightPx * (characterSetRectPx.width / characterSetRectPx.height);
     let stimulusRectPx = characterSetRectPx.scale(
-      widthDeg / characterSetRectPx.width
+      widthPx / characterSetRectPx.width
+      // heightPx / characterSetRectPx.height
     );
     stimulusRectPx = stimulusRectPx.offset(targetXYPx);
 
     // WE'RE DONE IF STIMULUS FITS
-    if (isRectInRect(stimulusRectPx.toArray(), screenRectPx.toArray())) {
+    if (isRectInRect(stimulusRectPx, screenRectPx)) {
       return [
         targetSizeDeg,
         {
@@ -728,6 +731,7 @@ const getLargestBoundsRatio = (
     top: stim.top / screen.top,
     bottom: stim.bottom / screen.bottom,
   };
+  logger("ratios", ratios);
   const largestBoundsRatio = Math.max(...Object.values(ratios));
   if (largestBoundsRatio <= 0) throw "Largest ratio is non-positive.";
   return largestBoundsRatio;

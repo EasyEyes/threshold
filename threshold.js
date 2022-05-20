@@ -788,8 +788,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       let font = paramReader.read("font", cond);
       if (paramReader.read("fontSource", cond) === "file")
         font = cleanFontName(font);
-      const letterRepeats =
-        paramReader.read("spacingRelationToSize", cond) === "ratio" ? 1 : 3;
+      const typographicCrowding =
+        paramReader.read("spacingRelationToSize", cond) === "typographic" &&
+        paramReader.read("thresholdParameter", cond) === "spacing";
+      const letterRepeats = typographicCrowding ? 3 : 1;
+      logger("letterRepeats", letterRepeats);
       characterSetBoundingRects[cond] = getCharacterSetBoundingBox(
         characterSet,
         font,
@@ -808,6 +811,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       characterSetBoundingBoxPolies, // ... the triplet.
       displayCharacterSetBoundingBoxPolies, // .. the full character set displayed during response time.
     ] = generateBoundingBoxPolies(paramReader, psychoJS);
+    logger("boundingBoxPolies", boundingBoxPolies);
     /* --- BOUNDING BOX --- */
 
     /* --------------------------------- READING -------------------------------- */
@@ -2359,6 +2363,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   stimulusParameters.widthPx
                 );
               }
+              target.setText(targetCharacter);
               flanker1.setAutoDraw(false);
               flanker2.setAutoDraw(false);
               break;
@@ -3073,8 +3078,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       // *fixation* updates
-      logger("fixation.status", fixation.status);
-      logger("fixationConfig.show", fixationConfig.show);
       if (
         t >= 0.0 &&
         fixation.status === PsychoJS.Status.NOT_STARTED &&
