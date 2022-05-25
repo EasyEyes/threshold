@@ -2614,7 +2614,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
             targetSpecs.setAutoDraw(true);
           }
-          gyrateFixation(fixation, t, displayOptions);
+          if (fixationConfig.markingFixationMotionRadiusDeg > 0)
+            gyrateFixation(fixation, t, displayOptions);
+          fixation.setAutoDraw(true);
         },
       });
 

@@ -234,5 +234,4 @@ export const gyrateFixation = (fixation, t, displayOptions) => {
   ];
   fixationConfig.currentPos = newFixationXY;
   fixation.setPos(newFixationXY);
-  fixation.setAutoDraw(true);
 };
