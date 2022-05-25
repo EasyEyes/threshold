@@ -153,6 +153,7 @@ import {
   addProceedButton,
   dynamicSetSize,
   instructionsText,
+  movePastFixation,
   removeBeepButton,
   removeProceedButton,
   _takeFixationClick,
@@ -2646,13 +2647,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       continueRoutine = true;
-      // if (
-      //   canType(responseType.current) &&
-      //   psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
-      // ) {
-      //   loggerText("trialInstructionRoutineEachFrame SPACE HIT");
-      //   continueRoutine = false;
-      // }
+      if (
+        canType(responseType.current) &&
+        psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
+      ) {
+        loggerText("trialInstructionRoutineEachFrame SPACE HIT");
+        continueRoutine = false;
+        movePastFixation();
+      }
 
       return Scheduler.Event.FLIP_REPEAT;
     };
@@ -2848,6 +2850,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current === "letter"
           ? letterConfig.delayBeforeStimOnsetSec
           : 0;
+      const timeWhenRespondable =
+        delayBeforeStimOnsetSec +
+        letterConfig.targetSafetyMarginSec +
+        letterConfig.targetDurationSec;
       /* -------------------------------------------------------------------------- */
       if (frameN === 0) {
         frameRemains =
@@ -2932,7 +2938,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           simulated[status.block][status.block_condition])
       ) {
         if (
-          t >= delayBeforeStimOnsetSec &&
+          t >= timeWhenRespondable &&
           key_resp.status === PsychoJS.Status.NOT_STARTED
         ) {
           // keep track of start time/frame for later
@@ -3200,10 +3206,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }
 
-      const timeWhenRespondable =
-        delayBeforeStimOnsetSec +
-        letterConfig.targetSafetyMarginSec +
-        letterConfig.targetDurationSec;
       updateBoundingBoxPolies(
         t,
         frameRemains,
@@ -3363,6 +3365,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           ) {
             logger("tolerances before calculateError", tolerances);
+            logger("letterTiming before calculateError", calculateError);
             calculateError(
               letterTiming,
               tolerances,

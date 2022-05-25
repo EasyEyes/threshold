@@ -219,14 +219,18 @@ export const _takeFixationClick = (e) => {
     clickDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx;
   if (clickingInFixation) {
     // Clicked on fixation
-    hideCursor();
-    if (fixationConfig.stim) fixationConfig.stim.setAutoDraw(false);
-    clickedContinue.current = true;
-    clickedContinue.timestamps.push(performance.now());
+    movePastFixation();
   } else {
     // wrongSynth.play();
     clickedContinue.current = false;
   }
+};
+
+export const movePastFixation = () => {
+  hideCursor();
+  if (fixationConfig.stim) fixationConfig.stim.setAutoDraw(false);
+  clickedContinue.current = true;
+  clickedContinue.timestamps.push(performance.now());
 };
 
 /* -------------------------------------------------------------------------- */
