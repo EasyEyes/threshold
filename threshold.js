@@ -2465,8 +2465,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(...fixation.stims);
-          trialComponents.push(flanker1);
           trialComponents.push(target);
+          trialComponents.push(flanker1);
           trialComponents.push(flanker2);
 
           trialComponents.push(showCharacterSet);
@@ -3101,7 +3101,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         flanker1.tStart = t; // (not accounting for frame time here)
         flanker1.frameNStart = frameN; // exact frame index
 
-        if (letterConfig.spacingRelationToSize === "typographic") {
+        if (
+          letterConfig.spacingRelationToSize === "typographic" ||
+          thresholdParameter === "size"
+        ) {
           flanker1.setAutoDraw(false);
         } else {
           flanker1.setAutoDraw(true);
@@ -3172,7 +3175,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         flanker2.tStart = t; // (not accounting for frame time here)
         flanker2.frameNStart = frameN; // exact frame index
 
-        if (letterConfig.spacingRelationToSize === "typographic") {
+        if (
+          letterConfig.spacingRelationToSize === "typographic" ||
+          thresholdParameter === "size"
+        ) {
           flanker2.setAutoDraw(false);
         } else {
           flanker2.setAutoDraw(true);
