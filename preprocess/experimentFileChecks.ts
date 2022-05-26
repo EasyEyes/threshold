@@ -323,9 +323,9 @@ export const populateDefaultValues = (df: any): any => {
             .filter((x: any) => x)
         )
       ) {
-        console.error(
-          `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
-        );
+        // console.error(
+        //   `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
+        // );
       }
       const column: string[] = df
         .select(columnName)
@@ -400,9 +400,9 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
             .filter((x: any) => x)
         )
       ) {
-        console.error(
-          `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
-        );
+        // console.error(
+        //   `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
+        // );
       }
       const column: string[] = df
         .select(columnName)
