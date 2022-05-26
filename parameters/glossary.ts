@@ -369,21 +369,21 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  calibrateGazeCheckBool: {
-    name: "calibrateGazeCheckBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "To check gaze tracking we don’t need a measuring device, and hardly any instructions. I think we could just put up our fixation cross in a few random places and ask them to click on it. It will be very similar to the training and we don’t need to tell the participant that we progressed from training to checking.",
-    type: "boolean",
-    default: "FALSE",
-  },
   calibrateFrameRateUnderStressBool: {
     name: "calibrateFrameRateUnderStressBool",
     availability: "now",
     example: "TRUE",
     explanation:
       "calbrateFrameRateUnderStressBool asks the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateGazeCheckBool: {
+    name: "calibrateGazeCheckBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "To check gaze tracking we don’t need a measuring device, and hardly any instructions. I think we could just put up our fixation cross in a few random places and ask them to click on it. It will be very similar to the training and we don’t need to tell the participant that we progressed from training to checking.",
     type: "boolean",
     default: "FALSE",
   },
@@ -656,14 +656,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       'When TRUE, markingBlankedNearTargetBool suppresses any parts of the fixation cross or target X that are too close to the possible targets in this conditionGroup. This enables both meanings of "too close": markingBlankingRadiusReEccentricity and markingBlankingRadiusReTargetHeight.',
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   markingBlankingRadiusReEccentricity: {
     name: "markingBlankingRadiusReEccentricity",
     availability: "now",
     example: "0.5",
     explanation:
-      'Considering crowding, define "too close" distance as a fraction of the target\'s radial eccentricity.',
+      'Considering crowding, define "too close" distance from the target as a fraction of the target\'s radial eccentricity.',
     type: "numerical",
     default: "0.5",
   },
@@ -672,7 +672,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "2",
     explanation:
-      'Considering masking, markingBlankingRadiusReTargetHeight specifies the "too close" distance as a fraction of target height.',
+      'Considering masking, markingBlankingRadiusReTargetHeight specifies the "too close" distance from the target as a fraction of target height.',
     type: "numerical",
     default: "0.2",
   },
@@ -717,7 +717,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "1",
     explanation:
-      "markingFixationStrokeLengthDeg specifies the stroke length in the fixation cross. The cross consists of two strokes, one horizontal, one vertical. Thus this is a diameter, unless the other marking parameters, which are mostly radii. ",
+      "markingFixationStrokeLengthDeg specifies the stroke length in the fixation cross. The cross consists of two strokes, one horizontal, one vertical. Thus this is a diameter, unless the other marking parameters, which are mostly radii. Setting this to a large value (e.g. 100) will produce a fixation cross that extends from edge to edge of the display, which may help restore salience of a cross in the presence of blanking near the possible target locations.",
     type: "numerical",
     default: "2",
   },
@@ -733,9 +733,9 @@ export const GLOSSARY: Glossary = {
   markingOffsetBeforeTargetOnsetSecs: {
     name: "markingOffsetBeforeTargetOnsetSecs",
     availability: "now",
-    example: "0.2",
+    example: "0.3",
     explanation:
-      "Pause before target onset to minimize forward masking of the target by the preceding fixation and target markings.",
+      "Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankingRadiusReTargetHeight.",
     type: "numerical",
     default: "0",
   },
@@ -803,7 +803,16 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "sounds",
     explanation:
-      "The name of a folder of sound files, to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of maskSoundFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+      "The name of a folder of sound files, to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of maskSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.]",
+    type: "text",
+    default: "",
+  },
+  maskerSoundPhrase: {
+    name: "maskerSoundPhrase",
+    availability: "now",
+    example: "",
+    explanation:
+      'maskerSoundPhrase is a text phrase that is used when targetKind is 16ChannelSound. The phrase consists of a series of words and category names, with each category name preceded by #. Currently the maskerSoundPhrase is "Ready #CallSign GoTo #Color #Number Now". Every word must appear as a sound file with that name, and every category must appear as a folder with that name, both in the current talker folder in the maskerSoundFolder.',
     type: "text",
     default: "",
   },
@@ -821,7 +830,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "After a mistaken response, play pure 500 Hz tone for 0.5 sec at amplitude 0.05. Usually FALSE, as we stay positive and give only positive feedback.",
+      "When playNegativeFeedbackBeepBool is TRUE, after a mistaken response, play pure 500 Hz tone for 0.5 sec at amplitude 0.05. Usually FALSE, as we typically stay positive and give only positive feedback.",
     type: "boolean",
     default: "FALSE",
   },
@@ -830,7 +839,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "After correct response, play pure 2000 Hz tone for 0.05 sec at amplitude 0.05. ",
+      "When playPositiveFeedbackBeepBool is TRUE, after each correct response, play pure 2000 Hz tone for 0.05 sec at amplitude 0.05. ",
     type: "boolean",
     default: "TRUE",
   },
@@ -1501,7 +1510,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "letter",
     explanation:
-      "• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The target sound is played for its full duration at level targetSoundDBSPL with a masker sound randomly selected from the maskerSoundFolder played at level maskerDBSPL. Also we play targetSoundNoise at level targetSoundNoiseDBSPL.\n• 16ChannelSound. The targetSoundFolder and maskerSoundFolder each contain a hierarchy of folders containing 16-channel sound files. At the moment they have folders of sounds produced by multiple talkers. Within the talkers folder are folders for each sound  is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. We randomly select 9 of the 16 bands. They are played for its full duration at targetSoundDBSPL. Also, a 16-channel masker sound file is randomly selected from the maskerSoundFolder, and we select the unused 7 of the 16 bands not already playing the target, and play them at level maskerDBSPL. Also we play targetSoundNoise at level targetSoundNoiseDBSPL.\n• reading Measure reading speed and retention. reading should be reclassified as a targetTask.\n",
+      '• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The target sound is played for its full duration at level targetSoundDBSPL with a masker sound randomly selected from the maskerSoundFolder played at level maskerDBSPL. Also we play targetSoundNoise at level targetSoundNoiseDBSPL.\n• vocoderPhrase. The targetSoundFolder and maskerSoundFolder each contain a hierarchy of folders containing 16-channel sound files. Each sound file is named for a word and contains the original or processed sound of that word (except that the file called "GoTo.wav" in fact contains the two words "go to"). The top level of folders in targetSoundFolder and maskerSoundFolder are folders of sounds produced by several talkers. Currently the talkers (Talker11, Talker14, Talker16, and Talker18) are all female. On each trial the target and masker are randomly assigned different talkers (never equal). Within each talker\'s folder are several loose word files (Now.wav, GoTo.wav, and Ready.wav), and several category folders (CallSign, Color, Number) that each contain several word files. Each trial follows text phrases provided in the parameters targetSoundPhrase and maskerSoundPhrase. Each phrase consists of a series of explicit words and category names, with each category name preceded by #. Currently the targetSoundPhrase is "Ready Baron GoTo #Color #Number Now", and the maskerSoundPhrase is "Ready #CallSign GoTo #Color #Number Now". The target and masker phrases are played at the same time, aligning the temporal midpoint of both words in each target-masker pair by symmetrically padding both ends of the briefer word with zeroes to make it the same length as the longer word. Each explicit word in each script is played every time. On each trial, each word category, marked by #, is replaced by a randomly selected word from that category folder, except that target and masker are always different from each other when either is drawn from a category.  On each trial, the target and masker phrases are combined by randomly taking 9 of the 16 channels of every word in the target phrase, and the remaining 7 channels from the masker words. The channel selection is consistent for all the words in the phrase, and new for each trial. targetSoundDBSPL specifies the sound level of the combined 9 channels taken from each target word. Similarly maskerSoundDBSPL specifies the sound level of the combined 7 channel taken from each masker word. Also, we play targetSoundNoise at level targetSoundNoiseDBSPL. The Zhang et al. (2021) paper mentions a noise control, in which the masker is white noise that has been filtered into 16 bands and windowed into word-length durations. The scientist achieves this simply by providing a maskerSoundFolder made up of these 16-channel noises, each derived from a word. \nRESPONSE. After playing the phrase, EasyEyes displays two columns, one for each category word in the targetSoundPhrase. The observer must select one word in each column in order to proceed to the next trial. (This is forced choice.) We score the trial as right only if both responses are right. That overall right/wrong response is provided to QUEST, which controls the targetSoundDBSPL.\n• reading Measure reading speed and retention. reading should be reclassified as a targetTask.\n',
     type: "categorical",
     default: "letter",
     categories: [
@@ -1509,7 +1518,7 @@ export const GLOSSARY: Glossary = {
       "gabor",
       "image",
       "sound",
-      "16ChannelSound",
+      "vocoderPhrase",
       "reading",
     ],
   },
@@ -1588,7 +1597,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.5",
     explanation:
-      "EasyEyes guarantees a blank time of targetSafetyMarginSec before and after the target presentation to minimize forward and backward masking of the target by instructions and other non-stimulus elements, including the characterSet and nudger. \n     ONSET: Since target onset is almost immediately after trial initiation, initiation of a trial is disabled until targetSafetyMarginSec has passed since the nudger and instructions were erased. \n     Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to characterSet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves to the crosshair, the instruction contrast will initally be 1 when the cursor is at the characterSet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). \n     OFFSET: After target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the characterSet. (Nudging isn't allowed until after the participant responds.)",
+      "IMPORTANT: Currently targetSafetyMarginSec only affects the after-target delay, from target offset to response screen onset. The participant cannot respond during that delay. targetSafetyMarginSec has no effect on the before-target delay. Use markingOffsetBeforeTargetOnsetSecs to control the delay between clicking the crosshair and display of the target.\n****************************\nEasyEyes guarantees a blank time of targetSafetyMarginSec before and after the target presentation to minimize forward and backward masking of the target by instructions and other non-stimulus elements, including the characterSet and nudger. \n     OFFSET: After target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the characterSet. (Nudging isn't allowed until after the participant responds.)\n\nNOT YET IMPLEMENTED:\n     ONSET: Since target onset is almost immediately after trial initiation, initiation of a trial is disabled until targetSafetyMarginSec has passed since the nudger and instructions were erased. \n     Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to characterSet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves from the response characterSet to the crosshair, the instruction contrast will initally be 1 when the cursor is at the characterSet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). ",
     type: "numerical",
     default: "0.7",
   },
@@ -1668,6 +1677,15 @@ export const GLOSSARY: Glossary = {
     explanation: "Positive when noise starts after the target starts.",
     type: "numerical",
     default: "-0.3",
+  },
+  targetSoundPhrase: {
+    name: "targetSoundPhrase",
+    availability: "now",
+    example: "",
+    explanation:
+      'targetSoundPhrase is a text phrase that is used when targetKind is 16ChannelSound. The phrase consists of a series of words and category names, with each category name preceded by #. Currently the targetSoundPhrase is "Ready Baron GoTo #Color #Number Now". Every word must appear as a sound file with that name, and every category must appear as a folder with that name, both in the current talker folder in the targetSoundFolder.',
+    type: "text",
+    default: "",
   },
   targetTask: {
     name: "targetTask",

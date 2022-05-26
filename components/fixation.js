@@ -1,4 +1,4 @@
-import { ShapeStim } from "../psychojs/src/visual";
+import { Polygon, ShapeStim } from "../psychojs/src/visual";
 import { Color } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
 import { displayOptions, fixationConfig, letterConfig } from "./global";
@@ -97,22 +97,49 @@ export class Fixation {
       this.setLineWidth(fixationConfig.strokeWidth);
     }
   }
+  /**
+   * Given a set of independent groups of vertices,
+   * ie the coordinates of the fixation cross and of the fixation blanking circle,
+   * set those vertices corresponding to the fixation cross (blanking circle
+   * doesn't use vertices), generating new stim objects if necessary.
+   * @param {number[][][]} vertices aka vertexGroups, ie list of groups of coordinates
+   */
   setVertices(vertices) {
+    logger("psychoJS win color", psychoJS._window.color);
     vertices.forEach((vertexGroup, i) => {
-      if (this.stims[i]) {
-        this.stims[i].setVertices(vertexGroup);
-      } else {
-        this.stims[i] = new ShapeStim({
+      // Single value represents radius, indicating blanking circle
+      if (vertexGroup[0].length == 1) {
+        this.stims[i] = new Polygon({
           win: psychoJS.window,
-          name: `fixation-${i}`,
+          name: `blanking-fixation-${i}`,
           units: "pix",
-          vertices: vertexGroup,
-          lineWidth: fixationConfig.strokeWidth,
-          closeShape: false,
-          color: new Color("black"),
+          radius: vertexGroup[0][0],
+          edges: 99,
+          closeShape: true,
+          fillColor: psychoJS.window.color,
+          lineColor: psychoJS.window.color,
           opacity: undefined,
-          depth: -6.0,
+          depth: -5.0,
+          lineWidth: 0,
         });
+        // Otherwise, treat as a ShapeStim
+      } else {
+        logger("typeof this.stims[i]", typeof this.stims[i]);
+        if (this.stims[i]) {
+          this.stims[i].setVertices(vertexGroup);
+        } else {
+          this.stims[i] = new ShapeStim({
+            win: psychoJS.window,
+            name: `fixation-${i}`,
+            units: "pix",
+            vertices: vertexGroup,
+            lineWidth: fixationConfig.strokeWidth,
+            closeShape: false,
+            color: new Color("black"),
+            opacity: undefined,
+            depth: -6.0,
+          });
+        }
       }
     });
     this.stims = this.stims.slice(0, vertices.length);
@@ -154,6 +181,19 @@ export const getFixationVerticies = (
   targetHeightPx,
   targetXYPx
 ) => {
+  const half = Math.round(strokeLength / 2);
+  const vertices = [
+    [
+      [-half, 0],
+      [0, 0],
+      [half, 0],
+      [0, 0],
+      [0, -half],
+      [0, 0],
+      [0, half],
+    ],
+  ];
+  // If we should blank near the target...
   if (
     fixationConfig.markingBlankedNearTargetBool &&
     targetHeightPx &&
@@ -171,47 +211,10 @@ export const getFixationVerticies = (
       eccentricityRadiusValue,
       targetHeightRadiusValue
     );
-    const screenExtent = [
-      displayOptions.window._size[0] / 2,
-      displayOptions.window._size[1] / 2,
-    ];
-    const fix = fixationConfig.pos;
-    return [
-      // Left
-      [
-        [-screenExtent[0], fix[1]],
-        [-blankingRadiusPx + fix[0], fix[1]],
-      ],
-      // Right
-      [
-        [blankingRadiusPx + fix[0], fix[1]],
-        [screenExtent[0], fix[1]],
-      ],
-      // Top
-      [
-        [fix[0], blankingRadiusPx + fix[1]],
-        [fix[0], screenExtent[1]],
-      ],
-      // Bottom
-      [
-        [fix[0], -blankingRadiusPx + fix[1]],
-        [fix[0], -screenExtent[1]],
-      ],
-    ];
-  } else {
-    const half = Math.round(strokeLength / 2);
-    return [
-      [
-        [-half, 0],
-        [0, 0],
-        [half, 0],
-        [0, 0],
-        [0, -half],
-        [0, 0],
-        [0, half],
-      ],
-    ];
+    // TODO should not be located at fixation position, but near (all possible locations for) fixation
+    vertices.push([[blankingRadiusPx], fixationConfig.pos]);
   }
+  return vertices;
 };
 
 export const gyrateFixation = (fixation, t, displayOptions) => {
