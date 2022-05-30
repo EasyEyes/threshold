@@ -65,3 +65,52 @@
 .popup-continue-button:active {
   background-color: #111;
 }
+
+/* -------------------------------------------------------------------------- */
+
+/* question and answer */
+
+.swal2-container {
+  background: #eaeaea !important;
+}
+
+.swal2-popup {
+  width: 80%;
+  cursor: default;
+  opacity: 1;
+  background: #fff;
+}
+
+.swal2-title {
+  color: #000 !important;
+  font-size: 1.6rem;
+  font-weight: 500;
+  margin: 2rem 1rem;
+  user-select: none;
+  text-align: left;
+}
+
+.swal2-radio {
+  color: #000;
+  flex-direction: column;
+}
+
+.swal2-radio label {
+  width: 80%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 0;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.swal2-confirm {
+  background-color: #333 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 7px !important;
+  /* margin: 1rem !important; */
+  display: block !important;
+  position: relative !important;
+}

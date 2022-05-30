@@ -92,8 +92,8 @@ import {
   whiteNoiseLevel,
   targetSoundFolder,
   maskerSoundFolder,
-  musicExpert,
   usingGaze,
+  targetTask,
 } from "./components/global.js";
 
 import {
@@ -256,7 +256,7 @@ import { _identify_trialInstructionRoutineEnd } from "./components/trialRoutines
 
 /* ---------------------------------- */
 
-import { switchKind } from "./components/blockTargetKind.js";
+import { switchKind, switchTask } from "./components/blockTargetKind.js";
 import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
 import { quitPsychoJS } from "./components/lifetime.js";
@@ -457,7 +457,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // open window:
   psychoJS.openWindow({
     fullscr: !debug,
-    color: new util.Color([0.9, 0.9, 0.9]),
+    color: new util.Color("#eaeaea"), // background color
     units: "height",
     waitBlanking: true,
   });
@@ -1081,30 +1081,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Preset params
       // ! Set current targetKind for the block
       targetKind.current = paramReader.read("targetKind", 1)[0];
-      /* -------------------------------------------------------------------------- */
 
-      /* -------------------------------------------------------------------------- */
-      // TEMP
-      if (targetKind.current === "sound") {
-        // eslint-disable-next-line no-undef
-        const result = await Swal.fire({
-          title:
-            "Have you ever learned to play a musical instrument or sung in a vocal ensemble?",
-          showCancelButton: false,
-          showDenyButton: true,
-          confirmButtonText: "Yes",
-          denyButtonText: `No`,
-          confirmButtonColor: "#333333",
-          denyButtonColor: "#333333",
-          allowEnterKey: false,
-        });
-
-        if (result) {
-          if (result.isConfirmed) musicExpert.current = true;
-          else musicExpert.current = false;
-        }
-        psychoJS.experiment.addData("musicExpert", musicExpert.current);
-      }
+      // ! Set current task for the block
+      // TODO support multiple target tasks in one block
+      // TODO support multiple target tasks in one condition, e.g., identify,questionAndAnswer?
+      targetTask.current = paramReader.read("targetTask", 1)[0];
       /* -------------------------------------------------------------------------- */
 
       // Schedule all the trials in the trialList:
@@ -1114,26 +1095,41 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
-        blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
-        blocksLoopScheduler.add(initInstructionRoutineEachFrame());
-        blocksLoopScheduler.add(initInstructionRoutineEnd());
-        switchKind(_thisBlock.targetKind, {
-          letter: () => {
-            blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
-            blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
-            blocksLoopScheduler.add(eduInstructionRoutineEnd(snapshot));
+
+        // only when not answering questions
+        switchTask(_thisBlock.targetTask, {
+          identify: () => {
+            blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
+            blocksLoopScheduler.add(initInstructionRoutineEachFrame());
+            blocksLoopScheduler.add(initInstructionRoutineEnd());
+
+            switchKind(_thisBlock.targetKind, {
+              letter: () => {
+                blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
+                blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
+                blocksLoopScheduler.add(eduInstructionRoutineEnd(snapshot));
+              },
+            });
           },
         });
+
         const trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
         blocksLoopScheduler.add(trialsLoopEnd);
 
-        switchKind(_thisBlock.targetKind, {
-          reading: () => {
-            blocksLoopScheduler.add(blockSchedulerFinalRoutineBegin(snapshot));
-            blocksLoopScheduler.add(blockSchedulerFinalRoutineEachFrame());
-            blocksLoopScheduler.add(blockSchedulerFinalRoutineEnd());
+        // only when not answering questions
+        switchTask(_thisBlock.targetTask, {
+          identify: () => {
+            switchKind(_thisBlock.targetKind, {
+              reading: () => {
+                blocksLoopScheduler.add(
+                  blockSchedulerFinalRoutineBegin(snapshot)
+                );
+                blocksLoopScheduler.add(blockSchedulerFinalRoutineEachFrame());
+                blocksLoopScheduler.add(blockSchedulerFinalRoutineEnd());
+              },
+            });
           },
         });
 
@@ -1164,50 +1160,64 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //   .map((c) => paramReader.read("conditionTrials", c.block_condition))
       //   .reduce((a, b) => a + b, 0);
 
-      switchKind(targetKind.current, {
-        reading: () => {
+      switchTask(targetTask.current, {
+        questionAndAnswer: () => {
           trials = new data.TrialHandler({
             psychoJS: psychoJS,
             name: "trials",
-            nReps: totalTrialsThisBlock.current,
+            nReps: 1,
             trialList: trialsConditions,
             method: TrialHandler.Method.SEQUENTIAL,
             seed: Math.round(performance.now()),
           });
         },
-        letter: () => {
-          trialsConditions = populateQuestDefaults(
-            trialsConditions,
-            paramReader
-          );
-          trials = new data.MultiStairHandler({
-            stairType: MultiStairHandler.StaircaseType.QUEST,
-            psychoJS: psychoJS,
-            name: "trials",
-            varName: "trialsVal",
-            nTrials: totalTrialsThisBlock.current,
-            conditions: trialsConditions,
-            method: TrialHandler.Method.FULLRANDOM,
-            seed: Math.round(performance.now()),
-          });
+        identify: () => {
+          switchKind(targetKind.current, {
+            reading: () => {
+              trials = new data.TrialHandler({
+                psychoJS: psychoJS,
+                name: "trials",
+                nReps: totalTrialsThisBlock.current,
+                trialList: trialsConditions,
+                method: TrialHandler.Method.SEQUENTIAL,
+                seed: Math.round(performance.now()),
+              });
+            },
+            letter: () => {
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader
+              );
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                nTrials: totalTrialsThisBlock.current,
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+              });
 
-          fixationConfig.show = true;
-        },
-        sound: () => {
-          trialsConditions = populateQuestDefaults(
-            trialsConditions,
-            paramReader,
-            "sound"
-          );
-          trials = new data.MultiStairHandler({
-            stairType: MultiStairHandler.StaircaseType.QUEST,
-            psychoJS: psychoJS,
-            name: "trials",
-            varName: "trialsVal",
-            nTrials: totalTrialsThisBlock.current,
-            conditions: trialsConditions,
-            method: TrialHandler.Method.FULLRANDOM,
-            seed: Math.round(performance.now()),
+              fixationConfig.show = true;
+            },
+            sound: () => {
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader,
+                "sound"
+              );
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                nTrials: totalTrialsThisBlock.current,
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+              });
+            },
           });
         },
       });
@@ -1228,9 +1238,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         trialsLoopScheduler.add(importConditions(snapshot, "trial"));
         // Instructions
-        trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
-        trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
-        trialsLoopScheduler.add(trialInstructionRoutineEnd());
+        if (targetTask.current !== "questionAndAnswer") {
+          trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
+          trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
+          trialsLoopScheduler.add(trialInstructionRoutineEnd());
+        }
         // Trials
         trialsLoopScheduler.add(trialRoutineBegin(snapshot));
         trialsLoopScheduler.add(trialRoutineEachFrame(snapshot));
@@ -1246,7 +1258,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function trialsLoopEnd() {
-    if (targetKind.current === "letter" || targetKind.current == "sound") {
+    if (
+      targetTask.current !== "questionAndAnswer" &&
+      (targetKind.current === "letter" || targetKind.current == "sound")
+    ) {
       // Proportion correct
       showPopup(
         expName,
@@ -1462,11 +1477,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
+      showCursor();
+
       status.block = snapshot.block + 1;
       totalBlocks.current = snapshot.nTotal;
 
       // PRESETS
       targetKind.current = paramReader.read("targetKind", status.block)[0];
+      // TODO support more
+      targetTask.current = paramReader.read("targetTask", status.block)[0];
       ////
 
       //------Prepare to start Routine 'filter'-------
@@ -2725,6 +2744,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       hideCursor();
 
+      /* -------------------------------------------------------------------------- */
+      if (targetTask.current === "questionAndAnswer") {
+        continueRoutine = true;
+        return Scheduler.Event.NEXT;
+      }
+      /* -------------------------------------------------------------------------- */
+
       switchKind(targetKind.current, {
         sound: async () => {
           //target is present half the time
@@ -2842,6 +2868,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         removeClickableCharacterSet(showCharacterSetResponse);
         return Scheduler.Event.NEXT;
       }
+
+      /* -------------------------------------------------------------------------- */
+      if (targetTask.current === "questionAndAnswer") {
+        continueRoutine = true;
+        return Scheduler.Event.NEXT;
+      }
+      /* -------------------------------------------------------------------------- */
 
       //------Loop for each frame of Routine 'trial'-------
       // get current time
@@ -3313,132 +3346,236 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         return Scheduler.Event.NEXT;
       }
 
-      // setTimeout(() => {
-      //   rc.resumeNudger();
-      // }, 700);
+      /* -------------------------------------------------------------------------- */
+      // ! question and answer
+      if (targetTask.current === "questionAndAnswer") {
+        let question, answers;
 
-      //------Ending Routine 'trial'-------
-      for (const thisComponent of trialComponents) {
-        if (typeof thisComponent.setAutoDraw === "function") {
-          thisComponent.setAutoDraw(false);
+        const thisQuestionType = paramReader.read(
+          "questionAndAnswerType",
+          snapshot.conditionName
+        );
+        const choiceQuestionBool = thisQuestionType === "choice";
+
+        let thisQuestionAndAnswer = paramReader.read(
+          "questionAndAnswer",
+          snapshot.conditionName
+        );
+        if (choiceQuestionBool) {
+          thisQuestionAndAnswer = thisQuestionAndAnswer.split("|");
+          question = thisQuestionAndAnswer[0];
+          answers = thisQuestionAndAnswer.slice(1);
+        } else {
+          question = thisQuestionAndAnswer;
+          answers = "";
         }
-      }
 
-      // was no response the correct answer?!
-      if (key_resp.keys === undefined) {
-        console.error("[key_resp.keys] No response error.");
-      }
+        const questionAndAnswerShortcut = paramReader.read(
+          "questionAndAnswerShortcut",
+          snapshot.conditionName
+        );
 
-      // NOTE Only means what it's called in `reading` mode
-      timing.stimulusOnsetToOffset =
-        routineClock.getTime() - timing.clickToStimulusOnsetSec;
+        let html = "";
+        const inputOptions = {};
 
-      // store data for psychoJS.experiment (ExperimentHandler)
-      // update the trial handler
-      switchKind(targetKind.current, {
-        sound: () => {
-          //report values to quest
-          if (
-            currentLoop instanceof MultiStairHandler &&
-            currentLoop.nRemaining !== 0
-          ) {
-            currentLoop.addResponse(
-              key_resp.corr,
-              ProposedVolumeLevelFromQuest.current / 20
-            );
+        if (choiceQuestionBool) {
+          // html += `<div class="question">${question}</div>`
+          html += '<div class="threshold-answers-set">';
+          for (let i = 0; i < answers.length; i++) {
+            html += `<button class="threshold-button threshold-answer" data-answer="${answers[i]}">${answers[i]}</button>`;
           }
-          addTrialStaircaseSummariesToData(currentLoop, psychoJS);
-          //psychoJS.experiment.addData("targetWasPresent", targetIsPresentBool.current);
-          //name of masker
-          //psychoJS.experiment.addData();
-        },
-        reading: () => {
-          addReadingStatsToOutput(trials.thisRepN, psychoJS);
-        },
-        letter: () => {
-          console.log(letterTiming, tolerances);
-
-          //check logic. letterTiming.targetFinishSec and letterTiming.targetStartSec are undefined for simulated observer
-          if (
-            !(
-              simulated &&
-              simulated[status.block] &&
-              simulated[status.block][status.block_condition]
-            )
-          ) {
-            logger("tolerances before calculateError", tolerances);
-            logger("letterTiming before calculateError", calculateError);
-            calculateError(
-              letterTiming,
-              tolerances,
-              letterConfig.targetDurationSec,
-              target
-            );
+          html += "</div>";
+          ////
+          for (const ans of answers) {
+            inputOptions[ans] = ans;
           }
+        } else {
+          html += `<input type="text" class="threshold-answer">`;
+          ////
+        }
 
-          // Add trial timing data
-          psychoJS.experiment.addData(
-            "trialFirstFrameSec",
-            letterTiming.trialFirstFrameSec
-          );
-          psychoJS.experiment.addData(
-            "targetStartSec",
-            letterTiming.targetStartSec
-          );
-          psychoJS.experiment.addData(
-            "targetFinishSec",
-            letterTiming.targetFinishSec
-          );
-          letterTiming.trialFirstFrameSec = undefined;
-          letterTiming.targetStartSec = undefined;
-          letterTiming.targetFinishSec = undefined;
-
-          logger("currentLoop.nRemaining", currentLoop.nRemaining);
-          logger(
-            "currentLoop instanceof MultiStairHandler",
-            currentLoop instanceof MultiStairHandler
-          );
-          if (
-            currentLoop instanceof MultiStairHandler &&
-            currentLoop.nRemaining !== 0
-          ) {
-            // currentLoop.addResponse(key_resp.corr, level);
-            if (
-              !addResponseIfTolerableError(
-                currentLoop,
-                key_resp.corr,
-                level,
-                tolerances,
-                usingGaze.current,
-                psychoJS
-              ) &&
-              usingGaze.current
-            ) {
-              // if not tolerable error, then nudge gaze
-              rc.nudgeGaze({
-                showOffset: true,
-              });
+        const result = await Swal.fire({
+          title: question,
+          // html: html,
+          input: choiceQuestionBool ? "radio" : "text",
+          inputOptions: inputOptions,
+          inputAttributes: {
+            autocapitalize: "off",
+          },
+          showCancelButton: false,
+          showDenyButton: false,
+          showConfirmButton: true,
+          allowEnterKey: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          customClass: {
+            confirmButton: "threshold-button",
+          },
+          // showClass: {
+          //   popup: "swal2-show",
+          //   backdrop: "swal2-backdrop-show",
+          //   icon: "swal2-icon-show",
+          // },
+          // hideClass: {
+          //   popup: "swal2-hide",
+          //   backdrop: "swal2-backdrop-hide",
+          //   icon: "swal2-icon-hide",
+          // },
+          showClass: {
+            popup: "",
+            backdrop: "swal2-backdrop-show",
+            icon: "swal2-icon-show",
+          },
+          hideClass: {
+            popup: "",
+            backdrop: "swal2-backdrop-hide",
+            icon: "swal2-icon-hide",
+          },
+          preConfirm: (value) => {
+            if (value == null || value === "") {
+              Swal.showValidationMessage("You must provide an answer.");
+              return false;
             }
-          }
-          addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
-        },
-      });
+          },
+        });
 
-      psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
-      psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
-      if (typeof key_resp.keys !== "undefined") {
-        // we had a response
-        psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
-        // ie time from the end to `trialRoutineBegin` to the start of `trialRoutineEnd`
-        psychoJS.experiment.addData(
-          "trialRoutineDurationFromBeginSec",
-          trialClock.getTime()
-        );
-        // ie time from the end of the previous trial to the end of this trial
-        psychoJS.experiment.addData(
-          "trialRoutineDurationFromPreviousEndSec",
-          routineClock.getTime()
-        );
+        logger("questionAndAnswer RESULT", result);
+
+        if (result && result.value) {
+          const answer = result.value;
+          psychoJS.experiment.addData(
+            questionAndAnswerShortcut || question,
+            answer
+          );
+          psychoJS.experiment.addData("questionAndAnswerResult", answer);
+        }
+
+        // continueRoutine = true;
+        // return Scheduler.Event.NEXT;
+      } else {
+        // ! ending trial routine
+        for (const thisComponent of trialComponents) {
+          if (typeof thisComponent.setAutoDraw === "function") {
+            thisComponent.setAutoDraw(false);
+          }
+        }
+
+        // was no response the correct answer?!
+        if (key_resp.keys === undefined) {
+          console.error("[key_resp.keys] No response error.");
+        }
+
+        // NOTE Only means what it's called in `reading` mode
+        timing.stimulusOnsetToOffset =
+          routineClock.getTime() - timing.clickToStimulusOnsetSec;
+
+        // store data for psychoJS.experiment (ExperimentHandler)
+        // update the trial handler
+        switchKind(targetKind.current, {
+          sound: () => {
+            //report values to quest
+            if (
+              currentLoop instanceof MultiStairHandler &&
+              currentLoop.nRemaining !== 0
+            ) {
+              currentLoop.addResponse(
+                key_resp.corr,
+                ProposedVolumeLevelFromQuest.current / 20
+              );
+            }
+            addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+            //psychoJS.experiment.addData("targetWasPresent", targetIsPresentBool.current);
+            //name of masker
+            //psychoJS.experiment.addData();
+          },
+          reading: () => {
+            addReadingStatsToOutput(trials.thisRepN, psychoJS);
+          },
+          letter: () => {
+            console.log(letterTiming, tolerances);
+
+            //check logic. letterTiming.targetFinishSec and letterTiming.targetStartSec are undefined for simulated observer
+            if (
+              !(
+                simulated &&
+                simulated[status.block] &&
+                simulated[status.block][status.block_condition]
+              )
+            ) {
+              logger("tolerances before calculateError", tolerances);
+              logger("letterTiming before calculateError", calculateError);
+              calculateError(
+                letterTiming,
+                tolerances,
+                letterConfig.targetDurationSec,
+                target
+              );
+            }
+
+            // Add trial timing data
+            psychoJS.experiment.addData(
+              "trialFirstFrameSec",
+              letterTiming.trialFirstFrameSec
+            );
+            psychoJS.experiment.addData(
+              "targetStartSec",
+              letterTiming.targetStartSec
+            );
+            psychoJS.experiment.addData(
+              "targetFinishSec",
+              letterTiming.targetFinishSec
+            );
+            letterTiming.trialFirstFrameSec = undefined;
+            letterTiming.targetStartSec = undefined;
+            letterTiming.targetFinishSec = undefined;
+
+            logger("currentLoop.nRemaining", currentLoop.nRemaining);
+            logger(
+              "currentLoop instanceof MultiStairHandler",
+              currentLoop instanceof MultiStairHandler
+            );
+            if (
+              currentLoop instanceof MultiStairHandler &&
+              currentLoop.nRemaining !== 0
+            ) {
+              // currentLoop.addResponse(key_resp.corr, level);
+              if (
+                !addResponseIfTolerableError(
+                  currentLoop,
+                  key_resp.corr,
+                  level,
+                  tolerances,
+                  usingGaze.current,
+                  psychoJS
+                ) &&
+                usingGaze.current
+              ) {
+                // if not tolerable error, then nudge gaze
+                rc.nudgeGaze({
+                  showOffset: true,
+                });
+              }
+            }
+            addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
+          },
+        });
+
+        psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
+        psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
+        if (typeof key_resp.keys !== "undefined") {
+          // we had a response
+          psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
+          // ie time from the end to `trialRoutineBegin` to the start of `trialRoutineEnd`
+          psychoJS.experiment.addData(
+            "trialRoutineDurationFromBeginSec",
+            trialClock.getTime()
+          );
+          // ie time from the end of the previous trial to the end of this trial
+          psychoJS.experiment.addData(
+            "trialRoutineDurationFromPreviousEndSec",
+            routineClock.getTime()
+          );
+        }
       }
 
       key_resp.stop();
@@ -3458,7 +3595,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       else hideTrialBreakProgressBar();
 
       // Check if trialBreak should be triggered
-      if (currentBlockCreditForTrialBreak >= 1) {
+      if (
+        targetTask.current !== "questionAndAnswer" &&
+        currentBlockCreditForTrialBreak >= 1
+      ) {
         currentBlockCreditForTrialBreak -= 1;
 
         showPopup(

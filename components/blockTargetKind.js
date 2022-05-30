@@ -24,3 +24,23 @@ export const switchKind = (targetKind, mappings) => {
       break;
   }
 };
+
+export const switchTask = (targetTask, mappings) => {
+  if (typeof mappings[targetTask] === "string")
+    return switchTask(mappings[targetTask], mappings);
+
+  const { identify, questionAndAnswer, detect } = mappings;
+  switch (targetTask) {
+    case "identify":
+      safeExecuteFunc(identify);
+      break;
+    case "questionAndAnswer":
+      safeExecuteFunc(questionAndAnswer);
+      break;
+    case "detect":
+      safeExecuteFunc(detect);
+      break;
+    default:
+      break;
+  }
+};

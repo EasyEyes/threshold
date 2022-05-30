@@ -852,41 +852,32 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  questionAndAnswer1: {
-    name: "questionAndAnswer1",
+  questionAndAnswer: {
+    name: "questionAndAnswer",
     availability: "now",
     example: "",
     explanation:
-      'A series of strings separated by the vertical bar character |. The first string is a question, and the rest are possible answers. The participant is required to click on one. For example "How much beauty do you get from this image right now?|1|2|3|4|5|6|7"\nOr   "Which kind of image is it?|figurative painting|abstract painting|photograph"',
-    type: "",
+      'Used to define the questions used in this trial. Can be either multiple choice or text collection, controlled by questionAndAnswerType.\nMultiple choice question A series of strings separated by the vertical bar character |. The first string is a question, and the rest are possible answers. The participant is required to click on one. For example "How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "Which kind of image is it?|figurative painting|abstract painting|photograph"\nText collect question For example, "Describe the image that you are seeing right now?" A text box will be presented to the participant for them to input the answer.',
+    type: "text",
     default: "",
   },
-  questionAndAnswer2: {
-    name: "questionAndAnswer2",
+  questionAndAnswerShortcut: {
+    name: "questionAndAnswerShortcut",
     availability: "now",
-    example: "",
+    example: "isMusicExpert",
     explanation:
-      "Same purpose, with a different name, so that you can have several questions in one trial. ",
-    type: "",
+      "To save the response in the final dataset in a concise manner, researcher can define the name of the column. If this field is missing, the whole question will be used as the name of the column in dataset.",
+    type: "text",
     default: "",
   },
-  questionAndAnswer3: {
-    name: "questionAndAnswer3",
+  questionAndAnswerType: {
+    name: "questionAndAnswerType",
     availability: "now",
     example: "",
-    explanation:
-      "Same purpose, with a different name, so that you can have several questions in one trial. ",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer4: {
-    name: "questionAndAnswer4",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same purpose, with a different name, so that you can have several questions in one trial. ",
-    type: "",
-    default: "",
+    explanation: "Control the type of the questionAndAnswer.",
+    type: "categorical",
+    default: "choice",
+    categories: ["choice", "text"],
   },
   readingCorpus: {
     name: "readingCorpus",
@@ -1085,7 +1076,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       'responseTypedBool allows participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. But responseMustClickCrosshairBool overrides all other settings while the crosshair is available for clicking.',
     type: "boolean",
-    default: "FALSE",
+    default: "TRUE",
   },
   responseTypedEasyEyesKeypadBool: {
     name: "responseTypedEasyEyesKeypadBool",
@@ -1531,32 +1522,6 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "8",
   },
-  targetQuestion1: {
-    name: "targetQuestion1",
-    availability: "later",
-    example:
-      "How much beauty do you get from this image right now?|1|2|3|4|5|6|7",
-    explanation:
-      "Parameter targetQuestion is a string consisting of a multiple-choice question and the allowed answers, all separated by the | character.",
-    type: "text",
-    default: "",
-  },
-  targetQuestion2: {
-    name: "targetQuestion2",
-    availability: "later",
-    example: '"',
-    explanation: '"',
-    type: "text",
-    default: "",
-  },
-  targetQuestion3: {
-    name: "targetQuestion3",
-    availability: "later",
-    example: '"',
-    explanation: '"',
-    type: "text",
-    default: "",
-  },
   targetRepeatsBool: {
     name: "targetRepeatsBool",
     availability: "later",
@@ -1692,10 +1657,10 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "identify",
     explanation:
-      'Can be one or multiple of the following categories. If there are multiple tasks in one trial, use comma to divide them, e.g., "identify,targetQuestion1". The participant\'s task:\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• targetQuestion1 (and targetQuestion2, etc.) uses the question and answers provided by parameter targetQuestion1. The participant must click on one of the answers.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'Can be one or multiple of the following categories.\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant will be presented a question.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
-    categories: ["identify", "detect", "targetQuestion@"],
+    categories: ["identify", "detect", "questionAndAnswer"],
   },
   thresholdAllowedDurationRatio: {
     name: "thresholdAllowedDurationRatio",

@@ -1,0 +1,32 @@
+_about,Demo of EasyEyes question and answer interface.,,,,,
+_authorEmails,dp3@nyu.edu,,,,,
+_authors,Denis Pelli,,,,,
+block,1,1,2,2,3,3
+calibrateTrackDistanceBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+conditionName,printLetters,printString,choiceQuestion,textQuestion,scriptLetters,scriptString
+conditionTrials,1,1,1,1,3,3
+font,Roboto Mono,Auckland Optotype.woff2,Roboto Mono,Roboto Mono,Roboto Mono,Fruktur
+fontCharacterSet,DHKNORSVZ,123456789,,,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz
+fontSource,google,file,google,google,google,google
+questionAndAnswer,,,This is an example multiple choice question. Please select your favorite fruit.|Apple|Banana|Watermelon|Strawberry,This is a free form text answer question. Please put the name of your favorite city here.,,
+questionAndAnswerShortcut,,,favFruit,favCity,,
+questionAndAnswerType,,,choice,text,,
+responseClickedBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+responseMustClickCrosshairBool,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
+responseTypedBool,TRUE,FALSE,TRUE,FALSE,TRUE,TRUE
+showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+showGrid,none,none,none,none,none,none
+spacingDirection,radial,radial,radial,radial,radial,radial
+spacingOverSizeRatio,1.4,1.4,1.4,1.4,1.4,1.4
+spacingRelationToSize,ratio,typographic,,,ratio,typographic
+targetDurationSec,0.15,0.15,,,1,1
+targetEccentricityXDeg,-10,10,-10,10,-10,10
+targetEccentricityYDeg,0,0,0,0,0,0
+targetMinimumPix,8,8,8,8,8,8
+targetTask,identify,identify,questionAndAnswer,questionAndAnswer,identify,identify
+thresholdBeta,2.3,2.3,2.3,2.3,2.3,2.3
+thresholdDelta,0.01,0.01,0.01,0.01,0.01,0.01
+thresholdGuess,2,2,2,2,2,2
+thresholdGuessLogSd,3,3,3,3,3,3
+thresholdParameter,spacing,spacing,spacing,spacing,spacing,spacing
+viewingDistanceDesiredCm,50,50,50,50,50,50

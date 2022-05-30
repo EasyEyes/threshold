@@ -29,6 +29,7 @@ export const grid = { current: undefined };
 export const totalBlocks = { current: undefined };
 export const totalTrialsThisBlock = { current: undefined };
 
+export const targetTask = { current: undefined };
 export const targetKind = { current: undefined };
 
 export const correctAns = { current: undefined }; // for keyboard ans
@@ -261,5 +262,3 @@ export const soundGainDBSPL = { current: undefined };
 export const whiteNoiseLevel = { current: undefined };
 export const maskerSoundFolder = { current: undefined };
 export const targetSoundFolder = { current: undefined };
-
-export const musicExpert = { current: undefined }; // TEMP
