@@ -861,21 +861,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  questionAndAnswer: {
-    name: "questionAndAnswer",
-    availability: "now",
-    example: "Is there life after death?|Yes|No|Maybe",
-    explanation:
-      'questionAndAnswer specifies a question to be asked in this condition. If the specification includes no answers, then EasyEyes accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives. Specifying just one answer is an error.\n\n• FREE-FORM: Provide just a nickname and a question, no answers. For example, "Desciption|Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n\n• MULTIPLE CHOICE: Provide several strings separated by the vertical bar character |. The first string is a question, and the rest are possible answers. There must be at least two answers. The participant must click on one. For example "How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "Which kind of image is it?|figurative painting|abstract painting|photograph".',
-    type: "text",
-    default: "",
-  },
   questionAndAnswer1: {
     name: "questionAndAnswer1",
     availability: "now",
-    example: "Is there life after death?|Yes|No|Maybe",
+    example: "AFTERLIFE|Is there life after death?|Yes|No|Maybe",
     explanation:
-      'questionAndAnswer1 specifies a nickname, a question to be asked in this condition, and perhaps some possible answers. Each element is separated from the preceding one by a vertical bar |. If the specification includes no answers, then the question accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives. Specifying just one answer is an error. The nickname is used solely to name the column of response in the saved data.\n\n• FREE-FORM: Provide just a nickname and a question, no answer. For example, "Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n\n• MULTIPLE CHOICE: Provide a nickname, a question, and at least two answers. The participant must click on one. For example "BEAUTY|How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "KIND|Which kind of image is it?|figurative painting|abstract painting|photograph"',
+      'questionAndAnswer1 provides a series of strings, separated by vertical bars |, that specify a nickname, a question to be asked in this condition, and perhaps some possible answers. The nickname is used solely to name the column of responses in the saved data. The nickname and question are required. If the specification includes no answers, then the question accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives. Specifying just one answer is currently an error, but this may change in a future enhancement. \n• FREE-FORM: Provide just a nickname and a question, no answer. For example, "DESCRIPTION|Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n• MULTIPLE CHOICE: Provide a nickname, a question, and at least two answers. The participant must click on one. For example "BEAUTY|How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "KIND|Which kind of image is it?|figurative painting|abstract painting|photograph"',
     type: "text",
     default: "",
   },
@@ -960,13 +951,364 @@ export const GLOSSARY: Glossary = {
     type: "",
     default: "",
   },
-  questionAndAnswerShortcut: {
-    name: "questionAndAnswerShortcut",
+  questionAndAnswer11: {
+    name: "questionAndAnswer11",
     availability: "now",
-    example: "LifeAfterDeath",
+    example: "",
     explanation:
-      "To save the response in the final dataset in a concise manner, the scientist can define the name of the column. If this field is missing, the whole question will be used as the name of the dataset column.",
-    type: "text",
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer12: {
+    name: "questionAndAnswer12",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer13: {
+    name: "questionAndAnswer13",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer14: {
+    name: "questionAndAnswer14",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer15: {
+    name: "questionAndAnswer15",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer16: {
+    name: "questionAndAnswer16",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer17: {
+    name: "questionAndAnswer17",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer18: {
+    name: "questionAndAnswer18",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer19: {
+    name: "questionAndAnswer19",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer20: {
+    name: "questionAndAnswer20",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer21: {
+    name: "questionAndAnswer21",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer22: {
+    name: "questionAndAnswer22",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer23: {
+    name: "questionAndAnswer23",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer24: {
+    name: "questionAndAnswer24",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer25: {
+    name: "questionAndAnswer25",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer26: {
+    name: "questionAndAnswer26",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer27: {
+    name: "questionAndAnswer27",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer28: {
+    name: "questionAndAnswer28",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer29: {
+    name: "questionAndAnswer29",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer30: {
+    name: "questionAndAnswer30",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer31: {
+    name: "questionAndAnswer31",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer32: {
+    name: "questionAndAnswer32",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer33: {
+    name: "questionAndAnswer33",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer34: {
+    name: "questionAndAnswer34",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer35: {
+    name: "questionAndAnswer35",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer36: {
+    name: "questionAndAnswer36",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer37: {
+    name: "questionAndAnswer37",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer38: {
+    name: "questionAndAnswer38",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer39: {
+    name: "questionAndAnswer39",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer40: {
+    name: "questionAndAnswer40",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer41: {
+    name: "questionAndAnswer41",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer42: {
+    name: "questionAndAnswer42",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer43: {
+    name: "questionAndAnswer43",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer44: {
+    name: "questionAndAnswer44",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer45: {
+    name: "questionAndAnswer45",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer46: {
+    name: "questionAndAnswer46",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer47: {
+    name: "questionAndAnswer47",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer48: {
+    name: "questionAndAnswer48",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer49: {
+    name: "questionAndAnswer49",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer50: {
+    name: "questionAndAnswer50",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
     default: "",
   },
   readingCorpus: {
@@ -1673,6 +2015,15 @@ export const GLOSSARY: Glossary = {
       'Define "size" as height (true) or width (false). This parameter is ignored when setting size by spacing.',
     type: "boolean",
     default: "FALSE",
+  },
+  targetSoundChannels: {
+    name: "targetSoundChannels",
+    availability: "now",
+    example: "7",
+    explanation:
+      "When the target sound file has more than one channel, targetSoundChannels specified how many (randomly selected) channels are used to create the target stimulus. Typically the rest of the channels are taken from the masker sound file.",
+    type: "integer",
+    default: "9",
   },
   targetSoundDBSPL: {
     name: "targetSoundDBSPL",

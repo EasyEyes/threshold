@@ -97,6 +97,7 @@
   cursor: default;
   opacity: 1;
   background: #fff;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
 .swal2-title {
@@ -143,6 +144,17 @@
 
 .swal2-radio label:has(input[type="radio"]:checked) {
   background-color: #aaa;
+  /* border-left: 5px solid #333; */
+}
+
+.swal2-radio label input {
+  display: none;
+}
+
+.swal2-textarea {
+  resize: none;
+  border-radius: 7px;
+  height: 7rem;
 }
 
 .swal2-confirm {
@@ -151,6 +163,10 @@
   border: none !important;
   border-radius: 7px !important;
   /* margin: 1rem !important; */
-  display: block !important;
+  display: block;
   position: relative !important;
+}
+
+.hidden-button {
+  display: none !important;
 }

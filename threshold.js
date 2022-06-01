@@ -94,6 +94,7 @@ import {
   maskerSoundFolder,
   usingGaze,
   targetTask,
+  questionsThisBlock,
 } from "./components/global.js";
 
 import {
@@ -1165,7 +1166,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trials = new data.TrialHandler({
             psychoJS: psychoJS,
             name: "trials",
-            nReps: 1,
+            nReps: totalTrialsThisBlock.current,
             trialList: trialsConditions,
             method: TrialHandler.Method.SEQUENTIAL,
             seed: Math.round(performance.now()),
@@ -1515,33 +1516,52 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
 
       // Get total trials for this block
-      switchKind(targetKind.current, {
-        sound: () => {
-          const possibleTrials = paramReader.read(
-            "conditionTrials",
-            status.block
-          );
-          totalTrialsThisBlock.current = possibleTrials.reduce(
-            (a, b) => a + b,
-            0
-          );
+      switchTask(targetTask.current, {
+        questionAndAnswer: () => {
+          // also, prep questions
+          questionsThisBlock.current = [];
+
+          for (let i = 1; i <= 50; i++) {
+            const question = paramReader.read(
+              `questionAndAnswer${i}`,
+              status.block
+            )[0];
+            if (question && question.length)
+              questionsThisBlock.current.push(question);
+          }
+
+          totalTrialsThisBlock.current = questionsThisBlock.current.length;
         },
-        reading: () => {
-          totalTrialsThisBlock.current = paramReader.read(
-            "readingPages",
-            status.block
-          )[0];
-        },
-        letter: () => {
-          const possibleTrials = paramReader.read(
-            "conditionTrials",
-            status.block
-          );
-          logger("possibleTrials", possibleTrials);
-          totalTrialsThisBlock.current = possibleTrials.reduce(
-            (a, b) => a + b,
-            0
-          );
+        identify: () => {
+          switchKind(targetKind.current, {
+            sound: () => {
+              const possibleTrials = paramReader.read(
+                "conditionTrials",
+                status.block
+              );
+              totalTrialsThisBlock.current = possibleTrials.reduce(
+                (a, b) => a + b,
+                0
+              );
+            },
+            reading: () => {
+              totalTrialsThisBlock.current = paramReader.read(
+                "readingPages",
+                status.block
+              )[0];
+            },
+            letter: () => {
+              const possibleTrials = paramReader.read(
+                "conditionTrials",
+                status.block
+              );
+              logger("possibleTrials", possibleTrials);
+              totalTrialsThisBlock.current = possibleTrials.reduce(
+                (a, b) => a + b,
+                0
+              );
+            },
+          });
         },
       });
 
@@ -2065,9 +2085,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         rc.resumeDistance();
         loggerText("[RC] resuming distance");
       }
-
-      // update trial/block count
-      status.trial = snapshot.thisN + 1;
 
       const reader = paramReader;
       const BC = status.block_condition;
@@ -3351,26 +3368,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (targetTask.current === "questionAndAnswer") {
         let question, answers;
 
-        let thisQuestionAndAnswer = paramReader.read(
-          "questionAndAnswer",
-          snapshot.block_condition
-        );
+        let thisQuestionAndAnswer =
+          questionsThisBlock.current[status.trial - 1];
 
-        const choiceQuestionBool = thisQuestionAndAnswer.includes("|");
+        const questionComponents = thisQuestionAndAnswer.split("|");
+        const choiceQuestionBool = questionComponents.length > 2;
 
+        question = questionComponents[1];
         if (choiceQuestionBool) {
-          thisQuestionAndAnswer = thisQuestionAndAnswer.split("|");
-          question = thisQuestionAndAnswer[0];
-          answers = thisQuestionAndAnswer.slice(1);
+          answers = questionComponents.slice(2);
         } else {
-          question = thisQuestionAndAnswer;
+          // freeform
           answers = "";
         }
 
-        const questionAndAnswerShortcut = paramReader.read(
-          "questionAndAnswerShortcut",
-          snapshot.conditionName
-        );
+        const questionAndAnswerShortcut = questionComponents[0];
 
         let html = "";
         const inputOptions = {};
@@ -3394,7 +3406,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const result = await Swal.fire({
           title: question,
           // html: html,
-          input: choiceQuestionBool ? "radio" : "text",
+          input: choiceQuestionBool ? "radio" : "textarea",
           inputOptions: inputOptions,
           inputAttributes: {
             autocapitalize: "off",
@@ -3406,7 +3418,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           allowOutsideClick: false,
           allowEscapeKey: false,
           customClass: {
-            confirmButton: "threshold-button",
+            confirmButton: `threshold-button${
+              choiceQuestionBool ? " hidden-button" : ""
+            }`,
           },
           // showClass: {
           //   popup: "swal2-show",
@@ -3427,6 +3441,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             popup: "",
             backdrop: "swal2-backdrop-hide",
             icon: "swal2-icon-hide",
+          },
+          didOpen: () => {
+            if (choiceQuestionBool) {
+              const _ = setInterval(() => {
+                const radioInputs =
+                  document.querySelectorAll(".swal2-radio input");
+
+                for (const e of radioInputs) {
+                  if (e.checked) {
+                    clearInterval(_);
+                    document.getElementsByClassName("swal2-confirm")[0].click();
+                  }
+                }
+              }, 200);
+            }
           },
           preConfirm: (value) => {
             if (value == null || value === "") {
@@ -3680,6 +3709,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "%c====== New Trial ======",
             "background: purple; color: white; padding: 1rem"
           );
+
+          // ! update trial counter
+          // dangerous
+          status.trial = currentLoopSnapshot.thisN + 1;
         } else {
           console.log(
             "%c====== Unknown Snapshot ======",
