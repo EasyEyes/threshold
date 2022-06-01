@@ -316,7 +316,7 @@ export const GLOSSARY: Glossary = {
   },
   _prolificEligibilityRequirements: {
     name: "_prolificEligibilityRequirements",
-    availability: "now",
+    availability: "soon",
     example: "",
     explanation:
       "This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
@@ -325,13 +325,22 @@ export const GLOSSARY: Glossary = {
   },
   _prolificStudyType: {
     name: "_prolificStudyType",
-    availability: "now",
+    availability: "soon",
     example: "US_REP_SAMPLE",
     explanation:
       "Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
     type: "categorical",
     default: "US_REP_SAMPLE",
     categories: ["UK_REP_SAMPLE", "US_REP_SAMPLE", "SINGLE"],
+  },
+  _requestEasyEyesID: {
+    name: "_requestEasyEyesID",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "When _requestEasyEyesID is TRUE, we ask the participant to type in their EasyEyesID from a previous session. We will require the EasyEyesID, and if not provided, we exit. It would be nice if, as an alternative to error-prone typing, we allowed the participant to drop an EasyEyesID file onto an EasyEyes dropbox. The plan is for EasyEyes to ALWAYS drop an EasyEyesID file in the Downloads folder whenever we save data. The filename is \nEasyEyesID QuickBrownFox123\nThe file content is: \nEasyEyesID QuickBrownFox123\nProlificID 1a75....\ncrowdingExperiment [the experiment filename without the extension]\ndate and time\nWe only need to read the EasyEyes userID, which is the final nonblank string in the filename.",
+    type: "",
+    default: "",
   },
   _zeroBasedNumberingBool: {
     name: "_zeroBasedNumberingBool",
@@ -855,29 +864,110 @@ export const GLOSSARY: Glossary = {
   questionAndAnswer: {
     name: "questionAndAnswer",
     availability: "now",
+    example: "Is there life after death?|Yes|No|Maybe",
+    explanation:
+      'questionAndAnswer specifies nickname and a question to be asked in this condition. If the specification includes no answers, then the question accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives. Specifying just one answer is an error.\n\n• FREE-FORM: Provide just a question, no answer. For example, "Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n\n• MULTIPLE CHOICE: Provide several strings separated by the vertical bar character |. The first string is a question, and the rest are possible answers. There must be at least two answers. The participant must click on one. For example "How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "Which kind of image is it?|figurative painting|abstract painting|photograph".',
+    type: "text",
+    default: "",
+  },
+  questionAndAnswer1: {
+    name: "questionAndAnswer1",
+    availability: "now",
+    example: "Is there life after death?|Yes|No|Maybe",
+    explanation:
+      'questionAndAnswer1 specifies a question to be asked in this condition. If the specification includes no answers, then EasyEyes accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives. Specifying just one answer is an error.\n\n• FREE-FORM: Provide just a question, no answer. For example, "Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n\n• MULTIPLE CHOICE: Provide series of strings separated by the vertical bar character |. The first string is a question, and the rest are possible answers. There must be at least two answers. The participant must click on one. For example "How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "Which kind of image is it?|figurative painting|abstract painting|photograph"',
+    type: "text",
+    default: "",
+  },
+  questionAndAnswer2: {
+    name: "questionAndAnswer2",
+    availability: "now",
     example: "",
     explanation:
-      'Used to define the questions used in this trial. Can be either multiple choice or text collection, controlled by questionAndAnswerType.\nMultiple choice question A series of strings separated by the vertical bar character |. The first string is a question, and the rest are possible answers. The participant is required to click on one. For example "How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "Which kind of image is it?|figurative painting|abstract painting|photograph"\nText collect question For example, "Describe the image that you are seeing right now?" A text box will be presented to the participant for them to input the answer.',
-    type: "text",
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer3: {
+    name: "questionAndAnswer3",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer4: {
+    name: "questionAndAnswer4",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer5: {
+    name: "questionAndAnswer5",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer6: {
+    name: "questionAndAnswer6",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer7: {
+    name: "questionAndAnswer7",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer8: {
+    name: "questionAndAnswer8",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer9: {
+    name: "questionAndAnswer9",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
+    default: "",
+  },
+  questionAndAnswer10: {
+    name: "questionAndAnswer10",
+    availability: "now",
+    example: "",
+    explanation:
+      "Same as above. Any specified questions are asked in numerical order.",
+    type: "",
     default: "",
   },
   questionAndAnswerShortcut: {
     name: "questionAndAnswerShortcut",
     availability: "now",
-    example: "isMusicExpert",
+    example: "LifeAfterDeath",
     explanation:
-      "To save the response in the final dataset in a concise manner, researcher can define the name of the column. If this field is missing, the whole question will be used as the name of the column in dataset.",
+      "To save the response in the final dataset in a concise manner, the scientist can define the name of the column. If this field is missing, the whole question will be used as the name of the dataset column.",
     type: "text",
     default: "",
-  },
-  questionAndAnswerType: {
-    name: "questionAndAnswerType",
-    availability: "now",
-    example: "",
-    explanation: "Control the type of the questionAndAnswer.",
-    type: "categorical",
-    default: "choice",
-    categories: ["choice", "text"],
   },
   readingCorpus: {
     name: "readingCorpus",

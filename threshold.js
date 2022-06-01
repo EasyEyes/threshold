@@ -3351,16 +3351,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (targetTask.current === "questionAndAnswer") {
         let question, answers;
 
-        const thisQuestionType = paramReader.read(
-          "questionAndAnswerType",
-          snapshot.conditionName
-        );
-        const choiceQuestionBool = thisQuestionType === "choice";
-
         let thisQuestionAndAnswer = paramReader.read(
           "questionAndAnswer",
           snapshot.conditionName
         );
+
+        const choiceQuestionBool = thisQuestionAndAnswer.includes("|");
+
         if (choiceQuestionBool) {
           thisQuestionAndAnswer = thisQuestionAndAnswer.split("|");
           question = thisQuestionAndAnswer[0];
