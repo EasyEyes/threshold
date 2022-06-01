@@ -25,7 +25,7 @@ const { Scheduler } = util;
 /* -------------------------------- External -------------------------------- */
 import * as jsQUEST from "./components/addons/jsQUEST.module.js";
 import Stats from "stats.js";
-import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
+// import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 ////
 /* ----------------------------------- CSS ---------------------------------- */
 import "./psychojs/src/index.css";
@@ -3353,7 +3353,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         let thisQuestionAndAnswer = paramReader.read(
           "questionAndAnswer",
-          snapshot.conditionName
+          snapshot.block_condition
         );
 
         const choiceQuestionBool = thisQuestionAndAnswer.includes("|");
@@ -3419,7 +3419,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //   icon: "swal2-icon-hide",
           // },
           showClass: {
-            popup: "",
+            popup: "fade-in",
             backdrop: "swal2-backdrop-show",
             icon: "swal2-icon-show",
           },

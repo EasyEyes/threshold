@@ -70,6 +70,24 @@
 
 /* question and answer */
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.fade-in {
+  animation-name: fadeIn;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+}
+
 .swal2-container {
   background: #eaeaea !important;
 }
@@ -93,6 +111,16 @@
 .swal2-radio {
   color: #000;
   flex-direction: column;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.swal2-radio .swal2-label {
+  margin-left: 1rem;
+  font-size: 1.5rem;
+  line-height: 150%;
+  user-select: none;
 }
 
 .swal2-radio label {
@@ -100,9 +128,21 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin: 0;
-  font-size: 1.2rem;
+  margin: 0.3rem 0;
+  font-size: 1.5rem;
   cursor: pointer;
+  padding: 0.5rem;
+  background-color: #ddd;
+  border-radius: 7px;
+}
+
+.swal2-radio label:hover {
+  outline: 2px solid #aaa !important;
+  outline-offset: 0.2rem !important;
+}
+
+.swal2-radio label:has(input[type="radio"]:checked) {
+  background-color: #aaa;
 }
 
 .swal2-confirm {
