@@ -479,7 +479,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationStrategy: {
     name: "fixationLocationStrategy",
-    availability: "later",
+    availability: "now",
     example: "centerFixation",
     explanation:
       "fixationLocationStrategy specifies the strategy by which EasyEyes places the fixation point, which is the origin of the visual coordinate system. Most experimenters will choose centerFixation, the default, which simply places fixation at the center of the screen. But for peripheral testing you might choose  asSpecified and put fixation near one edge of the display to maximize the eccentricity of a target at the opposite edge. Fixation, whether on- or off-screen, is always specified as a point in (x,y) display coordinates in the plane of the display (origin at lower left corner). The compiler requires that all conditions in a block have the same fixation point and fixationLocationStrategy. \n• centerFixation places fixation at the center of the screen. This is the default.\n• asSpecified indicates that fixation is specified by (fixationLocationXScreen, fixationLocationYScreen). \n\nNOT YET IMPLEMENTED:\nTo test even farther into the periphery, you might want to set fixationRequestedOffscreenBool TRUE and place the fixation off-screen by putting tape on a bottle or a box and drawing a fixation cross on it.\n• centerTargets sets the (possibly offscreen) fixation location so as to maximize the screen margin around the edges of all the possible targets.  We consider all possible targets across all conditions within the block.  \n• centerFixationAndTargets places fixation so as to maximize the screen margin around the fixation and the edges of all the possible targets within the block. We consider all possible targets across all conditions within the block.  \n\nSatisfying centerTargets or centerFixationAndTargets may be impossible beyond a certain maximum viewing distance (in cm) proportional to screen size (in cm). We generally don't know the screen size at compile time, as each participant has their own computer. Currently the scientist can only specify viewing distance as a fixed number of cm. \n\n[Since short viewing distances are uncomfortable, it might be useful to be able to request the maximize viewing distance such that the screen will have a needed visual subtense. In effect, this requests a viewing distance that is a multiple of screen width or height.]",
@@ -494,7 +494,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationXScreen: {
     name: "fixationLocationXScreen",
-    availability: "later",
+    availability: "now",
     example: "0.5",
     explanation:
       "If fixationLocationStrategy is asSpecified, then fixationLocationXScreen specifies fixation's X coordinate in the screen plane, as a fraction of screen width. The lower left corner is the origin (0,0), and the upper right corner is (1,1).",
@@ -503,7 +503,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationLocationYScreen: {
     name: "fixationLocationYScreen",
-    availability: "later",
+    availability: "now",
     example: "0.5",
     explanation:
       "If fixationLocationStrategy is asSpecified, then fixationLocationYScreen specifies the Y coordinate of fixation, as a fraction of screen height.",

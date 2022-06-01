@@ -82,26 +82,35 @@ export const prepareExperimentFileForThreshold = async (
   parsed.data = discardTrailingWhitespaceLines(parsed);
   parsed.data = discardTrailingWhitespaceColumns(parsed);
   parsed.data = discardCommentedLines(parsed);
+
+  if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
+
   // Recruitment
   if (
     parsed.data.find((i: string[]) => i[0] == "_participantRecruitmentService")
   ) {
-    if (!user.currentExperiment) user.currentExperiment = {};
+    // if (!user.currentExperiment) user.currentExperiment = {};
     user.currentExperiment.participantRecruitmentServiceName = parsed.data.find(
       (i: string[]) => i[0] == "_participantRecruitmentService"
     )?.[1];
   }
+
+  // if to streamline the science page
+  // from compiling to uploading, to setting mode to running
   if (
-    parsed.data.find(
-      (i: string[]) => i[0] == "_pavloviaOfferPilotingOptionBool"
-    )
+    parsed.data.find((i: string[]) => i[0] == "_pavloviaPreferRunningModeBool")
   ) {
-    if (!user.currentExperiment) user.currentExperiment = {};
-    user.currentExperiment.pavloviaOfferPilotingOptionBool =
+    // if (!user.currentExperiment) user.currentExperiment = {};
+
+    user.currentExperiment.pavloviaPreferRunningModeBool =
       parsed.data.find(
-        (i: string[]) => i[0] == "_pavloviaOfferPilotingOptionBool"
+        (i: string[]) => i[0] == "_pavloviaPreferRunningModeBool"
       )?.[1] == "TRUE";
+  } else {
+    // if (!user.currentExperiment) user.currentExperiment = {};
+    user.currentExperiment.pavloviaPreferRunningModeBool = true;
   }
+
   // Validate requested fonts
   const requestedFontList: string[] = getFontNameListBySource(parsed, "file");
   const requestedFontListWeb: string[] = getFontNameListBySource(
