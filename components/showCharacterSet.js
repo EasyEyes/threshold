@@ -1,4 +1,4 @@
-import { letterConfig } from "./global";
+import { letterConfig, font as globalFont } from "./global";
 
 function getCharacterSetShowPos(ele, showWhere) {
   switch (showWhere) {
@@ -26,7 +26,10 @@ export function setupClickableCharacterSet(
   const characterSetHolder = document.createElement("div");
   characterSetHolder.id = "characterSet-holder";
   characterSetHolder.className = "characterSet-holder";
+
   characterSetHolder.style.fontFamily = `"${font}"`;
+  characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
+
   getCharacterSetShowPos(characterSetHolder, where);
 
   pushCharacterSet(
@@ -95,6 +98,7 @@ const pushCharacterSet = (
     if (addFakeConnection)
       characterSet.style.fontVariantLigatures = "discretionary-lig-values";
     characterSet.innerHTML = addFakeConnection ? `&zwj;${a}&zwj;` : a;
+    characterSet.style.direction = globalFont.ltr ? "ltr" : "rtl";
 
     characterSet.onclick = () => {
       responseRegister.clickTime = performance.now();

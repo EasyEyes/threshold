@@ -5,11 +5,11 @@ block,1
 calibrateBlindSpotBool,FALSE
 calibrateScreenSizeBool,FALSE
 font,Roboto Mono
+fontLeftToRightBool,TRUE
 fontSource,google
 readingCorpus,the-phantom-tollbooth.txt
 readingDefineSingleLineSpacingAs,nominalSize
 readingFirstFewWords, The 
-readingLeftToRightBool,TRUE
 readingLinesPerPage,12
 readingMaxCharactersPerLine,57
 readingMultipleOfSingleLineSpacing,0.8

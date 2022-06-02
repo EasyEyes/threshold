@@ -39,6 +39,7 @@ export const font = {
   name: undefined,
   source: undefined,
   style: undefined,
+  ltr: undefined,
   instructionFont: undefined,
   instructionFontSource: undefined,
 };

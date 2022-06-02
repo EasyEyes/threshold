@@ -1764,7 +1764,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // LTR or RTL
           let readingDirectionLTR = paramReader.read(
-            "readingLeftToRightBool",
+            "fontLeftToRightBool",
             status.block
           )[0];
           if (!readingDirectionLTR) readingParagraph.setAlignHoriz("right");
@@ -2092,6 +2092,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       font.source = reader.read("fontSource", BC);
       font.name = reader.read("font", BC);
       if (font.source === "file") font.name = cleanFontName(font.name);
+
+      font.ltr = reader.read("fontLeftToRightBool", BC);
 
       showCounterBool = reader.read("showCounterBool", BC);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);

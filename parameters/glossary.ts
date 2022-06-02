@@ -42,7 +42,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_compatibleBrowser is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be \'all\', or just compatible browsers by name, or just incompatible browsers each preceded by "not". No mixing allowed. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If the particiapant\'s device is incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
     type: "multicategorical",
-    default: "all",
+    default: "Chrome",
     categories: [
       "all",
       "Chrome",
@@ -109,7 +109,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_compatibleDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
     type: "multicategorical",
-    default: "desktop tablet mobile",
+    default: "desktop",
     categories: ["desktop", "tablet", "mobile"],
   },
   _compatibleOperatingSystem: {
@@ -167,7 +167,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_compatibleProcessorCoresMinimum is a positive integer. It's value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the speed of generating random numbers (in MHz). https://en.wikipedia.org/wiki/Multi-core_processor ",
     type: "integer",
-    default: "0",
+    default: "6",
   },
   _consentForm: {
     name: "_consentForm",
@@ -563,6 +563,15 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  fontLeftToRightBool: {
+    name: "fontLeftToRightBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "fontLeftToRightBool should be set to TRUE for most languages, including English, which are written from left to right, and should be set to FALSE for Arabic, Hebrew, and other right-to-left languages. The default value is TRUE. For identifying letters, the letters will be placed accordingly on the response screen. For reading, it's important to set this correctly, or text may fall off the screen: left-to-right text will be left-aligned, and right-to-left text will be right aligned.                                                                                                                                                                                      ",
+    type: "boolean",
+    default: "TRUE",
+  },
   fontSource: {
     name: "fontSource",
     availability: "now",
@@ -708,16 +717,16 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "5",
     explanation:
-      "markingFixationMotionPeriodSec is the number of secs that it takes the crosshair to do one revolution around the origin.",
+      "markingFixationMotionPeriodSec is the time, in secs, that it takes the crosshair to do one revolution around the origin.",
     type: "numerical",
-    default: "5",
+    default: "10",
   },
   markingFixationMotionRadiusDeg: {
     name: "markingFixationMotionRadiusDeg",
     availability: "now",
     example: "0.5",
     explanation:
-      "markingFixationMotionRadiusDeg is the radius of the circular tragectory of the crosshari about the origin.",
+      "markingFixationMotionRadiusDeg is the radius of the circular trajectory of the crosshair about the origin.",
     type: "numerical",
     default: "0.5",
   },
@@ -726,7 +735,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "1",
     explanation:
-      "markingFixationStrokeLengthDeg specifies the stroke length in the fixation cross. The cross consists of two strokes, one horizontal, one vertical. Thus this is a diameter, unless the other marking parameters, which are mostly radii. Setting this to a large value (e.g. 100) will produce a fixation cross that extends from edge to edge of the display, which may help restore salience of a cross in the presence of blanking near the possible target locations.",
+      "markingFixationStrokeLengthDeg specifies the stroke length in the fixation cross. The cross consists of two strokes, one horizontal, one vertical. Thus this is a diameter, unless the other marking parameters, which are mostly radii. Setting this to a large value (e.g. 100) will produce a fixation cross that extends from edge to edge of the display, which may help restore salience of a cross despite blanking of the cross near possible target locations.",
     type: "numerical",
     default: "2",
   },
@@ -777,7 +786,7 @@ export const GLOSSARY: Glossary = {
     name: "markTheFixationBool",
     availability: "now",
     example: "TRUE",
-    explanation: "If true, then draw a fixation cross.",
+    explanation: "If markTheFixationBool is TRUE, then draw a fixation cross.",
     type: "boolean",
     default: "TRUE",
   },
@@ -786,7 +795,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "If true, draw an X at every possible target location, considering all conditions in this conditionGroup. ",
+      "If markThePossibleTargetsBool is TRUE, draw an X at every possible target location, considering all conditions in this conditionGroup. ",
     type: "boolean",
     default: "FALSE",
   },
@@ -812,7 +821,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "sounds",
     explanation:
-      "The name of a folder of sound files, to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of maskSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.]",
+      "The name of a folder of sound files, to be used when targetKind is sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of maskSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.]",
     type: "text",
     default: "",
   },
@@ -857,7 +866,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Play a purring sound to alert the observer while we await their response. Pure 200 Hz tone for 0.6 sec at amplitude 1.",
+      "NOT YET IMPLEMENTED. Play a purring sound to alert the observer while we await their response. Pure 200 Hz tone for 0.6 sec at amplitude 1.",
     type: "boolean",
     default: "TRUE",
   },
@@ -1333,20 +1342,11 @@ export const GLOSSARY: Glossary = {
   readingFirstFewWords: {
     name: "readingFirstFewWords",
     availability: "now",
-    example: "In the beginning was the word.",
+    example: "A guy walks into a bar",
     explanation:
       'readingFirstFewWords specifies the beginning of the reading in the corpus by its first few words, a string. The matching is exact, including case and punctuation. Default is the empty string, in which case we read from the beginning of the corpus. The EasyEyes compiler flags an error if a nonempty string is not found in the corpus. If the (nonempty) string appears more than once in the corpus, EasyEyes will randomly pick among the instances, independently for each reading. Thus, for an English-language corpus, one might reasonably set readingFirstFewWords to "The ", to begin each reading at a randomly chosen sentence that begins with "The ".',
     type: "text",
     default: "",
-  },
-  readingLeftToRightBool: {
-    name: "readingLeftToRightBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "readingLeftToRightBool should be set to TRUE for most languages, including English, that are written from left to right, and should be set to FALSE for Arabic, Hebrew, and other right-to-left languages. The default value is TRUE. If this parameter is correctly set, then left-to-right text will be left-aligned, and right-to-left text will be right aligned. Getting this parameter wrong will screw up the display, and your text may fall off the screen.",
-    type: "boolean",
-    default: "TRUE",
   },
   readingLinesPerPage: {
     name: "readingLinesPerPage",
