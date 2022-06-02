@@ -1,3 +1,5 @@
+import { letterConfig } from "./global";
+
 function getCharacterSetShowPos(ele, showWhere) {
   switch (showWhere) {
     case "bottom":
@@ -87,7 +89,13 @@ const pushCharacterSet = (
     if (extraCharClassName.length)
       characterSet.classList.add(extraCharClassName);
 
-    characterSet.innerText = a;
+    const addFakeConnection =
+      letterConfig.spacingRelationToSize === "typographic";
+
+    if (addFakeConnection)
+      characterSet.style.fontVariantLigatures = "discretionary-lig-values";
+    characterSet.innerHTML = addFakeConnection ? `&zwj;${a}&zwj;` : a;
+
     characterSet.onclick = () => {
       responseRegister.clickTime = performance.now();
       responseRegister.current = a.toLowerCase();

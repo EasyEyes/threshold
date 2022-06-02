@@ -1683,6 +1683,15 @@ export const GLOSSARY: Glossary = {
     default: "topLeft",
     categories: ["none", "topLeft", "bottomLeft"],
   },
+  responseShowIsolatedCharacterInConnectedFormBool: {
+    name: "responseShowIsolatedCharacterInConnectedFormBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "When we do crowded-letter identification in typographic mode in Arabic, the target character is currently displayed in connected mode as a stimulus and in disconnected mode on the response screen. That introduces an extra undesired difficulty in identifying the target. In Arabic the ligatures are smart, responding to the neighboring letters. When responseShowIsolatedCharacterInConnectedFormBool is TRUE we wrap zero-width joiner (ZWJ) characters around each of the response screen's isolated charcters, each member of the characterSet .",
+    type: "boolean",
+    default: "FALSE",
+  },
   showPercentCorrectBool: {
     name: "showPercentCorrectBool",
     availability: "now",
@@ -1840,7 +1849,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "ratio",
     explanation:
-      'spacingRelationToSize can be none, ratio, or typographic. When thresholdParameter is "spacing", spacingRelationToSize specifies how size depend on center-to-center target-flanker spacing. And when thresholdParameter is "size", spacingRelationToSize specifies how spacing depend on size. Can be none, ratio, or typographic. \n• none means no dependence. Size and spacing are set independently. \n• ratio means accept the thresholdParameter (which is either size or spacing) and adjust the other parameter to satisfy the specified "spacingOverSizeRatio". \n• typographic prints the triplet (flanker, target, flanker) as a (horizontal) string (horizontally) centered on the specified target eccentricity. By "horizontal" and "vertical", we just mean the orientation of the baseline, and orthogonal to it. ("Vertically," the characterSet bounding box is centered on the eccentric location, and all letters in the string are on same baseline.) If thresholdParameter is "spacing" then the font size of string is adjusted so that the width of the string is 3× specified spacing. Works with both left-to-right and right-to-left fonts. [If thresholdParameter is "size" then EasyEyes adjusts the font size of the string to achieve the specified target size.] ',
+      'spacingRelationToSize can be none, ratio, or typographic. When thresholdParameter is "spacing", spacingRelationToSize specifies how size depend on center-to-center target-flanker spacing. And when thresholdParameter is "size", spacingRelationToSize specifies how spacing depend on size.\n• none means no dependence. Size and spacing are set independently. \n• ratio means accept the thresholdParameter (which is either size or spacing) and adjust the other parameter to satisfy the specified "spacingOverSizeRatio". \n• typographic prints the triplet (flanker, target, flanker) as a (horizontal) string (horizontally) centered on the specified target eccentricity. By "horizontal" and "vertical", we just mean the orientation of the baseline, and orthogonal to it. ("Vertically," the characterSet bounding box is centered on the eccentric location, and all letters in the string are on same baseline.) If thresholdParameter is "spacing" then the font size of string is adjusted so that the width of the string is 3× specified spacing. Works with both left-to-right and right-to-left fonts. [If thresholdParameter is "size" then EasyEyes adjusts the font size of the string to achieve the specified target size.] ',
     type: "categorical",
     default: "ratio",
     categories: ["none", "ratio", "typographic"],
