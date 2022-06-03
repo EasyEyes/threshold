@@ -163,7 +163,7 @@ export const GLOSSARY: Glossary = {
   _compatibleProcessorCoresMinimum: {
     name: "_compatibleProcessorCoresMinimum",
     availability: "now",
-    example: "4",
+    example: "6",
     explanation:
       "_compatibleProcessorCoresMinimum is a positive integer. It's value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the speed of generating random numbers (in MHz). https://en.wikipedia.org/wiki/Multi-core_processor ",
     type: "integer",
@@ -289,7 +289,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantRecruitmentServiceAccount: {
     name: "_participantRecruitmentServiceAccount",
-    availability: "now",
+    availability: "soon",
     example: "123ABC",
     explanation:
       "Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -298,7 +298,7 @@ export const GLOSSARY: Glossary = {
   },
   _participantsHowMany: {
     name: "_participantsHowMany",
-    availability: "now",
+    availability: "soon",
     example: "20",
     explanation:
       "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -310,7 +310,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "FALSE",
     explanation:
-      "_pavloviaPreferRunningModeBool streamlines the use of Pavlovia's RUNNING mode when TRUE and streamlines the use of Pavlovia's PILOTING mode when FALSE. _pavloviaPreferRunningModeBool (default TRUE) helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, and cannot be deployed to anywhere else. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can deploy to anyone. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. If your experiment is already in RUNNING mode you can still convert to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
+      "Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, and cannot be deployed to anywhere else. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can deploy to anyone. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. If your experiment is already in RUNNING mode you can still convert to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
     type: "boolean",
     default: "TRUE",
   },
@@ -338,13 +338,13 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "When _requestEasyEyesID is TRUE, we ask the participant to type in their EasyEyesID from a previous session. We will require the EasyEyesID, and if not provided, we exit. It would be nice if, as an alternative to error-prone typing, we allowed the participant to drop an EasyEyesID file onto an EasyEyes dropbox. The plan is for EasyEyes to ALWAYS drop an EasyEyesID file in the Downloads folder whenever we save data. The filename is \nEasyEyesID QuickBrownFox123\nThe file content is: \nEasyEyesID QuickBrownFox123\nProlificID 1a75....\ncrowdingExperiment [the experiment filename without the extension]\ndate and time\nWe only need to read the EasyEyes userID, which is the final nonblank string in the filename.",
+      "When _requestEasyEyesID is TRUE, we ask the participant to provide their EasyEyesID from a previous session. They can type it into a text box, or submit an EasyEyes ID file. We will require the EasyEyesID, and if not provided, we exit. As an alternative to error-prone typing, we allow the participant to drop an EasyEyesID file onto an EasyEyes dropbox. EasyEyes will ALWAYS drop an EasyEyesID file in the Downloads folder whenever we save data. An example filename is\nEasyEyesID QuickBrownFox123\nThe file content is: \nEasyEyesID QuickBrownFox123\nProlificID 1a75....\ncrowdingExperiment [the experiment filename without the extension]\ndate and time\nWe only need to read the EasyEyesID, generated by PsychJS, which is the final nonblank string in the filename.",
     type: "",
     default: "",
   },
   _zeroBasedNumberingBool: {
     name: "_zeroBasedNumberingBool",
-    availability: "now",
+    availability: "soon",
     example: "FALSE",
     explanation:
       "If true then the first block and condition are numbered 0, otherwise 1.",
@@ -532,7 +532,8 @@ export const GLOSSARY: Glossary = {
     name: "flipScreenHorizontallyBool",
     availability: "later",
     example: "FALSE",
-    explanation: "Needed when the display is seen through a mirror.",
+    explanation:
+      "Set flipScreenHorizontallyBool TRUE when the display is seen through a mirror.",
     type: "boolean",
     default: "FALSE",
   },
@@ -870,454 +871,13 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  questionAndAnswer1: {
-    name: "questionAndAnswer1",
+  "questionAndAnswer@@": {
+    name: "questionAndAnswer@@",
     availability: "now",
     example: "AFTERLIFE|Is there life after death?|Yes|No|Maybe",
     explanation:
-      'questionAndAnswer1 provides a series of strings, separated by vertical bars |, that specify a nickname, a question to be asked in this condition, and perhaps some possible answers. The nickname is used solely to name the column of responses in the saved data. The nickname and question are required. If the specification includes no answers, then the question accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives. Specifying just one answer is currently an error, but this may change in a future enhancement. \n• FREE-FORM: Provide just a nickname and a question, no answer. For example, "DESCRIPTION|Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n• MULTIPLE CHOICE: Provide a nickname, a question, and at least two answers. The participant must click on one. For example "BEAUTY|How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "KIND|Which kind of image is it?|figurative painting|abstract painting|photograph"',
+      'questionAndAnswer@@ (e.g. questionAndAnswer01) consists of several strings, separated by vertical bars |, that specify: a nickname, a question to be asked, and perhaps some possible answers. The nickname is used solely to name the column of responses in the saved data. The nickname and question are required; the answers are not. If no answers are specified, then the question accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives. Specifying just one answer is currently an error, but this may change in a future enhancement. \n• FREE-FORM: Provide just a nickname and a question, no answer. For example, "DESCRIPTION|Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n• MULTIPLE CHOICE: Provide a nickname, a question, and at least two answers. The participant must click on one. For example "BEAUTY|How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "KIND|Which kind of image is it?|figurative painting|abstract painting|photograph"\n\nWe support questionAndAnswer01 - questionAndAnswer99, i.e. you can write 99 questions in one block.',
     type: "text",
-    default: "",
-  },
-  questionAndAnswer2: {
-    name: "questionAndAnswer2",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer3: {
-    name: "questionAndAnswer3",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer4: {
-    name: "questionAndAnswer4",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer5: {
-    name: "questionAndAnswer5",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer6: {
-    name: "questionAndAnswer6",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer7: {
-    name: "questionAndAnswer7",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer8: {
-    name: "questionAndAnswer8",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer9: {
-    name: "questionAndAnswer9",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer10: {
-    name: "questionAndAnswer10",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer11: {
-    name: "questionAndAnswer11",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer12: {
-    name: "questionAndAnswer12",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer13: {
-    name: "questionAndAnswer13",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer14: {
-    name: "questionAndAnswer14",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer15: {
-    name: "questionAndAnswer15",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer16: {
-    name: "questionAndAnswer16",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer17: {
-    name: "questionAndAnswer17",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer18: {
-    name: "questionAndAnswer18",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer19: {
-    name: "questionAndAnswer19",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer20: {
-    name: "questionAndAnswer20",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer21: {
-    name: "questionAndAnswer21",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer22: {
-    name: "questionAndAnswer22",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer23: {
-    name: "questionAndAnswer23",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer24: {
-    name: "questionAndAnswer24",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer25: {
-    name: "questionAndAnswer25",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer26: {
-    name: "questionAndAnswer26",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer27: {
-    name: "questionAndAnswer27",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer28: {
-    name: "questionAndAnswer28",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer29: {
-    name: "questionAndAnswer29",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer30: {
-    name: "questionAndAnswer30",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer31: {
-    name: "questionAndAnswer31",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer32: {
-    name: "questionAndAnswer32",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer33: {
-    name: "questionAndAnswer33",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer34: {
-    name: "questionAndAnswer34",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer35: {
-    name: "questionAndAnswer35",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer36: {
-    name: "questionAndAnswer36",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer37: {
-    name: "questionAndAnswer37",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer38: {
-    name: "questionAndAnswer38",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer39: {
-    name: "questionAndAnswer39",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer40: {
-    name: "questionAndAnswer40",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer41: {
-    name: "questionAndAnswer41",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer42: {
-    name: "questionAndAnswer42",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer43: {
-    name: "questionAndAnswer43",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer44: {
-    name: "questionAndAnswer44",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer45: {
-    name: "questionAndAnswer45",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer46: {
-    name: "questionAndAnswer46",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer47: {
-    name: "questionAndAnswer47",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer48: {
-    name: "questionAndAnswer48",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer49: {
-    name: "questionAndAnswer49",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
-    default: "",
-  },
-  questionAndAnswer50: {
-    name: "questionAndAnswer50",
-    availability: "now",
-    example: "",
-    explanation:
-      "Same as above. Any specified questions are asked in numerical order.",
-    type: "",
     default: "",
   },
   readingCorpus: {
@@ -1342,7 +902,7 @@ export const GLOSSARY: Glossary = {
   readingFirstFewWords: {
     name: "readingFirstFewWords",
     availability: "now",
-    example: "A guy walks into a bar",
+    example: "It was a dark and stormy night",
     explanation:
       'readingFirstFewWords specifies the beginning of the reading in the corpus by its first few words, a string. The matching is exact, including case and punctuation. Default is the empty string, in which case we read from the beginning of the corpus. The EasyEyes compiler flags an error if a nonempty string is not found in the corpus. If the (nonempty) string appears more than once in the corpus, EasyEyes will randomly pick among the instances, independently for each reading. Thus, for an English-language corpus, one might reasonably set readingFirstFewWords to "The ", to begin each reading at a randomly chosen sentence that begins with "The ".',
     type: "text",
@@ -1390,7 +950,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       'Number of possible answers for each question. Only one of the possible answers is right. The rest are "foils".',
     type: "integer",
-    default: "3",
+    default: "4",
   },
   readingNumberOfQuestions: {
     name: "readingNumberOfQuestions",
@@ -2038,7 +1598,8 @@ export const GLOSSARY: Glossary = {
     name: "targetSoundDBSPL",
     availability: "now",
     example: "20",
-    explanation: 'If targetKind is "sound", this specifies target sound level.',
+    explanation:
+      'If targetKind is "sound", targetSoundDBSPL specifies target sound level.',
     type: "numerical",
     default: "20",
   },
@@ -2162,7 +1723,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "2.3",
     explanation:
-      "Used by QUEST. The steepness parameter of the Weibull psychometric function.",
+      'QUEST sets the "steepness" of the Weibull psychometric function to thresholdBeta.',
     type: "numerical",
     default: "2.3",
   },
@@ -2171,7 +1732,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.01",
     explanation:
-      "Used by QUEST. Set the asymptote of the Weibull psychometric function to 1-delta.",
+      "QUEST set the asymptote of the Weibull psychometric function to 1-thresholdDelta.",
     type: "numerical",
     default: "0.01",
   },
@@ -2180,7 +1741,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "0.5",
     explanation:
-      "Used by QUEST. Sets the probability of correct/yes response when target is at zero strength. In an identification task, we typically set gamma to 1/n, where n is the number of equal-probability possible targets. When the target is a letter, n=length(fontCharacterSet). In two-alternative forced choice we typically set gamma to 0.5. The various targetTasks each have different default values of gamma. If you leave thresholdGamma empty then you'll get that default. If you set thresholdGamma then the value you provide will overrule the default.",
+      "thresholdGamma is a parameter of the psychometric function used by QUEST. thresholdGamma is the probability of correct/yes response when target is at zero strength. In an identification task, we typically set gamma to 1/n, where n is the number of equal-probability possible targets. When the target is a letter, n=length(fontCharacterSet). In two-alternative forced choice we typically set gamma to 0.5. The various targetTasks each have different default values of gamma. If you leave thresholdGamma empty then you'll get that default. If you set thresholdGamma then the value you provide will overrule the default.",
     type: "numerical",
     default: "",
   },
@@ -2304,3 +1865,5 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
   },
 };
+
+export const SUPER_MATCHING_PARAMS: string[] = ["questionAndAnswer@@"];

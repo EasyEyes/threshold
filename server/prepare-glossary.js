@@ -48,15 +48,26 @@ async function processLanguageSheet() {
     if (!parameterInfo.name.includes("__")) data[parameterName] = parameterInfo;
   }
 
+  const superMatchingParams = Object.keys(data).filter((key) =>
+    key.includes("@")
+  );
+
   const exportWarning = `/*
   Do not modify this file! Run npm \`npm run glossary\` at ROOT of this project to fetch from the Google Sheets.
   https://docs.google.com/spreadsheets/d/1x65NjykMm-XUOz98Eu_oo6ON2xspm_h0Q0M2u6UGtug/edit#gid=1287694458 
 */\n\n`;
   const exportHandle = `interface Glossary {[parameter: string]: { [field: string]: string | string[] };}\n\nexport const GLOSSARY: Glossary =`;
 
+  const exportSuperMatchingParamArray = `\n\nexport const SUPER_MATCHING_PARAMS: string[] = ${JSON.stringify(
+    superMatchingParams
+  )};\n`;
+
   fs.writeFile(
     `${process.cwd()}/parameters/glossary.ts`,
-    exportWarning + exportHandle + JSON.stringify(data) + "\n",
+    exportWarning +
+      exportHandle +
+      JSON.stringify(data) +
+      exportSuperMatchingParamArray,
     (error) => {
       if (error) {
         console.log("Error! Couldn't write to the file.", error);

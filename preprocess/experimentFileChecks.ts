@@ -27,7 +27,7 @@ import {
   INCONSISTENT_VIEWING_DISTANCES,
   TEXT_FILES_MISSING,
 } from "./errorMessages";
-import { GLOSSARY } from "../parameters/glossary";
+import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import { isNumeric, levDist, arraysEqual } from "./utils";
 // import { Modal } from "bootstrap";
 
@@ -191,7 +191,7 @@ const areAllPresentParametersRecognized = (
   const recognized: string[] = [];
 
   const checkIfRecognized = (parameter: string): any => {
-    if (!GLOSSARY.hasOwnProperty(parameter)) {
+    if (!(parameter in GLOSSARY) && !_superMatching(parameter)) {
       unrecognized.push({
         name: parameter,
         closest: similarlySpelledCandidates(parameter, Object.keys(GLOSSARY)),
@@ -205,6 +205,19 @@ const areAllPresentParametersRecognized = (
   parameters.splice(0, parameters.length, ...recognized);
 
   return unrecognized.map(UNRECOGNIZED_PARAMETER);
+};
+
+const _superMatching = (parameter: string): boolean => {
+  for (const superMatchingParameter of SUPER_MATCHING_PARAMS) {
+    const possibleSharedString = superMatchingParameter.replace(/@/g, "");
+    if (
+      parameter.includes(possibleSharedString) &&
+      superMatchingParameter.replace(possibleSharedString, "").length ===
+        parameter.replace(possibleSharedString, "").length
+    )
+      return true;
+  }
+  return false;
 };
 
 const areAllPresentParametersCurrentlySupported = (
@@ -476,7 +489,9 @@ const similarlySpelledCandidates = (
     (a: any, b: any) =>
       levDist(proposedParameter, a) - levDist(proposedParameter, b)
   );
-  return closest.slice(0, numberOfCandidatesToReturn - 1);
+
+  const candidates = closest.slice(0, numberOfCandidatesToReturn - 1);
+  return candidates.map((c) => c.replace(/@/g, "9"));
 };
 
 const isResponsePossible = (df: any): EasyEyesError[] => {
