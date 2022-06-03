@@ -25,6 +25,12 @@ export function ifTrue(arr) {
   return false;
 }
 
+export function fillNumberLength(n, length) {
+  let str = n.toString();
+  while (str.length < length) str = "0" + str;
+  return str;
+}
+
 /**
  * Create a mapping between an arbitrary set of strings, ie `possibleResponses`,
  * and a set of ascii-supported keys, ie [0,1,...,9,A,B,...Z].

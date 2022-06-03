@@ -6,6 +6,7 @@
 
 import {
   debug,
+  fillNumberLength,
   getTripletCharacters,
   ifTrue,
   sleep,
@@ -1521,9 +1522,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // also, prep questions
           questionsThisBlock.current = [];
 
-          for (let i = 1; i <= 50; i++) {
+          for (let i = 1; i <= 99; i++) {
             const question = paramReader.read(
-              `questionAndAnswer${i}`,
+              `questionAndAnswer${fillNumberLength(i, 2)}`,
               status.block
             )[0];
             if (question && question.length)
