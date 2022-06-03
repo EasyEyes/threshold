@@ -89,12 +89,12 @@ export class Fixation {
         XYPixOfXYDeg(
           [fixationConfig.markingFixationStrokeLengthDeg, 0],
           displayOptions
-        )[0] - fixationConfig.currentPos[0];
+        )[0] - fixationConfig.pos[0];
       fixationConfig.strokeWidth =
         XYPixOfXYDeg(
           [0, fixationConfig.markingFixationStrokeThicknessDeg],
           displayOptions
-        )[1] - fixationConfig.currentPos[1];
+        )[1] - fixationConfig.pos[1];
       fixationConfig.markingFixationHotSpotRadiusPx = Math.abs(
         fixationConfig.pos[0] -
           XYPixOfXYDeg(
@@ -237,22 +237,19 @@ export const getFixationVerticies = (
 
 export const gyrateFixation = (fixation, t, displayOptions) => {
   const rPx = Math.abs(
-    XYPixOfXYDeg(fixationConfig.pos, displayOptions)[0] -
+    fixationConfig.pos[0] -
       XYPixOfXYDeg(
-        [
-          fixationConfig.pos[0] + fixationConfig.markingFixationMotionRadiusDeg,
-          fixationConfig.pos[1],
-        ],
+        [fixationConfig.markingFixationMotionRadiusDeg, 0],
         displayOptions
       )[0]
   );
   const period = fixationConfig.markingFixationMotionPeriodSec;
   const newFixationXY = [
-    fixationConfig.pos[0] +
+    fixationConfig.nominalPos[0] +
       Math.cos((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
-    fixationConfig.pos[1] +
+    fixationConfig.nominalPos[1] +
       Math.sin((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
   ];
-  fixationConfig.currentPos = newFixationXY;
+  fixationConfig.pos = newFixationXY;
   fixation.setPos(newFixationXY);
 };

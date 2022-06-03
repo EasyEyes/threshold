@@ -1489,8 +1489,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       targetKind.current = paramReader.read("targetKind", status.block)[0];
       // TODO support more
       targetTask.current = paramReader.read("targetTask", status.block)[0];
-      fixationConfig.pos = getFixationPos(status.block, paramReader);
-      fixationConfig.currentPos = fixationConfig.pos;
+      fixationConfig.nominalPos = getFixationPos(status.block, paramReader);
+      fixationConfig.pos = fixationConfig.nominalPos;
       ////
 
       //------Prepare to start Routine 'filter'-------
@@ -2348,6 +2348,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // DISPLAY OPTIONS
           displayOptions.window = psychoJS.window;
 
+          fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
           const targetEccentricityXYPx = XYPixOfXYDeg(
             letterConfig.targetEccentricityXYDeg,
@@ -2375,6 +2376,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.spacingOverSizeRatio,
             letterConfig.targetSizeIsHeightBool
           );
+          logger("flanker positions", stimulusParameters.targetAndFlankersXYPx);
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
 

@@ -25,7 +25,7 @@ export const measureGazeError = (
       const [xPx, yPx] = psychojsUnitsFromWindowUnits(
         [r.value.x, r.value.y],
         [rc.windowWidthPx.value, rc.windowHeightPx.value],
-        fixationConfig.currentPos
+        fixationConfig.pos
       );
       // Convert to degrees.
       [

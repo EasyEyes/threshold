@@ -201,13 +201,9 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
     pixelPosition = [0, 0];
   }
   pixelPosition[0] =
-    pixelPosition[0] +
-    displayOptions.nearPointXYPix[0] +
-    fixationConfig.currentPos[0];
+    pixelPosition[0] + displayOptions.nearPointXYPix[0] + fixationConfig.pos[0];
   pixelPosition[1] =
-    pixelPosition[1] +
-    displayOptions.nearPointXYPix[1] +
-    fixationConfig.currentPos[1];
+    pixelPosition[1] + displayOptions.nearPointXYPix[1] + fixationConfig.pos[1];
   return pixelPosition;
 };
 
@@ -243,8 +239,8 @@ export const XYDegOfXYPix = (xyPix, displayOptions) => {
     we use the direction of the pixel vector (re near point).
   */
   const nearPointOffsetXYPx = [
-    xyPix[0] - displayOptions.nearPointXYPix[0] - fixationConfig.currentPos[0],
-    xyPix[1] - displayOptions.nearPointXYPix[1] - fixationConfig.currentPos[1],
+    xyPix[0] - displayOptions.nearPointXYPix[0] - fixationConfig.pos[0],
+    xyPix[1] - displayOptions.nearPointXYPix[1] - fixationConfig.pos[1],
   ];
   const rPix = norm(nearPointOffsetXYPx);
   // ASSUMES equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB

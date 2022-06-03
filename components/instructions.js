@@ -212,8 +212,8 @@ export const _takeFixationClick = (e) => {
       ]}, [pX, pY] ${[pX, pY]}`
     );
   const clickDistanceFromFixation = Math.hypot(
-    cX - fixationConfig.currentPos[0],
-    cY - fixationConfig.currentPos[1]
+    cX - fixationConfig.pos[0],
+    cY - fixationConfig.pos[1]
   );
   const clickingInFixation =
     clickDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx;

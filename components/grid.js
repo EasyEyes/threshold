@@ -96,7 +96,7 @@ export class Grid {
   cycle() {
     this._undraw(true);
     this.units = this._cycleUnits(this.units);
-    // this.spawnGridStims(this.units);
+    this.spawnGridStims(this.units);
     [this.lines, this.labels] = this.allGrids[this.units];
     this._reflectVisibility();
   }
@@ -171,15 +171,15 @@ export class Grid {
       [
         XYDegOfXYPix(
           [
-            fixationConfig.currentPos[0] - this.dimensions[0] / 2,
-            fixationConfig.currentPos[1],
+            fixationConfig.pos[0] - this.dimensions[0] / 2,
+            fixationConfig.pos[1],
           ],
           this.displayOptions
         )[0],
         XYDegOfXYPix(
           [
-            fixationConfig.currentPos[0] + this.dimensions[0] / 2,
-            fixationConfig.currentPos[1],
+            fixationConfig.pos[0] + this.dimensions[0] / 2,
+            fixationConfig.pos[1],
           ],
           this.displayOptions
         )[0],
@@ -187,15 +187,15 @@ export class Grid {
       [
         XYDegOfXYPix(
           [
-            fixationConfig.currentPos[0],
-            fixationConfig.currentPos[1] + this.dimensions[1] / 2,
+            fixationConfig.pos[0],
+            fixationConfig.pos[1] + this.dimensions[1] / 2,
           ],
           this.displayOptions
         )[1],
         XYDegOfXYPix(
           [
-            fixationConfig.currentPos[0],
-            fixationConfig.currentPos[1] - this.dimensions[1] / 2,
+            fixationConfig.pos[0],
+            fixationConfig.pos[1] - this.dimensions[1] / 2,
           ],
           this.displayOptions
         )[1],
@@ -208,29 +208,6 @@ export class Grid {
       case "cm":
         return this.dimensionsCm.map((dim) => Math.floor(dim / 1) + 1);
       case "deg":
-        // logger("dim [origin[0], height/2]", XYDegOfXYPix([fixationConfig.pos[0], this.dimensions[1]/2], this.displayOptions))
-        // logger("this.dimensionsDeg", this.dimensionsDeg)
-        // const labels = ["xDeg", "yDeg", "xPx", "yPx", "orientation"]
-        // const rows = [labels]
-        // logger("this.displayOptions.fixationXYDeg", fixationConfig.pos)
-        // for (let x=fixationConfig.pos[0]; x<this.dimensionsDeg[0]; x++){
-        //   // if (i % 100 === 0) logger(`dim i=${i}`, XYDegOfXYPix([fixationConfig.pos[0] + i, this.dimensions[1]/2], this.displayOptions))
-        //   for (let ydeg=1; ydeg<25; ydeg++){
-        //     const point = XYPixOfXYDeg([x, ydeg], this.displayOptions)
-        //     rows.push([x, ydeg, ...point, "vertical"])
-        //   }
-        // }
-        // for (let y=fixationConfig.pos[1]; y<this.dimensionsDeg[1]; y++){
-        //   for (let deg=1; deg<25; deg++){
-        //     const point = XYPixOfXYDeg([deg, y], this.displayOptions)
-        //     rows.push([deg, y, ...point, "horizontal"])
-        //   }
-        // }
-        // // https://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
-        // let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n")
-        // var encodedUri = encodeURI(csvContent)
-        // window.open(encodedUri)
-
         return this.dimensionsDeg.map((dims) =>
           dims.map((dim) => Math.abs(Math.floor(dim / 1)) + 1)
         );
@@ -537,7 +514,7 @@ export class Grid {
    * 10**(rMm/38)*0.15 - 0.15 = r         [5]
    */
   _getMmGridStims = () => {
-    const fixation = fixationConfig.currentPos;
+    const fixation = fixationConfig.pos;
     const screen = {
       top: this.dimensions[1] / 2,
       bottom: -this.dimensions[1] / 2,
@@ -562,8 +539,7 @@ export class Grid {
       // Find new r, aka norm(xy). See [5] above.
       const r = Math.pow(10, rMm / 38) * 0.15 - 0.15;
       const rPix =
-        XYPixOfXYDeg([r, 0], this.displayOptions)[0] -
-        fixationConfig.currentPos[0];
+        XYPixOfXYDeg([r, 0], this.displayOptions)[0] - fixationConfig.pos[0];
       if (rPix < 50) {
         rMm += 1;
         continue;
@@ -578,7 +554,7 @@ export class Grid {
           radius: rPix,
           ori: 0,
           size: 1,
-          pos: fixationConfig.currentPos,
+          pos: fixationConfig.pos,
           lineWidth: labeled ? 4 : 1,
           lineColor: new util.Color("plum"),
           opacity: 1,
@@ -590,7 +566,7 @@ export class Grid {
 
       if (labeled) {
         // Create label
-        const spaceToTheRight = fixationConfig.currentPos[0] < 0 ? 1 : -1;
+        const spaceToTheRight = fixationConfig.pos[0] < 0 ? 1 : -1;
         const pos = XYPixOfXYDeg([spaceToTheRight * r, 0], this.displayOptions);
         labels.push(
           new visual.TextStim({

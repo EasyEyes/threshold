@@ -362,8 +362,8 @@ export const restrictSpacingDeg = (
     throw "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'";
   const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
   const targetIsFoveal =
-    targetXYPx[0] === fixationConfig.currentPos[0] &&
-    targetXYPx[1] === fixationConfig.currentPos[1];
+    targetXYPx[0] === fixationConfig.pos[0] &&
+    targetXYPx[1] === fixationConfig.pos[1];
 
   // We will impose the target's height heightPx on all three letters in the triplet.
   // We scale the characterSet bounding box to have the specified heightPx.
@@ -555,8 +555,8 @@ export const restrictSpacingDeg = (
                   targetXYPx[1] - deltaXYPx[1],
                 ];
                 const flanker2XYPxRelativeFixation = [
-                  flanker2XYPx[0] - fixationConfig.currentPos[0],
-                  flanker2XYPx[1] - fixationConfig.currentPos[1],
+                  flanker2XYPx[0] - fixationConfig.pos[0],
+                  flanker2XYPx[1] - fixationConfig.pos[1],
                 ];
                 flanker2XYDeg = XYDegOfXYPix(
                   flanker2XYPxRelativeFixation,
