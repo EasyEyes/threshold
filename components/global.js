@@ -46,8 +46,8 @@ export const font = {
 export const fontCharacterSet = { current: undefined, where: undefined };
 
 export const fixationConfig = {
-  pos: [0, 0], // Nominal, scientist specified position
-  currentPos: [0, 0], // Actually, current position
+  nominalPos: [0, 0], // Nominal, scientist specified position. Only used as a reference point when gyrating fixation.
+  pos: [0, 0], // Actual, current position XY in psychoJS `pix` units. In general, the only location value one should use.
   offset: undefined, // Random starting offset
   show: true,
   strokeLength: 45, // aka fixationStrokeLengthPx

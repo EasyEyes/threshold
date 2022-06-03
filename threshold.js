@@ -9,6 +9,7 @@ import {
   fillNumberLength,
   getTripletCharacters,
   ifTrue,
+  norm,
   sleep,
 } from "./components/utils.js";
 
@@ -274,6 +275,7 @@ import {
 } from "./components/compatibilityCheck.js";
 import {
   Fixation,
+  getFixationPos,
   getFixationVerticies,
   gyrateFixation,
 } from "./components/fixation.js";
@@ -1488,6 +1490,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       targetKind.current = paramReader.read("targetKind", status.block)[0];
       // TODO support more
       targetTask.current = paramReader.read("targetTask", status.block)[0];
+      fixationConfig.nominalPos = getFixationPos(status.block, paramReader);
+      fixationConfig.pos = fixationConfig.nominalPos;
       ////
 
       //------Prepare to start Routine 'filter'-------
@@ -2345,6 +2349,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // DISPLAY OPTIONS
           displayOptions.window = psychoJS.window;
 
+          fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
           const targetEccentricityXYPx = XYPixOfXYDeg(
             letterConfig.targetEccentricityXYDeg,
@@ -2372,6 +2377,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.spacingOverSizeRatio,
             letterConfig.targetSizeIsHeightBool
           );
+          logger("flanker positions", stimulusParameters.targetAndFlankersXYPx);
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
 
@@ -3531,8 +3537,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 simulated[status.block][status.block_condition]
               )
             ) {
-              logger("tolerances before calculateError", tolerances);
-              logger("letterTiming before calculateError", calculateError);
               calculateError(
                 letterTiming,
                 tolerances,

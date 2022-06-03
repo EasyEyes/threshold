@@ -21,7 +21,7 @@ export const measureGazeError = (
       tolerances.measured.gazeMeasurementLatencySec =
         (r.timestamp - r.value.latencyMs - crosshairClickTimestamp) / 1000;
 
-      // Convert to psychoJS units pixels
+      // Convert to psychoJS units pixels, relative to fixation
       const [xPx, yPx] = psychojsUnitsFromWindowUnits(
         [r.value.x, r.value.y],
         [rc.windowWidthPx.value, rc.windowHeightPx.value],

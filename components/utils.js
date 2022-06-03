@@ -2,7 +2,12 @@
 export const debug = process.env.debug;
 // export const debug = true;
 
-import { skipTrialOrBlock, status, viewingDistanceCm } from "./global";
+import {
+  fixationConfig,
+  skipTrialOrBlock,
+  status,
+  viewingDistanceCm,
+} from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 
 export function sleep(ms) {
@@ -201,8 +206,10 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
   } else {
     pixelPosition = [0, 0];
   }
-  pixelPosition[0] = pixelPosition[0] + displayOptions.nearPointXYPix[0];
-  pixelPosition[1] = pixelPosition[1] + displayOptions.nearPointXYPix[1];
+  pixelPosition[0] =
+    pixelPosition[0] + displayOptions.nearPointXYPix[0] + fixationConfig.pos[0];
+  pixelPosition[1] =
+    pixelPosition[1] + displayOptions.nearPointXYPix[1] + fixationConfig.pos[1];
   return pixelPosition;
 };
 
@@ -238,8 +245,8 @@ export const XYDegOfXYPix = (xyPix, displayOptions) => {
     we use the direction of the pixel vector (re near point).
   */
   const nearPointOffsetXYPx = [
-    xyPix[0] - displayOptions.nearPointXYPix[0],
-    xyPix[1] - displayOptions.nearPointXYPix[1],
+    xyPix[0] - displayOptions.nearPointXYPix[0] - fixationConfig.pos[0],
+    xyPix[1] - displayOptions.nearPointXYPix[1] - fixationConfig.pos[1],
   ];
   const rPix = norm(nearPointOffsetXYPx);
   // ASSUMES equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB
