@@ -339,20 +339,21 @@ export const NO_RESPONSE_POSSIBLE = (
   };
 };
 
-export const INCONSISTENT_VIEWING_DISTANCES = (
+export const NONUNIQUE_WITHIN_BLOCK = (
+  offendingParameter: string,
   offendingBlocks: string[]
 ): EasyEyesError => {
   const multiple = offendingBlocks.length > 1;
   return {
-    name: "Viewing distances are not unique within blocks",
-    message: `All conditions within a given block must specify the same viewing distance. Block${
+    name: "Values are not unique within blocks",
+    message: `This parameter requires that all conditions within a block have the same value. Block${
       multiple ? "s" : ""
     } ${verballyEnumerate(offendingBlocks)} request${
       multiple ? "" : "s"
-    } multiple different viewing distances.`,
+    } different values.`,
     hint: "",
     context: "preprocessor",
     kind: "error",
-    parameters: ["viewingDistanceDesiredCm"],
+    parameters: [offendingParameter],
   };
 };

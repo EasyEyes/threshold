@@ -1,8 +1,29 @@
 import { Polygon, ShapeStim } from "../psychojs/src/visual";
-import { Color } from "../psychojs/src/util";
+import { Color, to_px } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
 import { displayOptions, fixationConfig, letterConfig } from "./global";
 import { logger, XYPixOfXYDeg } from "./utils";
+
+export const getFixationPos = (blockN, paramReader) => {
+  const locationStrategy = paramReader.read(
+    "fixationLocationStrategy",
+    blockN
+  )[0];
+  if (locationStrategy === "centerFixation") return [0, 0];
+  const specifiedLocationXYDenisCoords = [
+    paramReader.read("fixationLocationXScreen", blockN)[0],
+    paramReader.read("fixationLocationYScreen", blockN)[0],
+  ];
+  const specifiedLocationXYNorm = specifiedLocationXYDenisCoords.map(
+    (z) => 2 * z - 1
+  );
+  const specifiedLocationXYPx = to_px(
+    specifiedLocationXYNorm,
+    "norm",
+    psychoJS.window
+  );
+  return specifiedLocationXYPx;
+};
 
 export class Fixation {
   constructor() {
@@ -22,9 +43,6 @@ export class Fixation {
   }
 
   update(reader, BC, targetHeightPx, targetXYPx) {
-    // TODO implement support for fixationLocationStrategy
-    fixationConfig.pos = [0, 0];
-
     fixationConfig.markingBlankedNearTargetBool = reader.read(
       "markingBlankedNearTargetBool",
       BC
@@ -67,14 +85,16 @@ export class Fixation {
         (s) => displayOptions[s]
       )
     ) {
-      fixationConfig.strokeLength = XYPixOfXYDeg(
-        [fixationConfig.markingFixationStrokeLengthDeg, 0],
-        displayOptions
-      )[0];
-      fixationConfig.strokeWidth = XYPixOfXYDeg(
-        [0, fixationConfig.markingFixationStrokeThicknessDeg],
-        displayOptions
-      )[1];
+      fixationConfig.strokeLength =
+        XYPixOfXYDeg(
+          [fixationConfig.markingFixationStrokeLengthDeg, 0],
+          displayOptions
+        )[0] - fixationConfig.currentPos[0];
+      fixationConfig.strokeWidth =
+        XYPixOfXYDeg(
+          [0, fixationConfig.markingFixationStrokeThicknessDeg],
+          displayOptions
+        )[1] - fixationConfig.currentPos[1];
       fixationConfig.markingFixationHotSpotRadiusPx = Math.abs(
         fixationConfig.pos[0] -
           XYPixOfXYDeg(
@@ -105,7 +125,6 @@ export class Fixation {
    * @param {number[][][]} vertices aka vertexGroups, ie list of groups of coordinates
    */
   setVertices(vertices) {
-    logger("psychoJS win color", psychoJS._window.color);
     vertices.forEach((vertexGroup, i) => {
       // Single value represents radius, indicating blanking circle
       if (vertexGroup[0].length == 1) {
@@ -124,7 +143,6 @@ export class Fixation {
         });
         // Otherwise, treat as a ShapeStim
       } else {
-        logger("typeof this.stims[i]", typeof this.stims[i]);
         if (this.stims[i]) {
           this.stims[i].setVertices(vertexGroup);
         } else {

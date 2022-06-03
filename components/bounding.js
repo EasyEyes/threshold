@@ -1,6 +1,11 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
-import { displayOptions, letterConfig, targetKind } from "./global.js";
+import {
+  displayOptions,
+  fixationConfig,
+  letterConfig,
+  targetKind,
+} from "./global.js";
 
 import {
   logger,
@@ -356,7 +361,9 @@ export const restrictSpacingDeg = (
   if (spacingRelationToSize === "none" && !letterConfig.targetSizeDeg)
     throw "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'";
   const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
-  const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
+  const targetIsFoveal =
+    targetXYPx[0] === fixationConfig.currentPos[0] &&
+    targetXYPx[1] === fixationConfig.currentPos[1];
 
   // We will impose the target's height heightPx on all three letters in the triplet.
   // We scale the characterSet bounding box to have the specified heightPx.
@@ -547,7 +554,14 @@ export const restrictSpacingDeg = (
                   targetXYPx[0] - deltaXYPx[0],
                   targetXYPx[1] - deltaXYPx[1],
                 ];
-                flanker2XYDeg = XYDegOfXYPix(flanker2XYPx, displayOptions);
+                const flanker2XYPxRelativeFixation = [
+                  flanker2XYPx[0] - fixationConfig.currentPos[0],
+                  flanker2XYPx[1] - fixationConfig.currentPos[1],
+                ];
+                flanker2XYDeg = XYDegOfXYPix(
+                  flanker2XYPxRelativeFixation,
+                  displayOptions
+                );
                 var deltaXYDeg = [
                   flanker2XYDeg[0] - targetXYDeg[0],
                   flanker2XYDeg[1] - targetXYDeg[1],
@@ -577,6 +591,7 @@ export const restrictSpacingDeg = (
             v2XY = tangentialXY.map((z) => z * spacingDeg);
             break;
           case "horizontal":
+            // TODO check in compiler
             if (!targetIsFoveal)
               throw "Horizontal flankers are undefined in the periphery.";
             v1XY = horizontalXY.map((z) => z * -spacingDeg);
@@ -731,7 +746,6 @@ const getLargestBoundsRatio = (
     top: stim.top / screen.top,
     bottom: stim.bottom / screen.bottom,
   };
-  logger("ratios", ratios);
   const largestBoundsRatio = Math.max(...Object.values(ratios));
   if (largestBoundsRatio <= 0) throw "Largest ratio is non-positive.";
   return largestBoundsRatio;

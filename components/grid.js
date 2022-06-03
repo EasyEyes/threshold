@@ -9,6 +9,7 @@ import {
   XYPixOfXYDeg,
   XYDegOfXYPix,
   isInRect,
+  logger,
 } from "./utils.js";
 
 /*
@@ -167,14 +168,38 @@ export class Grid {
     );
     // TODO generalize to fixation != [0,0]
     this.dimensionsDeg = [
-      XYDegOfXYPix(
-        [this.dimensions[0] / 2, fixationConfig.pos[1]],
-        this.displayOptions
-      )[0],
-      XYDegOfXYPix(
-        [fixationConfig.pos[0], this.dimensions[1] / 2],
-        this.displayOptions
-      )[1],
+      [
+        XYDegOfXYPix(
+          [
+            fixationConfig.currentPos[0] - this.dimensions[0] / 2,
+            fixationConfig.currentPos[1],
+          ],
+          this.displayOptions
+        )[0],
+        XYDegOfXYPix(
+          [
+            fixationConfig.currentPos[0] + this.dimensions[0] / 2,
+            fixationConfig.currentPos[1],
+          ],
+          this.displayOptions
+        )[0],
+      ],
+      [
+        XYDegOfXYPix(
+          [
+            fixationConfig.currentPos[0],
+            fixationConfig.currentPos[1] + this.dimensions[1] / 2,
+          ],
+          this.displayOptions
+        )[1],
+        XYDegOfXYPix(
+          [
+            fixationConfig.currentPos[0],
+            fixationConfig.currentPos[1] - this.dimensions[1] / 2,
+          ],
+          this.displayOptions
+        )[1],
+      ],
     ];
 
     switch (units) {
@@ -206,7 +231,9 @@ export class Grid {
         // var encodedUri = encodeURI(csvContent)
         // window.open(encodedUri)
 
-        return this.dimensionsDeg.map((dim) => Math.floor(dim / 1) + 1);
+        return this.dimensionsDeg.map((dims) =>
+          dims.map((dim) => Math.abs(Math.floor(dim / 1)) + 1)
+        );
     }
   };
 
@@ -389,11 +416,24 @@ export class Grid {
 
   _getDegGridStims = () => {
     const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg");
+    logger("numberOfGridLinesPerSide", numberOfGridLinesPerSide);
     const [lines, labels] = [[], []];
     for (const region of ["right", "left", "upper", "lower"]) {
-      const nGridlines = ["right", "left"].includes(region)
-        ? numberOfGridLinesPerSide[0]
-        : numberOfGridLinesPerSide[1];
+      let nGridlines;
+      switch (region) {
+        case "left":
+          nGridlines = numberOfGridLinesPerSide[0][1];
+          break;
+        case "right":
+          nGridlines = numberOfGridLinesPerSide[0][0];
+          break;
+        case "upper":
+          nGridlines = numberOfGridLinesPerSide[1][1];
+          break;
+        case "lower":
+          nGridlines = numberOfGridLinesPerSide[1][0];
+          break;
+      }
 
       for (let i = 0; i < nGridlines; i++) {
         if (["left", "lower"].includes(region) && i === 0) continue;
@@ -445,18 +485,17 @@ export class Grid {
   };
 
   _getDegGridPathVerticies = (lineId, region) => {
-    const origin = fixationConfig.pos;
     const verticies = [];
     let pos = [];
-    // VERIFY correctness given origin aka fixation != [0,0]
+    // in psychoJS px units, ie origin at center of screen
     const screenRect = {
-      left: origin[0] - this.dimensions[0] / 2,
-      right: origin[0] + this.dimensions[0] / 2,
-      top: origin[1] + this.dimensions[1] / 2,
-      bottom: origin[1] - this.dimensions[1] / 2,
+      left: -this.dimensions[0] / 2,
+      right: this.dimensions[0] / 2,
+      top: this.dimensions[1] / 2,
+      bottom: -this.dimensions[1] / 2,
     };
     let pointOnScreen = true;
-    let e = ["left", "right"].includes(region) ? origin[0] : origin[1];
+    let e = 0;
     while (pointOnScreen) {
       let posPoint, negPoint;
       switch (region) {
@@ -478,14 +517,15 @@ export class Grid {
           break;
       }
       pointOnScreen =
-        isInRect(...posPoint, screenRect) && isInRect(...negPoint, screenRect);
+        isInRect(...posPoint, screenRect) || isInRect(...negPoint, screenRect);
+
       if (pointOnScreen) e += 0.1;
       verticies.unshift(negPoint);
       verticies.push(posPoint);
     }
     pos = ["left", "right"].includes(region)
-      ? [verticies[verticies.length - 10][0], screenRect.bottom + 5]
-      : [screenRect.left + 5, verticies[verticies.length - 10][1]];
+      ? [verticies[Math.floor(verticies.length / 2)][0], screenRect.bottom + 5]
+      : [screenRect.left + 5, verticies[Math.floor(verticies.length / 2)][1]];
     return [verticies, pos];
   };
 
@@ -497,8 +537,7 @@ export class Grid {
    * 10**(rMm/38)*0.15 - 0.15 = r         [5]
    */
   _getMmGridStims = () => {
-    const fixation = fixationConfig.pos;
-    const fixationDeg = XYDegOfXYPix(fixation, this.displayOptions);
+    const fixation = fixationConfig.currentPos;
     const screen = {
       top: this.dimensions[1] / 2,
       bottom: -this.dimensions[1] / 2,
@@ -517,16 +556,14 @@ export class Grid {
       circle.right < screen.right ||
       circle.left > screen.left;
     const [circles, labels] = [[], []];
-    let rMm = 0,
-      mostRecentLabel = fixation[0];
+    let rMm = 0;
     while (moreCirclesNeeded) {
       const labeled = rMm % 5 === 0 ? true : false;
       // Find new r, aka norm(xy). See [5] above.
       const r = Math.pow(10, rMm / 38) * 0.15 - 0.15;
-      const rPix = XYPixOfXYDeg(
-        [fixationDeg[0] + r, fixationDeg[1]],
-        this.displayOptions
-      )[0];
+      const rPix =
+        XYPixOfXYDeg([r, 0], this.displayOptions)[0] -
+        fixationConfig.currentPos[0];
       if (rPix < 50) {
         rMm += 1;
         continue;
@@ -541,7 +578,7 @@ export class Grid {
           radius: rPix,
           ori: 0,
           size: 1,
-          pos: fixation,
+          pos: fixationConfig.currentPos,
           lineWidth: labeled ? 4 : 1,
           lineColor: new util.Color("plum"),
           opacity: 1,
@@ -553,10 +590,8 @@ export class Grid {
 
       if (labeled) {
         // Create label
-        const pos = XYPixOfXYDeg(
-          [fixationDeg[0] + r, fixationDeg[1]],
-          this.displayOptions
-        );
+        const spaceToTheRight = fixationConfig.currentPos[0] < 0 ? 1 : -1;
+        const pos = XYPixOfXYDeg([spaceToTheRight * r, 0], this.displayOptions);
         labels.push(
           new visual.TextStim({
             name: `mm-grid-label-${rMm}`,
@@ -564,7 +599,7 @@ export class Grid {
             text: `${rMm} mm`,
             font: "Arial",
             units: "pix",
-            alignHoriz: "left",
+            alignHoriz: "center",
             pos: pos,
             height: 15,
             ori: 0.0,
@@ -574,17 +609,13 @@ export class Grid {
             autoLog: false,
           })
         );
-        mostRecentLabel = rPix;
       }
       // Add & update
       rMm += 1;
-      circle.top = XYPixOfXYDeg([fixationDeg[0], r], this.displayOptions)[1];
-      circle.bottom = XYPixOfXYDeg(
-        [fixationDeg[0], -r],
-        this.displayOptions
-      )[1];
-      circle.left = XYPixOfXYDeg([-r, fixationDeg[1]], this.displayOptions)[0];
-      circle.right = XYPixOfXYDeg([r, fixationDeg[1]], this.displayOptions)[0];
+      circle.top = XYPixOfXYDeg([0, r], this.displayOptions)[1];
+      circle.bottom = XYPixOfXYDeg([0, -r], this.displayOptions)[1];
+      circle.left = XYPixOfXYDeg([-r, 0], this.displayOptions)[0];
+      circle.right = XYPixOfXYDeg([r, 0], this.displayOptions)[0];
       moreCirclesNeeded =
         circle.top < screen.top ||
         circle.bottom > screen.bottom ||

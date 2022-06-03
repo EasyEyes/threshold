@@ -24,7 +24,7 @@ import {
   NO_RESPONSE_POSSIBLE,
   FORM_FILES_MISSING,
   FONT_FILES_MISSING,
-  INCONSISTENT_VIEWING_DISTANCES,
+  NONUNIQUE_WITHIN_BLOCK,
   TEXT_FILES_MISSING,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
@@ -125,8 +125,16 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   // Verify there is at least one response method turned on
   errors.push(...isResponsePossible(experimentDf));
 
-  // Check that there is only one unique viewing distance within each block
-  errors.push(...areViewingDistancesConsistentWithinBlocks(experimentDf));
+  // Check that relevant parameters have unique values within blocks (ie one value per block)
+  errors.push(
+    ...areBlockUniqueValuesConsistent(experimentDf, [
+      "viewingDistanceDesiredCm",
+      "fixationLocationStrategy",
+      "fixationLocationXScreen",
+      "fixationLocationYScreen",
+      "targetKind",
+    ])
+  );
 
   // Remove empty errors (FUTURE ought to be unnecessary, find root cause)
   errors = errors
@@ -622,32 +630,39 @@ export const isTextMissing = (
 interface stringToString {
   [index: string]: string;
 }
-const areViewingDistancesConsistentWithinBlocks = (
-  df: any
+/**
+ * Block-level parameters are defined as having only one unique value per block.
+ * Check that these parameters are consistent within blocks.
+ */
+const areBlockUniqueValuesConsistent = (
+  df: any,
+  blockLevelParameters: string[]
 ): EasyEyesError[] => {
-  if (df.listColumns().includes("viewingDistanceDesiredCm")) {
-    const inconsistentBlocks: string[] = [];
-    const blocks = df
-      .select("block")
-      .toArray()
-      .map(([x]: [string]) => x);
-    const distances = df
-      .select("viewingDistanceDesiredCm")
-      .toArray()
-      .map(([x]: [string]) => x);
-    const distancePerBlock: stringToString = {};
-    for (const [i, block] of blocks.entries()) {
-      if (
-        distancePerBlock.hasOwnProperty(block) &&
-        distancePerBlock[block] !== distances[i]
-      ) {
-        inconsistentBlocks.push(block);
+  const errors: EasyEyesError[] = [];
+  for (const blockParam of blockLevelParameters) {
+    if (df.listColumns().includes(blockParam)) {
+      const inconsistentBlocks: string[] = [];
+      const blocks = df
+        .select("block")
+        .toArray()
+        .map(([x]: [string]) => x);
+      const values = df
+        .select(blockParam)
+        .toArray()
+        .map(([x]: [string]) => x);
+      const valuePerBlock: stringToString = {};
+      for (const [i, block] of blocks.entries()) {
+        if (
+          valuePerBlock.hasOwnProperty(block) &&
+          valuePerBlock[block] !== values[i]
+        ) {
+          inconsistentBlocks.push(block);
+        }
+        valuePerBlock[block] = values[i];
       }
-      distancePerBlock[block] = distances[i];
+      if (inconsistentBlocks.length)
+        errors.push(NONUNIQUE_WITHIN_BLOCK(blockParam, inconsistentBlocks));
     }
-    if (inconsistentBlocks.length)
-      return [INCONSISTENT_VIEWING_DISTANCES(inconsistentBlocks)];
   }
-  // If the scientist didn't specify viewing distances, then the (consistent) defaults will be used
-  return [];
+  return errors;
 };

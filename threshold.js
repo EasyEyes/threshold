@@ -8,6 +8,7 @@ import {
   debug,
   getTripletCharacters,
   ifTrue,
+  norm,
   sleep,
 } from "./components/utils.js";
 
@@ -273,6 +274,7 @@ import {
 } from "./components/compatibilityCheck.js";
 import {
   Fixation,
+  getFixationPos,
   getFixationVerticies,
   gyrateFixation,
 } from "./components/fixation.js";
@@ -1487,6 +1489,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       targetKind.current = paramReader.read("targetKind", status.block)[0];
       // TODO support more
       targetTask.current = paramReader.read("targetTask", status.block)[0];
+      fixationConfig.pos = getFixationPos(status.block, paramReader);
+      fixationConfig.currentPos = fixationConfig.pos;
       ////
 
       //------Prepare to start Routine 'filter'-------
@@ -3530,8 +3534,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 simulated[status.block][status.block_condition]
               )
             ) {
-              logger("tolerances before calculateError", tolerances);
-              logger("letterTiming before calculateError", calculateError);
               calculateError(
                 letterTiming,
                 tolerances,
