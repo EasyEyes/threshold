@@ -557,7 +557,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.gui._removeWelcomeDialogBox();
           // psychoJS.gui.closeDialog();
           psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
-          psychoJS.window.adjustScreenSize();
+          // psychoJS.window.adjustScreenSize();
           psychoJS.eventManager.clearEvents();
 
           document.body.classList.remove("hide-ui-dialog");
