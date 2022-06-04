@@ -1,12 +1,18 @@
 import { Scheduler } from "../psychojs/src/util/index.js";
 
 import { hideForm, showForm } from "./forms";
-import { rc, showCharacterSetResponse } from "./global";
+import {
+  localStorageKey,
+  rc,
+  showCharacterSetResponse,
+  thisExperimentInfo,
+} from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
 import { recruitmentServiceData } from "./recruitmentService";
+import { downloadTextFile } from "./saveFile.js";
 import { removeClickableCharacterSet } from "./showCharacterSet";
-import { showCursor } from "./utils";
+import { showCursor, sleep } from "./utils";
 
 export async function quitPsychoJS(message, isCompleted, paramReader) {
   removeClickableCharacterSet(showCharacterSetResponse);
@@ -69,6 +75,27 @@ export async function quitPsychoJS(message, isCompleted, paramReader) {
     else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
     else if (document.msExitFullscreen) document.msExitFullscreen();
   }
+
+  // save user id
+  sleep(250);
+  if (
+    paramReader.read("_requestEasyEyesIDSaveToFileBool")[0] &&
+    thisExperimentInfo.participant
+  ) {
+    downloadTextFile(
+      `EasyEyes_${thisExperimentInfo.session}_${thisExperimentInfo.participant}.txt`,
+      `EasyEyes
+ID         : ${thisExperimentInfo.participant}
+SESSION    : ${thisExperimentInfo.session}
+FILE       : ${thisExperimentInfo.experimentFileName.split("/").pop()}
+EXPERIMENT : ${thisExperimentInfo.experimentName}
+DATE       : ${thisExperimentInfo.date.toString()}
+`
+    );
+  }
+  // save to local storage
+  if (thisExperimentInfo.participant)
+    localStorage.setItem(localStorageKey, JSON.stringify(thisExperimentInfo));
 
   if (recruitmentServiceData.name == "Prolific" && isCompleted) {
     let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;

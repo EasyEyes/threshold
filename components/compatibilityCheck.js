@@ -236,7 +236,7 @@ export const displayCompatibilityMessage = async (msg, Language) => {
     document.getElementById("root").style.display = "none";
 
     // //create title msg
-    let titleMsg = document.createElement("h4");
+    let titleMsg = document.createElement("h3");
     titleMsg.innerHTML = phrases.EE_compatibilityTitle[Language];
     let titleContainer = document.createElement("div");
     titleContainer.style.textAlign = "center";
@@ -271,7 +271,7 @@ export const displayCompatibilityMessage = async (msg, Language) => {
     const proceedButton = document.createElement("button");
     proceedButton.classList.add("form-input-btn");
     proceedButton.style.width = "7rem";
-    proceedButton.style.margin = "20px";
+    proceedButton.style.margin = "3rem 0";
     proceedButton.id = "procced-btn";
     proceedButton.innerHTML = "Proceed";
     proceedButton.addEventListener("click", () => {

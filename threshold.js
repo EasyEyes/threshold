@@ -1,6 +1,4 @@
-﻿/* eslint-disable no-redeclare */
-
-/*****************
+﻿/*****************
  * Crowding Test *
  *****************/
 
@@ -97,6 +95,7 @@ import {
   usingGaze,
   targetTask,
   questionsThisBlock,
+  thisExperimentInfo,
 } from "./components/global.js";
 
 import {
@@ -279,15 +278,11 @@ import {
   getFixationVerticies,
   gyrateFixation,
 } from "./components/fixation.js";
+import { checkCrossSessionId } from "./components/crossSession.js";
 
 /* -------------------------------------------------------------------------- */
 
 window.jsQUEST = jsQUEST;
-
-// store info about the experiment session:
-let expName = "threshold"; // from the Builder filename that created this script
-let expInfo = { participant: debug ? rc.id.value : "", session: "001" };
-let experimentFileName, experimentName;
 
 const fontsRequired = {};
 var simulated;
@@ -295,7 +290,7 @@ var simulated;
 
 const paramReaderInitialized = async (reader) => {
   buildWindowErrorHandling(reader);
-  await sleep(250);
+  // await sleep(250);
 
   // if (rc.concurrency.value <= 0) {
   //   await rc.performance();
@@ -325,6 +320,26 @@ const paramReaderInitialized = async (reader) => {
   if (proceed && !compMsg["proceed"]) {
     showExperimentEnding();
     return;
+  }
+
+  // ! check cross session user id
+  thisExperimentInfo.requestedCrossSessionId = false;
+  if (reader.read("_requestEasyEyesIDBool")[0]) {
+    const gotParticipantId = (participant, session) => {
+      if (participant) {
+        thisExperimentInfo.requestedCrossSessionId = true;
+        thisExperimentInfo.participant = participant;
+        thisExperimentInfo.setSession(Number(session) + 1);
+      }
+    };
+    const result = await checkCrossSessionId(gotParticipantId);
+    if (!result) {
+      showExperimentEnding();
+      return;
+    }
+  } else {
+    thisExperimentInfo.participant = rc.id.value;
+    thisExperimentInfo.setSession(1);
   }
 
   // show screens before actual experiment begins
@@ -364,7 +379,7 @@ const paramReaderInitialized = async (reader) => {
   ////
   const startExperiment = () => {
     // ! POPUPS for take a break & proportion correct
-    preparePopup(rc.language.value, expName); // Try to use only one popup ele for both (or even more) popup features
+    preparePopup(rc.language.value, thisExperimentInfo.name); // Try to use only one popup ele for both (or even more) popup features
     prepareTrialBreakProgressBar();
 
     if (document.querySelector("#rc-panel-holder"))
@@ -440,11 +455,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     });
   }
 
-  experimentFileName = paramReader.read(
+  thisExperimentInfo.experimentFileName = paramReader.read(
     "_experimentFilename",
     "__ALL_BLOCKS__"
   )[0];
-  experimentName = paramReader.read("_experimentName", "__ALL_BLOCKS__")[0];
+  thisExperimentInfo.experimentName = paramReader.read(
+    "_experimentName",
+    "__ALL_BLOCKS__"
+  )[0];
 
   logger("fontsRequired", fontsRequired);
   for (let i in fontsRequired) {
@@ -472,7 +490,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // schedule the experiment:
   psychoJS.schedule(
     psychoJS.gui.DlgFromDict({
-      dictionary: expInfo,
+      dictionary: {
+        participant: thisExperimentInfo.participant,
+        session: thisExperimentInfo.session,
+      },
       title: phrases.T_thresholdTitle[rc.language.value],
       participantText: phrases.T_participant[rc.language.value],
       sessionText: phrases.T_session[rc.language.value],
@@ -512,15 +533,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // quit if user presses Cancel in dialog box:
   dialogCancelScheduler.add(quitPsychoJS, "", false, paramReader);
 
-  if (useRC) {
-    expInfo["participant"] = rc.id.value;
-  }
-
   logger("_resources", _resources);
   psychoJS
     .start({
-      expName: expName,
-      expInfo: expInfo,
+      expName: thisExperimentInfo.name,
+      expInfo: thisExperimentInfo,
       resources: [
         {
           name: "conditions/blockCount.csv",
@@ -561,26 +578,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // var frameDur;
   async function updateInfo() {
-    expInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
-    expInfo["expName"] = expName;
-    expInfo["psychopyVersion"] = `${psychoJSPackage.version}-threshold-prod`;
+    thisExperimentInfo.date = util.MonotonicClock.getDateStr(); // add a simple timestamp
+    thisExperimentInfo.expName = thisExperimentInfo.name;
+    thisExperimentInfo.psychopyVersion = `${psychoJSPackage.version}-threshold-prod`;
 
-    expInfo["hardwareConcurrency"] = rc.concurrency.value;
+    thisExperimentInfo.hardwareConcurrency = rc.concurrency.value;
 
-    expInfo["deviceType"] = rc.deviceType.value;
-    expInfo["deviceSystem"] = rc.system.value;
-    expInfo["deviceSystemFamily"] = rc.systemFamily.value;
-    expInfo["deviceBrowser"] = rc.browser.value;
-    expInfo["deviceBrowserVersion"] = rc.browserVersion.value;
-    expInfo["deviceLanguage"] = rc.userLanguage.value;
+    thisExperimentInfo["deviceType"] = rc.deviceType.value;
+    thisExperimentInfo["deviceSystem"] = rc.system.value;
+    thisExperimentInfo["deviceSystemFamily"] = rc.systemFamily.value;
+    thisExperimentInfo["deviceBrowser"] = rc.browser.value;
+    thisExperimentInfo["deviceBrowserVersion"] = rc.browserVersion.value;
+    thisExperimentInfo["deviceLanguage"] = rc.userLanguage.value;
 
-    expInfo["psychojsWindowDimensions"] = String(psychoJS._window._size);
+    thisExperimentInfo["psychojsWindowDimensions"] = String(
+      psychoJS._window._size
+    );
 
     // store frame rate of monitor if we can measure it successfully
-    expInfo["monitorFrameRate"] = psychoJS.window.getActualFrameRate();
+    thisExperimentInfo["monitorFrameRate"] =
+      psychoJS.window.getActualFrameRate();
     psychoJS.experiment.addData(
       "frameRateReportedByPsychoJS",
-      expInfo["monitorFrameRate"]
+      thisExperimentInfo["monitorFrameRate"]
     );
     if (rc.stressFps) {
       psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
@@ -590,12 +610,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
     }
 
-    // if (typeof expInfo["frameRate"] !== "undefined")
-    //   frameDur = 1.0 / Math.round(expInfo["frameRate"]);
-    // else frameDur = 1.0 / 60.0; // couldn't get a reliable measure so guess
-
     // add info from the URL:
-    util.addInfoFromUrl(expInfo);
+    util.addInfoFromUrl(thisExperimentInfo);
 
     return Scheduler.Event.NEXT;
   }
@@ -1072,7 +1088,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS: psychoJS,
         nReps: 1,
         method: TrialHandler.Method.SEQUENTIAL,
-        extraInfo: expInfo,
+        extraInfo: thisExperimentInfo,
         originPath: undefined,
         trialList: "conditions/blockCount.csv",
         seed: Math.round(performance.now()),
@@ -1268,7 +1284,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     ) {
       // Proportion correct
       showPopup(
-        expName,
+        thisExperimentInfo.name,
         replacePlaceholders(
           phrases.T_proportionCorrectPopup[rc.language.value],
           `${Math.round(
@@ -1280,7 +1296,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         instructionsText.trialBreak(rc.language.value, responseType.current),
         false
       );
-      await addPopupLogic(expName, responseType.current, null);
+      await addPopupLogic(thisExperimentInfo.name, responseType.current, null);
 
       // Reset trial counter
       status.trialCorrect_thisBlock = 0;
@@ -2188,7 +2204,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           renderObj.tinyHint.setAutoDraw(true);
 
           if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForReading(reader, BC, experimentFileName);
+            updateTargetSpecsForReading(
+              reader,
+              BC,
+              thisExperimentInfo.experimentFileName
+            );
 
           trialComponents = [];
           trialComponents.push(key_resp);
@@ -2506,7 +2526,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
           if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForLetter(stimulusParameters, experimentFileName);
+            updateTargetSpecsForLetter(
+              stimulusParameters,
+              thisExperimentInfo.experimentFileName
+            );
 
           trialComponents = [];
           trialComponents.push(key_resp);
@@ -3635,7 +3658,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         currentBlockCreditForTrialBreak -= 1;
 
         showPopup(
-          expName,
+          thisExperimentInfo.name,
           phrases.T_takeABreakPopup[rc.language.value],
           "",
           true
@@ -3650,14 +3673,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           setTimeout(() => {
             // Show proceed hint and/or button
             showPopupProceed(
-              expName,
+              thisExperimentInfo.name,
               instructionsText.trialBreak(
                 rc.language.value,
                 responseType.current
               ),
               canClick(responseType.current)
             );
-            addPopupLogic(expName, responseType.current, () => {
+            addPopupLogic(thisExperimentInfo.name, responseType.current, () => {
               resolve(Scheduler.Event.NEXT);
             });
           }, takeABreakMinimumDurationSec * 1000);

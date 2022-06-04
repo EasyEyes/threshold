@@ -1,5 +1,42 @@
 // ! AVOID IMPORTS HERE
 
+export const thisExperimentInfo = {
+  name: "threshold",
+  expName: "threshold",
+
+  psychopyVersion: undefined,
+
+  requestedCrossSessionId: false,
+  participant: undefined,
+  _s: 1, // session
+
+  experimentFileName: undefined,
+  experimentName: undefined,
+
+  date: undefined,
+
+  hardwareConcurrency: undefined,
+  deviceType: undefined,
+  deviceSystem: undefined,
+  deviceSystemFamily: undefined,
+  deviceBrowser: undefined,
+  deviceBrowserVersion: undefined,
+  deviceLanguage: undefined,
+
+  psychojsWindowDimensions: undefined,
+  monitorFrameRate: undefined,
+
+  get session() {
+    return this._s.toString().padStart(4, "0");
+  },
+
+  setSession(num) {
+    this._s = num;
+  },
+};
+
+export const localStorageKey = "__EASYEYES__";
+
 /* -------------------------------- EXTERNALS ------------------------------- */
 /* ---------------------------- Remote Calibrator --------------------------- */
 export const useRC = true;

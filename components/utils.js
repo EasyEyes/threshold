@@ -36,6 +36,15 @@ export function fillNumberLength(n, length) {
   return str;
 }
 
+export const cleanFileName = (filename) => {
+  // remove the path
+  let name = filename.split("/").pop();
+  // remove the extension
+  name = name.split(".").shift();
+
+  return name;
+};
+
 /**
  * Create a mapping between an arbitrary set of strings, ie `possibleResponses`,
  * and a set of ascii-supported keys, ie [0,1,...,9,A,B,...Z].

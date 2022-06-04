@@ -104,7 +104,8 @@
   color: #000 !important;
   font-size: 1.6rem;
   font-weight: 500;
-  margin: 2rem 1rem;
+  margin: 3rem 2.5rem 1rem;
+  padding: 0;
   user-select: none;
   text-align: left;
 }
@@ -169,4 +170,42 @@
 
 .hidden-button {
   display: none !important;
+}
+
+/* -------------------------------------------------------------------------- */
+
+.swal2-input {
+  font-family: Courier, monospace;
+  font-size: 2rem;
+  margin: 1rem 4rem 0;
+}
+
+.swal2-input-label,
+.swal2-html-container {
+  margin: 2rem 4rem 0;
+  /* text-align: left; */
+  line-height: 150%;
+}
+
+.swal2-cancel,
+.swal2-deny {
+  border-radius: 7px !important;
+}
+
+.swal2-file {
+  padding: 1rem;
+}
+
+/* ----------------------------- special classes ---------------------------- */
+
+.id-collection-popup .threshold-button {
+  position: relative;
+}
+
+.centered-title {
+  text-align: center;
+}
+
+.narrow-popup {
+  width: 60% !important;
 }
