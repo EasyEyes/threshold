@@ -60,3 +60,9 @@
 .hide-ui-dialog .ui-dialog {
   display: none !important;
 }
+
+.psychojs-alert-text {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: rgb(216, 69, 50);
+}

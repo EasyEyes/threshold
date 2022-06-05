@@ -2804,7 +2804,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-
+      throw "fake error";
       hideCursor();
 
       /* -------------------------------------------------------------------------- */
