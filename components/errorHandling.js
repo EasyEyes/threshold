@@ -1,9 +1,11 @@
 import { psychoJS } from "./globalPsychoJS.js";
 import { quitPsychoJS } from "./lifetime.js";
+import { showCursor } from "./utils.js";
 
 export const buildWindowErrorHandling = (paramReader) => {
   window.onerror = (message, source, lineno, colno, error) => {
     console.log("onerror");
+    showCursor();
 
     const errorMessage = JSON.stringify({
       message: message,
@@ -31,6 +33,8 @@ export const buildWindowErrorHandling = (paramReader) => {
 
   window.onunhandledrejection = function (error) {
     console.log("onunhandledrejection");
+    showCursor();
+
     // save data
     console.error(error?.reason);
 

@@ -3417,6 +3417,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         let thisQuestionAndAnswer =
           questionsThisBlock.current[status.trial - 1];
 
+        console.log("questionsThisBlock", questionsThisBlock);
+        console.log("status", status);
+        console.log("thisQuestionAndAnswer", thisQuestionAndAnswer);
+
         const questionComponents = thisQuestionAndAnswer.split("|");
         const choiceQuestionBool = questionComponents.length > 2;
 
