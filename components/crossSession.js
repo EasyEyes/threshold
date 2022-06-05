@@ -4,17 +4,17 @@ export const checkCrossSessionId = async (callback) => {
   const localStorageInfo = JSON.parse(localStorage.getItem(localStorageKey));
 
   let storedId = undefined;
-  if (localStorageInfo && localStorageInfo.participant)
-    storedId = localStorageInfo.participant;
+  if (localStorageInfo && localStorageInfo.EasyEyesID)
+    storedId = localStorageInfo.EasyEyesID;
   const hasStoredId = storedId !== undefined;
 
   let id = await Swal.fire({
-    title: "Participant ID Requested",
+    title: "EasyEyes ID Requested",
     html: hasStoredId
       ? `We found that you participated in a previous session at <b>${preprocessPsychoJSTime(
           localStorageInfo.date
-        )}</b>. The participant ID is <b>${storedId}</b>. Press OK if it's correct, or enter a new one and continue.`
-      : "The researcher requested you to provide your participant ID from the previous session, please type it here, or upload the file downloaded when the last session ends.",
+        )}</b>. The EasyEyes ID is <b>${storedId}</b>. Press OK if it's correct, or enter a new one and continue.`
+      : "The researcher requested you to provide your EasyEyes ID from the previous session, please type it here, or upload the file downloaded when the last session ends.",
     // inputLabel:
     input: "text",
     inputValue: hasStoredId ? storedId : "",
@@ -29,7 +29,7 @@ export const checkCrossSessionId = async (callback) => {
     allowEscapeKey: false,
 
     cancelButtonText: "Upload EasyEyes ID file",
-    denyButtonText: `I don't have an ID`,
+    denyButtonText: `I don't have EasyEyes ID`,
 
     customClass: {
       popup: "narrow-popup id-collection-popup",
@@ -47,7 +47,7 @@ export const checkCrossSessionId = async (callback) => {
 
     preConfirm: (id) => {
       if (id && id.length < 5) {
-        Swal.showValidationMessage("The participant ID is invalid.");
+        Swal.showValidationMessage("The EasyEyes ID is invalid.");
         return false;
       }
     },
@@ -104,14 +104,8 @@ export const checkCrossSessionId = async (callback) => {
     } else {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const participant = e.target.result
-          .split("\n")[1]
-          .split(":")[1]
-          .replace(/ /, "");
-        const session = e.target.result
-          .split("\n")[2]
-          .split(":")[1]
-          .replace(/ /, "");
+        const participant = e.target.result.split("\n")[3].split(/\s+/g)[1];
+        const session = e.target.result.split("\n")[4].split(/\s+/g)[1];
         callback(participant, session);
       };
       reader.readAsText(idFromFile.value);

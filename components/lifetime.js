@@ -1,4 +1,5 @@
 import { Scheduler } from "../psychojs/src/util/index.js";
+import { isProlificExperiment } from "./externalServices.js";
 
 import { hideForm, showForm } from "./forms";
 import {
@@ -80,17 +81,30 @@ export async function quitPsychoJS(message, isCompleted, paramReader) {
   sleep(250);
   if (
     paramReader.read("_requestEasyEyesIDSaveToFileBool")[0] &&
-    thisExperimentInfo.participant
+    thisExperimentInfo.EasyEyesID
   ) {
     downloadTextFile(
-      `EasyEyes_${thisExperimentInfo.session}_${thisExperimentInfo.participant}.txt`,
-      `EasyEyes
-ID         : ${thisExperimentInfo.participant}
-SESSION    : ${thisExperimentInfo.session}
-FILE       : ${thisExperimentInfo.experimentFileName.split("/").pop()}
-EXPERIMENT : ${thisExperimentInfo.experimentName}
-DATE       : ${thisExperimentInfo.date.toString()}
-`
+      `EasyEyes_${thisExperimentInfo.session}_${thisExperimentInfo.EasyEyesID}.txt`,
+      `Please keep this file for participating in the future sessions -
+When an experiment has several sessions, the file connects them.
+
+EasyEyesID              ${thisExperimentInfo.EasyEyesID}
+EasyEyesSession         ${thisExperimentInfo.session}
+participant             ${thisExperimentInfo.participant}
+
+file                    ${thisExperimentInfo.experimentFileName
+        .split("/")
+        .pop()}
+experimentName          ${thisExperimentInfo.experimentName}
+
+date                    ${thisExperimentInfo.date.toString()}` +
+        (isProlificExperiment()
+          ? `
+
+ProlificParticipantID   ${thisExperimentInfo.ProlificParticipantID}
+ProlificSession         ${thisExperimentInfo.ProlificSessionID}
+ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
+          : "")
     );
   }
   // save to local storage

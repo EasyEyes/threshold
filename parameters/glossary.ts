@@ -349,7 +349,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "We always save participant ID to browser local storage. If needed, researcher can also have it saved as a text file to the participant computer.",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   _zeroBasedNumberingBool: {
     name: "_zeroBasedNumberingBool",

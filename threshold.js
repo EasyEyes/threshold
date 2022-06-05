@@ -279,6 +279,10 @@ import {
   gyrateFixation,
 } from "./components/fixation.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
+import {
+  isProlificExperiment,
+  saveProlificInfo,
+} from "./components/externalServices.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -329,7 +333,11 @@ const paramReaderInitialized = async (reader) => {
       if (participant) {
         thisExperimentInfo.requestedCrossSessionId = true;
         thisExperimentInfo.participant = participant;
-        thisExperimentInfo.setSession(Number(session) + 1);
+        thisExperimentInfo.setSession(
+          isNaN(Number(session)) ? session : Number(session) + 1
+        );
+
+        thisExperimentInfo.EasyEyesID = participant;
       }
     };
     const result = await checkCrossSessionId(gotParticipantId);
@@ -340,6 +348,8 @@ const paramReaderInitialized = async (reader) => {
   } else {
     thisExperimentInfo.participant = rc.id.value;
     thisExperimentInfo.setSession(1);
+
+    thisExperimentInfo.EasyEyesID = rc.id.value;
   }
 
   // show screens before actual experiment begins
@@ -534,6 +544,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   dialogCancelScheduler.add(quitPsychoJS, "", false, paramReader);
 
   logger("_resources", _resources);
+
+  // ! START EXPERIMENT
   psychoJS
     .start({
       expName: thisExperimentInfo.name,
@@ -612,6 +624,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // add info from the URL:
     util.addInfoFromUrl(thisExperimentInfo);
+    // record Prolific related info to thisExperimentInfo
+    if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo);
 
     return Scheduler.Event.NEXT;
   }
@@ -1543,12 +1557,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           questionsThisBlock.current = [];
 
           for (let i = 1; i <= 99; i++) {
-            const question = paramReader.read(
-              `questionAndAnswer${fillNumberLength(i, 2)}`,
-              status.block
-            )[0];
-            if (question && question.length)
-              questionsThisBlock.current.push(question);
+            const qName = `questionAndAnswer${fillNumberLength(i, 2)}`;
+            if (paramReader.has(qName)) {
+              const question = paramReader.read(qName, status.block)[0];
+              if (question && question.length)
+                questionsThisBlock.current.push(question);
+            }
           }
 
           totalTrialsThisBlock.current = questionsThisBlock.current.length;

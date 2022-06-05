@@ -10,6 +10,12 @@ export const thisExperimentInfo = {
   participant: undefined,
   _s: 1, // session
 
+  EasyEyesID: undefined,
+
+  ProlificParticipantID: undefined,
+  ProlificSessionID: undefined,
+  ProlificStudyID: undefined,
+
   experimentFileName: undefined,
   experimentName: undefined,
 
@@ -29,6 +35,8 @@ export const thisExperimentInfo = {
   get session() {
     return this._s.toString().padStart(4, "0");
   },
+
+  set session(value) {},
 
   setSession(num) {
     this._s = num;
