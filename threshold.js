@@ -3417,10 +3417,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         let thisQuestionAndAnswer =
           questionsThisBlock.current[status.trial - 1];
 
-        console.log("questionsThisBlock", questionsThisBlock);
-        console.log("status", status);
-        console.log("thisQuestionAndAnswer", thisQuestionAndAnswer);
-
         const questionComponents = thisQuestionAndAnswer.split("|");
         const choiceQuestionBool = questionComponents.length > 2;
 
@@ -3568,8 +3564,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             addReadingStatsToOutput(trials.thisRepN, psychoJS);
           },
           letter: () => {
-            console.log(letterTiming, tolerances);
-
             //check logic. letterTiming.targetFinishSec and letterTiming.targetStartSec are undefined for simulated observer
             if (
               !(
@@ -3746,28 +3740,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function importConditions(currentLoopSnapshot, snapshotType) {
     return async function () {
-      if (debug) {
-        if (snapshotType === "block") {
-          console.log(
-            "%c====== New Block ======",
-            "background: orange; color: white; padding: 1rem"
-          );
-        } else if (snapshotType === "trial") {
-          console.log(
-            "%c====== New Trial ======",
-            "background: purple; color: white; padding: 1rem"
-          );
+      // if (debug) {
+      if (snapshotType === "block") {
+        console.log(
+          "%c====== New Block ======",
+          "background: orange; color: white; padding: 1rem"
+        );
+      } else if (snapshotType === "trial") {
+        console.log(
+          "%c====== New Trial ======",
+          "background: purple; color: white; padding: 1rem"
+        );
 
-          // ! update trial counter
-          // dangerous
-          status.trial = currentLoopSnapshot.thisN + 1;
-        } else {
-          console.log(
-            "%c====== Unknown Snapshot ======",
-            "background: red; color: white; padding: 1rem"
-          );
-        }
+        // ! update trial counter
+        // dangerous
+        status.trial = currentLoopSnapshot.thisN + 1;
+      } else {
+        console.log(
+          "%c====== Unknown Snapshot ======",
+          "background: red; color: white; padding: 1rem"
+        );
       }
+      // }
 
       logger(`this ${snapshotType}`, currentLoopSnapshot.getCurrentTrial());
       psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());
