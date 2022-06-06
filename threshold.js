@@ -328,7 +328,7 @@ const paramReaderInitialized = async (reader) => {
 
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
-  if (reader.read("_requestEasyEyesIDBool")[0]) {
+  if (reader.read("_participantEasyEyesIDGetBool")[0]) {
     const gotParticipantId = (participant, session, storedId) => {
       if (participant) {
         thisExperimentInfo.requestedCrossSessionId = true;

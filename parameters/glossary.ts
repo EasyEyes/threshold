@@ -258,6 +258,24 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "30",
   },
+  _participantEasyEyesIDGetBool: {
+    name: "_participantEasyEyesIDGetBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Multi-session experiments require a way to link a participant's several sessions. When _participantEasyEyesIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID. If EasyEyes cannot get an approved EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantEasyEyesIDPutBool below.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  _participantEasyEyesIDPutBool: {
+    name: "_participantEasyEyesIDPutBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "EasyEyes always saves an EasyEyesID cookie in browser local storage. If _participantEasyEyesIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantEasyEyesIDGetBool above.",
+    type: "boolean",
+    default: "FALSE",
+  },
   _participantPay: {
     name: "_participantPay",
     availability: "now",
@@ -1061,6 +1079,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  responseShowIsolatedCharacterInConnectedFormBool: {
+    name: "responseShowIsolatedCharacterInConnectedFormBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "When we do crowded-letter identification in typographic mode in Arabic, the target character is currently displayed in connected mode as a stimulus and in disconnected mode on the response screen. That introduces an extra undesired difficulty in identifying the target. In Arabic the ligatures are smart, responding to the neighboring letters. When responseShowIsolatedCharacterInConnectedFormBool is TRUE we wrap zero-width joiner (ZWJ) characters around each of the response screen's isolated charcters, each member of the characterSet .",
+    type: "boolean",
+    default: "FALSE",
+  },
   responseSpokenBool: {
     name: "responseSpokenBool",
     availability: "later",
@@ -1251,15 +1278,6 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "topLeft",
     categories: ["none", "topLeft", "bottomLeft"],
-  },
-  responseShowIsolatedCharacterInConnectedFormBool: {
-    name: "responseShowIsolatedCharacterInConnectedFormBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "When we do crowded-letter identification in typographic mode in Arabic, the target character is currently displayed in connected mode as a stimulus and in disconnected mode on the response screen. That introduces an extra undesired difficulty in identifying the target. In Arabic the ligatures are smart, responding to the neighboring letters. When responseShowIsolatedCharacterInConnectedFormBool is TRUE we wrap zero-width joiner (ZWJ) characters around each of the response screen's isolated charcters, each member of the characterSet .",
-    type: "boolean",
-    default: "FALSE",
   },
   showPercentCorrectBool: {
     name: "showPercentCorrectBool",

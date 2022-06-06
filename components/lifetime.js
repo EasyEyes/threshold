@@ -80,7 +80,7 @@ export async function quitPsychoJS(message, isCompleted, paramReader) {
   // save user id
   sleep(250);
   if (
-    paramReader.read("_requestEasyEyesIDSaveToFileBool")[0] &&
+    paramReader.read("_participantEasyEyesIDPutBool")[0] &&
     thisExperimentInfo.EasyEyesID
   ) {
     downloadTextFile(
