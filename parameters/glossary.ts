@@ -272,7 +272,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "EasyEyes always saves an EasyEyesID cookie in browser local storage. If _participantEasyEyesIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantEasyEyesIDGetBool above.",
+      "EasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _participantEasyEyesIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantEasyEyesIDGetBool above.",
     type: "boolean",
     default: "FALSE",
   },

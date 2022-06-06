@@ -110,7 +110,15 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
   }
   // save to local storage
   if (thisExperimentInfo.participant)
-    localStorage.setItem(localStorageKey, JSON.stringify(thisExperimentInfo));
+    localStorage.setItem(
+      localStorageKey,
+      JSON.stringify({
+        ...thisExperimentInfo,
+        experimentName: getPavloviaProjectName(
+          thisExperimentInfo.experimentName
+        ),
+      })
+    );
 
   if (recruitmentServiceData.name == "Prolific" && isCompleted) {
     let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
