@@ -631,6 +631,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // record Prolific related info to thisExperimentInfo
     if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo);
 
+    logger("ENV NAME", psychoJS.getEnvironment());
+    logger("PSYCHOJS _CONFIG", psychoJS._config);
+
     return Scheduler.Event.NEXT;
   }
 
