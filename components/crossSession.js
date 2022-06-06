@@ -56,7 +56,7 @@ export const checkCrossSessionId = async (callback) => {
   if (id.isDenied) {
     return false;
   } else if (id.isConfirmed) {
-    callback(id.value, localStorageInfo.session);
+    callback(id.value, localStorageInfo.session, storedId);
     return true;
   } else if (id.isDismissed) {
     const idFromFile = await Swal.fire({
@@ -104,9 +104,9 @@ export const checkCrossSessionId = async (callback) => {
     } else {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const participant = e.target.result.split("\n")[3].split(/\s+/g)[1];
-        const session = e.target.result.split("\n")[4].split(/\s+/g)[1];
-        callback(participant, session);
+        const participant = e.target.result.split("\n")[2].split(/\s+/g)[1];
+        const session = e.target.result.split("\n")[3].split(/\s+/g)[1];
+        callback(participant, session, participant);
       };
       reader.readAsText(idFromFile.value);
       return true;

@@ -347,7 +347,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "We always save participant ID to browser local storage. If needed, researcher can also have it saved as a text file to the participant computer.",
+      "We always save participant ID to browser local storage. If _requestEasyEyesIDSaveToFileBool is TRUE, the ID will also be saved as a text file in the Donwload Folder of the  participant's computer.",
     type: "boolean",
     default: "FALSE",
   },
@@ -356,7 +356,7 @@ export const GLOSSARY: Glossary = {
     availability: "soon",
     example: "FALSE",
     explanation:
-      "If true then the first block and condition are numbered 0, otherwise 1.",
+      "NOT YET IMPLEMENTED. If true then the first block and condition are numbered 0, otherwise 1.",
     type: "boolean",
     default: "FALSE",
   },

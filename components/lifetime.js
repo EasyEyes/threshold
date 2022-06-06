@@ -85,8 +85,7 @@ export async function quitPsychoJS(message, isCompleted, paramReader) {
   ) {
     downloadTextFile(
       `EasyEyes_${thisExperimentInfo.session}_${thisExperimentInfo.EasyEyesID}.txt`,
-      `Please keep this file for participating in the future sessions -
-When an experiment has several sessions, the file connects them.
+      `When an experiment has multiple sessions, this file helps to connect the sessions.
 
 EasyEyesID              ${thisExperimentInfo.EasyEyesID}
 EasyEyesSession         ${thisExperimentInfo.session}
@@ -96,7 +95,6 @@ file                    ${thisExperimentInfo.experimentFileName
         .split("/")
         .pop()}
 experimentName          ${thisExperimentInfo.experimentName}
-
 date                    ${thisExperimentInfo.date.toString()}` +
         (isProlificExperiment()
           ? `
