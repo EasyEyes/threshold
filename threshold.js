@@ -261,7 +261,7 @@ import { _identify_trialInstructionRoutineEnd } from "./components/trialRoutines
 import { switchKind, switchTask } from "./components/blockTargetKind.js";
 import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
-import { quitPsychoJS } from "./components/lifetime.js";
+import { getPavloviaProjectName, quitPsychoJS } from "./components/lifetime.js";
 import {
   getTrialData,
   initSoundFiles,
@@ -633,6 +633,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     window.console.log("ENV NAME", psychoJS.getEnvironment());
     window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
+    window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
 
     return Scheduler.Event.NEXT;
   }

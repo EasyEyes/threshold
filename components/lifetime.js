@@ -1,3 +1,4 @@
+import { ExperimentHandler } from "../psychojs/src/data/ExperimentHandler.js";
 import { Scheduler } from "../psychojs/src/util/index.js";
 import { isProlificExperiment } from "./externalServices.js";
 
@@ -94,7 +95,9 @@ participant             ${thisExperimentInfo.participant}
 file                    ${thisExperimentInfo.experimentFileName
         .split("/")
         .pop()}
-experimentName          ${thisExperimentInfo.experimentName}
+experimentName          ${getPavloviaProjectName(
+        thisExperimentInfo.experimentName
+      )}
 date                    ${thisExperimentInfo.date.toString()}` +
         (isProlificExperiment()
           ? `
@@ -121,3 +124,13 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
 
   return Scheduler.Event.QUIT;
 }
+
+export const getPavloviaProjectName = (nameFromTable) => {
+  if (
+    psychoJS.getEnvironment() === ExperimentHandler.Environment.SERVER &&
+    psychoJS._config &&
+    psychoJS._config.experiment
+  )
+    return psychoJS._config.experiment.name;
+  else return nameFromTable ? nameFromTable : "unknown";
+};
