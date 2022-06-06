@@ -390,9 +390,9 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
         offendingValues = offendingValues.map((x) => {
           return {
             value: x.value
-              .split(" ")
+              .split(",")
               .filter((s) => !categories?.includes(s))
-              .join(" "),
+              .join(","),
             block: x.block,
           };
         });
@@ -462,7 +462,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
         case "multicategorical":
           const validMulti = (s: string): boolean =>
             s
-              .split(" ")
+              .split(",")
               .filter((x) => x)
               .every((s) => GLOSSARY[columnName]["categories"].includes(s));
           checkType(
