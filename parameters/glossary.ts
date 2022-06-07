@@ -263,7 +263,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "Multi-session experiments require a way to link a participant's several sessions. When _participantEasyEyesIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID. If EasyEyes cannot get an approved EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantEasyEyesIDPutBool below.",
+      "RENAMED. THIS IS OBSOLETE. Multi-session experiments require a way to link a participant's several sessions. When _participantEasyEyesIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID. If EasyEyes cannot get an approved EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantEasyEyesIDPutBool below.",
     type: "boolean",
     default: "FALSE",
   },
@@ -272,7 +272,25 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "TRUE",
     explanation:
-      "EasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _participantEasyEyesIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantEasyEyesIDGetBool above.",
+      "RENAMED. THIS IS OBSOLETE. EasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _participantEasyEyesIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantEasyEyesIDGetBool above.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  _participantIDGetBool: {
+    name: "_participantIDGetBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Multi-session experiments require a way to link a participant's several sessions. When _participantIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID. If EasyEyes cannot get an approved EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
+    type: "boolean",
+    default: "FALSE",
+  },
+  _participantIDPutBool: {
+    name: "_participantIDPutBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "EasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantIDGetBool above.",
     type: "boolean",
     default: "FALSE",
   },

@@ -84,6 +84,9 @@ export async function quitPsychoJS(message, isCompleted, paramReader) {
     paramReader.read("_participantEasyEyesIDPutBool")[0] &&
     thisExperimentInfo.EasyEyesID
   ) {
+    // ! NOTICE
+    // ! after changing the file format
+    // ! make sure you also update crossSession.js to update how to parse it
     downloadTextFile(
       `EasyEyes_${thisExperimentInfo.session}_${thisExperimentInfo.EasyEyesID}.txt`,
       `When an experiment has multiple sessions, this file helps to connect the sessions.
