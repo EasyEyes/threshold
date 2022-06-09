@@ -2391,8 +2391,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // DISPLAY OPTIONS
           displayOptions.window = psychoJS.window;
 
-          fixationConfig.pos = fixationConfig.nominalPos;
-          fixation.setPos(fixationConfig.pos);
           const targetEccentricityXYPx = XYPixOfXYDeg(
             letterConfig.targetEccentricityXYDeg,
             displayOptions
@@ -2429,12 +2427,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulusParameters.heightPx,
             stimulusParameters.targetAndFlankersXYPx[0]
           );
-          fixation.update(
-            paramReader,
-            BC,
-            stimulusParameters.heightPx,
-            stimulusParameters.targetAndFlankersXYPx[0]
-          );
+          fixationConfig.pos = fixationConfig.nominalPos;
+          fixation.setPos(fixationConfig.pos);
 
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
           psychoJS.experiment.addData(

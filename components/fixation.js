@@ -55,6 +55,8 @@ export class Fixation {
       "markingBlankingRadiusReTargetHeight",
       BC
     );
+    // TODO find the correct, general across conditions, location
+    fixationConfig.markingBlankingPos = fixationConfig.pos;
     fixationConfig.markingFixationStrokeLengthDeg = reader.read(
       "markingFixationStrokeLengthDeg",
       BC
@@ -160,13 +162,23 @@ export class Fixation {
         }
       }
     });
+    this.stims
+      .slice(vertices.length)
+      .forEach((stim) => stim.setAutoDraw(false));
     this.stims = this.stims.slice(0, vertices.length);
   }
   setAutoDraw(bool) {
     this.stims.forEach((stim) => stim.setAutoDraw(bool));
   }
   setPos(positionXYPx) {
-    this.stims.forEach((stim) => stim.setPos(positionXYPx));
+    this.stims.forEach((stim) => {
+      // If this stim is the blanking circle, set it to that position instead
+      if (Polygon.prototype.isPrototypeOf(stim)) {
+        stim.setPos(fixationConfig.markingBlankingPos);
+      } else {
+        stim.setPos(positionXYPx);
+      }
+    });
   }
   _updateIfNeeded() {
     this.stims.forEach((stim) => stim._updateIfNeeded());

@@ -98,6 +98,7 @@ export const fixationConfig = {
   strokeLength: 45, // aka fixationStrokeLengthPx
   strokeWidth: 2, // aka fixationStrokeThicknessPx
   markingBlankedNearTargetBool: undefined,
+  markingBlankingPos: undefined,
   markingBlankingRadiusReEccentricity: undefined,
   markingBlankingRadiusReTargetHeight: undefined,
   markingFixationHotSpotRadiusDeg: undefined,

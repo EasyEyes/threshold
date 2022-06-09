@@ -169,6 +169,15 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "6",
   },
+  _compileAsNewExperimentBool: {
+    name: "_compileAsNewExperimentBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without institutional Pavlovia licenses. When TRUE, when you compile an experiment, EasyEyes appends the smallest possible integer (no less than 1) that creates an unused (unique) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users who need tokens, Pavlovia requires that tokens be assigned to a specific experiment (repo). For them, every time we change the repo name, they must visit Pavlovia to reassign tokens. They might prefer to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the datafiles will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists need to shift tokens only the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting pavlovia, until the experiment runs out of tokens. Alas, this flag won't help PILOTING mode, which can only be used from within Pavlovia. Some users might like _compileAsNewExperimentBool FALSE to avoid the huge proliferation of repos. ",
+    type: "",
+    default: "",
+  },
   _consentForm: {
     name: "_consentForm",
     availability: "now",
@@ -357,6 +366,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
     type: "text",
+    default: "",
+  },
+  _prolificProject: {
+    name: "_prolificProject",
+    availability: "now",
+    example: "",
+    explanation:
+      "If the experiment table specifies a _prolificProject number then we use it, calling Prolific in workspace mode. If _prolificProject is empty or absent, then we call Prolific in pre-workspace mode. The scientist can run all studies with the same _prolificProject, or have several and choose the right project for each study.",
+    type: "",
     default: "",
   },
   _prolificStudyType: {
