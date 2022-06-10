@@ -478,13 +478,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     "__ALL_BLOCKS__"
   )[0];
 
-  if (thisExperimentInfo.experimentName.length) {
-    thisExperimentInfo.name = thisExperimentInfo.expName =
-      thisExperimentInfo.experimentName;
-  } else {
-    thisExperimentInfo.name = thisExperimentInfo.expName =
-      getPavloviaProjectName();
-  }
+  thisExperimentInfo.name = thisExperimentInfo.expName = getPavloviaProjectName(
+    thisExperimentInfo.experimentName
+  );
 
   logger("fontsRequired", fontsRequired);
   for (let i in fontsRequired) {
