@@ -245,7 +245,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     example: "crowding",
     explanation:
-      "Very important. If omitted, as default we use the table file name (without extension) as the experiment name. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      '_experimentName specifies the desired name for the GitLab repository, which Pavlovia calls your "experiment". If empty, the compiler provides a default, which is the the table file name (without extension) plus the smallest integer greater than zero that results in an unused repo name, in your Pavlovia account. Note that if the specified name corresponds to an existing repository, new study files will replace old ones and results will accumulate. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.',
     type: "text",
     default: "",
   },
