@@ -300,6 +300,13 @@ const paramReaderInitialized = async (reader) => {
   //   await rc.performance();
   // }
 
+  console.log(
+    "browser, deviceType, OS",
+    reader.read("_compatibleBrowser"),
+    reader.read("_compatibleDeviceType"),
+    reader.read("_compatibleOperatingSystem")
+  );
+
   const compMsg = checkSystemCompatibility(
     reader.read("_compatibleBrowser")[0].split(","),
     rc.browser.value,
@@ -3766,7 +3773,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         // ! update trial counter
         // dangerous
-        status.trial = currentLoopSnapshot.thisN + 1;
+        logger("currentLoopSnapshot", currentLoopSnapshot);
+        status.trial = currentLoopSnapshot.thisN;
       } else {
         console.log(
           "%c====== Unknown Snapshot ======",
