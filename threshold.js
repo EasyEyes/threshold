@@ -392,10 +392,7 @@ const paramReaderInitialized = async (reader) => {
 
   ////
   const startExperiment = () => {
-    // ! POPUPS for take a break & proportion correct
-    preparePopup(rc.language.value, thisExperimentInfo.name); // Try to use only one popup ele for both (or even more) popup features
-    prepareTrialBreakProgressBar();
-
+    // ! clean RC dom
     if (document.querySelector("#rc-panel-holder"))
       document.querySelector("#rc-panel-holder").remove();
 
@@ -487,6 +484,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     logger(i, fontsRequired[i]);
     _resources.push({ name: i, path: fontsRequired[i] });
   }
+
+  // ! POPUPS for take a break & proportion correct
+  preparePopup(rc.language.value, thisExperimentInfo.name); // Try to use only one popup ele for both (or even more) popup features
+  prepareTrialBreakProgressBar();
 
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
