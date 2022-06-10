@@ -475,19 +475,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     "__ALL_BLOCKS__"
   )[0];
 
-  thisExperimentInfo.name = thisExperimentInfo.expName = getPavloviaProjectName(
-    thisExperimentInfo.experimentName
-  );
-
   logger("fontsRequired", fontsRequired);
   for (let i in fontsRequired) {
     logger(i, fontsRequired[i]);
     _resources.push({ name: i, path: fontsRequired[i] });
   }
-
-  // ! POPUPS for take a break & proportion correct
-  preparePopup(rc.language.value, thisExperimentInfo.name); // Try to use only one popup ele for both (or even more) popup features
-  prepareTrialBreakProgressBar();
 
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
@@ -553,6 +545,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   dialogCancelScheduler.add(quitPsychoJS, "", false, paramReader);
 
   logger("_resources", _resources);
+
+  thisExperimentInfo.name = thisExperimentInfo.expName = getPavloviaProjectName(
+    thisExperimentInfo.experimentName
+  );
+  window.console.log("thisExperimentInfo.name", thisExperimentInfo.name);
 
   // ! START EXPERIMENT
   psychoJS
@@ -696,6 +693,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       clock: new util.Clock(),
       waitForStart: true,
     });
+
+    /* -------------------------------------------------------------------------- */
+
+    // ! POPUPS for take a break & proportion correct
+    preparePopup(rc.language.value, thisExperimentInfo.name); // Try to use only one popup ele for both (or even more) popup features
+    prepareTrialBreakProgressBar();
+
+    /* -------------------------------------------------------------------------- */
 
     //initialize sound experiment files
     //edit - use list of sound targetKinds instead of sound
