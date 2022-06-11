@@ -32,3 +32,15 @@
   bottom: 0.5rem;
   /* right: 1rem; */
 }
+
+.order-1 {
+  order: 1;
+}
+
+.order-2 {
+  order: 2;
+}
+
+.order-3 {
+  order: 3;
+}

@@ -28,15 +28,15 @@ export const checkCrossSessionId = async (callback) => {
     allowOutsideClick: false,
     allowEscapeKey: false,
 
-    cancelButtonText: "Upload EasyEyes ID file",
-    denyButtonText: `I don't have EasyEyes ID`,
+    cancelButtonText: "Upload EasyEyes ID file", // grey
+    denyButtonText: `I don't have EasyEyes ID`, // red
 
     customClass: {
       popup: "narrow-popup id-collection-popup",
       title: "centered-title",
-      confirmButton: `threshold-button`,
-      cancelButton: `threshold-button`,
-      denyButton: `threshold-button`,
+      confirmButton: `threshold-button order-1`,
+      cancelButton: `threshold-button order-2`,
+      denyButton: `threshold-button order-3`,
     },
     showClass: {
       popup: "fade-in",
@@ -46,7 +46,7 @@ export const checkCrossSessionId = async (callback) => {
     },
 
     preConfirm: (id) => {
-      if (id && id.length < 5) {
+      if (id && id.length < 1) {
         Swal.showValidationMessage("The EasyEyes ID is invalid.");
         return false;
       }
@@ -79,8 +79,9 @@ export const checkCrossSessionId = async (callback) => {
       customClass: {
         popup: "narrow-popup id-collection-popup",
         title: "centered-title",
-        confirmButton: `threshold-button`,
-        denyButton: `threshold-button`,
+        confirmButton: `threshold-button order-1`,
+        // cancelButton: `threshold-button order-2`,
+        denyButton: `threshold-button order-3`,
       },
       showClass: {
         popup: "fade-in",

@@ -89,7 +89,7 @@ export async function quitPsychoJS(message = "", isCompleted, paramReader) {
     // ! make sure you also update crossSession.js to update how to parse it
     downloadTextFile(
       `EasyEyes_${thisExperimentInfo.session}_${thisExperimentInfo.EasyEyesID}.txt`,
-      `When an experiment has multiple sessions, this file helps to connect the sessions.
+      `Please keep this file to facilitate participation in future sessions. When an experiment has several sessions, you can use this file to connect them, while retaining your anonymity.
 
 EasyEyesID              ${thisExperimentInfo.EasyEyesID}
 EasyEyesSession         ${thisExperimentInfo.session}
