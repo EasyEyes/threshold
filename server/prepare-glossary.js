@@ -32,7 +32,7 @@ async function processLanguageSheet() {
     const parameterInfo = {
       name: parameterName,
       availability: parameter["NOW"] || "now",
-      example: parameter["EXAMPLE"],
+      // example: parameter["EXAMPLE"],
       // explanation: parameter["EXPLANATION"],
       type: parameter["TYPE"],
       default: parameter["DEFAULT"],
