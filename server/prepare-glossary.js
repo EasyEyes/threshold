@@ -31,18 +31,18 @@ async function processLanguageSheet() {
     const parameterName = parameter["INPUT PARAMETER"];
     const parameterInfo = {
       name: parameterName,
-      availability: parameter["Now"] || "now",
-      example: parameter["Example"],
-      explanation: parameter["Explanation"],
-      type: parameter["Type"],
-      default: parameter["Default"],
+      availability: parameter["NOW"] || "now",
+      example: parameter["EXAMPLE"],
+      // explanation: parameter["EXPLANATION"],
+      type: parameter["TYPE"],
+      default: parameter["DEFAULT"],
     };
     // Categories is only relevant for the "categorical" and "multicategorica" types
     if (
       parameterInfo.type === "categorical" ||
       parameterInfo.type === "multicategorical"
     )
-      parameterInfo.categories = parameter["Categories"].split(", ");
+      parameterInfo.categories = parameter["CATEGORIES"].split(", ");
     // Exclude rows that Denis used for other notes
     // if (parameterInfo.name && parameterInfo.type)
     if (!parameterInfo.name.includes("__")) data[parameterName] = parameterInfo;
