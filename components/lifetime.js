@@ -81,7 +81,7 @@ export async function quitPsychoJS(message = "", isCompleted, paramReader) {
   // save user id
   sleep(250);
   if (
-    paramReader.read("_participantEasyEyesIDPutBool")[0] &&
+    paramReader.read("_participantIDPutBool")[0] &&
     thisExperimentInfo.EasyEyesID
   ) {
     // ! NOTICE
