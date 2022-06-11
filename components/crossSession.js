@@ -46,7 +46,7 @@ export const checkCrossSessionId = async (callback) => {
     },
 
     preConfirm: (id) => {
-      if (id && id.length < 1) {
+      if (!id || id.length < 1) {
         Swal.showValidationMessage("The EasyEyes ID is invalid.");
         return false;
       }
