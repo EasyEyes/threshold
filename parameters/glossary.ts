@@ -354,6 +354,10 @@ export const GLOSSARY: Glossary = {
   soundGainDBSPL: { name: "soundGainDBSPL", availability: "now" },
   spacingDeg: { name: "spacingDeg", availability: "now" },
   spacingDirection: { name: "spacingDirection", availability: "now" },
+  spacingForRatioIsOuterBool: {
+    name: "spacingForRatioIsOuterBool",
+    availability: "now",
+  },
   spacingOverSizeRatio: { name: "spacingOverSizeRatio", availability: "now" },
   spacingRelationToSize: { name: "spacingRelationToSize", availability: "now" },
   spacingSymmetry: { name: "spacingSymmetry", availability: "now" },

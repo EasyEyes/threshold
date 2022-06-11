@@ -2424,6 +2424,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "spacingRelationToSize",
             letterConfig.spacingRelationToSize
           );
+          var spacingForRatioIsOuterBool = reader.read(
+            "spacingForRatioIsOuterBool",
+            BC
+          );
           [level, stimulusParameters] = restrictLevel(
             proposedLevel,
             thresholdParameter,
@@ -2432,7 +2436,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.spacingRelationToSize,
             letterConfig.spacingSymmetry,
             letterConfig.spacingOverSizeRatio,
-            letterConfig.targetSizeIsHeightBool
+            letterConfig.targetSizeIsHeightBool,
+            spacingForRatioIsOuterBool
           );
           logger("flanker positions", stimulusParameters.targetAndFlankersXYPx);
           psychoJS.experiment.addData("level", level);

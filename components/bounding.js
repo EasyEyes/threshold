@@ -158,7 +158,8 @@ export const restrictLevel = (
   spacingRelationToSize,
   spacingSymmetry,
   spacingOverSizeRatio,
-  targetSizeIsHeightBool
+  targetSizeIsHeightBool,
+  spacingForRatioIsOuterBool
 ) => {
   if (
     !["radial", "tangential", "horizontal", "vertical"].includes(
@@ -210,7 +211,8 @@ export const restrictLevel = (
         spacingOverSizeRatio,
         spacingSymmetry,
         thresholdParameter,
-        displayOptions
+        displayOptions,
+        spacingForRatioIsOuterBool
       );
       level = Math.log10(spacingDeg);
       break;
@@ -316,7 +318,8 @@ export const restrictSpacingDeg = (
   characterSetRectPx,
   spacingOverSizeRatio,
   spacingSymmetry,
-  thresholdParameter
+  thresholdParameter,
+  spacingForRatioIsOuterBool
 ) => {
   // TODO make sure rects are valid, ie height&width are nonnegative
   /* 
@@ -430,7 +433,14 @@ export const restrictSpacingDeg = (
         break;
       case "ratio":
         // Use spacingDeg and spacingOverSizeRatio to set size.
-        sizeDeg = spacingDeg / spacingOverSizeRatio;
+        if (spacingForRatioIsOuterBool)
+          sizeDeg = spacingDeg / spacingOverSizeRatio;
+        else {
+          var eccDeg = norm(targetXYDeg); //target eccentricity in Deg
+          var innerSpacing = eccDeg - (eccDeg * eccDeg) / (eccDeg + spacingDeg); // inner spacing in Deg
+          sizeDeg = innerSpacing / spacingOverSizeRatio;
+        }
+
         if (targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
           [, topPx] = XYPixOfXYDeg(
