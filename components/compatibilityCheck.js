@@ -31,24 +31,24 @@ export const checkSystemCompatibility = (
 
   var deviceIsCompatibleBool = true;
   var msg = [];
-  //compatibilityType ----> all, not, or a browser name
+  // compatibilityType ----> all, not, or a browser name
   const browserCompatibilityType = compatibleBrowser[0].trim().slice(0, 3);
   const OSCompatibilityType = compatibleOS[0].trim().slice(0, 3);
 
-  //COMPUTE deviceIsCompatibleBool and compatibilityRequirements
+  // COMPUTE deviceIsCompatibleBool and compatibilityRequirements
   switch (browserCompatibilityType) {
     case "all": // ignore browser
       switch (OSCompatibilityType) {
         case "all": //ignore OSes
           msg.push(phrases.EE_compatibleDeviceCores[Language]);
           break;
-        case "not": //report incompatible OSes
+        case "not": // report incompatible OSes
           deviceIsCompatibleBool =
             deviceIsCompatibleBool &&
             !compatibleOS.includes("not" + deviceSysFamily);
           msg.push(phrases.EE_compatibleNotOSDeviceCores[Language]);
           break;
-        default: //report compatible OSes
+        default: // report compatible OSes
           deviceIsCompatibleBool =
             deviceIsCompatibleBool && compatibleOS.includes(deviceSysFamily);
           msg.push(phrases.EE_compatibleOSDeviceCores[Language]);

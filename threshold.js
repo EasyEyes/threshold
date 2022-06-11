@@ -972,7 +972,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS(undefined, false, paramReader);
+        return quitPsychoJS("", false, paramReader);
       }
 
       // check if the Routine should terminate
@@ -1064,7 +1064,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     ) {
       removeBeepButton();
 
-      return quitPsychoJS(undefined, false, paramReader);
+      return quitPsychoJS("", false, paramReader);
     }
 
     if (!continueRoutine || clickedContinue.current) {
@@ -1501,7 +1501,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS(undefined, false, paramReader);
+        return quitPsychoJS("", false, paramReader);
       }
 
       // Continue?
@@ -1670,7 +1670,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS(undefined, false, paramReader);
+        return quitPsychoJS("", false, paramReader);
       }
 
       // check if the Routine should terminate
@@ -2736,7 +2736,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         let action = await handleEscapeKey();
         if (action.quitSurvey) {
-          return quitPsychoJS(undefined, false, paramReader);
+          return quitPsychoJS("", false, paramReader);
         }
         if (action.skipTrial || action.skipBlock) {
           return Scheduler.Event.NEXT;
@@ -3319,7 +3319,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         let action = await handleEscapeKey();
         if (action.quitSurvey) {
-          return quitPsychoJS(undefined, false, paramReader);
+          return quitPsychoJS("", false, paramReader);
         }
       }
 

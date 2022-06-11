@@ -16,7 +16,7 @@ import { downloadTextFile } from "./saveFile.js";
 import { removeClickableCharacterSet } from "./showCharacterSet";
 import { showCursor, sleep } from "./utils";
 
-export async function quitPsychoJS(message, isCompleted, paramReader) {
+export async function quitPsychoJS(message = "", isCompleted, paramReader) {
   removeClickableCharacterSet(showCharacterSetResponse);
   removeBeepButton();
   removeProceedButton();
@@ -124,13 +124,15 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     );
 
   if (recruitmentServiceData.name == "Prolific" && isCompleted) {
-    let additionalMessage = ` Please visit <a target="_blank" href="${recruitmentServiceData.url}">HERE</a> to complete the experiment.`;
+    let additionalMessage = ` Please go to Prolific to complete the experiment.`;
     psychoJS.quit({
       message: message + additionalMessage,
       isCompleted: isCompleted,
+      okText: "Go to Prolific to complete the experiment",
+      okUrl: recruitmentServiceData.url,
     });
   } else {
-    psychoJS.quit({ message: message, isCompleted: isCompleted });
+    psychoJS.quit({ message: message, isCompleted: isCompleted, okText: "OK" });
   }
 
   return Scheduler.Event.QUIT;

@@ -50,10 +50,19 @@ export class ParamReader {
 
     // ! Number - block
     const returner = [];
-    for (let b of this._experiment) {
+
+    for (let b of this._experiment)
       if (Number(b.block) === blockOrConditionName) returner.push(b[name]);
-    }
+
     return returner;
+  }
+
+  _validateExperiment() {
+    let valid = false;
+    for (let b of this._experiment) {
+      if (Number(b.block) === 1) valid = true;
+    }
+    return valid;
   }
 
   _superMatchParam(parameter) {
@@ -133,7 +142,14 @@ export class ParamReader {
                 this._experiment.push(thisCondition);
               }
               if (i === this._blockCount) {
-                if (callback && typeof callback === "function") callback(that);
+                if (callback && typeof callback === "function") {
+                  const _validateInterval = setInterval(() => {
+                    if (this._validateExperiment()) {
+                      callback(that);
+                      clearInterval(_validateInterval);
+                    }
+                  }, 5);
+                }
               }
             },
           });
