@@ -319,6 +319,7 @@ export const restrictSpacingDeg = (
   spacingOverSizeRatio,
   spacingSymmetry,
   thresholdParameter,
+  displayOption,
   spacingForRatioIsOuterBool
 ) => {
   // TODO make sure rects are valid, ie height&width are nonnegative
@@ -433,9 +434,9 @@ export const restrictSpacingDeg = (
         break;
       case "ratio":
         // Use spacingDeg and spacingOverSizeRatio to set size.
-        if (spacingForRatioIsOuterBool)
+        if (spacingForRatioIsOuterBool) {
           sizeDeg = spacingDeg / spacingOverSizeRatio;
-        else {
+        } else {
           var eccDeg = norm(targetXYDeg); //target eccentricity in Deg
           var innerSpacing = eccDeg - (eccDeg * eccDeg) / (eccDeg + spacingDeg); // inner spacing in Deg
           sizeDeg = innerSpacing / spacingOverSizeRatio;
