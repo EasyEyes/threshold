@@ -67,7 +67,7 @@ export const buildWindowErrorHandling = (paramReader) => {
       onOK: () => {
         quitPsychoJS("", false, paramReader);
       },
-      okText: "Report error to EasyEyes team",
+      okText: "Report error to the EasyEyes team",
     });
 
     return true;
