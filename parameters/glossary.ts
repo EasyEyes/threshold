@@ -426,6 +426,18 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  fontLikeAPeriod: {
+    name: "fontLikeAPeriod",
+    availability: "now",
+    type: "text",
+    default: ".",
+  },
+  fontPadToAvoidClippingBool: {
+    name: "fontPadToAvoidClippingBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
   fontSource: {
     name: "fontSource",
     availability: "now",

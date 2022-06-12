@@ -1343,9 +1343,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       status.trialCorrect_thisBlock = 0;
       status.trialCompleted_thisBlock = 0;
     }
-
     if (currentLoop instanceof MultiStairHandler)
-      addBlockStaircaseSummariesToData(currentLoop, psychoJS);
+      addBlockStaircaseSummariesToData(currentLoop, psychoJS, displayOptions);
 
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
