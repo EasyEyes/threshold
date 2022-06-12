@@ -603,11 +603,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // var frameDur;
   async function updateInfo() {
-    thisExperimentInfo.date = util.MonotonicClock.getDateStr(); // add a simple timestamp
-    thisExperimentInfo.expName = thisExperimentInfo.name;
-    thisExperimentInfo.psychopyVersion = `${psychoJSPackage.version}-threshold-prod`;
+    thisExperimentInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
+    thisExperimentInfo["expName"] = thisExperimentInfo.name;
+    thisExperimentInfo[
+      "psychopyVersion"
+    ] = `${psychoJSPackage.version}-threshold-prod`;
 
-    thisExperimentInfo.hardwareConcurrency = rc.concurrency.value;
+    thisExperimentInfo["hardwareConcurrency"] = rc.concurrency.value;
 
     thisExperimentInfo["deviceType"] = rc.deviceType.value;
     thisExperimentInfo["deviceSystem"] = rc.system.value;

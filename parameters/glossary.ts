@@ -262,8 +262,8 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  _prolificProject: {
-    name: "_prolificProject",
+  _prolificProjectID: {
+    name: "_prolificProjectID",
     availability: "now",
     type: "",
     default: "",
