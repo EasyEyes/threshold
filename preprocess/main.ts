@@ -85,30 +85,37 @@ export const prepareExperimentFileForThreshold = async (
 
   if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
 
-  // Recruitment
+  // ! Recruitment
   if (
     parsed.data.find((i: string[]) => i[0] == "_participantRecruitmentService")
   ) {
-    // if (!user.currentExperiment) user.currentExperiment = {};
     user.currentExperiment.participantRecruitmentServiceName = parsed.data.find(
       (i: string[]) => i[0] == "_participantRecruitmentService"
     )?.[1];
   }
 
-  // if to streamline the science page
+  // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
   if (
     parsed.data.find((i: string[]) => i[0] == "_pavloviaPreferRunningModeBool")
   ) {
-    // if (!user.currentExperiment) user.currentExperiment = {};
-
     user.currentExperiment.pavloviaPreferRunningModeBool =
       parsed.data.find(
         (i: string[]) => i[0] == "_pavloviaPreferRunningModeBool"
       )?.[1] == "TRUE";
   } else {
-    // if (!user.currentExperiment) user.currentExperiment = {};
     user.currentExperiment.pavloviaPreferRunningModeBool = true;
+  }
+
+  // ! if the prolific account, if any, is in workspace mode or not
+  if (parsed.data.find((i: string[]) => i[0] == "_prolificProjectID")) {
+    // if there's a project id, the account is in workspace mode
+    user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
+      (i: string[]) => i[0] == "_prolificProjectID"
+    )?.[1];
+    user.currentExperiment.prolificWorkspaceModeBool = true;
+  } else {
+    user.currentExperiment.prolificWorkspaceModeBool = false;
   }
 
   // Validate requested fonts
