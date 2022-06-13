@@ -758,6 +758,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  responseCharacterHasMedialShapeBool: {
+    name: "responseCharacterHasMedialShapeBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   responseShowIsolatedCharacterInConnectedFormBool: {
     name: "responseShowIsolatedCharacterInConnectedFormBool",
     availability: "now",

@@ -1107,11 +1107,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "responseCharacterHasMedialShapeBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "In Arabic, ligatures respond to the neighboring letters. When we do crowded identification of Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If responseCharacterMedialShapeBool is TRUE then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when responseCharacterMedialShapeBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "responseShowIsolatedCharacterInConnectedFormBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      "In Arabic, ligatures respond to the neighboring letters. When we do crowded-letter identification in typographic mode in Arabic, the target character is displayed in medial shape (i.e. connected) as a stimulus. If responseShowIsolatedCharacterInConnectedFormBool is TRUE then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when responseShowIsolatedCharacterInConnectedFormBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement",
+      "In Arabic, ligatures respond to the neighboring letters. When we do crowded identification of Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If responseShowIsolatedCharacterInConnectedFormBool is TRUE then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when responseShowIsolatedCharacterInConnectedFormBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement",
     type: "boolean",
     default: "FALSE",
     categories: "",
