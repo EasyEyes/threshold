@@ -1498,7 +1498,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "TEMPORARY. There are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. To replicate CriticalSpacing data, when thresholdPameter is spacing, spacingSymmetry is cortex, and spacingRelationToSize is ratio, spacingForRatioIsOuterBool (default FALSE) determines whether target size is based on inner (FALSE) or outer (TRUE) spacing. ",
+      "There are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. To replicate CriticalSpacing data, when thresholdPameter is spacing, spacingSymmetry is cortex, and spacingRelationToSize is ratio, spacingForRatioIsOuterBool (default FALSE) determines whether target size is based on inner (FALSE) or outer (TRUE) spacing. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1661,16 +1661,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "targetRepeatsMaxLines can be 1, 3, 4, … . It specifies the desired number of lines, but fewer lines may be displayed if limited by screen height. Sarah Waugh recommends 3.",
     type: "numerical",
     default: "3",
-    categories: "",
-  },
-  {
-    name: "targetRepeatsPracticeBool",
-    availability: "later",
-    example: "TRUE",
-    explanation:
-      "If targetRepeatsBool then precedes data collection by practice, as explained in note below.",
-    type: "boolean",
-    default: "TRUE",
     categories: "",
   },
   {
