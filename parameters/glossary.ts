@@ -1119,12 +1119,6 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "3",
   },
-  targetRepeatsPracticeBool: {
-    name: "targetRepeatsPracticeBool",
-    availability: "later",
-    type: "boolean",
-    default: "TRUE",
-  },
   targetSafetyMarginSec: {
     name: "targetSafetyMarginSec",
     availability: "now",

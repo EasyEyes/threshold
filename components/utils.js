@@ -371,12 +371,8 @@ export const addBlockStaircaseSummariesToData = (
             innerSpacingDeg = targetDeg - innerFlankerDeg[0];
             break;
         }
-        innerSpacingFromQuestMean = Math.log10(innerSpacingDeg);
-      } else innerSpacingFromQuestMean = staircase.mean();
-      psychoJS.experiment.addData(
-        "innerSpacingFromQuestMean",
-        innerSpacingFromQuestMean
-      );
+      } else innerSpacingDeg = Math.pow(10, staircase.mean());
+      psychoJS.experiment.addData("innerSpacingThresholdDeg", innerSpacingDeg);
       //========================================================
       psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", staircase.sd());
       psychoJS.experiment.addData(
