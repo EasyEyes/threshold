@@ -572,11 +572,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "fontPadToAvoidClippingBool",
+    name: "fontPadTextToAvoidClippingBool",
     availability: "now",
     example: "FALSE",
     explanation:
-      "fontPadToAvoidClippingBool (default TRUE) when TRUE asks EasyEyes to pad every stimulus string with white space to avoid clipping.",
+      "fontPadTextToAvoidClippingBool (default TRUE) when TRUE asks EasyEyes to pad every stimulus string with white space to avoid clipping. The padding consists of a carriage return and a space, both before and after. The displacement caused by the padding is measured in advance, and taken into account, so text appears at the desired location.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -596,7 +596,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "later",
     example: "bold",
     explanation:
-      'NOT YET IMPLEMENTED. Can be regular (default), bold, italic, or bold-italic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
+      'fontSyle IS NOT YET IMPLEMENTED. Can be regular (default), bold, italic, or bold-italic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
     type: "categorical",
     default: "regular",
     categories: "regular, bold, italic, boldItalic",
@@ -656,7 +656,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "soon",
     example: "regular",
     explanation:
-      "Must be regular, bold, italic, or boldItalic. When you select a font file that is already styled, just select regular here. Otherwise the browser might try to tilt or thicken the already italic or bold font with unexpected results.",
+      "NOT YET IMPLEMENTED. Must be regular, bold, italic, or boldItalic. When you select a font file that is already styled, just select regular here. Otherwise the browser might try to tilt or thicken the already italic or bold font with unexpected results.",
     type: "categorical",
     default: "regular",
     categories: "regular, italic, bold, boldItalic",

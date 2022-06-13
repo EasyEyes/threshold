@@ -432,8 +432,8 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  fontPadToAvoidClippingBool: {
-    name: "fontPadToAvoidClippingBool",
+  fontPadTextToAvoidClippingBool: {
+    name: "fontPadTextToAvoidClippingBool",
     availability: "now",
     type: "boolean",
     default: "TRUE",
