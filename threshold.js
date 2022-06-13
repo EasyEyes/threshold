@@ -637,8 +637,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
     }
 
-    // add info from the URL:
-    util.addInfoFromUrl(thisExperimentInfo);
+    // ! add info from the URL:
+    // ! disabled as we add Prolific fields in our own ways and we don't want to overwrite
+    // ! EasyEyes fields with Prolific fields
+    // util.addInfoFromUrl(thisExperimentInfo);
+
     // record Prolific related info to thisExperimentInfo
     if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo);
 
