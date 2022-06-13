@@ -13,7 +13,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Effect of font on crowding.",
     explanation:
-      "Optional brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
     categories: "",
@@ -542,6 +542,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontDotCharacter",
+    availability: "now",
+    example: "x",
+    explanation:
+      'fontDotCharacter is a period "." by default. EasyEyes uses it to measure the rendering offset caused by adding white space padding to the draw text command to avoid clipping. Many international fonts include a period, but perhaps some don\'t. All we need is a black character (not white space) that is small enough to not be clipped when drawn without padding. So any small character, not white space, will do.',
+    type: "text",
+    default: ".",
+    categories: "",
+  },
+  {
     name: "fontFeatureSettings",
     availability: "now",
     example: "",
@@ -559,16 +569,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "fontLeftToRightBool should be set to TRUE for most languages, including English, which are written from left to right, and should be set to FALSE for Arabic, Hebrew, and other right-to-left languages. The default value is TRUE. For identifying letters, the letters will be placed accordingly on the response screen. For reading, it's important to set this correctly, or text may fall off the screen: left-to-right text will be left-aligned, and right-to-left text will be right aligned.                                                                                                                                                                                      ",
     type: "boolean",
     default: "TRUE",
-    categories: "",
-  },
-  {
-    name: "fontLikeAPeriod",
-    availability: "now",
-    example: "x",
-    explanation:
-      'fontLikeAPeriod is a period "." by default. EasyEyes uses it to measure the rendering offset caused by adding white space padding to the draw text command to avoid clipping. Many international fonts include a period, but perhaps some don\'t. All we need is a black character (not white space) that is small enough to not be clipped when drawn without padding. So any small character, not white space, will do.',
-    type: "text",
-    default: ".",
     categories: "",
   },
   {
@@ -596,7 +596,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "later",
     example: "bold",
     explanation:
-      'Can be regular (default), bold, italic, or bold-italic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
+      'NOT YET IMPLEMENTED. Can be regular (default), bold, italic, or bold-italic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
     type: "categorical",
     default: "regular",
     categories: "regular, bold, italic, boldItalic",
@@ -629,6 +629,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       'Font used for participant instructions. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \ngoogle: instructionFont is a filename (including extension) of a font on the Google Fonts server.\nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Adobe. ("server" support is coming.)\nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
     type: "text",
     default: "Verdana",
+    categories: "",
+  },
+  {
+    name: "instructionFontLeftToRightBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "instructionFontLeftToRightBool should be set to TRUE for most languages, including English, which are written from left to right, and should be set to FALSE for Arabic, Hebrew, and other right-to-left languages. The default value is TRUE. For identifying letters, the letters will be placed accordingly on the response screen. For reading, it's important to set this correctly, or text may fall off the screen: left-to-right text will be left-aligned, and right-to-left text will be right aligned.                                                                                                                                                                                      ",
+    type: "boolean",
+    default: "TRUE",
     categories: "",
   },
   {
@@ -1077,6 +1087,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "responseCharacterHasMedialShapeBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "In Arabic, ligatures respond to the neighboring letters. When we identify crowded Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If responseCharacterHasMedialShapeBool is TRUE then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when responseCharacterHasMedialShapeBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "responseClickedBool",
     availability: "now",
     example: "TRUE",
@@ -1107,21 +1127,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "responseCharacterHasMedialShapeBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "In Arabic, ligatures respond to the neighboring letters. When we do crowded identification of Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If responseCharacterMedialShapeBool is TRUE then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when responseCharacterMedialShapeBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "responseShowIsolatedCharacterInConnectedFormBool",
-    availability: "now",
+    availability: "deprecated",
     example: "TRUE",
     explanation:
-      "In Arabic, ligatures respond to the neighboring letters. When we do crowded identification of Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If responseShowIsolatedCharacterInConnectedFormBool is TRUE then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when responseShowIsolatedCharacterInConnectedFormBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement",
+      "OBSOLETE NAME. TO BE REPLACED BY responseCharacterHasMedialShapeBool.",
     type: "boolean",
     default: "FALSE",
     categories: "",

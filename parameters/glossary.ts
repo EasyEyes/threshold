@@ -414,6 +414,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "abcdefghijklmnopqrstuvwxyz",
   },
+  fontDotCharacter: {
+    name: "fontDotCharacter",
+    availability: "now",
+    type: "text",
+    default: ".",
+  },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
     availability: "now",
@@ -425,12 +431,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "TRUE",
-  },
-  fontLikeAPeriod: {
-    name: "fontLikeAPeriod",
-    availability: "now",
-    type: "text",
-    default: ".",
   },
   fontPadToAvoidClippingBool: {
     name: "fontPadToAvoidClippingBool",
@@ -469,6 +469,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "Verdana",
+  },
+  instructionFontLeftToRightBool: {
+    name: "instructionFontLeftToRightBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
   },
   instructionFontSource: {
     name: "instructionFontSource",
@@ -740,6 +746,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  responseCharacterHasMedialShapeBool: {
+    name: "responseCharacterHasMedialShapeBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   responseClickedBool: {
     name: "responseClickedBool",
     availability: "now",
@@ -758,15 +770,9 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  responseCharacterHasMedialShapeBool: {
-    name: "responseCharacterHasMedialShapeBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
   responseShowIsolatedCharacterInConnectedFormBool: {
     name: "responseShowIsolatedCharacterInConnectedFormBool",
-    availability: "now",
+    availability: "deprecated",
     type: "boolean",
     default: "FALSE",
   },
