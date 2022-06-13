@@ -8,7 +8,7 @@
     "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm ci && cd ..",
     "format": "prettier --write \"**/*.{js,css,html,md,ts}\"",
     "phrases": "node server/fetch-languages-sheets.js && git add components/i18n.js",
-    "glossary": "node server/prepare-glossary.js && prettier --write parameters/glossary.ts && git add parameters/glossary.ts",
+    "glossary": "node server/prepare-glossary.js && prettier --write parameters/glossary.ts && git add parameters/glossary.ts && prettier --write parameters/glossary-full.ts && git add parameters/glossary-full.ts",
     "fetch": "npm run phrases && npm run glossary",
     "prepare": "husky install && npm run setup:psychojs",
     "start": "webpack serve --env=development",

@@ -26,14 +26,13 @@ async function processLanguageSheet() {
     }
   );
 
+  /* -------------------------------------------------------------------------- */
   const data = {};
   for (let parameter of rowsJSON) {
     const parameterName = parameter["INPUT PARAMETER"];
     const parameterInfo = {
       name: parameterName,
       availability: parameter["NOW"] || "now",
-      // example: parameter["EXAMPLE"],
-      // explanation: parameter["EXPLANATION"],
       type: parameter["TYPE"],
       default: parameter["DEFAULT"],
     };
@@ -47,6 +46,27 @@ async function processLanguageSheet() {
     // if (parameterInfo.name && parameterInfo.type)
     if (!parameterInfo.name.includes("__")) data[parameterName] = parameterInfo;
   }
+  /* -------------------------------------------------------------------------- */
+  const dataFull = [];
+  for (let parameter of rowsJSON) {
+    const parameterName = parameter["INPUT PARAMETER"];
+    const parameterInfo = {
+      name: parameterName,
+      availability: parameter["NOW"] || "now",
+      example: parameter["EXAMPLE"],
+      explanation: parameter["EXPLANATION"],
+      type: parameter["TYPE"],
+      default: parameter["DEFAULT"],
+    };
+    if (
+      parameterInfo.type === "categorical" ||
+      parameterInfo.type === "multicategorical"
+    )
+      parameterInfo.categories = parameter["CATEGORIES"];
+    else parameterInfo.categories = "";
+    if (!parameterInfo.name.includes("__")) dataFull.push(parameterInfo);
+  }
+  /* -------------------------------------------------------------------------- */
 
   const superMatchingParams = Object.keys(data).filter((key) =>
     key.includes("@")
@@ -74,6 +94,26 @@ async function processLanguageSheet() {
       } else {
         console.log(
           "EasyEyes glossary of inputs fetched and written into files successfully."
+        );
+      }
+    }
+  );
+
+  const exportHandleFull1 = `interface GlossaryFullItem { [field: string]: string | string[] };\n\n`;
+  const exportHandleFull2 = `export const GLOSSARY: GlossaryFullItem[] =`;
+  fs.writeFile(
+    `${process.cwd()}/parameters/glossary-full.ts`,
+    exportWarning +
+      exportHandleFull1 +
+      exportHandleFull2 +
+      JSON.stringify(dataFull) +
+      exportSuperMatchingParamArray,
+    (error) => {
+      if (error) {
+        console.log("Error! Couldn't write to the file.", error);
+      } else {
+        console.log(
+          "EasyEyes glossary (FULL VERSION) of inputs fetched and written into files successfully."
         );
       }
     }
