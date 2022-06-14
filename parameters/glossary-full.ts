@@ -296,7 +296,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "The scientist must know, or guess, whether Prolific is in Workspace mode or not. If your experiment table includes a _prolificProjectID number then EasyEyes will use it and call Prolific in workspace mode. If _prolificProjectID is empty or absent, then EasyEyes will call Prolific in pre-workspace mode. Note that Prolific is locked into one mode or the other. (Prolific can be switched into Workspace mode, but can never be switched back to pre-Workspace mode.) If we call Prolific in the wrong mode, the call fails to transfer vital information for our study. Currently EasyEyes can't tell what mode Prolific is in, and expects the scientist to know and to include, or not include, the _prolificProjectID accordingly. So if you arrive in Prolific, and find Prolific ignorant of our study, you probably guessed wrong about Prolific's mode. It's easy to tell Prolific's mode while you're in it. The scientist can run all studies with the same _prolificProjectID, or have several projects and choose the right one for each study. ",
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
@@ -1088,7 +1088,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "responseCharacterHasMedialShapeBool",
-    availability: "now",
+    availability: "soon",
     example: "TRUE",
     explanation:
       "In Arabic, ligatures respond to the neighboring letters. When we identify crowded Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If responseCharacterHasMedialShapeBool is TRUE then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when responseCharacterHasMedialShapeBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement",
@@ -1124,16 +1124,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "REQUESTED BY MANY PARTICIPANTS (This grants the frequent request from our participants that they prefer to type the letter, even if they're required to click on the crosshair to begin each trial.) Overrules all other response boolean parameters to enable clicking, and ONLY clicking of the crosshair, to request the next trial. The hope is that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) ",
     type: "boolean",
     default: "TRUE",
-    categories: "",
-  },
-  {
-    name: "responseShowIsolatedCharacterInConnectedFormBool",
-    availability: "deprecated",
-    example: "TRUE",
-    explanation:
-      "OBSOLETE NAME. TO BE REPLACED BY responseCharacterHasMedialShapeBool.",
-    type: "boolean",
-    default: "FALSE",
     categories: "",
   },
   {
@@ -1966,7 +1956,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "30",
     explanation:
       "viewingDistanceMaxForScreenWidthDeg places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. ",
-    type: "",
+    type: "numerical",
     default: "",
     categories: "",
   },

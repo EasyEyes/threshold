@@ -265,7 +265,7 @@ export const GLOSSARY: Glossary = {
   _prolificProjectID: {
     name: "_prolificProjectID",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   _prolificStudyType: {
@@ -748,7 +748,7 @@ export const GLOSSARY: Glossary = {
   },
   responseCharacterHasMedialShapeBool: {
     name: "responseCharacterHasMedialShapeBool",
-    availability: "now",
+    availability: "soon",
     type: "boolean",
     default: "FALSE",
   },
@@ -769,12 +769,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "TRUE",
-  },
-  responseShowIsolatedCharacterInConnectedFormBool: {
-    name: "responseShowIsolatedCharacterInConnectedFormBool",
-    availability: "deprecated",
-    type: "boolean",
-    default: "FALSE",
   },
   responseSpokenBool: {
     name: "responseSpokenBool",
@@ -1305,7 +1299,7 @@ export const GLOSSARY: Glossary = {
   viewingDistanceMaxForScreenWidthDeg: {
     name: "viewingDistanceMaxForScreenWidthDeg",
     availability: "now",
-    type: "",
+    type: "numerical",
     default: "",
   },
   viewingDistanceMinForTargetSizeDeg: {
