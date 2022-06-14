@@ -142,7 +142,7 @@ export const GLOSSARY: Glossary = {
   },
   _compileAsNewExperimentBool: {
     name: "_compileAsNewExperimentBool",
-    availability: "now",
+    availability: "later",
     type: "boolean",
     default: "TRUE",
   },
