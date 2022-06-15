@@ -1097,19 +1097,19 @@ export const GLOSSARY: Glossary = {
   },
   targetRepeatsBool: {
     name: "targetRepeatsBool",
-    availability: "later",
+    availability: "now",
     type: "boolean",
     default: "FALSE",
   },
   targetRepeatsBorderCharacter: {
     name: "targetRepeatsBorderCharacter",
-    availability: "later",
+    availability: "now",
     type: "text",
     default: "$",
   },
   targetRepeatsMaxLines: {
     name: "targetRepeatsMaxLines",
-    availability: "later",
+    availability: "now",
     type: "numerical",
     default: "3",
   },

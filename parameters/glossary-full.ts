@@ -1625,7 +1625,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "targetRepeatsBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
       'Display many copies of two targets, alternating across the screen. The observer reports both. Thus each presentation gets two responses, which count as two trials. David Regan and colleagues (1992) reported that in testing foveal acuity of patients with poor fixation (e.g. nystagmus) it helps to have a "repeat-letter format" eye chart covered with letters of the same size, so that no matter where the eye lands, performance is determined by the letter nearest to the point of fixation, where acuity is best. We here extend that idea to crowding. We cover some part of the screen with an alternating pattern of two letters, like a checkerboard, so that the letters can crowd each other, and ask the observer to report both letters. Again, we expect performance to be determined by the letters nearest to the (unpredictable) point of fixation, where crowding distance is least.',
@@ -1635,7 +1635,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "targetRepeatsBorderCharacter",
-    availability: "later",
+    availability: "now",
     example: "$",
     explanation:
       "When targetRepeatsBool, then targetRepeatsBorderCharacter specifies the character to use to make the outer border. This character has letters on only one side, so it's less crowded. So we don't want to give the fame away by putting a target letter here.",
@@ -1645,7 +1645,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "targetRepeatsMaxLines",
-    availability: "later",
+    availability: "now",
     example: "3",
     explanation:
       "targetRepeatsMaxLines can be 1, 3, 4, … . It specifies the desired number of lines, but fewer lines may be displayed if limited by screen height. Sarah Waugh recommends 3.",
