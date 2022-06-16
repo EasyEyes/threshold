@@ -175,14 +175,38 @@ export const calibrateAudio = async (reader) => {
         siteUrl: "https://hqjq0u.deta.dev",
         targetElementId: "soundDisplay",
       };
-      const { Speaker, VolumeCalibration } = speakerCalibrator;
+      const calibratorParams = {
+        numCalibrationRounds: 2,
+        numCalibrationNodes: 2,
+        download: false,
+      };
+      const {
+        Speaker,
+        VolumeCalibration,
+        UnsupportedDeviceError,
+        MissingSpeakerIdError,
+        CalibrationTimedOutError,
+      } = speakerCalibrator;
       document.querySelector("#soundMessage").innerHTML = copy.qr;
       document.querySelector("#soundYes").style.display = "none";
       document.querySelector("#soundNo").style.display = "none";
-      soundGainDBSPL.current = await Speaker.startCalibration(
-        speakerParameters,
-        VolumeCalibration
-      );
+      try {
+        soundGainDBSPL.current = await Speaker.startCalibration(
+          speakerParameters,
+          VolumeCalibration,
+          calibratorParams
+        );
+      } catch (e) {
+        if (e instanceof UnsupportedDeviceError) {
+          // Do something here
+        }
+        if (e instanceof MissingSpeakerIdError) {
+          // Do something here
+        }
+        if (e instanceof CalibrationTimedOutError) {
+          // Do something here
+        }
+      }
 
       elems.display.style.display = "none";
       elems.message.innerHTML =
