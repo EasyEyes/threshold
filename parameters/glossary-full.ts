@@ -613,7 +613,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "fontWeight",
-    availability: "later",
+    availability: "now",
     example: "550",
     explanation:
       "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = fontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
@@ -1121,7 +1121,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "REQUESTED BY MANY PARTICIPANTS (This grants the frequent request from our participants that they prefer to type the letter, even if they're required to click on the crosshair to begin each trial.) Overrules all other response boolean parameters to enable clicking, and ONLY clicking of the crosshair, to request the next trial. The hope is that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) ",
+      "REQUESTED BY MANY PARTICIPANTS (This grants the frequent request from our participants that they prefer to type the letter, even if they're required to click on the crosshair to begin each trial.) Setting responseMustClickCrosshairBool TRUE overrules all other response boolean parameters to enable clicking, and ONLY clicking, of the crosshair, to request the next trial. We suppose that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) ",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1937,7 +1937,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "If viewingDistanceDesiredCm is nonzero, then it specifies the desired viewing distance. The default is zero, which is ignored. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.\n     The output CSV data file reports viewingDistanceCm. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. ",
     type: "numerical",
-    default: "40",
+    default: "50",
     categories: "",
   },
   {

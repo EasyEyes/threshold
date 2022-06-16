@@ -460,7 +460,7 @@ export const GLOSSARY: Glossary = {
   },
   fontWeight: {
     name: "fontWeight",
-    availability: "later",
+    availability: "now",
     type: "numerical",
     default: "NaN",
   },
@@ -1288,7 +1288,7 @@ export const GLOSSARY: Glossary = {
     name: "viewingDistanceDesiredCm",
     availability: "now",
     type: "numerical",
-    default: "40",
+    default: "50",
   },
   viewingDistanceMaxForScreenHeightDeg: {
     name: "viewingDistanceMaxForScreenHeightDeg",
