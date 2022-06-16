@@ -566,7 +566,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "fontLeftToRightBool should be set to TRUE for most languages, including English, which are written from left to right, and should be set to FALSE for Arabic, Hebrew, and other right-to-left languages. The default value is TRUE. For identifying letters, the letters will be placed accordingly on the response screen. For reading, it's important to set this correctly, or text may fall off the screen: left-to-right text will be left-aligned, and right-to-left text will be right aligned.                                                                                                                                                                                      ",
+      "Set fontLeftToRightBool (default TRUE) to TRUE for languages that, like English, are written from left to right, and to FALSE for right-to-left languages, like Arabic and Hebrew.  For identifying letters, the letters will be placed accordingly on the response screen. For reading, left-to-right text will be left-aligned, and right-to-left text will be right aligned. If this is set incorrectly for reading, text may fall off the screen.                                                                                                                                           ",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -786,7 +786,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.3",
     explanation:
-      "Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankingRadiusReTargetHeight.",
+      "Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankedNearTargetBool.",
     type: "numerical",
     default: "0",
     categories: "",

@@ -126,16 +126,16 @@
 }
 
 .swal2-radio label {
-  width: 80%;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin: 0.3rem 0;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  background-color: #ddd;
-  border-radius: 7px;
+  width: 80% !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  margin: 0.3rem 0 !important;
+  font-size: 1.5rem !important;
+  cursor: pointer !important;
+  padding: 0.5rem !important;
+  background-color: #ddd !important;
+  border-radius: 7px !important;
 }
 
 .swal2-radio label:hover {

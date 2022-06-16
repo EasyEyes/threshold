@@ -42,7 +42,7 @@
     "dataframe-js": "^1.4.4",
     "eslint": "^8.17.0",
     "file-loader": "^6.2.0",
-    "googleapis": "^102.0.0",
+    "googleapis": "^103.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.1",
     "prettier": "^2.7.0",

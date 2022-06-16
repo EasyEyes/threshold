@@ -3531,12 +3531,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }, 200);
             }
           },
-          preConfirm: (value) => {
-            if (value == null || value === "") {
-              Swal.showValidationMessage("You must provide an answer.");
-              return false;
-            }
-          },
+          // preConfirm: (value) => {
+          //   if (choiceQuestionBool && !value) {
+          //     Swal.showValidationMessage("You must select an answer.");
+          //     return false;
+          //   }
+          // },
         });
 
         logger("questionAndAnswer RESULT", result);
