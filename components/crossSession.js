@@ -56,7 +56,11 @@ export const checkCrossSessionId = async (callback) => {
   if (id.isDenied) {
     return false;
   } else if (id.isConfirmed) {
-    callback(id.value, localStorageInfo.session, storedId);
+    callback(
+      id.value,
+      localStorageInfo ? localStorageInfo.session : null,
+      storedId
+    );
     return true;
   } else if (id.isDismissed) {
     const idFromFile = await Swal.fire({

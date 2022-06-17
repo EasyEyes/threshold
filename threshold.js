@@ -337,13 +337,13 @@ const paramReaderInitialized = async (reader) => {
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
   if (reader.read("_participantIDGetBool")[0]) {
-    const gotParticipantId = (participant, session, storedId) => {
+    const gotParticipantId = (participant, session = null, storedId) => {
       if (participant) {
         thisExperimentInfo.requestedCrossSessionId = true;
         thisExperimentInfo.participant = participant;
         if (storedId !== undefined && participant === storedId) {
           thisExperimentInfo.setSession(
-            isNaN(Number(session)) ? session : Number(session) + 1
+            session && isNaN(Number(session)) ? session : Number(session) + 1
           );
         } else {
           thisExperimentInfo.setSession(1);
