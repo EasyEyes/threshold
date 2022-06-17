@@ -9,6 +9,7 @@ import {
   ifTrue,
   norm,
   sleep,
+  padWithWhitespace,
 } from "./components/utils.js";
 
 import * as core from "./psychojs/src/core/index.js";
@@ -192,7 +193,7 @@ import { getTrialInfoStr } from "./components/trialCounter.js";
 ////
 
 import {
-  getCharacterSetBoundingBox,
+  generateCharacterSetBoundingRects,
   restrictLevel,
 } from "./components/bounding.js";
 
@@ -845,27 +846,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       autoLog: false,
     });
 
-    characterSetBoundingRects = {};
-    for (const cond of paramReader.block_conditions) {
-      const characterSet = String(
-        paramReader.read("fontCharacterSet", cond)
-      ).split("");
-      let font = paramReader.read("font", cond);
-      if (paramReader.read("fontSource", cond) === "file")
-        font = cleanFontName(font);
-      const typographicCrowding =
-        paramReader.read("spacingRelationToSize", cond) === "typographic" &&
-        paramReader.read("thresholdParameter", cond) === "spacing";
-      const letterRepeats = typographicCrowding ? 3 : 1;
-      logger("letterRepeats", letterRepeats);
-      characterSetBoundingRects[cond] = getCharacterSetBoundingBox(
-        characterSet,
-        font,
-        psychoJS.window,
-        letterRepeats,
-        100
-      );
-    }
+    characterSetBoundingRects = generateCharacterSetBoundingRects(
+      paramReader,
+      cleanFontName
+    );
 
     getTinyHint();
 
@@ -2308,6 +2292,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // TODO check that we are actually trying to test for "spacing", not "size"
 
+          letterConfig.padText = reader.read(
+            "fontPadTextToAvoidClippingBool",
+            BC
+          );
           letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
           letterConfig.delayBeforeStimOnsetSec = reader.read(
             "markingOffsetBeforeTargetOnsetSecs",
@@ -2471,7 +2459,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   stimulusParameters.widthPx
                 );
               }
-              target.setText(targetCharacter);
+              const targetText = letterConfig.padText
+                ? padWithWhitespace(targetCharacter)
+                : targetCharacter;
+              target.setText(targetText);
               flanker1.setAutoDraw(false);
               flanker2.setAutoDraw(false);
               break;
@@ -2480,7 +2471,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 case "none":
                   break;
                 case "ratio":
-                  target.setText(targetCharacter);
+                  target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+                  let targetText = letterConfig.padText
+                    ? padWithWhitespace(targetCharacter)
+                    : targetCharacter;
+                  target.setText(targetText);
                   if (letterConfig.targetSizeIsHeightBool)
                     target.scaleToHeightPx(stimulusParameters.heightPx);
                   else {
@@ -2489,16 +2484,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       stimulusParameters.widthPx
                     );
                   }
-
                   var flankersHeightPx = target.getHeight();
-                  flanker1.setText(firstFlankerCharacter);
-                  flanker2.setText(secondFlankerCharacter);
+                  const f1Text = letterConfig.padText
+                    ? padWithWhitespace(firstFlankerCharacter)
+                    : firstFlankerCharacter;
+                  const f2Text = letterConfig.padText
+                    ? padWithWhitespace(secondFlankerCharacter)
+                    : secondFlankerCharacter;
+
                   flanker1.setFont(font.name);
                   flanker2.setFont(font.name);
                   flanker1.setHeight(flankersHeightPx);
                   flanker2.setHeight(flankersHeightPx);
                   flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
                   flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
+                  flanker1.setText(f1Text);
+                  flanker2.setText(f2Text);
                   psychoJS.experiment.addData("flankerLocationsPx", [
                     stimulusParameters.targetAndFlankersXYPx[1],
                     stimulusParameters.targetAndFlankersXYPx[2],
@@ -2510,11 +2511,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   //   firstFlankerCharacter +
                   //   targetCharacter +
                   //   secondFlankerCharacter;
-                  target.setText(
+                  const tripletCharacters =
                     firstFlankerCharacter +
-                      targetCharacter +
-                      secondFlankerCharacter
-                  );
+                    targetCharacter +
+                    secondFlankerCharacter;
+                  targetText = letterConfig.padText
+                    ? padWithWhitespace(tripletCharacters)
+                    : tripletCharacters;
+                  target.setText(targetText);
                   // target.setHeight(stimulusParameters.heightPx);
                   target.scaleToWidthPx(
                     stimulusParameters.heightPx,
@@ -2540,15 +2544,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             flanker1: flanker1,
             flanker2: flanker2,
           };
+          const boundingBools = {
+            stimulus: showBoundingBox,
+            characterSet: showCharacterSetBoundingBox,
+          };
+          const tripletBoundingStims = {
+            stimulus: boundingBoxPolies,
+            characterSet: characterSetBoundingBoxPolies,
+          };
           sizeAndPositionBoundingBoxes(
-            {
-              stimulus: showBoundingBox,
-              characterSet: showCharacterSetBoundingBox,
-            },
-            {
-              stimulus: boundingBoxPolies,
-              characterSet: characterSetBoundingBoxPolies,
-            },
+            boundingBools,
+            tripletBoundingStims,
             displayCharacterSetBoundingBoxPolies[BC],
             tripletStims,
             characterSetBoundingRects[BC],

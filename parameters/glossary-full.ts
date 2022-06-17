@@ -371,6 +371,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "calibrateLoudspeakerBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Setting calibrateLoudspeakerBool TRUE requests calibration of the loudspeaker's impuse response, using the participant's internet-connected iPhone/iPad. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding one that's compatible. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration only if it sets calibrateLoudspeakerBool TRUE.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "calibrateScreenSizeBool",
     availability: "now",
     example: "TRUE",
@@ -385,7 +395,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Ask the participant to use a ruler, yardstick, meter stick, or tape measure to measure the distance directly to assess accuracy.",
+      "Setting calibrateScreenSizeCheckBool TRUE asks the participant to use a ruler, yardstick, meter stick, or tape measure to measure the distance directly to assess accuracy.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -395,7 +405,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Requests sound calibration, using the participant's iPhone. Early exit if no iPhone is available.",
+      "Setting calibrateSoundLevelBool TRUE requests gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateLoudspeakerBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration only if it sets calibrateSoundLevelBool TRUE.",
     type: "boolean",
     default: "FALSE",
     categories: "",

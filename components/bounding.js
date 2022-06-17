@@ -7,6 +7,7 @@ import {
   targetKind,
 } from "./global.js";
 
+import { psychoJS } from "./globalPsychoJS.js";
 import {
   logger,
   XYPixOfXYDeg,
@@ -18,7 +19,35 @@ import {
   validateRectPoints,
 } from "./utils.js";
 
-export const getCharacterSetBoundingBox = (
+export const generateCharacterSetBoundingRects = (
+  paramReader,
+  cleanFontName
+) => {
+  const rects = {};
+  for (const BC of paramReader.block_conditions) {
+    const characterSet = String(paramReader.read("fontCharacterSet", BC)).split(
+      ""
+    );
+    let font = paramReader.read("font", BC);
+    if (paramReader.read("fontSource", BC) === "file")
+      font = cleanFontName(font);
+    const typographicCrowding =
+      paramReader.read("spacingRelationToSize", BC) === "typographic" &&
+      paramReader.read("thresholdParameter", BC) === "spacing";
+    const letterRepeats = typographicCrowding ? 3 : 1;
+    logger("letterRepeats", letterRepeats);
+    rects[BC] = _getCharacterSetBoundingBox(
+      characterSet,
+      font,
+      psychoJS.window,
+      letterRepeats,
+      100
+    );
+  }
+  return rects;
+};
+
+const _getCharacterSetBoundingBox = (
   characterSet,
   font,
   window,

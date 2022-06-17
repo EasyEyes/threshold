@@ -133,6 +133,7 @@ export const letterConfig = Object.seal({
   flankerCharacters: [undefined, undefined],
   delayBeforeStimOnsetSec: undefined,
   targetSafetyMarginSec: undefined,
+  padText: undefined, // fontPadTextToAvoidClippingBool
 });
 
 export const instructionFont = { current: undefined };

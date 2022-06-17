@@ -726,3 +726,17 @@ export const psychojsUnitsFromWindowUnits = (
   const [xPx, yPx] = [centeredX - fixationXYPx[0], centeredY - fixationXYPx[1]];
   return [xPx, yPx];
 };
+
+export const padWithWhitespace = (s) => {
+  if (s.split("").includes("\u200B")) logger("string already padded!", s);
+  return `\n\u200B\u202F${s}\u202F\u200B\n`;
+};
+
+export const stripWhitespacePadding = (s) => {
+  return s
+    .trim()
+    .split("")
+    .filter((c) => !["\u202F", "\u200B"].includes(c))
+    .join("")
+    .trim();
+};
