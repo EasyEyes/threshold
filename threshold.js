@@ -2449,6 +2449,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "targetLocationPx",
             stimulusParameters.targetAndFlankersXYPx[0]
           );
+
+          let targetText;
+
           switch (thresholdParameter) {
             case "size":
               if (letterConfig.targetSizeIsHeightBool)
@@ -2459,10 +2462,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   stimulusParameters.widthPx
                 );
               }
-              const targetText = letterConfig.padText
+              targetText = letterConfig.padText
                 ? padWithWhitespace(targetCharacter)
                 : targetCharacter;
               target.setText(targetText);
+
               flanker1.setAutoDraw(false);
               flanker2.setAutoDraw(false);
               break;
@@ -2472,10 +2476,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   break;
                 case "ratio":
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
-                  let targetText = letterConfig.padText
+
+                  targetText = letterConfig.padText
                     ? padWithWhitespace(targetCharacter)
                     : targetCharacter;
                   target.setText(targetText);
+
                   if (letterConfig.targetSizeIsHeightBool)
                     target.scaleToHeightPx(stimulusParameters.heightPx);
                   else {
@@ -2484,6 +2490,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       stimulusParameters.widthPx
                     );
                   }
+
                   var flankersHeightPx = target.getHeight();
                   const f1Text = letterConfig.padText
                     ? padWithWhitespace(firstFlankerCharacter)
@@ -2515,10 +2522,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     firstFlankerCharacter +
                     targetCharacter +
                     secondFlankerCharacter;
+
                   targetText = letterConfig.padText
                     ? padWithWhitespace(tripletCharacters)
                     : tripletCharacters;
                   target.setText(targetText);
+
                   // target.setHeight(stimulusParameters.heightPx);
                   target.scaleToWidthPx(
                     stimulusParameters.heightPx,

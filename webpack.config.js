@@ -110,6 +110,7 @@ module.exports = (env, options) => {
           "process.env.debug": false,
         }),
       ],
+      devtool: "source-map",
     });
   }
 };
