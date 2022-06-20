@@ -463,7 +463,8 @@ export const restrictSpacingDeg = (
         break;
       case "ratio":
         // Use spacingDeg and spacingOverSizeRatio to set size.
-        if (spacingForRatioIsOuterBool) {
+        // NOTE for foveal targets (ie norm(targetXYDeg) == 0), inner vs outer flanker distinction is undefined
+        if (spacingForRatioIsOuterBool || norm(targetXYDeg) === 0) {
           sizeDeg = spacingDeg / spacingOverSizeRatio;
         } else {
           var eccDeg = norm(targetXYDeg); //target eccentricity in Deg
@@ -637,7 +638,7 @@ export const restrictSpacingDeg = (
             v1XY = horizontalXY.map((z) => z * -spacingDeg);
             v2XY = horizontalXY.map((z) => z * spacingDeg);
             break;
-          case "vertial":
+          case "vertical":
             if (!targetIsFoveal)
               throw "Vertical flankers are undefined in the periphery.";
             v1XY = verticalXY.map((z) => z * -spacingDeg);
