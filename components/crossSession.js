@@ -50,6 +50,14 @@ export const checkCrossSessionId = async (callback) => {
         Swal.showValidationMessage("The EasyEyes ID is invalid.");
         return false;
       }
+      if (!/^[A-Za-z0-9]*$/.test(id)) {
+        Swal.showValidationMessage(
+          "The EasyEyes ID contains invalid characters. Only letters and numbers are allowed."
+        );
+        return false;
+      }
+
+      return true;
     },
   });
 
