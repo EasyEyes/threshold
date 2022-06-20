@@ -307,6 +307,7 @@ export const restrictSizeDeg = (
         targetSizeDeg,
         {
           heightPx: heightPx,
+          widthPx: widthPx,
           targetAndFlankersXYPx: [targetXYPx],
           sizeDeg: targetSizeDeg,
           heightDeg: heightDeg,

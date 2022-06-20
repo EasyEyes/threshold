@@ -2454,6 +2454,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           switch (thresholdParameter) {
             case "size":
+              targetText = letterConfig.padText
+                ? padWithWhitespace(targetCharacter)
+                : targetCharacter;
+              target.setText(targetText);
               if (letterConfig.targetSizeIsHeightBool)
                 target.scaleToHeightPx(stimulusParameters.heightPx);
               else {
@@ -2462,10 +2466,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   stimulusParameters.widthPx
                 );
               }
-              targetText = letterConfig.padText
-                ? padWithWhitespace(targetCharacter)
-                : targetCharacter;
-              target.setText(targetText);
+              target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
               flanker1.setAutoDraw(false);
               flanker2.setAutoDraw(false);
@@ -2505,12 +2506,31 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   flanker2.setHeight(flankersHeightPx);
                   flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
                   flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
+                  // flanker1 === outer flanker
                   flanker1.setText(f1Text);
+                  // flanker2 === inner flanker
                   flanker2.setText(f2Text);
                   psychoJS.experiment.addData("flankerLocationsPx", [
                     stimulusParameters.targetAndFlankersXYPx[1],
                     stimulusParameters.targetAndFlankersXYPx[2],
                   ]);
+                  const targetSpacingPx = spacingForRatioIsOuterBool
+                    ? norm([
+                        stimulusParameters.targetAndFlankersXYPx[0][0] -
+                          stimulusParameters.targetAndFlankersXYPx[1][0],
+                        stimulusParameters.targetAndFlankersXYPx[0][1] -
+                          stimulusParameters.targetAndFlankersXYPx[1][1],
+                      ])
+                    : norm([
+                        stimulusParameters.targetAndFlankersXYPx[0][0] -
+                          stimulusParameters.targetAndFlankersXYPx[2][0],
+                        stimulusParameters.targetAndFlankersXYPx[0][1] -
+                          stimulusParameters.targetAndFlankersXYPx[2][1],
+                      ]);
+                  psychoJS.experiment.addData(
+                    "targetSpacingPx",
+                    targetSpacingPx
+                  );
                   break;
                 case "typographic":
                   // ...include the flankers in the same string/stim as the target.
@@ -3041,7 +3061,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "targetBoundingBox",
               String(target.getBoundingBox(true))
             );
-            if (letterConfig.spacingRelationToSize === "ratio") {
+            if (
+              letterConfig.spacingRelationToSize === "ratio" &&
+              thresholdParameter === "spacing"
+            ) {
               psychoJS.experiment.addData(
                 "flanker1BoundingBox",
                 String(flanker1.getBoundingBox(true))
