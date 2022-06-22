@@ -716,7 +716,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      'Considering crowding, define "too close" distance from the target as a fraction of the target\'s radial eccentricity.',
+      "So that markings don't crowd the target, the closest that a marking pixel can be to the target center is specified by setting markingBlankingRadiusReEccentricity to the fraction (default 0.5) of the target's radial eccentricity.",
     type: "numerical",
     default: "0.5",
     categories: "",
@@ -726,9 +726,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "2",
     explanation:
-      'Considering masking, markingBlankingRadiusReTargetHeight specifies the "too close" distance from the target as a fraction of target height.',
+      "So that markings don't mask the target, the closest that a marking pixel can be to the traget center is specified by setting markingBlankingRadiusReTargetHeight (default 1) to the fraction of target height.",
     type: "numerical",
-    default: "0.2",
+    default: "1",
     categories: "",
   },
   {
