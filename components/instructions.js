@@ -38,6 +38,14 @@ export const instructionsText = {
   soundBegin: (L) => {
     return phrases.T_thresholdSoundBeginBlock[L] + "\n\n";
   },
+  speechInNoiseBegin: (L) => {
+    return (
+      phrases.T_sentenceProcedure[L] +
+      "\n\n" +
+      phrases.T_sentenceGuessingGame[L] +
+      "\n\n"
+    );
+  },
   popularFeatures: (L, takeABreakTrialCreditsThisBlock = 0) => {
     return takeABreakTrialCreditsThisBlock === 0
       ? ""
@@ -90,6 +98,9 @@ export const instructionsText = {
     respond: {
       sound: (L) => {
         return phrases.T_thresholdSoundResponse[L];
+      },
+      speechInNoise: (L) => {
+        return phrases.T_sentenceIdentifyClick[L];
       },
       spacing: (L, responseType = 2) => {
         switch (responseType) {
