@@ -3117,14 +3117,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             speechInNoiseTargetList.current = targetList.map(
               (target) => target["name"]
             );
-            // console.log(speechInNoiseTargetList.current)
-            //console.log("correctAns", correctAns.current);
-            //console.log("targetList",targetList);
           } else {
             //target is present half the time
             targetIsPresentBool.current = Math.random() < 0.5;
             correctAns.current = targetIsPresentBool.current ? "y" : "n";
-            console.log(correctAns.current);
             trialSoundBuffer = await getToneInMelodyTrialData(
               status.block_condition,
               targetIsPresentBool.current,
@@ -3419,7 +3415,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // Was this correct?
             if (key_resp.keys == correctAns.current) {
               // Play correct audio
-              console.log("was here");
               switchKind(targetKind.current, {
                 sound: () => {
                   correctSynth.play();
