@@ -93,10 +93,13 @@ import {
   whiteNoiseLevel,
   targetSoundFolder,
   maskerSoundFolder,
+  speechInNoiseTargetList,
+  speechInNoiseShowClickable,
   usingGaze,
   targetTask,
   questionsThisBlock,
   thisExperimentInfo,
+  vocoderPhraseSoundFiles,
 } from "./components/global.js";
 
 import {
@@ -264,10 +267,15 @@ import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
 import { getPavloviaProjectName, quitPsychoJS } from "./components/lifetime.js";
 import {
-  getTrialData,
-  initSoundFiles,
-  playAudioBuffer,
+  getToneInMelodyTrialData,
+  initToneInMelodySoundFiles,
 } from "./components/toneInMelody.js";
+import { playAudioBuffer } from "./components/soundUtils.js";
+import {
+  getSpeechInNoiseTrialData,
+  initSpeechInNoiseSoundFiles,
+} from "./components/speechInNoise.js";
+
 import {
   checkSystemCompatibility,
   displayCompatibilityMessage,
@@ -284,6 +292,10 @@ import {
   isProlificExperiment,
   saveProlificInfo,
 } from "./components/externalServices.js";
+import {
+  getVocoderPhraseTrialData,
+  initVocoderPhraseSoundFiles,
+} from "./components/vocoderPhrase.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -717,24 +729,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     //initialize sound experiment files
     //edit - use list of sound targetKinds instead of sound
-    if (paramReader.read("targetKind", "__ALL_BLOCKS__").includes("sound")) {
-      //read masker andtarget sound folders
-      var MaskerFolders = paramReader.read(
-        "maskerSoundFolder",
-        "__ALL_BLOCKS__"
-      );
+    // if (paramReader.read("targetKind", "__ALL_BLOCKS__").includes("sound")) {
+    //   //read masker andtarget sound folders
+    //   var MaskerFolders = paramReader.read(
+    //     "maskerSoundFolder",
+    //     "__ALL_BLOCKS__"
+    //   );
 
-      var targetFolders = paramReader.read(
-        "targetSoundFolder",
-        "__ALL_BLOCKS__"
-      );
+    //   var targetFolders = paramReader.read(
+    //     "targetSoundFolder",
+    //     "__ALL_BLOCKS__"
+    //   );
 
-      //only unique folders
-      MaskerFolders = [...new Set(MaskerFolders)];
-      targetFolders = [...new Set(targetFolders)];
+    //   //only unique folders
+    //   MaskerFolders = [...new Set(MaskerFolders)];
+    //   targetFolders = [...new Set(targetFolders)];
 
-      await initSoundFiles(MaskerFolders, targetFolders);
-    }
+    //   await initSoundFiles(MaskerFolders, targetFolders);
+    // }
 
     fixation = new Fixation();
     // fixationConfig.stim = fixation;
@@ -1086,6 +1098,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
+      vocoderPhrase: () => {
+        if (psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0) {
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
     });
 
     return Scheduler.Event.FLIP_REPEAT;
@@ -1255,6 +1273,52 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 "sound"
               );
+              console.log("sound:trialsConditions", trialsConditions);
+              // console.log("trialsConditions", trialsConditions);
+
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                nTrials: totalTrialsThisBlock.current,
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+              });
+            },
+            vocoderPhrase: () => {
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader,
+                "sound"
+              );
+              console.log("trialsConditions", trialsConditions);
+
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                nTrials: totalTrialsThisBlock.current,
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+              });
+            },
+          });
+        },
+        detect: () => {
+          switchKind(targetKind.current, {
+            sound: () => {
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader,
+                "sound"
+              );
+              console.log("sound:trialsConditions", trialsConditions);
+              // console.log("trialsConditions", trialsConditions);
+
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
                 psychoJS: psychoJS,
@@ -1275,9 +1339,31 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       renderObj.tinyHint.setText("");
       renderObj.tinyHint.setAutoDraw(false);
-
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials;
+
+      //initialize sound files:
+      if (targetKind.current === "vocoderPhrase") {
+        vocoderPhraseSoundFiles.current = await initVocoderPhraseSoundFiles(
+          trialsConditions
+        );
+        vocoderPhraseSoundFiles.loaded = true;
+        console.log(vocoderPhraseSoundFiles.current["targetList"]);
+      } else if (targetKind.current === "sound") {
+        if (targetTask.current === "identify") {
+          //init trial sound data
+          var speechInNoiseConditions = trialsConditions.filter(
+            (condition) => condition["targetTask"] == "identify"
+          );
+          initSpeechInNoiseSoundFiles(speechInNoiseConditions);
+        } else {
+          //init trial sound data
+          var toneInMelodyConditions = trialsConditions.filter(
+            (condition) => condition["targetTask"] == "detect"
+          );
+          initToneInMelodySoundFiles(toneInMelodyConditions);
+        }
+      }
 
       // Schedule all the trials in the trialList:
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1300,7 +1386,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           endLoopIteration(trialsLoopScheduler, snapshot)
         );
       }
-
       return Scheduler.Event.NEXT;
     };
   }
@@ -1582,6 +1667,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         identify: () => {
           switchKind(targetKind.current, {
+            vocoderPhrase: () => {
+              const possibleTrials = paramReader.read(
+                "conditionTrials",
+                status.block
+              );
+              totalTrialsThisBlock.current = possibleTrials.reduce(
+                (a, b) => a + b,
+                0
+              );
+            },
             sound: () => {
               const possibleTrials = paramReader.read(
                 "conditionTrials",
@@ -1727,10 +1822,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
 
       switchKind(targetKind.current, {
-        sound: () => {
+        vocoderPhrase: () => {
+          //setup instruction
+          const instr =
+            targetTask.current == "identify"
+              ? instructionsText.speechInNoiseBegin(L)
+              : instructionsText.soundBegin(L);
           _instructionSetup(
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
-              instructionsText.soundBegin(L)
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr
+          );
+        },
+        sound: () => {
+          targetTask.current = paramReader.read("targetTask", status.block)[0];
+          //console.log("targetTask:", targetTask.current);
+          const instr =
+            targetTask.current == "identify"
+              ? instructionsText.speechInNoiseBegin(L)
+              : instructionsText.soundBegin(L);
+          _instructionSetup(
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr
           );
         },
         letter: () => {
@@ -2072,6 +2182,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const parametersToExcludeFromData = [];
 
       switchKind(targetKind.current, {
+        vocoderPhrase: () => {
+          for (let c of snapshot.handler.getConditions()) {
+            if (c.block_condition === trials._currentStaircase._name) {
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
+              addConditionToData(
+                paramReader,
+                status.block_condition,
+                psychoJS.experiment,
+                parametersToExcludeFromData
+              );
+            }
+          }
+        },
         sound: () => {
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
@@ -2165,21 +2289,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       usingGaze.current = paramReader.read("calibrateTrackGazeBool", BC);
 
       switchKind(targetKind.current, {
-        sound: () => {
-          //change to proper instruction setup from the google sheet
+        vocoderPhrase: () => {
+          //change instructions
           var w = window.innerWidth / 3;
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["sound"](rc.language.value),
             w,
             [-window.innerWidth / 2 + w * 1.1, 0]
           );
+
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
           ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
-          maskerVolumeDbSPL.current = paramReader.read(
-            "maskerDBSPL",
-            status.block_condition
-          );
 
           // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
           soundGainDBSPL.current =
@@ -2190,6 +2311,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "usedSoundGainDBSPL",
             soundGainDBSPL.current
           );
+
           whiteNoiseLevel.current = paramReader.read(
             "targetSoundNoiseDBSPL",
             status.block_condition
@@ -2198,12 +2320,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "targetSoundFolder",
             status.block_condition
           );
+          maskerVolumeDbSPL.current = paramReader.read(
+            "maskerDBSPL",
+            status.block_condition
+          );
           maskerSoundFolder.current = paramReader.read(
             "maskerSoundFolder",
             status.block_condition
           );
           if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForSound(
+            updateTargetSpecsForSoundDetect(
               ProposedVolumeLevelFromQuest.current,
               maskerVolumeDbSPL.current,
               soundGainDBSPL.current,
@@ -2211,6 +2337,70 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetSoundFolder.current,
               maskerSoundFolder.current
             );
+          trialComponents = [];
+          trialComponents.push(key_resp);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
+        },
+        sound: () => {
+          var w = window.innerWidth / 3;
+          _instructionBeforeStimulusSetup(
+            instructionsText.trial.fixate["sound"](rc.language.value),
+            w,
+            [-window.innerWidth / 2 + w * 1.1, 0]
+          );
+
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+          ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
+
+          // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
+          soundGainDBSPL.current =
+            typeof soundGainDBSPL.current !== "undefined"
+              ? soundGainDBSPL.current
+              : paramReader.read("soundGainDBSPL", status.block_condition);
+          psychoJS.experiment.addData(
+            "usedSoundGainDBSPL",
+            soundGainDBSPL.current
+          );
+
+          whiteNoiseLevel.current = paramReader.read(
+            "targetSoundNoiseDBSPL",
+            status.block_condition
+          );
+          targetSoundFolder.current = paramReader.read(
+            "targetSoundFolder",
+            status.block_condition
+          );
+
+          if (targetTask.current == "detect") {
+            maskerVolumeDbSPL.current = paramReader.read(
+              "maskerDBSPL",
+              status.block_condition
+            );
+            maskerSoundFolder.current = paramReader.read(
+              "maskerSoundFolder",
+              status.block_condition
+            );
+            if (showConditionNameConfig.showTargetSpecs)
+              updateTargetSpecsForSoundDetect(
+                ProposedVolumeLevelFromQuest.current,
+                maskerVolumeDbSPL.current,
+                soundGainDBSPL.current,
+                whiteNoiseLevel.current,
+                targetSoundFolder.current,
+                maskerSoundFolder.current
+              );
+          } else if (targetTask.current == "identify") {
+            if (showConditionNameConfig.showTargetSpecs)
+              updateTargetSpecsForSoundIdentify(
+                ProposedVolumeLevelFromQuest.current,
+                soundGainDBSPL.current,
+                whiteNoiseLevel.current,
+                targetSoundFolder.current
+              );
+          }
+
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
@@ -2730,6 +2920,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
       switchKind(targetKind.current, {
+        vocoderPhrase: () => {
+          if (
+            psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+          ) {
+            loggerText("trialInstructionRoutineEachFrame enter HIT");
+            continueRoutine = false;
+          }
+        },
         sound: () => {
           if (
             psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
@@ -2819,6 +3017,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       switchKind(targetKind.current, {
+        vocoderPhrase: () => {
+          return Scheduler.Event.NEXT;
+        },
         sound: () => {
           return Scheduler.Event.NEXT;
         },
@@ -2878,20 +3079,61 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
 
       switchKind(targetKind.current, {
-        sound: async () => {
-          //target is present half the time
-          targetIsPresentBool.current = Math.random() < 0.5;
-          correctAns.current = targetIsPresentBool.current ? "y" : "n";
-
-          var trialSoundBuffer = await getTrialData(
-            maskerSoundFolder.current,
-            targetSoundFolder.current,
-            targetIsPresentBool.current,
+        vocoderPhrase: async () => {
+          // const interval = setInterval(()=>{},50)
+          console.log(vocoderPhraseSoundFiles.current["targetList"]);
+          const trialSound = getVocoderPhraseTrialData(
+            vocoderPhraseSoundFiles.current["targetList"],
+            vocoderPhraseSoundFiles.current["maskerList"],
+            status.block_condition,
             ProposedVolumeLevelFromQuest.current,
-            maskerVolumeDbSPL.current,
             whiteNoiseLevel.current,
-            soundGainDBSPL.current
+            soundGainDBSPL.current,
+            maskerVolumeDbSPL.current
           );
+          playAudioBuffer(trialSound);
+          vocoderPhraseSoundFiles.current = undefined;
+          vocoderPhraseSoundFiles.loaded = false;
+        },
+
+        sound: async () => {
+          var trialSoundBuffer;
+          targetTask.current = paramReader.read(
+            "targetTask",
+            status.block_condition
+          );
+          if (targetTask.current == "identify") {
+            const { targetList, trialSound, correctAnsIndex } =
+              await getSpeechInNoiseTrialData(
+                status.block_condition,
+                ProposedVolumeLevelFromQuest.current,
+                whiteNoiseLevel.current,
+                soundGainDBSPL.current
+              );
+
+            trialSoundBuffer = trialSound;
+            correctAns.current =
+              targetList[correctAnsIndex]["name"].toLowerCase();
+            speechInNoiseTargetList.current = targetList.map(
+              (target) => target["name"]
+            );
+            // console.log(speechInNoiseTargetList.current)
+            //console.log("correctAns", correctAns.current);
+            //console.log("targetList",targetList);
+          } else {
+            //target is present half the time
+            targetIsPresentBool.current = Math.random() < 0.5;
+            correctAns.current = targetIsPresentBool.current ? "y" : "n";
+            console.log(correctAns.current);
+            trialSoundBuffer = await getToneInMelodyTrialData(
+              status.block_condition,
+              targetIsPresentBool.current,
+              ProposedVolumeLevelFromQuest.current,
+              maskerVolumeDbSPL.current,
+              whiteNoiseLevel.current,
+              soundGainDBSPL.current
+            );
+          }
           playAudioBuffer(trialSoundBuffer);
         },
         reading: () => {
@@ -2942,12 +3184,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //use google sheets phrases for instructions
       switchKind(targetKind.current, {
         sound: () => {
-          _instructionSetup(
-            instructionsText.trial.respond["sound"](rc.language.value)
-          );
-          instructions.setText(
-            instructionsText.trial.respond["sound"](rc.language.value)
-          );
+          const instr =
+            targetTask.current == "identify"
+              ? instructionsText.trial.respond["speechInNoise"](
+                  rc.language.value
+                )
+              : instructionsText.trial.respond["sound"](rc.language.value);
+          _instructionSetup(instr);
+          instructions.setText(instr);
         },
       });
       instructions.setAutoDraw(false);
@@ -3034,8 +3278,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         switchKind(targetKind.current, {
           sound: () => {
-            //only accepts y or n
-            validAns = ["y", "n"];
+            if (targetTask.current == "detect") {
+              //only accepts y or n
+              validAns = ["y", "n"];
+            }
           },
           reading: () => {
             // READING Only accepts SPACE
@@ -3089,6 +3335,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
       /* -------------------------------------------------------------------------- */
+      //speech in noise setup clickable characters
+      if (
+        targetKind.current == "sound" &&
+        targetTask.current == "identify" &&
+        speechInNoiseTargetList.current &&
+        speechInNoiseShowClickable.current
+      ) {
+        validAns = [""];
+        speechInNoiseShowClickable.current = false;
+        //console.log(speechInNoiseTargetList)
+        setupClickableCharacterSet(
+          speechInNoiseTargetList.current,
+          font.name,
+          "bottom",
+          showCharacterSetResponse,
+          null,
+          "",
+          "sound"
+        );
+      }
 
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
@@ -3102,8 +3368,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           simulated[status.block][status.block_condition])
       ) {
         if (
-          t >= timeWhenRespondable &&
-          key_resp.status === PsychoJS.Status.NOT_STARTED
+          targetKind.current === "sound" ||
+          (t >= timeWhenRespondable &&
+            key_resp.status === PsychoJS.Status.NOT_STARTED)
         ) {
           // keep track of start time/frame for later
           key_resp.tStart = t; // (not accounting for frame time here)
@@ -3152,6 +3419,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // Was this correct?
             if (key_resp.keys == correctAns.current) {
               // Play correct audio
+              console.log("was here");
               switchKind(targetKind.current, {
                 sound: () => {
                   correctSynth.play();
@@ -3252,7 +3520,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         t >= 0.0 &&
         fixation.status === PsychoJS.Status.NOT_STARTED &&
         fixationConfig.show &&
-        targetKind.current !== "sound"
+        targetKind.current !== "sound" &&
+        targetKind.current !== "vocoderPhrase"
       ) {
         logger("in *fixation* updates with stims", fixation.stims);
         // keep track of start time/frame for later
@@ -3453,6 +3722,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialRoutineEnd(snapshot) {
     return async function () {
       ////
+      speechInNoiseShowClickable.current = true;
       grid.current.hide(true);
 
       if (showConditionNameConfig.showTargetSpecs)

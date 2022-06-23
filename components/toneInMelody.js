@@ -1,132 +1,50 @@
-import JSZip from "jszip";
-import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 import mergeBuffers from "merge-audio-buffers";
+import {
+  setWaveFormToZeroDbSPL,
+  adjustSoundDbSPL,
+  audioCtx,
+  initSoundFiles,
+  loadVocoderPhraseSoundFiles,
+} from "./soundUtils";
+import {
+  getVocoderPhraseTrialData,
+  initVocoderPhraseSoundFiles,
+} from "./vocoderPhrase";
 
 var maskerList = {};
 var targetList = {};
-var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
 var whiteNoise;
 var whiteNoiseData;
-export const initSoundFiles = async (maskerFolderNames, targetFolderNames) => {
-  maskerList = {};
-  targetList = {};
-  //load maskers
-  await maskerFolderNames.map(async (name) => {
-    maskerList[name] = [];
-    //console.log(name);
-    await fetch(`folders/${name}.zip`)
-      .then((response) => {
-        return response.blob();
-      })
-      .then((data) => {
-        var Zip = new JSZip();
-        Zip.loadAsync(data).then((zip) => {
-          zip.forEach((relativePath, zipEntry) => {
-            maskerList[name].push(
-              zipEntry.async("arraybuffer").then((data) => {
-                return getAudioBufferFromArrayBuffer(data);
-              })
-            );
-          });
-        });
-      });
-  });
-  //console.log(await maskerList["IM_Melody_Masker_Sounds"])
-  //load target
-  targetFolderNames.map(async (name) => {
-    targetList[name] = [];
-    console.log(name);
-    await fetch(`folders/${name}.zip`)
-      .then((response) => {
-        return response.blob();
-      })
-      .then((data) => {
-        var Zip = new JSZip();
-        Zip.loadAsync(data).then((zip) => {
-          zip.forEach((relativePath, zipEntry) => {
-            targetList[name].push(
-              zipEntry.async("arraybuffer").then((data) => {
-                return getAudioBufferFromArrayBuffer(data);
-              })
-            );
-          });
-        });
-      });
-  });
 
-  // await fetch(`folders/${targetFolderName}.zip`)
-  //   .then((response) => {
-  //     return response.blob();
-  //   })
-  //   .then(async (data) => {
-  //     return Zip.loadAsync(data).then((zip) => {
-  //       var TargetSound;
-  //       zip.forEach((relativePath, zipEntry) => {
-  //         targetSound.push(
-  //           zipEntry.async("arraybuffer").then((data) => {
-  //             return getAudioBufferFromArrayBuffer(data);
-  //           })
-  //         );
-  //       });
-  //       return targetSound;
-  //     });
-  //   });
-
-  //console.log("target:", targetSound);
+export const initToneInMelodySoundFiles = async (trialsConditions) => {
+  // var x = await initVocoderPhraseSoundFiles(trialsConditions); //remove
+  // console.log("x",await x)
+  const blockFiles = await initSoundFiles(trialsConditions);
+  maskerList = blockFiles["maskers"];
+  targetList = blockFiles["target"];
 };
 
-const getAudioBufferFromArrayBuffer = (arrayBuffer) => {
-  return arrayBufferToAudioBuffer(arrayBuffer, audioCtx).then((audioBuffer) => {
-    return audioBuffer;
-  });
-};
-
-const setWaveFormToZeroDbSPL = (arr) => {
-  const rms = getRMSOfWaveForm(arr);
-  //normalize to 0 db spl
-  //by convention sound with a mean square of 1 is at 0 db
-  if (rms != 0) {
-    for (var i = 0; i < arr.length; i++) {
-      arr[i] = arr[i] / rms;
-    }
-  }
-
-  //don't change to:
-  //arr.forEach((elem) => elem / rms);
-  return arr;
-};
-
-const getRMSOfWaveForm = (arr) => {
-  const Squares = arr.map((val) => val * val);
-  const Sum = Squares.reduce((acum, val) => acum + val);
-  const Mean = Sum / arr.length;
-  return Math.sqrt(Mean);
-};
-
-const adjustSoundDbSPL = (arr, volumeDbSPL) => {
-  const gain = 10 ** (volumeDbSPL / 20);
-  for (var i = 0; i < arr.length; i++) {
-    arr[i] *= gain;
-  }
-  //don't change to:
-  //arr.forEach((elem) => elem * gain);
-  return arr;
-};
-
-export const getTrialData = async (
-  maskerFolderName,
-  targetFolderName,
+export const getToneInMelodyTrialData = async (
+  blockCondition,
   targetIsPresentBool,
   targetVolumeDbSPLFromQuest,
   maskerVolumDbSPL,
   whiteNoiseLevel,
   soundGainDBSPL
 ) => {
+  // await getVocoderPhraseTrialData(
+  //   blockCondition,
+  //   targetVolumeDbSPLFromQuest,
+  //   whiteNoiseLevel,
+  //   soundGainDBSPL,
+  //   maskerVolumDbSPL
+  // );
   //pick random masker
   var randomIndex = Math.floor(
-    Math.random() * maskerList[maskerFolderName].length
+    Math.random() * maskerList[blockCondition].length
   );
-  var trialMasker = await maskerList[maskerFolderName][randomIndex];
+  var trialMasker = await maskerList[blockCondition][randomIndex]["file"];
 
   //modify masker
   //console.log(trialMasker);
@@ -157,10 +75,8 @@ export const getTrialData = async (
     //pick and modify target
     //console.log(await targetSound);
     //trialTarget = await getAudioBufferFromArrayBuffer(await targetSound);
-    randomIndex = Math.floor(
-      Math.random() * targetList[targetFolderName].length
-    );
-    trialTarget = await targetList[targetFolderName][randomIndex];
+    randomIndex = Math.floor(Math.random() * targetList[blockCondition].length);
+    trialTarget = await targetList[blockCondition][randomIndex]["file"];
 
     //this implementation works as well
     // var trialTargetData = new Float32Array(trialTarget.length);
@@ -201,11 +117,4 @@ export const getTrialData = async (
   return targetIsPresentBool
     ? mergeBuffers([trialMasker, trialTarget, whiteNoise], audioCtx)
     : mergeBuffers([trialMasker, whiteNoise], audioCtx);
-};
-
-export const playAudioBuffer = (audioBuffer) => {
-  var source = audioCtx.createBufferSource();
-  source.buffer = audioBuffer;
-  source.connect(audioCtx.destination);
-  source.start();
 };
