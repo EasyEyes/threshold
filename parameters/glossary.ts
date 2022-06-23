@@ -531,7 +531,7 @@ export const GLOSSARY: Glossary = {
     name: "markingBlankingRadiusReTargetHeight",
     availability: "now",
     type: "numerical",
-    default: "0.2",
+    default: "1",
   },
   markingClippedToStimulusRectBool: {
     name: "markingClippedToStimulusRectBool",
