@@ -44,7 +44,7 @@
     "file-loader": "^6.2.0",
     "googleapis": "^104.0.0",
     "husky": "^8.0.1",
-    "lint-staged": "^13.0.2",
+    "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.3.1",
