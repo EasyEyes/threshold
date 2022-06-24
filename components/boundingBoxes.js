@@ -7,6 +7,7 @@ import {
   padWithWhitespace,
   Rectangle,
   stripWhitespacePadding,
+  toFixedNumber,
 } from "./utils.js";
 import { letterConfig } from "./global.js";
 
@@ -533,4 +534,11 @@ export const getRelativePosition = (
     stimBoundingBoxXY[1] +
       normalizedCharacterSetRect.centers[character][1] * height,
   ];
+};
+
+export const prettyPrintPsychojsBoundingBox = (bb) => {
+  return `height : ${toFixedNumber(bb.height, 0)},\
+  width : ${toFixedNumber(bb.width, 0)},\
+  x: ${toFixedNumber(bb.x)},\
+  y: ${toFixedNumber(bb.y)}`;
 };

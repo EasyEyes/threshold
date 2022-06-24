@@ -222,6 +222,7 @@ import {
   addBoundingBoxesToComponents,
   sizeAndPositionBoundingBoxes,
   updateBoundingBoxPolies,
+  prettyPrintPsychojsBoundingBox,
 } from "./components/boundingBoxes.js";
 
 // READING
@@ -635,10 +636,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     thisExperimentInfo["deviceBrowserVersion"] = rc.browserVersion.value;
     thisExperimentInfo["deviceLanguage"] = rc.userLanguage.value;
 
-    thisExperimentInfo["psychojsWindowDimensions"] = String(
-      psychoJS._window._size
-    );
-
+    thisExperimentInfo[
+      "psychojsWindowDimensions"
+    ] = `[${psychoJS._window._size.toString()}]`;
     // store frame rate of monitor if we can measure it successfully
     thisExperimentInfo["monitorFrameRate"] =
       psychoJS.window.getActualFrameRate();
@@ -2652,6 +2652,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ? padWithWhitespace(targetCharacter)
                 : targetCharacter;
               target.setText(targetText);
+              // TODO I don't think this distinction in how to scale target, based on targetSizeIsHeightBool, is (should be?) necessary.
+              //      In restrictSizeDeg, we calculate the heightPx corresponding to the desired height or width the scientist specifies.
+              //      I believe we should always be able to scale height to heightPx. -gus
               if (letterConfig.targetSizeIsHeightBool)
                 target.scaleToHeightPx(stimulusParameters.heightPx);
               else {
@@ -3311,7 +3314,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
             psychoJS.experiment.addData(
               "targetBoundingBox",
-              String(target.getBoundingBox(true))
+              prettyPrintPsychojsBoundingBox(target.getBoundingBox(true))
             );
             if (
               letterConfig.spacingRelationToSize === "ratio" &&
@@ -3319,11 +3322,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ) {
               psychoJS.experiment.addData(
                 "flanker1BoundingBox",
-                String(flanker1.getBoundingBox(true))
+                prettyPrintPsychojsBoundingBox(flanker1.getBoundingBox(true))
               );
               psychoJS.experiment.addData(
                 "flanker2BoundingBox",
-                String(flanker2.getBoundingBox(true))
+                prettyPrintPsychojsBoundingBox(flanker2.getBoundingBox(true))
               );
             }
             /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
