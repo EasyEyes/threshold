@@ -21,7 +21,8 @@ export function setupClickableCharacterSet(
   where,
   responseRegister,
   extraFunction = null,
-  extraCharClassName = ""
+  extraCharClassName = "",
+  targetKind = ""
 ) {
   const characterSetHolder = document.createElement("div");
   characterSetHolder.id = "characterSet-holder";
@@ -29,6 +30,14 @@ export function setupClickableCharacterSet(
 
   characterSetHolder.style.fontFamily = `"${font}"`;
   characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
+
+  if (targetKind == "sound") {
+    characterSetHolder.style.display = "grid";
+    //characterSetHolder.style.flexWrap = "wrap";
+    characterSetHolder.style.gridTemplateColumns = "repeat(4,20vw)";
+    characterSetHolder.style.gridTemplateRows = "repeat(7,7vh)";
+    characterSetHolder.style.gridAutoFlow = "column";
+  }
 
   getCharacterSetShowPos(characterSetHolder, where);
 

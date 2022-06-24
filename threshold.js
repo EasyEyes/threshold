@@ -89,6 +89,7 @@ import {
   ProposedVolumeLevelFromQuest,
   maskerVolumeDbSPL,
   soundGainDBSPL,
+  invertedImpulseResponse,
   whiteNoiseLevel,
   targetSoundFolder,
   maskerSoundFolder,
@@ -262,11 +263,19 @@ import { switchKind, switchTask } from "./components/blockTargetKind.js";
 import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
 import { getPavloviaProjectName, quitPsychoJS } from "./components/lifetime.js";
+
 import {
-  getTrialData,
-  initSoundFiles,
-  playAudioBuffer,
+  getToneInMelodyTrialData,
+  initToneInMelodySoundFiles,
 } from "./components/toneInMelody.js";
+
+import {
+  getSpeechInNoiseTrialData,
+  initSpeechInNoiseSoundFiles,
+} from "./components/speechInNoise.js";
+
+import { playAudioBufferWithImpulseResponseCalibration } from "./components/webAudio.js";
+
 import {
   checkSystemCompatibility,
   displayCompatibilityMessage,
@@ -716,24 +725,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     //initialize sound experiment files
     //edit - use list of sound targetKinds instead of sound
-    if (paramReader.read("targetKind", "__ALL_BLOCKS__").includes("sound")) {
-      //read masker andtarget sound folders
-      var MaskerFolders = paramReader.read(
-        "maskerSoundFolder",
-        "__ALL_BLOCKS__"
-      );
+    // if (paramReader.read("targetKind", "__ALL_BLOCKS__").includes("sound")) {
+    //   //read masker andtarget sound folders
+    //   var MaskerFolders = paramReader.read(
+    //     "maskerSoundFolder",
+    //     "__ALL_BLOCKS__"
+    //   );
 
-      var targetFolders = paramReader.read(
-        "targetSoundFolder",
-        "__ALL_BLOCKS__"
-      );
+    //   var targetFolders = paramReader.read(
+    //     "targetSoundFolder",
+    //     "__ALL_BLOCKS__"
+    //   );
 
-      //only unique folders
-      MaskerFolders = [...new Set(MaskerFolders)];
-      targetFolders = [...new Set(targetFolders)];
+    //   //only unique folders
+    //   MaskerFolders = [...new Set(MaskerFolders)];
+    //   targetFolders = [...new Set(targetFolders)];
 
-      await initSoundFiles(MaskerFolders, targetFolders);
-    }
+    //   await initSoundFiles(MaskerFolders, targetFolders);
+    // }
 
     fixation = new Fixation();
     // fixationConfig.stim = fixation;
@@ -2844,20 +2853,44 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       switchKind(targetKind.current, {
         sound: async () => {
-          //target is present half the time
-          targetIsPresentBool.current = Math.random() < 0.5;
-          correctAns.current = targetIsPresentBool.current ? "y" : "n";
-
-          var trialSoundBuffer = await getTrialData(
-            maskerSoundFolder.current,
-            targetSoundFolder.current,
-            targetIsPresentBool.current,
-            ProposedVolumeLevelFromQuest.current,
-            maskerVolumeDbSPL.current,
-            whiteNoiseLevel.current,
-            soundGainDBSPL.current
+          var trialSoundBuffer;
+          targetTask.current = paramReader.read(
+            "targetTask",
+            status.block_condition
           );
-          playAudioBuffer(trialSoundBuffer);
+          if (targetTask.current == "identify") {
+            const { targetList, trialSound, correctAnsIndex } =
+              await getSpeechInNoiseTrialData(
+                status.block_condition,
+                ProposedVolumeLevelFromQuest.current,
+                whiteNoiseLevel.current,
+                soundGainDBSPL.current
+              );
+
+            trialSoundBuffer = trialSound;
+            correctAns.current =
+              targetList[correctAnsIndex]["name"].toLowerCase();
+            speechInNoiseTargetList.current = targetList.map(
+              (target) => target["name"]
+            );
+            //console.log(speechInNoiseTargetList.current)
+            //console.log("correctAns", correctAns.current);
+            //console.log("targetList",targetList);
+          } else {
+            //target is present half the time
+            targetIsPresentBool.current = Math.random() < 0.5;
+            correctAns.current = targetIsPresentBool.current ? "y" : "n";
+
+            trialSoundBuffer = await getToneInMelodyTrialData(
+              status.block_condition,
+              targetIsPresentBool.current,
+              ProposedVolumeLevelFromQuest.current,
+              maskerVolumeDbSPL.current,
+              whiteNoiseLevel.current,
+              soundGainDBSPL.current
+            );
+          }
+          await playAudioBufferWithImpulseResponseCalibration(trialSoundBuffer);
         },
         reading: () => {
           readingSound.play();

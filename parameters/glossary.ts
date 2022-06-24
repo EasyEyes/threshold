@@ -306,6 +306,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  calibrateLoudspeakerBool: {
+    name: "calibrateLoudspeakerBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   calibrateScreenSizeBool: {
     name: "calibrateScreenSizeBool",
     availability: "now",

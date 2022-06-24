@@ -371,6 +371,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "calibrateLoudspeakerBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Requests sound calibration, using the participant's iPhone. Early exit if no iPhone is available.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "calibrateScreenSizeBool",
     availability: "now",
     example: "TRUE",
