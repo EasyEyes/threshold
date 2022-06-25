@@ -318,7 +318,6 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                       .then((data) => {
                         return getAudioBufferFromArrayBuffer(data);
                       });
-                    //console.log(audioData)
                     if (
                       targetList[condition["block_condition"]][Entryname[1]][
                         fileName[0]
@@ -366,7 +365,6 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
             });
           });
         });
-      // console.log(targetList);
     }
   });
 
