@@ -90,6 +90,7 @@ import {
   ProposedVolumeLevelFromQuest,
   maskerVolumeDbSPL,
   soundGainDBSPL,
+  invertedImpulseResponse,
   whiteNoiseLevel,
   targetSoundFolder,
   maskerSoundFolder,
@@ -270,7 +271,10 @@ import {
   getToneInMelodyTrialData,
   initToneInMelodySoundFiles,
 } from "./components/toneInMelody.js";
-import { playAudioBuffer } from "./components/soundUtils.js";
+import {
+  playAudioBuffer,
+  playAudioBufferWithImpulseResponseCalibration,
+} from "./components/soundUtils.js";
 import {
   getSpeechInNoiseTrialData,
   initSpeechInNoiseSoundFiles,
@@ -3091,7 +3095,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             soundGainDBSPL.current,
             maskerVolumeDbSPL.current
           );
-          playAudioBuffer(trialSound);
+          playAudioBufferWithImpulseResponseCalibration(
+            trialSound,
+            invertedImpulseResponse.current
+          );
           vocoderPhraseSoundFiles.current = undefined;
           vocoderPhraseSoundFiles.loaded = false;
         },
@@ -3130,7 +3137,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               soundGainDBSPL.current
             );
           }
-          playAudioBuffer(trialSoundBuffer);
+          playAudioBufferWithImpulseResponseCalibration(
+            trialSoundBuffer,
+            invertedImpulseResponse.current
+          );
         },
         reading: () => {
           readingSound.play();

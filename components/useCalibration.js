@@ -1,6 +1,7 @@
 import { phrases } from "./i18n";
 import { debug, ifTrue, loggerText } from "./utils";
-import { soundGainDBSPL, rc } from "./global";
+import { soundGainDBSPL, invertedImpulseResponse, rc } from "./global";
+import { GLOSSARY } from "../parameters/glossary.ts";
 
 export const useCalibration = (reader) => {
   return ifTrue([
@@ -47,6 +48,7 @@ export const formCalibrationList = (reader) => {
         check: reader.read("calibrateScreenSizeCheckBool")[0],
       },
     });
+
   if (ifTrue(reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__")))
     tasks.push({
       name: "measureDistance",
@@ -57,6 +59,7 @@ export const formCalibrationList = (reader) => {
         showCancelButton: false,
       },
     });
+
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({
@@ -77,6 +80,7 @@ export const formCalibrationList = (reader) => {
         showCancelButton: false,
       },
     });
+
   if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({
@@ -154,12 +158,23 @@ export const saveCheckData = (rc, psychoJS) => {
 };
 
 export const calibrateAudio = async (reader) => {
-  if (!ifTrue(reader.read("calibrateSoundLevelBool", "__ALL_BLOCKS__")))
-    return true;
+  const [calibrateSoundLevel, calibrateLoudspeaker] = [
+    ifTrue(
+      reader.read(GLOSSARY.calibrateSoundLevelBool.name, "__ALL_BLOCKS__")
+    ),
+    ifTrue(
+      reader.read(GLOSSARY.calibrateLoudspeakerBool.name, "__ALL_BLOCKS__")
+    ),
+  ];
+
+  if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
+
   return new Promise(async (resolve) => {
     const lang = rc.language.value;
     const copy = {
-      title: phrases.RC_soundCalibrationTitle[lang],
+      title: calibrateSoundLevel
+        ? phrases.RC_soundCalibrationTitle[lang]
+        : "Loudspeaker Level",
       soundCalibration: phrases.RC_soundCalibration[lang],
       neediPhone: phrases.RC_soundCalibrationNeedsIPhone[lang],
       yes: phrases.RC_soundCalibrationYes[lang],
@@ -169,57 +184,46 @@ export const calibrateAudio = async (reader) => {
       clickToStart: phrases.RC_soundCalibrationClickToStart[lang],
       done: phrases.RC_soundCalibrationDone[lang],
     };
+
     const elems = _addSoundCalibrationElems(copy);
+
     document.querySelector("#soundYes").addEventListener("click", async (e) => {
-      const speakerParameters = {
-        siteUrl: "https://hqjq0u.deta.dev",
-        targetElementId: "soundDisplay",
-      };
-      const calibratorParams = {
-        numCalibrationRounds: 2,
-        numCalibrationNodes: 2,
-        download: false,
-      };
-      const {
-        Speaker,
-        VolumeCalibration,
-        UnsupportedDeviceError,
-        MissingSpeakerIdError,
-        CalibrationTimedOutError,
-      } = speakerCalibrator;
       document.querySelector("#soundMessage").innerHTML = copy.qr;
-      document.querySelector("#soundYes").style.display = "none";
+      document.querySelector("#soundNavContainer").style.display = "none";
       document.querySelector("#soundNo").style.display = "none";
+
       try {
-        soundGainDBSPL.current = await Speaker.startCalibration(
-          speakerParameters,
-          VolumeCalibration,
-          calibratorParams
-        );
+        if (calibrateSoundLevel) {
+          await _runSoundLevelCalibration();
+        } else {
+          await _runLoudspeakerCalibration();
+        }
       } catch (e) {
-        if (e instanceof UnsupportedDeviceError) {
-          // Do something here
+        if (e instanceof speakerCalibrator.UnsupportedDeviceError) {
+          alert(`${e}: Your Movile Device is incompatiable with this test`);
+          resolve(false);
         }
-        if (e instanceof MissingSpeakerIdError) {
-          // Do something here
-        }
-        if (e instanceof CalibrationTimedOutError) {
-          // Do something here
+        if (e instanceof speakerCalibrator.CalibrationTimedOutError) {
+          alert(`${e}: Something went wrong during this step`);
+          resolve(false);
         }
       }
 
       elems.display.style.display = "none";
       elems.message.innerHTML =
         copy.done +
-        "\nMeasured soundGainDBSPL " +
-        String(soundGainDBSPL.current);
-      elems.yes.innerHTML = "Continue to experiment.";
+        (calibrateSoundLevel
+          ? "\nMeasured soundGainDBSPL " + String(soundGainDBSPL.current)
+          : "");
+      elems.yesButton.innerHTML = "Continue to experiment.";
+      document.querySelector("#soundNavContainer").style.display = "block";
       document.querySelector("#soundYes").style.display = "block";
-      elems.yes.addEventListener("click", async (e) => {
+      elems.yesButton.addEventListener("click", async (e) => {
         _removeSoundCalibrationElems(Object.values(elems));
         resolve(true);
       });
     });
+
     document.querySelector("#soundNo").addEventListener("click", (e) => {
       _removeSoundCalibrationElems(Object.values(elems));
       resolve(false);
@@ -227,64 +231,240 @@ export const calibrateAudio = async (reader) => {
   });
 };
 
+const _buildSoundCalibrationUI = (type = 0) => {
+  const lang = rc.language.value;
+  const elements = {
+    soundContainer: {
+      id: "soundContainer",
+      copy: null,
+      classList: ["popup"],
+    },
+    soundTitle: {
+      id: "soundTitle",
+      copy:
+        type == 0
+          ? phrases.RC_soundCalibrationTitle[lang]
+          : "Loudspeaker Calibration",
+    },
+    soundSubtitle: {
+      id: "soundSubtitle",
+      copy: phrases.RC_soundCalibration[lang],
+    },
+    soundMessage: {
+      id: "soundMessage",
+      copy: phrases.RC_soundCalibrationNeedsIPhone[lang],
+    },
+    soundDisplay: {
+      id: "soundDisplay",
+      copy: null,
+    },
+    soundNavContainer: {
+      id: "soundNavContainer",
+      copy: null,
+    },
+    soundYes: {
+      id: "soundYes",
+      copy: phrases.RC_soundCalibrationYes[lang],
+      classList: ["btn"],
+    },
+    soundNo: {
+      id: "soundNo",
+      copy: phrases.RC_soundCalibrationNo[lang],
+      classList: ["btn", "btn-primary"],
+    },
+  };
+  console.log(elements.soundYes.classList.join(" "));
+  const htmlString = `
+  <div id=${
+    elements.soundContainer.id
+  } class=${elements.soundContainer.classList.join(" ")}>
+    <h1 id=${elements.soundTitle.id}>${elements.soundTitle.copy}</h1>
+    <h2 id=${elements.soundSubtitle.id}>${elements.soundSubtitle.copy}</h2>
+    <p id=${elements.soundMessage.id}>${elements.soundMessage.copy}</p>
+    <div id=${elements.soundDisplay.id}></div>
+    <div id=${elements.soundNavContainer.id}>
+        <button id=${
+          elements.soundYes.id
+        } class=${elements.soundYes.classList.join(" ")}> ${
+    elements.soundYes.copy
+  } </button>
+        <button id=${
+          elements.soundNo.id
+        } class=${elements.soundNo.classList.join(" ")}> ${
+    elements.soundNo.copy
+  } </button>
+    </div>
+  </div>
+  `;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, "text/html");
+  return doc.body;
+};
+
 const _addSoundCalibrationElems = (copy) => {
   document.querySelector("#root").style.visibility = "hidden";
-  const titleElem = document.createElement("h1");
-  const messageElem = document.createElement("p");
+  const title = document.createElement("h1");
+  const subtitle = document.createElement("h2");
+  const background = document.createElement("div");
   const container = document.createElement("div");
-  const displayElem = document.createElement("div");
+  const message = document.createElement("div");
+  const display = document.createElement("div");
+  const navContainer = document.createElement("div");
   const yesButton = document.createElement("button");
   const noButton = document.createElement("button");
   const elems = {
-    title: titleElem,
-    message: messageElem,
-    display: displayElem,
-    yes: yesButton,
-    no: noButton,
-    container: container,
+    background,
+    title,
+    subtitle,
+    display,
+    navContainer,
+    yesButton,
+    noButton,
+    container,
+    message,
   };
 
-  titleElem.setAttribute("id", "soundTitle");
-  messageElem.setAttribute("id", "soundMessage");
+  title.setAttribute("id", "soundTitle");
+  subtitle.setAttribute("id", "soundSubtitle");
+  message.setAttribute("id", "soundMessage");
   container.setAttribute("id", "soundContainer");
-  displayElem.setAttribute("id", "soundDisplay");
+  background.setAttribute("id", "background");
+  display.setAttribute("id", "soundDisplay");
+  navContainer.setAttribute("id", "soundNavContainer");
   yesButton.setAttribute("id", "soundYes");
   noButton.setAttribute("id", "soundNo");
 
-  titleElem.innerHTML =
-    "<p>" + copy.soundCalibration + "</p><p>" + copy.title + "</p>";
-  messageElem.innerHTML = copy.neediPhone;
+  title.innerHTML = copy.soundCalibration;
+  subtitle.innerHTML = copy.title;
+  message.innerHTML = copy.neediPhone;
   yesButton.innerHTML = copy.yes;
   noButton.innerHTML = copy.no;
 
-  container.classList.add("popup");
+  background.classList.add(...["popup", "rc-panel"]);
+  container.classList.add(...["container"]);
+  yesButton.classList.add(...["btn", "btn-primary"]);
+  noButton.classList.add(...["btn", "btn-secondary"]);
 
-  container.appendChild(titleElem);
-  container.appendChild(messageElem);
-  container.appendChild(displayElem);
-  container.appendChild(yesButton);
-  container.appendChild(noButton);
-  document.body.appendChild(container);
+  background.appendChild(container);
+  container.appendChild(title);
+  container.appendChild(subtitle);
+  container.appendChild(message);
+  container.appendChild(navContainer);
+  navContainer.appendChild(yesButton);
+  navContainer.appendChild(noButton);
+  container.appendChild(display);
+  document.body.appendChild(background);
 
   _addSoundCss();
 
   return elems;
 };
+
 const _removeSoundCalibrationElems = (elems) => {
   Object.values(elems).forEach((elem) => elem.remove());
   document.querySelector("#root").style.visibility = "visible";
 };
+
 const _addSoundCss = () => {
   const styles = `
-  #soundContainer {
-    width: 100% - 2rem;
-    height: 100%;
+  #background {
+    width: 60%;
+    height: fit-content;
     margin: auto;
-  } `;
+  }
+  #soundContainer {
+    height: 100%;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  #soundContainer > * {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  #soundNavContainer > * {
+    margin-right: 10px;
+  }
+  #soundDisplay {
+    height: 200px;
+    display: flex;
+    justify-content: center;
+  }
+  #soundDisplay > * {
+    margin: auto;
+  }
+  #soundDisplay > div {
+    height: 90px;
+    width: 90px;
+  }
+  `;
   const styleSheet = document.createElement("style");
   styleSheet.innerText = styles;
   document.head.appendChild(styleSheet);
 };
+
+const _runSoundLevelCalibration = async () => {
+  const {
+    Speaker,
+    VolumeCalibration,
+    UnsupportedDeviceError,
+    MissingSpeakerIdError,
+    CalibrationTimedOutError,
+  } = speakerCalibrator;
+
+  const speakerParameters = {
+    siteUrl: "https://hqjq0u.deta.dev",
+    targetElementId: "soundDisplay",
+  };
+
+  const calibratorParams = {
+    numCalibrationRounds: 1,
+    numCalibrationNodes: 1,
+    download: false,
+  };
+
+  soundGainDBSPL.current = await Speaker.startCalibration(
+    speakerParameters,
+    VolumeCalibration,
+    calibratorParams
+  );
+};
+
+const _runLoudspeakerCalibration = async () => {
+  const {
+    Speaker,
+    ImpulseResponseCalibration,
+    UnsupportedDeviceError,
+    MissingSpeakerIdError,
+    CalibrationTimedOutError,
+  } = speakerCalibrator;
+
+  const speakerParameters = {
+    siteUrl: "https://hqjq0u.deta.dev",
+    targetElementId: "soundDisplay",
+  };
+
+  const calibratorParams = {
+    numCalibrationRounds: 3,
+    numCalibrationNodes: 3,
+    download: false,
+  };
+
+  const debug = false;
+
+  if (debug) {
+    invertedImpulseResponse.current = [
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    ];
+  } else {
+    invertedImpulseResponse.current = await Speaker.startCalibration(
+      speakerParameters,
+      ImpulseResponseCalibration,
+      calibratorParams
+    );
+  }
+};
+
 /* -------------------------------------------------------------------------- */
 
 const getCmValue = (numericalValue, unit) => {
