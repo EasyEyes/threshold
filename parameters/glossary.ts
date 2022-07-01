@@ -168,13 +168,13 @@ export const GLOSSARY: Glossary = {
     name: "_dateCreated",
     availability: "now",
     type: "date",
-    default: "NaN",
+    default: " ",
   },
   _dateModified: {
     name: "_dateModified",
     availability: "now",
     type: "date",
-    default: "NaN",
+    default: " ",
   },
   _debriefForm: {
     name: "_debriefForm",
@@ -468,7 +468,7 @@ export const GLOSSARY: Glossary = {
     name: "fontWeight",
     availability: "now",
     type: "numerical",
-    default: "NaN",
+    default: "",
   },
   instructionFont: {
     name: "instructionFont",
