@@ -137,7 +137,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "Optional date of creation. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "date",
-    default: "NaN",
+    default: " ",
     categories: "",
   },
   {
@@ -147,7 +147,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "Optional date of latest modification. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "date",
-    default: "NaN",
+    default: " ",
     categories: "",
   },
   {
@@ -628,7 +628,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "To control a variable font, accepts a numerical value to be assigned like this: \nmyText.style.fontWeight = fontWeight\nNOTE: If you use this parameter, then EasyEyes will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
     type: "numerical",
-    default: "NaN",
+    default: "",
     categories: "",
   },
   {
@@ -872,7 +872,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "sounds",
     explanation:
-      "The name of a folder of sound files, to be used when targetKind is sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of maskSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.]",
+      "The name of a folder of sound files (each file can be in WAV or AAC format), to be used when targetKind is sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of maskSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.] \n     Both WAV and AAC sound files can include multiple channels. Because of browser limitations, EasyEyes can use only up to 8 channels per file. The AAC files are much more compact (about 10% the bytes as WAV, depending on data rate) but lossy; they are as compact as MP3 files, and have much better sound quality. We suggest starting with WAV, and switching to AAC only if you experience an undesirably long delay in loading. That switch may reduce data quality slighly but will reduce your loading time ten-fold.",
     type: "text",
     default: "",
     categories: "",
@@ -1718,7 +1718,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "sounds",
     explanation:
-      "The name of a folder of sound files, to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+      "The name of a folder of sound files (each file can be in WAV or AAC format), to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
     type: "text",
     default: "",
     categories: "",
@@ -1955,7 +1955,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "viewingDistanceMaxForScreenHeightDeg places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. All three viewingDistanceMXXX parameters place bounds on viewing distance (cm). If viewingDistanceDesiredCm is nonzero then it sets the viewing distance, and if it's zero then viewing distance is a degree of freedom. Whether or not the viewing distance is set, EasyEyes rejects as incompatible any screen that cannot satisfy all the viewingDistanceXXX restrictions. The combination of viewingDistanceMaxXXX and viewingDistanceMinForTargetSizeDeg sets a lower bound on screen width and/or height in pixels, \nminWidthPx=viewingDistanceMaxForScreenWidthDeg*targetSizePx/viewingDistanceMinForTargetSizeDeg\nand\nminHeightPx=viewingDistanceMaxForScreenHeightDeg*targetSizePx/viewingDistanceMinForTargetSizeDeg\nwhich EasyEyes checks on its compatibility screen, before size calibration. Incompatibility with a particular viewingDistanceDesiredCm can only be discovered after size calibration.",
+      'viewingDistanceAllowedRatio must be positive, and specifies a tolerance interval around the desired viewing distance D. If viewingDistanceAllowedRatio>1, then the allowed range of viewing distance is D/viewingDistanceAllowedRatio to D*viewingDistanceAllowedRatio. If it\'s <1 then the allowed range of viewing distance is D*viewingDistanceAllowedRatio to D/viewingDistanceAllowedRatio. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, toward the desired viewing distance. We call that "nudging". A value of 0 allows all viewing distances. [CSV and Excel files do not allow Inf.]',
     type: "numerical",
     default: "0",
     categories: "",
