@@ -173,6 +173,7 @@ export const checkSystemCompatibility = (
       : Math.round(2 * computeRandomMHz)
   );
   msg = msg.replace(/Mac/g, "macOS");
+  msg = msg.replace(/OS X/g, "macOS");
   msg = msg.replace(/Microsoft Edge/g, "Edge");
 
   const describeDevice = msg;
