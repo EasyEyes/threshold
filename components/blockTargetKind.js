@@ -4,7 +4,15 @@ export const switchKind = (targetKind, mappings) => {
   if (typeof mappings[targetKind] === "string")
     return switchKind(mappings[targetKind], mappings);
 
-  const { reading, letter, gabor, image, sound, vocoderPhrase } = mappings;
+  const {
+    reading,
+    letter,
+    gabor,
+    image,
+    sound,
+    vocoderPhrase,
+    repeatedLetters,
+  } = mappings;
   switch (targetKind) {
     case "reading":
       safeExecuteFunc(reading);
@@ -22,6 +30,9 @@ export const switchKind = (targetKind, mappings) => {
       break;
     case "vocoderPhrase":
       safeExecuteFunc(vocoderPhrase);
+      break;
+    case "repeatedLetters":
+      safeExecuteFunc(repeatedLetters);
       break;
     default:
       break;

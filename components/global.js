@@ -110,7 +110,7 @@ export const fixationConfig = {
   markingFixationStrokeThicknessDeg: undefined,
   markingOffsetBeforeTargetOnsetSecs: undefined,
   markingOnsetAfterTargetOffsetSecs: undefined,
-  stim: undefined, // psychoJS shapeStim
+  stims: undefined, // psychoJS shapeStim
 };
 
 export const showConditionNameConfig = {
@@ -135,6 +135,11 @@ export const letterConfig = Object.seal({
   flankerCharacters: [undefined, undefined],
   delayBeforeStimOnsetSec: undefined,
   targetSafetyMarginSec: undefined,
+});
+
+export const repeatedLettersConfig = Object.seal({
+  targetRepeatsBorderCharacter: undefined,
+  targetRepeatsMaxLines: undefined,
 });
 
 export const instructionFont = { current: undefined };

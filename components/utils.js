@@ -296,6 +296,12 @@ export const addConditionToData = (
   }
 };
 
+export const addObjectItemsToData = (object, experiment) => {
+  for (const [name, value] of Object.entries(object)) {
+    experiment.addData(name, value);
+  }
+};
+
 export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
   // TODO What to do when data saving is rejected?
   if (currentLoop._currentStaircase) {

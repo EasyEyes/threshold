@@ -6,6 +6,29 @@ import {
   toFixedNumber,
 } from "./utils";
 
+export const readAllowedTolerances = (tolerances, reader, BC) => {
+  tolerances.allowed.thresholdAllowedDurationRatio = reader.read(
+    "thresholdAllowedDurationRatio",
+    BC
+  );
+  tolerances.allowed.thresholdAllowedGazeRErrorDeg = reader.read(
+    "thresholdAllowedGazeRErrorDeg",
+    BC
+  );
+  tolerances.allowed.thresholdAllowedGazeXErrorDeg = reader.read(
+    "thresholdAllowedGazeXErrorDeg",
+    BC
+  );
+  tolerances.allowed.thresholdAllowedGazeYErrorDeg = reader.read(
+    "thresholdAllowedGazeYErrorDeg",
+    BC
+  );
+  tolerances.allowed.thresholdAllowedLatencySec = reader.read(
+    "thresholdAllowedLatencySec",
+    BC
+  );
+};
+
 export const measureGazeError = (
   tolerances,
   displayOptions,

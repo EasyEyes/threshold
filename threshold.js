@@ -198,6 +198,7 @@ import { getTrialInfoStr } from "./components/trialCounter.js";
 import {
   generateCharacterSetBoundingRects,
   restrictLevel,
+  restrictRepeatedLettersSpacing,
 } from "./components/bounding.js";
 
 import { Grid } from "./components/grid.js";
@@ -254,12 +255,16 @@ import {
   calculateError,
   addResponseIfTolerableError,
   measureGazeError,
+  readAllowedTolerances,
 } from "./components/errorMeasurement.js";
 
 /* ---------------------------------- */
 // * TRIAL ROUTINES
 
-import { _identify_trialInstructionRoutineEnd } from "./components/trialRoutines.js";
+import {
+  _identify_trialInstructionRoutineEnd,
+  _letter_trialRoutineEachFrame,
+} from "./components/trialRoutines.js";
 
 /* ---------------------------------- */
 
@@ -305,6 +310,10 @@ import {
   updateBlockCompleted,
   updateCurrentBlockCondition,
 } from "./components/temporaryLogger.js";
+import {
+  readTrialLevelLetterParams,
+  readTrialLevelRepeatedLetterParams,
+} from "./components/letter.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -1124,6 +1133,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
+      repeatedLetters: () => {
+        if (
+          canType(responseType.current) &&
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+        ) {
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
     });
 
     return Scheduler.Event.FLIP_REPEAT;
@@ -1287,6 +1305,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               fixationConfig.show = true;
             },
+            repeatedLetters: () => {
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader
+              );
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                nTrials: totalTrialsThisBlock.current,
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+              });
+
+              fixationConfig.show = true;
+              logger("repeatedLetters trialsLoopBegin, trials", trials);
+            },
             sound: () => {
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
@@ -1417,7 +1454,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   async function trialsLoopEnd() {
     if (
       targetTask.current !== "questionAndAnswer" &&
-      (targetKind.current === "letter" || targetKind.current == "sound")
+      (targetKind.current === "letter" ||
+        targetKind.current == "sound" ||
+        targetKind.current === "repeatedLetters")
     ) {
       // Proportion correct
       showPopup(
@@ -1727,6 +1766,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 0
               );
             },
+            repeatedLetters: () => {
+              const possibleTrials = paramReader.read(
+                "conditionTrials",
+                status.block
+              );
+              totalTrialsThisBlock.current = possibleTrials.reduce(
+                (a, b) => a + b,
+                0
+              );
+              logger(
+                "repeatedLetters filterRoutineBegin got total trials this block"
+              );
+            },
           });
         },
       });
@@ -1878,6 +1930,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 totalTrialsThisBlock.current
               ) +
               instructionsText.initialEnd(L, responseType.current)
+          );
+        },
+        repeatedLetters: () => {
+          _instructionSetup(
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+              instructionsText.popularFeatures(
+                L,
+                paramReader.read("takeABreakTrialCredit", status.block)[0]
+              ) +
+              instructionsText.initialByThresholdParameter["spacing"](
+                L,
+                responseType.current,
+                totalTrialsThisBlock.current
+              ) +
+              instructionsText.initialEnd(L, responseType.current)
+          );
+          logger(
+            "repeatedLetters initInstructionRoutineBegin, after _isntructionSetup"
           );
         },
         reading: () => {
@@ -2207,7 +2277,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       TrialHandler.fromSnapshot(snapshot);
 
       const parametersToExcludeFromData = [];
+      const letterSetCondition = () => {
+        for (let c of snapshot.handler.getConditions()) {
+          if (c.block_condition === trials._currentStaircase._name) {
+            status.condition = c;
+            status.block_condition = status.condition["block_condition"];
+          }
+        }
 
+        // ! responseType
+        responseType.original = responseType.current;
+        responseType.current = getResponseType(
+          paramReader.read("responseClickedBool", status.block_condition),
+          paramReader.read("responseTypedBool", status.block_condition),
+          paramReader.read(
+            "responseTypedEasyEyesKeypadBool",
+            status.block_condition
+          ),
+          paramReader.read("responseSpokenBool", status.block_condition),
+          paramReader.read(
+            "responseMustClickCrosshairBool",
+            status.block_condition
+          )
+        );
+        logger("responseType", responseType);
+        if (canClick(responseType.current)) showCursor();
+      };
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           for (let c of snapshot.handler.getConditions()) {
@@ -2229,33 +2324,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.condition = snapshot.getCurrentTrial();
           status.block_condition = trials.thisTrial.block_condition;
         },
-        letter: () => {
-          for (let c of snapshot.handler.getConditions()) {
-            if (c.block_condition === trials._currentStaircase._name) {
-              status.condition = c;
-              console.log(status.condition, status.block_condition);
-              status.block_condition = status.condition["block_condition"];
-            }
-          }
-
-          // ! responseType
-          responseType.original = responseType.current;
-          responseType.current = getResponseType(
-            paramReader.read("responseClickedBool", status.block_condition),
-            paramReader.read("responseTypedBool", status.block_condition),
-            paramReader.read(
-              "responseTypedEasyEyesKeypadBool",
-              status.block_condition
-            ),
-            paramReader.read("responseSpokenBool", status.block_condition),
-            paramReader.read(
-              "responseMustClickCrosshairBool",
-              status.block_condition
-            )
-          );
-          logger("responseType", responseType);
-          if (canClick(responseType.current)) showCursor();
-        },
+        letter: letterSetCondition,
+        repeatedLetters: letterSetCondition,
       });
 
       addConditionToData(
@@ -2276,12 +2346,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       const reader = paramReader;
       const BC = status.block_condition;
+      logger("BC", BC);
 
       font.source = reader.read("fontSource", BC);
       font.name = reader.read("font", BC);
       font.padding = reader.read("fontPadding", BC);
       if (font.source === "file") font.name = cleanFontName(font.name);
-
       font.ltr = reader.read("fontLeftToRightBool", BC);
 
       showCounterBool = reader.read("showCounterBool", BC);
@@ -2509,10 +2579,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "[Screen Width] Using arbitrary screen width. Enable RC."
             );
 
-          // TODO check that we are actually trying to test for "spacing", not "size"
-
-          letterConfig.spacingDirection = reader.read("spacingDirection", BC);
-          letterConfig.spacingSymmetry = reader.read("spacingSymmetry", BC);
+          readTrialLevelLetterParams(reader, BC);
+          readAllowedTolerances(tolerances, reader, BC);
 
           validAns = String(reader.read("fontCharacterSet", BC))
             .toLowerCase()
@@ -2520,72 +2588,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
 
-          letterConfig.targetSizeIsHeightBool = reader.read(
-            "targetSizeIsHeightBool",
-            BC
-          );
           thresholdParameter = reader.read("thresholdParameter", BC);
-          letterConfig.targetMinimumPix = reader.read("targetMinimumPix", BC);
-          letterConfig.spacingOverSizeRatio = reader.read(
-            "spacingOverSizeRatio",
-            BC
-          );
-          letterConfig.spacingRelationToSize = reader.read(
-            "spacingRelationToSize",
-            BC
-          );
+
           showBoundingBox = reader.read("showBoundingBoxBool", BC) || false;
           showCharacterSetBoundingBox = reader.read(
             "showCharacterSetBoundingBoxBool",
-            BC
-          );
-
-          letterConfig.targetMinimumPix = reader.read("targetMinimumPix", BC);
-
-          const targetEccentricityXDeg = reader.read(
-            "targetEccentricityXDeg",
-            BC
-          );
-          psychoJS.experiment.addData(
-            "targetEccentricityXDeg",
-            targetEccentricityXDeg
-          );
-          const targetEccentricityYDeg = reader.read(
-            "targetEccentricityYDeg",
-            BC
-          );
-          psychoJS.experiment.addData(
-            "targetEccentricityYDeg",
-            targetEccentricityYDeg
-          );
-          letterConfig.targetEccentricityXYDeg = [
-            targetEccentricityXDeg,
-            targetEccentricityYDeg,
-          ];
-
-          letterConfig.thresholdParameter = reader.read(
-            "thresholdParameter",
-            BC
-          );
-
-          tolerances.allowed.thresholdAllowedDurationRatio = reader.read(
-            "thresholdAllowedDurationRatio",
-            BC
-          );
-          tolerances.allowed.thresholdAllowedGazeRErrorDeg = reader.read(
-            "thresholdAllowedGazeRErrorDeg",
-            BC
-          );
-          tolerances.allowed.thresholdAllowedGazeXErrorDeg = reader.read(
-            "thresholdAllowedGazeXErrorDeg",
-            BC
-          );
-          tolerances.allowed.thresholdAllowedGazeYErrorDeg = reader.read(
-            "thresholdAllowedGazeYErrorDeg",
-            BC
-          );
-          tolerances.allowed.thresholdAllowedLatencySec = reader.read(
-            "thresholdAllowedLatencySec",
             BC
           );
 
@@ -2878,6 +2885,57 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
         },
+        repeatedLetters: () => {
+          // Set up instructions
+          _instructionBeforeStimulusSetup(
+            instructionsText.trial.fixate["spacing"](
+              rc.language.value,
+              responseType.current
+            )
+          );
+
+          clickedContinue.current = false;
+          document.addEventListener("click", _takeFixationClick);
+          document.addEventListener("touchend", _takeFixationClick);
+
+          // Read relevant trial-level parameters (and save to letterConfig? repeatedLettersConfig?)
+          TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
+          readAllowedTolerances(tolerances, reader, BC);
+          readTrialLevelLetterParams(reader, BC);
+          readTrialLevelRepeatedLetterParams(reader, BC);
+
+          // Get level from quest
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+
+          // Constrain to fit on screen
+          [level, stimulusParameters] = restrictRepeatedLettersSpacing(
+            proposedLevel,
+            letterConfig.targetEccentricityXYDeg,
+            characterSetBoundingRects[BC]
+          );
+
+          // Generate stims to fill screen
+
+          // Update fixation
+          fixation.update(
+            paramReader,
+            BC,
+            100, // stimulusParameters.heightPx,
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+          );
+          fixationConfig.pos = fixationConfig.nominalPos;
+          fixation.setPos(fixationConfig.pos);
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
+          // fixation.setAutoDraw(true);
+
+          // Add stims to trialComponents
+          target.setText("repeatedLetters");
+          trialComponents = [];
+          trialComponents.push(...fixation.stims);
+          trialComponents.push(target);
+        },
       });
 
       /* --------------------------------- PUBLIC --------------------------------- */
@@ -2937,6 +2995,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
+      const letterEachFrame = () => {
+        // IDENTIFY
+        /* --- SIMULATED --- */
+        if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
+        /* --- /SIMULATED --- */
+        t = instructionsClock.getTime();
+        frameN = frameN + 1;
+
+        if (showConditionNameConfig.showTargetSpecs) {
+          targetSpecsConfig.pos[0] = -window.innerWidth / 2;
+          targetSpecsConfig.pos[1] = -window.innerHeight / 2;
+          if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
+            // keep track of start time/frame for later
+            targetSpecs.tStart = t; // (not accounting for frame time here)
+            targetSpecs.frameNStart = frameN; // exact frame index
+          }
+          targetSpecs.setAutoDraw(true);
+        }
+        if (fixationConfig.markingFixationMotionRadiusDeg > 0)
+          gyrateFixation(fixation, t, displayOptions);
+        fixation.setAutoDraw(true);
+      };
+
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           if (
@@ -2957,28 +3038,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         reading: () => {
           continueRoutine = false;
         },
-        letter: () => {
-          // IDENTIFY
-          /* --- SIMULATED --- */
-          if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
-          /* --- /SIMULATED --- */
-          t = instructionsClock.getTime();
-          frameN = frameN + 1;
-
-          if (showConditionNameConfig.showTargetSpecs) {
-            targetSpecsConfig.pos[0] = -window.innerWidth / 2;
-            targetSpecsConfig.pos[1] = -window.innerHeight / 2;
-            if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
-              // keep track of start time/frame for later
-              targetSpecs.tStart = t; // (not accounting for frame time here)
-              targetSpecs.frameNStart = frameN; // exact frame index
-            }
-            targetSpecs.setAutoDraw(true);
-          }
-          if (fixationConfig.markingFixationMotionRadiusDeg > 0)
-            gyrateFixation(fixation, t, displayOptions);
-          fixation.setAutoDraw(true);
-        },
+        letter: letterEachFrame,
+        repeatedLetters: letterEachFrame,
       });
 
       if (showConditionNameConfig.show) {
@@ -3075,6 +3136,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
             }
           }
+        },
+        repeatedLetters: () => {
+          _identify_trialInstructionRoutineEnd(
+            instructions,
+            _takeFixationClick,
+            fixation
+          );
         },
       });
 
@@ -3204,12 +3272,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
 
-          if (grid.current) grid.current.update();
+        },
+        repeatedLetters: () => {
+          // TODO Same as letter, factor out
+          // if (snapshot.getCurrentTrial().trialsVal)
+          //   logger("Level", snapshot.getCurrentTrial().trialsVal);
+          // logger("Index", snapshot.thisIndex);
 
-          // Turn off fixation at the start of `trialRoutine`
-          // fixation.setAutoDraw(false);
+          responseType.current = resetResponseType(
+            responseType.original,
+            responseType.current,
+            paramReader.read(
+              "responseMustClickCrosshairBool",
+              status.block_condition
+            )
+          );
         },
       });
+
+      if (grid.current) grid.current.update();
       ////
 
       //------Prepare to start Routine 'trial'-------
@@ -3330,6 +3411,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         letterTiming.trialFirstFrameSec = t;
 
+        const _letterAndRepeatedLetter = () => {
+          _letter_trialRoutineEachFrame();
+        };
         switchKind(targetKind.current, {
           sound: () => {
             if (targetTask.current == "detect") {
@@ -3344,48 +3428,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (!correctAns.current || correctAns.current !== "space")
               correctAns.current = "space";
           },
-          letter: () => {
-            if (
-              paramReader.read("calibrateTrackGazeBool", status.block_condition)
-            )
-              measureGazeError(
-                tolerances,
-                displayOptions,
-                clickedContinue.timestamps[
-                  clickedContinue.timestamps.length - 1
-                ],
-                letterConfig.targetDurationSec
-              );
-            /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
-            psychoJS.experiment.addData(
-              "targetBoundingBox",
-              prettyPrintPsychojsBoundingBox(target.getBoundingBox(true))
-            );
-            if (
-              letterConfig.spacingRelationToSize === "ratio" &&
-              thresholdParameter === "spacing"
-            ) {
-              psychoJS.experiment.addData(
-                "flanker1BoundingBox",
-                prettyPrintPsychojsBoundingBox(flanker1.getBoundingBox(true))
-              );
-              psychoJS.experiment.addData(
-                "flanker2BoundingBox",
-                prettyPrintPsychojsBoundingBox(flanker2.getBoundingBox(true))
-              );
-            }
-            /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
-
-            // ? Should allow for reading?
-            if (timing.clickToStimulusOnsetSec)
-              if (showConditionNameConfig.showTargetSpecs) {
-                showConditionNameConfig.targetSpecs += `\nclickToStimulusOnsetSec: ${
-                  Math.round(timing.clickToStimulusOnsetSec * 100000.0) / 100000
-                } [${isTimingOK(timing.clickToStimulusOnsetSec, 0.1)}]`;
-                targetSpecs.setText(showConditionNameConfig.targetSpecs);
-                showConditionName(conditionName, targetSpecs);
-              }
-          },
+          letter: () => {},
         });
       }
       /* -------------------------------------------------------------------------- */
@@ -3561,7 +3604,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current !== "sound" &&
         targetKind.current !== "vocoderPhrase"
       ) {
-        // logger("in *fixation* updates with stims", fixation.stims);
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index

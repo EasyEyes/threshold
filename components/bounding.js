@@ -4,6 +4,7 @@ import {
   displayOptions,
   fixationConfig,
   letterConfig,
+  repeatedLettersConfig,
   targetKind,
 } from "./global.js";
 
@@ -799,4 +800,267 @@ const getLargestBoundsRatio = (
   const largestBoundsRatio = Math.max(...Object.values(ratios));
   if (largestBoundsRatio <= 0) throw "Largest ratio is non-positive.";
   return largestBoundsRatio;
+};
+
+export const restrictRepeatedLettersSpacing = (
+  proposedLevel,
+  targetXYDeg,
+  characterSetRectPx
+) => {
+  // Calculate the extent of the screen
+  const screenLowerLeft = [
+    -displayOptions.window._size[0] / 2,
+    -displayOptions.window._size[1] / 2,
+  ];
+  const screenUpperRight = [
+    displayOptions.window._size[0] / 2,
+    displayOptions.window._size[1] / 2,
+  ];
+  const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
+
+  // Find pos of target in pixels
+  const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
+  logger("targetXYPx", targetXYPx);
+
+  // Calculate our implicated spacing
+  let spacingDeg = Math.pow(10, proposedLevel);
+  logger("spacingDeg", spacingDeg);
+
+  // Loop
+  for (const _ of [...new Array(200).keys()]) {
+    let sizeDeg, heightDeg, widthDeg, heightPx, widthPx;
+    // Get character sizes
+    logger("spacingRelationToSize", letterConfig.spacingRelationToSize);
+    switch (letterConfig.spacingRelationToSize) {
+      case "none":
+        // Use specified targetSizeDeg
+        sizeDeg = letterConfig.targetSizeDeg;
+        if (letterConfig.targetSizeIsHeightBool) {
+          heightDeg = sizeDeg;
+          const [, topPx] = XYPixOfXYDeg(
+            [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
+            displayOptions
+          );
+          const [, bottomPx] = XYPixOfXYDeg(
+            [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
+            displayOptions
+          );
+          heightPx = topPx - bottomPx;
+          widthPx =
+            (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
+        } else {
+          widthDeg = sizeDeg;
+          heightDeg =
+            widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
+          const [leftPx] = XYPixOfXYDeg(
+            [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
+            displayOptions
+          );
+          const [rightPx] = XYPixOfXYDeg(
+            [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
+            displayOptions
+          );
+          widthPx = rightPx - leftPx;
+          heightPx =
+            widthPx * (characterSetRectPx.height / characterSetRectPx.width);
+          heightDeg =
+            XYDegOfXYPix(
+              [targetXYPx[0], targetXYPx[1] + heightPx / 2],
+              displayOptions
+            )[1] -
+            XYDegOfXYPix(
+              [targetXYPx[0], targetXYPx[1] - heightPx / 2],
+              displayOptions
+            )[1];
+        }
+        break;
+      case "ratio":
+        // Use spacingDeg and spacingOverSizeRatio to set size.
+        logger("ratio");
+        sizeDeg = spacingDeg / letterConfig.spacingOverSizeRatio;
+        logger("spacingOverSizeRatio", letterConfig.spacingOverSizeRatio);
+        logger("sizeDeg", sizeDeg);
+
+        if (letterConfig.targetSizeIsHeightBool) {
+          heightDeg = sizeDeg;
+          const [, topPx] = XYPixOfXYDeg(
+            [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
+            displayOptions
+          );
+          const [, bottomPx] = XYPixOfXYDeg(
+            [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
+            displayOptions
+          );
+          // I think that this is how we should do things, ie the above code assumes that
+          // ascent == descent, ie that the center of the character is [x,y] with the top h/2 above
+          // [, topPx] = XYPixOfXYDeg(
+          //   [
+          //     targetXYDeg[0],
+          //     targetXYDeg[1] + heightDeg * characterSetRectPx.ascentToDescent,
+          //   ],
+          //   displayOptions
+          // );
+          // [, bottomPx] = XYPixOfXYDeg(
+          //   [
+          //     targetXYDeg[0],
+          //     targetXYDeg[1] -
+          //       heightDeg * (1 - characterSetRectPx.ascentToDescent),
+          //   ],
+          //   displayOptions
+          // );
+          heightPx = topPx - bottomPx;
+          logger("heightPx", heightPx);
+          widthPx =
+            (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
+          logger("widthPx", widthPx);
+        } else {
+          widthDeg = sizeDeg;
+          const [leftPx] = XYPixOfXYDeg(
+            [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
+            displayOptions
+          );
+          const [rightPx] = XYPixOfXYDeg(
+            [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
+            displayOptions
+          );
+          widthPx = rightPx - leftPx;
+          heightPx =
+            widthPx * (characterSetRectPx.height / characterSetRectPx.width);
+          heightDeg =
+            XYDegOfXYPix(
+              [targetXYPx[0], targetXYPx[1] + heightPx / 2],
+              displayOptions
+            )[1] -
+            XYDegOfXYPix(
+              [targetXYPx[0], targetXYPx[1] - heightPx / 2],
+              displayOptions
+            )[1];
+        }
+        break;
+      case "typographic":
+        throw "typographic spacingRelationToSize undefined when targetKind is repeatedLetters";
+    }
+    const approxSpacingPx =
+      XYPixOfXYDeg(
+        [targetXYDeg[0] + spacingDeg / 2, targetXYDeg[1]],
+        displayOptions
+      )[0] -
+      XYPixOfXYDeg(
+        [targetXYDeg[0] - spacingDeg / 2, targetXYDeg[1]],
+        displayOptions
+      )[0];
+
+    // At least three lines, up to targetRepeatsMaxLines
+    const possibleNumbersOfLines = [
+      ...new Array(
+        Math.max(1, repeatedLettersConfig.targetRepeatsMaxLines - 2)
+      ).keys(),
+    ]
+      .map((i) => i + 3)
+      .reverse();
+    logger("possibleNumbersOfLines", possibleNumbersOfLines);
+
+    let largestBoundsRatio;
+    for (const lineNumbers of possibleNumbersOfLines) {
+      const stimulusLocations = [];
+      // Calculate how many columns we can have.
+      const minimumColumn = 4;
+      let spaceAvailable = displayOptions.window._size[0];
+      let numberOfColumns = 0;
+      logger("widthPx", widthPx);
+      logger("approxSpacingPx", approxSpacingPx);
+      // while (spaceAvailable >= (2*widthPx + approxSpacingPx)) {
+      //   logger('numberOfColumns', numberOfColumns);
+      //   logger("spaceAvailable", spaceAvailable);
+      //   numberOfColumns += 1;
+      //   spaceAvailable -= widthPx + approxSpacingPx;
+      // }
+      numberOfColumns = Math.max(minimumColumn, numberOfColumns + 1);
+      logger("numberOfColumns", numberOfColumns);
+      logger("approxSpacingPx", approxSpacingPx);
+      logger("heightPx", heightPx);
+      logger("widthPx", widthPx);
+
+      // Calculate bounding box around field of stims
+      const stimuliFieldExtentXPx =
+        numberOfColumns * widthPx + (numberOfColumns - 1) * approxSpacingPx;
+      const stimuliFieldExtentYPx =
+        lineNumbers * heightPx + (lineNumbers - 1) * approxSpacingPx;
+      const lowerLeftOfStimFieldPx = [
+        targetXYPx[0] - stimuliFieldExtentXPx / 2,
+        targetXYPx[1] - stimuliFieldExtentYPx / 2,
+      ];
+      const upperRightOfStimFieldPx = [
+        targetXYPx[0] + stimuliFieldExtentXPx / 2,
+        targetXYPx[1] + stimuliFieldExtentYPx / 2,
+      ];
+      // const lowerLeftOfStimFieldPx = [
+      //   targetXYPx[0] - (1.5*approxSpacingPx) - (2*widthPx),
+      //   targetXYPx[1] - approxSpacingPx - (1.5*heightPx)];
+      // const upperRightOfStimFieldPx = [
+      //   targetXYPx[0] - (1.5*approxSpacingPx) - (2*widthPx),
+      //   targetXYPx[1] - approxSpacingPx - (1.5*heightPx)];
+      const stimulusFieldBoundingRectPx = new Rectangle(
+        lowerLeftOfStimFieldPx,
+        upperRightOfStimFieldPx
+      );
+      logger("stimulusFieldBoundingRectPx", stimulusFieldBoundingRectPx);
+
+      // Get largestBoundsRatio
+      largestBoundsRatio = getLargestBoundsRatio(
+        stimulusFieldBoundingRectPx,
+        screenRectPx,
+        targetXYPx,
+        "spacing",
+        letterConfig.spacingRelationToSize,
+        widthPx,
+        heightPx
+      );
+      logger("largestBoundsRatio", largestBoundsRatio);
+      // Set largestBoundsRatio to some max, so we don't dwarf the value of spacingDeg
+      largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
+
+      // Return level, { targetHeightPx, sizeDeg, spacingDeg, lineNumbers, [{type: pos}]}
+      if (largestBoundsRatio <= 1) {
+        // Find the location, and type, of each stimulus
+        for (const rowId of [...new Array(lineNumbers)]) {
+          const yPointer =
+            displayOptions.window._size[1] / 2 -
+            Math.round(heightPx / 2 + rowId * approxSpacingPx);
+          let xPointer =
+            displayOptions.window._size[0] / -2 + Math.round(widthPx / 2);
+          for (const columnId of [...new Array(numberOfColumns)]) {
+            const currentCharacterType =
+              rowId === 0 ||
+              rowId === lineNumbers - 1 ||
+              columnId === 0 ||
+              columnId === numberOfColumns - 1
+                ? "border"
+                : (columnId + (rowId % 2 === 0 ? 0 : 1)) % 2 == 0
+                ? "target1"
+                : "target2";
+            stimulusLocations.push({
+              type: currentCharacterType,
+              pos: [xPointer, yPointer],
+            });
+            xPointer += approxSpacingPx;
+          }
+        }
+        const stimulusParameters = {
+          widthPx: Math.round(widthPx),
+          heightPx: Math.round(heightPx),
+          stimulusLocations: stimulusLocations,
+          sizeDeg: sizeDeg,
+          spacingDeg: spacingDeg,
+          heightDeg: heightDeg,
+        };
+        return [Math.log10(spacingDeg), stimulusParameters];
+      }
+    }
+    // Calculate new spacing, ie spacing/largestBoundsRatio
+    logger("spacingDeg before largestBounds", spacingDeg);
+    spacingDeg = spacingDeg / largestBoundsRatio;
+    logger("largestBoundsRatio", largestBoundsRatio);
+    logger("spacingDeg after largestBounds", spacingDeg);
+  }
 };
