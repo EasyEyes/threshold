@@ -126,6 +126,7 @@ export const letterConfig = Object.seal({
   targetSizeDeg: undefined,
   targetCharacter: undefined,
   targetEccentricityXYDeg: [undefined, undefined],
+  thresholdParameter: undefined,
   spacingDirection: undefined,
   spacingSymmetry: undefined,
   spacingOverSizeRatio: undefined,

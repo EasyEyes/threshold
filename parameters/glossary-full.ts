@@ -93,7 +93,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "_compileAsNewExperimentBool",
     availability: "later",
-    example: "",
+    example: "FALSE",
     explanation:
       "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without institutional Pavlovia licenses. When TRUE, when you compile an experiment, EasyEyes appends the smallest possible integer (no less than 1) that creates an unused (unique) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users who need tokens, Pavlovia requires that tokens be assigned to a specific experiment (repo). For them, every time we change the repo name, they must visit Pavlovia to reassign tokens. They might prefer to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the datafiles will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists need to shift tokens only the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting pavlovia, until the experiment runs out of tokens. Alas, this flag won't help PILOTING mode, which can only be used from within Pavlovia. Some users might like _compileAsNewExperimentBool FALSE to avoid the huge proliferation of repos. ",
     type: "boolean",
@@ -295,7 +295,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "The scientist must know, or guess, whether Prolific is in Workspace mode or not. If your experiment table includes a _prolificProjectID number then EasyEyes will use it and call Prolific in workspace mode. If _prolificProjectID is empty or absent, then EasyEyes will call Prolific in pre-workspace mode. Note that Prolific is locked into one mode or the other. (Prolific can be switched into Workspace mode, but can never be switched back to pre-Workspace mode.) If we call Prolific in the wrong mode, the call fails to transfer vital information for our study. Currently EasyEyes can't tell what mode Prolific is in, and expects the scientist to know and to include, or not include, the _prolificProjectID accordingly. So if you arrive in Prolific, and find Prolific ignorant of our study, you probably guessed wrong about Prolific's mode. It's easy to tell Prolific's mode while you're in it. The scientist can run all studies with the same _prolificProjectID, or have several projects and choose the right one for each study. ",
+      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _prolificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _prolificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, you can switch your Prolific into Workspace mode, but you can never switch it back to pre-Workspace mode.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
     type: "text",
     default: "",
     categories: "",
@@ -832,7 +832,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "markTheFixationBool",
     availability: "now",
-    example: "TRUE",
+    example: "",
     explanation: "If markTheFixationBool is TRUE, then draw a fixation cross.",
     type: "boolean",
     default: "TRUE",
@@ -841,7 +841,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "markThePossibleTargetsBool",
     availability: "now",
-    example: "FALSE",
+    example: "",
     explanation:
       "If markThePossibleTargetsBool is TRUE, draw an X at every possible target location, considering all conditions in this conditionGroup. ",
     type: "boolean",
@@ -872,7 +872,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "sounds",
     explanation:
-      "The name of a folder of sound files (each file can be in WAV or AAC format), to be used when targetKind is sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of maskSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.] \n     Both WAV and AAC sound files can include multiple channels. Because of browser limitations, EasyEyes can use only up to 8 channels per file. The AAC files are much more compact (about 10% the bytes as WAV, depending on data rate) but lossy; they are as compact as MP3 files, and have much better sound quality. We suggest starting with WAV, and switching to AAC only if you experience an undesirably long delay in loading. That switch may reduce data quality slighly but will reduce your loading time ten-fold.",
+      "The name of a folder of sound files (each file can be in WAV or AAC format), to be used when targetKind is sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of maskSoundFolder. See targetSoundFolder for comments on the WAV and ACC file formats.",
     type: "text",
     default: "",
     categories: "",
@@ -1718,7 +1718,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "sounds",
     explanation:
-      "The name of a folder of sound files (each file can be in WAV or AAC format), to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+      "The name of a folder of sound files (each file can be in WAV or AAC format), to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the directly enclosed files, while ignoring any subfolders and their contents.]\n    Both WAV and AAC sound files can include multiple channels. Because of browser limitations, EasyEyes can use only up to 8 channels per file. AAC files are much more compact (about 10% the bytes as WAV, depending on data rate) but lossy. AAC files are as compact as MP3 files, with much better sound quality. We suggest starting with WAV, and switching to AAC only if you experience an undesirably long delay in loading your sounds. Switching to AAC will reduce your loading time ten-fold (or more, depending on data rate), but may reduce the sound quality slightly.",
     type: "text",
     default: "",
     categories: "",

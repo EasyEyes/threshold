@@ -2551,6 +2551,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "targetSafetyMarginSec",
             BC
           );
+          letterConfig.thresholdParameter = reader.read(
+            "thresholdParameter",
+            BC
+          );
 
           tolerances.allowed.thresholdAllowedDurationRatio = reader.read(
             "thresholdAllowedDurationRatio",
@@ -2635,7 +2639,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulusParameters.heightPx,
             stimulusParameters.targetAndFlankersXYPx[0]
           );
-          fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
 
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
@@ -3040,6 +3043,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _takeFixationClick,
             fixation
           );
+          if (fixationConfig.markingFixationMotionRadiusDeg) {
+            const targetNominalPos = target.getPos();
+            const fixationDisplacement = [
+              fixationConfig.pos[0] - fixationConfig.nominalPos[0],
+              fixationConfig.pos[1] - fixationConfig.nominalPos[1],
+            ];
+            const offsetTargetPos = [
+              targetNominalPos[0] + fixationDisplacement[0],
+              targetNominalPos[1] + fixationDisplacement[1],
+            ];
+            target.setPos(offsetTargetPos);
+            if (
+              letterConfig.spacingRelationToSize !== "typographic" &&
+              letterConfig.thresholdParameter === "spacing"
+            ) {
+              for (const flanker of [flanker1, flanker2]) {
+                const flankerNominalPos = flanker.getPos();
+                flanker.setPos([
+                  flankerNominalPos[0] + fixationDisplacement[0],
+                  flankerNominalPos[1] + fixationDisplacement[1],
+                ]);
+              }
+            }
+          }
         },
       });
 
@@ -3732,6 +3759,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ////
       speechInNoiseShowClickable.current = true;
       grid.current.hide(true);
+
+      if (fixationConfig.nominalPos)
+        fixationConfig.pos = fixationConfig.nominalPos;
 
       if (showConditionNameConfig.showTargetSpecs)
         targetSpecs.setAutoDraw(false);
