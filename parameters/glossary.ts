@@ -142,7 +142,7 @@ export const GLOSSARY: Glossary = {
   },
   _compileAsNewExperimentBool: {
     name: "_compileAsNewExperimentBool",
-    availability: "later",
+    availability: "now",
     type: "boolean",
     default: "TRUE",
   },
@@ -437,6 +437,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "TRUE",
+  },
+  fontPadding: {
+    name: "fontPadding",
+    availability: "now",
+    type: "text",
+    default: "",
   },
   fontPadTextToAvoidClippingBool: {
     name: "fontPadTextToAvoidClippingBool",

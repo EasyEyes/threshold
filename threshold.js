@@ -3188,6 +3188,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             )
           );
+
+          if (grid.current) grid.current.update();
+
           // Turn off fixation at the start of `trialRoutine`
           // fixation.setAutoDraw(false);
         },

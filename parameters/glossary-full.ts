@@ -92,7 +92,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "_compileAsNewExperimentBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
       "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without institutional Pavlovia licenses. When TRUE, when you compile an experiment, EasyEyes appends the smallest possible integer (no less than 1) that creates an unused (unique) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users who need tokens, Pavlovia requires that tokens be assigned to a specific experiment (repo). For them, every time we change the repo name, they must visit Pavlovia to reassign tokens. They might prefer to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the datafiles will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists need to shift tokens only the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting pavlovia, until the experiment runs out of tokens. Alas, this flag won't help PILOTING mode, which can only be used from within Pavlovia. Some users might like _compileAsNewExperimentBool FALSE to avoid the huge proliferation of repos. ",
@@ -582,11 +582,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontPadding",
+    availability: "now",
+    example: "",
+    explanation:
+      'fontPadding is a string consisting of white space, an "x", and more white space. When fontPadTextToAvoidClippingBool is TRUE, EasyEyes uses the fontPadding string to pad every stimulus string with white space to avoid clipping. EasyEyes replaces the "x" in the fontPadding string by whatever text is supposed to be displayed. Originally the default string was \n<RETURN> <SPACE> x <SPACE> <RETURN>. The displacement caused by the padding is measured in advance, and taken into account, so text appears at the desired location.',
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "fontPadTextToAvoidClippingBool",
     availability: "now",
     example: "FALSE",
     explanation:
-      "fontPadTextToAvoidClippingBool (default TRUE) when TRUE asks EasyEyes to pad every stimulus string with white space to avoid clipping. The padding consists of a carriage return and a space, both before and after. The displacement caused by the padding is measured in advance, and taken into account, so text appears at the desired location.",
+      "fontPadTextToAvoidClippingBool (default TRUE) when TRUE asks EasyEyes to use fontPadding to pad every stimulus string, befire and after, with white space to avoid clipping. The padding originally consisted of a carriage return and a space, both before and after. The displacement caused by the padding is measured in advance, and taken into account, so text appears at the desired location.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -606,7 +616,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "later",
     example: "bold",
     explanation:
-      'fontSyle IS NOT YET IMPLEMENTED. Can be regular (default), bold, italic, or bold-italic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
+      'NOT YET IMPLEMENTED. fontSyle can be regular (default), bold, italic, or bold-italic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
     type: "categorical",
     default: "regular",
     categories: "regular, bold, italic, boldItalic",
@@ -1329,7 +1339,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "deg",
     explanation:
-      "showGrid displays a full-screen grid that aids visual checking of location and size. Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. ",
+      "showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially after a moving crosshair, which might compromise stimulus timing. So turn off grids when you collect human data and when you check timing.",
     type: "categorical",
     default: "disabled",
     categories: "px, cm, deg, mm, none, disabled",
