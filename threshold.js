@@ -2652,7 +2652,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           switch (thresholdParameter) {
             case "size":
               targetText = letterConfig.padText
-                ? padWithWhitespace(targetCharacter)
+                ? padWithWhitespace(
+                    targetCharacter,
+                    paramReader.read("fontPadding", BC)
+                  )
                 : targetCharacter;
               target.setText(targetText);
               // TODO I don't think this distinction in how to scale target, based on targetSizeIsHeightBool, is (should be?) necessary.
@@ -2679,7 +2682,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
                   targetText = letterConfig.padText
-                    ? padWithWhitespace(targetCharacter)
+                    ? padWithWhitespace(
+                        targetCharacter,
+                        paramReader.read("fontPadding", BC)
+                      )
                     : targetCharacter;
                   target.setText(targetText);
 
@@ -2694,10 +2700,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                   var flankersHeightPx = target.getHeight();
                   const f1Text = letterConfig.padText
-                    ? padWithWhitespace(firstFlankerCharacter)
+                    ? padWithWhitespace(
+                        firstFlankerCharacter,
+                        paramReader.read("fontPadding", BC)
+                      )
                     : firstFlankerCharacter;
                   const f2Text = letterConfig.padText
-                    ? padWithWhitespace(secondFlankerCharacter)
+                    ? padWithWhitespace(
+                        secondFlankerCharacter,
+                        paramReader.read("fontPadding", BC)
+                      )
                     : secondFlankerCharacter;
 
                   flanker1.setFont(font.name);
@@ -2744,7 +2756,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     secondFlankerCharacter;
 
                   targetText = letterConfig.padText
-                    ? padWithWhitespace(tripletCharacters)
+                    ? padWithWhitespace(
+                        tripletCharacters,
+                        paramReader.read("fontPadding", BC)
+                      )
                     : tripletCharacters;
                   target.setText(targetText);
 

@@ -87,7 +87,8 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
           characterSet,
           boundingConfig,
           psychoJS,
-          padText
+          padText,
+          reader.read("fontPadding", cond)
         );
     }
   }
@@ -102,12 +103,14 @@ const getDisplayCharacterSetBoundingPolies = (
   characterSet,
   boundingConfig,
   psychoJS,
-  padText
+  padText,
+  fontPadding
 ) => {
   const [polies, characters] = [[], []];
   for (const character of characterSet) {
-    logger("letterConfig.padText in getDisplayCharacter", letterConfig.padText);
-    const text = padText ? padWithWhitespace(character) : character;
+    const text = padText
+      ? padWithWhitespace(character, fontPadding)
+      : character;
     logger("character", character);
     logger("text", text);
     characters.push(

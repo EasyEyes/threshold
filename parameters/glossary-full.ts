@@ -586,7 +586,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'fontPadding is a string consisting of white space, an "x", and more white space. When fontPadTextToAvoidClippingBool is TRUE, EasyEyes uses the fontPadding string to pad every stimulus string with white space to avoid clipping. EasyEyes replaces the "x" in the fontPadding string by whatever text is supposed to be displayed. Originally the default string was \n<RETURN> <SPACE> x <SPACE> <RETURN>. The displacement caused by the padding is measured in advance, and taken into account, so text appears at the desired location.',
+      'fontPadding is a string consisting of white space, an "x", and more white space. When fontPadTextToAvoidClippingBool is TRUE, EasyEyes uses the fontPadding string to pad every stimulus string with white space to avoid clipping. EasyEyes replaces the "x" in the fontPadding string by whatever text is supposed to be displayed. Originally the default string was \n<RETURN> <SPACE> x <SPACE> <RETURN>.  The whitespace is ignored internally by our modifications to psychoJS, so text appears at the desired location.',
     type: "text",
     default: "",
     categories: "",
@@ -596,7 +596,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "fontPadTextToAvoidClippingBool (default TRUE) when TRUE asks EasyEyes to use fontPadding to pad every stimulus string, befire and after, with white space to avoid clipping. The padding originally consisted of a carriage return and a space, both before and after. The displacement caused by the padding is measured in advance, and taken into account, so text appears at the desired location.",
+      "fontPadTextToAvoidClippingBool (default TRUE) when TRUE asks EasyEyes to use fontPadding to pad every stimulus string, befire and after, with white space to avoid clipping. The padding originally consisted of a carriage return and a space, both before and after. The whitespace is ignored internally by our modifications to psychoJS, so text appears at the desired location.",
     type: "boolean",
     default: "TRUE",
     categories: "",
