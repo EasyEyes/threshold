@@ -142,7 +142,7 @@ export const GLOSSARY: Glossary = {
   },
   _compileAsNewExperimentBool: {
     name: "_compileAsNewExperimentBool",
-    availability: "later",
+    availability: "now",
     type: "boolean",
     default: "TRUE",
   },
@@ -168,13 +168,13 @@ export const GLOSSARY: Glossary = {
     name: "_dateCreated",
     availability: "now",
     type: "date",
-    default: "NaN",
+    default: " ",
   },
   _dateModified: {
     name: "_dateModified",
     availability: "now",
     type: "date",
-    default: "NaN",
+    default: " ",
   },
   _debriefForm: {
     name: "_debriefForm",
@@ -438,6 +438,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  fontPadding: {
+    name: "fontPadding",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   fontPadTextToAvoidClippingBool: {
     name: "fontPadTextToAvoidClippingBool",
     availability: "now",
@@ -468,7 +474,7 @@ export const GLOSSARY: Glossary = {
     name: "fontWeight",
     availability: "now",
     type: "numerical",
-    default: "NaN",
+    default: "",
   },
   instructionFont: {
     name: "instructionFont",

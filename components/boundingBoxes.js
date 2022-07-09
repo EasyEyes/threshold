@@ -7,6 +7,7 @@ import {
   padWithWhitespace,
   Rectangle,
   stripWhitespacePadding,
+  toFixedNumber,
 } from "./utils.js";
 import { letterConfig } from "./global.js";
 
@@ -86,7 +87,8 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
           characterSet,
           boundingConfig,
           psychoJS,
-          padText
+          padText,
+          reader.read("fontPadding", cond)
         );
     }
   }
@@ -101,12 +103,14 @@ const getDisplayCharacterSetBoundingPolies = (
   characterSet,
   boundingConfig,
   psychoJS,
-  padText
+  padText,
+  fontPadding
 ) => {
   const [polies, characters] = [[], []];
   for (const character of characterSet) {
-    logger("letterConfig.padText in getDisplayCharacter", letterConfig.padText);
-    const text = padText ? padWithWhitespace(character) : character;
+    const text = padText
+      ? padWithWhitespace(character, fontPadding)
+      : character;
     logger("character", character);
     logger("text", text);
     characters.push(
@@ -533,4 +537,11 @@ export const getRelativePosition = (
     stimBoundingBoxXY[1] +
       normalizedCharacterSetRect.centers[character][1] * height,
   ];
+};
+
+export const prettyPrintPsychojsBoundingBox = (bb) => {
+  return `height : ${toFixedNumber(bb.height, 0)},\
+  width : ${toFixedNumber(bb.width, 0)},\
+  x: ${toFixedNumber(bb.x)},\
+  y: ${toFixedNumber(bb.y)}`;
 };

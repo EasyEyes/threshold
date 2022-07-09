@@ -464,8 +464,12 @@ export const restrictSpacingDeg = (
         break;
       case "ratio":
         // Use spacingDeg and spacingOverSizeRatio to set size.
-        // NOTE for foveal targets (ie norm(targetXYDeg) == 0), inner vs outer flanker distinction is undefined
-        if (spacingForRatioIsOuterBool || norm(targetXYDeg) === 0) {
+        // NOTE for foveal targets (ie norm(targetXYDeg) == 0), or targets with tangential flankers, inner vs outer flanker distinction is undefined
+        if (
+          spacingForRatioIsOuterBool ||
+          norm(targetXYDeg) === 0 ||
+          letterConfig.spacingDirection !== "radial"
+        ) {
           sizeDeg = spacingDeg / spacingOverSizeRatio;
         } else {
           var eccDeg = norm(targetXYDeg); //target eccentricity in Deg

@@ -727,16 +727,23 @@ export const psychojsUnitsFromWindowUnits = (
   return [xPx, yPx];
 };
 
-export const padWithWhitespace = (s) => {
-  if (s.split("").includes("\u200B")) logger("string already padded!", s);
-  return `\n\u200B\u202F${s}\u202F\u200B\n`;
+export const padWithWhitespace = (s, fontPadding) => {
+  if (fontPadding) {
+    const paddingStrings = fontPadding.split("x");
+    const paddedS = `${paddingStrings[0]}${s}${paddingStrings[1]}`;
+    return paddedS;
+  }
+  const paddedS = `${"\u00A0".repeat(3)}\n\u00A0${s}\u00A0\n${"\u00A0".repeat(
+    3
+  )}`;
+  return paddedS;
 };
 
 export const stripWhitespacePadding = (s) => {
   return s
     .trim()
     .split("")
-    .filter((c) => !["\u202F", "\u200B"].includes(c))
+    .filter((c) => !["\u00A0", "\u202F", "\u200B", "."].includes(c))
     .join("")
     .trim();
 };

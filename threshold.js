@@ -222,6 +222,7 @@ import {
   addBoundingBoxesToComponents,
   sizeAndPositionBoundingBoxes,
   updateBoundingBoxPolies,
+  prettyPrintPsychojsBoundingBox,
 } from "./components/boundingBoxes.js";
 
 // READING
@@ -635,10 +636,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     thisExperimentInfo["deviceBrowserVersion"] = rc.browserVersion.value;
     thisExperimentInfo["deviceLanguage"] = rc.userLanguage.value;
 
-    thisExperimentInfo["psychojsWindowDimensions"] = String(
-      psychoJS._window._size
-    );
-
+    thisExperimentInfo[
+      "psychojsWindowDimensions"
+    ] = `[${psychoJS._window._size.toString()}]`;
     // store frame rate of monitor if we can measure it successfully
     thisExperimentInfo["monitorFrameRate"] =
       psychoJS.window.getActualFrameRate();
@@ -2551,6 +2551,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "targetSafetyMarginSec",
             BC
           );
+          letterConfig.thresholdParameter = reader.read(
+            "thresholdParameter",
+            BC
+          );
 
           tolerances.allowed.thresholdAllowedDurationRatio = reader.read(
             "thresholdAllowedDurationRatio",
@@ -2635,7 +2639,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulusParameters.heightPx,
             stimulusParameters.targetAndFlankersXYPx[0]
           );
-          fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
 
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
@@ -2649,9 +2652,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           switch (thresholdParameter) {
             case "size":
               targetText = letterConfig.padText
-                ? padWithWhitespace(targetCharacter)
+                ? padWithWhitespace(
+                    targetCharacter,
+                    paramReader.read("fontPadding", BC)
+                  )
                 : targetCharacter;
               target.setText(targetText);
+              // TODO I don't think this distinction in how to scale target, based on targetSizeIsHeightBool, is (should be?) necessary.
+              //      In restrictSizeDeg, we calculate the heightPx corresponding to the desired height or width the scientist specifies.
+              //      I believe we should always be able to scale height to heightPx. -gus
               if (letterConfig.targetSizeIsHeightBool)
                 target.scaleToHeightPx(stimulusParameters.heightPx);
               else {
@@ -2673,7 +2682,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
                   targetText = letterConfig.padText
-                    ? padWithWhitespace(targetCharacter)
+                    ? padWithWhitespace(
+                        targetCharacter,
+                        paramReader.read("fontPadding", BC)
+                      )
                     : targetCharacter;
                   target.setText(targetText);
 
@@ -2688,10 +2700,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                   var flankersHeightPx = target.getHeight();
                   const f1Text = letterConfig.padText
-                    ? padWithWhitespace(firstFlankerCharacter)
+                    ? padWithWhitespace(
+                        firstFlankerCharacter,
+                        paramReader.read("fontPadding", BC)
+                      )
                     : firstFlankerCharacter;
                   const f2Text = letterConfig.padText
-                    ? padWithWhitespace(secondFlankerCharacter)
+                    ? padWithWhitespace(
+                        secondFlankerCharacter,
+                        paramReader.read("fontPadding", BC)
+                      )
                     : secondFlankerCharacter;
 
                   flanker1.setFont(font.name);
@@ -2738,7 +2756,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     secondFlankerCharacter;
 
                   targetText = letterConfig.padText
-                    ? padWithWhitespace(tripletCharacters)
+                    ? padWithWhitespace(
+                        tripletCharacters,
+                        paramReader.read("fontPadding", BC)
+                      )
                     : tripletCharacters;
                   target.setText(targetText);
 
@@ -3037,6 +3058,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _takeFixationClick,
             fixation
           );
+          if (fixationConfig.markingFixationMotionRadiusDeg) {
+            const targetNominalPos = target.getPos();
+            const fixationDisplacement = [
+              fixationConfig.pos[0] - fixationConfig.nominalPos[0],
+              fixationConfig.pos[1] - fixationConfig.nominalPos[1],
+            ];
+            const offsetTargetPos = [
+              targetNominalPos[0] + fixationDisplacement[0],
+              targetNominalPos[1] + fixationDisplacement[1],
+            ];
+            target.setPos(offsetTargetPos);
+            if (
+              letterConfig.spacingRelationToSize !== "typographic" &&
+              letterConfig.thresholdParameter === "spacing"
+            ) {
+              for (const flanker of [flanker1, flanker2]) {
+                const flankerNominalPos = flanker.getPos();
+                flanker.setPos([
+                  flankerNominalPos[0] + fixationDisplacement[0],
+                  flankerNominalPos[1] + fixationDisplacement[1],
+                ]);
+              }
+            }
+          }
         },
       });
 
@@ -3158,6 +3203,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             )
           );
+
+          if (grid.current) grid.current.update();
+
           // Turn off fixation at the start of `trialRoutine`
           // fixation.setAutoDraw(false);
         },
@@ -3311,7 +3359,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
             psychoJS.experiment.addData(
               "targetBoundingBox",
-              String(target.getBoundingBox(true))
+              prettyPrintPsychojsBoundingBox(target.getBoundingBox(true))
             );
             if (
               letterConfig.spacingRelationToSize === "ratio" &&
@@ -3319,11 +3367,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ) {
               psychoJS.experiment.addData(
                 "flanker1BoundingBox",
-                String(flanker1.getBoundingBox(true))
+                prettyPrintPsychojsBoundingBox(flanker1.getBoundingBox(true))
               );
               psychoJS.experiment.addData(
                 "flanker2BoundingBox",
-                String(flanker2.getBoundingBox(true))
+                prettyPrintPsychojsBoundingBox(flanker2.getBoundingBox(true))
               );
             }
             /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
@@ -3729,6 +3777,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ////
       speechInNoiseShowClickable.current = true;
       grid.current.hide(true);
+
+      if (fixationConfig.nominalPos)
+        fixationConfig.pos = fixationConfig.nominalPos;
 
       if (showConditionNameConfig.showTargetSpecs)
         targetSpecs.setAutoDraw(false);
