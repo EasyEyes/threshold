@@ -371,7 +371,6 @@ const _runSoundLevelCalibration = async () => {
 };
 
 const _runLoudspeakerCalibration = async (elems) => {
-  console.log("Here");
   const {
     Speaker,
     ImpulseResponseCalibration,
