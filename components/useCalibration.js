@@ -196,7 +196,7 @@ export const calibrateAudio = async (reader) => {
         if (calibrateSoundLevel) {
           await _runSoundLevelCalibration();
         } else {
-          await _runLoudspeakerCalibration();
+          await _runLoudspeakerCalibration(elems);
         }
       } catch (e) {
         if (e instanceof speakerCalibrator.UnsupportedDeviceError) {
@@ -207,9 +207,10 @@ export const calibrateAudio = async (reader) => {
           alert(`${e}: Something went wrong during this step`);
           resolve(false);
         }
+        console.error(e);
       }
 
-      elems.display.style.display = "none";
+      elems.displayQR.style.display = "none";
       elems.message.innerHTML =
         copy.done +
         (calibrateSoundLevel
@@ -231,76 +232,6 @@ export const calibrateAudio = async (reader) => {
   });
 };
 
-const _buildSoundCalibrationUI = (type = 0) => {
-  const lang = rc.language.value;
-  const elements = {
-    soundContainer: {
-      id: "soundContainer",
-      copy: null,
-      classList: ["popup"],
-    },
-    soundTitle: {
-      id: "soundTitle",
-      copy:
-        type == 0
-          ? phrases.RC_soundCalibrationTitle[lang]
-          : "Loudspeaker Calibration",
-    },
-    soundSubtitle: {
-      id: "soundSubtitle",
-      copy: phrases.RC_soundCalibration[lang],
-    },
-    soundMessage: {
-      id: "soundMessage",
-      copy: phrases.RC_soundCalibrationNeedsIPhone[lang],
-    },
-    soundDisplay: {
-      id: "soundDisplay",
-      copy: null,
-    },
-    soundNavContainer: {
-      id: "soundNavContainer",
-      copy: null,
-    },
-    soundYes: {
-      id: "soundYes",
-      copy: phrases.RC_soundCalibrationYes[lang],
-      classList: ["btn"],
-    },
-    soundNo: {
-      id: "soundNo",
-      copy: phrases.RC_soundCalibrationNo[lang],
-      classList: ["btn", "btn-primary"],
-    },
-  };
-  console.log(elements.soundYes.classList.join(" "));
-  const htmlString = `
-  <div id=${
-    elements.soundContainer.id
-  } class=${elements.soundContainer.classList.join(" ")}>
-    <h1 id=${elements.soundTitle.id}>${elements.soundTitle.copy}</h1>
-    <h2 id=${elements.soundSubtitle.id}>${elements.soundSubtitle.copy}</h2>
-    <p id=${elements.soundMessage.id}>${elements.soundMessage.copy}</p>
-    <div id=${elements.soundDisplay.id}></div>
-    <div id=${elements.soundNavContainer.id}>
-        <button id=${
-          elements.soundYes.id
-        } class=${elements.soundYes.classList.join(" ")}> ${
-    elements.soundYes.copy
-  } </button>
-        <button id=${
-          elements.soundNo.id
-        } class=${elements.soundNo.classList.join(" ")}> ${
-    elements.soundNo.copy
-  } </button>
-    </div>
-  </div>
-  `;
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlString, "text/html");
-  return doc.body;
-};
-
 const _addSoundCalibrationElems = (copy) => {
   document.querySelector("#root").style.visibility = "hidden";
   const title = document.createElement("h1");
@@ -308,7 +239,9 @@ const _addSoundCalibrationElems = (copy) => {
   const background = document.createElement("div");
   const container = document.createElement("div");
   const message = document.createElement("div");
-  const display = document.createElement("div");
+  const displayContainer = document.createElement("div");
+  const displayQR = document.createElement("div");
+  const displayUpdate = document.createElement("div");
   const navContainer = document.createElement("div");
   const yesButton = document.createElement("button");
   const noButton = document.createElement("button");
@@ -316,7 +249,9 @@ const _addSoundCalibrationElems = (copy) => {
     background,
     title,
     subtitle,
-    display,
+    displayContainer,
+    displayQR,
+    displayUpdate,
     navContainer,
     yesButton,
     noButton,
@@ -329,7 +264,9 @@ const _addSoundCalibrationElems = (copy) => {
   message.setAttribute("id", "soundMessage");
   container.setAttribute("id", "soundContainer");
   background.setAttribute("id", "background");
-  display.setAttribute("id", "soundDisplay");
+  displayContainer.setAttribute("id", "displayContainer");
+  displayQR.setAttribute("id", "displayQR");
+  displayUpdate.setAttribute("id", "displayUpdate");
   navContainer.setAttribute("id", "soundNavContainer");
   yesButton.setAttribute("id", "soundYes");
   noButton.setAttribute("id", "soundNo");
@@ -352,7 +289,9 @@ const _addSoundCalibrationElems = (copy) => {
   container.appendChild(navContainer);
   navContainer.appendChild(yesButton);
   navContainer.appendChild(noButton);
-  container.appendChild(display);
+  container.appendChild(displayContainer);
+  displayContainer.appendChild(displayQR);
+  displayContainer.appendChild(displayUpdate);
   document.body.appendChild(background);
 
   _addSoundCss();
@@ -385,15 +324,16 @@ const _addSoundCss = () => {
   #soundNavContainer > * {
     margin-right: 10px;
   }
-  #soundDisplay {
-    height: 200px;
+  #displayContainer > * {
+    margin: auto;
     display: flex;
     justify-content: center;
   }
-  #soundDisplay > * {
-    margin: auto;
+  #displayContainer > div {
+    padding-top: 5px;
+    padding-bottom: 5px;
   }
-  #soundDisplay > div {
+  #displayContainer > div > div {
     height: 90px;
     width: 90px;
   }
@@ -418,8 +358,8 @@ const _runSoundLevelCalibration = async () => {
   };
 
   const calibratorParams = {
-    numCalibrationRounds: 1,
-    numCalibrationNodes: 1,
+    numCaptures: 5,
+    numMLSPerCapture: 4,
     download: false,
   };
 
@@ -430,7 +370,8 @@ const _runSoundLevelCalibration = async () => {
   );
 };
 
-const _runLoudspeakerCalibration = async () => {
+const _runLoudspeakerCalibration = async (elems) => {
+  console.log("Here");
   const {
     Speaker,
     ImpulseResponseCalibration,
@@ -441,14 +382,20 @@ const _runLoudspeakerCalibration = async () => {
 
   const speakerParameters = {
     siteUrl: "https://hqjq0u.deta.dev",
-    targetElementId: "soundDisplay",
+    targetElementId: "displayQR",
   };
 
   const calibratorParams = {
-    numCalibrationRounds: 3,
-    numCalibrationNodes: 3,
+    numCaptures: 3,
+    numMLSPerCapture: 3,
     download: false,
   };
+
+  const calibrator = new ImpulseResponseCalibration(calibratorParams);
+
+  calibrator.on("update", ({ message, ...rest }) => {
+    elems.displayUpdate.innerHTML = message;
+  });
 
   const debug = false;
 
@@ -459,8 +406,7 @@ const _runLoudspeakerCalibration = async () => {
   } else {
     invertedImpulseResponse.current = await Speaker.startCalibration(
       speakerParameters,
-      ImpulseResponseCalibration,
-      calibratorParams
+      calibrator
     );
   }
 };
