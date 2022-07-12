@@ -265,7 +265,12 @@ export const XYDegOfXYPix = (xyPix, displayOptions) => {
   );
   const rDeg = rRad * (180 / Math.PI);
   let xyDeg =
-    rPix > 0 ? [(xyPix[0] * rDeg) / rPix, (xyPix[1] * rDeg) / rPix] : [0, 0];
+    rPix > 0
+      ? [
+          (nearPointOffsetXYPx[0] * rDeg) / rPix,
+          (nearPointOffsetXYPx[1] * rDeg) / rPix,
+        ]
+      : [0, 0];
   xyDeg = [
     xyDeg[0] + displayOptions.nearPointXYDeg[0],
     xyDeg[1] + displayOptions.nearPointXYDeg[1],
