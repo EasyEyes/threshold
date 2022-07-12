@@ -290,7 +290,6 @@ import {
   Fixation,
   getFixationPos,
   getFixationVerticies,
-  gyrateFixation,
 } from "./components/fixation.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import {
@@ -2983,7 +2982,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetSpecs.setAutoDraw(true);
           }
           if (fixationConfig.markingFixationMotionRadiusDeg > 0)
-            gyrateFixation(fixation, t, displayOptions);
+            fixation.walk(t);
+          // fixation.gyrate(t);
           fixation.setAutoDraw(true);
         },
       });

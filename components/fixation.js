@@ -2,7 +2,7 @@ import { Polygon, ShapeStim } from "../psychojs/src/visual";
 import { Color, to_px } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
 import { displayOptions, fixationConfig, letterConfig } from "./global";
-import { logger, XYPixOfXYDeg } from "./utils";
+import { logger, norm, XYDegOfXYPix, XYPixOfXYDeg } from "./utils";
 
 export const getFixationPos = (blockN, paramReader) => {
   const locationStrategy = paramReader.read(
@@ -40,6 +40,7 @@ export class Fixation {
         depth: -6.0,
       }),
     ];
+    this.previousStep = [0, 0];
   }
 
   update(reader, BC, targetHeightPx, targetXYPx) {
@@ -82,6 +83,7 @@ export class Fixation {
       "markingOffsetBeforeTargetOnsetSecs",
       BC
     );
+    fixationConfig.markingFixationMotionStepSizePx = 2;
     if (
       ["pixPerCm", "nearPointXYDeg", "nearPointXYPix"].every(
         (s) => displayOptions[s]
@@ -180,6 +182,65 @@ export class Fixation {
       }
     });
   }
+  gyrate(t) {
+    const rPx = Math.abs(
+      fixationConfig.pos[0] -
+        XYPixOfXYDeg(
+          [fixationConfig.markingFixationMotionRadiusDeg, 0],
+          displayOptions
+        )[0]
+    );
+    const period = fixationConfig.markingFixationMotionPeriodSec;
+    const newFixationXY = [
+      fixationConfig.nominalPos[0] +
+        Math.cos((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
+      fixationConfig.nominalPos[1] +
+        Math.sin((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
+    ];
+    fixationConfig.pos = newFixationXY;
+    this.setPos(newFixationXY);
+  }
+  walk(t) {
+    logger("Math.round(t*100)", Math.round(t * 100));
+    if (Math.round(1 + t * 1000) % 2 !== 0) return;
+
+    // Find how far away we currently are from our nominal fixation position
+    const fixationCurrentDisplacement = XYDegOfXYPix(
+      fixationConfig.nominalPos,
+      displayOptions
+    );
+    const fixationDistance = norm(fixationCurrentDisplacement);
+
+    logger("fixationCurrentDisplacement", fixationCurrentDisplacement);
+    logger("fixationDistance", fixationDistance);
+
+    // Step will be the movement that we take this iteration.
+    let step = [0, 1].map((z) => {
+      // If we've reached/passed the boundary, take a step toward the nominal fixation
+      if (fixationDistance >= fixationConfig.markingFixationMotionRadiusDeg) {
+        return (
+          3 *
+          fixationConfig.markingFixationMotionStepSizePx *
+          (fixationConfig.pos[z] > fixationConfig.nominalPos[z] ? -1 : 1)
+        );
+        // Otherwise, take a step in a random direction (ie up,down,left,right)
+      } else {
+        const biasedDirection = this.previousStep[z] >= 0 ? 1 : -1;
+        return (
+          fixationConfig.markingFixationMotionStepSizePx *
+          (Math.random() >= 0.025 ? biasedDirection : -1 * biasedDirection)
+        );
+      }
+    });
+
+    // Find and set the location of the fixation after it has taken this step
+    const newPosition = [0, 1].map((z) => fixationConfig.pos[z] + step[z]);
+    this.previousStep = step;
+
+    // TODO would it be cool or confusing to have `fixationConfig.pos` get automatically set on `fixation.setPos`?
+    fixationConfig.pos = newPosition;
+    this.setPos(fixationConfig.pos);
+  }
   _updateIfNeeded() {
     this.stims.forEach((stim) => stim._updateIfNeeded());
   }
@@ -245,23 +306,4 @@ export const getFixationVerticies = (
     vertices.push([[blankingRadiusPx], fixationConfig.pos]);
   }
   return vertices;
-};
-
-export const gyrateFixation = (fixation, t, displayOptions) => {
-  const rPx = Math.abs(
-    fixationConfig.pos[0] -
-      XYPixOfXYDeg(
-        [fixationConfig.markingFixationMotionRadiusDeg, 0],
-        displayOptions
-      )[0]
-  );
-  const period = fixationConfig.markingFixationMotionPeriodSec;
-  const newFixationXY = [
-    fixationConfig.nominalPos[0] +
-      Math.cos((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
-    fixationConfig.nominalPos[1] +
-      Math.sin((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
-  ];
-  fixationConfig.pos = newFixationXY;
-  fixation.setPos(newFixationXY);
 };

@@ -105,6 +105,7 @@ export const fixationConfig = {
   markingFixationHotSpotRadiusPx: undefined,
   markingFixationMotionRadiusDeg: undefined,
   markingFixationMotionPeriodSec: undefined,
+  markingFixationMotionStepSizePx: undefined,
   markingFixationStrokeLengthDeg: undefined,
   markingFixationStrokeThicknessDeg: undefined,
   markingOffsetBeforeTargetOnsetSecs: undefined,

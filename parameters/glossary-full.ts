@@ -371,6 +371,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "calibrateInterPupillaryDistanceBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "NOT RECOMMENDED AT THIS TIME. Setting calibrateInterPupillaryDistanceBool TRUE requests Initial measurement of the interpupillary distance (cm) to later estimate viewing distance and near point. At this time, please use calibrateBlindSpotBool and calibrateTrackDistanceBool instead.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "calibrateLoudspeakerBool",
     availability: "now",
     example: "TRUE",
@@ -415,7 +425,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Use this to turn EasyEyes distance tracking on and off. Before tracking can begin you must make an initial calibration of distance, either by easyEyesBlindSpotBool or easyEyesPupilDistanceBool, or both. Distance tracking uses the webcam to monitor position of the participant's head. It ignores where you're looking. The head is not a point, of course. Since this is for vision research, the point we estimate is the midpoint between the two eyes. That point is sometimes called cyclopean, referring to the mythical one-eyed Cyclops in Homer's Odyssey. From each webcam image we extract: 1. the viewing distance, from the midpoint (between the two eyes) to the screen, and 2. the near point, which is the point in the plane of the screen that is closest to the midpoint between the eyes. When rendering visual stimulus specified in deg, it is necessary to take the viewing distance (and near point) into account. The location of the near point is important at large eccentricities (over 10 deg) and is usually safely ignored at small eccentricities (less than 10 deg).",
+      "Use this to enable and disable  EasyEyes distance tracking. Before tracking can begin you must use calibrateBlindSpotBool to make an initial calibration of distance. (In principle, intead of calibrateBlindSpotBool, you could instead use calibrateTrackNearPointBool to measures the Interpupillary distance, but we do not recommend this at this time.)  Distance tracking uses the webcam to monitor position of the participant's head. It ignores where you're looking. The head is not a point, of course. Since this is for vision research, the point we estimate is the midpoint between the two eyes. That point is sometimes called cyclopean, referring to the mythical one-eyed Cyclops in Homer's Odyssey. From each webcam image we extract: 1. the viewing distance, from the midpoint (between the two eyes) to the screen, and 2. the near point, which is the point in the plane of the screen that is closest to the midpoint between the eyes. When rendering visual stimulus specified in deg, it is necessary to take the viewing distance (and near point) into account. The location of the near point is important at large eccentricities (over 10 deg) but usually can be safely ignored at small eccentricities (less than 10 deg).",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -433,9 +443,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "calibrateTrackNearPointBool",
     availability: "now",
-    example: "FALSE",
+    example: "TRUE",
     explanation:
-      "Initial measurement of the pupillary distance to later estimate near point.",
+      "NOT RECOMMENDED AT THIS TIME. Initial measurement of the pupillary distance to later estimate near point. This measures the interpupillary distance in cm. Please use calibrateBlindSpotBool and calibrateTrackDistanceBool instead.",
     type: "boolean",
     default: "FALSE",
     categories: "",
