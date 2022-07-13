@@ -1105,6 +1105,7 @@ export const GLOSSARY: Glossary = {
       "sound",
       "vocoderPhrase",
       "reading",
+      "repeatedLetters",
     ],
   },
   targetMinimumPix: {
