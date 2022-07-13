@@ -1,14 +1,7 @@
 import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
-import {
-  logger,
-  norm,
-  padWithWhitespace,
-  Rectangle,
-  stripWhitespacePadding,
-  toFixedNumber,
-} from "./utils.js";
+import { logger, norm, Rectangle, toFixedNumber } from "./utils.js";
 import { letterConfig } from "./global.js";
 
 /**
@@ -80,15 +73,12 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
     const characterSet = String(reader.read("fontCharacterSet", cond)).split(
       ""
     );
-    const padText = reader.read("fontPadTextToAvoidClippingBool", cond);
     if (reader.read("showCharacterSetBoundingBoxBool", cond)) {
       displayCharacterSetBoundingBoxPolies[cond] =
         getDisplayCharacterSetBoundingPolies(
           characterSet,
           boundingConfig,
-          psychoJS,
-          padText,
-          reader.read("fontPadding", cond)
+          psychoJS
         );
     }
   }
@@ -102,17 +92,11 @@ export const generateBoundingBoxPolies = (reader, psychoJS) => {
 const getDisplayCharacterSetBoundingPolies = (
   characterSet,
   boundingConfig,
-  psychoJS,
-  padText,
-  fontPadding
+  psychoJS
 ) => {
   const [polies, characters] = [[], []];
   for (const character of characterSet) {
-    const text = padText
-      ? padWithWhitespace(character, fontPadding)
-      : character;
-    logger("character", character);
-    logger("text", text);
+    const text = character;
     characters.push(
       new visual.TextStim({
         // alignHoriz: "right",
@@ -478,7 +462,7 @@ const sizeAndPositionDisplayCharacterSet = (
         displayCharacterBoundingBox.x,
         displayCharacterBoundingBox.y,
       ];
-      let displayText = stripWhitespacePadding(displayCharacter.getText());
+      let displayText = displayCharacter.getText();
       return getRelativePosition(
         displayCharacterXY,
         normalizedCharacterSetBoundingRect,
@@ -509,7 +493,7 @@ const getCharacterSetBoundingBoxPositions = (
   height
 ) => {
   const stimBoxes = stims.map((s) => s.getBoundingBox(true));
-  const texts = stims.map((s) => stripWhitespacePadding(s.getText()));
+  const texts = stims.map((s) => s.getText());
   logger("texts", texts);
   return stimBoxes.map((b, i) =>
     getRelativePosition(

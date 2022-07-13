@@ -9,7 +9,6 @@ import {
   ifTrue,
   norm,
   sleep,
-  padWithWhitespace,
 } from "./components/utils.js";
 
 import * as core from "./psychojs/src/core/index.js";
@@ -2486,10 +2485,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // TODO check that we are actually trying to test for "spacing", not "size"
 
-          letterConfig.padText = reader.read(
-            "fontPadTextToAvoidClippingBool",
-            BC
-          );
           letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
           letterConfig.delayBeforeStimOnsetSec = reader.read(
             "markingOffsetBeforeTargetOnsetSecs",
@@ -2651,12 +2646,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           switch (thresholdParameter) {
             case "size":
-              targetText = letterConfig.padText
-                ? padWithWhitespace(
-                    targetCharacter,
-                    paramReader.read("fontPadding", BC)
-                  )
-                : targetCharacter;
+              targetText = targetCharacter;
               target.setText(targetText);
               // TODO I don't think this distinction in how to scale target, based on targetSizeIsHeightBool, is (should be?) necessary.
               //      In restrictSizeDeg, we calculate the heightPx corresponding to the desired height or width the scientist specifies.
@@ -2681,12 +2671,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 case "ratio":
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
-                  targetText = letterConfig.padText
-                    ? padWithWhitespace(
-                        targetCharacter,
-                        paramReader.read("fontPadding", BC)
-                      )
-                    : targetCharacter;
+                  targetText = targetCharacter;
                   target.setText(targetText);
 
                   if (letterConfig.targetSizeIsHeightBool)
@@ -2699,18 +2684,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   }
 
                   var flankersHeightPx = target.getHeight();
-                  const f1Text = letterConfig.padText
-                    ? padWithWhitespace(
-                        firstFlankerCharacter,
-                        paramReader.read("fontPadding", BC)
-                      )
-                    : firstFlankerCharacter;
-                  const f2Text = letterConfig.padText
-                    ? padWithWhitespace(
-                        secondFlankerCharacter,
-                        paramReader.read("fontPadding", BC)
-                      )
-                    : secondFlankerCharacter;
+                  const f1Text = firstFlankerCharacter;
+                  const f2Text = secondFlankerCharacter;
 
                   flanker1.setFont(font.name);
                   flanker2.setFont(font.name);
@@ -2755,12 +2730,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     targetCharacter +
                     secondFlankerCharacter;
 
-                  targetText = letterConfig.padText
-                    ? padWithWhitespace(
-                        tripletCharacters,
-                        paramReader.read("fontPadding", BC)
-                      )
-                    : tripletCharacters;
+                  targetText = tripletCharacters;
                   target.setText(targetText);
 
                   // target.setHeight(stimulusParameters.heightPx);
