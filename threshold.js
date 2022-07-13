@@ -305,6 +305,7 @@ import {
   getVocoderPhraseTrialData,
   initVocoderPhraseSoundFiles,
 } from "./components/vocoderPhrase.js";
+import { readTrialLevelLetterParams } from "./components/letter.js";
 import {
   setInitialData,
   updateBlockCompleted,
@@ -313,7 +314,8 @@ import {
 import {
   readTrialLevelLetterParams,
   readTrialLevelRepeatedLetterParams,
-} from "./components/letter.js";
+  generateRepeatedLettersStims,
+} from "./components/repeatedLetters.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -2916,6 +2918,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           // Generate stims to fill screen
+          const repeatedLettersStims =
+            generateRepeatedLettersStims(stimulusParameters);
+          logger("repeatedLettersStims", repeatedLettersStims);
 
           // Update fixation
           fixation.update(
@@ -3271,7 +3276,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             )
           );
-
         },
         repeatedLetters: () => {
           // TODO Same as letter, factor out

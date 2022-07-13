@@ -1,8 +1,7 @@
-import { letterConfig, repeatedLettersConfig } from "./global";
+import { letterConfig } from "./global";
 import { logger } from "./utils";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
-  letterConfig.padText = reader.read("fontPadTextToAvoidClippingBool", BC);
   letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
   letterConfig.delayBeforeStimOnsetSec = reader.read(
     "markingOffsetBeforeTargetOnsetSecs",
@@ -32,19 +31,4 @@ export const readTrialLevelLetterParams = (reader, BC) => {
   ];
 
   letterConfig.targetSafetyMarginSec = reader.read("targetSafetyMarginSec", BC);
-};
-
-/*  
-    ||| REPEATED LETTERS |||
-    vvv                  vvv
-*/
-export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
-  repeatedLettersConfig.targetRepeatsBorderCharacter = reader.read(
-    "targetRepeatsBorderCharacter",
-    BC
-  );
-  repeatedLettersConfig.targetRepeatsMaxLines = reader.read(
-    "targetRepeatsMaxLines",
-    BC
-  );
 };
