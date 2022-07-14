@@ -3110,10 +3110,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             soundGainDBSPL.current,
             maskerVolumeDbSPL.current
           );
-          playAudioBufferWithImpulseResponseCalibration(
-            trialSound,
-            invertedImpulseResponse.current
-          );
+          if (invertedImpulseResponse.current)
+            playAudioBufferWithImpulseResponseCalibration(
+              trialSound,
+              invertedImpulseResponse.current
+            );
+          else playAudioBuffer(trialSound);
           vocoderPhraseSoundFiles.current = undefined;
           vocoderPhraseSoundFiles.loaded = false;
         },
@@ -3152,10 +3154,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               soundGainDBSPL.current
             );
           }
-          playAudioBufferWithImpulseResponseCalibration(
-            trialSoundBuffer,
-            invertedImpulseResponse.current
-          );
+          console.log("status.block_condition,", status.block_condition);
+          if (invertedImpulseResponse.current)
+            playAudioBufferWithImpulseResponseCalibration(
+              trialSoundBuffer,
+              invertedImpulseResponse.current
+            );
+          else playAudioBuffer(trialSoundBuffer);
+          showCursor();
         },
         reading: () => {
           readingSound.play();
@@ -3359,26 +3365,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
       /* -------------------------------------------------------------------------- */
-      //speech in noise setup clickable characters
-      if (
-        targetKind.current == "sound" &&
-        targetTask.current == "identify" &&
-        speechInNoiseTargetList.current &&
-        speechInNoiseShowClickable.current
-      ) {
-        validAns = [""];
-        speechInNoiseShowClickable.current = false;
-        //console.log(speechInNoiseTargetList)
-        setupClickableCharacterSet(
-          speechInNoiseTargetList.current,
-          font.name,
-          "bottom",
-          showCharacterSetResponse,
-          null,
-          "",
-          "sound"
-        );
-      }
 
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
@@ -3706,6 +3692,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           instructions.setAutoDraw(true);
         },
       });
+      //speech in noise setup clickable characters
+      if (
+        targetKind.current == "sound" &&
+        targetTask.current == "identify" &&
+        speechInNoiseTargetList.current &&
+        speechInNoiseShowClickable.current
+      ) {
+        validAns = [""];
+        speechInNoiseShowClickable.current = false;
+        setupClickableCharacterSet(
+          speechInNoiseTargetList.current,
+          font.name,
+          "bottom",
+          showCharacterSetResponse,
+          null,
+          "",
+          "sound"
+        );
+        speechInNoiseTargetList.current = undefined;
+      }
+
       /* -------------------------------------------------------------------------- */
 
       // check if the Routine should terminate
