@@ -28,7 +28,7 @@ export const checkSystemCompatibility = (
   else deviceBrowserVersion = Number(deviceBrowserVersion[0]);
 
   if (deviceSysFamily == "Mac") deviceSysFamily = "macOS";
-
+  if (deviceBrowser == "Microsoft Edge") deviceBrowser = "Edge";
   var deviceIsCompatibleBool = true;
   var msg = [];
   // compatibilityType ----> all, not, or a browser name

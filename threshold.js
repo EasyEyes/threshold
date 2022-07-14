@@ -317,12 +317,12 @@ const paramReaderInitialized = async (reader) => {
   //   await rc.performance();
   // }
 
-  console.log(
-    "browser, deviceType, OS",
-    reader.read("_compatibleBrowser"),
-    reader.read("_compatibleDeviceType"),
-    reader.read("_compatibleOperatingSystem")
-  );
+  // console.log(
+  //   "browser, deviceType, OS",
+  //   reader.read("_compatibleBrowser"),
+  //   reader.read("_compatibleDeviceType"),
+  //   reader.read("_compatibleOperatingSystem"),
+  // );
 
   const compMsg = checkSystemCompatibility(
     reader.read("_compatibleBrowser")[0].split(","),
