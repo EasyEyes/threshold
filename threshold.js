@@ -1358,7 +1358,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           var speechInNoiseConditions = trialsConditions.filter(
             (condition) => condition["targetTask"] == "identify"
           );
-          initSpeechInNoiseSoundFiles(speechInNoiseConditions);
+          await initSpeechInNoiseSoundFiles(speechInNoiseConditions);
         } else {
           //init trial sound data
           var toneInMelodyConditions = trialsConditions.filter(
