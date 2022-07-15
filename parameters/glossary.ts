@@ -426,12 +426,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "abcdefghijklmnopqrstuvwxyz",
   },
-  fontDotCharacter: {
-    name: "fontDotCharacter",
-    availability: "now",
-    type: "text",
-    default: ".",
-  },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
     availability: "now",
@@ -447,14 +441,8 @@ export const GLOSSARY: Glossary = {
   fontPadding: {
     name: "fontPadding",
     availability: "now",
-    type: "text",
-    default: "",
-  },
-  fontPadTextToAvoidClippingBool: {
-    name: "fontPadTextToAvoidClippingBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
+    type: "numerical",
+    default: "500",
   },
   fontSource: {
     name: "fontSource",
