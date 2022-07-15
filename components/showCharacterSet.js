@@ -120,8 +120,8 @@ const pushCharacterSet = (
     characterSet.style.direction = globalFont.ltr ? "ltr" : "rtl";
 
     characterSet.onclick = () => {
-      responseRegister.clickTime = performance.now();
-      responseRegister.current = a.toLowerCase();
+      responseRegister.clickTime.push(performance.now());
+      responseRegister.current.push(a.toLowerCase());
       if (extraFunction) extraFunction(a); // TEMP? For reading response
     };
     characterSetHolder.appendChild(characterSet);

@@ -3,6 +3,7 @@
  *****************/
 
 import {
+  arraysEqual,
   debug,
   fillNumberLength,
   getTripletCharacters,
@@ -100,6 +101,7 @@ import {
   questionsThisBlock,
   thisExperimentInfo,
   vocoderPhraseSoundFiles,
+  repeatedLettersConfig,
 } from "./components/global.js";
 
 import {
@@ -198,7 +200,6 @@ import { getTrialInfoStr } from "./components/trialCounter.js";
 import {
   generateCharacterSetBoundingRects,
   restrictLevel,
-  restrictRepeatedLettersSpacing,
 } from "./components/bounding.js";
 
 import { Grid } from "./components/grid.js";
@@ -315,6 +316,7 @@ import {
   readTrialLevelLetterParams,
   readTrialLevelRepeatedLetterParams,
   generateRepeatedLettersStims,
+  restrictRepeatedLettersSpacing,
 } from "./components/repeatedLetters.js";
 
 /* -------------------------------------------------------------------------- */
@@ -2613,7 +2615,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
               `color: red; font-size: 1.5rem; font-family: "${font.name}"`
             );
-          correctAns.current = targetCharacter.toLowerCase();
+          correctAns.current = [targetCharacter.toLowerCase()];
           /* -------------------------------------------------------------------------- */
 
           // DISPLAY OPTIONS
@@ -2918,9 +2920,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           // Generate stims to fill screen
-          const repeatedLettersStims =
+          repeatedLettersConfig.stims =
             generateRepeatedLettersStims(stimulusParameters);
-          logger("repeatedLettersStims", repeatedLettersStims);
 
           // Update fixation
           fixation.update(
@@ -2938,8 +2939,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Add stims to trialComponents
           target.setText("repeatedLetters");
           trialComponents = [];
+          trialComponents.push(...repeatedLettersConfig.stims);
           trialComponents.push(...fixation.stims);
-          trialComponents.push(target);
         },
       });
 
@@ -3233,15 +3234,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               );
 
             trialSoundBuffer = trialSound;
-            correctAns.current =
-              targetList[correctAnsIndex]["name"].toLowerCase();
+            correctAns.current = [
+              targetList[correctAnsIndex]["name"].toLowerCase(),
+            ];
             speechInNoiseTargetList.current = targetList.map(
               (target) => target["name"]
             );
           } else {
             //target is present half the time
             targetIsPresentBool.current = Math.random() < 0.5;
-            correctAns.current = targetIsPresentBool.current ? "y" : "n";
+            correctAns.current = [targetIsPresentBool.current ? "y" : "n"];
             trialSoundBuffer = await getToneInMelodyTrialData(
               status.block_condition,
               targetIsPresentBool.current,
@@ -3303,8 +3305,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       continueRoutine = true; // until we're told otherwise
 
       key_resp.status = PsychoJS.Status.NOT_STARTED; // ? Why we don't need this to run before?
-      key_resp.keys = undefined;
-      key_resp.rt = undefined;
+      key_resp.keys = [];
+      key_resp.rt = [];
       _key_resp_allKeys = [];
 
       _instructionSetup(
@@ -3391,7 +3393,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
 
       const delayBeforeStimOnsetSec =
-        targetKind.current === "letter"
+        targetKind.current === "letter" ||
+        targetKind.current === "repeatedLetters"
           ? letterConfig.delayBeforeStimOnsetSec
           : 0;
       const timeWhenRespondable =
@@ -3429,8 +3432,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // READING Only accepts SPACE
             if (!validAns.length || validAns[0] !== "space")
               validAns = ["space"];
-            if (!correctAns.current || correctAns.current !== "space")
-              correctAns.current = "space";
+            if (
+              !correctAns.current.length ||
+              !correctAns.current.includes("space")
+            )
+              correctAns.current = ["space"];
           },
           letter: () => {},
         });
@@ -3494,14 +3500,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           });
 
           _key_resp_allKeys = _key_resp_allKeys.concat(theseKeys);
-
-          if (_key_resp_allKeys.length > 0) {
-            key_resp.keys =
-              _key_resp_allKeys[_key_resp_allKeys.length - 1].name; // just the last key pressed
-            key_resp.rt = _key_resp_allKeys[_key_resp_allKeys.length - 1].rt;
+          if (_key_resp_allKeys.length >= responseType.numberOfResponses) {
+            key_resp.keys = _key_resp_allKeys
+              .slice(_key_resp_allKeys.length - responseType.numberOfResponses)
+              .map((r) => r.name);
+            key_resp.rt = _key_resp_allKeys
+              .slice(_key_resp_allKeys.length - responseType.numberOfResponses)
+              .map((r) => r.rt);
 
             // Was this correct?
-            if (key_resp.keys == correctAns.current) {
+            if (arraysEqual(key_resp.keys.sort(), correctAns.current.sort())) {
               // Play correct audio
               switchKind(targetKind.current, {
                 sound: () => {
@@ -3532,13 +3540,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       // *showCharacterSetResponse* updates
-      if (showCharacterSetResponse.current) {
+      if (showCharacterSetResponse.current.length) {
         key_resp.keys = showCharacterSetResponse.current;
-        key_resp.rt =
-          (showCharacterSetResponse.clickTime -
-            showCharacterSetResponse.onsetTime) /
-          1000;
-        if (showCharacterSetResponse.current == correctAns.current) {
+        key_resp.rt = showCharacterSetResponse.clickTime.map(
+          (clickTime, i) =>
+            (clickTime - showCharacterSetResponse.onsetTime[i]) / 1000
+        );
+        if (
+          arraysEqual(
+            showCharacterSetResponse.current.sort(),
+            correctAns.current.sort()
+          )
+        ) {
           // Play correct audio
           correctSynth.play();
           status.trialCorrect_thisBlock++;
@@ -3615,28 +3628,78 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // fixation.setAutoDraw(true);
       }
 
-      // *flanker1* updates
-      if (
-        t >= delayBeforeStimOnsetSec &&
-        flanker1.status === PsychoJS.Status.NOT_STARTED
-      ) {
-        // keep track of start time/frame for later
-        flanker1.tStart = t; // (not accounting for frame time here)
-        flanker1.frameNStart = frameN; // exact frame index
+      switch (targetKind.current) {
+        case "repeatedLetters":
+          // *target* updates
+          if (
+            repeatedLettersConfig.stims.every(
+              (s) => s.status === PsychoJS.Status.STARTED
+            ) &&
+            !letterTiming.targetStartSec
+          ) {
+            letterTiming.targetStartSec = t;
+            repeatedLettersConfig.stims.forEach(
+              (s) => (s.frameNDrawnConfirmed = frameN)
+            );
+            letterTiming.targetDrawnConfirmedTimestamp = performance.now();
+            letterTiming.crosshairClickedTimestamp =
+              clickedContinue.timestamps[clickedContinue.timestamps.length - 1];
+          }
 
-        if (
-          letterConfig.spacingRelationToSize === "typographic" ||
-          thresholdParameter === "size"
-        ) {
-          flanker1.setAutoDraw(false);
-        } else {
-          flanker1.setAutoDraw(true);
-        }
-      }
-      if (flanker1.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-        flanker1.setAutoDraw(false);
-      }
+          if (
+            t >= delayBeforeStimOnsetSec &&
+            repeatedLettersConfig.stims.every(
+              (s) => s.status === PsychoJS.Status.NOT_STARTED
+            )
+          ) {
+            // keep track of start time/frame for later
+            repeatedLettersConfig.stims.forEach((s) => {
+              s.tStart = t; // (not accounting for frame time here)
+              s.frameNStart = frameN; // exact frame index
+              s.setAutoDraw(true);
+            });
+          }
 
+          if (
+            repeatedLettersConfig.stims.every(
+              (s) => s.status === PsychoJS.Status.FINISHED
+            ) &&
+            !letterTiming.targetFinishSec
+          ) {
+            letterTiming.targetFinishSec = t;
+            target.frameNFinishConfirmed = frameN;
+
+            if (showConditionNameConfig.showTargetSpecs) {
+              const thisDuration =
+                letterTiming.targetFinishSec - letterTiming.targetStartSec;
+              showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
+                Math.round(thisDuration * 100000.0) / 100000
+              } [${isTimingOK(
+                Math.abs(thisDuration - letterConfig.targetDurationSec),
+                0.02
+              )}]`;
+              targetSpecs.setText(showConditionNameConfig.targetSpecs);
+              showConditionName(conditionName, targetSpecs);
+            }
+          }
+
+          if (
+            repeatedLettersConfig.stims.every(
+              (s) => s.status === PsychoJS.Status.STARTED
+            ) &&
+            t >= frameRemains
+          ) {
+            repeatedLettersConfig.stims.forEach((s) => {
+              s.setAutoDraw(false);
+              s.frameNEnd = frameN;
+            });
+
+            setTimeout(() => {
+              showCursor();
+            }, 500);
+          }
+          break;
+      }
       // *target* updates
       if (
         target.status === PsychoJS.Status.STARTED &&
@@ -3694,27 +3757,51 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }, 500);
       }
 
-      // *flanker2* updates
-      if (
-        t >= delayBeforeStimOnsetSec &&
-        flanker2.status === PsychoJS.Status.NOT_STARTED
-      ) {
-        // keep track of start time/frame for later
-        flanker2.tStart = t; // (not accounting for frame time here)
-        flanker2.frameNStart = frameN; // exact frame index
-
+      if (targetKind.current === "letter") {
+        // *flanker1* updates
         if (
-          letterConfig.spacingRelationToSize === "typographic" ||
-          thresholdParameter === "size"
+          t >= delayBeforeStimOnsetSec &&
+          flanker1.status === PsychoJS.Status.NOT_STARTED
         ) {
-          flanker2.setAutoDraw(false);
-        } else {
-          flanker2.setAutoDraw(true);
-        }
-      }
+          // keep track of start time/frame for later
+          flanker1.tStart = t; // (not accounting for frame time here)
+          flanker1.frameNStart = frameN; // exact frame index
 
-      if (flanker2.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-        flanker2.setAutoDraw(false);
+          if (
+            letterConfig.spacingRelationToSize === "typographic" ||
+            thresholdParameter === "size"
+          ) {
+            flanker1.setAutoDraw(false);
+          } else {
+            flanker1.setAutoDraw(true);
+          }
+        }
+        if (flanker1.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+          flanker1.setAutoDraw(false);
+        }
+
+        // *flanker2* updates
+        if (
+          t >= delayBeforeStimOnsetSec &&
+          flanker2.status === PsychoJS.Status.NOT_STARTED
+        ) {
+          // keep track of start time/frame for later
+          flanker2.tStart = t; // (not accounting for frame time here)
+          flanker2.frameNStart = frameN; // exact frame index
+
+          if (
+            letterConfig.spacingRelationToSize === "typographic" ||
+            thresholdParameter === "size"
+          ) {
+            flanker2.setAutoDraw(false);
+          } else {
+            flanker2.setAutoDraw(true);
+          }
+        }
+
+        if (flanker2.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+          flanker2.setAutoDraw(false);
+        }
       }
 
       // check for quit (typically the Esc key)
@@ -3742,6 +3829,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         thresholdParameter
       );
       /* -------------------------------------------------------------------------- */
+      responseType.numberOfResponses =
+        targetKind.current === "repeatedLetters" ? 2 : 1;
+
       // SHOW CharacterSet AND INSTRUCTIONS
       switchKind(targetKind.current, {
         sound: () => {
@@ -3774,6 +3864,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
       //speech in noise setup clickable characters
+      // *showCharacterSet* updates
+      logger(
+        "showCharacterSet.status",
+        showCharacterSet.status === PsychoJS.Status.NOT_STARTED
+      );
+      logger(
+        "t >= delayBeforeStimOnsetSec + letterConfig.targetSafetyMarginSec + letterConfig.targetDurationSec",
+        t >=
+          delayBeforeStimOnsetSec +
+            letterConfig.targetSafetyMarginSec +
+            letterConfig.targetDurationSec
+      );
+      logger(
+        "delayBeforeStimOnsetSec + letterConfig.targetSafetyMarginSec + letterConfig.targetDurationSec",
+        delayBeforeStimOnsetSec +
+          letterConfig.targetSafetyMarginSec +
+          letterConfig.targetDurationSec
+      );
       if (
         targetKind.current == "sound" &&
         targetTask.current == "identify" &&
@@ -3782,6 +3890,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         validAns = [""];
         speechInNoiseShowClickable.current = false;
+        // keep track of start time/frame for later
+        showCharacterSet.tStart = t; // (not accounting for frame time here)
+        showCharacterSet.frameNStart = frameN; // exact frame index
+        showCharacterSet.setAutoDraw(true);
+        logger(
+          "setupClickableCharacterSet fontCharacterSet.current",
+          fontCharacterSet.current
+        );
+        logger("setupClickableCharacterSet font.name", font.name);
+        logger(
+          "setupClickableCharacterSet fontCharacterSet.where",
+          fontCharacterSet.where
+        );
+        logger(
+          "setupClickableCharacterSet showCharacterSetResponse",
+          showCharacterSetResponse
+        );
         setupClickableCharacterSet(
           speechInNoiseTargetList.current,
           font.name,
@@ -4003,7 +4128,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         // was no response the correct answer?!
-        if (key_resp.keys === undefined) {
+        if (key_resp.keys === []) {
           console.error("[key_resp.keys] No response error.");
         }
 
@@ -4098,15 +4223,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
         });
 
-        psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
+        psychoJS.experiment.addData("key_resp.keys", key_resp.keys.toString());
         psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
         psychoJS.experiment.addData("correctAns", correctAns.current);
         // console.log("key_resp.keys", key_resp.keys);
         // console.log("key_resp.corr", key_resp.corr);
         // console.log("correctAns.current", correctAns.current);
-        if (typeof key_resp.keys !== "undefined") {
+        // if (typeof key_resp.keys !== "undefined") {
+        if (key_resp.keys.length) {
           // we had a response
-          psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
+          psychoJS.experiment.addData("key_resp.rt", key_resp.rt.toString());
           // ie time from the end to `trialRoutineBegin` to the start of `trialRoutineEnd`
           psychoJS.experiment.addData(
             "trialRoutineDurationFromBeginSec",

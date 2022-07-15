@@ -141,8 +141,8 @@ export const simulateObserverResponse = (
     waitRelease: false,
   });
 
-  keyboard.keys = theseKeys[0].name;
-  keyboard.rt = theseKeys[0].rt;
+  keyboard.keys = [theseKeys[0].name];
+  keyboard.rt = [theseKeys[0].rt];
 
   if (signalingKeyCode === correctSignalingKeyCode) {
     keyboard.corr = 1;
