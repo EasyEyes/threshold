@@ -2266,6 +2266,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       font.source = reader.read("fontSource", BC);
       font.name = reader.read("font", BC);
+      font.padding = reader.read("fontPadding", BC);
       if (font.source === "file") font.name = cleanFontName(font.name);
 
       font.ltr = reader.read("fontLeftToRightBool", BC);
@@ -2662,6 +2663,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   stimulusParameters.widthPx
                 );
               }
+              target.setPadding(font.padding);
+
               target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
               flanker1.setAutoDraw(false);
@@ -2670,7 +2673,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             case "spacing":
               switch (letterConfig.spacingRelationToSize) {
                 case "none":
-                  break;
                 case "ratio":
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
@@ -2700,6 +2702,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   flanker1.setText(f1Text);
                   // flanker2 === inner flanker
                   flanker2.setText(f2Text);
+
+                  target.setPadding(font.padding);
+                  flanker1.setPadding(font.padding);
+                  flanker2.setPadding(font.padding);
                   psychoJS.experiment.addData("flankerLocationsPx", [
                     stimulusParameters.targetAndFlankersXYPx[1],
                     stimulusParameters.targetAndFlankersXYPx[2],
@@ -2741,6 +2747,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     stimulusParameters.heightPx,
                     stimulusParameters.widthPx
                   );
+                  target.setPadding(font.padding);
                   flanker1.setAutoDraw(false);
                   flanker2.setAutoDraw(false);
                   break;

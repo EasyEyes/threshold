@@ -34,14 +34,16 @@ export const generateCharacterSetBoundingRects = (
     const typographicCrowding =
       paramReader.read("spacingRelationToSize", BC) === "typographic" &&
       paramReader.read("thresholdParameter", BC) === "spacing";
+    const padding = paramReader.read("fontPadding", BC);
     const letterRepeats = typographicCrowding ? 3 : 1;
-    logger("letterRepeats", letterRepeats);
+
     rects[BC] = _getCharacterSetBoundingBox(
       characterSet,
       font,
       psychoJS.window,
       letterRepeats,
-      100
+      100,
+      padding
     );
   }
   return rects;
@@ -52,7 +54,8 @@ const _getCharacterSetBoundingBox = (
   font,
   window,
   repeats = 1,
-  height = 50
+  height = 50,
+  padding = 0
 ) => {
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
   let characterSetBoundingRectPoints = [
@@ -74,6 +77,7 @@ const _getCharacterSetBoundingBox = (
     depth: -7.0,
     autoDraw: false,
     autoLog: false,
+    padding: padding,
   });
   const [centers, boundingRectPoints] = [{}, {}];
   let setAscent = -Infinity;

@@ -87,6 +87,7 @@ export const font = {
   ltr: undefined,
   instructionFont: undefined,
   instructionFontSource: undefined,
+  padding: undefined,
 };
 export const fontCharacterSet = { current: undefined, where: undefined };
 
