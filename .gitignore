@@ -24,6 +24,8 @@ examples/*/**
 !examples/tables/testTiming.csv
 !examples/tables/questionExperiment.csv
 
+!examples/folders/folders
+
 ###
 
 node_modules
