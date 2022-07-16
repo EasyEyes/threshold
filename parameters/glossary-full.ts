@@ -584,7 +584,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "fontPadding",
     availability: "now",
-    example: "1000",
+    example: "3",
     explanation:
       "fontPadding is a positive number specifying how much padding PIXI.js should add around each string to avoid clipping, but, presumably, at the cost of slower rendering. The default value, before we intervened, was 100??. To handle fonts with lots of flourishes (e.g. Burgues, Arabic) we recommend 500??.",
     type: "numerical",

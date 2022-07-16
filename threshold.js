@@ -573,7 +573,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   thisExperimentInfo.name = thisExperimentInfo.expName = getPavloviaProjectName(
     thisExperimentInfo.experimentName
   );
-  window.console.log("thisExperimentInfo.name", thisExperimentInfo.name);
 
   // ! START EXPERIMENT
   psychoJS
