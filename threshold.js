@@ -1836,7 +1836,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         sound: () => {
           targetTask.current = paramReader.read("targetTask", status.block)[0];
-          //console.log("targetTask:", targetTask.current);
           const instr =
             targetTask.current == "identify"
               ? instructionsText.speechInNoiseBegin(L)
