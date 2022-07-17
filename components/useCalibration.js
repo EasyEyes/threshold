@@ -2,6 +2,7 @@ import { phrases } from "./i18n";
 import { debug, ifTrue, loggerText } from "./utils";
 import { soundGainDBSPL, invertedImpulseResponse, rc } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
+import { addSoundTestElements } from "./soundTest";
 
 export const useCalibration = (reader) => {
   return ifTrue([
@@ -183,6 +184,7 @@ export const calibrateAudio = async (reader) => {
       holdiPhoneOK: phrases.RC_soundCalibrationHoldIPhoneOk[lang],
       clickToStart: phrases.RC_soundCalibrationClickToStart[lang],
       done: phrases.RC_soundCalibrationDone[lang],
+      test: "Test", //include in phrases doc
     };
 
     const elems = _addSoundCalibrationElems(copy);
@@ -217,8 +219,15 @@ export const calibrateAudio = async (reader) => {
           ? "\nMeasured soundGainDBSPL " + String(soundGainDBSPL.current)
           : "");
       elems.yesButton.innerHTML = "Continue to experiment.";
-      document.querySelector("#soundNavContainer").style.display = "block";
+      document.querySelector("#soundNavContainer").style.display = "flex";
       document.querySelector("#soundYes").style.display = "block";
+
+      elems.testButton.style.visibility = "visible";
+      elems.testButton.addEventListener("click", async (e) => {
+        addSoundTestElements(reader);
+        $("#soundTestModal").modal("show");
+      });
+
       elems.yesButton.addEventListener("click", async (e) => {
         _removeSoundCalibrationElems(Object.values(elems));
         resolve(true);
@@ -245,6 +254,7 @@ const _addSoundCalibrationElems = (copy) => {
   const navContainer = document.createElement("div");
   const yesButton = document.createElement("button");
   const noButton = document.createElement("button");
+  const testButton = document.createElement("button");
   const elems = {
     background,
     title,
@@ -257,6 +267,7 @@ const _addSoundCalibrationElems = (copy) => {
     noButton,
     container,
     message,
+    testButton,
   };
 
   title.setAttribute("id", "soundTitle");
@@ -270,17 +281,20 @@ const _addSoundCalibrationElems = (copy) => {
   navContainer.setAttribute("id", "soundNavContainer");
   yesButton.setAttribute("id", "soundYes");
   noButton.setAttribute("id", "soundNo");
+  testButton.setAttribute("id", "soundTest");
 
   title.innerHTML = copy.soundCalibration;
   subtitle.innerHTML = copy.title;
   message.innerHTML = copy.neediPhone;
   yesButton.innerHTML = copy.yes;
   noButton.innerHTML = copy.no;
+  testButton.innerHTML = copy.test;
 
   background.classList.add(...["popup", "rc-panel"]);
   container.classList.add(...["container"]);
   yesButton.classList.add(...["btn", "btn-primary"]);
   noButton.classList.add(...["btn", "btn-secondary"]);
+  testButton.classList.add(...["btn", "btn-success"]);
 
   background.appendChild(container);
   container.appendChild(title);
@@ -289,6 +303,7 @@ const _addSoundCalibrationElems = (copy) => {
   container.appendChild(navContainer);
   navContainer.appendChild(yesButton);
   navContainer.appendChild(noButton);
+  navContainer.appendChild(testButton);
   container.appendChild(displayContainer);
   displayContainer.appendChild(displayQR);
   displayContainer.appendChild(displayUpdate);
@@ -336,6 +351,11 @@ const _addSoundCss = () => {
   #displayContainer > div > div {
     height: 90px;
     width: 90px;
+  }
+  #soundTest {
+    visibility: hidden;
+    data-toggle="modal"
+    data-target="#soundTestModal"
   }
   `;
   const styleSheet = document.createElement("style");
