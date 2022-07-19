@@ -980,6 +980,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
   },
+  soundCalibrationLevelDBSPL: {
+    name: "soundCalibrationLevelDBSPL",
+    availability: "now",
+    type: "numerical",
+    default: "94",
+  },
   soundGainDBSPL: {
     name: "soundGainDBSPL",
     availability: "now",

@@ -1,9 +1,11 @@
 import JSZip from "jszip";
 import { invertedImpulseResponse, soundGainDBSPL } from "./global";
 import {
+  adjustSoundDbSPL,
   getAudioBufferFromArrayBuffer,
   playAudioBuffer,
   playAudioBufferWithImpulseResponseCalibration,
+  setWaveFormToZeroDbSPL,
 } from "./soundUtils";
 
 export const addSoundTestElements = (reader) => {
@@ -179,7 +181,6 @@ const addToggleCSS = () => {
 
 const populateSoundFiles = async (reader, modalBody, toggleInput) => {
   var targetSoundFolders = reader.read("targetSoundFolder", "__ALL_BLOCKS__");
-  console.log("targetSoundFolders", targetSoundFolders);
   targetSoundFolders = [...new Set(targetSoundFolders)]; // remove duplicates
   const targetSoundFiles = {};
   await Promise.all(
@@ -222,11 +223,11 @@ const addSoundFileElements = (
   toggleInput,
   reader
 ) => {
-  Object.keys(targetSoundFiles).forEach((blockName) => {
+  Object.keys(targetSoundFiles).forEach((blockName, index) => {
     const horizontal = document.createElement("hr");
     const block = document.createElement("div");
     block.setAttribute("class", "block");
-    targetSoundFiles[blockName].forEach((soundFile, index) => {
+    targetSoundFiles[blockName].forEach((soundFile) => {
       const soundFileContainer = document.createElement("div");
       soundFileContainer.setAttribute("class", "soundFileContainer");
       const soundFileName = document.createElement("h4");
@@ -236,19 +237,30 @@ const addSoundFileElements = (
       soundFileButton.innerHTML = "Play";
       soundFileButton.addEventListener("click", async () => {
         const soundFileBuffer = await soundFile.file;
-        console.log("soundGainDBSPL", soundGainDBSPL);
         // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
         const soundGain =
           typeof soundGainDBSPL.current !== "undefined"
             ? soundGainDBSPL.current
-            : reader.read("soundGainDBSPL", "__ALL_BLOCKS__");
-        console.log("soundGain", soundGain[index]);
-        if (toggleInput.checked)
-          playAudioBufferWithImpulseResponseCalibration(
-            soundFileBuffer,
-            invertedImpulseResponse.current
-          );
-        else playAudioBuffer(soundFileBuffer);
+            : reader.read("soundGainDBSPL", "__ALL_BLOCKS__")[index];
+
+        var audioData = soundFileBuffer.getChannelData(0);
+        const soundCalibrationLevelDBSPL = reader.read(
+          "soundCalibrationLevelDBSPL",
+          "__ALL_BLOCKS__"
+        )[index];
+        setWaveFormToZeroDbSPL(audioData);
+        adjustSoundDbSPL(audioData, soundCalibrationLevelDBSPL - soundGain);
+        if (toggleInput.checked) {
+          if (invertedImpulseResponse.current)
+            playAudioBufferWithImpulseResponseCalibration(
+              soundFileBuffer,
+              invertedImpulseResponse.current
+            );
+          else
+            alert(
+              "There was an error loading the impulse response. Please try calibrating again."
+            );
+        } else playAudioBuffer(soundFileBuffer);
       });
       soundFileContainer.appendChild(soundFileName);
       soundFileContainer.appendChild(soundFileButton);
