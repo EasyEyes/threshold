@@ -1463,6 +1463,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "soundCalibrationLevelDBSPL",
+    availability: "now",
+    example: "84",
+    explanation:
+      "soundCalibrationLevelDBSPL is the nominal sound level that we produce in order to calibrate or check gain calibration. The industry standard is 94 dB SPL, but that may be too loud in some situations. The default value is currently 94 dB SPL.",
+    type: "numerical",
+    default: "94",
+    categories: "",
+  },
+  {
     name: "soundGainDBSPL",
     availability: "now",
     example: "13",

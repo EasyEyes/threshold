@@ -457,6 +457,7 @@ const sizeAndPositionDisplayCharacterSet = (
       displayCharacter.setHeight(heightPx);
       displayCharacter.setPos(characterPosition);
       displayCharacter._updateIfNeeded();
+
       const displayCharacterBoundingBox = displayCharacter.getBoundingBox(true);
       const displayCharacterXY = [
         displayCharacterBoundingBox.x,
@@ -492,10 +493,11 @@ const getCharacterSetBoundingBoxPositions = (
   normalizedCharacterSetBoundingRect,
   height
 ) => {
-  const stimBoxes = stims.map((s) => s.getBoundingBox(true));
+  logger("stims", stims);
+  logger("stims[0].getText().length", stims[0].getText().length);
+  const boundingBoxes = stims.map((s) => s.getBoundingBox(true));
   const texts = stims.map((s) => s.getText());
-  logger("texts", texts);
-  return stimBoxes.map((b, i) =>
+  return boundingBoxes.map((b, i) =>
     getRelativePosition(
       [b.x, b.y],
       normalizedCharacterSetBoundingRect,
@@ -511,10 +513,29 @@ export const getRelativePosition = (
   text,
   height
 ) => {
-  const character =
-    text.length > 1
-      ? text[Math.floor(text.length / 2)].repeat(text.length)
-      : text;
+  let character;
+  if (
+    text.length === 1 &&
+    !normalizedCharacterSetRect.centers.hasOwnProperty(text)
+  ) {
+    if (normalizedCharacterSetRect.centers.hasOwnProperty(text.repeat(3)))
+      character = text.repeat(3);
+    else
+      throw `Neither ${text} nor ${text.repeat(
+        3
+      )} found in normalizedCharSetRect`;
+  } else {
+    character =
+      text.length > 1
+        ? text[Math.floor(text.length / 2)].repeat(text.length)
+        : text;
+    logger("text", text);
+    logger("character", character);
+  }
+  logger(
+    `center of ${character}`,
+    normalizedCharacterSetRect.centers[character]
+  );
   return [
     stimBoundingBoxXY[0] +
       normalizedCharacterSetRect.centers[character][0] * height,

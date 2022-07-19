@@ -82,15 +82,13 @@ const _getCharacterSetBoundingBox = (
   const [centers, boundingRectPoints] = [{}, {}];
   let setAscent = -Infinity;
   let setDescent = -Infinity;
-  const texts = [...characterSet.map((character) => character.repeat(repeats))];
-  // Also add the individual characters, to show display charSet bounding boxes in typographic mode
-  if (repeats > 1) texts.push(...characterSet);
+  const texts = characterSet.map((character) => character.repeat(repeats));
   // For (simplified approximation of) each possible stimuli text...
   for (const textToSet of texts) {
+    logger("textToSet", textToSet);
     //... set our testStim to reflect that, so we can measure.
     const xy = [0, 0];
     testStim.setText(textToSet);
-    // testStim.setPos(xy);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
 
     // Get measurements of how far the text stim extends in each direction
@@ -104,16 +102,19 @@ const _getCharacterSetBoundingBox = (
     setDescent = Math.max(setDescent, descent);
 
     // Get the bounding points around this specific text stim
-    const thisBoundingRectPoints =
-      textToSet.length === 1
-        ? [
-            [-left + xy[0], -descent + xy[1]],
-            [right + xy[0], ascent + xy[1]],
-          ]
-        : [
-            [xy[0] - thisBB.width / 2, xy[1] - thisBB.height / 2],
-            [xy[0] + thisBB.width / 2, xy[1] + thisBB.height / 2],
-          ];
+    const thisBoundingRectPoints = [
+      [-left + xy[0], -descent + xy[1]],
+      [right + xy[0], ascent + xy[1]],
+    ];
+    // textToSet.length === 1
+    //   ? [
+    //       [-left + xy[0], -descent + xy[1]],
+    //       [right + xy[0], ascent + xy[1]],
+    //     ]
+    //   : [
+    //       [xy[0] - thisBB.width / 2, xy[1] - thisBB.height / 2],
+    //       [xy[0] + thisBB.width / 2, xy[1] + thisBB.height / 2],
+    //     ];
 
     validateRectPoints(thisBoundingRectPoints);
     boundingRectPoints[textToSet] = thisBoundingRectPoints;
