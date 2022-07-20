@@ -896,7 +896,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       alignVert: "center",
       autoDraw: false,
       autoLog: false,
-      padding: paramReader.read("readingPadding", "__ALL_BLOCKS__")[0],
+      padding: paramReader.read("fontPadding", "__ALL_BLOCKS__")[0],
     });
     /* -------------------------------------------------------------------------- */
 
