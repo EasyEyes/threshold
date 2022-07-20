@@ -890,11 +890,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ori: 0.0,
       color: new util.Color("black"),
       opacity: 1.0,
-      depth: -7.0,
+      depth: -9.0,
       isInstruction: false,
       alignHoriz: "left",
       alignVert: "center",
       autoDraw: false,
+      autoLog: false,
+      padding: paramReader.read("readingPadding", "__ALL_BLOCKS__")[0],
     });
     /* -------------------------------------------------------------------------- */
 
