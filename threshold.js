@@ -1962,6 +1962,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (readingDirectionLTR)
             readingParagraph.setPos([-thisBlockWrapWidth * 0.5, 0]);
           else readingParagraph.setPos([thisBlockWrapWidth * 0.5, 0]);
+
+          // PADDING
+          readingParagraph.setPadding(
+            paramReader.read("fontPadding", status.block)[0]
+          );
         },
       });
 
