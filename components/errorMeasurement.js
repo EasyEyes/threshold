@@ -113,15 +113,12 @@ export const addResponseIfTolerableError = (
     ? [durationAcceptable, latencyAcceptable, gazeAcceptable]
     : [durationAcceptable, latencyAcceptable];
 
-  if (relevantChecks.every((x) => x)) {
-    psychoJS.experiment.addData("trialGivenToQuest", true);
-    loop.addResponse(answerCorrect, level);
-    return true;
-  } else {
-    psychoJS.experiment.addData("trialGivenToQuest", false);
-    loop._nextTrial();
-    return false;
-  }
+  const validTrialToGiveToQUEST = relevantChecks.every((x) => x);
+
+  psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
+  loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
+
+  return validTrialToGiveToQUEST;
 };
 
 const addMeasuredErrorToOutput = (psychoJS, tolerances) => {
