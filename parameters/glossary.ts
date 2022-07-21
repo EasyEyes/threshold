@@ -442,7 +442,7 @@ export const GLOSSARY: Glossary = {
     name: "fontPadding",
     availability: "now",
     type: "numerical",
-    default: "3",
+    default: "0.5",
   },
   fontSource: {
     name: "fontSource",

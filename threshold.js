@@ -4020,6 +4020,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         psychoJS.experiment.addData("key_resp.keys", key_resp.keys);
         psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
+        psychoJS.experiment.addData("correctAns", correctAns.current);
+        // console.log("key_resp.keys", key_resp.keys);
+        // console.log("key_resp.corr", key_resp.corr);
+        // console.log("correctAns.current", correctAns.current);
         if (typeof key_resp.keys !== "undefined") {
           // we had a response
           psychoJS.experiment.addData("key_resp.rt", key_resp.rt);
