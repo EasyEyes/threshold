@@ -2195,12 +2195,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
-              addConditionToData(
-                paramReader,
-                status.block_condition,
-                psychoJS.experiment,
-                parametersToExcludeFromData
-              );
             }
           }
         },
@@ -2209,12 +2203,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
-              addConditionToData(
-                paramReader,
-                status.block_condition,
-                psychoJS.experiment,
-                parametersToExcludeFromData
-              );
             }
           }
         },
@@ -2227,12 +2215,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
-              addConditionToData(
-                paramReader,
-                status.block_condition,
-                psychoJS.experiment,
-                parametersToExcludeFromData
-              );
             }
           }
 
@@ -2256,6 +2238,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
+      addConditionToData(
+        paramReader,
+        status.block_condition,
+        psychoJS.experiment,
+        parametersToExcludeFromData
+      );
       /* --------------------------------- PUBLIC --------------------------------- */
 
       // ! distance
