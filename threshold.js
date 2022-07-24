@@ -3790,23 +3790,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
       // ! question and answer
       if (targetTask.current === "questionAndAnswer") {
-        let question, answers;
+        // TEXT|New York|This is a free form text answer question. Please put the name of your favorite city here.
+        // CHOICE|Apple|This is an example multiple choice question. Please select your favorite fruit.|Apple|Banana|Watermelon|Strawberry
+        // 0     |1    |2                                                                              |3
+        let correctAnswer, question, answers;
 
         let thisQuestionAndAnswer =
           questionsThisBlock.current[status.trial - 1];
 
         const questionComponents = thisQuestionAndAnswer.split("|");
-        const choiceQuestionBool = questionComponents.length > 2;
+        const choiceQuestionBool = questionComponents.length > 3;
 
-        question = questionComponents[1];
+        // ! shortcut
+        const questionAndAnswerShortcut = questionComponents[0];
+        // ! correct answer
+        correctAnswer = questionComponents[1];
+        // ! question
+        question = questionComponents[2];
+        // ! answers
         if (choiceQuestionBool) {
-          answers = questionComponents.slice(2);
+          answers = questionComponents.slice(3);
         } else {
-          // freeform
+          // freeform / TEXT
           answers = "";
         }
-
-        const questionAndAnswerShortcut = questionComponents[0];
 
         let html = "";
         const inputOptions = {};
@@ -3896,6 +3903,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.experiment.addData(
             questionAndAnswerShortcut || question,
             answer
+          );
+          psychoJS.experiment.addData(
+            `${questionAndAnswerShortcut || question}CorrectAnswer`,
+            correctAnswer
+          );
+          psychoJS.experiment.addData(
+            "questionAndAnswerCorrectAnswer",
+            correctAnswer
           );
           psychoJS.experiment.addData("questionAndAnswerResult", answer);
         }
