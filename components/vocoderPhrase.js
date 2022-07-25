@@ -1,16 +1,20 @@
 import mergeBuffers from "merge-audio-buffers";
 import { audioCtx, loadVocoderPhraseSoundFiles } from "./soundUtils";
 
-// var targetList = {};
-// var maskerList = {};
+var targetList = {};
+var maskerList = {};
 var whiteNoise;
 var whiteNoiseData;
 
 export const initVocoderPhraseSoundFiles = async (trialsConditions) => {
   const blockFiles = await loadVocoderPhraseSoundFiles(trialsConditions);
   // return new Promise(async (resolve) => {
-  //   var targetList = await blockFiles["target"];
-  //   var maskerList = await blockFiles["maskerList"];
+  targetList = blockFiles["target"];
+  maskerList = blockFiles["maskerList"];
+  console.log(Object.keys(targetList));
+  console.log(Object.keys(maskerList));
+  // console.log( targetList["1_1"]);
+  // console.log("maskerList", maskerList);
   //   resolve({targetList:targetList,maskerList:maskerList});
   // });
   return {
@@ -20,8 +24,8 @@ export const initVocoderPhraseSoundFiles = async (trialsConditions) => {
 };
 
 export const getVocoderPhraseTrialData = async (
-  targetList,
-  maskerList,
+  // targetList,
+  // maskerList,
   blockCondition,
   targetVolumeDbSPLFromQuest,
   whiteNoiseLevel,
@@ -41,8 +45,8 @@ export const getVocoderPhraseTrialData = async (
   var maskerSentenceAudio;
 
   var targetKeys = Object.keys(targetList[blockCondition]);
-  console.log("list", targetKeys);
-  console.log(targetList[blockCondition]);
+  // console.log("list", targetKeys);
+  // console.log(targetList[blockCondition]);
 
   targetSentenceAudio = getTargetSentenceAudio(
     targetKeys,
@@ -59,7 +63,7 @@ export const getVocoderPhraseTrialData = async (
   );
   const targetAudio = combineAudioBuffers(targetSentenceAudio, audioCtx);
   const maskerAudio = combineAudioBuffers(maskerSentenceAudio, audioCtx);
-  console.log(mergeBuffers([targetAudio, maskerAudio], audioCtx));
+  // console.log(mergeBuffers([targetAudio, maskerAudio], audioCtx));
   return mergeBuffers([targetAudio, maskerAudio], audioCtx);
 };
 
@@ -182,7 +186,7 @@ const getMaskerSentenceAudio = (
       maskerSentenceAudio.push(trialWordData);
     } else {
       const word = maskerList_[maskerTalker][elem];
-      console.log(word, elem);
+      // console.log(word, elem);
       const trialWordData = getTrialAudioBuffer(maskerChannels, word, audioCtx);
       maskerSentenceAudio.push(trialWordData);
     }

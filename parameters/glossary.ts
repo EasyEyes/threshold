@@ -408,6 +408,30 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  flankerCharacterSet: {
+    name: "flankerCharacterSet",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  flankerFont: {
+    name: "flankerFont",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  flankerFontSource: {
+    name: "flankerFontSource",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  flankerNumber: {
+    name: "flankerNumber",
+    availability: "now",
+    type: "",
+    default: "",
+  },
   flipScreenHorizontallyBool: {
     name: "flipScreenHorizontallyBool",
     availability: "later",

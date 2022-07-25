@@ -1351,8 +1351,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         vocoderPhraseSoundFiles.current = await initVocoderPhraseSoundFiles(
           trialsConditions
         );
+
         vocoderPhraseSoundFiles.loaded = true;
-        console.log(vocoderPhraseSoundFiles.current["targetList"]);
+        console.log(
+          "vocoderPhraseSoundFiles",
+          vocoderPhraseSoundFiles.current["targetList"]
+        );
       } else if (targetKind.current === "sound") {
         if (targetTask.current === "identify") {
           //init trial sound data
@@ -1651,7 +1655,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
         );
       /* -------------------------------------------------------------------------- */
-
       // Get total trials for this block
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
@@ -3104,15 +3107,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         vocoderPhrase: async () => {
           // const interval = setInterval(()=>{},50)
           console.log(vocoderPhraseSoundFiles.current["targetList"]);
-          const trialSound = getVocoderPhraseTrialData(
-            vocoderPhraseSoundFiles.current["targetList"],
-            vocoderPhraseSoundFiles.current["maskerList"],
+          const trialSound = await getVocoderPhraseTrialData(
+            // vocoderPhraseSoundFiles.current["targetList"],
+            // vocoderPhraseSoundFiles.current["maskerList"],
             status.block_condition,
             ProposedVolumeLevelFromQuest.current,
             whiteNoiseLevel.current,
             soundGainDBSPL.current,
             maskerVolumeDbSPL.current
           );
+          console.log("trialSound", trialSound);
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
               trialSound,

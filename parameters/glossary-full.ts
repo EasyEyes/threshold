@@ -475,7 +475,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "40",
     explanation:
-      "Number of trials of this condition to run in this block. They are all randomly interleaved. Each condition can have a different number of trials. ",
+      "Number of trials of this condition to run in this block. They are all randomly interleaved. Each condition can have a different number of trials. IMPORTANT: We have parameters, e.g. thresholdAllowedDuration, that can reject trials for various reasons, e.g. bad duration. When a trial is rejected, it is not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the rejected trial's result so you could reanalyze your data including the rejected trials. In principle, it would be nice to add a new trial to make up for each rejected trial, but the PsychoJS MultiStair code has no provision for adding a trial to an ongoing loop. We hope to add that capability in the future.",
     type: "integer",
     default: "35",
     categories: "",
@@ -529,6 +529,46 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "To test the far periphery it may be worth the trouble of setting up an off-screen fixation mark, with help from the participant. Set fixationRequestedOffscreenBool TRUE and EasyEyes will ask the participant to put tape on a bottle or a box and draw a crosshair on it. To figure out where the crosshair is, EasyEyes will display arrows on the display and ask the participant to drag the arrow heads to point to the crosshair.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "flankerCharacterSet",
+    availability: "now",
+    example: "",
+    explanation:
+      "flankerCharacterSet is like fontCharacterSet but for the flankers. If not specified, then use fontCharacterSet.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "flankerFont",
+    availability: "now",
+    example: "",
+    explanation:
+      "flankerFont is like font, but for the flankers. If not specified, then use font.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "flankerFontSource",
+    availability: "now",
+    example: "",
+    explanation:
+      "flankerFontSource is like fontSource, but for the flankers. If not specified, then use fontSource.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "flankerNumber",
+    availability: "now",
+    example: "",
+    explanation:
+      "flankerNumber is the number of flanker characters on each side of the target.",
+    type: "",
+    default: "",
     categories: "",
   },
   {
@@ -932,7 +972,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "AFTERLIFE|Is there life after death?|Yes|No|Maybe",
     explanation:
-      'questionAndAnswer@@ (e.g. questionAndAnswer01) consists of several strings, separated by vertical bars |, that specify: a nickname, a question to be asked, and perhaps some possible answers. The nickname is used solely to name the column of responses in the saved data. The nickname and question are required; the answers are not. If no answers are specified, then the question accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives. Specifying just one answer is currently an error, but this may change in a future enhancement. \nIMPORTANT: You can have many questionAndAnswer in one condition, but the block may not include any other condition. The EasyEyes compiler will soon enforce this.\n• FREE-FORM: Provide just a nickname and a question, no answer. For example, "DESCRIPTION|Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n• MULTIPLE CHOICE: Provide a nickname, a question, and at least two answers. The participant must click on one. For example "BEAUTY|How much beauty do you get from this image right now?|1|2|3|4|5|6|7" Or "KIND|Which kind of image is it?|figurative painting|abstract painting|photograph"\n\nWe support questionAndAnswer01 - questionAndAnswer99, i.e. you can write 99 questions in one block.',
+      'UPDATE: we just added a new correctAnswer field. All tables that used questionAndAnswer before July 23, 2022 must be updated to the new format.\n\nquestionAndAnswer@@ (e.g. questionAndAnswer01) consists of several strings, separated by vertical bars |, that specify: a nickname, correctAnswer (may be empty), a question to be asked, and perhaps some possible answers.  The nickname is used solely to name the column of responses in the saved data. The correctAnswer may be omitted, in which case the vertical bars before and after it will be contiguous. The nickname and question are required; the answers are optional. If no answers are specified, then the question accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives, a button devoted to each one. Specifying just one answer is currently an error, but this may change in a future enhancement. (We might use the single-answer field to specify the single-answer type, e.g. logical, numerical, integer, text.)\nIMPORTANT: To use questionAndAnswer you MUST set targetTask to questionAndAnswer. The compiler will soon enforce this.\nIMPORTANT: You can have many questionAndAnswer in one condition, e.g.  questionAndAnswer01, questionAndAnswer02, questionAndAnswer03, but the block may not include any other condition. The EasyEyes compiler will soon enforce this.\n• FREE-FORM: Provide just a nickname, an empty correctAnswer, and a question, no answer. For example, "DESCRIPTION||Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n• MULTIPLE CHOICE: Provide a nickname, a correctAnswer, a question, and at least two answers. The participant must click on one. For example:\nFRUIT|apple|Which of the following is a fruit?|house|sky|apple|father|country\nBEAUTY||How much beauty do you get from this image right now?|1|2|3|4|5|6|7\nor\nKIND||What kind of image is it?|figurative painting|abstract painting|photograph\n\nEasyEyes supports questionAndAnswer01 ... questionAndAnswer99, i.e. you can have up to 99 questions in one block. The questions you use must start with 01 and cannot skip.  You can have any number of blocks, each with new questions.',
     type: "text",
     default: "",
     categories: "",
@@ -1806,7 +1846,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1.5",
     explanation:
-      "thresholdAllowedDurationRatio. QUEST receives the trial's response only if measured duration is in the range [targetDurationSec/r targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1.",
+      "thresholdAllowedDurationRatio. QUEST receives the trial's response only if measured duration is in the range [targetDurationSec/r targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. (Also see conditionTrials.)",
     type: "numerical",
     default: "1.5",
     categories: "",
@@ -1816,7 +1856,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      "thresholdAllowedGazeRErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg.",
+      "thresholdAllowedGazeRErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. (Also see conditionTrials.)",
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -1826,7 +1866,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      "thresholdAllowedGazeXErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg.",
+      "thresholdAllowedGazeXErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg. (Also see conditionTrials.)",
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -1836,7 +1876,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      "thresholdAllowedGazeYErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.",
+      "thresholdAllowedGazeYErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg. (Also see conditionTrials.)",
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -1846,7 +1886,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.1",
     explanation:
-      "thresholdAllowedLatencySec. QUEST receives the trial's response only if measured target latency is less than or equal to thresholdAllowedLatencySec.",
+      "thresholdAllowedLatencySec. QUEST receives the trial's response only if measured target latency is less than or equal to thresholdAllowedLatencySec. (Also see conditionTrials.)",
     type: "numerical",
     default: "0.1",
     categories: "",

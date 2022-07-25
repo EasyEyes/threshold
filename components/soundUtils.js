@@ -197,180 +197,213 @@ var flag = true;
 export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
   const maskerList = {};
   const targetList = {};
-  trialsConditions.map(async (condition) => {
-    //console.log("here.....", condition);
-    maskerList[condition["block_condition"]] = {};
-    targetList[condition["block_condition"]] = {};
+  await Promise.all(
+    trialsConditions.map(async (condition) => {
+      //console.log("here.....", condition);
+      maskerList[condition["block_condition"]] = {};
+      targetList[condition["block_condition"]] = {};
 
-    //load maskers
-    if (condition["maskerSoundFolder"]) {
-      console.log(`folders/${condition["maskerSoundFolder"]}.zip`);
-      //await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
-      await fetch(`folders/VocodedWord.zip`)
-        .then((response) => response.blob())
-        .then((data) => {
-          var Zip = new JSZip();
-          Zip.loadAsync(data).then(async (zip) => {
-            //console.log(zip.files);
-            zip.forEach(async (relativePath, zipEntry) => {
-              //console.log( zipEntry.name.split("/").length,zipEntry)
-              const Entryname = zipEntry.name.split("/");
-              //eg: VocodedWord/Talker11/Baron.wav
-              if (Entryname.length == 3) {
-                if (zipEntry.dir) {
-                  maskerList[condition["block_condition"]][Entryname[1]] = {};
-                  //eg. {1_2: {talker11:{}}}
-                } else {
-                  //verify file name extension
-
-                  //.substring(0, name[2].lastIndexOf(".")); //without extension
-                  if (verifyFileNameExtension(Entryname[2])) {
-                    const fileName = Entryname[2].split(".");
-                    //eg Baron.hi.wav --> ['Baron', 'hi', 'wav']
-                    // hi -> high frquency bands
-                    // low freuqncy bands
-                    const audioData = await zipEntry
-                      .async("arrayBuffer")
-                      .then((data) => {
-                        return getAudioBufferFromArrayBuffer(data);
-                      });
-                    //console.log(audioData)
-                    if (
-                      maskerList[condition["block_condition"]][Entryname[1]][
-                        fileName[0]
-                      ]
-                    )
-                      maskerList[condition["block_condition"]][Entryname[1]][
-                        fileName[0]
-                      ][fileName[1]] = audioData;
-                    else
-                      maskerList[condition["block_condition"]][Entryname[1]][
-                        fileName[0]
-                      ] = { [fileName[1]]: audioData };
-                  }
-                }
-              } else if (Entryname.length == 4) {
-                if (zipEntry.dir)
-                  maskerList[condition["block_condition"]][Entryname[1]][
-                    Entryname[2]
-                  ] = {};
-                else {
-                  if (verifyFileNameExtension(Entryname[3])) {
-                    const audioData = await zipEntry
-                      .async("arraybuffer")
-                      .then((data) => {
-                        return getAudioBufferFromArrayBuffer(data);
-                      });
-                    const fileName = Entryname[3].split(".");
-                    //targetList[condition["block_condition"]][name[1]][name[2]][fileName[0]] = {};
-                    if (
-                      maskerList[condition["block_condition"]][Entryname[1]][
-                        Entryname[2]
-                      ][fileName[0]]
-                    )
-                      maskerList[condition["block_condition"]][Entryname[1]][
-                        Entryname[2]
-                      ][fileName[0]][fileName[1]] = audioData;
+      //load maskers
+      if (condition["maskerSoundFolder"]) {
+        console.log(`folders/${condition["maskerSoundFolder"]}.zip`);
+        //await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
+        await fetch(`folders/VocodedWord.zip`)
+          .then((response) => response.blob())
+          .then(async (data) => {
+            var Zip = new JSZip();
+            await Zip.loadAsync(data).then((zip) => {
+              return Promise.all(
+                Object.keys(zip.files).map(async (filename) => {
+                  const entryName = {
+                    current: filename,
+                    split: filename.split("/"),
+                  };
+                  if (entryName.split.length == 3) {
+                    entryName.current = getEntryNameDataForFile(
+                      entryName.current
+                    );
+                    //eg: filename ===> VocodedWord/Talker11/Baron.hi.wav
+                    if (isDirectory(zip.files[filename]))
+                      maskerList[condition["block_condition"]][
+                        entryName.current.Talker
+                      ] = {};
+                    //eg. {1_2: {talker11:{}}}
                     else {
-                      maskerList[condition["block_condition"]][Entryname[1]][
-                        Entryname[2]
-                      ][fileName[0]] = { [fileName[1]]: audioData };
+                      // console.log("zip.files",zip.files[filename])
+                      const file = await processAudioDataForFile(
+                        filename,
+                        zip.files[filename]
+                      );
+                      if (file) {
+                        // console.log("file",file)
+                        //separate high and low frequency bands]
+                        if (
+                          maskerList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.split.name]
+                        )
+                          maskerList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.split.name][
+                            entryName.current.split.freq
+                          ] = file.audioData;
+                        else
+                          maskerList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.split.name] = {
+                            [entryName.current.split.freq]: file.audioData,
+                          };
+                      }
+                    }
+                  } else if (entryName.split.length == 4) {
+                    //eg: filename ===> VocodedWord/Talker11/CallSign/Arrow.hi.wav
+                    entryName.current = getEntryNameDataForFileInSubFolder(
+                      entryName.current
+                    );
+                    // console.log("debug",maskerList[condition["block_condition"]][entryName.current.Talker])
+                    if (isDirectory(zip.files[filename]))
+                      maskerList[condition["block_condition"]][
+                        entryName.current.Talker
+                      ][entryName.current.subFolder] = {};
+                    else {
+                      const file = await processAudioDataForFileInSubFolder(
+                        filename,
+                        zip.files[filename]
+                      );
+                      if (file) {
+                        // console.log("file",file)
+                        //separate high and low frequency bands]
+                        if (
+                          maskerList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.subFolder][
+                            entryName.current.split.name
+                          ]
+                        )
+                          maskerList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.subFolder][
+                            entryName.current.split.name
+                          ][entryName.current.split.freq] = file.audioData;
+                        else
+                          maskerList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.subFolder][
+                            entryName.current.split.name
+                          ] = {
+                            [entryName.current.split.freq]: file.audioData,
+                          };
+                      }
                     }
                   }
-                }
-              }
+                })
+              );
             });
-            // console.log(maskerList["1_1"]["Talker11"])
           });
-        });
-      //console.log(maskerList)
-    }
+      }
 
-    //load target
-    if (condition["targetSoundFolder"]) {
-      //console.log(`folders/${condition["targetSoundFolder"]}.zip`);
-      //await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
-      await fetch(`folders/VocodedWord.zip`)
-        .then((response) => response.blob())
-        .then((data) => {
-          var Zip = new JSZip();
-          Zip.loadAsync(data).then(async (zip) => {
-            //console.log(zip.files);
-            zip.forEach(async (relativePath, zipEntry) => {
-              //console.log( zipEntry.name.split("/").length,zipEntry)
-              const Entryname = zipEntry.name.split("/");
-              //eg: VocodedWord/Talker11/Baron.wav
-              if (Entryname.length == 3) {
-                if (zipEntry.dir) {
-                  targetList[condition["block_condition"]][Entryname[1]] = {};
-                  //eg. {1_2: {talker11:{}}}
-                } else {
-                  //verify file name extension
+      //load target
+      if (condition["targetSoundFolder"]) {
+        //console.log(`folders/${condition["targetSoundFolder"]}.zip`);
+        //await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
+        await fetch(`folders/VocodedWord.zip`)
+          .then((response) => response.blob())
+          .then(async (data) => {
+            var Zip = new JSZip();
 
-                  //.substring(0, name[2].lastIndexOf(".")); //without extension
-                  if (verifyFileNameExtension(Entryname[2])) {
-                    const fileName = Entryname[2].split(".");
-                    //eg Baron.hi.wav --> ['Baron', 'hi', 'wav']
-                    // hi -> high frquency bands
-                    // low freuqncy bands
-                    const audioData = await zipEntry
-                      .async("arrayBuffer")
-                      .then((data) => {
-                        return getAudioBufferFromArrayBuffer(data);
-                      });
-                    if (
-                      targetList[condition["block_condition"]][Entryname[1]][
-                        fileName[0]
-                      ]
-                    )
-                      targetList[condition["block_condition"]][Entryname[1]][
-                        fileName[0]
-                      ][fileName[1]] = audioData;
-                    else
-                      targetList[condition["block_condition"]][Entryname[1]][
-                        fileName[0]
-                      ] = { [fileName[1]]: audioData };
-                  }
-                }
-              } else if (Entryname.length == 4) {
-                if (zipEntry.dir)
-                  targetList[condition["block_condition"]][Entryname[1]][
-                    Entryname[2]
-                  ] = {};
-                else {
-                  if (verifyFileNameExtension(Entryname[3])) {
-                    const audioData = await zipEntry
-                      .async("arraybuffer")
-                      .then((data) => {
-                        return getAudioBufferFromArrayBuffer(data);
-                      });
-                    const fileName = Entryname[3].split(".");
-                    //targetList[condition["block_condition"]][name[1]][name[2]][fileName[0]] = {};
-                    if (
-                      targetList[condition["block_condition"]][Entryname[1]][
-                        Entryname[2]
-                      ][fileName[0]]
-                    )
-                      targetList[condition["block_condition"]][Entryname[1]][
-                        Entryname[2]
-                      ][fileName[0]][fileName[1]] = audioData;
+            await Zip.loadAsync(data).then((zip) => {
+              return Promise.all(
+                Object.keys(zip.files).map(async (filename) => {
+                  const entryName = {
+                    current: filename,
+                    split: filename.split("/"),
+                  };
+                  if (entryName.split.length == 3) {
+                    entryName.current = getEntryNameDataForFile(
+                      entryName.current
+                    );
+                    //eg: filename ===> VocodedWord/Talker11/Baron.hi.wav
+                    if (isDirectory(zip.files[filename]))
+                      targetList[condition["block_condition"]][
+                        entryName.current.Talker
+                      ] = {};
+                    //eg. {1_2: {talker11:{}}}
                     else {
-                      targetList[condition["block_condition"]][Entryname[1]][
-                        Entryname[2]
-                      ][fileName[0]] = { [fileName[1]]: audioData };
+                      // console.log("zip.files",zip.files[filename])
+                      const file = await processAudioDataForFile(
+                        filename,
+                        zip.files[filename]
+                      );
+                      if (file) {
+                        // console.log("file",file)
+                        //separate high and low frequency bands]
+                        if (
+                          targetList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.split.name]
+                        )
+                          targetList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.split.name][
+                            entryName.current.split.freq
+                          ] = file.audioData;
+                        else
+                          targetList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.split.name] = {
+                            [entryName.current.split.freq]: file.audioData,
+                          };
+                      }
+                    }
+                  } else if (entryName.split.length == 4) {
+                    //eg: filename ===> VocodedWord/Talker11/CallSign/Arrow.hi.wav
+                    entryName.current = getEntryNameDataForFileInSubFolder(
+                      entryName.current
+                    );
+                    // console.log("debug",maskerList[condition["block_condition"]][entryName.current.Talker])
+                    if (isDirectory(zip.files[filename]))
+                      targetList[condition["block_condition"]][
+                        entryName.current.Talker
+                      ][entryName.current.subFolder] = {};
+                    else {
+                      const file = await processAudioDataForFileInSubFolder(
+                        filename,
+                        zip.files[filename]
+                      );
+                      if (file) {
+                        // console.log("file",file)
+                        //separate high and low frequency bands]
+                        if (
+                          targetList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.subFolder][
+                            entryName.current.split.name
+                          ]
+                        )
+                          targetList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.subFolder][
+                            entryName.current.split.name
+                          ][entryName.current.split.freq] = file.audioData;
+                        else
+                          targetList[condition["block_condition"]][
+                            entryName.current.Talker
+                          ][entryName.current.subFolder][
+                            entryName.current.split.name
+                          ] = {
+                            [entryName.current.split.freq]: file.audioData,
+                          };
+                      }
                     }
                   }
-                }
-              }
+                })
+              );
             });
           });
-        });
-    }
-  });
+      }
+    })
+  );
 
-  // return new Promise((resolve) => {
-  //   resolve({ target: targetList, maskerList: maskerList });
-  // });
   return { target: targetList, maskerList: maskerList };
 };
 
@@ -382,3 +415,66 @@ const verifyFileNameExtension = (name) => {
 };
 
 const acceptableExtensions = ["wav"];
+
+const isDirectory = (entry) => {
+  return entry.dir;
+};
+
+const getEntryNameDataForFile = (entry) => {
+  const entryName = entry.split("/");
+  const split = entryName[2].split(".");
+  return {
+    Talker: entryName[1],
+    fileName: entryName[2],
+    split: {
+      name: split[0],
+      freq: split[1],
+    },
+  };
+};
+
+const getEntryNameDataForFileInSubFolder = (entry) => {
+  const entryName = entry.split("/");
+  const split = entryName[3].split(".");
+  return {
+    Talker: entryName[1],
+    subFolder: entryName[2],
+    fileName: entryName[3],
+    split: {
+      name: split[0],
+      freq: split[1],
+    },
+  };
+};
+
+const processAudioDataForFile = async (fileName, zipEntry) => {
+  if (verifyFileNameExtension(fileName)) {
+    const audioData = await zipEntry
+      .async("arrayBuffer")
+      .then(async (fileData) => {
+        return await getAudioBufferFromArrayBuffer(fileData);
+      });
+    const filename = getEntryNameDataForFile(fileName);
+    // console.log("audioData",audioData)
+    return {
+      audioData: audioData,
+      fileName: filename,
+    };
+  } else return false;
+};
+
+const processAudioDataForFileInSubFolder = async (fileName, zipEntry) => {
+  if (verifyFileNameExtension(fileName)) {
+    const audioData = await zipEntry
+      .async("arrayBuffer")
+      .then(async (fileData) => {
+        return await getAudioBufferFromArrayBuffer(fileData);
+      });
+    const filename = getEntryNameDataForFileInSubFolder(fileName);
+
+    return {
+      audioData: audioData,
+      fileName: filename,
+    };
+  } else return false;
+};
