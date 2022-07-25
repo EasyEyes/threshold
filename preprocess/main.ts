@@ -156,8 +156,6 @@ export const prepareExperimentFileForThreshold = async (
 
   //validate requested Folders;
   const requestedFolderList: any = getFolderNames(parsed);
-  console.log("requestedFolderList", requestedFolderList);
-  console.log("easyeyesResources.folders", easyeyesResources.folders);
   errors.push(
     ...isSoundFolderMissing(requestedFolderList, easyeyesResources.folders)
   );
