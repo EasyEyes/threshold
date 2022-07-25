@@ -3904,15 +3904,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             questionAndAnswerShortcut || question,
             answer
           );
+          // psychoJS.experiment.addData(
+          //   `${questionAndAnswerShortcut || question}CorrectAnswer`,
+          //   correctAnswer
+          // );
           psychoJS.experiment.addData(
-            `${questionAndAnswerShortcut || question}CorrectAnswer`,
-            correctAnswer
+            "questionAndAnswerNickname",
+            questionAndAnswerShortcut
           );
+          psychoJS.experiment.addData("questionAndAnswerQuestion", question);
           psychoJS.experiment.addData(
             "questionAndAnswerCorrectAnswer",
             correctAnswer
           );
-          psychoJS.experiment.addData("questionAndAnswerResult", answer);
+          psychoJS.experiment.addData("questionAndAnswerResponse", answer);
         }
 
         // continueRoutine = true;
