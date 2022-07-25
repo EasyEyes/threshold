@@ -22,12 +22,19 @@ export const getFolderNames = (parsed: any): any => {
   }
   maskedfolderList.shift();
   targetfolderList.shift();
-  let folderList: string[] = maskedfolderList.concat(targetfolderList);
-  folderList = folderList.filter(
-    (item, pos) => folderList.indexOf(item) === pos
-  );
-  folderList = folderList.map((x) => x + ".zip");
-  return folderList;
+
+  maskedfolderList = [...new Set(maskedfolderList)];
+  targetfolderList = [...new Set(targetfolderList)];
+  // let folderList: string[] = maskedfolderList.concat(targetfolderList);
+  // folderList = folderList.filter(
+  //   (item, pos) => folderList.indexOf(item) === pos
+  // );
+  // folderList = folderList.map((x) => x + ".zip");
+  // return folderList;
+  return {
+    maskerSoundFolder: maskedfolderList,
+    targetSoundFolder: targetfolderList,
+  };
 };
 
 export const getFormNames = (parsed: any): any => {

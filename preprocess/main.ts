@@ -9,6 +9,7 @@ import {
   validateExperimentDf,
   isTextMissing,
   populateDefaultValues,
+  isSoundFolderMissing,
 } from "./experimentFileChecks";
 
 import { FONT_FILES_MISSING_WEB } from "./errorMessages";
@@ -154,7 +155,12 @@ export const prepareExperimentFileForThreshold = async (
     errors.push(...isTextMissing(requestedTextList, easyeyesResources.texts));
 
   //validate requested Folders;
-  const requestedFolderList: string[] = getFolderNames(parsed);
+  const requestedFolderList: any = getFolderNames(parsed);
+  console.log("requestedFolderList", requestedFolderList);
+  console.log("easyeyesResources.folders", easyeyesResources.folders);
+  errors.push(
+    ...isSoundFolderMissing(requestedFolderList, easyeyesResources.folders)
+  );
 
   // TODO remove if we find no problems are caused by not validating commas
   // Check that every row has the same number of values

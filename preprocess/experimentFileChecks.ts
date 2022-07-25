@@ -26,6 +26,7 @@ import {
   FONT_FILES_MISSING,
   NONUNIQUE_WITHIN_BLOCK,
   TEXT_FILES_MISSING,
+  SOUND_FOLDER_MISSING,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import { isNumeric, levDist, arraysEqual } from "./utils";
@@ -582,6 +583,33 @@ export const isFormMissing = (
   if (!existingFormList.includes(requestedForm)) {
     errorList.push(FORM_FILES_MISSING(formType, [requestedForm]));
   }
+
+  return errorList;
+};
+
+export const isSoundFolderMissing = (
+  requestedFolderList: any,
+  existingFolderList: string[]
+): EasyEyesError[] => {
+  const errorList: EasyEyesError[] = [];
+
+  // for(const requestedFolder of requestedFolderList){
+  //   if(!existingFolderList.includes(requestedFolder)){
+  //     errorList.push(SOUND_FOLDER_MISSING(requestedFolder));
+  //   }
+  // }
+
+  const keys = Object.keys(requestedFolderList);
+  const missingFolderList: any[] = [];
+  keys.map((key) => {
+    requestedFolderList[key].forEach((requestedFolder: any) => {
+      if (!existingFolderList.includes(requestedFolder)) {
+        missingFolderList.push(requestedFolder);
+      }
+    });
+    errorList.push(SOUND_FOLDER_MISSING(key, missingFolderList));
+    missingFolderList.splice(0);
+  });
 
   return errorList;
 };

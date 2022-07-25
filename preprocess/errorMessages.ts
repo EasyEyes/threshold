@@ -149,6 +149,24 @@ export const FONT_FILES_MISSING_WEB = (
   };
 };
 
+export const SOUND_FOLDER_MISSING = (
+  parameter: string,
+  missingFileNameList: string[]
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList.map((fileName: string) => {
+    htmlList += `<li>${fileName}</li>`;
+  });
+  return {
+    name: "Sound folder is missing",
+    message: `We could not find the following folder(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the folder(s) to the drop box above ↑`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 export const FORM_FILES_MISSING = (
   parameter: string,
   missingFileNameList: string[]
