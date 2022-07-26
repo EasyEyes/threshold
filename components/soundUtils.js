@@ -101,7 +101,7 @@ export const createImpulseResponseFilterNode = async (
   const myArrayBuffer = audioCtx.createBuffer(
     1,
     // TODO: quality check this
-    invertedImpulseResponseBuffer.length / audioCtx.sampleRate,
+    invertedImpulseResponseBuffer.length - 1,
     audioCtx.sampleRate
   );
 
