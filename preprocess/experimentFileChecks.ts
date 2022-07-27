@@ -603,11 +603,13 @@ export const isSoundFolderMissing = (
   const missingFolderList: any[] = [];
   keys.map((key) => {
     requestedFolderList[key].forEach((requestedFolder: any) => {
-      if (!existingFolderList.includes(requestedFolder)) {
+      if (!existingFolderList.includes(requestedFolder + ".zip")) {
+        // console.log(requestedFolder+".zip")
         missingFolderList.push(requestedFolder);
       }
     });
-    errorList.push(SOUND_FOLDER_MISSING(key, missingFolderList));
+    if (missingFolderList.length)
+      errorList.push(SOUND_FOLDER_MISSING(key, missingFolderList));
     missingFolderList.splice(0);
   });
 

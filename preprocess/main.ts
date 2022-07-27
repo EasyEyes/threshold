@@ -155,10 +155,17 @@ export const prepareExperimentFileForThreshold = async (
     errors.push(...isTextMissing(requestedTextList, easyeyesResources.texts));
 
   //validate requested Folders;
-  const requestedFolderList: any = getFolderNames(parsed);
-  errors.push(
-    ...isSoundFolderMissing(requestedFolderList, easyeyesResources.folders)
-  );
+  // console.log("easyeyesResources.folders", easyeyesResources.folders)
+  const folderList: any = getFolderNames(parsed);
+  errors.push(...isSoundFolderMissing(folderList, easyeyesResources.folders));
+  const keys = Object.keys(folderList);
+  const requestedFolderList: any[] = [];
+  keys.map((key) => {
+    folderList[key].forEach((requestedFolder: any) => {
+      requestedFolderList.push(requestedFolder + ".zip");
+    });
+  });
+  // console.log("requestedFolderList", requestedFolderList);
 
   // TODO remove if we find no problems are caused by not validating commas
   // Check that every row has the same number of values
