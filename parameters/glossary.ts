@@ -76,6 +76,12 @@ export const GLOSSARY: Glossary = {
       "notCocCoc",
     ],
   },
+  _compatibleCameraBool: {
+    name: "_compatibleCameraBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
   _compatibleBrowserVersionMinimum: {
     name: "_compatibleBrowserVersionMinimum",
     availability: "now",

@@ -70,22 +70,26 @@ export const calculateError = async (
     letterTiming.targetStartSec === null ||
     letterTiming.targetFinishSec === null
   ) {
-    throw new Error("targetStartSec or targetFinishSec is missing");
-  }
-  const measuredTargetDurationSec =
-    letterTiming.targetFinishSec - letterTiming.targetStartSec;
+    console.error(
+      "targetStartSec or targetFinishSec is missing, in calculateError"
+    );
+  } else {
+    const measuredTargetDurationSec =
+      letterTiming.targetFinishSec - letterTiming.targetStartSec;
 
-  tolerances.measured.targetMeasuredDurationSec = measuredTargetDurationSec;
-  tolerances.measured.targetMeasuredDurationFrames =
-    targetFrameTimingReport.recordedEnd - targetFrameTimingReport.recordedStart;
-  tolerances.measured.thresholdDurationRatio =
-    measuredTargetDurationSec < targetDurationSec
-      ? targetDurationSec / measuredTargetDurationSec
-      : measuredTargetDurationSec / targetDurationSec;
-  tolerances.measured.targetMeasuredLatencySec =
-    (letterTiming.targetDrawnConfirmedTimestamp -
-      letterTiming.crosshairClickedTimestamp) /
-    1000;
+    tolerances.measured.targetMeasuredDurationSec = measuredTargetDurationSec;
+    tolerances.measured.targetMeasuredDurationFrames =
+      targetFrameTimingReport.recordedEnd -
+      targetFrameTimingReport.recordedStart;
+    tolerances.measured.thresholdDurationRatio =
+      measuredTargetDurationSec < targetDurationSec
+        ? targetDurationSec / measuredTargetDurationSec
+        : measuredTargetDurationSec / targetDurationSec;
+    tolerances.measured.targetMeasuredLatencySec =
+      (letterTiming.targetDrawnConfirmedTimestamp -
+        letterTiming.crosshairClickedTimestamp) /
+      1000;
+  }
 };
 
 export const addResponseIfTolerableError = (
@@ -141,8 +145,13 @@ const _targetDurationAcceptable = (
   measuredDurationRatio,
   allowedDurationRatio
 ) => {
-  return measuredDurationRatio <= allowedDurationRatio;
-  // return (measuredDurationSec >= (targetDurationSec/allowedDurationRatio) && measuredDurationSec <= (targetDurationSec*allowedDurationRatio))
+  if (measuredDurationRatio && allowedDurationRatio) {
+    return measuredDurationRatio <= allowedDurationRatio;
+    // return (measuredDurationSec >= (targetDurationSec/allowedDurationRatio) && measuredDurationSec <= (targetDurationSec*allowedDurationRatio))
+  } else {
+    console.error("Unable to check if target duration is acceptable.");
+    return false;
+  }
 };
 
 const _gazeErrorAcceptable = (measured, allowed) => {
@@ -152,16 +161,32 @@ const _gazeErrorAcceptable = (measured, allowed) => {
     thresholdAllowedGazeYErrorDeg,
     thresholdAllowedGazeRErrorDeg,
   } = allowed;
-
-  return (
-    Math.abs(gazeMeasuredXDeg) <= Math.abs(thresholdAllowedGazeXErrorDeg) &&
-    Math.abs(gazeMeasuredYDeg) <= Math.abs(thresholdAllowedGazeYErrorDeg) &&
-    gazeMeasuredRDeg <= thresholdAllowedGazeRErrorDeg
-  );
+  if (
+    gazeMeasuredRDeg &&
+    gazeMeasuredXDeg &&
+    gazeMeasuredYDeg &&
+    thresholdAllowedGazeRErrorDeg &&
+    thresholdAllowedGazeXErrorDeg &&
+    thresholdAllowedGazeYErrorDeg
+  ) {
+    return (
+      Math.abs(gazeMeasuredXDeg) <= Math.abs(thresholdAllowedGazeXErrorDeg) &&
+      Math.abs(gazeMeasuredYDeg) <= Math.abs(thresholdAllowedGazeYErrorDeg) &&
+      gazeMeasuredRDeg <= thresholdAllowedGazeRErrorDeg
+    );
+  } else {
+    console.error("Unable to check if gaze position is acceptable.");
+    return false;
+  }
 };
 
 const _targetLatencyAcceptable = (measuredTargetLatency, allowedLatency) => {
-  return measuredTargetLatency <= allowedLatency;
+  if (measuredTargetLatency && allowedLatency) {
+    return measuredTargetLatency <= allowedLatency;
+  } else {
+    console.error("Unable to check if target latency is acceptable.");
+    return false;
+  }
 };
 
 const _reportTargetTimingFrames = (targetStim) => {

@@ -3603,16 +3603,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         target.frameNFinishConfirmed = frameN;
 
         if (showConditionNameConfig.showTargetSpecs) {
-          const thisDuration =
-            letterTiming.targetFinishSec - letterTiming.targetStartSec;
-          showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
-            Math.round(thisDuration * 100000.0) / 100000
-          } [${isTimingOK(
-            Math.abs(thisDuration - letterConfig.targetDurationSec),
-            0.02
-          )}]`;
-          targetSpecs.setText(showConditionNameConfig.targetSpecs);
-          showConditionName(conditionName, targetSpecs);
+          if (
+            letterTiming.targetFinishSec !== undefined &&
+            letterTiming.targetStartSec !== undefined
+          ) {
+            const thisDuration =
+              letterTiming.targetFinishSec - letterTiming.targetStartSec;
+            showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
+              Math.round(thisDuration * 100000.0) / 100000
+            } [${isTimingOK(
+              Math.abs(thisDuration - letterConfig.targetDurationSec),
+              0.02
+            )}]`;
+            targetSpecs.setText(showConditionNameConfig.targetSpecs);
+            showConditionName(conditionName, targetSpecs);
+          }
         }
       }
       if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {

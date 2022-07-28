@@ -50,6 +50,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "all, Chrome, Safari, Firefox, Opera, Edge, Chromium, Tor, Duckduckgo, Brave, Vivaldi, Midori, SamsungInternet, UCBrowser, Android, Firefox, QQBrowser, Instabridge, WhaleBrowser, Puffin, YandexBrowser, EdgeLegacy, Edge, CocCoc, notChrome, notSafari, notFirefox, notOpera, notEdge, notChromium, notTor, notDuckduckgo, notBrave, notVivaldi, notMidori, notSamsungInternet, notUCBrowser, notAndroid, notFirefox, notQQBrowser, notInstabridge, notWhaleBrowser, notPuffin, notYandexBrowser, notEdgeLegacy, notEdge, notCocCoc",
   },
   {
+    name: "_compatibleCameraBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "_compatibleCameraBool (default TRUE) tells EasyEyes whether to check for the presence of a camera. We use the camera to track gaze and viewing distance so most experiments need it. Note that use of the camera requires permission of the participant, and some will refuse. Before asking we show an assurance that we won't retain the photos themselves and will retain only position and orientation of head and gaze. (Do we also retain the interpupillary distance in cm?) Currently we do this in the Remote Calibrator, but it would be better to do it here so people don't waste time calibrating if their camera is broken or EasyEyes can't find it. (As one participant reported to me today via Prolific.)",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_compatibleBrowserVersionMinimum",
     availability: "now",
     example: "100",
@@ -95,7 +105,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without institutional Pavlovia licenses. When TRUE, when you compile an experiment, EasyEyes appends the smallest possible integer (no less than 1) that creates an unused (unique) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users who need tokens, Pavlovia requires that tokens be assigned to a specific experiment (repo). For them, every time we change the repo name, they must visit Pavlovia to reassign tokens. They might prefer to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the datafiles will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists need to shift tokens only the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting pavlovia, until the experiment runs out of tokens. Alas, this flag won't help PILOTING mode, which can only be used from within Pavlovia. Some users might like _compileAsNewExperimentBool FALSE to avoid the huge proliferation of repos. ",
+      "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without institutional Pavlovia licenses. When TRUE, when you compile an experiment, EasyEyes takes the spreadsheet table name and appends the smallest possible integer (no less than 1) to create a unique (unused) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users who need tokens, Pavlovia requires that tokens be assigned to a specific experiment (repo). For them, every time we change the repo name, they must visit Pavlovia to reassign tokens. They might prefer to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the datafiles will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists need to shift tokens only the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting Pavlovia, until the experiment runs out of tokens. Note that this flag won't help PILOTING mode, which can only be used from within Pavlovia. Some users might like _compileAsNewExperimentBool FALSE to avoid the huge proliferation of repos. ",
     type: "boolean",
     default: "TRUE",
     categories: "",
