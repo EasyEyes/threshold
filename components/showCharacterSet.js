@@ -30,6 +30,7 @@ export function setupClickableCharacterSet(
 
   characterSetHolder.style.fontFamily = `"${font}"`;
   characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
+
   if (targetKind == "sound") {
     characterSetHolder.style.display = "grid";
     //characterSetHolder.style.flexWrap = "wrap";
@@ -37,6 +38,7 @@ export function setupClickableCharacterSet(
     characterSetHolder.style.gridTemplateRows = "repeat(7,7vh)";
     characterSetHolder.style.gridAutoFlow = "column";
   }
+
   getCharacterSetShowPos(characterSetHolder, where);
 
   pushCharacterSet(
@@ -97,10 +99,12 @@ const pushCharacterSet = (
 ) => {
   for (let a of ans) {
     let characterSet = document.createElement("span");
+
     if (targetKind == "sound") {
       characterSet.style.fontSize = "15px";
       characterSet.style.textAlign = "left";
     }
+
     characterSet.className = "characterSet";
     if (extraCharClassName.length)
       characterSet.classList.add(extraCharClassName);
@@ -110,7 +114,9 @@ const pushCharacterSet = (
 
     if (addFakeConnection)
       characterSet.style.fontVariantLigatures = "discretionary-lig-values";
-    characterSet.innerHTML = addFakeConnection ? `&zwj;${a}&zwj;` : a;
+
+    characterSet.innerHTML =
+      addFakeConnection && targetKind === "reading" ? `&zwj;${a}&zwj;` : a;
     characterSet.style.direction = globalFont.ltr ? "ltr" : "rtl";
 
     characterSet.onclick = () => {
