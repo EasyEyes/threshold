@@ -278,7 +278,7 @@ export class Grid {
             units: "pix",
             lineWidth: i % 5 === 0 ? 5 : 2,
             lineColor: new util.Color("black"),
-            fillColor: new util.Color("black"),
+            // fillColor: new util.Color("black"),
             opacity: this.opacity,
             vertices: verticies,
             depth: -999999,
@@ -357,7 +357,7 @@ export class Grid {
             units: "pix",
             lineWidth: i % 5 === 0 ? 5 : 2,
             lineColor: new util.Color("blue"),
-            fillColor: new util.Color("blue"),
+            // fillColor: new util.Color("blue"),
             opacity: 1.0,
             vertices: verticies,
             depth: -999999,
@@ -393,7 +393,6 @@ export class Grid {
 
   _getDegGridStims = () => {
     const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg");
-    logger("numberOfGridLinesPerSide", numberOfGridLinesPerSide);
     const [lines, labels] = [[], []];
     for (const region of ["right", "left", "upper", "lower"]) {
       let nGridlines;

@@ -1,5 +1,4 @@
 import { letterConfig } from "./global";
-import { logger } from "./utils";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
@@ -8,7 +7,6 @@ export const readTrialLevelLetterParams = (reader, BC) => {
     BC
   );
   letterConfig.spacingDirection = reader.read("spacingDirection", BC);
-  logger("spacingDirection", letterConfig.spacingDirection);
   letterConfig.spacingSymmetry = reader.read("spacingSymmetry", BC);
   letterConfig.targetSizeIsHeightBool = reader.read(
     "targetSizeIsHeightBool",
@@ -17,13 +15,8 @@ export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.targetMinimumPix = reader.read("targetMinimumPix", BC);
   letterConfig.spacingOverSizeRatio = reader.read("spacingOverSizeRatio", BC);
   letterConfig.spacingRelationToSize = reader.read("spacingRelationToSize", BC);
-  logger(
-    "spacingRelationToSize in readTrialLevel",
-    reader.read("spacingRelationToSize", BC)
-  );
   letterConfig.targetMinimumPix = reader.read("targetMinimumPix", BC);
   const targetEccentricityXDeg = reader.read("targetEccentricityXDeg", BC);
-  logger("targetEccentricityXDeg", targetEccentricityXDeg);
   const targetEccentricityYDeg = reader.read("targetEccentricityYDeg", BC);
   letterConfig.targetEccentricityXYDeg = [
     targetEccentricityXDeg,

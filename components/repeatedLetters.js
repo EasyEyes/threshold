@@ -5,6 +5,7 @@ import {
   repeatedLettersConfig,
   displayOptions,
   fixationConfig,
+  correctAns,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -35,6 +36,9 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
     fontCharacterSet.current,
     2
   );
+  logger("targetCharacters", targetCharacters);
+  correctAns.current = targetCharacters.map((c) => c.toLowerCase());
+  logger("correctAns.current", correctAns.current);
   const stims = stimulusParameters.stimulusLocations.map((stimInfo, i) => {
     const { type, pos } = stimInfo;
     const character =
@@ -79,18 +83,14 @@ export const restrictRepeatedLettersSpacing = (
 
   // Find pos of target in pixels
   const targetXYPx = fixationConfig.pos;
-  // const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
-  logger("targetXYPx", targetXYPx);
 
   // Calculate our implicated spacing
   let spacingDeg = Math.pow(10, proposedLevel);
-  logger("spacingDeg", spacingDeg);
 
   // Loop
   for (const _ of [...new Array(200).keys()]) {
     let sizeDeg, heightDeg, widthDeg, heightPx, widthPx;
     // Get character sizes
-    logger("spacingRelationToSize", letterConfig.spacingRelationToSize);
     switch (letterConfig.spacingRelationToSize) {
       case "none":
         // Use specified targetSizeDeg
@@ -136,10 +136,7 @@ export const restrictRepeatedLettersSpacing = (
         break;
       case "ratio":
         // Use spacingDeg and spacingOverSizeRatio to set size.
-        logger("ratio");
         sizeDeg = spacingDeg / letterConfig.spacingOverSizeRatio;
-        logger("spacingOverSizeRatio", letterConfig.spacingOverSizeRatio);
-        logger("sizeDeg", sizeDeg);
 
         if (letterConfig.targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
@@ -192,13 +189,14 @@ export const restrictRepeatedLettersSpacing = (
       )[0];
 
     // At least three lines, up to targetRepeatsMaxLines
-    const possibleNumbersOfLines = [
+    let possibleNumbersOfLines = [
       ...new Array(
         Math.max(1, repeatedLettersConfig.targetRepeatsMaxLines - 2)
       ).keys(),
     ]
       .map((i) => i + 3)
       .reverse();
+    possibleNumbersOfLines = [possibleNumbersOfLines.shift()];
 
     let largestBoundsRatio, numberOfColumns;
     for (const lineNumbers of possibleNumbersOfLines) {
@@ -208,19 +206,18 @@ export const restrictRepeatedLettersSpacing = (
         let spaceAvailable = displayOptions.window._size[0];
         const minimumColumn = 4;
         numberOfColumns = 0;
-        while (spaceAvailable >= 2 * widthPx + approxSpacingPx) {
+        while (spaceAvailable >= approxSpacingPx + widthPx / 2) {
           numberOfColumns += 1;
-          spaceAvailable -= widthPx + approxSpacingPx;
+          spaceAvailable -= approxSpacingPx;
         }
-        numberOfColumns = Math.max(minimumColumn, numberOfColumns + 1);
+        numberOfColumns = Math.max(minimumColumn, numberOfColumns);
       }
 
       // Calculate bounding box around field of stims
-      logger("targetXYPx", targetXYPx);
       const stimuliFieldExtentXPx =
-        numberOfColumns * widthPx + (numberOfColumns - 1) * approxSpacingPx;
+        (numberOfColumns - 1) * approxSpacingPx + widthPx;
       const stimuliFieldExtentYPx =
-        lineNumbers * heightPx + (lineNumbers - 1) * approxSpacingPx;
+        (lineNumbers - 1) * approxSpacingPx + heightPx;
       const lowerLeftOfStimFieldPx = [
         targetXYPx[0] - stimuliFieldExtentXPx / 2,
         targetXYPx[1] - stimuliFieldExtentYPx / 2,
@@ -244,7 +241,6 @@ export const restrictRepeatedLettersSpacing = (
         widthPx,
         heightPx
       );
-      logger("largestBoundsRatio", largestBoundsRatio);
       // Set largestBoundsRatio to some max, so we don't dwarf the value of spacingDeg
       largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
 
@@ -253,17 +249,14 @@ export const restrictRepeatedLettersSpacing = (
         // Find the location, and type, of each stimulus
         for (const rowId of [...new Array(lineNumbers).keys()]) {
           const yPointer =
-            stimuliFieldExtentYPx / 2 -
-            // displayOptions.window._size[1] / 2 -
-            Math.round(heightPx / 2 + rowId * approxSpacingPx);
-          logger("approxSpacingDeg", approxSpacingPx);
-          logger("rowId", rowId);
-          logger("heightPx", heightPx);
-          logger("widthPx", widthPx);
-          logger("yPointer", yPointer);
+            displayOptions.window._size[1] / 2 -
+            (displayOptions.window._size[1] - stimuliFieldExtentYPx) / 2 -
+            Math.round(approxSpacingPx * rowId) -
+            heightPx / 2;
           let xPointer =
-            displayOptions.window._size[0] / -2 + stimuliFieldExtentXPx / 2; // + Math.round(widthPx / 2);
-          // displayOptions.window._size[0] / -2 + Math.round(widthPx / 2);
+            -displayOptions.window._size[0] / 2 +
+            (displayOptions.window._size[0] - stimuliFieldExtentXPx) / 2 +
+            widthPx / 2;
           for (const columnId of [...new Array(numberOfColumns).keys()]) {
             const currentCharacterType =
               rowId === 0 ||
@@ -274,14 +267,11 @@ export const restrictRepeatedLettersSpacing = (
                 : (columnId + (rowId % 2 === 0 ? 0 : 1)) % 2 === 0
                 ? "target1"
                 : "target2";
-            logger("rowId, columnId", [rowId, columnId]);
             const pos = [xPointer, yPointer];
             stimulusLocations.push({
               type: currentCharacterType,
               pos: pos,
             });
-            logger("currentCharacterType", currentCharacterType);
-            logger("pointer positions", [xPointer, yPointer]);
             xPointer += approxSpacingPx;
           }
         }
