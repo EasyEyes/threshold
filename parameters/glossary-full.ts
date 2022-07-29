@@ -544,41 +544,41 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "flankerCharacterSet",
     availability: "now",
-    example: "",
+    example: "abc",
     explanation:
       "flankerCharacterSet is like fontCharacterSet but for the flankers. If not specified, then use fontCharacterSet.",
-    type: "",
-    default: "",
+    type: "text",
+    default: "abcdefghijklmnopqrstuvwxyz",
     categories: "",
   },
   {
     name: "flankerFont",
     availability: "now",
-    example: "",
+    example: "Sloan.woff2",
     explanation:
       "flankerFont is like font, but for the flankers. If not specified, then use font.",
-    type: "",
-    default: "",
+    type: "text",
+    default: "Roboto Mono",
     categories: "",
   },
   {
     name: "flankerFontSource",
     availability: "now",
-    example: "",
+    example: "file",
     explanation:
       "flankerFontSource is like fontSource, but for the flankers. If not specified, then use fontSource.",
-    type: "",
-    default: "",
-    categories: "",
+    type: "categorical",
+    default: "google",
+    categories: "file, google, browser",
   },
   {
     name: "flankerNumber",
     availability: "now",
-    example: "",
+    example: "2",
     explanation:
       "flankerNumber is the number of flanker characters on each side of the target.",
-    type: "",
-    default: "",
+    type: "integer",
+    default: "1",
     categories: "",
   },
   {
@@ -646,7 +646,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "file",
     explanation:
-      "fontSource must be file, google, server (not yet supported), or browser. Browsers blithely substitute for unavailable or slow-to-load fonts. That's great for keeping the web going, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has fontSource file, the compiler checks for presence of the font in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app. Any popular font format will work, but for quick upload, we recommend minimizing file size by using the highly compressed WOFF2 webfont file format, indicated by the filename extension woff2. \n\nfile: font contains the filename (with extension) of a file in the Fonts folder in the EasyEyesResources repository in your Pavlovia account. Font availability is checked by the EasyEyes compiler, to avoid runtime surprises. \n\ngoogle: font contains the font name as recognized by the Google Fonts server.\n\nserver: font contains the URL of the font on a font server. (\"server\" support is coming.)\n\nbrowser: font is a font-preference string that is passed to the participant's browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don't know any quick way to discover what font the browser chose, so the scientist will never know.) ",
+      "fontSource must be file, google, server (not yet supported), or browser. Browsers blithely substitute for unavailable or slow-to-load fonts. That's great for keeping the web going, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has fontSource file, the compiler checks for presence of the font in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app. Any popular font format will work, but for quick upload, we recommend minimizing file size by using the highly compressed WOFF2 webfont file format, indicated by the filename extension woff2. \n\nfile: font contains the filename (with extension) of a file in the Fonts folder in the EasyEyesResources repository in your Pavlovia account. Font availability is checked by the EasyEyes compiler, to avoid runtime surprises. LIMITATIONS: The font filename should not have any spaces. EasyEyes currently is only aware of up to 20 fonts. Further fonts are ignored. We hope to remove these limits in a future release. If you hit the 20-font limit, you can use the VIew code button in Pavlovia to open the EasyEyesResources repository and delete fonts that you don't need right now.\n\ngoogle: font contains the font name as recognized by the Google Fonts server.\n\nserver: font contains the URL of the font on a font server. (\"server\" support is coming.)\n\nbrowser: font is a font-preference string that is passed to the participant's browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don't know any quick way to discover what font the browser chose, so the scientist will never know.) ",
     type: "categorical",
     default: "google",
     categories: "file, google, browser",
@@ -992,7 +992,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "the-phantom-tollbooth.txt",
     explanation:
-      "The filename of a text file that has already been uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\n",
+      "The filename of a text file that has already been uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\nIMPORTANT: Currently, leaving the readingCorpus field blank causes a fatal error in EasyEyes when that condition runs. We plan to add a compiler check to detect the problem at compile time, before your study runs.\n",
     type: "text",
     default: "",
     categories: "",
