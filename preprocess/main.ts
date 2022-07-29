@@ -204,6 +204,7 @@ export const prepareExperimentFileForThreshold = async (
   if (errors.length) {
     // console.log("ERRORS", errors);
     callback(
+      user,
       requestedForms,
       requestedFontList,
       requestedTextList,
@@ -213,6 +214,7 @@ export const prepareExperimentFileForThreshold = async (
     );
   } else {
     callback(
+      user,
       requestedForms,
       requestedFontList,
       requestedTextList,
