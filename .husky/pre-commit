@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-npm run fetch && npx lint-staged
+npm run fetch && git add components/i18n.js && git add parameters && npx lint-staged
