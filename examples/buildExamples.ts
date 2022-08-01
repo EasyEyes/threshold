@@ -76,6 +76,7 @@ const constructForEXperiment = async (d: string) => {
     "tables/" + d,
     readFileSync,
     (
+      user: any,
       forms: any,
       fonts: string[],
       texts: string[],
@@ -89,6 +90,11 @@ const constructForEXperiment = async (d: string) => {
       console.log("Requested FOLDERS", folders);
 
       if (errorList.length) {
+        console.log();
+        console.log("=====================");
+        console.log("ERRORS");
+        console.log();
+
         errorList.forEach((err) => console.log(err));
         throw "Found errors!";
       }
