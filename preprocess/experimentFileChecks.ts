@@ -598,6 +598,8 @@ export const isSoundFolderMissing = (
   //     errorList.push(SOUND_FOLDER_MISSING(requestedFolder));
   //   }
   // }
+  console.log("requestedFolderList", requestedFolderList);
+  console.log("existingFolderList", existingFolderList);
 
   const keys = Object.keys(requestedFolderList);
   const missingFolderList: any[] = [];

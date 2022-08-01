@@ -300,6 +300,10 @@ import {
   getVocoderPhraseTrialData,
   initVocoderPhraseSoundFiles,
 } from "./components/vocoderPhrase.js";
+import {
+  setInitialData,
+  updateBlockCompleted,
+} from "./components/temporaryLogger.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -324,6 +328,8 @@ const paramReaderInitialized = async (reader) => {
   //   reader.read("_compatibleOperatingSystem"),
   // );
 
+  //temporary logger for debugging
+  // setInitialData(window.location.toString(),"","",true,3,rc.browser.value,Date.now(),rc.id.value)
   const compMsg = checkSystemCompatibility(
     reader.read("_compatibleBrowser")[0].split(","),
     rc.browser.value,
@@ -4073,6 +4079,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
       else hideTrialBreakProgressBar();
 
+      //initiate temporary logger
+      // updateBlockCompleted(rc.id.value,{blockCompleted:status.block_condition,time:Date.now()},window.location.toString())
+      console.log("used block", status.block_condition);
       // Check if trialBreak should be triggered
       if (
         targetTask.current !== "questionAndAnswer" &&
