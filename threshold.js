@@ -300,10 +300,10 @@ import {
   getVocoderPhraseTrialData,
   initVocoderPhraseSoundFiles,
 } from "./components/vocoderPhrase.js";
-import {
-  setInitialData,
-  updateBlockCompleted,
-} from "./components/temporaryLogger.js";
+// import {
+//   setInitialData,
+//   updateBlockCompleted,
+// } from "./components/temporaryLogger.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -329,16 +329,16 @@ const paramReaderInitialized = async (reader) => {
   // );
 
   //temporary logger for debugging
-  setInitialData(
-    window.location.toString(),
-    "",
-    "",
-    true,
-    3,
-    rc.browser.value,
-    Date.now(),
-    rc.id.value
-  );
+  // setInitialData(
+  //   window.location.toString(),
+  //   "",
+  //   "",
+  //   true,
+  //   3,
+  //   rc.browser.value,
+  //   Date.now(),
+  //   rc.id.value
+  // );
 
   const compMsg = checkSystemCompatibility(
     reader.read("_compatibleBrowser")[0].split(","),
@@ -4090,11 +4090,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       else hideTrialBreakProgressBar();
 
       //initiate temporary logger
-      updateBlockCompleted(
-        rc.id.value,
-        { blockCompleted: status.block + "_" + status.trial, time: Date.now() },
-        window.location.toString()
-      );
+      // updateBlockCompleted(
+      //   rc.id.value,
+      //   { blockCompleted: status.block + "_" + status.trial, time: Date.now() },
+      //   window.location.toString()
+      // );
       // console.log("used block", status.block + "_" + status.trial);
       // console.log("used block", status.block);
       // console.log("used block", status);
