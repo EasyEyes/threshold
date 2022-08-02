@@ -4095,7 +4095,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         { blockCompleted: status.block + "_" + status.trial, time: Date.now() },
         window.location.toString()
       );
-      console.log("used block", status.block + "_" + status.trial);
+      // console.log("used block", status.block + "_" + status.trial);
       // console.log("used block", status.block);
       // console.log("used block", status);
 
