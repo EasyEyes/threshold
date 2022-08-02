@@ -342,11 +342,6 @@ const paramReaderInitialized = async (reader) => {
     rc.computeRandomMHz ? rc.computeRandomMHz.value : 0,
     rc.language.value
   );
-
-  const proceed = await displayCompatibilityMessage(
-    compMsg["msg"],
-    rc.language.value
-  );
   //temporary logger for debugging
   setInitialData(
     window.location.toString(),
@@ -358,6 +353,11 @@ const paramReaderInitialized = async (reader) => {
     Date.now(),
     rc.id.value
   );
+  const proceed = await displayCompatibilityMessage(
+    compMsg["msg"],
+    rc.language.value
+  );
+
   hideCompatibilityMessage();
 
   if (proceed && !compMsg["proceed"]) {
