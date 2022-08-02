@@ -328,18 +328,6 @@ const paramReaderInitialized = async (reader) => {
   //   reader.read("_compatibleOperatingSystem"),
   // );
 
-  //temporary logger for debugging
-  setInitialData(
-    window.location.toString(),
-    "",
-    "",
-    true,
-    3,
-    rc.browser.value,
-    Date.now(),
-    rc.id.value
-  );
-
   const compMsg = checkSystemCompatibility(
     reader.read("_compatibleBrowser")[0].split(","),
     rc.browser.value,
@@ -358,6 +346,17 @@ const paramReaderInitialized = async (reader) => {
   const proceed = await displayCompatibilityMessage(
     compMsg["msg"],
     rc.language.value
+  );
+  //temporary logger for debugging
+  setInitialData(
+    window.location.toString(),
+    "",
+    "",
+    compMsg["proceed"],
+    rc.concurrency.value,
+    rc.browser.value,
+    Date.now(),
+    rc.id.value
   );
   hideCompatibilityMessage();
 
