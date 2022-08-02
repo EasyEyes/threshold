@@ -1,5 +1,11 @@
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, update, get, set } from "firebase/database";
+import { initializeApp } from "../node_modules/firebase/app";
+import {
+  getDatabase,
+  ref,
+  update,
+  get,
+  set,
+} from "../node_modules/firebase/database";
 
 //TODO: change config keys to Netlify environment variables
 const firebaseConfig = {
