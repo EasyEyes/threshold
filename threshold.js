@@ -329,7 +329,17 @@ const paramReaderInitialized = async (reader) => {
   // );
 
   //temporary logger for debugging
-  // setInitialData(window.location.toString(),"","",true,3,rc.browser.value,Date.now(),rc.id.value)
+  setInitialData(
+    window.location.toString(),
+    "",
+    "",
+    true,
+    3,
+    rc.browser.value,
+    Date.now(),
+    rc.id.value
+  );
+
   const compMsg = checkSystemCompatibility(
     reader.read("_compatibleBrowser")[0].split(","),
     rc.browser.value,
@@ -3167,7 +3177,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               soundGainDBSPL.current
             );
           }
-          console.log("status.block_condition,", status.block_condition);
+          // console.log("status.block_condition,", status.block_condition);
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
               trialSoundBuffer,
@@ -4080,8 +4090,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       else hideTrialBreakProgressBar();
 
       //initiate temporary logger
-      // updateBlockCompleted(rc.id.value,{blockCompleted:status.block_condition,time:Date.now()},window.location.toString())
-      console.log("used block", status.block_condition);
+      updateBlockCompleted(
+        rc.id.value,
+        { blockCompleted: status.block + "_" + status.trial, time: Date.now() },
+        window.location.toString()
+      );
+      console.log("used block", status.block + "_" + status.trial);
+      // console.log("used block", status.block);
+      // console.log("used block", status);
+
       // Check if trialBreak should be triggered
       if (
         targetTask.current !== "questionAndAnswer" &&
