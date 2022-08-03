@@ -145,10 +145,10 @@ export class ParamReader {
                 if (callback && typeof callback === "function") {
                   const _validateInterval = setInterval(() => {
                     if (this._validateExperiment()) {
-                      callback(that);
                       clearInterval(_validateInterval);
+                      callback(that);
                     }
-                  }, 5);
+                  }, 10);
                 }
               }
             },

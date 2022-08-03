@@ -430,6 +430,15 @@ const paramReaderInitialized = async (reader) => {
   logger("READ readingWordListArchive", readingWordListArchive);
   logger("READ readingWordFrequencyArchive", readingWordFrequencyArchive);
 
+  // stats.js
+  if (ifTrue(reader.read("showFPSBool", "__ALL_BLOCKS__"))) {
+    stats.current = new Stats();
+    stats.current.showPanel(0);
+    document.body.appendChild(stats.current.dom);
+    stats.current.dom.style.display = "none";
+    stats.on = false;
+  }
+
   ////
   const startExperiment = () => {
     // ! clean RC dom
@@ -440,15 +449,6 @@ const paramReaderInitialized = async (reader) => {
     experiment(reader.blockCount);
   };
   ////
-
-  // stats.js
-  if (ifTrue(reader.read("showFPSBool", "__ALL_BLOCKS__"))) {
-    stats.current = new Stats();
-    stats.current.showPanel(0);
-    document.body.appendChild(stats.current.dom);
-    stats.current.dom.style.display = "none";
-    stats.on = false;
-  }
 
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
@@ -612,7 +612,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           psychoJS.gui.dialogComponent.button = "OK";
           psychoJS.gui._removeWelcomeDialogBox();
-          // psychoJS.gui.closeDialog();
+          // psychoJS.gui.closeDialog( );
           psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
           // psychoJS.window.adjustScreenSize();
           psychoJS.eventManager.clearEvents();
@@ -2233,6 +2233,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
+              console.log(status.condition, status.block_condition);
               status.block_condition = status.condition["block_condition"];
             }
           }
