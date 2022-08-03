@@ -4,7 +4,31 @@ import {
   norm,
   psychojsUnitsFromWindowUnits,
   toFixedNumber,
+  logger,
 } from "./utils";
+
+export const readAllowedTolerances = (tolerances, reader, BC) => {
+  tolerances.allowed.thresholdAllowedDurationRatio = reader.read(
+    "thresholdAllowedDurationRatio",
+    BC
+  );
+  tolerances.allowed.thresholdAllowedGazeRErrorDeg = reader.read(
+    "thresholdAllowedGazeRErrorDeg",
+    BC
+  );
+  tolerances.allowed.thresholdAllowedGazeXErrorDeg = reader.read(
+    "thresholdAllowedGazeXErrorDeg",
+    BC
+  );
+  tolerances.allowed.thresholdAllowedGazeYErrorDeg = reader.read(
+    "thresholdAllowedGazeYErrorDeg",
+    BC
+  );
+  tolerances.allowed.thresholdAllowedLatencySec = reader.read(
+    "thresholdAllowedLatencySec",
+    BC
+  );
+};
 
 export const measureGazeError = (
   tolerances,
@@ -18,6 +42,7 @@ export const measureGazeError = (
       frames: 9,
     },
     (r) => {
+      logger("measuring gaze now");
       tolerances.measured.gazeMeasurementLatencySec =
         (r.timestamp - r.value.latencyMs - crosshairClickTimestamp) / 1000;
 
@@ -120,6 +145,8 @@ export const addResponseIfTolerableError = (
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x);
 
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
+  logger("trialGivenToQUEST", validTrialToGiveToQUEST);
+  logger("answerCorrect", answerCorrect);
   loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
 
   return validTrialToGiveToQUEST;

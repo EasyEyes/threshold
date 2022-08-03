@@ -70,6 +70,31 @@ export const updateTargetSpecsForLetter = (
   }\nviewingDistanceCm: ${viewingDistanceCm.current}`;
 };
 
+export const updateTargetSpecsForRepeatedLetters = (
+  stimulusParameters,
+  experimentFileName
+) => {
+  showConditionNameConfig.targetSpecs = `sizeDeg: ${
+    Math.round(10 * stimulusParameters.sizeDeg) / 10
+  }\n${
+    stimulusParameters.spacingDeg
+      ? `spacingDeg: ${Math.round(10 * stimulusParameters.spacingDeg) / 10}`
+      : ""
+  }\nheightDeg: ${
+    Math.round(10 * stimulusParameters.heightDeg) / 10
+  }\nheightPx: ${Math.round(
+    stimulusParameters.heightPx
+  )}\nfilename: ${experimentFileName}\nfont: ${
+    font.name
+  }\nspacingRelationToSize: ${
+    letterConfig.spacingRelationToSize
+  }\nspacingOverSizeRatio: ${
+    letterConfig.spacingOverSizeRatio
+  }\ntargetSizeIsHeightBool: ${
+    letterConfig.targetSizeIsHeightBool
+  }\nviewingDistanceCm: ${viewingDistanceCm.current}`;
+};
+
 export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
   showConditionNameConfig.targetSpecs = `filename: ${experimentFileName}\nreadingCorpus: ${reader.read(
     "readingCorpus",

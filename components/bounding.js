@@ -4,6 +4,7 @@ import {
   displayOptions,
   fixationConfig,
   letterConfig,
+  repeatedLettersConfig,
   targetKind,
 } from "./global.js";
 
@@ -469,17 +470,21 @@ export const restrictSpacingDeg = (
       case "ratio":
         // Use spacingDeg and spacingOverSizeRatio to set size.
         // NOTE for foveal targets (ie norm(targetXYDeg) == 0), or targets with tangential flankers, inner vs outer flanker distinction is undefined
-        if (
-          spacingForRatioIsOuterBool ||
-          norm(targetXYDeg) === 0 ||
-          letterConfig.spacingDirection !== "radial"
-        ) {
-          sizeDeg = spacingDeg / spacingOverSizeRatio;
-        } else {
-          var eccDeg = norm(targetXYDeg); //target eccentricity in Deg
-          var innerSpacing = eccDeg - (eccDeg * eccDeg) / (eccDeg + spacingDeg); // inner spacing in Deg
-          sizeDeg = innerSpacing / spacingOverSizeRatio;
-        }
+
+        // FIX intended to swap inner and outer (??) flanker as the default, but is broken.
+        // Ex. given spacingOverSizeRatio = 1, spacing does not equal size
+        // if (
+        //   spacingForRatioIsOuterBool ||
+        //   norm(targetXYDeg) === 0 ||
+        //   letterConfig.spacingDirection !== "radial"
+        // ) {
+        //   sizeDeg = spacingDeg / spacingOverSizeRatio;
+        // } else {
+        //   var eccDeg = norm(targetXYDeg); //target eccentricity in Deg
+        //   var innerSpacing = eccDeg - (eccDeg * eccDeg) / (eccDeg + spacingDeg); // inner spacing in Deg
+        //   sizeDeg = innerSpacing / spacingOverSizeRatio;
+        // }
+        sizeDeg = spacingDeg / spacingOverSizeRatio;
 
         if (targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
@@ -551,9 +556,6 @@ export const restrictSpacingDeg = (
           [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
           displayOptions
         );
-        // [,topPx] = XYPixOfXYDeg([targetXYDeg[0], targetXYDeg[1] + heightDeg/2], displayOptions);
-        // [,bottomPx] = XYPixOfXYDeg([targetXYDeg[0], targetXYDeg[1] - heightDeg/2], displayOptions);
-        // heightPx = topPx - bottomPx;
         widthPx = rightPx - leftPx;
         heightPx =
           (widthPx * characterSetRectPx.height) / characterSetRectPx.width;
@@ -592,26 +594,11 @@ export const restrictSpacingDeg = (
                   flanker1XYPx[0] - targetXYPx[0],
                   flanker1XYPx[1] - targetXYPx[1],
                 ];
-
-                // heightPx = targetSizeIsHeightBool
-                //   ? norm(deltaXYPx) / spacingOverSizeRatio
-                //   : norm(deltaXYPx) / spacingOverSizeRatio * (
-                //     characterSetRectPx.width / characterSetRectPx.height);
-                // widthPx =
-                //   heightPx *
-                //   (characterSetRectPx.width / characterSetRectPx.height);
                 flanker2XYPx = [
                   targetXYPx[0] - deltaXYPx[0],
                   targetXYPx[1] - deltaXYPx[1],
                 ];
-                const flanker2XYPxRelativeFixation = [
-                  flanker2XYPx[0] - fixationConfig.pos[0],
-                  flanker2XYPx[1] - fixationConfig.pos[1],
-                ];
-                flanker2XYDeg = XYDegOfXYPix(
-                  flanker2XYPxRelativeFixation,
-                  displayOptions
-                );
+                flanker2XYDeg = XYDegOfXYPix(flanker2XYPx, displayOptions);
                 var deltaXYDeg = [
                   flanker2XYDeg[0] - targetXYDeg[0],
                   flanker2XYDeg[1] - targetXYDeg[1],
@@ -726,7 +713,7 @@ export const restrictSpacingDeg = (
   throw `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${letterConfig.targetMinimumPix}`;
 };
 
-const getLargestBoundsRatio = (
+export const getLargestBoundsRatio = (
   stimulusRectPx,
   screenRectPx,
   targetXYPx,

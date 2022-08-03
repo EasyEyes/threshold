@@ -56,9 +56,9 @@ export function setupClickableCharacterSet(
 }
 
 export function removeClickableCharacterSet(responseRegister) {
-  responseRegister.current = null;
+  responseRegister.current = [];
   responseRegister.onsetTime = 0;
-  responseRegister.clickTime = 0;
+  responseRegister.clickTime = [];
 
   const ele = document.querySelectorAll(".characterSet-holder");
   ele.forEach((e) => {
@@ -120,9 +120,11 @@ const pushCharacterSet = (
     characterSet.style.direction = globalFont.ltr ? "ltr" : "rtl";
 
     characterSet.onclick = () => {
-      responseRegister.clickTime = performance.now();
-      responseRegister.current = a.toLowerCase();
+      responseRegister.clickTime.push(performance.now());
+      responseRegister.current.push(a.toLowerCase());
       if (extraFunction) extraFunction(a); // TEMP? For reading response
+      characterSet.style.border = "2px solid black";
+      characterSet.style.backgroundColor = "lightgray";
     };
     characterSetHolder.appendChild(characterSet);
   }

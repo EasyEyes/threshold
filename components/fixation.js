@@ -21,7 +21,7 @@ export const getFixationPos = (blockN, paramReader) => {
     specifiedLocationXYNorm,
     "norm",
     psychoJS.window
-  );
+  ).map(Math.round);
   return specifiedLocationXYPx;
 };
 

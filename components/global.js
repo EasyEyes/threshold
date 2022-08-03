@@ -77,7 +77,7 @@ export const totalTrialsThisBlock = { current: undefined };
 export const targetTask = { current: undefined };
 export const targetKind = { current: undefined };
 
-export const correctAns = { current: undefined }; // for keyboard ans
+export const correctAns = { current: [] }; // for keyboard ans
 
 // Renders
 export const font = {
@@ -110,7 +110,7 @@ export const fixationConfig = {
   markingFixationStrokeThicknessDeg: undefined,
   markingOffsetBeforeTargetOnsetSecs: undefined,
   markingOnsetAfterTargetOffsetSecs: undefined,
-  stim: undefined, // psychoJS shapeStim
+  stims: undefined, // psychoJS shapeStim
 };
 
 export const showConditionNameConfig = {
@@ -135,6 +135,12 @@ export const letterConfig = Object.seal({
   flankerCharacters: [undefined, undefined],
   delayBeforeStimOnsetSec: undefined,
   targetSafetyMarginSec: undefined,
+});
+
+export const repeatedLettersConfig = Object.seal({
+  targetRepeatsBorderCharacter: undefined,
+  targetRepeatsMaxLines: undefined,
+  stims: undefined,
 });
 
 export const instructionFont = { current: undefined };
@@ -202,14 +208,19 @@ export const viewingDistanceCm = { current: 40 };
 
 /* ------------------------------ Interactions ------------------------------ */
 
-export const responseType = { current: 2, original: 2 };
+export const responseType = {
+  current: 2,
+  original: 2,
+  numberOfResponses: undefined,
+};
 export const clickedContinue = { current: false, timestamps: [] };
 export const modalButtonTriggeredViaKeyboard = { current: false };
 
 export const showCharacterSetResponse = {
-  current: null,
-  onsetTime: 0,
-  clickTime: 0,
+  current: [],
+  // current: null,
+  onsetTime: [],
+  clickTime: [],
 };
 
 /* ------------------------------- SIMULATION ------------------------------- */

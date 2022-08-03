@@ -296,6 +296,12 @@ export const addConditionToData = (
   }
 };
 
+export const addObjectItemsToData = (object, experiment) => {
+  for (const [name, value] of Object.entries(object)) {
+    experiment.addData(name, value);
+  }
+};
+
 export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
   // TODO What to do when data saving is rejected?
   if (currentLoop._currentStaircase) {
@@ -653,12 +659,16 @@ export const norm = (v) => {
 };
 
 export const getTripletCharacters = (charset) => {
-  let allCharacters = shuffle([...charset]);
+  return sampleWithoutReplacement(charset, 3);
+};
+
+export const sampleWithoutReplacement = (population, sampleSize) => {
+  const elements = shuffle([...population]);
   const samples = [];
-  samples.push(allCharacters[0]);
-  samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
-  samples.push(allCharacters.filter((char) => !samples.includes(char))[0]);
-  return shuffle(samples);
+  for (const sampleN of [...new Array(sampleSize).keys()]) {
+    samples.push(elements.filter((x) => !samples.includes(x))[0]);
+  }
+  return samples;
 };
 
 export const getCharSetBaselineOffsetPosition = (
