@@ -35,7 +35,7 @@ const parseExperimentID = (experimentID) => {
   const data = experimentID.split("?");
   return {
     expID: data[0],
-    participantID: data.length > 1 ? data[1] : null,
+    participantID: data.length > 1 ? data[1].split("&")[0].split("=")[1] : null,
   };
 };
 
@@ -60,12 +60,15 @@ export const setInitialData = (
   const data = {
     [expID]: {
       [userID]: {
-        userProlificID: participantID ? participantID : userProlificID,
-        userPavloviaID: userPavloviaID,
+        userProlificID: participantID ? participantID : "null",
+        userPavloviaID: userID,
         compatibleBool: compatibleBool,
         cores: cores,
         browser: browser,
         ExperimentStartingTimestamp: startingTimestamp,
+        currentBlock: "null",
+        currentBlockStartingtime: "null",
+        blockCompleted: "null",
       },
     },
   };
@@ -111,7 +114,7 @@ export const updateBlockCompleted = async (
   return await get(ref(db, `/${expID}/${userID}/blockCompleted`)).then(
     async (snapshot) => {
       const array = { current: undefined };
-      if (snapshot.exists()) {
+      if (snapshot.exists() && snapshot.val() !== "null") {
         array.current = snapshot.val();
         // console.log(array);
         array.current.push(blockCompleted);
