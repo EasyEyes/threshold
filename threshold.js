@@ -1936,19 +1936,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         repeatedLetters: () => {
-          _instructionSetup(
+          const repeatedLettersBlockInstructs =
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
-              instructionsText.popularFeatures(
-                L,
-                paramReader.read("takeABreakTrialCredit", status.block)[0]
-              ) +
-              instructionsText.initialByThresholdParameter["spacing"](
-                L,
-                responseType.current,
-                totalTrialsThisBlock.current
-              ) +
-              instructionsText.initialEnd(L, responseType.current)
-          );
+            instructionsText.popularFeatures(
+              L,
+              paramReader.read("takeABreakTrialCredit", status.block)[0]
+            ) +
+            instructionsText.initialByThresholdParameter["spacing"](
+              L,
+              responseType.current,
+              totalTrialsThisBlock.current
+            ) +
+            instructionsText.initialEnd(L, responseType.current);
+          _instructionSetup(repeatedLettersBlockInstructs);
         },
         reading: () => {
           _instructionSetup(
@@ -2932,7 +2932,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.setPos(fixationConfig.pos);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
-          // fixation.setAutoDraw(true);
 
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForRepeatedLetters(
@@ -3425,7 +3424,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         switchKind(targetKind.current, {
           letter: () => {
-            _letter_trialRoutineFirstFrame(paramReader, thresholdParameter);
+            _letter_trialRoutineFirstFrame(
+              paramReader,
+              thresholdParameter,
+              targetSpecs,
+              conditionName
+            );
           },
           repeatedLetters: () => {
             _repeatedLetters_trialRoutineFirstFrame(paramReader);

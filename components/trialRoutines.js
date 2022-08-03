@@ -17,6 +17,7 @@ import {
   repeatedLettersConfig,
   targetKind,
   status,
+  timing,
   letterTiming,
   showConditionNameConfig,
   showCharacterSetResponse,
@@ -233,7 +234,9 @@ export const _repeatedLetters_trialRoutineEachFrame = (
 
 export const _letter_trialRoutineFirstFrame = (
   paramReader,
-  thresholdParameter
+  thresholdParameter,
+  targetSpecs,
+  conditionName
 ) => {
   if (paramReader.read("calibrateTrackGazeBool", status.block_condition))
     measureGazeError(
@@ -243,10 +246,11 @@ export const _letter_trialRoutineFirstFrame = (
       letterConfig.targetDurationSec
     );
   /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
-  psychoJS.experiment.addData(
-    "targetBoundingBox",
-    prettyPrintPsychojsBoundingBox(target.getBoundingBox(true))
-  );
+  if (typeof target !== "undefined")
+    psychoJS.experiment.addData(
+      "targetBoundingBox",
+      prettyPrintPsychojsBoundingBox(target.getBoundingBox(true))
+    );
   if (
     letterConfig.spacingRelationToSize === "ratio" &&
     thresholdParameter === "spacing" &&

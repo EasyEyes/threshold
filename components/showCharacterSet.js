@@ -123,6 +123,8 @@ const pushCharacterSet = (
       responseRegister.clickTime.push(performance.now());
       responseRegister.current.push(a.toLowerCase());
       if (extraFunction) extraFunction(a); // TEMP? For reading response
+      characterSet.style.border = "2px solid black";
+      characterSet.style.backgroundColor = "lightgray";
     };
     characterSetHolder.appendChild(characterSet);
   }

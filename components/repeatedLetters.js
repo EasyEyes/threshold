@@ -82,7 +82,7 @@ export const restrictRepeatedLettersSpacing = (
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
 
   // Find pos of target in pixels
-  const targetXYPx = fixationConfig.pos;
+  const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
 
   // Calculate our implicated spacing
   let spacingDeg = Math.pow(10, proposedLevel);
@@ -125,11 +125,11 @@ export const restrictRepeatedLettersSpacing = (
             widthPx * (characterSetRectPx.height / characterSetRectPx.width);
           heightDeg =
             XYDegOfXYPix(
-              [targetXYPx[0], targetXYPx[1] + heightPx / 2],
+              [fixationConfig.pos[0], fixationConfig.pos[1] + heightPx / 2],
               displayOptions
             )[1] -
             XYDegOfXYPix(
-              [targetXYPx[0], targetXYPx[1] - heightPx / 2],
+              [fixationConfig.pos[0], fixationConfig.pos[1] - heightPx / 2],
               displayOptions
             )[1];
         }
@@ -178,6 +178,13 @@ export const restrictRepeatedLettersSpacing = (
       case "typographic":
         throw "typographic spacingRelationToSize undefined when targetKind is repeatedLetters";
     }
+
+    // Compute lower bound
+    if (heightPx < letterConfig.targetMinimumPix) {
+      spacingDeg = spacingDeg * (letterConfig.targetMinimumPix / heightPx);
+      continue;
+    }
+
     const approxSpacingPx =
       XYPixOfXYDeg(
         [targetXYDeg[0] + spacingDeg / 2, targetXYDeg[1]],
@@ -196,7 +203,6 @@ export const restrictRepeatedLettersSpacing = (
     ]
       .map((i) => i + 3)
       .reverse();
-    possibleNumbersOfLines = [possibleNumbersOfLines.shift()];
 
     let largestBoundsRatio, numberOfColumns;
     for (const lineNumbers of possibleNumbersOfLines) {
@@ -219,11 +225,11 @@ export const restrictRepeatedLettersSpacing = (
       const stimuliFieldExtentYPx =
         (lineNumbers - 1) * approxSpacingPx + heightPx;
       const lowerLeftOfStimFieldPx = [
-        targetXYPx[0] - stimuliFieldExtentXPx / 2,
+        -stimuliFieldExtentXPx / 2,
         targetXYPx[1] - stimuliFieldExtentYPx / 2,
       ];
       const upperRightOfStimFieldPx = [
-        targetXYPx[0] + stimuliFieldExtentXPx / 2,
+        stimuliFieldExtentXPx / 2,
         targetXYPx[1] + stimuliFieldExtentYPx / 2,
       ];
       const stimulusFieldBoundingRectPx = new Rectangle(
@@ -249,8 +255,8 @@ export const restrictRepeatedLettersSpacing = (
         // Find the location, and type, of each stimulus
         for (const rowId of [...new Array(lineNumbers).keys()]) {
           const yPointer =
-            displayOptions.window._size[1] / 2 -
-            (displayOptions.window._size[1] - stimuliFieldExtentYPx) / 2 -
+            targetXYPx[1] +
+            stimuliFieldExtentYPx / 2 -
             Math.round(approxSpacingPx * rowId) -
             heightPx / 2;
           let xPointer =
@@ -289,4 +295,5 @@ export const restrictRepeatedLettersSpacing = (
     // Calculate new spacing, ie spacing/largestBoundsRatio
     spacingDeg = spacingDeg / largestBoundsRatio;
   }
+  throw "Unable to bound to suitable repeatedLetters stimuli parameters.";
 };

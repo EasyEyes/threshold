@@ -145,7 +145,7 @@ export const addResponseIfTolerableError = (
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x);
 
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
-  logger("trialGivenToResponse", validTrialToGiveToQUEST);
+  logger("trialGivenToQUEST", validTrialToGiveToQUEST);
   logger("answerCorrect", answerCorrect);
   loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
 

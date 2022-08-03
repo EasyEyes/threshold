@@ -3,6 +3,7 @@ import {
   clickedContinue,
   fixationConfig,
   modalButtonTriggeredViaKeyboard,
+  targetKind,
 } from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { _onlyClick } from "./response.js";
@@ -21,13 +22,26 @@ export const returnOrClickProceed = (L, responseType, prev = "") => {
 };
 
 export const spaceOrCrosshair = (L, responseType, prev = "") => {
-  switch (responseType) {
-    case 0:
-      return prev + phrases.T_readyPressSpace[L];
-    case 1:
-      return prev + phrases.T_readyClickCrosshair[L];
-    default:
-      return prev + phrases.T_readyPressSpaceOrClickCrosshair[L];
+  if (targetKind.current === "repeatedLetters") {
+    switch (responseType) {
+      case 0:
+        return prev + phrases.T_readyPressSpaceRepeatedLetters[L];
+      case 1:
+        return prev + phrases.T_readyClickCrosshairRepeatedLetters[L];
+      default:
+        return (
+          prev + phrases.T_readyPressSpaceOrClickCrosshairRepeatedLetters[L]
+        );
+    }
+  } else {
+    switch (responseType) {
+      case 0:
+        return prev + phrases.T_readyPressSpace[L];
+      case 1:
+        return prev + phrases.T_readyClickCrosshair[L];
+      default:
+        return prev + phrases.T_readyPressSpaceOrClickCrosshair[L];
+    }
   }
 };
 
@@ -54,21 +68,44 @@ export const instructionsText = {
   initialByThresholdParameter: {
     spacing: (L, responseType = 2, trialsThisBlock = 0) => {
       const extraSpace = phrases.EE_languageUseSpace[L] ? " " : "";
-      let text = replacePlaceholders(
-        phrases.T_thresholdBeginBlock[L],
-        trialsThisBlock
-      );
-      switch (responseType) {
-        case 0:
-          text += extraSpace + `${phrases.T_pressingKey[L]}\n\n`;
-          break;
-        case 1:
-          text += extraSpace + `${phrases.T_clickingLetter[L]}\n\n`;
-          break;
-        default:
-          text +=
-            extraSpace + `${phrases.T_pressingKeyOrClickingLetter[L]}\n\n`;
-          break;
+      let text;
+      if (targetKind.current === "repeatedLetters") {
+        text = replacePlaceholders(
+          phrases.T_thresholdRepeatedLettersBeginBlock[L],
+          trialsThisBlock
+        );
+        switch (responseType) {
+          case 0:
+            text +=
+              extraSpace + `${phrases.T_pressingKeyRepeatedLetters[L]}\n\n`;
+            break;
+          case 1:
+            text +=
+              extraSpace + `${phrases.T_clickingLetterRepeatedLetters[L]}\n\n`;
+            break;
+          default:
+            text +=
+              extraSpace +
+              `${phrases.T_pressingKeyOrClickingLetterRepeatedLetters[L]}\n\n`;
+            break;
+        }
+      } else {
+        text = replacePlaceholders(
+          phrases.T_thresholdBeginBlock[L],
+          trialsThisBlock
+        );
+        switch (responseType) {
+          case 0:
+            text += extraSpace + `${phrases.T_pressingKey[L]}\n\n`;
+            break;
+          case 1:
+            text += extraSpace + `${phrases.T_clickingLetter[L]}\n\n`;
+            break;
+          default:
+            text +=
+              extraSpace + `${phrases.T_pressingKeyOrClickingLetter[L]}\n\n`;
+            break;
+        }
       }
       return text;
     },
@@ -103,13 +140,24 @@ export const instructionsText = {
         return phrases.T_sentenceIdentifyClick[L];
       },
       spacing: (L, responseType = 2) => {
-        switch (responseType) {
-          case 0:
-            return phrases.T_identifyPressIt[L];
-          case 1:
-            return phrases.T_identifyClickIt[L];
-          default:
-            return phrases.T_identifyPressItOrClickIt[L];
+        if (targetKind.current === "repeatedLetters") {
+          switch (responseType) {
+            case 0:
+              return phrases.T_identifyPressItRepeatedLetters[L];
+            case 1:
+              return phrases.T_identifyClickItRepeatedLetters[L];
+            default:
+              return phrases.T_identifyPressItOrClickItRepeatedLetters[L];
+          }
+        } else {
+          switch (responseType) {
+            case 0:
+              return phrases.T_identifyPressIt[L];
+            case 1:
+              return phrases.T_identifyClickIt[L];
+            default:
+              return phrases.T_identifyPressItOrClickIt[L];
+          }
         }
       },
     },
