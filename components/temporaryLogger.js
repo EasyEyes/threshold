@@ -27,6 +27,18 @@ export const getLogFile = async (experimentID) => {
   return await getData("/" + experimentID);
 };
 
+const parseExperimentID = (experimentID) => {
+  experimentID = experimentID.split("/");
+  experimentID = experimentID.join("|");
+  experimentID = experimentID.split(".");
+  experimentID = experimentID.join("*");
+  const data = experimentID.split("?");
+  return {
+    expID: data[0],
+    participantID: data.length > 1 ? data[1] : null,
+  };
+};
+
 // set initial Data for a specific user in a specific experiment by a specific scientist : uses scientistPavloviaID experimentId and pavloviaID
 export const setInitialData = (
   experimentID,
@@ -39,25 +51,27 @@ export const setInitialData = (
   userID
 ) => {
   // console.log("experimentId", experimentID)
-  experimentID = experimentID.split("/");
-  experimentID = experimentID.join("|");
-  experimentID = experimentID.split(".");
-  experimentID = experimentID.join("*");
+  // experimentID = experimentID.split("/");
+  // experimentID = experimentID.join("|");
+  // experimentID = experimentID.split(".");
+  // experimentID = experimentID.join("*");
+
+  const { expID, participantID } = parseExperimentID(experimentID);
   const data = {
-    [experimentID]: {
+    [expID]: {
       [userID]: {
-        userProlificID: userProlificID,
+        userProlificID: participantID ? participantID : userProlificID,
         userPavloviaID: userPavloviaID,
         compatibleBool: compatibleBool,
         cores: cores,
         browser: browser,
-        startingTimestamp: startingTimestamp,
+        ExperimentStartingTimestamp: startingTimestamp,
       },
     },
   };
-  get(ref(db, "/" + experimentID)).then(async (snapshot) => {
+  get(ref(db, "/" + expID)).then(async (snapshot) => {
     if (snapshot.exists()) {
-      await addData("/" + experimentID, data[experimentID]);
+      await addData("/" + expID, data[expID]);
     } else {
       await addData("/", data);
     }
@@ -88,11 +102,13 @@ export const updateBlockCompleted = async (
   blockCompleted,
   experimentID
 ) => {
-  experimentID = experimentID.split("/");
-  experimentID = experimentID.join("|");
-  experimentID = experimentID.split(".");
-  experimentID = experimentID.join("*");
-  return await get(ref(db, `/${experimentID}/${userID}/blockCompleted`)).then(
+  // experimentID = experimentID.split("/");
+  // experimentID = experimentID.join("|");
+  // experimentID = experimentID.split(".");
+  // experimentID = experimentID.join("*");
+  const { expID, participantID } = parseExperimentID(experimentID);
+
+  return await get(ref(db, `/${expID}/${userID}/blockCompleted`)).then(
     async (snapshot) => {
       const array = { current: undefined };
       if (snapshot.exists()) {
@@ -105,9 +121,20 @@ export const updateBlockCompleted = async (
         array.current.push(blockCompleted);
       }
       return await set(
-        ref(db, `/${experimentID}/${userID}/blockCompleted`),
+        ref(db, `/${expID}/${userID}/blockCompleted`),
         array.current
       );
     }
   );
+};
+
+export const updateCurrentBlockCondition = async (
+  experimentID,
+  currentBlock,
+  time,
+  userID
+) => {
+  const { expID, participantID } = parseExperimentID(experimentID);
+  await set(ref(db, `/${expID}/${userID}/currentBlock`), currentBlock);
+  await set(ref(db, `/${expID}/${userID}/currentBlockStartingtime`), time);
 };

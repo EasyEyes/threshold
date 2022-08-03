@@ -303,6 +303,7 @@ import {
 import {
   setInitialData,
   updateBlockCompleted,
+  updateCurrentBlockCondition,
 } from "./components/temporaryLogger.js";
 
 /* -------------------------------------------------------------------------- */
@@ -4193,6 +4194,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // dangerous
         logger("currentLoopSnapshot", currentLoopSnapshot);
         status.trial = currentLoopSnapshot.thisN;
+        // console.log("block_condition",status.block + "_" + status.trial );
+        updateCurrentBlockCondition(
+          window.location.toString(),
+          status.block + "_" + status.trial,
+          Date.now(),
+          rc.id.value
+        );
       } else {
         console.log(
           "%c====== Unknown Snapshot ======",
