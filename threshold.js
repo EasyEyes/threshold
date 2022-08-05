@@ -965,7 +965,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     displayOptions.window = psychoJS.window;
 
-    grid.current = new Grid("none", displayOptions, psychoJS);
+    grid.current = new Grid("disabled", displayOptions, psychoJS);
 
     return Scheduler.Event.NEXT;
   }
@@ -3301,7 +3301,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
-      if (grid.current) grid.current.update();
+      grid.current.update();
       ////
 
       //------Prepare to start Routine 'trial'-------
