@@ -677,10 +677,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     );
     if (rc.stressFps) {
       psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
-      psychoJS.experiment.addData(
-        "computeRandomMHz",
-        rc.computeRandomMHz.value
-      );
+    } else {
+      // forcedly make sure that computeRandomMHz is always available
+      await rc.performanceCompute((result) => {
+        psychoJS.experiment.addData(
+          "computeRandomMHz",
+          result.value.computeRandomMHz
+        );
+      });
     }
 
     // ! add info from the URL:
