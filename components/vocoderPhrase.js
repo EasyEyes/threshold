@@ -41,30 +41,55 @@ export const getVocoderPhraseTrialData = async (
   var targetChannels = populateTargetIndices();
   var maskerChannels = populateMaskerIndices(targetChannels);
 
-  var targetSentenceAudio;
-  var maskerSentenceAudio;
-
   var targetKeys = Object.keys(targetList[blockCondition]);
   // console.log("list", targetKeys);
   // console.log(targetList[blockCondition]);
 
-  targetSentenceAudio = getTargetSentenceAudio(
-    targetKeys,
-    targetPhrase,
-    targetChannels,
-    targetList[blockCondition]
-  );
+  const { targetSentenceAudio, talker, categoriesChosen } =
+    getTargetSentenceAudio(
+      targetKeys,
+      targetPhrase,
+      targetChannels,
+      targetList[blockCondition]
+    );
   var maskerKeys = Object.keys(maskerList[blockCondition]);
-  maskerSentenceAudio = getMaskerSentenceAudio(
+  const maskerSentenceAudio = getMaskerSentenceAudio(
     maskerKeys,
     maskerPhrase,
     maskerChannels,
-    maskerList[blockCondition]
+    maskerList[blockCondition],
+    talker,
+    categoriesChosen
   );
   const targetAudio = combineAudioBuffers(targetSentenceAudio, audioCtx);
   const maskerAudio = combineAudioBuffers(maskerSentenceAudio, audioCtx);
+  console.log("targetSentenceAudio", targetSentenceAudio);
+  console.log("maskerSentenceAudio", maskerSentenceAudio);
+  console.log("targetAudio", targetAudio);
+  console.log("maskerAudio", maskerAudio);
+
   // console.log(mergeBuffers([targetAudio, maskerAudio], audioCtx));
   return mergeBuffers([targetAudio, maskerAudio], audioCtx);
+};
+
+const compareAndPadZerosAtBothEnds = (targetArray, maskerArray) => {
+  if (targetArray.length == maskerArray.length) {
+    return [targetArray, maskerArray];
+  } else if (targetArray.length > maskerArray.length) {
+    return [targetArray, padZeros(maskerArray, targetArray.length)];
+  } else return [padZeros(targetArray, maskerArray.length), maskerArray];
+};
+
+const padZeros = (arr, arr1Length) => {
+  const diff = arr1Length - arr.length;
+  const leftSize = Math.floor(diff / 2);
+  const rightSize = diff - leftSize;
+
+  const left = Array(leftSize).fill(0);
+  const right = Array(rightSize).fill(0);
+  const result = left.concat(arr, right);
+
+  return result;
 };
 
 const combineAudioBuffers = (audioBuffers, context) => {
@@ -136,6 +161,7 @@ const getTargetSentenceAudio = (
   var targetSentenceAudio = [];
   const randTargetIndex = Math.floor(Math.random() * targetKeys.length);
   const targetTalker = targetKeys[randTargetIndex];
+  const categoriesChosen = {}; //keep track of categories chosen
   targetPhrase.map(async (elem) => {
     if (elem[0] === "#") {
       const withoutHashtag = elem.substring(1);
@@ -149,6 +175,7 @@ const getTargetSentenceAudio = (
         targetList_[targetTalker][withoutHashtag][categoryItem],
         audioCtx
       );
+      categoriesChosen[withoutHashtag] = categoryItem;
       targetSentenceAudio.push(trialWordData);
     } else {
       const word = targetList_[targetTalker][elem];
@@ -157,35 +184,52 @@ const getTargetSentenceAudio = (
     }
   });
 
-  return targetSentenceAudio;
+  return {
+    targetSentenceAudio: targetSentenceAudio,
+    talker: targetTalker,
+    categoriesChosen: categoriesChosen,
+  };
 };
 
 const getMaskerSentenceAudio = (
   maskerKeys,
   maskerPhrase,
   maskerChannels,
-  maskerList_
+  maskerList_,
+  targetTalker,
+  categoriesChosen
 ) => {
+  console.log("categoriesChosen", categoriesChosen);
   var maskerSentenceAudio = [];
   //console.log(maskerKeys)
-  const randMaskerIndex = Math.floor(Math.random() * maskerKeys.length);
-  const maskerTalker = maskerKeys[randMaskerIndex];
+  const randMaskerIndex = { t: undefined };
+  const maskerTalker = { t: targetTalker };
+  while (maskerTalker.t === targetTalker) {
+    randMaskerIndex.t = Math.floor(Math.random() * maskerKeys.length);
+    maskerTalker.t = maskerKeys[randMaskerIndex.t];
+  }
   maskerPhrase.map((elem) => {
     if (elem[0] === "#") {
       const withoutHashtag = elem.substring(1);
       const categoryKeys = Object.keys(
-        maskerList_[maskerTalker][withoutHashtag]
+        maskerList_[maskerTalker.t][withoutHashtag]
       );
-      const randCategoryIndex = Math.floor(Math.random() * categoryKeys.length);
-      const categoryItem = categoryKeys[randCategoryIndex];
+      //choose a random category from the list of categories not chosen by the target
+      const randCategoryIndex = { t: undefined };
+      const categoryItem = { t: categoriesChosen[withoutHashtag] };
+      while (categoryItem.t === categoriesChosen[withoutHashtag]) {
+        randCategoryIndex.t = Math.floor(Math.random() * categoryKeys.length);
+        categoryItem.t = categoryKeys[randCategoryIndex.t];
+      }
+
       const trialWordData = getTrialAudioBuffer(
         maskerChannels,
-        maskerList_[maskerTalker][withoutHashtag][categoryItem],
+        maskerList_[maskerTalker.t][withoutHashtag][categoryItem.t],
         audioCtx
       );
       maskerSentenceAudio.push(trialWordData);
     } else {
-      const word = maskerList_[maskerTalker][elem];
+      const word = maskerList_[maskerTalker.t][elem];
       // console.log(word, elem);
       const trialWordData = getTrialAudioBuffer(maskerChannels, word, audioCtx);
       maskerSentenceAudio.push(trialWordData);

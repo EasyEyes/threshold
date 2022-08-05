@@ -19,8 +19,6 @@ export const setWaveFormToZeroDbSPL = (arr) => {
     }
   }
 
-  //don't change to:
-  //arr.forEach((elem) => elem / rms);
   return arr;
 };
 
@@ -36,8 +34,7 @@ export const adjustSoundDbSPL = (arr, volumeDbSPL) => {
   for (var i = 0; i < arr.length; i++) {
     arr[i] *= gain;
   }
-  //don't change to:
-  //arr.forEach((elem) => elem * gain);
+
   return arr;
 };
 
