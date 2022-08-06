@@ -377,7 +377,6 @@ const _runSoundLevelCalibration = async (elems) => {
     targetElementId: "displayQR",
   };
 
-  console.log("Here");
   console.log(VolumeCalibration);
   const calibrator = new VolumeCalibration();
 
@@ -385,13 +384,10 @@ const _runSoundLevelCalibration = async (elems) => {
     elems.displayUpdate.innerHTML = message;
   });
 
-  console.log("There");
   soundGainDBSPL.current = await Speaker.startCalibration(
     speakerParameters,
     calibrator
   );
-
-  console.log("Everywhere");
 };
 
 const _runLoudspeakerCalibration = async (elems) => {
