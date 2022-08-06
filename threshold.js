@@ -681,10 +681,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     );
     if (rc.stressFps) {
       psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
-      psychoJS.experiment.addData(
-        "computeRandomMHz",
-        rc.computeRandomMHz.value
-      );
+    } else {
+      // forcedly make sure that computeRandomMHz is always available
+      await rc.performanceCompute((result) => {
+        psychoJS.experiment.addData(
+          "computeRandomMHz",
+          result.value.computeRandomMHz
+        );
+      });
     }
 
     // ! add info from the URL:
@@ -965,7 +969,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     displayOptions.window = psychoJS.window;
 
-    grid.current = new Grid("none", displayOptions, psychoJS);
+    grid.current = new Grid("disabled", displayOptions, psychoJS);
 
     return Scheduler.Event.NEXT;
   }
@@ -3295,7 +3299,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
-      if (grid.current) grid.current.update();
+      grid.current.update();
       ////
 
       //------Prepare to start Routine 'trial'-------

@@ -65,7 +65,8 @@ export class Grid {
   update(units = undefined, displayOptions = undefined) {
     if (units) this.units = units;
     if (displayOptions) this.displayOptions = displayOptions;
-    this.visible = this.units === "disabled" ? false : true;
+    if (this.units === "disabled") return;
+    this.visible = true;
     this._undraw();
     this.spawnGridStims();
     [this.lines, this.labels] = this.allGrids[this.units];

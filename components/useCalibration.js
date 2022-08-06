@@ -196,7 +196,7 @@ export const calibrateAudio = async (reader) => {
 
       try {
         if (calibrateSoundLevel) {
-          await _runSoundLevelCalibration();
+          await _runSoundLevelCalibration(elems);
         } else {
           await _runLoudspeakerCalibration(elems);
         }
@@ -363,7 +363,7 @@ const _addSoundCss = () => {
   document.head.appendChild(styleSheet);
 };
 
-const _runSoundLevelCalibration = async () => {
+const _runSoundLevelCalibration = async (elems) => {
   const {
     Speaker,
     VolumeCalibration,
@@ -374,19 +374,19 @@ const _runSoundLevelCalibration = async () => {
 
   const speakerParameters = {
     siteUrl: "https://hqjq0u.deta.dev",
-    targetElementId: "soundDisplay",
+    targetElementId: "displayQR",
   };
 
-  const calibratorParams = {
-    numCaptures: 5,
-    numMLSPerCapture: 4,
-    download: false,
-  };
+  console.log(VolumeCalibration);
+  const calibrator = new VolumeCalibration();
+
+  calibrator.on("update", ({ message, ...rest }) => {
+    elems.displayUpdate.innerHTML = message;
+  });
 
   soundGainDBSPL.current = await Speaker.startCalibration(
     speakerParameters,
-    VolumeCalibration,
-    calibratorParams
+    calibrator
   );
 };
 
