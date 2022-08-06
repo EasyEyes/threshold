@@ -138,7 +138,7 @@ export const initSoundFiles = async (trialsConditions) => {
   var maskerList = {};
   var targetList = {};
   trialsConditions.map(async (condition) => {
-    console.log(condition);
+    // console.log(condition);
     maskerList[condition["block_condition"]] = [];
     targetList[condition["block_condition"]] = [];
     //load maskers
@@ -202,7 +202,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
 
       //load maskers
       if (condition["maskerSoundFolder"]) {
-        console.log(`folders/${condition["maskerSoundFolder"]}.zip`);
+        // console.log(`folders/${condition["maskerSoundFolder"]}.zip`);
         //await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
         await fetch(`folders/VocodedWord.zip`)
           .then((response) => response.blob())

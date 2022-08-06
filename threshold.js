@@ -35,6 +35,7 @@ import "./components/css/utils.css";
 import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
+import "./components/css/vocoderPhrase.css";
 import "./components/css/forms.css";
 import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
@@ -100,8 +101,10 @@ import {
   targetTask,
   questionsThisBlock,
   thisExperimentInfo,
-  vocoderPhraseSoundFiles,
+  vocoderPhrases,
   repeatedLettersConfig,
+  vocoderPhraseCategories,
+  vocoderPhraseShowClickable,
 } from "./components/global.js";
 
 import {
@@ -308,6 +311,7 @@ import {
 import {
   getVocoderPhraseTrialData,
   initVocoderPhraseSoundFiles,
+  vocoderPhraseSetupClickableCategory,
 } from "./components/vocoderPhrase.js";
 import { readTrialLevelLetterParams } from "./components/letter.js";
 import {
@@ -1334,8 +1338,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 "sound"
               );
-              console.log("sound:trialsConditions", trialsConditions);
-              // console.log("trialsConditions", trialsConditions);
+              // console.log("sound:trialsConditions", trialsConditions);
 
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1354,7 +1357,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 "sound"
               );
-              console.log("trialsConditions", trialsConditions);
+              // console.log("trialsConditions", trialsConditions);
 
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1405,15 +1408,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       //initialize sound files:
       if (targetKind.current === "vocoderPhrase") {
-        vocoderPhraseSoundFiles.current = await initVocoderPhraseSoundFiles(
-          trialsConditions
-        );
-
-        vocoderPhraseSoundFiles.loaded = true;
-        console.log(
-          "vocoderPhraseSoundFiles",
-          vocoderPhraseSoundFiles.current["targetList"]
-        );
+        await initVocoderPhraseSoundFiles(trialsConditions);
       } else if (targetKind.current === "sound") {
         if (targetTask.current === "identify") {
           //init trial sound data
@@ -1900,10 +1895,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //setup instruction
-          const instr =
-            targetTask.current == "identify"
-              ? instructionsText.speechInNoiseBegin(L)
-              : instructionsText.soundBegin(L);
+          const instr = "Placeholder instructions for vocoderPhrase \n\n";
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr
           );
@@ -3201,26 +3193,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       switchKind(targetKind.current, {
         vocoderPhrase: async () => {
-          // const interval = setInterval(()=>{},50)
-          console.log(vocoderPhraseSoundFiles.current["targetList"]);
-          const trialSound = await getVocoderPhraseTrialData(
-            // vocoderPhraseSoundFiles.current["targetList"],
-            // vocoderPhraseSoundFiles.current["maskerList"],
-            status.block_condition,
-            ProposedVolumeLevelFromQuest.current,
-            whiteNoiseLevel.current,
-            soundGainDBSPL.current,
-            maskerVolumeDbSPL.current
-          );
-          console.log("trialSound", trialSound);
+          //get trial phrase
+          //change hardcoded value
+          vocoderPhrases.targetPhrase =
+            "Ready Baron GoTo #Color #Number Now".split(" ");
+          vocoderPhrases.maskerPhrase =
+            "Ready #CallSign GoTo #Color #Number Now".split(" ");
+
+          const { trialSound, categoriesChosen, allCategories } =
+            await getVocoderPhraseTrialData(
+              vocoderPhrases.targetPhrase,
+              vocoderPhrases.maskerPhrase,
+              status.block_condition,
+              ProposedVolumeLevelFromQuest.current,
+              whiteNoiseLevel.current,
+              soundGainDBSPL.current,
+              maskerVolumeDbSPL.current
+            );
+
+          vocoderPhraseCategories.chosen = categoriesChosen;
+          vocoderPhraseCategories.all = allCategories;
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
               trialSound,
               invertedImpulseResponse.current
             );
           else playAudioBuffer(trialSound);
-          vocoderPhraseSoundFiles.current = undefined;
-          vocoderPhraseSoundFiles.loaded = false;
         },
 
         sound: async () => {
@@ -3325,6 +3323,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       //use google sheets phrases for instructions
       switchKind(targetKind.current, {
+        vocoderPhrase: () => {
+          // change instruction
+          const instr =
+            "(placeholder instruction) pick all the correct categories";
+          _instructionSetup(instr);
+          instructions.setText(instr);
+        },
         sound: () => {
           const instr =
             targetTask.current == "identify"
@@ -3440,6 +3445,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               //only accepts y or n
               validAns = ["y", "n"];
             }
+          },
+          vocoderPhrase: () => {
+            //only clickable
+            responseType.current = 1;
           },
           reading: () => {
             // READING Only accepts SPACE
@@ -3787,8 +3796,40 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // SHOW CharacterSet AND INSTRUCTIONS
       switchKind(targetKind.current, {
+        vocoderPhrase: () => {
+          showCursor();
+          instructions.setAutoDraw(true);
+          if (vocoderPhraseShowClickable.current) {
+            vocoderPhraseShowClickable.current = false;
+            vocoderPhraseSetupClickableCategory(vocoderPhraseCategories);
+          }
+        },
         sound: () => {
           instructions.setAutoDraw(true);
+          //speech in noise setup clickable characters
+          // *showCharacterSet* updates
+          if (
+            targetTask.current == "identify" &&
+            speechInNoiseTargetList.current &&
+            speechInNoiseShowClickable.current
+          ) {
+            validAns = [""];
+            speechInNoiseShowClickable.current = false;
+            // keep track of start time/frame for later
+            showCharacterSet.tStart = t; // (not accounting for frame time here)
+            showCharacterSet.frameNStart = frameN; // exact frame index
+            showCharacterSet.setAutoDraw(true);
+            setupClickableCharacterSet(
+              speechInNoiseTargetList.current,
+              font.name,
+              "bottom",
+              showCharacterSetResponse,
+              null,
+              "",
+              "sound"
+            );
+            speechInNoiseTargetList.current = undefined;
+          }
         },
         letter: () => {
           // *showCharacterSet* updates
@@ -3816,31 +3857,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         },
       });
-      //speech in noise setup clickable characters
-      // *showCharacterSet* updates
-      if (
-        targetKind.current == "sound" &&
-        targetTask.current == "identify" &&
-        speechInNoiseTargetList.current &&
-        speechInNoiseShowClickable.current
-      ) {
-        validAns = [""];
-        speechInNoiseShowClickable.current = false;
-        // keep track of start time/frame for later
-        showCharacterSet.tStart = t; // (not accounting for frame time here)
-        showCharacterSet.frameNStart = frameN; // exact frame index
-        showCharacterSet.setAutoDraw(true);
-        setupClickableCharacterSet(
-          speechInNoiseTargetList.current,
-          font.name,
-          "bottom",
-          showCharacterSetResponse,
-          null,
-          "",
-          "sound"
-        );
-        speechInNoiseTargetList.current = undefined;
-      }
 
       /* -------------------------------------------------------------------------- */
 
@@ -3882,6 +3898,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       ////
       speechInNoiseShowClickable.current = true;
+      vocoderPhraseShowClickable.current = true;
       grid.current.hide(true);
 
       if (fixationConfig.nominalPos)

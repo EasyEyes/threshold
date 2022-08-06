@@ -24,19 +24,14 @@ export const initVocoderPhraseSoundFiles = async (trialsConditions) => {
 };
 
 export const getVocoderPhraseTrialData = async (
-  // targetList,
-  // maskerList,
+  targetPhrase,
+  maskerPhrase,
   blockCondition,
   targetVolumeDbSPLFromQuest,
   whiteNoiseLevel,
   soundGainDbSPL,
   maskerVolumeDbSPL
 ) => {
-  //get trial phrase
-  //change hardcoded value
-  const targetPhrase = "Ready Baron GoTo #Color #Number Now".split(" ");
-  const maskerPhrase = "Ready #CallSign GoTo #Color #Number Now".split(" ");
-
   //populate target and masker channel indices
   var targetChannels = populateTargetIndices();
   var maskerChannels = populateMaskerIndices(targetChannels);
@@ -45,7 +40,7 @@ export const getVocoderPhraseTrialData = async (
   // console.log("list", targetKeys);
   // console.log(targetList[blockCondition]);
 
-  const { targetSentenceAudio, talker, categoriesChosen } =
+  const { targetSentenceAudio, talker, categoriesChosen, allCategories } =
     getTargetSentenceAudio(
       targetKeys,
       targetPhrase,
@@ -69,7 +64,11 @@ export const getVocoderPhraseTrialData = async (
   console.log("maskerAudio", maskerAudio);
 
   // console.log(mergeBuffers([targetAudio, maskerAudio], audioCtx));
-  return mergeBuffers([targetAudio, maskerAudio], audioCtx);
+  return {
+    trialSound: mergeBuffers([targetAudio, maskerAudio], audioCtx),
+    categoriesChosen: categoriesChosen,
+    allCategories: allCategories,
+  };
 };
 
 const compareAndPadZerosAtBothEnds = (targetArray, maskerArray) => {
@@ -162,6 +161,7 @@ const getTargetSentenceAudio = (
   const randTargetIndex = Math.floor(Math.random() * targetKeys.length);
   const targetTalker = targetKeys[randTargetIndex];
   const categoriesChosen = {}; //keep track of categories chosen
+  const allCategories = {}; //keep track of all categories
   targetPhrase.map(async (elem) => {
     if (elem[0] === "#") {
       const withoutHashtag = elem.substring(1);
@@ -175,6 +175,9 @@ const getTargetSentenceAudio = (
         targetList_[targetTalker][withoutHashtag][categoryItem],
         audioCtx
       );
+      allCategories[withoutHashtag] = Object.keys(
+        targetList_[targetTalker][withoutHashtag]
+      );
       categoriesChosen[withoutHashtag] = categoryItem;
       targetSentenceAudio.push(trialWordData);
     } else {
@@ -183,11 +186,12 @@ const getTargetSentenceAudio = (
       targetSentenceAudio.push(trialWordData);
     }
   });
-
+  console.log("allCategories", allCategories);
   return {
     targetSentenceAudio: targetSentenceAudio,
     talker: targetTalker,
     categoriesChosen: categoriesChosen,
+    allCategories: allCategories,
   };
 };
 
@@ -237,4 +241,46 @@ const getMaskerSentenceAudio = (
   });
 
   return maskerSentenceAudio;
+};
+
+export const vocoderPhraseSetupClickableCategory = (categories) => {
+  const container = document.createElement("div");
+  container.classList.add("vocoder-phrase-clickable-category");
+  container.id = "vocoder-phrase-clickable-category";
+
+  const allCategories = categories["all"]; //all categories
+  const chosenCategory = categories["chosen"]; //chosen categories
+
+  const categoryKeys = Object.keys(allCategories);
+
+  categoryKeys.forEach((elem, ind, arr) => {
+    const categoryContainer = document.createElement("div");
+    categoryContainer.classList.add("vocoder-phrase-category-container");
+    categoryContainer.id = "vocoder-phrase-category-container";
+    categoryContainer.style.margin = "10px";
+
+    const categoryTitle = document.createElement("div");
+    categoryTitle.classList.add("vocoder-phrase-category-title");
+    categoryTitle.id = "vocoder-phrase-category-title";
+    categoryTitle.innerHTML = elem;
+
+    const categoryList = document.createElement("div");
+    categoryList.classList.add("vocoder-phrase-category-list");
+    categoryList.id = "vocoder-phrase-category-list";
+    categoryList.style.display = "flex";
+    categoryList.style.flexDirection = "column";
+
+    allCategories[elem].forEach((elem2, ind2, arr2) => {
+      const categoryItem = document.createElement("div");
+      categoryItem.classList.add("vocoder-phrase-category-item");
+      categoryItem.innerHTML = elem2;
+      categoryList.appendChild(categoryItem);
+    });
+
+    categoryContainer.appendChild(categoryTitle);
+    categoryContainer.appendChild(categoryList);
+    container.appendChild(categoryContainer);
+  });
+
+  document.body.appendChild(container);
 };

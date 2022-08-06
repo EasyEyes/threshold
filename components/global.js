@@ -330,3 +330,9 @@ export const speechInNoiseTargetList = { current: undefined };
 export const musicExpert = { current: undefined }; // TEMP
 export const speechInNoiseShowClickable = { current: true };
 export const vocoderPhraseSoundFiles = { current: undefined, loaded: false };
+export const vocoderPhrases = {
+  targetPhrase: undefined,
+  maskerPhrase: undefined,
+};
+export const vocoderPhraseCategories = { chosen: undefined, all: undefined };
+export const vocoderPhraseShowClickable = { current: true };
