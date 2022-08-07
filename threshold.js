@@ -1598,7 +1598,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             psychoJS.experiment.nextEntry();
             if (correct) correctSynth.play();
           },
-          "readingAnswer"
+          "readingAnswer",
+          targetKind.current
         );
 
         readingCurrentQuestionIndex.current++;
@@ -1635,7 +1636,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             psychoJS.experiment.nextEntry();
             if (correct) correctSynth.play();
           },
-          "readingAnswer"
+          "readingAnswer",
+          targetKind.current
         );
 
         readingCurrentQuestionIndex.current++;
@@ -3811,7 +3813,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               fontCharacterSet.current,
               font.name,
               fontCharacterSet.where,
-              showCharacterSetResponse
+              showCharacterSetResponse,
+              targetKind.current
             );
 
             instructions.tSTart = t;

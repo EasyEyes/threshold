@@ -1,4 +1,5 @@
-import { letterConfig, font as globalFont } from "./global";
+import { switchKind } from "./blockTargetKind";
+import { letterConfig, readingConfig, font as globalFont } from "./global";
 
 function getCharacterSetShowPos(ele, showWhere) {
   switch (showWhere) {
@@ -70,7 +71,8 @@ export function updateClickableCharacterSet(
   ans,
   responseRegister,
   extraFunction = null,
-  extraCharClassName = ""
+  extraCharClassName = "",
+  targetKind = ""
 ) {
   const characterSetHolder = document.querySelector(".characterSet-holder");
   while (characterSetHolder.firstChild) {
@@ -82,7 +84,8 @@ export function updateClickableCharacterSet(
     characterSetHolder,
     responseRegister,
     extraFunction,
-    extraCharClassName
+    extraCharClassName,
+    targetKind
   );
   return characterSetHolder;
 }
@@ -101,7 +104,7 @@ const pushCharacterSet = (
     let characterSet = document.createElement("span");
 
     if (targetKind == "sound") {
-      characterSet.style.fontSize = "15px";
+      characterSet.style.fontSize = "1rem";
       characterSet.style.textAlign = "left";
     }
 
@@ -116,8 +119,19 @@ const pushCharacterSet = (
       characterSet.style.fontVariantLigatures = "discretionary-lig-values";
 
     characterSet.innerHTML =
-      addFakeConnection && targetKind === "reading" ? `&zwj;${a}&zwj;` : a;
+      addFakeConnection && targetKind !== "reading" ? `&zwj;${a}&zwj;` : a;
     characterSet.style.direction = globalFont.ltr ? "ltr" : "rtl";
+
+    // TODO customize for letter config
+    characterSet.style.fontSize = "2rem";
+
+    switchKind(targetKind, {
+      reading: () => {
+        if (readingConfig.height !== undefined)
+          characterSet.style.fontSize = `${readingConfig.height}px`;
+        else characterSet.style.fontSize = "2rem";
+      },
+    });
 
     characterSet.onclick = () => {
       responseRegister.clickTime.push(performance.now());
