@@ -54,7 +54,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "_compatibleCameraBool (default TRUE) tells EasyEyes whether to check for the presence of a camera. We use the camera to track gaze and viewing distance so most experiments need it. Note that use of the camera requires permission of the participant, and some will refuse. Before asking we show an assurance that we won't retain the photos themselves and will retain only position and orientation of head and gaze. (Do we also retain the interpupillary distance in cm?) Currently we do this in the Remote Calibrator, but it would be better to do it here so people don't waste time calibrating if their camera is broken or EasyEyes can't find it. (As one participant reported to me today via Prolific.)",
+      "_compatibleCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track gaze and viewing distance so most experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only position and orientation of head and gaze. (Do we also retain the interpupillary distance in cm?) Currently we do this in the Remote Calibrator, but it would be better to do it here so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.)",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -175,7 +175,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "crowding.csv",
     explanation:
-      "_experimentFilename is the filename of the experiment table. ",
+      "_experimentFilename is the filename of the experiment table, including the extension, typically XLSX or CSV.",
     type: "text",
     default: "",
     categories: "",
@@ -215,7 +215,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Multi-session experiments require a way to link a participant's several sessions. When _participantIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID. If EasyEyes cannot get an approved EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
+      "MIGHT CHANGE TO: _requestEasyEyesIDBool\nMulti-session experiments require a way to link a participant's several sessions. When _participantIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID. If EasyEyes cannot get an approved EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -225,7 +225,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "EasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantIDGetBool above.",
+      "MIGHT CHANGE TO: _requestEasyEyesIDSaveToFileBool\nEasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantIDGetBool above.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -319,6 +319,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "US_REP_SAMPLE",
     categories: "UK_REP_SAMPLE, US_REP_SAMPLE, SINGLE",
+  },
+  {
+    name: "_requestEasyEyesIDBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "CHANGING FROM: _participantIDGetBool\nMulti-session experiments require a way to link a participant's several sessions. When _requestEasyEyesIDBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID. If EasyEyes cannot get an approved EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_requestEasyEyesIDSaveToFileBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "CHANGING FROM: _participantIDPutBool\nEasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _requestEasyEyesIDSaveToFileBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _requestEasyEyesIDBool above.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
   },
   {
     name: "_zeroBasedNumberingBool",

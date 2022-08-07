@@ -137,6 +137,8 @@ export const playAudioBufferWithImpulseResponseCalibration = async (
 export const initSoundFiles = async (trialsConditions) => {
   var maskerList = {};
   var targetList = {};
+  // console.log("trialsConditions", trialsConditions);
+
   trialsConditions.map(async (condition) => {
     // console.log(condition);
     maskerList[condition["block_condition"]] = [];

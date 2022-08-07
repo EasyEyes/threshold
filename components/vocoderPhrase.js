@@ -11,8 +11,8 @@ export const initVocoderPhraseSoundFiles = async (trialsConditions) => {
   // return new Promise(async (resolve) => {
   targetList = blockFiles["target"];
   maskerList = blockFiles["maskerList"];
-  console.log(Object.keys(targetList));
-  console.log(Object.keys(maskerList));
+  // console.log(Object.keys(targetList));
+  // console.log(Object.keys(maskerList));
   // console.log( targetList["1_1"]);
   // console.log("maskerList", maskerList);
   //   resolve({targetList:targetList,maskerList:maskerList});
@@ -58,10 +58,10 @@ export const getVocoderPhraseTrialData = async (
   );
   const targetAudio = combineAudioBuffers(targetSentenceAudio, audioCtx);
   const maskerAudio = combineAudioBuffers(maskerSentenceAudio, audioCtx);
-  console.log("targetSentenceAudio", targetSentenceAudio);
-  console.log("maskerSentenceAudio", maskerSentenceAudio);
-  console.log("targetAudio", targetAudio);
-  console.log("maskerAudio", maskerAudio);
+  // console.log("targetSentenceAudio", targetSentenceAudio);
+  // console.log("maskerSentenceAudio", maskerSentenceAudio);
+  // console.log("targetAudio", targetAudio);
+  // console.log("maskerAudio", maskerAudio);
 
   // console.log(mergeBuffers([targetAudio, maskerAudio], audioCtx));
   return {
@@ -186,7 +186,7 @@ const getTargetSentenceAudio = (
       targetSentenceAudio.push(trialWordData);
     }
   });
-  console.log("allCategories", allCategories);
+  // console.log("allCategories", allCategories);
   return {
     targetSentenceAudio: targetSentenceAudio,
     talker: targetTalker,
@@ -203,7 +203,7 @@ const getMaskerSentenceAudio = (
   targetTalker,
   categoriesChosen
 ) => {
-  console.log("categoriesChosen", categoriesChosen);
+  // console.log("categoriesChosen", categoriesChosen);
   var maskerSentenceAudio = [];
   //console.log(maskerKeys)
   const randMaskerIndex = { t: undefined };
@@ -243,7 +243,10 @@ const getMaskerSentenceAudio = (
   return maskerSentenceAudio;
 };
 
-export const vocoderPhraseSetupClickableCategory = (categories) => {
+export const vocoderPhraseSetupClickableCategory = (
+  categories,
+  responseRegister
+) => {
   const container = document.createElement("div");
   container.classList.add("vocoder-phrase-clickable-category");
   container.id = "vocoder-phrase-clickable-category";
@@ -252,12 +255,13 @@ export const vocoderPhraseSetupClickableCategory = (categories) => {
   const chosenCategory = categories["chosen"]; //chosen categories
 
   const categoryKeys = Object.keys(allCategories);
-
+  const categoryLength = categoryKeys.length;
+  const response = {};
   categoryKeys.forEach((elem, ind, arr) => {
     const categoryContainer = document.createElement("div");
     categoryContainer.classList.add("vocoder-phrase-category-container");
     categoryContainer.id = "vocoder-phrase-category-container";
-    categoryContainer.style.margin = "10px";
+    categoryContainer.style.marginLeft = "10vw";
 
     const categoryTitle = document.createElement("div");
     categoryTitle.classList.add("vocoder-phrase-category-title");
@@ -272,8 +276,31 @@ export const vocoderPhraseSetupClickableCategory = (categories) => {
 
     allCategories[elem].forEach((elem2, ind2, arr2) => {
       const categoryItem = document.createElement("div");
-      categoryItem.classList.add("vocoder-phrase-category-item");
+      categoryItem.className = "vocoder-phrase-category-item";
       categoryItem.innerHTML = elem2;
+      categoryItem.onclick = () => {
+        response[elem] = elem2;
+        // console.log("response", response);
+        //make more efficient after deadline
+        const items = categoryList.children;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].innerHTML === elem2) {
+            items[i].classList.add("vocoder-phrase-item-selected");
+          } else {
+            items[i].classList.remove("vocoder-phrase-item-selected");
+          }
+        }
+        const responseKeys = Object.keys(response);
+        const responseToRecord = [];
+        if (responseKeys.length === categoryLength) {
+          responseRegister.clickTime.push(performance.now());
+          responseKeys.map((responseKey) => {
+            responseToRecord.push(responseKey + "_" + response[responseKey]);
+          });
+          // console.log("responseToRecord", responseToRecord);
+          responseRegister.current = responseToRecord;
+        }
+      };
       categoryList.appendChild(categoryItem);
     });
 
@@ -283,4 +310,17 @@ export const vocoderPhraseSetupClickableCategory = (categories) => {
   });
 
   document.body.appendChild(container);
+};
+
+export const vocoderPhraseRemoveClickableCategory = (responseRegister) => {
+  responseRegister.current = [];
+  responseRegister.onsetTime = 0;
+  responseRegister.clickTime = [];
+
+  const ele = document.querySelectorAll(".vocoder-phrase-clickable-category");
+  if (ele.length > 0) {
+    ele.forEach((e) => {
+      document.body.removeChild(e);
+    });
+  }
 };

@@ -281,6 +281,18 @@ export const GLOSSARY: Glossary = {
     default: "US_REP_SAMPLE",
     categories: ["UK_REP_SAMPLE", "US_REP_SAMPLE", "SINGLE"],
   },
+  _requestEasyEyesIDBool: {
+    name: "_requestEasyEyesIDBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  _requestEasyEyesIDSaveToFileBool: {
+    name: "_requestEasyEyesIDSaveToFileBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   _zeroBasedNumberingBool: {
     name: "_zeroBasedNumberingBool",
     availability: "soon",

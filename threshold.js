@@ -197,6 +197,8 @@ import {
   updateTargetSpecsForRepeatedLetters,
   updateTargetSpecsForReading,
   updateTargetSpecsForSound,
+  updateTargetSpecsForSoundDetect,
+  updateTargetSpecsForSoundIdentify,
 } from "./components/showTrialInformation.js";
 import { getTrialInfoStr } from "./components/trialCounter.js";
 ////
@@ -311,6 +313,7 @@ import {
 import {
   getVocoderPhraseTrialData,
   initVocoderPhraseSoundFiles,
+  vocoderPhraseRemoveClickableCategory,
   vocoderPhraseSetupClickableCategory,
 } from "./components/vocoderPhrase.js";
 import { readTrialLevelLetterParams } from "./components/letter.js";
@@ -1276,7 +1279,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // totalTrialsThisBlock.current = trialsConditions
       //   .map((c) => paramReader.read("conditionTrials", c.block_condition))
       //   .reduce((a, b) => a + b, 0);
-
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
           trials = new data.TrialHandler({
@@ -1361,8 +1363,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 "sound"
               );
-              // console.log("trialsConditions", trialsConditions);
-
+              // console.log("VocoderPhrasetrialsConditions", trialsConditions);
+              // console.log("totalTrialsThisBlock.current", totalTrialsThisBlock.current);
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
                 psychoJS: psychoJS,
@@ -1384,7 +1386,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 "sound"
               );
-              console.log("sound:trialsConditions", trialsConditions);
+              // console.log("sound:trialsConditions", trialsConditions);
               // console.log("trialsConditions", trialsConditions);
 
               trials = new data.MultiStairHandler({
@@ -1413,19 +1415,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //initialize sound files:
       if (targetKind.current === "vocoderPhrase") {
         await initVocoderPhraseSoundFiles(trialsConditions);
+        // console.log("vocoderPhraseConditions", trialsConditions);
       } else if (targetKind.current === "sound") {
         if (targetTask.current === "identify") {
           //init trial sound data
           var speechInNoiseConditions = trialsConditions.filter(
             (condition) => condition["targetTask"] == "identify"
           );
-          await initSpeechInNoiseSoundFiles(speechInNoiseConditions);
+          // console.log("speechInNoiseConditions", trialsConditions);
+          await initSpeechInNoiseSoundFiles(
+            speechInNoiseConditions.length
+              ? speechInNoiseConditions
+              : trialsConditions
+          );
+          // console.log("speechInNoiseConditions", speechInNoiseConditions);
         } else {
           //init trial sound data
           var toneInMelodyConditions = trialsConditions.filter(
             (condition) => condition["targetTask"] == "detect"
           );
-          initToneInMelodySoundFiles(toneInMelodyConditions);
+          initToneInMelodySoundFiles(
+            toneInMelodyConditions.length
+              ? toneInMelodyConditions
+              : trialsConditions
+          );
         }
       }
 
@@ -1661,7 +1674,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       loggerText("blockSchedulerFinalRoutineEnd");
       removeClickableCharacterSet(showCharacterSetResponse);
-
+      vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
       return Scheduler.Event.NEXT;
     };
   }
@@ -2298,6 +2311,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       };
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
+          // console.log("vocoderConditions",snapshot.handler.getConditions())
+          // console.log("currentStaircase",trials._currentStaircase._name)
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
@@ -2419,7 +2434,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "maskerSoundFolder",
             status.block_condition
           );
-          if (showConditionNameConfig.showTargetSpecs)
+          if (showConditionNameConfig.showTargetSpecs) {
             updateTargetSpecsForSoundDetect(
               ProposedVolumeLevelFromQuest.current,
               maskerVolumeDbSPL.current,
@@ -2428,6 +2443,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetSoundFolder.current,
               maskerSoundFolder.current
             );
+          }
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
@@ -3031,7 +3047,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (
             psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
           ) {
-            loggerText("trialInstructionRoutineEachFrame enter HIT");
+            // loggerText("trialInstructionRoutineEachFrame enter HIT");
             continueRoutine = false;
           }
         },
@@ -3039,7 +3055,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (
             psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
           ) {
-            loggerText("trialInstructionRoutineEachFrame enter HIT");
+            // loggerText("trialInstructionRoutineEachFrame enter HIT");
             continueRoutine = false;
           }
         },
@@ -3204,17 +3220,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           vocoderPhrases.maskerPhrase =
             "Ready #CallSign GoTo #Color #Number Now".split(" ");
 
+          // console.log("snapshot", snapshot);
+          // console.log("trialData",snapshot.getCurrentTrial())
+          // console.log("status.block_condition", status.condition.block_condition)
           const { trialSound, categoriesChosen, allCategories } =
             await getVocoderPhraseTrialData(
               vocoderPhrases.targetPhrase,
               vocoderPhrases.maskerPhrase,
-              status.block_condition,
+              status.condition.block_condition,
               ProposedVolumeLevelFromQuest.current,
               whiteNoiseLevel.current,
               soundGainDBSPL.current,
               maskerVolumeDbSPL.current
             );
-
+          const chosenCategoryKeys = Object.keys(categoriesChosen);
+          correctAns.current = [];
+          chosenCategoryKeys.map((category) => {
+            correctAns.current.push(
+              category + "_" + categoriesChosen[category]
+            );
+          });
           vocoderPhraseCategories.chosen = categoriesChosen;
           vocoderPhraseCategories.all = allCategories;
           if (invertedImpulseResponse.current)
@@ -3234,7 +3259,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (targetTask.current == "identify") {
             const { targetList, trialSound, correctAnsIndex } =
               await getSpeechInNoiseTrialData(
-                status.block_condition,
+                status.condition.block_condition,
                 ProposedVolumeLevelFromQuest.current,
                 whiteNoiseLevel.current,
                 soundGainDBSPL.current
@@ -3252,7 +3277,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetIsPresentBool.current = Math.random() < 0.5;
             correctAns.current = [targetIsPresentBool.current ? "y" : "n"];
             trialSoundBuffer = await getToneInMelodyTrialData(
-              status.block_condition,
+              status.condition.block_condition,
               targetIsPresentBool.current,
               ProposedVolumeLevelFromQuest.current,
               maskerVolumeDbSPL.current,
@@ -3388,6 +3413,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         logger("toShowCursor === true");
         showCursor();
         removeClickableCharacterSet(showCharacterSetResponse);
+        vocoderPhraseRemoveClickableCategory(showCategoryResponse);
         return Scheduler.Event.NEXT;
       }
 
@@ -3554,6 +3580,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const uniqueResponses = new Set(_key_resp_allKeys.map((k) => k.name));
       if (uniqueResponses.size >= responseType.numberOfResponses) {
         // The characters with which the participant responded
+        console.log("allKeys", _key_resp_allKeys);
+        console.log("uniqueResponses", uniqueResponses);
+        console.log(
+          "responseType.numberOfResponses",
+          responseType.numberOfResponses
+        );
         const participantResponse = [...uniqueResponses].slice(
           _key_resp_allKeys.length - responseType.numberOfResponses
         );
@@ -3565,6 +3597,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ) {
           // Play correct audio
           switchKind(targetKind.current, {
+            vocoderPhrase: () => {
+              correctSynth.play();
+              status.trialCorrect_thisBlock++;
+              status.trialCompleted_thisBlock++;
+            },
             sound: () => {
               correctSynth.play();
               status.trialCorrect_thisBlock++;
@@ -3592,6 +3629,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         removeClickableCharacterSet(showCharacterSetResponse);
+        vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
         continueRoutine = false;
       }
       // *trialCounter* updates
@@ -3795,8 +3833,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         thresholdParameter
       );
       /* -------------------------------------------------------------------------- */
-      responseType.numberOfResponses =
-        targetKind.current === "repeatedLetters" ? 2 : 1;
+      switch (targetKind.current) {
+        case "repeatedLetters":
+          responseType.numberOfResponses = 2;
+          break;
+        case "vocoderPhrase":
+          responseType.numberOfResponses = Object.keys(
+            vocoderPhraseCategories.all
+          ).length;
+          break;
+        default:
+          responseType.numberOfResponses = 1;
+          break;
+      }
+      // responseType.numberOfResponses =
+      //   targetKind.current === "repeatedLetters" ? 2 : 1;
 
       // SHOW CharacterSet AND INSTRUCTIONS
       switchKind(targetKind.current, {
@@ -3804,8 +3855,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showCursor();
           instructions.setAutoDraw(true);
           if (vocoderPhraseShowClickable.current) {
+            // keep track of start time/frame for later
+            showCharacterSet.tStart = t; // (not accounting for frame time here)
+            showCharacterSet.frameNStart = frameN; // exact frame index
+            showCharacterSet.setAutoDraw(true);
             vocoderPhraseShowClickable.current = false;
-            vocoderPhraseSetupClickableCategory(vocoderPhraseCategories);
+            vocoderPhraseSetupClickableCategory(
+              vocoderPhraseCategories,
+              showCharacterSetResponse
+            );
           }
         },
         sound: () => {
@@ -3868,6 +3926,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
         removeClickableCharacterSet(showCharacterSetResponse);
+        vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
         continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
@@ -4084,6 +4143,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // store data for psychoJS.experiment (ExperimentHandler)
         // update the trial handler
         switchKind(targetKind.current, {
+          vocoderPhrase: () => {
+            //report values to quest
+            if (
+              currentLoop instanceof MultiStairHandler &&
+              currentLoop.nRemaining !== 0
+            ) {
+              currentLoop.addResponse(
+                key_resp.corr,
+                ProposedVolumeLevelFromQuest.current / 20
+              );
+            }
+            addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+          },
           sound: () => {
             //report values to quest
             if (

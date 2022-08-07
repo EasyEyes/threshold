@@ -14,8 +14,10 @@ var whiteNoiseData;
 export const initSpeechInNoiseSoundFiles = async (trialsConditions) => {
   const blockFiles = await initSoundFiles(trialsConditions);
   targetList = blockFiles["target"];
+
   return new Promise((resolve, reject) => {
     const interval = setInterval(() => {
+      // console.log("targetList", targetList);
       if (Object.keys(targetList).length !== 0) {
         clearInterval(interval);
         resolve(true);

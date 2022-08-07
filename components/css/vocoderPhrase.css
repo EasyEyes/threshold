@@ -1,22 +1,36 @@
 #vocoder-phrase-clickable-category {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   overflow-x: auto;
   z-index: 9999999;
   position: fixed;
+  /* padding-left: 30px; */
+  margin-top: 20vh;
 }
 
-#vocoder-phrase-category-item {
+.vocoder-phrase-category-item {
   display: inline-block;
   padding: 15px;
   border-radius: 7px;
   box-sizing: border-box;
   border: 2px solid rgba(0, 0, 0, 0);
 }
-#vocoder-phrase-category-item:hover {
+.vocoder-phrase-category-item:hover {
   border-color: black;
   cursor: pointer;
+}
+
+.vocoder-phrase-category-title {
+  /* font-size: 1.5em; */
+  font-weight: bold;
+  /* color: black; */
+}
+
+.vocoder-phrase-item-selected {
+  border-color: black;
+}
+
+.vocoder-phrase-item-not-selected {
+  border-color: rgba(0, 0, 0, 0);
 }
