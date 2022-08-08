@@ -148,7 +148,7 @@ export class ParamReader {
                       clearInterval(_validateInterval);
                       callback(that);
                     }
-                  }, 10);
+                  }, 100);
                 }
               }
             },
