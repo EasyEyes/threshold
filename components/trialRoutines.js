@@ -225,7 +225,8 @@ export const _repeatedLetters_trialRoutineEachFrame = (
       fontCharacterSet.current,
       font.name,
       fontCharacterSet.where,
-      showCharacterSetResponse
+      showCharacterSetResponse,
+      targetKind.current
     );
 
     instructions.tSTart = t;
