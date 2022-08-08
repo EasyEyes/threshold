@@ -5,6 +5,7 @@ import {
   audioCtx,
   initSoundFiles,
   loadVocoderPhraseSoundFiles,
+  initSoundFilesWithPromiseAll,
 } from "./soundUtils";
 import {
   getVocoderPhraseTrialData,
@@ -20,7 +21,8 @@ var whiteNoiseData;
 export const initToneInMelodySoundFiles = async (trialsConditions) => {
   // var x = await initVocoderPhraseSoundFiles(trialsConditions); //remove
   // console.log("x",await x)
-  const blockFiles = await initSoundFiles(trialsConditions);
+  // initSoundFilesWithPromiseAll
+  const blockFiles = await initSoundFilesWithPromiseAll(trialsConditions);
   maskerList = blockFiles["maskers"];
   targetList = blockFiles["target"];
 };

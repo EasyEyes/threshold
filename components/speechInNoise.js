@@ -4,6 +4,7 @@ import {
   adjustSoundDbSPL,
   audioCtx,
   initSoundFiles,
+  initSoundFilesWithPromiseAll,
 } from "./soundUtils";
 //var maskerList = {};
 var targetList = {};
@@ -12,7 +13,7 @@ var whiteNoise;
 var whiteNoiseData;
 
 export const initSpeechInNoiseSoundFiles = async (trialsConditions) => {
-  const blockFiles = await initSoundFiles(trialsConditions);
+  const blockFiles = await initSoundFilesWithPromiseAll(trialsConditions);
   targetList = blockFiles["target"];
 
   return new Promise((resolve, reject) => {

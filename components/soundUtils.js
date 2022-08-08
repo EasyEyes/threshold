@@ -192,6 +192,66 @@ export const initSoundFiles = async (trialsConditions) => {
 
   return { maskers: maskerList, target: targetList };
 };
+
+export const initSoundFilesWithPromiseAll = async (trialsConditions) => {
+  var maskerList = {};
+  var targetList = {};
+
+  await Promise.all(
+    trialsConditions.map(async (condition) => {
+      maskerList[condition["block_condition"]] = [];
+      targetList[condition["block_condition"]] = [];
+
+      //load maskers
+      if (condition["maskerSoundFolder"]) {
+        await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
+          .then((response) => {
+            return response.blob();
+          })
+          .then(async (data) => {
+            var Zip = new JSZip();
+            await Zip.loadAsync(data).then((zip) => {
+              return Promise.all(
+                Object.keys(zip.files).map(async (filename) => {
+                  var name = filename.substring(0, filename.lastIndexOf("."));
+                  var file = await zip.files[filename].async("arraybuffer");
+                  maskerList[condition["block_condition"]].push({
+                    name: name,
+                    file: getAudioBufferFromArrayBuffer(file),
+                  });
+                })
+              );
+            });
+          });
+      }
+
+      // load target
+      if (condition["targetSoundFolder"]) {
+        await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
+          .then((response) => {
+            return response.blob();
+          })
+          .then(async (data) => {
+            var Zip = new JSZip();
+            await Zip.loadAsync(data).then((zip) => {
+              return Promise.all(
+                Object.keys(zip.files).map(async (filename) => {
+                  var name = filename.substring(0, filename.lastIndexOf("."));
+                  var file = await zip.files[filename].async("arraybuffer");
+                  targetList[condition["block_condition"]].push({
+                    name: name,
+                    file: getAudioBufferFromArrayBuffer(file),
+                  });
+                })
+              );
+            });
+          });
+      }
+    })
+  );
+
+  return { maskers: maskerList, target: targetList };
+};
 var flag = true;
 export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
   const maskerList = {};
