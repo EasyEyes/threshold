@@ -205,8 +205,8 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
       //load maskers
       if (condition["maskerSoundFolder"]) {
         // console.log(`folders/${condition["maskerSoundFolder"]}.zip`);
-        //await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
-        await fetch(`folders/VocodedWord.zip`)
+        await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
+          // await fetch(`folders/VocodedWord.zip`)
           .then((response) => response.blob())
           .then(async (data) => {
             var Zip = new JSZip();
@@ -304,8 +304,8 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
       //load target
       if (condition["targetSoundFolder"]) {
         //console.log(`folders/${condition["targetSoundFolder"]}.zip`);
-        //await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
-        await fetch(`folders/VocodedWord.zip`)
+        await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
+          // await fetch(`folders/VocodedWord.zip`)
           .then((response) => response.blob())
           .then(async (data) => {
             var Zip = new JSZip();

@@ -1,5 +1,11 @@
 import mergeBuffers from "merge-audio-buffers";
-import { audioCtx, loadVocoderPhraseSoundFiles } from "./soundUtils";
+import {
+  adjustSoundDbSPL,
+  audioCtx,
+  getRMSOfWaveForm,
+  loadVocoderPhraseSoundFiles,
+  setWaveFormToZeroDbSPL,
+} from "./soundUtils";
 
 var targetList = {};
 var maskerList = {};
@@ -27,10 +33,10 @@ export const getVocoderPhraseTrialData = async (
   targetPhrase,
   maskerPhrase,
   blockCondition,
-  targetVolumeDbSPLFromQuest,
-  whiteNoiseLevel,
-  soundGainDbSPL,
-  maskerVolumeDbSPL
+  targetVolumeDbSPLFromQuest = 10,
+  whiteNoiseLevel = 70,
+  soundGainDBSPL = 0,
+  maskerVolumeDbSPL = 10
 ) => {
   //populate target and masker channel indices
   var targetChannels = populateTargetIndices();
@@ -56,30 +62,140 @@ export const getVocoderPhraseTrialData = async (
     talker,
     categoriesChosen
   );
-  const targetAudio = combineAudioBuffers(targetSentenceAudio, audioCtx);
-  const maskerAudio = combineAudioBuffers(maskerSentenceAudio, audioCtx);
-  // console.log("targetSentenceAudio", targetSentenceAudio);
-  // console.log("maskerSentenceAudio", maskerSentenceAudio);
+  // mergeAudioBuffersWithMergerNode(targetSentenceAudio[0]);
+  const mergedTargetSentenceAudio = mergeChannelsByAdding(targetSentenceAudio);
+  const mergedMaskerSentenceAudio = mergeChannelsByAdding(maskerSentenceAudio);
+
+  // align target and masker audio buffers
+  const { targetAudioBuffersAligned, maskerAudioBuffersAligned } =
+    alignTargetAndMaskerAudioBuffers(
+      mergedTargetSentenceAudio,
+      mergedMaskerSentenceAudio
+    );
+  // console.log("targetAudioBuffersAligned", targetAudioBuffersAligned);
+  // console.log("maskerAudioBuffersAligned", maskerAudioBuffersAligned);
+
+  const targetAudio = combineAudioBuffers(targetAudioBuffersAligned, audioCtx);
+  const maskerAudio = combineAudioBuffers(maskerAudioBuffersAligned, audioCtx);
+
+  //adjust target volume
+  const targetAudioData = targetAudio.getChannelData(0);
+  setWaveFormToZeroDbSPL(targetAudioData);
+  // console.log("targetAudioDataRMS", getRMSOfWaveForm(targetAudioData));
+  adjustSoundDbSPL(targetAudioData, targetVolumeDbSPLFromQuest);
+
+  //adjust masker volume
+  const maskerAudioData = maskerAudio.getChannelData(0);
+  setWaveFormToZeroDbSPL(maskerAudioData);
+  // console.log("maskerAudioDataRMS", getRMSOfWaveForm(maskerAudioData));
+  adjustSoundDbSPL(maskerAudioData, maskerVolumeDbSPL);
+
   // console.log("targetAudio", targetAudio);
   // console.log("maskerAudio", maskerAudio);
 
-  // console.log(mergeBuffers([targetAudio, maskerAudio], audioCtx));
+  //add white noise
+  const whiteNoise = audioCtx.createBuffer(
+    1,
+    targetAudio.length,
+    audioCtx.sampleRate
+  );
+  var whiteNoiseData = whiteNoise.getChannelData(0);
+  for (var i = 0; i < whiteNoiseData.length; i++) {
+    whiteNoiseData[i] = Math.random() * 2 - 1;
+  }
+
+  setWaveFormToZeroDbSPL(whiteNoiseData);
+  adjustSoundDbSPL(whiteNoiseData, whiteNoiseLevel - soundGainDBSPL);
+
   return {
-    trialSound: mergeBuffers([targetAudio, maskerAudio], audioCtx),
+    trialSound: mergeBuffers([targetAudio, maskerAudio, whiteNoise], audioCtx),
     categoriesChosen: categoriesChosen,
     allCategories: allCategories,
   };
 };
 
-// const mergeAudioBuffersWithMergerNode = (audioBuffers)=>{
-//       const merger = audioCtx.createChannelMerger(audioBuffers.length);
-//       const splitter = audioCtx.createChannelSplitter(audioBuffers.length);
-//       const source = audioCtx.createBufferSource();
+//TODO
+const mergeAudioBuffersWithMergerNode = (audioBuffer) => {
+  // const merger = audioCtx.createChannelMerger(audioBuffer.numberOfChannels);
+  // const splitter = audioCtx.createChannelSplitter(audioBuffer.numberOfChannels);
+  // const source = audioCtx.createBufferSource();
+  // console.log("merging.....")
+  // source.buffer = audioBuffer;
+  // source.connect(splitter);
+  // for (var i=0; i<audioBuffer.numberOfChannels; i++){
+  //   // console.log(audioBuffer.getChannelData(i).length);
+  //     splitter.connect(merger, 0, i);
+  // }
+  // // merger.connect(audioCtx.destination);
+  // // source.start();
+  // console.log("merger", merger);
+  // return merger;
+  // const dest =
+};
 
-//       console.log("merging.....")
+const mergeChannelsByAdding = (audioBuffers) => {
+  const newAudioBuffers = [];
+  // for(var i=0;i<audioBuffers.length;i++){
+  //   // console.log("audioBuffer", audioBuffer);
+  // const newAudioBuffer = audioCtx.createBuffer(1, audioBuffers[i].length, audioCtx.sampleRate);
+  // const newChannel = newAudioBuffer.getChannelData(0);
+  // // console.log("newChannel", newChannel);
+  // for (var j=0;j<audioBuffers[i].numberOfChannels;j++){
+  //   const channel = audioBuffers[i].getChannelData(j);
+  //   // console.log("channel", channel);
+  //   for (var k=0;k<channel.length;k++){
+  //     newChannel[k] += channel[k];
+  //   }
+  //   // console.log("newChannel", newChannel);
+  // }
 
-//       // const dest =
-// }
+  // newAudioBuffers.push(newAudioBuffer);
+
+  // }
+
+  audioBuffers.forEach((audioBuffer) => {
+    const newAudioBuffer = audioCtx.createBuffer(
+      1,
+      audioBuffer.length,
+      audioCtx.sampleRate
+    );
+    const newChannel = newAudioBuffer.getChannelData(0);
+    for (var j = 0; j < audioBuffer.numberOfChannels; j++) {
+      const channel = audioBuffer.getChannelData(j);
+      for (var k = 0; k < channel.length; k++) {
+        newChannel[k] += channel[k];
+      }
+    }
+    newAudioBuffers.push(newAudioBuffer);
+  });
+
+  // console.log("newAudioBuffers", newAudioBuffers);
+  return newAudioBuffers;
+};
+
+const alignTargetAndMaskerAudioBuffers = (
+  targetAudioBuffers,
+  maskerAudioBuffers
+) => {
+  const targetAudioBuffersAligned = [];
+  const maskerAudioBuffersAligned = [];
+  for (var i = 0; i < targetAudioBuffers.length; i++) {
+    const targetAudioBuffer = targetAudioBuffers[i];
+    const maskerAudioBuffer = maskerAudioBuffers[i];
+    const aligned = compareAndPadZerosAtBothEnds(
+      targetAudioBuffer.getChannelData(0),
+      maskerAudioBuffer.getChannelData(0)
+    );
+    targetAudioBuffer.copyToChannel(aligned[0], 0);
+    maskerAudioBuffer.copyToChannel(aligned[1], 0);
+    targetAudioBuffersAligned.push(targetAudioBuffer);
+    maskerAudioBuffersAligned.push(maskerAudioBuffer);
+  }
+  return {
+    targetAudioBuffersAligned: targetAudioBuffersAligned,
+    maskerAudioBuffersAligned: targetAudioBuffersAligned,
+  };
+};
 
 const compareAndPadZerosAtBothEnds = (targetArray, maskerArray) => {
   if (targetArray.length == maskerArray.length) {
@@ -96,9 +212,10 @@ const padZeros = (arr, arr1Length) => {
 
   const left = Array(leftSize).fill(0);
   const right = Array(rightSize).fill(0);
-  const result = left.concat(arr, right);
-
-  return result;
+  const data = Array.prototype.slice.call(arr);
+  const result = left.concat(data, right);
+  const resultFloatArray = new Float32Array(result);
+  return resultFloatArray;
 };
 
 const combineAudioBuffers = (audioBuffers, context) => {

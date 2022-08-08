@@ -58,6 +58,7 @@ export const getSpeechInNoiseTrialData = async (
   }
   setWaveFormToZeroDbSPL(whiteNoiseData);
   adjustSoundDbSPL(whiteNoiseData, whiteNoiseLevel - soundGainDBSPL);
+
   return {
     targetList: targetList[blockCondition],
     trialSound: mergeBuffers([trialTarget, whiteNoise], audioCtx),
