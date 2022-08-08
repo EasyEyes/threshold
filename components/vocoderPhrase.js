@@ -71,6 +71,16 @@ export const getVocoderPhraseTrialData = async (
   };
 };
 
+// const mergeAudioBuffersWithMergerNode = (audioBuffers)=>{
+//       const merger = audioCtx.createChannelMerger(audioBuffers.length);
+//       const splitter = audioCtx.createChannelSplitter(audioBuffers.length);
+//       const source = audioCtx.createBufferSource();
+
+//       console.log("merging.....")
+
+//       // const dest =
+// }
+
 const compareAndPadZerosAtBothEnds = (targetArray, maskerArray) => {
   if (targetArray.length == maskerArray.length) {
     return [targetArray, maskerArray];

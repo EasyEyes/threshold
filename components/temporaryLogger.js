@@ -69,6 +69,9 @@ export const setInitialData = (
         currentBlock: "null",
         currentBlockStartingtime: "null",
         blockCompleted: "null",
+        _beforeQuitFunction: false,
+        _insideQuitFunction: false,
+        _afterQuitFunction: false,
       },
     },
   };
@@ -140,4 +143,9 @@ export const updateCurrentBlockCondition = async (
   const { expID, participantID } = parseExperimentID(experimentID);
   await set(ref(db, `/${expID}/${userID}/currentBlock`), currentBlock);
   await set(ref(db, `/${expID}/${userID}/currentBlockStartingtime`), time);
+};
+
+export const logPsychoJSQuit = async (step, experimentID, userID) => {
+  const { expID, participantID } = parseExperimentID(experimentID);
+  await set(ref(db, `/${expID}/${userID}/${step}`), true);
 };

@@ -3582,12 +3582,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const uniqueResponses = new Set(_key_resp_allKeys.map((k) => k.name));
       if (uniqueResponses.size >= responseType.numberOfResponses) {
         // The characters with which the participant responded
-        console.log("allKeys", _key_resp_allKeys);
-        console.log("uniqueResponses", uniqueResponses);
-        console.log(
-          "responseType.numberOfResponses",
-          responseType.numberOfResponses
-        );
+        // console.log("allKeys", _key_resp_allKeys);
+        // console.log("uniqueResponses", uniqueResponses);
+        // console.log(
+        //   "responseType.numberOfResponses",
+        //   responseType.numberOfResponses
+        // );
         const participantResponse = [...uniqueResponses].slice(
           _key_resp_allKeys.length - responseType.numberOfResponses
         );
