@@ -1,5 +1,6 @@
 import { switchKind } from "./blockTargetKind";
 import { letterConfig, readingConfig, font as globalFont } from "./global";
+import { safeExecuteFunc } from "./utils";
 
 function getCharacterSetShowPos(ele, showWhere) {
   switch (showWhere) {
@@ -136,7 +137,7 @@ const pushCharacterSet = (
     characterSet.onclick = () => {
       responseRegister.clickTime.push(performance.now());
       responseRegister.current.push(a.toLowerCase());
-      if (extraFunction) extraFunction(a); // TEMP? For reading response
+      safeExecuteFunc(extraFunction, a); // TEMP? For reading response
       characterSet.style.border = "2px solid black";
       characterSet.style.backgroundColor = "lightgray";
     };

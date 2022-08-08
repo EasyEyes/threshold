@@ -3923,6 +3923,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               font.name,
               fontCharacterSet.where,
               showCharacterSetResponse,
+              null,
+              "",
               targetKind.current
             );
 
