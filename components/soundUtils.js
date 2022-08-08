@@ -477,3 +477,33 @@ const processAudioDataForFileInSubFolder = async (fileName, zipEntry) => {
     };
   } else return false;
 };
+
+export const addTrialStaircaseSummariesToDataForSound = (
+  currentLoop,
+  psychoJS
+) => {
+  // TODO What to do when data saving is rejected?
+  if (currentLoop._currentStaircase) {
+    psychoJS.experiment.addData(
+      "staircaseName",
+      currentLoop._currentStaircase._name
+    );
+    psychoJS.experiment.addData(
+      "questMeanAtEndOfTrial",
+      currentLoop._currentStaircase.mean()
+    );
+    psychoJS.experiment.addData(
+      "questSDAtEndOfTrial",
+      currentLoop._currentStaircase.sd()
+    );
+    psychoJS.experiment.addData(
+      "questQuantileOfQuantileOrderAtEndOfTrial",
+      currentLoop._currentStaircase.quantile(
+        currentLoop._currentStaircase._jsQuest.quantileOrder
+      )
+    );
+  }
+  // else {
+  //   throw "undefined currentLoop._currentStaircase [add TRIAL data failed]";
+  // }
+};

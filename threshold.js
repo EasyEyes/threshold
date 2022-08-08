@@ -286,6 +286,7 @@ import {
   initToneInMelodySoundFiles,
 } from "./components/toneInMelody.js";
 import {
+  addTrialStaircaseSummariesToDataForSound,
   playAudioBuffer,
   playAudioBufferWithImpulseResponseCalibration,
 } from "./components/soundUtils.js";
@@ -1218,6 +1219,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         // only when not answering questions
         switchTask(_thisBlock.targetTask, {
+          detect: () => {
+            switchKind(_thisBlock.targetKind, {
+              sound: () => {
+                blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
+                blocksLoopScheduler.add(initInstructionRoutineEachFrame());
+                blocksLoopScheduler.add(initInstructionRoutineEnd());
+              },
+            });
+          },
           identify: () => {
             blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
             blocksLoopScheduler.add(initInstructionRoutineEachFrame());
@@ -1434,7 +1444,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           var toneInMelodyConditions = trialsConditions.filter(
             (condition) => condition["targetTask"] == "detect"
           );
-          initToneInMelodySoundFiles(
+          await initToneInMelodySoundFiles(
             toneInMelodyConditions.length
               ? toneInMelodyConditions
               : trialsConditions
@@ -4157,7 +4167,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ProposedVolumeLevelFromQuest.current / 20
               );
             }
-            addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+            addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);
           },
           sound: () => {
             //report values to quest
@@ -4170,7 +4180,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ProposedVolumeLevelFromQuest.current / 20
               );
             }
-            addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+            addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);
+            // console.log("currentLoop", currentLoop);
             //psychoJS.experiment.addData("targetWasPresent", targetIsPresentBool.current);
             //name of masker
             //psychoJS.experiment.addData();
