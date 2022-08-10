@@ -372,6 +372,18 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  computeImageJS: {
+    name: "computeImageJS",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  computeMovieJS: {
+    name: "computeMovieJS",
+    availability: "now",
+    type: "",
+    default: "",
+  },
   conditionGroup: {
     name: "conditionGroup",
     availability: "later",
@@ -1338,7 +1350,7 @@ export const GLOSSARY: Glossary = {
     name: "viewingDistanceAllowedRatio",
     availability: "now",
     type: "numerical",
-    default: "1.2",
+    default: "0",
   },
   viewingDistanceDesiredCm: {
     name: "viewingDistanceDesiredCm",
@@ -1346,20 +1358,20 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "50",
   },
-  viewingDistanceMaxForScreenHeightDeg: {
-    name: "viewingDistanceMaxForScreenHeightDeg",
-    availability: "now",
-    type: "numerical",
-    default: "0",
-  },
-  viewingDistanceMaxForScreenWidthDeg: {
-    name: "viewingDistanceMaxForScreenWidthDeg",
+  viewingDistanceSmallEnoughToAllowScreenHeightDeg: {
+    name: "viewingDistanceSmallEnoughToAllowScreenHeightDeg",
     availability: "now",
     type: "numerical",
     default: "",
   },
-  viewingDistanceMinForTargetSizeDeg: {
-    name: "viewingDistanceMinForTargetSizeDeg",
+  viewingDistanceSmallEnoughToAllowScreenWidthDeg: {
+    name: "viewingDistanceSmallEnoughToAllowScreenWidthDeg",
+    availability: "now",
+    type: "numerical",
+    default: "",
+  },
+  viewingDistanceLargeEnoughToAllowTargetSizeDeg: {
+    name: "viewingDistanceLargeEnoughToAllowTargetSizeDeg",
     availability: "now",
     type: "numerical",
     default: "0",

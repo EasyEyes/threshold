@@ -1806,6 +1806,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             },
           });
         },
+        detect: () => {
+          switchKind(targetKind.current, {
+            sound: () => {
+              const possibleTrials = paramReader.read(
+                "conditionTrials",
+                status.block
+              );
+              totalTrialsThisBlock.current = possibleTrials.reduce(
+                (a, b) => a + b,
+                0
+              );
+            },
+          });
+        },
       });
 
       // keep track of which components have finished
@@ -2524,6 +2538,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
+          console.log("trialCounter", trialCounter);
         },
 
         reading: () => {
@@ -3000,6 +3015,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current
       );
       trialCounter.setText(trialCounterStr);
+      console.log("trialCounterStr", trialCounterStr);
+      console.log("status.trial", status.trial);
+      console.log("totalTrialsThisBlock.current", totalTrialsThisBlock.current);
       trialCounter.setFont(instructionFont.current);
       trialCounter.setHeight(trialCounterConfig.height);
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);

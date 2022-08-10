@@ -481,6 +481,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "computeImageJS",
+    availability: "now",
+    example: "",
+    explanation:
+      "computeImageJS is JavaScript code to compute a static image (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The value is double in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentrictyXDeg, targetEccentrictyYDeg, targetCPerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), luminanceNit. For example\nimageNit=ones([length(yDeg),length(xDeg)]);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCPerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(j,:)=luminanceNit*(1+targetContrast*gy(j)*fx);\nend",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "computeMovieJS",
+    availability: "now",
+    example: "",
+    explanation:
+      "computeImageJS is JavaScript code to compute a static image (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The value is double in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentrictyXDeg, targetEccentrictyYDeg, targetCPerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), luminanceNit. For example\nimageNit=ones([length(yDeg),length(xDeg)]);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCPerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(j,:)=luminanceNit*(1+targetContrast*gy(j)*fx);\nend",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
     name: "conditionGroup",
     availability: "later",
     example: "1",
@@ -2032,7 +2052,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "viewingDistanceMaxForScreenHeightDeg",
+    name: "viewingDistanceAllowedRatio",
     availability: "now",
     example: "30",
     explanation:
@@ -2042,21 +2062,31 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "viewingDistanceMaxForScreenWidthDeg",
+    name: "viewingDistanceSmallEnoughToAllowScreenHeightDeg",
     availability: "now",
     example: "30",
     explanation:
-      "viewingDistanceMaxForScreenWidthDeg places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. ",
+      "viewingDistanceSmallEnoughToAllowScreenHeightDeg places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. ",
     type: "numerical",
     default: "",
     categories: "",
   },
   {
-    name: "viewingDistanceMinForTargetSizeDeg",
+    name: "viewingDistanceSmallEnoughToAllowScreenWidthDeg",
+    availability: "now",
+    example: "30",
+    explanation:
+      "viewingDistanceSmallEnoughToAllowScreenWidthDeg places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. ",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "viewingDistanceLargeEnoughToAllowTargetSizeDeg",
     availability: "now",
     example: "0.02",
     explanation:
-      "viewingDistanceMinForTargetSizeDeg places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. Default is zero, which is ignored. This depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix.",
+      "viewingDistanceLargeEnoughToAllowTargetSizeDeg places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. Default is zero, which is ignored. This depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2066,7 +2096,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Setting viewingDistanceNudgingBool TRUE enables the nudger. The nudger compares measured viewing distance to desired viewing distance, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range. The viewing-distance nudger (\"Closer!\", \"Farther!\") gets the participant to the right distance. \n     We protect the stimulus from nudging. The nudger will never occlude, or forward or backward mask, the stimulus. Think of the trial as beginning at the participant's click (or keypress) requesting the stimulus and ending at the click (or keypress) response. This leaves a pre-trial interval from the response until the click requesting the next trial. EasyEyes nudges only before and between trials. Furthermore, to prevent forward masking, EasyEyes ignores attempts to click (or key press) during nudging and until targetSafetyMarginSec after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n    For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial, and sets nudgingCancelsTrialBool to always be FALSE. \n\n     FUTURE. To make sure that the stimulus is never obscured by nudging, we designate three intevals:\nPRE-TRIAL INTERVAL. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging. \nSTIMULUS INTERVAL. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus, we protect the stimulus by suspending nudging. \nRESPONSE INTERVAL. From the end of the stimulus until the observer responds, we also suspend nudging, so the nudge won't interfere with remembering the target. \nIf we acquire the possibility of canceling a trial, then we could allow nudging during the stimulus interval, and immediately cancel that trial. Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. The current version of MultistairHandler doesn't cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial interval, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during the stimulus interval we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. \n",
+      "Setting viewingDistanceNudgingBool TRUE (deafult is FALSE) enables the nudger. The nudger compares measured viewing distance to desired viewing distance, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range. The viewing-distance nudger (\"Closer!\", \"Farther!\") gets the participant to the right distance. \n     We protect the stimulus from nudging. The nudger will never occlude, or forward or backward mask, the stimulus. Think of the trial as beginning at the participant's click (or keypress) requesting the stimulus and ending at the click (or keypress) response. This leaves a pre-trial interval from the response until the click requesting the next trial. EasyEyes nudges only before and between trials. Furthermore, to prevent forward masking, EasyEyes ignores attempts to click (or key press) during nudging and until targetSafetyMarginSec after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n    For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial, and sets nudgingCancelsTrialBool to always be FALSE. \n\n     FUTURE. To make sure that the stimulus is never obscured by nudging, we designate three intevals:\nPRE-TRIAL INTERVAL. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging. \nSTIMULUS INTERVAL. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus, we protect the stimulus by suspending nudging. \nRESPONSE INTERVAL. From the end of the stimulus until the observer responds, we also suspend nudging, so the nudge won't interfere with remembering the target. \nIf we acquire the possibility of canceling a trial, then we could allow nudging during the stimulus interval, and immediately cancel that trial. Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. The current version of MultistairHandler doesn't cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial interval, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during the stimulus interval we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. \n",
     type: "boolean",
     default: "FALSE",
     categories: "",
