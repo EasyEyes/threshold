@@ -1,5 +1,10 @@
 import { switchKind } from "./blockTargetKind";
-import { letterConfig, readingConfig, font as globalFont } from "./global";
+import {
+  showCharacterSetResponse,
+  letterConfig,
+  readingConfig,
+  font as globalFont,
+} from "./global";
 import { safeExecuteFunc } from "./utils";
 
 function getCharacterSetShowPos(ele, showWhere) {
