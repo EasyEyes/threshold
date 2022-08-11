@@ -494,7 +494,6 @@ const getCharacterSetBoundingBoxPositions = (
 ) => {
   const stimBoxes = stims.map((s) => s.getBoundingBox(true));
   const texts = stims.map((s) => s.getText());
-  logger("texts", texts);
   return stimBoxes.map((b, i) =>
     getRelativePosition(
       [b.x, b.y],

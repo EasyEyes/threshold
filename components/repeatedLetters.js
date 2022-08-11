@@ -19,6 +19,21 @@ import { getLargestBoundsRatio } from "./bounding";
 import { TextStim } from "../psychojs/src/visual";
 import { Color } from "../psychojs/src/util";
 
+export const duplicateRepeatedLetterConditions = (conditions) => {
+  const newConditions = [];
+  conditions.forEach((c) => {
+    if (c.targetKind === "repeatedLetters") {
+      const c1 = Object.assign({ _duplicatedConditionCardinal: 1 }, c);
+      const c2 = Object.assign({ _duplicatedConditionCardinal: 2 }, c);
+      newConditions.push(c1);
+      newConditions.push(c2);
+    } else {
+      newConditions.push(c);
+    }
+  });
+  return newConditions;
+};
+
 export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
   // TODO add a preprocessor check that the border character isn't found in the target character set
   repeatedLettersConfig.targetRepeatsBorderCharacter = reader.read(
@@ -36,9 +51,7 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
     fontCharacterSet.current,
     2
   );
-  logger("targetCharacters", targetCharacters);
   correctAns.current = targetCharacters.map((c) => c.toLowerCase());
-  logger("correctAns.current", correctAns.current);
   const stims = stimulusParameters.stimulusLocations.map((stimInfo, i) => {
     const { type, pos } = stimInfo;
     const character =

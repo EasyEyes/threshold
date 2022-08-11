@@ -76,17 +76,17 @@ export const GLOSSARY: Glossary = {
       "notCocCoc",
     ],
   },
-  _compatibleCameraBool: {
-    name: "_compatibleCameraBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-  },
   _compatibleBrowserVersionMinimum: {
     name: "_compatibleBrowserVersionMinimum",
     availability: "now",
     type: "integer",
     default: "0",
+  },
+  _compatibleCameraBool: {
+    name: "_compatibleCameraBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
   },
   _compatibleDeviceType: {
     name: "_compatibleDeviceType",
@@ -390,6 +390,12 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "0",
   },
+  computeRectDeg: {
+    name: "computeRectDeg",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   conditionName: {
     name: "conditionName",
     availability: "now",
@@ -569,6 +575,12 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     type: "boolean",
     default: "FALSE",
+  },
+  luminanceNit: {
+    name: "luminanceNit",
+    availability: "now",
+    type: "numerical",
+    default: "",
   },
   markingBlankedNearTargetBool: {
     name: "markingBlankedNearTargetBool",
@@ -1114,9 +1126,15 @@ export const GLOSSARY: Glossary = {
   },
   targetContrast: {
     name: "targetContrast",
-    availability: "soon",
+    availability: "now",
     type: "numerical",
     default: "-1",
+  },
+  targetCyclePerDeg: {
+    name: "targetCyclePerDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0",
   },
   targetDurationSec: {
     name: "targetDurationSec",
@@ -1132,6 +1150,12 @@ export const GLOSSARY: Glossary = {
   },
   targetEccentricityYDeg: {
     name: "targetEccentricityYDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+  },
+  targetHz: {
+    name: "targetHz",
     availability: "now",
     type: "numerical",
     default: "0",
@@ -1162,6 +1186,18 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "8",
+  },
+  targetOrientationDeg: {
+    name: "targetOrientationDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+  },
+  targetPhaseDeg: {
+    name: "targetPhaseDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0",
   },
   targetRepeatsBool: {
     name: "targetRepeatsBool",
@@ -1253,12 +1289,30 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  targetSpaceConstantDeg: {
+    name: "targetSpaceConstantDeg",
+    availability: "now",
+    type: "numerical",
+    default: "1.00E+10",
+  },
   targetTask: {
     name: "targetTask",
     availability: "now",
     type: "categorical",
     default: "identify",
     categories: ["identify", "detect", "questionAndAnswer"],
+  },
+  targetTimeConstantSec: {
+    name: "targetTimeConstantSec",
+    availability: "now",
+    type: "numerical",
+    default: "1.00E+10",
+  },
+  targetWhenSec: {
+    name: "targetWhenSec",
+    availability: "now",
+    type: "numerical",
+    default: "0",
   },
   thresholdAllowedDurationRatio: {
     name: "thresholdAllowedDurationRatio",
@@ -1358,18 +1412,6 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "50",
   },
-  viewingDistanceSmallEnoughToAllowScreenHeightDeg: {
-    name: "viewingDistanceSmallEnoughToAllowScreenHeightDeg",
-    availability: "now",
-    type: "numerical",
-    default: "",
-  },
-  viewingDistanceSmallEnoughToAllowScreenWidthDeg: {
-    name: "viewingDistanceSmallEnoughToAllowScreenWidthDeg",
-    availability: "now",
-    type: "numerical",
-    default: "",
-  },
   viewingDistanceLargeEnoughToAllowTargetSizeDeg: {
     name: "viewingDistanceLargeEnoughToAllowTargetSizeDeg",
     availability: "now",
@@ -1381,6 +1423,18 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "FALSE",
+  },
+  viewingDistanceSmallEnoughToAllowScreenHeightDeg: {
+    name: "viewingDistanceSmallEnoughToAllowScreenHeightDeg",
+    availability: "now",
+    type: "numerical",
+    default: "",
+  },
+  viewingDistanceSmallEnoughToAllowScreenWidthDeg: {
+    name: "viewingDistanceSmallEnoughToAllowScreenWidthDeg",
+    availability: "now",
+    type: "numerical",
+    default: "",
   },
   wirelessKeyboardNeededBool: {
     name: "wirelessKeyboardNeededBool",

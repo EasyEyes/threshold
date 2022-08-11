@@ -50,16 +50,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "all, Chrome, Safari, Firefox, Opera, Edge, Chromium, Tor, Duckduckgo, Brave, Vivaldi, Midori, SamsungInternet, UCBrowser, Android, Firefox, QQBrowser, Instabridge, WhaleBrowser, Puffin, YandexBrowser, EdgeLegacy, Edge, CocCoc, notChrome, notSafari, notFirefox, notOpera, notEdge, notChromium, notTor, notDuckduckgo, notBrave, notVivaldi, notMidori, notSamsungInternet, notUCBrowser, notAndroid, notFirefox, notQQBrowser, notInstabridge, notWhaleBrowser, notPuffin, notYandexBrowser, notEdgeLegacy, notEdge, notCocCoc",
   },
   {
-    name: "_compatibleCameraBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "_compatibleCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track gaze and viewing distance so most experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only position and orientation of head and gaze. (Do we also retain the interpupillary distance in cm?) Currently we do this in the Remote Calibrator, but it would be better to do it here so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.)",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
     name: "_compatibleBrowserVersionMinimum",
     availability: "now",
     example: "100",
@@ -67,6 +57,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_compatibleBrowserMinimumVersion is the minimum integer version number of the browser for compatibility. The default is zero.",
     type: "integer",
     default: "0",
+    categories: "",
+  },
+  {
+    name: "_compatibleCameraBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "_compatibleCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track gaze and viewing distance so most experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only position and orientation of head and gaze. (Do we also retain the interpupillary distance in cm?) Currently we do this in the Remote Calibrator, but it would be better to do it here so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.)",
+    type: "boolean",
+    default: "TRUE",
     categories: "",
   },
   {
@@ -485,7 +485,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "computeImageJS is JavaScript code to compute a static image (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The value is double in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentrictyXDeg, targetEccentrictyYDeg, targetCPerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), luminanceNit. For example\nimageNit=ones([length(yDeg),length(xDeg)]);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCPerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(j,:)=luminanceNit*(1+targetContrast*gy(j)*fx);\nend",
+      "computeImageJS is JavaScript code to compute a static image array (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The imageNit(y,x) value  is in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), and luminanceNit. For example\n% THIS MATLAB CODE MUST BE TRANSLATED TO JAVASCRIPT\n% Compute vertical Gabor.\nimageNit=ones([length(xDeg),length(yDeg)]);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(:,j)=luminanceNit*(1+targetContrast*gy(j)*fx);\nend\n",
     type: "",
     default: "",
     categories: "",
@@ -495,7 +495,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "computeImageJS is JavaScript code to compute a static image (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The value is double in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentrictyXDeg, targetEccentrictyYDeg, targetCPerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), luminanceNit. For example\nimageNit=ones([length(yDeg),length(xDeg)]);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCPerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(j,:)=luminanceNit*(1+targetContrast*gy(j)*fx);\nend",
+      "computeMovieJS is JavaScript code to compute a movie array (movieNit) from the vectors xDeg, yDeg, and tSec, which have one point per pixel and frame. tSec has mean zero, e.g. [-1/60, 0, 1/60] for a three-frame movei. The movieNit(y,x,t) value is double in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentrictyXDeg, targetEccentrictyYDeg, targetWhenSec, targetCPerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec,  luminanceNit. For example\nimageNit=ones([length(yDeg),length(xDeg),length(tSec)]);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\ngt=exp(-((tSec-targetWhenSec)/targetSpaceConstantDeg)^2);\nfor k=1:length(tSec)\n     fx=sin(2*pi*(tSec(k)-tWhenSec)*targetHz + 2*pi*(xDeg-targetEccentrictyYDeg)*targetCPerDeg + 2*pi*targetPhase/360);\n     fx=gx .* fx;\n     for j=1:length(yDeg)\n          movieNit(j,:,k)=luminanceNit*(1+targetContrast*gt(k)*gy(j)*fx);\n     end\nend\nend",
     type: "",
     default: "",
     categories: "",
@@ -508,6 +508,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '"conditionGroup" imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross, target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among any specified set of targets simply by creating a condition for each target, and giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
     type: "integer",
     default: "0",
+    categories: "",
+  },
+  {
+    name: "computeRectDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "computeRectDeg (default is whole screen) consists of four numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and the the right of fixation. The sequence is left,bottom,right,top.",
+    type: "text",
+    default: "",
     categories: "",
   },
   {
@@ -789,6 +799,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "At the end of this block, invite the participant to make parting comments. ",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "luminanceNit",
+    availability: "now",
+    example: "",
+    explanation:
+      "luminanceNit (default none) is the desired screen luminance in cd/m^2, i.e. nits. Specifying luminance will only be practical when we use an HDR codec supporting PQ. More typically, we'll want to use the display at the background luminance it was designed for, often 500 cd/m^2. The default empty value indicates that we should use the display at whatever background luminance we find it in.",
+    type: "numerical",
+    default: "",
     categories: "",
   },
   {
@@ -1665,12 +1685,22 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "targetContrast",
-    availability: "soon",
-    example: "-1",
+    availability: "now",
+    example: "",
     explanation:
-      "Weber contrast ∆L/L0 of a letter or Michelson contrast (LMax-LMin)/(LMax+LMin) of a Gabor. A white letter is 100% contrast; a black letter is -100% contrast. Currently accurate only for 0 and ±1.",
+      "NOT YET IMPLEMENT: targetContrast is the desired luminance contrast of the target. For letters we use Weber contrast, \nc=(LLetter-LBackground)/LBackground. \nA white letter has contrast +1; a black letter has contrast -1.\nFor gabors, we use Michelson contrast, \nc=(LMax-LMin)/(LMax+LMin).\nNOTE: Until we shift to using HDR movies, contrast is only accurate for values of -1, 0, and 1.",
     type: "numerical",
     default: "-1",
+    categories: "",
+  },
+  {
+    name: "targetCyclePerDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetCyclePerDeg (default 0) is the target spatial frequency in cycles per deg. Sine of zero is zero and cosine of zero is 1, so if you're using zero targetCyclePerDeg to get a Gaussian blob, then set targetPhaseDeg to 90.",
+    type: "numerical",
+    default: "0",
     categories: "",
   },
   {
@@ -1678,7 +1708,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.15",
     explanation:
-      "The duration of target presentation. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. Set responseAllowedEarlyBool to FALSE if you want to allow response only after target offset.",
+      "targetDurationSec (default 0.15) is the duration of target presentation. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. Set responseAllowedEarlyBool to FALSE if you want to allow response only after target offset.",
     type: "numerical",
     default: "0.15",
     categories: "",
@@ -1704,6 +1734,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "targetHz",
+    availability: "now",
+    example: "",
+    explanation: "targetHz (default 0) is the target temporal frequency in Hz.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
     name: "targetImageFolder",
     availability: "now",
     example: "faces",
@@ -1718,7 +1757,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "letter",
     explanation:
-      '• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• reading Measure reading speed and retention. Soon reading will instead by a category of targetTask.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The target sound is played for its full duration at level targetSoundDBSPL with a masker sound randomly selected from the maskerSoundFolder played at level maskerDBSPL. Also we play targetSoundNoise at level targetSoundNoiseDBSPL.\n• vocoderPhrase. The targetSoundFolder and maskerSoundFolder each contain a hierarchy of folders containing 16-channel sound files. Each sound file is named for a word and contains the original or processed sound of that word (except that the file called "GoTo.wav" in fact contains the two words "go to"). The top level of folders in targetSoundFolder and maskerSoundFolder are folders of sounds produced by several talkers. Currently the talkers (Talker11, Talker14, Talker16, and Talker18) are all female. On each trial the target and masker are randomly assigned different talkers (never equal). Within each talker\'s folder are several loose word files (Now.wav, GoTo.wav, and Ready.wav), and several category folders (CallSign, Color, Number) that each contain several word files. Each trial follows text phrases provided in the parameters targetSoundPhrase and maskerSoundPhrase. Each phrase consists of a series of explicit words and category names, with each category name preceded by #. Currently the targetSoundPhrase is "Ready Baron GoTo #Color #Number Now", and the maskerSoundPhrase is "Ready #CallSign GoTo #Color #Number Now". The target and masker phrases are played at the same time, aligning the temporal midpoint of both words in each target-masker pair by symmetrically padding both ends of the briefer word with zeroes to make it the same length as the longer word. Each explicit word in each script is played every time. On each trial, each word category, marked by #, is replaced by a randomly selected word from that category folder, except that target and masker are always different from each other when either is drawn from a category.  On each trial, the target and masker phrases are combined by randomly taking 9 of the 16 channels of every word in the target phrase, and the remaining 7 channels from the masker words. The channel selection is consistent for all the words in the phrase, and new for each trial. targetSoundDBSPL specifies the sound level of the combined 9 channels taken from each target word. Similarly maskerSoundDBSPL specifies the sound level of the combined 7 channel taken from each masker word. Also, we play targetSoundNoise at level targetSoundNoiseDBSPL. The Zhang et al. (2021) paper mentions a noise control, in which the masker is white noise that has been filtered into 16 bands and windowed into word-length durations. The scientist achieves this simply by providing a maskerSoundFolder made up of these 16-channel noises, each derived from a word. \nRESPONSE. After playing the phrase, EasyEyes displays two columns, one for each category word in the targetSoundPhrase. The observer must select one word in each column in order to proceed to the next trial. (This is forced choice.) We score the trial as right only if both responses are right. That overall right/wrong response is provided to QUEST, which controls the targetSoundDBSPL.',
+      'targetKind (default letter) specifies the kind of target.\n• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• reading Measure reading speed and retention. Soon reading will instead be a category of targetTask.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The target sound is played for its full duration at level targetSoundDBSPL with a masker sound randomly selected from the maskerSoundFolder played at level maskerDBSPL. Also we play targetSoundNoise at level targetSoundNoiseDBSPL.\n• vocoderPhrase. The targetSoundFolder and maskerSoundFolder each contain a hierarchy of folders containing 16-channel sound files. Each sound file is named for a word and contains the original or processed sound of that word (except that the file called "GoTo.wav" in fact contains the two words "go to"). The top level of folders in targetSoundFolder and maskerSoundFolder are folders of sounds produced by several talkers. Currently the talkers (Talker11, Talker14, Talker16, and Talker18) are all female. On each trial the target and masker are randomly assigned different talkers (never equal). Within each talker\'s folder are several loose word files (Now.wav, GoTo.wav, and Ready.wav), and several category folders (CallSign, Color, Number) that each contain several word files. Each trial follows text phrases provided in the parameters targetSoundPhrase and maskerSoundPhrase. Each phrase consists of a series of explicit words and category names, with each category name preceded by #. Currently the targetSoundPhrase is "Ready Baron GoTo #Color #Number Now", and the maskerSoundPhrase is "Ready #CallSign GoTo #Color #Number Now". The target and masker phrases are played at the same time, aligning the temporal midpoint of both words in each target-masker pair by symmetrically padding both ends of the briefer word with zeroes to make it the same length as the longer word. Each explicit word in each script is played every time. On each trial, each word category, marked by #, is replaced by a randomly selected word from that category folder, except that target and masker are always different from each other when either is drawn from a category.  On each trial, the target and masker phrases are combined by randomly taking 9 of the 16 channels of every word in the target phrase, and the remaining 7 channels from the masker words. The channel selection is consistent for all the words in the phrase, and new for each trial. targetSoundDBSPL specifies the sound level of the combined 9 channels taken from each target word. Similarly maskerSoundDBSPL specifies the sound level of the combined 7 channel taken from each masker word. Also, we play targetSoundNoise at level targetSoundNoiseDBSPL. The Zhang et al. (2021) paper mentions a noise control, in which the masker is white noise that has been filtered into 16 bands and windowed into word-length durations. The scientist achieves this simply by providing a maskerSoundFolder made up of these 16-channel noises, each derived from a word. \nRESPONSE. After playing the phrase, EasyEyes displays two columns, one for each category word in the targetSoundPhrase. The observer must select one word in each column in order to proceed to the next trial. (This is forced choice.) We score the trial as right only if both responses are right. That overall right/wrong response is provided to QUEST, which controls the targetSoundDBSPL.',
     type: "categorical",
     default: "letter",
     categories:
@@ -1732,6 +1771,25 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "Enough pixels for decent rendering of this target. This refers to size (in pixels) as specified by targetSizeIsHeightBool.",
     type: "numerical",
     default: "8",
+    categories: "",
+  },
+  {
+    name: "targetOrientationDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetOrientationDeg (default 0) is the orientation of the target, clockwise from vertical.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
+    name: "targetPhaseDeg",
+    availability: "now",
+    example: "",
+    explanation: "targetPhaseDeg (default 0) is the target phase in degrees.",
+    type: "numerical",
+    default: "0",
     categories: "",
   },
   {
@@ -1882,6 +1940,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "targetSpaceConstantDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetSpaceConstantDeg (default practially infinite) is the 1/e radius of the Gaussian envelope.",
+    type: "numerical",
+    default: "1.00E+10",
+    categories: "",
+  },
+  {
     name: "targetTask",
     availability: "now",
     example: "identify",
@@ -1890,6 +1958,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "identify",
     categories: "identify, detect, questionAndAnswer",
+  },
+  {
+    name: "targetTimeConstantSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetTimeConstantSec (default practically infinite) is the time for the temporal Gaussian envelope modulating target contrast to drop from 1 to 1/e.",
+    type: "numerical",
+    default: "1.00E+10",
+    categories: "",
+  },
+  {
+    name: "targetWhenSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetWhenSec (default 0) is when the central time of the target occurs relative to the middle of the movie.",
+    type: "numerical",
+    default: "0",
+    categories: "",
   },
   {
     name: "thresholdAllowedDurationRatio",
@@ -2042,16 +2130,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "viewingDistanceDesiredCm",
-    availability: "now",
-    example: "45",
-    explanation:
-      "If viewingDistanceDesiredCm is nonzero, then it specifies the desired viewing distance. The default is zero, which is ignored. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.\n     The output CSV data file reports viewingDistanceCm. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. ",
-    type: "numerical",
-    default: "50",
-    categories: "",
-  },
-  {
     name: "viewingDistanceAllowedRatio",
     availability: "now",
     example: "30",
@@ -2062,23 +2140,13 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "viewingDistanceSmallEnoughToAllowScreenHeightDeg",
+    name: "viewingDistanceDesiredCm",
     availability: "now",
-    example: "30",
+    example: "45",
     explanation:
-      "viewingDistanceSmallEnoughToAllowScreenHeightDeg places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. ",
+      "If viewingDistanceDesiredCm is nonzero, then it specifies the desired viewing distance. The default is zero, which is ignored. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.\n     The output CSV data file reports viewingDistanceCm. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. ",
     type: "numerical",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "viewingDistanceSmallEnoughToAllowScreenWidthDeg",
-    availability: "now",
-    example: "30",
-    explanation:
-      "viewingDistanceSmallEnoughToAllowScreenWidthDeg places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. ",
-    type: "numerical",
-    default: "",
+    default: "50",
     categories: "",
   },
   {
@@ -2099,6 +2167,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "Setting viewingDistanceNudgingBool TRUE (deafult is FALSE) enables the nudger. The nudger compares measured viewing distance to desired viewing distance, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range. The viewing-distance nudger (\"Closer!\", \"Farther!\") gets the participant to the right distance. \n     We protect the stimulus from nudging. The nudger will never occlude, or forward or backward mask, the stimulus. Think of the trial as beginning at the participant's click (or keypress) requesting the stimulus and ending at the click (or keypress) response. This leaves a pre-trial interval from the response until the click requesting the next trial. EasyEyes nudges only before and between trials. Furthermore, to prevent forward masking, EasyEyes ignores attempts to click (or key press) during nudging and until targetSafetyMarginSec after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n    For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial, and sets nudgingCancelsTrialBool to always be FALSE. \n\n     FUTURE. To make sure that the stimulus is never obscured by nudging, we designate three intevals:\nPRE-TRIAL INTERVAL. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging. \nSTIMULUS INTERVAL. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus, we protect the stimulus by suspending nudging. \nRESPONSE INTERVAL. From the end of the stimulus until the observer responds, we also suspend nudging, so the nudge won't interfere with remembering the target. \nIf we acquire the possibility of canceling a trial, then we could allow nudging during the stimulus interval, and immediately cancel that trial. Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. The current version of MultistairHandler doesn't cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial interval, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during the stimulus interval we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. \n",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "viewingDistanceSmallEnoughToAllowScreenHeightDeg",
+    availability: "now",
+    example: "30",
+    explanation:
+      "viewingDistanceSmallEnoughToAllowScreenHeightDeg places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. ",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "viewingDistanceSmallEnoughToAllowScreenWidthDeg",
+    availability: "now",
+    example: "30",
+    explanation:
+      "viewingDistanceSmallEnoughToAllowScreenWidthDeg places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. ",
+    type: "numerical",
+    default: "",
     categories: "",
   },
   {

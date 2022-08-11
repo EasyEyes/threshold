@@ -42,7 +42,6 @@ export const measureGazeError = (
       frames: 9,
     },
     (r) => {
-      logger("measuring gaze now");
       tolerances.measured.gazeMeasurementLatencySec =
         (r.timestamp - r.value.latencyMs - crosshairClickTimestamp) / 1000;
 
@@ -145,8 +144,6 @@ export const addResponseIfTolerableError = (
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x);
 
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
-  logger("trialGivenToQUEST", validTrialToGiveToQUEST);
-  logger("answerCorrect", answerCorrect);
   loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
 
   return validTrialToGiveToQUEST;

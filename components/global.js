@@ -141,6 +141,8 @@ export const repeatedLettersConfig = Object.seal({
   targetRepeatsBorderCharacter: undefined,
   targetRepeatsMaxLines: undefined,
   stims: undefined,
+  level: undefined,
+  stimulusParameters: undefined,
 });
 
 export const instructionFont = { current: undefined };
@@ -211,7 +213,7 @@ export const viewingDistanceCm = { current: 40 };
 export const responseType = {
   current: 2,
   original: 2,
-  numberOfResponses: undefined,
+  numberOfResponses: 1,
 };
 export const clickedContinue = { current: false, timestamps: [] };
 export const modalButtonTriggeredViaKeyboard = { current: false };
@@ -221,6 +223,7 @@ export const showCharacterSetResponse = {
   // current: null,
   onsetTime: [],
   clickTime: [],
+  alreadyClickedCharacters: [],
 };
 
 /* ------------------------------- SIMULATION ------------------------------- */

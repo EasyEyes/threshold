@@ -179,6 +179,7 @@ import {
 import {
   removeClickableCharacterSet,
   setupClickableCharacterSet,
+  toggleClickedCharacters,
   updateClickableCharacterSet,
 } from "./components/showCharacterSet.js";
 
@@ -324,6 +325,7 @@ import {
   updateCurrentBlockCondition,
 } from "./components/temporaryLogger.js";
 import {
+  duplicateRepeatedLetterConditions,
   readTrialLevelRepeatedLetterParams,
   generateRepeatedLettersStims,
   restrictRepeatedLettersSpacing,
@@ -1335,6 +1337,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 trialsConditions,
                 paramReader
               );
+              trialsConditions =
+                duplicateRepeatedLetterConditions(trialsConditions);
+              logger(
+                "trialsConditions after duplicating trialsLoopBegin",
+                trialsConditions
+              );
+              logger(
+                "totalTrialsThisBlock.current",
+                totalTrialsThisBlock.current
+              );
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
                 psychoJS: psychoJS,
@@ -1344,6 +1356,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                duplicates: 2,
               });
 
               fixationConfig.show = true;
@@ -1456,7 +1469,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for (const _trial of trials) {
         const snapshot = trials.getSnapshot();
-
         trialsLoopScheduler.add(importConditions(snapshot, "trial"));
         // Instructions
         if (targetTask.current !== "questionAndAnswer") {
@@ -1788,7 +1800,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 "conditionTrials",
                 status.block
               );
-              logger("possibleTrials", possibleTrials);
               totalTrialsThisBlock.current = possibleTrials.reduce(
                 (a, b) => a + b,
                 0
@@ -1799,24 +1810,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 "conditionTrials",
                 status.block
               );
-              totalTrialsThisBlock.current = possibleTrials.reduce(
-                (a, b) => a + b,
-                0
-              );
-            },
-          });
-        },
-        detect: () => {
-          switchKind(targetKind.current, {
-            sound: () => {
-              const possibleTrials = paramReader.read(
-                "conditionTrials",
-                status.block
-              );
-              totalTrialsThisBlock.current = possibleTrials.reduce(
-                (a, b) => a + b,
-                0
-              );
+              // Since each requested trial (from the scientist) requires two trials (on for each response)
+              // when targetKind === repeatedLetters.
+              const trialsPerRequested = 2;
+              totalTrialsThisBlock.current =
+                possibleTrials.reduce((a, b) => a + b, 0) * trialsPerRequested;
             },
           });
         },
@@ -2293,6 +2291,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var wirelessKeyboardNeededBool;
 
   var _key_resp_allKeys;
+  var _responsesWithinCardinal, _responsesAcrossCardinals;
   var trialComponents;
 
   // Credit
@@ -2309,15 +2308,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
-      const parametersToExcludeFromData = [];
-      const letterSetCondition = () => {
-        for (let c of snapshot.handler.getConditions()) {
-          if (c.block_condition === trials._currentStaircase._name) {
-            status.condition = c;
-            status.block_condition = status.condition["block_condition"];
-          }
-        }
+      // Number of responses required before the current (psychojs) trial ends
+      // For all current targetKinds this is 1.
+      responseType.numberOfResponses = 1;
 
+      const letterSetResponseType = () => {
         // ! responseType
         responseType.original = responseType.current;
         responseType.current = getResponseType(
@@ -2358,10 +2353,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.condition = snapshot.getCurrentTrial();
           status.block_condition = trials.thisTrial.block_condition;
         },
-        letter: letterSetCondition,
-        repeatedLetters: letterSetCondition,
+        letter: () => {
+          letterSetResponseType();
+          for (let c of snapshot.handler.getConditions()) {
+            if (c.block_condition === trials._currentStaircase._name) {
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
+            }
+          }
+        },
+        repeatedLetters: () => {
+          letterSetResponseType();
+          for (let c of snapshot.handler.getConditions()) {
+            if (
+              c.block_condition === trials._currentStaircase._name &&
+              c._duplicatedConditionCardinal === trials._duplicatedTrialCardinal
+            ) {
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
+            }
+          }
+        },
       });
 
+      const parametersToExcludeFromData = [];
       addConditionToData(
         paramReader,
         status.block_condition,
@@ -2920,72 +2935,89 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
         },
         repeatedLetters: () => {
-          // Set up instructions
-          _instructionBeforeStimulusSetup(
-            instructionsText.trial.fixate["spacing"](
-              rc.language.value,
-              responseType.current
-            )
-          );
-
-          clickedContinue.current = false;
-          document.addEventListener("click", _takeFixationClick);
-          document.addEventListener("touchend", _takeFixationClick);
-
+          /// Do on both trials for this condition
           // Read relevant trial-level parameters (and save to letterConfig? repeatedLettersConfig?)
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
           readAllowedTolerances(tolerances, reader, BC);
           readTrialLevelLetterParams(reader, BC);
           readTrialLevelRepeatedLetterParams(reader, BC);
 
-          validAns = String(reader.read("fontCharacterSet", BC))
-            .toLowerCase()
-            .split("");
-          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
-
-          // Get level from quest
-          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-
-          // Constrain to fit on screen
-          [level, stimulusParameters] = restrictRepeatedLettersSpacing(
-            proposedLevel,
-            letterConfig.targetEccentricityXYDeg,
-            characterSetBoundingRects[BC]
-          );
-
-          // Generate stims to fill screen
-          repeatedLettersConfig.stims =
-            generateRepeatedLettersStims(stimulusParameters);
-
-          // Update fixation
-          fixation.update(
-            paramReader,
-            BC,
-            100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
-          );
-          fixationConfig.pos = fixationConfig.nominalPos;
-          fixation.setPos(fixationConfig.pos);
-          fixation.tStart = t;
-          fixation.frameNStart = frameN;
-
-          if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForRepeatedLetters(
-              stimulusParameters,
-              thisExperimentInfo.experimentFileName
+          /// Do on just the first trial for this condition
+          if (status.condition._duplicatedConditionCardinal === 1) {
+            validAns = String(reader.read("fontCharacterSet", BC))
+              .toLowerCase()
+              .split("");
+            fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
+            // Set up instructions
+            _instructionBeforeStimulusSetup(
+              instructionsText.trial.fixate["spacing"](
+                rc.language.value,
+                responseType.current
+              )
             );
 
-          // Add stims to trialComponents
-          target.setText("repeatedLetters");
-          trialComponents = [];
-          trialComponents.push(...repeatedLettersConfig.stims);
-          trialComponents.push(...fixation.stims);
-          trialComponents.push(key_resp);
+            clickedContinue.current = false;
+            document.addEventListener("click", _takeFixationClick);
+            document.addEventListener("touchend", _takeFixationClick);
 
-          trialComponents.push(showCharacterSet);
-          trialComponents.push(trialCounter);
-          trialComponents.push(renderObj.tinyHint);
+            // Get level from quest
+            let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+            psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+
+            // Constrain to fit on screen
+            [level, stimulusParameters] = restrictRepeatedLettersSpacing(
+              proposedLevel,
+              letterConfig.targetEccentricityXYDeg,
+              characterSetBoundingRects[BC]
+            );
+
+            // Generate stims to fill screen
+            repeatedLettersConfig.stims =
+              generateRepeatedLettersStims(stimulusParameters);
+            repeatedLettersConfig.level = level;
+            repeatedLettersConfig.stimulusParameters = stimulusParameters;
+
+            // Update fixation
+            fixation.update(
+              paramReader,
+              BC,
+              100, // stimulusParameters.heightPx,
+              XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+            );
+            fixationConfig.pos = fixationConfig.nominalPos;
+            fixation.setPos(fixationConfig.pos);
+            fixation.tStart = t;
+            fixation.frameNStart = frameN;
+
+            if (showConditionNameConfig.showTargetSpecs)
+              updateTargetSpecsForRepeatedLetters(
+                stimulusParameters,
+                thisExperimentInfo.experimentFileName
+              );
+
+            // Add stims to trialComponents
+            trialComponents = [];
+            trialComponents.push(...repeatedLettersConfig.stims);
+            trialComponents.push(...fixation.stims);
+            trialComponents.push(key_resp);
+
+            trialComponents.push(showCharacterSet);
+            trialComponents.push(trialCounter);
+            trialComponents.push(renderObj.tinyHint);
+          } else {
+            clickedContinue.current = true;
+            if (showConditionNameConfig.showTargetSpecs)
+              updateTargetSpecsForRepeatedLetters(
+                repeatedLettersConfig.stimulusParameters,
+                thisExperimentInfo.experimentFileName
+              );
+            // Add stims to trialComponents
+            trialComponents = [];
+            trialComponents.push(key_resp);
+            trialComponents.push(showCharacterSet);
+            trialComponents.push(trialCounter);
+            trialComponents.push(renderObj.tinyHint);
+          }
         },
       });
 
@@ -3367,6 +3399,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       key_resp.rt = [];
       _key_resp_allKeys = [];
 
+      /// DEFN Conditional trial (ie one per condition according to the experimenter). WHOLE
+      /// DEFN Cardinal trial (ie one condition according to psychojs). PART
+      // In multi-part trials/conditions (ie repeatedLetters, which requires the response from
+      // two trials for a given condition), we call these sub-trials `cardinals`.
+      // By keeping track of responses within, and across, cardinals, we can support arbitrary
+      // numbers of responses per cardinal, and per trial (ie across cardinals).
+      if (status.condition._duplicatedConditionCardinal !== 2) {
+        _responsesAcrossCardinals = [];
+        showCharacterSetResponse.alreadyClickedCharacters = [];
+      }
+      _responsesWithinCardinal = [];
+
       _instructionSetup(
         instructionsText.trial.respond["spacing"](
           rc.language.value,
@@ -3433,6 +3477,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   var frameRemains;
+  var timeWhenRespondable;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
       ////
@@ -3440,7 +3485,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ////
 
       if (toShowCursor()) {
-        logger("toShowCursor === true");
         showCursor();
         removeClickableCharacterSet(showCharacterSetResponse);
         vocoderPhraseRemoveClickableCategory(showCategoryResponse);
@@ -3464,12 +3508,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current === "repeatedLetters"
           ? letterConfig.delayBeforeStimOnsetSec
           : 0;
-      const timeWhenRespondable =
-        delayBeforeStimOnsetSec +
-        letterConfig.targetSafetyMarginSec +
-        letterConfig.targetDurationSec;
       /* -------------------------------------------------------------------------- */
       if (frameN === 0) {
+        // If this isn't duplicatedConditionCardinal === 1, then this trial isn't for showing stimuli.
+        // Instead, it's response type trial, ie one of a multi-part trial just used for response. AKA cardinal trial
+        // Allow response right away if this is just a response trial
+        const responseTypeTrial =
+          status.condition.hasOwnProperty("_duplicatedConditionCardinal") &&
+          status.condition._duplicatedConditionCardinal !== 1;
+        timeWhenRespondable = responseTypeTrial
+          ? 0
+          : delayBeforeStimOnsetSec +
+            letterConfig.targetSafetyMarginSec +
+            letterConfig.targetDurationSec;
+
         frameRemains =
           delayBeforeStimOnsetSec +
           letterConfig.targetDurationSec -
@@ -3498,7 +3550,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
           },
           repeatedLetters: () => {
-            _repeatedLetters_trialRoutineFirstFrame(paramReader);
+            _repeatedLetters_trialRoutineFirstFrame(
+              paramReader,
+              status.condition._duplicatedConditionCardinal
+            );
           },
           sound: () => {
             if (targetTask.current == "detect") {
@@ -3579,13 +3634,35 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             keyList: validAns,
             waitRelease: false,
           });
+          _key_resp_allKeys.push(...theseKeys);
 
-          _key_resp_allKeys = _key_resp_allKeys.concat(theseKeys);
+          // NOTE this precludes repeated inputs for the same key. If in future this is desired, revisit.
+          // eg consider passing `clear=true`, and recording all keys
+          const newKeysPressed = theseKeys
+            .map((k) => k.name)
+            .filter(
+              (c) =>
+                !(
+                  _responsesWithinCardinal.includes(c) ||
+                  _responsesAcrossCardinals.includes(c)
+                )
+            );
+          _responsesWithinCardinal.push(...newKeysPressed);
         }
       }
       // Input from clickable character set
       // *showCharacterSetResponse* updates
       if (showCharacterSetResponse.current.length) {
+        // Add the new characters to those pressed. See NOTE above, ie this approach doesn't register duplicate letter presses
+        const newKeysClicked = showCharacterSetResponse.current.filter(
+          (c) =>
+            !(
+              _responsesWithinCardinal.includes(c) ||
+              _responsesAcrossCardinals.includes(c)
+            )
+        );
+        _responsesWithinCardinal.push(...newKeysClicked);
+
         key_resp.keys.push(...showCharacterSetResponse.current);
         key_resp.rt.push(
           ...showCharacterSetResponse.clickTime.map(
@@ -3594,37 +3671,46 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           )
         );
         // TODO record `code` and `rt`
-        _key_resp_allKeys = _key_resp_allKeys.concat(
-          key_resp.keys
-            .slice(
-              key_resp.keys.length - showCharacterSetResponse.current.length
-            )
-            .map((letter) => new KeyPress(undefined, undefined, letter))
+        const clickedKeypresses = showCharacterSetResponse.current.map(
+          (letter) => new KeyPress(undefined, undefined, letter)
         );
+        _key_resp_allKeys.push(clickedKeypresses);
 
         showCharacterSetResponse.current = [];
         showCharacterSetResponse.clickTime = [];
       }
+      const newResponses = [...new Set(_responsesWithinCardinal)].filter(
+        (k) => !_responsesAcrossCardinals.includes(k)
+      );
+      showCharacterSetResponse.alreadyClickedCharacters.push(...newResponses);
+      if (showCharacterSet.status === PsychoJS.Status.STARTED)
+        toggleClickedCharacters();
 
       // Check if the (set of clickable charset and keyboard) inputs constitute an end-of-trial
-      const uniqueResponses = new Set(_key_resp_allKeys.map((k) => k.name));
-      if (uniqueResponses.size >= responseType.numberOfResponses) {
+      if (newResponses.length >= responseType.numberOfResponses) {
+        _responsesAcrossCardinals.push(..._responsesWithinCardinal);
         // The characters with which the participant responded
-        // console.log("allKeys", _key_resp_allKeys);
-        // console.log("uniqueResponses", uniqueResponses);
-        // console.log(
-        //   "responseType.numberOfResponses",
-        //   responseType.numberOfResponses
-        // );
-        const participantResponse = [...uniqueResponses].slice(
-          _key_resp_allKeys.length - responseType.numberOfResponses
+        const participantResponse = newResponses.slice(
+          newResponses.length - responseType.numberOfResponses
         );
-        logger("participantResponse", participantResponse);
-        logger("correctAns.current", correctAns.current);
+        let responseCorrect;
+        if (targetKind.current === "repeatedLetters") {
+          // Each response given this trial is a correct answer
+          responseCorrect = participantResponse.every((r) =>
+            correctAns.current.includes(r)
+          );
+          // Remove the registerd response(s) from the set of possible correct answers
+          correctAns.current = correctAns.current.filter(
+            (a) => !participantResponse.includes(a)
+          );
+        } else {
+          responseCorrect = arraysEqual(
+            participantResponse.sort(),
+            correctAns.current.sort()
+          );
+        }
         // Was this correct?
-        if (
-          arraysEqual(participantResponse.sort(), correctAns.current.sort())
-        ) {
+        if (responseCorrect) {
           // Play correct audio
           switchKind(targetKind.current, {
             vocoderPhrase: () => {
@@ -3732,13 +3818,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetSpecs,
             conditionName,
             showCharacterSet,
-            instructions
+            instructions,
+            status.condition._duplicatedConditionCardinal
           );
           break;
       }
-
-      // targetKind === letter specific? -----v
-      // targetKind === letter specific? -----^
 
       if (targetKind.current === "letter") {
         // *target* updates
@@ -3863,21 +3947,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         thresholdParameter
       );
       /* -------------------------------------------------------------------------- */
-      switch (targetKind.current) {
-        case "repeatedLetters":
-          responseType.numberOfResponses = 2;
-          break;
-        case "vocoderPhrase":
-          responseType.numberOfResponses = Object.keys(
-            vocoderPhraseCategories.all
-          ).length;
-          break;
-        default:
-          responseType.numberOfResponses = 1;
-          break;
-      }
-      // responseType.numberOfResponses =
-      //   targetKind.current === "repeatedLetters" ? 2 : 1;
 
       // SHOW CharacterSet AND INSTRUCTIONS
       switchKind(targetKind.current, {

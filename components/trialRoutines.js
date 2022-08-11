@@ -117,17 +117,22 @@ export const _letter_trialRoutineEnd = (
   addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
 };
 
-export const _repeatedLetters_trialRoutineFirstFrame = (paramReader) => {
-  if (
-    paramReader.read("calibrateTrackGazeBool", status.block_condition) &&
-    tolerances.measured.gazeMeasurementLatencySec === undefined
-  )
-    measureGazeError(
-      tolerances,
-      displayOptions,
-      clickedContinue.timestamps[clickedContinue.timestamps.length - 1],
-      letterConfig.targetDurationSec
-    );
+export const _repeatedLetters_trialRoutineFirstFrame = (
+  paramReader,
+  duplicatedConditionCardinal
+) => {
+  if (duplicatedConditionCardinal === 1) {
+    if (
+      paramReader.read("calibrateTrackGazeBool", status.block_condition) &&
+      tolerances.measured.gazeMeasurementLatencySec === undefined
+    )
+      measureGazeError(
+        tolerances,
+        displayOptions,
+        clickedContinue.timestamps[clickedContinue.timestamps.length - 1],
+        letterConfig.targetDurationSec
+      );
+  }
 };
 export const _repeatedLetters_trialRoutineEachFrame = (
   t,
@@ -137,103 +142,123 @@ export const _repeatedLetters_trialRoutineEachFrame = (
   targetSpecs,
   conditionName,
   showCharacterSet,
-  instructions
+  instructions,
+  duplicatedConditionCardinal
 ) => {
-  // Draw targets
-  if (
-    t >= delayBeforeStimOnsetSec &&
-    repeatedLettersConfig.stims.every(
-      (s) => s.status === PsychoJS.Status.NOT_STARTED
-    )
-  ) {
-    // keep track of start time/frame for later
-    repeatedLettersConfig.stims.forEach((s) => {
-      s.tStart = t; // (not accounting for frame time here)
-      s.frameNStart = frameN; // exact frame index
-      s.setAutoDraw(true);
-    });
-  }
-  // Confirm that targets are drawn
-  if (
-    repeatedLettersConfig.stims.every(
-      (s) => s.status === PsychoJS.Status.STARTED
-    ) &&
-    !letterTiming.targetStartSec
-  ) {
-    letterTiming.targetStartSec = t;
-    repeatedLettersConfig.stims.forEach(
-      (s) => (s.frameNDrawnConfirmed = frameN)
-    );
-    letterTiming.targetDrawnConfirmedTimestamp = performance.now();
-    letterTiming.crosshairClickedTimestamp =
-      clickedContinue.timestamps[clickedContinue.timestamps.length - 1];
-  }
-  // Undraw targets
-  if (
-    repeatedLettersConfig.stims.every(
-      (s) => s.status === PsychoJS.Status.STARTED
-    ) &&
-    t >= frameRemains
-  ) {
-    repeatedLettersConfig.stims.forEach((s) => {
-      s.setAutoDraw(false);
-      s.frameNEnd = frameN;
-    });
-    setTimeout(() => {
-      showCursor();
-    }, 500);
-  }
-  // Confirm targets undrawn
-  if (
-    repeatedLettersConfig.stims.every(
-      (s) => s.status === PsychoJS.Status.FINISHED
-    ) &&
-    !letterTiming.targetFinishSec
-  ) {
-    letterTiming.targetFinishSec = t;
-    repeatedLettersConfig.stims.forEach(
-      (s) => (s.frameNFinishConfirmed = frameN)
-    );
-
-    if (showConditionNameConfig.showTargetSpecs) {
-      const thisDuration =
-        letterTiming.targetFinishSec - letterTiming.targetStartSec;
-      showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
-        Math.round(thisDuration * 100000.0) / 100000
-      } [${isTimingOK(
-        Math.abs(thisDuration - letterConfig.targetDurationSec),
-        0.02
-      )}]`;
-      targetSpecs.setText(showConditionNameConfig.targetSpecs);
-      showConditionName(conditionName, targetSpecs);
+  if (duplicatedConditionCardinal === 1) {
+    // Draw targets
+    if (
+      t >= delayBeforeStimOnsetSec &&
+      repeatedLettersConfig.stims.every(
+        (s) => s.status === PsychoJS.Status.NOT_STARTED
+      )
+    ) {
+      // keep track of start time/frame for later
+      repeatedLettersConfig.stims.forEach((s) => {
+        s.tStart = t; // (not accounting for frame time here)
+        s.frameNStart = frameN; // exact frame index
+        s.setAutoDraw(true);
+      });
     }
-  }
-  // SHOW CharacterSet AND INSTRUCTIONS
-  // *showCharacterSet* updates
-  if (
-    t >=
-      delayBeforeStimOnsetSec +
-        letterConfig.targetSafetyMarginSec +
-        letterConfig.targetDurationSec &&
-    showCharacterSet.status === PsychoJS.Status.NOT_STARTED
-  ) {
-    // keep track of start time/frame for later
-    showCharacterSet.tStart = t; // (not accounting for frame time here)
-    showCharacterSet.frameNStart = frameN; // exact frame index
-    showCharacterSet.setAutoDraw(true);
-    setupClickableCharacterSet(
-      fontCharacterSet.current,
-      font.name,
-      fontCharacterSet.where,
-      showCharacterSetResponse,
-      null,
-      "",
-      targetKind.current
-    );
+    // Confirm that targets are drawn
+    if (
+      repeatedLettersConfig.stims.every(
+        (s) => s.status === PsychoJS.Status.STARTED
+      ) &&
+      !letterTiming.targetStartSec
+    ) {
+      letterTiming.targetStartSec = t;
+      repeatedLettersConfig.stims.forEach(
+        (s) => (s.frameNDrawnConfirmed = frameN)
+      );
+      letterTiming.targetDrawnConfirmedTimestamp = performance.now();
+      letterTiming.crosshairClickedTimestamp =
+        clickedContinue.timestamps[clickedContinue.timestamps.length - 1];
+    }
+    // Undraw targets
+    if (
+      repeatedLettersConfig.stims.every(
+        (s) => s.status === PsychoJS.Status.STARTED
+      ) &&
+      t >= frameRemains
+    ) {
+      repeatedLettersConfig.stims.forEach((s) => {
+        s.setAutoDraw(false);
+        s.frameNEnd = frameN;
+      });
+      setTimeout(() => {
+        showCursor();
+      }, 500);
+    }
+    // Confirm targets undrawn
+    if (
+      repeatedLettersConfig.stims.every(
+        (s) => s.status === PsychoJS.Status.FINISHED
+      ) &&
+      !letterTiming.targetFinishSec
+    ) {
+      letterTiming.targetFinishSec = t;
+      repeatedLettersConfig.stims.forEach(
+        (s) => (s.frameNFinishConfirmed = frameN)
+      );
 
-    instructions.tSTart = t;
-    instructions.frameNStart = frameN;
-    instructions.setAutoDraw(true);
+      if (showConditionNameConfig.showTargetSpecs) {
+        const thisDuration =
+          letterTiming.targetFinishSec - letterTiming.targetStartSec;
+        showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
+          Math.round(thisDuration * 100000.0) / 100000
+        } [${isTimingOK(
+          Math.abs(thisDuration - letterConfig.targetDurationSec),
+          0.02
+        )}]`;
+        targetSpecs.setText(showConditionNameConfig.targetSpecs);
+        showConditionName(conditionName, targetSpecs);
+      }
+    }
+    // SHOW CharacterSet AND INSTRUCTIONS
+    // *showCharacterSet* updates
+    if (
+      t >=
+        delayBeforeStimOnsetSec +
+          letterConfig.targetSafetyMarginSec +
+          letterConfig.targetDurationSec &&
+      showCharacterSet.status === PsychoJS.Status.NOT_STARTED
+    ) {
+      // keep track of start time/frame for later
+      showCharacterSet.tStart = t; // (not accounting for frame time here)
+      showCharacterSet.frameNStart = frameN; // exact frame index
+      showCharacterSet.setAutoDraw(true);
+      setupClickableCharacterSet(
+        fontCharacterSet.current,
+        font.name,
+        fontCharacterSet.where,
+        showCharacterSetResponse,
+        null,
+        "",
+        targetKind.current
+      );
+
+      instructions.tSTart = t;
+      instructions.frameNStart = frameN;
+      instructions.setAutoDraw(true);
+    }
+  } else {
+    if (showCharacterSet.status === PsychoJS.Status.NOT_STARTED) {
+      // keep track of start time/frame for later
+      showCharacterSet.tStart = t; // (not accounting for frame time here)
+      showCharacterSet.frameNStart = frameN; // exact frame index
+      showCharacterSet.setAutoDraw(true);
+      setupClickableCharacterSet(
+        fontCharacterSet.current,
+        font.name,
+        fontCharacterSet.where,
+        showCharacterSetResponse
+      );
+      showCursor();
+      instructions.tSTart = t;
+      instructions.frameNStart = frameN;
+      instructions.setAutoDraw(true);
+    }
   }
 };
 

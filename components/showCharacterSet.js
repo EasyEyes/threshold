@@ -109,6 +109,7 @@ const pushCharacterSet = (
       characterSet.style.textAlign = "left";
     }
 
+    characterSet.id = `clickableCharacter-${a.toLowerCase()}`;
     characterSet.className = "characterSet";
     if (extraCharClassName.length)
       characterSet.classList.add(extraCharClassName);
@@ -143,4 +144,15 @@ const pushCharacterSet = (
     };
     characterSetHolder.appendChild(characterSet);
   }
+};
+
+export const toggleClickedCharacters = () => {
+  const clickedCharacterElems =
+    showCharacterSetResponse.alreadyClickedCharacters.map((c) =>
+      document.getElementById(`clickableCharacter-${c.toLowerCase()}`)
+    );
+  clickedCharacterElems.forEach((e) => {
+    e.style.border = "2px solid black";
+    e.style.backgroundColor = "lightgray";
+  });
 };
