@@ -378,10 +378,10 @@ export const GLOSSARY: Glossary = {
     type: "",
     default: "",
   },
-  computeMovieJS: {
-    name: "computeMovieJS",
+  computeRectDeg: {
+    name: "computeRectDeg",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   conditionGroup: {
@@ -389,12 +389,6 @@ export const GLOSSARY: Glossary = {
     availability: "later",
     type: "integer",
     default: "0",
-  },
-  computeRectDeg: {
-    name: "computeRectDeg",
-    availability: "now",
-    type: "text",
-    default: "",
   },
   conditionName: {
     name: "conditionName",
@@ -694,6 +688,36 @@ export const GLOSSARY: Glossary = {
     name: "maskerSoundPhrase",
     availability: "now",
     type: "text",
+    default: "",
+  },
+  movieComputeJS: {
+    name: "movieComputeJS",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
+  movieDurationSec: {
+    name: "movieDurationSec",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  movieLuminanceNit: {
+    name: "movieLuminanceNit",
+    availability: "now",
+    type: "numerical",
+    default: "",
+  },
+  movieRectDeg: {
+    name: "movieRectDeg",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
+  movieTargetOnsetDelaySec: {
+    name: "movieTargetOnsetDelaySec",
+    availability: "now",
+    type: "",
     default: "",
   },
   notes: { name: "notes", availability: "now", type: "text", default: "" },

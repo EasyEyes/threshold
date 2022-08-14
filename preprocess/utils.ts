@@ -25,6 +25,14 @@ export const getFolderNames = (parsed: any): any => {
 
   maskedfolderList = [...new Set(maskedfolderList)];
   targetfolderList = [...new Set(targetfolderList)];
+
+  //remove empty strings from the lists
+  maskedfolderList = maskedfolderList.filter((item: string) => item !== "");
+  targetfolderList = targetfolderList.filter((item: string) => item !== "");
+
+  // console.log("maskerFolder",maskedfolderList)
+  // console.log("targetFolder",targetfolderList)
+
   // let folderList: string[] = maskedfolderList.concat(targetfolderList);
   // folderList = folderList.filter(
   //   (item, pos) => folderList.indexOf(item) === pos

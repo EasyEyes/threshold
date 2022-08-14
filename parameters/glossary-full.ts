@@ -485,18 +485,18 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "computeImageJS is JavaScript code to compute a static image array (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The imageNit(y,x) value  is in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), and luminanceNit. For example\n% THIS MATLAB CODE MUST BE TRANSLATED TO JAVASCRIPT\n% Compute vertical Gabor.\nimageNit=ones([length(xDeg),length(yDeg)]);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(:,j)=luminanceNit*(1+targetContrast*gy(j)*fx);\nend\n",
+      "DEPRECATED. USE movieComputeJS INSTEAD. computeImageJS is JavaScript code to compute a static image array (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The imageNit(y,x) value  is in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), and luminanceNit. For example\n% THIS MATLAB CODE MUST BE TRANSLATED TO JAVASCRIPT\n% Compute vertical Gabor.\nimageNit=ones([length(xDeg),length(yDeg)]);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(:,j)=luminanceNit*(1+targetContrast*gy(j)*fx);\nend\n",
     type: "",
     default: "",
     categories: "",
   },
   {
-    name: "computeMovieJS",
+    name: "computeRectDeg",
     availability: "now",
     example: "",
     explanation:
-      "computeMovieJS is JavaScript code to compute a movie array (movieNit) from the vectors xDeg, yDeg, and tSec, which have one point per pixel and frame. tSec has mean zero, e.g. [-1/60, 0, 1/60] for a three-frame movei. The movieNit(y,x,t) value is double in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentrictyXDeg, targetEccentrictyYDeg, targetWhenSec, targetCPerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec,  luminanceNit. For example\nimageNit=ones([length(yDeg),length(xDeg),length(tSec)]);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg)^2);\ngt=exp(-((tSec-targetWhenSec)/targetSpaceConstantDeg)^2);\nfor k=1:length(tSec)\n     fx=sin(2*pi*(tSec(k)-tWhenSec)*targetHz + 2*pi*(xDeg-targetEccentrictyYDeg)*targetCPerDeg + 2*pi*targetPhase/360);\n     fx=gx .* fx;\n     for j=1:length(yDeg)\n          movieNit(j,:,k)=luminanceNit*(1+targetContrast*gt(k)*gy(j)*fx);\n     end\nend\nend",
-    type: "",
+      "DEPRECATED. USE movieRectDeg INSTEAD. computeRectDeg (default is whole screen) consists of four numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and to the right of fixation. The sequence is left,bottom,right,top.",
+    type: "text",
     default: "",
     categories: "",
   },
@@ -508,16 +508,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '"conditionGroup" imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross, target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among any specified set of targets simply by creating a condition for each target, and giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
     type: "integer",
     default: "0",
-    categories: "",
-  },
-  {
-    name: "computeRectDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "computeRectDeg (default is whole screen) consists of four numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and the the right of fixation. The sequence is left,bottom,right,top.",
-    type: "text",
-    default: "",
     categories: "",
   },
   {
@@ -806,7 +796,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "luminanceNit (default none) is the desired screen luminance in cd/m^2, i.e. nits. Specifying luminance will only be practical when we use an HDR codec supporting PQ. More typically, we'll want to use the display at the background luminance it was designed for, often 500 cd/m^2. The default empty value indicates that we should use the display at whatever background luminance we find it in.",
+      "DEPRECATED. USE movieLuminanceNit INSTEAD. luminanceNit (default none) is the desired screen luminance in cd/m^2, i.e. nits. Specifying luminance will only be practical when we use an HDR codec supporting PQ. More typically, we'll want to use the display at the background luminance it was designed for, often 500 cd/m^2. The default empty value indicates that we should use the display at whatever background luminance we find it in.",
     type: "numerical",
     default: "",
     categories: "",
@@ -998,6 +988,56 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "movieComputeJS",
+    availability: "now",
+    example: "",
+    explanation:
+      "movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute the movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box.  The program must compute and define either “imageNit” or “movieNit”, not both. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. \nFor example\n% THIS MATLAB CODE MUST BE TRANSLATED TO JAVASCRIPT\n% Compute vertical Gabor.\nimageNit=ones([length(xDeg),length(yDeg)]);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(:,j)=movieLuminanceNit*(1+targetContrast*gy(j)*fx);\nend\n\n% Compute drifting vertical Gabor, with Gaussian envelope in time.\nmovieNit=ones([length(xDeg),length(yDeg)],length(tSec));\ntMidSec=movieTargetOnsetDelaySec+targetDurationSec/2;\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngt=exp(-((tSec-tMidSec)/targetTimeConstantSec).^2);\nfor k=1:length(tSec)\n     fx=sin(2*pi*(targetPhase/360 + tSec(k)*targetHz + (xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+);\n     for j=1:length(yDeg)\n          imageNit(:,j)=movieLuminanceNit*(1+targetContrast*gt(k)*gy(j)*fx);\n     end\nend",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "movieDurationSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "movieDurationSec (default is empty, which requests targetDurationSec) is the movie duration in seconds.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "movieLuminanceNit",
+    availability: "now",
+    example: "",
+    explanation:
+      "movieLuminanceNit (default none) is the desired screen luminance in cd/m^2, i.e. nits. Specifying luminance will only be practical when we use an HDR codec supporting PQ. More typically, we'll want to use the display at the background luminance it was designed for, often 500 cd/m^2, or half that. The default empty value indicates that we should use the display at whatever background luminance we find it in.",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "movieRectDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "movieRectDeg (default is empty, indicating whole screen) consists of four float numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and to the right of fixation. The sequence is left,bottom,right,top. Whatever is requested will be mapped to pixels and clipped by the screen rect.",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "movieTargetOnsetDelaySec",
+    availability: "now",
+    example: "",
+    explanation:
+      "movieTargetOnsetDelaySec (default is empty, which requests that targetDurationSec is centered in the movieDurationSec) specified the delay from movie onset to target onset.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
     name: "notes",
     availability: "now",
     example: "",
@@ -1040,9 +1080,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "questionAndAnswer@@",
     availability: "now",
-    example: "AFTERLIFE|Is there life after death?|Yes|No|Maybe",
+    example: "AFTERLIFE|No|Is there life after death?|Yes|No|Maybe",
     explanation:
-      'UPDATE: we just added a new correctAnswer field. All tables that used questionAndAnswer before July 23, 2022 must be updated to the new format.\n\nquestionAndAnswer@@ (e.g. questionAndAnswer01) consists of several strings, separated by vertical bars |, that specify: a nickname, correctAnswer (may be empty), a question to be asked, and perhaps some possible answers.  The nickname is used solely to name the column of responses in the saved data. The correctAnswer may be omitted, in which case the vertical bars before and after it will be contiguous. The nickname and question are required; the answers are optional. If no answers are specified, then the question accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives, a button devoted to each one. Specifying just one answer is currently an error, but this may change in a future enhancement. (We might use the single-answer field to specify the single-answer type, e.g. logical, numerical, integer, text.)\nIMPORTANT: To use questionAndAnswer you MUST set targetTask to questionAndAnswer. The compiler will soon enforce this.\nIMPORTANT: You can have many questionAndAnswer in one condition, e.g.  questionAndAnswer01, questionAndAnswer02, questionAndAnswer03, but the block may not include any other condition. The EasyEyes compiler will soon enforce this.\n• FREE-FORM: Provide just a nickname, an empty correctAnswer, and a question, no answer. For example, "DESCRIPTION||Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n• MULTIPLE CHOICE: Provide a nickname, a correctAnswer, a question, and at least two answers. The participant must click on one. For example:\nFRUIT|apple|Which of the following is a fruit?|house|sky|apple|father|country\nBEAUTY||How much beauty do you get from this image right now?|1|2|3|4|5|6|7\nor\nKIND||What kind of image is it?|figurative painting|abstract painting|photograph\n\nEasyEyes supports questionAndAnswer01 ... questionAndAnswer99, i.e. you can have up to 99 questions in one block. The questions you use must start with 01 and cannot skip.  You can have any number of blocks, each with new questions.',
+      'questionAndAnswer01 ... questionAndAnswer99 each consist of several strings, separated by vertical bars |, that specify: a \nnickname, \ncorrectAnswer (may be empty), \na question to be asked, \nand perhaps several possible answers.  \nThe nickname is used solely to name the column of responses in the saved data. The correctAnswer may be omitted, in which case the vertical bars before and after it will be contiguous. The nickname and question are required; the correct answer and possible answers are optional. If no possible answers are specified, then the question accepts a free-form text answer. If multiple answers are specified, then they are offered to the participant as multiple-choice alternatives, a button devoted to each one. Specifying just one answer is currently an error, but this may change in a future enhancement. (We might use the single-answer field to specify the single-answer type, e.g. logical, numerical, integer, text.)\nIMPORTANT: To use questionAndAnswer you MUST set targetTask to questionAndAnswer. The compiler will soon enforce this.\nIMPORTANT: You can have many questionAndAnswer in one condition, e.g.  questionAndAnswer01, questionAndAnswer02, questionAndAnswer03, but the block may not include any other condition. The EasyEyes compiler will soon enforce this.\n• FREE-FORM: Provide just a nickname, an empty correctAnswer, and a question, no answer. For example, "DESCRIPTION||Describe the image that you are seeing right now?" The participant is invited to type their answer into a text box.\n• MULTIPLE CHOICE: Provide a nickname, a correctAnswer, a question, and at least two possible answers. The participant must click on one. For example:\nFRUIT|apple|Which of the following is a fruit?|house|sky|apple|father|country\nBEAUTY||How much beauty do you get from this image right now?|1|2|3|4|5|6|7\nor\nKIND||What kind of image is it?|figurative painting|abstract painting|photograph\n\nEasyEyes supports questionAndAnswer01 ... questionAndAnswer99, i.e. you can have up to 99 questions in one block. The questions you use must start with the ending 01 and cannot skip numbers.  You can have any number of blocks, each with up to 99 new questions.',
     type: "text",
     default: "",
     categories: "",
@@ -2054,7 +2094,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "thresholdGamma is a parameter of the psychometric function used by QUEST. thresholdGamma is the probability of correct/yes response when target is at zero strength. In an identification task, we typically set gamma to 1/n, where n is the number of equal-probability possible targets. When the target is a letter, n=length(fontCharacterSet). In two-alternative forced choice we typically set gamma to 0.5. The various targetTasks each have different default values of gamma. If you leave thresholdGamma empty then you'll get that default. If you set thresholdGamma then the value you provide will overrule the default.",
+      "thresholdGamma (default is empty which produces a compiler error) is a parameter of the psychometric function used by QUEST. thresholdGamma is the probability of correct/yes response when target is at zero strength. In an identification task, we typically set gamma to 1/n, where n is the number of equal-probability possible targets. When the target is a letter, n=length(fontCharacterSet). In two-alternative forced choice we typically set gamma to 0.5. The various targetTasks each have different default values of gamma. If you leave thresholdGamma empty then you'll get that default. If you set thresholdGamma then the value you provide will overrule the default.",
     type: "numerical",
     default: "",
     categories: "",
