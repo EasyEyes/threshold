@@ -13,16 +13,34 @@ import { GLOSSARY } from "../parameters/glossary";
 export const getFolderNames = (parsed: any): any => {
   let maskedfolderList: string[] = [];
   let targetfolderList: string[] = [];
+  let targetTaskList: string[] = [];
+  let targetKindList: string[] = [];
   for (let i = 0; i < parsed.data.length; i++) {
     if (parsed.data[i][0] == "maskerSoundFolder") {
       maskedfolderList = [...parsed.data[i]];
     } else if (parsed.data[i][0] == "targetSoundFolder") {
       targetfolderList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "targetTask") {
+      targetTaskList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "targetKind") {
+      targetKindList = [...parsed.data[i]];
     }
   }
   maskedfolderList.shift();
   targetfolderList.shift();
+  targetTaskList.shift();
+  targetKindList.shift();
 
+  // console.log("targetTaskList", targetTaskList);
+  // console.log("targetKindList", targetKindList);
+  // console.log("maskedfolderList", maskedfolderList);
+  // console.log("targetfolderList", targetfolderList);
+
+  // targetKind:Sound and targetTask:Detect needs masker and target folders
+
+  //targetKind:Sound and targetTask:Identify needs target folder
+
+  //remove duplicates
   maskedfolderList = [...new Set(maskedfolderList)];
   targetfolderList = [...new Set(targetfolderList)];
 

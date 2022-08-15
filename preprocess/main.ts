@@ -158,7 +158,11 @@ export const prepareExperimentFileForThreshold = async (
   // console.log("easyeyesResources.folders", easyeyesResources.folders)
   const folderList: any = getFolderNames(parsed);
 
-  if (easyeyesResources.folders.length)
+  if (
+    easyeyesResources.folders.length > 0 &&
+    folderList.maskerSoundFolder.length > 0 &&
+    folderList.targetSoundFolder.length > 0
+  )
     errors.push(...isSoundFolderMissing(folderList, easyeyesResources.folders));
   const keys = Object.keys(folderList);
   const requestedFolderList: any[] = [];

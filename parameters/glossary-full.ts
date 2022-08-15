@@ -485,7 +485,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "DEPRECATED. USE movieComputeJS INSTEAD. computeImageJS is JavaScript code to compute a static image array (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The imageNit(y,x) value  is in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), and luminanceNit. For example\n% THIS MATLAB CODE MUST BE TRANSLATED TO JAVASCRIPT\n% Compute vertical Gabor.\nimageNit=ones([length(xDeg),length(yDeg)]);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(:,j)=luminanceNit*(1+targetContrast*gy(j)*fx);\nend\n",
+      "DEPRECATED. USE movieComputeJS INSTEAD. computeImageJS is JavaScript code to compute a static image array (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The imageNit(y,x) value  is in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), and luminanceNit. For example\n\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length)\n  .fill(0)\n  .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n  gx.push(\n    Math.exp(-1 * ((x - targetEccentrictyYDeg) / targetSpaceConstantDeg) ** 2)\n  );\n}\nfor (const y of yDeg) {\n  gy.push(\n    Math.exp(-1 * ((y - targetEccentrictyYDeg) / targetSpaceConstantDeg) ** 2)\n  );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n  fx[i] =\n    gx[i] *\n    Math.sin(\n      2 * Math.PI * (xDeg[i] - targetEccentrictyYDeg) * targetCyclePerDeg +\n        (2 * Math.PI * targetPhase) / 360\n    );\n}\nfor (j = 0; j < yDeg.length; j++) {\n  for (i = 0; i < xDeg.length; i++) {\n    imageNit[i][j] = (255 / 2) * (1 + targetContrast * gy[j] * fx[i]);\n  }\n}",
     type: "",
     default: "",
     categories: "",
@@ -988,11 +988,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "movieBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "When movieBool (default FALSE) is TRUE, EasyEyes will show the stimulus as an HDR movie. When it's FALSE (the default), EasyEyes will show the stimulus on the JavaScript Canvas. ",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "movieComputeJS",
     availability: "now",
     example: "",
     explanation:
-      "movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute the movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box.  The program must compute and define either “imageNit” or “movieNit”, not both. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. \nFor example\n% THIS MATLAB CODE MUST BE TRANSLATED TO JAVASCRIPT\n% Compute vertical Gabor.\nimageNit=ones([length(xDeg),length(yDeg)]);\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\nfx=gx .* sin(2*pi*(xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+2*pi*targetPhase/360);\nfor j=1:length(yDeg)\n     imageNit(:,j)=movieLuminanceNit*(1+targetContrast*gy(j)*fx);\nend\n\n% Compute drifting vertical Gabor, with Gaussian envelope in time.\nmovieNit=ones([length(xDeg),length(yDeg)],length(tSec));\ntMidSec=movieTargetOnsetDelaySec+targetDurationSec/2;\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngt=exp(-((tSec-tMidSec)/targetTimeConstantSec).^2);\nfor k=1:length(tSec)\n     fx=sin(2*pi*(targetPhase/360 + tSec(k)*targetHz + (xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+);\n     for j=1:length(yDeg)\n          imageNit(:,j)=movieLuminanceNit*(1+targetContrast*gt(k)*gy(j)*fx);\n     end\nend",
+      "movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute the HDR movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box.  The program must compute and define either “imageNit” or “movieNit”, not both. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. \nFor example\n% Compute drifting vertical Gabor, with Gaussian envelope in time.\nmovieNit=ones([length(xDeg),length(yDeg)],length(tSec));\ntMidSec=movieTargetOnsetDelaySec+targetDurationSec/2;\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngt=exp(-((tSec-tMidSec)/targetTimeConstantSec).^2);\nfor k=1:length(tSec)\n     fx=sin(2*pi*(targetPhase/360 + tSec(k)*targetHz + (xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+);\n     for j=1:length(yDeg)\n          movieNit(:,j)=movieLuminanceNit*(1+targetContrast*gt(k)*gy(j)*fx);\n     end\nend",
     type: "text",
     default: "",
     categories: "",
@@ -1022,9 +1032,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "movieRectDeg (default is empty, indicating whole screen) consists of four float numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and to the right of fixation. The sequence is left,bottom,right,top. Whatever is requested will be mapped to pixels and clipped by the screen rect.",
+      "movieRectDeg (default is empty, indicating whole screen) consists of four float numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and to the right of fixation. The sequence is left,bottom,right,top. Whatever is requested will be mapped to pixels and clipped by the screen rect.\n\nThe scientist provides movieRectDeg, which defines a rect in visual coordinates (i.e. on the retina). Note that straight lines in visual space generally correspond to curves in pixel space. However, the HDR movie must be a rect (horizontal & vertical rectangle) on the screen, so EasyEyes defines the movieRectPx screen rect approximation to movieRectDeg. movieRectDeg is rectangular on the retina, and movieRectPx is rectangular on the screen. \n\nmovieRectPx is the screen rect used for the movie. It is derived from movieRectDeg according to movieRectPxContainsDegBool, and then clipped by screenRectPx. If movieRectDeg is empty (the default) then movieRectPx is the whole screen, ie screenRectPx.\n\n\nThe movie bounds are movieRectPx. To compute a movie, we usually need to know the visual coordinate of each pixel. EasyEyes provides the 2*width*height array xyDeg, where array xyDeg(i,j) is the x,y position in deg of pixel (i,j).",
     type: "text",
     default: "",
+    categories: "",
+  },
+  {
+    name: "movieRectPxContainsDegBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "If movieRectPxContainsDegBool (default FALSE) is TRUE then movieRectPx is the screen bounding box of movieRectDeg. If it's FALSE then it's the bounding box of the four screen points that correspond to the four midpoints (on the retina) of the four sides of movieRectDeg.",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {

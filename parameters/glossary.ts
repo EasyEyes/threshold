@@ -690,6 +690,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  movieBool: {
+    name: "movieBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   movieComputeJS: {
     name: "movieComputeJS",
     availability: "now",
@@ -713,6 +719,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "",
+  },
+  movieRectPxContainsDegBool: {
+    name: "movieRectPxContainsDegBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
   },
   movieTargetOnsetDelaySec: {
     name: "movieTargetOnsetDelaySec",
