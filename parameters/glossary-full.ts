@@ -1927,7 +1927,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "20",
     explanation:
-      'If targetKind is "sound", targetSoundDBSPL specifies target sound level.',
+      'If targetKind is "sound", targetSoundDBSPL specifies target sound level in dB SPL.',
     type: "numerical",
     default: "20",
     categories: "",
@@ -2184,19 +2184,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1.3",
     explanation:
-      'viewingDistanceAllowedRatio must be positive, and specifies a tolerance interval around the desired viewing distance D. If viewingDistanceAllowedRatio>1, then the allowed range of viewing distance is D/viewingDistanceAllowedRatio to D*viewingDistanceAllowedRatio. If it\'s <1 then the allowed range of viewing distance is D*viewingDistanceAllowedRatio to D/viewingDistanceAllowedRatio. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, toward the desired viewing distance. We call that "nudging". A value of 0 allows all viewing distances. [CSV and Excel files do not allow Inf.]',
+      'viewingDistanceAllowedRatio (default 1.2) must be positive, and specifies a tolerance interval around the desired viewing distance D = viewingDistanceDesiredCm. If viewingDistanceAllowedRatio>1, then the allowed range of viewing distance is D/viewingDistanceAllowedRatio to D*viewingDistanceAllowedRatio. If it\'s <1 then the allowed range of viewing distance is D*viewingDistanceAllowedRatio to D/viewingDistanceAllowedRatio. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, toward the desired viewing distance. We call that "nudging". A value of 0 allows all viewing distances. [CSV and Excel files do not allow Inf.]',
     type: "numerical",
     default: "1.2",
-    categories: "",
-  },
-  {
-    name: "viewingDistanceAllowedRatio",
-    availability: "now",
-    example: "30",
-    explanation:
-      'viewingDistanceAllowedRatio must be positive, and specifies a tolerance interval around the desired viewing distance D. If viewingDistanceAllowedRatio>1, then the allowed range of viewing distance is D/viewingDistanceAllowedRatio to D*viewingDistanceAllowedRatio. If it\'s <1 then the allowed range of viewing distance is D*viewingDistanceAllowedRatio to D/viewingDistanceAllowedRatio. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, toward the desired viewing distance. We call that "nudging". A value of 0 allows all viewing distances. [CSV and Excel files do not allow Inf.]',
-    type: "numerical",
-    default: "0",
     categories: "",
   },
   {

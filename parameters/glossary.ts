@@ -1440,7 +1440,7 @@ export const GLOSSARY: Glossary = {
     name: "viewingDistanceAllowedRatio",
     availability: "now",
     type: "numerical",
-    default: "0",
+    default: "1.2",
   },
   viewingDistanceDesiredCm: {
     name: "viewingDistanceDesiredCm",

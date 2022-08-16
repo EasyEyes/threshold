@@ -290,6 +290,7 @@ import {
   addTrialStaircaseSummariesToDataForSound,
   playAudioBuffer,
   playAudioBufferWithImpulseResponseCalibration,
+  displayRightOrWrong,
 } from "./components/soundUtils.js";
 import {
   getSpeechInNoiseTrialData,
@@ -3728,11 +3729,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Play correct audio
           switchKind(targetKind.current, {
             vocoderPhrase: () => {
+              displayRightOrWrong(true);
               correctSynth.play();
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
             sound: () => {
+              displayRightOrWrong(true);
               correctSynth.play();
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
@@ -3751,6 +3754,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // CORRECT
           key_resp.corr = 1;
         } else {
+          if (
+            paramReader.read(
+              "playNegativeFeedbackBeepBool",
+              status.block_condition
+            ) &&
+            (targetKind.current === "vocoderPhrase" ||
+              targetKind.current === "sound")
+          ) {
+            displayRightOrWrong(false);
+            // wrongSynth.play();
+          }
+
           // Play wrong audio
           // wrongSynth.play();
           status.trialCompleted_thisBlock++;

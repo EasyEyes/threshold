@@ -567,3 +567,23 @@ export const addTrialStaircaseSummariesToDataForSound = (
   //   throw "undefined currentLoop._currentStaircase [add TRIAL data failed]";
   // }
 };
+
+export const displayRightOrWrong = (correct) => {
+  const rightOrWrong = document.createElement("h1");
+  rightOrWrong.style.position = "absolute";
+  rightOrWrong.style.top = "30%";
+  rightOrWrong.style.left = "50%";
+  rightOrWrong.style.transform = "translate(-50%, -50%)";
+  rightOrWrong.style.fontSize = "100px";
+  if (correct) {
+    rightOrWrong.style.color = "green";
+    rightOrWrong.innerHTML = "RIGHT";
+  } else {
+    rightOrWrong.style.color = "red";
+    rightOrWrong.innerHTML = "WRONG";
+  }
+  document.body.appendChild(rightOrWrong);
+  setTimeout(() => {
+    document.body.removeChild(rightOrWrong);
+  }, 300);
+};
