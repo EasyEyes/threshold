@@ -375,7 +375,7 @@ export const GLOSSARY: Glossary = {
   computeImageJS: {
     name: "computeImageJS",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   computeRectDeg: {
@@ -705,7 +705,7 @@ export const GLOSSARY: Glossary = {
   movieDurationSec: {
     name: "movieDurationSec",
     availability: "now",
-    type: "",
+    type: "numerical",
     default: "",
   },
   movieLuminanceNit: {
@@ -729,7 +729,7 @@ export const GLOSSARY: Glossary = {
   movieTargetOnsetDelaySec: {
     name: "movieTargetOnsetDelaySec",
     availability: "now",
-    type: "",
+    type: "numerical",
     default: "",
   },
   notes: { name: "notes", availability: "now", type: "text", default: "" },
@@ -741,12 +741,6 @@ export const GLOSSARY: Glossary = {
   },
   playPositiveFeedbackBeepBool: {
     name: "playPositiveFeedbackBeepBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-  },
-  playPurrWhenReadyBool: {
-    name: "playPurrWhenReadyBool",
     availability: "now",
     type: "boolean",
     default: "TRUE",
@@ -875,6 +869,24 @@ export const GLOSSARY: Glossary = {
   },
   responseMustClickCrosshairBool: {
     name: "responseMustClickCrosshairBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
+  responseNegativeFeedbackBool: {
+    name: "responseNegativeFeedbackBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  responsePositiveFeedbackBool: {
+    name: "responsePositiveFeedbackBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
+  responsePurrWhenReadyBool: {
+    name: "responsePurrWhenReadyBool",
     availability: "now",
     type: "boolean",
     default: "TRUE",
@@ -1215,6 +1227,7 @@ export const GLOSSARY: Glossary = {
       "vocoderPhrase",
       "reading",
       "repeatedLetters",
+      "rsvpReading",
     ],
   },
   targetMinimumPix: {

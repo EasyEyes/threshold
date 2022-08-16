@@ -486,7 +486,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "DEPRECATED. USE movieComputeJS INSTEAD. computeImageJS is JavaScript code to compute a static image array (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The imageNit(y,x) value  is in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), and luminanceNit. For example\n\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length)\n  .fill(0)\n  .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n  gx.push(\n    Math.exp(-1 * ((x - targetEccentrictyYDeg) / targetSpaceConstantDeg) ** 2)\n  );\n}\nfor (const y of yDeg) {\n  gy.push(\n    Math.exp(-1 * ((y - targetEccentrictyYDeg) / targetSpaceConstantDeg) ** 2)\n  );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n  fx[i] =\n    gx[i] *\n    Math.sin(\n      2 * Math.PI * (xDeg[i] - targetEccentrictyYDeg) * targetCyclePerDeg +\n        (2 * Math.PI * targetPhase) / 360\n    );\n}\nfor (j = 0; j < yDeg.length; j++) {\n  for (i = 0; i < xDeg.length; i++) {\n    imageNit[i][j] = (255 / 2) * (1 + targetContrast * gy[j] * fx[i]);\n  }\n}",
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
@@ -1002,7 +1002,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute the HDR movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box.  The program must compute and define either “imageNit” or “movieNit”, not both. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. \nFor example\n% Compute drifting vertical Gabor, with Gaussian envelope in time.\nmovieNit=ones([length(xDeg),length(yDeg)],length(tSec));\ntMidSec=movieTargetOnsetDelaySec+targetDurationSec/2;\ngx=exp(-((xDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngy=exp(-((yDeg-targetEccentrictyYDeg)/targetSpaceConstantDeg).^2);\ngt=exp(-((tSec-tMidSec)/targetTimeConstantSec).^2);\nfor k=1:length(tSec)\n     fx=sin(2*pi*(targetPhase/360 + tSec(k)*targetHz + (xDeg-targetEccentrictyYDeg)*targetCyclePerDeg+);\n     for j=1:length(yDeg)\n          movieNit(:,j)=movieLuminanceNit*(1+targetContrast*gt(k)*gy(j)*fx);\n     end\nend",
+      'movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute the HDR movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box. The program must define and fill either the “imageNit” or “movieNit” array, not both. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. \n\nxyDeg is a 2*width*height float array, which provides the exact x,y visual coordinate of each screen pixel in movieRectPx. \nxDeg and yDeg are float vectors, which provide approximate visual coordinates of the screen pixels in movieRectPx. \nTo compute a movie as a visual stimulus, we usually need the visual coordinate of each pixel. EasyEyes provides the width*height*2 array xyDeg[i,j,k], where each 2-number element (indexed by k) is the x,y position in deg of pixel i,j. Use of the xyDeg array does not allow speed up by computational separation of x and y, so you may prefer to use the separable approximation provided by the width-long vector xDeg and height-long vector yDeg, which provide approximate visual coordinates of the pixels in movieRectPx. (Note: xyDeg takes time and space for EasyEyes to compute, and not all movieComputeJS programs need it, so EasyEyes skips making xyDeg if the string  "xyDeg" is not found in the movieComputeJS file.)\n\nEXAMPLE: movieComputeJS might contain the filename "VerticalGrating.js", and that file might contain:\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length).fill(0)\n        .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n        gx.push(\n                Math.exp(-((x-targetEccentrictyXDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nfor (const y of yDeg) {\n        gy.push(\n                Math.exp(-((y-targetEccentrictyYDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n        fx[i]=gx[i]*Math.sin(\n                2*Math.PI*((xDeg[i]-targetEccentrictyXDeg)*targetCyclePerDeg + targetPhase/360)\n        )\n}\nfor (j = 0; j < yDeg.length; j++) {\n        for (i = 0; i < xDeg.length; i++) {\n                imageNit[i][j] = (255/2) * (1 + targetContrast * gy[j] * fx[i]);\n        }\n}',
     type: "text",
     default: "",
     categories: "",
@@ -1013,7 +1013,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "movieDurationSec (default is empty, which requests targetDurationSec) is the movie duration in seconds.",
-    type: "",
+    type: "numerical",
     default: "",
     categories: "",
   },
@@ -1022,7 +1022,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "movieLuminanceNit (default none) is the desired screen luminance in cd/m^2, i.e. nits. Specifying luminance will only be practical when we use an HDR codec supporting PQ. More typically, we'll want to use the display at the background luminance it was designed for, often 500 cd/m^2, or half that. The default empty value indicates that we should use the display at whatever background luminance we find it in.",
+      "movieLuminanceNit (default none) is the desired screen luminance in cd/m^2, i.e. nits. Specifying luminance will only be practical when we use an HDR codec supporting PQ. More typically, we'll want to use the display at the background luminance it was designed for, often 500 cd/m^2 in 2022, or half that. The default empty value indicates that we should use the display at whatever background luminance we find it in.",
     type: "numerical",
     default: "",
     categories: "",
@@ -1032,7 +1032,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "movieRectDeg (default is empty, indicating whole screen) consists of four float numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and to the right of fixation. The sequence is left,bottom,right,top. Whatever is requested will be mapped to pixels and clipped by the screen rect.\n\nThe scientist provides movieRectDeg, which defines a rect in visual coordinates (i.e. on the retina). Note that straight lines in visual space generally correspond to curves in pixel space. However, the HDR movie must be a rect (horizontal & vertical rectangle) on the screen, so EasyEyes defines the movieRectPx screen rect approximation to movieRectDeg. movieRectDeg is rectangular on the retina, and movieRectPx is rectangular on the screen. \n\nmovieRectPx is the screen rect used for the movie. It is derived from movieRectDeg according to movieRectPxContainsDegBool, and then clipped by screenRectPx. If movieRectDeg is empty (the default) then movieRectPx is the whole screen, ie screenRectPx.\n\n\nThe movie bounds are movieRectPx. To compute a movie, we usually need to know the visual coordinate of each pixel. EasyEyes provides the 2*width*height array xyDeg, where array xyDeg(i,j) is the x,y position in deg of pixel (i,j).",
+      "movieRectDeg (default is empty, indicating whole screen) indicates the desired approximate movie size and location in the visual field. It consists of four float numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and to the right of fixation. The sequence is left,bottom,right,top. Whatever is requested will be mapped to pixels and clipped by screenRectPx. \n\nNote that movieRectDeg is a rect on the retina, which will be curved on the screen, and tthe movie's screen pixels are specified as the screen rect, movieRectDeg. Guided by movieRectPxContainsDegBool, EasyEyes creates screenRectPx to be a reasonable approximation to movieRectDeg.\n\nThe scientist provides movieRectDeg, which defines a rect in visual coordinates (i.e. on the retina). Note that straight lines in visual space generally correspond to curves in pixel space. However, the HDR movie must be a rect (horizontal & vertical rectangle) on the screen, so EasyEyes defines the movieRectPx screen rect approximation to movieRectDeg. movieRectDeg is rectangular on the retina, and movieRectPx is rectangular on the screen. \n\nmovieRectPx is the screen rect used for the movie. It is derived from movieRectDeg according to movieRectPxContainsDegBool, and then clipped by screenRectPx. If movieRectDeg is empty (the default) then movieRectPx is the whole screen, ie screenRectPx.\n\nThe movie bounds are movieRectPx. To compute a movie, we usually need to know the visual coordinate of each pixel. EasyEyes provides the 2*width*height array xyDeg, where array xyDeg(i,j) is the x,y position in deg of pixel (i,j).",
     type: "text",
     default: "",
     categories: "",
@@ -1042,7 +1042,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "If movieRectPxContainsDegBool (default FALSE) is TRUE then movieRectPx is the screen bounding box of movieRectDeg. If it's FALSE then it's the bounding box of the four screen points that correspond to the four midpoints (on the retina) of the four sides of movieRectDeg.",
+      "If movieRectPxContainsDegBool (default FALSE) is FALSE then movieRectPx is the bounding box of the four screen points that correspond to the four midpoints (on the retina) of the four sides of movieRectDeg. If it's TRUE then movieRectPx is the screen bounding box containing the four midpoints and the four corners of movieRectDeg. So movieRectPx will contain practically all the pixels in movieRectDeg.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1053,7 +1053,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "movieTargetOnsetDelaySec (default is empty, which requests that targetDurationSec is centered in the movieDurationSec) specified the delay from movie onset to target onset.",
-    type: "",
+    type: "numerical",
     default: "",
     categories: "",
   },
@@ -1072,7 +1072,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "When playNegativeFeedbackBeepBool is TRUE, after a mistaken response, play pure 500 Hz tone for 0.5 sec at amplitude 0.05. Usually FALSE, as we typically stay positive and give only positive feedback.",
+      "DEPRECATED. USE responseNegativeFeedbackBool INSTEAD. When playNegativeFeedbackBeepBool is TRUE, after a mistaken response, play pure 500 Hz tone for 0.5 sec at amplitude 0.05. Usually FALSE, as we typically stay positive and give only positive feedback.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1082,17 +1082,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "When playPositiveFeedbackBeepBool is TRUE, after each correct response, play pure 2000 Hz tone for 0.05 sec at amplitude 0.05. ",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
-    name: "playPurrWhenReadyBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "NOT YET IMPLEMENTED. Play a purring sound to alert the observer while we await their response. Pure 200 Hz tone for 0.6 sec at amplitude 1.",
+      "DEPRECATED. USE responsePositiveFeedbackBool INSTEAD. When playPositiveFeedbackBeepBool is TRUE, after each correct response, play pure 2000 Hz tone for 0.05 sec at amplitude 0.05. ",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1301,7 +1291,37 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "REQUESTED BY MANY PARTICIPANTS (This grants the frequent request from our participants that they prefer to type the letter, even if they're required to click on the crosshair to begin each trial.) Setting responseMustClickCrosshairBool TRUE overrules all other response boolean parameters to enable clicking, and ONLY clicking, of the crosshair, to request the next trial. We suppose that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) ",
+      "Setting responseMustClickCrosshairBool TRUE overrules all other response boolean parameters to enable clicking, and ONLY clicking, of the crosshair, to request the next trial. We suppose that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) REQUESTED BY MANY PARTICIPANTS (This grants the frequent request from our participants that they prefer to type the letter, even if they're required to click on the crosshair to begin each trial.) ",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "responseNegativeFeedbackBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "When responseNegativeFeedbackBeepBool (default FALSE) is TRUE, after a mistaken response, provide negative feedback (sound is a pure 500 Hz tone for 0.5 sec at amplitude 0.05; word is wrong). Default is FALSE, as we typically stay positive and give only positive feedback.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "responsePositiveFeedbackBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "When responsePositiveFeedbackBool (default TRUE) is TRUE, after each correct response, provide positive feedback (sound is a pure 2000 Hz tone for 0.05 sec at amplitude 0.05; word is RIGHT). ",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "responsePurrWhenReadyBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "NOT YET IMPLEMENTED. When responsePurrWhenReadyBool (default FALSE) is TRUE, play a purring sound to alert the observer while we await their response. Pure 200 Hz tone indefinitely at amplitude 1. Stop purring when they respond.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1821,7 +1841,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "letter",
     categories:
-      "letter, gabor, image, sound, vocoderPhrase, reading, repeatedLetters",
+      "letter, gabor, image, sound, vocoderPhrase, reading, repeatedLetters, rsvpReading",
   },
   {
     name: "targetMinimumPix",
