@@ -1311,7 +1311,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "When responsePositiveFeedbackBool (default TRUE) is TRUE, after each correct response, provide positive feedback (sound is a pure 2000 Hz tone for 0.05 sec at amplitude 0.05; word is RIGHT). ",
+      "When responsePositiveFeedbackBool (default TRUE) is TRUE, after each correct response, provide positive feedback (sound is a pure 2000 Hz tone for 0.05 sec at amplitude 0.05; word is RIGHT). WORKING FOR SOUND TASKS; NOT YET IMPLEMENTED FOR VISION TASKS.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1471,7 +1471,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
+      "NOT YET IMPLEMENTED: Whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1549,7 +1549,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "later",
     example: "right",
     explanation:
-      "Can be none or right. Meant for children. Graphically displays a vertical green bar that tracks the trial count. The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the block. Sometimes we call the green liquid spaceship fuel for Jamie the astronaut.",
+      "NOT YET IMPLEMENTED: Can be none or right. Meant for children. Graphically displays a vertical green bar that tracks the trial count. The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the block. Sometimes we call the green liquid spaceship fuel for Jamie the astronaut.",
     type: "categorical",
     default: "none",
     categories: "none, right",
@@ -1579,7 +1579,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Click the crosshair.",
     explanation:
-      "showText displays the provided text at bottom left of screen, aligned left, with line breaking to show multiple lines. This is static, unchanged before, during, and after the stimulus. Default is empty string, no text. Same point size as used by showConditionNameBool. If all three are present, then showText on top, then showConditionNameBool, then showTargetSpecsBool at bottom. [Do we need showTextBeforeStimulus or showTextAfterStimulus?]",
+      "showText (default empty string) displays the provided text at the bottom-left of the screen, aligned left, with line breaking to show multiple lines. This is static, unchanged before, during, and after the stimulus. Default is empty string, no text. Same point size as used by showConditionNameBool. If all three are present, then showText on top, then showConditionNameBool, then showTargetSpecsBool at the bottom. [FUTURE: Do we need showTextBeforeStimulus or showTextAfterStimulus?]",
     type: "text",
     default: "",
     categories: "",
