@@ -4,12 +4,6 @@
 import { DataFrame } from "dataframe-js";
 import { GLOSSARY } from "../parameters/glossary";
 
-/**
- * Get requested consentForm and debriefForm
- * @param {Papa.ParseResult<string[]>} parsed
- * @returns {consentForm: string, debriefForm: string}
- */
-
 export const getFolderNames = (parsed: any): any => {
   let maskedfolderList: string[] = [];
   let targetfolderList: string[] = [];
@@ -61,6 +55,23 @@ export const getFolderNames = (parsed: any): any => {
     maskerSoundFolder: maskedfolderList,
     targetSoundFolder: targetfolderList,
   };
+};
+
+export const getCodeList = (parsed: any): any => {
+  let codeList: string[] = [];
+
+  for (let i = 0; i < parsed.data.length; i++) {
+    if (parsed.data[i][0] === "movieComputeJS") {
+      codeList = [...parsed.data[i]];
+      break;
+    }
+  }
+
+  codeList.shift(); // remove the first column
+  codeList = [...new Set(codeList)]; // remove duplicates
+  codeList = codeList.filter((item: string) => item !== ""); // remove empty strings
+
+  return codeList;
 };
 
 export const getFormNames = (parsed: any): any => {

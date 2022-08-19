@@ -203,6 +203,26 @@ export const TEXT_FILES_MISSING = (
   };
 };
 
+export const CODE_FILES_MISSING = (
+  parameter: string,
+  missingFileNameList: string[]
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList
+    .map((fileName: string) => {
+      htmlList += `<li>${fileName}</li>`;
+    })
+    .join("");
+  return {
+    name: "JavaScript code file is missing",
+    message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 export const PARAMETERS_NOT_ALPHABETICAL = (
   firstOffendingParameter: string
 ): EasyEyesError => {

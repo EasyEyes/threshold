@@ -95,6 +95,12 @@ export const GLOSSARY: Glossary = {
     default: "desktop",
     categories: ["desktop", "tablet", "mobile"],
   },
+  _compatibleIPhoneTooBool: {
+    name: "_compatibleIPhoneTooBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   _compatibleOperatingSystem: {
     name: "_compatibleOperatingSystem",
     availability: "now",

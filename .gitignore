@@ -5,6 +5,7 @@ examples/*/**
 # !examples/fonts
 # !examples/forms
 # !examples/tables
+# !examples/folders
 
 !examples/fonts/Auckland Optotype.woff2
 !examples/fonts/Douglass Pen.woff2
@@ -25,6 +26,8 @@ examples/*/**
 !examples/tables/questionExperiment.csv
 
 !examples/folders/folders
+
+!examples/code/examples.js
 
 ###
 

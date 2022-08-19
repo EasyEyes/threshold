@@ -27,6 +27,7 @@ import {
   NONUNIQUE_WITHIN_BLOCK,
   TEXT_FILES_MISSING,
   SOUND_FOLDER_MISSING,
+  CODE_FILES_MISSING,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import { isNumeric, levDist, arraysEqual } from "./utils";
@@ -653,6 +654,26 @@ export const isTextMissing = (
   if (missingText.size > 0) {
     errorList.push(
       TEXT_FILES_MISSING("readingCorpus", Array.from(missingText) as string[])
+    );
+  }
+
+  return errorList;
+};
+
+export const isCodeMissing = (
+  requestedCodeList: string[],
+  existingCodeList: string[]
+): EasyEyesError[] => {
+  const errorList: EasyEyesError[] = [];
+  const missingCode = new Set();
+
+  for (const requested of requestedCodeList) {
+    if (!existingCodeList.includes(requested)) missingCode.add(requested);
+  }
+
+  if (missingCode.size > 0) {
+    errorList.push(
+      CODE_FILES_MISSING("movieComputeJS", Array.from(missingCode) as string[])
     );
   }
 

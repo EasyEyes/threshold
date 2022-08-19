@@ -10,6 +10,7 @@ import {
   isTextMissing,
   populateDefaultValues,
   isSoundFolderMissing,
+  isCodeMissing,
 } from "./experimentFileChecks";
 
 import { FONT_FILES_MISSING_WEB } from "./errorMessages";
@@ -20,6 +21,7 @@ import {
   getFontNameListBySource,
   getFormNames,
   getTextList,
+  getCodeList,
   addNewUnderscoreParam,
   getFolderNames,
 } from "./utils";
@@ -119,7 +121,7 @@ export const prepareExperimentFileForThreshold = async (
     user.currentExperiment.prolificWorkspaceModeBool = false;
   }
 
-  // Validate requested fonts
+  // ! Validate requested fonts
   const requestedFontList: string[] = getFontNameListBySource(parsed, "file");
   const requestedFontListWeb: string[] = getFontNameListBySource(
     parsed,
@@ -131,7 +133,7 @@ export const prepareExperimentFileForThreshold = async (
     if (!Array.isArray(error)) errors.push(error);
   }
 
-  // Validate requested forms
+  // ! Validate requested forms
   const requestedForms: any = getFormNames(parsed);
   if (space === "web" && requestedForms.consentForm)
     errors.push(
@@ -150,11 +152,12 @@ export const prepareExperimentFileForThreshold = async (
       )
     );
 
+  // ! Validate requested text
   const requestedTextList: any[] = getTextList(parsed);
   if (space === "web")
     errors.push(...isTextMissing(requestedTextList, easyeyesResources.texts));
 
-  //validate requested Folders;
+  // ! validate requested Folders;
   // console.log("easyeyesResources.folders", easyeyesResources.folders)
   const folderList: any = getFolderNames(parsed);
 
@@ -172,6 +175,11 @@ export const prepareExperimentFileForThreshold = async (
     });
   });
   // console.log("requestedFolderList", requestedFolderList);
+
+  // ! validate requested code files
+  const requestedCodeList: any[] = getCodeList(parsed);
+  if (space === "web")
+    errors.push(...isCodeMissing(requestedCodeList, easyeyesResources.code));
 
   // TODO remove if we find no problems are caused by not validating commas
   // Check that every row has the same number of values
@@ -215,6 +223,7 @@ export const prepareExperimentFileForThreshold = async (
       requestedFontList,
       requestedTextList,
       requestedFolderList,
+      requestedCodeList,
       [],
       errors
     );
@@ -225,6 +234,7 @@ export const prepareExperimentFileForThreshold = async (
       requestedFontList,
       requestedTextList,
       requestedFolderList,
+      requestedCodeList,
       splitIntoBlockFiles(df, space),
       []
     );

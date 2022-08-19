@@ -54,7 +54,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "100",
     explanation:
-      "_compatibleBrowserMinimumVersion is the minimum integer version number of the browser for compatibility. The default is zero.",
+      "_compatibleBrowserVersionMinimum (default 0) is the minimum integer version number of the browser for compatibility. ",
     type: "integer",
     default: "0",
     categories: "",
@@ -64,7 +64,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "_compatibleCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track gaze and viewing distance so most experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only position and orientation of head and gaze. (Do we also retain the interpupillary distance in cm?) Currently we do this in the Remote Calibrator, but it would be better to do it here so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.)",
+      "NOT YET IMPLEMENTED. _compatibleCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and interpupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier compatibility check so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.)",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -78,6 +78,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "multicategorical",
     default: "desktop",
     categories: "desktop, tablet, mobile",
+  },
+  {
+    name: "_compatibleIPhoneTooBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "NOT YET IMPLEMENTED. If TRUE, _compatibleIPhoneTooBool (default FALSE) asks the participant if, in addition to whatever device is running the experiment, they have an iPhone/iPad to use for sound calibration. EasyEyes just asks, without verifying. Verification will happen later, when the QR code is shown to recruit the iPhone/iPad. \n[We have not yet considered, in the case of an experiment running on an iPad or iPhone, whether we could use its built-in mic to calibrate its loudspeaker, eliminating the need for a second device.] ",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
   },
   {
     name: "_compatibleOperatingSystem",
@@ -105,7 +115,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without institutional Pavlovia licenses. When TRUE (the default), when EasyEyes compiles your experiment, EasyEyes appends the smallest possible integer (at least 1) to the spreadsheet filename (without extension) to create a unique (unused) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users who need tokens, Pavlovia requires that tokens be assigned to a specific experiment (repo). For them, every time EasyEyes changes the repo name, they must visit Pavlovia to assign tokens to the new repo, which can be tedious. So they might like to set _compileAsNewExperimentBool FALSE to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the datafiles will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists only need to assign tokens the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting Pavlovia, until the experiment runs out of tokens. Note that this flag doen't affect PILOTING mode, which is free and can only be used from within Pavlovia. Also, any users concerned over the huge proliferation of repos might like to set _compileAsNewExperimentBool FALSE to minimize the number of repos created by EasyEyes.",
+      "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without institutional Pavlovia licenses. When TRUE (the default), when EasyEyes compiles your experiment, EasyEyes appends the smallest possible integer (at least 1) to the spreadsheet filename (without extension) to create a unique (unused) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users who need tokens, Pavlovia requires that tokens be assigned to a specific experiment (repo). For them, every time EasyEyes changes the repo name, they must visit Pavlovia to assign tokens to the new repo, which can be a nuisance. Token users can eliminate the nuisance by setting _compileAsNewExperimentBool FALSE to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the data files will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists only need to assign tokens the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting Pavlovia, until the experiment runs out of tokens. Note that this flag doen't affect PILOTING mode, which is always free and can only be used from within Pavlovia. Also, any users concerned over the huge proliferation of repos might like to set _compileAsNewExperimentBool FALSE to minimize the number of repos created by EasyEyes.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1768,7 +1778,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "NOT YET IMPLEMENT: targetContrast is the desired luminance contrast of the target. For letters we use Weber contrast, \nc=(LLetter-LBackground)/LBackground. \nA white letter has contrast +1; a black letter has contrast -1.\nFor gabors, we use Michelson contrast, \nc=(LMax-LMin)/(LMax+LMin).\nNOTE: Until we shift to using HDR movies, contrast is only accurate for values of -1, 0, and 1.",
+      "NOT YET IMPLEMENT: targetContrast (default 1) is the desired luminance contrast of the target. For letters we use Weber contrast, \nc=(LLetter-LBackground)/LBackground. \nA white letter has contrast +1; a black letter has contrast -1.\nFor gabors, we use Michelson contrast, \nc=(LMax-LMin)/(LMax+LMin).\nFor scientist-supplied images, the image is presented faithfully when targetContrast is 1, and scaled in contrast proportionally when targetContrast is not 1.\nNOTE: Until we shift to using HDR movies, contrast is only accurate for values of -1, 0, and 1.",
     type: "numerical",
     default: "-1",
     categories: "",
@@ -1798,7 +1808,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "10",
     explanation:
-      "targetEccentricityXDeg is the x location of the target center, relative to fixation. The target center is defined as the center of the bounding box for the letters in the fontCharacterSet. (See targetBoundingBoxHorizontalAlignment.)",
+      "targetEccentricityXDeg (default 0) is the x location of the target center, relative to fixation. The target center is defined as the center of the bounding box for the letters in the fontCharacterSet. (See targetBoundingBoxHorizontalAlignment.)",
     type: "numerical",
     default: "0",
     categories: "",
@@ -1808,7 +1818,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0",
     explanation:
-      "targetEccentricityYDeg is the y location of the target center, relative to fixation.",
+      "targetEccentricityYDeg (default 0) is the y location of the target center, relative to fixation.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2014,7 +2024,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'targetSoundPhrase is a text phrase that is used when targetKind is 16ChannelSound. The phrase consists of a series of words and category names, with each category name preceded by #. Currently the targetSoundPhrase is "Ready Baron GoTo #Color #Number Now". Every word must appear as a sound file with that name, and every category must appear as a folder with that name, both in the current talker folder in the targetSoundFolder.',
+      'targetSoundPhrase (default empty string) is a text phrase that is used when targetKind is 16ChannelSound. The phrase consists of a series of words and category names, with each category name preceded by #. Currently the targetSoundPhrase is "Ready Baron GoTo #Color #Number Now". Every word must appear as a sound file with that name, and every category must appear as a folder with that name, both in the current talker folder in the targetSoundFolder.',
     type: "text",
     default: "",
     categories: "",
@@ -2024,7 +2034,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetSpaceConstantDeg (default practially infinite) is the 1/e radius of the Gaussian envelope.",
+      "targetSpaceConstantDeg (default practially infinite) is the 1/e radius of the Gaussian envelope in deg.",
     type: "numerical",
     default: "1.00E+10",
     categories: "",
