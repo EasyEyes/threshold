@@ -2457,7 +2457,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["sound"](rc.language.value),
             w,
-            [-window.innerWidth / 2 + w * 1.1, 0]
+            // [-window.innerWidth / 2 + w * 1.1, 0]
+            [-window.innerWidth * 0.4, window.innerHeight * 0.4]
           );
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
@@ -2510,7 +2511,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["sound"](rc.language.value),
             w,
-            [-window.innerWidth / 2 + w * 1.1, 0]
+            [-window.innerWidth * 0.4, window.innerHeight * 0.4]
+            // [-window.innerWidth / 2 + w * 1.1, 0]
           );
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();

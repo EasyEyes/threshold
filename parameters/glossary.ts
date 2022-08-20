@@ -469,6 +469,12 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "1",
   },
+  flankerSpacingDeg: {
+    name: "flankerSpacingDeg",
+    availability: "now",
+    type: "numerical",
+    default: "",
+  },
   flipScreenHorizontallyBool: {
     name: "flipScreenHorizontallyBool",
     availability: "later",
@@ -1229,6 +1235,7 @@ export const GLOSSARY: Glossary = {
       "letter",
       "gabor",
       "image",
+      "movie",
       "sound",
       "vocoderPhrase",
       "reading",
