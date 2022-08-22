@@ -283,7 +283,7 @@ const getTrialAudioBufferNewImplementation = (
 ) => {
   const newAudioBuffer = audioContext.createBuffer(
     1,
-    audioBuffer.length,
+    audioData.length,
     audioCtx.sampleRate
   );
   const newChannel = newAudioBuffer.getChannelData(0);
