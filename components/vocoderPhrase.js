@@ -36,10 +36,11 @@ export const getVocoderPhraseTrialData = async (
   targetVolumeDbSPLFromQuest = 10,
   whiteNoiseLevel = 70,
   soundGainDBSPL = 0,
-  maskerVolumeDbSPL = 10
+  maskerVolumeDbSPL = 10,
+  numberOfChannels = 9
 ) => {
   //populate target and masker channel indices
-  var targetChannels = populateTargetIndices();
+  var targetChannels = populateTargetIndices(numberOfChannels);
   var maskerChannels = populateMaskerIndices(targetChannels);
 
   var targetKeys = Object.keys(targetList[blockCondition]);
@@ -238,8 +239,8 @@ const combineAudioBuffers = (audioBuffers, context) => {
   return tmp;
 };
 //populate array with 9 random numbers from 0 to 15
-const populateTargetIndices = () => {
-  var targetChannels = [...Array(9)];
+const populateTargetIndices = (numberOfChannels = 9) => {
+  var targetChannels = [...Array(numberOfChannels)];
   targetChannels.forEach((elem, ind, arr) => {
     var val = Math.floor(Math.random() * 16);
     while (targetChannels.includes(val)) val = Math.floor(Math.random() * 16);

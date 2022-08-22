@@ -3310,7 +3310,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ProposedVolumeLevelFromQuest.current,
               whiteNoiseLevel.current,
               soundGainDBSPL.current,
-              maskerVolumeDbSPL.current
+              maskerVolumeDbSPL.current,
+              paramReader.read("targetSoundChannels", status.block_condition)
             );
           const chosenCategoryKeys = Object.keys(categoriesChosen);
           correctAns.current = [];
