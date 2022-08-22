@@ -596,7 +596,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "abc",
     explanation:
-      "flankerCharacterSet (default is fontCharacterSet) is like fontCharacterSet but for the flankers. ",
+      "flankerCharacterSet (default is the fontCharacterSet) is like fontCharacterSet but for the flankers. ",
     type: "text",
     default: "abcdefghijklmnopqrstuvwxyz",
     categories: "",
@@ -606,7 +606,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Sloan.woff2",
     explanation:
-      "flankerFont (default is font) is like font, but for the flankers. ",
+      "flankerFont (default is the font) is like font, but for the flankers. ",
     type: "text",
     default: "Roboto Mono",
     categories: "",
@@ -616,7 +616,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "file",
     explanation:
-      "flankerFontSource (default is fontSource) is like fontSource, but for the flankers. ",
+      "flankerFontSource (default is the fontSource) is like fontSource, but for the flankers. ",
     type: "categorical",
     default: "google",
     categories: "file, google, browser",
@@ -636,7 +636,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "flankerSpacingDeg (default spacingDeg) is the center-to-center spacing between repeated flankers, as determined by flankerNumber. This is independent of spacingDeg, which specifies the center-to-center spacing of the target and each adjacent flanker.",
+      "flankerSpacingDeg (default is the spacingDeg) is the center-to-center spacing between repeated flankers, as determined by flankerNumber. This is independent of spacingDeg, which specifies the center-to-center spacing of the target and each adjacent flanker.",
     type: "numerical",
     default: "",
     categories: "",

@@ -3700,7 +3700,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         (k) => !_responsesAcrossCardinals.includes(k)
       );
       showCharacterSetResponse.alreadyClickedCharacters.push(...newResponses);
-      if (showCharacterSet.status === PsychoJS.Status.STARTED)
+      if (
+        showCharacterSet.status === PsychoJS.Status.STARTED &&
+        targetKind.current !== "vocoderPhrase"
+      )
         toggleClickedCharacters();
 
       // Check if the (set of clickable charset and keyboard) inputs constitute an end-of-trial
