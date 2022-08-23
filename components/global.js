@@ -339,3 +339,4 @@ export const vocoderPhrases = {
 };
 export const vocoderPhraseCategories = { chosen: undefined, all: undefined };
 export const vocoderPhraseShowClickable = { current: true };
+export const vocoderPhraseCorrectResponse = { current: undefined };

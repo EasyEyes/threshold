@@ -105,6 +105,7 @@ import {
   repeatedLettersConfig,
   vocoderPhraseCategories,
   vocoderPhraseShowClickable,
+  vocoderPhraseCorrectResponse,
 } from "./components/global.js";
 
 import {
@@ -3302,6 +3303,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // console.log("snapshot", snapshot);
           // console.log("trialData",snapshot.getCurrentTrial())
           // console.log("status.block_condition", status.condition.block_condition)
+          // console.log("numChannels",paramReader.read("targetSoundChannels", status.block_condition))
           const { trialSound, categoriesChosen, allCategories } =
             await getVocoderPhraseTrialData(
               vocoderPhrases.targetPhrase,
@@ -3313,6 +3315,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               maskerVolumeDbSPL.current,
               paramReader.read("targetSoundChannels", status.block_condition)
             );
+
           const chosenCategoryKeys = Object.keys(categoriesChosen);
           correctAns.current = [];
           chosenCategoryKeys.map((category) => {
@@ -3320,6 +3323,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               category + "_" + categoriesChosen[category]
             );
           });
+          // console.log("correctAns", correctAns.current);
           vocoderPhraseCategories.chosen = categoriesChosen;
           vocoderPhraseCategories.all = allCategories;
           if (invertedImpulseResponse.current)
@@ -3671,6 +3675,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Input from clickable character set
       // *showCharacterSetResponse* updates
       if (showCharacterSetResponse.current.length) {
+        if (targetKind.current === "vocoderPhrase")
+          vocoderPhraseCorrectResponse.current =
+            showCharacterSetResponse.current;
         // Add the new characters to those pressed. See NOTE above, ie this approach doesn't register duplicate letter presses
         const newKeysClicked = showCharacterSetResponse.current.filter(
           (c) =>
@@ -3725,24 +3732,31 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             (a) => !participantResponse.includes(a)
           );
         } else {
-          responseCorrect = arraysEqual(
-            participantResponse.sort(),
-            correctAns.current.sort()
-          );
+          responseCorrect =
+            targetKind.current === "vocoderPhrase"
+              ? arraysEqual(
+                  vocoderPhraseCorrectResponse.current.sort(),
+                  correctAns.current.sort()
+                )
+              : arraysEqual(
+                  participantResponse.sort(),
+                  correctAns.current.sort()
+                );
         }
+
         // Was this correct?
         if (responseCorrect) {
           // Play correct audio
           switchKind(targetKind.current, {
             vocoderPhrase: () => {
               displayRightOrWrong(true);
-              correctSynth.play();
+              // correctSynth.play();
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
             sound: () => {
               displayRightOrWrong(true);
-              correctSynth.play();
+              // correctSynth.play();
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
@@ -3762,7 +3776,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         } else {
           if (
             paramReader.read(
-              "playNegativeFeedbackBeepBool",
+              "responseNegativeFeedbackBool",
               status.block_condition
             ) &&
             (targetKind.current === "vocoderPhrase" ||

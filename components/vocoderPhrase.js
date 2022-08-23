@@ -39,9 +39,12 @@ export const getVocoderPhraseTrialData = async (
   maskerVolumeDbSPL = 10,
   numberOfChannels = 9
 ) => {
+  // console.log("numberOfChannels", numberOfChannels);
   //populate target and masker channel indices
   var targetChannels = populateTargetIndices(numberOfChannels);
   var maskerChannels = populateMaskerIndices(targetChannels);
+  // console.log("targetChannels", targetChannels);
+  // console.log("maskerChannels", maskerChannels);
 
   var targetKeys = Object.keys(targetList[blockCondition]);
   // console.log("list", targetKeys);
@@ -54,6 +57,7 @@ export const getVocoderPhraseTrialData = async (
       targetChannels,
       targetList[blockCondition]
     );
+  // console.log("categoriesChosen", categoriesChosen);
   var maskerKeys = Object.keys(maskerList[blockCondition]);
   const maskerSentenceAudio = getMaskerSentenceAudio(
     maskerKeys,
@@ -64,15 +68,12 @@ export const getVocoderPhraseTrialData = async (
     categoriesChosen
   );
   // // mergeAudioBuffersWithMergerNode(targetSentenceAudio[0]);
-  const mergedTargetSentenceAudio = mergeChannelsByAdding(targetSentenceAudio);
-  const mergedMaskerSentenceAudio = mergeChannelsByAdding(maskerSentenceAudio);
+  // const mergedTargetSentenceAudio = mergeChannelsByAdding(targetSentenceAudio);
+  // const mergedMaskerSentenceAudio = mergeChannelsByAdding(maskerSentenceAudio);
 
   // align target and masker audio buffers
   const { targetAudioBuffersAligned, maskerAudioBuffersAligned } =
-    alignTargetAndMaskerAudioBuffers(
-      mergedTargetSentenceAudio,
-      mergedMaskerSentenceAudio
-    );
+    alignTargetAndMaskerAudioBuffers(targetSentenceAudio, maskerSentenceAudio);
   // console.log("targetAudioBuffersAligned", targetAudioBuffersAligned);
   // console.log("maskerAudioBuffersAligned", maskerAudioBuffersAligned);
 
@@ -83,13 +84,16 @@ export const getVocoderPhraseTrialData = async (
   const targetAudioData = targetAudio.getChannelData(0);
   setWaveFormToZeroDbSPL(targetAudioData);
   // console.log("targetAudioDataRMS", getRMSOfWaveForm(targetAudioData));
-  adjustSoundDbSPL(targetAudioData, targetVolumeDbSPLFromQuest);
+  adjustSoundDbSPL(
+    targetAudioData,
+    targetVolumeDbSPLFromQuest - soundGainDBSPL
+  );
 
   //adjust masker volume
   const maskerAudioData = maskerAudio.getChannelData(0);
   setWaveFormToZeroDbSPL(maskerAudioData);
   // console.log("maskerAudioDataRMS", getRMSOfWaveForm(maskerAudioData));
-  adjustSoundDbSPL(maskerAudioData, maskerVolumeDbSPL);
+  adjustSoundDbSPL(maskerAudioData, maskerVolumeDbSPL - soundGainDBSPL);
 
   // console.log("targetAudio", targetAudio);
   // console.log("maskerAudio", maskerAudio);
@@ -178,6 +182,10 @@ const alignTargetAndMaskerAudioBuffers = (
   targetAudioBuffers,
   maskerAudioBuffers
 ) => {
+  return {
+    targetAudioBuffersAligned: targetAudioBuffers,
+    maskerAudioBuffersAligned: maskerAudioBuffers,
+  };
   const targetAudioBuffersAligned = [];
   const maskerAudioBuffersAligned = [];
   for (var i = 0; i < targetAudioBuffers.length; i++) {
@@ -293,16 +301,15 @@ const getTrialAudioBufferNewImplementation = (
 
   channelIndices.forEach((channelIndex) => {
     const channelData = new Float32Array(audioData["hi"].length);
-    for (var i = 0; i < channelData.length; i++) {}
     if (channelIndex < 8) {
       audioData["lo"].copyFromChannel(channelData, channelIndex);
-      newChannel += channelData;
     } else {
       audioData["hi"].copyFromChannel(channelData, channelIndex - 8);
-      newChannel += channelData;
+    }
+    for (var i = 0; i < channelData.length; i++) {
+      newChannel[i] += channelData[i];
     }
   });
-
   return newAudioBuffer;
 };
 
@@ -326,17 +333,17 @@ const getTargetSentenceAudio = (
       const randCategoryIndex = Math.floor(Math.random() * categoryKeys.length);
       const categoryItem = categoryKeys[randCategoryIndex];
 
-      const trialWordData = getTrialAudioBuffer(
-        targetChannels,
-        targetList_[targetTalker][withoutHashtag][categoryItem],
-        audioCtx
-      );
-
-      // const trialWordData = getTrialAudioBufferNewImplementation(
+      // const trialWordData = getTrialAudioBuffer(
       //   targetChannels,
       //   targetList_[targetTalker][withoutHashtag][categoryItem],
       //   audioCtx
       // );
+
+      const trialWordData = getTrialAudioBufferNewImplementation(
+        targetChannels,
+        targetList_[targetTalker][withoutHashtag][categoryItem],
+        audioCtx
+      );
 
       allCategories[withoutHashtag] = Object.keys(
         targetList_[targetTalker][withoutHashtag]
@@ -345,12 +352,12 @@ const getTargetSentenceAudio = (
       targetSentenceAudio.push(trialWordData);
     } else {
       const word = targetList_[targetTalker][elem];
-      const trialWordData = getTrialAudioBuffer(targetChannels, word, audioCtx);
-      // const trialWordData = getTrialAudioBufferNewImplementation(
-      //   targetChannels,
-      //   word,
-      //   audioCtx
-      // );
+      // const trialWordData = getTrialAudioBuffer(targetChannels, word, audioCtx);
+      const trialWordData = getTrialAudioBufferNewImplementation(
+        targetChannels,
+        word,
+        audioCtx
+      );
 
       targetSentenceAudio.push(trialWordData);
     }
@@ -395,27 +402,27 @@ const getMaskerSentenceAudio = (
         categoryItem.t = categoryKeys[randCategoryIndex.t];
       }
 
-      const trialWordData = getTrialAudioBuffer(
-        maskerChannels,
-        maskerList_[maskerTalker.t][withoutHashtag][categoryItem.t],
-        audioCtx
-      );
-
-      // const trialWordData = getTrialAudioBufferNewImplementation(
+      // const trialWordData = getTrialAudioBuffer(
       //   maskerChannels,
       //   maskerList_[maskerTalker.t][withoutHashtag][categoryItem.t],
       //   audioCtx
       // );
+
+      const trialWordData = getTrialAudioBufferNewImplementation(
+        maskerChannels,
+        maskerList_[maskerTalker.t][withoutHashtag][categoryItem.t],
+        audioCtx
+      );
       maskerSentenceAudio.push(trialWordData);
     } else {
       const word = maskerList_[maskerTalker.t][elem];
       // console.log(word, elem);
-      const trialWordData = getTrialAudioBuffer(maskerChannels, word, audioCtx);
-      // const trialWordData = getTrialAudioBufferNewImplementation(
-      //   maskerChannels,
-      //   word,
-      //   audioCtx
-      // );
+      // const trialWordData = getTrialAudioBuffer(maskerChannels, word, audioCtx);
+      const trialWordData = getTrialAudioBufferNewImplementation(
+        maskerChannels,
+        word,
+        audioCtx
+      );
       maskerSentenceAudio.push(trialWordData);
     }
   });
