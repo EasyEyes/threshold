@@ -1952,7 +1952,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //setup instruction
-          const instr = "Placeholder instructions for vocoderPhrase \n\n";
+          const instr = instructionsText.vocoderPhraseBegin(L);
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr
           );
@@ -2454,9 +2454,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //change instructions
-          var w = window.innerWidth / 3;
+          var w = window.innerWidth;
           _instructionBeforeStimulusSetup(
-            instructionsText.trial.fixate["sound"](rc.language.value),
+            instructionsText.trial.fixate["vocoderPhrase"](rc.language.value),
             w,
             // [-window.innerWidth / 2 + w * 1.1, 0]
             [-window.innerWidth * 0.4, window.innerHeight * 0.4]
@@ -3450,8 +3450,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           // change instruction
-          const instr =
-            "(placeholder instruction) pick all the correct categories";
+          const instr = instructionsText.trial.respond["vocoderPhrase"](
+            rc.language.value
+          );
           _instructionSetup(instr);
           instructions.setText(instr);
         },

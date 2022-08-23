@@ -7,6 +7,7 @@ import {
   setWaveFormToZeroDbSPL,
 } from "./soundUtils";
 
+const vocoderPhrase = "Ready Baron, go to {Color} {Number} now";
 var targetList = {};
 var maskerList = {};
 var whiteNoise;
@@ -434,9 +435,21 @@ export const vocoderPhraseSetupClickableCategory = (
   categories,
   responseRegister
 ) => {
+  const responseScreen = document.createElement("div");
+  responseScreen.id = "responseScreen";
+  responseScreen.classList.add("responseScreen");
+
+  const phrase = document.createElement("div");
+  phrase.classList.add("vocoder-phrase-header");
+  phrase.id = "vocoder-phrase-header";
+  phrase.innerHTML = vocoderPhrase;
+
+  responseScreen.appendChild(phrase);
+
   const container = document.createElement("div");
   container.classList.add("vocoder-phrase-clickable-category");
   container.id = "vocoder-phrase-clickable-category";
+  responseScreen.appendChild(container);
 
   const allCategories = categories["all"]; //all categories
   const chosenCategory = categories["chosen"]; //chosen categories
@@ -467,6 +480,15 @@ export const vocoderPhraseSetupClickableCategory = (
       categoryItem.innerHTML = elem2;
       categoryItem.onclick = () => {
         response[elem] = elem2;
+
+        const headerPhrase = document.getElementById("vocoder-phrase-header");
+        headerPhrase.innerHTML = vocoderPhrase;
+        headerPhrase.innerHTML = headerPhrase.innerHTML.replace(
+          "{" + elem + "}",
+          elem2
+        );
+        // console.log("elem2", elem2);
+        // console.log("elem", elem)
         // console.log("response", response);
         //make more efficient after deadline
         const items = categoryList.children;
@@ -496,7 +518,8 @@ export const vocoderPhraseSetupClickableCategory = (
     container.appendChild(categoryContainer);
   });
 
-  document.body.appendChild(container);
+  // document.body.appendChild(phrase);
+  document.body.appendChild(responseScreen);
 };
 
 export const vocoderPhraseRemoveClickableCategory = (responseRegister) => {
@@ -504,7 +527,7 @@ export const vocoderPhraseRemoveClickableCategory = (responseRegister) => {
   responseRegister.onsetTime = 0;
   responseRegister.clickTime = [];
 
-  const ele = document.querySelectorAll(".vocoder-phrase-clickable-category");
+  const ele = document.querySelectorAll(".responseScreen");
   if (ele.length > 0) {
     ele.forEach((e) => {
       document.body.removeChild(e);

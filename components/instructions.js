@@ -49,6 +49,9 @@ export const instructionsText = {
   initial: (L) => {
     return phrases.T_thresholdSoundCheck[L] + `\n\n`;
   },
+  vocoderPhraseBegin: (L) => {
+    return phrases.T_soundPhraseBlock[L] + "\n\n";
+  },
   soundBegin: (L) => {
     return phrases.T_thresholdSoundBeginBlock[L] + "\n\n";
   },
@@ -125,6 +128,9 @@ export const instructionsText = {
   },
   trial: {
     fixate: {
+      vocoderPhrase: (L) => {
+        return phrases.T_soundPhraseTrial[L];
+      },
       sound: (L) => {
         return phrases.T_thresholdSoundNewTrial[L];
       },
@@ -133,6 +139,9 @@ export const instructionsText = {
       },
     },
     respond: {
+      vocoderPhrase: (L) => {
+        return phrases.T_soundPhraseResponse[L];
+      },
       sound: (L) => {
         return phrases.T_thresholdSoundResponse[L];
       },

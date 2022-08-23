@@ -1,12 +1,25 @@
+#responseScreen {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+#vocoder-phrase-header {
+  z-index: 9999999;
+  /* position:"fixed"; */
+  margin-top: 23vh;
+  margin-left: 10vw;
+  font-size: xx-large;
+}
 #vocoder-phrase-clickable-category {
   display: flex;
   flex-direction: row;
   width: 100%;
   overflow-x: auto;
   z-index: 9999999;
-  position: fixed;
+  /* position: fixed; */
   /* padding-left: 30px; */
-  margin-top: 20vh;
+  margin-top: 7vh;
 }
 
 .vocoder-phrase-category-item {
