@@ -1,3 +1,12 @@
+#soundTestModalSoundLevelContainer {
+  display: flex;
+  justify-content: space-between;
+}
+#soundTestModalSpeakerSoundGainContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3vh;
+}
 #responseScreen {
   position: absolute;
   top: 0px;

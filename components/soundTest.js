@@ -8,7 +8,26 @@ import {
   setWaveFormToZeroDbSPL,
 } from "./soundUtils";
 
+const soundCalibrationLevelDBSPL = { current: undefined };
+const soundGain = { current: undefined };
+
 export const addSoundTestElements = (reader) => {
+  const calibrationLevelFromFile = reader.read(
+    "soundCalibrationLevelDBSPL",
+    "__ALL_BLOCKS__"
+  );
+  if (calibrationLevelFromFile.length > 0) {
+    soundCalibrationLevelDBSPL.current = calibrationLevelFromFile[0];
+  }
+
+  const soundGainFromFile = reader.read("soundGainDBSPL", "__ALL_BLOCKS__");
+  const calculatedSoundGain = soundGainDBSPL.current;
+  if (calculatedSoundGain) {
+    soundGain.current = calculatedSoundGain;
+  } else if (soundGainFromFile.length > 0) {
+    soundGain.current = soundGainFromFile[0];
+  }
+
   const modal = document.createElement("div");
   const modalDialog = document.createElement("div");
   const modalContent = document.createElement("div");
@@ -21,6 +40,12 @@ export const addSoundTestElements = (reader) => {
   const modalBody = document.createElement("div");
   const modalFooter = document.createElement("div");
   const horizontal = document.createElement("hr");
+  const soundLevelContainer = document.createElement("div");
+  const soundLevel = document.createElement("p");
+  const soundLevelInput = document.createElement("input");
+  const speakerSoundGainContainer = document.createElement("div");
+  const speakerSoundGain = document.createElement("p");
+  const speakerSoundGainInput = document.createElement("input");
 
   const elems = {
     modal,
@@ -31,6 +56,12 @@ export const addSoundTestElements = (reader) => {
     modalToggle,
     modalBody,
     modalFooter,
+    soundLevelContainer,
+    soundLevel,
+    soundLevelInput,
+    speakerSoundGainContainer,
+    speakerSoundGain,
+    speakerSoundGainInput,
   };
 
   modal.setAttribute("id", "soundTestModal");
@@ -42,6 +73,20 @@ export const addSoundTestElements = (reader) => {
   modalToggle.setAttribute("id", "soundTestModalToggle");
   modalBody.setAttribute("id", "soundTestModalBody");
   modalFooter.setAttribute("id", "soundTestModalFooter");
+  soundLevelContainer.setAttribute("id", "soundTestModalSoundLevelContainer");
+  soundLevel.setAttribute("id", "soundTestModalSoundLevel");
+  soundLevelInput.setAttribute("id", "soundTestModalSoundLevelInput");
+  soundLevelInput.setAttribute("type", "number");
+  speakerSoundGainContainer.setAttribute(
+    "id",
+    "soundTestModalSpeakerSoundGainContainer"
+  );
+  speakerSoundGain.setAttribute("id", "soundTestModalSpeakerSoundGain");
+  speakerSoundGainInput.setAttribute(
+    "id",
+    "soundTestModalSpeakerSoundGainInput"
+  );
+  speakerSoundGainInput.setAttribute("type", "number");
 
   modal.classList.add(...["modal", "fade"]);
   modalDialog.classList.add(...["modal-dialog"]);
@@ -55,10 +100,25 @@ export const addSoundTestElements = (reader) => {
   modalSubtitle.innerHTML =
     "Use the toggle for IR correction. It may take some time to load the sound files.";
 
+  soundLevel.innerHTML = "Sound Level (dB SPL):";
+  if (soundCalibrationLevelDBSPL.current)
+    soundLevelInput.value = soundCalibrationLevelDBSPL.current;
+
+  speakerSoundGain.innerHTML = "Speaker Sound Gain (dB SPL):";
+  if (soundGain.current) speakerSoundGainInput.value = soundGain.current;
+
   modal.appendChild(modalDialog);
   modalDialog.appendChild(modalContent);
   modalHeaderContainer.appendChild(modalHeader);
   modalHeaderContainer.appendChild(modalSubtitle);
+
+  speakerSoundGainContainer.appendChild(speakerSoundGain);
+  speakerSoundGainContainer.appendChild(speakerSoundGainInput);
+  soundLevelContainer.appendChild(soundLevel);
+  soundLevelContainer.appendChild(soundLevelInput);
+  modalHeaderContainer.appendChild(soundLevelContainer);
+  modalHeaderContainer.appendChild(speakerSoundGainContainer);
+
   modalHeaderContainer.appendChild(horizontal);
   modalContent.appendChild(modalHeaderContainer);
   modalHeader.appendChild(modalTitle);
@@ -198,6 +258,7 @@ const populateSoundFiles = async (reader, modalBody, toggleInput) => {
           const files = await Zip.loadAsync(data).then((zip) => {
             const soundFiles = [];
             zip.forEach((relativePath, zipEntry) => {
+              // console.log("isDirectory", zipEntry.dir);
               var name = zipEntry.name;
               name = name.substring(0, name.lastIndexOf("."));
               soundFiles.push({
@@ -238,18 +299,28 @@ const addSoundFileElements = (
       soundFileButton.addEventListener("click", async () => {
         const soundFileBuffer = await soundFile.file;
         // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
-        const soundGain =
-          typeof soundGainDBSPL.current !== "undefined"
-            ? soundGainDBSPL.current
-            : reader.read("soundGainDBSPL", "__ALL_BLOCKS__")[index];
 
+        soundGain.current = document.getElementById(
+          "soundTestModalSpeakerSoundGainInput"
+        ).value;
+        // typeof soundGainDBSPL.current !== "undefined"
+        //   ? soundGainDBSPL.current
+        //   : reader.read("soundGainDBSPL", "__ALL_BLOCKS__")[index];
+        // console.log("sounGain",soundGain.current)
         var audioData = soundFileBuffer.getChannelData(0);
-        const soundCalibrationLevelDBSPL = reader.read(
-          "soundCalibrationLevelDBSPL",
-          "__ALL_BLOCKS__"
-        )[index];
+        soundCalibrationLevelDBSPL.current = document.getElementById(
+          "soundTestModalSoundLevelInput"
+        ).value;
+        // console.log("soundCalibrationLevelDBSPL",soundCalibrationLevelDBSPL.current)
+        // soundCalibrationLevelDBSPL? soundCalibrationLevelDBSPL: reader.read(
+        //   "soundCalibrationLevelDBSPL",
+        //   "__ALL_BLOCKS__"
+        // )[index];
         setWaveFormToZeroDbSPL(audioData);
-        adjustSoundDbSPL(audioData, soundCalibrationLevelDBSPL - soundGain);
+        adjustSoundDbSPL(
+          audioData,
+          soundCalibrationLevelDBSPL.current - soundGain.current
+        );
         if (toggleInput.checked) {
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
