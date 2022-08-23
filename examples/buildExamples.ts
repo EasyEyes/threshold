@@ -81,6 +81,7 @@ const constructForEXperiment = async (d: string) => {
       fonts: string[],
       texts: string[],
       folders: string[],
+      code: string[],
       fileStringList: string[][],
       errorList: any[]
     ) => {
@@ -88,6 +89,7 @@ const constructForEXperiment = async (d: string) => {
       console.log("Requested FONTS", fonts);
       console.log("Requested TEXTS", texts);
       console.log("Requested FOLDERS", folders);
+      console.log("Requested CODE", code);
 
       if (errorList.length) {
         console.log();
@@ -128,8 +130,11 @@ const constructForEXperiment = async (d: string) => {
       copyFolder("forms", dir);
       copyFolder("texts", dir);
       copyFolder("folders", dir);
+      copyFolder("code", dir);
+
       mkdirSync(`${dir}/js`);
       copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);
+
       copyFileSync(
         "../js/reading-page-flip.mp3",
         `${dir}/js/reading-page-flip.mp3`
