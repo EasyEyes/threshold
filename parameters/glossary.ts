@@ -306,6 +306,18 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
   },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
+  calibrate1000HzSoundLevelBool: {
+    name: "calibrate1000HzSoundLevelBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateAllHzSoundLevelBool: {
+    name: "calibrateAllHzSoundLevelBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   calibrateBlindSpotBool: {
     name: "calibrateBlindSpotBool",
     availability: "now",
@@ -368,12 +380,6 @@ export const GLOSSARY: Glossary = {
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  calibrateTrackNearPointBool: {
-    name: "calibrateTrackNearPointBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
@@ -570,8 +576,8 @@ export const GLOSSARY: Glossary = {
     default: "English",
     categories: [""],
   },
-  instructionTableURL: {
-    name: "instructionTableURL",
+  internationalTableURL: {
+    name: "internationalTableURL",
     availability: "later",
     type: "text",
     default: "",
