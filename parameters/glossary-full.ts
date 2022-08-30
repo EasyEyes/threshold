@@ -64,7 +64,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "NOT YET IMPLEMENTED. _compatibleCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and interpupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier compatibility check so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.)",
+      "NOT YET IMPLEMENTED. _compatibleCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and pupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier compatibility check so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.)",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -108,6 +108,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_compatibleProcessorCoresMinimum is a positive integer. It's value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the speed of generating random numbers (in MHz). https://en.wikipedia.org/wiki/Multi-core_processor ",
     type: "integer",
     default: "6",
+    categories: "",
+  },
+  {
+    name: "_compatibleScreenSizeMinimumPx",
+    availability: "now",
+    example: "",
+    explanation:
+      "_compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; its value is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
+    type: "integer",
+    default: "",
     categories: "",
   },
   {
@@ -365,7 +375,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1",
     explanation:
-      "The block number. The first condition (second column) must have a block number of 0 or 1, consistent with zeroBasedNumberingBool. After the first condition, each successive condition (column) must have the same block number as the one preceding it, or increased by +1.",
+      "The block number (default empty). The first condition (second column) must have a block number of 0 or 1, consistent with zeroBasedNumberingBool. After the first condition, each successive condition (column) must have the same block number as the one preceding it, or increased by +1.",
     type: "integer",
     default: "1",
     categories: "",
@@ -375,7 +385,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Setting calibrate1000HzSoundLevelBool TRUE (default FALSE) requests sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateLoudspeakerBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrate1000HzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
+      "Set calibrate1000HzSoundLevelBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateLoudspeakerBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrate1000HzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -385,7 +395,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Setting calibrateAllHzSoundLevelBool TRUE requests sound gain calibration (db SPL re numerical dB) at all frequencies, using the participant's internet-connected iPhone/iPad. This is done by using the iPhone/iPad to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding an iPhone/iPad that's compatible. Calibration is done once, before block 1, if any condition in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateAllHzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
+      "Set calibrateAllHzSoundLevelBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at all frequencies, using the participant's internet-connected iPhone/iPad. This is done by using the iPhone/iPad to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding an iPhone/iPad that's compatible. Calibration is done once, before block 1, if any condition in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateAllHzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -395,7 +405,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      'Initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position.',
+      'Set calibrateBlindSpotBool TRUE (default FALSE) to make an initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -405,7 +415,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      'When TRUE, requests checking of the calibrator by the participant, provided they have a tape measure, meter stick, or yard stick, or failing that, a ruler. After each size or distance calibration, if calibrationDistanceCheckBool=TRUE, then we will ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick; a 12" or 30 cm ruler could be used if we exclude long distances), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. If no device, then we skip the rest of the calibrations that need a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like "16 3/16" or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. Our current scheme with the calibrator is to have a Boolean parameter for each calibration. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people on Prolific and mention in our job description that they must have a tape measure, meter stick or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.\n',
+      'Set calibrateDistanceCheckBool TRUE (default FALSE), to request checking of the calibrator by the participant, provided they have a tape measure, meter stick, or yard stick, or failing that, a ruler. After each size or distance calibration, if calibrationDistanceCheckBool is TRUE, then we will ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick; a 12" or 30 cm ruler could be used if we exclude long distances), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. If no device, then we skip the rest of the calibrations that need a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like "16 3/16" or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. Our current scheme with the calibrator is to have a Boolean parameter for each calibration. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people on Prolific and mention in our job description that they must have a tape measure, meter stick or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.\n',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -415,7 +425,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "calbrateFrameRateUnderStressBool asks the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
+      "Set calbrateFrameRateUnderStressBool TRUE (default FALSE) to ask the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -431,21 +441,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibrateInterPupillaryDistanceBool",
+    name: "calibratePupillaryDistanceBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      "DEPRECATED. USE calibrateBlindSpotBool INSTEAD. Set calibrateInterPupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of interpupillary distance, to calibrate viewing distance. ",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "calibrateLoudspeakerBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "DEPRECATED. USE calibrateAllHzBool INSTEAD. Setting calibrateLoudspeakerBool TRUE requests calibration of the loudspeaker's impuse response, using the participant's internet-connected iPhone/iPad. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding one that's compatible. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration only if it sets calibrateLoudspeakerBool TRUE.",
+      "NOT YET IMPLEMENTED. USE calibrateBlindSpotBool INSTEAD. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -471,21 +471,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibrateSoundLevelBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "DEPRECATED. USE calibrate1000HzSoundLevelBool INSTEAD. Setting calibrateSoundLevelBool TRUE (default FALSE) requests gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateLoudspeakerBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration only if it sets calibrateSoundLevelBool TRUE.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "calibrateTrackDistanceBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calibrateTrackDistanceBool TRUE (default FALSE) to enable EasyEyes distance tracking on every trial. Before tracking can begin, EasyEyes must first map the blindspot to make an initial calibration of distance, so if calibrateTrackDistanceBool is TRUE, then calibrateBlindSpotBool must also be TRUE. (In principle, you could use calibrateInterPupillaryDistanceBool instead of calibrateBlindSpotBool, but that is not currently supported.) Distance tracking uses the webcam to monitor position of the participant's head (defined as the midpoint betweeen the locations of the two eyes). It ignores where you're looking (eye rotation). The head is not a point, of course. Since this is for vision research, the point we estimate is the midpoint between the two eyes. That point is sometimes called cyclopean, referring to the mythical one-eyed Cyclops in Homer's Odyssey. From each webcam image we extract: 1. the viewing distance, from the midpoint (between the two eyes) to the screen, and 2. the near point, which is the point in the plane of the screen that is closest to the midpoint between the eyes. When rendering visual stimulus specified in deg, it is necessary to take the viewing distance (and near point) into account. The location of the near point is important at large eccentricities (over 10 deg) but usually can be safely ignored at small eccentricities (less than 10 deg).",
+      "DEPRECATED. USE calibrateBlindSpotBool INSTEAD. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -496,6 +486,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "FALSE",
     explanation:
       "Set calibrateTrackGazeBool TRUE (default FALSE) to use the webcam for gaze tracking. It must be calibrated before use. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "calibrateTrackNearPointBool",
+    availability: "now",
+    example: "",
+    explanation: "OBSOLETE. USE calibratePupillaryDistanceBool INSTEAD.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -555,7 +554,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "Display a foveal triplet that is easy to read if the participant's eye is on fixation, and hard to read if the eye is elsewhere.",
+      "NOT YET IMPLEMENTED: Display a foveal triplet that is easy to read if the participant's eye is on fixation, and hard to read if the eye is elsewhere.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -656,7 +655,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "later",
     example: "FALSE",
     explanation:
-      "Set flipScreenHorizontallyBool TRUE (default is FALSE) when the display is seen through a mirror.",
+      "NOT YET IMPLEMENTED: Set flipScreenHorizontallyBool TRUE (default is FALSE) when the display is seen through a mirror.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -686,7 +685,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'Font features provide information about how to use the glyphs in a font to render a script or language. fontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. "calt" enables the font’s "contextual alternates", especially connections between adjacent letters in a script font. "smcp" enables small caps. "zero" requests a slash through the zero character to distinguish it from O. Most font features are Boolean and accept an argument of 0 for off, and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, including Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\nhttps://helpx.adobe.com/in/fonts/using/open-type-syntax.html\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-ligatures\nhttps://en.wikipedia.org/wiki/Ligature_(writing)\nhttps://stackoverflow.com/questions/7069247/inserting-html-tag-in-the-middle-of-arabic-word-breaks-word-connection-cursive/55218489#55218489\n',
+      'NOT YET IMPLEMENTED: Font features provide information about how to use the glyphs in a font to render a script or language. fontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. "calt" enables the font’s "contextual alternates", especially connections between adjacent letters in a script font. "smcp" enables small caps. "zero" requests a slash through the zero character to distinguish it from O. Most font features are Boolean and accept an argument of 0 for off, and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, including Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\nhttps://helpx.adobe.com/in/fonts/using/open-type-syntax.html\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-ligatures\nhttps://en.wikipedia.org/wiki/Ligature_(writing)\nhttps://stackoverflow.com/questions/7069247/inserting-html-tag-in-the-middle-of-arabic-word-breaks-word-connection-cursive/55218489#55218489\n',
     type: "text",
     default: "",
     categories: "",
@@ -706,7 +705,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "3",
     explanation:
-      "fontPadding is a positive number (default 0.5; we've tried 0, 0.5, 1, and 3) specifying how much padding PIXI.js should add around each string to avoid clipping, at the cost of slower rendering. Setting fontPadding to zero produces the default PIXI.js behavior, which renders the Roboto Mono font perfectly, but slightly clips the left and bottom edges of strings in fonts with more flourish, i.e. Catalina, Burgues, and Arabic. Increasing fontPadding to 0.5 or higher eliminates clipping of these fonts. (We haven't tried values between 0 and 0.5.) On our 8-core M1 MacBook ProSetting, setting fontPadding to 0 or 0.5 gives good timing:  Requesting 150 ms targetDurationSec results in mean duration within 10 ms that and SD about 20 ms, as I recall. Setting fontPadding to 3 results in terrible timing: Rendering is obviously very slow, and the requested 150 ms targetDurationSec yields 100 ms mean duration. The table testClippingOfCrowdingAndReading.xlsx was used to assess this.",
+      "fontPadding is a positive number (default 0.5; we've tried 0, 0.5, 1, and 3) specifying how much padding PIXI.js should add around each string to avoid clipping, at the cost of slower rendering. Setting fontPadding to zero produces the default PIXI.js behavior, which renders the Roboto Mono font perfectly, but slightly clips the left and bottom edges of strings in fonts with more flourish, i.e. Catalina, Burgues, and Arabic. Increasing fontPadding to 0.5 or higher eliminates clipping of these fonts. (We haven't tried values between 0 and 0.5.) On our 8-core M1 MacBook ProSetting, setting fontPadding to 0 or 0.5 gives good timing:  Requesting 150 ms targetDurationSec results in mean duration within 10 ms that and SD about 20 ms, as I recall. Setting fontPadding to 3 results in terrible timing: Rendering is obviously very slow, and the requested 150 ms targetDurationSec yields 100 ms mean duration. The experiment testClippingOfCrowdingAndReading.xlsx was used to assess this.",
     type: "numerical",
     default: "0.5",
     categories: "",
@@ -736,7 +735,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'fontVariationSettings accepts a string to control a variable font. You set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have all-lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variation, and we can pick any value along each axis to control the font rendering. fontVariationSettings receives a string. The default is the empty string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nThe string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. "wght" is weight, which allows you to select any weight from extra thin to regular to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. To discover which axes a variable font supports, you can consult the webpage https://fontgauntlet.com/ or the individual font\'s documentation. Variable fonts are supported by all modern browsers, and not by Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
+      'NOT YET IMPLEMENTED. fontVariationSettings accepts a string to control a variable font. You set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have all-lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variation, and we can pick any value along each axis to control the font rendering. fontVariationSettings receives a string. The default is the empty string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nThe string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. "wght" is weight, which allows you to select any weight from extra thin to regular to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. To discover which axes a variable font supports, you can consult the webpage https://fontgauntlet.com/ or the individual font\'s documentation. Variable fonts are supported by all modern browsers, and not by Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
     type: "text",
     default: "",
     categories: "",
@@ -746,7 +745,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "550",
     explanation:
-      "fontWeight (default is regular weight) accepts a positive integer that sets the weight of a variable font. (IMPLEMENTATION: myText.style.fontWeight = fontWeight.)\nNOTE: If you set this parameter, then EasyEyes will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
+      "NOT YET IMPLEMENTED. fontWeight (default is regular weight) accepts a positive integer that sets the weight of a variable font. (IMPLEMENTATION: myText.style.fontWeight = fontWeight.)\nNOTE: If you set this parameter, then EasyEyes will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
     type: "numerical",
     default: "",
     categories: "",
@@ -803,10 +802,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "internationalTableURL",
-    availability: "later",
+    availability: "now",
     example: "",
     explanation:
-      'internationalTableURL (default is URL of this table) is the URL of a Google Sheets table of international phrases to be used to give instructions throughout the experiment. A scientist can substitute her own table, presumably a modified copy of this one (the EasyEyes International Phrases Table). https://docs.google.com/spreadsheets/d/1UFfNikfLuo8bSromE34uWDuJrMPFiJG3VpoQKdCGkII/edit#gid=0\nThis table allows the Participant page to make all non-stimulus text international. In every place that it displays instruction text, the Participant page looks up the mnemonic code for the needed phrase in the instruction table, to find a unicode phrase in the selected instructionLanguage (e.g. English, German, or Arabic). It\'s a Google Sheets file called "EasyEyes International Phrases".\nhttps://docs.google.com/spreadsheets/d/1AZbihlk-CP7sitLGb9yZYbmcnqQ_afjjG8h6h5UWvvo/edit#gid=0\nThe first column has mnemonic phrase names. Each of the following columns gives the corresponding text in a different language. After the first column, each column represents one language. Each row is devoted to one phrase. The second row is languageNameEnglish, with values: English, German, Polish, etc. The third row is languageNameNative, with values: English, Deutsch, Polskie, etc. \n     We incorporate the latest "EasyEyes International Phrases" file when we compile threshold.js. For a particular experiment, we only need the first column (the mnemonic name) and the column whose heading matches instructionLanguage. We should copy those two columns into a Javascript dictionary, so we can easily look up each mnemonic phrase name to get the phrase in the instructionLanguage. To display any instruction, we will use the dictionary to convert a mnemonic name to a unicode phrase. \n     languageDirection. Note that most languages are left to right (LTR), and a few (e.g. Arabic, Urdu, Farsi, and Hebrew) are right to left (RTL). Text placement may need to take the direction into account. The direction (LTR or RTL) is provided by the languageDirection field.\n     languageNameNative. If we later allow the participant to choose the language, then the language selection should be based on the native language name, like Deustch or Polskie, i.e. using languageNameNative instead of languageNameEnglish.',
+      'NOT YET IMPLEMENTED. internationalTableURL (default is URL of this table) is the URL of a Google Sheets table of international phrases to be used to give instructions throughout the experiment. A scientist can substitute her own table, presumably a modified copy of this one (the EasyEyes International Phrases Table). https://docs.google.com/spreadsheets/d/1UFfNikfLuo8bSromE34uWDuJrMPFiJG3VpoQKdCGkII/edit#gid=0\nThis table allows the Participant page to make all non-stimulus text international. In every place that it displays instruction text, the Participant page looks up the mnemonic code for the needed phrase in the instruction table, to find a unicode phrase in the selected instructionLanguage (e.g. English, German, or Arabic). It\'s a Google Sheets file called "EasyEyes International Phrases".\nhttps://docs.google.com/spreadsheets/d/1AZbihlk-CP7sitLGb9yZYbmcnqQ_afjjG8h6h5UWvvo/edit#gid=0\nThe first column has mnemonic phrase names. Each of the following columns gives the corresponding text in a different language. After the first column, each column represents one language. Each row is devoted to one phrase. The second row is languageNameEnglish, with values: English, German, Polish, etc. The third row is languageNameNative, with values: English, Deutsch, Polskie, etc. \n     We incorporate the latest "EasyEyes International Phrases" file when we compile threshold.js. For a particular experiment, we only need the first column (the mnemonic name) and the column whose heading matches instructionLanguage. We should copy those two columns into a Javascript dictionary, so we can easily look up each mnemonic phrase name to get the phrase in the instructionLanguage. To display any instruction, we will use the dictionary to convert a mnemonic name to a unicode phrase. \n     languageDirection. Note that most languages are left to right (LTR), and a few (e.g. Arabic, Urdu, Farsi, and Hebrew) are right to left (RTL). Text placement may need to take the direction into account. The direction (LTR or RTL) is provided by the languageDirection field.\n     languageNameNative. If we later allow the participant to choose the language, then the language selection should be based on the native language name, like Deustch or Polskie, i.e. using languageNameNative instead of languageNameEnglish.',
     type: "text",
     default: "",
     categories: "",
@@ -816,7 +815,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "later",
     example: "FALSE",
     explanation:
-      "At the end of this block, invite the participant to make parting comments. ",
+      "NOT YET IMPLEMENTED. At the end of this block, invite the participant to make parting comments. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -836,7 +835,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      'When TRUE, markingBlankedNearTargetBool (default FALSE) suppresses any parts of the fixation cross or target X that are too close to the possible targets in this conditionGroup. This enables both meanings of "too close": markingBlankingRadiusReEccentricity and markingBlankingRadiusReTargetHeight.',
+      'Setting markingBlankedNearTargetBool TRUE (default FALSE) suppresses any parts of the fixation cross or target X that are too close to the possible targets in this conditionGroup. This enables both meanings of "too close": markingBlankingRadiusReEccentricity and markingBlankingRadiusReTargetHeight.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -945,7 +944,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "markingTargetStrokeLengthDeg",
     availability: "now",
     example: "1",
-    explanation: "Stroke length in the target X.",
+    explanation: "Stroke length in the X marking the possible target location.",
     type: "numerical",
     default: "1",
     categories: "",
@@ -954,7 +953,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "markingTargetStrokeThicknessDeg",
     availability: "now",
     example: "0.03",
-    explanation: "Stroke thickness in the target X.",
+    explanation:
+      "Stroke thickness in the X marking the possible target location.",
     type: "numerical",
     default: "0.03",
     categories: "",
@@ -963,7 +963,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "markTheFixationBool",
     availability: "now",
     example: "",
-    explanation: "If markTheFixationBool is TRUE, then draw a fixation cross.",
+    explanation:
+      "Setting markTheFixationBool TRUE (the default) draws a fixation cross.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -973,7 +974,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "If markThePossibleTargetsBool is TRUE, draw an X at every possible target location, considering all conditions in this conditionGroup. ",
+      "Setting markThePossibleTargetsBool TRUE (default FALSE), draws an X at every possible target location, considering all conditions in this conditionGroup. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -989,10 +990,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "maskerSoundDBSPL",
+    availability: "now",
+    example: "",
+    explanation:
+      "maskerSoundDBSPL (default -100) is sound level of the masker in dB SPL.",
+    type: "",
+    default: "-100",
+    categories: "",
+  },
+  {
     name: "maskerDBSPL",
     availability: "now",
     example: "",
-    explanation: "Sound level of the masker, in dB SPL.",
+    explanation:
+      "DEPRECATED. USE maskerSoundDBSPL INSTEAD. Sound level of the masker, in dB SPL.",
     type: "numerical",
     default: "50",
     categories: "",
@@ -1015,16 +1027,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       'maskerSoundPhrase is a text phrase that is used when targetKind is 16ChannelSound. The phrase consists of a series of words and category names, with each category name preceded by #. Currently the maskerSoundPhrase is "Ready #CallSign GoTo #Color #Number Now". Every word must appear as a sound file with that name, and every category must appear as a folder with that name, both in the current talker folder in the maskerSoundFolder.',
     type: "text",
     default: "",
-    categories: "",
-  },
-  {
-    name: "movieBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "When movieBool (default FALSE) is TRUE, EasyEyes will show the stimulus as an HDR movie. When it's FALSE (the default), EasyEyes will show the stimulus on the JavaScript Canvas. ",
-    type: "boolean",
-    default: "FALSE",
     categories: "",
   },
   {
@@ -1152,7 +1154,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "It was a dark and stormy night",
     explanation:
-      'readingFirstFewWords specifies the beginning of the reading in the corpus by its first few words, a string. The matching is exact, including case and punctuation. Default is the empty string, in which case we read from the beginning of the corpus. The EasyEyes compiler flags an error if a nonempty string is not found in the corpus. If the (nonempty) string appears more than once in the corpus, EasyEyes will randomly pick among the instances, independently for each reading. Thus, for an English-language corpus, one might reasonably set readingFirstFewWords to "The ", to begin each reading at a randomly chosen sentence that begins with "The ".',
+      'readingFirstFewWords (default "") specifies the beginning of the reading in the corpus by its first few words, a string. The matching is exact, including case and punctuation. Default is the empty string, in which case we read from the beginning of the corpus. The EasyEyes compiler flags an error if a nonempty string is not found in the corpus. If the (nonempty) string appears more than once in the corpus, EasyEyes will randomly pick among the instances, independently for each reading. Thus, for an English-language corpus, one might reasonably set readingFirstFewWords to "The ", to begin each reading at a randomly chosen sentence that begins with "The ".',
     type: "text",
     default: "",
     categories: "",
@@ -1161,9 +1163,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "readingLinesPerPage",
     availability: "now",
     example: "8",
-    explanation: "Number of lines of text per page.",
+    explanation:
+      "readingLinesPerPage (default 4) is the number of lines of text per page.",
     type: "numerical",
-    default: "8",
+    default: "4",
     categories: "",
   },
   {
@@ -1171,7 +1174,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "57",
     explanation:
-      "readingMaxCharactersPerLine is used to set the maximum line length, notin pixels, notfor line breaking. We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine. Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters, notso, notcounting the space between words, notwe multiply by 6 to get 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, notso to get an average of 9, notwe could use a max of 9.5, notor 9.5*6=57 letter widths.",
+      "readingMaxCharactersPerLine (default 57) is the maximum line length in characters. (Note that line breaking is based on pixels, not characters; readingMaxCharactersPerLine is used to compute readingMaxPixPerLine.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.",
     type: "numerical",
     default: "57",
     categories: "",
@@ -2254,7 +2257,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.02",
     explanation:
-      "viewingDistanceLargeEnoughToAllowTargetSizeDeg places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. Default is zero, which is ignored. This depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix.",
+      "viewingDistanceLargeEnoughToAllowTargetSizeDeg (default 0.1 deg) places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2274,7 +2277,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "viewingDistanceSmallEnoughToAllowScreenHeightDeg places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. ",
+      "viewingDistanceSmallEnoughToAllowScreenHeightDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.",
     type: "numerical",
     default: "",
     categories: "",
@@ -2284,7 +2287,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "viewingDistanceSmallEnoughToAllowScreenWidthDeg places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. ",
+      "viewingDistanceSmallEnoughToAllowScreenWidthDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px compatibility requirement before the experiment begins.",
     type: "numerical",
     default: "",
     categories: "",
@@ -2294,7 +2297,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "Needed at viewing distances beyond 60 cm. Could be commercial wireless keyboard or EasyEyes keypad emulator running on any smartphone. ",
+      "NOT YET IMPLEMENTED: Needed at viewing distances beyond 60 cm. Could be a commercial wireless keyboard or an EasyEyes keypad emulator running on any smartphone. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
