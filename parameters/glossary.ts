@@ -869,7 +869,7 @@ export const GLOSSARY: Glossary = {
   },
   responseCharacterHasMedialShapeBool: {
     name: "responseCharacterHasMedialShapeBool",
-    availability: "soon",
+    availability: "now",
     type: "boolean",
     default: "FALSE",
   },

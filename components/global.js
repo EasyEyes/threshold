@@ -135,6 +135,8 @@ export const letterConfig = Object.seal({
   flankerCharacters: [undefined, undefined],
   delayBeforeStimOnsetSec: undefined,
   targetSafetyMarginSec: undefined,
+  ////
+  responseCharacterHasMedialShape: undefined,
 });
 
 export const repeatedLettersConfig = Object.seal({

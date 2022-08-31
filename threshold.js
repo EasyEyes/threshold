@@ -508,7 +508,10 @@ const paramReaderInitialized = async (reader) => {
   }
 };
 
-const paramReader = new ParamReader("conditions", paramReaderInitialized);
+export const paramReader = new ParamReader(
+  "conditions",
+  paramReaderInitialized
+);
 
 /* -------------------------------------------------------------------------- */
 
@@ -2448,6 +2451,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
       letterConfig.delayBeforeStimOnsetSec = reader.read(
         "markingOffsetBeforeTargetOnsetSecs",
+        BC
+      );
+
+      // if to add fake connections
+      letterConfig.responseCharacterHasMedialShape = reader.read(
+        "responseCharacterHasMedialShapeBool",
         BC
       );
 
