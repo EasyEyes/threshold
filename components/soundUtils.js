@@ -213,12 +213,17 @@ export const initSoundFilesWithPromiseAll = async (trialsConditions) => {
             await Zip.loadAsync(data).then((zip) => {
               return Promise.all(
                 Object.keys(zip.files).map(async (filename) => {
-                  var name = filename.substring(0, filename.lastIndexOf("."));
-                  var file = await zip.files[filename].async("arraybuffer");
-                  maskerList[condition["block_condition"]].push({
-                    name: name,
-                    file: getAudioBufferFromArrayBuffer(file),
-                  });
+                  if (
+                    !zip.files[filename].dir &&
+                    verifyFileNameExtension(filename)
+                  ) {
+                    var name = filename.substring(0, filename.lastIndexOf("."));
+                    var file = await zip.files[filename].async("arraybuffer");
+                    maskerList[condition["block_condition"]].push({
+                      name: name,
+                      file: getAudioBufferFromArrayBuffer(file),
+                    });
+                  }
                 })
               );
             });
@@ -234,14 +239,20 @@ export const initSoundFilesWithPromiseAll = async (trialsConditions) => {
           .then(async (data) => {
             var Zip = new JSZip();
             await Zip.loadAsync(data).then((zip) => {
+              console.log(zip);
               return Promise.all(
                 Object.keys(zip.files).map(async (filename) => {
-                  var name = filename.substring(0, filename.lastIndexOf("."));
-                  var file = await zip.files[filename].async("arraybuffer");
-                  targetList[condition["block_condition"]].push({
-                    name: name,
-                    file: getAudioBufferFromArrayBuffer(file),
-                  });
+                  if (
+                    !zip.files[filename].dir &&
+                    verifyFileNameExtension(filename)
+                  ) {
+                    var name = filename.substring(0, filename.lastIndexOf("."));
+                    var file = await zip.files[filename].async("arraybuffer");
+                    targetList[condition["block_condition"]].push({
+                      name: name,
+                      file: getAudioBufferFromArrayBuffer(file),
+                    });
+                  }
                 })
               );
             });
@@ -466,14 +477,14 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
   return { target: targetList, maskerList: maskerList };
 };
 
-const verifyFileNameExtension = (name) => {
+export const verifyFileNameExtension = (name) => {
   name = name.split(".");
   const ext = name[name.length - 1];
   if (acceptableExtensions.includes(ext)) return true;
   return false;
 };
 
-const acceptableExtensions = ["wav"];
+const acceptableExtensions = ["wav", "aac"];
 
 const isDirectory = (entry) => {
   return entry.dir;

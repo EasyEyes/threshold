@@ -4,7 +4,7 @@
     "module": "es2022",
     "target": "es2021",
     "strict": true,
-    "allowJs": false,
+    "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "esModuleInterop": true

@@ -25,6 +25,22 @@ export const getFolderNames = (parsed: any): any => {
   targetTaskList.shift();
   targetKindList.shift();
 
+  let folderAndTargetKindObjectList = [];
+  for (let i = 0; i < maskedfolderList.length; i++) {
+    if (
+      targetKindList[i] === "vocoderPhrase" ||
+      targetKindList[i] === "sound"
+    ) {
+      folderAndTargetKindObjectList.push({
+        maskerSoundFolder: maskedfolderList[i],
+        targetSoundFolder: targetfolderList[i],
+        targetTask: targetTaskList[i],
+        targetKind: targetKindList[i],
+      });
+    }
+  }
+  console.log("folderAndTargetKindObjectList", folderAndTargetKindObjectList);
+
   // console.log("targetTaskList", targetTaskList);
   // console.log("targetKindList", targetKindList);
   // console.log("maskedfolderList", maskedfolderList);
@@ -54,6 +70,7 @@ export const getFolderNames = (parsed: any): any => {
   return {
     maskerSoundFolder: maskedfolderList,
     targetSoundFolder: targetfolderList,
+    folderAndTargetKindObjectList: folderAndTargetKindObjectList,
   };
 };
 

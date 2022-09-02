@@ -28,6 +28,7 @@ import {
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import { webFontChecker } from "./fontCheck";
+import { getRequestedFoldersForStructureCheck } from "./folderStructureCheck";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -160,20 +161,27 @@ export const prepareExperimentFileForThreshold = async (
   // ! validate requested Folders;
   // console.log("easyeyesResources.folders", easyeyesResources.folders)
   const folderList: any = getFolderNames(parsed);
-
+  const maskerAndTargetFolders: any = {
+    maskerSoundFolder: folderList.maskerSoundFolder,
+    targetSoundFolder: folderList.targetSoundFolder,
+  };
   if (
     easyeyesResources.folders.length > 0 &&
     folderList.maskerSoundFolder.length > 0 &&
     folderList.targetSoundFolder.length > 0
   )
-    errors.push(...isSoundFolderMissing(folderList, easyeyesResources.folders));
-  const keys = Object.keys(folderList);
+    errors.push(
+      ...isSoundFolderMissing(maskerAndTargetFolders, easyeyesResources.folders)
+    );
+  const keys = Object.keys(maskerAndTargetFolders);
   const requestedFolderList: any[] = [];
   keys.map((key) => {
-    folderList[key].forEach((requestedFolder: any) => {
+    maskerAndTargetFolders[key].forEach((requestedFolder: any) => {
       requestedFolderList.push(requestedFolder + ".zip");
     });
   });
+
+  // await getRequestedFoldersForStructureCheck(folderList.folderAndTargetKindObjectList)
   // console.log("requestedFolderList", requestedFolderList);
 
   // ! validate requested code files

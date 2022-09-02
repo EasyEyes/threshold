@@ -112,6 +112,20 @@ export const TOO_MANY_CSV_FILES_FOUND: EasyEyesError = {
   parameters: ["FILE"],
 };
 
+export const INVALID_FOLDER_STRUCTURE = (
+  folderName: string,
+  parameter: string
+): EasyEyesError => {
+  return {
+    name: "Invalid folder structure",
+    message: `The folder "${folderName}" doesn't have the correct structure.`,
+    hint: "Make sure you follow the correct folder structure for your zip files. Please see the example folders provided",
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 // TODO Too much duplicated code for similar file missing errors!
 export const FONT_FILES_MISSING = (
   parameter: string,

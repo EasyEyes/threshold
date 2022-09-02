@@ -152,6 +152,12 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "6",
   },
+  _compatibleScreenSizeMinimumPx: {
+    name: "_compatibleScreenSizeMinimumPx",
+    availability: "now",
+    type: "integer",
+    default: "",
+  },
   _compileAsNewExperimentBool: {
     name: "_compileAsNewExperimentBool",
     availability: "now",
@@ -306,6 +312,18 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
   },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
+  calibrate1000HzSoundLevelBool: {
+    name: "calibrate1000HzSoundLevelBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateAllHzSoundLevelBool: {
+    name: "calibrateAllHzSoundLevelBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   calibrateBlindSpotBool: {
     name: "calibrateBlindSpotBool",
     availability: "now",
@@ -330,14 +348,8 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  calibrateInterPupillaryDistanceBool: {
-    name: "calibrateInterPupillaryDistanceBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  calibrateLoudspeakerBool: {
-    name: "calibrateLoudspeakerBool",
+  calibratePupillaryDistanceBool: {
+    name: "calibratePupillaryDistanceBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
@@ -350,12 +362,6 @@ export const GLOSSARY: Glossary = {
   },
   calibrateScreenSizeCheckBool: {
     name: "calibrateScreenSizeCheckBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  calibrateSoundLevelBool: {
-    name: "calibrateSoundLevelBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
@@ -570,9 +576,9 @@ export const GLOSSARY: Glossary = {
     default: "English",
     categories: [""],
   },
-  instructionTableURL: {
-    name: "instructionTableURL",
-    availability: "later",
+  internationalTableURL: {
+    name: "internationalTableURL",
+    availability: "now",
     type: "text",
     default: "",
   },
@@ -684,6 +690,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
   },
+  maskerSoundDBSPL: {
+    name: "maskerSoundDBSPL",
+    availability: "now",
+    type: "",
+    default: "-100",
+  },
   maskerDBSPL: {
     name: "maskerDBSPL",
     availability: "now",
@@ -701,12 +713,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "",
-  },
-  movieBool: {
-    name: "movieBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
   },
   movieComputeJS: {
     name: "movieComputeJS",
@@ -786,7 +792,7 @@ export const GLOSSARY: Glossary = {
     name: "readingLinesPerPage",
     availability: "now",
     type: "numerical",
-    default: "8",
+    default: "4",
   },
   readingMaxCharactersPerLine: {
     name: "readingMaxCharactersPerLine",
@@ -863,7 +869,7 @@ export const GLOSSARY: Glossary = {
   },
   responseCharacterHasMedialShapeBool: {
     name: "responseCharacterHasMedialShapeBool",
-    availability: "soon",
+    availability: "now",
     type: "boolean",
     default: "FALSE",
   },
