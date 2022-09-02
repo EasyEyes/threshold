@@ -1,3 +1,4 @@
+import { paramReader } from "../threshold";
 import { switchKind } from "./blockTargetKind";
 import {
   showCharacterSetResponse,
@@ -119,8 +120,9 @@ const pushCharacterSet = (
     if (extraCharClassName.length)
       characterSet.classList.add(extraCharClassName);
 
-    const addFakeConnection =
-      letterConfig.spacingRelationToSize === "typographic";
+    // const addFakeConnection =
+    //   letterConfig.spacingRelationToSize === "typographic";
+    const addFakeConnection = letterConfig.responseCharacterHasMedialShape;
 
     if (addFakeConnection)
       characterSet.style.fontVariantLigatures = "discretionary-lig-values";

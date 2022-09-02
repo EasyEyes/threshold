@@ -161,10 +161,10 @@ export const saveCheckData = (rc, psychoJS) => {
 export const calibrateAudio = async (reader) => {
   const [calibrateSoundLevel, calibrateLoudspeaker] = [
     ifTrue(
-      reader.read(GLOSSARY.calibrateSoundLevelBool.name, "__ALL_BLOCKS__")
+      reader.read(GLOSSARY.calibrate1000HzSoundLevelBool.name, "__ALL_BLOCKS__")
     ),
     ifTrue(
-      reader.read(GLOSSARY.calibrateLoudspeakerBool.name, "__ALL_BLOCKS__")
+      reader.read(GLOSSARY.calibrateAllHzSoundLevelBool.name, "__ALL_BLOCKS__")
     ),
   ];
 

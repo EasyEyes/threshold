@@ -23,6 +23,7 @@ export const setWaveFormToZeroDbSPL = (arr) => {
 };
 
 export const getRMSOfWaveForm = (arr) => {
+  //returns rms of waveform
   const Squares = arr.map((val) => val * val);
   const Sum = Squares.reduce((acum, val) => acum + val);
   const Mean = Sum / arr.length;
