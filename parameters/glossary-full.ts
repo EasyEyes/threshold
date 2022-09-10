@@ -540,6 +540,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "conditionEnabledBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "When conditionEnabledBool is FALSE, (default is TRUE) the condition (column in experiment table) does not run, but the block number is treated normally. Thus even if all the conditions of a block are disabled, the block is still counted by the block counter. This makes it easy to skip conditions during development and debugging without removing their details from the experiment table. ",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "conditionTrials",
     availability: "now",
     example: "40",

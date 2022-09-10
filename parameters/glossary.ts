@@ -408,6 +408,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  conditionEnabledBool: {
+    name: "conditionEnabledBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
   conditionTrials: {
     name: "conditionTrials",
     availability: "now",

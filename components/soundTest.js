@@ -297,9 +297,10 @@ const addSoundFileElements = (
       soundFileButton.classList.add(...["btn", "btn-success"]);
       soundFileButton.innerHTML = "Play";
       soundFileButton.addEventListener("click", async () => {
-        const soundFileBuffer = await soundFile.file;
+        const soundFileBuffer = cloneAudioBuffer(await soundFile.file);
+        // Object.assign({},await soundFile.file);
         // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
-
+        // console.log("soundFleBuffer", soundFileBuffer);
         soundGain.current = document.getElementById(
           "soundTestModalSpeakerSoundGainInput"
         ).value;
@@ -308,6 +309,7 @@ const addSoundFileElements = (
         //   : reader.read("soundGainDBSPL", "__ALL_BLOCKS__")[index];
         // console.log("sounGain",soundGain.current)
         var audioData = soundFileBuffer.getChannelData(0);
+        // console.log("audioData", audioData);
         soundCalibrationLevelDBSPL.current = document.getElementById(
           "soundTestModalSoundLevelInput"
         ).value;
@@ -363,4 +365,18 @@ const addSoundFileCSS = () => {
   const soundTestFileStyleSheet = document.createElement("style");
   soundTestFileStyleSheet.innerText = styles;
   document.head.appendChild(soundTestFileStyleSheet);
+};
+
+const cloneAudioBuffer = (audioBuffer) => {
+  const newAudioBuffer = new AudioBuffer({
+    length: audioBuffer.length,
+    sampleRate: audioBuffer.sampleRate,
+    numberOfChannels: audioBuffer.numberOfChannels,
+  });
+
+  for (let channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+    newAudioBuffer.copyToChannel(audioBuffer.getChannelData(channel), channel);
+  }
+
+  return newAudioBuffer;
 };
