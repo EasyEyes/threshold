@@ -3,6 +3,7 @@ import { invertedImpulseResponse, soundGainDBSPL } from "./global";
 import {
   adjustSoundDbSPL,
   getAudioBufferFromArrayBuffer,
+  getRMSOfWaveForm,
   playAudioBuffer,
   playAudioBufferWithImpulseResponseCalibration,
   setWaveFormToZeroDbSPL,
@@ -46,7 +47,8 @@ export const addSoundTestElements = (reader) => {
   const speakerSoundGainContainer = document.createElement("div");
   const speakerSoundGain = document.createElement("p");
   const speakerSoundGainInput = document.createElement("input");
-
+  // const rmsOfSoundContainer = document.createElement("div");
+  const rmsOfSound = document.createElement("p");
   const elems = {
     modal,
     modalDialog,
@@ -62,6 +64,8 @@ export const addSoundTestElements = (reader) => {
     speakerSoundGainContainer,
     speakerSoundGain,
     speakerSoundGainInput,
+    // rmsOfSoundContainer,
+    rmsOfSound,
   };
 
   modal.setAttribute("id", "soundTestModal");
@@ -87,6 +91,8 @@ export const addSoundTestElements = (reader) => {
     "soundTestModalSpeakerSoundGainInput"
   );
   speakerSoundGainInput.setAttribute("type", "number");
+  // rmsOfSoundContainer.setAttribute("id", "soundTestModalRMSOfSoundContainer");
+  rmsOfSound.setAttribute("id", "soundTestModalRMSOfSound");
 
   modal.classList.add(...["modal", "fade"]);
   modalDialog.classList.add(...["modal-dialog"]);
@@ -99,13 +105,12 @@ export const addSoundTestElements = (reader) => {
   modalTitle.innerHTML = "Sound Test";
   modalSubtitle.innerHTML =
     "Use the toggle for IR correction. It may take some time to load the sound files.";
-
   soundLevel.innerHTML = "Sound Level (dB SPL):";
   if (soundCalibrationLevelDBSPL.current)
     soundLevelInput.value = soundCalibrationLevelDBSPL.current;
-
   speakerSoundGain.innerHTML = "Speaker Sound Gain (dB SPL):";
   if (soundGain.current) speakerSoundGainInput.value = soundGain.current;
+  rmsOfSound.innerHTML = "RMS of sound played: **** dB SPL";
 
   modal.appendChild(modalDialog);
   modalDialog.appendChild(modalContent);
@@ -120,6 +125,7 @@ export const addSoundTestElements = (reader) => {
   modalHeaderContainer.appendChild(speakerSoundGainContainer);
 
   modalHeaderContainer.appendChild(horizontal);
+  modalHeaderContainer.appendChild(rmsOfSound);
   modalContent.appendChild(modalHeaderContainer);
   modalHeader.appendChild(modalTitle);
   modalHeader.appendChild(modalToggle);
@@ -319,10 +325,15 @@ const addSoundFileElements = (
         //   "__ALL_BLOCKS__"
         // )[index];
         setWaveFormToZeroDbSPL(audioData);
+        // console.log("rms",getRMSOfWaveForm(audioData))
         adjustSoundDbSPL(
           audioData,
           soundCalibrationLevelDBSPL.current - soundGain.current
         );
+        const rmsOfSound = document.getElementById("soundTestModalRMSOfSound");
+        rmsOfSound.innerHTML = `RMS of sound played: ${getRMSOfWaveForm(
+          audioData
+        )} dB SPL`;
         if (toggleInput.checked) {
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
