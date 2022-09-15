@@ -265,3 +265,24 @@ export const gyrateFixation = (fixation, t, displayOptions) => {
   fixationConfig.pos = newFixationXY;
   fixation.setPos(newFixationXY);
 };
+
+/**
+ * Move the provided stimuli based on the fixation's current position relative to it's nominal position,
+ * ie the position based upon which the stimuli were generated.
+ * Should be used iff gyrateFixation() is used.
+ * @param {psychoJS.VisualStim[]} stims Array of psychojs stims
+ */
+export const offsetStimsToFixationPos = (stims) => {
+  const fixationDisplacement = [
+    fixationConfig.pos[0] - fixationConfig.nominalPos[0],
+    fixationConfig.pos[1] - fixationConfig.nominalPos[1],
+  ];
+  for (const stim of stims) {
+    const nominalPos = target.getPos();
+    const offsetPos = [
+      nominalPos[0] + fixationDisplacement[0],
+      nominalPos[1] + fixationDisplacement[1],
+    ];
+    stim.setPos(offsetPos);
+  }
+};

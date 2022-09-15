@@ -933,6 +933,30 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  rsvpReadingFlankTargetWithRandomLettersBool: {
+    name: "rsvpReadingFlankTargetWithRandomLettersBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  rsvpReadingNumberOfDistractors: {
+    name: "rsvpReadingNumberOfDistractors",
+    availability: "now",
+    type: "numerical",
+    default: "5",
+  },
+  rsvpReadingNumberOfTargetWordsInSequence: {
+    name: "rsvpReadingNumberOfTargetWordsInSequence",
+    availability: "now",
+    type: "numerical",
+    default: "5",
+  },
+  rsvpReadingRequireUniqueWordsBool: {
+    name: "rsvpReadingRequireUniqueWordsBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   screenshotBool: {
     name: "screenshotBool",
     availability: "now",

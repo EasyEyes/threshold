@@ -112,6 +112,25 @@ export const instructionsText = {
       }
       return text;
     },
+    timing: (L, responseType = 1, trialsThisBlock = 0) => {
+      const extraSpace = phrases.EE_languageUseSpace[L] ? " " : "";
+      let text;
+      if (targetKind.current === "rsvpReading") {
+        text = replacePlaceholders(
+          phrases.T_thresholdRsvpReadingBeginBlock[L],
+          trialsThisBlock
+        );
+        switch (responseType) {
+          case 0:
+            // TODO keypress isn't defined yet
+            break;
+          case 1:
+            text += extraSpace + `${phrases.T_clickingWordRSVPReading[L]}\n\n`;
+            break;
+        }
+      }
+      return text;
+    },
   },
   initialEnd: (L, responseType = 2) => {
     let t = phrases.T_guessingGame[L] + " ";
@@ -139,6 +158,9 @@ export const instructionsText = {
       },
     },
     respond: {
+      rsvpReading: (L) => {
+        return phrases.T_identifyClickItRsvpReading[L];
+      },
       vocoderPhrase: (L) => {
         return phrases.T_soundPhraseResponse[L];
       },

@@ -1400,6 +1400,45 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "rsvpReadingFlankTargetWithRandomLettersBool",
+    availability: "now",
+    example: "FALSE",
+    explanation: "rsvpReadingFlankTargetWithRandomLettersBool",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingNumberOfDistractors",
+    availability: "now",
+    example: "3",
+    explanation:
+      "rsvpReadingNumberOfDistractors determines the number of alternate response words that are provided, shuffled along with the target word, for response when targetKind is rsvpReading.",
+    type: "numerical",
+    default: "5",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingNumberOfTargetWordsInSequence",
+    availability: "now",
+    example: "6",
+    explanation:
+      "rsvpReadingNumberOfTargetWordsInSequence determines how many (target) words are shown in sequence per trial. In other words, this defines the length of the reading sample presented to the participant during each rsvpReading trial. NOTE must be consistent within block due to implementation restrictions.",
+    type: "numerical",
+    default: "5",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingRequireUniqueWordsBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "If TRUE, only select words for the target sequence and distractor words which have not yet been used as a target or distractor. If FALSE, draw words directly from the corpus, even if those words have already been used in this experiment.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "screenshotBool",
     availability: "now",
     example: "TRUE",

@@ -12,6 +12,7 @@ export const switchKind = (targetKind, mappings) => {
     sound,
     vocoderPhrase,
     repeatedLetters,
+    rsvpReading,
   } = mappings;
   switch (targetKind) {
     case "reading":
@@ -33,6 +34,9 @@ export const switchKind = (targetKind, mappings) => {
       break;
     case "repeatedLetters":
       safeExecuteFunc(repeatedLetters);
+      break;
+    case "rsvpReading":
+      safeExecuteFunc(rsvpReading);
       break;
     default:
       break;

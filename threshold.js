@@ -5,6 +5,7 @@
 import {
   arraysEqual,
   debug,
+  duplicateConditionsOfTargetKind,
   fillNumberLength,
   getTripletCharacters,
   ifTrue,
@@ -35,7 +36,9 @@ import "./components/css/utils.css";
 import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
+// TODO change vocoder to use phraseIdentification styling
 import "./components/css/vocoderPhrase.css";
+import "./components/css/phraseIdentification.css";
 import "./components/css/forms.css";
 import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
@@ -106,6 +109,10 @@ import {
   vocoderPhraseCategories,
   vocoderPhraseShowClickable,
   vocoderPhraseCorrectResponse,
+  rsvpReadingTargetSets,
+  dummyStim,
+  rsvpReadingResponse,
+  phraseIdentificationResponse,
 } from "./components/global.js";
 
 import {
@@ -152,6 +159,8 @@ import {
   canType,
   getResponseType,
   resetResponseType,
+  setupPhraseIdentification,
+  showPhraseIdentification,
 } from "./components/response.js";
 
 import { cleanFontName, loadFonts } from "./components/fonts.js";
@@ -308,6 +317,7 @@ import {
   getFixationPos,
   getFixationVerticies,
   gyrateFixation,
+  offsetStimsToFixationPos,
 } from "./components/fixation.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import {
@@ -333,6 +343,13 @@ import {
   restrictRepeatedLettersSpacing,
 } from "./components/repeatedLetters.js";
 import { KeyPress } from "./psychojs/src/core/index.js";
+import {
+  generateRSVPReadingTargetSets,
+  getRSVPReadingCategories,
+  getRSVPReadingHeightPx,
+  _rsvpReading_trialInstructionRoutineBegin,
+  _rsvpReading_trialRoutineEachFrame,
+} from "./components/rsvpReading.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -915,6 +932,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       cleanFontName
     );
 
+    dummyStim.current = new visual.TextStim({
+      win: psychoJS.window,
+      name: "dummy",
+      text: "",
+      font: "Arial",
+      units: "pix",
+      pos: [0, 0],
+      height: 1.0,
+      wrapWidth: window.innerWidth,
+      ori: 0.0,
+      color: new util.Color("black"),
+      opacity: 0.0,
+      depth: -5.0,
+      autoLog: false,
+      autoDraw: false,
+    });
+
     getTinyHint();
 
     /* --- BOUNDING BOX --- */
@@ -1166,6 +1200,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
+      rsvpReading: () => {
+        if (
+          canType(responseType.current) &&
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+        ) {
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
     });
 
     return Scheduler.Event.FLIP_REPEAT;
@@ -1342,15 +1385,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 trialsConditions,
                 paramReader
               );
-              trialsConditions =
-                duplicateRepeatedLetterConditions(trialsConditions);
-              logger(
-                "trialsConditions after duplicating trialsLoopBegin",
-                trialsConditions
-              );
-              logger(
-                "totalTrialsThisBlock.current",
-                totalTrialsThisBlock.current
+              trialsConditions = duplicateConditionsOfTargetKind(
+                trialsConditions,
+                2,
+                "repeatedLetters"
               );
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1363,7 +1401,33 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 seed: Math.round(performance.now()),
                 duplicates: 2,
               });
-
+              fixationConfig.show = true;
+            },
+            rsvpReading: () => {
+              const numberOfWordsPerSeries = paramReader.read(
+                "rsvpReadingNumberOfTargetWordsInSequence",
+                trialsConditions.block
+              )[0];
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader
+              );
+              trialsConditions = duplicateConditionsOfTargetKind(
+                trialsConditions,
+                numberOfWordsPerSeries,
+                "rsvpReading"
+              );
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                nTrials: totalTrialsThisBlock.current,
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+                duplicates: numberOfWordsPerSeries,
+              });
               fixationConfig.show = true;
             },
             sound: () => {
@@ -1499,7 +1563,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       targetTask.current !== "questionAndAnswer" &&
       (targetKind.current === "letter" ||
         targetKind.current == "sound" ||
-        targetKind.current === "repeatedLetters")
+        targetKind.current === "repeatedLetters" ||
+        targetKind.current === "rsvpReading")
     ) {
       // Proportion correct
       showPopup(
@@ -1821,6 +1886,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               totalTrialsThisBlock.current =
                 possibleTrials.reduce((a, b) => a + b, 0) * trialsPerRequested;
             },
+            rsvpReading: () => {
+              const possibleTrials = paramReader.read(
+                "conditionTrials",
+                status.block
+              );
+              const trialsPerRequested = 6;
+              totalTrialsThisBlock.current =
+                possibleTrials.reduce((a, b) => a + b, 0) * trialsPerRequested;
+            },
           });
         },
         detect: () => {
@@ -1999,6 +2073,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ) +
             instructionsText.initialEnd(L, responseType.current);
           _instructionSetup(repeatedLettersBlockInstructs);
+        },
+        rsvpReading: () => {
+          const rsvpReadingBlockInstructs =
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+            instructionsText.initialByThresholdParameter["timing"](
+              L,
+              1, // TODO only clicking is defined so far
+              paramReader
+                .read("conditionTrials", status.block)
+                .reduce((a, b) => a + b)
+            );
+          _instructionSetup(rsvpReadingBlockInstructs);
+          getThisBlockPages(
+            paramReader,
+            status.block,
+            dummyStim.current,
+            totalTrialsThisBlock.current
+          );
         },
         reading: () => {
           _instructionSetup(
@@ -2229,6 +2321,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker1.setAutoDraw(true);
           flanker2.setAutoDraw(true);
         },
+        rsvpReading: () => logger("TODO rsvpLetter eduInstructionRoutineBegin"),
       });
 
       psychoJS.eventManager.clearKeys();
@@ -2263,6 +2356,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "eduInstructionRoutineDurationFromPreviousEndSec",
             routineClock.getTime()
           );
+        },
+        rsvpReading: () => {
+          logger("TODO rsvpReading eduInstructionRoutineEnd");
         },
       });
 
@@ -2329,7 +2425,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Number of responses required before the current (psychojs) trial ends
       // For all current targetKinds this is 1.
-      responseType.numberOfResponses = 1;
+      responseType.numberOfResponses =
+        targetKind.current === "rsvpReading" ? 6 : 1;
 
       const letterSetResponseType = () => {
         // ! responseType
@@ -2376,6 +2473,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterSetResponseType();
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
+            }
+          }
+        },
+        rsvpReading: () => {
+          letterSetResponseType();
+          for (let c of snapshot.handler.getConditions()) {
+            if (
+              c.block_condition === trials._currentStaircase._name &&
+              c._duplicatedConditionCardinal === trials._duplicatedTrialCardinal
+            ) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
             }
@@ -3046,6 +3155,99 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             trialComponents.push(renderObj.tinyHint);
           }
         },
+        rsvpReading: () => {
+          TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
+
+          if (status.condition._duplicatedConditionCardinal === 1) {
+            readAllowedTolerances(tolerances, reader, BC);
+            readTrialLevelLetterParams(reader, BC);
+            clickedContinue.current = false;
+            rsvpReadingResponse.displayStatus = false;
+            document.addEventListener("click", _takeFixationClick);
+            document.addEventListener("touchend", _takeFixationClick);
+
+            // Get level from quest
+            let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+            psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+
+            level = proposedLevel;
+            psychoJS.experiment.addData("level", level);
+
+            // TODO Constrain any way?
+            const durationSec = Math.pow(10, level);
+
+            const numberOfWords = paramReader.read(
+              "rsvpReadingNumberOfTargetWordsInSequence",
+              status.block
+            )[0];
+            const heightPx = getRSVPReadingHeightPx(reader, BC);
+            const spacingPx = heightPx * letterConfig.spacingOverSizeRatio;
+            const targetSets = generateRSVPReadingTargetSets(
+              numberOfWords,
+              XYPixOfXYDeg(
+                letterConfig.targetEccentricityXYDeg,
+                displayOptions
+              ),
+              heightPx,
+              spacingPx,
+              durationSec,
+              paramReader,
+              status.block_condition
+            );
+            rsvpReadingTargetSets.upcoming = targetSets;
+            correctAns.current = targetSets.map((t) => t.word.toLowerCase());
+            rsvpReadingTargetSets.past = [];
+
+            rsvpReadingResponse.categories = getRSVPReadingCategories(
+              rsvpReadingTargetSets.upcoming
+            );
+            rsvpReadingResponse.screen = setupPhraseIdentification(
+              rsvpReadingResponse.categories
+            );
+
+            rsvpReadingTargetSets.current =
+              rsvpReadingTargetSets.upcoming.shift();
+
+            fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
+            // Set up instructions
+            _instructionBeforeStimulusSetup(
+              instructionsText.trial.fixate["spacing"](
+                rc.language.value,
+                responseType.current
+              )
+            );
+
+            // Update fixation
+            fixation.update(
+              paramReader,
+              BC,
+              100, // stimulusParameters.heightPx,
+              XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+            );
+            fixationConfig.pos = fixationConfig.nominalPos;
+            fixation.setPos(fixationConfig.pos);
+            fixation.tStart = t;
+            fixation.frameNStart = frameN;
+
+            // TODO show target specs
+            // if (showConditionNameConfig.showTargetSpecs)
+            //   updateTargetSpecsForRepeatedLetters(
+            //     stimulusParameters,
+            //     thisExperimentInfo.experimentFileName
+            //   );
+
+            // Add stims to trialComponents
+            trialComponents = [];
+            trialComponents.push(...fixation.stims);
+            trialComponents.push(key_resp);
+            trialComponents.push(showCharacterSet);
+            trialComponents.push(trialCounter);
+            trialComponents.push(renderObj.tinyHint);
+            // trialComponents.push(...rsvpReadingFeedback.stims);
+          } else {
+            clickedContinue.current = true;
+          }
+        },
       });
 
       /* --------------------------------- PUBLIC --------------------------------- */
@@ -3153,6 +3355,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         letter: letterEachFrame,
         repeatedLetters: letterEachFrame,
+        rsvpReading: () => {
+          if (status.condition._duplicatedConditionCardinal === 1) {
+            letterEachFrame();
+          } else {
+            continueRoutine = false;
+          }
+        },
       });
 
       if (showConditionNameConfig.show) {
@@ -3225,28 +3434,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             fixation
           );
           if (fixationConfig.markingFixationMotionRadiusDeg) {
-            const targetNominalPos = target.getPos();
-            const fixationDisplacement = [
-              fixationConfig.pos[0] - fixationConfig.nominalPos[0],
-              fixationConfig.pos[1] - fixationConfig.nominalPos[1],
-            ];
-            const offsetTargetPos = [
-              targetNominalPos[0] + fixationDisplacement[0],
-              targetNominalPos[1] + fixationDisplacement[1],
-            ];
-            target.setPos(offsetTargetPos);
-            if (
+            const stimsToOffset =
               letterConfig.spacingRelationToSize !== "typographic" &&
               letterConfig.thresholdParameter === "spacing"
-            ) {
-              for (const flanker of [flanker1, flanker2]) {
-                const flankerNominalPos = flanker.getPos();
-                flanker.setPos([
-                  flankerNominalPos[0] + fixationDisplacement[0],
-                  flankerNominalPos[1] + fixationDisplacement[1],
-                ]);
-              }
-            }
+                ? [target, flanker1, flanker2]
+                : [target];
+            offsetStimsToFixationPos(stimsToOffset);
           }
         },
         repeatedLetters: () => {
@@ -3255,6 +3448,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _takeFixationClick,
             fixation
           );
+          offsetStimsToFixationPos(repeatedLettersConfig.stims);
+        },
+        rsvpReading: () => {
+          if (status.condition._duplicatedConditionCardinal === 1) {
+            _identify_trialInstructionRoutineEnd(
+              instructions,
+              _takeFixationClick,
+              fixation
+            );
+            if (fixationConfig.markingFixationMotionRadiusDeg) {
+              const stimsToOffset = [
+                ...rsvpReadingTargetSets.current.stims,
+                ...rsvpReadingTargetSets.upcoming.map((s) => s.stims).flat(),
+              ];
+              offsetStimsToFixationPos(stimsToOffset);
+            }
+          }
         },
       });
 
@@ -3415,6 +3625,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
         },
+        rsvpReading: () => {
+          logger("TODO rsvpReading trialRoutineBegin");
+        },
       });
 
       grid.current.update();
@@ -3437,6 +3650,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // By keeping track of responses within, and across, cardinals, we can support arbitrary
       // numbers of responses per cardinal, and per trial (ie across cardinals).
       if (status.condition._duplicatedConditionCardinal !== 2) {
+        // != 2?? mean === 1?
         _responsesAcrossCardinals = [];
         showCharacterSetResponse.alreadyClickedCharacters = [];
       }
@@ -3457,6 +3671,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       //use google sheets phrases for instructions
       switchKind(targetKind.current, {
+        rsvpReading: () => {
+          const instr = instructionsText.trial.respond["rsvpReading"](
+            rc.language.value
+          );
+          _instructionSetup(instr);
+          instructions.setText(instr);
+        },
         vocoderPhrase: () => {
           // change instruction
           const instr = instructionsText.trial.respond["vocoderPhrase"](
@@ -3587,6 +3808,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.condition._duplicatedConditionCardinal
             );
           },
+          rsvpReading: () => {
+            //only clickable
+            responseType.current = 1;
+            if (status.condition._duplicatedConditionCardinal !== 1) {
+              continueRoutine = false;
+            }
+          },
           sound: () => {
             if (targetTask.current == "detect") {
               //only accepts y or n
@@ -3610,6 +3838,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
       /* -------------------------------------------------------------------------- */
+
+      // Phrase Identification
+      // TODO generalize for use with other target kinds
+      if (
+        targetKind.current === "rsvpReading" &&
+        status.condition._duplicatedConditionCardinal === 1
+      ) {
+        // Given that we are done showing stimuli...
+        if (typeof rsvpReadingTargetSets.current === "undefined") {
+          // ...show the response screen
+          if (!rsvpReadingResponse.displayStatus) {
+            showPhraseIdentification(rsvpReadingResponse.screen);
+            rsvpReadingResponse.displayStatus = true;
+            // ... and continue when enough responses have been registered
+          } else if (
+            phraseIdentificationResponse.current.length ===
+            rsvpReadingTargetSets.past.length
+          ) {
+            continueRoutine = false;
+          }
+        }
+      }
 
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
@@ -3780,6 +4030,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
+            rsvpReading: () => {
+              logger("TODO rsvpReading unique on-correct behavior?");
+              correctSynth.play();
+              status.trialCorrect_thisBlock++;
+              status.trialCompleted_thisBlock++;
+            },
           });
           // CORRECT
           key_resp.corr = 1;
@@ -3879,6 +4135,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showCharacterSet,
             instructions,
             status.condition._duplicatedConditionCardinal
+          );
+          break;
+        case "rsvpReading":
+          _rsvpReading_trialRoutineEachFrame(
+            t,
+            frameN,
+            status.condition._duplicatedConditionCardinal,
+            instructions
           );
           break;
       }
@@ -4352,6 +4616,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop,
               simulated,
               key_resp,
+              level
+            );
+          },
+          rsvpReading: () => {
+            // TODO add response, clicktime/duration to data
+            const thisResponse = phraseIdentificationResponse.current.shift();
+            const thisResponseTime =
+              phraseIdentificationResponse.clickTime.shift();
+            const _thisResponseCategory =
+              phraseIdentificationResponse.categoriesResponded.shift();
+            addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+            currentLoop.addResponse(
+              phraseIdentificationResponse.correct.shift() ? 1 : 0,
               level
             );
           },
