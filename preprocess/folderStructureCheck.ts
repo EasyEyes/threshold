@@ -53,7 +53,6 @@ import JSZip from "jszip";
 // import {userRepoFiles} from "../../source/components/constants"
 import { getProjectByNameInProjectList } from "../../source/components/gitlabUtils";
 import { getUserInfo } from "../../source/components/user";
-import { Buffer } from "buffer";
 import Swal from "sweetalert2";
 
 // import {tempAccessToken} from "../../source/TemporaryLog"
