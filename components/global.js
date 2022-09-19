@@ -223,10 +223,18 @@ export const modalButtonTriggeredViaKeyboard = { current: false };
 export const showCharacterSetResponse = {
   current: [],
   // current: null,
-  onsetTime: [],
+  onsetTime: [], // 0?
   clickTime: [],
   alreadyClickedCharacters: [],
 };
+
+export const phraseIdentificationResponse = Object.seal({
+  current: [], // Responses
+  correct: [], // Correctness of responses
+  categoriesResponded: [], // List of categories for which we already have a response
+  onsetTime: [], // 0?
+  clickTime: [],
+});
 
 /* ------------------------------- SIMULATION ------------------------------- */
 
@@ -342,3 +350,40 @@ export const vocoderPhrases = {
 export const vocoderPhraseCategories = { chosen: undefined, all: undefined };
 export const vocoderPhraseShowClickable = { current: true };
 export const vocoderPhraseCorrectResponse = { current: undefined };
+export const soundCalibrationLevelDBSPL = { current: undefined };
+
+export const rsvpReadingWordHistory = {
+  currentWordPosition: [0, 0],
+  usedWords: [],
+  usedTargets: [],
+  usedDistractors: [],
+};
+
+export const rsvpReadingTargetSets = {
+  current: undefined,
+  upcoming: [],
+  past: [],
+};
+
+export const rsvpReadingResponse = {
+  categories: undefined,
+  screen: undefined,
+  displayStatus: false,
+};
+
+export const rsvpReadingTiming = {
+  current: {
+    startSec: undefined,
+    finishSec: undefined,
+    drawnConfirmedTimestamp: undefined,
+    undrawnConfirmedTimestamp: undefined,
+  },
+  past: [],
+};
+export const dummyStim = { current: undefined };
+
+// export const speechRecognizer = {
+//   recognition: undefined,
+//   status: undefined,
+//   responses: [],
+// };

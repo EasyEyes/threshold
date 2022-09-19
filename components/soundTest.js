@@ -1,14 +1,18 @@
 import JSZip from "jszip";
-import { invertedImpulseResponse, soundGainDBSPL } from "./global";
+import {
+  invertedImpulseResponse,
+  soundGainDBSPL,
+  soundCalibrationLevelDBSPL,
+} from "./global";
 import {
   adjustSoundDbSPL,
   getAudioBufferFromArrayBuffer,
+  getRMSOfWaveForm,
   playAudioBuffer,
   playAudioBufferWithImpulseResponseCalibration,
   setWaveFormToZeroDbSPL,
 } from "./soundUtils";
 
-const soundCalibrationLevelDBSPL = { current: undefined };
 const soundGain = { current: undefined };
 
 export const addSoundTestElements = (reader) => {
@@ -16,7 +20,10 @@ export const addSoundTestElements = (reader) => {
     "soundCalibrationLevelDBSPL",
     "__ALL_BLOCKS__"
   );
-  if (calibrationLevelFromFile.length > 0) {
+  if (
+    calibrationLevelFromFile.length > 0 &&
+    soundCalibrationLevelDBSPL.current === undefined
+  ) {
     soundCalibrationLevelDBSPL.current = calibrationLevelFromFile[0];
   }
 
@@ -46,7 +53,9 @@ export const addSoundTestElements = (reader) => {
   const speakerSoundGainContainer = document.createElement("div");
   const speakerSoundGain = document.createElement("p");
   const speakerSoundGainInput = document.createElement("input");
-
+  // const rmsOfSoundContainer = document.createElement("div");
+  const rmsOfSound = document.createElement("p");
+  const maxAmplitude = document.createElement("p");
   const elems = {
     modal,
     modalDialog,
@@ -62,6 +71,9 @@ export const addSoundTestElements = (reader) => {
     speakerSoundGainContainer,
     speakerSoundGain,
     speakerSoundGainInput,
+    // rmsOfSoundContainer,
+    rmsOfSound,
+    maxAmplitude,
   };
 
   modal.setAttribute("id", "soundTestModal");
@@ -87,6 +99,9 @@ export const addSoundTestElements = (reader) => {
     "soundTestModalSpeakerSoundGainInput"
   );
   speakerSoundGainInput.setAttribute("type", "number");
+  // rmsOfSoundContainer.setAttribute("id", "soundTestModalRMSOfSoundContainer");
+  rmsOfSound.setAttribute("id", "soundTestModalRMSOfSound");
+  maxAmplitude.setAttribute("id", "soundTestModalMaxAmplitude");
 
   modal.classList.add(...["modal", "fade"]);
   modalDialog.classList.add(...["modal-dialog"]);
@@ -99,13 +114,14 @@ export const addSoundTestElements = (reader) => {
   modalTitle.innerHTML = "Sound Test";
   modalSubtitle.innerHTML =
     "Use the toggle for IR correction. It may take some time to load the sound files.";
-
-  soundLevel.innerHTML = "Sound Level (dB SPL):";
+  soundLevel.innerHTML = "Sound Calibration Level (dB SPL):";
   if (soundCalibrationLevelDBSPL.current)
     soundLevelInput.value = soundCalibrationLevelDBSPL.current;
-
-  speakerSoundGain.innerHTML = "Speaker Sound Gain (dB SPL):";
-  if (soundGain.current) speakerSoundGainInput.value = soundGain.current;
+  speakerSoundGain.innerHTML = "Sound Gain (dB SPL):";
+  if (soundGain.current)
+    speakerSoundGainInput.value = Math.round(soundGain.current * 10) / 10;
+  rmsOfSound.innerHTML = "Digital sound amplitude RMS: **** dB";
+  maxAmplitude.innerHTML = "Digital sound max absolute value: 1.000";
 
   modal.appendChild(modalDialog);
   modalDialog.appendChild(modalContent);
@@ -116,10 +132,13 @@ export const addSoundTestElements = (reader) => {
   speakerSoundGainContainer.appendChild(speakerSoundGainInput);
   soundLevelContainer.appendChild(soundLevel);
   soundLevelContainer.appendChild(soundLevelInput);
-  modalHeaderContainer.appendChild(soundLevelContainer);
   modalHeaderContainer.appendChild(speakerSoundGainContainer);
+  modalHeaderContainer.appendChild(soundLevelContainer);
 
   modalHeaderContainer.appendChild(horizontal);
+  modalHeaderContainer.appendChild(maxAmplitude);
+  modalHeaderContainer.appendChild(rmsOfSound);
+
   modalContent.appendChild(modalHeaderContainer);
   modalHeader.appendChild(modalTitle);
   modalHeader.appendChild(modalToggle);
@@ -297,9 +316,10 @@ const addSoundFileElements = (
       soundFileButton.classList.add(...["btn", "btn-success"]);
       soundFileButton.innerHTML = "Play";
       soundFileButton.addEventListener("click", async () => {
-        const soundFileBuffer = await soundFile.file;
+        const soundFileBuffer = cloneAudioBuffer(await soundFile.file);
+        // Object.assign({},await soundFile.file);
         // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
-
+        // console.log("soundFleBuffer", soundFileBuffer);
         soundGain.current = document.getElementById(
           "soundTestModalSpeakerSoundGainInput"
         ).value;
@@ -308,6 +328,7 @@ const addSoundFileElements = (
         //   : reader.read("soundGainDBSPL", "__ALL_BLOCKS__")[index];
         // console.log("sounGain",soundGain.current)
         var audioData = soundFileBuffer.getChannelData(0);
+        // console.log("audioData", audioData);
         soundCalibrationLevelDBSPL.current = document.getElementById(
           "soundTestModalSoundLevelInput"
         ).value;
@@ -317,10 +338,15 @@ const addSoundFileElements = (
         //   "__ALL_BLOCKS__"
         // )[index];
         setWaveFormToZeroDbSPL(audioData);
+        // console.log("rms",getRMSOfWaveForm(audioData))
         adjustSoundDbSPL(
           audioData,
           soundCalibrationLevelDBSPL.current - soundGain.current
         );
+        const rmsOfSound = document.getElementById("soundTestModalRMSOfSound");
+        rmsOfSound.innerHTML = `Digital sound amplitude RMS: ${calculateDBFromRMS(
+          getRMSOfWaveForm(audioData)
+        )} dB`;
         if (toggleInput.checked) {
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
@@ -363,4 +389,24 @@ const addSoundFileCSS = () => {
   const soundTestFileStyleSheet = document.createElement("style");
   soundTestFileStyleSheet.innerText = styles;
   document.head.appendChild(soundTestFileStyleSheet);
+};
+
+const cloneAudioBuffer = (audioBuffer) => {
+  const newAudioBuffer = new AudioBuffer({
+    length: audioBuffer.length,
+    sampleRate: audioBuffer.sampleRate,
+    numberOfChannels: audioBuffer.numberOfChannels,
+  });
+
+  for (let channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+    newAudioBuffer.copyToChannel(audioBuffer.getChannelData(channel), channel);
+  }
+
+  return newAudioBuffer;
+};
+
+const calculateDBFromRMS = (rms) => {
+  const db = -20 * Math.log10(rms);
+  // round to 1 decimal place
+  return Math.round(db * 10) / 10;
 };

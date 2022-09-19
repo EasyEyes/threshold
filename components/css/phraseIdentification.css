@@ -1,0 +1,58 @@
+.responseScreen {
+  /* width: 100vw;
+  height: 100vh;
+  top: 0px;
+  left: 0px; */
+  font-size: 1.5rem;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  cursor: auto;
+}
+
+.phrase-identification-header {
+  z-index: 9999999;
+  font-size: xx-large;
+}
+.phrase-identification-clickable-categories {
+  margin: auto;
+  display: flex;
+  flex-direction: row;
+  align-content: space-between;
+  z-index: 9999999;
+}
+
+.phrase-identification-category-item {
+  display: inline-block;
+  padding: 15px;
+  border-radius: 7px;
+  box-sizing: border-box;
+  border: 2px solid rgba(0, 0, 0, 0);
+}
+.phrase-identification-category-item:hover {
+  border-color: black;
+  cursor: pointer;
+}
+
+.phrase-identification-category-title {
+  /* font-size: 1.5em; */
+  font-weight: bold;
+  /* color: black; */
+}
+
+.phrase-identification-item-selected {
+  border-color: black;
+}
+
+.phrase-identification-item-not-selected {
+  border-color: rgba(0, 0, 0, 0);
+}
+
+.phrase-identification-item-correct {
+  background-color: rgba(0, 128, 0, 0.266);
+}
+
+.phrase-identification-item-incorrect {
+  background-color: rgba(255, 0, 0, 0.26);
+}
