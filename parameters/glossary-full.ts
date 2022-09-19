@@ -1400,6 +1400,54 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "rsvpReadingFlankTargetWithLettersBool",
+    availability: "now",
+    example: "FALSE",
+    explanation: "rsvpReadingFlankTargetWithRandomLettersBool",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingFlankTargetWithWhichLetter",
+    availability: "now",
+    example: "x",
+    explanation: "rsvpReadingFlankTargetWithWhichLetter",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingNumberOfDistractors",
+    availability: "now",
+    example: "3",
+    explanation:
+      "rsvpReadingNumberOfDistractors determines the number of alternate response words that are provided, shuffled along with the target word, for response when targetKind is rsvpReading.",
+    type: "numerical",
+    default: "5",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingNumberOfTargetWordsInSequence",
+    availability: "now",
+    example: "6",
+    explanation:
+      "rsvpReadingNumberOfTargetWordsInSequence determines how many (target) words are shown in sequence per trial. In other words, this defines the length of the reading sample presented to the participant during each rsvpReading trial. NOTE must be consistent within block due to implementation restrictions.",
+    type: "numerical",
+    default: "5",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingRequireUniqueWordsBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "If TRUE, only select words for the target sequence and distractor words which have not yet been used as a target or distractor. If FALSE, draw words directly from the corpus, even if those words have already been used in this experiment.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "screenshotBool",
     availability: "now",
     example: "TRUE",
@@ -1698,11 +1746,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "soundCalibrationLevelDBSPL",
     availability: "now",
-    example: "84",
+    example: "74",
     explanation:
-      "soundCalibrationLevelDBSPL is the nominal sound level that we produce in order to calibrate or check gain calibration. The industry standard is 94 dB SPL, but that may be too loud in some situations. The default value is currently 94 dB SPL.",
+      "soundCalibrationLevelDBSPL is the nominal sound level that we produce in order to calibrate or check gain calibration. The industry standard is 94 dB SPL, but that may be too loud in some situations.",
     type: "numerical",
-    default: "94",
+    default: "74",
     categories: "",
   },
   {
@@ -1710,7 +1758,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "13",
     explanation:
-      "The \"gain\" (in dB) of the the participant's sound system. For a sound vector with level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a vector is 10*log(P) dB, where P is the power, P=mean(S^2), where S is the sound vector. Currently the scientist sets soundGainDBSPL. Our plan is for EasyEyes to measure it on the participant's computer.",
+      "The \"gain\" (in dB) of the the participant's sound system. For a sound vector with level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a vector is 10*log(P) dB, where P is the power, P=mean(S^2), where S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool or calibrateAllHzDBSPLBool TRUE to measure soundGainDBSPL on each participant's computer. For testing of EasyEyes, the scientist can explicityly set soundGainDBSPL.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -1990,7 +2038,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "20",
     explanation:
-      'If targetKind is "sound", targetSoundDBSPL specifies target sound level in dB SPL.',
+      'If targetKind is "sound", targetSoundDBSPL specifies desired target sound level in dB SPL. However, to avoid clipping of the waveform, EasyEyes imposes a maximum on this level to prevent the digital sound waveform from exceeding the range ±1. ',
     type: "numerical",
     default: "20",
     categories: "",

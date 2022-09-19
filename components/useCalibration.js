@@ -1,8 +1,14 @@
 import { phrases } from "./i18n";
 import { debug, ifTrue, loggerText } from "./utils";
-import { soundGainDBSPL, invertedImpulseResponse, rc } from "./global";
+import {
+  soundGainDBSPL,
+  invertedImpulseResponse,
+  rc,
+  soundCalibrationLevelDBSPL,
+} from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import { addSoundTestElements } from "./soundTest";
+import { getSoundCalibrationLevelDBSPLFromIIR } from "./soundUtils";
 
 export const useCalibration = (reader) => {
   return ifTrue([
@@ -428,6 +434,13 @@ const _runLoudspeakerCalibration = async (elems) => {
       calibrator
     );
   }
+  const { normalizedIIR, calibrationLevel } =
+    getSoundCalibrationLevelDBSPLFromIIR(invertedImpulseResponse.current);
+  // console.log("invertedImpulseResponse", invertedImpulseResponse.current);
+  invertedImpulseResponse.current = normalizedIIR;
+  soundCalibrationLevelDBSPL.current = calibrationLevel;
+  // console.log("soundCalibrationLevelDBSPL.current", soundCalibrationLevelDBSPL.current);
+  // console.log("normalizedIIR", normalizedIIR);
 };
 
 /* -------------------------------------------------------------------------- */

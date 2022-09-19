@@ -135,6 +135,35 @@ export const playAudioBufferWithImpulseResponseCalibration = async (
   playAudioNodeGraph(webAudioNodes);
 };
 
+export const getSoundCalibrationLevelDBSPLFromIIR = (iir) => {
+  const Fs = 48000;
+  //t=0:1/fs:length(iir)/fs; % time vector
+  const t = [0];
+  for (let i = 1; i < iir.length; i++) {
+    t.push(t[i - 1] + 1.0 / Fs);
+  }
+
+  const phase = t.map((val) => 2 * Math.PI * 1000 * val);
+  const cosPhase = phase.map((val) => Math.cos(val));
+  const sinPhase = phase.map((val) => Math.sin(val));
+  const cosPhaseIIRSquared = cosPhase.map((val, i) => (val * iir[i]) ** 2);
+  const sinPhaseIIRSquared = sinPhase.map((val, i) => (val * iir[i]) ** 2);
+  const sinCosSum = cosPhaseIIRSquared.map(
+    (val, i) => val + sinPhaseIIRSquared[i]
+  );
+  const energyFiltered = sinCosSum.reduce((acum, val) => acum + val);
+  const energyUnfiltered = 1;
+  const gain = Math.sqrt(energyFiltered / energyUnfiltered);
+
+  const normalizedIIR = iir.map((val) => val / gain);
+  const soundCalibrationLevelDBSPL = -20 * Math.log10(gain);
+
+  return {
+    normalizedIIR: normalizedIIR,
+    calibrationLevel: soundCalibrationLevelDBSPL,
+  };
+};
+
 export const initSoundFiles = async (trialsConditions) => {
   var maskerList = {};
   var targetList = {};
