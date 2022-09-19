@@ -740,3 +740,119 @@ export const psychojsUnitsFromWindowUnits = (
   const [xPx, yPx] = [centeredX - fixationXYPx[0], centeredY - fixationXYPx[1]];
   return [xPx, yPx];
 };
+
+/**
+ * Generate a random string letters (a-z) of length=len.
+ * Exclude characters in usedLetters, and add newly sampled letters to usedLetters (side-effect).
+ * @param {Number} len Desired length of the string
+ * @param {String[]} usedLetters
+ * @returns
+ */
+export const generateRandomString = (len, usedLetters = []) => {
+  // Ensure len is an int
+  len = Math.floor(len);
+  const uniqueUsedLetters = [...new Set(usedLetters)];
+  const usedCharCodes = uniqueUsedLetters.map((c) => c.charCodeAt(0));
+  const possibleCharCodes = [...new Array(25).keys()].map((i) => 97 + i);
+  const usableCharCodes = possibleCharCodes.filter(
+    (c) => !usedCharCodes.includes(c)
+  );
+  const drawWithReplacement = (n) =>
+    [...new Array(n).keys()].map(
+      (i) =>
+        [...usableCharCodes, ...usedCharCodes][Math.floor(Math.random() * n)]
+    );
+  const sampledCharCodes =
+    usableCharCodes.length >= len
+      ? shuffle(usableCharCodes).slice(0, len)
+      : drawWithReplacement(len);
+  const sampledCharacters = sampledCharCodes.map((c) => String.fromCharCode(c));
+  const sampledString = sampledCharacters.join("");
+  usedLetters.push(...sampledCharacters);
+  return sampledString;
+};
+
+/**
+ * Get an array of values, length=numberOfValues, evenly spaced by intervalSize and centered at 0.
+ * eg
+ *  getEvenlySpacedValues(4, 25) => [-50, -25, 25, 50]
+ *  getEvenlySpacedValues(3, 25) => [-25, 0, 25]
+ * @param {Number} numberOfValues Length of returned array
+ * @param {Number} intervalSize Distance between values in returned array
+ * @returns {Number[]}
+ */
+export const getEvenlySpacedValues = (numberOfValues, intervalSize) => {
+  numberOfValues = Math.floor(numberOfValues);
+  const shape = [...new Array(numberOfValues).keys()];
+  const values = [];
+  for (const i of shape) {
+    if (numberOfValues % 2 === 0) {
+      const a = numberOfValues / 2;
+      if (i < a) {
+        values.push(-intervalSize / 2 - (a - 1 - i) * intervalSize);
+      } else {
+        values.push(intervalSize / 2 + (i - a) * intervalSize);
+      }
+    } else {
+      const a = Math.floor(numberOfValues / 2);
+      values.push((i - a) * intervalSize);
+    }
+  }
+  return values;
+};
+
+/**
+ * Given an (increasing) interval (ie [a,b] given a < b), return an array of values
+ * representing maximally, evenly spaced points.
+ * eg
+ *  getValuesEvenlySpacedWithinInterval(4, [1,4]) => [1,2,3,4]
+ *  getValuesEvenlySpacedWithinInterval(3, [0,1]) => [0,0.5,1]
+ * @param {Number} numberOfValues The number of points to spread within the interval
+ * @param {Number[]} interval Increasing array of length=2, the (inclusive) range within which to place points
+ * @returns {Number[]}
+ */
+export const getValuesEvenlySpacedWithinInterval = (
+  numberOfValues,
+  interval
+) => {
+  if (interval.length !== 2)
+    throw "Must provide a 2D interval (array of length=2)";
+  if (!(interval[0] < interval[1]))
+    throw "Interval must be increasing (interval[0] > interval[1])";
+  const intervalRange = Math.abs(interval[1] - interval[0]);
+  const intervalSize = intervalRange / numberOfValues;
+  const intervalCenter = (interval[0] + interval[1]) / 2;
+  const offsets = getEvenlySpacedValues(numberOfValues, intervalSize);
+  return offsets.map((o) => o + intervalCenter);
+};
+
+/**
+ * Given a list of conditions, return a new list of conditions for which
+ * each condition of targetKind===whichTargetKind appears numDuplications times.
+ * @param {Object[]} conditions Array of psychojs conditions
+ * @param {Number} numDuplications Duplicate selected conditions this many times
+ * @param {String} whichTargetKind Duplicate all conditions of this type
+ * @returns {Object[]} New condition list, populated with duplicated conditions
+ */
+export const duplicateConditionsOfTargetKind = (
+  conditions,
+  numDuplications,
+  whichTargetKind
+) => {
+  numDuplications = Math.floor(numDuplications);
+  const newConditions = [];
+  conditions.forEach((c) => {
+    if (c.targetKind === whichTargetKind) {
+      for (let i = 1; i <= numDuplications; i++) {
+        const duplicated = Object.assign(
+          { _duplicatedConditionCardinal: i },
+          c
+        );
+        newConditions.push(duplicated);
+      }
+    } else {
+      newConditions.push(c);
+    }
+  });
+  return newConditions;
+};
