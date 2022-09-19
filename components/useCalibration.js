@@ -180,8 +180,8 @@ export const calibrateAudio = async (reader) => {
     const lang = rc.language.value;
     const copy = {
       title: calibrateSoundLevel
-        ? phrases.RC_soundCalibrationTitle[lang]
-        : "Loudspeaker Level",
+        ? phrases.RC_soundCalibrationTitle1000Hz[lang]
+        : phrases.RC_soundCalibrationTitleAllHz[lang],
       soundCalibration: phrases.RC_soundCalibration[lang],
       neediPhone: phrases.RC_soundCalibrationNeedsIPhone[lang],
       yes: phrases.RC_soundCalibrationYes[lang],
