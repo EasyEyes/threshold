@@ -53,6 +53,8 @@ import JSZip from "jszip";
 // import {userRepoFiles} from "../../source/components/constants"
 import { getProjectByNameInProjectList } from "../../source/components/gitlabUtils";
 import { getUserInfo } from "../../source/components/user";
+import { Buffer } from "buffer";
+import Swal from "sweetalert2";
 
 // import {tempAccessToken} from "../../source/TemporaryLog"
 const tempAccessToken = require("../../source/TemporaryLog").tempAccessToken;
@@ -88,12 +90,20 @@ export const test = async () => {
 };
 
 export const getRequestedFoldersForStructureCheck = async (
-  folderAndTargetKindObjectList: Object[]
-): Promise<Object[]> => {
-  const processed: any = {
-    maskers: [],
-    targets: [],
-  };
+  folderAndTargetKindObjectList: any[]
+): Promise<any[]> => {
+  //create a swal to show the user that the folder structure is being checked
+  Swal.fire({
+    title: "Checking folder structure...",
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    allowEnterKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+
+  const files: any[] = [];
   const [user, resources] = await getUserInfo(tempAccessToken.t);
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     user.projectList,
@@ -112,88 +122,180 @@ export const getRequestedFoldersForStructureCheck = async (
   };
 
   // console.log("userRepoFiles", userRepoFiles) //userRepoFiles.requestedFolders
+  // console.log("folderAndTargetKindObjectList", folderAndTargetKindObjectList);
+  const maskers: any[] = [];
+  const targets: any[] = [];
+  for (let i = 0; i < folderAndTargetKindObjectList.length; i++) {
+    maskers.push({
+      name: folderAndTargetKindObjectList[i].maskerSoundFolder,
+      targetKind: folderAndTargetKindObjectList[i].targetKind,
+    });
+    targets.push({
+      name: folderAndTargetKindObjectList[i].targetSoundFolder,
+      targetKind: folderAndTargetKindObjectList[i].targetKind,
+    });
+  }
 
-  const result = await Promise.all(
-    folderAndTargetKindObjectList.map(async (object: any) => {
-      // if(resources.folders.includes(folder)){}
-      if (!processed.maskers.includes(object.maskerSoundFolder)) {
-        processed.maskers.push(object.maskerSoundFolder);
-        const encodedFilePath = processPath(object.maskerSoundFolder);
-        const response = await fetch(
-          `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-          requestOptions
-        );
-      }
+  //remove duplicates
+  const uniqueMaskers = removeDuplicatesFromArrayOFObjects(maskers);
+  const uniqueTargets = removeDuplicatesFromArrayOFObjects(targets);
 
-      if (!processed.targets.includes(object.targetSoundFolder)) {
-        processed.targets.push(object.targetSoundFolder);
-        const encodedFilePath = processPath(object.targetSoundFolder);
-        const response = await fetch(
-          `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-          requestOptions
-        );
-      }
-
-      //   console.log("response", response)
-      // result.push({name:folder,file:response})
-      // if(response.status === 200)
-      // return {name:folder,file:await response.blob()}
-      // else return {name:folder,file:null}
+  const maskerFiles = await Promise.all(
+    uniqueMaskers.map(async (masker) => {
+      const encodedFilePath = processPath(masker.name + ".zip");
+      const response = await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+        requestOptions
+      ).then((response) => response.text());
+      const content = JSON.parse(response).content;
+      const file: any = {};
+      file["name"] = masker;
+      file["file"] = content;
+      file["targetKind"] = masker.targetKind;
+      file["parameter"] = "maskerSoundFolder";
+      files.push(file);
     })
   );
+
+  const targetFiles = await Promise.all(
+    uniqueTargets.map(async (target) => {
+      // console.log("target", target);
+      const encodedFilePath = processPath(target.name + ".zip");
+      const response = await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+        requestOptions
+      ).then((response) => response.text());
+      const content = JSON.parse(response).content;
+      const file: any = {};
+      file["name"] = target;
+      file["file"] = content;
+      file["targetKind"] = target.targetKind;
+      file["parameter"] = "targetSoundFolder";
+      files.push(file);
+    })
+  );
+  // console.log("files", files);
+  const errors = await folderStructureCheck(files);
+  // console.log("errors", errors);
+  Swal.close();
+  return new Promise((resolve, reject) => {
+    resolve(errors);
+  });
+  //   folderAndTargetKindObjectList.map(async (object: any) => {
+  //     // if(resources.folders.includes(folder)){}
+  //     let response;
+  //     let trial: any = {};
+  //     let content;
+
+  //     if (!processed.maskers.includes(object.maskerSoundFolder)) {
+  //       // console.log("processed.maskers", processed.maskers);
+  //       // console.log("object.maskerSoundFolder", object.maskerSoundFolder);
+  //       const encodedFilePath = processPath(object.maskerSoundFolder+".zip");
+  //        response = await fetch(
+  //         `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+  //         requestOptions
+  //       ).then(response=>response.text());
+  //       content = JSON.parse(response).content;
+  //       processed.maskers.push(object.maskerSoundFolder);
+  //       trial["name"] = object.maskerSoundFolder;
+  //       trial["file"] =content;
+  //       trial["targetKind"] = object.targetKind;
+  //       trial["parameter"] = "maskerSoundFolder";
+  //       files.push(trial);
+  //     }
+
+  //     if (!processed.targets.includes(object.targetSoundFolder)) {
+  //       // console.log("processed.targets", processed.targets);
+  //       // console.log("object.targetSoundFolder", object.targetSoundFolder);
+  //       const encodedFilePath = processPath(object.targetSoundFolder +".zip");
+  //       response = await fetch(
+  //         `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+  //         requestOptions
+  //       ).then(response=>response.text());
+  //       content = JSON.parse(response).content;
+  //       processed.targets.push(object.targetSoundFolder);
+  //       trial["name"] = object.targetSoundFolder;
+  //       trial["file"] =content;
+  //       trial["targetKind"] = object.targetKind;
+  //       trial["parameter"] = "targetSoundFolder";
+  //       files.push(trial);
+  //     }
+
+  //     //   console.log("response", response)
+  //     // result.push({name:folder,file:response})
+  //     // if(response.status === 200)
+
+  //     // console.log("decodedContent", content);
+  //     // let Zip = new JSZip();
+  //     // let zipFile = await Zip.loadAsync(content, { base64: true });
+  //     // let files = Object.keys(zipFile.files);
+  //     // console.log("files", files)
+  //     // else return {name:folder,file:null}
+  //   })
+  // );
+  // console.log("files", files);
+  // console.log("errors",await folderStructureCheck(files));
   // return result;
   // return folderStructureCheck(result)
-  return [];
+  // folderStructureCheck(trial);
 };
 
 //folders Object[]:  [{name: "", file: File}, {name: "", file: File}]
-export const folderStructureCheck = (
-  folders: Object[],
-  targetKind: string,
-  parameter: string
+export const folderStructureCheck = async (
+  folders: Object[]
 ): Promise<EasyEyesError[]> => {
-  if (targetKind === "sound")
-    return folderStructureCheckSound(folders, parameter);
-  else targetKind === "VocoderPhrase";
-  return folderStructureCheckVocoderPhrase(folders, parameter);
-};
-
-export const folderStructureCheckSound = async (
-  folders: any[],
-  parameter: string
-): Promise<EasyEyesError[]> => {
-  const errors: EasyEyesError[] = [];
+  const errors: any[] = [];
 
   await Promise.all(
-    folders.map(async (folder) => {
-      let Zip = new JSZip(); // Create a new JSZip instance
-      const error = await Zip.loadAsync(folder.file).then(async (zip) => {
-        if (
-          !Object.keys(zip.files).some((fileName) => {
-            const isfileLocationCorrect = fileName.split("/").length === 1;
-            const isFileExtensionCorrect = verifyFileNameExtension(fileName);
-            const isDirectory = zip.files[fileName].dir;
-            return (
-              isfileLocationCorrect && isFileExtensionCorrect && !isDirectory
-            );
-          })
-        ) {
-          return INVALID_FOLDER_STRUCTURE(folder.name, parameter);
-        }
-      });
-      if (error) errors.push(error);
+    folders.map(async (folder: any) => {
+      if (folder.targetKind === "sound") {
+        const error = await folderStructureCheckSound(folder);
+        if (error) errors.push(error);
+      } else if (folder.targetKind === "VocoderPhrase") {
+        const error = await folderStructureCheckVocoderPhrase(folder);
+        if (error) errors.push(error);
+      }
     })
   );
-  return errors;
+
+  return Promise.resolve(errors);
+};
+
+export const folderStructureCheckSound = async (folder: any): Promise<any> => {
+  // const errors: EasyEyesError[] = [];
+
+  // await Promise.all(
+  // folders.map(async (folder) => {
+  let Zip = new JSZip(); // Create a new JSZip instance
+  const error = await Zip.loadAsync(folder.file, { base64: true }).then(
+    async (zip) => {
+      if (
+        !Object.keys(zip.files).some((fileName) => {
+          const isfileLocationCorrect = fileName.split("/").length === 1;
+          const isFileExtensionCorrect = verifyFileNameExtension(fileName);
+          const isDirectory = zip.files[fileName].dir;
+          return (
+            isfileLocationCorrect && isFileExtensionCorrect && !isDirectory
+          );
+        })
+      ) {
+        return INVALID_FOLDER_STRUCTURE(folder.name.name, folder.parameter);
+      }
+      return null;
+    }
+  );
+  // if (error) errors.push(error);
+  // })
+  // );
+  return Promise.resolve(error);
 };
 
 export const folderStructureCheckVocoderPhrase = async (
-  folders: Object[],
-  parameter: string
+  folder: any
 ): Promise<EasyEyesError[]> => {
   const errors: EasyEyesError[] = [];
 
-  return errors;
+  return Promise.resolve(errors);
 };
 
 export const verifyFileNameExtension = (name: string) => {
@@ -220,83 +322,25 @@ export const encodeGitlabFilePath = (filePath: string): string => {
 const processPath = (path: string): string => {
   return encodeGitlabFilePath(`folders/${path}`);
 };
-/*
-    `${resourceType}/${fileName}`
-      );
 
-      const content: string = await getBase64FileDataFromGitLab(
-              parseInt(easyEyesResourcesRepo.id),
-              resourcesRepoFilePath,
-              user.accessToken
-            );
+function base64ToBuffer(str: any) {
+  str = window.atob(str); // creates a ASCII string
+  var buffer = new ArrayBuffer(str.length),
+    view = new Uint8Array(buffer);
+  for (var i = 0; i < str.length; i++) {
+    view[i] = str.charCodeAt(i);
+  }
+  return buffer;
+}
 
-
-
-export const getBase64FileDataFromGitLab = (
-  repoID: number,
-  filePath: string,
-  accessToken: string
-): Promise<string> => {
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise<string>(async (resolve) => {
-    // Create auth header
-    const headers: Headers = new Headers();
-    headers.append("Authorization", `bearer ${accessToken}`);
-
-    // Create Gitlab API request options
-    const requestOptions: any = {
-      method: "GET",
-      headers: headers,
-      redirect: "follow",
-    };
-
-    // Convert given filepath to URL-encoded string
-    const encodedFilePath = encodeGitlabFilePath(filePath);
-
-    // Make API call to fetch data
-    const response = await fetch(
-      `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-      requestOptions
-    )
-      .then((response) => {
-        // ? It seems that it also works for text files?
-        return response.text();
+const removeDuplicatesFromArrayOFObjects = (array: any[]) => {
+  return array.filter((value, index) => {
+    const _value = JSON.stringify(value);
+    return (
+      index ===
+      array.findIndex((obj) => {
+        return JSON.stringify(obj) === _value;
       })
-      .then((result) => {
-        return result;
-      })
-      .catch((error) => {
-        return error;
-      });
-
-    resolve(JSON.parse(response).content);
+    );
   });
 };
-
-
-  
-  
-  */
-
-/*
-
- const headers: Headers = new Headers();
-    headers.append("Authorization", `bearer ${accessToken}`);
-
-    // Create Gitlab API request options
-    const requestOptions: any = {
-      method: "GET",
-      headers: headers,
-      redirect: "follow",
-    };
-
-    // Convert given filepath to URL-encoded string
-    const encodedFilePath = encodeGitlabFilePath(filePath);
-
-    // Make API call to fetch data
-    const response = await fetch(
-      `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-      requestOptions
-    )
-
-*/

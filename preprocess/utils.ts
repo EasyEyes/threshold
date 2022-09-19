@@ -39,7 +39,7 @@ export const getFolderNames = (parsed: any): any => {
       });
     }
   }
-  console.log("folderAndTargetKindObjectList", folderAndTargetKindObjectList);
+  // console.log("folderAndTargetKindObjectList", folderAndTargetKindObjectList);
 
   // console.log("targetTaskList", targetTaskList);
   // console.log("targetKindList", targetKindList);

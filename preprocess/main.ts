@@ -181,7 +181,12 @@ export const prepareExperimentFileForThreshold = async (
     });
   });
 
-  // await getRequestedFoldersForStructureCheck(folderList.folderAndTargetKindObjectList)
+  const folderStructureErrors = await getRequestedFoldersForStructureCheck(
+    folderList.folderAndTargetKindObjectList
+  );
+  if (folderStructureErrors.length > 0) {
+    errors.push(...folderStructureErrors);
+  }
   // console.log("requestedFolderList", requestedFolderList);
 
   // ! validate requested code files

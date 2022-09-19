@@ -118,7 +118,7 @@ export const INVALID_FOLDER_STRUCTURE = (
 ): EasyEyesError => {
   return {
     name: "Invalid folder structure",
-    message: `The folder "${folderName}" doesn't have the correct structure.`,
+    message: `The folder "${folderName}"  specified by ${parameter} doesn't have the correct structure.`,
     hint: "Make sure you follow the correct folder structure for your zip files. Please see the example folders provided",
     context: "preprocessor",
     kind: "error",

@@ -408,6 +408,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  conditionEnabledBool: {
+    name: "conditionEnabledBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
   conditionTrials: {
     name: "conditionTrials",
     availability: "now",
@@ -927,6 +933,36 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  rsvpReadingFlankTargetWithLettersBool: {
+    name: "rsvpReadingFlankTargetWithLettersBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  rsvpReadingFlankTargetWithWhichLetter: {
+    name: "rsvpReadingFlankTargetWithWhichLetter",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
+  rsvpReadingNumberOfDistractors: {
+    name: "rsvpReadingNumberOfDistractors",
+    availability: "now",
+    type: "numerical",
+    default: "5",
+  },
+  rsvpReadingNumberOfTargetWordsInSequence: {
+    name: "rsvpReadingNumberOfTargetWordsInSequence",
+    availability: "now",
+    type: "numerical",
+    default: "5",
+  },
+  rsvpReadingRequireUniqueWordsBool: {
+    name: "rsvpReadingRequireUniqueWordsBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
   screenshotBool: {
     name: "screenshotBool",
     availability: "now",
@@ -1117,7 +1153,7 @@ export const GLOSSARY: Glossary = {
     name: "soundCalibrationLevelDBSPL",
     availability: "now",
     type: "numerical",
-    default: "94",
+    default: "74",
   },
   soundGainDBSPL: {
     name: "soundGainDBSPL",
