@@ -331,11 +331,11 @@ import {
   vocoderPhraseSetupClickableCategory,
 } from "./components/vocoderPhrase.js";
 import { readTrialLevelLetterParams } from "./components/letter.js";
-import {
-  setInitialData,
-  updateBlockCompleted,
-  updateCurrentBlockCondition,
-} from "./components/temporaryLogger.js";
+// import {
+//   setInitialData,
+//   updateBlockCompleted,
+//   updateCurrentBlockCondition,
+// } from "./components/temporaryLogger.js";
 import {
   duplicateRepeatedLetterConditions,
   readTrialLevelRepeatedLetterParams,
@@ -389,16 +389,16 @@ const paramReaderInitialized = async (reader) => {
     rc.language.value
   );
   //temporary logger for debugging
-  setInitialData(
-    window.location.toString(),
-    "",
-    "",
-    compMsg["proceed"],
-    rc.concurrency.value,
-    rc.browser.value,
-    Date.now(),
-    rc.id.value
-  );
+  // setInitialData(
+  //   window.location.toString(),
+  //   "",
+  //   "",
+  //   compMsg["proceed"],
+  //   rc.concurrency.value,
+  //   rc.browser.value,
+  //   Date.now(),
+  //   rc.id.value
+  // );
   const proceed = await displayCompatibilityMessage(
     compMsg["msg"],
     rc.language.value
@@ -4674,11 +4674,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       else hideTrialBreakProgressBar();
 
       //initiate temporary logger
-      updateBlockCompleted(
-        rc.id.value,
-        { blockCompleted: status.block + "_" + status.trial, time: Date.now() },
-        window.location.toString()
-      );
+      // updateBlockCompleted(
+      //   rc.id.value,
+      //   { blockCompleted: status.block + "_" + status.trial, time: Date.now() },
+      //   window.location.toString()
+      // );
       // console.log("used block", status.block + "_" + status.trial);
       // console.log("used block", status.block);
       // console.log("used block", status);
@@ -4777,12 +4777,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // dangerous
         status.trial = currentLoopSnapshot.thisN;
         // console.log("block_condition",status.block + "_" + status.trial );
-        updateCurrentBlockCondition(
-          window.location.toString(),
-          status.block + "_" + status.trial,
-          Date.now(),
-          rc.id.value
-        );
+        // updateCurrentBlockCondition(
+        //   window.location.toString(),
+        //   status.block + "_" + status.trial,
+        //   Date.now(),
+        //   rc.id.value
+        // );
       } else {
         console.log(
           "%c====== Unknown Snapshot ======",
