@@ -6,10 +6,14 @@ import {
 } from "./global";
 import {
   adjustSoundDbSPL,
+  connectAudioNodes,
+  createAudioNodeFromBuffer,
   getAudioBufferFromArrayBuffer,
+  getGainNode,
   getRMSOfWaveForm,
   playAudioBuffer,
   playAudioBufferWithImpulseResponseCalibration,
+  playAudioNodeGraph,
   setWaveFormToZeroDbSPL,
 } from "./soundUtils";
 
@@ -41,9 +45,19 @@ export const addSoundTestElements = (reader) => {
   const modalHeaderContainer = document.createElement("div");
   const modalHeader = document.createElement("div");
   const modalTitle = document.createElement("h2");
+
   const modalSubtitle = document.createElement("p");
+  const togglesContainer = document.createElement("div");
   const toggleElements = addToggleSwitch();
   const modalToggle = toggleElements.toggleSwitch;
+  const IRCorrectionToggleLabel = document.createElement("label");
+  const IRCorrectionToggleContainer = document.createElement("div");
+  const useGainNodeToggleContainer = document.createElement("div");
+  const useGainNodeToggleElements = addToggleSwitch();
+  const useGainNodeToggle = useGainNodeToggleElements.toggleSwitch;
+  const useGainNodeInput = useGainNodeToggleElements.toggleSwitchInput;
+  const useGainNodeLabel = document.createElement("label");
+
   const modalBody = document.createElement("div");
   const modalFooter = document.createElement("div");
   const horizontal = document.createElement("hr");
@@ -53,6 +67,10 @@ export const addSoundTestElements = (reader) => {
   const speakerSoundGainContainer = document.createElement("div");
   const speakerSoundGain = document.createElement("p");
   const speakerSoundGainInput = document.createElement("input");
+
+  // const adjustedSoundLevelContainer = document.createElement("div");
+  const adjustedSoundLevel = document.createElement("p");
+  // const adjustedSoundLevelInput = document.createElement("input");
   // const rmsOfSoundContainer = document.createElement("div");
   const rmsOfSound = document.createElement("p");
   const maxAmplitude = document.createElement("p");
@@ -99,9 +117,34 @@ export const addSoundTestElements = (reader) => {
     "soundTestModalSpeakerSoundGainInput"
   );
   speakerSoundGainInput.setAttribute("type", "number");
+
+  // adjustedSoundLevelContainer.setAttribute( "id", "soundTestModalAdjustedSoundLevelContainer");
+  adjustedSoundLevel.setAttribute("id", "soundTestModalAdjustedSoundLevel");
+  // adjustedSoundLevelInput.setAttribute("id", "soundTestModalAdjustedSoundLevelInput");
+  // adjustedSoundLevelInput.setAttribute("type", "number");
   // rmsOfSoundContainer.setAttribute("id", "soundTestModalRMSOfSoundContainer");
   rmsOfSound.setAttribute("id", "soundTestModalRMSOfSound");
   maxAmplitude.setAttribute("id", "soundTestModalMaxAmplitude");
+  useGainNodeLabel.setAttribute("id", "soundTestModalUseGainNodeLabel");
+  // useGainNodeLabel.setAttribute("for", "soundTestModalUseGainNodeToggle");
+  useGainNodeLabel.innerText = "Use Gain Node";
+  useGainNodeToggle.setAttribute("id", "soundTestModalUseGainNodeToggle");
+  useGainNodeToggle.style.marginLeft = "10px";
+  useGainNodeInput.setAttribute("id", "soundTestModalUseGainNodeToggleInput");
+
+  togglesContainer.setAttribute("id", "soundTestModalTogglesContainer");
+  togglesContainer.style.display = "flex";
+  togglesContainer.style.flexDirection = "column";
+  IRCorrectionToggleLabel.setAttribute("id", "soundTestModalIRCorrectionLabel");
+  IRCorrectionToggleLabel.innerText = "IR Correction";
+  modalToggle.style.marginLeft = "10px";
+  IRCorrectionToggleContainer.style.display = "flex";
+  // space between toggle and label
+  IRCorrectionToggleContainer.style.marginBottom = "10px";
+  IRCorrectionToggleContainer.style.justifyContent = "space-between";
+  useGainNodeToggleContainer.style.display = "flex";
+  useGainNodeToggleContainer.style.justifyContent = "space-between";
+  useGainNodeToggleContainer.style.marginBottom = "10px";
 
   modal.classList.add(...["modal", "fade"]);
   modalDialog.classList.add(...["modal-dialog"]);
@@ -114,14 +157,17 @@ export const addSoundTestElements = (reader) => {
   modalTitle.innerHTML = "Sound Test";
   modalSubtitle.innerHTML =
     "Use the toggle for IR correction. It may take some time to load the sound files.";
-  soundLevel.innerHTML = "Sound Calibration Level (dB SPL):";
+  soundLevel.innerHTML = "Sound Level (dB SPL):";
   if (soundCalibrationLevelDBSPL.current)
-    soundLevelInput.value = soundCalibrationLevelDBSPL.current;
+    soundLevelInput.value = soundCalibrationLevelDBSPL.current.toFixed(1);
   speakerSoundGain.innerHTML = "Sound Gain (dB SPL):";
   if (soundGain.current)
-    speakerSoundGainInput.value = Math.round(soundGain.current * 10) / 10;
+    speakerSoundGainInput.value = (
+      Math.round(soundGain.current * 10) / 10
+    ).toFixed(1);
   rmsOfSound.innerHTML = "Digital sound amplitude RMS: **** dB";
   maxAmplitude.innerHTML = "Digital sound max absolute value: 1.000";
+  adjustedSoundLevel.innerHTML = "Adjusted soundCalibrationLevel: **** dB SPL";
 
   modal.appendChild(modalDialog);
   modalDialog.appendChild(modalContent);
@@ -138,10 +184,25 @@ export const addSoundTestElements = (reader) => {
   modalHeaderContainer.appendChild(horizontal);
   modalHeaderContainer.appendChild(maxAmplitude);
   modalHeaderContainer.appendChild(rmsOfSound);
+  modalHeaderContainer.appendChild(adjustedSoundLevel);
+  //append the toggles
+  IRCorrectionToggleContainer.appendChild(IRCorrectionToggleLabel);
+  IRCorrectionToggleContainer.appendChild(modalToggle);
+  useGainNodeToggleContainer.appendChild(useGainNodeLabel);
+  useGainNodeToggleContainer.appendChild(useGainNodeToggle);
+  togglesContainer.appendChild(IRCorrectionToggleContainer);
+  togglesContainer.appendChild(useGainNodeToggleContainer);
+  // togglesContainer.appendChild(IRCorrectionToggleLabel);
+  // togglesContainer.appendChild(modalToggle);
+  // togglesContainer.appendChild(useGainNodeLabel);
+  // togglesContainer.appendChild(useGainNodeToggle);
 
   modalContent.appendChild(modalHeaderContainer);
   modalHeader.appendChild(modalTitle);
-  modalHeader.appendChild(modalToggle);
+  modalHeader.appendChild(togglesContainer);
+  // modalHeader.appendChild(modalToggle);
+  // modalHeader.appendChild(useGainNodeLabel);
+  // modalHeader.appendChild(useGainNodeToggle);
   // modalContent.appendChild(modalSubtitle);
   modalContent.appendChild(modalBody);
   modalContent.appendChild(modalFooter);
@@ -323,41 +384,98 @@ const addSoundFileElements = (
         soundGain.current = document.getElementById(
           "soundTestModalSpeakerSoundGainInput"
         ).value;
-        // typeof soundGainDBSPL.current !== "undefined"
-        //   ? soundGainDBSPL.current
-        //   : reader.read("soundGainDBSPL", "__ALL_BLOCKS__")[index];
-        // console.log("sounGain",soundGain.current)
+        // rouund soundGain to 1 decimal places
+        soundGain.current = Math.round(soundGain.current * 10) / 10;
+        document.getElementById("soundTestModalSpeakerSoundGainInput").value =
+          soundGain.current.toFixed(1);
         var audioData = soundFileBuffer.getChannelData(0);
-        // console.log("audioData", audioData);
         soundCalibrationLevelDBSPL.current = document.getElementById(
           "soundTestModalSoundLevelInput"
         ).value;
-        // console.log("soundCalibrationLevelDBSPL",soundCalibrationLevelDBSPL.current)
-        // soundCalibrationLevelDBSPL? soundCalibrationLevelDBSPL: reader.read(
-        //   "soundCalibrationLevelDBSPL",
-        //   "__ALL_BLOCKS__"
-        // )[index];
         setWaveFormToZeroDbSPL(audioData);
-        // console.log("rms",getRMSOfWaveForm(audioData))
-        adjustSoundDbSPL(
-          audioData,
-          soundCalibrationLevelDBSPL.current - soundGain.current
+        // round soundCalibrationLevelDBSPL to 1 decimal places
+        soundCalibrationLevelDBSPL.current =
+          Math.round(soundCalibrationLevelDBSPL.current * 10) / 10;
+        document.getElementById("soundTestModalSoundLevelInput").value =
+          soundCalibrationLevelDBSPL.current.toFixed(1);
+        const limitedRMS = getRMSLimit(
+          soundCalibrationLevelDBSPL.current - soundGain.current,
+          audioData
         );
+        soundCalibrationLevelDBSPL.current =
+          soundGain.current + calculateDBFromRMS(limitedRMS);
+        // round soundCalibrationLevelDBSPL to 1 decimal places
+        soundCalibrationLevelDBSPL.current =
+          Math.round(soundCalibrationLevelDBSPL.current * 10) / 10;
+        document.getElementById(
+          "soundTestModalAdjustedSoundLevel"
+        ).innerHTML = `Adjusted soundCalibrationLevel: ${soundCalibrationLevelDBSPL.current} dB SPL`;
         const rmsOfSound = document.getElementById("soundTestModalRMSOfSound");
-        rmsOfSound.innerHTML = `Digital sound amplitude RMS: ${calculateDBFromRMS(
-          getRMSOfWaveForm(audioData)
-        )} dB`;
-        if (toggleInput.checked) {
-          if (invertedImpulseResponse.current)
-            playAudioBufferWithImpulseResponseCalibration(
-              soundFileBuffer,
-              invertedImpulseResponse.current
-            );
-          else
-            alert(
-              "There was an error loading the impulse response. Please try calibrating again."
-            );
-        } else playAudioBuffer(soundFileBuffer);
+        const useGainNodeBool = document.getElementById(
+          "soundTestModalUseGainNodeToggleInput"
+        ).checked;
+
+        //use gain node
+        if (useGainNodeBool) {
+          const gainNode = getGainNode(
+            getGainValue(soundCalibrationLevelDBSPL.current - soundGain.current)
+          );
+          // gainNode.gain.value = getGainValue(soundCalibrationLevelDBSPL.current-soundGain.current);
+          const webAudioNodes = [];
+          webAudioNodes.push(createAudioNodeFromBuffer(soundFileBuffer));
+          webAudioNodes.push(gainNode);
+          if (toggleInput.checked) {
+            if (invertedImpulseResponse.current) {
+              rmsOfSound.innerHTML = `Digital sound amplitude RMS: ${calculateDBFromRMS(
+                Math.round(gainNode.gain.value * 10) / 10
+              )} dB`;
+              webAudioNodes.push(
+                await createImpulseResponseFilterNode(
+                  invertedImpulseResponse.current
+                )
+              );
+              connectAudioNodes(webAudioNodes);
+              playAudioNodeGraph(webAudioNodes);
+            } else {
+              alert(
+                "There was an error loading the impulse response. Please try calibrating again."
+              );
+            }
+          } else {
+            // console.log("gainNode",calculateDBFromRMS(gainNode.gain.value))
+            // console.log("gainValue",getGainValue(soundCalibrationLevelDBSPL.current-soundGain.current))
+            rmsOfSound.innerHTML = `Digital sound amplitude RMS: ${calculateDBFromRMS(
+              gainNode.gain.value
+            )} dB`;
+            connectAudioNodes(webAudioNodes);
+            // check if the first node connected to the second node?
+            // console.log("webAudioNodes",webAudioNodes)
+            playAudioNodeGraph(webAudioNodes);
+          }
+        }
+
+        // adjust sound by changing the amplitude of the sound file manually
+        else {
+          // console.log("gainValue",getGainValue(soundCalibrationLevelDBSPL.current-soundGain.current))
+          adjustSoundDbSPL(
+            audioData,
+            soundCalibrationLevelDBSPL.current - soundGain.current
+          );
+          rmsOfSound.innerHTML = `Digital sound amplitude RMS: ${calculateDBFromRMS(
+            getRMSOfWaveForm(audioData)
+          )} dB`;
+          if (toggleInput.checked) {
+            if (invertedImpulseResponse.current)
+              playAudioBufferWithImpulseResponseCalibration(
+                soundFileBuffer,
+                invertedImpulseResponse.current
+              );
+            else
+              alert(
+                "There was an error loading the impulse response. Please try calibrating again."
+              );
+          } else playAudioBuffer(soundFileBuffer);
+        }
       });
       soundFileContainer.appendChild(soundFileName);
       soundFileContainer.appendChild(soundFileButton);
@@ -406,7 +524,30 @@ const cloneAudioBuffer = (audioBuffer) => {
 };
 
 const calculateDBFromRMS = (rms) => {
-  const db = -20 * Math.log10(rms);
+  const db = 20 * Math.log10(rms);
   // round to 1 decimal place
   return Math.round(db * 10) / 10;
+};
+
+const getGainValue = (dbSPL) => {
+  const gain = Math.pow(10, dbSPL / 20);
+  return gain;
+};
+
+const getRMSLimit = (dbSPL, buffer) => {
+  // get max value of absolute value of buffer
+  const sMax = Math.max(...buffer.map(Math.abs));
+  // update sMax in document
+  document.getElementById(
+    "soundTestModalMaxAmplitude"
+  ).innerHTML = `Digital sound max absolute value: ${sMax.toFixed(3)}`;
+  const rms = getGainValue(dbSPL);
+  const sRms = getRMSOfWaveForm(buffer);
+  const rmsLimit = sRms / sMax;
+
+  // console.log("rmsLimit",rmsLimit)
+  // console.log("rms",rms)
+  // console.log("db", dbSPL)
+  // console.log("dbfromrms",calculateDBFromRMS(rms))
+  return Math.min(rmsLimit, rms);
 };

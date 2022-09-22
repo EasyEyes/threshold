@@ -46,13 +46,19 @@ export const playAudioBuffer = (audioBuffer) => {
   source.start();
 };
 
+// get gain node
+export const getGainNode = (gain) => {
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.value = gain;
+  return gainNode;
+};
 /**
  * Given an array of web audio nodes, builds the node graph in the order
  * they are placed into the array
  * @param {<AudioContext>} audioCtx the target audio context
  * @param {<AudioNode>} webAudioNodes the nodes !order matters!
  */
-const connectAudioNodes = (webAudioNodes) => {
+export const connectAudioNodes = (webAudioNodes) => {
   let i = 0;
   let nextNode;
   let curNode;

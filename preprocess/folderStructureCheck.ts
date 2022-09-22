@@ -91,6 +91,9 @@ export const test = async () => {
 export const getRequestedFoldersForStructureCheck = async (
   folderAndTargetKindObjectList: any[]
 ): Promise<any[]> => {
+  //just return empty for local examples
+  if (!tempAccessToken) return [];
+
   //create a swal to show the user that the folder structure is being checked
   Swal.fire({
     title: "Checking folder structure...",

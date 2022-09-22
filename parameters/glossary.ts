@@ -366,6 +366,25 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  calibrateSound1000HzBool: {
+    name: "calibrateSound1000HzBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateSoundAllHzBool: {
+    name: "calibrateSoundAllHzBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateSoundDB: {
+    name: "calibrateSoundDB",
+    availability: "now",
+    type: "text",
+    default:
+      "-3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1",
+  },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
     availability: "now",
@@ -396,6 +415,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  conditionEnabledBool: {
+    name: "conditionEnabledBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
   conditionGroup: {
     name: "conditionGroup",
     availability: "later",
@@ -407,12 +432,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "",
-  },
-  conditionEnabledBool: {
-    name: "conditionEnabledBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
   },
   conditionTrials: {
     name: "conditionTrials",
@@ -696,17 +715,17 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
   },
-  maskerSoundDBSPL: {
-    name: "maskerSoundDBSPL",
-    availability: "now",
-    type: "",
-    default: "-100",
-  },
   maskerDBSPL: {
     name: "maskerDBSPL",
     availability: "now",
     type: "numerical",
     default: "50",
+  },
+  maskerSoundDBSPL: {
+    name: "maskerSoundDBSPL",
+    availability: "now",
+    type: "",
+    default: "-100",
   },
   maskerSoundFolder: {
     name: "maskerSoundFolder",

@@ -385,7 +385,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calibrate1000HzSoundLevelBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateLoudspeakerBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrate1000HzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
+      "USE calibrateSound1000HzBool INSTEAD. Set calibrate1000HzSoundLevelBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateLoudspeakerBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrate1000HzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -395,7 +395,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calibrateAllHzSoundLevelBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at all frequencies, using the participant's internet-connected iPhone/iPad. This is done by using the iPhone/iPad to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding an iPhone/iPad that's compatible. Calibration is done once, before block 1, if any condition in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateAllHzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
+      "USE calibrateSoundAllHzBool INSTEAD. Set calibrateAllHzSoundLevelBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at all frequencies, using the participant's internet-connected iPhone/iPad. This is done by using the iPhone/iPad to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding an iPhone/iPad that's compatible. Calibration is done once, before block 1, if any condition in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateAllHzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -471,6 +471,37 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "calibrateSound1000HzBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Set calibrateSound1000HzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateSoundAllHzBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrateSound1000HzBool TRUE. Any particular condition can set calibrateSound1000HzBool or calibrateSoundAllHzBool TRUE, but not both.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "calibrateSoundAllHzBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "Set calibrateSoundAllHzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at all frequencies, using the participant's internet-connected iPhone/iPad. This is done by using the iPhone/iPad to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding an iPhone/iPad that's compatible. Calibration is done once, before block 1, if any condition in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateSoundAllHzBool TRUE. Any particular condition can set calibrateSound1000HzBool or calibrateSoundAllHzBool TRUE, but not both.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "calibrateSoundDB",
+    availability: "now",
+    example: "-3",
+    explanation:
+      "calibrateSoundDB is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
+    type: "text",
+    default:
+      "-3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1",
+    categories: "",
+  },
+  {
     name: "calibrateTrackDistanceBool",
     availability: "now",
     example: "TRUE",
@@ -520,6 +551,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "conditionEnabledBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "When conditionEnabledBool is FALSE, (default is TRUE) the condition (column in experiment table) does not run, but the block number is treated normally. Thus even if all the conditions of a block are disabled, the block is still counted by the block counter. This makes it easy to skip conditions during development and debugging without removing their details from the experiment table. ",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "conditionGroup",
     availability: "later",
     example: "1",
@@ -537,16 +578,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "Use this to label your condition to help guide your subsequent data analysis. Not used by EasyEyes.",
     type: "text",
     default: "",
-    categories: "",
-  },
-  {
-    name: "conditionEnabledBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "When conditionEnabledBool is FALSE, (default is TRUE) the condition (column in experiment table) does not run, but the block number is treated normally. Thus even if all the conditions of a block are disabled, the block is still counted by the block counter. This makes it easy to skip conditions during development and debugging without removing their details from the experiment table. ",
-    type: "boolean",
-    default: "TRUE",
     categories: "",
   },
   {
@@ -1000,16 +1031,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "maskerSoundDBSPL",
-    availability: "now",
-    example: "",
-    explanation:
-      "maskerSoundDBSPL (default -100) is sound level of the masker in dB SPL.",
-    type: "",
-    default: "-100",
-    categories: "",
-  },
-  {
     name: "maskerDBSPL",
     availability: "now",
     example: "",
@@ -1017,6 +1038,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "DEPRECATED. USE maskerSoundDBSPL INSTEAD. Sound level of the masker, in dB SPL.",
     type: "numerical",
     default: "50",
+    categories: "",
+  },
+  {
+    name: "maskerSoundDBSPL",
+    availability: "now",
+    example: "",
+    explanation:
+      "maskerSoundDBSPL (default -100) is sound level of the masker in dB SPL.",
+    type: "",
+    default: "-100",
     categories: "",
   },
   {
@@ -1748,7 +1779,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "74",
     explanation:
-      "soundCalibrationLevelDBSPL is the nominal sound level that we produce in order to calibrate or check gain calibration. The industry standard is 94 dB SPL, but that may be too loud in some situations.",
+      "USE calibrateSoundDB INSTEAD. soundCalibrationLevelDBSPL is the nominal sound level that we produce in order to calibrate or check gain calibration. The industry standard is 94 dB SPL, but that may be too loud in some situations.",
     type: "numerical",
     default: "74",
     categories: "",

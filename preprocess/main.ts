@@ -181,11 +181,13 @@ export const prepareExperimentFileForThreshold = async (
     });
   });
 
-  const folderStructureErrors = await getRequestedFoldersForStructureCheck(
-    folderList.folderAndTargetKindObjectList
-  );
-  if (folderStructureErrors.length > 0) {
-    errors.push(...folderStructureErrors);
+  if (folderList.folderAndTargetKindObjectList.length > 0) {
+    const folderStructureErrors = await getRequestedFoldersForStructureCheck(
+      folderList.folderAndTargetKindObjectList
+    );
+    if (folderStructureErrors.length > 0) {
+      errors.push(...folderStructureErrors);
+    }
   }
   // console.log("requestedFolderList", requestedFolderList);
 
