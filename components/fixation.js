@@ -278,7 +278,7 @@ export const offsetStimsToFixationPos = (stims) => {
     fixationConfig.pos[1] - fixationConfig.nominalPos[1],
   ];
   for (const stim of stims) {
-    const nominalPos = target.getPos();
+    const nominalPos = stim.getPos();
     const offsetPos = [
       nominalPos[0] + fixationDisplacement[0],
       nominalPos[1] + fixationDisplacement[1],
