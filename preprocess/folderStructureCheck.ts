@@ -56,12 +56,15 @@ import { getUserInfo } from "../../source/components/user";
 import Swal from "sweetalert2";
 
 // import {tempAccessToken} from "../../source/TemporaryLog"
-const tempAccessToken = require("../../source/TemporaryLog").tempAccessToken;
+// const tempAccessToken = require("../../source/components/global").tempAccessToken;
+// es6 import tempAccessToken from "../../source/components/global"
+import { tempAccessToken } from "../../source/components/global";
 
 export const test = async () => {
   console.log("test");
   // console.log("userRepoFiles", userRepoFiles) //userRepoFiles.requestedFolders
   console.log("tempAccessToken", tempAccessToken);
+  if (!tempAccessToken.t) return;
   const [user, resources] = await getUserInfo(tempAccessToken.t);
   console.log("user", user);
   console.log("resources", resources); //resources.folders
@@ -92,7 +95,10 @@ export const getRequestedFoldersForStructureCheck = async (
   folderAndTargetKindObjectList: any[]
 ): Promise<any[]> => {
   //just return empty for local examples
-  if (!tempAccessToken) return [];
+  if (!tempAccessToken.t) {
+    console.log("tempAccessToken is null", tempAccessToken);
+    return [];
+  }
 
   //create a swal to show the user that the folder structure is being checked
   Swal.fire({
