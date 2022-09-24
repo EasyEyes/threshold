@@ -15,8 +15,9 @@
     "build": "webpack --env=production",
     "examples": "sh server/examples.sh",
     "update:submodules": "git submodule update --init --recursive",
+    "clean": "rm -r node_modules",
     "netlify": "git submodule update --init --recursive && npm run setup:psychojs && npm run build && npm run examples",
-    "netlify:website": "run-s update:submodules setup:psychojs build"
+    "netlify:website": "run-s update:submodules setup:psychojs build clean"
   },
   "repository": {
     "type": "git",
