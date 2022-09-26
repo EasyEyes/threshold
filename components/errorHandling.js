@@ -40,18 +40,18 @@ export const buildWindowErrorHandling = (paramReader) => {
 
     // psychoJS default behavior
     if (error?.reason?.stack === undefined) {
-      document.body.setAttribute("data-error", JSON.stringify(error?.reason));
-      psychoJS.experiment.addData("error", JSON.stringify(error?.reason));
+      // no stack from reason
+      const errorMessage = `STACK ${JSON.stringify(error?.stack)}`;
+      document.body.setAttribute("data-error", errorMessage);
+      psychoJS.experiment.addData("error", errorMessage);
     } else {
-      document.body.setAttribute(
-        "data-error",
-        JSON.stringify(error?.reason?.stack)
-      );
+      // stack from reason
+      const errorMessage = `STACK ${JSON.stringify(
+        error?.reason?.stack
+      )} REASON ${JSON.stringify(error?.reason)}`;
+      document.body.setAttribute("data-error", errorMessage);
       try {
-        psychoJS.experiment.addData(
-          "error",
-          JSON.stringify(error?.reason?.stack)
-        );
+        psychoJS.experiment.addData("error", errorMessage);
       } catch (exception) {
         console.error(
           "Failed to add error to experiment data. Perhaps psychoJS.experiment is undefined.",

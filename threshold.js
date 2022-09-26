@@ -360,6 +360,9 @@ var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
+  // ! avoid opening windows twice
+  if (typeof psychoJS._window !== "undefined") return;
+
   buildWindowErrorHandling(reader);
   // await sleep(250);
 
@@ -485,13 +488,17 @@ const paramReaderInitialized = async (reader) => {
   }
 
   ////
-  const startExperiment = () => {
-    // ! clean RC dom
-    if (document.querySelector("#rc-panel-holder"))
-      document.querySelector("#rc-panel-holder").remove();
+  const startExperiment = async () => {
+    if (!(await calibrateAudio(reader))) {
+      quitPsychoJS("", "", reader);
+    } else {
+      // ! clean RC dom
+      if (document.querySelector("#rc-panel-holder"))
+        document.querySelector("#rc-panel-holder").remove();
 
-    // ! Start actual experiment
-    experiment(reader.blockCount);
+      // ! Start actual experiment
+      experiment(reader.blockCount);
+    }
   };
   ////
 
@@ -509,19 +516,11 @@ const paramReaderInitialized = async (reader) => {
         rc.pauseGaze();
         // rc.pauseDistance();
 
-        if (!(await calibrateAudio(reader))) {
-          quitPsychoJS("", "", reader);
-        } else {
-          startExperiment();
-        }
+        await startExperiment();
       }
     );
   } else {
-    if (!(await calibrateAudio(reader))) {
-      quitPsychoJS("", "", reader);
-    } else {
-      startExperiment();
-    }
+    await startExperiment();
   }
 };
 

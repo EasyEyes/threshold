@@ -77,7 +77,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '_compatibleDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
     type: "multicategorical",
     default: "desktop",
-    categories: "all,desktop, tablet, mobile",
+    categories: "all, desktop, tablet, mobile",
   },
   {
     name: "_compatibleIPhoneTooBool",

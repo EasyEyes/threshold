@@ -141,14 +141,18 @@ export class ParamReader {
                 }
                 this._experiment.push(thisCondition);
               }
+
+              // reached only when all blocks are loaded
               if (i === this._blockCount) {
                 if (callback && typeof callback === "function") {
+                  ////
                   const _validateInterval = setInterval(() => {
                     if (this._validateExperiment()) {
                       clearInterval(_validateInterval);
                       callback(that);
                     }
-                  }, 100);
+                  }, 500);
+                  ////
                 }
               }
             },
