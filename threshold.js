@@ -2470,16 +2470,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition = trials.thisTrial.block_condition;
         },
         letter: () => {
-          letterSetResponseType();
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
             }
           }
+          letterSetResponseType();
         },
         rsvpReading: () => {
-          letterSetResponseType();
           for (let c of snapshot.handler.getConditions()) {
             if (
               c.block_condition === trials._currentStaircase._name &&
@@ -2489,9 +2488,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition = status.condition["block_condition"];
             }
           }
+          letterSetResponseType();
         },
         repeatedLetters: () => {
-          letterSetResponseType();
           for (let c of snapshot.handler.getConditions()) {
             if (
               c.block_condition === trials._currentStaircase._name &&
@@ -2501,6 +2500,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition = status.condition["block_condition"];
             }
           }
+          letterSetResponseType();
         },
       });
 

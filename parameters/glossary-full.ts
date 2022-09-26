@@ -77,7 +77,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '_compatibleDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
     type: "multicategorical",
     default: "desktop",
-    categories: "desktop, tablet, mobile",
+    categories: "all,desktop, tablet, mobile",
   },
   {
     name: "_compatibleIPhoneTooBool",
@@ -2079,7 +2079,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "sounds",
     explanation:
-      "The name of a folder of sound files (each file can be in WAV or AAC format), to be used when targetKind==sound. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the directly enclosed files, while ignoring any subfolders and their contents.]\n    For speech in noise (targetKind - sound and targetTask- identify) and tone in melody (targetKind- sound and targetTask- detect) experiments, the sound files must be directly inside the zip files and not in another folder within the zip files. Please refer to the example files.\n    Both WAV and AAC sound files can include multiple channels. Because of browser limitations, EasyEyes can use only up to 8 channels per file. AAC files are much more compact (about 10% the bytes as WAV, depending on data rate) but lossy. AAC files are as compact as MP3 files, with much better sound quality. We suggest starting with WAV, and switching to AAC only if you experience an undesirably long delay in loading your sounds. Switching to AAC will reduce your loading time ten-fold (or more, depending on data rate), but may reduce the sound quality slightly.",
+      "The name of a zip archive of sound files (each file can be in WAV or AAC format), to be used when targetKind==sound. The the zip archive is submitted to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the directly enclosed files.\n    For speech in noise (targetKind - sound and targetTask- identify) and tone in melody (targetKind- sound and targetTask- detect) experiments, the sound files must be directly inside the zip files and not in another folder within the zip files. Please refer to the example files.\n    Both WAV and AAC sound files can include multiple channels. Because of browser limitations, EasyEyes can use only up to 8 channels per file. AAC files are much more compact (about 10% the bytes as WAV, depending on data rate) but lossy. AAC files are as compact as MP3 files, with much better sound quality. We suggest starting with WAV, and switching to AAC only if you experience an undesirably long delay in loading your sounds. Switching to AAC will reduce your loading time ten-fold (or more, depending on data rate), but may reduce the sound quality slightly.",
     type: "text",
     default: "",
     categories: "",

@@ -93,7 +93,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "multicategorical",
     default: "desktop",
-    categories: ["desktop", "tablet", "mobile"],
+    categories: ["all,desktop", "tablet", "mobile"],
   },
   _compatibleIPhoneTooBool: {
     name: "_compatibleIPhoneTooBool",
