@@ -16,8 +16,9 @@
     "examples": "sh server/examples.sh",
     "update:submodules": "git submodule update --init --recursive",
     "clean": "rm -r node_modules",
-    "netlify": "run-s ci update:submodules setup:psychojs build examples",
-    "netlify:website": "run-s ci update:submodules setup:psychojs build"
+    "netlify:install": "npm ci",
+    "netlify": "run-s netlify:install update:submodules setup:psychojs build examples",
+    "netlify:website": "run-s netlify:install update:submodules setup:psychojs build"
   },
   "repository": {
     "type": "git",
