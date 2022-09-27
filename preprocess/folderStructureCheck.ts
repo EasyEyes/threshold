@@ -48,12 +48,13 @@
 
 //********************************************************** */
 
-import { EasyEyesError, INVALID_FOLDER_STRUCTURE } from "./errorMessages";
 import JSZip from "jszip";
+import Swal from "sweetalert2";
+
 // import {userRepoFiles} from "../../source/components/constants"
+import { EasyEyesError, INVALID_FOLDER_STRUCTURE } from "./errorMessages";
 import { getProjectByNameInProjectList } from "../../source/components/gitlabUtils";
 import { getUserInfo } from "../../source/components/user";
-import Swal from "sweetalert2";
 
 // import {tempAccessToken} from "../../source/TemporaryLog"
 // const tempAccessToken = require("../../source/components/global").tempAccessToken;

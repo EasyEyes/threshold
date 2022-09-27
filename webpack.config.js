@@ -32,6 +32,9 @@ const config = {
       },
     ],
   },
+  resolve: {
+    extensions: [".ts", ".js"],
+  },
   devtool: "source-map",
   output: {
     path: __dirname + "/js",
