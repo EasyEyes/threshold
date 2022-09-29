@@ -56,3 +56,31 @@
 .phrase-identification-item-incorrect {
   background-color: rgba(255, 0, 0, 0.26);
 }
+
+.scientist-feedback-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border-color: black;
+  border-width: 2px;
+  border-style: solid;
+  background-color: lightblue;
+  visibility: visible;
+}
+.scientist-feedback-circle-container {
+  display: flex;
+  flex-direction: row;
+  z-index: 9999999;
+  height: 100px;
+
+  position: absolute;
+  bottom: 0;
+  left: calc(50%-50vw);
+}
+
+.scientist-feedback-circle-correct {
+  background-color: rgba(0, 128, 0, 0.266);
+}
+.scientist-feedback-circle-incorrect {
+  background-color: rgba(255, 0, 0, 0.26);
+}

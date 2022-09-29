@@ -36,7 +36,6 @@ import "./components/css/utils.css";
 import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
-// TODO change vocoder to use phraseIdentification styling
 import "./components/css/vocoderPhrase.css";
 import "./components/css/phraseIdentification.css";
 import "./components/css/forms.css";
@@ -344,9 +343,15 @@ import {
 } from "./components/repeatedLetters.js";
 import { KeyPress } from "./psychojs/src/core/index.js";
 import {
+  addScientistKeypressFeedback,
+  Category,
+  constrainRSVPReadingSpeed,
   generateRSVPReadingTargetSets,
   getRSVPReadingCategories,
   getRSVPReadingHeightPx,
+  registerKeypressForRSVPReading,
+  removeScientistKeypressFeedback,
+  updateTrialCounterNumbersForRSVPReading,
   _rsvpReading_trialInstructionRoutineBegin,
   _rsvpReading_trialRoutineEachFrame,
 } from "./components/rsvpReading.js";
@@ -1404,7 +1409,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             },
             rsvpReading: () => {
               const numberOfWordsPerSeries = paramReader.read(
-                "rsvpReadingNumberOfTargetWordsInSequence",
+                "rsvpReadingNumberOfWords",
                 trialsConditions.block
               )[0];
               trialsConditions = populateQuestDefaults(
@@ -1566,6 +1571,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current === "rsvpReading")
     ) {
       // Proportion correct
+      logger("endof trials loop status", status);
       showPopup(
         thisExperimentInfo.name,
         replacePlaceholders(
@@ -2078,7 +2084,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
             instructionsText.initialByThresholdParameter["timing"](
               L,
-              1, // TODO only clicking is defined so far
+              responseType.current,
               paramReader
                 .read("conditionTrials", status.block)
                 .reduce((a, b) => a + b)
@@ -2424,8 +2430,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Number of responses required before the current (psychojs) trial ends
       // For all current targetKinds this is 1.
-      responseType.numberOfResponses =
-        targetKind.current === "rsvpReading" ? 6 : 1;
+      responseType.numberOfResponses = 1;
 
       const letterSetResponseType = () => {
         // ! responseType
@@ -2442,6 +2447,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "responseMustClickCrosshairBool",
             status.block_condition
           )
+        );
+        logger(
+          "responseType trialInstructionRoutineBegin",
+          responseType.current
         );
         if (canClick(responseType.current)) showCursor();
       };
@@ -2478,6 +2487,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterSetResponseType();
         },
         rsvpReading: () => {
+          // if (canClick(responseType.current)) showCursor();
+          logger(
+            "responseType.current trialInstructionRoutineBegin",
+            responseType.current
+          );
+          t;
           for (let c of snapshot.handler.getConditions()) {
             if (
               c.block_condition === trials._currentStaircase._name &&
@@ -3165,30 +3180,35 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             document.addEventListener("click", _takeFixationClick);
             document.addEventListener("touchend", _takeFixationClick);
 
+            rsvpReadingResponse.responseType =
+              paramReader.read("responseTypedBool", BC) &&
+              !paramReader.read("responseClickedBool", BC)
+                ? "typed"
+                : "clicked";
+
             // Get level from quest
             let proposedLevel = currentLoop._currentStaircase.getQuestValue();
             psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-            level = proposedLevel;
-            psychoJS.experiment.addData("level", level);
-
-            // TODO Constrain any way?
-            const durationSec = Math.pow(10, level);
-
             const numberOfWords = paramReader.read(
-              "rsvpReadingNumberOfTargetWordsInSequence",
+              "rsvpReadingNumberOfWords",
               status.block
             )[0];
-            const heightPx = getRSVPReadingHeightPx(reader, BC);
-            const spacingPx = heightPx * letterConfig.spacingOverSizeRatio;
+            level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
+            logger("level vs unconstrained level", [level, proposedLevel]);
+            psychoJS.experiment.addData("level", level);
+
+            const durationSec = Math.pow(10, level);
+
+            rsvpReadingTargetSets.numberOfSets = numberOfWords;
+            logger("target set inputs", [
+              numberOfWords,
+              durationSec,
+              paramReader,
+              status.block_condition,
+            ]);
             const targetSets = generateRSVPReadingTargetSets(
               numberOfWords,
-              XYPixOfXYDeg(
-                letterConfig.targetEccentricityXYDeg,
-                displayOptions
-              ),
-              heightPx,
-              spacingPx,
               durationSec,
               paramReader,
               status.block_condition
@@ -3197,12 +3217,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             correctAns.current = targetSets.map((t) => t.word.toLowerCase());
             rsvpReadingTargetSets.past = [];
 
-            rsvpReadingResponse.categories = getRSVPReadingCategories(
-              rsvpReadingTargetSets.upcoming
+            rsvpReadingResponse.categories = rsvpReadingTargetSets.upcoming.map(
+              (s) => new Category(s.word, s.foilWords)
             );
-            rsvpReadingResponse.screen = setupPhraseIdentification(
-              rsvpReadingResponse.categories
-            );
+            if (rsvpReadingResponse.responseType === "clicked") {
+              logger(
+                "rsvpReadingResponse.responseType",
+                rsvpReadingResponse.responseType
+              );
+              rsvpReadingResponse.screen = setupPhraseIdentification(
+                rsvpReadingResponse.categories
+              );
+            } else {
+              // TODO set up for typed yes/no response
+            }
 
             rsvpReadingTargetSets.current =
               rsvpReadingTargetSets.upcoming.shift();
@@ -3625,7 +3653,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         rsvpReading: () => {
-          logger("TODO rsvpReading trialRoutineBegin");
+          responseType.current = resetResponseType(
+            responseType.original,
+            responseType.current,
+            paramReader.read(
+              "responseMustClickCrosshairBool",
+              status.block_condition
+            )
+          );
+          logger(
+            "responseType.current trialRoutineBegin",
+            responseType.current
+          );
         },
       });
 
@@ -3672,10 +3711,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         rsvpReading: () => {
           const instr = instructionsText.trial.respond["rsvpReading"](
-            rc.language.value
+            rc.language.value,
+            responseType.current
           );
           _instructionSetup(instr);
           instructions.setText(instr);
+          logger(
+            "responseType.current trialRoutineBegin",
+            responseType.current
+          );
         },
         vocoderPhrase: () => {
           // change instruction
@@ -3770,10 +3814,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.condition._duplicatedConditionCardinal !== 1;
         timeWhenRespondable = responseTypeTrial
           ? 0
+          : targetKind.current === "rsvpReading"
+          ? rsvpReadingTargetSets.upcoming[
+              rsvpReadingTargetSets.upcoming.length - 1
+            ].stopTime
           : delayBeforeStimOnsetSec +
             letterConfig.targetSafetyMarginSec +
             letterConfig.targetDurationSec;
 
+        logger("timewhenRespondable", timeWhenRespondable);
         frameRemains =
           delayBeforeStimOnsetSec +
           letterConfig.targetDurationSec -
@@ -3807,13 +3856,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.condition._duplicatedConditionCardinal
             );
           },
-          rsvpReading: () => {
-            //only clickable
-            responseType.current = 1;
-            if (status.condition._duplicatedConditionCardinal !== 1) {
-              continueRoutine = false;
-            }
-          },
           sound: () => {
             if (targetTask.current == "detect") {
               //only accepts y or n
@@ -3834,32 +3876,50 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
               correctAns.current = ["space"];
           },
+          rsvpReading: () => {
+            //only clickable
+            // responseType.current = 1;
+            if (status.condition._duplicatedConditionCardinal !== 1) {
+              continueRoutine = false;
+            }
+          },
         });
       }
       /* -------------------------------------------------------------------------- */
 
-      // Phrase Identification
-      // TODO generalize for use with other target kinds
+      // TODO move this chunk to rsvpReading.js
+      // Given rsvpReading, and we are done showing stimuli...
       if (
         targetKind.current === "rsvpReading" &&
-        status.condition._duplicatedConditionCardinal === 1
+        status.condition._duplicatedConditionCardinal === 1 &&
+        typeof rsvpReadingTargetSets.current === "undefined"
       ) {
-        // Given that we are done showing stimuli...
-        if (typeof rsvpReadingTargetSets.current === "undefined") {
-          // ...show the response screen
-          if (!rsvpReadingResponse.displayStatus) {
-            showPhraseIdentification(rsvpReadingResponse.screen);
-            rsvpReadingResponse.displayStatus = true;
-            // ... and continue when enough responses have been registered
-          } else if (
-            phraseIdentificationResponse.current.length ===
-            rsvpReadingTargetSets.past.length
-          ) {
-            continueRoutine = false;
-          }
+        showCursor();
+        // Show the response screen if response modality is clicking
+        if (
+          rsvpReadingResponse.responseType === "clicked" &&
+          !rsvpReadingResponse.displayStatus
+        ) {
+          showPhraseIdentification(rsvpReadingResponse.screen);
+          rsvpReadingResponse.displayStatus = true;
+        } else if (!rsvpReadingResponse.displayStatus) {
+          // Else create some subtle feedback that the scientist can use
+          addScientistKeypressFeedback(rsvpReadingTargetSets.numberOfSets);
+          rsvpReadingResponse.displayStatus = true;
+        }
+
+        // Continue when enough responses have been registered
+        if (
+          phraseIdentificationResponse.current.length ===
+          rsvpReadingTargetSets.numberOfSets
+        ) {
+          removeScientistKeypressFeedback();
+          updateTrialCounterNumbersForRSVPReading();
+          continueRoutine = false;
         }
       }
 
+      logger("canType trialRoutineEachFrame", canType(responseType.current));
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
       // response type more independent
@@ -3881,6 +3941,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           key_resp.frameNStart = frameN; // exact frame index
           // TODO Use PsychoJS clock if possible
           // Reset together with PsychoJS
+          // ??? why are we using showCharacterSetResponse in this key_resp section?
           showCharacterSetResponse.onsetTime = performance.now();
 
           // keyboard checking is just starting
@@ -3911,11 +3972,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
           /* --- /SIMULATED --- */
 
+          const keyList =
+            targetKind.current === "rsvpReading" ? ["up", "down"] : validAns;
           let theseKeys = key_resp.getKeys({
-            keyList: validAns,
+            keyList: keyList,
             waitRelease: false,
           });
           _key_resp_allKeys.push(...theseKeys);
+
+          if (targetKind.current === "rsvpReading")
+            registerKeypressForRSVPReading(theseKeys);
 
           // NOTE this precludes repeated inputs for the same key. If in future this is desired, revisit.
           // eg consider passing `clear=true`, and recording all keys
@@ -3974,7 +4040,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         toggleClickedCharacters();
 
       // Check if the (set of clickable charset and keyboard) inputs constitute an end-of-trial
-      if (newResponses.length >= responseType.numberOfResponses) {
+      if (
+        newResponses.length >= responseType.numberOfResponses &&
+        targetKind.current !== "rsvpReading"
+      ) {
         _responsesAcrossCardinals.push(..._responsesWithinCardinal);
         // The characters with which the participant responded
         const participantResponse = newResponses.slice(
@@ -4029,12 +4098,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
-            rsvpReading: () => {
-              logger("TODO rsvpReading unique on-correct behavior?");
-              correctSynth.play();
-              status.trialCorrect_thisBlock++;
-              status.trialCompleted_thisBlock++;
-            },
+            // rsvpReading: () => {
+            //   logger("TODO rsvpReading unique on-correct behavior?");
+            //   correctSynth.play();
+            //   status.trialCorrect_thisBlock++;
+            //   status.trialCompleted_thisBlock++;
+            // },
           });
           // CORRECT
           key_resp.corr = 1;
@@ -4630,6 +4699,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               phraseIdentificationResponse.correct.shift() ? 1 : 0,
               level
             );
+            // showCursor();
           },
         });
 

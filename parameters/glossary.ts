@@ -958,17 +958,35 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  rsvpReadingFlankerCharacterSet: {
+    name: "rsvpReadingFlankerCharacterSet",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   rsvpReadingFlankTargetWithWhichLetter: {
     name: "rsvpReadingFlankTargetWithWhichLetter",
     availability: "now",
     type: "text",
     default: "",
   },
+  rsvpReadingNumberOfResponseOptions: {
+    name: "rsvpReadingNumberOfResponseOptions",
+    availability: "now",
+    type: "numerical",
+    default: "6",
+  },
   rsvpReadingNumberOfDistractors: {
     name: "rsvpReadingNumberOfDistractors",
     availability: "now",
     type: "numerical",
     default: "5",
+  },
+  rsvpReadingNumberOfWords: {
+    name: "rsvpReadingNumberOfWords",
+    availability: "now",
+    type: "numerical",
+    default: "6",
   },
   rsvpReadingNumberOfTargetWordsInSequence: {
     name: "rsvpReadingNumberOfTargetWordsInSequence",
@@ -1167,12 +1185,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "2",
-  },
-  soundCalibrationLevelDBSPL: {
-    name: "soundCalibrationLevelDBSPL",
-    availability: "now",
-    type: "numerical",
-    default: "74",
   },
   soundGainDBSPL: {
     name: "soundGainDBSPL",

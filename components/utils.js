@@ -670,6 +670,19 @@ export const sampleWithoutReplacement = (population, sampleSize) => {
   return samples;
 };
 
+/**
+ * Return a sample randomly, independently drawn from population
+ * @param {Any[]} population Array representing the population to be sampled
+ * @param {Number} sampleSize Number of times to sample, ie length of the return value
+ * @returns
+ */
+export const sampleWithReplacement = (population, sampleSize) => {
+  sampleSize = Math.round(sampleSize);
+  return [...new Array(sampleSize).keys()].map(
+    (x) => population[Math.floor(population.length * Math.random())]
+  );
+};
+
 export const getCharSetBaselineOffsetPosition = (
   XYPix,
   normalizedCharacterSetRect,
@@ -739,37 +752,6 @@ export const psychojsUnitsFromWindowUnits = (
   // And then find the position relative to fixation.
   const [xPx, yPx] = [centeredX - fixationXYPx[0], centeredY - fixationXYPx[1]];
   return [xPx, yPx];
-};
-
-/**
- * Generate a random string letters (a-z) of length=len.
- * Exclude characters in usedLetters, and add newly sampled letters to usedLetters (side-effect).
- * @param {Number} len Desired length of the string
- * @param {String[]} usedLetters
- * @returns
- */
-export const generateRandomString = (len, usedLetters = []) => {
-  // Ensure len is an int
-  len = Math.floor(len);
-  const uniqueUsedLetters = [...new Set(usedLetters)];
-  const usedCharCodes = uniqueUsedLetters.map((c) => c.charCodeAt(0));
-  const possibleCharCodes = [...new Array(25).keys()].map((i) => 97 + i);
-  const usableCharCodes = possibleCharCodes.filter(
-    (c) => !usedCharCodes.includes(c)
-  );
-  const drawWithReplacement = (n) =>
-    [...new Array(n).keys()].map(
-      (i) =>
-        [...usableCharCodes, ...usedCharCodes][Math.floor(Math.random() * n)]
-    );
-  const sampledCharCodes =
-    usableCharCodes.length >= len
-      ? shuffle(usableCharCodes).slice(0, len)
-      : drawWithReplacement(len);
-  const sampledCharacters = sampledCharCodes.map((c) => String.fromCharCode(c));
-  const sampledString = sampledCharacters.join("");
-  usedLetters.push(...sampledCharacters);
-  return sampledString;
 };
 
 /**

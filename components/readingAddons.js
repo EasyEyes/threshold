@@ -85,6 +85,7 @@ export const getThisBlockPages = (
         readingCorpusArchive[thisURL],
         paramReader.read("readingFirstFewWords", block)[0]
       );
+      logger("after getReadingUsedText", readingUsedText[thisURL]);
     } else {
       readingUsedText[thisURL] = readingCorpusArchive[thisURL];
       skippedWordsNum = 0;

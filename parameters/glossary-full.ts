@@ -876,7 +876,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      'Setting markingBlankedNearTargetBool TRUE (default FALSE) suppresses any parts of the fixation cross or target X that are too close to the possible targets in this conditionGroup. This enables both meanings of "too close": markingBlankingRadiusReEccentricity and markingBlankingRadiusReTargetHeight.',
+      'Setting markingBlankedNearTargetBool TRUE (default FALSE) suppresses any parts of the fixation cross or target X that are too close to the possible targets in this conditionGroup. This enables both meanings of "too close": markingBlankingRadiusReEccentricity and markingBlankingRadiusReTargetHeight.\nUseful with any target eccentricity.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -886,7 +886,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "So that markings don't crowd the target, the closest that a marking pixel can be to the target center is specified by setting markingBlankingRadiusReEccentricity to the fraction (default 0.5) of the target's radial eccentricity.",
+      "So that markings don't crowd the target, the closest that a marking pixel can be to the target center is specified by setting markingBlankingRadiusReEccentricity to the fraction (default 0.5) of the target's radial eccentricity.\nUseful with a peripheral target.",
     type: "numerical",
     default: "0.5",
     categories: "",
@@ -896,7 +896,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "2",
     explanation:
-      "So that markings don't mask the target, the closest that a marking pixel can be to the traget center is specified by setting markingBlankingRadiusReTargetHeight (default 1) to the fraction of target height.",
+      "So that markings don't mask the target, the closest that a marking pixel can be to the traget center is specified by setting markingBlankingRadiusReTargetHeight (default 1) to the fraction of target height.\nUseful with any target eccentricity.",
     type: "numerical",
     default: "1",
     categories: "",
@@ -916,7 +916,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.05",
     explanation:
-      "markingFixationHotSpotRadiusDeg is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.",
+      "markingFixationHotSpotRadiusDeg is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
     type: "numerical",
     default: "0.3",
     categories: "",
@@ -926,7 +926,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "5",
     explanation:
-      "markingFixationMotionPeriodSec is the time, in secs, that it takes the crosshair to do one revolution around the origin.",
+      "markingFixationMotionPeriodSec is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
     type: "numerical",
     default: "10",
     categories: "",
@@ -936,7 +936,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "markingFixationMotionRadiusDeg is the radius of the circular trajectory of the crosshair about the origin.",
+      "markingFixationMotionRadiusDeg is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
     type: "numerical",
     default: "0.5",
     categories: "",
@@ -946,7 +946,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1",
     explanation:
-      "markingFixationStrokeLengthDeg specifies the stroke length in the fixation cross. The cross consists of two strokes, one horizontal, one vertical. Thus this is a diameter, unless the other marking parameters, which are mostly radii. Setting this to a large value (e.g. 100) will produce a fixation cross that extends from edge to edge of the display, which may help restore salience of a cross despite blanking of the cross near possible target locations.",
+      "markingFixationStrokeLengthDeg specifies the stroke length in the fixation cross. The cross consists of two strokes, one horizontal, one vertical. Thus this is a diameter, unless the other marking parameters, which are mostly radii. Setting this to a large value (e.g. 100) will produce a fixation cross that extends from edge to edge of the display, which may help restore salience of a cross despite blanking of the cross near possible target locations. You can avoid colliding with a peripheral target by setting this short, or by leaving it long and setting markingBlankingRadiusReTargetHeight.",
     type: "numerical",
     default: "2",
     categories: "",
@@ -966,7 +966,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.3",
     explanation:
-      "Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankedNearTargetBool.",
+      "Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankedNearTargetBool. Especially useful with a foveal target.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -976,7 +976,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.2",
     explanation:
-      "Pause before onset of fixation and target markings to minimize backward masking of the target.",
+      "Pause before onset of fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -985,7 +985,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "markingTargetStrokeLengthDeg",
     availability: "now",
     example: "1",
-    explanation: "Stroke length in the X marking the possible target location.",
+    explanation:
+      "Stroke length in the X marking the possible target location. ",
     type: "numerical",
     default: "1",
     categories: "",
@@ -1003,9 +1004,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "markTheFixationBool",
     availability: "now",
-    example: "",
+    example: "FALSE",
     explanation:
-      "Setting markTheFixationBool TRUE (the default) draws a fixation cross.",
+      "Setting markTheFixationBool TRUE (default) draws a fixation cross. This will collide with a foveal target unless you prevent collision by using markingBlankingRadiusReTargetHeight or markingOffsetBeforeTargetOnsetSecs and markingOnsetAfterTargetOffsetSecs.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1013,7 +1014,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "markThePossibleTargetsBool",
     availability: "now",
-    example: "",
+    example: "TRUE",
     explanation:
       "Setting markThePossibleTargetsBool TRUE (default FALSE), draws an X at every possible target location, considering all conditions in this conditionGroup. ",
     type: "boolean",
@@ -1395,7 +1396,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "NOT YET IMPLEMENTED. When responsePurrWhenReadyBool (default FALSE) is TRUE, play a purring sound to alert the observer while we await their response. Pure 200 Hz tone indefinitely at amplitude 1. Stop purring when they respond.",
+      "When responsePurrWhenReadyBool (default FALSE) is TRUE, play a purring sound to alert the observer while we await their response. Pure 200 Hz tone indefinitely at amplitude 1. Stop purring when they respond.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1434,18 +1435,40 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "rsvpReadingFlankTargetWithLettersBool",
     availability: "now",
     example: "FALSE",
-    explanation: "rsvpReadingFlankTargetWithRandomLettersBool",
+    explanation:
+      "DEPRECATED. USE rsvpReadingFlankerCharacterSet INSTEAD. rsvpReadingFlankTargetWithRandomLettersBool",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingFlankerCharacterSet",
+    availability: "now",
+    example: "x",
+    explanation:
+      "rsvpReadingFlankerCharacterSet is a possibly empty (the default) string of characters. If empty then there are no flankers. If nonempty then the target is surrounded with independent random samples from this string. Thus, if the string is only one character then the flankers are all the same character.",
+    type: "text",
+    default: "",
     categories: "",
   },
   {
     name: "rsvpReadingFlankTargetWithWhichLetter",
     availability: "now",
     example: "x",
-    explanation: "rsvpReadingFlankTargetWithWhichLetter",
+    explanation:
+      "DEPRECATED. USE rsvpReadingFlankerCharacterSet INSTEAD. rsvpReadingFlankTargetWithWhichLetter",
     type: "text",
     default: "",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingNumberOfResponseOptions",
+    availability: "now",
+    example: "3",
+    explanation:
+      "rsvpReadingNumberOfResponseOptions is the number of different words (only one of which is correct) provided as possible responses when targetKind is rsvpReading. The response option list is in alphabetical order.",
+    type: "numerical",
+    default: "6",
     categories: "",
   },
   {
@@ -1453,9 +1476,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "3",
     explanation:
-      "rsvpReadingNumberOfDistractors determines the number of alternate response words that are provided, shuffled along with the target word, for response when targetKind is rsvpReading.",
+      "DEPRECATED. USE rsvpReadingNumberOfFoils INSTEAD. rsvpReadingNumberOfDistractors determines the number of alternate response words that are provided, shuffled along with the target word, for response when targetKind is rsvpReading.",
     type: "numerical",
     default: "5",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingNumberOfWords",
+    availability: "now",
+    example: "6",
+    explanation:
+      "rsvpReadingNumberOfWords specifies how many words are shown per trial during each rsvpReading trial. Must be consistent across rsvpReading conditions within a block due to implementation restrictions.",
+    type: "numerical",
+    default: "6",
     categories: "",
   },
   {
@@ -1463,7 +1496,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "6",
     explanation:
-      "rsvpReadingNumberOfTargetWordsInSequence determines how many (target) words are shown in sequence per trial. In other words, this defines the length of the reading sample presented to the participant during each rsvpReading trial. NOTE must be consistent within block due to implementation restrictions.",
+      "DEPRECATED. USE rsvpReadingNumberOfWords INSTEAD. rsvpReadingNumberOfTargetWordsInSequence determines how many (target) words are shown in sequence per trial. In other words, this defines the length of the reading sample presented to the participant during each rsvpReading trial. NOTE must be consistent within block due to implementation restrictions.",
     type: "numerical",
     default: "5",
     categories: "",
@@ -1473,7 +1506,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "If TRUE, only select words for the target sequence and distractor words which have not yet been used as a target or distractor. If FALSE, draw words directly from the corpus, even if those words have already been used in this experiment.",
+      "If TRUE, only select words for the target sequence and foil words which have not yet been used as a target or foil. If FALSE, draw words directly from the corpus, even if those words have already been used in this condition.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1775,21 +1808,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "soundCalibrationLevelDBSPL",
-    availability: "now",
-    example: "74",
-    explanation:
-      "USE calibrateSoundDB INSTEAD. soundCalibrationLevelDBSPL is the nominal sound level that we produce in order to calibrate or check gain calibration. The industry standard is 94 dB SPL, but that may be too loud in some situations.",
-    type: "numerical",
-    default: "74",
-    categories: "",
-  },
-  {
     name: "soundGainDBSPL",
     availability: "now",
     example: "13",
     explanation:
-      "The \"gain\" (in dB) of the the participant's sound system. For a sound vector with level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a vector is 10*log(P) dB, where P is the power, P=mean(S^2), where S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool or calibrateAllHzDBSPLBool TRUE to measure soundGainDBSPL on each participant's computer. For testing of EasyEyes, the scientist can explicityly set soundGainDBSPL.",
+      "The \"gain\" (in dB) of the the participant's sound system at 1000 Hz. For a sound vector with level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a vector is 10*log(P) dB, where P is the power, P=mean(S^2), where S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool or calibrateAllHzDBSPLBool TRUE to measure soundGainDBSPL on each participant's computer. For testing of EasyEyes, the scientist can explicitly set soundGainDBSPL. Running calibrate1000HzDBSPLBool calibrates solely at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response, and installs that filter. The filter is adjust to have unit gain at 1000 Hz. Thus, in that case, soundGainDBSPL will be correct for all frequencies, within the linear range of the loudspeaker.",
     type: "numerical",
     default: "0",
     categories: "",

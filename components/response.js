@@ -79,7 +79,7 @@ export const _onlyClick = (responseType) => {
 
 /**
  * Create, and return, an html element containing the phrase identification page
- * @param {Object<string, string[]>} categories Keys are target words, and values are arrays of distractor words
+ * @param {Category[]} categories Keys are target words, and values are arrays of distractor words
  * @returns {HTMLElement} Response screen element, parent of feedback and response buttons
  */
 export const setupPhraseIdentification = (categories) => {
@@ -99,11 +99,13 @@ export const setupPhraseIdentification = (categories) => {
   container.id = "phrase-identification-clickable-category";
   responseScreen.appendChild(container);
 
-  const categoryKeys = Object.keys(categories);
   const response = {};
 
-  // categoryId aka target word
-  categoryKeys.forEach((categoryId) => {
+  for (const [categoryNum, category] of categories.entries()) {
+    const targetWord = category.target;
+    // In case targetWord are not unique across categories, include category index
+    const categoryId = targetWord + String(categoryNum);
+
     const categoryContainer = document.createElement("div");
     categoryContainer.classList.add("phrase-identification-category-container");
     categoryContainer.id = "phrase-identification-category-container";
@@ -121,13 +123,24 @@ export const setupPhraseIdentification = (categories) => {
     categoryColumn.style.flexDirection = "column";
 
     // categoryChild aka distractor word
-    categories[categoryId].forEach((categoryChild, i) => {
+    category.elements.forEach((categoryChild) => {
       const categoryItem = document.createElement("div");
       categoryItem.id = `phrase-identification-category-item-${categoryChild}`;
       categoryItem.className = `phrase-identification-category-item`;
       categoryItem.innerHTML = categoryChild;
       categoryItem.onclick = () => {
-        if (!response.hasOwnProperty(categoryId)) {
+        // Only register one response per category
+        if (
+          !phraseIdentificationResponse.categoriesResponded.includes(
+            categoryNum
+          )
+        ) {
+          const answerIsCorrect = categoryChild === targetWord ? 1 : 0;
+          phraseIdentificationResponse.categoriesResponded.push(categoryNum);
+          phraseIdentificationResponse.clickTime.push(performance.now());
+          phraseIdentificationResponse.current.push(categoryChild);
+          phraseIdentificationResponse.correct.push(answerIsCorrect);
+
           response[categoryId] = categoryChild;
           categoryItem.classList.add("phrase-identification-item-selected");
 
@@ -136,25 +149,10 @@ export const setupPhraseIdentification = (categories) => {
           );
           correspondingFeedbackText.innerHTML = categoryChild;
           correspondingFeedbackText.classList.add(
-            categoryChild === categoryId
+            categoryChild === targetWord
               ? "phrase-identification-item-correct"
               : "phrase-identification-item-incorrect"
           );
-
-          if (
-            !phraseIdentificationResponse.categoriesResponded.includes(
-              categoryId + String(i)
-            )
-          ) {
-            phraseIdentificationResponse.current.push(categoryChild);
-            phraseIdentificationResponse.correct.push(
-              categoryChild === categoryId ? 1 : 0
-            );
-            phraseIdentificationResponse.categoriesResponded.push(
-              categoryId + String(i)
-            );
-            phraseIdentificationResponse.clickTime.push(performance.now());
-          }
         }
       };
       categoryColumn.appendChild(categoryItem);
@@ -163,7 +161,7 @@ export const setupPhraseIdentification = (categories) => {
     categoryContainer.appendChild(categoryTitle);
     categoryContainer.appendChild(categoryColumn);
     container.appendChild(categoryContainer);
-  });
+  }
   return responseScreen;
 };
 

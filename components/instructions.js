@@ -33,6 +33,15 @@ export const spaceOrCrosshair = (L, responseType, prev = "") => {
           prev + phrases.T_readyPressSpaceOrClickCrosshairRepeatedLetters[L]
         );
     }
+  } else if (targetKind.current === "rsvpReading") {
+    switch (responseType) {
+      case 0:
+        return prev + phrases.T_readyPressSpaceRSVPReading[L];
+      case 1:
+        return prev + phrases.T_readyClickCrosshairRSVPReading[L];
+      default:
+        return prev + phrases.T_readyPressSpaceOrClickCrosshairRSVPReading[L];
+    }
   } else {
     switch (responseType) {
       case 0:
@@ -122,7 +131,7 @@ export const instructionsText = {
         );
         switch (responseType) {
           case 0:
-            // TODO keypress isn't defined yet
+            text += extraSpace + `${phrases.T_pressingKeyRSVPReading[L]}\n\n`;
             break;
           case 1:
             text += extraSpace + `${phrases.T_clickingWordRSVPReading[L]}\n\n`;
@@ -158,8 +167,12 @@ export const instructionsText = {
       },
     },
     respond: {
-      rsvpReading: (L) => {
-        return phrases.T_identifyClickItRsvpReading[L];
+      rsvpReading: (L, responseType) => {
+        if (responseType === 0) {
+          return phrases.T_identifyPressItRsvpReading[L];
+        } else {
+          return phrases.T_identifyClickItRsvpReading[L];
+        }
       },
       vocoderPhrase: (L) => {
         return phrases.T_soundPhraseResponse[L];

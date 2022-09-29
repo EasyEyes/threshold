@@ -356,10 +356,11 @@ export const rsvpReadingWordHistory = {
   currentWordPosition: [0, 0],
   usedWords: [],
   usedTargets: [],
-  usedDistractors: [],
+  usedFoils: [],
 };
 
 export const rsvpReadingTargetSets = {
+  numberOfSets: undefined,
   current: undefined,
   upcoming: [],
   past: [],
@@ -369,6 +370,7 @@ export const rsvpReadingResponse = {
   categories: undefined,
   screen: undefined,
   displayStatus: false,
+  responseType: undefined,
 };
 
 export const rsvpReadingTiming = {
