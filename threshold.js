@@ -1571,7 +1571,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current === "rsvpReading")
     ) {
       // Proportion correct
-      logger("endof trials loop status", status);
       showPopup(
         thisExperimentInfo.name,
         replacePlaceholders(
@@ -3195,18 +3194,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block
             )[0];
             level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
-            logger("level vs unconstrained level", [level, proposedLevel]);
             psychoJS.experiment.addData("level", level);
 
             const durationSec = Math.pow(10, level);
 
             rsvpReadingTargetSets.numberOfSets = numberOfWords;
-            logger("target set inputs", [
-              numberOfWords,
-              durationSec,
-              paramReader,
-              status.block_condition,
-            ]);
             const targetSets = generateRSVPReadingTargetSets(
               numberOfWords,
               durationSec,
@@ -3822,7 +3814,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.targetSafetyMarginSec +
             letterConfig.targetDurationSec;
 
-        logger("timewhenRespondable", timeWhenRespondable);
         frameRemains =
           delayBeforeStimOnsetSec +
           letterConfig.targetDurationSec -
@@ -3913,13 +3904,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           phraseIdentificationResponse.current.length ===
           rsvpReadingTargetSets.numberOfSets
         ) {
-          removeScientistKeypressFeedback();
+          if (rsvpReadingResponse.responseType === "typed")
+            removeScientistKeypressFeedback();
           updateTrialCounterNumbersForRSVPReading();
           continueRoutine = false;
         }
       }
 
-      logger("canType trialRoutineEachFrame", canType(responseType.current));
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
       // response type more independent

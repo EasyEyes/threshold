@@ -67,7 +67,6 @@ export class RSVPReadingTargetSet {
         sampleWithReplacement(this.flankerCharacterSet, 1).join("") +
         this.word +
         sampleWithReplacement(this.flankerCharacterSet, 1).join("");
-      logger("strings", [topString, bottomString, middleString]);
       // Create the stims for those strings
       const topRowFlankerLetters = _generateLetterStimsForWord(
         topString,
@@ -137,17 +136,14 @@ export const generateRSVPReadingTargetSets = (
   const targetWords = [...new Array(numberOfTargets)].map((i) =>
     _getNextRSVPWord(uniqueWordsRequired)
   );
-  logger("targetWords", targetWords);
   rsvpReadingWordHistory.usedTargets.push(...targetWords);
   const numberOfFoils =
     paramReader.read("rsvpReadingNumberOfResponseOptions", BC) - 1;
-  logger("numberOfFoils", numberOfFoils);
   const foilWords = targetWords.map((w, i) =>
     [...new Array(numberOfFoils).keys()].map((s) =>
       _getNextRSVPWord(uniqueWordsRequired)
     )
   );
-  logger("foilWords", foilWords);
   foilWords.forEach((d) => rsvpReadingWordHistory.usedFoils.push(...d));
   const targetSets = [];
   for (const [i, targetWord] of targetWords.entries()) {
@@ -296,7 +292,6 @@ export const _rsvpReading_trialRoutineEachFrame = (
       // Mark start-time for this target set
       if (!rsvpReadingTiming.current.startSec) {
         rsvpReadingTiming.current.startSec = t;
-        logger("rsvp marking timing startSec");
       }
       if (
         !rsvpReadingTiming.current.drawnConfirmedTimestamp &&
@@ -305,7 +300,6 @@ export const _rsvpReading_trialRoutineEachFrame = (
         )
       ) {
         rsvpReadingTiming.current.drawnConfirmedTimestamp = t;
-        logger("rsvp marking timing drawnConfirmedTimestamp");
       }
     }
     if (rsvpReadingTargetSets.current.stopTime <= t) {
@@ -336,7 +330,6 @@ export const _rsvpReading_trialRoutineEachFrame = (
         justFinishedStims.forEach((s) => (s.frameNFinishedConfirmed = frameN));
       }
     }
-  } else {
   }
 };
 
@@ -426,7 +419,7 @@ const updateScientistKeypressFeedback = (correctBool) => {
 };
 
 export const removeScientistKeypressFeedback = () => {
-  const feedbackCircles = document.querySelector(
+  const feedbackCircles = document.body.querySelector(
     ".scientist-feedback-circle-container"
   );
   logger("removing ", feedbackCircles);
