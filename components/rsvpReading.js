@@ -419,18 +419,14 @@ const updateScientistKeypressFeedback = (correctBool) => {
 };
 
 export const removeScientistKeypressFeedback = () => {
-  const feedbackCircles = document.body.querySelector(
+  const feedbackCircles = document.querySelector(
     ".scientist-feedback-circle-container"
   );
-  logger("removing ", feedbackCircles);
-  feedbackCircles.parentNode.removeChild(feedbackCircles);
+  if (feedbackCircles != null)
+    feedbackCircles.parentNode.removeChild(feedbackCircles);
 };
 
 export const updateTrialCounterNumbersForRSVPReading = () => {
-  logger(
-    "Going to update trial counter numbers",
-    phraseIdentificationResponse.correct
-  );
   phraseIdentificationResponse.correct.forEach((bool) => {
     status.trialCompleted_thisBlock += 1;
     if (bool) status.trialCorrect_thisBlock += 1;
