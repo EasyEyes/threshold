@@ -181,6 +181,33 @@ export const updateTargetSpecsForSoundIdentify = (
   }\nsoundGainDBSPL: ${soundGain}\nnoiseLevel: ${noiseLevel}\ntargetSoundFolder: ${targetSoundFolder}`;
 };
 
+export const updateTargetSpecsForRsvpReading = (stimulusParameters) => {
+  // TODO populate with relevant values
+  // showConditionNameConfig.targetSpecs = `sizeDeg: ${
+  //   Math.round(10 * stimulusParameters.sizeDeg) / 10
+  // }\n${
+  //   stimulusParameters.spacingDeg
+  //     ? `spacingDeg: ${Math.round(10 * stimulusParameters.spacingDeg) / 10}`
+  //     : ""
+  // }\nheightDeg: ${
+  //   Math.round(10 * stimulusParameters.heightDeg) / 10
+  // }\nheightPx: ${Math.round(
+  //   stimulusParameters.heightPx
+  // )}\nfilename: ${experimentFileName}\nfont: ${
+  //   font.name
+  // }\nspacingRelationToSize: ${
+  //   letterConfig.spacingRelationToSize
+  // }\nspacingOverSizeRatio: ${
+  //   letterConfig.spacingOverSizeRatio
+  // }\nspacingSymmetry: ${letterConfig.spacingSymmetry}\ntargetDurationSec: ${
+  //   letterConfig.targetDurationSec
+  // }\ntargetSizeIsHeightBool: ${
+  //   letterConfig.targetSizeIsHeightBool
+  // }\ntargetEccentricityXYDeg: ${
+  //   letterConfig.targetEccentricityXYDeg
+  // }\nviewingDistanceCm: ${viewingDistanceCm.current}`;
+};
+
 export const isTimingOK = (measured, target) => {
   return measured < target ? "OK" : "BAD";
 };

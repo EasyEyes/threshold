@@ -120,7 +120,6 @@ import {
   psychoJS,
   renderObj,
   initMouse,
-  psychojsMouse,
 } from "./components/globalPsychoJS.js";
 
 ////
@@ -267,12 +266,7 @@ import {
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
 import { addPopupLogic } from "./components/popup.js";
 
-import {
-  calculateError,
-  addResponseIfTolerableError,
-  measureGazeError,
-  readAllowedTolerances,
-} from "./components/errorMeasurement.js";
+import { readAllowedTolerances } from "./components/errorMeasurement.js";
 
 /* ---------------------------------- */
 // * TRIAL ROUTINES
@@ -336,7 +330,6 @@ import { readTrialLevelLetterParams } from "./components/letter.js";
 //   updateCurrentBlockCondition,
 // } from "./components/temporaryLogger.js";
 import {
-  duplicateRepeatedLetterConditions,
   readTrialLevelRepeatedLetterParams,
   generateRepeatedLettersStims,
   restrictRepeatedLettersSpacing,

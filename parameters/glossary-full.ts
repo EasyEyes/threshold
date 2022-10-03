@@ -74,7 +74,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "desktop",
     explanation:
-      '_compatibleDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. ',
+      '_compatibleDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. NOTE: The value "all" is not yet implemented.',
     type: "multicategorical",
     default: "desktop",
     categories: "all, desktop, tablet, mobile",
@@ -1236,7 +1236,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "3",
     explanation:
-      'If readingSetSizeBy is "nominal", notthen set point size to readingNominalSizeDeg*pixPerDeg.',
+      'If readingSetSizeBy is "nominal", then set point size to the product readingNominalSizeDeg*pixPerDeg.',
     type: "numerical",
     default: "1",
     categories: "",
@@ -1276,7 +1276,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "spacing",
     explanation:
-      "How do you specify the size of the text to be read?\n• nominal will set the point size of the text to readingNominalSizeDeg*pixPerDeg,  \n• xHeight will adjust text size to achieve the specified x-height (the height of lowercase x),  i.e. readingXHeightDeg. \n• spacing will adjust the text size to achieve the specified letter-to-letter readingSpacingDeg.",
+      "How do you specify the size of the text to be read?\n• nominal will set the point size of the text to readingNominalSizeDeg*pixPerDeg,  \n• xHeight will adjust text size to achieve the specified x-height (the height of lowercase x),  i.e. readingXHeightDeg. \n• spacing will adjust the text size to achieve the specified average letter-to-letter readingSpacingDeg.",
     type: "categorical",
     default: "spacing",
     categories: "nominal, xHeight, spacing",
@@ -1434,9 +1434,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "rsvpReadingFlankTargetWithLettersBool",
     availability: "now",
-    example: "FALSE",
+    example: "",
     explanation:
-      "DEPRECATED. USE rsvpReadingFlankerCharacterSet INSTEAD. rsvpReadingFlankTargetWithRandomLettersBool",
+      "OBSOLETE. RETAINED SOLELY FOR REPLICATION OF BUG REPORTED IN TRELLO CARD. https://trello.com/c/xKZaBnEV",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1452,16 +1452,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "rsvpReadingFlankTargetWithWhichLetter",
-    availability: "now",
-    example: "x",
-    explanation:
-      "DEPRECATED. USE rsvpReadingFlankerCharacterSet INSTEAD. rsvpReadingFlankTargetWithWhichLetter",
-    type: "text",
-    default: "",
-    categories: "",
-  },
-  {
     name: "rsvpReadingNumberOfResponseOptions",
     availability: "now",
     example: "3",
@@ -1472,16 +1462,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "rsvpReadingNumberOfDistractors",
-    availability: "now",
-    example: "3",
-    explanation:
-      "DEPRECATED. USE rsvpReadingNumberOfFoils INSTEAD. rsvpReadingNumberOfDistractors determines the number of alternate response words that are provided, shuffled along with the target word, for response when targetKind is rsvpReading.",
-    type: "numerical",
-    default: "5",
-    categories: "",
-  },
-  {
     name: "rsvpReadingNumberOfWords",
     availability: "now",
     example: "6",
@@ -1489,16 +1469,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "rsvpReadingNumberOfWords specifies how many words are shown per trial during each rsvpReading trial. Must be consistent across rsvpReading conditions within a block due to implementation restrictions.",
     type: "numerical",
     default: "6",
-    categories: "",
-  },
-  {
-    name: "rsvpReadingNumberOfTargetWordsInSequence",
-    availability: "now",
-    example: "6",
-    explanation:
-      "DEPRECATED. USE rsvpReadingNumberOfWords INSTEAD. rsvpReadingNumberOfTargetWordsInSequence determines how many (target) words are shown in sequence per trial. In other words, this defines the length of the reading sample presented to the participant during each rsvpReading trial. NOTE must be consistent within block due to implementation restrictions.",
-    type: "numerical",
-    default: "5",
     categories: "",
   },
   {

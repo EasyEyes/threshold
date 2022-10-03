@@ -13,10 +13,8 @@ import {
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
-  generateRandomString,
   getEvenlySpacedValues,
   logger,
-  sampleWithoutReplacement,
   sampleWithReplacement,
   shuffle,
   XYPixOfXYDeg,
@@ -32,7 +30,8 @@ export class RSVPReadingTargetSet {
     durationSec,
     orderNumber,
     foilWords,
-    flankerCharacterSet
+    flankerCharacterSet,
+    spacingRelationToSize
   ) {
     this.word = word;
     this.foilWords = foilWords;
@@ -41,6 +40,7 @@ export class RSVPReadingTargetSet {
     this.stopTime = this.startTime + durationSec;
     this.orderNumber = orderNumber;
     this.flankerCharacterSet = flankerCharacterSet.split("");
+    this.spacingRelationToSize = spacingRelationToSize;
 
     this._heightPx = heightPx;
     this._spacingPx = spacingPx;
@@ -67,42 +67,115 @@ export class RSVPReadingTargetSet {
         sampleWithReplacement(this.flankerCharacterSet, 1).join("") +
         this.word +
         sampleWithReplacement(this.flankerCharacterSet, 1).join("");
-      // Create the stims for those strings
-      const topRowFlankerLetters = _generateLetterStimsForWord(
-        topString,
-        [this.position[0], this.position[1] + this._spacingPx],
-        this._heightPx,
-        this._spacingPx,
-        `topFlanker-${this.orderNumber}`
-      );
-      const bottomRowFlankerLetters = _generateLetterStimsForWord(
-        bottomString,
-        [this.position[0], this.position[1] - this._spacingPx],
-        this._heightPx,
-        this._spacingPx,
-        `bottomFlanker-${this.orderNumber}`
-      );
-      const targetRowLetters = _generateLetterStimsForWord(
-        middleString,
-        this.position,
-        this._heightPx,
-        this._spacingPx,
-        `middleRow-${this.orderNumber}`
-      );
-      return [
-        ...topRowFlankerLetters,
-        ...bottomRowFlankerLetters,
-        ...targetRowLetters,
+      const topRowPosition = [
+        this.position[0],
+        this.position[1] + this._spacingPx,
       ];
+      const bottomRowPosition = [
+        this.position[0],
+        this.position[1] - this._spacingPx,
+      ];
+      // Create the stims for those strings
+      if (this.spacingRelationToSize === "ratio") {
+        const topRowFlankerLetters = _generateLetterStimsForWord(
+          topString,
+          topRowPosition,
+          this._heightPx,
+          this._spacingPx,
+          `topFlanker-${this.orderNumber}`
+        );
+        const bottomRowFlankerLetters = _generateLetterStimsForWord(
+          bottomString,
+          bottomRowPosition,
+          this._heightPx,
+          this._spacingPx,
+          `bottomFlanker-${this.orderNumber}`
+        );
+        const targetRowLetters = _generateLetterStimsForWord(
+          middleString,
+          this.position,
+          this._heightPx,
+          this._spacingPx,
+          `middleRow-${this.orderNumber}`
+        );
+        return [
+          ...topRowFlankerLetters,
+          ...bottomRowFlankerLetters,
+          ...targetRowLetters,
+        ];
+      } else {
+        const topRowWordStim = new TextStim({
+          name: `topRow-${this.orderNumber}-${topString}`,
+          win: psychoJS.window,
+          text: topString,
+          font: font.name,
+          pos: topRowPosition,
+          units: "pix",
+          height: this._heightPx,
+          wrapWidth: undefined,
+          ori: 0.0,
+          color: new Color("black"),
+          opacity: 1.0,
+          depth: -8.0,
+        });
+        const bottomRowWordStim = new TextStim({
+          name: `bottomRow-${this.orderNumber}-${bottomString}`,
+          win: psychoJS.window,
+          text: bottomString,
+          font: font.name,
+          pos: bottomRowPosition,
+          units: "pix",
+          height: this._heightPx,
+          wrapWidth: undefined,
+          ori: 0.0,
+          color: new Color("black"),
+          opacity: 1.0,
+          depth: -8.0,
+        });
+        const middleRowWordStim = new TextStim({
+          name: `middleRow-${this.orderNumber}-${middleString}`,
+          win: psychoJS.window,
+          text: middleString,
+          font: font.name,
+          pos: this.position,
+          units: "pix",
+          height: this._heightPx,
+          wrapWidth: undefined,
+          ori: 0.0,
+          color: new Color("black"),
+          opacity: 1.0,
+          depth: -8.0,
+        });
+        return [topRowWordStim, bottomRowWordStim, middleRowWordStim];
+      }
     } else {
       // Otherwise just generate a stim for the target word
-      return _generateLetterStimsForWord(
-        this.word,
-        this.position,
-        this._heightPx,
-        this._spacingPx,
-        `middleRow-${this.orderNumber}`
-      );
+      if (this.spacingRelationToSize === "ratio") {
+        return _generateLetterStimsForWord(
+          this.word,
+          this.position,
+          this._heightPx,
+          this._spacingPx,
+          `middleRow-${this.orderNumber}`
+        );
+      } else {
+        return [
+          new TextStim({
+            name: `middleRow-${this.orderNumber}-${this.word}`,
+            win: psychoJS.window,
+            text: this.word,
+            font: font.name,
+            pos: this.pos,
+            units: "pix",
+            height: this._heightPx,
+            wrapWidth: undefined,
+            ori: 0.0,
+            color: new Color("black"),
+            opacity: 1.0,
+            depth: -8.0,
+          }),
+        ];
+      }
     }
   }
 }
@@ -156,7 +229,8 @@ export const generateRSVPReadingTargetSets = (
         durationSec,
         i,
         foilWords[i],
-        paramReader.read("rsvpReadingFlankerCharacterSet", BC)
+        paramReader.read("rsvpReadingFlankerCharacterSet", BC),
+        paramReader.read("spacingRelationToSize", BC)
       )
     );
   }
