@@ -4,12 +4,9 @@ import { fixationConfig } from "./global.js";
 
 import {
   degreesToPixels,
-  pixelsToDegrees,
-  getPixPerCm,
   XYPixOfXYDeg,
   XYDegOfXYPix,
   isInRect,
-  logger,
 } from "./utils.js";
 
 /*
@@ -95,7 +92,7 @@ export class Grid {
    * [Triggered on relevant keypress, ie tilde]
    */
   cycle() {
-    this._undraw(true);
+    this._undraw();
     this.units = this._cycleUnits(this.units);
     this.spawnGridStims(this.units);
     [this.lines, this.labels] = this.allGrids[this.units];
@@ -104,7 +101,7 @@ export class Grid {
 
   /**
    * Generate the stims for the grid, and store in `this._allGridStims`.
-   * Generates all three grids if now parameter is provided, or else just the provided unit's grid.
+   * Generates all grids if now parameter is provided, or else just the provided unit's grid.
    * @param {("px" | "cm" | "deg" | "mm" | "none")} units
    */
   spawnGridStims(units = undefined) {
@@ -140,10 +137,11 @@ export class Grid {
    * ie `_draw` if `visible===true`, else `_undraw`
    */
   _reflectVisibility() {
-    const stims = [...this.lines, ...this.labels];
-    stims.forEach((s) => {
-      if (s) s.setAutoDraw(this.visible);
-    });
+    if (this.visible) {
+      this._draw();
+    } else {
+      this._undraw();
+    }
   }
 
   _getGridStims(units) {

@@ -3653,7 +3653,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
-      grid.current.update();
       ////
 
       //------Prepare to start Routine 'trial'-------
@@ -4439,7 +4438,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ////
       speechInNoiseShowClickable.current = true;
       vocoderPhraseShowClickable.current = true;
-      grid.current.hide(true);
+      grid.current.hide();
 
       if (fixationConfig.nominalPos)
         fixationConfig.pos = fixationConfig.nominalPos;

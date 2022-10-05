@@ -397,12 +397,6 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  calibrateTrackNearPointBool: {
-    name: "calibrateTrackNearPointBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
   computeImageJS: {
     name: "computeImageJS",
     availability: "now",

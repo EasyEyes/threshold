@@ -132,6 +132,7 @@ export const loggerText = (text) => {
 };
 
 /**
+ * DEPRECATED Should not be used. 1 dimensional deg -> pix conversion is undefined.
  * Convert a (magnitude) value of visual degrees to pixels
  * @todo add tests
  * @param {Number} degrees Scalar, in degrees

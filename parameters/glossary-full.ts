@@ -522,15 +522,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibrateTrackNearPointBool",
-    availability: "now",
-    example: "",
-    explanation: "OBSOLETE. USE calibratePupillaryDistanceBool INSTEAD.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "computeImageJS",
     availability: "now",
     example: "",
@@ -1644,7 +1635,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "deg",
     explanation:
-      "showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially after a moving crosshair, which might compromise stimulus timing. So turn off grids when you collect human data and when you check timing.",
+      "showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially after a moving crosshair, which might compromise stimulus timing (high stimulus latency and wrong duration). So turn off grids when you collect human data and when you check timing.",
     type: "categorical",
     default: "disabled",
     categories: "px, cm, deg, mm, none, disabled",
@@ -2149,7 +2140,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "identify",
     explanation:
-      'Can be one or multiple of the following categories.\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant will be presented a question.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'Can be one or more of the following categories, separated by commas,\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant will be presented a question.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
     type: "categorical",
     default: "identify",
     categories: "identify, detect, questionAndAnswer",
@@ -2169,7 +2160,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetWhenSec (default 0) is when the central time of the target occurs relative to the middle of the movie.",
+      "targetWhenSec (default 0) indicates when the middle time of the target occurs relative to the middle of the movie.",
     type: "numerical",
     default: "0",
     categories: "",
