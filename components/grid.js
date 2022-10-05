@@ -1,6 +1,7 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
 import { fixationConfig } from "./global.js";
+import { psychoJS } from "./globalPsychoJS.js";
 
 import {
   degreesToPixels,
@@ -45,8 +46,11 @@ export class Grid {
         e.code === this.gridkey.code ||
         this.gridkey.key.includes(e.key) ||
         e.keyCode === this.gridkey.keyCode
-      )
+      ) {
         this.cycle();
+        if (psychoJS && psychoJS.experiment)
+          psychoJS.experiment.addData("cycledGridTo", this.units);
+      }
       e.stopPropagation();
     };
     // EXPERIMENTAL window.onresize = (e) => this.update();

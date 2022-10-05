@@ -17,7 +17,7 @@ export const useCalibration = (reader) => {
     ...reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__"),
-    ...reader.read("calibrateTrackNearPointBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibratePupillaryDistanceBool", "__ALL_BLOCKS__"),
   ]);
 };
 
@@ -73,7 +73,7 @@ export const formCalibrationList = (reader) => {
       name: "trackDistance",
       options: {
         nearPoint: ifTrue(
-          reader.read("calibrateTrackNearPointBool", "__ALL_BLOCKS__")
+          reader.read("calibratePupillaryDistanceBool", "__ALL_BLOCKS__")
         ),
         showVideo: false,
         desiredDistanceCm: reader.has("viewingDistanceDesiredCm")
