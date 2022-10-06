@@ -41,7 +41,9 @@ export const buildWindowErrorHandling = (paramReader) => {
     // psychoJS default behavior
     if (error?.reason?.stack === undefined) {
       // no stack from reason
-      const errorMessage = `STACK ${JSON.stringify(error?.stack)}`;
+      const errorMessage = `STACK ${JSON.stringify(
+        error?.stack
+      )} ERROR ${error}`;
       document.body.setAttribute("data-error", errorMessage);
       psychoJS.experiment.addData("error", errorMessage);
     } else {
