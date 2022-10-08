@@ -745,6 +745,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "",
   },
+  movieHz: {
+    name: "movieHz",
+    availability: "now",
+    type: "numerical",
+    default: "60",
+  },
   movieLuminanceNit: {
     name: "movieLuminanceNit",
     availability: "now",
@@ -768,6 +774,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "",
+  },
+  movieSec: {
+    name: "movieSec",
+    availability: "now",
+    type: "numerical",
+    default: "60",
   },
   notes: { name: "notes", availability: "now", type: "text", default: "" },
   playNegativeFeedbackBeepBool: {

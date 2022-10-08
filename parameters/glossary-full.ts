@@ -1083,6 +1083,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "movieHz",
+    availability: "now",
+    example: "",
+    explanation:
+      "movieHz is the desired frame rate of the movie. Most displays run at 60 Hz, some are faster, and some have variable frame rate. movieHz controls the number of computed movie frames. Each computed frame could be displayed for several display frames. For example, one might save computation time by setting movieHz to 15 for display on a 60 Hz display.",
+    type: "numerical",
+    default: "60",
+    categories: "",
+  },
+  {
     name: "movieLuminanceNit",
     availability: "now",
     example: "",
@@ -1120,6 +1130,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "movieTargetOnsetDelaySec (default is empty, which requests that targetDurationSec is centered in the movieDurationSec) specified the delay from movie onset to target onset.",
     type: "numerical",
     default: "",
+    categories: "",
+  },
+  {
+    name: "movieSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "movieSec is the  desired duration of the movie. The actual duration will be an integer number of frames. EasyEyes will compute n=round(movieHz*movieSec) frames, with a duration of n/movieHz.",
+    type: "numerical",
+    default: "60",
     categories: "",
   },
   {

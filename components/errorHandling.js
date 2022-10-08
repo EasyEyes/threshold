@@ -39,19 +39,13 @@ export const buildWindowErrorHandling = (paramReader) => {
     console.error(error?.reason);
 
     // psychoJS default behavior
-    if (error?.reason?.stack === undefined) {
-      // no stack from reason
-      const errorMessage = `STACK ${JSON.stringify(
-        error?.stack
-      )} ERROR ${error}`;
-      document.body.setAttribute("data-error", errorMessage);
-      psychoJS.experiment.addData("error", errorMessage);
-    } else {
+    if (error?.reason?.stack) {
       // stack from reason
       const errorMessage = `STACK ${JSON.stringify(
-        error?.reason?.stack
+        error?.reason?.stack || error?.stack
       )} REASON ${JSON.stringify(error?.reason)}`;
       document.body.setAttribute("data-error", errorMessage);
+
       try {
         psychoJS.experiment.addData("error", errorMessage);
       } catch (exception) {
@@ -60,6 +54,13 @@ export const buildWindowErrorHandling = (paramReader) => {
           exception
         );
       }
+    } else {
+      // no stack from reason
+      const errorMessage = `STACK ${JSON.stringify(
+        error?.stack
+      )} ERROR ${error} REASON ${JSON.stringify(error?.reason)}`;
+      document.body.setAttribute("data-error", errorMessage);
+      psychoJS.experiment.addData("error", errorMessage);
     }
 
     // quit
