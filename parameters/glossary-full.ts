@@ -1107,29 +1107,29 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "movieRectDeg (default is empty, indicating whole screen) indicates the desired approximate movie size and location in the visual field. It consists of four float numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and to the right of fixation. The sequence is left,bottom,right,top. Whatever is requested will be mapped to pixels and clipped by screenRectPx. \n\nNote that movieRectDeg is a rect on the retina, which will be curved on the screen, and tthe movie's screen pixels are specified as the screen rect, movieRectDeg. Guided by movieRectPxContainsDegBool, EasyEyes creates screenRectPx to be a reasonable approximation to movieRectDeg.\n\nThe scientist provides movieRectDeg, which defines a rect in visual coordinates (i.e. on the retina). Note that straight lines in visual space generally correspond to curves in pixel space. However, the HDR movie must be a rect (horizontal & vertical rectangle) on the screen, so EasyEyes defines the movieRectPx screen rect approximation to movieRectDeg. movieRectDeg is rectangular on the retina, and movieRectPx is rectangular on the screen. \n\nmovieRectPx is the screen rect used for the movie. It is derived from movieRectDeg according to movieRectPxContainsDegBool, and then clipped by screenRectPx. If movieRectDeg is empty (the default) then movieRectPx is the whole screen, ie screenRectPx.\n\nThe movie bounds are movieRectPx. To compute a movie, we usually need to know the visual coordinate of each pixel. EasyEyes provides the 2*width*height array xyDeg, where array xyDeg(i,j) is the x,y position in deg of pixel (i,j).",
+      "movieRectDeg (default is empty, indicating whole screen) indicates the desired approximate movie size and location in the visual field. It consists of four float numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and to the right of fixation. The sequence is left,bottom,right,top. Whatever is requested will be mapped to pixels and clipped by screenRectPx. \n     Note that movieRectDeg is a rect on the retina, which will be curved on the screen, and tthe movie's screen pixels are specified as the screen rect, movieRectDeg. Guided by movieRectPxContainsRectDegBool, EasyEyes creates screenRectPx to be a reasonable approximation to movieRectDeg.\n     The scientist provides movieRectDeg, which defines a rect in visual coordinates (i.e. deg on the retina). Note that straight lines in visual space generally correspond to curves in pixel space. However, the HDR movie must be a screen rect (horizontal & vertical rectangle), so EasyEyes defines the movieRectPx screen rect approximation to movieRectDeg. movieRectDeg is rectangular on the retina, and movieRectPx is rectangular on the screen. \n     movieRectPx is the screen rect used for the movie. It is derived from movieRectDeg according to movieRectPxContainsDegBool, and then clipped by screenRectPx. If movieRectDeg is empty (the default) then movieRectPx is the whole screen, ie screenRectPx.\n     The movie bounds are movieRectPx. To compute a movie, we usually need to know the visual coordinate of each pixel. If needed, EasyEyes provides the 2*width*height array xyDeg, where array xyDeg(i,j) is the x,y position in deg of pixel (i,j).",
     type: "text",
     default: "",
     categories: "",
   },
   {
-    name: "movieRectPxContainsDegBool",
+    name: "movieRectPxContainsRectDegBool",
     availability: "now",
     example: "",
     explanation:
-      "If movieRectPxContainsDegBool (default FALSE) is FALSE then movieRectPx is the bounding box of the four screen points that correspond to the four midpoints (on the retina) of the four sides of movieRectDeg. If it's TRUE then movieRectPx is the screen bounding box containing the four midpoints and the four corners of movieRectDeg. So movieRectPx will contain practically all the pixels in movieRectDeg.",
+      "If movieRectPxContainsRectDegBool (default FALSE) is FALSE then movieRectPx is the bounding box of the four screen points that correspond to the four midpoints (on the retina) of the four sides of movieRectDeg. If it's TRUE then movieRectPx is the screen bounding box containing the four midpoints and the four corners of movieRectDeg. So movieRectPx will contain practically all the pixels in movieRectDeg. The issue, of course, is that a rect on the screen (px coordinates) when mapped to the retina (deg coordinates) is not a rect, all four sides are curved. Similarly, a rect on the retina (deg coordinates) when mapped to the screen (px coordinates) is not a rect, all four sides are curved. Despite the imprerfect correspondence, rects are convenient, so movieRectPxContainsRectDegBool selects how to approximate the correspondence. Usually the scientist will want to specify in deg coordinates, but want the efficiciency of implementation in px coordinates.",
     type: "boolean",
     default: "FALSE",
     categories: "",
   },
   {
-    name: "movieTargetOnsetDelaySec",
+    name: "movieTargetDelaySec",
     availability: "now",
     example: "",
     explanation:
-      "movieTargetOnsetDelaySec (default is empty, which requests that targetDurationSec is centered in the movieDurationSec) specified the delay from movie onset to target onset.",
+      "movieTargetDelaySec (default is 0) specified the target delay (positive or negative) relative to being centered in the movie duration movieSec.",
     type: "numerical",
-    default: "",
+    default: "0",
     categories: "",
   },
   {
@@ -1137,7 +1137,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "movieSec is the  desired duration of the movie. The actual duration will be an integer number of frames. EasyEyes will compute n=round(movieHz*movieSec) frames, with a duration of n/movieHz.",
+      "movieSec is the desired duration of the movie. The actual duration will be an integer number of frames. EasyEyes will compute n=round(movieHz*movieSec) frames, with a duration of n/movieHz.",
     type: "numerical",
     default: "60",
     categories: "",

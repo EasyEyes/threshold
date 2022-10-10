@@ -763,17 +763,17 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  movieRectPxContainsDegBool: {
-    name: "movieRectPxContainsDegBool",
+  movieRectPxContainsRectDegBool: {
+    name: "movieRectPxContainsRectDegBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
   },
-  movieTargetOnsetDelaySec: {
-    name: "movieTargetOnsetDelaySec",
+  movieTargetDelaySec: {
+    name: "movieTargetDelaySec",
     availability: "now",
     type: "numerical",
-    default: "",
+    default: "0",
   },
   movieSec: {
     name: "movieSec",

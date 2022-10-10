@@ -311,15 +311,18 @@ export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
       currentLoop._currentStaircase._name
     );
     psychoJS.experiment.addData(
-      "questMeanAtEndOfTrial",
+      "questMeanBeforeThisTrialResponse",
+      // "questMeanAtEndOfTrial",
       currentLoop._currentStaircase.mean()
     );
     psychoJS.experiment.addData(
-      "questSDAtEndOfTrial",
+      "questSDBeforeThisTrialResponse",
+      // "questSDAtEndOfTrial",
       currentLoop._currentStaircase.sd()
     );
     psychoJS.experiment.addData(
-      "questQuantileOfQuantileOrderAtEndOfTrial",
+      "questQuantileOfQuantileOrderBeforeThisTrialResponse",
+      // "questQuantileOfQuantileOrderAtEndOfTrial",
       currentLoop._currentStaircase.quantile(
         currentLoop._currentStaircase._jsQuest.quantileOrder
       )

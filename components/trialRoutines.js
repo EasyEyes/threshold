@@ -92,10 +92,8 @@ export const _letter_trialRoutineEnd = (
   letterTiming.targetStartSec = undefined;
   letterTiming.targetFinishSec = undefined;
 
-  if (
-    currentLoop instanceof MultiStairHandler &&
-    currentLoop.nRemaining !== 0
-  ) {
+  addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
+  if (currentLoop instanceof MultiStairHandler) {
     // currentLoop.addResponse(key_resp.corr, level);
     if (
       !addResponseIfTolerableError(
@@ -114,7 +112,6 @@ export const _letter_trialRoutineEnd = (
       });
     }
   }
-  addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
 };
 
 export const _repeatedLetters_trialRoutineFirstFrame = (
