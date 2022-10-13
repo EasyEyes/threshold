@@ -36,11 +36,11 @@ export const spaceOrCrosshair = (L, responseType, prev = "") => {
   } else if (targetKind.current === "rsvpReading") {
     switch (responseType) {
       case 0:
-        return prev + phrases.T_readyPressSpaceRSVPReading[L];
+        return prev + phrases.T_readyPressSpaceRsvpReading[L];
       case 1:
-        return prev + phrases.T_readyClickCrosshairRSVPReading[L];
+        return prev + phrases.T_readyClickCrosshairRsvpReading[L];
       default:
-        return prev + phrases.T_readyPressSpaceOrClickCrosshairRSVPReading[L];
+        return prev + phrases.T_readyPressSpaceOrClickCrosshairRsvpReading[L];
     }
   } else {
     switch (responseType) {
@@ -131,10 +131,10 @@ export const instructionsText = {
         );
         switch (responseType) {
           case 0:
-            text += extraSpace + `${phrases.T_pressingKeyRSVPReading[L]}\n\n`;
+            text += extraSpace + `${phrases.T_pressingKeyRsvpReading[L]}\n\n`;
             break;
           case 1:
-            text += extraSpace + `${phrases.T_clickingWordRSVPReading[L]}\n\n`;
+            text += extraSpace + `${phrases.T_clickingWordRsvpReading[L]}\n\n`;
             break;
         }
       }

@@ -2,6 +2,7 @@ import axios from "axios";
 
 import {
   displayOptions,
+  fontCharacterSet,
   readingCorpusArchive,
   readingFrequencyToWordArchive,
   readingPageStats,
@@ -9,6 +10,7 @@ import {
   readingUsedText,
   readingWordFrequencyArchive,
   readingWordListArchive,
+  status,
   timing,
 } from "./global";
 import { degreesToPixels, getRandomInt, logger } from "./utils";
@@ -85,7 +87,6 @@ export const getThisBlockPages = (
         readingCorpusArchive[thisURL],
         paramReader.read("readingFirstFewWords", block)[0]
       );
-      logger("after getReadingUsedText", readingUsedText[thisURL]);
     } else {
       readingUsedText[thisURL] = readingCorpusArchive[thisURL];
       skippedWordsNum = 0;
@@ -99,9 +100,7 @@ export const getThisBlockPages = (
       readingCorpusArchive[thisURL],
       paramReader.read("readingMaxCharactersPerLine", block)[0],
       paramReader.read("readingLinesPerPage", block)[0],
-      typeof numberOfPages === "undefined"
-        ? paramReader.read("readingPages", block)[0]
-        : numberOfPages,
+      numberOfPages ?? paramReader.read("readingPages", block)[0],
       readingParagraph
     );
     readingUsedText[thisURL] = preparedSentences.readingUsedText;
@@ -329,6 +328,34 @@ export const addReadingStatsToOutput = (pageN, psychoJS) => {
   );
 };
 
+export const findReadingSize = (
+  readingSetSizeBy,
+  paramReader,
+  readingParagraph
+) => {
+  switch (readingSetSizeBy) {
+    case "nominal":
+      return (
+        paramReader.read("readingNominalSizeDeg", status.block)[0] *
+        degreesToPixels(1, {
+          pixPerCm: displayOptions.pixPerCm,
+        })
+      );
+    case "xHeight":
+      return getSizeForXHeight(
+        readingParagraph,
+        paramReader.read("readingXHeightDeg", status.block)[0]
+      );
+    case "spacing":
+      return getSizeForSpacing(
+        readingParagraph,
+        paramReader.read("readingSpacingDeg", status.block)[0],
+        fontCharacterSet.current.join("")
+      );
+    default:
+      return;
+  }
+};
 /* --------------------------------- HELPERS -------------------------------- */
 
 const removeLastSpace = (str) => {

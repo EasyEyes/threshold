@@ -4,6 +4,7 @@ import {
   displayOptions,
   font,
   letterConfig,
+  readingConfig,
   readingThisBlockPages,
   rsvpReadingTargetSets,
   rsvpReadingTiming,
@@ -20,18 +21,17 @@ import {
   XYPixOfXYDeg,
 } from "./utils";
 import { Color } from "../psychojs/src/util";
+import { findReadingSize } from "./readingAddons";
 
 export class RSVPReadingTargetSet {
   constructor(
     word,
     position,
-    heightPx,
-    spacingPx,
     durationSec,
     orderNumber,
     foilWords,
-    flankerCharacterSet,
-    spacingRelationToSize
+    paramReader,
+    BC
   ) {
     this.word = word;
     this.foilWords = foilWords;
@@ -39,34 +39,61 @@ export class RSVPReadingTargetSet {
     this.startTime = durationSec * orderNumber;
     this.stopTime = this.startTime + durationSec;
     this.orderNumber = orderNumber;
-    this.flankerCharacterSet = flankerCharacterSet.split("");
-    this.spacingRelationToSize = spacingRelationToSize;
+    this.flankerCharacterSet = paramReader
+      .read("rsvpReadingFlankerCharacterSet", BC)
+      .split("");
 
-    this._heightPx = heightPx;
-    this._spacingPx = spacingPx;
+    this.paramReader = paramReader;
+    this.BC = BC;
+    // For use if spacingRelationToSize === ratio
+    this._heightPx = getRSVPReadingHeightPx(this.paramReader, this.BC);
+    this._spacingPx = this._heightPx * letterConfig.spacingOverSizeRatio;
 
     this.flankerLettersUsed = [];
 
     this.stims = this.generateStims();
   }
   generateStims() {
-    // If there are flanker characters to use...
+    // Determine target and distractor strings
+    const strings = this._generateStimStrings();
+    // Create the stims for those strings
+    switch (letterConfig.spacingRelationToSize) {
+      case "ratio":
+        return _generateRatioStims(strings);
+      case "typographic":
+        return this._generateTypographicStims(strings);
+      default:
+        console.error(
+          `Unsupported spacingRelationToSize: ${letterConfig.spacingRelationToSize}`
+        );
+        break;
+    }
+  }
+  _generateStimStrings() {
+    let strings = [];
     if (this.flankerCharacterSet.length > 0) {
-      let topString, middleString, bottomString;
       const lineLength = this.word.length + 2;
-      // Determine the strings to be shown
-      topString = sampleWithReplacement(
-        this.flankerCharacterSet,
-        lineLength
-      ).join("");
-      bottomString = sampleWithReplacement(
-        this.flankerCharacterSet,
-        lineLength
-      ).join("");
-      middleString =
+      // Top string
+      strings.push(
+        sampleWithReplacement(this.flankerCharacterSet, lineLength).join("")
+      );
+      // Middle string
+      strings.push(
         sampleWithReplacement(this.flankerCharacterSet, 1).join("") +
-        this.word +
-        sampleWithReplacement(this.flankerCharacterSet, 1).join("");
+          this.word +
+          sampleWithReplacement(this.flankerCharacterSet, 1).join("")
+      );
+      // Bottom string
+      strings.push(
+        sampleWithReplacement(this.flankerCharacterSet, lineLength).join("")
+      );
+    } else {
+      strings.push(this.word);
+    }
+    return strings;
+  }
+  _generateRatioStims(strings) {
+    if (strings.length > 1) {
       const topRowPosition = [
         this.position[0],
         this.position[1] + this._spacingPx,
@@ -75,108 +102,67 @@ export class RSVPReadingTargetSet {
         this.position[0],
         this.position[1] - this._spacingPx,
       ];
-      // Create the stims for those strings
-      if (this.spacingRelationToSize === "ratio") {
-        const topRowFlankerLetters = _generateLetterStimsForWord(
-          topString,
-          topRowPosition,
-          this._heightPx,
-          this._spacingPx,
-          `topFlanker-${this.orderNumber}`
-        );
-        const bottomRowFlankerLetters = _generateLetterStimsForWord(
-          bottomString,
-          bottomRowPosition,
-          this._heightPx,
-          this._spacingPx,
-          `bottomFlanker-${this.orderNumber}`
-        );
-        const targetRowLetters = _generateLetterStimsForWord(
-          middleString,
-          this.position,
-          this._heightPx,
-          this._spacingPx,
-          `middleRow-${this.orderNumber}`
-        );
-        return [
-          ...topRowFlankerLetters,
-          ...bottomRowFlankerLetters,
-          ...targetRowLetters,
-        ];
-      } else {
-        const topRowWordStim = new TextStim({
-          name: `topRow-${this.orderNumber}-${topString}`,
-          win: psychoJS.window,
-          text: topString,
-          font: font.name,
-          pos: topRowPosition,
-          units: "pix",
-          height: this._heightPx,
-          wrapWidth: undefined,
-          ori: 0.0,
-          color: new Color("black"),
-          opacity: 1.0,
-          depth: -8.0,
-        });
-        const bottomRowWordStim = new TextStim({
-          name: `bottomRow-${this.orderNumber}-${bottomString}`,
-          win: psychoJS.window,
-          text: bottomString,
-          font: font.name,
-          pos: bottomRowPosition,
-          units: "pix",
-          height: this._heightPx,
-          wrapWidth: undefined,
-          ori: 0.0,
-          color: new Color("black"),
-          opacity: 1.0,
-          depth: -8.0,
-        });
-        const middleRowWordStim = new TextStim({
-          name: `middleRow-${this.orderNumber}-${middleString}`,
-          win: psychoJS.window,
-          text: middleString,
-          font: font.name,
-          pos: this.position,
-          units: "pix",
-          height: this._heightPx,
-          wrapWidth: undefined,
-          ori: 0.0,
-          color: new Color("black"),
-          opacity: 1.0,
-          depth: -8.0,
-        });
-        return [topRowWordStim, bottomRowWordStim, middleRowWordStim];
-      }
+      const topRowFlankerLetters = _generateLetterStimsForWord(
+        strings[0],
+        topRowPosition,
+        this._heightPx,
+        this._spacingPx,
+        `topFlanker-${this.orderNumber}`
+      );
+      const targetRowLetters = _generateLetterStimsForWord(
+        strings[1],
+        this.position,
+        this._heightPx,
+        this._spacingPx,
+        `middleRow-${this.orderNumber}`
+      );
+      const bottomRowFlankerLetters = _generateLetterStimsForWord(
+        strings[2],
+        bottomRowPosition,
+        this._heightPx,
+        this._spacingPx,
+        `bottomFlanker-${this.orderNumber}`
+      );
+      return [
+        ...topRowFlankerLetters,
+        ...targetRowLetters,
+        ...bottomRowFlankerLetters,
+      ];
     } else {
-      // Otherwise just generate a stim for the target word
-      if (this.spacingRelationToSize === "ratio") {
-        return _generateLetterStimsForWord(
-          this.word,
-          this.position,
-          this._heightPx,
-          this._spacingPx,
-          `middleRow-${this.orderNumber}`
-        );
-      } else {
-        return [
-          new TextStim({
-            name: `middleRow-${this.orderNumber}-${this.word}`,
-            win: psychoJS.window,
-            text: this.word,
-            font: font.name,
-            pos: this.pos,
-            units: "pix",
-            height: this._heightPx,
-            wrapWidth: undefined,
-            ori: 0.0,
-            color: new Color("black"),
-            opacity: 1.0,
-            depth: -8.0,
-          }),
-        ];
-      }
+      return _generateLetterStimsForWord(
+        this.word,
+        this.position,
+        this._heightPx,
+        this._spacingPx,
+        `middleRow-${this.orderNumber}`
+      );
     }
+  }
+
+  _generateTypographicStims(strings) {
+    const text = strings.join("\n");
+    const readingStim = new TextStim({
+      name: `typographicReadingTarget-${this.orderNumber}}`,
+      win: psychoJS.window,
+      text: text,
+      font: font.name,
+      pos: this.position,
+      units: "pix",
+      height: this._heightPx,
+      wrapWidth: undefined,
+      ori: 0.0,
+      color: new Color("black"),
+      opacity: 1.0,
+      depth: 999999,
+    });
+    readingConfig.height = findReadingSize(
+      this.paramReader.read("readingSetSizeBy", this.BC),
+      this.paramReader,
+      readingStim
+    );
+    readingStim.setHeight(readingConfig.height);
+    readingStim.setText(text);
+    return [readingStim];
   }
 }
 
@@ -199,8 +185,6 @@ export const generateRSVPReadingTargetSets = (
     letterConfig.targetEccentricityXYDeg,
     displayOptions
   );
-  const heightPx = getRSVPReadingHeightPx(paramReader, BC);
-  const spacingPx = heightPx * letterConfig.spacingOverSizeRatio;
 
   const uniqueWordsRequired = paramReader.read(
     "rsvpReadingRequireUniqueWordsBool",
@@ -224,13 +208,11 @@ export const generateRSVPReadingTargetSets = (
       new RSVPReadingTargetSet(
         targetWord,
         position,
-        heightPx,
-        spacingPx,
         durationSec,
         i,
         foilWords[i],
-        paramReader.read("rsvpReadingFlankerCharacterSet", BC),
-        paramReader.read("spacingRelationToSize", BC)
+        paramReader,
+        BC
       )
     );
   }
@@ -265,7 +247,7 @@ const _generateLetterStimsForWord = (
       ori: 0.0,
       color: new Color("black"),
       opacity: 1.0,
-      depth: -8.0,
+      depth: 999999,
     });
   });
   return letters;
@@ -320,7 +302,7 @@ const _getNextRSVPWord = (requireUnique) => {
     else {
       // TODO log this error to scientist/EE
       console.error(
-        "Uh oh! Word is not unique, and there are no other words left. Shamefully providing a word from those previously used."
+        "Uh oh! Word is not unique, and there are no other words left. Resorting to providing a word from those previously used."
       );
       return rsvpReadingWordHistory.usedWords[
         Math.floor(rsvpReadingWordHistory.length * Math.random())
@@ -443,10 +425,7 @@ export const resetTiming = (timing) => {
 };
 
 export const registerKeypressForRSVPReading = (keypresses) => {
-  if (keypresses.length)
-    logger("TYPED keypresses in registerKeypressForRSVPReading", keypresses);
   keypresses.forEach((k) => {
-    logger("TYPED k", k);
     const correct = k.name === "up" ? 1 : 0;
     phraseIdentificationResponse.clickTime.push(performance.now());
     phraseIdentificationResponse.current.push(k);

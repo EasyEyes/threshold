@@ -1197,7 +1197,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "nominalSize",
     explanation:
-      "What shall we say is the \"single\" line spacing (baseline to baseline) of the text to be read? The actual spacing will be a multiple of that: readingMultipleOfSingleLineSpacing. \n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. So single spacing of 12 pt Times would be 12 pt line spacing.\n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \n• twiceXHeight defines single line spacing as twice the font's x-height.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.",
+      "readingMultipleOfSingleLineSpacing selects a definition of \"single\" line spacing (baseline to baseline) of the text to be read. The actual spacing will be a multiple of that: readingMultipleOfSingleLineSpacing. \n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. So single spacing of 12 pt Times would be 12 pt line spacing.\n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \n• twiceXHeight defines single line spacing as twice the font's x-height.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.",
     type: "categorical",
     default: "nominalSize",
     categories: "nominalSize, font, twiceXHeight, explicit",
@@ -1905,6 +1905,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "targetCyclePerDeg (default 0) is the target spatial frequency in cycles per deg. Sine of zero is zero and cosine of zero is 1, so if you're using zero targetCyclePerDeg to get a Gaussian blob, then set targetPhaseDeg to 90.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
+    name: "targetDelaySec",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetDelaySec (default 0) delays presentation of the target in a movie. By default, time is zero at the middle of the movie. EasyEyes will subtract targetDelaySec from that default to produce the time coordinate used to compute the target.",
     type: "numerical",
     default: "0",
     categories: "",

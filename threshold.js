@@ -248,6 +248,7 @@ import {
   getThisBlockPages,
   loadReadingCorpus,
   addReadingStatsToOutput,
+  findReadingSize,
 } from "./components/readingAddons.js";
 
 // POPUP
@@ -2125,30 +2126,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ).split("");
 
           // HEIGHT
-          switch (paramReader.read("readingSetSizeBy", status.block)[0]) {
-            case "nominal":
-              readingConfig.height =
-                paramReader.read("readingNominalSizeDeg", status.block)[0] *
-                degreesToPixels(1, {
-                  pixPerCm: displayOptions.pixPerCm,
-                });
-              break;
-            case "xHeight":
-              readingConfig.height = getSizeForXHeight(
-                readingParagraph,
-                paramReader.read("readingXHeightDeg", status.block)[0]
-              );
-              break;
-            case "spacing":
-              readingConfig.height = getSizeForSpacing(
-                readingParagraph,
-                paramReader.read("readingSpacingDeg", status.block)[0],
-                fontCharacterSet.current.join("")
-              );
-              break;
-            default:
-              break;
-          }
+          readingConfig.height = findReadingSize(
+            paramReader.read("readingSetSizeBy", status.block)[0],
+            paramReader,
+            readingParagraph
+          );
           readingParagraph.setHeight(readingConfig.height);
 
           // LTR or RTL
@@ -3213,8 +3195,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rsvpReadingResponse.screen = setupPhraseIdentification(
                 rsvpReadingResponse.categories
               );
-            } else {
-              // TODO set up for typed yes/no response
             }
 
             rsvpReadingTargetSets.current =
@@ -3646,10 +3626,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             )
           );
-          logger(
-            "responseType.current trialRoutineBegin",
-            responseType.current
-          );
         },
       });
 
@@ -3700,10 +3676,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           _instructionSetup(instr);
           instructions.setText(instr);
-          logger(
-            "responseType.current trialRoutineBegin",
-            responseType.current
-          );
         },
         vocoderPhrase: () => {
           // change instruction

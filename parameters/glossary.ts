@@ -1257,6 +1257,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
   },
+  targetDelaySec: {
+    name: "targetDelaySec",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+  },
   targetDurationSec: {
     name: "targetDurationSec",
     availability: "now",
