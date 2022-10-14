@@ -940,6 +940,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  responseSpokenToExperimenterBool: {
+    name: "responseSpokenToExperimenterBool",
+    availability: "later",
+    type: "boolean",
+    default: "FALSE",
+  },
   responseSpokenBool: {
     name: "responseSpokenBool",
     availability: "later",

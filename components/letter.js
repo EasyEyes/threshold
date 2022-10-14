@@ -1,6 +1,7 @@
 import { letterConfig } from "./global";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
+  letterConfig.thresholdParameter = reader.read("thresholdParameter", BC);
   letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
   letterConfig.delayBeforeStimOnsetSec = reader.read(
     "markingOffsetBeforeTargetOnsetSecs",

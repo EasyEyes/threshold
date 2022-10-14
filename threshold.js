@@ -3431,6 +3431,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               letterConfig.thresholdParameter === "spacing"
                 ? [target, flanker1, flanker2]
                 : [target];
+            // TODO offset bounding boxes if on
+            const boundingBoxStims = [
+              ...Object.getOwnPropertyNames(boundingBoxPolies).map(
+                (prop) => boundingBoxPolies[prop]
+              ),
+              ...Object.getOwnPropertyNames(characterSetBoundingBoxPolies).map(
+                (prop) => characterSetBoundingBoxPolies[prop]
+              ),
+            ];
+            stimsToOffset.push(...boundingBoxStims);
             offsetStimsToFixationPos(stimsToOffset);
           }
         },
@@ -3452,7 +3462,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (fixationConfig.markingFixationMotionRadiusDeg) {
               const stimsToOffset = [
                 ...rsvpReadingTargetSets.current.stims,
-                ...rsvpReadingTargetSets.upcoming.map((s) => s.stims).flat(),
+                // ...rsvpReadingTargetSets.upcoming.map((s) => s.stims).flat(),
               ];
               offsetStimsToFixationPos(stimsToOffset);
             }

@@ -1413,6 +1413,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "responseSpokenToExperimenterBool",
+    availability: "later",
+    example: "FALSE",
+    explanation:
+      "responseSpokenToExperimenterBool requires the participant to respond verbally to the experimenter sitting alongside, e.g. by verbally naming the target. The experimenter will score the verbal response. This is used to test children.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "responseSpokenBool",
     availability: "later",
     example: "FALSE",
