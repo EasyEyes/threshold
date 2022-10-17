@@ -174,8 +174,8 @@ export const calibrateAudio = async (reader) => {
     ),
   ];
 
-  // const soundLevels = reader.read(GLOSSARY.calibrateSoundDB.name)[0].split(",");
-  const soundLevels = [-3.1, -13.1];
+  const soundLevels = reader.read(GLOSSARY.calibrateSoundDB.name)[0].split(",");
+  // const soundLevels = [-3.1, -13.1];
   // change sound Levels to gain values
   const gains = soundLevels.map((soundLevel) => {
     return Math.pow(10, soundLevel / 20);
