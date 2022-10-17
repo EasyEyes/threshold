@@ -1197,10 +1197,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "nominalSize",
     explanation:
-      "readingMultipleOfSingleLineSpacing selects a definition of \"single\" line spacing (baseline to baseline) of the text to be read. The actual spacing will be a multiple of that: readingMultipleOfSingleLineSpacing. \n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. So single spacing of 12 pt Times would be 12 pt line spacing.\n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \n• twiceXHeight defines single line spacing as twice the font's x-height.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.",
+      "readingDefineSingleLineSpacingAs selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual spacing will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. \nIMPLEMENTED\n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. So single spacing of 12 pt Times would be 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. TImes New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
     type: "categorical",
     default: "nominalSize",
-    categories: "nominalSize, font, twiceXHeight, explicit",
+    categories: "nominalSize, explicit",
   },
   {
     name: "readingFirstFewWords",
@@ -1587,7 +1587,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "If TRUE, then display condition name as text at lower-left corner, or, if showTargetSpecsBool is TRUE, above target specs. See showTargetSpecsBool. The point size of condition-name text should be 1.4x bigger than we use for target specs.",
+      "If TRUE, then display condition name as text at lower-left corner, or, if showTargetSpecsBool is TRUE, above target specs. See showTargetSpecsBool. The point size of condition-name text should be 1.4x bigger than we use for target specs. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1611,6 +1611,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "bottomRight",
     categories: "bottomLeft, bottomRight, bottomCenter",
+  },
+  {
+    name: "showExperimentNameBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "showExperimentNameBool (default FALSE) is useful when making screenshots to show the experimentName (i.e. the name of the Pavlovia repository, e.g. crowding3). It should go in the lower left corner. We have several text messages that stack up there. If all four are present, then **showText** on top, above **showConditionNameBool**, above **showExperimentNameBool**, above **showTargetSpecsBool**.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
   },
   {
     name: "showFixationMarkBool",
@@ -1715,7 +1725,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "For debugging. If true, showTargetSpecsBool displays various target parameters, including size and spacing, in lower left corner, similar to the trial/block counter. ",
+      "For debugging. If true, showTargetSpecsBool displays various target parameters, including size and spacing, in lower left corner, similar to the trial/block counter. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1725,7 +1735,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Click the crosshair.",
     explanation:
-      "showText (default empty string) displays the provided text at the bottom-left of the screen, aligned left, with line breaking to show multiple lines. This is static, unchanged before, during, and after the stimulus. Default is empty string, no text. Same point size as used by showConditionNameBool. If all three are present, then showText on top, then showConditionNameBool, then showTargetSpecsBool at the bottom. [FUTURE: Do we need showTextBeforeStimulus or showTextAfterStimulus?]",
+      "showText (default empty string) displays the provided text at the bottom-left of the screen, aligned left, with line breaking to show multiple lines. This is static, unchanged before, during, and after the stimulus. Default is empty string, no text. Same point size as used by showConditionNameBool. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool. [FUTURE: Do we need showTextBeforeStimulus or showTextAfterStimulus?]",
     type: "text",
     default: "",
     categories: "",

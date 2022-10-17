@@ -174,6 +174,15 @@ export const calibrateAudio = async (reader) => {
     ),
   ];
 
+  // const soundLevels = reader.read(GLOSSARY.calibrateSoundDB.name)[0].split(",");
+  const soundLevels = [-3.1, -13.1];
+  // change sound Levels to gain values
+  const gains = soundLevels.map((soundLevel) => {
+    return Math.pow(10, soundLevel / 20);
+  });
+  // console.log("gains", gains)
+  // console.log("soundLevels", soundLevels)
+
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
 
   return new Promise(async (resolve) => {
@@ -202,7 +211,7 @@ export const calibrateAudio = async (reader) => {
 
       try {
         if (calibrateSoundLevel) {
-          await _runSoundLevelCalibration(elems);
+          await _runSoundLevelCalibration(elems, gains);
         } else {
           await _runLoudspeakerCalibration(elems);
         }
@@ -219,11 +228,44 @@ export const calibrateAudio = async (reader) => {
       }
 
       elems.displayQR.style.display = "none";
-      elems.message.innerHTML =
-        copy.done +
-        (calibrateSoundLevel
-          ? "\nMeasured soundGainDBSPL " + String(soundGainDBSPL.current)
-          : "");
+      elems.message.innerHTML = copy.done;
+      // +
+      // (calibrateSoundLevel
+      //   ? "\nMeasured soundGainDBSPL " + String(soundGainDBSPL.current)
+      //   : "");
+      // display sound levels and soundGainDbSPL.current in a table
+      if (calibrateSoundLevel) {
+        elems.soundLevelsTable.style.display = "block";
+        elems.soundLevelsTable.innerHTML = "";
+        elems.soundLevelsTable.setAttribute("id", "soundLevelsTable");
+        const thead = document.createElement("thead");
+        const tbody = document.createElement("tbody");
+        const tr = document.createElement("tr");
+        const th1 = document.createElement("th");
+        const th2 = document.createElement("th");
+        th1.innerHTML = "calibrateSoundDB";
+        th2.innerHTML = "soundGainDBSPL";
+        // padding between the two columns
+        th1.style.paddingRight = "20px";
+        tr.appendChild(th1);
+        tr.appendChild(th2);
+        thead.appendChild(tr);
+        elems.soundLevelsTable.appendChild(thead);
+        elems.soundLevelsTable.appendChild(tbody);
+        for (let i = 0; i < soundLevels.length; i++) {
+          const tr = document.createElement("tr");
+          const td1 = document.createElement("td");
+          const td2 = document.createElement("td");
+          td1.innerHTML = soundLevels[i];
+          td2.innerHTML = soundGainDBSPL.current[i];
+          // padding between the two columns
+          td1.style.paddingRight = "20px";
+          tr.appendChild(td1);
+          tr.appendChild(td2);
+          tbody.appendChild(tr);
+        }
+      }
+
       elems.yesButton.innerHTML = "Continue to experiment.";
       document.querySelector("#soundNavContainer").style.display = "flex";
       document.querySelector("#soundYes").style.display = "block";
@@ -261,6 +303,7 @@ const _addSoundCalibrationElems = (copy) => {
   const yesButton = document.createElement("button");
   const noButton = document.createElement("button");
   const testButton = document.createElement("button");
+  const soundLevelsTable = document.createElement("table");
   const elems = {
     background,
     title,
@@ -274,6 +317,7 @@ const _addSoundCalibrationElems = (copy) => {
     container,
     message,
     testButton,
+    soundLevelsTable,
   };
 
   title.setAttribute("id", "soundTitle");
@@ -313,6 +357,7 @@ const _addSoundCalibrationElems = (copy) => {
   container.appendChild(displayContainer);
   displayContainer.appendChild(displayQR);
   displayContainer.appendChild(displayUpdate);
+  container.appendChild(soundLevelsTable);
   document.body.appendChild(background);
 
   _addSoundCss();
@@ -369,7 +414,7 @@ const _addSoundCss = () => {
   document.head.appendChild(styleSheet);
 };
 
-const _runSoundLevelCalibration = async (elems) => {
+const _runSoundLevelCalibration = async (elems, gains) => {
   const {
     Speaker,
     VolumeCalibration,
@@ -381,9 +426,10 @@ const _runSoundLevelCalibration = async (elems) => {
   const speakerParameters = {
     siteUrl: "https://hqjq0u.deta.dev",
     targetElementId: "displayQR",
+    gainValues: gains,
   };
 
-  console.log(VolumeCalibration);
+  // console.log(VolumeCalibration);
   const calibrator = new VolumeCalibration();
 
   calibrator.on("update", ({ message, ...rest }) => {

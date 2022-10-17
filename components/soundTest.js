@@ -20,21 +20,21 @@ import {
 const soundGain = { current: undefined };
 
 export const addSoundTestElements = (reader) => {
-  const calibrationLevelFromFile = reader.read(
-    "soundCalibrationLevelDBSPL",
-    "__ALL_BLOCKS__"
-  );
-  if (
-    calibrationLevelFromFile.length > 0 &&
-    soundCalibrationLevelDBSPL.current === undefined
-  ) {
-    soundCalibrationLevelDBSPL.current = calibrationLevelFromFile[0];
-  }
+  // const calibrationLevelFromFile = reader.read(
+  //   "soundCalibrationLevelDBSPL",
+  //   "__ALL_BLOCKS__"
+  // );
+  // if (
+  //   calibrationLevelFromFile.length > 0 &&
+  //   soundCalibrationLevelDBSPL.current === undefined
+  // ) {
+  //   soundCalibrationLevelDBSPL.current = calibrationLevelFromFile[0];
+  // }
 
   const soundGainFromFile = reader.read("soundGainDBSPL", "__ALL_BLOCKS__");
   const calculatedSoundGain = soundGainDBSPL.current;
   if (calculatedSoundGain) {
-    soundGain.current = calculatedSoundGain;
+    soundGain.current = calculatedSoundGain[0];
   } else if (soundGainFromFile.length > 0) {
     soundGain.current = soundGainFromFile[0];
   }

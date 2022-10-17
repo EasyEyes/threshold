@@ -811,7 +811,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "nominalSize",
-    categories: ["nominalSize", "font", "twiceXHeight", "explicit"],
+    categories: ["nominalSize", "explicit"],
   },
   readingFirstFewWords: {
     name: "readingFirstFewWords",
@@ -1061,6 +1061,12 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "bottomRight",
     categories: ["bottomLeft", "bottomRight", "bottomCenter"],
+  },
+  showExperimentNameBool: {
+    name: "showExperimentNameBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
   },
   showFixationMarkBool: {
     name: "showFixationMarkBool",

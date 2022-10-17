@@ -42,6 +42,7 @@ import "./components/css/forms.css";
 import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
 import "./components/css/psychojsExtra.css";
+import "./components/css/soundCalibration.css";
 
 ////
 /* -------------------------------------------------------------------------- */
