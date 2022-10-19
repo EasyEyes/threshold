@@ -535,19 +535,45 @@ const getGainValue = (dbSPL) => {
 };
 
 const getRMSLimit = (dbSPL, buffer) => {
+  // console.log("dbSPL", dbSPL);
+  // console.log("buffer", buffer);
   // get max value of absolute value of buffer
-  const sMax = Math.max(...buffer.map(Math.abs));
+  // const absValue = buffer.map((value) => Math.abs(value));
+  // console.log("absValue", absValue);
+  const sMax = getMaxValueOfAbsoluteValueOfBuffer(buffer);
+  // console.log("sMax", sMax);
   // update sMax in document
   document.getElementById(
     "soundTestModalMaxAmplitude"
   ).innerHTML = `Digital sound max absolute value: ${sMax.toFixed(3)}`;
+
   const rms = getGainValue(dbSPL);
+  // console.log("rms", rms);
   const sRms = getRMSOfWaveForm(buffer);
+  // console.log("sRms", sRms);
   const rmsLimit = sRms / sMax;
+  // console.log("rmsLimit", rmsLimit);
 
   // console.log("rmsLimit",rmsLimit)
   // console.log("rms",rms)
   // console.log("db", dbSPL)
   // console.log("dbfromrms",calculateDBFromRMS(rms))
   return Math.min(rmsLimit, rms);
+};
+
+// function to get the max value of the absolute value of the buffer
+const getMaxValueOfAbsoluteValueOfBuffer = (buffer) => {
+  const absValue = buffer.map((value) => Math.abs(value));
+  const sMax = getMax(absValue);
+  return sMax;
+};
+
+const getMax = (arr) => {
+  let len = arr.length;
+  let max = -Infinity;
+
+  while (len--) {
+    max = arr[len] > max ? arr[len] : max;
+  }
+  return max;
 };

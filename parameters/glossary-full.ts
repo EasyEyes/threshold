@@ -381,26 +381,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibrate1000HzSoundLevelBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "USE calibrateSound1000HzBool INSTEAD. Set calibrate1000HzSoundLevelBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateLoudspeakerBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrate1000HzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "calibrateAllHzSoundLevelBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "USE calibrateSoundAllHzBool INSTEAD. Set calibrateAllHzSoundLevelBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at all frequencies, using the participant's internet-connected iPhone/iPad. This is done by using the iPhone/iPad to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding an iPhone/iPad that's compatible. Calibration is done once, before block 1, if any condition in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateAllHzSoundLevelBool TRUE. Any particular condition can set calibrate1000HzSoundLevelBool or calibrateAllHzSoundLevelBool TRUE, but not both.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "calibrateBlindSpotBool",
     availability: "now",
     example: "TRUE",
@@ -475,7 +455,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calibrateSound1000HzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateSoundAllHzBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrateSound1000HzBool TRUE. Any particular condition can set calibrateSound1000HzBool or calibrateSoundAllHzBool TRUE, but not both.",
+      "Set calibrateSound1000HzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateSoundAllHzBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrateSound1000HzBool TRUE. ??Any particular condition can set calibrateSound1000HzBool or calibrateSoundAllHzBool TRUE, but not both.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1023,16 +1003,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "maskerDBSPL",
-    availability: "now",
-    example: "",
-    explanation:
-      "DEPRECATED. USE maskerSoundDBSPL INSTEAD. Sound level of the masker, in dB SPL.",
-    type: "numerical",
-    default: "50",
-    categories: "",
-  },
-  {
     name: "maskerSoundDBSPL",
     availability: "now",
     example: "",
@@ -1069,16 +1039,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute an HDR movie. This is used if and only if the targetKind is movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box. The program must define and fill either the “imageNit” or “movieNit” array, not both. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. \n\nxyDeg is a 2*width*height float array, which provides the exact x,y visual coordinate of each screen pixel in movieRectPx. \nxDeg and yDeg are float vectors, which provide approximate visual coordinates of the screen pixels in movieRectPx. \nTo compute a movie as a visual stimulus, we usually need the visual coordinate of each pixel. EasyEyes provides the width*height*2 array xyDeg[i,j,k], where each 2-number element (indexed by k) is the x,y position in deg of pixel i,j. Use of the xyDeg array does not allow speed up by computational separation of x and y, so you may prefer to use the separable approximation provided by the width-long vector xDeg and height-long vector yDeg, which provide approximate visual coordinates of the pixels in movieRectPx. (Note: xyDeg takes time and space for EasyEyes to compute, and not all movieComputeJS programs need it, so EasyEyes skips making xyDeg if the string  "xyDeg" is not found in the movieComputeJS file.)\n\nEXAMPLE: movieComputeJS might contain the filename "VerticalGrating.js", and that file might contain:\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length).fill(0)\n        .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n        gx.push(\n                Math.exp(-((x-targetEccentrictyXDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nfor (const y of yDeg) {\n        gy.push(\n                Math.exp(-((y-targetEccentrictyYDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n        fx[i]=gx[i]*Math.sin(\n                2*Math.PI*((xDeg[i]-targetEccentrictyXDeg)*targetCyclePerDeg + targetPhase/360)\n        )\n}\nfor (j = 0; j < yDeg.length; j++) {\n        for (i = 0; i < xDeg.length; i++) {\n                imageNit[i][j] = (255/2) * (1 + targetContrast * gy[j] * fx[i]);\n        }\n}',
     type: "text",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "movieDurationSec",
-    availability: "now",
-    example: "",
-    explanation:
-      "movieDurationSec (default is empty, which requests targetDurationSec) is the movie duration in seconds.",
-    type: "numerical",
     default: "",
     categories: "",
   },
@@ -1153,26 +1113,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "playNegativeFeedbackBeepBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "DEPRECATED. USE responseNegativeFeedbackBool INSTEAD. When playNegativeFeedbackBeepBool is TRUE, after a mistaken response, play pure 500 Hz tone for 0.5 sec at amplitude 0.05. Usually FALSE, as we typically stay positive and give only positive feedback.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "playPositiveFeedbackBeepBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "DEPRECATED. USE responsePositiveFeedbackBool INSTEAD. When playPositiveFeedbackBeepBool is TRUE, after each correct response, play pure 2000 Hz tone for 0.05 sec at amplitude 0.05. ",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
     name: "questionAndAnswer@@",
     availability: "now",
     example: "AFTERLIFE|No|Is there life after death?|Yes|No|Maybe",
@@ -1197,7 +1137,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "nominalSize",
     explanation:
-      "readingDefineSingleLineSpacingAs selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual spacing will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. \nIMPLEMENTED\n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. So single spacing of 12 pt Times would be 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. TImes New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
+      "NOT YET IMPLEMENTED. readingDefineSingleLineSpacingAs selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual spacing will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. \nIMPLEMENTED\n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. So single spacing of 12 pt Times would be 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. TImes New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
     type: "categorical",
     default: "nominalSize",
     categories: "nominalSize, explicit",
@@ -1237,7 +1177,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1.2",
     explanation:
-      'Set the line spacing (measured baseline to baseline) as this multiple of "single" line spacing, notwhich is defined by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, notincluding Adobe inDesign.',
+      'NOT YET IMPLEMENTED. Set the line spacing (measured baseline to baseline) as this multiple of "single" line spacing, notwhich is defined by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, notincluding Adobe inDesign.',
     type: "numerical",
     default: "1.2",
     categories: "",
@@ -1297,7 +1237,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "2",
     explanation:
-      "Explicit value of single line spacing. This is ignored unless readingDefineSingleLineSpacingAs is explicit.",
+      "NOT YET IMPLEMENTED. Explicit value of single line spacing. This is ignored unless readingDefineSingleLineSpacingAs is explicit.",
     type: "numerical",
     default: "1",
     categories: "",
@@ -2323,7 +2263,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       'thresholdParameter designates that a parameter (e.g. size or spacing) will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacing" to vary center-to-center spacing of target and neighboring flankers. \n• "size" to vary target size. \n• "contrast" awaits HDR10 support.\n• "eccentricity"  to be added soon.\n• "soundLevel" awaits sound support.\n• "soundNoiseLevel" awaits sound support.',
     type: "categorical",
     default: "spacing",
-    categories: "spacing, size, soundLevel",
+    categories: "spacing, size, soundLevel, contrast",
   },
   {
     name: "thresholdProcedure",

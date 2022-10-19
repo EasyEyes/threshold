@@ -312,18 +312,6 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
   },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
-  calibrate1000HzSoundLevelBool: {
-    name: "calibrate1000HzSoundLevelBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  calibrateAllHzSoundLevelBool: {
-    name: "calibrateAllHzSoundLevelBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
   calibrateBlindSpotBool: {
     name: "calibrateBlindSpotBool",
     availability: "now",
@@ -709,12 +697,6 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
   },
-  maskerDBSPL: {
-    name: "maskerDBSPL",
-    availability: "now",
-    type: "numerical",
-    default: "50",
-  },
   maskerSoundDBSPL: {
     name: "maskerSoundDBSPL",
     availability: "now",
@@ -737,12 +719,6 @@ export const GLOSSARY: Glossary = {
     name: "movieComputeJS",
     availability: "now",
     type: "text",
-    default: "",
-  },
-  movieDurationSec: {
-    name: "movieDurationSec",
-    availability: "now",
-    type: "numerical",
     default: "",
   },
   movieHz: {
@@ -782,18 +758,6 @@ export const GLOSSARY: Glossary = {
     default: "60",
   },
   notes: { name: "notes", availability: "now", type: "text", default: "" },
-  playNegativeFeedbackBeepBool: {
-    name: "playNegativeFeedbackBeepBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  playPositiveFeedbackBeepBool: {
-    name: "playPositiveFeedbackBeepBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-  },
   "questionAndAnswer@@": {
     name: "questionAndAnswer@@",
     availability: "now",
@@ -1520,7 +1484,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "spacing",
-    categories: ["spacing", "size", "soundLevel"],
+    categories: ["spacing", "size", "soundLevel", "contrast"],
   },
   thresholdProcedure: {
     name: "thresholdProcedure",
