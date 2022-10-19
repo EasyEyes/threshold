@@ -2,6 +2,18 @@ import { psychoJS } from "./globalPsychoJS.js";
 import { quitPsychoJS } from "./lifetime.js";
 import { showCursor } from "./utils.js";
 
+// ! EXPERIMENTAL
+// https://stackoverflow.com/a/73956189
+console.warn(
+  "[EasyEyesPromise] Customized Promise used. This affects the performance and cause errors."
+);
+window.Promise = class EasyEyesPromise extends Promise {
+  constructor() {
+    super(...arguments);
+    this.__creationPoint = new Error().stack;
+  }
+};
+
 export const buildWindowErrorHandling = (paramReader) => {
   window.onerror = (message, source, lineno, colno, error) => {
     console.log("onerror");
@@ -43,7 +55,9 @@ export const buildWindowErrorHandling = (paramReader) => {
       // stack from reason
       const errorMessage = `STACK ${JSON.stringify(
         error?.reason?.stack || error?.stack
-      )} REASON ${JSON.stringify(error?.reason)}`;
+      )}\nSTACK2 ${error.promise?.__creationPoint}\nREASON ${JSON.stringify(
+        error?.reason
+      )}`;
       document.body.setAttribute("data-error", errorMessage);
 
       try {
@@ -56,9 +70,9 @@ export const buildWindowErrorHandling = (paramReader) => {
       }
     } else {
       // no stack from reason
-      const errorMessage = `STACK ${JSON.stringify(
-        error?.stack
-      )} ERROR ${error} REASON ${JSON.stringify(error?.reason)}`;
+      const errorMessage = `STACK ${JSON.stringify(error?.stack)}\nSTACK2 ${
+        error.promise?.__creationPoint
+      }\nERROR ${error}\nREASON ${JSON.stringify(error?.reason)}`;
       document.body.setAttribute("data-error", errorMessage);
       psychoJS.experiment.addData("error", errorMessage);
     }
