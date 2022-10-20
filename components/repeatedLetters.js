@@ -3,9 +3,11 @@ import {
   fontCharacterSet,
   letterConfig,
   repeatedLettersConfig,
+  repeatedLettersResponse,
   displayOptions,
   fixationConfig,
   correctAns,
+  status,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -309,4 +311,27 @@ export const restrictRepeatedLettersSpacing = (
     spacingDeg = spacingDeg / largestBoundsRatio;
   }
   throw "Unable to bound to suitable repeatedLetters stimuli parameters.";
+};
+
+export const registerResponseForRepeatedLetters = (
+  responseCharacter,
+  rt,
+  correctAnswers,
+  correctSynth
+) => {
+  repeatedLettersResponse.current.push(responseCharacter);
+  repeatedLettersResponse.rt.push(rt);
+  const correct = correctAnswers.includes(responseCharacter) ? 1 : 0;
+  logger("correct?", correct);
+  repeatedLettersResponse.correct.push(correct);
+
+  status.trialCompleted_thisBlock++;
+  // Correct press
+  if (correct) {
+    correctSynth.play();
+    status.trialCorrect_thisBlock++;
+    return correctAnswers.filter((a) => a !== responseCharacter);
+  }
+  // Incorrect
+  return correctAnswers;
 };

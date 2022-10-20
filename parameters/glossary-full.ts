@@ -455,9 +455,20 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calibrateSound1000HzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Early exit if no iPhone is available. Though redundant, both this and calibrateSoundAllHzBool can be requested, to allow checking of one against the other. Calibration is done once, at the beginning, before block 1, if any condition in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrateSound1000HzBool TRUE. ??Any particular condition can set calibrateSound1000HzBool or calibrateSoundAllHzBool TRUE, but not both.",
+      "Set calibrateSound1000HzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Testing can be done at many sound levels to calibrate the effect of dynamic gain control, which is commonly used in laptops to protect small speakers. Early exit if no iPhone is available. Calibration is done only once, at the beginning, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrateSound1000HzBool TRUE. The parameters calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the all-Hz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. ",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "calibrateSound1000HzDB",
+    availability: "now",
+    example: "-3",
+    explanation:
+      "calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes since gain will drop at high sound levels. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
+    type: "text",
+    default:
+      "-3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1",
     categories: "",
   },
   {
@@ -465,9 +476,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calibrateSoundAllHzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at all frequencies, using the participant's internet-connected iPhone/iPad. This is done by using the iPhone/iPad to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding an iPhone/iPad that's compatible. Calibration is done once, before block 1, if any condition in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateSoundAllHzBool TRUE. Any particular condition can set calibrateSound1000HzBool or calibrateSoundAllHzBool TRUE, but not both.",
+      "Set calibrateSoundAllHzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at all frequencies, relative to 1000 Hz, using the participant's internet-connected iPhone/iPad. This is done by using the iPhone/iPad to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding an iPhone/iPad that's compatible. Calibration is done once, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateSoundAllHzBool TRUE.  calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the allHz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. ",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "calibrateSoundAllHzDB",
+    availability: "now",
+    example: "-3",
+    explanation:
+      "calibrateSoundAllHzDB, used with calibrateSoundAllHzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -23.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes since gain will drop at high sound levels. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
+    type: "text",
+    default: "-13.1",
     categories: "",
   },
   {
@@ -475,7 +496,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "-3",
     explanation:
-      "calibrateSoundDB is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
+      "DEPRECATED. calibrateSoundDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes since gain will drop at high sound levels. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
     type: "text",
     default:
       "-3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1",
@@ -486,7 +507,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "DEPRECATED. USE calibrateBlindSpotBool INSTEAD. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
+      "Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackDistanceBool=TRUE. \n\nFUTURE PLANS: calibrateBlindSpotBool??. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -496,7 +517,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "Set calibrateTrackGazeBool TRUE (default FALSE) to use the webcam for gaze tracking. It must be calibrated before use. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
+      "Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -536,7 +557,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "later",
     example: "1",
     explanation:
-      '"conditionGroup" imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross, target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among any specified set of targets simply by creating a condition for each target, and giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
+      'NOT YET IMPLEMENTED. "conditionGroup" imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross, target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among any specified set of targets simply by creating a condition for each target, and giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
     type: "integer",
     default: "0",
     categories: "",
@@ -586,7 +607,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "centerFixation",
     explanation:
-      "fixationLocationStrategy specifies the strategy by which EasyEyes places the fixation point, which is the origin of the visual coordinate system. Most experimenters will choose centerFixation, the default, which simply places fixation at the center of the screen. But for peripheral testing you might choose  asSpecified and put fixation near one edge of the display to maximize the eccentricity of a target at the opposite edge. Fixation, whether on- or off-screen, is always specified as a point in (x,y) display coordinates in the plane of the display (origin at lower left corner). The compiler requires that all conditions in a block have the same fixation point and fixationLocationStrategy. \n• centerFixation places fixation at the center of the screen. This is the default.\n• asSpecified indicates that fixation is specified by (fixationLocationXScreen, fixationLocationYScreen). \n\nNOT YET IMPLEMENTED:\nTo test even farther into the periphery, you might want to set fixationRequestedOffscreenBool TRUE and place the fixation off-screen by putting tape on a bottle or a box and drawing a fixation cross on it.\n• centerTargets sets the (possibly offscreen) fixation location so as to maximize the screen margin around the edges of all the possible targets.  We consider all possible targets across all conditions within the block.  \n• centerFixationAndTargets places fixation so as to maximize the screen margin around the fixation and the edges of all the possible targets within the block. We consider all possible targets across all conditions within the block.  \n\nSatisfying centerTargets or centerFixationAndTargets may be impossible beyond a certain maximum viewing distance (in cm) proportional to screen size (in cm). We generally don't know the screen size at compile time, as each participant has their own computer. Currently the scientist can only specify viewing distance as a fixed number of cm. \n\n[Since short viewing distances are uncomfortable, it might be useful to be able to request the maximize viewing distance such that the screen will have a needed visual subtense. In effect, this requests a viewing distance that is a multiple of screen width or height.]",
+      "NOT YET IMPLEMENTED. fixationLocationStrategy specifies the strategy by which EasyEyes places the fixation point, which is the origin of the visual coordinate system. Most experimenters will choose centerFixation, the default, which simply places fixation at the center of the screen. But for peripheral testing you might choose  asSpecified and put fixation near one edge of the display to maximize the eccentricity of a target at the opposite edge. Fixation, whether on- or off-screen, is always specified as a point in (x,y) display coordinates in the plane of the display (origin at lower left corner). The compiler requires that all conditions in a block have the same fixation point and fixationLocationStrategy. \n• centerFixation places fixation at the center of the screen. This is the default.\n• asSpecified indicates that fixation is specified by (fixationLocationXScreen, fixationLocationYScreen). \n\nNOT YET IMPLEMENTED:\nTo test even farther into the periphery, you might want to set fixationRequestedOffscreenBool TRUE and place the fixation off-screen by putting tape on a bottle or a box and drawing a fixation cross on it.\n• centerTargets sets the (possibly offscreen) fixation location so as to maximize the screen margin around the edges of all the possible targets.  We consider all possible targets across all conditions within the block.  \n• centerFixationAndTargets places fixation so as to maximize the screen margin around the fixation and the edges of all the possible targets within the block. We consider all possible targets across all conditions within the block.  \n\nSatisfying centerTargets or centerFixationAndTargets may be impossible beyond a certain maximum viewing distance (in cm) proportional to screen size (in cm). We generally don't know the screen size at compile time, as each participant has their own computer. Currently the scientist can only specify viewing distance as a fixed number of cm. \n\n[Since short viewing distances are uncomfortable, it might be useful to be able to request the maximize viewing distance such that the screen will have a needed visual subtense. In effect, this requests a viewing distance that is a multiple of screen width or height.]",
     type: "categorical",
     default: "centerFixation",
     categories:
@@ -2240,7 +2261,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "thresholdGamma (default is empty which produces a compiler error) is a parameter of the psychometric function used by QUEST. thresholdGamma is the probability of correct/yes response when target is at zero strength. In an identification task, we typically set gamma to 1/n, where n is the number of equal-probability possible targets. When the target is a letter, n=length(fontCharacterSet). In two-alternative forced choice we typically set gamma to 0.5. The various targetTasks each have different default values of gamma. If you leave thresholdGamma empty then you'll get that default. If you set thresholdGamma then the value you provide will overrule the default.",
+      "thresholdGamma (default is empty which is filled in at runtime as explained below) is a parameter of the psychometric function used by QUEST. thresholdGamma is the probability of correct or yes response when the target is at zero strength. In an identification task with n equally-probable possibilities, one should set gamma to 1/n. Currently thresholdGamma defaults to 0.5 (which is appropriate for two-alternative forced choice), unless targetKind=letter.  In that case, if all the letters are unique, then n=length(fontCharacterSet), and the default value for thresholdGamma is 1/n. The various targetTasks and targetKinds should each have different default values of gamma, but currently thresholdGamma always default to 0.5 unless targetKind=letter. If you leave thresholdGamma empty then you'll get the default. If you set thresholdGamma to a numerical probability then that number will overrule the default. NOTE: You are allowed to have repeated letters in fontCharacterSet to give the letters unequal frequency. In that case, the default value of thresholdGamma is set to the probability of the most common letter being the right letter. For example, if fontCharacterSet='AAB', then the default value of thresholdGamma is 2/3.",
     type: "numerical",
     default: "",
     categories: "",
@@ -2248,11 +2269,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "thresholdGuess",
     availability: "now",
-    example: "2",
+    example: "1",
     explanation:
-      "Used to prime QUEST by providing a prior PDF, which is specified as a Gaussian as a function of the log threshold parameter. Its mean is the log of your guess, and its SD (in log units) is specifed below . We typically take our guess from our standard formulas for size and spacing threshold as a function of eccentricity.",
+      "thresholdGuess is your best guess for threshold, in linear units. (Unlike thresholdGuessLogSd, which is logarithmic.) Used to prime QUEST by providing a prior PDF, which is specified as a Gaussian as a function of the log threshold parameter. Its mean is the log of your guess, and its SD (in log units) is specifed below. We typically take our guess from our standard formulas for size and spacing threshold as a function of eccentricity.",
     type: "numerical",
-    default: "2",
+    default: "1",
     categories: "",
   },
   {
@@ -2260,7 +2281,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "2",
     explanation:
-      "Used by QUEST. Sets the standard deviation of the prior PDF as a function of log of the threshold parameter.",
+      "thresholdGuessLogSd (default 2) specifies what standard deviation (in log units) you want Quest to assume for your threshold guess. Better to err on the high side, so you don't exclude actual cases. Used by QUEST. Sets the standard deviation of the prior PDF as a function of log of the threshold parameter.",
     type: "numerical",
     default: "2",
     categories: "",
@@ -2280,7 +2301,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "QUEST",
     explanation:
-      'Can be QUEST or none. We may add Fechner\'s "method of constant stimuli". Note that when rendering we restrict the threshold parameter to values that can be rendered without artifact, i.e. not too small to have enough pixels to avoid jaggies and not too big for target (and flankers in spacing threshold) to fit entirely on screen. The response returned to QUEST is accompanied by the true value of the threshold parameter, regardless of what QUEST suggested.',
+      'thresholdProcedure (default QUEST) can be QUEST or none. We may add Fechner\'s "method of constant stimuli". Note that when rendering we restrict the threshold parameter to values that can be rendered without artifact, i.e. not too small to have enough pixels to avoid jaggies and not too big for target (and flankers in spacing threshold) to fit entirely on screen. The response returned to QUEST is accompanied by the true value of the threshold parameter, regardless of what QUEST suggested.',
     type: "categorical",
     default: "QUEST",
     categories: "none, QUEST",

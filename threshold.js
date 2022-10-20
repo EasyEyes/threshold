@@ -112,6 +112,7 @@ import {
   dummyStim,
   rsvpReadingResponse,
   phraseIdentificationResponse,
+  repeatedLettersResponse,
 } from "./components/global.js";
 
 import {
@@ -334,6 +335,7 @@ import {
   readTrialLevelRepeatedLetterParams,
   generateRepeatedLettersStims,
   restrictRepeatedLettersSpacing,
+  registerResponseForRepeatedLetters,
 } from "./components/repeatedLetters.js";
 import { KeyPress } from "./psychojs/src/core/index.js";
 import {
@@ -1383,11 +1385,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 trialsConditions,
                 paramReader
               );
-              trialsConditions = duplicateConditionsOfTargetKind(
-                trialsConditions,
-                2,
-                "repeatedLetters"
-              );
+              // trialsConditions = duplicateConditionsOfTargetKind(
+              //   trialsConditions,
+              //   2,
+              //   "repeatedLetters"
+              // );
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
                 psychoJS: psychoJS,
@@ -1397,7 +1399,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
-                duplicates: 2,
               });
               fixationConfig.show = true;
             },
@@ -1410,11 +1411,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 trialsConditions,
                 paramReader
               );
-              trialsConditions = duplicateConditionsOfTargetKind(
-                trialsConditions,
-                numberOfWordsPerSeries,
-                "rsvpReading"
-              );
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
                 psychoJS: psychoJS,
@@ -1424,7 +1420,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
-                duplicates: numberOfWordsPerSeries,
               });
               fixationConfig.show = true;
             },
@@ -1880,18 +1875,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               );
               // Since each requested trial (from the scientist) requires two trials (on for each response)
               // when targetKind === repeatedLetters.
-              const trialsPerRequested = 2;
-              totalTrialsThisBlock.current =
-                possibleTrials.reduce((a, b) => a + b, 0) * trialsPerRequested;
+              totalTrialsThisBlock.current = possibleTrials.reduce(
+                (a, b) => a + b,
+                0
+              );
             },
             rsvpReading: () => {
               const possibleTrials = paramReader.read(
                 "conditionTrials",
                 status.block
               );
-              const trialsPerRequested = 6;
-              totalTrialsThisBlock.current =
-                possibleTrials.reduce((a, b) => a + b, 0) * trialsPerRequested;
+              totalTrialsThisBlock.current = possibleTrials.reduce(
+                (a, b) => a + b,
+                0
+              );
             },
           });
         },
@@ -2469,10 +2466,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           t;
           for (let c of snapshot.handler.getConditions()) {
-            if (
-              c.block_condition === trials._currentStaircase._name &&
-              c._duplicatedConditionCardinal === trials._duplicatedTrialCardinal
-            ) {
+            if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
             }
@@ -2481,10 +2475,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         repeatedLetters: () => {
           for (let c of snapshot.handler.getConditions()) {
-            if (
-              c.block_condition === trials._currentStaircase._name &&
-              c._duplicatedConditionCardinal === trials._duplicatedTrialCardinal
-            ) {
+            if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
               status.block_condition = status.condition["block_condition"];
             }
@@ -3081,179 +3072,158 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readTrialLevelLetterParams(reader, BC);
           readTrialLevelRepeatedLetterParams(reader, BC);
 
-          /// Do on just the first trial for this condition
-          if (status.condition._duplicatedConditionCardinal === 1) {
-            validAns = String(reader.read("fontCharacterSet", BC))
-              .toLowerCase()
-              .split("");
-            fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
-            // Set up instructions
-            _instructionBeforeStimulusSetup(
-              instructionsText.trial.fixate["spacing"](
-                rc.language.value,
-                responseType.current
-              )
+          validAns = String(reader.read("fontCharacterSet", BC))
+            .toLowerCase()
+            .split("");
+          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
+          // Set up instructions
+          _instructionBeforeStimulusSetup(
+            instructionsText.trial.fixate["spacing"](
+              rc.language.value,
+              responseType.current
+            )
+          );
+
+          clickedContinue.current = false;
+          document.addEventListener("click", _takeFixationClick);
+          document.addEventListener("touchend", _takeFixationClick);
+
+          // Get level from quest
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+
+          // Constrain to fit on screen
+          [level, stimulusParameters] = restrictRepeatedLettersSpacing(
+            proposedLevel,
+            letterConfig.targetEccentricityXYDeg,
+            characterSetBoundingRects[BC]
+          );
+          logger("repeated", { level, stimulusParameters, proposedLevel });
+          logger("repeated targetEcc", letterConfig.targetEccentricityXYDeg);
+          logger("repeated characterSet", characterSetBoundingRects[BC]);
+
+          // Generate stims to fill screen
+          repeatedLettersConfig.stims =
+            generateRepeatedLettersStims(stimulusParameters);
+          repeatedLettersConfig.level = level;
+          repeatedLettersConfig.stimulusParameters = stimulusParameters;
+
+          // Update fixation
+          fixation.update(
+            paramReader,
+            BC,
+            100, // stimulusParameters.heightPx,
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+          );
+          fixationConfig.pos = fixationConfig.nominalPos;
+          fixation.setPos(fixationConfig.pos);
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
+
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecsForRepeatedLetters(
+              stimulusParameters,
+              thisExperimentInfo.experimentFileName
             );
 
-            clickedContinue.current = false;
-            document.addEventListener("click", _takeFixationClick);
-            document.addEventListener("touchend", _takeFixationClick);
+          // Add stims to trialComponents
+          trialComponents = [];
+          trialComponents.push(...repeatedLettersConfig.stims);
+          trialComponents.push(...fixation.stims);
+          trialComponents.push(key_resp);
 
-            // Get level from quest
-            let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-            psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-
-            // Constrain to fit on screen
-            [level, stimulusParameters] = restrictRepeatedLettersSpacing(
-              proposedLevel,
-              letterConfig.targetEccentricityXYDeg,
-              characterSetBoundingRects[BC]
-            );
-
-            // Generate stims to fill screen
-            repeatedLettersConfig.stims =
-              generateRepeatedLettersStims(stimulusParameters);
-            repeatedLettersConfig.level = level;
-            repeatedLettersConfig.stimulusParameters = stimulusParameters;
-
-            // Update fixation
-            fixation.update(
-              paramReader,
-              BC,
-              100, // stimulusParameters.heightPx,
-              XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
-            );
-            fixationConfig.pos = fixationConfig.nominalPos;
-            fixation.setPos(fixationConfig.pos);
-            fixation.tStart = t;
-            fixation.frameNStart = frameN;
-
-            if (showConditionNameConfig.showTargetSpecs)
-              updateTargetSpecsForRepeatedLetters(
-                stimulusParameters,
-                thisExperimentInfo.experimentFileName
-              );
-
-            // Add stims to trialComponents
-            trialComponents = [];
-            trialComponents.push(...repeatedLettersConfig.stims);
-            trialComponents.push(...fixation.stims);
-            trialComponents.push(key_resp);
-
-            trialComponents.push(showCharacterSet);
-            trialComponents.push(trialCounter);
-            trialComponents.push(renderObj.tinyHint);
-          } else {
-            clickedContinue.current = true;
-            if (showConditionNameConfig.showTargetSpecs)
-              updateTargetSpecsForRepeatedLetters(
-                repeatedLettersConfig.stimulusParameters,
-                thisExperimentInfo.experimentFileName
-              );
-            // Add stims to trialComponents
-            trialComponents = [];
-            trialComponents.push(key_resp);
-            trialComponents.push(showCharacterSet);
-            trialComponents.push(trialCounter);
-            trialComponents.push(renderObj.tinyHint);
-          }
+          trialComponents.push(showCharacterSet);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
         },
         rsvpReading: () => {
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
-          if (status.condition._duplicatedConditionCardinal === 1) {
-            readAllowedTolerances(tolerances, reader, BC);
-            readTrialLevelLetterParams(reader, BC);
-            clickedContinue.current = false;
-            rsvpReadingResponse.displayStatus = false;
-            document.addEventListener("click", _takeFixationClick);
-            document.addEventListener("touchend", _takeFixationClick);
+          readAllowedTolerances(tolerances, reader, BC);
+          readTrialLevelLetterParams(reader, BC);
+          clickedContinue.current = false;
+          rsvpReadingResponse.displayStatus = false;
+          document.addEventListener("click", _takeFixationClick);
+          document.addEventListener("touchend", _takeFixationClick);
 
-            rsvpReadingResponse.responseType =
-              paramReader.read("responseTypedBool", BC) &&
-              !paramReader.read("responseClickedBool", BC)
-                ? "typed"
-                : "clicked";
+          rsvpReadingResponse.responseType =
+            paramReader.read("responseTypedBool", BC) &&
+            !paramReader.read("responseClickedBool", BC)
+              ? "typed"
+              : "clicked";
 
-            // Get level from quest
-            let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-            psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+          // Get level from quest
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-            const numberOfWords = paramReader.read(
-              "rsvpReadingNumberOfWords",
-              status.block
-            )[0];
-            level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
-            psychoJS.experiment.addData("level", level);
+          const numberOfWords = paramReader.read(
+            "rsvpReadingNumberOfWords",
+            status.block
+          )[0];
+          level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
+          psychoJS.experiment.addData("level", level);
 
-            const durationSec = Math.pow(10, level);
+          const durationSec = Math.pow(10, level);
 
-            rsvpReadingTargetSets.numberOfSets = numberOfWords;
-            const targetSets = generateRSVPReadingTargetSets(
-              numberOfWords,
-              durationSec,
-              paramReader,
-              status.block_condition
+          rsvpReadingTargetSets.numberOfSets = numberOfWords;
+          const targetSets = generateRSVPReadingTargetSets(
+            numberOfWords,
+            durationSec,
+            paramReader,
+            status.block_condition
+          );
+          rsvpReadingTargetSets.upcoming = targetSets;
+          correctAns.current = targetSets.map((t) => t.word.toLowerCase());
+          rsvpReadingTargetSets.past = [];
+
+          rsvpReadingResponse.categories = rsvpReadingTargetSets.upcoming.map(
+            (s) => new Category(s.word, s.foilWords)
+          );
+          if (rsvpReadingResponse.responseType === "clicked") {
+            rsvpReadingResponse.screen = setupPhraseIdentification(
+              rsvpReadingResponse.categories
             );
-            rsvpReadingTargetSets.upcoming = targetSets;
-            correctAns.current = targetSets.map((t) => t.word.toLowerCase());
-            rsvpReadingTargetSets.past = [];
-
-            rsvpReadingResponse.categories = rsvpReadingTargetSets.upcoming.map(
-              (s) => new Category(s.word, s.foilWords)
-            );
-            if (rsvpReadingResponse.responseType === "clicked") {
-              logger(
-                "rsvpReadingResponse.responseType",
-                rsvpReadingResponse.responseType
-              );
-              rsvpReadingResponse.screen = setupPhraseIdentification(
-                rsvpReadingResponse.categories
-              );
-            }
-
-            rsvpReadingTargetSets.current =
-              rsvpReadingTargetSets.upcoming.shift();
-
-            fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
-            // Set up instructions
-            _instructionBeforeStimulusSetup(
-              instructionsText.trial.fixate["spacing"](
-                rc.language.value,
-                responseType.current
-              )
-            );
-
-            // Update fixation
-            fixation.update(
-              paramReader,
-              BC,
-              100, // stimulusParameters.heightPx,
-              XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
-            );
-            fixationConfig.pos = fixationConfig.nominalPos;
-            fixation.setPos(fixationConfig.pos);
-            fixation.tStart = t;
-            fixation.frameNStart = frameN;
-
-            // TODO show target specs
-            // if (showConditionNameConfig.showTargetSpecs)
-            //   updateTargetSpecsForRepeatedLetters(
-            //     stimulusParameters,
-            //     thisExperimentInfo.experimentFileName
-            //   );
-
-            // Add stims to trialComponents
-            trialComponents = [];
-            trialComponents.push(...fixation.stims);
-            trialComponents.push(key_resp);
-            trialComponents.push(showCharacterSet);
-            trialComponents.push(trialCounter);
-            trialComponents.push(renderObj.tinyHint);
-            // trialComponents.push(...rsvpReadingFeedback.stims);
-          } else {
-            clickedContinue.current = true;
           }
+
+          rsvpReadingTargetSets.current =
+            rsvpReadingTargetSets.upcoming.shift();
+
+          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
+          // Set up instructions
+          _instructionBeforeStimulusSetup(
+            instructionsText.trial.fixate["spacing"](
+              rc.language.value,
+              responseType.current
+            )
+          );
+
+          // Update fixation
+          fixation.update(
+            paramReader,
+            BC,
+            100, // stimulusParameters.heightPx,
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+          );
+          fixationConfig.pos = fixationConfig.nominalPos;
+          fixation.setPos(fixationConfig.pos);
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
+
+          // TODO show target specs
+          // if (showConditionNameConfig.showTargetSpecs)
+          //   updateTargetSpecsForRepeatedLetters(
+          //     stimulusParameters,
+          //     thisExperimentInfo.experimentFileName
+          //   );
+
+          // Add stims to trialComponents
+          trialComponents = [];
+          trialComponents.push(...fixation.stims);
+          trialComponents.push(key_resp);
+          trialComponents.push(showCharacterSet);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
+          // trialComponents.push(...rsvpReadingFeedback.stims);
         },
       });
 
@@ -3362,13 +3332,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         letter: letterEachFrame,
         repeatedLetters: letterEachFrame,
-        rsvpReading: () => {
-          if (status.condition._duplicatedConditionCardinal === 1) {
-            letterEachFrame();
-          } else {
-            continueRoutine = false;
-          }
-        },
+        rsvpReading: letterEachFrame,
       });
 
       if (showConditionNameConfig.show) {
@@ -3465,22 +3429,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _takeFixationClick,
             fixation
           );
-          offsetStimsToFixationPos(repeatedLettersConfig.stims);
+          if (fixationConfig.markingFixationMotionRadiusDeg)
+            offsetStimsToFixationPos(repeatedLettersConfig.stims);
         },
         rsvpReading: () => {
-          if (status.condition._duplicatedConditionCardinal === 1) {
-            _identify_trialInstructionRoutineEnd(
-              instructions,
-              _takeFixationClick,
-              fixation
-            );
-            if (fixationConfig.markingFixationMotionRadiusDeg) {
-              const stimsToOffset = [
-                ...rsvpReadingTargetSets.current.stims,
-                // ...rsvpReadingTargetSets.upcoming.map((s) => s.stims).flat(),
-              ];
-              offsetStimsToFixationPos(stimsToOffset);
-            }
+          _identify_trialInstructionRoutineEnd(
+            instructions,
+            _takeFixationClick,
+            fixation
+          );
+          if (fixationConfig.markingFixationMotionRadiusDeg) {
+            const stimsToOffset = [
+              ...rsvpReadingTargetSets.current.stims,
+              ...rsvpReadingTargetSets.upcoming.map((s) => s.stims).flat(),
+            ];
+            offsetStimsToFixationPos(stimsToOffset);
           }
         },
       });
@@ -3666,18 +3629,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       key_resp.rt = [];
       _key_resp_allKeys = [];
 
-      /// DEFN Conditional trial (ie one per condition according to the experimenter). WHOLE
-      /// DEFN Cardinal trial (ie one condition according to psychojs). PART
-      // In multi-part trials/conditions (ie repeatedLetters, which requires the response from
-      // two trials for a given condition), we call these sub-trials `cardinals`.
-      // By keeping track of responses within, and across, cardinals, we can support arbitrary
-      // numbers of responses per cardinal, and per trial (ie across cardinals).
-      if (status.condition._duplicatedConditionCardinal !== 2) {
-        // != 2?? mean === 1?
-        _responsesAcrossCardinals = [];
-        showCharacterSetResponse.alreadyClickedCharacters = [];
-      }
-      _responsesWithinCardinal = [];
+      // TODO disassemble and restructure repeatedLetter inputs to not be built on duplicates/cardinals
+      showCharacterSetResponse.alreadyClickedCharacters = [];
 
       _instructionSetup(
         instructionsText.trial.respond["spacing"](
@@ -3790,18 +3743,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // If this isn't duplicatedConditionCardinal === 1, then this trial isn't for showing stimuli.
         // Instead, it's response type trial, ie one of a multi-part trial just used for response. AKA cardinal trial
         // Allow response right away if this is just a response trial
-        const responseTypeTrial =
-          status.condition.hasOwnProperty("_duplicatedConditionCardinal") &&
-          status.condition._duplicatedConditionCardinal !== 1;
-        timeWhenRespondable = responseTypeTrial
-          ? 0
-          : targetKind.current === "rsvpReading"
-          ? rsvpReadingTargetSets.upcoming[
-              rsvpReadingTargetSets.upcoming.length - 1
-            ].stopTime
-          : delayBeforeStimOnsetSec +
-            letterConfig.targetSafetyMarginSec +
-            letterConfig.targetDurationSec;
+        // const responseTypeTrial =
+        //   status.condition.hasOwnProperty("_duplicatedConditionCardinal") &&
+        //   status.condition._duplicatedConditionCardinal !== 1;
+        timeWhenRespondable =
+          targetKind.current === "rsvpReading"
+            ? rsvpReadingTargetSets.upcoming[
+                rsvpReadingTargetSets.upcoming.length - 1
+              ].stopTime
+            : delayBeforeStimOnsetSec +
+              letterConfig.targetSafetyMarginSec +
+              letterConfig.targetDurationSec;
 
         frameRemains =
           delayBeforeStimOnsetSec +
@@ -3831,10 +3783,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
           },
           repeatedLetters: () => {
-            _repeatedLetters_trialRoutineFirstFrame(
-              paramReader,
-              status.condition._duplicatedConditionCardinal
-            );
+            _repeatedLetters_trialRoutineFirstFrame(paramReader);
           },
           sound: () => {
             if (targetTask.current == "detect") {
@@ -3859,9 +3808,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReading: () => {
             //only clickable
             // responseType.current = 1;
-            if (status.condition._duplicatedConditionCardinal !== 1) {
-              continueRoutine = false;
-            }
           },
         });
       }
@@ -3871,7 +3817,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Given rsvpReading, and we are done showing stimuli...
       if (
         targetKind.current === "rsvpReading" &&
-        status.condition._duplicatedConditionCardinal === 1 &&
         typeof rsvpReadingTargetSets.current === "undefined"
       ) {
         showCursor();
@@ -3962,19 +3907,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           if (targetKind.current === "rsvpReading")
             registerKeypressForRSVPReading(theseKeys);
-
-          // NOTE this precludes repeated inputs for the same key. If in future this is desired, revisit.
-          // eg consider passing `clear=true`, and recording all keys
-          const newKeysPressed = theseKeys
-            .map((k) => k.name)
-            .filter(
-              (c) =>
-                !(
-                  _responsesWithinCardinal.includes(c) ||
-                  _responsesAcrossCardinals.includes(c)
-                )
-            );
-          _responsesWithinCardinal.push(...newKeysPressed);
+          // if (targetKind.current === "repeatedLetters"){
+          //   theseKeys.forEach(k => {
+          //     logger("correctAns", correctAns.current);
+          //     correctAns.current = registerResponseForRepeatedLetters(k.name,k.rt, correctAns.current);
+          //   });
+          // }
         }
       }
       // Input from clickable character set
@@ -3983,36 +3921,35 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (targetKind.current === "vocoderPhrase")
           vocoderPhraseCorrectResponse.current =
             showCharacterSetResponse.current;
-        // Add the new characters to those pressed. See NOTE above, ie this approach doesn't register duplicate letter presses
-        const newKeysClicked = showCharacterSetResponse.current.filter(
-          (c) =>
-            !(
-              _responsesWithinCardinal.includes(c) ||
-              _responsesAcrossCardinals.includes(c)
-            )
-        );
-        _responsesWithinCardinal.push(...newKeysClicked);
 
-        key_resp.keys.push(...showCharacterSetResponse.current);
-        key_resp.rt.push(
-          ...showCharacterSetResponse.clickTime.map(
-            (clickTime, i) =>
-              (clickTime - showCharacterSetResponse.onsetTime[i]) / 1000
-          )
+        const responses = [...showCharacterSetResponse.current];
+        const rts = showCharacterSetResponse.clickTime.map(
+          (clickTime, i) =>
+            (clickTime - showCharacterSetResponse.onsetTime[i]) / 1000
         );
+        key_resp.keys.push(...responses);
+        key_resp.rt.push(...rts);
         // TODO record `code` and `rt`
         const clickedKeypresses = showCharacterSetResponse.current.map(
           (letter) => new KeyPress(undefined, undefined, letter)
         );
         _key_resp_allKeys.push(clickedKeypresses);
 
+        // if (targetKind.current === "repeatedLetters"){
+        //   showCharacterSetResponse.current.forEach((r,i) => {
+        //     logger("correctAns", correctAns.current);
+        //     correctAns.current = registerResponseForRepeatedLetters(r, rts[i], correctAns.current);
+        //   });
+        // }
+
+        // TODO update how already clicked characters are shown, ie for repeatedLetters
+        showCharacterSetResponse.alreadyClickedCharacters.push(
+          ...showCharacterSetResponse.current
+        );
         showCharacterSetResponse.current = [];
         showCharacterSetResponse.clickTime = [];
       }
-      const newResponses = [...new Set(_responsesWithinCardinal)].filter(
-        (k) => !_responsesAcrossCardinals.includes(k)
-      );
-      showCharacterSetResponse.alreadyClickedCharacters.push(...newResponses);
+
       if (
         showCharacterSet.status === PsychoJS.Status.STARTED &&
         targetKind.current !== "vocoderPhrase"
@@ -4020,37 +3957,38 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         toggleClickedCharacters();
 
       // Check if the (set of clickable charset and keyboard) inputs constitute an end-of-trial
+      // for regimes which require a single response to QUEST
+      // TODO consolidate all endtrial/correctness logic into one place, ie generalize to include rsvpReading,repeatedLetters
+      const uniqueResponses = new Set(_key_resp_allKeys.map((k) => k.name));
       if (
-        newResponses.length >= responseType.numberOfResponses &&
-        targetKind.current !== "rsvpReading"
+        uniqueResponses.size >= responseType.numberOfResponses &&
+        targetKind.current !== "rsvpReading" &&
+        targetKind.current !== "repeatedLetters"
       ) {
-        _responsesAcrossCardinals.push(..._responsesWithinCardinal);
         // The characters with which the participant responded
-        const participantResponse = newResponses.slice(
-          newResponses.length - responseType.numberOfResponses
+        const participantResponse = [...uniqueResponses].slice(
+          uniqueResponses.size - responseType.numberOfResponses
         );
-        let responseCorrect;
-        if (targetKind.current === "repeatedLetters") {
-          // Each response given this trial is a correct answer
-          responseCorrect = participantResponse.every((r) =>
-            correctAns.current.includes(r)
-          );
-          // Remove the registerd response(s) from the set of possible correct answers
-          correctAns.current = correctAns.current.filter(
-            (a) => !participantResponse.includes(a)
-          );
-        } else {
-          responseCorrect =
-            targetKind.current === "vocoderPhrase"
-              ? arraysEqual(
-                  vocoderPhraseCorrectResponse.current.sort(),
-                  correctAns.current.sort()
-                )
-              : arraysEqual(
-                  participantResponse.sort(),
-                  correctAns.current.sort()
-                );
-        }
+        // if (targetKind.current === "repeatedLetters") {
+        //   // Each response given this trial is a correct answer
+        //   responseCorrect = participantResponse.every((r) =>
+        //     correctAns.current.includes(r)
+        //   );
+        //   // Remove the registerd response(s) from the set of possible correct answers
+        //   correctAns.current = correctAns.current.filter(
+        //     (a) => !participantResponse.includes(a)
+        //   );
+        // } else {
+        const responseCorrect =
+          targetKind.current === "vocoderPhrase"
+            ? arraysEqual(
+                vocoderPhraseCorrectResponse.current.sort(),
+                correctAns.current.sort()
+              )
+            : arraysEqual(
+                participantResponse.sort(),
+                correctAns.current.sort()
+              );
 
         // Was this correct?
         if (responseCorrect) {
@@ -4073,17 +4011,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
-            repeatedLetters: () => {
-              correctSynth.play();
-              status.trialCorrect_thisBlock++;
-              status.trialCompleted_thisBlock++;
-            },
-            // rsvpReading: () => {
-            //   logger("TODO rsvpReading unique on-correct behavior?");
-            //   correctSynth.play();
-            //   status.trialCorrect_thisBlock++;
-            //   status.trialCompleted_thisBlock++;
-            // },
           });
           // CORRECT
           key_resp.corr = 1;
@@ -4173,7 +4100,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       switch (targetKind.current) {
         case "repeatedLetters":
-          _repeatedLetters_trialRoutineEachFrame(
+          // Continue after done displaying stimuli, when enough responses have been registered
+          continueRoutine = _repeatedLetters_trialRoutineEachFrame(
             t,
             frameN,
             delayBeforeStimOnsetSec,
@@ -4181,17 +4109,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetSpecs,
             conditionName,
             showCharacterSet,
-            instructions,
-            status.condition._duplicatedConditionCardinal
+            instructions
           );
           break;
         case "rsvpReading":
-          _rsvpReading_trialRoutineEachFrame(
-            t,
-            frameN,
-            status.condition._duplicatedConditionCardinal,
-            instructions
-          );
+          _rsvpReading_trialRoutineEachFrame(t, frameN, instructions);
           break;
       }
 
@@ -4654,31 +4576,68 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               target,
               currentLoop,
               simulated,
-              key_resp,
+              key_resp.corr,
               level
             );
           },
           repeatedLetters: () => {
+            const numberOfResponses = repeatedLettersResponse.current.length;
+            for (let i = 0; i < numberOfResponses; i++) {
+              const thisResponse = repeatedLettersResponse.current.shift();
+              const thisResponseTime = repeatedLettersResponse.rt.shift();
+              psychoJS.experiment.addData(
+                `repatedLetters-${i}-RESPONSE`,
+                thisResponse
+              );
+              psychoJS.experiment.addData(
+                `repeatedLetters-${i}-RESPONSE${thisResponse}-TimeOfResponse`,
+                thisResponseTime
+              );
+            }
             _letter_trialRoutineEnd(
               repeatedLettersConfig.stims[0],
               currentLoop,
               simulated,
-              key_resp,
+              repeatedLettersResponse.correct,
               level
             );
+            repeatedLettersResponse.current = [];
+            repeatedLettersResponse.correct = [];
+            repeatedLettersResponse.rt = [];
           },
           rsvpReading: () => {
-            // TODO add response, clicktime/duration to data
-            const thisResponse = phraseIdentificationResponse.current.shift();
-            const thisResponseTime =
-              phraseIdentificationResponse.clickTime.shift();
-            const _thisResponseCategory =
-              phraseIdentificationResponse.categoriesResponded.shift();
+            // {
+            //   current: phraseIdentificationResponse.current,
+            //   correct: phraseIdentificationResponse.correct,
+            //   categoriesResponded: phraseIdentificationResponse.categoriesResponded,
+            // });
+            const numberOfResponses =
+              phraseIdentificationResponse.current.length;
+            for (let i = 0; i < numberOfResponses; i++) {
+              const thisResponse = phraseIdentificationResponse.current.shift();
+              const thisResponseTime =
+                phraseIdentificationResponse.clickTime.shift();
+              const _thisResponseCategory =
+                phraseIdentificationResponse.categoriesResponded.shift();
+              psychoJS.experiment.addData(
+                `rsvpReading-${i}-TARGET${_thisResponseCategory}-RESPONSE`,
+                thisResponse
+              );
+              psychoJS.experiment.addData(
+                `rsvpReading-${i}-TARGET${_thisResponseCategory}-TimeOfResponse`,
+                thisResponseTime
+              );
+            }
+
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+            // TODO only give to QUEST if acceptable
+            const giveToQuest = true;
             currentLoop.addResponse(
-              phraseIdentificationResponse.correct.shift() ? 1 : 0,
-              level
+              phraseIdentificationResponse.correct,
+              level,
+              giveToQuest
             );
+            phraseIdentificationResponse.correct = [];
             // showCursor();
           },
         });

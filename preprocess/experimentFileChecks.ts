@@ -441,7 +441,8 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
           checkType(column, isInt, columnName, correctType);
           break;
         case "numerical":
-          checkType(column, isNumeric, columnName, correctType);
+          const isNumerical = (s: string): boolean => isNumeric(s) || s === "";
+          checkType(column, isNumerical, columnName, correctType);
           break;
         case "boolean":
           const isBool = (s: string): boolean =>
