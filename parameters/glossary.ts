@@ -421,6 +421,12 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "35",
   },
+  errorBool: {
+    name: "errorBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   fixationCheckBool: {
     name: "fixationCheckBool",
     availability: "now",

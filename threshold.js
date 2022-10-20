@@ -2428,6 +2428,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         if (canClick(responseType.current)) showCursor();
       };
+
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           // console.log("vocoderConditions",snapshot.handler.getConditions())
@@ -2507,10 +2508,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         rc.resumeDistance();
         loggerText("[RC] resuming distance");
+
+        // reset tracking target distance
+        viewingDistanceDesiredCm.current = paramReader.read(
+          "viewingDistanceDesiredCm",
+          status.block_condition
+        );
+
+        if (rc.setDistanceDesired)
+          rc.setDistanceDesired(viewingDistanceDesiredCm.current);
       }
 
       const reader = paramReader;
       const BC = status.block_condition;
+
+      // ! trigger fake error
+      if (reader.read("errorBool", BC)) {
+        reader.read("xyz", BC);
+      }
 
       font.source = reader.read("fontSource", BC);
       font.name = reader.read("font", BC);

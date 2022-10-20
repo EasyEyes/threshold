@@ -562,6 +562,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "errorBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "errorBool (default FALSE) throws a fatal error in the first condition for which this parameter is TRUE. This is used to check out the EasyEyes error reporting.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "fixationCheckBool",
     availability: "now",
     example: "FALSE",
