@@ -2515,6 +2515,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition
         );
 
+        viewingDistanceCm.current = rc.viewingDistanceCm
+          ? rc.viewingDistanceCm.value
+          : viewingDistanceCm.current;
+
         if (rc.setDistanceDesired)
           rc.setDistanceDesired(viewingDistanceDesiredCm.current);
       }
@@ -3740,6 +3744,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
       /* -------------------------------------------------------------------------- */
+      // ! distance
+      if (ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block)))
+        viewingDistanceCm.current = rc.viewingDistanceCm
+          ? rc.viewingDistanceCm.value
+          : viewingDistanceCm.current;
+
       addApparatusInfoToData(displayOptions, rc, psychoJS, stimulusParameters);
 
       // ie time spent in `trialRoutineBegin`

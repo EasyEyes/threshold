@@ -360,11 +360,24 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  calibrateSound1000HzDB: {
+    name: "calibrateSound1000HzDB",
+    availability: "now",
+    type: "text",
+    default:
+      "-3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1",
+  },
   calibrateSoundAllHzBool: {
     name: "calibrateSoundAllHzBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
+  },
+  calibrateSoundAllHzDB: {
+    name: "calibrateSoundAllHzDB",
+    availability: "now",
+    type: "text",
+    default: "-13.1",
   },
   calibrateSoundDB: {
     name: "calibrateSoundDB",
@@ -1477,7 +1490,7 @@ export const GLOSSARY: Glossary = {
     name: "thresholdGuess",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "1",
   },
   thresholdGuessLogSd: {
     name: "thresholdGuessLogSd",
