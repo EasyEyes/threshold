@@ -59,7 +59,7 @@ export class RSVPReadingTargetSet {
     // Create the stims for those strings
     switch (letterConfig.spacingRelationToSize) {
       case "ratio":
-        return _generateRatioStims(strings);
+        return this._generateRatioStims(strings);
       case "typographic":
         return this._generateTypographicStims(strings);
       default:
@@ -314,77 +314,70 @@ const _getNextRSVPWord = (requireUnique) => {
   }
 };
 
-export const _rsvpReading_trialRoutineEachFrame = (
-  t,
-  frameN,
-  duplicatedConditionCardinal,
-  instructions
-) => {
-  if (duplicatedConditionCardinal === 1) {
-    // Done showing stimuli
-    if (
-      typeof rsvpReadingTargetSets.current === "undefined" &&
-      rsvpReadingTargetSets.upcoming.length === 0
-    ) {
-      instructions.tSTart = t;
-      instructions.frameNStart = frameN;
-      instructions.setAutoDraw(true);
-      return;
-    }
+export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
+  // Done showing stimuli
+  if (
+    typeof rsvpReadingTargetSets.current === "undefined" &&
+    rsvpReadingTargetSets.upcoming.length === 0
+  ) {
+    instructions.tSTart = t;
+    instructions.frameNStart = frameN;
+    instructions.setAutoDraw(true);
+    return;
+  }
 
-    // Draw current target set, given it's time and they're not yet drawn
+  // Draw current target set, given it's time and they're not yet drawn
+  if (
+    rsvpReadingTargetSets.current.startTime <= t &&
+    rsvpReadingTargetSets.current.stims.every(
+      (s) => s.status === PsychoJS.Status.NOT_STARTED
+    )
+  ) {
+    rsvpReadingTargetSets.current.stims.forEach((s) => {
+      // keep track of start time/frame for later
+      s.tStart = t; // (not accounting for frame time here)
+      s.frameNStart = frameN; // exact frame index
+      s.setAutoDraw(true);
+    });
+    // Mark start-time for this target set
+    if (!rsvpReadingTiming.current.startSec) {
+      rsvpReadingTiming.current.startSec = t;
+    }
     if (
-      rsvpReadingTargetSets.current.startTime <= t &&
+      !rsvpReadingTiming.current.drawnConfirmedTimestamp &&
       rsvpReadingTargetSets.current.stims.every(
         (s) => s.status === PsychoJS.Status.NOT_STARTED
       )
     ) {
+      rsvpReadingTiming.current.drawnConfirmedTimestamp = t;
+    }
+  }
+  if (rsvpReadingTargetSets.current.stopTime <= t) {
+    // If current targets are done, undraw them and update which is the current targetSet
+    if (
+      rsvpReadingTargetSets.current.stims.every(
+        (s) => s.status === PsychoJS.Status.STARTED
+      )
+    ) {
       rsvpReadingTargetSets.current.stims.forEach((s) => {
-        // keep track of start time/frame for later
-        s.tStart = t; // (not accounting for frame time here)
-        s.frameNStart = frameN; // exact frame index
-        s.setAutoDraw(true);
+        s.setAutoDraw(false);
       });
-      // Mark start-time for this target set
-      if (!rsvpReadingTiming.current.startSec) {
-        rsvpReadingTiming.current.startSec = t;
-      }
-      if (
-        !rsvpReadingTiming.current.drawnConfirmedTimestamp &&
-        rsvpReadingTargetSets.current.stims.every(
-          (s) => s.status === PsychoJS.Status.NOT_STARTED
-        )
-      ) {
-        rsvpReadingTiming.current.drawnConfirmedTimestamp = t;
-      }
+      rsvpReadingTiming.finishSec = t;
+      rsvpReadingTargetSets.past.push(rsvpReadingTargetSets.current);
+      rsvpReadingTargetSets.current = rsvpReadingTargetSets.upcoming.shift();
     }
-    if (rsvpReadingTargetSets.current.stopTime <= t) {
-      // If current targets are done, undraw them and update which is the current targetSet
-      if (
-        rsvpReadingTargetSets.current.stims.every(
-          (s) => s.status === PsychoJS.Status.STARTED
-        )
-      ) {
-        rsvpReadingTargetSets.current.stims.forEach((s) => {
-          s.setAutoDraw(false);
-        });
-        rsvpReadingTiming.finishSec = t;
-        rsvpReadingTargetSets.past.push(rsvpReadingTargetSets.current);
-        rsvpReadingTargetSets.current = rsvpReadingTargetSets.upcoming.shift();
-      }
-    }
-    if (rsvpReadingTargetSets.past.length) {
-      // The frame just after finishing, to note when the stimuli are confirmed to be undrawn
-      const justFinishedStims =
-        rsvpReadingTargetSets.past[rsvpReadingTargetSets.past.length - 1].stims;
-      if (
-        justFinishedStims.every((s) => s.status === PsychoJS.Status.FINISHED) &&
-        rsvpReadingTiming.current.drawnConfirmedTimestamp &&
-        !rsvpReadingTiming.current.undrawnConfirmedTimestamp
-      ) {
-        rsvpReadingTiming.current.undrawnConfirmedTimestamp = t;
-        justFinishedStims.forEach((s) => (s.frameNFinishedConfirmed = frameN));
-      }
+  }
+  if (rsvpReadingTargetSets.past.length) {
+    // The frame just after finishing, to note when the stimuli are confirmed to be undrawn
+    const justFinishedStims =
+      rsvpReadingTargetSets.past[rsvpReadingTargetSets.past.length - 1].stims;
+    if (
+      justFinishedStims.every((s) => s.status === PsychoJS.Status.FINISHED) &&
+      rsvpReadingTiming.current.drawnConfirmedTimestamp &&
+      !rsvpReadingTiming.current.undrawnConfirmedTimestamp
+    ) {
+      rsvpReadingTiming.current.undrawnConfirmedTimestamp = t;
+      justFinishedStims.forEach((s) => (s.frameNFinishedConfirmed = frameN));
     }
   }
 };

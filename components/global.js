@@ -146,6 +146,11 @@ export const repeatedLettersConfig = Object.seal({
   level: undefined,
   stimulusParameters: undefined,
 });
+export const repeatedLettersResponse = Object.seal({
+  current: [],
+  rt: [],
+  correct: [],
+});
 
 export const instructionFont = { current: undefined };
 

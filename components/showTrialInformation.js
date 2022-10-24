@@ -8,6 +8,7 @@ import {
   showConditionNameConfig,
   viewingDistanceCm,
 } from "./global";
+import { logger } from "./utils";
 
 export const showConditionName = (conditionName, targetSpecs) => {
   if (showConditionNameConfig.show) {
@@ -74,6 +75,7 @@ export const updateTargetSpecsForRepeatedLetters = (
   stimulusParameters,
   experimentFileName
 ) => {
+  logger("stimulusParameters", stimulusParameters);
   showConditionNameConfig.targetSpecs = `sizeDeg: ${
     Math.round(10 * stimulusParameters.sizeDeg) / 10
   }\n${

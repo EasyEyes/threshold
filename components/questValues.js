@@ -1,3 +1,5 @@
+import { logger } from "./utils";
+
 export const populateQuestDefaults = (
   conditionsList,
   reader,
@@ -7,15 +9,20 @@ export const populateQuestDefaults = (
     const condition = conditionsList[i];
     const cName = condition["block_condition"];
 
+    const readerGamma = reader.read("thresholdGamma", cName);
+    // If no gamma value is provided, calculate the default
+    const gamma =
+      readerGamma !== ""
+        ? readerGamma
+        : targetKind == "letter"
+        ? getGamma(reader.read("fontCharacterSet", cName))
+        : 0.5;
     const questValues = {
       startVal: Math.log10(reader.read("thresholdGuess", cName)),
       startValSd: reader.read("thresholdGuessLogSd", cName),
       beta: reader.read("thresholdBeta", cName),
       delta: reader.read("thresholdDelta", cName),
-      gamma:
-        targetKind == "letter"
-          ? getGamma(reader.read("fontCharacterSet", cName))
-          : 0.5,
+      gamma: gamma,
       pThreshold: reader.read("thresholdProportionCorrect", cName),
       nTrials: reader.read("conditionTrials", cName),
     };
