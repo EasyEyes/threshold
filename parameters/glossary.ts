@@ -588,12 +588,30 @@ export const GLOSSARY: Glossary = {
     default: "browser",
     categories: ["file", "google", "browser"],
   },
-  instructionFontStyle: {
-    name: "instructionFontStyle",
-    availability: "soon",
+  instructionForBlock: {
+    name: "instructionForBlock",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
+  instructionForResponse: {
+    name: "instructionForResponse",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
+  instructionForStimulus: {
+    name: "instructionForStimulus",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
+  instructionForStimulusLocation: {
+    name: "instructionForStimulusLocation",
+    availability: "now",
     type: "categorical",
-    default: "regular",
-    categories: ["regular", "italic", "bold", "boldItalic"],
+    default: "upperLeft",
+    categories: ["top", "upperLeft"],
   },
   instructionLanguage: {
     name: "instructionLanguage",

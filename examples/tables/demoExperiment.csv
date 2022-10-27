@@ -7,7 +7,7 @@ block,1,1,2,2,3,3
 calibrateTrackDistanceBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 conditionName,printLetters,printString,scriptLetters,scriptString,arabicLetters,arabicString
 conditionTrials,3,3,3,3,3,3
-font,Sloan.woff2,Auckland Optotype.woff2,Roboto Mono,Fruktur,Noto Sans Arabic Regular,Noto Sans Arabic Regular
+font,Sloan.woff2,Auckland Optotype.woff2,Roboto Mono,Fruktur,Noto Sans Arabic,Noto Sans Arabic
 fontCharacterSet,DHKNORSVZ,123456789,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ابتثجحخدذرزسشصضطظعغفقكلمنهوي,ابتثجحخدذرزسشصضطظعغفقكلمنهوي
 fontSource,file,file,google,google,google,google
 responseClickedBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE

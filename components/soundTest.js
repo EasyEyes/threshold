@@ -69,7 +69,7 @@ export const addSoundTestElements = (reader) => {
   const speakerSoundGainInput = document.createElement("input");
 
   // const adjustedSoundLevelContainer = document.createElement("div");
-  const adjustedSoundLevel = document.createElement("p");
+  // const adjustedSoundLevel = document.createElement("p");
   // const adjustedSoundLevelInput = document.createElement("input");
   // const rmsOfSoundContainer = document.createElement("div");
   const rmsOfSound = document.createElement("p");
@@ -119,7 +119,7 @@ export const addSoundTestElements = (reader) => {
   speakerSoundGainInput.setAttribute("type", "number");
 
   // adjustedSoundLevelContainer.setAttribute( "id", "soundTestModalAdjustedSoundLevelContainer");
-  adjustedSoundLevel.setAttribute("id", "soundTestModalAdjustedSoundLevel");
+  // adjustedSoundLevel.setAttribute("id", "soundTestModalAdjustedSoundLevel");
   // adjustedSoundLevelInput.setAttribute("id", "soundTestModalAdjustedSoundLevelInput");
   // adjustedSoundLevelInput.setAttribute("type", "number");
   // rmsOfSoundContainer.setAttribute("id", "soundTestModalRMSOfSoundContainer");
@@ -167,7 +167,7 @@ export const addSoundTestElements = (reader) => {
     ).toFixed(1);
   rmsOfSound.innerHTML = "Digital sound amplitude RMS: **** dB";
   maxAmplitude.innerHTML = "Digital sound max absolute value: 1.000";
-  adjustedSoundLevel.innerHTML = "Adjusted soundCalibrationLevel: **** dB SPL";
+  // adjustedSoundLevel.innerHTML = "Adjusted soundCalibrationLevel: **** dB SPL"
 
   modal.appendChild(modalDialog);
   modalDialog.appendChild(modalContent);
@@ -184,7 +184,7 @@ export const addSoundTestElements = (reader) => {
   modalHeaderContainer.appendChild(horizontal);
   modalHeaderContainer.appendChild(maxAmplitude);
   modalHeaderContainer.appendChild(rmsOfSound);
-  modalHeaderContainer.appendChild(adjustedSoundLevel);
+  // modalHeaderContainer.appendChild(adjustedSoundLevel);
   //append the toggles
   IRCorrectionToggleContainer.appendChild(IRCorrectionToggleLabel);
   IRCorrectionToggleContainer.appendChild(modalToggle);
@@ -407,9 +407,11 @@ const addSoundFileElements = (
         // round soundCalibrationLevelDBSPL to 1 decimal places
         soundCalibrationLevelDBSPL.current =
           Math.round(soundCalibrationLevelDBSPL.current * 10) / 10;
-        document.getElementById(
-          "soundTestModalAdjustedSoundLevel"
-        ).innerHTML = `Adjusted soundCalibrationLevel: ${soundCalibrationLevelDBSPL.current} dB SPL`;
+        document.getElementById("soundTestModalSoundLevelInput").value =
+          soundCalibrationLevelDBSPL.current;
+        // document.getElementById(
+        //   "soundTestModalAdjustedSoundLevel"
+        // ).innerHTML = `Adjusted soundCalibrationLevel: ${soundCalibrationLevelDBSPL.current} dB SPL`;
         const rmsOfSound = document.getElementById("soundTestModalRMSOfSound");
         const useGainNodeBool = document.getElementById(
           "soundTestModalUseGainNodeToggleInput"

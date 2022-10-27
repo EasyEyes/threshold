@@ -26,27 +26,36 @@ export const getFolderNames = (parsed: any): any => {
   targetKindList.shift();
 
   let folderAndTargetKindObjectList = [];
-  for (let i = 0; i < maskedfolderList.length; i++) {
-    if (
-      targetKindList[i] === "vocoderPhrase" ||
-      targetKindList[i] === "sound"
-    ) {
-      folderAndTargetKindObjectList.push({
-        maskerSoundFolder: maskedfolderList[i],
-        targetSoundFolder: targetfolderList[i],
-        targetTask: targetTaskList[i],
-        targetKind: targetKindList[i],
-      });
-    }
-  }
-  // console.log("folderAndTargetKindObjectList", folderAndTargetKindObjectList);
-
-  // console.log("targetTaskList", targetTaskList);
-  // console.log("targetKindList", targetKindList);
-  // console.log("maskedfolderList", maskedfolderList);
-  // console.log("targetfolderList", targetfolderList);
 
   // targetKind:Sound and targetTask:Detect needs masker and target folders
+  if (maskedfolderList.length > 0 && targetfolderList.length > 0) {
+    for (let i = 0; i < maskedfolderList.length; i++) {
+      if (
+        targetKindList[i] === "vocoderPhrase" ||
+        targetKindList[i] === "sound"
+      ) {
+        folderAndTargetKindObjectList.push({
+          maskerSoundFolder: maskedfolderList[i],
+          targetSoundFolder: targetfolderList[i],
+          targetTask: targetTaskList[i],
+          targetKind: targetKindList[i],
+        });
+      }
+    }
+  } else if (targetfolderList.length > 0) {
+    for (let i = 0; i < targetfolderList.length; i++) {
+      if (
+        targetKindList[i] === "vocoderPhrase" ||
+        targetKindList[i] === "sound"
+      ) {
+        folderAndTargetKindObjectList.push({
+          targetSoundFolder: targetfolderList[i],
+          targetTask: targetTaskList[i],
+          targetKind: targetKindList[i],
+        });
+      }
+    }
+  }
 
   //targetKind:Sound and targetTask:Identify needs target folder
 

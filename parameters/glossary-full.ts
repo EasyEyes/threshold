@@ -824,14 +824,44 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "file, google, browser",
   },
   {
-    name: "instructionFontStyle",
-    availability: "soon",
-    example: "regular",
+    name: "instructionForBlock",
+    availability: "now",
+    example: "",
     explanation:
-      "NOT YET IMPLEMENTED. Must be regular, bold, italic, or boldItalic. When you select a font file that is already styled, just select regular here. Otherwise the browser might try to tilt or thicken the already italic or bold font with unexpected results.",
+      "instructionForBlock (the default depends on targetTask and targetKind) is instructional text presented once in the block, before any trial of any condition, replacing whatever were the default block instructions for this condition. An empty field requests the default text, so write #NONE to suppress block instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. Use the string #PAGE_BREAK to insert a page break. You can use an unlimited number of pages. You should normally end each page with the symbol #CONTINUE, which will be replaced by text telling the participant how to continue to the next page: offering one or both of hitting RETURN and clicking the PROCEED button, as appropriate given the setting of the responseClickedBool and responseTypedBool parameters (see https://trello.com/c/OI2CzqX6). If the block has multiple conditions, then EasyEyes will present every unique set of block instructions, one after another, before the first trial. (A fancier scheme, which we could introduce if there were demand, would allow the scientist to use conditionGroup to create groups of conditions within a block, and present the block instructions for each group immediately before the first trial of any condition in that group. However, so far, none of our experiments have needed to show more than one set of block instructions.) FUTURE: Support Markdown to allow simple formating, including italic and bold. FUTURE: If the participant has requested translation to another language, then we use Google Translate to do so. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "instructionForResponse",
+    availability: "now",
+    example: "",
+    explanation:
+      "instructionForResponse (the default depends on targetTask and targetKind) is instructional text, to be shown immediately after each stimulus of this condition, that reminds the participant how to respond to the stimulus, e.g. clicking or typing to identify, detect, or rate. This text replaces whatever were the default response instructions. An empty field requests the default text, so write #NONE to suppress response instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. We typically ask the participant to respond by clicking one or more buttons indicating their selection(s). We rarely use the standard  #CONTINUE symbol here. FUTURE: Support Markdown to allow simple formating, including italic and bold. FUTURE: If the participant has requested translation to another language, then we use Google Translate to do so. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "instructionForStimulus",
+    availability: "now",
+    example: "",
+    explanation:
+      "instructionForStimulus (the default depends on targetTask and targetKind) is instructional text, to be shown immediately before each stimulus of this condition, that reminds the participant of the task and how to request the stimulus. This text replaces whatever were the default stimulus instructions. An empty field requests the default text, so write #NONE to suppress stimulus instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. To initiate a trial we typically ask the participant to click the center of a crosshair or hit the SPACE BAR. We rarely use the standard  #CONTINUE symbol here. If the participant has requested translation to another language, then we use Google Translate to do so. FUTURE: Support Markdown to allow simple formating, including italic and bold. FUTURE: If the participant has requested translation to another language, then we use Google Translate to do so. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "instructionForStimulusLocation",
+    availability: "now",
+    example: "",
+    explanation:
+      "instructionForStimulusLocation (default upperLeft) indicates where the stimulus instructions should be placed on the screen: top or upperLeft. If you select top, then the text will be at the top of the screen, using the full width of the screen (allowing modest right and left margins), aligned with the left or right side of the display, as guided by whether instructionFontLeftToRightBool is TRUE or FALSE. When you select upperLeft, EasyEyes will break the text up into short lines of text, to present it as a square block of text in the upper left corner, which may help keep the text far from the target.",
     type: "categorical",
-    default: "regular",
-    categories: "regular, italic, bold, boldItalic",
+    default: "upperLeft",
+    categories: "top, upperLeft",
   },
   {
     name: "instructionLanguage",

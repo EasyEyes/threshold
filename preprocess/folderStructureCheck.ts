@@ -135,10 +135,13 @@ export const getRequestedFoldersForStructureCheck = async (
   const maskers: any[] = [];
   const targets: any[] = [];
   for (let i = 0; i < folderAndTargetKindObjectList.length; i++) {
-    maskers.push({
-      name: folderAndTargetKindObjectList[i].maskerSoundFolder,
-      targetKind: folderAndTargetKindObjectList[i].targetKind,
-    });
+    if (folderAndTargetKindObjectList[i].maskerSoundFolder) {
+      maskers.push({
+        name: folderAndTargetKindObjectList[i].maskerSoundFolder,
+        targetKind: folderAndTargetKindObjectList[i].targetKind,
+      });
+    }
+
     targets.push({
       name: folderAndTargetKindObjectList[i].targetSoundFolder,
       targetKind: folderAndTargetKindObjectList[i].targetKind,
