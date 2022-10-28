@@ -6,19 +6,22 @@ export const prepareReadingQuestions = (
   numberOfQ: number,
   numberOfA: number,
   textPages: string[],
-  freqToWords: FrequencyToWords
+  freqToWords: FrequencyToWords,
+  targetKind?: string
 ) => {
   const usablePages = [...textPages];
-  if (usablePages.length > 2) usablePages.shift();
-  if (usablePages.length > 1) usablePages.pop();
-
+  if (targetKind !== "rsvpReading") {
+    if (usablePages.length > 2) usablePages.shift();
+    if (usablePages.length > 1) usablePages.pop();
+  }
   // Get displayed words
   const displayedWords = new Set();
   for (const page of textPages) {
     const pageList = preprocessCorpusToWordList(preprocessRawCorpus(page));
     for (const word of pageList) {
-      if (word.length && onlyAlphabets(word))
-        displayedWords.add(word.toLowerCase());
+      if (word.length && (onlyAlphabets(word) || targetKind === "rsvpReading"))
+        displayedWords.add(word);
+      // displayedWords.add(word.toLowerCase());
     }
   }
 
@@ -27,7 +30,8 @@ export const prepareReadingQuestions = (
     const [correctAnswer, correctAnswerFreq] = getCorrectAnswer(
       usablePages,
       freqToWords,
-      questions
+      questions,
+      targetKind
     );
     if (correctAnswerFreq === 0)
       throw "Failed to construct a new question. [no correct answer]";
@@ -49,7 +53,7 @@ export const prepareReadingQuestions = (
         if (
           displayedWords.has(word) ||
           word === correctAnswer ||
-          word.length < 2
+          (word.length < 2 && targetKind !== "rsvpReading") // Allow for short words in rsvpReading
         )
           continue;
         possibleFoils.add(word);
@@ -59,7 +63,10 @@ export const prepareReadingQuestions = (
       freqToTest += freqAdjustCounter;
       while (freqToWords[freqToTest] === undefined) {
         freqToTest += freqAdjustCounter;
-        if (freqToTest > maxFrequency) freqAdjustCounter = -freqAdjustCounter;
+        if (freqToTest > maxFrequency) {
+          freqAdjustCounter = -freqAdjustCounter;
+          freqToTest = maxFrequency;
+        }
         if (freqToTest < 1)
           throw "Failed to construct a new question. [no enough foils]";
       }
@@ -79,6 +86,12 @@ interface WordFrequencies {
 export const getWordFrequencies = (words: string[]) => {
   const frequencies: WordFrequencies = {};
   for (let word of words) {
+    // TODO Denis doesn't want capitalisation to be changed, yet if we care about word frequency we must treat upper/lowercase to be the same word
+    // possible to store frequency of both word and word.toLowerCase()? eg...
+    // if (word !== word.toLowerCase()) {
+    //   if (!(word in frequencies)) frequencies[word] = frequencies[word.toLowerCase()] ?? 1;
+    //   else frequencies[word] += 1;
+    // }
     word = word.toLowerCase();
     if (!(word in frequencies)) frequencies[word] = 1;
     else frequencies[word] += 1;
@@ -95,7 +108,9 @@ export const processWordFreqToFreqToWords = (
   const freqToWords: FrequencyToWords = {};
 
   for (const word in wordFrequencies) {
-    if (onlyAlphabets(word)) {
+    // TODO acceptable??
+    if (true) {
+      // if (onlyAlphabets(word)) {
       const freq = wordFrequencies[word];
       if (!(freq in freqToWords)) freqToWords[freq] = [];
       freqToWords[freq].push(word);
@@ -134,15 +149,22 @@ export const preprocessCorpusToWordList = (text: string) => {
 export const getCorrectAnswer = (
   usablePages: string[],
   freqToWords: FrequencyToWords,
-  questions: ReadingQuestionAnswers[]
+  questions: ReadingQuestionAnswers[],
+  targetKind?: string
 ): [string, number] => {
   // Get usable words
   const usableWords = new Set();
+  const pageWords: string[] = [];
   for (const page of usablePages) {
     const pageList = preprocessCorpusToWordList(preprocessRawCorpus(page));
     for (const word of pageList) {
-      if (word.length && onlyAlphabets(word))
+      if (
+        word.length &&
+        (onlyAlphabets(word) || targetKind === "rsvpReading")
+      ) {
         usableWords.add(word.toLowerCase());
+        if (targetKind === "rsvpReading") pageWords.push(word);
+      }
     }
   }
 
@@ -152,10 +174,20 @@ export const getCorrectAnswer = (
   for (const freq of frequencies) {
     const words = freqToWords[Number(freq)];
     for (const word of shuffle(words)) {
+      const timesWordAppearsInSource = pageWords.filter(
+        (w) => w.toLowerCase() === word.toLowerCase()
+      ).length;
+      const timesWordAppearsInQuestions = questions.filter(
+        (q) => q.correctAnswer.toLowerCase() === word.toLowerCase()
+      ).length;
+      const wordStillNeededForRsvp =
+        targetKind === "rsvpReading" &&
+        timesWordAppearsInQuestions < timesWordAppearsInSource;
       if (
-        word.length > 1 &&
+        (word.length > 1 || targetKind === "rsvpReading") &&
         usableWords.has(word) &&
-        !questions.find((q) => q.correctAnswer === word)
+        (!questions.find((q) => q.correctAnswer === word) ||
+          wordStillNeededForRsvp)
       ) {
         return [word, Number(freq)];
       }

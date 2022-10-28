@@ -113,6 +113,7 @@ import {
   rsvpReadingResponse,
   phraseIdentificationResponse,
   repeatedLettersResponse,
+  rsvpReadingWordsForThisBlock,
 } from "./components/global.js";
 
 import {
@@ -343,8 +344,7 @@ import {
   Category,
   constrainRSVPReadingSpeed,
   generateRSVPReadingTargetSets,
-  getRSVPReadingCategories,
-  getRSVPReadingHeightPx,
+  getThisBlockRSVPReadingWords,
   registerKeypressForRSVPReading,
   removeScientistKeypressFeedback,
   updateTrialCounterNumbersForRSVPReading,
@@ -2080,11 +2080,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 .reduce((a, b) => a + b)
             );
           _instructionSetup(rsvpReadingBlockInstructs);
-          getThisBlockPages(
+          rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
-            status.block,
-            dummyStim.current,
-            totalTrialsThisBlock.current
+            status.block
           );
         },
         reading: () => {
@@ -3162,16 +3160,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           const numberOfWords = paramReader.read(
             "rsvpReadingNumberOfWords",
-            status.block
-          )[0];
+            status.block_condition
+          );
           level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
           psychoJS.experiment.addData("level", level);
 
           const durationSec = Math.pow(10, level);
 
+          const thisTrialWords =
+            rsvpReadingWordsForThisBlock.current[
+              status.block_condition
+            ].shift();
           rsvpReadingTargetSets.numberOfSets = numberOfWords;
           const targetSets = generateRSVPReadingTargetSets(
-            numberOfWords,
+            thisTrialWords,
             durationSec,
             paramReader,
             status.block_condition
@@ -3414,7 +3416,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               letterConfig.thresholdParameter === "spacing"
                 ? [target, flanker1, flanker2]
                 : [target];
-            // TODO offset bounding boxes if on
             const boundingBoxStims = [
               ...Object.getOwnPropertyNames(boundingBoxPolies).map(
                 (prop) => boundingBoxPolies[prop]

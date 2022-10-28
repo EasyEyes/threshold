@@ -66,7 +66,9 @@ export const getThisBlockPages = (
   paramReader,
   block,
   readingParagraph,
-  numberOfPages = undefined
+  numberOfPages = undefined,
+  readingLinesPerPage = undefined,
+  wordsPerLine = undefined
 ) => {
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block)[0];
@@ -98,10 +100,11 @@ export const getThisBlockPages = (
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL],
       readingCorpusArchive[thisURL],
-      paramReader.read("readingMaxCharactersPerLine", block)[0],
-      paramReader.read("readingLinesPerPage", block)[0],
+      wordsPerLine ?? paramReader.read("readingMaxCharactersPerLine", block)[0],
+      readingLinesPerPage ?? paramReader.read("readingLinesPerPage", block)[0],
       numberOfPages ?? paramReader.read("readingPages", block)[0],
-      readingParagraph
+      readingParagraph,
+      paramReader.read("targetKind", block)[0]
     );
     readingUsedText[thisURL] = preparedSentences.readingUsedText;
 
@@ -150,10 +153,20 @@ export const preprocessCorpusToSentenceList = (
   lineBuffer,
   lineNumber,
   numberOfPages,
-  readingParagraphStimulus
+  readingParagraphStimulus,
+  targetKind = "reading"
 ) => {
-  if (usedText.length < lineBuffer * (lineNumber + 1) * (numberOfPages + 1))
-    usedText += " " + originalText;
+  // Extended for use in rsvpReading by allowing lineBuffer,lineNumber to either be scalars or arrays
+  if (lineBuffer instanceof Array && lineNumber instanceof Array) {
+    if (
+      usedText.length <
+      lineBuffer[0] * (lineNumber[0] + 1) * (numberOfPages + 1)
+    )
+      usedText += " " + originalText;
+  } else {
+    if (usedText.length < lineBuffer * (lineNumber + 1) * (numberOfPages + 1))
+      usedText += " " + originalText;
+  }
   const usedTextList = usedText.split(" ").filter((w) => w.length > 0);
 
   const sentences = [];
@@ -168,77 +181,100 @@ export const preprocessCorpusToSentenceList = (
     let line = 1;
     let thisPageLineHeights = [];
 
-    while (line <= lineNumber) {
-      // LINE
-      let thisLineCharCount = lineBuffer;
-      thisLineText = "";
-      thisLineTempWordList = [];
+    if (targetKind === "reading") {
+      while (line <= lineNumber) {
+        // LINE
+        let thisLineCharCount = lineBuffer;
+        thisLineText = "";
+        thisLineTempWordList = [];
 
-      while (thisLineCharCount > 0 && usedTextList.length > 0) {
-        // WORD
-        const newWord = usedTextList.shift();
-        thisLineTempWordList.push(newWord);
-        thisLineCharCount -= newWord.length;
+        while (thisLineCharCount > 0 && usedTextList.length > 0) {
+          // WORD
+          const newWord = usedTextList.shift();
+          thisLineTempWordList.push(newWord);
+          thisLineCharCount -= newWord.length;
 
-        const tempLineText = thisLineText + newWord;
-        readingParagraphStimulus.setText(tempLineText);
-        const testWidth = readingParagraphStimulus.getBoundingBox(true).width;
+          const tempLineText = thisLineText + newWord;
+          readingParagraphStimulus.setText(tempLineText);
+          const testWidth = readingParagraphStimulus.getBoundingBox(true).width;
 
-        if (
-          (testWidth > window.innerWidth * 0.8 || thisLineCharCount < -5) &&
-          thisLineTempWordList.length > 1 /* allow at least one word */
-        ) {
-          // Give up this word for this line
-          // Go to the next line
-          usedTextList.unshift(newWord);
-          thisLineTempWordList.pop();
+          if (
+            (testWidth > window.innerWidth * 0.8 || thisLineCharCount < -5) &&
+            thisLineTempWordList.length > 1 /* allow at least one word */
+          ) {
+            // Give up this word for this line
+            // Go to the next line
+            usedTextList.unshift(newWord);
+            thisLineTempWordList.pop();
 
-          if (lineNumber > line)
-            // Not the last line
-            thisLineText = removeLastSpace(thisLineText) + "\n";
-          break;
-        } else {
-          thisLineText += newWord;
-          if (thisLineCharCount > 3 && testWidth <= window.innerWidth * 0.8) {
-            // Continue on this line
-            thisLineText += " ";
-            thisLineCharCount -= 1;
-          } else {
-            // Got to the next line
             if (lineNumber > line)
+              // Not the last line
               thisLineText = removeLastSpace(thisLineText) + "\n";
             break;
+          } else {
+            thisLineText += newWord;
+            if (thisLineCharCount > 3 && testWidth <= window.innerWidth * 0.8) {
+              // Continue on this line
+              thisLineText += " ";
+              thisLineCharCount -= 1;
+            } else {
+              // Got to the next line
+              if (lineNumber > line)
+                thisLineText = removeLastSpace(thisLineText) + "\n";
+              break;
+            }
           }
         }
+
+        readingParagraphStimulus.setText(thisLineText);
+        const newTestHeight =
+          readingParagraphStimulus.getBoundingBox(true).height;
+
+        if (
+          (thisPageLineHeights.reduce((p, c) => p + c, 0) + newTestHeight >
+            window.innerHeight * 0.7 ||
+            (maxLinePerPageSoFar && line > maxLinePerPageSoFar)) &&
+          !(maxLinePerPageSoFar && line <= maxLinePerPageSoFar)
+        ) {
+          // Give up this line
+          // Go to the next page
+          for (
+            let wordInd = thisLineTempWordList.length - 1;
+            wordInd >= 0;
+            wordInd--
+          )
+            usedTextList.unshift(thisLineTempWordList[wordInd]);
+          line--;
+          break;
+        } else {
+          thisPageText += thisLineText;
+          thisPageLineHeights.push(newTestHeight);
+          line++;
+        }
       }
-
-      readingParagraphStimulus.setText(thisLineText);
-      const newTestHeight =
-        readingParagraphStimulus.getBoundingBox(true).height;
-
-      if (
-        (thisPageLineHeights.reduce((p, c) => p + c, 0) + newTestHeight >
-          window.innerHeight * 0.7 ||
-          (maxLinePerPageSoFar && line > maxLinePerPageSoFar)) &&
-        !(maxLinePerPageSoFar && line <= maxLinePerPageSoFar)
-      ) {
-        // Give up this line
-        // Go to the next page
-        for (
-          let wordInd = thisLineTempWordList.length - 1;
-          wordInd >= 0;
-          wordInd--
-        )
-          usedTextList.unshift(thisLineTempWordList[wordInd]);
-        line--;
-        break;
-      } else {
+      if (!maxLinePerPageSoFar) maxLinePerPageSoFar = line;
+    } else {
+      // rsvpReading
+      let thisLineNumber =
+        lineNumber instanceof Array ? lineNumber[i] : lineNumber;
+      let thisLineBuffer =
+        lineBuffer instanceof Array ? lineBuffer[i] : lineBuffer;
+      while (line <= thisLineNumber) {
+        // LINE
+        let thisLineWordCount = thisLineBuffer;
+        thisLineText = "";
+        thisLineTempWordList = [];
+        while (thisLineWordCount > 0 && usedTextList.length > 0) {
+          // WORD
+          const newWord = usedTextList.shift();
+          thisLineTempWordList.push(newWord);
+          thisLineWordCount--;
+        }
+        thisLineText = thisLineTempWordList.join(" ") + "\n";
         thisPageText += thisLineText;
-        thisPageLineHeights.push(newTestHeight);
         line++;
       }
     }
-    if (!maxLinePerPageSoFar) maxLinePerPageSoFar = line;
 
     const numberWordsThisPage = preprocessCorpusToWordList(thisPageText).length;
     const previousStartingIndex =

@@ -5,12 +5,12 @@ import {
   font,
   letterConfig,
   readingConfig,
-  readingThisBlockPages,
+  readingFrequencyToWordArchive,
   rsvpReadingTargetSets,
   rsvpReadingTiming,
-  rsvpReadingWordHistory,
   status,
   phraseIdentificationResponse,
+  dummyStim,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -21,7 +21,8 @@ import {
   XYPixOfXYDeg,
 } from "./utils";
 import { Color } from "../psychojs/src/util";
-import { findReadingSize } from "./readingAddons";
+import { findReadingSize, getThisBlockPages } from "./readingAddons";
+import { prepareReadingQuestions, preprocessCorpusToWordList } from "./reading";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -175,8 +176,92 @@ export class Category {
   }
 }
 
+class rsvpReadingTrialWords {
+  constructor(sequence, responseOptions) {
+    this.sequence = sequence;
+    const keys = preprocessCorpusToWordList(sequence);
+    const remainingResponseOptions = responseOptions.slice();
+
+    // Make sure that response options are in sequence order
+    this.responseOptions = keys.map((k, i) => {
+      const targetWords = remainingResponseOptions.map(
+        (responses) => responses[0]
+      );
+      const improperAddress = targetWords.indexOf(k.toLowerCase());
+      let properOptions = remainingResponseOptions
+        .splice(improperAddress, 1)
+        .pop();
+      // ACCEPT? hacky way to ensure the target words are presented as displayed, ie with punctuation and case
+      // properOptions = [sequence.split(/\s/)[i], ...properOptions.slice(1)];
+      return properOptions;
+    });
+    this.targetWords = this.responseOptions.map((responses) => responses[0]);
+    this.foils = this.responseOptions.map((responses) => responses.slice(1));
+    this.responseOptions = this.responseOptions.map((options) =>
+      shuffle(options)
+    );
+  }
+}
+
+export const getThisBlockRSVPReadingWords = (reader, block) => {
+  // Given block of some conditions, each condition consisting in some trials,
+  // for condition create a reading page with a number of lines equal to number of trials for this condition
+  // and (???number of words in sentence) equal to length of rsvp sequence.
+  // for each trial of each condition, also create reading questions, number of questions equal to length of rsvp sequence, number of answers equal to rsvpnunmberofresponses-1
+  const conditions = reader.conditions.filter((c) => c.block === block);
+  const numTrialsPerCondition = reader.read("conditionTrials", block);
+  const pagePerCondition = getThisBlockPages(
+    reader,
+    block,
+    dummyStim,
+    conditions.length,
+    numTrialsPerCondition,
+    reader.read("rsvpReadingNumberOfWords", block)
+  );
+  const sequences = pagePerCondition.map((p) => p.split("\n"));
+  const targetsAndFoils = sequences.map((conditionTrials, i) =>
+    conditionTrials.map((trial) => {
+      const BC = conditions[i]["block_condition"];
+      const targetSequence = preprocessCorpusToWordList(trial);
+      const nQuestions = targetSequence.length;
+      const nAnswers = reader.read("rsvpReadingNumberOfResponseOptions", BC);
+      const questions = prepareReadingQuestions(
+        nQuestions,
+        nAnswers,
+        targetSequence,
+        readingFrequencyToWordArchive[reader.read("readingCorpus", BC)],
+        "rsvpReading"
+      );
+      const responseOptions = questions.map((q) => [
+        q.correctAnswer,
+        ...q.foils,
+      ]);
+      return responseOptions;
+    })
+  );
+  const wordsPerCondition = {};
+  conditions.forEach((c) => {
+    const BC = c.block_condition;
+    const sequencesForThisCondition = sequences.shift();
+    const responseOptionsForThisCondition = targetsAndFoils.shift();
+    wordsPerCondition[BC] = sequencesForThisCondition.map(
+      (sequence, i) =>
+        new rsvpReadingTrialWords(sequence, responseOptionsForThisCondition[i])
+    );
+  });
+  return wordsPerCondition;
+};
+
+/**
+ *
+ * @param {rsvpReadingTrialWords} wordsForThisTrial
+ * @param {number} durationSec
+ * @param {Reader} paramReader
+ * @param {string} BC
+ * @returns
+ */
 export const generateRSVPReadingTargetSets = (
-  numberOfTargets,
+  wordsForThisTrial,
   durationSec,
   paramReader,
   BC
@@ -186,22 +271,8 @@ export const generateRSVPReadingTargetSets = (
     displayOptions
   );
 
-  const uniqueWordsRequired = paramReader.read(
-    "rsvpReadingRequireUniqueWordsBool",
-    BC
-  );
-  const targetWords = [...new Array(numberOfTargets)].map((i) =>
-    _getNextRSVPWord(uniqueWordsRequired)
-  );
-  rsvpReadingWordHistory.usedTargets.push(...targetWords);
-  const numberOfFoils =
-    paramReader.read("rsvpReadingNumberOfResponseOptions", BC) - 1;
-  const foilWords = targetWords.map((w, i) =>
-    [...new Array(numberOfFoils).keys()].map((s) =>
-      _getNextRSVPWord(uniqueWordsRequired)
-    )
-  );
-  foilWords.forEach((d) => rsvpReadingWordHistory.usedFoils.push(...d));
+  const targetWords = wordsForThisTrial.targetWords;
+  const foilWords = wordsForThisTrial.foils;
   const targetSets = [];
   for (const [i, targetWord] of targetWords.entries()) {
     targetSets.push(
@@ -251,67 +322,6 @@ const _generateLetterStimsForWord = (
     });
   });
   return letters;
-};
-
-const _getNextRSVPWord = (requireUnique) => {
-  // Move on to the next word
-  rsvpReadingWordHistory.currentWordPosition[1] += 1;
-
-  // TODO make impossible
-  if (
-    readingThisBlockPages.length <=
-    rsvpReadingWordHistory.currentWordPosition[0] + 1
-  )
-    throw "Not enough sentences prepared.";
-
-  let currentSentence = rsvpReadingWordHistory.currentWordPosition[0];
-  let currentWord = rsvpReadingWordHistory.currentWordPosition[1];
-  let sourceSentence = readingThisBlockPages[currentSentence]
-    .split(/(\s+)/)
-    .filter((x) => x && !/\s/g.test(x));
-  // SEE https://stackoverflow.com/questions/1731190/check-if-a-string-has-white-space
-  // let sourceSentence = readingThisBlockPages[currentSentence]
-  //   .split(/[^a-zA-Z']/)
-  //   .filter((x) => x);
-
-  if (currentWord >= sourceSentence.length) {
-    rsvpReadingWordHistory.currentWordPosition[0] += 1;
-    rsvpReadingWordHistory.currentWordPosition[1] = 0;
-    currentSentence = rsvpReadingWordHistory.currentWordPosition[0];
-    currentWord = rsvpReadingWordHistory.currentWordPosition[1];
-    sourceSentence = readingThisBlockPages[currentSentence]
-      .split(/[^a-zA-Z']/)
-      .filter((x) => x);
-  }
-
-  // const sourceSentence =  readingThisBlockPages[currentSentence].split(/[\s,\?\!\.\-\"\`]+/);
-  const nextWord = sourceSentence[currentWord];
-
-  const otherWordsLeft =
-    sourceSentence.length > currentWord ||
-    currentSentence < readingThisBlockPages.length;
-
-  // Scientist may require that words are unique, eg to ensure that the target and foil are different, or prevent an exposure effect
-  const suggestedWordIsAcceptable = requireUnique
-    ? !rsvpReadingWordHistory.usedWords.includes(nextWord)
-    : true;
-  if (!suggestedWordIsAcceptable) {
-    // If this word isn't unique, but there are other prepared words left to draw from, just go through this process again.
-    if (otherWordsLeft) return _getNextRSVPWord(requireUnique);
-    // If this word isn't unique and there are not other words left to draw from, fall back to some less-desirable strategy, eg sampling the used words.
-    else {
-      // TODO log this error to scientist/EE
-      console.error(
-        "Uh oh! Word is not unique, and there are no other words left. Resorting to providing a word from those previously used."
-      );
-      return rsvpReadingWordHistory.usedWords[
-        Math.floor(rsvpReadingWordHistory.length * Math.random())
-      ];
-    }
-  } else {
-    rsvpReadingWordHistory.usedWords.push(nextWord);
-    return nextWord;
-  }
 };
 
 export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {

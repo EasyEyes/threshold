@@ -135,7 +135,6 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
       "fixationLocationXScreen",
       "fixationLocationYScreen",
       "targetKind",
-      "rsvpReadingNumberOfTargetWordsInSequence",
     ])
   );
 
