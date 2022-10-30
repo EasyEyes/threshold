@@ -18,7 +18,7 @@ import {
 } from "./soundUtils";
 
 const soundGain = { current: undefined };
-
+const soundDBSPL = { current: undefined };
 export const addSoundTestElements = (reader) => {
   // const calibrationLevelFromFile = reader.read(
   //   "soundCalibrationLevelDBSPL",
@@ -31,6 +31,9 @@ export const addSoundTestElements = (reader) => {
   //   soundCalibrationLevelDBSPL.current = calibrationLevelFromFile[0];
   // }
 
+  if (soundCalibrationLevelDBSPL.current) {
+    soundDBSPL.current = soundCalibrationLevelDBSPL.current;
+  }
   const soundGainFromFile = reader.read("soundGainDBSPL", "__ALL_BLOCKS__");
   const calculatedSoundGain = soundGainDBSPL.current;
   if (calculatedSoundGain) {
@@ -68,6 +71,7 @@ export const addSoundTestElements = (reader) => {
   const speakerSoundGain = document.createElement("p");
   const speakerSoundGainInput = document.createElement("input");
 
+  const nameOfPlayedSound = document.createElement("p");
   // const adjustedSoundLevelContainer = document.createElement("div");
   // const adjustedSoundLevel = document.createElement("p");
   // const adjustedSoundLevelInput = document.createElement("input");
@@ -123,6 +127,8 @@ export const addSoundTestElements = (reader) => {
   // adjustedSoundLevelInput.setAttribute("id", "soundTestModalAdjustedSoundLevelInput");
   // adjustedSoundLevelInput.setAttribute("type", "number");
   // rmsOfSoundContainer.setAttribute("id", "soundTestModalRMSOfSoundContainer");
+
+  nameOfPlayedSound.setAttribute("id", "soundTestModalNameOfPlayedSound");
   rmsOfSound.setAttribute("id", "soundTestModalRMSOfSound");
   maxAmplitude.setAttribute("id", "soundTestModalMaxAmplitude");
   useGainNodeLabel.setAttribute("id", "soundTestModalUseGainNodeLabel");
@@ -157,16 +163,16 @@ export const addSoundTestElements = (reader) => {
   modalTitle.innerHTML = "Sound Test";
   modalSubtitle.innerHTML =
     "Use the toggle for IR correction. It may take some time to load the sound files.";
-  soundLevel.innerHTML = "Sound Level (dB SPL):";
-  if (soundCalibrationLevelDBSPL.current)
-    soundLevelInput.value = soundCalibrationLevelDBSPL.current.toFixed(1);
-  speakerSoundGain.innerHTML = "Sound Gain (dB SPL):";
+  soundLevel.innerHTML = "Desired sound level (dB SPL):";
+  if (soundDBSPL.current) soundLevelInput.value = soundDBSPL.current.toFixed(1);
+  speakerSoundGain.innerHTML = "Sound gain at 1000Hz (dB SPL):";
   if (soundGain.current)
     speakerSoundGainInput.value = (
       Math.round(soundGain.current * 10) / 10
     ).toFixed(1);
-  rmsOfSound.innerHTML = "Digital sound amplitude RMS: **** dB";
-  maxAmplitude.innerHTML = "Digital sound max absolute value: 1.000";
+  rmsOfSound.innerHTML = "Digital sound RMS dB: **** dB";
+  maxAmplitude.innerHTML = "Digital sound max: ****";
+  nameOfPlayedSound.innerHTML = "Playing sound: ****";
   // adjustedSoundLevel.innerHTML = "Adjusted soundCalibrationLevel: **** dB SPL"
 
   modal.appendChild(modalDialog);
@@ -181,10 +187,12 @@ export const addSoundTestElements = (reader) => {
   modalHeaderContainer.appendChild(speakerSoundGainContainer);
   modalHeaderContainer.appendChild(soundLevelContainer);
 
-  modalHeaderContainer.appendChild(horizontal);
-  modalHeaderContainer.appendChild(maxAmplitude);
+  // modalHeaderContainer.appendChild(horizontal);
   modalHeaderContainer.appendChild(rmsOfSound);
+  modalHeaderContainer.appendChild(maxAmplitude);
+
   // modalHeaderContainer.appendChild(adjustedSoundLevel);
+  modalHeaderContainer.appendChild(nameOfPlayedSound);
   //append the toggles
   IRCorrectionToggleContainer.appendChild(IRCorrectionToggleLabel);
   IRCorrectionToggleContainer.appendChild(modalToggle);
@@ -322,6 +330,7 @@ const addToggleCSS = () => {
 const populateSoundFiles = async (reader, modalBody, toggleInput) => {
   var targetSoundFolders = reader.read("targetSoundFolder", "__ALL_BLOCKS__");
   targetSoundFolders = [...new Set(targetSoundFolders)]; // remove duplicates
+  targetSoundFolders = targetSoundFolders.filter((folder) => folder); // remove empty strings
   const targetSoundFiles = {};
   await Promise.all(
     targetSoundFolders.map(async (targetSoundFolder, blockCount) => {
@@ -377,6 +386,9 @@ const addSoundFileElements = (
       soundFileButton.classList.add(...["btn", "btn-success"]);
       soundFileButton.innerHTML = "Play";
       soundFileButton.addEventListener("click", async () => {
+        // display name of sound file
+        document.getElementById("soundTestModalNameOfPlayedSound").innerHTML =
+          "Playing sound: " + soundFile.name;
         const soundFileBuffer = cloneAudioBuffer(await soundFile.file);
         // Object.assign({},await soundFile.file);
         // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
@@ -389,26 +401,36 @@ const addSoundFileElements = (
         document.getElementById("soundTestModalSpeakerSoundGainInput").value =
           soundGain.current.toFixed(1);
         var audioData = soundFileBuffer.getChannelData(0);
-        soundCalibrationLevelDBSPL.current = document.getElementById(
+        soundDBSPL.current = document.getElementById(
           "soundTestModalSoundLevelInput"
         ).value;
         setWaveFormToZeroDbSPL(audioData);
         // round soundCalibrationLevelDBSPL to 1 decimal places
-        soundCalibrationLevelDBSPL.current =
-          Math.round(soundCalibrationLevelDBSPL.current * 10) / 10;
+        soundDBSPL.current = Math.round(soundDBSPL.current * 10) / 10;
         document.getElementById("soundTestModalSoundLevelInput").value =
-          soundCalibrationLevelDBSPL.current.toFixed(1);
+          soundDBSPL.current.toFixed(1);
         const limitedRMS = getRMSLimit(
-          soundCalibrationLevelDBSPL.current - soundGain.current,
+          soundDBSPL.current - soundGain.current,
           audioData
         );
-        soundCalibrationLevelDBSPL.current =
-          soundGain.current + calculateDBFromRMS(limitedRMS);
+
+        const soundDB = calculateDBFromRMS(limitedRMS);
+        soundDBSPL.current = soundGain.current + soundDB;
+
+        const maxOfOriginalSound =
+          getMaxValueOfAbsoluteValueOfBuffer(audioData);
+        const theGainValue = getGainValue(
+          soundDBSPL.current - soundGain.current
+        );
+        const soundMax = maxOfOriginalSound * theGainValue;
+        document.getElementById(
+          "soundTestModalMaxAmplitude"
+        ).innerHTML = `Digital sound max: ${soundMax.toFixed(2)}`;
+
         // round soundCalibrationLevelDBSPL to 1 decimal places
-        soundCalibrationLevelDBSPL.current =
-          Math.round(soundCalibrationLevelDBSPL.current * 10) / 10;
+        soundDBSPL.current = Math.round(soundDBSPL.current * 10) / 10;
         document.getElementById("soundTestModalSoundLevelInput").value =
-          soundCalibrationLevelDBSPL.current;
+          soundDBSPL.current;
         // document.getElementById(
         //   "soundTestModalAdjustedSoundLevel"
         // ).innerHTML = `Adjusted soundCalibrationLevel: ${soundCalibrationLevelDBSPL.current} dB SPL`;
@@ -420,7 +442,7 @@ const addSoundFileElements = (
         //use gain node
         if (useGainNodeBool) {
           const gainNode = getGainNode(
-            getGainValue(soundCalibrationLevelDBSPL.current - soundGain.current)
+            getGainValue(soundDBSPL.current - soundGain.current)
           );
           // gainNode.gain.value = getGainValue(soundCalibrationLevelDBSPL.current-soundGain.current);
           const webAudioNodes = [];
@@ -428,7 +450,7 @@ const addSoundFileElements = (
           webAudioNodes.push(gainNode);
           if (toggleInput.checked) {
             if (invertedImpulseResponse.current) {
-              rmsOfSound.innerHTML = `Digital sound amplitude RMS: ${calculateDBFromRMS(
+              rmsOfSound.innerHTML = `Digital sound RMS dB: ${calculateDBFromRMS(
                 Math.round(gainNode.gain.value * 10) / 10
               )} dB`;
               webAudioNodes.push(
@@ -446,7 +468,7 @@ const addSoundFileElements = (
           } else {
             // console.log("gainNode",calculateDBFromRMS(gainNode.gain.value))
             // console.log("gainValue",getGainValue(soundCalibrationLevelDBSPL.current-soundGain.current))
-            rmsOfSound.innerHTML = `Digital sound amplitude RMS: ${calculateDBFromRMS(
+            rmsOfSound.innerHTML = `Digital sound RMS dB: ${calculateDBFromRMS(
               gainNode.gain.value
             )} dB`;
             connectAudioNodes(webAudioNodes);
@@ -459,13 +481,12 @@ const addSoundFileElements = (
         // adjust sound by changing the amplitude of the sound file manually
         else {
           // console.log("gainValue",getGainValue(soundCalibrationLevelDBSPL.current-soundGain.current))
-          adjustSoundDbSPL(
-            audioData,
-            soundCalibrationLevelDBSPL.current - soundGain.current
-          );
-          rmsOfSound.innerHTML = `Digital sound amplitude RMS: ${calculateDBFromRMS(
+
+          adjustSoundDbSPL(audioData, soundDBSPL.current - soundGain.current);
+          rmsOfSound.innerHTML = `Digital sound RMS dB: ${calculateDBFromRMS(
             getRMSOfWaveForm(audioData)
           )} dB`;
+
           if (toggleInput.checked) {
             if (invertedImpulseResponse.current)
               playAudioBufferWithImpulseResponseCalibration(
@@ -545,9 +566,6 @@ const getRMSLimit = (dbSPL, buffer) => {
   const sMax = getMaxValueOfAbsoluteValueOfBuffer(buffer);
   // console.log("sMax", sMax);
   // update sMax in document
-  document.getElementById(
-    "soundTestModalMaxAmplitude"
-  ).innerHTML = `Digital sound max absolute value: ${sMax.toFixed(3)}`;
 
   const rms = getGainValue(dbSPL);
   // console.log("rms", rms);
@@ -556,11 +574,8 @@ const getRMSLimit = (dbSPL, buffer) => {
   const rmsLimit = sRms / sMax;
   // console.log("rmsLimit", rmsLimit);
 
-  // console.log("rmsLimit",rmsLimit)
-  // console.log("rms",rms)
-  // console.log("db", dbSPL)
-  // console.log("dbfromrms",calculateDBFromRMS(rms))
   return Math.min(rmsLimit, rms);
+  // return rmsLimit;
 };
 
 // function to get the max value of the absolute value of the buffer
