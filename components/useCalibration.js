@@ -212,7 +212,12 @@ export const calibrateAudio = async (reader) => {
       document.querySelector("#soundNo").style.display = "none";
 
       try {
-        if (calibrateSoundLevel) {
+        if (calibrateSoundLevel && calibrateLoudspeaker) {
+          await _runSoundLevelCalibrationAndLoudspeakerCalibration(
+            elems,
+            gains
+          );
+        } else if (calibrateSoundLevel) {
           await _runSoundLevelCalibration(elems, gains);
         } else {
           await _runLoudspeakerCalibration(elems);
@@ -491,6 +496,15 @@ const _runLoudspeakerCalibration = async (elems) => {
   // console.log("normalizedIIR", normalizedIIR);
 };
 
+const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
+  elems,
+  gains
+) => {
+  await _runSoundLevelCalibration(elems, gains);
+  (elems.subtitle.innerHTML =
+    phrases.RC_soundCalibrationTitleAllHz[rc.language.value]),
+    await _runLoudspeakerCalibration(elems);
+};
 /* -------------------------------------------------------------------------- */
 
 const getCmValue = (numericalValue, unit) => {

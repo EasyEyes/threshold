@@ -101,7 +101,7 @@ export const addSoundTestElements = (reader) => {
   modal.setAttribute("id", "soundTestModal");
   // make modal draggable with jquery
   $(modal).draggable({
-    handle: "#soundTestModalHeader",
+    handle: "#soundTestModalContent",
   });
   // make modal disappear when clicking outside of it  with jquery on
   $(document).on("click", function (e) {
