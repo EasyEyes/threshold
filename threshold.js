@@ -3719,6 +3719,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   var frameRemains;
   var timeWhenRespondable;
+  var rsvpEndRoutineAtT;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
       ////
@@ -3757,11 +3758,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // const responseTypeTrial =
         //   status.condition.hasOwnProperty("_duplicatedConditionCardinal") &&
         //   status.condition._duplicatedConditionCardinal !== 1;
+        rsvpEndRoutineAtT = undefined;
         timeWhenRespondable =
           targetKind.current === "rsvpReading"
-            ? rsvpReadingTargetSets.upcoming[
-                rsvpReadingTargetSets.upcoming.length - 1
-              ].stopTime
+            ? rsvpReadingTargetSets.upcoming.length
+              ? rsvpReadingTargetSets.upcoming[
+                  rsvpReadingTargetSets.upcoming.length - 1
+                ].stopTime
+              : rsvpReadingTargetSets.current.stopTime
             : delayBeforeStimOnsetSec +
               letterConfig.targetSafetyMarginSec +
               letterConfig.targetDurationSec;
@@ -3849,10 +3853,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           phraseIdentificationResponse.current.length ===
           rsvpReadingTargetSets.numberOfSets
         ) {
-          if (rsvpReadingResponse.responseType === "typed")
-            removeScientistKeypressFeedback();
-          updateTrialCounterNumbersForRSVPReading();
-          continueRoutine = false;
+          // Ensure a small delay after the last response, so the participant sees feedback for every response
+          rsvpEndRoutineAtT = rsvpEndRoutineAtT ?? t + 0.5;
+          if (t >= rsvpEndRoutineAtT) {
+            if (rsvpReadingResponse.responseType === "typed")
+              removeScientistKeypressFeedback();
+            updateTrialCounterNumbersForRSVPReading();
+            continueRoutine = false;
+          }
         }
       }
 
