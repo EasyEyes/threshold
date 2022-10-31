@@ -99,6 +99,10 @@ export const addSoundTestElements = (reader) => {
   };
 
   modal.setAttribute("id", "soundTestModal");
+  // make modal draggable with jquery
+  $(modal).draggable({
+    handle: "#soundTestModalContent",
+  });
   modalDialog.setAttribute("id", "soundTestModalDialog");
   modalContent.setAttribute("id", "soundTestModalContent");
   modalHeader.setAttribute("id", "soundTestModalHeader");
@@ -155,7 +159,7 @@ export const addSoundTestElements = (reader) => {
   modal.classList.add(...["modal", "fade"]);
   modalDialog.classList.add(...["modal-dialog"]);
   modalContent.classList.add(...["modal-content"]);
-  // modalHeaderContainer.classList.add(...["modal-header"]);
+  // modalHeader.classList.add(...["modal-header"]);
   modalTitle.classList.add(...["modal-title"]);
   modalBody.classList.add(...["modal-body"]);
   modalFooter.classList.add(...["modal-footer"]);

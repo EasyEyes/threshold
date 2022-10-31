@@ -531,6 +531,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  fontKerning: {
+    name: "fontKerning",
+    availability: "now",
+    type: "",
+    default: "normal",
+  },
   fontLeftToRightBool: {
     name: "fontLeftToRightBool",
     availability: "now",
@@ -556,6 +562,18 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "regular",
     categories: ["regular", "bold", "italic", "boldItalic"],
+  },
+  fontTrackingLetter: {
+    name: "fontTrackingLetter",
+    availability: "now",
+    type: "",
+    default: "0",
+  },
+  fontTrackingWord: {
+    name: "fontTrackingWord",
+    availability: "now",
+    type: "",
+    default: "0",
   },
   fontVariationSettings: {
     name: "fontVariationSettings",

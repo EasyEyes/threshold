@@ -236,7 +236,7 @@ export const calibrateAudio = async (reader) => {
       //   ? "\nMeasured soundGainDBSPL " + String(soundGainDBSPL.current)
       //   : "");
       // display sound levels and soundGainDbSPL.current in a table
-      if (calibrateSoundLevel) {
+      if (calibrateSoundLevel && soundGainDBSPL.current) {
         elems.soundLevelsTable.style.display = "block";
         elems.soundLevelsTable.innerHTML = "";
         elems.soundLevelsTable.setAttribute("id", "soundLevelsTable");

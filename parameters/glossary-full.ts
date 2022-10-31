@@ -734,6 +734,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontKerning",
+    availability: "now",
+    example: "",
+    explanation:
+      "fontKerning (default auto) uses the fontKerning Canvas command to enable or disable kerning: auto (yes/no as dictated by browser), normal (yes), or none (no).\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fontKerning",
+    type: "",
+    default: "normal",
+    categories: "",
+  },
+  {
     name: "fontLeftToRightBool",
     availability: "now",
     example: "FALSE",
@@ -772,6 +782,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "regular",
     categories: "regular, bold, italic, boldItalic",
+  },
+  {
+    name: "fontTrackingLetter",
+    availability: "now",
+    example: "",
+    explanation:
+      'fontTrackingLetter (default 0) uses the "letterSpacing" Canvas command to adjust the spacing between letters.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing\nIt adds a positive or negative value to whatever the font would do otherwise. This is closely related to what Microsoft Word calls "tracking". The distance inserted (in px) is the product of the value provided and the point side of the font. "letterSpacing" is part of the new CanvasRenderingContext2D, which is available for Chrome, Edge, and Samsung, not for Safari and Firefox. That\'s ok.',
+    type: "",
+    default: "0",
+    categories: "",
+  },
+  {
+    name: "fontTrackingWord",
+    availability: "now",
+    example: "",
+    explanation:
+      'fontTrackingWord (default 0) uses the "wordSpacing" Canvas command to adjust the spacing between words.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/wordSpacing\nThe distance inserted (in px) is the product of the value provided and the point side of the font. This works for Chrome, Edge, and Samsung, not for Safari and Firefox.',
+    type: "",
+    default: "0",
+    categories: "",
   },
   {
     name: "fontVariationSettings",
