@@ -4,15 +4,15 @@ import { showCursor } from "./utils.js";
 
 // ! EXPERIMENTAL
 // https://stackoverflow.com/a/73956189
-console.warn(
-  "[EasyEyesPromise] Customized Promise used. This affects the performance and cause errors."
-);
-window.Promise = class EasyEyesPromise extends Promise {
-  constructor() {
-    super(...arguments);
-    this.__creationPoint = new Error().stack;
-  }
-};
+// console.warn(
+//   "[EasyEyesPromise] Customized Promise used. This affects the performance and cause errors."
+// );
+// window.Promise = class EasyEyesPromise extends Promise {
+//   constructor() {
+//     super(...arguments);
+//     this.__creationPoint = new Error().stack;
+//   }
+// };
 
 export const buildWindowErrorHandling = (paramReader) => {
   window.onerror = (message, source, lineno, colno, error) => {
@@ -48,16 +48,14 @@ export const buildWindowErrorHandling = (paramReader) => {
     showCursor();
 
     // save data
-    console.error(error?.reason);
+    console.log(error);
 
     // psychoJS default behavior
     if (error?.reason?.stack) {
       // stack from reason
       const errorMessage = `STACK ${JSON.stringify(
         error?.reason?.stack || error?.stack
-      )}\nSTACK2 ${error.promise?.__creationPoint}\nREASON ${JSON.stringify(
-        error?.reason
-      )}`;
+      )}\nREASON ${JSON.stringify(error?.reason)}`;
       document.body.setAttribute("data-error", errorMessage);
 
       try {
@@ -70,9 +68,9 @@ export const buildWindowErrorHandling = (paramReader) => {
       }
     } else {
       // no stack from reason
-      const errorMessage = `STACK ${JSON.stringify(error?.stack)}\nSTACK2 ${
-        error.promise?.__creationPoint
-      }\nERROR ${error}\nREASON ${JSON.stringify(error?.reason)}`;
+      const errorMessage = `STACK ${JSON.stringify(
+        error?.stack
+      )}\nERROR ${error}\nREASON ${JSON.stringify(error?.reason)}`;
       document.body.setAttribute("data-error", errorMessage);
       psychoJS.experiment.addData("error", errorMessage);
     }
