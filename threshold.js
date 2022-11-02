@@ -207,6 +207,7 @@ import {
   updateTargetSpecsForLetter,
   updateTargetSpecsForRepeatedLetters,
   updateTargetSpecsForReading,
+  updateTargetSpecsForRsvpReading,
   updateTargetSpecsForSound,
   updateTargetSpecsForSoundDetect,
   updateTargetSpecsForSoundIdentify,
@@ -3101,9 +3102,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.targetEccentricityXYDeg,
             characterSetBoundingRects[BC]
           );
-          logger("repeated", { level, stimulusParameters, proposedLevel });
-          logger("repeated targetEcc", letterConfig.targetEccentricityXYDeg);
-          logger("repeated characterSet", characterSetBoundingRects[BC]);
 
           // Generate stims to fill screen
           repeatedLettersConfig.stims =
@@ -3167,6 +3165,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.experiment.addData("level", level);
 
           const durationSec = Math.pow(10, level);
+          psychoJS.experiment.addData(
+            "rsvpReadingWordDurationSec",
+            durationSec
+          );
 
           const thisTrialWords =
             rsvpReadingWordsForThisBlock.current[
@@ -3216,12 +3218,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.tStart = t;
           fixation.frameNStart = frameN;
 
-          // TODO show target specs
-          // if (showConditionNameConfig.showTargetSpecs)
-          //   updateTargetSpecsForRepeatedLetters(
-          //     stimulusParameters,
-          //     thisExperimentInfo.experimentFileName
-          //   );
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecsForRsvpReading(
+              paramReader,
+              BC,
+              thisExperimentInfo.experimentFileName,
+              {
+                targetWordDurationSec: durationSec,
+                rsvpReadingNumberOfWords: numberOfWords,
+                rsvpReadingResponseModality: rsvpReadingResponse.responseType,
+              }
+            );
+          trialCounter.setAutoDraw(showCounterBool);
 
           // Add stims to trialComponents
           trialComponents = [];

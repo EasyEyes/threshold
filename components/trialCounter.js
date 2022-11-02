@@ -14,7 +14,6 @@ export function getTrialInfoStr(
   taskKind
 ) {
   let res = "";
-
   if (showCounterBool) {
     if (currentTrialIndex && currentTrialLength) {
       switchKind(taskKind, {
@@ -47,6 +46,15 @@ export function getTrialInfoStr(
         },
         letter: () => {
           // On trial routines, show the trial# and block#...
+          res = replacePlaceholders(
+            phrases.T_counterTrialBlock[L],
+            currentTrialIndex,
+            currentTrialLength,
+            currentBlockIndex,
+            blockCount
+          );
+        },
+        rsvpReading: () => {
           res = replacePlaceholders(
             phrases.T_counterTrialBlock[L],
             currentTrialIndex,
