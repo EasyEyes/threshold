@@ -456,7 +456,6 @@ const updateScientistKeypressFeedback = (correctBool) => {
   const feedbackCircles = [
     ...document.querySelectorAll(".scientist-feedback-circle"),
   ];
-  logger("feedbackCircles", feedbackCircles);
   const unresolvedCircles = feedbackCircles.filter(
     (e) =>
       !(
@@ -464,10 +463,8 @@ const updateScientistKeypressFeedback = (correctBool) => {
         [...e.classList].includes("scientist-feedback-circle-incorrect")
       )
   );
-  logger("unresolvedCircles", unresolvedCircles);
   const nextCircle = unresolvedCircles.shift();
-  logger("nextCircle", nextCircle);
-  nextCircle.classList.add(
+  nextCircle?.classList.add(
     correctBool
       ? "scientist-feedback-circle-correct"
       : "scientist-feedback-circle-incorrect"

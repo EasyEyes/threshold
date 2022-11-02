@@ -3835,32 +3835,33 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current === "rsvpReading" &&
         typeof rsvpReadingTargetSets.current === "undefined"
       ) {
-        showCursor();
-        // Show the response screen if response modality is clicking
-        if (
-          rsvpReadingResponse.responseType === "clicked" &&
-          !rsvpReadingResponse.displayStatus
-        ) {
-          showPhraseIdentification(rsvpReadingResponse.screen);
-          rsvpReadingResponse.displayStatus = true;
-        } else if (!rsvpReadingResponse.displayStatus) {
-          // Else create some subtle feedback that the scientist can use
-          addScientistKeypressFeedback(rsvpReadingTargetSets.numberOfSets);
-          rsvpReadingResponse.displayStatus = true;
-        }
-
         // Continue when enough responses have been registered
         if (
-          phraseIdentificationResponse.current.length ===
+          phraseIdentificationResponse.current.length >=
           rsvpReadingTargetSets.numberOfSets
         ) {
           // Ensure a small delay after the last response, so the participant sees feedback for every response
           rsvpEndRoutineAtT = rsvpEndRoutineAtT ?? t + 0.5;
+          logger("t, endAt", [t, rsvpEndRoutineAtT]);
           if (t >= rsvpEndRoutineAtT) {
             if (rsvpReadingResponse.responseType === "typed")
               removeScientistKeypressFeedback();
             updateTrialCounterNumbersForRSVPReading();
             continueRoutine = false;
+          }
+        } else {
+          showCursor();
+          // Show the response screen if response modality is clicking
+          if (
+            rsvpReadingResponse.responseType === "clicked" &&
+            !rsvpReadingResponse.displayStatus
+          ) {
+            showPhraseIdentification(rsvpReadingResponse.screen);
+            rsvpReadingResponse.displayStatus = true;
+          } else if (!rsvpReadingResponse.displayStatus) {
+            // Else create some subtle feedback that the scientist can use
+            addScientistKeypressFeedback(rsvpReadingTargetSets.numberOfSets);
+            rsvpReadingResponse.displayStatus = true;
           }
         }
       }
