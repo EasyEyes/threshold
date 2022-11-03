@@ -139,6 +139,7 @@ export const setupPhraseIdentification = (categories) => {
           phraseIdentificationResponse.categoriesResponded.push(categoryNum);
           phraseIdentificationResponse.clickTime.push(performance.now());
           phraseIdentificationResponse.current.push(categoryChild);
+          phraseIdentificationResponse.targetWord.push(targetWord);
           phraseIdentificationResponse.correct.push(answerIsCorrect);
 
           response[categoryId] = categoryChild;

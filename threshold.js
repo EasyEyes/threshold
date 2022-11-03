@@ -5,12 +5,12 @@
 import {
   arraysEqual,
   debug,
-  duplicateConditionsOfTargetKind,
   fillNumberLength,
   getTripletCharacters,
   ifTrue,
   norm,
   sleep,
+  toFixedNumber,
 } from "./components/utils.js";
 
 import * as core from "./psychojs/src/core/index.js";
@@ -4635,28 +4635,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             repeatedLettersResponse.rt = [];
           },
           rsvpReading: () => {
-            // {
-            //   current: phraseIdentificationResponse.current,
-            //   correct: phraseIdentificationResponse.correct,
-            //   categoriesResponded: phraseIdentificationResponse.categoriesResponded,
-            // });
-            const numberOfResponses =
-              phraseIdentificationResponse.current.length;
-            for (let i = 0; i < numberOfResponses; i++) {
-              const thisResponse = phraseIdentificationResponse.current.shift();
-              const thisResponseTime =
-                phraseIdentificationResponse.clickTime.shift();
-              const _thisResponseCategory =
-                phraseIdentificationResponse.categoriesResponded.shift();
-              psychoJS.experiment.addData(
-                `rsvpReading-${i}-TARGET${_thisResponseCategory}-RESPONSE`,
-                thisResponse
-              );
-              psychoJS.experiment.addData(
-                `rsvpReading-${i}-TARGET${_thisResponseCategory}-TimeOfResponse`,
-                thisResponseTime
-              );
-            }
+            psychoJS.experiment.addData(
+              "rsvpReadingParticipantResponses",
+              phraseIdentificationResponse.current.toString()
+            );
+            psychoJS.experiment.addData(
+              "rsvpReadingTargetWords",
+              phraseIdentificationResponse.targetWord.toString()
+            );
+            psychoJS.experiment.addData(
+              "rsvpReadingTimesOfResponse",
+              phraseIdentificationResponse.clickTime
+                .map((t) => toFixedNumber(t, 2))
+                .toString()
+            );
+            phraseIdentificationResponse.current = [];
+            phraseIdentificationResponse.targetWord = [];
+            phraseIdentificationResponse.correct = [];
+            phraseIdentificationResponse.clickTime = [];
+            phraseIdentificationResponse.categoriesResponded = [];
 
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);
             // TODO only give to QUEST if acceptable
