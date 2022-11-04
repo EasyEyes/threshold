@@ -351,6 +351,7 @@ import {
   updateTrialCounterNumbersForRSVPReading,
   _rsvpReading_trialInstructionRoutineBegin,
   _rsvpReading_trialRoutineEachFrame,
+  removeRevealableTargetWordsToAidSpokenScoring,
 } from "./components/rsvpReading.js";
 
 /* -------------------------------------------------------------------------- */
@@ -3148,8 +3149,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           document.addEventListener("touchend", _takeFixationClick);
 
           rsvpReadingResponse.responseType =
-            paramReader.read("responseTypedBool", BC) &&
-            !paramReader.read("responseClickedBool", BC)
+            (paramReader.read("responseTypedBool", BC) &&
+              !paramReader.read("responseClickedBool", BC)) ||
+            paramReader.read("responseSpokenToExperimenterBool", BC)
               ? "typed"
               : "clicked";
 
@@ -4655,6 +4657,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             phraseIdentificationResponse.clickTime = [];
             phraseIdentificationResponse.categoriesResponded = [];
 
+            removeRevealableTargetWordsToAidSpokenScoring();
+
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);
             // TODO only give to QUEST if acceptable
             const giveToQuest = true;
@@ -4663,8 +4667,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               level,
               giveToQuest
             );
-            phraseIdentificationResponse.correct = [];
-            // showCursor();
           },
         });
 

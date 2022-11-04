@@ -961,7 +961,7 @@ export const GLOSSARY: Glossary = {
   },
   responseSpokenToExperimenterBool: {
     name: "responseSpokenToExperimenterBool",
-    availability: "later",
+    availability: "now",
     type: "boolean",
     default: "FALSE",
   },

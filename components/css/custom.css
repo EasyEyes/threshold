@@ -23,3 +23,26 @@
   font-size: 1.2rem;
   padding: 3px;
 }
+
+.rsvpReadingTargetWordsKey {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 2.5vh;
+  left: 1vw;
+  z-index: 9999999;
+
+  font-size: 2em;
+}
+
+.rsvpReadingTargetWord {
+  padding: 20px;
+}
+.hidden {
+  visibility: hidden;
+}
+
+.rsvpReadingTargetWordCurrent {
+  text-decoration: underline;
+  background: none;
+}

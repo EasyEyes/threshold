@@ -359,12 +359,6 @@ export const vocoderPhraseCorrectResponse = { current: undefined };
 export const soundCalibrationLevelDBSPL = { current: undefined };
 
 export const rsvpReadingWordsForThisBlock = { current: undefined };
-export const rsvpReadingWordHistory = {
-  currentWordPosition: [0, 0],
-  usedWords: [],
-  usedTargets: [],
-  usedFoils: [],
-};
 
 export const rsvpReadingTargetSets = {
   numberOfSets: undefined,

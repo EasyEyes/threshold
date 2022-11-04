@@ -11,6 +11,7 @@ import {
   status,
   phraseIdentificationResponse,
   dummyStim,
+  rsvpReadingResponse,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -330,9 +331,12 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     typeof rsvpReadingTargetSets.current === "undefined" &&
     rsvpReadingTargetSets.upcoming.length === 0
   ) {
-    instructions.tSTart = t;
-    instructions.frameNStart = frameN;
-    instructions.setAutoDraw(true);
+    if (instructions.autoDraw === false) {
+      instructions.tSTart = t;
+      instructions.frameNStart = frameN;
+      instructions.setAutoDraw(true);
+      addRevealableTargetWordsToAidSpokenScoring();
+    }
     return;
   }
 
@@ -435,6 +439,7 @@ export const registerKeypressForRSVPReading = (keypresses) => {
     phraseIdentificationResponse.correct.push(correct);
 
     updateScientistKeypressFeedback(correct);
+    _highlightNextWordInRevealedKey();
   });
 };
 
@@ -503,4 +508,50 @@ export const constrainRSVPReadingSpeed = (proposedLevel) => {
       : notTooLongDuration;
 
   return Math.log10(constrainedDuration);
+};
+
+export const addRevealableTargetWordsToAidSpokenScoring = () => {
+  const revealableTargetWordsKey = document.createElement("div");
+  revealableTargetWordsKey.className = "rsvpReadingTargetWordsKey";
+  revealableTargetWordsKey.id = "rsvpReadingTargetWordsKey";
+  rsvpReadingTargetSets.past.forEach((ts, i) => {
+    const thisWordCue = document.createElement("div");
+    thisWordCue.innerText = ts.word;
+    thisWordCue.classList.add("rsvpReadingTargetWord");
+    thisWordCue.classList.add(
+      i === 0
+        ? "rsvpReadingTargetWordCurrent"
+        : "rsvpReadingTargetWordNotYetResponded"
+    );
+    revealableTargetWordsKey.appendChild(thisWordCue);
+  });
+  revealableTargetWordsKey.classList.add("hidden");
+  document.body.appendChild(revealableTargetWordsKey);
+  document.addEventListener("keydown", (e) => {
+    if (e.shiftKey && rsvpReadingResponse.responseType === "typed")
+      revealableTargetWordsKey.classList.toggle("hidden");
+  });
+};
+
+export const removeRevealableTargetWordsToAidSpokenScoring = () => {
+  const scoringAid = document.querySelector("#rsvpReadingTargetWordsKey");
+  if (scoringAid) scoringAid.parentNode.removeChild(scoringAid);
+};
+
+const _highlightNextWordInRevealedKey = () => {
+  const previousWord = document.querySelector(".rsvpReadingTargetWordCurrent");
+  if (previousWord)
+    previousWord.classList.replace(
+      "rsvpReadingTargetWordCurrent",
+      "rsvpReadingTargetWordAlreadyResponded"
+    );
+  const nextWords = document.querySelectorAll(
+    ".rsvpReadingTargetWordNotYetResponded"
+  );
+  const nextWord = [...nextWords].shift();
+  if (nextWord)
+    nextWord.classList.replace(
+      "rsvpReadingTargetWordNotYetResponded",
+      "rsvpReadingTargetWordCurrent"
+    );
 };
