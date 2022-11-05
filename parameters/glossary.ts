@@ -1337,8 +1337,8 @@ export const GLOSSARY: Glossary = {
       "sound",
       "vocoderPhrase",
       "reading",
-      "repeatedLetters",
       "rsvpReading",
+      "repeatedLetters",
     ],
   },
   targetMinimumPix: {
@@ -1539,7 +1539,9 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "spacing",
-    categories: ["spacing", "size", "soundLevel", "contrast"],
+    categories: [
+      "spacing,spacingDeg,size,targetSizeDeg,targetDurationSec,targetContrast,soundLevel,targetSoundDBSPL,targetSoundNoiseDBSPL",
+    ],
   },
   thresholdProcedure: {
     name: "thresholdProcedure",

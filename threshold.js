@@ -4653,7 +4653,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
             phraseIdentificationResponse.current = [];
             phraseIdentificationResponse.targetWord = [];
-            phraseIdentificationResponse.correct = [];
             phraseIdentificationResponse.clickTime = [];
             phraseIdentificationResponse.categoriesResponded = [];
 
@@ -4667,6 +4666,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               level,
               giveToQuest
             );
+            phraseIdentificationResponse.correct = [];
           },
         });
 
