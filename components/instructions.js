@@ -131,10 +131,14 @@ export const instructionsText = {
         );
         switch (responseType) {
           case 0:
-            text += extraSpace + `${phrases.T_pressingKeyRsvpReading[L]}\n\n`;
+            text +=
+              extraSpace +
+              `${phrases.T_pressingKeyRsvpReading[L]} ${phrases.T_escapeToQuit[L]} ${phrases.T_continueHitReturn[L]}\n\n`;
             break;
           case 1:
-            text += extraSpace + `${phrases.T_clickingWordRsvpReading[L]}\n\n`;
+            text +=
+              extraSpace +
+              `${phrases.T_clickingWordRsvpReading[L]} ${phrases.T_escapeToQuit[L]} ${phrases.T_continueClickProceed[L]}\n\n`;
             break;
         }
       }
