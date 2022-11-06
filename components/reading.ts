@@ -19,9 +19,13 @@ export const prepareReadingQuestions = (
   for (const page of textPages) {
     const pageList = preprocessCorpusToWordList(preprocessRawCorpus(page));
     for (const word of pageList) {
-      if (word.length && (onlyAlphabets(word) || targetKind === "rsvpReading"))
-        displayedWords.add(word);
-      // displayedWords.add(word.toLowerCase());
+      if (
+        word.length &&
+        (onlyAlphabets(word) || targetKind === "rsvpReading")
+      ) {
+        displayedWords.add(word.toLowerCase());
+        // displayedWords.add(word);
+      }
     }
   }
 
@@ -51,7 +55,7 @@ export const prepareReadingQuestions = (
     while (possibleFoils.size < foilCount) {
       for (const word of shuffle(freqToWords[freqToTest])) {
         if (
-          displayedWords.has(word) ||
+          displayedWords.has(word.toLowerCase()) ||
           word === correctAnswer ||
           (word.length < 2 && targetKind !== "rsvpReading") // Allow for short words in rsvpReading
         )
