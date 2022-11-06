@@ -129,6 +129,7 @@ export const instructionsText = {
           phrases.T_thresholdRsvpReadingBeginBlock[L],
           trialsThisBlock
         );
+        logger("responseType", responseType);
         switch (responseType) {
           case 0:
             text +=
@@ -139,6 +140,11 @@ export const instructionsText = {
             text +=
               extraSpace +
               `${phrases.T_clickingWordRsvpReading[L]} ${phrases.T_escapeToQuit[L]} ${phrases.T_continueClickProceed[L]}\n\n`;
+            break;
+          case 2:
+            text +=
+              extraSpace +
+              `${phrases.T_clickingWordRsvpReading[L]} ${phrases.T_escapeToQuit[L]} ${phrases.T_continueHitReturnOrClickProceed[L]}\n\n`;
             break;
         }
       }

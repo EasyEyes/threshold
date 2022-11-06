@@ -25,6 +25,7 @@ import { Color } from "../psychojs/src/util";
 import { findReadingSize, getThisBlockPages } from "./readingAddons";
 import { prepareReadingQuestions, preprocessCorpusToWordList } from "./reading";
 import { showCursor } from "./utils";
+import { showPhraseIdentification } from "./response";
 
 export class RSVPReadingTargetSet {
   constructor(
