@@ -141,7 +141,6 @@ import {
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
   addApparatusInfoToData,
-  degreesToPixels,
 } from "./components/utils.js";
 import { buildWindowErrorHandling } from "./components/errorHandling.js";
 
@@ -160,7 +159,6 @@ import {
   getResponseType,
   resetResponseType,
   setupPhraseIdentification,
-  showPhraseIdentification,
 } from "./components/response.js";
 
 import { cleanFontName, loadFonts } from "./components/fonts.js";
@@ -341,14 +339,11 @@ import {
 } from "./components/repeatedLetters.js";
 import { KeyPress } from "./psychojs/src/core/index.js";
 import {
-  addScientistKeypressFeedback,
   Category,
   constrainRSVPReadingSpeed,
   generateRSVPReadingTargetSets,
   getThisBlockRSVPReadingWords,
   registerKeypressForRSVPReading,
-  removeScientistKeypressFeedback,
-  updateTrialCounterNumbersForRSVPReading,
   _rsvpReading_trialInstructionRoutineBegin,
   _rsvpReading_trialRoutineEachFrame,
   removeRevealableTargetWordsToAidSpokenScoring,
@@ -3839,43 +3834,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       /* -------------------------------------------------------------------------- */
 
-      // TODO move this chunk to rsvpReading.js
-      // Given rsvpReading, and we are done showing stimuli...
-      if (
-        targetKind.current === "rsvpReading" &&
-        typeof rsvpReadingTargetSets.current === "undefined"
-      ) {
-        // Continue when enough responses have been registered
-        if (
-          phraseIdentificationResponse.current.length >=
-          rsvpReadingTargetSets.numberOfSets
-        ) {
-          // Ensure a small delay after the last response, so the participant sees feedback for every response
-          rsvpEndRoutineAtT = rsvpEndRoutineAtT ?? t + 0.5;
-          logger("t, endAt", [t, rsvpEndRoutineAtT]);
-          if (t >= rsvpEndRoutineAtT) {
-            if (rsvpReadingResponse.responseType === "typed")
-              removeScientistKeypressFeedback();
-            updateTrialCounterNumbersForRSVPReading();
-            continueRoutine = false;
-          }
-        } else {
-          showCursor();
-          // Show the response screen if response modality is clicking
-          if (
-            rsvpReadingResponse.responseType === "clicked" &&
-            !rsvpReadingResponse.displayStatus
-          ) {
-            showPhraseIdentification(rsvpReadingResponse.screen);
-            rsvpReadingResponse.displayStatus = true;
-          } else if (!rsvpReadingResponse.displayStatus) {
-            // Else create some subtle feedback that the scientist can use
-            addScientistKeypressFeedback(rsvpReadingTargetSets.numberOfSets);
-            rsvpReadingResponse.displayStatus = true;
-          }
-        }
-      }
-
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
       // response type more independent
@@ -4144,7 +4102,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           break;
         case "rsvpReading":
-          _rsvpReading_trialRoutineEachFrame(t, frameN, instructions);
+          continueRoutine = _rsvpReading_trialRoutineEachFrame(
+            t,
+            frameN,
+            instructions
+          );
           break;
       }
 

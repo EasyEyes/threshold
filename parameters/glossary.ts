@@ -629,7 +629,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "upperLeft",
-    categories: ["top", "upperLeft"],
+    categories: ["top", "upperLeft", "upperRight"],
   },
   instructionLanguage: {
     name: "instructionLanguage",
@@ -1540,7 +1540,15 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "spacing",
     categories: [
-      "spacing,spacingDeg,size,targetSizeDeg,targetDurationSec,targetContrast,soundLevel,targetSoundDBSPL,targetSoundNoiseDBSPL",
+      "spacing",
+      "spacingDeg",
+      "size",
+      "targetSizeDeg",
+      "targetDurationSec",
+      "targetContrast",
+      "soundLevel",
+      "targetSoundDBSPL",
+      "targetSoundNoiseDBSPL",
     ],
   },
   thresholdProcedure: {
