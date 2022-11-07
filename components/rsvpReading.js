@@ -195,7 +195,7 @@ class rsvpReadingTrialWords {
         .splice(improperAddress, 1)
         .pop();
       // ACCEPT? hacky way to ensure the target words are presented as displayed, ie with punctuation and case
-      // properOptions = [sequence.split(/\s/)[i], ...properOptions.slice(1)];
+      properOptions = [sequence.split(/\s/)[i], ...properOptions.slice(1)];
       return properOptions;
     });
     this.targetWords = this.responseOptions.map((responses) => responses[0]);
