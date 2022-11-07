@@ -3187,7 +3187,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           if (rsvpReadingResponse.responseType === "clicked") {
             rsvpReadingResponse.screen = setupPhraseIdentification(
-              rsvpReadingResponse.categories
+              rsvpReadingResponse.categories,
+              paramReader,
+              BC
             );
           }
 

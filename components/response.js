@@ -82,7 +82,7 @@ export const _onlyClick = (responseType) => {
  * @param {Category[]} categories Keys are target words, and values are arrays of distractor words
  * @returns {HTMLElement} Response screen element, parent of feedback and response buttons
  */
-export const setupPhraseIdentification = (categories) => {
+export const setupPhraseIdentification = (categories, reader, BC) => {
   const responseScreen = document.createElement("div");
   responseScreen.id = "phrase-identification-response-screen";
   responseScreen.classList.add("responseScreen");
@@ -101,6 +101,8 @@ export const setupPhraseIdentification = (categories) => {
 
   const response = {};
 
+  const leftToRightBool = reader.read("fontLeftToRightBool", BC);
+  categories = leftToRightBool ? categories : categories.reverse();
   for (const [categoryNum, category] of categories.entries()) {
     const targetWord = category.target;
     // In case targetWord are not unique across categories, include category index
