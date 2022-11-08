@@ -424,7 +424,7 @@ const addSoundFileElements = (
 
         const parameters = soundCalibrationResults.current.parameters;
         const unrestrictedInDB = CompressorInverseDb(
-          soundDBSPL.current,
+          soundDBSPL.current - soundGain.current,
           parameters.T,
           parameters.R,
           parameters.W

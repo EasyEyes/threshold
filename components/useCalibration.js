@@ -275,7 +275,9 @@ export const calibrateAudio = async (reader) => {
           const td2 = document.createElement("td");
           const td3 = document.createElement("td");
           // display the values with 1 decimal place
-          td1.innerHTML = soundLevels[i].toFixed(1);
+          // convert soundLevels to float
+          td1.innerHTML = String(parseFloat(soundLevels[i]).toFixed(1));
+          // td1.innerHTML = soundLevels[i].toFixed(1);
           td2.innerHTML = soundGainValues[i].toFixed(1);
           td3.innerHTML = outDBSPLValues[i].toFixed(1);
           // padding between the three columns
