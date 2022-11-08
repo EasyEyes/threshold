@@ -171,6 +171,8 @@ import {
   addBeepButton,
   addProceedButton,
   dynamicSetSize,
+  getCustomInstructionText,
+  getStimulusCustomInstructionPos,
   instructionsText,
   movePastFixation,
   removeBeepButton,
@@ -1621,9 +1623,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         readingClickableAnswersUpdate.current = false;
 
         // Display
-        instructions.setText(
-          phrases.T_readingTaskQuestionPrompt[rc.language.value]
+        const customInstructions = getCustomInstructionText(
+          "response",
+          paramReader,
+          status.block_condition
         );
+        if (customInstructions.length) {
+          instructions.setText(customInstructions);
+        } else {
+          instructions.setText(
+            phrases.T_readingTaskQuestionPrompt[rc.language.value]
+          );
+        }
         instructions.setAutoDraw(true);
       }
 
@@ -2198,6 +2209,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       trialCounter.setText(trialCounterStr);
       trialCounter.setAutoDraw(true);
+
+      const customInstructions = getCustomInstructionText(
+        "block",
+        paramReader,
+        status.block
+      );
+      if (customInstructions.length) _instructionSetup(customInstructions);
 
       return Scheduler.Event.NEXT;
     };
@@ -3241,6 +3259,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
+      const customInstructions = getCustomInstructionText(
+        "stimulus",
+        paramReader,
+        status.block_condition
+      );
+      if (customInstructions.length) {
+        const customInstructionsLocation = getStimulusCustomInstructionPos(
+          paramReader,
+          status.block_condition
+        );
+        _instructionBeforeStimulusSetup(
+          customInstructions,
+          undefined,
+          customInstructionsLocation
+        );
+      }
+
       /* --------------------------------- PUBLIC --------------------------------- */
 
       // Grid for both target kinds
@@ -3728,6 +3763,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var frameRemains;
   var timeWhenRespondable;
   var rsvpEndRoutineAtT;
+  var customResponseInstructionsDisplayed;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
       ////
@@ -3767,16 +3803,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //   status.condition.hasOwnProperty("_duplicatedConditionCardinal") &&
         //   status.condition._duplicatedConditionCardinal !== 1;
         rsvpEndRoutineAtT = undefined;
-        timeWhenRespondable =
-          targetKind.current === "rsvpReading"
-            ? rsvpReadingTargetSets.upcoming.length
+        customResponseInstructionsDisplayed = false;
+        switch (targetKind.current) {
+          case "rsvpReading":
+            timeWhenRespondable = rsvpReadingTargetSets.upcoming.length
               ? rsvpReadingTargetSets.upcoming[
                   rsvpReadingTargetSets.upcoming.length - 1
                 ].stopTime
-              : rsvpReadingTargetSets.current.stopTime
-            : delayBeforeStimOnsetSec +
+              : rsvpReadingTargetSets.current.stopTime;
+            break;
+          case "letter":
+          case "repeatedLetters":
+            timeWhenRespondable =
+              delayBeforeStimOnsetSec +
               letterConfig.targetSafetyMarginSec +
               letterConfig.targetDurationSec;
+            break;
+          default:
+            timeWhenRespondable = 0;
+        }
+        if (
+          paramReader.read("responseAllowedEarlyBool", status.block_condition)
+        )
+          timeWhenRespondable = 0;
 
         frameRemains =
           delayBeforeStimOnsetSec +
@@ -4336,6 +4385,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ////
       if (stats.on) stats.current.end();
       ////
+
+      if (
+        t >= timeWhenRespondable &&
+        !customResponseInstructionsDisplayed &&
+        !["reading"].includes(targetKind.current)
+      ) {
+        const customInstructions = getCustomInstructionText(
+          "response",
+          paramReader,
+          status.block_condition
+        );
+        if (customInstructions.length) {
+          instructions.setText(customInstructions);
+          instructions.tSTart = t;
+          instructions.frameNStart = frameN;
+          instructions.setAutoDraw(true);
+        }
+        customResponseInstructionsDisplayed = true;
+      }
 
       // refresh the screen if continuing
       if (continueRoutine) {

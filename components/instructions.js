@@ -369,3 +369,40 @@ const getSumHeight = (instructionList) => {
     total += instruction.getBoundingBox().height;
   return total;
 };
+
+/**
+ *
+ * @param {"block"|"stimulus"|"response"} when
+ * @param {*} instructionStim
+ * @param {*} reader
+ * @param {*} blockOrCondition
+ */
+export const getCustomInstructionText = (when, reader, blockOrCondition) => {
+  let instructionText;
+  switch (when) {
+    case "block":
+      instructionText = reader
+        .read("instructionForBlock", blockOrCondition)
+        .join("\n");
+      break;
+    case "stimulus":
+      instructionText = reader.read("instructionForStimulus", blockOrCondition);
+      break;
+    case "response":
+      instructionText = reader.read("instructionForResponse", blockOrCondition);
+      break;
+  }
+  return instructionText;
+};
+
+export const getStimulusCustomInstructionPos = (reader, BC) => {
+  const requestedPosition = reader.read("instructionForStimulusLocation", BC);
+  switch (requestedPosition) {
+    case "top":
+      return [0, window.innerHeight * 0.4];
+    case "upperLeft":
+      return [window.innerWidth * -0.4, window.innerHeight * 0.4];
+    case "upperRight":
+      return [window.innerWidth * 0.4, window.innerHeight * 0.4];
+  }
+};
