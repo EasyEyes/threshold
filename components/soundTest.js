@@ -36,8 +36,8 @@ export const addSoundTestElements = (reader) => {
     soundDBSPL.current = soundCalibrationLevelDBSPL.current;
   }
   const soundGainFromFile = reader.read("soundGainDBSPL", "__ALL_BLOCKS__");
-  if (soundCalibrationParameters.current) {
-    soundGain.current = soundCalibrationParameters.current.gainDBSPL;
+  if (soundCalibrationResults.current) {
+    soundGain.current = soundCalibrationResults.current.parameters.gainDBSPL;
   } else if (soundGainFromFile.length > 0) {
     soundGain.current = soundGainFromFile[0];
   }
@@ -423,16 +423,17 @@ const addSoundFileElements = (
           soundDBSPL.current.toFixed(1);
 
         const parameters = soundCalibrationResults.current.parameters;
-        const inDB = CompressorInverseDb(
+        const unrestrictedInDB = CompressorInverseDb(
           soundDBSPL.current,
           parameters.T,
           parameters.R,
           parameters.W
         );
-        const limitedRMS = getRMSLimit(inDB, audioData);
-
-        const soundDB = calculateDBFromRMS(limitedRMS);
-        soundDBSPL.current = soundGain.current + soundDB;
+        const limitedRMS = getRMSLimit(unrestrictedInDB, audioData);
+        const inDB = calculateDBFromRMS(limitedRMS);
+        soundDBSPL.current =
+          soundGain.current +
+          CompressorDb(inDB, parameters.T, parameters.R, parameters.W);
 
         const maxOfOriginalSound =
           getMaxValueOfAbsoluteValueOfBuffer(audioData);
@@ -610,16 +611,44 @@ const getMax = (arr) => {
 
 const CompressorInverseDb = (outDb, T, R, W) => {
   let inDb = 0;
+  let a = 0;
+  let b = 0;
+  let c = 0;
+  let inDb2 = 0;
+
   if (outDb > T + W / 2 / R) {
-    inDb = T + R(outDb - T);
+    inDb = T + R * (outDb - T);
   } else if (outDb > T - W / 2) {
     a = 1;
-    b = 2(W / (1 / R - 1) - (T - W / 2));
-    c = (-outDb2W / (1 / R - 1) + (T - W / 2)) ^ 2;
+    b = 2 * (W / (1 / R - 1) - (T - W / 2));
+    c = ((-outDb * 2 * W) / (1 / R - 1) + (T - W / 2)) ^ 2;
     inDb2 = -b / 2 - Math.sqrt(b ^ (2 - 4 * c)) / 2;
     inDb = inDb2;
   } else {
     inDb = outDb;
   }
   return inDb;
+};
+
+const CompressorDb = (inDb, T, R, W) => {
+  // Implement dynamic range compression of input level inDb with parameters
+  // T, R, and W.
+  // Compression equation taken from "Gain computer" in MATLAB documentation:
+  // https://www.mathworks.com/help/audio/ref/compressor-system-object.html#d124e70828
+  // Their equation is equation 4 in this published paper (which they cite):
+  // Giannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss. "Digital
+  // Dynamic Range Compressor Design –– A Tutorial and Analysis."
+  // Journal of Audio Engineering Society, Vol. 60, Issue 6, 2012, pp. 399–408.
+  // http://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf
+
+  let outDb = 0;
+  if (inDb > T + W / 2) {
+    outDb = T + (inDb - T) / R;
+  } else if (inDb > T - W / 2) {
+    outDb = (inDb + (1 / R - 1) * (inDb - (T - W / 2))) ^ (2 / (2 * W));
+  } else {
+    outDb = inDb;
+  }
+
+  return outDb;
 };

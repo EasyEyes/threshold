@@ -176,10 +176,10 @@ export const calibrateAudio = async (reader) => {
     ),
   ];
 
-  // const soundLevels = reader
-  //   .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
-  //   .split(",");
-  const soundLevels = [-3.1, -13.1];
+  const soundLevels = reader
+    .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
+    .split(",");
+  // const soundLevels = [-3.1, -13.1];
   // change sound Levels to gain values
   const gains = soundLevels.map((soundLevel) => {
     return Math.pow(10, soundLevel / 20);
@@ -258,7 +258,7 @@ export const calibrateAudio = async (reader) => {
         th3.innerHTML = "Sound (dB SPL)";
         // padding between the three columns
         th1.style.paddingRight = "20px";
-        th2.style.paddingRight = "20px";
+        th3.style.paddingRight = "20px";
         tr.appendChild(th1);
         tr.appendChild(th3);
         tr.appendChild(th2);
@@ -278,8 +278,9 @@ export const calibrateAudio = async (reader) => {
           td1.innerHTML = soundLevels[i].toFixed(1);
           td2.innerHTML = soundGainValues[i].toFixed(1);
           td3.innerHTML = outDBSPLValues[i].toFixed(1);
-          // padding between the two columns
+          // padding between the three columns
           td1.style.paddingRight = "20px";
+          td3.style.paddingRight = "20px";
           tr.appendChild(td1);
           tr.appendChild(td3);
           tr.appendChild(td2);
@@ -291,6 +292,8 @@ export const calibrateAudio = async (reader) => {
         <p>T: ${parameters.T}</p>
         <p>R: ${parameters.R}</p>
         <p>W: ${parameters.W}</p>
+        <p>soundGain: ${parameters.gainDBSPL.toFixed(1)}</p>
+        <p>backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}</p> 
         `;
       }
 
