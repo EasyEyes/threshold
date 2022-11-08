@@ -3,6 +3,7 @@ import {
   invertedImpulseResponse,
   soundGainDBSPL,
   soundCalibrationLevelDBSPL,
+  soundCalibrationResults,
 } from "./global";
 import {
   adjustSoundDbSPL,
@@ -35,9 +36,8 @@ export const addSoundTestElements = (reader) => {
     soundDBSPL.current = soundCalibrationLevelDBSPL.current;
   }
   const soundGainFromFile = reader.read("soundGainDBSPL", "__ALL_BLOCKS__");
-  const calculatedSoundGain = soundGainDBSPL.current;
-  if (calculatedSoundGain) {
-    soundGain.current = calculatedSoundGain[0];
+  if (soundCalibrationParameters.current) {
+    soundGain.current = soundCalibrationParameters.current.gainDBSPL;
   } else if (soundGainFromFile.length > 0) {
     soundGain.current = soundGainFromFile[0];
   }
@@ -421,19 +421,23 @@ const addSoundFileElements = (
         soundDBSPL.current = Math.round(soundDBSPL.current * 10) / 10;
         document.getElementById("soundTestModalSoundLevelInput").value =
           soundDBSPL.current.toFixed(1);
-        const limitedRMS = getRMSLimit(
-          soundDBSPL.current - soundGain.current,
-          audioData
+
+        const parameters = soundCalibrationResults.current.parameters;
+        const inDB = CompressorInverseDb(
+          soundDBSPL.current,
+          parameters.T,
+          parameters.R,
+          parameters.W
         );
+        const limitedRMS = getRMSLimit(inDB, audioData);
 
         const soundDB = calculateDBFromRMS(limitedRMS);
         soundDBSPL.current = soundGain.current + soundDB;
 
         const maxOfOriginalSound =
           getMaxValueOfAbsoluteValueOfBuffer(audioData);
-        const theGainValue = getGainValue(
-          soundDBSPL.current - soundGain.current
-        );
+
+        const theGainValue = getGainValue(inDB);
         const soundMax = maxOfOriginalSound * theGainValue;
         document.getElementById(
           "soundTestModalMaxAmplitude"
@@ -453,10 +457,7 @@ const addSoundFileElements = (
 
         //use gain node
         if (useGainNodeBool) {
-          const gainNode = getGainNode(
-            getGainValue(soundDBSPL.current - soundGain.current)
-          );
-          // gainNode.gain.value = getGainValue(soundCalibrationLevelDBSPL.current-soundGain.current);
+          const gainNode = getGainNode(getGainValue(inDB));
           const webAudioNodes = [];
           webAudioNodes.push(createAudioNodeFromBuffer(soundFileBuffer));
           webAudioNodes.push(gainNode);
@@ -494,7 +495,7 @@ const addSoundFileElements = (
         else {
           // console.log("gainValue",getGainValue(soundCalibrationLevelDBSPL.current-soundGain.current))
 
-          adjustSoundDbSPL(audioData, soundDBSPL.current - soundGain.current);
+          adjustSoundDbSPL(audioData, inDB);
           rmsOfSound.innerHTML = `Digital sound RMS dB: ${calculateDBFromRMS(
             getRMSOfWaveForm(audioData)
           )} dB`;
@@ -605,4 +606,20 @@ const getMax = (arr) => {
     max = arr[len] > max ? arr[len] : max;
   }
   return max;
+};
+
+const CompressorInverseDb = (outDb, T, R, W) => {
+  let inDb = 0;
+  if (outDb > T + W / 2 / R) {
+    inDb = T + R(outDb - T);
+  } else if (outDb > T - W / 2) {
+    a = 1;
+    b = 2(W / (1 / R - 1) - (T - W / 2));
+    c = (-outDb2W / (1 / R - 1) + (T - W / 2)) ^ 2;
+    inDb2 = -b / 2 - Math.sqrt(b ^ (2 - 4 * c)) / 2;
+    inDb = inDb2;
+  } else {
+    inDb = outDb;
+  }
+  return inDb;
 };

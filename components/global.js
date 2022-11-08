@@ -357,6 +357,7 @@ export const vocoderPhraseCategories = { chosen: undefined, all: undefined };
 export const vocoderPhraseShowClickable = { current: true };
 export const vocoderPhraseCorrectResponse = { current: undefined };
 export const soundCalibrationLevelDBSPL = { current: undefined };
+export const soundCalibrationResults = { current: undefined };
 
 export const rsvpReadingWordsForThisBlock = { current: undefined };
 
