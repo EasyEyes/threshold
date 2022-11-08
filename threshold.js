@@ -3924,7 +3924,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const clickedKeypresses = showCharacterSetResponse.current.map(
           (letter) => new KeyPress(undefined, undefined, letter)
         );
-        _key_resp_allKeys.push(clickedKeypresses);
+        _key_resp_allKeys.push(...clickedKeypresses);
 
         // if (targetKind.current === "repeatedLetters"){
         //   showCharacterSetResponse.current.forEach((r,i) => {
