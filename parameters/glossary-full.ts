@@ -282,7 +282,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "_participantRecruitmentServiceAccount",
-    availability: "soon",
+    availability: "now",
     example: "123ABC",
     explanation:
       "Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -292,7 +292,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "_participantsHowMany",
-    availability: "soon",
+    availability: "now",
     example: "20",
     explanation:
       "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
@@ -312,7 +312,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "_prolificEligibilityRequirements",
-    availability: "soon",
+    availability: "now",
     example: "",
     explanation:
       "This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
@@ -332,7 +332,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "_prolificStudyType",
-    availability: "soon",
+    availability: "now",
     example: "US_REP_SAMPLE",
     explanation:
       "Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
@@ -361,21 +361,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_zeroBasedNumberingBool",
-    availability: "soon",
-    example: "FALSE",
-    explanation:
-      "NOT YET IMPLEMENTED. If true then the first block and condition are numbered 0, otherwise 1.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "block",
     availability: "now",
     example: "1",
     explanation:
-      "The block number (default empty). The first condition (second column) must have a block number of 0 or 1, consistent with zeroBasedNumberingBool. After the first condition, each successive condition (column) must have the same block number as the one preceding it, or increased by +1.",
+      "The block number is required in every condition. There is no default. The first condition (currently second column, soon will be third column) must have block=1. After the first condition, each successive condition (column) must have the same block number as the one preceding it, or increased by +1.",
     type: "integer",
     default: "1",
     categories: "",
@@ -554,10 +544,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "conditionGroup",
-    availability: "later",
+    availability: "now",
     example: "1",
     explanation:
-      'NOT YET IMPLEMENTED. "conditionGroup" imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross, target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among any specified set of targets simply by creating a condition for each target, and giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
+      'NOT YET IMPLEMENTED. conditionGroup imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross and target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among the targets in any set simply by creating a condition for each target, and giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
     type: "integer",
     default: "0",
     categories: "",
@@ -567,7 +557,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Crowding",
     explanation:
-      "Use this to label your condition to help guide your subsequent data analysis. Not used by EasyEyes.",
+      "Use conditionName to label the condition to help guide your subsequent data analysis. Not used by EasyEyes. Set showConditionNameBool=TRUE to display it during each trial.",
     type: "text",
     default: "",
     categories: "",
@@ -577,7 +567,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "40",
     explanation:
-      "Number of trials of this condition to run in this block. They are all randomly interleaved. Each condition can have a different number of trials. IMPORTANT: We have parameters, e.g. thresholdAllowedDuration, that can reject trials for various reasons, e.g. bad duration. When a trial is rejected, it is not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the rejected trial's result so you could reanalyze your data including the rejected trials. In principle, it would be nice to add a new trial to make up for each rejected trial, but the PsychoJS MultiStair code has no provision for adding a trial to an ongoing loop. We hope to add that capability in the future.",
+      "conditionTrials is the number of trials of this condition to run in this block. Each condition can have a different number of trials. They are all randomly interleaved. IMPORTANT: We have parameters, e.g. thresholdAllowedDuration, that can reject trials for various reasons, e.g. bad duration. When a trial is rejected, it is not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the rejected trial's result so you could reanalyze your data including the rejected trials. In principle, it would be nice to add a new trial to make up for each rejected trial, but the PsychoJS MultiStair code has no provision for adding a trial to an ongoing loop. We hope to add that capability in the future.",
     type: "integer",
     default: "35",
     categories: "",
@@ -635,10 +625,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "fixationRequestedOffscreenBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
-      "To test the far periphery it may be worth the trouble of setting up an off-screen fixation mark, with help from the participant. Set fixationRequestedOffscreenBool TRUE and EasyEyes will ask the participant to put tape on a bottle or a box and draw a crosshair on it. To figure out where the crosshair is, EasyEyes will display arrows on the display and ask the participant to drag the arrow heads to point to the crosshair.",
+      "To test the far periphery, with help from the participant, it may be worth the trouble of setting up an off-screen fixation mark. Set fixationRequestedOffscreenBool TRUE and EasyEyes will ask the participant to put tape on a bottle or box and draw a crosshair on it. To figure out where the crosshair is, EasyEyes will display arrows on the display and ask the participant to drag the arrow heads to point to the crosshair.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -695,7 +685,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "flipScreenHorizontallyBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
       "NOT YET IMPLEMENTED: Set flipScreenHorizontallyBool TRUE (default is FALSE) when the display is seen through a mirror.",
@@ -775,7 +765,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "fontStyle",
-    availability: "later",
+    availability: "now",
     example: "bold",
     explanation:
       'NOT YET IMPLEMENTED. fontSyle can be regular (default), bold, italic, or bold-italic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
@@ -808,7 +798,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'NOT YET IMPLEMENTED. fontVariationSettings accepts a string to control a variable font. You set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have all-lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variation, and we can pick any value along each axis to control the font rendering. fontVariationSettings receives a string. The default is the empty string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nThe string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. "wght" is weight, which allows you to select any weight from extra thin to regular to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. To discover which axes a variable font supports, you can consult the webpage https://fontgauntlet.com/ or the individual font\'s documentation. Variable fonts are supported by all modern browsers, and not by Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
+      'NOT YET IMPLEMENTED. fontVariationSettings accepts a string to control a variable font (default is the empty string). You set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have all-lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variation, and we can pick any value along each axis to control the font rendering. fontVariationSettings receives a string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nThe string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. "wght" is weight, which allows you to select any weight from extra thin to regular to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. To discover which axes a variable font supports, you can consult the webpage https://fontgauntlet.com/ or the individual font\'s documentation. Variable fonts are supported by all modern browsers, and not by Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
     type: "text",
     default: "",
     categories: "",
@@ -818,7 +808,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "550",
     explanation:
-      "NOT YET IMPLEMENTED. fontWeight (default is regular weight) accepts a positive integer that sets the weight of a variable font. (IMPLEMENTATION: myText.style.fontWeight = fontWeight.)\nNOTE: If you set this parameter, then EasyEyes will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
+      "NOT YET IMPLEMENTED. fontWeight (default is regular weight) accepts a positive integer that sets the weight of a variable font. (IMPLEMENTATION: myText.style.fontWeight = fontWeight.)\nNOTE: If you set this parameter, then the EasyEyes compiler will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
     type: "numerical",
     default: "",
     categories: "",
@@ -828,7 +818,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Georgia",
     explanation:
-      'Font used to display instructions to the participant. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \ngoogle: instructionFont is a filename (including extension) of a font on the Google Fonts server.\nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Adobe. ("server" support is coming.)\nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
+      'instructionFont (default empty string) sets the font used to display instructions to the participant. The font parameter applies to the target and stimulus text. instructionFont does the same thing for the instructional text. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \ngoogle: instructionFont is a filename (including extension) of a font on the Google Fonts server.\nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Adobe. ("server" support is coming.)\nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
     type: "text",
     default: "Verdana",
     categories: "",
@@ -858,7 +848,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "instructionForBlock (empty default, which has no effect) is instructional text to be presented once at the beginning of the block, before running any trial of any condition. This text replaces whatever were the condition's default instructions, which depend on targetTask and targetKind. An empty field requests the default text, so write #NONE to suppress block instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. Use the string #PAGE_BREAK to insert a page break. You can use an unlimited number of pages. You should normally end each page with the symbol #PROCEED, which will be replaced by text telling the participant how to continue to the next page: offering one or both of hitting RETURN and clicking the PROCEED button, as appropriate given the setting of the responseClickedBool and responseTypedBool parameters (see https://trello.com/c/OI2CzqX6). If the block has multiple conditions, then EasyEyes will present every unique set of block instructions, one after another, before the first trial. FUTURE: Support Markdown to allow simple formating, including italic and bold. FUTURE: If the participant has requested translation to another language, then we use Google Translate to do so. ",
+      "instructionForBlock (empty default, which has no effect) is instructional text to be presented once at the beginning of the block, before running any trial of any condition. This text replaces whatever were the condition's default instructions, which depend on targetTask and targetKind. An empty field requests the default text, so write #NONE to suppress block instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. Use the string #PAGE_BREAK to insert a page break. You can use an unlimited number of pages. You should normally end each page with the symbol #PROCEED, which will be replaced by text telling the participant how to continue to the next page: offering one or both of hitting RETURN and clicking the PROCEED button, as appropriate given the setting of the responseClickedBool and responseTypedBool parameters (see https://trello.com/c/OI2CzqX6). If the block has multiple conditions, then EasyEyes will present every unique set of block instructions, one after another, before the first trial. FUTURE: Support Markdown to allow simple formatting, including italic and bold. FUTURE: If the participant has requested translation to another language, then we use Google Translate to do so. ",
     type: "text",
     default: "",
     categories: "",
@@ -895,7 +885,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "instructionLanguage",
-    availability: "soon",
+    availability: "now",
     example: "Italian",
     explanation:
       'English name for the language used for instructions to the participant. It must be "participant" or match one of the entries in the second row of the EasyEyes International phrases sheet. If you enter "participant", then the participant will be allowed to select the instruction language from a pull-down menu.',
@@ -915,22 +905,12 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "invitePartingCommentsBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
       "NOT YET IMPLEMENTED. At the end of this block, invite the participant to make parting comments. ",
     type: "boolean",
     default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "luminanceNit",
-    availability: "now",
-    example: "",
-    explanation:
-      "DEPRECATED. USE movieLuminanceNit INSTEAD. luminanceNit (default is half of maximum scree luminance) is the desired screen luminance in cd/m^2, i.e. nits. Specifying luminance will only be practical when we use an HDR codec supporting PQ. More typically, we'll want to use the display at the background luminance it was designed for, often 500 cd/m^2. The default empty value indicates that we should use the display at whatever background luminance we find it in.",
-    type: "numerical",
-    default: "",
     categories: "",
   },
   {
@@ -1288,7 +1268,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "3",
     explanation:
-      'Number of possible answers for each question. Only one of the possible answers is right. The rest are "foils".',
+      'Number of possible answers for each question (which of these words did you read just now?). Only one of the possible answers is right. The rest are "foils". The foils have approximately the same frequency in the corpus as the target.',
     type: "integer",
     default: "4",
     categories: "",
@@ -1455,7 +1435,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "responseSpokenBool",
-    availability: "later",
+    availability: "now",
     example: "FALSE",
     explanation:
       "responseSpokenBool allows participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
@@ -1508,7 +1488,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "3",
     explanation:
-      "rsvpReadingNumberOfResponseOptions is the number of different words (only one of which is correct) provided as possible responses when targetKind is rsvpReading. The response option list is in alphabetical order.",
+      "[FUTURE: delete this and use readingNumberOfPossibleAnswers instead.] rsvpReadingNumberOfResponseOptions is the number of different words (only one of which is correct) provided as possible responses (in alphabetical order) when targetKind is rsvpReading. The foils have approximately the same frequency in the corpus as the target. This parameter is used only when responseSpokenToExperimenterBool is FALSE.",
     type: "numerical",
     default: "6",
     categories: "",
@@ -1518,7 +1498,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "6",
     explanation:
-      "rsvpReadingNumberOfWords specifies how many words are shown during each rsvpReading trial. Must be consistent across rsvpReading conditions within a block due to implementation restrictions.",
+      "rsvpReadingNumberOfWords specifies how many words are shown during each rsvpReading trial. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
     type: "numerical",
     default: "6",
     categories: "",
@@ -1528,7 +1508,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "If TRUE, only select words for the target sequence and foil words which have not yet been used as a target or foil. If FALSE, draw words directly from the corpus, even if those words have already been used in this condition.",
+      "If rsvpReadingRequireUniqueWordsBool is TRUE, only select words for the target sequence and foil words which have not yet been used as a target or foil. If FALSE, draw words directly from the corpus, even if those words have already been used in this condition.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1733,7 +1713,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "showProgressBarWhere",
-    availability: "later",
+    availability: "now",
     example: "right",
     explanation:
       "NOT YET IMPLEMENTED: Can be none or right. Meant for children. Graphically displays a vertical green bar that tracks the trial count. The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the block. Sometimes we call the green liquid spaceship fuel for Jamie the astronaut.",
@@ -2024,7 +2004,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "letter",
     explanation:
-      'targetKind (default letter) specifies the kind of target.\n• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font and targetStyle.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• movie EasyEyes uses javascript movieComputeJS, provided by the scientist to compute an HDR movie, newly generated for each trial, and allows targetTask to be identify or detect.\n• reading Measure reading speed and retention. Soon reading will instead be a category of targetTask.\n• rsvpReading Flashes several words with Quest-controlled word duration. When doing silent RSVP the participant sees a row of lines, one per word. Below each line is a list of possible words, including the corret one. The participant must select a word in each column to continue. When doing vocal RSVP you can press the SHIFT key after the child finishes speaking to see the words that they saw, to help you score the what the child said. For each word, press either up arrow for correct or down arrow for wrong. Soon reading will instead be a category of targetTask.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The target sound is played for its full duration at level targetSoundDBSPL with a masker sound randomly selected from the maskerSoundFolder played at level maskerDBSPL. Also, in the background, we play targetSoundNoise at level targetSoundNoiseDBSPL.\n• vocoderPhrase. The targetSoundFolder and maskerSoundFolder each contain a hierarchy of folders containing 16-channel sound files. Each sound file is named for a word and contains the original or processed sound of that word (except that the file called "GoTo.wav" in fact contains the two words "go to"). The top level of folders in targetSoundFolder and maskerSoundFolder are folders of sounds produced by several talkers. Currently the talkers (Talker11, Talker14, Talker16, and Talker18) are all female. On each trial the target and masker are randomly assigned different talkers (never equal). Within each talker\'s folder are several loose word files (Now.wav, GoTo.wav, and Ready.wav), and several category folders (CallSign, Color, Number) that each contain several word files. Each trial follows text phrases provided in the parameters targetSoundPhrase and maskerSoundPhrase. Each phrase consists of a series of explicit words and category names, with each category name preceded by #. Currently the targetSoundPhrase is "Ready Baron GoTo #Color #Number Now", and the maskerSoundPhrase is "Ready #CallSign GoTo #Color #Number Now". The target and masker phrases are played at the same time, aligning the temporal midpoint of both words in each target-masker pair by symmetrically padding both ends of the briefer word with zeroes to make it the same length as the longer word. Each explicit word in each script is played every time. On each trial, each word category, marked by #, is replaced by a randomly selected word from that category folder, except that target and masker are always different from each other when either is drawn from a category.  On each trial, the target and masker phrases are combined by randomly taking targetSoundChannels (default 9) of the 16 channels of every word in the target phrase, and the remaining 16-targetSoundChannels channels from the masker words. The channel selection is consistent for all the words in the phrase, and new for each trial. targetSoundDBSPL specifies the sound level of the combined targetSoundChannels channels taken from each target word. Similarly maskerSoundDBSPL specifies the sound level of the combined 16-targetSoundChannels channels taken from each masker word. Also, we play targetSoundNoise at level targetSoundNoiseDBSPL. The Zhang et al. (2021) paper mentions a noise control, in which the masker is white noise that has been filtered into 16 bands and windowed into word-length durations. The scientist achieves this simply by providing a maskerSoundFolder made up of these 16-channel noises, each derived from a word. \nRESPONSE. After playing the phrase, EasyEyes displays two columns, one for each category word in the targetSoundPhrase. The observer must select one word in each column in order to proceed to the next trial. (This is forced choice.) We score the trial as right only if both responses are right. That overall right/wrong response is provided to QUEST, which controls the targetSoundDBSPL.',
+      'targetKind (default letter) specifies the kind of target.\n• letter On each trial, the target is a randomly selected character from the fontCharacterSet displayed in the specified font.\n• gabor A gabor is the product of a Gaussian and a sinewave. As a function of space, the sinewave produces a grating, and the Gaussain vignettes it to a specific area, without introducing edges. Gabors are a popular stimulus in vision research because they have compact frequency and location.\n• image An image is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetImageFolder. The image is displayed at the target eccentricity with the target size.\n• movie EasyEyes uses javascript movieComputeJS, provided by the scientist to compute an HDR movie, newly generated for each trial, and allows targetTask to be identify or detect.\n• reading Measure reading speed and retention. Uses specified font and writing direction (fontLeftToRightBool). readingXXX parameters specify corpus and starting point, control font size (usually via letter-to-letter spacing in deg), number of characters per line, and number of lines per page, and determine how many alternatives in each retention question and how many retention questions. The set of alternatives consists of a target word and foils that have approximately the same frequency in the corpus.\n• rsvpReading Flashes several words with Quest-controlled word duration. The parameter responseSpokenToExperimenterBool determines whether the trial\'s scoring is "spoken" (for children) or "silent" (for adults). In "silent" scoring, the participant sees a horizontal row of lines, each representing a shown word. Below each line is a list of possible words, including the correct one. The participant must select a word in each column to continue. readingXXX parameters specify how many alternatives for each word and how many retention questions. The set of alternatives consists of a target word and foils that have approximately the same frequency in the corpus.  In "spoken" scoring we assume that an experimenter sits next to the child participant, who reads the presented words aloud. Once the child has read the words aloud, the experimenter presses the SHIFT key to see the actual words, to guide scoring of what the child said. For each word, the experimenter presses either the up arrow for correct or down arrow for wrong. Supports fontLeftToRightBool for, e.g., Arabic.\n• sound A sound is randomly drawn, without replacement (for this condition in this block) from a folder whose name is specified by targetSoundFolder. The target sound is played for its full duration at level targetSoundDBSPL with a masker sound randomly selected from the maskerSoundFolder played at level maskerDBSPL. Also, in the background, we play targetSoundNoise at level targetSoundNoiseDBSPL.\n• vocoderPhrase. The targetSoundFolder and maskerSoundFolder each contain a hierarchy of folders containing 16-channel sound files. Each sound file is named for a word and contains the original or processed sound of that word (except that the file called "GoTo.wav" in fact contains the two words "go to"). The top level of folders in targetSoundFolder and maskerSoundFolder are folders of sounds produced by several talkers. Currently the talkers (Talker11, Talker14, Talker16, and Talker18) are all female. On each trial the target and masker are randomly assigned different talkers (never equal). Within each talker\'s folder are several loose word files (Now.wav, GoTo.wav, and Ready.wav), and several category folders (CallSign, Color, Number) that each contain several word files. Each trial follows text phrases provided in the parameters targetSoundPhrase and maskerSoundPhrase. Each phrase consists of a series of explicit words and category names, with each category name preceded by #. Currently the targetSoundPhrase is "Ready Baron GoTo #Color #Number Now", and the maskerSoundPhrase is "Ready #CallSign GoTo #Color #Number Now". The target and masker phrases are played at the same time, aligning the temporal midpoint of both words in each target-masker pair by symmetrically padding both ends of the briefer word with zeroes to make it the same length as the longer word. Each explicit word in each script is played every time. On each trial, each word category, marked by #, is replaced by a randomly selected word from that category folder, except that target and masker are always different from each other when either is drawn from a category.  On each trial, the target and masker phrases are combined by randomly taking targetSoundChannels (default 9) of the 16 channels of every word in the target phrase, and the remaining 16-targetSoundChannels channels from the masker words. The channel selection is consistent for all the words in the phrase, and new for each trial. targetSoundDBSPL specifies the sound level of the combined targetSoundChannels channels taken from each target word. Similarly maskerSoundDBSPL specifies the sound level of the combined 16-targetSoundChannels channels taken from each masker word. Also, we play targetSoundNoise at level targetSoundNoiseDBSPL. The Zhang et al. (2021) paper mentions a noise control, in which the masker is white noise that has been filtered into 16 bands and windowed into word-length durations. The scientist achieves this simply by providing a maskerSoundFolder made up of these 16-channel noises, each derived from a word. \nRESPONSE. After playing the phrase, EasyEyes displays two columns, one for each category word in the targetSoundPhrase. The observer must select one word in each column in order to proceed to the next trial. (This is forced choice.) We score the trial as right only if both responses are right. That overall right/wrong response is provided to QUEST, which controls the targetSoundDBSPL.',
     type: "categorical",
     default: "letter",
     categories:
