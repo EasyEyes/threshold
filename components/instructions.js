@@ -381,9 +381,13 @@ export const getCustomInstructionText = (when, reader, blockOrCondition) => {
   let instructionText;
   switch (when) {
     case "block":
-      instructionText = reader
-        .read("instructionForBlock", blockOrCondition)
-        .join("\n");
+      if (reader.read("instructionForBlock", blockOrCondition).some(Boolean)) {
+        instructionText = reader
+          .read("instructionForBlock", blockOrCondition)
+          .join("\n");
+      } else {
+        instructionText = "";
+      }
       break;
     case "stimulus":
       instructionText = reader.read("instructionForStimulus", blockOrCondition);
