@@ -421,7 +421,7 @@ const addSoundFileElements = (
         soundDBSPL.current = Math.round(soundDBSPL.current * 10) / 10;
         document.getElementById("soundTestModalSoundLevelInput").value =
           soundDBSPL.current.toFixed(1);
-
+        console.log("soundDBSPL.current", soundDBSPL.current);
         const parameters = soundCalibrationResults.current.parameters;
         const unrestrictedInDB = CompressorInverseDb(
           soundDBSPL.current - soundGain.current,
@@ -434,7 +434,12 @@ const addSoundFileElements = (
         soundDBSPL.current =
           soundGain.current +
           CompressorDb(inDB, parameters.T, parameters.R, parameters.W);
-
+        soundDBSPL.current = Math.round(soundDBSPL.current * 10) / 10;
+        // console.log("soundDBSPL.current", soundDBSPL.current);
+        // console.log("soundGain.current", soundGain.current);
+        // console.log("inDB", inDB);
+        // console.log("unrestrictedInDB", unrestrictedInDB);
+        // console.log("CompressorDB",  CompressorDb(inDB, parameters.T, parameters.R, parameters.W));
         const maxOfOriginalSound =
           getMaxValueOfAbsoluteValueOfBuffer(audioData);
 
@@ -445,7 +450,7 @@ const addSoundFileElements = (
         ).innerHTML = `Digital sound max: ${soundMax.toFixed(2)}`;
 
         // round soundCalibrationLevelDBSPL to 1 decimal places
-        soundDBSPL.current = Math.round(soundDBSPL.current * 10) / 10;
+
         document.getElementById("soundTestModalSoundLevelInput").value =
           soundDBSPL.current;
         // document.getElementById(
@@ -572,24 +577,11 @@ const getGainValue = (dbSPL) => {
 };
 
 const getRMSLimit = (dbSPL, buffer) => {
-  // console.log("dbSPL", dbSPL);
-  // console.log("buffer", buffer);
-  // get max value of absolute value of buffer
-  // const absValue = buffer.map((value) => Math.abs(value));
-  // console.log("absValue", absValue);
   const sMax = getMaxValueOfAbsoluteValueOfBuffer(buffer);
-  // console.log("sMax", sMax);
-  // update sMax in document
-
-  const rms = getGainValue(dbSPL);
-  // console.log("rms", rms);
   const sRms = getRMSOfWaveForm(buffer);
-  // console.log("sRms", sRms);
   const rmsLimit = sRms / sMax;
-  // console.log("rmsLimit", rmsLimit);
-
+  const rms = getGainValue(dbSPL);
   return Math.min(rmsLimit, rms);
-  // return rmsLimit;
 };
 
 // function to get the max value of the absolute value of the buffer
@@ -621,8 +613,8 @@ const CompressorInverseDb = (outDb, T, R, W) => {
   } else if (outDb > T - W / 2) {
     a = 1;
     b = 2 * (W / (1 / R - 1) - (T - W / 2));
-    c = ((-outDb * 2 * W) / (1 / R - 1) + (T - W / 2)) ^ 2;
-    inDb2 = -b / 2 - Math.sqrt(b ^ (2 - 4 * c)) / 2;
+    c = (-outDb * 2 * W) / (1 / R - 1) + (T - W / 2) ** 2;
+    inDb2 = -b / 2 - Math.sqrt(b ** 2 - 4 * c) / 2;
     inDb = inDb2;
   } else {
     inDb = outDb;
@@ -645,7 +637,7 @@ const CompressorDb = (inDb, T, R, W) => {
   if (inDb > T + W / 2) {
     outDb = T + (inDb - T) / R;
   } else if (inDb > T - W / 2) {
-    outDb = (inDb + (1 / R - 1) * (inDb - (T - W / 2))) ^ (2 / (2 * W));
+    outDb = inDb + ((1 / R - 1) * (inDb - (T - W / 2)) ** 2) / (2 * W);
   } else {
     outDb = inDb;
   }

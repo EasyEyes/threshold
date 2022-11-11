@@ -11,7 +11,6 @@ import { GLOSSARY } from "../parameters/glossary.ts";
 import { addSoundTestElements } from "./soundTest";
 import { getSoundCalibrationLevelDBSPLFromIIR } from "./soundUtils";
 
-console.log(speakerCalibrator);
 export const useCalibration = (reader) => {
   return ifTrue([
     ...reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"),
@@ -266,8 +265,8 @@ export const calibrateAudio = async (reader) => {
         elems.soundLevelsTable.appendChild(thead);
         elems.soundLevelsTable.appendChild(tbody);
         const parameters = soundCalibrationResults.current.parameters;
-        const soundGainValues =
-          soundCalibrationResults.current.soundGainDBSPLValues;
+        // const soundGainValues =
+        //   soundCalibrationResults.current.soundGainDBSPLValues;
         const outDBSPLValues = soundCalibrationResults.current.outDBSPLValues;
         for (let i = 0; i < soundLevels.length; i++) {
           const tr = document.createElement("tr");
@@ -278,7 +277,9 @@ export const calibrateAudio = async (reader) => {
           // convert soundLevels to float
           td1.innerHTML = String(parseFloat(soundLevels[i]).toFixed(1));
           // td1.innerHTML = soundLevels[i].toFixed(1);
-          td2.innerHTML = soundGainValues[i].toFixed(1);
+          td2.innerHTML = (
+            outDBSPLValues[i] - parseFloat(soundLevels[i])
+          ).toFixed(1);
           td3.innerHTML = outDBSPLValues[i].toFixed(1);
           // padding between the three columns
           td1.style.paddingRight = "20px";
@@ -291,9 +292,9 @@ export const calibrateAudio = async (reader) => {
         // display the parameters used for the calibration
         elems.soundParametersFromCalibration.innerHTML = `
         <p>Parameters:</p>
-        <p>T: ${parameters.T}</p>
-        <p>R: ${parameters.R}</p>
-        <p>W: ${parameters.W}</p>
+        <p>T: ${parameters.T.toFixed(1)}</p>
+        <p>R: ${parameters.R.toFixed(1)}</p>
+        <p>W: ${parameters.W.toFixed(1)}</p>
         <p>soundGain: ${parameters.gainDBSPL.toFixed(1)}</p>
         <p>backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}</p> 
         `;

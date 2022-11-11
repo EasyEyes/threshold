@@ -258,13 +258,13 @@ export const GLOSSARY: Glossary = {
   },
   _participantRecruitmentServiceAccount: {
     name: "_participantRecruitmentServiceAccount",
-    availability: "soon",
+    availability: "now",
     type: "text",
     default: "",
   },
   _participantsHowMany: {
     name: "_participantsHowMany",
-    availability: "soon",
+    availability: "now",
     type: "integer",
     default: "1",
   },
@@ -276,7 +276,7 @@ export const GLOSSARY: Glossary = {
   },
   _prolificEligibilityRequirements: {
     name: "_prolificEligibilityRequirements",
-    availability: "soon",
+    availability: "now",
     type: "text",
     default: "",
   },
@@ -288,7 +288,7 @@ export const GLOSSARY: Glossary = {
   },
   _prolificStudyType: {
     name: "_prolificStudyType",
-    availability: "soon",
+    availability: "now",
     type: "categorical",
     default: "US_REP_SAMPLE",
     categories: ["UK_REP_SAMPLE", "US_REP_SAMPLE", "SINGLE"],
@@ -302,12 +302,6 @@ export const GLOSSARY: Glossary = {
   _requestEasyEyesIDSaveToFileBool: {
     name: "_requestEasyEyesIDSaveToFileBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  _zeroBasedNumberingBool: {
-    name: "_zeroBasedNumberingBool",
-    availability: "soon",
     type: "boolean",
     default: "FALSE",
   },
@@ -418,7 +412,7 @@ export const GLOSSARY: Glossary = {
   },
   conditionGroup: {
     name: "conditionGroup",
-    availability: "later",
+    availability: "now",
     type: "integer",
     default: "0",
   },
@@ -472,7 +466,7 @@ export const GLOSSARY: Glossary = {
   },
   fixationRequestedOffscreenBool: {
     name: "fixationRequestedOffscreenBool",
-    availability: "later",
+    availability: "now",
     type: "boolean",
     default: "FALSE",
   },
@@ -509,7 +503,7 @@ export const GLOSSARY: Glossary = {
   },
   flipScreenHorizontallyBool: {
     name: "flipScreenHorizontallyBool",
-    availability: "later",
+    availability: "now",
     type: "boolean",
     default: "FALSE",
   },
@@ -558,7 +552,7 @@ export const GLOSSARY: Glossary = {
   },
   fontStyle: {
     name: "fontStyle",
-    availability: "later",
+    availability: "now",
     type: "categorical",
     default: "regular",
     categories: ["regular", "bold", "italic", "boldItalic"],
@@ -633,7 +627,7 @@ export const GLOSSARY: Glossary = {
   },
   instructionLanguage: {
     name: "instructionLanguage",
-    availability: "soon",
+    availability: "now",
     type: "categorical",
     default: "English",
     categories: [""],
@@ -646,15 +640,9 @@ export const GLOSSARY: Glossary = {
   },
   invitePartingCommentsBool: {
     name: "invitePartingCommentsBool",
-    availability: "later",
+    availability: "now",
     type: "boolean",
     default: "FALSE",
-  },
-  luminanceNit: {
-    name: "luminanceNit",
-    availability: "now",
-    type: "numerical",
-    default: "",
   },
   markingBlankedNearTargetBool: {
     name: "markingBlankedNearTargetBool",
@@ -967,7 +955,7 @@ export const GLOSSARY: Glossary = {
   },
   responseSpokenBool: {
     name: "responseSpokenBool",
-    availability: "later",
+    availability: "now",
     type: "boolean",
     default: "FALSE",
   },
@@ -1139,7 +1127,7 @@ export const GLOSSARY: Glossary = {
   },
   showProgressBarWhere: {
     name: "showProgressBarWhere",
-    availability: "later",
+    availability: "now",
     type: "categorical",
     default: "none",
     categories: ["none", "right"],
