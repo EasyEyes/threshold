@@ -177,6 +177,7 @@ import {
   movePastFixation,
   removeBeepButton,
   removeProceedButton,
+  updateInstructionFont,
   _takeFixationClick,
 } from "./components/instructions.js";
 
@@ -1789,6 +1790,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       status.block = snapshot.block + 1;
       totalBlocks.current = snapshot.nTotal;
 
+      updateInstructionFont(paramReader, status.block, [
+        instructions,
+        instructions2,
+        trialCounter,
+      ]);
+
       // PRESETS
       targetKind.current = paramReader.read("targetKind", status.block)[0];
       // TODO support more
@@ -3278,6 +3285,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* --------------------------------- PUBLIC --------------------------------- */
 
+      updateInstructionFont(paramReader, BC, [
+        instructions,
+        instructions2,
+        trialCounter,
+      ]);
+
       // Grid for both target kinds
       grid.current.update(reader.read("showGrid", BC), displayOptions);
 
@@ -4546,6 +4559,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 }
               }, 200);
             }
+            // TODO how to change font on question&answer?
+            // const questionAndAnswers = document.querySelector(".swal2-container");
+            // questionAndAnswers.style.fontFamily = instructionFont.current;
+            // questionAndAnswers.style.font = instructionFont.current;
           },
           // preConfirm: (value) => {
           //   if (choiceQuestionBool && !value) {

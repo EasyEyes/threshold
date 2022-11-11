@@ -2,9 +2,11 @@ import { phrases } from "./i18n.js";
 import {
   clickedContinue,
   fixationConfig,
+  instructionFont,
   modalButtonTriggeredViaKeyboard,
   targetKind,
 } from "./global.js";
+import { cleanFontName } from "./fonts.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { _onlyClick } from "./response.js";
 import { hideCursor, logger } from "./utils.js";
@@ -409,4 +411,19 @@ export const getStimulusCustomInstructionPos = (reader, BC) => {
     case "upperRight":
       return [window.innerWidth * 0.4, window.innerHeight * 0.4];
   }
+};
+
+export const updateInstructionFont = (
+  reader,
+  blockOrCondition,
+  instructionStims
+) => {
+  let font = reader.read("instructionFont", blockOrCondition);
+  let source = reader.read("instructionFontSource", blockOrCondition);
+  if (font instanceof Array) font = font[0];
+  if (source instanceof Array) source = source[0];
+  instructionFont.current = font;
+  if (source === "file")
+    instructionFont.current = cleanFontName(instructionFont.current);
+  instructionStims.forEach((s) => s.setFont(instructionFont.current));
 };
