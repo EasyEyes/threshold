@@ -521,6 +521,11 @@ const paramReaderInitialized = async (reader) => {
           // rc.pauseDistance();
 
           await startExperiment();
+        } else {
+          psychoJS?.experiment?.addData(
+            "error",
+            "Participant re-calibrated. You may consider discarding the trials before."
+          );
         }
       }
     );
