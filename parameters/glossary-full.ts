@@ -80,6 +80,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "all, desktop, tablet, mobile",
   },
   {
+    name: "_compatibleDisplay",
+    availability: "now",
+    example: "HDRMovie",
+    explanation:
+      "NOT YET IMPLEMENTED. _compatibleDisplay requires support for key display features:\nHDRMovie: Browser supports HDR movies.\ntenBit: Display supports 10-bit imaging. https://trello.com/c/VxGHyxDa\n\nNOTE ON CODEC. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, and we might not support it. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying compatible browsers. It might be better to specify compatible codecs. However when we reject a participant's computer it would be more helpful to tell them what browsers we support, rather than which codecs. ",
+    type: "multicategorical",
+    default: "",
+    categories: "HDRMovie, tenBit",
+  },
+  {
     name: "_compatibleIPhoneTooBool",
     availability: "now",
     example: "TRUE",
@@ -115,7 +125,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; its value is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
+      "??? _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; its value is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
     type: "integer",
     default: "",
     categories: "",
@@ -145,7 +155,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "http://xyz?cc=123",
     explanation:
-      "A URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
+      "_daisyChainURLAfterEasyEyes is a URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
     type: "text",
     default: "",
     categories: "",
@@ -155,7 +165,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "http://xyz?cc=123",
     explanation:
-      "A URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), signaling the participant's eligibility for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Thanks to Becca Hirst at Open Science Tools for suggesting daisy chaining.",
+      "_daisyChainURLBeforeEasyEyes is a URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), signaling the participant's eligibility for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Thanks to Becca Hirst at Open Science Tools for suggesting daisy chaining.",
     type: "text",
     default: "",
     categories: "",
@@ -1318,9 +1328,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "If readingSetSizeBy is spacing, the point size of the text to be read is adjusted to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. For the proportionality of spacing to point size, I suggest we measure the width of the fontCharacterSet string, and divide by the number of numbers in the string.",
+      "readingSpacingDeg has default 0.5 deg. If readingSetSizeBy is spacing, the point size of the text to be read is adjusted to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. For the proportionality of spacing to point size, I suggest we measure the width of the fontCharacterSet string, and divide by the number of numbers in the string.",
     type: "numerical",
-    default: "1",
+    default: "0.5",
     categories: "",
   },
   {

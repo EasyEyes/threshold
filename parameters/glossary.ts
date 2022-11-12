@@ -95,6 +95,13 @@ export const GLOSSARY: Glossary = {
     default: "desktop",
     categories: ["all", "desktop", "tablet", "mobile"],
   },
+  _compatibleDisplay: {
+    name: "_compatibleDisplay",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    categories: ["HDRMovie", "tenBit"],
+  },
   _compatibleIPhoneTooBool: {
     name: "_compatibleIPhoneTooBool",
     availability: "now",
@@ -885,7 +892,7 @@ export const GLOSSARY: Glossary = {
     name: "readingSpacingDeg",
     availability: "now",
     type: "numerical",
-    default: "1",
+    default: "0.5",
   },
   readingTargetMaxWordFrequency: {
     name: "readingTargetMaxWordFrequency",

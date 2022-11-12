@@ -503,6 +503,7 @@ const paramReaderInitialized = async (reader) => {
   };
   ////
 
+  const experimentStarted = { current: false };
   // ! Remote Calibrator
   if (useRC && useCalibration(reader)) {
     rc.panel(
@@ -512,12 +513,15 @@ const paramReaderInitialized = async (reader) => {
         debug: debug,
       },
       async () => {
-        rc.removePanel();
+        if (!experimentStarted.current) {
+          experimentStarted.current = true;
+          rc.removePanel();
 
-        rc.pauseGaze();
-        // rc.pauseDistance();
+          rc.pauseGaze();
+          // rc.pauseDistance();
 
-        await startExperiment();
+          await startExperiment();
+        }
       }
     );
   } else {
