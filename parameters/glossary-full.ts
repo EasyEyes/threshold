@@ -82,12 +82,12 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "_compatibleDisplay",
     availability: "now",
-    example: "HDRMovie",
+    example: "hdrMovie",
     explanation:
       "NOT YET IMPLEMENTED. _compatibleDisplay requires support for key display features:\nHDRMovie: Browser supports HDR movies.\ntenBit: Display supports 10-bit imaging. https://trello.com/c/VxGHyxDa\n\nNOTE ON CODEC. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, and we might not support it. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying compatible browsers. It might be better to specify compatible codecs. However when we reject a participant's computer it would be more helpful to tell them what browsers we support, rather than which codecs. ",
     type: "multicategorical",
     default: "",
-    categories: "HDRMovie, tenBit",
+    categories: "hdrMovie, tenBit",
   },
   {
     name: "_compatibleIPhoneTooBool",

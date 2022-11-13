@@ -100,7 +100,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "multicategorical",
     default: "",
-    categories: ["HDRMovie", "tenBit"],
+    categories: ["hdrMovie", "tenBit"],
   },
   _compatibleIPhoneTooBool: {
     name: "_compatibleIPhoneTooBool",

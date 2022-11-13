@@ -247,8 +247,8 @@ import {
 // READING
 import { prepareReadingQuestions } from "./components/reading.ts";
 import {
-  getSizeForSpacing,
-  getSizeForXHeight,
+  // getSizeForSpacing,
+  // getSizeForXHeight,
   getThisBlockPages,
   loadReadingCorpus,
   addReadingStatsToOutput,
