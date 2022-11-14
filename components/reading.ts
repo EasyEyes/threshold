@@ -20,8 +20,8 @@ export const prepareReadingQuestions = (
     const pageList = preprocessCorpusToWordList(preprocessRawCorpus(page));
     for (const word of pageList) {
       if (
-        word.length &&
-        (onlyAlphabets(word) || targetKind === "rsvpReading")
+        word.length
+        // (onlyAlphabets(word) || targetKind === "rsvpReading")
       ) {
         displayedWords.add(word.toLowerCase());
         // displayedWords.add(word);
@@ -163,8 +163,8 @@ export const getCorrectAnswer = (
     const pageList = preprocessCorpusToWordList(preprocessRawCorpus(page));
     for (const word of pageList) {
       if (
-        word.length &&
-        (onlyAlphabets(word) || targetKind === "rsvpReading")
+        word.length
+        // (onlyAlphabets(word) || targetKind === "rsvpReading")
       ) {
         usableWords.add(word.toLowerCase());
         if (targetKind === "rsvpReading") pageWords.push(word);
