@@ -4568,10 +4568,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 }
               }, 200);
             }
-            // TODO how to change font on question&answer?
-            // const questionAndAnswers = document.querySelector(".swal2-container");
-            // questionAndAnswers.style.fontFamily = instructionFont.current;
-            // questionAndAnswers.style.font = instructionFont.current;
+            const questionAndAnswers = document.querySelector(".swal2-title");
+            questionAndAnswers.style.fontFamily = instructionFont.current;
+            questionAndAnswers.style.font = instructionFont.current;
           },
           // preConfirm: (value) => {
           //   if (choiceQuestionBool && !value) {
