@@ -109,7 +109,7 @@ export const getRequestedFoldersForStructureCheck = async (
     allowEnterKey: false,
     didOpen: () => {
       // Question: does it do anything here? - PJ
-      Swal.showLoading(undefined);
+      Swal.showLoading(null);
     },
   });
 
