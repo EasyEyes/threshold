@@ -1,3 +1,5 @@
+import { logger, sampleWithReplacement } from "./utils";
+
 interface ReadingQuestionAnswers {
   correctAnswer: string;
   foils: string[];
@@ -71,12 +73,23 @@ export const prepareReadingQuestions = (
           freqAdjustCounter = -freqAdjustCounter;
           freqToTest = maxFrequency;
         }
-        if (freqToTest < 1)
-          throw "Failed to construct a new question. [no enough foils]";
+        if (freqToTest < 1) {
+          break;
+          // throw "Failed to construct a new question. [no enough foils]";
+        }
       }
     }
-
-    const possibleFoilsList = shuffle([...possibleFoils]);
+    let possibleFoilsList;
+    if (possibleFoils.size < foilCount) {
+      const fauxFoilsNeeded = foilCount - possibleFoils.size;
+      const fauxFoils = sampleWithReplacement(
+        [...possibleFoils],
+        fauxFoilsNeeded
+      );
+      possibleFoilsList = shuffle([...possibleFoils, ...fauxFoils]);
+    } else {
+      possibleFoilsList = shuffle([...possibleFoils]);
+    }
     newQuestion.foils.push(...possibleFoilsList);
     questions.push(newQuestion);
   }
