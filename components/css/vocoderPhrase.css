@@ -11,12 +11,14 @@
   position: absolute;
   top: 0px;
   left: 0px;
+  display: flex;
+  flex-direction: column;
 }
 
 #vocoder-phrase-header {
   z-index: 9999999;
   /* position:"fixed"; */
-  margin-top: 23vh;
+  margin-top: 20vh;
   margin-left: 10vw;
   font-size: xx-large;
 }
@@ -28,7 +30,8 @@
   z-index: 9999999;
   /* position: fixed; */
   /* padding-left: 30px; */
-  margin-top: 7vh;
+  margin-top: 10vh;
+  margin-left: 10vw;
 }
 
 .vocoder-phrase-category-item {

@@ -1,4 +1,6 @@
 import mergeBuffers from "merge-audio-buffers";
+import { soundCalibrationResults } from "./global";
+import { getCorrectedInDbAndSoundDBSPL } from "./soundTest";
 import {
   adjustSoundDbSPL,
   audioCtx,
@@ -40,17 +42,10 @@ export const getVocoderPhraseTrialData = async (
   maskerVolumeDbSPL = 10,
   numberOfChannels = 9
 ) => {
-  // console.log("numberOfChannels", numberOfChannels);
   //populate target and masker channel indices
   var targetChannels = populateTargetIndices(numberOfChannels);
   var maskerChannels = populateMaskerIndices(targetChannels);
-  // console.log("targetChannels", targetChannels);
-  // console.log("maskerChannels", maskerChannels);
-
   var targetKeys = Object.keys(targetList[blockCondition]);
-  // console.log("list", targetKeys);
-  // console.log(targetList[blockCondition]);
-
   const { targetSentenceAudio, talker, categoriesChosen, allCategories } =
     getTargetSentenceAudio(
       targetKeys,
@@ -68,36 +63,38 @@ export const getVocoderPhraseTrialData = async (
     talker,
     categoriesChosen
   );
-  // // mergeAudioBuffersWithMergerNode(targetSentenceAudio[0]);
-  // const mergedTargetSentenceAudio = mergeChannelsByAdding(targetSentenceAudio);
-  // const mergedMaskerSentenceAudio = mergeChannelsByAdding(maskerSentenceAudio);
-
   // align target and masker audio buffers
   const { targetAudioBuffersAligned, maskerAudioBuffersAligned } =
     alignTargetAndMaskerAudioBuffers(targetSentenceAudio, maskerSentenceAudio);
-  // console.log("targetAudioBuffersAligned", targetAudioBuffersAligned);
-  // console.log("maskerAudioBuffersAligned", maskerAudioBuffersAligned);
 
   const targetAudio = combineAudioBuffers(targetAudioBuffersAligned, audioCtx);
   const maskerAudio = combineAudioBuffers(maskerAudioBuffersAligned, audioCtx);
-
   //adjust target volume
   const targetAudioData = targetAudio.getChannelData(0);
   setWaveFormToZeroDbSPL(targetAudioData);
-  // console.log("targetAudioDataRMS", getRMSOfWaveForm(targetAudioData));
-  adjustSoundDbSPL(
-    targetAudioData,
-    targetVolumeDbSPLFromQuest - soundGainDBSPL
+
+  // adjust target volume
+  const parameters = soundCalibrationResults.current.parameters;
+  const correctedValuesForTarget = getCorrectedInDbAndSoundDBSPL(
+    targetVolumeDbSPLFromQuest,
+    soundGainDBSPL,
+    parameters,
+    targetAudioData
   );
+
+  adjustSoundDbSPL(targetAudioData, correctedValuesForTarget.inDB);
 
   //adjust masker volume
   const maskerAudioData = maskerAudio.getChannelData(0);
   setWaveFormToZeroDbSPL(maskerAudioData);
-  // console.log("maskerAudioDataRMS", getRMSOfWaveForm(maskerAudioData));
-  adjustSoundDbSPL(maskerAudioData, maskerVolumeDbSPL - soundGainDBSPL);
-
-  // console.log("targetAudio", targetAudio);
-  // console.log("maskerAudio", maskerAudio);
+  // adjust masker volume
+  const correctedValuesForMasker = getCorrectedInDbAndSoundDBSPL(
+    maskerVolumeDbSPL,
+    soundGainDBSPL,
+    parameters,
+    maskerAudioData
+  );
+  adjustSoundDbSPL(maskerAudioData, correctedValuesForMasker.inDB);
 
   //add white noise
   const whiteNoise = audioCtx.createBuffer(
@@ -111,12 +108,32 @@ export const getVocoderPhraseTrialData = async (
   }
 
   setWaveFormToZeroDbSPL(whiteNoiseData);
-  adjustSoundDbSPL(whiteNoiseData, whiteNoiseLevel - soundGainDBSPL);
+  // adjust white noise volume
+  const correctedValuesForWhiteNoise = getCorrectedInDbAndSoundDBSPL(
+    whiteNoiseLevel,
+    soundGainDBSPL,
+    parameters,
+    whiteNoiseData
+  );
+  adjustSoundDbSPL(whiteNoiseData, correctedValuesForWhiteNoise.inDB);
 
+  // console.log("whiteNoiseLevelCorrectedIndb", correctedValuesForWhiteNoise.inDB);
+  // console.log("whiteNoiseLevelCorrectedSoundDBSPL", correctedValuesForWhiteNoise.correctedSoundDBSPL);
+  // console.log("whiteNoiseLevel", whiteNoiseLevel);
+  // console.log("soundGainDBSPL", soundGainDBSPL);
+  // console.log("targetVolumeDbSPLFromQuest", targetVolumeDbSPLFromQuest);
+  // console.log("correctedTargetVolumeDbSPLINDB", correctedValuesForTarget.inDB);
+  // console.log("correctedTargetVolumeDbSPLSoundDBSPL", correctedValuesForTarget.correctedSoundDBSPL);
+  // console.log("maskerVolumeDbSPL", maskerVolumeDbSPL);
+  // console.log("correctedMaskerVolumeDbSPLINDB", correctedValuesForMasker.inDB);
+  // console.log("correctedMaskerVolumeDbSPLSoundDBSPL", correctedValuesForMasker.correctedSoundDBSPL);
   return {
-    trialSound: mergeBuffers([targetAudio, maskerAudio, whiteNoise], audioCtx),
+    trialSound: maskerChannels.length
+      ? mergeBuffers([targetAudio, maskerAudio, whiteNoise], audioCtx)
+      : mergeBuffers([targetAudio, whiteNoise], audioCtx),
     categoriesChosen: categoriesChosen,
     allCategories: allCategories,
+    targetVolumeDbSPL: correctedValuesForTarget.correctedSoundDBSPL,
   };
 };
 

@@ -20,6 +20,7 @@ export const getFolderNames = (parsed: any): any => {
       targetKindList = [...parsed.data[i]];
     }
   }
+
   maskedfolderList.shift();
   targetfolderList.shift();
   targetTaskList.shift();
@@ -31,7 +32,7 @@ export const getFolderNames = (parsed: any): any => {
   if (maskedfolderList.length > 0 && targetfolderList.length > 0) {
     for (let i = 0; i < maskedfolderList.length; i++) {
       if (
-        targetKindList[i] === "vocoderPhrase" ||
+        // targetKindList[i] === "vocoderPhrase" ||
         targetKindList[i] === "sound"
       ) {
         folderAndTargetKindObjectList.push({

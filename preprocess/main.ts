@@ -159,7 +159,6 @@ export const prepareExperimentFileForThreshold = async (
     errors.push(...isTextMissing(requestedTextList, easyeyesResources.texts));
 
   // ! validate requested Folders;
-  // console.log("easyeyesResources.folders", easyeyesResources.folders)
   const folderList: any = getFolderNames(parsed);
   const maskerAndTargetFolders: any = {
     maskerSoundFolder: folderList.maskerSoundFolder,

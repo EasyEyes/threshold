@@ -2631,7 +2631,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition
           );
           maskerVolumeDbSPL.current = paramReader.read(
-            "maskerDBSPL",
+            "maskerSoundDBSPL",
             status.block_condition
           );
           maskerSoundFolder.current = paramReader.read(
@@ -2687,7 +2687,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           if (targetTask.current == "detect") {
             maskerVolumeDbSPL.current = paramReader.read(
-              "maskerDBSPL",
+              "maskerSoundDBSPL",
               status.block_condition
             );
             maskerSoundFolder.current = paramReader.read(
@@ -3569,22 +3569,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           vocoderPhrases.maskerPhrase =
             "Ready #CallSign GoTo #Color #Number Now".split(" ");
 
-          // console.log("snapshot", snapshot);
-          // console.log("trialData",snapshot.getCurrentTrial())
-          // console.log("status.block_condition", status.condition.block_condition)
-          // console.log("numChannels",paramReader.read("targetSoundChannels", status.block_condition))
-          const { trialSound, categoriesChosen, allCategories } =
-            await getVocoderPhraseTrialData(
-              vocoderPhrases.targetPhrase,
-              vocoderPhrases.maskerPhrase,
-              status.condition.block_condition,
-              ProposedVolumeLevelFromQuest.current,
-              whiteNoiseLevel.current,
-              soundGainDBSPL.current,
-              maskerVolumeDbSPL.current,
-              paramReader.read("targetSoundChannels", status.block_condition)
-            );
+          const {
+            trialSound,
+            categoriesChosen,
+            allCategories,
+            targetVolumeDbSPL,
+          } = await getVocoderPhraseTrialData(
+            vocoderPhrases.targetPhrase,
+            vocoderPhrases.maskerPhrase,
+            status.condition.block_condition,
+            ProposedVolumeLevelFromQuest.current,
+            whiteNoiseLevel.current,
+            soundGainDBSPL.current,
+            maskerVolumeDbSPL.current,
+            paramReader.read("targetSoundChannels", status.block_condition)
+          );
 
+          ProposedVolumeLevelFromQuest.adjusted = targetVolumeDbSPL;
           const chosenCategoryKeys = Object.keys(categoriesChosen);
           correctAns.current = [];
           chosenCategoryKeys.map((category) => {
@@ -3592,7 +3593,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               category + "_" + categoriesChosen[category]
             );
           });
-          // console.log("correctAns", correctAns.current);
           vocoderPhraseCategories.chosen = categoriesChosen;
           vocoderPhraseCategories.all = allCategories;
           if (invertedImpulseResponse.current)
@@ -3610,7 +3610,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition
           );
           if (targetTask.current == "identify") {
-            const { targetList, trialSound, correctAnsIndex } =
+            const { targetList, trialSound, correctAnsIndex, targetVolume } =
               await getSpeechInNoiseTrialData(
                 status.condition.block_condition,
                 ProposedVolumeLevelFromQuest.current,
@@ -3618,6 +3618,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 soundGainDBSPL.current
               );
 
+            ProposedVolumeLevelFromQuest.adjusted = targetVolume;
             trialSoundBuffer = trialSound;
             correctAns.current = [
               targetList[correctAnsIndex]["name"].toLowerCase(),
@@ -3629,14 +3630,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             //target is present half the time
             targetIsPresentBool.current = Math.random() < 0.5;
             correctAns.current = [targetIsPresentBool.current ? "y" : "n"];
-            trialSoundBuffer = await getToneInMelodyTrialData(
-              status.condition.block_condition,
-              targetIsPresentBool.current,
-              ProposedVolumeLevelFromQuest.current,
-              maskerVolumeDbSPL.current,
-              whiteNoiseLevel.current,
-              soundGainDBSPL.current
-            );
+
+            const { trialSoundMelody, targetVolume } =
+              await getToneInMelodyTrialData(
+                status.condition.block_condition,
+                targetIsPresentBool.current,
+                ProposedVolumeLevelFromQuest.current,
+                maskerVolumeDbSPL.current,
+                whiteNoiseLevel.current,
+                soundGainDBSPL.current
+              );
+            trialSoundBuffer = trialSoundMelody;
+            ProposedVolumeLevelFromQuest.adjusted = targetIsPresentBool.current
+              ? targetVolume
+              : ProposedVolumeLevelFromQuest.current;
           }
           // console.log("status.block_condition,", status.block_condition);
           if (invertedImpulseResponse.current)
@@ -4635,7 +4642,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ) {
               currentLoop.addResponse(
                 key_resp.corr,
-                ProposedVolumeLevelFromQuest.current / 20
+                ProposedVolumeLevelFromQuest.adjusted / 20
               );
             }
             addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);
@@ -4648,7 +4655,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ) {
               currentLoop.addResponse(
                 key_resp.corr,
-                ProposedVolumeLevelFromQuest.current / 20
+                ProposedVolumeLevelFromQuest.adjusted / 20
               );
             }
             addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);

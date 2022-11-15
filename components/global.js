@@ -338,7 +338,10 @@ export const trialCounterConfig = {
 /* ------------------------------- Sound ------------------------------------ */
 /* -------------------------------------------------------------------------- */
 export const targetIsPresentBool = { current: undefined };
-export const ProposedVolumeLevelFromQuest = { current: undefined };
+export const ProposedVolumeLevelFromQuest = {
+  current: undefined,
+  adjusted: undefined,
+};
 export const maskerVolumeDbSPL = { current: undefined };
 export const soundGainDBSPL = { current: undefined };
 export const invertedImpulseResponse = { current: undefined };
