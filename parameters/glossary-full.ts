@@ -492,17 +492,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibrateSoundDB",
-    availability: "now",
-    example: "-3",
-    explanation:
-      "DEPRECATED. calibrateSoundDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes since gain will drop at high sound levels. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
-    type: "text",
-    default:
-      "-3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1",
-    categories: "",
-  },
-  {
     name: "calibrateTrackDistanceBool",
     availability: "now",
     example: "TRUE",
@@ -528,16 +517,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "DEPRECATED. USE movieComputeJS INSTEAD. computeImageJS (default empty) is JavaScript code to compute a static image array (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The imageNit(y,x) value  is in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), and luminanceNit. For example\n\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length)\n  .fill(0)\n  .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n  gx.push(\n    Math.exp(-1 * ((x - targetEccentrictyYDeg) / targetSpaceConstantDeg) ** 2)\n  );\n}\nfor (const y of yDeg) {\n  gy.push(\n    Math.exp(-1 * ((y - targetEccentrictyYDeg) / targetSpaceConstantDeg) ** 2)\n  );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n  fx[i] =\n    gx[i] *\n    Math.sin(\n      2 * Math.PI * (xDeg[i] - targetEccentrictyYDeg) * targetCyclePerDeg +\n        (2 * Math.PI * targetPhase) / 360\n    );\n}\nfor (j = 0; j < yDeg.length; j++) {\n  for (i = 0; i < xDeg.length; i++) {\n    imageNit[i][j] = (255 / 2) * (1 + targetContrast * gy[j] * fx[i]);\n  }\n}",
-    type: "text",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "computeRectDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "DEPRECATED. USE movieRectDeg INSTEAD. computeRectDeg (default is whole screen) consists of four numbers separated by commas, stored as text. All number are in deg relative to fixation. deg are positive above and to the right of fixation. The sequence is left,bottom,right,top.",
     type: "text",
     default: "",
     categories: "",
@@ -1834,9 +1813,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "13",
     explanation:
-      "The \"gain\" (in dB) of the the participant's sound system at 1000 Hz. For a sound vector with level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a vector is 10*log(P) dB, where P is the power, P=mean(S^2), where S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool or calibrateAllHzDBSPLBool TRUE to measure soundGainDBSPL on each participant's computer. For testing of EasyEyes, the scientist can explicitly set soundGainDBSPL. Running calibrate1000HzDBSPLBool calibrates solely at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response, and installs that filter. The filter is adjust to have unit gain at 1000 Hz. Thus, in that case, soundGainDBSPL will be correct for all frequencies, within the linear range of the loudspeaker.",
+      "soundGainDBSPL (default 80) is the assumed gain (dB SPL) at 1000 Hz from digital sound to physical sound in the linear part of the transfer function (i.e. at digital sound levels below T-W/2, where T and W are explained below in soundGainTWR). For a sound vector with low level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a sound vector is 10*log(P) dB, where P is the power, P=mean(S^2), where S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant's computer at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz), over the linear range of the loudspeaker, i.e. at digital sound levels below T-W/2.",
     type: "numerical",
-    default: "0",
+    default: "80",
+    categories: "",
+  },
+  {
+    name: "soundGainTWR",
+    availability: "now",
+    example: "",
+    explanation:
+      'soundGainTWR (default 0,0,1) is a comma-separated list of 3 numbers that is used with soundGainDBSPL to specifies the remaining parameters of our model for the participant computer\'s dynamic range compression of sound gain: T (in dB), W (in dB), and R (dimensionless). Typically each number will have one digit after the decimal, e.g. "-10.1,-15.1,11.0".\nT is the "threshold" sound level (dB) at the knee in the curve of outDbSPL vs inDb. The curve is straight at low and high sound levels (inDB<T-W/2 or inDb>T+W/2). Those lines would intersect at T, but the curve rounds the knee, as controlled by W.\nW is the "width" of the knee. The rounded knee extends from T-W/2 to T+W/2.\nR is the reciprocal of the slope of outDbSPL vs inDb at sound levels above T+W/2.\nIf calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. \nOur compression model (using T, W, and R) is Eq. 4 in Giannoulis et al. (2012).\nGiannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss (2012). Digital Dynamic Range Compressor Design –– A Tutorial and Analysis. Journal of Audio Engineering Society. Vol. 60, Issue 6, pp. 399–408.\nhttp://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf',
+    type: "text",
+    default: "0,0,1",
     categories: "",
   },
   {

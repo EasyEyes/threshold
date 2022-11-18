@@ -380,13 +380,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "-13.1",
   },
-  calibrateSoundDB: {
-    name: "calibrateSoundDB",
-    availability: "now",
-    type: "text",
-    default:
-      "-3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1",
-  },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
     availability: "now",
@@ -401,12 +394,6 @@ export const GLOSSARY: Glossary = {
   },
   computeImageJS: {
     name: "computeImageJS",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
-  computeRectDeg: {
-    name: "computeRectDeg",
     availability: "now",
     type: "text",
     default: "",
@@ -1204,7 +1191,13 @@ export const GLOSSARY: Glossary = {
     name: "soundGainDBSPL",
     availability: "now",
     type: "numerical",
-    default: "0",
+    default: "80",
+  },
+  soundGainTWR: {
+    name: "soundGainTWR",
+    availability: "now",
+    type: "text",
+    default: "0,0,1",
   },
   spacingDeg: {
     name: "spacingDeg",

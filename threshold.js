@@ -2521,7 +2521,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment,
         parametersToExcludeFromData
       );
-      psychoJS.experiment.addData("block_condition", BC);
+      psychoJS.experiment.addData("block_condition", status.block_condition);
       /* --------------------------------- PUBLIC --------------------------------- */
 
       // ! distance
