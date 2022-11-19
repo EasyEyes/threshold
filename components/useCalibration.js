@@ -6,9 +6,10 @@ import {
   rc,
   soundCalibrationLevelDBSPL,
   soundCalibrationResults,
+  debugBool,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
-import { addSoundTestElements } from "./soundTest";
+import { addSoundTestElements, displayParameters } from "./soundTest";
 import { getSoundCalibrationLevelDBSPLFromIIR } from "./soundUtils";
 
 export const useCalibration = (reader) => {
@@ -243,72 +244,20 @@ export const calibrateAudio = async (reader) => {
       //   : "");
       // display sound levels and soundGainDbSPL.current in a table
       if (calibrateSoundLevel && soundCalibrationResults.current) {
-        elems.soundLevelsTable.style.display = "block";
-        elems.soundLevelsTable.innerHTML = "";
-        elems.soundLevelsTable.setAttribute("id", "soundLevelsTable");
-        const thead = document.createElement("thead");
-        const tbody = document.createElement("tbody");
-        const tr = document.createElement("tr");
-        const th1 = document.createElement("th");
-        const th2 = document.createElement("th");
-        const th3 = document.createElement("th");
-        th1.innerHTML = "Digital (dB)";
-        th2.innerHTML = "Gain at 1000 Hz (dB SPL)";
-        th3.innerHTML = "Sound (dB SPL)";
-        // padding between the three columns
-        th1.style.paddingRight = "20px";
-        th3.style.paddingRight = "20px";
-        tr.appendChild(th1);
-        tr.appendChild(th3);
-        tr.appendChild(th2);
-        thead.appendChild(tr);
-        elems.soundLevelsTable.appendChild(thead);
-        elems.soundLevelsTable.appendChild(tbody);
-        const parameters = soundCalibrationResults.current.parameters;
-        // const soundGainValues =
-        //   soundCalibrationResults.current.soundGainDBSPLValues;
-        const outDBSPLValues = soundCalibrationResults.current.outDBSPLValues;
-        for (let i = 0; i < soundLevels.length; i++) {
-          const tr = document.createElement("tr");
-          const td1 = document.createElement("td");
-          const td2 = document.createElement("td");
-          const td3 = document.createElement("td");
-          // display the values with 1 decimal place
-          // convert soundLevels to float
-          td1.innerHTML = String(parseFloat(soundLevels[i]).toFixed(1));
-          // td1.innerHTML = soundLevels[i].toFixed(1);
-          td2.innerHTML = (
-            outDBSPLValues[i] - parseFloat(soundLevels[i])
-          ).toFixed(1);
-          td3.innerHTML = outDBSPLValues[i].toFixed(1);
-          // padding between the three columns
-          td1.style.paddingRight = "20px";
-          td3.style.paddingRight = "20px";
-          tr.appendChild(td1);
-          tr.appendChild(td3);
-          tr.appendChild(td2);
-          tbody.appendChild(tr);
-        }
-        // display the parameters used for the calibration
-        elems.soundParametersFromCalibration.innerHTML = `
-        <p>Parameters:</p>
-        <p>T: ${parameters.T.toFixed(1)}</p>
-        <p>R: ${parameters.R.toFixed(1)}</p>
-        <p>W: ${parameters.W.toFixed(1)}</p>
-        <p>soundGain: ${parameters.gainDBSPL.toFixed(1)}</p>
-        <p>backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}</p> 
-        `;
+        displayParameters(elems, soundLevels, soundCalibrationResults);
       }
 
       elems.yesButton.innerHTML = "Continue to experiment.";
       document.querySelector("#soundNavContainer").style.display = "flex";
       document.querySelector("#soundYes").style.display = "block";
 
-      elems.testButton.style.visibility = "visible";
-      elems.testButton.addEventListener("click", async (e) => {
-        addSoundTestElements(reader);
-        $("#soundTestModal").modal("show");
-      });
+      if (debugBool.current) {
+        elems.testButton.style.visibility = "visible";
+        elems.testButton.addEventListener("click", async (e) => {
+          addSoundTestElements(reader);
+          $("#soundTestModal").modal("show");
+        });
+      }
 
       elems.yesButton.addEventListener("click", async (e) => {
         _removeSoundCalibrationElems(Object.values(elems));
@@ -477,6 +426,7 @@ const _runSoundLevelCalibration = async (elems, gains) => {
     speakerParameters,
     calibrator
   );
+  // console.log("results", soundCalibrationResults.current);
 };
 
 const _runLoudspeakerCalibration = async (elems) => {

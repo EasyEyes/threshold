@@ -40,7 +40,8 @@ export const getVocoderPhraseTrialData = async (
   whiteNoiseLevel = 70,
   soundGainDBSPL = 0,
   maskerVolumeDbSPL = 10,
-  numberOfChannels = 9
+  numberOfChannels = 9,
+  parameters
 ) => {
   //populate target and masker channel indices
   var targetChannels = populateTargetIndices(numberOfChannels);
@@ -74,7 +75,7 @@ export const getVocoderPhraseTrialData = async (
   setWaveFormToZeroDbSPL(targetAudioData);
 
   // adjust target volume
-  const parameters = soundCalibrationResults.current.parameters;
+  // const parameters = soundCalibrationResults.current.parameters;
   const correctedValuesForTarget = getCorrectedInDbAndSoundDBSPL(
     targetVolumeDbSPLFromQuest,
     soundGainDBSPL,

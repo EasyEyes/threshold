@@ -35,7 +35,8 @@ export const getToneInMelodyTrialData = async (
   targetVolumeDbSPLFromQuest,
   maskerVolumDbSPL,
   whiteNoiseLevel,
-  soundGainDBSPL
+  soundGainDBSPL,
+  parameters
 ) => {
   //pick random masker
   var randomIndex = Math.floor(
@@ -47,7 +48,7 @@ export const getToneInMelodyTrialData = async (
   var trialMaskerData = trialMasker.getChannelData(0);
   setWaveFormToZeroDbSPL(trialMaskerData);
   // adjust masker volume
-  const parameters = soundCalibrationResults.current.parameters;
+  // const parameters = soundCalibrationResults.current.parameters;
   const correctedValuesForMasker = getCorrectedInDbAndSoundDBSPL(
     maskerVolumDbSPL,
     soundGainDBSPL,

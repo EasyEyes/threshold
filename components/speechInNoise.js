@@ -33,7 +33,8 @@ export const getSpeechInNoiseTrialData = async (
   blockCondition,
   targetVolumeDbSPLFromQuest,
   whiteNoiseLevel,
-  soundGainDBSPL
+  soundGainDBSPL,
+  parameters
 ) => {
   var trialTarget;
 
@@ -45,7 +46,7 @@ export const getSpeechInNoiseTrialData = async (
   var trialTargetData = trialTarget.getChannelData(0);
   setWaveFormToZeroDbSPL(trialTargetData);
   // adjust target volume
-  const parameters = soundCalibrationResults.current.parameters;
+  // const parameters = soundCalibrationResults.current.parameters;
   const correctedValuesForTarget = getCorrectedInDbAndSoundDBSPL(
     targetVolumeDbSPLFromQuest,
     soundGainDBSPL,

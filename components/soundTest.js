@@ -4,6 +4,7 @@ import {
   soundGainDBSPL,
   soundCalibrationLevelDBSPL,
   soundCalibrationResults,
+  soundGainTWR,
 } from "./global";
 import {
   adjustSoundDbSPL,
@@ -424,7 +425,14 @@ const addSoundFileElements = (
           soundDBSPL.current.toFixed(1);
 
         // adjust sound gain and find inDB
-        const parameters = soundCalibrationResults.current.parameters;
+        const gainParameterFromFile = reader.read("soundGainTWR")[0].split(",");
+        soundGainTWR.T = Number(gainParameterFromFile[0]);
+        soundGainTWR.W = Number(gainParameterFromFile[1]);
+        soundGainTWR.R = Number(gainParameterFromFile[2]);
+        const parameters = soundCalibrationResults.current
+          ? soundCalibrationResults.current.parameters
+          : soundGainTWR;
+        // const parameters = soundCalibrationResults.current.parameters;
         const correctedValues = getCorrectedInDbAndSoundDBSPL(
           soundDBSPL.current,
           soundGain.current,
@@ -657,4 +665,85 @@ export const getCorrectedInDbAndSoundDBSPL = (
   // console.log("correctedSoundDBSPL", correctedSoundDBSPL);
   //   console.log("function over");
   return { inDB, correctedSoundDBSPL };
+};
+
+export const displayParameters = (
+  elems,
+  soundLevels,
+  soundCalibrationResults
+) => {
+  elems.soundLevelsTable.style.display = "block";
+  elems.soundLevelsTable.innerHTML = "";
+  elems.soundLevelsTable.setAttribute("id", "soundLevelsTable");
+  const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
+  const tr = document.createElement("tr");
+  const th1 = document.createElement("th");
+  const th2 = document.createElement("th");
+  const th3 = document.createElement("th");
+  const th4 = document.createElement("th");
+  const th5 = document.createElement("th");
+  th1.innerHTML = "in (dB SPL)";
+  th2.innerHTML = "Gain (dB SPL)";
+  th3.innerHTML = "out (dB SPL)";
+  th4.innerHTML = "THD (%)";
+  th5.innerHTML = "out @all Hz (dB SPL)";
+  // padding between the three columns
+  th1.style.paddingRight = "20px";
+  th2.style.paddingRight = "20px";
+  th3.style.paddingRight = "20px";
+  th4.style.paddingRight = "20px";
+  tr.appendChild(th1);
+  tr.appendChild(th3);
+  tr.appendChild(th2);
+  tr.appendChild(th4);
+  tr.appendChild(th5);
+  thead.appendChild(tr);
+  elems.soundLevelsTable.appendChild(thead);
+  elems.soundLevelsTable.appendChild(tbody);
+  const parameters = soundCalibrationResults.current.parameters;
+  const outDBSPL1000Values = soundCalibrationResults.current.outDBSPL1000Values;
+  // const soundGainValues =
+  //   soundCalibrationResults.current.soundGainDBSPLValues;
+  const outDBSPLValues = soundCalibrationResults.current.outDBSPLValues;
+  const THDValues = soundCalibrationResults.current.thdValues;
+  for (let i = 0; i < soundLevels.length; i++) {
+    const tr = document.createElement("tr");
+    const td1 = document.createElement("td");
+    const td2 = document.createElement("td");
+    const td3 = document.createElement("td");
+    const td4 = document.createElement("td");
+    const td5 = document.createElement("td");
+    // display the values with 1 decimal place
+    // convert soundLevels to float
+    td1.innerHTML = String(parseFloat(soundLevels[i]).toFixed(1));
+    // td1.innerHTML = soundLevels[i].toFixed(1);
+    td2.innerHTML = (
+      outDBSPL1000Values[i] - parseFloat(soundLevels[i])
+    ).toFixed(1);
+    td3.innerHTML = outDBSPL1000Values[i].toFixed(1);
+    td4.innerHTML = (THDValues[i] * 100).toFixed(2);
+    td5.innerHTML = outDBSPLValues[i].toFixed(1);
+    // padding between the 5 columns
+    td1.style.paddingRight = "20px";
+    td2.style.paddingRight = "20px";
+    td3.style.paddingRight = "20px";
+    td4.style.paddingRight = "20px";
+
+    tr.appendChild(td1);
+    tr.appendChild(td3);
+    tr.appendChild(td2);
+    tr.appendChild(td4);
+    tr.appendChild(td5);
+    tbody.appendChild(tr);
+  }
+  // display the parameters used for the calibration
+  elems.soundParametersFromCalibration.innerHTML = `
+  <p>Parameters:</p>
+  <p>T: ${parameters.T.toFixed(1)}</p>
+  <p>R: ${parameters.R.toFixed(1)}</p>
+  <p>W: ${parameters.W.toFixed(1)}</p>
+  <p>gainDBSPL: ${parameters.gainDBSPL.toFixed(1)}</p>
+  <p>backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}</p> 
+  `;
 };

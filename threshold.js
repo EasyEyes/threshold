@@ -114,6 +114,9 @@ import {
   phraseIdentificationResponse,
   repeatedLettersResponse,
   rsvpReadingWordsForThisBlock,
+  soundCalibrationResults,
+  soundGainTWR,
+  debugBool,
 } from "./components/global.js";
 
 import {
@@ -414,6 +417,9 @@ const paramReaderInitialized = async (reader) => {
     showExperimentEnding();
     return;
   }
+
+  // get debug mode from reader
+  debugBool.current = reader.read("_debugBool")[0];
 
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
@@ -3569,6 +3575,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           vocoderPhrases.maskerPhrase =
             "Ready #CallSign GoTo #Color #Number Now".split(" ");
 
+          const gainParameterFromFile = paramReader
+            .read("soundGainTWR", status.block_condition)
+            .split(",");
+          soundGainTWR.T = Number(gainParameterFromFile[0]);
+          soundGainTWR.W = Number(gainParameterFromFile[1]);
+          soundGainTWR.R = Number(gainParameterFromFile[2]);
+          const soundGainParameters = soundCalibrationResults.current
+            ? soundCalibrationResults.current.parameters
+            : soundGainTWR;
+
           const {
             trialSound,
             categoriesChosen,
@@ -3582,7 +3598,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             whiteNoiseLevel.current,
             soundGainDBSPL.current,
             maskerVolumeDbSPL.current,
-            paramReader.read("targetSoundChannels", status.block_condition)
+            paramReader.read("targetSoundChannels", status.block_condition),
+            soundGainParameters
           );
 
           ProposedVolumeLevelFromQuest.adjusted = targetVolumeDbSPL;
@@ -3609,13 +3626,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "targetTask",
             status.block_condition
           );
+          const gainParameterFromFile = paramReader
+            .read("soundGainTWR", status.block_condition)
+            .split(",");
+          soundGainTWR.T = Number(gainParameterFromFile[0]);
+          soundGainTWR.W = Number(gainParameterFromFile[1]);
+          soundGainTWR.R = Number(gainParameterFromFile[2]);
+          // console.log("soundGainTWR",soundGainTWR);
+          const soundGainParameters = soundCalibrationResults.current
+            ? soundCalibrationResults.current.parameters
+            : soundGainTWR;
           if (targetTask.current == "identify") {
             const { targetList, trialSound, correctAnsIndex, targetVolume } =
               await getSpeechInNoiseTrialData(
                 status.condition.block_condition,
                 ProposedVolumeLevelFromQuest.current,
                 whiteNoiseLevel.current,
-                soundGainDBSPL.current
+                soundGainDBSPL.current,
+                soundGainParameters
               );
 
             ProposedVolumeLevelFromQuest.adjusted = targetVolume;
@@ -3638,7 +3666,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ProposedVolumeLevelFromQuest.current,
                 maskerVolumeDbSPL.current,
                 whiteNoiseLevel.current,
-                soundGainDBSPL.current
+                soundGainDBSPL.current,
+                soundGainParameters
               );
             trialSoundBuffer = trialSoundMelody;
             ProposedVolumeLevelFromQuest.adjusted = targetIsPresentBool.current
