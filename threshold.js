@@ -2527,6 +2527,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment,
         parametersToExcludeFromData
       );
+      psychoJS.experiment.addData("block_condition", status.block_condition);
       /* --------------------------------- PUBLIC --------------------------------- */
 
       // ! distance
@@ -2781,7 +2782,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-          psychoJS.experiment.addData("block_condition", BC);
           psychoJS.experiment.addData(
             "flankerOrientation",
             reader.read("spacingDirection", BC)
@@ -4663,30 +4663,36 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // update the trial handler
         switchKind(targetKind.current, {
           vocoderPhrase: () => {
+            addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);
             //report values to quest
             if (
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
+              // TODO only give to QUEST if acceptable
+              const giveToQuest = true;
+              psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
               currentLoop.addResponse(
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20
               );
             }
-            addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);
           },
           sound: () => {
+            addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);
             //report values to quest
             if (
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
+              // TODO only give to QUEST if acceptable
+              const giveToQuest = true;
+              psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
               currentLoop.addResponse(
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20
               );
             }
-            addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);
             // console.log("currentLoop", currentLoop);
             //psychoJS.experiment.addData("targetWasPresent", targetIsPresentBool.current);
             //name of masker
@@ -4754,6 +4760,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);
             // TODO only give to QUEST if acceptable
             const giveToQuest = true;
+            psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
             currentLoop.addResponse(
               phraseIdentificationResponse.correct,
               level,
