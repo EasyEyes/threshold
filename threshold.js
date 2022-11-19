@@ -722,6 +722,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "frameRateReportedByPsychoJS",
       thisExperimentInfo["monitorFrameRate"]
     );
+    // add sound calibration results
+    if (soundCalibrationResults.current) {
+      psychoJS.experiment.addData(
+        "inDBValues",
+        soundCalibrationResults.current.inDBValues
+      );
+      psychoJS.experiment.addData(
+        "outDBSPLValues",
+        soundCalibrationResults.current.outDBSPLValues
+      );
+      psychoJS.experiment.addData(
+        "outDBSPL1000Values",
+        soundCalibrationResults.current.outDBSPL1000Values
+      );
+      psychoJS.experiment.addData(
+        "soundGainParameters",
+        JSON.stringify(soundCalibrationResults.current.parameters)
+      );
+      psychoJS.experiment.addData(
+        "THD",
+        soundCalibrationResults.current.thdValues
+      );
+    }
     if (rc.stressFps) {
       psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
     } else {

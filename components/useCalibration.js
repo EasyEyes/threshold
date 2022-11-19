@@ -414,6 +414,7 @@ const _runSoundLevelCalibration = async (elems, gains) => {
     siteUrl: "https://hqjq0u.deta.dev",
     targetElementId: "displayQR",
     gainValues: gains,
+    debug: debugBool.current,
   };
 
   // console.log(VolumeCalibration);
@@ -442,6 +443,7 @@ const _runLoudspeakerCalibration = async (elems) => {
   const speakerParameters = {
     siteUrl: "https://hqjq0u.deta.dev",
     targetElementId: "displayQR",
+    debug: debugBool.current,
   };
 
   const calibratorParams = {
