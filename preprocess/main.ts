@@ -164,14 +164,19 @@ export const prepareExperimentFileForThreshold = async (
     maskerSoundFolder: folderList.maskerSoundFolder,
     targetSoundFolder: folderList.targetSoundFolder,
   };
+  const missingFolderErrors: any = [];
+
   if (
     easyeyesResources.folders.length > 0 &&
     folderList.maskerSoundFolder.length > 0 &&
     folderList.targetSoundFolder.length > 0
-  )
-    errors.push(
+  ) {
+    missingFolderErrors.push(
       ...isSoundFolderMissing(maskerAndTargetFolders, easyeyesResources.folders)
     );
+    errors.push(...missingFolderErrors);
+  }
+
   const keys = Object.keys(maskerAndTargetFolders);
   const requestedFolderList: any[] = [];
   keys.map((key) => {
@@ -180,7 +185,10 @@ export const prepareExperimentFileForThreshold = async (
     });
   });
 
-  if (folderList.folderAndTargetKindObjectList.length > 0) {
+  if (
+    folderList.folderAndTargetKindObjectList.length > 0 &&
+    missingFolderErrors.length === 0
+  ) {
     const folderStructureErrors = await getRequestedFoldersForStructureCheck(
       folderList.folderAndTargetKindObjectList
     );
