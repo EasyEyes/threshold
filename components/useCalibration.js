@@ -428,6 +428,9 @@ const _runSoundLevelCalibration = async (elems, gains) => {
     speakerParameters,
     calibrator
   );
+  if (soundCalibrationResults.current)
+    soundGainDBSPL.current =
+      soundCalibrationResults.current.parameters.gainDBSPL;
   // console.log("results", soundCalibrationResults.current);
 };
 

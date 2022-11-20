@@ -2647,6 +2647,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             typeof soundGainDBSPL.current !== "undefined"
               ? soundGainDBSPL.current
               : paramReader.read("soundGainDBSPL", status.block_condition);
+
           psychoJS.experiment.addData(
             "usedSoundGainDBSPL",
             soundGainDBSPL.current
