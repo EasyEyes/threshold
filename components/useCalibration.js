@@ -83,7 +83,7 @@ export const formCalibrationList = (reader) => {
           : undefined,
         desiredDistanceTolerance: reader.read("viewingDistanceAllowedRatio")[0],
         desiredDistanceMonitor: reader.has("viewingDistanceDesiredCm"),
-        desiredDistanceMonitorAllowRecalibrate: false,
+        desiredDistanceMonitorAllowRecalibrate: !debugBool.current,
         fullscreen: !debug,
         sparkle: true,
         check: reader.read("calibrateDistanceCheckBool")[0],
