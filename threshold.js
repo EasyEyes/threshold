@@ -13,6 +13,8 @@ import {
   toFixedNumber,
 } from "./components/utils.js";
 
+import Swal from "sweetalert2";
+
 import * as core from "./psychojs/src/core/index.js";
 import * as data from "./psychojs/src/data/index.js";
 import * as util from "./psychojs/src/util/index.js";
@@ -42,7 +44,7 @@ import "./components/css/forms.css";
 import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
 import "./components/css/psychojsExtra.css";
-
+import "./components/css/video.css";
 ////
 /* -------------------------------------------------------------------------- */
 /* --------------------------------- Global --------------------------------- */
@@ -118,6 +120,11 @@ import {
   soundGainTWR,
   debugBool,
 } from "./components/global.js";
+
+import {
+  evaluateJSCode,
+  generate_video,
+} from "./components/imageAndVideoGeneration.js";
 
 import {
   clock,
@@ -358,6 +365,13 @@ import {
 } from "./components/rsvpReading.js";
 
 /* -------------------------------------------------------------------------- */
+
+var videoblob = [];
+const video = document.createElement("video");
+const source = document.createElement("source");
+const loader = document.createElement("loader");
+const loaderText = document.createElement("p");
+let video_flag = 1;
 
 window.jsQUEST = jsQUEST;
 
@@ -1501,6 +1515,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 seed: Math.round(performance.now()),
               });
             },
+            movie: () => {
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader,
+                "movie"
+              );
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                nTrials: totalTrialsThisBlock.current,
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+              });
+              logger("Rajat trials", trials);
+            },
           });
         },
         detect: () => {
@@ -1597,7 +1629,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       (targetKind.current === "letter" ||
         targetKind.current == "sound" ||
         targetKind.current === "repeatedLetters" ||
-        targetKind.current === "rsvpReading")
+        targetKind.current === "rsvpReading" ||
+        targetKind.current === "movie")
     ) {
       // Proportion correct
       showPopup(
@@ -1945,6 +1978,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 0
               );
             },
+            movie: () => {
+              const possibleTrials = paramReader.read(
+                "conditionTrials",
+                status.block
+              );
+              totalTrialsThisBlock.current = possibleTrials.reduce(
+                (a, b) => a + b,
+                0
+              );
+            },
           });
         },
         detect: () => {
@@ -2228,6 +2271,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // PADDING
           readingParagraph.setPadding(
             paramReader.read("fontPadding", status.block)[0]
+          );
+        },
+        movie: () => {
+          loggerText("inside movie");
+          _instructionSetup(
+            snapshot.block === 0 ? instructionsText.initial(L) : ""
           );
         },
       });
@@ -2540,6 +2589,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterSetResponseType();
         },
         repeatedLetters: () => {
+          for (let c of snapshot.handler.getConditions()) {
+            if (c.block_condition === trials._currentStaircase._name) {
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
+            }
+          }
+          letterSetResponseType();
+        },
+        movie: () => {
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
@@ -3310,6 +3368,46 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(renderObj.tinyHint);
           // trialComponents.push(...rsvpReadingFeedback.stims);
         },
+        movie: () => {
+          readAllowedTolerances(tolerances, reader, BC);
+          readTrialLevelLetterParams(reader, BC);
+          clickedContinue.current = false;
+          document.addEventListener("click", _takeFixationClick);
+          document.addEventListener("touchend", _takeFixationClick);
+
+          level = currentLoop._currentStaircase.getQuestValue();
+
+          //generate movie
+          loggerText("Generate movie here");
+          //var F = new Function(paramReader.read("computeImageJS", BC))();
+          var imageNit = evaluateJSCode(paramReader, status, displayOptions);
+          loader.setAttribute("id", "loader");
+          loaderText.setAttribute("id", "loaderText");
+          document.body.appendChild(loader);
+          document.body.appendChild(loaderText);
+          loaderText.innerHTML = "Generating movie";
+          generate_video(imageNit).then((data) => {
+            videoblob = data;
+            logger("data", data);
+          });
+          fixation.update(
+            paramReader,
+            BC,
+            100, // stimulusParameters.heightPx,
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+          );
+          fixationConfig.pos = fixationConfig.nominalPos;
+          fixation.setPos(fixationConfig.pos);
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
+
+          trialComponents = [];
+          trialComponents.push(...fixation.stims);
+          trialComponents.push(key_resp);
+          //trialComponents.push(showCharacterSet);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
+        },
       });
 
       const customInstructions = getCustomInstructionText(
@@ -3441,6 +3539,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: letterEachFrame,
         repeatedLetters: letterEachFrame,
         rsvpReading: letterEachFrame,
+        movie: () => {
+          continueRoutine = false;
+        },
       });
 
       if (showConditionNameConfig.show) {
@@ -3779,6 +3880,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
         },
+        movie: () => {
+          responseType.current = resetResponseType(
+            responseType.original,
+            responseType.current,
+            paramReader.read(
+              "responseMustClickCrosshairBool",
+              status.block_condition
+            )
+          );
+        },
       });
 
       ////
@@ -3996,6 +4107,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReading: () => {
             //only clickable
             // responseType.current = 1;
+          },
+          movie: () => {
+            // play the movie only for the first frame ( not needed here )
+            document.body.appendChild(video);
+            //video.attributes
+            //video.style.zIndex = "1000009";
+            //video.style.position = "absolute";
+            //set continueRoutine = false once movie is over
           },
         });
       }
@@ -4274,6 +4393,40 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             frameN,
             instructions
           );
+          break;
+        case "movie":
+          // Play the movie here
+          // logger("waiting for movie to play");
+          // if(videoblob.length>0){
+          //   logger("playing a movie");
+          //   continueRoutine = false;
+          // }
+
+          logger("len videoblob", videoblob.length);
+          if (videoblob.length > 0 && video_flag == 1) {
+            //document.getElementById("movie-container").style.display = "none";
+            document.querySelector("canvas").style.display = "none";
+            document.getElementById("root").style.display = "none";
+            loader.style.display = "none";
+            loaderText.style.display = "none";
+            video.setAttribute("src", videoblob);
+            //source.setAttribute('type', 'video/mp4');
+            //video.appendChild(source);
+            video.play();
+            video_flag = 0;
+            // video.addEventListener('ended', () => {
+            //   logger("Yoooo!")
+            //   video.pause();
+            //   continueRoutine = false;
+            // }, false);
+          }
+          // if movie is done register responses
+          //
+          video.onended = function () {
+            continueRoutine = false;
+            video_flag = 1;
+            videoblob = [];
+          };
           break;
       }
 
