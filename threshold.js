@@ -2671,7 +2671,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           if (showConditionNameConfig.showTargetSpecs) {
             updateTargetSpecsForSoundDetect(
-              ProposedVolumeLevelFromQuest.current,
+              undefined,
               maskerVolumeDbSPL.current,
               soundGainDBSPL.current,
               whiteNoiseLevel.current,
@@ -2727,7 +2727,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
             if (showConditionNameConfig.showTargetSpecs)
               updateTargetSpecsForSoundDetect(
-                ProposedVolumeLevelFromQuest.current,
+                undefined,
                 maskerVolumeDbSPL.current,
                 soundGainDBSPL.current,
                 whiteNoiseLevel.current,
@@ -2737,7 +2737,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           } else if (targetTask.current == "identify") {
             if (showConditionNameConfig.showTargetSpecs)
               updateTargetSpecsForSoundIdentify(
-                ProposedVolumeLevelFromQuest.current,
+                undefined,
                 soundGainDBSPL.current,
                 whiteNoiseLevel.current,
                 targetSoundFolder.current
@@ -3414,7 +3414,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           if (
-            psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+            psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
           ) {
             // loggerText("trialInstructionRoutineEachFrame enter HIT");
             continueRoutine = false;
@@ -3422,7 +3422,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         sound: () => {
           if (
-            psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+            psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
           ) {
             // loggerText("trialInstructionRoutineEachFrame enter HIT");
             continueRoutine = false;
@@ -3636,6 +3636,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           });
           vocoderPhraseCategories.chosen = categoriesChosen;
           vocoderPhraseCategories.all = allCategories;
+          if (showConditionNameConfig.showTargetSpecs) {
+            updateTargetSpecsForSoundDetect(
+              ProposedVolumeLevelFromQuest.adjusted,
+              maskerVolumeDbSPL.current,
+              soundGainDBSPL.current,
+              whiteNoiseLevel.current,
+              targetSoundFolder.current,
+              maskerSoundFolder.current
+            );
+            targetSpecs.setText(showConditionNameConfig.targetSpecs);
+            targetSpecs.setAutoDraw(true);
+          }
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
               trialSound,
@@ -3678,6 +3690,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             speechInNoiseTargetList.current = targetList.map(
               (target) => target["name"]
             );
+
+            if (showConditionNameConfig.showTargetSpecs) {
+              updateTargetSpecsForSoundIdentify(
+                ProposedVolumeLevelFromQuest.adjusted,
+                soundGainDBSPL.current,
+                whiteNoiseLevel.current,
+                targetSoundFolder.current
+              );
+              targetSpecs.setText(showConditionNameConfig.targetSpecs);
+              targetSpecs.setAutoDraw(true);
+            }
           } else {
             //target is present half the time
             targetIsPresentBool.current = Math.random() < 0.5;
@@ -3697,6 +3720,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ProposedVolumeLevelFromQuest.adjusted = targetIsPresentBool.current
               ? targetVolume
               : ProposedVolumeLevelFromQuest.current;
+            if (showConditionNameConfig.showTargetSpecs) {
+              updateTargetSpecsForSoundDetect(
+                targetIsPresentBool.current
+                  ? ProposedVolumeLevelFromQuest.adjusted
+                  : undefined,
+                maskerVolumeDbSPL.current,
+                soundGainDBSPL.current,
+                whiteNoiseLevel.current,
+                targetSoundFolder.current,
+                maskerSoundFolder.current
+              );
+              targetSpecs.setText(showConditionNameConfig.targetSpecs);
+              targetSpecs.setAutoDraw(true);
+            }
           }
           // console.log("status.block_condition,", status.block_condition);
           if (invertedImpulseResponse.current)

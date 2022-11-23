@@ -1,6 +1,13 @@
 import mergeBuffers from "merge-audio-buffers";
 import { soundCalibrationResults } from "./global";
-import { getCorrectedInDbAndSoundDBSPL } from "./soundTest";
+import {
+  calculateDBFromRMS,
+  CompressorDb,
+  CompressorInverseDb,
+  getCorrectedInDbAndSoundDBSPL,
+  getGainValue,
+  getMaxValueOfAbsoluteValueOfBuffer,
+} from "./soundTest";
 import {
   adjustSoundDbSPL,
   audioCtx,
@@ -70,33 +77,8 @@ export const getVocoderPhraseTrialData = async (
 
   const targetAudio = combineAudioBuffers(targetAudioBuffersAligned, audioCtx);
   const maskerAudio = combineAudioBuffers(maskerAudioBuffersAligned, audioCtx);
-  //adjust target volume
   const targetAudioData = targetAudio.getChannelData(0);
-  setWaveFormToZeroDbSPL(targetAudioData);
-
-  // adjust target volume
-  // const parameters = soundCalibrationResults.current.parameters;
-  const correctedValuesForTarget = getCorrectedInDbAndSoundDBSPL(
-    targetVolumeDbSPLFromQuest,
-    soundGainDBSPL,
-    parameters,
-    targetAudioData
-  );
-
-  adjustSoundDbSPL(targetAudioData, correctedValuesForTarget.inDB);
-
-  //adjust masker volume
   const maskerAudioData = maskerAudio.getChannelData(0);
-  setWaveFormToZeroDbSPL(maskerAudioData);
-  // adjust masker volume
-  const correctedValuesForMasker = getCorrectedInDbAndSoundDBSPL(
-    maskerVolumeDbSPL,
-    soundGainDBSPL,
-    parameters,
-    maskerAudioData
-  );
-  adjustSoundDbSPL(maskerAudioData, correctedValuesForMasker.inDB);
-
   //add white noise
   const whiteNoise = audioCtx.createBuffer(
     1,
@@ -108,26 +90,59 @@ export const getVocoderPhraseTrialData = async (
     whiteNoiseData[i] = Math.random() * 2 - 1;
   }
 
+  setWaveFormToZeroDbSPL(targetAudioData);
+  setWaveFormToZeroDbSPL(maskerAudioData);
   setWaveFormToZeroDbSPL(whiteNoiseData);
-  // adjust white noise volume
-  const correctedValuesForWhiteNoise = getCorrectedInDbAndSoundDBSPL(
-    whiteNoiseLevel,
-    soundGainDBSPL,
-    parameters,
-    whiteNoiseData
+  // check noise and masker levels
+  const noiseDB = CompressorInverseDb(
+    whiteNoiseLevel - soundGainDBSPL,
+    parameters.T,
+    parameters.R,
+    parameters.W
   );
-  adjustSoundDbSPL(whiteNoiseData, correctedValuesForWhiteNoise.inDB);
+  const noiseMaxOverRms =
+    getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
+  const noiseGain = getGainValue(noiseDB);
 
-  // console.log("whiteNoiseLevelCorrectedIndb", correctedValuesForWhiteNoise.inDB);
-  // console.log("whiteNoiseLevelCorrectedSoundDBSPL", correctedValuesForWhiteNoise.correctedSoundDBSPL);
-  // console.log("whiteNoiseLevel", whiteNoiseLevel);
-  // console.log("soundGainDBSPL", soundGainDBSPL);
-  // console.log("targetVolumeDbSPLFromQuest", targetVolumeDbSPLFromQuest);
-  // console.log("correctedTargetVolumeDbSPLINDB", correctedValuesForTarget.inDB);
-  // console.log("correctedTargetVolumeDbSPLSoundDBSPL", correctedValuesForTarget.correctedSoundDBSPL);
-  // console.log("maskerVolumeDbSPL", maskerVolumeDbSPL);
-  // console.log("correctedMaskerVolumeDbSPLINDB", correctedValuesForMasker.inDB);
-  // console.log("correctedMaskerVolumeDbSPLSoundDBSPL", correctedValuesForMasker.correctedSoundDBSPL);
+  if (noiseMaxOverRms * noiseGain > 1) {
+    throw "The noise level given is too high to play without distortion";
+  }
+  const maskerMaxOverRms =
+    getMaxValueOfAbsoluteValueOfBuffer(maskerAudioData) / 1;
+  const maskerDB = CompressorInverseDb(
+    maskerVolumeDbSPL - soundGainDBSPL,
+    parameters.T,
+    parameters.R,
+    parameters.W
+  );
+  const maskerGain = getGainValue(maskerDB);
+  if (maskerMaxOverRms * maskerGain > 1) {
+    throw "The masker level given is too high to play without distortion";
+  }
+  if (maskerMaxOverRms * maskerGain + noiseMaxOverRms * noiseGain > 1) {
+    throw "The masker and noise levels given are too high to play together without distortion";
+  }
+
+  //adjust masker volume and white noise volumes
+  adjustSoundDbSPL(whiteNoiseData, noiseDB);
+  adjustSoundDbSPL(maskerAudioData, maskerDB);
+
+  // adjust target volume
+  // const parameters = soundCalibrationResults.current.parameters;
+  const correctedValuesForTarget =
+    getCorrectedInDbAndSoundDBSPLForVocoderPhrase(
+      targetVolumeDbSPLFromQuest,
+      soundGainDBSPL,
+      parameters,
+      targetAudioData,
+      maskerAudioData,
+      maskerVolumeDbSPL,
+      whiteNoiseData,
+      whiteNoiseLevel
+    );
+
+  adjustSoundDbSPL(targetAudioData, correctedValuesForTarget.inDB);
+
   return {
     trialSound: maskerChannels.length
       ? mergeBuffers([targetAudio, maskerAudio, whiteNoise], audioCtx)
@@ -136,6 +151,56 @@ export const getVocoderPhraseTrialData = async (
     allCategories: allCategories,
     targetVolumeDbSPL: correctedValuesForTarget.correctedSoundDBSPL,
   };
+};
+
+export const getCorrectedInDbAndSoundDBSPLForVocoderPhrase = (
+  soundDBSPL,
+  soundGain,
+  parameters,
+  audioData,
+  trialMaskerData,
+  maskerLevel,
+  whiteNoiseData,
+  whiteNoiseLevel
+) => {
+  const noiseDB = CompressorInverseDb(
+    whiteNoiseLevel - soundGain,
+    parameters.T,
+    parameters.R,
+    parameters.W
+  );
+  const noiseMaxOverRms =
+    getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
+  const noiseGain = getGainValue(noiseDB);
+
+  const maskerMaxOverRms =
+    getMaxValueOfAbsoluteValueOfBuffer(trialMaskerData) / 1;
+  const maskerDB = CompressorInverseDb(
+    maskerLevel - soundGain,
+    parameters.T,
+    parameters.R,
+    parameters.W
+  );
+  const maskerGain = getGainValue(maskerDB);
+
+  const targetMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(audioData) / 1;
+  const targetCeiling =
+    1 - maskerMaxOverRms * maskerGain - noiseMaxOverRms * noiseGain;
+  const targetDB = CompressorInverseDb(
+    soundDBSPL - soundGain,
+    parameters.T,
+    parameters.R,
+    parameters.W
+  );
+  const targetGain = getGainValue(targetDB);
+
+  const inDB =
+    targetMaxOverRms * targetGain > targetCeiling
+      ? calculateDBFromRMS(targetCeiling / targetMaxOverRms)
+      : targetDB;
+  const correctedSoundDBSPL =
+    soundGain + CompressorDb(inDB, parameters.T, parameters.R, parameters.W);
+  return { inDB, correctedSoundDBSPL };
 };
 
 //TODO

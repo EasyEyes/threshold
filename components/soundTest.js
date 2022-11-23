@@ -557,18 +557,18 @@ const cloneAudioBuffer = (audioBuffer) => {
   return newAudioBuffer;
 };
 
-const calculateDBFromRMS = (rms) => {
+export const calculateDBFromRMS = (rms) => {
   const db = 20 * Math.log10(rms);
   // round to 1 decimal place
   return Math.round(db * 10) / 10;
 };
 
-const getGainValue = (dbSPL) => {
+export const getGainValue = (dbSPL) => {
   const gain = Math.pow(10, dbSPL / 20);
   return gain;
 };
 
-const getRMSLimit = (dbSPL, buffer) => {
+export const getRMSLimit = (dbSPL, buffer) => {
   const sMax = getMaxValueOfAbsoluteValueOfBuffer(buffer);
   const sRms = getRMSOfWaveForm(buffer);
   const rmsLimit = sRms / sMax;
@@ -577,13 +577,13 @@ const getRMSLimit = (dbSPL, buffer) => {
 };
 
 // function to get the max value of the absolute value of the buffer
-const getMaxValueOfAbsoluteValueOfBuffer = (buffer) => {
+export const getMaxValueOfAbsoluteValueOfBuffer = (buffer) => {
   const absValue = buffer.map((value) => Math.abs(value));
   const sMax = getMax(absValue);
   return sMax;
 };
 
-const getMax = (arr) => {
+export const getMax = (arr) => {
   let len = arr.length;
   let max = -Infinity;
 
@@ -593,7 +593,7 @@ const getMax = (arr) => {
   return max;
 };
 
-const CompressorInverseDb = (outDb, T, R, W) => {
+export const CompressorInverseDb = (outDb, T, R, W) => {
   let inDb = 0;
   let a = 0;
   let b = 0;
@@ -614,7 +614,7 @@ const CompressorInverseDb = (outDb, T, R, W) => {
   return inDb;
 };
 
-const CompressorDb = (inDb, T, R, W) => {
+export const CompressorDb = (inDb, T, R, W) => {
   // Implement dynamic range compression of input level inDb with parameters
   // T, R, and W.
   // Compression equation taken from "Gain computer" in MATLAB documentation:

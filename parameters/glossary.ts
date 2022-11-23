@@ -371,8 +371,7 @@ export const GLOSSARY: Glossary = {
     name: "calibrateSound1000HzDB",
     availability: "now",
     type: "text",
-    default:
-      "-3.1,-13.1,-23.1,-33.1,-43.1,-53.1,-63.1,-73.1,-83.1,-93.1, -103.1",
+    default: "-3.1,-7,-10,-15,-20,-30,-40,-100",
   },
   calibrateSoundAllHzBool: {
     name: "calibrateSoundAllHzBool",
@@ -774,7 +773,7 @@ export const GLOSSARY: Glossary = {
     name: "movieLuminanceNit",
     availability: "now",
     type: "numerical",
-    default: "",
+    default: "-1",
   },
   movieRectDeg: {
     name: "movieRectDeg",
@@ -1326,7 +1325,6 @@ export const GLOSSARY: Glossary = {
     categories: [
       "letter",
       "gabor",
-      "image",
       "movie",
       "sound",
       "vocoderPhrase",

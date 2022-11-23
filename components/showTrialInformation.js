@@ -220,9 +220,9 @@ export const updateTargetSpecsForSoundDetect = (
   targetSoundFolder,
   maskerSoundFolder
 ) => {
-  showConditionNameConfig.targetSpecs = `targetLevel: ${
-    Math.round(10 * targetLevel) / 10
-  }\nmaskerLevel: ${maskerLevel}\nsoundGainDBSPL: ${soundGain}\nnoiseLevel: ${noiseLevel}\ntargetSoundFolder: ${targetSoundFolder}\nmaskerSoundFolder ${maskerSoundFolder}`;
+  showConditionNameConfig.targetSpecs = `targetSoundDBSPL: ${
+    targetLevel ? Math.round(10 * targetLevel) / 10 : "****"
+  }\nmaskerSoundDBSPL: ${maskerLevel}\nsoundGainDBSPL: ${soundGain}\nnoiseSoundDBSPL: ${noiseLevel}\ntargetSoundFolder: ${targetSoundFolder}\nmaskerSoundFolder: ${maskerSoundFolder}`;
 };
 
 export const updateTargetSpecsForSoundIdentify = (
@@ -231,9 +231,9 @@ export const updateTargetSpecsForSoundIdentify = (
   noiseLevel,
   targetSoundFolder
 ) => {
-  showConditionNameConfig.targetSpecs = `targetLevel: ${
-    Math.round(10 * targetLevel) / 10
-  }\nsoundGainDBSPL: ${soundGain}\nnoiseLevel: ${noiseLevel}\ntargetSoundFolder: ${targetSoundFolder}`;
+  showConditionNameConfig.targetSpecs = `targetSoundDBSPL: ${
+    targetLevel ? Math.round(10 * targetLevel) / 10 : "****"
+  }\nsoundGainDBSPL: ${soundGain}\nnoiseSoundDBSPL: ${noiseLevel}\ntargetSoundFolder: ${targetSoundFolder}`;
 };
 
 export const isTimingOK = (measured, target) => {

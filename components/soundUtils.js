@@ -632,5 +632,5 @@ export const displayRightOrWrong = (correct) => {
   document.body.appendChild(rightOrWrong);
   setTimeout(() => {
     document.body.removeChild(rightOrWrong);
-  }, 300);
+  }, 1000);
 };

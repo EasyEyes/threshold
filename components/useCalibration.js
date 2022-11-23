@@ -431,6 +431,7 @@ const _runSoundLevelCalibration = async (elems, gains) => {
   if (soundCalibrationResults.current)
     soundGainDBSPL.current =
       soundCalibrationResults.current.parameters.gainDBSPL;
+  soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
   // console.log("results", soundCalibrationResults.current);
 };
 
