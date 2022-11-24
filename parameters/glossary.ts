@@ -371,7 +371,7 @@ export const GLOSSARY: Glossary = {
     name: "calibrateSound1000HzDB",
     availability: "now",
     type: "text",
-    default: "-3.1,-7,-10,-15,-20,-30,-40,-100",
+    default: "-3.1,-10,-15,-20,-25,-30,-40,-100",
   },
   calibrateSoundAllHzBool: {
     name: "calibrateSoundAllHzBool",
