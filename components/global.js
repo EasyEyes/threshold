@@ -363,6 +363,7 @@ export const soundCalibrationLevelDBSPL = { current: undefined };
 export const soundCalibrationResults = { current: undefined };
 export const soundGainTWR = { T: undefined, W: undefined, R: undefined };
 export const debugBool = { current: false };
+export const ICalibDBSPL = { current: undefined };
 export const rsvpReadingWordsForThisBlock = { current: undefined };
 
 export const rsvpReadingTargetSets = {

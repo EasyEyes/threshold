@@ -385,6 +385,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "-13.1",
   },
+  calibrateSoundAssumingThisICalibDBSPL: {
+    name: "calibrateSoundAssumingThisICalibDBSPL",
+    availability: "now",
+    type: "numerical",
+    default: "31",
+  },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
     availability: "now",

@@ -703,8 +703,6 @@ export const displayParameters = (
   elems.soundLevelsTable.appendChild(tbody);
   const parameters = soundCalibrationResults.current.parameters;
   const outDBSPL1000Values = soundCalibrationResults.current.outDBSPL1000Values;
-  // const soundGainValues =
-  //   soundCalibrationResults.current.soundGainDBSPLValues;
   const outDBSPLValues = soundCalibrationResults.current.outDBSPLValues;
   const THDValues = soundCalibrationResults.current.thdValues;
   for (let i = 0; i < soundLevels.length; i++) {

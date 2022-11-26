@@ -7,6 +7,7 @@ import {
   soundCalibrationLevelDBSPL,
   soundCalibrationResults,
   debugBool,
+  ICalibDBSPL,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import { addSoundTestElements, displayParameters } from "./soundTest";
@@ -177,10 +178,14 @@ export const calibrateAudio = async (reader) => {
     ),
   ];
 
-  const soundLevels = reader
-    .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
-    .split(",");
-  // const soundLevels = [-3.1, -13.1];
+  ICalibDBSPL.current = reader.read(
+    GLOSSARY.calibrateSoundAssumingThisICalibDBSPL.name
+  )[0];
+  // console.log("ICalibDBSPL", ICalibDBSPL);
+  // const soundLevels = reader
+  //   .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
+  //   .split(",");
+  const soundLevels = [-3.1, -13.1];
   // change sound Levels to gain values
   const gains = soundLevels.map((soundLevel) => {
     return Math.pow(10, soundLevel / 20);
@@ -414,7 +419,8 @@ const _runSoundLevelCalibration = async (elems, gains) => {
     siteUrl: "https://hqjq0u.deta.dev",
     targetElementId: "displayQR",
     gainValues: gains,
-    debug: debugBool.current,
+    debug: false,
+    ICalib: ICalibDBSPL.current,
   };
 
   // console.log(VolumeCalibration);
@@ -428,11 +434,13 @@ const _runSoundLevelCalibration = async (elems, gains) => {
     speakerParameters,
     calibrator
   );
-  if (soundCalibrationResults.current)
+  if (soundCalibrationResults.current) {
     soundGainDBSPL.current =
       soundCalibrationResults.current.parameters.gainDBSPL;
-  soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
-  // console.log("results", soundCalibrationResults.current);
+    soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
+  }
+
+  console.log("results", soundCalibrationResults.current);
 };
 
 const _runLoudspeakerCalibration = async (elems) => {
