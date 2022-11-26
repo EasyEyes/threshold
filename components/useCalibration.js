@@ -182,10 +182,10 @@ export const calibrateAudio = async (reader) => {
     GLOSSARY.calibrateSoundAssumingThisICalibDBSPL.name
   )[0];
   // console.log("ICalibDBSPL", ICalibDBSPL);
-  // const soundLevels = reader
-  //   .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
-  //   .split(",");
-  const soundLevels = [-3.1, -13.1];
+  const soundLevels = reader
+    .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
+    .split(",");
+  // const soundLevels = [-3.1, -13.1];
   // change sound Levels to gain values
   const gains = soundLevels.map((soundLevel) => {
     return Math.pow(10, soundLevel / 20);
@@ -323,6 +323,10 @@ const _addSoundCalibrationElems = (copy) => {
   yesButton.setAttribute("id", "soundYes");
   noButton.setAttribute("id", "soundNo");
   testButton.setAttribute("id", "soundTest");
+  soundParametersFromCalibration.setAttribute(
+    "id",
+    "soundParametersFromCalibration"
+  );
 
   title.innerHTML = copy.soundCalibration;
   subtitle.innerHTML = copy.title;

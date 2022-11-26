@@ -672,6 +672,9 @@ export const displayParameters = (
   soundLevels,
   soundCalibrationResults
 ) => {
+  elems.soundParametersFromCalibration.style.whiteSpace = "pre";
+  // reduce the spacing between the lines for soundParametersFromCalibration
+  // elems.soundParametersFromCalibration.style.lineHeight = "0.8";
   elems.soundLevelsTable.style.display = "block";
   elems.soundLevelsTable.innerHTML = "";
   elems.soundLevelsTable.setAttribute("id", "soundLevelsTable");
@@ -737,11 +740,12 @@ export const displayParameters = (
   }
   // display the parameters used for the calibration
   elems.soundParametersFromCalibration.innerHTML = `
-  <p>Parameters:</p>
-  <p>T: ${parameters.T.toFixed(1)}</p>
-  <p>R: ${parameters.R.toFixed(1)}</p>
-  <p>W: ${parameters.W.toFixed(1)}</p>
-  <p>gainDBSPL: ${parameters.gainDBSPL.toFixed(1)}</p>
-  <p>backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}</p> 
+  Parameters:\n
+  T: ${parameters.T.toFixed(1)}\n
+  R: ${parameters.R.toFixed(1)}\n
+  W: ${parameters.W.toFixed(1)}\n
+  gainDBSPL: ${parameters.gainDBSPL.toFixed(1)}\n
+  backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}\n
+  RMSError: ${parameters.RMSError.toFixed(1)}
   `;
 };
