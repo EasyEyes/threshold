@@ -1,5 +1,9 @@
 import * as FFmpeg from "./js/ffmpeg.min.js";
 import * as IJS from "./js/image-js.min.js";
+import axios from "axios";
+
+import { preprocessRawCorpus } from "./reading.ts";
+
 import {
   logger,
   XYPixOfXYDeg,
@@ -125,8 +129,17 @@ export async function generate_video(imageArray) {
 
   return videoBlob;
 }
+const readJS = async (filename) => {
+  const response = await axios.get(`code/${filename}`);
+  if (!response)
+    console.error(`Error loading text from this source (./code/${filename})!`);
 
-export function evaluateJSCode(paramReader, status, displayOptions) {
+  var code = preprocessRawCorpus(response.data);
+  // logger(code)
+  return code;
+};
+
+export async function evaluateJSCode(paramReader, status, displayOptions) {
   const BC = status.block_condition;
   const targetEccentrictyXDeg = paramReader.read("targetEccentricityXDeg", BC);
   const targetEccentrictyYDeg = paramReader.read("targetEccentricityYDeg", BC);
@@ -163,36 +176,39 @@ export function evaluateJSCode(paramReader, status, displayOptions) {
   const targetDelaySec = paramReader.read("targetDelaySec", BC);
   const targetTimeConstantSec = paramReader.read("targetTimeConstantSec", BC);
   const targetHz = paramReader.read("targetHz", BC);
-  var jsCode = paramReader.read("computeImageJS", BC);
-  //logger("JS CODE ",jsCode);
-  //logger("computeRectDeg",computeRectDeg);
-  var args =
-    "XYPixOfXYDeg, XYDegOfXYPix, IsRectInRect,movieRectDeg,movieRectPxContainsDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentrictyXDeg,targetEccentrictyYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetPhase,targetContrast";
-  logger("jsCode", jsCode);
-  var myFunc = new Function(args, jsCode);
-  var imageNit = myFunc(
-    XYPixOfXYDeg,
-    XYDegOfXYPix,
-    isRectInRect,
-    movieRectDeg,
-    movieRectPxContainsDegBool,
-    screenRectPx,
-    movieHz,
-    movieSec,
-    targetDelaySec,
-    targetTimeConstantSec,
-    targetHz,
-    displayOptions,
-    targetEccentrictyXDeg,
-    targetEccentrictyYDeg,
-    targetSpaceConstantDeg,
-    targetCyclePerDeg,
-    targetPhase,
-    targetContrast
-  );
-  // console.table(imageNit)
-  // logger("imageNit error", imageNit[0][0].length);
-  // logger("imageNit error", imageNit[0].length);
-  // logger("imageNit error", imageNit.length);
-  return imageNit;
+  //var jsCode = paramReader.read("computeImageJS", BC);
+  const filename = paramReader.read("movieComputeJS", BC);
+  return readJS(filename).then((response) => {
+    logger("last index", response.lastIndexOf("}"));
+    var jsCode = response.substring(
+      response.indexOf("{") + 1,
+      response.lastIndexOf("}")
+    );
+    //console.log(`Received code: ${jsCode}`);
+    var args =
+      "XYPixOfXYDeg, XYDegOfXYPix, IsRectInRect,movieRectDeg,movieRectPxContainsDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentrictyXDeg,targetEccentrictyYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetPhase,targetContrast";
+    logger("jsCode", jsCode);
+    var myFunc = new Function(args, jsCode);
+    var imageNit = myFunc(
+      XYPixOfXYDeg,
+      XYDegOfXYPix,
+      isRectInRect,
+      movieRectDeg,
+      movieRectPxContainsDegBool,
+      screenRectPx,
+      movieHz,
+      movieSec,
+      targetDelaySec,
+      targetTimeConstantSec,
+      targetHz,
+      displayOptions,
+      targetEccentrictyXDeg,
+      targetEccentrictyYDeg,
+      targetSpaceConstantDeg,
+      targetCyclePerDeg,
+      targetPhase,
+      targetContrast
+    );
+    return imageNit;
+  });
 }

@@ -378,6 +378,7 @@ var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
+  logger("Rajat paramReaderInitialized called");
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
 
@@ -573,6 +574,7 @@ var characterSetBoundingRects = {};
 const experiment = (howManyBlocksAreThereInTotal) => {
   ////
   // Resources
+  logger("Rajat experiment function called");
   initializeEscHandlingDiv();
   const _resources = [];
   const blockNumbers = paramReader._experiment.map((block) => block.block);
@@ -711,6 +713,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // var frameDur;
   async function updateInfo() {
+    logger("Rajat updateInfo async");
     thisExperimentInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     thisExperimentInfo["expName"] = thisExperimentInfo.name;
     thisExperimentInfo[
@@ -823,6 +826,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     blockScheduleFinalClock;
 
   async function experimentInit() {
+    logger("Rajat experimentInit called");
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
@@ -1068,7 +1072,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     displayOptions.window = psychoJS.window;
 
     grid.current = new Grid("disabled", displayOptions, psychoJS);
-
+    logger("Rajat experimentInit ended");
     return Scheduler.Event.NEXT;
   }
 
@@ -1080,6 +1084,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineBegin(snapshot) {
     return async function () {
+      logger(
+        "Rajat return of fileRoutineBegin called with parameter snapshot :",
+        snapshot
+      );
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       //------Prepare to start Routine 'file'-------
@@ -1100,6 +1108,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineEachFrame() {
     return async function () {
+      logger("Rajat return of fileRoutineEachFrame called");
       /* --- SIMULATED --- */
       if (simulated) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
@@ -1134,6 +1143,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
       // refresh the screen if continuing
+      logger("Rajat continueRoutine is", continueRoutine);
       if (continueRoutine) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
@@ -1145,6 +1155,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineEnd() {
     return async function () {
+      logger("Rajat fileRoutineEnd called");
       //------Ending Routine 'file'-------
       for (const thisComponent of fileComponents) {
         if (typeof thisComponent.setAutoDraw === "function") {
@@ -1160,6 +1171,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   function _instructionSetup(text) {
+    logger("Rajat _instructionSetup called");
     t = 0;
     instructionsClock.reset(); // clock
     frameN = -1;
@@ -1176,6 +1188,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     wrapWidth = window.innerWidth / 4,
     pos = [-window.innerWidth / 2 + 5, window.innerHeight / 2 - 5]
   ) {
+    logger("Rajat _instructionBeforeStimulusSetup called");
     t = 0;
     instructionsClock.reset(); // clock
     frameN = -1;
@@ -1189,6 +1202,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function _instructionRoutineEachFrame() {
+    logger("Rajat _instructionRoutineEachFrame called");
     /* --- SIMULATED --- */
     if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
     /* --- /SIMULATED --- */
@@ -1209,6 +1223,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     if (!continueRoutine || clickedContinue.current) {
+      logger(
+        "Rajat inside if statement of _instructionRoutineEachFrame continueRoutine",
+        continueRoutine
+      );
+      logger(
+        "Rajat inside if statement of _instructionRoutineEachFrame clickedContinue.current",
+        clickedContinue.current
+      );
       continueRoutine = true;
       clickedContinue.current = false;
       return Scheduler.Event.NEXT;
@@ -1218,10 +1240,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     switchKind(targetKind.current, {
       letter: () => {
+        //logger("Rajat inside switch (letter) statement of _instructionRoutineEachFrame")
         if (
           canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
         ) {
+          logger(
+            "Rajat inside switch's (letter) if statement of _instructionRoutineEachFrame"
+          );
           continueRoutine = false;
           removeProceedButton();
         }
@@ -1285,6 +1311,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     return async function () {
+      logger("Rajat return blocksLoopBegin called");
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
 
       // set up handler to look after randomisation of conditions etc
@@ -2098,6 +2125,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   /* ------------------------- Block Init Instructions ------------------------ */
   // BLOCK 1st INSTRUCTION
   function initInstructionRoutineBegin(snapshot) {
+    logger("Rajat initInstructionRoutineBegin called");
     return async function () {
       loggerText(
         `initInstructionRoutineBegin targetKind ${targetKind.current}`
@@ -3373,16 +3401,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //generate movie
           loggerText("Generate movie here");
           //var F = new Function(paramReader.read("computeImageJS", BC))();
-          var imageNit = evaluateJSCode(paramReader, status, displayOptions);
+          evaluateJSCode(paramReader, status, displayOptions).then(
+            (imageNit) => {
+              generate_video(imageNit).then((data) => {
+                videoblob = data;
+              });
+            }
+          );
           loader.setAttribute("id", "loader");
           loaderText.setAttribute("id", "loaderText");
           document.body.appendChild(loader);
           document.body.appendChild(loaderText);
           loaderText.innerHTML = "Generating movie";
-          generate_video(imageNit).then((data) => {
-            videoblob = data;
-            logger("data", data);
-          });
+          // generate_video(imageNit).then((data) => {
+          //   videoblob = data;
+          //   logger("data", data);
+          // });
           fixation.update(
             paramReader,
             BC,
@@ -4362,29 +4396,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           break;
         case "movie":
           // Play the movie here
-          // logger("waiting for movie to play");
-          // if(videoblob.length>0){
-          //   logger("playing a movie");
-          //   continueRoutine = false;
-          // }
-
           logger("len videoblob", videoblob.length);
           if (videoblob.length > 0 && video_flag == 1) {
-            //document.getElementById("movie-container").style.display = "none";
+            logger("Running ");
             document.querySelector("canvas").style.display = "none";
             document.getElementById("root").style.display = "none";
             loader.style.display = "none";
             loaderText.style.display = "none";
             video.setAttribute("src", videoblob);
-            //source.setAttribute('type', 'video/mp4');
-            //video.appendChild(source);
             video.play();
             video_flag = 0;
-            // video.addEventListener('ended', () => {
-            //   logger("Yoooo!")
-            //   video.pause();
-            //   continueRoutine = false;
-            // }, false);
           }
           // if movie is done register responses
           //
