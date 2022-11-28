@@ -507,7 +507,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "calibrateSoundAssumingICalibDBSPL is a calibration factor for iPhone recordings. The physical sound level (in dB SPL) is iCalib+20*log10(rms), where rms is the root mean square of the digital sound recording. The value we got from the internet seems to be about 14 dB SPL too high. This allows the scientist to override the current default.",
     type: "numerical",
-    default: "31",
+    default: "104.9",
     categories: "",
   },
   {

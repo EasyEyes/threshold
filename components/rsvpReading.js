@@ -19,13 +19,18 @@ import {
   logger,
   sampleWithReplacement,
   shuffle,
+  toFixedNumber,
   XYPixOfXYDeg,
 } from "./utils";
 import { Color } from "../psychojs/src/util";
 import { findReadingSize, getThisBlockPages } from "./readingAddons";
 import { prepareReadingQuestions, preprocessCorpusToWordList } from "./reading";
 import { showCursor } from "./utils";
-import { showPhraseIdentification } from "./response";
+import {
+  getPhraseIdentificationReactionTimes,
+  noteStimulusOnsetForPhraseIdentification,
+  showPhraseIdentification,
+} from "./response";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -390,6 +395,9 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       if (!rsvpReadingTiming.current.startSec) {
         rsvpReadingTiming.current.startSec = t;
       }
+      // If this is the first target set, mark the stimulus onset (to calculate response times later)
+      if (rsvpReadingTargetSets.past.length === 0)
+        noteStimulusOnsetForPhraseIdentification();
       if (
         !rsvpReadingTiming.current.drawnConfirmedTimestamp &&
         rsvpReadingTargetSets.current.stims.every(
@@ -479,7 +487,6 @@ export const registerKeypressForRSVPReading = (keypresses) => {
 };
 
 export const addScientistKeypressFeedback = (numberOfResponsesExpected) => {
-  console.log({ numberOfResponsesExpected });
   // TODO move feedback based on the other things that might be there, eg trial counter
   const feedbackContainer = document.createElement("div");
   feedbackContainer.className = "scientist-feedback-circle-container";
@@ -489,7 +496,7 @@ export const addScientistKeypressFeedback = (numberOfResponsesExpected) => {
     feedbackContainer.appendChild(feedbackCircle);
   }
   document.body.appendChild(feedbackContainer);
-  logger("added the feedback circles!", feedbackContainer);
+  phraseIdentificationResponse.onsetTime = performance.now();
 };
 
 const updateScientistKeypressFeedback = (correctBool) => {
@@ -589,4 +596,29 @@ const _highlightNextWordInRevealedKey = () => {
       "rsvpReadingTargetWordNotYetResponded",
       "rsvpReadingTargetWordCurrent"
     );
+};
+
+export const addRsvpReadingTrialResponsesToData = () => {
+  const clicked = rsvpReadingResponse.responseType === "clicked";
+  psychoJS.experiment.addData(
+    "rsvpReadingParticipantResponses",
+    clicked ? phraseIdentificationResponse.current.toString() : ""
+  );
+  psychoJS.experiment.addData(
+    "rsvpReadingTargetWords",
+    rsvpReadingTargetSets.past.map((ts) => ts.word).toString()
+  );
+  psychoJS.experiment.addData(
+    "rsvpReadingResponseCorrectBool",
+    phraseIdentificationResponse.correct
+      .map((b) => (b ? "TRUE" : "FALSE"))
+      .toString()
+  );
+  logger("targetSets past", rsvpReadingTargetSets.past);
+  psychoJS.experiment.addData(
+    "rsvpReadingResponseTimesSec",
+    getPhraseIdentificationReactionTimes()
+      .map((t) => toFixedNumber(t, 2))
+      .toString()
+  );
 };

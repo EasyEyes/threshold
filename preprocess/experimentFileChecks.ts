@@ -510,6 +510,7 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
     "responseClickedBool",
     "responseTypedBool",
     "responseTypedEasyEyesKeypadBool",
+    "responseSpokenToExperimenterBool",
     "simulateParticipantBool",
   ];
   // Modalities the experimenter specified

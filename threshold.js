@@ -159,6 +159,7 @@ import {
 import {
   canClick,
   canType,
+  clearPhraseIdentificationRegisters,
   getResponseType,
   resetResponseType,
   setupPhraseIdentification,
@@ -353,6 +354,7 @@ import {
   _rsvpReading_trialInstructionRoutineBegin,
   _rsvpReading_trialRoutineEachFrame,
   removeRevealableTargetWordsToAidSpokenScoring,
+  addRsvpReadingTrialResponsesToData,
 } from "./components/rsvpReading.js";
 
 /* -------------------------------------------------------------------------- */
@@ -2072,7 +2074,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("responseClickedBool", status.block)[0],
         paramReader.read("responseTypedBool", status.block)[0],
         paramReader.read("responseTypedEasyEyesKeypadBool", status.block)[0],
-        paramReader.read("responseSpokenBool", status.block)[0]
+        paramReader.read("responseSpokenBool", status.block)[0],
+        paramReader.read("responseMustClickCrosshairBool", status.block)[0],
+        paramReader.read("responseSpokenToExperimenterBool", status.block)[0]
       );
 
       switchKind(targetKind.current, {
@@ -2475,6 +2479,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("responseSpokenBool", status.block_condition),
           paramReader.read(
             "responseMustClickCrosshairBool",
+            status.block_condition
+          ),
+          paramReader.read(
+            "responseSpokenToExperimenterBool",
             status.block_condition
           )
         );
@@ -4797,25 +4805,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             repeatedLettersResponse.rt = [];
           },
           rsvpReading: () => {
-            psychoJS.experiment.addData(
-              "rsvpReadingParticipantResponses",
-              phraseIdentificationResponse.current.toString()
-            );
-            psychoJS.experiment.addData(
-              "rsvpReadingTargetWords",
-              phraseIdentificationResponse.targetWord.toString()
-            );
-            psychoJS.experiment.addData(
-              "rsvpReadingTimesOfResponse",
-              phraseIdentificationResponse.clickTime
-                .map((t) => toFixedNumber(t, 2))
-                .toString()
-            );
-            phraseIdentificationResponse.current = [];
-            phraseIdentificationResponse.targetWord = [];
-            phraseIdentificationResponse.clickTime = [];
-            phraseIdentificationResponse.categoriesResponded = [];
-
+            addRsvpReadingTrialResponsesToData();
+            clearPhraseIdentificationRegisters();
             removeRevealableTargetWordsToAidSpokenScoring();
 
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);

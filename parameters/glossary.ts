@@ -389,7 +389,7 @@ export const GLOSSARY: Glossary = {
     name: "calibrateSoundAssumingThisICalibDBSPL",
     availability: "now",
     type: "numerical",
-    default: "31",
+    default: "104.9",
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
