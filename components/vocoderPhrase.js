@@ -47,8 +47,7 @@ export const getVocoderPhraseTrialData = async (
   whiteNoiseLevel = 70,
   soundGainDBSPL = 0,
   maskerVolumeDbSPL = 10,
-  numberOfChannels = 9,
-  parameters
+  numberOfChannels = 9
 ) => {
   //populate target and masker channel indices
   var targetChannels = populateTargetIndices(numberOfChannels);
@@ -94,12 +93,7 @@ export const getVocoderPhraseTrialData = async (
   setWaveFormToZeroDbSPL(maskerAudioData);
   setWaveFormToZeroDbSPL(whiteNoiseData);
   // check noise and masker levels
-  const noiseDB = CompressorInverseDb(
-    whiteNoiseLevel - soundGainDBSPL,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
+  const noiseDB = whiteNoiseLevel - soundGainDBSPL;
   const noiseMaxOverRms =
     getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
   const noiseGain = getGainValue(noiseDB);
@@ -109,12 +103,7 @@ export const getVocoderPhraseTrialData = async (
   }
   const maskerMaxOverRms =
     getMaxValueOfAbsoluteValueOfBuffer(maskerAudioData) / 1;
-  const maskerDB = CompressorInverseDb(
-    maskerVolumeDbSPL - soundGainDBSPL,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
+  const maskerDB = maskerVolumeDbSPL - soundGainDBSPL;
   const maskerGain = getGainValue(maskerDB);
   if (maskerMaxOverRms * maskerGain > 1) {
     throw "The masker level given is too high to play without distortion";
@@ -133,12 +122,8 @@ export const getVocoderPhraseTrialData = async (
     getCorrectedInDbAndSoundDBSPLForVocoderPhrase(
       targetVolumeDbSPLFromQuest,
       soundGainDBSPL,
-      parameters,
       targetAudioData,
-      maskerAudioData,
-      maskerVolumeDbSPL,
-      whiteNoiseData,
-      whiteNoiseLevel
+      targetCeiling
     );
 
   adjustSoundDbSPL(targetAudioData, correctedValuesForTarget.inDB);
@@ -156,50 +141,19 @@ export const getVocoderPhraseTrialData = async (
 export const getCorrectedInDbAndSoundDBSPLForVocoderPhrase = (
   soundDBSPL,
   soundGain,
-  parameters,
   audioData,
-  trialMaskerData,
-  maskerLevel,
-  whiteNoiseData,
-  whiteNoiseLevel
+  targetCeiling
 ) => {
-  const noiseDB = CompressorInverseDb(
-    whiteNoiseLevel - soundGain,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
-  const noiseMaxOverRms =
-    getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
-  const noiseGain = getGainValue(noiseDB);
-
-  const maskerMaxOverRms =
-    getMaxValueOfAbsoluteValueOfBuffer(trialMaskerData) / 1;
-  const maskerDB = CompressorInverseDb(
-    maskerLevel - soundGain,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
-  const maskerGain = getGainValue(maskerDB);
-
   const targetMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(audioData) / 1;
-  const targetCeiling =
-    1 - maskerMaxOverRms * maskerGain - noiseMaxOverRms * noiseGain;
-  const targetDB = CompressorInverseDb(
-    soundDBSPL - soundGain,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
+
+  const targetDB = soundDBSPL - soundGain;
   const targetGain = getGainValue(targetDB);
 
   const inDB =
     targetMaxOverRms * targetGain > targetCeiling
       ? calculateDBFromRMS(targetCeiling / targetMaxOverRms)
       : targetDB;
-  const correctedSoundDBSPL =
-    soundGain + CompressorDb(inDB, parameters.T, parameters.R, parameters.W);
+  const correctedSoundDBSPL = soundGain + inDB;
   return { inDB, correctedSoundDBSPL };
 };
 

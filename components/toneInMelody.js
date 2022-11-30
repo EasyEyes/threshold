@@ -42,7 +42,7 @@ export const getToneInMelodyTrialData = async (
   maskerVolumeDbSPL,
   whiteNoiseLevel,
   soundGainDBSPL,
-  parameters
+  targetSoundNoiseBool
 ) => {
   // create masker
   //pick random masker
@@ -54,51 +54,47 @@ export const getToneInMelodyTrialData = async (
   var trialMaskerData = trialMasker.getChannelData(0);
   setWaveFormToZeroDbSPL(trialMaskerData);
 
-  // create white noise
-  whiteNoise = audioCtx.createBuffer(
-    1,
-    trialMaskerData.length,
-    audioCtx.sampleRate
-  );
-  whiteNoiseData = whiteNoise.getChannelData(0);
-  for (var i = 0; i < whiteNoiseData.length; i++) {
-    whiteNoiseData[i] = Math.random() * 2 - 1;
-  }
-  setWaveFormToZeroDbSPL(whiteNoiseData);
+  var noiseMaxOverRms = 0;
+  var noiseGain = 0;
+  if (targetSoundNoiseBool) {
+    // create white noise
+    whiteNoise = audioCtx.createBuffer(
+      1,
+      trialMaskerData.length,
+      audioCtx.sampleRate
+    );
+    whiteNoiseData = whiteNoise.getChannelData(0);
+    for (var i = 0; i < whiteNoiseData.length; i++) {
+      whiteNoiseData[i] = Math.random() * 2 - 1;
+    }
+    setWaveFormToZeroDbSPL(whiteNoiseData);
 
-  // check noise and masker levels
-  const noiseDB = CompressorInverseDb(
-    whiteNoiseLevel - soundGainDBSPL,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
-  const noiseMaxOverRms =
-    getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
-  const noiseGain = getGainValue(noiseDB);
-
-  if (noiseMaxOverRms * noiseGain > 1) {
-    throw "The noise level given is too high to play without distortion";
+    // check noise and masker levels
+    const noiseDB = whiteNoiseLevel - soundGainDBSPL;
+    noiseMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
+    noiseGain = getGainValue(noiseDB);
+    if (noiseMaxOverRms * noiseGain > 1) {
+      throw "The noise level given is too high to play without distortion";
+    }
   }
+
   const maskerMaxOverRms =
     getMaxValueOfAbsoluteValueOfBuffer(trialMaskerData) / 1;
-  const maskerDB = CompressorInverseDb(
-    maskerVolumeDbSPL - soundGainDBSPL,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
+  const maskerDB = maskerVolumeDbSPL - soundGainDBSPL;
   const maskerGain = getGainValue(maskerDB);
   if (maskerMaxOverRms * maskerGain > 1) {
     throw "The masker level given is too high to play without distortion";
   }
-  if (maskerMaxOverRms * maskerGain + noiseMaxOverRms * noiseGain > 1) {
-    throw "The masker and noise levels given are too high to play together without distortion";
+
+  if (targetSoundNoiseBool) {
+    if (maskerMaxOverRms * maskerGain + noiseMaxOverRms * noiseGain > 1) {
+      throw "The masker and noise levels given are too high to play together without distortion";
+    }
   }
 
   //modify masker and noise
   adjustSoundDbSPL(trialMaskerData, maskerDB);
-  adjustSoundDbSPL(whiteNoiseData, noiseDB);
+  if (targetSoundNoiseBool) adjustSoundDbSPL(whiteNoiseData, noiseDB);
 
   var trialTarget;
   var targetVolume;
@@ -116,12 +112,8 @@ export const getToneInMelodyTrialData = async (
       getCorrectedInDbAndSoundDBSPLForToneInMelody(
         targetVolumeDbSPLFromQuest,
         soundGainDBSPL,
-        parameters,
         trialTargetData,
-        trialMaskerData,
-        maskerVolumeDbSPL,
-        whiteNoiseData,
-        whiteNoiseLevel
+        1 - maskerMaxOverRms * maskerGain - noiseMaxOverRms * noiseGain
       );
 
     adjustSoundDbSPL(trialTargetData, correctedValuesForTarget.inDB);
@@ -130,61 +122,33 @@ export const getToneInMelodyTrialData = async (
 
   return targetIsPresentBool
     ? {
-        trialSoundMelody: mergeBuffers(
-          [trialMasker, trialTarget, whiteNoise],
-          audioCtx
-        ),
+        trialSoundMelody: targetSoundNoiseBool
+          ? mergeBuffers([trialMasker, trialTarget, whiteNoise], audioCtx)
+          : mergeBuffers([trialMasker, trialTarget], audioCtx),
         targetVolume: targetVolume,
       }
-    : { trialSoundMelody: mergeBuffers([trialMasker, whiteNoise], audioCtx) };
+    : {
+        trialSoundMelody: targetSoundNoiseBool
+          ? mergeBuffers([trialMasker, whiteNoise], audioCtx)
+          : trialMasker,
+      };
 };
 
 export const getCorrectedInDbAndSoundDBSPLForToneInMelody = (
   soundDBSPL,
   soundGain,
-  parameters,
   audioData,
-  trialMaskerData,
-  maskerLevel,
-  whiteNoiseData,
-  whiteNoiseLevel
+  targetCeiling
 ) => {
-  const noiseDB = CompressorInverseDb(
-    whiteNoiseLevel - soundGain,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
-  const noiseMaxOverRms =
-    getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
-  const noiseGain = getGainValue(noiseDB);
-
-  const maskerMaxOverRms =
-    getMaxValueOfAbsoluteValueOfBuffer(trialMaskerData) / 1;
-  const maskerDB = CompressorInverseDb(
-    maskerLevel - soundGain,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
-  const maskerGain = getGainValue(maskerDB);
-
   const targetMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(audioData) / 1;
-  const targetCeiling =
-    1 - maskerMaxOverRms * maskerGain - noiseMaxOverRms * noiseGain;
-  const targetDB = CompressorInverseDb(
-    soundDBSPL - soundGain,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
+
+  const targetDB = soundDBSPL - soundGain;
   const targetGain = getGainValue(targetDB);
 
   const inDB =
     targetMaxOverRms * targetGain > targetCeiling
       ? calculateDBFromRMS(targetCeiling / targetMaxOverRms)
       : targetDB;
-  const correctedSoundDBSPL =
-    soundGain + CompressorDb(inDB, parameters.T, parameters.R, parameters.W);
+  const correctedSoundDBSPL = soundGain + inDB;
   return { inDB, correctedSoundDBSPL };
 };

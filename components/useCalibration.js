@@ -232,7 +232,7 @@ export const calibrateAudio = async (reader) => {
         }
       } catch (e) {
         if (e instanceof speakerCalibrator.UnsupportedDeviceError) {
-          alert(`${e}: Your Movile Device is incompatiable with this test`);
+          alert(`${e}: Your Mobile Device is incompatiable with this test`);
           resolve(false);
         }
         if (e instanceof speakerCalibrator.CalibrationTimedOutError) {

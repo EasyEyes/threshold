@@ -3622,8 +3622,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             whiteNoiseLevel.current,
             soundGainDBSPL.current,
             maskerVolumeDbSPL.current,
-            paramReader.read("targetSoundChannels", status.block_condition),
-            soundGainParameters
+            paramReader.read("targetSoundChannels", status.block_condition)
           );
 
           ProposedVolumeLevelFromQuest.adjusted = targetVolumeDbSPL;
@@ -3662,16 +3661,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "targetTask",
             status.block_condition
           );
-          const gainParameterFromFile = paramReader
-            .read("soundGainTWR", status.block_condition)
-            .split(",");
-          soundGainTWR.T = Number(gainParameterFromFile[0]);
-          soundGainTWR.W = Number(gainParameterFromFile[1]);
-          soundGainTWR.R = Number(gainParameterFromFile[2]);
-          // console.log("soundGainTWR",soundGainTWR);
-          const soundGainParameters = soundCalibrationResults.current
-            ? soundCalibrationResults.current.parameters
-            : soundGainTWR;
+
           if (targetTask.current == "identify") {
             const { targetList, trialSound, correctAnsIndex, targetVolume } =
               await getSpeechInNoiseTrialData(
@@ -3679,7 +3669,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ProposedVolumeLevelFromQuest.current,
                 whiteNoiseLevel.current,
                 soundGainDBSPL.current,
-                soundGainParameters
+                paramReader.read("targetSoundNoiseBool", status.block_condition)
               );
 
             ProposedVolumeLevelFromQuest.adjusted = targetVolume;
@@ -3714,7 +3704,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 maskerVolumeDbSPL.current,
                 whiteNoiseLevel.current,
                 soundGainDBSPL.current,
-                soundGainParameters
+                paramReader.read("targetSoundNoiseBool", status.block_condition)
               );
             trialSoundBuffer = trialSoundMelody;
             ProposedVolumeLevelFromQuest.adjusted = targetIsPresentBool.current

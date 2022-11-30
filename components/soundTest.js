@@ -425,18 +425,11 @@ const addSoundFileElements = (
           soundDBSPL.current.toFixed(1);
 
         // adjust sound gain and find inDB
-        const gainParameterFromFile = reader.read("soundGainTWR")[0].split(",");
-        soundGainTWR.T = Number(gainParameterFromFile[0]);
-        soundGainTWR.W = Number(gainParameterFromFile[1]);
-        soundGainTWR.R = Number(gainParameterFromFile[2]);
-        const parameters = soundCalibrationResults.current
-          ? soundCalibrationResults.current.parameters
-          : soundGainTWR;
+
         // const parameters = soundCalibrationResults.current.parameters;
         const correctedValues = getCorrectedInDbAndSoundDBSPL(
           soundDBSPL.current,
           soundGain.current,
-          parameters,
           audioData
         );
         const inDB = correctedValues.inDB;
@@ -447,7 +440,9 @@ const addSoundFileElements = (
           getMaxValueOfAbsoluteValueOfBuffer(audioData);
         const theGainValue = getGainValue(inDB);
         const soundMax = maxOfOriginalSound * theGainValue;
-
+        // console.log("inDB", inDB);
+        // console.log("soundMax", soundMax);
+        // console.log("soundDBSPL.current", soundDBSPL.current);
         document.getElementById(
           "soundTestModalMaxAmplitude"
         ).innerHTML = `Digital sound max: ${soundMax.toFixed(2)}`;
@@ -640,30 +635,19 @@ export const CompressorDb = (inDb, T, R, W) => {
 export const getCorrectedInDbAndSoundDBSPL = (
   soundDBSPL,
   soundGain,
-  parameters,
   audioData
 ) => {
-  // console.log("inside getCorrectedInDbAndSoundDBSPL");
-  // console.log("soundDBSPL", soundDBSPL);
-  // console.log("soundGain", soundGain);
-  // console.log("parameters", parameters);
+  const targetMaxOverRms =
+    getMaxValueOfAbsoluteValueOfBuffer(audioData) / getRMSOfWaveForm(audioData);
+  const targetDB = soundDBSPL - soundGain;
+  const targetGain = getGainValue(targetDB);
 
-  const unrestrictedInDB = CompressorInverseDb(
-    soundDBSPL - soundGain,
-    parameters.T,
-    parameters.R,
-    parameters.W
-  );
-  // console.log("unrestrictedInDB", unrestrictedInDB);
-  const limitedRMS = getRMSLimit(unrestrictedInDB, audioData);
-  // console.log("limitedRMS", limitedRMS);
-  const inDB = calculateDBFromRMS(limitedRMS);
-  // console.log("inDB", inDB);
-  const correctedSoundDBSPL =
-    soundGain + CompressorDb(inDB, parameters.T, parameters.R, parameters.W);
-  // console.log("compresorDB", CompressorDb(inDB, parameters.T, parameters.R, parameters.W));
-  // console.log("correctedSoundDBSPL", correctedSoundDBSPL);
-  //   console.log("function over");
+  const inDB =
+    targetMaxOverRms * targetGain > 1
+      ? calculateDBFromRMS(1 / targetMaxOverRms)
+      : targetDB;
+  const correctedSoundDBSPL = soundGain + inDB;
+
   return { inDB, correctedSoundDBSPL };
 };
 
