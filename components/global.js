@@ -238,7 +238,7 @@ export const phraseIdentificationResponse = Object.seal({
   correct: [], // Correctness of responses
   targetWord: [], // The correct responses, ie this.correct = this.current === this.targetWord
   categoriesResponded: [], // List of categories for which we already have a response
-  onsetTime: [], // 0?
+  onsetTime: 0,
   clickTime: [],
 });
 

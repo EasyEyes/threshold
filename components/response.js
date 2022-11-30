@@ -34,14 +34,15 @@ export const getResponseType = (
   type,
   keypad,
   speak,
-  mustClickCrosshairForResponse
+  mustClickCrosshairForResponse,
+  spokenToExperimenter
 ) => {
   // responseMustClickCrosshairBool
   if (mustClickCrosshairForResponse) return 1;
 
   // Default routine
   const c = click,
-    t = type,
+    t = type || spokenToExperimenter, // the experimenter will type, based on spoken response
     k = keypad,
     s = speak;
   if (!c && t && !k && !s) return 0;
@@ -170,8 +171,26 @@ export const setupPhraseIdentification = (categories, reader, BC) => {
 
 export const showPhraseIdentification = (responseScreen) => {
   document.body.appendChild(responseScreen);
-  phraseIdentificationResponse.onsetTime = performance.now();
   showCursor();
+};
+
+export const noteStimulusOnsetForPhraseIdentification = () => {
+  phraseIdentificationResponse.onsetTime = performance.now();
+  console.log("onset marked!");
+};
+
+export const getPhraseIdentificationReactionTimes = () => {
+  return phraseIdentificationResponse.clickTime.map(
+    (t) => (t - phraseIdentificationResponse.onsetTime) / 1000
+  );
+};
+
+export const clearPhraseIdentificationRegisters = () => {
+  phraseIdentificationResponse.current = [];
+  phraseIdentificationResponse.targetWord = [];
+  phraseIdentificationResponse.clickTime = [];
+  phraseIdentificationResponse.categoriesResponded = [];
+  phraseIdentificationResponse.onsetTime = undefined;
 };
 
 /* -- SPEECH RECOGNITION -- */
