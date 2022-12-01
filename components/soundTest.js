@@ -1,3 +1,4 @@
+import { Chart } from "chart.js/auto";
 import JSZip from "jszip";
 import {
   invertedImpulseResponse,
@@ -732,4 +733,139 @@ export const displayParameters = (
   backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}\n
   RMSError: ${parameters.RMSError.toFixed(1)}
   `;
+
+  // plot
+  elems.soundTestContainer.style.display = "flex";
+
+  // plot the sound levels
+  // create plot canvas
+  const plotCanvas = document.createElement("canvas");
+  plotCanvas.setAttribute("id", "plotCanvas");
+  // plotCanvas.style.width = "20%";
+
+  elems.soundTestPlots.appendChild(plotCanvas);
+
+  const mergedDataPoints = soundLevels.map((x, i) => {
+    return { x: x, y: outDBSPL1000Values[i] };
+  });
+  // sort the data points by x
+  mergedDataPoints.sort((a, b) => a.x - b.x);
+  const model = soundLevels.map((x, i) => {
+    return {
+      x: x,
+      y: SoundLevelModel(
+        Number(x),
+        parameters.backgroundDBSPL,
+        parameters.gainDBSPL,
+        parameters.T,
+        parameters.W,
+        parameters.R
+      ),
+    };
+  });
+  // sort the data points by x
+  model.sort((a, b) => a.x - b.x);
+
+  // console.log("model", model);
+  // console.log("mergedDataPoints", mergedDataPoints);
+
+  // plot both the data points (dot) and the model (line)
+  const data = {
+    datasets: [
+      {
+        label: "Data",
+        data: mergedDataPoints,
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 1,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        showLine: false,
+      },
+      {
+        label: "Model",
+        data: model,
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        showLine: true,
+        tension: 0.1,
+      },
+    ],
+  };
+
+  const config = {
+    type: "scatter",
+    data: data,
+    options: {
+      scales: {
+        x: {
+          type: "linear",
+          position: "bottom",
+          title: {
+            display: true,
+            text: "in (dB)",
+          },
+        },
+        y: {
+          type: "linear",
+          position: "left",
+          title: {
+            display: true,
+            text: "out (dB SPL)",
+          },
+        },
+      },
+    },
+  };
+  const plot = new Chart(plotCanvas, config);
+};
+
+const SoundLevelModel = (inDb, backgroundDbSpl, gainDbSpl, T, W, R) => {
+  // % We play a sine wave through a speaker and use an iPhone to measure the
+  // % sound level. The level of the digital source is RMS expressed in dB.
+  // % Because digital sound exceeding the range -1 to +1 may be clipped we do
+  // % not allow a sinewave sound to exceed amplitude 1. A sine of amplitude 1
+  // % has an RMS value of 1/sqrt(2) which correponds to -3.1 dB. We measure
+  // % sound in units of dB SPL. So we play sines at several source levels (in
+  // % dB) and record at several sound levels (in dB SPL). My model for what's
+  // % happening combines an arbitrary gain (in dB SPL) and a dynamic range
+  // % compression (which attenuates loud sounds to protect the small
+  // % loudspeaker of the laptop), and added background sound in the room.
+  // % Plotting my measurements makes me think this model will fit well.
+  // % However, the model has five degrees of freedom and will require many
+  // % measurements. It may be necessary to fit the model early, with some
+  // % parameters locked, to estimate the most important parameters (background
+  // % noise level and threshold T) to guide further measurements.
+
+  // % REVISED November 29, 2022
+  // % FORMERLY WE THOUGHT COMPRESSION OCCURRED IN THE LOUDSPEAKER SYSTEM. NOW
+  // % WE BELIEVE IT OCCURS IN THE IPHONE MICROPHONE.THE COMPRESSION FORMULA IS
+  // % UNCHANGED.
+  // % Now the model for sound production is trivially simple:
+  // % outDbSpl=inDb+gainDbSpl;
+
+  // % This is the model we use to fit our iPhone readings.
+
+  // % Our model of the computer sound system is the cascade of dynamic range
+  // % compression, a gain from digital (dB) to physical (dB SPL) sound, and
+  // % the addition of ambient background noise (physical powers add).
+
+  const totalDbSpl =
+    10 *
+    Math.log10(10 ** (backgroundDbSpl / 10) + 10 ** ((gainDbSpl + inDb) / 10));
+  const measuredDbSpl = CompressorDb(totalDbSpl, T, R, W);
+  // log all values
+  // console.log("inDb", inDb);
+  // console.log("backgroundDbSpl", backgroundDbSpl);
+  // console.log("gainDbSpl", gainDbSpl);
+  // console.log("T", T);
+  // console.log("W", W);
+  // console.log("R", R);
+  // console.log("totalDbSpl", totalDbSpl);
+  // console.log("measuredDbSpl", measuredDbSpl);
+
+  return measuredDbSpl;
 };

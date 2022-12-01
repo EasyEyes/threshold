@@ -293,7 +293,9 @@ const _addSoundCalibrationElems = (copy) => {
   const noButton = document.createElement("button");
   const testButton = document.createElement("button");
   const soundLevelsTable = document.createElement("table");
+  const soundTestContainer = document.createElement("div");
   const soundParametersFromCalibration = document.createElement("div");
+  const soundTestPlots = document.createElement("div");
   const elems = {
     background,
     title,
@@ -309,6 +311,8 @@ const _addSoundCalibrationElems = (copy) => {
     testButton,
     soundLevelsTable,
     soundParametersFromCalibration,
+    soundTestPlots,
+    soundTestContainer,
   };
 
   title.setAttribute("id", "soundTitle");
@@ -327,6 +331,8 @@ const _addSoundCalibrationElems = (copy) => {
     "id",
     "soundParametersFromCalibration"
   );
+  soundTestPlots.setAttribute("id", "soundTestPlots");
+  soundTestContainer.setAttribute("id", "soundTestContainer");
 
   title.innerHTML = copy.soundCalibration;
   subtitle.innerHTML = copy.title;
@@ -353,7 +359,9 @@ const _addSoundCalibrationElems = (copy) => {
   displayContainer.appendChild(displayQR);
   displayContainer.appendChild(displayUpdate);
   container.appendChild(soundLevelsTable);
-  container.appendChild(soundParametersFromCalibration);
+  soundTestContainer.appendChild(soundParametersFromCalibration);
+  soundTestContainer.appendChild(soundTestPlots);
+  container.appendChild(soundTestContainer);
   document.body.appendChild(background);
 
   _addSoundCss();
