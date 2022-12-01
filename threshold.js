@@ -369,8 +369,10 @@ const paramReaderInitialized = async (reader) => {
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
 
+  // get debug mode from reader
+  debugBool.current = reader.read("_debugBool")[0];
+
   buildWindowErrorHandling(reader);
-  // await sleep(250);
 
   // if (rc.concurrency.value <= 0) {
   //   await rc.performance();
@@ -419,9 +421,6 @@ const paramReaderInitialized = async (reader) => {
     showExperimentEnding();
     return;
   }
-
-  // get debug mode from reader
-  debugBool.current = reader.read("_debugBool")[0];
 
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
@@ -518,7 +517,7 @@ const paramReaderInitialized = async (reader) => {
       formCalibrationList(reader),
       "#rc-panel-holder",
       {
-        debug: debug,
+        debug: debug || debugBool.current,
       },
       async () => {
         if (!experimentStarted.current) {
