@@ -1,0 +1,52 @@
+_about,Demo Gabor,,
+_authors,Denis Pelli,,
+_compatibleBrowser,"Chrome,Edge",,
+_compatibleDeviceType,desktop,,
+_compatibleProcessorCoresMinimum,6,,
+%_consentForm,2022-01 IRB-FY2016-404 Remote Testing.pdf,,
+%_debriefForm,2022-01 IRB-FY2016-404 Debrief.pdf,,
+_participantDurationMinutes,9,,
+_participantRecruitmentService,Prolific,,
+_prolificProjectID,62cd33e1566da7aa25d1790f,,
+block,1,2,2
+calibrateScreenSizeBool,,TRUE,TRUE
+calibrateTrackDistanceBool,,FALSE,FALSE
+conditionName,English fluency,vertical Gabor,horizontal Gabor
+conditionTrials,,3,3
+fontCharacterSet,,HVLR,HVLR
+movieComputeJS,,tiltedGabor.js,tiltedGabor.js
+movieHz,,1,1
+movieLuminanceNit,500,500,500
+movieRectDeg,,"-5,-5,5,5","-5,-5,5,5"
+movieRectPxContainsRectDegBool,,FALSE,FALSE
+movieSec,,1,1
+movieTargetDelaySec,,0,0
+questionAndAnswer01,EN1|banana|Which of the following words is a fruit?|paper|table|café|banana|director,,
+%questionAndAnswer02,EN2|shovel|Which of the following words is a tool?|school|shovel|farm|laundromat|dumpster,,
+responseClickedBool,,TRUE,TRUE
+responseMustClickCrosshairBool,,TRUE,TRUE
+responseTypedBool,,TRUE,TRUE
+showConditionNameBool,,TRUE,TRUE
+showCounterBool,,TRUE,TRUE
+targetContrast,1,1,1
+targetCyclePerDeg,,3,3
+targetDurationSec,,1,1
+targetEccentricityXDeg,,0,0
+targetEccentricityYDeg,,0,0
+targetKind,,movie,movie
+targetOrientationDeg,,0,90
+targetPhaseDeg,,0,0
+targetSizeIsHeightBool,,FALSE,FALSE
+targetSpaceConstantDeg,,2,2
+targetTask,questionAndAnswer,identify,identify
+thresholdGuess,,0.1,0.1
+thresholdParameter,targetContrast,targetContrast,targetContrast
+viewingDistanceDesiredCm,,50,50
+
+
+
+
+
+
+
+
