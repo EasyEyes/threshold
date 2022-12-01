@@ -766,8 +766,24 @@ export const displayParameters = (
   // sort the data points by x
   model.sort((a, b) => a.x - b.x);
 
+  const modelWithOutBackground = soundLevels.map((x, i) => {
+    return {
+      x: x,
+      y: SoundLevelModel(
+        Number(x),
+        -Infinity,
+        parameters.gainDBSPL,
+        parameters.T,
+        parameters.W,
+        parameters.R
+      ),
+    };
+  });
+  // sort the data points by x
+  modelWithOutBackground.sort((a, b) => a.x - b.x);
   // console.log("model", model);
   // console.log("mergedDataPoints", mergedDataPoints);
+  // console.log("modelWithOutBackground", modelWithOutBackground);
 
   // plot both the data points (dot) and the model (line)
   const data = {
@@ -791,6 +807,19 @@ export const displayParameters = (
         pointRadius: 3,
         pointHoverRadius: 5,
         showLine: true,
+        tension: 0.1,
+      },
+      {
+        type: "line",
+        label: "Model without background",
+        data: modelWithOutBackground,
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        showLine: true,
+        borderDash: [5, 5],
         tension: 0.1,
       },
     ],
