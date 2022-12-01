@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "./js",
     "noImplicitAny": true,
     "module": "es2022",
     "target": "es2021",
@@ -8,5 +9,6 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-  }
+  },
+  "exclude": ["node_modules", "js"]
 }
