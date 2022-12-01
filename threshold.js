@@ -4177,6 +4177,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // responseType.current = 1;
           },
           movie: () => {
+            // _letter_trialRoutineFirstFrame(
+            //   paramReader,
+            //   thresholdParameter,
+            //   targetSpecs,
+            //   conditionName,
+            //   target,
+            //   flanker1,
+            //   flanker2
+            // );
             // play the movie only for the first frame ( not needed here )
             //video.attributes
             //video.style.zIndex = "1000009";
