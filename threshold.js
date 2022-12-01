@@ -145,6 +145,7 @@ import {
   loggerText,
   hideCursor,
   showCursor,
+  sampleWithoutReplacement,
   toShowCursor,
   XYPixOfXYDeg,
   addConditionToData,
@@ -368,6 +369,8 @@ import {
 
 var videoblob = [];
 const video = document.createElement("video");
+video.style.position = "absolute";
+video.style.zIndex = 20000;
 const source = document.createElement("source");
 const loader = document.createElement("loader");
 const loaderText = document.createElement("p");
@@ -1559,6 +1562,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 seed: Math.round(performance.now()),
               });
               logger("Rajat trials", trials);
+              fixationConfig.show = true;
             },
           });
         },
@@ -3398,12 +3402,41 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         movie: () => {
           readAllowedTolerances(tolerances, reader, BC);
-          readTrialLevelLetterParams(reader, BC);
           clickedContinue.current = false;
           document.addEventListener("click", _takeFixationClick);
           document.addEventListener("touchend", _takeFixationClick);
 
           level = currentLoop._currentStaircase.getQuestValue();
+
+          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
+
+          // thresholdParameter = reader.read("thresholdParameter", BC);
+
+          validAns = String(reader.read("fontCharacterSet", BC))
+            .toLowerCase()
+            .split("");
+          var [targetOrientation] = sampleWithoutReplacement(
+            fontCharacterSet.current,
+            1
+          );
+          if (debug)
+            console.log(
+              `%c${targetOrientation}`,
+              `color: red; font-size: 1.5rem; font-family: "${font.name}"`
+            );
+          correctAns.current = [targetOrientation.toLowerCase()];
+          /* -------------------------------------------------------------------------- */
+
+          fixation.update(
+            paramReader,
+            BC,
+            100, // stimulusParameters.heightPx,
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+          );
+          fixationConfig.pos = fixationConfig.nominalPos;
+          fixation.setPos(fixationConfig.pos);
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
 
           //generate movie
           loggerText("Generate movie here");
@@ -3424,21 +3457,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //   videoblob = data;
           //   logger("data", data);
           // });
-          fixation.update(
-            paramReader,
-            BC,
-            100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
-          );
-          fixationConfig.pos = fixationConfig.nominalPos;
-          fixation.setPos(fixationConfig.pos);
-          fixation.tStart = t;
-          fixation.frameNStart = frameN;
+          showCharacterSet.setPos([0, 0]);
+          showCharacterSet.setText("");
+          //showCharacterSet.setText(getCharacterSetShowText(validAns));
 
           trialComponents = [];
-          trialComponents.push(...fixation.stims);
           trialComponents.push(key_resp);
-          //trialComponents.push(showCharacterSet);
+          trialComponents.push(...fixation.stims);
+
+          trialComponents.push(showCharacterSet);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
         },
@@ -3687,6 +3714,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ];
             offsetStimsToFixationPos(stimsToOffset);
           }
+        },
+        movie: () => {
+          _identify_trialInstructionRoutineEnd(
+            instructions,
+            _takeFixationClick,
+            fixation
+          );
         },
       });
 
@@ -4144,7 +4178,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           movie: () => {
             // play the movie only for the first frame ( not needed here )
-            document.body.appendChild(video);
             //video.attributes
             //video.style.zIndex = "1000009";
             //video.style.position = "absolute";
@@ -4433,20 +4466,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           logger("len videoblob", videoblob.length);
           if (videoblob.length > 0 && video_flag == 1) {
             logger("Running ");
-            document.querySelector("canvas").style.display = "none";
-            document.getElementById("root").style.display = "none";
+            // document.querySelector("canvas").style.display = "none";
+            // document.getElementById("root").style.display = "none";
             loader.style.display = "none";
             loaderText.style.display = "none";
             video.setAttribute("src", videoblob);
+            document.body.appendChild(video);
             video.play();
             video_flag = 0;
           }
+
           // if movie is done register responses
-          //
+
           video.onended = function () {
-            continueRoutine = false;
+            // continueRoutine = false;
             video_flag = 1;
             videoblob = [];
+            logger("played");
+            document.body.removeChild(video);
           };
           break;
       }
@@ -4642,6 +4679,37 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetKind.current
             );
 
+            instructions.tSTart = t;
+            instructions.frameNStart = frameN;
+            instructions.setAutoDraw(true);
+          }
+        },
+        movie: () => {
+          // *showCharacterSet* updates
+          if (
+            t >=
+              delayBeforeStimOnsetSec +
+                letterConfig.targetSafetyMarginSec +
+                letterConfig.targetDurationSec &&
+            showCharacterSet.status === PsychoJS.Status.NOT_STARTED
+          ) {
+            // keep track of start time/frame for later
+            showCharacterSet.tStart = t; // (not accounting for frame time here)
+            showCharacterSet.frameNStart = frameN; // exact frame index
+            showCharacterSet.setAutoDraw(true);
+            setupClickableCharacterSet(
+              fontCharacterSet.current,
+              font.name,
+              fontCharacterSet.where,
+              showCharacterSetResponse,
+              null,
+              "",
+              targetKind.current
+            );
+
+            instructions.setText(
+              "Please identify the orientation by selecting a letter.\n V means vertical, H means horizontal, R means tilted right, and L means tilted left."
+            );
             instructions.tSTart = t;
             instructions.frameNStart = frameN;
             instructions.setAutoDraw(true);
