@@ -1,5 +1,5 @@
-import * as FFmpeg from "./js/ffmpeg.min.js";
-import * as IJS from "./js/image-js.min.js";
+import * as FFmpeg from "./addons/ffmpeg.min.js";
+import { Image } from "image-js";
 import axios from "axios";
 
 import { preprocessRawCorpus } from "./reading.ts";
@@ -30,7 +30,7 @@ export async function generate_image(bitmapArray) {
         data[i++] = 65535;
       }
     }
-    let image = new IJS.Image(width, height, data, {
+    let image = new Image(width, height, data, {
       alpha: 1,
       kind: "RGBA",
       bitDepth: 16,

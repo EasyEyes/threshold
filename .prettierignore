@@ -2,8 +2,8 @@
 package.json
 package-lock.json
 
-addons/*.js
-addons/*.js.map
+**/addons/*.js
+**/addons/*.js.map
 lib/*.js
 lib/*.js.map
 
