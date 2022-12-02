@@ -97,6 +97,7 @@ export const addPopupLogic = async (keyName, responseType, func = null) => {
     const handleKeyResponse = (e) => {
       e.preventDefault();
       if (e.key === "Enter") {
+        e.stopPropagation();
         proceed();
         document.removeEventListener("keydown", handleKeyResponse);
       }
