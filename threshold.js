@@ -13,6 +13,8 @@ import {
   toFixedNumber,
 } from "./components/utils.js";
 
+import Swal from "sweetalert2";
+
 import * as core from "./psychojs/src/core/index.js";
 import * as data from "./psychojs/src/data/index.js";
 import * as util from "./psychojs/src/util/index.js";
@@ -42,7 +44,7 @@ import "./components/css/forms.css";
 import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
 import "./components/css/psychojsExtra.css";
-
+import "./components/css/video.css";
 ////
 /* -------------------------------------------------------------------------- */
 /* --------------------------------- Global --------------------------------- */
@@ -120,6 +122,11 @@ import {
 } from "./components/global.js";
 
 import {
+  evaluateJSCode,
+  generate_video,
+} from "./components/imageAndVideoGeneration.js";
+
+import {
   clock,
   getTinyHint,
   psychoJS,
@@ -138,6 +145,7 @@ import {
   loggerText,
   hideCursor,
   showCursor,
+  sampleWithoutReplacement,
   toShowCursor,
   XYPixOfXYDeg,
   addConditionToData,
@@ -359,6 +367,15 @@ import {
 
 /* -------------------------------------------------------------------------- */
 
+var videoblob = [];
+const video = document.createElement("video");
+video.style.position = "absolute";
+video.style.zIndex = 20000;
+const source = document.createElement("source");
+const loader = document.createElement("loader");
+const loaderText = document.createElement("p");
+let video_flag = 1;
+
 window.jsQUEST = jsQUEST;
 
 const fontsRequired = {};
@@ -366,6 +383,7 @@ var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
+  logger("Rajat paramReaderInitialized called");
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
 
@@ -560,6 +578,7 @@ var characterSetBoundingRects = {};
 const experiment = (howManyBlocksAreThereInTotal) => {
   ////
   // Resources
+  logger("Rajat experiment function called");
   initializeEscHandlingDiv();
   const _resources = [];
   const blockNumbers = paramReader._experiment.map((block) => block.block);
@@ -698,6 +717,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // var frameDur;
   async function updateInfo() {
+    logger("Rajat updateInfo async");
     thisExperimentInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     thisExperimentInfo["expName"] = thisExperimentInfo.name;
     thisExperimentInfo[
@@ -810,6 +830,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     blockScheduleFinalClock;
 
   async function experimentInit() {
+    logger("Rajat experimentInit called");
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
@@ -1055,7 +1076,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     displayOptions.window = psychoJS.window;
 
     grid.current = new Grid("disabled", displayOptions, psychoJS);
-
+    logger("Rajat experimentInit ended");
     return Scheduler.Event.NEXT;
   }
 
@@ -1067,6 +1088,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineBegin(snapshot) {
     return async function () {
+      logger(
+        "Rajat return of fileRoutineBegin called with parameter snapshot :",
+        snapshot
+      );
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       //------Prepare to start Routine 'file'-------
@@ -1087,6 +1112,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineEachFrame() {
     return async function () {
+      logger("Rajat return of fileRoutineEachFrame called");
       /* --- SIMULATED --- */
       if (simulated) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
@@ -1121,6 +1147,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
       // refresh the screen if continuing
+      logger("Rajat continueRoutine is", continueRoutine);
       if (continueRoutine) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
@@ -1132,6 +1159,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineEnd() {
     return async function () {
+      logger("Rajat fileRoutineEnd called");
       //------Ending Routine 'file'-------
       for (const thisComponent of fileComponents) {
         if (typeof thisComponent.setAutoDraw === "function") {
@@ -1147,6 +1175,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   function _instructionSetup(text) {
+    logger("Rajat _instructionSetup called");
     t = 0;
     instructionsClock.reset(); // clock
     frameN = -1;
@@ -1163,6 +1192,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     wrapWidth = window.innerWidth / 4,
     pos = [-window.innerWidth / 2 + 5, window.innerHeight / 2 - 5]
   ) {
+    logger("Rajat _instructionBeforeStimulusSetup called");
     t = 0;
     instructionsClock.reset(); // clock
     frameN = -1;
@@ -1176,6 +1206,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function _instructionRoutineEachFrame() {
+    logger("Rajat _instructionRoutineEachFrame called");
     /* --- SIMULATED --- */
     if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
     /* --- /SIMULATED --- */
@@ -1196,6 +1227,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     if (!continueRoutine || clickedContinue.current) {
+      logger(
+        "Rajat inside if statement of _instructionRoutineEachFrame continueRoutine",
+        continueRoutine
+      );
+      logger(
+        "Rajat inside if statement of _instructionRoutineEachFrame clickedContinue.current",
+        clickedContinue.current
+      );
       continueRoutine = true;
       clickedContinue.current = false;
       return Scheduler.Event.NEXT;
@@ -1205,10 +1244,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     switchKind(targetKind.current, {
       letter: () => {
+        //logger("Rajat inside switch (letter) statement of _instructionRoutineEachFrame")
         if (
           canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
         ) {
+          logger(
+            "Rajat inside switch's (letter) if statement of _instructionRoutineEachFrame"
+          );
           continueRoutine = false;
           removeProceedButton();
         }
@@ -1272,6 +1315,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     return async function () {
+      logger("Rajat return blocksLoopBegin called");
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
 
       // set up handler to look after randomisation of conditions etc
@@ -1501,6 +1545,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 seed: Math.round(performance.now()),
               });
             },
+            movie: () => {
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader,
+                "movie"
+              );
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                nTrials: totalTrialsThisBlock.current,
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+              });
+              logger("Rajat trials", trials);
+              fixationConfig.show = true;
+            },
           });
         },
         detect: () => {
@@ -1597,7 +1660,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       (targetKind.current === "letter" ||
         targetKind.current == "sound" ||
         targetKind.current === "repeatedLetters" ||
-        targetKind.current === "rsvpReading")
+        targetKind.current === "rsvpReading" ||
+        targetKind.current === "movie")
     ) {
       // Proportion correct
       showPopup(
@@ -1945,6 +2009,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 0
               );
             },
+            movie: () => {
+              const possibleTrials = paramReader.read(
+                "conditionTrials",
+                status.block
+              );
+              totalTrialsThisBlock.current = possibleTrials.reduce(
+                (a, b) => a + b,
+                0
+              );
+            },
           });
         },
         detect: () => {
@@ -2056,6 +2130,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   /* ------------------------- Block Init Instructions ------------------------ */
   // BLOCK 1st INSTRUCTION
   function initInstructionRoutineBegin(snapshot) {
+    logger("Rajat initInstructionRoutineBegin called");
     return async function () {
       loggerText(
         `initInstructionRoutineBegin targetKind ${targetKind.current}`
@@ -2228,6 +2303,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // PADDING
           readingParagraph.setPadding(
             paramReader.read("fontPadding", status.block)[0]
+          );
+        },
+        movie: () => {
+          loggerText("inside movie");
+          _instructionSetup(
+            snapshot.block === 0 ? instructionsText.initial(L) : ""
           );
         },
       });
@@ -2540,6 +2621,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterSetResponseType();
         },
         repeatedLetters: () => {
+          for (let c of snapshot.handler.getConditions()) {
+            if (c.block_condition === trials._currentStaircase._name) {
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
+            }
+          }
+          letterSetResponseType();
+        },
+        movie: () => {
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
@@ -3310,6 +3400,75 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(renderObj.tinyHint);
           // trialComponents.push(...rsvpReadingFeedback.stims);
         },
+        movie: () => {
+          readAllowedTolerances(tolerances, reader, BC);
+          clickedContinue.current = false;
+          document.addEventListener("click", _takeFixationClick);
+          document.addEventListener("touchend", _takeFixationClick);
+
+          level = currentLoop._currentStaircase.getQuestValue();
+
+          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
+
+          // thresholdParameter = reader.read("thresholdParameter", BC);
+
+          validAns = String(reader.read("fontCharacterSet", BC))
+            .toLowerCase()
+            .split("");
+          var [targetOrientation] = sampleWithoutReplacement(
+            fontCharacterSet.current,
+            1
+          );
+          if (debug)
+            console.log(
+              `%c${targetOrientation}`,
+              `color: red; font-size: 1.5rem; font-family: "${font.name}"`
+            );
+          correctAns.current = [targetOrientation.toLowerCase()];
+          /* -------------------------------------------------------------------------- */
+
+          fixation.update(
+            paramReader,
+            BC,
+            100, // stimulusParameters.heightPx,
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+          );
+          fixationConfig.pos = fixationConfig.nominalPos;
+          fixation.setPos(fixationConfig.pos);
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
+
+          //generate movie
+          loggerText("Generate movie here");
+          //var F = new Function(paramReader.read("computeImageJS", BC))();
+          evaluateJSCode(paramReader, status, displayOptions).then(
+            (imageNit) => {
+              generate_video(imageNit).then((data) => {
+                videoblob = data;
+              });
+            }
+          );
+          loader.setAttribute("id", "loader");
+          loaderText.setAttribute("id", "loaderText");
+          document.body.appendChild(loader);
+          document.body.appendChild(loaderText);
+          loaderText.innerHTML = "Generating movie";
+          // generate_video(imageNit).then((data) => {
+          //   videoblob = data;
+          //   logger("data", data);
+          // });
+          showCharacterSet.setPos([0, 0]);
+          showCharacterSet.setText("");
+          //showCharacterSet.setText(getCharacterSetShowText(validAns));
+
+          trialComponents = [];
+          trialComponents.push(key_resp);
+          trialComponents.push(...fixation.stims);
+
+          trialComponents.push(showCharacterSet);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
+        },
       });
 
       const customInstructions = getCustomInstructionText(
@@ -3441,6 +3600,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: letterEachFrame,
         repeatedLetters: letterEachFrame,
         rsvpReading: letterEachFrame,
+        movie: () => {
+          continueRoutine = false;
+        },
       });
 
       if (showConditionNameConfig.show) {
@@ -3552,6 +3714,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ];
             offsetStimsToFixationPos(stimsToOffset);
           }
+        },
+        movie: () => {
+          _identify_trialInstructionRoutineEnd(
+            instructions,
+            _takeFixationClick,
+            fixation
+          );
         },
       });
 
@@ -3779,6 +3948,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
         },
+        movie: () => {
+          responseType.current = resetResponseType(
+            responseType.original,
+            responseType.current,
+            paramReader.read(
+              "responseMustClickCrosshairBool",
+              status.block_condition
+            )
+          );
+        },
       });
 
       ////
@@ -3996,6 +4175,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReading: () => {
             //only clickable
             // responseType.current = 1;
+          },
+          movie: () => {
+            // _letter_trialRoutineFirstFrame(
+            //   paramReader,
+            //   thresholdParameter,
+            //   targetSpecs,
+            //   conditionName,
+            //   target,
+            //   flanker1,
+            //   flanker2
+            // );
+            // play the movie only for the first frame ( not needed here )
+            //video.attributes
+            //video.style.zIndex = "1000009";
+            //video.style.position = "absolute";
+            //set continueRoutine = false once movie is over
           },
         });
       }
@@ -4275,6 +4470,31 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             instructions
           );
           break;
+        case "movie":
+          // Play the movie here
+          logger("len videoblob", videoblob.length);
+          if (videoblob.length > 0 && video_flag == 1) {
+            logger("Running ");
+            // document.querySelector("canvas").style.display = "none";
+            // document.getElementById("root").style.display = "none";
+            loader.style.display = "none";
+            loaderText.style.display = "none";
+            video.setAttribute("src", videoblob);
+            document.body.appendChild(video);
+            video.play();
+            video_flag = 0;
+          }
+
+          // if movie is done register responses
+
+          video.onended = function () {
+            // continueRoutine = false;
+            video_flag = 1;
+            videoblob = [];
+            logger("played");
+            document.body.removeChild(video);
+          };
+          break;
       }
 
       if (targetKind.current === "letter") {
@@ -4468,6 +4688,37 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetKind.current
             );
 
+            instructions.tSTart = t;
+            instructions.frameNStart = frameN;
+            instructions.setAutoDraw(true);
+          }
+        },
+        movie: () => {
+          // *showCharacterSet* updates
+          if (
+            t >=
+              delayBeforeStimOnsetSec +
+                letterConfig.targetSafetyMarginSec +
+                letterConfig.targetDurationSec &&
+            showCharacterSet.status === PsychoJS.Status.NOT_STARTED
+          ) {
+            // keep track of start time/frame for later
+            showCharacterSet.tStart = t; // (not accounting for frame time here)
+            showCharacterSet.frameNStart = frameN; // exact frame index
+            showCharacterSet.setAutoDraw(true);
+            setupClickableCharacterSet(
+              fontCharacterSet.current,
+              font.name,
+              fontCharacterSet.where,
+              showCharacterSetResponse,
+              null,
+              "",
+              targetKind.current
+            );
+
+            instructions.setText(
+              "Please identify the orientation by selecting a letter.\n V means vertical, H means horizontal, R means tilted right, and L means tilted left."
+            );
             instructions.tSTart = t;
             instructions.frameNStart = frameN;
             instructions.setAutoDraw(true);
