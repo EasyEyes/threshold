@@ -64,10 +64,10 @@
   line-height: 80%;
 }
 
-#plotCanvas {
+/* #plotCanvas {
   width: 100%;
-  height: 100%;
-}
+  height: 100%; 
+} */
 
 /* #soundTestContainer{
 
@@ -75,5 +75,7 @@
 
 #soundTestPlots {
   margin-left: 5%;
-  flex: 1;
+  margin-right: 5%;
+  /* height: 60vh; */
+  /* flex: 1; */
 }

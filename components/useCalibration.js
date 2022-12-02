@@ -186,6 +186,7 @@ export const calibrateAudio = async (reader) => {
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
     .split(",");
   // const soundLevels = [-3.1, -13.1];
+  // const soundLevels = [-3.1, -10,-20,-30,-40, -50]
   // change sound Levels to gain values
   const gains = soundLevels.map((soundLevel) => {
     return Math.pow(10, soundLevel / 20);
@@ -249,6 +250,20 @@ export const calibrateAudio = async (reader) => {
       //   ? "\nMeasured soundGainDBSPL " + String(soundGainDBSPL.current)
       //   : "");
       // display sound levels and soundGainDbSPL.current in a table
+      // test
+      // soundCalibrationResults.current = {
+      //   outDBSPL1000Values: [103.3,102.9,102.0,95.3,85.2,75],
+      //   thdValues:[85.7, 82.1, 79.3, 78.2, 76.4,74.5, 73.4,70.3, 63.0,-60.1, 47.8, 11.4],
+      //   outDBSPLValues:[85.7, 82.1, 79.3, 78.2, 76.4,74.5, 73.4,70.3, 63.0,-60.1, 47.8, 11.4],
+      //   parameters:{
+      //     T: 100,
+      //     W: 10,
+      //     R: 1000,
+      //     backgroundDBSPL: 18.6,
+      //     gainDBSPL: 125,
+      //     RMSError:0.1,
+      //   }
+      // }
       if (calibrateSoundLevel && soundCalibrationResults.current) {
         displayParameters(elems, soundLevels, soundCalibrationResults);
       }

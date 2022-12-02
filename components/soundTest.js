@@ -741,28 +741,33 @@ export const displayParameters = (
   // create plot canvas
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
-  // plotCanvas.style.width = "20%";
+  plotCanvas.width = 450;
+  plotCanvas.height = 500;
 
   elems.soundTestPlots.appendChild(plotCanvas);
-
   const mergedDataPoints = soundLevels.map((x, i) => {
     return { x: x, y: outDBSPL1000Values[i] };
   });
   // sort the data points by x
   mergedDataPoints.sort((a, b) => a.x - b.x);
-  const model = soundLevels.map((x, i) => {
-    return {
-      x: x,
+
+  // model should start from min of soundLevels and end at max of soundLevels with 0.1 interval
+  const model = [];
+  const minM = Math.min(...soundLevels);
+  const maxM = Math.max(...soundLevels);
+  for (let i = minM; i <= maxM; i += 0.1) {
+    model.push({
+      x: i,
       y: SoundLevelModel(
-        Number(x),
+        Number(i),
         parameters.backgroundDBSPL,
         parameters.gainDBSPL,
         parameters.T,
         parameters.W,
         parameters.R
       ),
-    };
-  });
+    });
+  }
   // sort the data points by x
   model.sort((a, b) => a.x - b.x);
 
@@ -779,11 +784,38 @@ export const displayParameters = (
       ),
     };
   });
+
   // sort the data points by x
   modelWithOutBackground.sort((a, b) => a.x - b.x);
-  // console.log("model", model);
-  // console.log("mergedDataPoints", mergedDataPoints);
-  // console.log("modelWithOutBackground", modelWithOutBackground);
+
+  // min of y values
+  // const min = Math.min(
+  //   ...mergedDataPoints.map(({ y }) => y),
+  //   ...model.map(({ y }) => y),
+  //   ...modelWithOutBackground.map(({ y }) => y)
+  // );
+  // const minValue = Math.floor(min/10)*10;
+  // // console.log("minValue", minValue);
+  // const max = Math.max(
+  //   ...mergedDataPoints.map(({ y }) => y),
+  //   ...model.map(({ y }) => y),
+  //   ...modelWithOutBackground.map(({ y }) => y)
+  // );
+  // const maxValue = Math.ceil(max/10)*10;
+
+  // //min of x values
+  // const minx = Math.min(
+  //   ...mergedDataPoints.map(({ x }) => x),
+  //   ...model.map(({ x }) => x),
+  //   ...modelWithOutBackground.map(({ x }) => x)
+  // );
+  // const minValueX = Math.floor(minx/10)*10;
+  // const maxx = Math.max(
+  //   ...mergedDataPoints.map(({ x }) => x),
+  //   ...model.map(({ x }) => x),
+  //   ...modelWithOutBackground.map(({ x }) => x)
+  // );
+  // const maxValueX = Math.ceil(maxx/10)*10;
 
   // plot both the data points (dot) and the model (line)
   const data = {
@@ -804,8 +836,8 @@ export const displayParameters = (
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
         borderWidth: 1,
-        pointRadius: 3,
-        pointHoverRadius: 5,
+        pointRadius: 0.5,
+        pointHoverRadius: 2,
         showLine: true,
         tension: 0.1,
       },
@@ -816,8 +848,8 @@ export const displayParameters = (
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
         borderWidth: 1,
-        pointRadius: 3,
-        pointHoverRadius: 5,
+        pointRadius: 1,
+        pointHoverRadius: 2,
         showLine: true,
         borderDash: [5, 5],
         tension: 0.1,
@@ -829,14 +861,47 @@ export const displayParameters = (
     type: "scatter",
     data: data,
     options: {
+      responsive: false,
+      // aspectRatio : 1,
+      plugins: {
+        legend: {
+          labels: {
+            usePointStyle: true,
+            generateLabels: function (chart) {
+              const data = chart.data;
+              if (data.datasets.length) {
+                return data.datasets.map(function (dataset, i) {
+                  return {
+                    text: dataset.label,
+                    fillStyle: dataset.backgroundColor,
+                    strokeStyle: dataset.borderColor,
+                    lineWidth: dataset.borderWidth,
+                    hidden: !chart.isDatasetVisible(i),
+                    index: i,
+                    lineDash: dataset.borderDash,
+                    pointStyle: "line",
+                    lineWidth: 1,
+                  };
+                });
+              }
+              return [];
+            },
+          },
+        },
+      },
       scales: {
         x: {
           type: "linear",
           position: "bottom",
           title: {
             display: true,
-            text: "in (dB)",
+            text: "in (dB SPL)",
           },
+          ticks: {
+            stepSize: 10,
+          },
+          // min:  minValueX,
+          // max: maxValueX,
         },
         y: {
           type: "linear",
@@ -845,6 +910,11 @@ export const displayParameters = (
             display: true,
             text: "out (dB SPL)",
           },
+          ticks: {
+            stepSize: 10,
+          },
+          // min: minValue,
+          // max: maxValue> minValue + 100? maxValue: minValue + 100,
         },
       },
     },
