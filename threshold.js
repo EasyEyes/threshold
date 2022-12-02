@@ -4362,6 +4362,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
+            movie: () => {
+              correctSynth.play();
+              status.trialCorrect_thisBlock++;
+              status.trialCompleted_thisBlock++;
+            },
           });
           // CORRECT
           key_resp.corr = 1;
@@ -5059,6 +5064,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               giveToQuest
             );
             phraseIdentificationResponse.correct = [];
+          },
+          movie: () => {
+            //TODO
+            addTrialStaircaseSummariesToData(currentLoop, psychoJS);
           },
         });
 
