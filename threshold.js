@@ -2149,7 +2149,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("responseTypedBool", status.block)[0],
         paramReader.read("responseTypedEasyEyesKeypadBool", status.block)[0],
         paramReader.read("responseSpokenBool", status.block)[0],
-        paramReader.read("responseMustClickCrosshairBool", status.block)[0],
+        undefined,
         paramReader.read("responseSpokenToExperimenterBool", status.block)[0]
       );
 

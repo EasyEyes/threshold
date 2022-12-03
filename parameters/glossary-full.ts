@@ -728,7 +728,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "The color of the targets, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
     type: "text",
-    default: "0,0,0,1",
+    default: "0.6,0,0,1",
     categories: "",
   },
   {
