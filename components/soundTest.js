@@ -736,6 +736,9 @@ export const displayParameters = (
   RMSError: ${parameters.RMSError.toFixed(1)}
   `;
 
+  // button to download the soundLevelsTable and the parameters as a csv file
+  downloadCalibrationData(elems.downloadButton, parameters);
+
   // plot
   elems.soundTestContainer.style.display = "flex";
 
@@ -969,4 +972,43 @@ const SoundLevelModel = (inDb, backgroundDbSpl, gainDbSpl, T, W, R) => {
   // console.log("measuredDbSpl", measuredDbSpl);
 
   return measuredDbSpl;
+};
+
+const downloadCalibrationData = (downloadButton, parameters) => {
+  downloadButton.innerHTML = "Download";
+  downloadButton.style.marginTop = "10px";
+  downloadButton.style.marginBottom = "10px";
+  downloadButton.addEventListener("click", () => {
+    // traspose the soundLevelsTable
+    const table = document.getElementById("soundLevelsTable");
+    const tableRows = table.rows;
+    const tableColumns = tableRows[0].cells.length;
+    const tableRowsLength = tableRows.length;
+    const tableData = [];
+    for (let i = 0; i < tableColumns; i++) {
+      tableData[i] = [];
+      for (let j = 0; j < tableRowsLength; j++) {
+        tableData[i][j] = tableRows[j].cells[i].innerHTML;
+      }
+    }
+    // add the parameters to the tableData
+    tableData.push(["\nParameters"]);
+    tableData.push(["backgroundDbSpl", parameters.backgroundDBSPL.toFixed(1)]);
+    tableData.push(["gainDbSpl", parameters.gainDBSPL.toFixed(1)]);
+    tableData.push(["T", parameters.T.toFixed(1)]);
+    tableData.push(["W", parameters.W.toFixed(1)]);
+    tableData.push(["R", parameters.R.toFixed(1)]);
+
+    // convert the tableData to a csv string
+    const csvString = tableData
+      .map((e) => e.join(","))
+      .join(String.fromCharCode(13) + String.fromCharCode(10));
+    // download the csv string as a file
+    const a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURI(csvString);
+    a.target = "_blank";
+    a.download = "soundLevelsTable.csv";
+    document.body.appendChild(a);
+    a.click();
+  });
 };

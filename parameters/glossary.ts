@@ -318,6 +318,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  backgroundColorRGB: {
+    name: "backgroundColorRGB",
+    availability: "now",
+    type: "text",
+    default: "234,234,234",
+  },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
   calibrateBlindSpotBool: {
     name: "calibrateBlindSpotBool",
@@ -562,14 +568,14 @@ export const GLOSSARY: Glossary = {
     default: "regular",
     categories: ["regular", "bold", "italic", "boldItalic"],
   },
-  fontTrackingLetter: {
-    name: "fontTrackingLetter",
+  fontTrackingForLetters: {
+    name: "fontTrackingForLetters",
     availability: "now",
     type: "",
     default: "0",
   },
-  fontTrackingWord: {
-    name: "fontTrackingWord",
+  fontTrackingForWords: {
+    name: "fontTrackingForWords",
     availability: "now",
     type: "",
     default: "0",
@@ -1202,13 +1208,13 @@ export const GLOSSARY: Glossary = {
     name: "soundGainDBSPL",
     availability: "now",
     type: "numerical",
-    default: "80",
+    default: "125",
   },
   soundGainTWR: {
     name: "soundGainTWR",
     availability: "now",
     type: "text",
-    default: "0,0,1",
+    default: "100,10,100",
   },
   spacingDeg: {
     name: "spacingDeg",
@@ -1274,6 +1280,12 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "center",
     categories: ["center", "origin"],
+  },
+  targetColorRGB: {
+    name: "targetColorRGB",
+    availability: "now",
+    type: "text",
+    default: "0,0,0",
   },
   targetContrast: {
     name: "targetContrast",
