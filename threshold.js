@@ -2441,6 +2441,31 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker2.setAutoDraw(true);
         },
         rsvpReading: () => logger("TODO rsvpLetter eduInstructionRoutineBegin"),
+        movie: () => {
+          // IDENTIFY
+          _instructionSetup(instructionsText.edu(rc.language.value));
+
+          instructions2.setText(
+            instructionsText.eduBelow(rc.language.value, responseType.current)
+          );
+          instructions2.setWrapWidth(window.innerWidth * 0.8);
+          instructions2.setPos([
+            -window.innerWidth * 0.4,
+            -window.innerHeight * 0.4,
+          ]);
+          instructions2.setAutoDraw(true);
+          dynamicSetSize(
+            [instructions, instructions2],
+            instructionsConfig.height
+          );
+
+          var h = 50;
+
+          fixation.setVertices(getFixationVerticies(h));
+          fixation.setLineWidth(5);
+          fixation.setPos([0, 0]);
+          fixation.setAutoDraw(true);
+        },
       });
 
       psychoJS.eventManager.clearKeys();
@@ -3401,8 +3426,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // trialComponents.push(...rsvpReadingFeedback.stims);
         },
         movie: () => {
-          readAllowedTolerances(tolerances, reader, BC);
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
           clickedContinue.current = false;
+
           document.addEventListener("click", _takeFixationClick);
           document.addEventListener("touchend", _takeFixationClick);
 
@@ -3435,11 +3462,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
-          fixation.tStart = t;
-          fixation.frameNStart = frameN;
 
           //generate movie
-          loggerText("Generate movie here");
+          // loggerText("Generate movie here");
           //var F = new Function(paramReader.read("computeImageJS", BC))();
           evaluateJSCode(paramReader, status, displayOptions).then(
             (imageNit) => {
@@ -3448,11 +3473,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               });
             }
           );
-          loader.setAttribute("id", "loader");
-          loaderText.setAttribute("id", "loaderText");
-          document.body.appendChild(loader);
-          document.body.appendChild(loaderText);
-          loaderText.innerHTML = "Generating movie";
+          // loader.setAttribute("id", "loader");
+          // loaderText.setAttribute("id", "loaderText");
+          // document.body.appendChild(loader);
+          // document.body.appendChild(loaderText);
+          // loaderText.innerHTML = "Generating movie";
           // generate_video(imageNit).then((data) => {
           //   videoblob = data;
           //   logger("data", data);
@@ -3600,9 +3625,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: letterEachFrame,
         repeatedLetters: letterEachFrame,
         rsvpReading: letterEachFrame,
-        movie: () => {
-          continueRoutine = false;
-        },
+        movie: letterEachFrame,
       });
 
       if (showConditionNameConfig.show) {
@@ -4721,9 +4744,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetKind.current
             );
 
-            instructions.setText(
-              "Please identify the orientation by selecting a letter.\n V means vertical, H means horizontal, R means tilted right, and L means tilted left."
-            );
+            // instructions.setText(
+            //   "Please identify the orientation by selecting a letter.\n V means vertical, H means horizontal, R means tilted right, and L means tilted left."
+            // );
             instructions.tSTart = t;
             instructions.frameNStart = frameN;
             instructions.setAutoDraw(true);
