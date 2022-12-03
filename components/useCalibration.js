@@ -451,10 +451,10 @@ const _runSoundLevelCalibration = async (elems, gains) => {
   } = speakerCalibrator;
 
   const speakerParameters = {
-    siteUrl: "https://hqjq0u.deta.dev",
+    siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
     gainValues: gains,
-    debug: false,
+    debug: debugBool.current,
     ICalib: ICalibDBSPL.current,
   };
 
@@ -488,7 +488,7 @@ const _runLoudspeakerCalibration = async (elems) => {
   } = speakerCalibrator;
 
   const speakerParameters = {
-    siteUrl: "https://hqjq0u.deta.dev",
+    siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
     debug: debugBool.current,
   };

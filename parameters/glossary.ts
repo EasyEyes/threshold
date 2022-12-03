@@ -318,12 +318,6 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  backgroundColorRGB: {
-    name: "backgroundColorRGB",
-    availability: "now",
-    type: "text",
-    default: "234,234,234",
-  },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
   calibrateBlindSpotBool: {
     name: "calibrateBlindSpotBool",
@@ -529,6 +523,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "abcdefghijklmnopqrstuvwxyz",
+  },
+  fontColorRGBA: {
+    name: "fontColorRGBA",
+    availability: "now",
+    type: "text",
+    default: "0,0,0,1",
   },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
@@ -1012,6 +1012,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  screenColorRGB: {
+    name: "screenColorRGB",
+    availability: "now",
+    type: "text",
+    default: "0.92,0.92,0.92",
+  },
   screenshotBool: {
     name: "screenshotBool",
     availability: "now",
@@ -1280,12 +1286,6 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "center",
     categories: ["center", "origin"],
-  },
-  targetColorRGB: {
-    name: "targetColorRGB",
-    availability: "now",
-    type: "text",
-    default: "0,0,0",
   },
   targetContrast: {
     name: "targetContrast",

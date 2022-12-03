@@ -381,15 +381,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "backgroundColorRGB",
-    availability: "now",
-    example: "",
-    explanation: "The color of the background for the experiment.",
-    type: "text",
-    default: "234,234,234",
-    categories: "",
-  },
-  {
     name: "block",
     availability: "now",
     example: "1",
@@ -728,6 +719,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "fontCharacterSet is a string of unicode characters. \nLETTER IDENTIFICATION: On each trial, the target and flankers are randomly drawn from this character set, without replacement. Allowed responses are restricted to this character set. The other keys on the keyboard are dead. Letters may appear more than once in the string, to increase their probability of being drawn, but once one is drawn any identical letters are removed with it, so the drawn samples won't have any repeats. (We have no experience using repeats in the fontCharacterSet.)\nREADING: The fontCharacterSet string is used to estimate typical spacing. For English I use lowercase a-z. ",
     type: "text",
     default: "abcdefghijklmnopqrstuvwxyz",
+    categories: "",
+  },
+  {
+    name: "fontColorRGBA",
+    availability: "now",
+    example: "",
+    explanation:
+      "The color of the targets, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
+    type: "text",
+    default: "0,0,0,1",
     categories: "",
   },
   {
@@ -1531,6 +1532,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "screenColorRGB",
+    availability: "now",
+    example: "",
+    explanation:
+      "The background color for the condition, in RGB, on a scale of 0 to 1 for each dimension.",
+    type: "text",
+    default: "0.92,0.92,0.92",
+    categories: "",
+  },
+  {
     name: "screenshotBool",
     availability: "now",
     example: "TRUE",
@@ -1946,15 +1957,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "center",
     categories: "center, origin",
-  },
-  {
-    name: "targetColorRGB",
-    availability: "now",
-    example: "",
-    explanation: "The color of the target letters.",
-    type: "text",
-    default: "0,0,0",
-    categories: "",
   },
   {
     name: "targetContrast",
