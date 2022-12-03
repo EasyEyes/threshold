@@ -736,6 +736,8 @@ export const displayParameters = (
   RMSError: ${parameters.RMSError.toFixed(1)}
   `;
 
+  elems.downloadButton.style.visibility = "visible";
+  elems.downloadButton.classList.add(...["btn", "btn-success"]);
   // button to download the soundLevelsTable and the parameters as a csv file
   downloadCalibrationData(elems.downloadButton, parameters);
 

@@ -365,7 +365,8 @@ const _addSoundCalibrationElems = (copy) => {
   yesButton.classList.add(...["btn", "btn-primary"]);
   noButton.classList.add(...["btn", "btn-secondary"]);
   testButton.classList.add(...["btn", "btn-success"]);
-  downloadButton.classList.add(...["btn", "btn-success"]);
+  //make download button invisible
+  downloadButton.style.visibility = "hidden";
 
   background.appendChild(container);
   container.appendChild(title);
