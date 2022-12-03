@@ -622,10 +622,12 @@ export const CompressorDb = (inDb, T, R, W) => {
   // http://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf
 
   let outDb = 0;
-  if (inDb > T + W / 2) {
+  const WFinal = W >= 0 ? W : 0;
+  if (inDb > T + WFinal / 2) {
     outDb = T + (inDb - T) / R;
-  } else if (inDb > T - W / 2) {
-    outDb = inDb + ((1 / R - 1) * (inDb - (T - W / 2)) ** 2) / (2 * W);
+  } else if (inDb > T - WFinal / 2) {
+    outDb =
+      inDb + ((1 / R - 1) * (inDb - (T - WFinal / 2)) ** 2) / (2 * WFinal);
   } else {
     outDb = inDb;
   }
