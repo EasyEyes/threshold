@@ -57,11 +57,17 @@ export const cleanFileName = (filename) => {
 export const colorRGBASnippetToRGBA = (rgbaSnippet) => {
   // 0.8,0.8,0.8,1 to rgba(0.8 * 255,0.8 * 255,0.8 * 255,1)
   let rgba = rgbaSnippet.split(",");
+
+  // if any value is undefined, replace with 1
+  for (let i = 0; i < rgba.length; i++) if (rgba[i] === undefined) rgba[i] = 1;
+  if (rgba.length === 3) rgba.push(1);
+
   let rgbaString = "rgba(";
   for (let i = 0; i < 3; i++) {
     rgbaString += parseFloat(rgba[i]) * 255 + ",";
   }
   rgbaString += rgba[3] + ")";
+
   return rgbaString;
 };
 

@@ -132,6 +132,8 @@ const pushCharacterSet = (
       addFakeConnection && targetKind !== "reading" ? `&zwj;${a}&zwj;` : a;
     characterSet.style.direction = globalFont.ltr ? "ltr" : "rtl";
 
+    characterSet.style.color = colorRGBASnippetToRGBA(globalFont.colorRGBA);
+
     // TODO customize for letter config
     characterSet.style.fontSize = "2rem";
 
