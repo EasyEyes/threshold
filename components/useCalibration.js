@@ -311,6 +311,8 @@ const _addSoundCalibrationElems = (copy) => {
   const soundTestContainer = document.createElement("div");
   const soundParametersFromCalibration = document.createElement("div");
   const soundTestPlots = document.createElement("div");
+  const downloadButton = document.createElement("button");
+  const buttonAndParametersContainer = document.createElement("div");
   const elems = {
     background,
     title,
@@ -328,6 +330,8 @@ const _addSoundCalibrationElems = (copy) => {
     soundParametersFromCalibration,
     soundTestPlots,
     soundTestContainer,
+    downloadButton,
+    buttonAndParametersContainer,
   };
 
   title.setAttribute("id", "soundTitle");
@@ -361,6 +365,8 @@ const _addSoundCalibrationElems = (copy) => {
   yesButton.classList.add(...["btn", "btn-primary"]);
   noButton.classList.add(...["btn", "btn-secondary"]);
   testButton.classList.add(...["btn", "btn-success"]);
+  //make download button invisible
+  downloadButton.style.visibility = "hidden";
 
   background.appendChild(container);
   container.appendChild(title);
@@ -374,7 +380,9 @@ const _addSoundCalibrationElems = (copy) => {
   displayContainer.appendChild(displayQR);
   displayContainer.appendChild(displayUpdate);
   container.appendChild(soundLevelsTable);
-  soundTestContainer.appendChild(soundParametersFromCalibration);
+  buttonAndParametersContainer.appendChild(soundParametersFromCalibration);
+  buttonAndParametersContainer.appendChild(downloadButton);
+  soundTestContainer.appendChild(buttonAndParametersContainer);
   soundTestContainer.appendChild(soundTestPlots);
   container.appendChild(soundTestContainer);
   document.body.appendChild(background);
@@ -443,10 +451,10 @@ const _runSoundLevelCalibration = async (elems, gains) => {
   } = speakerCalibrator;
 
   const speakerParameters = {
-    siteUrl: "https://hqjq0u.deta.dev",
+    siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
     gainValues: gains,
-    debug: false,
+    debug: debugBool.current,
     ICalib: ICalibDBSPL.current,
   };
 
@@ -480,7 +488,7 @@ const _runLoudspeakerCalibration = async (elems) => {
   } = speakerCalibrator;
 
   const speakerParameters = {
-    siteUrl: "https://hqjq0u.deta.dev",
+    siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
     debug: debugBool.current,
   };

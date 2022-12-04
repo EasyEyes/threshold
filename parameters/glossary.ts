@@ -528,7 +528,7 @@ export const GLOSSARY: Glossary = {
     name: "fontColorRGBA",
     availability: "now",
     type: "text",
-    default: "0.6,0,0,1",
+    default: "0,0,0,1",
   },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
