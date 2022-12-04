@@ -524,6 +524,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "abcdefghijklmnopqrstuvwxyz",
   },
+  fontColorRGBA: {
+    name: "fontColorRGBA",
+    availability: "now",
+    type: "text",
+    default: "0.6,0,0,1",
+  },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
     availability: "now",
@@ -562,14 +568,14 @@ export const GLOSSARY: Glossary = {
     default: "regular",
     categories: ["regular", "bold", "italic", "boldItalic"],
   },
-  fontTrackingLetter: {
-    name: "fontTrackingLetter",
+  fontTrackingForLetters: {
+    name: "fontTrackingForLetters",
     availability: "now",
     type: "",
     default: "0",
   },
-  fontTrackingWord: {
-    name: "fontTrackingWord",
+  fontTrackingForWords: {
+    name: "fontTrackingForWords",
     availability: "now",
     type: "",
     default: "0",
@@ -1006,6 +1012,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  screenColorRGB: {
+    name: "screenColorRGB",
+    availability: "now",
+    type: "text",
+    default: "0.92,0.92,0.92",
+  },
   screenshotBool: {
     name: "screenshotBool",
     availability: "now",
@@ -1202,13 +1214,13 @@ export const GLOSSARY: Glossary = {
     name: "soundGainDBSPL",
     availability: "now",
     type: "numerical",
-    default: "80",
+    default: "125",
   },
   soundGainTWR: {
     name: "soundGainTWR",
     availability: "now",
     type: "text",
-    default: "0,0,1",
+    default: "100,10,100",
   },
   spacingDeg: {
     name: "spacingDeg",

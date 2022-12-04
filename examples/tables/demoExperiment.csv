@@ -13,6 +13,7 @@ fontSource,file,file,google,google,google,google
 responseClickedBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 responseMustClickCrosshairBool,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
 responseTypedBool,TRUE,FALSE,TRUE,TRUE,TRUE,FALSE
+screenColorRGB,,"1,0.5,1",,,,
 showCounterBool,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 showGrid,none,none,none,none,none,none
 spacingDirection,radial,radial,radial,radial,radial,radial

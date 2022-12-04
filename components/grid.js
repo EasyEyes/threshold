@@ -247,7 +247,7 @@ export class Grid {
       const nGridlines =
         region === "vertical" ? numberOfGridLines[0] : numberOfGridLines[1];
       for (let i = 0; i < nGridlines; i++) {
-        const verticies =
+        const vertices =
           region === "vertical"
             ? [
                 [
@@ -283,7 +283,7 @@ export class Grid {
             lineColor: new util.Color("black"),
             // fillColor: new util.Color("black"),
             opacity: this.opacity,
-            vertices: verticies,
+            vertices: vertices,
             depth: -999999,
             ori: 0.0,
             interpolate: false,
@@ -327,7 +327,7 @@ export class Grid {
       const nGridlines =
         region === "vertical" ? numberOfGridLines[0] : numberOfGridLines[1];
       for (let i = 0; i < nGridlines; i++) {
-        const verticies =
+        const vertices =
           region === "vertical"
             ? [
                 [
@@ -362,7 +362,7 @@ export class Grid {
             lineColor: new util.Color("blue"),
             // fillColor: new util.Color("blue"),
             opacity: 1.0,
-            vertices: verticies,
+            vertices: vertices,
             depth: -999999,
             ori: 0.0,
             interpolate: false,
@@ -416,7 +416,7 @@ export class Grid {
 
       for (let i = 0; i < nGridlines; i++) {
         if (["left", "lower"].includes(region) && i === 0) continue;
-        let [verticies, pos] = this._getDegGridPathVerticies(i, region);
+        let [vertices, pos] = this._getDegGridPathVertices(i, region);
         lines.push(
           new visual.ShapeStim({
             name: `${region}-grid-line-${i}`,
@@ -427,7 +427,7 @@ export class Grid {
             // fillColor: new util.Color("crimson"),
             closeShape: false,
             opacity: this.opacity,
-            vertices: verticies,
+            vertices: vertices,
             depth: -999999,
             ori: 0.0,
             interpolate: false,
@@ -463,8 +463,8 @@ export class Grid {
     return [lines, labels];
   };
 
-  _getDegGridPathVerticies = (lineId, region) => {
-    const verticies = [];
+  _getDegGridPathVertices = (lineId, region) => {
+    const vertices = [];
     let pos = [];
     // in psychoJS px units, ie origin at center of screen
     const screenRect = {
@@ -499,13 +499,13 @@ export class Grid {
         isInRect(...posPoint, screenRect) || isInRect(...negPoint, screenRect);
 
       if (pointOnScreen) e += 0.1;
-      verticies.unshift(negPoint);
-      verticies.push(posPoint);
+      vertices.unshift(negPoint);
+      vertices.push(posPoint);
     }
     pos = ["left", "right"].includes(region)
-      ? [verticies[Math.floor(verticies.length / 2)][0], screenRect.bottom + 5]
-      : [screenRect.left + 5, verticies[Math.floor(verticies.length / 2)][1]];
-    return [verticies, pos];
+      ? [vertices[Math.floor(vertices.length / 2)][0], screenRect.bottom + 5]
+      : [screenRect.left + 5, vertices[Math.floor(vertices.length / 2)][1]];
+    return [vertices, pos];
   };
 
   /**

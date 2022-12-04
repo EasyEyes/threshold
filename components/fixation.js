@@ -32,7 +32,7 @@ export class Fixation {
         win: psychoJS.window,
         name: "fixation-0",
         units: "pix",
-        vertices: getFixationVerticies(fixationConfig.strokeLength),
+        vertices: getFixationVertices(fixationConfig.strokeLength),
         lineWidth: fixationConfig.strokeWidth,
         closeShape: false,
         color: new Color("black"),
@@ -110,12 +110,12 @@ export class Fixation {
 
     if (this.stims) {
       this.setPos(fixationConfig.pos);
-      const theseVerts = getFixationVerticies(
+      const theseVertices = getFixationVertices(
         fixationConfig.strokeLength,
         targetHeightPx,
         targetXYPx
       );
-      this.setVertices(theseVerts);
+      this.setVertices(theseVertices);
       this.setLineWidth(fixationConfig.strokeWidth);
     }
   }
@@ -206,7 +206,7 @@ export class Fixation {
   }
 }
 
-export const getFixationVerticies = (
+export const getFixationVertices = (
   strokeLength,
   targetHeightPx,
   targetXYPx

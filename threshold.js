@@ -4,13 +4,14 @@
 
 import {
   arraysEqual,
+  colorRGBASnippetToRGBA,
+  colorRGBSnippetToRGB,
   debug,
   fillNumberLength,
   getTripletCharacters,
   ifTrue,
   norm,
   sleep,
-  toFixedNumber,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -119,6 +120,7 @@ import {
   soundCalibrationResults,
   soundGainTWR,
   debugBool,
+  screenBackground,
 } from "./components/global.js";
 
 import {
@@ -325,7 +327,7 @@ import {
 import {
   Fixation,
   getFixationPos,
-  getFixationVerticies,
+  getFixationVertices,
   gyrateFixation,
   offsetStimsToFixationPos,
 } from "./components/fixation.js";
@@ -383,7 +385,6 @@ var simulated;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
-  logger("Rajat paramReaderInitialized called");
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
 
@@ -395,13 +396,6 @@ const paramReaderInitialized = async (reader) => {
   // if (rc.concurrency.value <= 0) {
   //   await rc.performance();
   // }
-
-  // console.log(
-  //   "browser, deviceType, OS",
-  //   reader.read("_compatibleBrowser"),
-  //   reader.read("_compatibleDeviceType"),
-  //   reader.read("_compatibleOperatingSystem"),
-  // );
 
   const compMsg = checkSystemCompatibility(
     reader.read("_compatibleBrowser")[0].split(","),
@@ -578,7 +572,6 @@ var characterSetBoundingRects = {};
 const experiment = (howManyBlocksAreThereInTotal) => {
   ////
   // Resources
-  logger("Rajat experiment function called");
   initializeEscHandlingDiv();
   const _resources = [];
   const blockNumbers = paramReader._experiment.map((block) => block.block);
@@ -610,10 +603,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   const purrSynth = getPurrSynth(psychoJS);
   const readingSound = getReadingSound();
 
+  // initial background color
+  screenBackground.colorRGB = paramReader.read(
+    "screenColorRGB",
+    "__ALL_BLOCKS__"
+  )[0];
+  loggerText(screenBackground.colorRGB);
+
   // open window:
   psychoJS.openWindow({
     fullscr: !debug,
-    color: new util.Color("#eaeaea"), // background color
+    color: new util.Color(
+      colorRGBSnippetToRGB(screenBackground.defaultColorRGBA)
+    ), // background color
     units: "height",
     waitBlanking: true,
   });
@@ -717,7 +719,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // var frameDur;
   async function updateInfo() {
-    logger("Rajat updateInfo async");
     thisExperimentInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     thisExperimentInfo["expName"] = thisExperimentInfo.name;
     thisExperimentInfo[
@@ -830,7 +831,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     blockScheduleFinalClock;
 
   async function experimentInit() {
-    logger("Rajat experimentInit called");
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
@@ -1076,7 +1076,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     displayOptions.window = psychoJS.window;
 
     grid.current = new Grid("disabled", displayOptions, psychoJS);
-    logger("Rajat experimentInit ended");
+
     return Scheduler.Event.NEXT;
   }
 
@@ -1088,10 +1088,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineBegin(snapshot) {
     return async function () {
-      logger(
-        "Rajat return of fileRoutineBegin called with parameter snapshot :",
-        snapshot
-      );
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       //------Prepare to start Routine 'file'-------
@@ -1112,7 +1108,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineEachFrame() {
     return async function () {
-      logger("Rajat return of fileRoutineEachFrame called");
       /* --- SIMULATED --- */
       if (simulated) return Scheduler.Event.NEXT;
       /* --- /SIMULATED --- */
@@ -1147,7 +1142,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
       // refresh the screen if continuing
-      logger("Rajat continueRoutine is", continueRoutine);
       if (continueRoutine) {
         return Scheduler.Event.FLIP_REPEAT;
       } else {
@@ -1159,7 +1153,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineEnd() {
     return async function () {
-      logger("Rajat fileRoutineEnd called");
       //------Ending Routine 'file'-------
       for (const thisComponent of fileComponents) {
         if (typeof thisComponent.setAutoDraw === "function") {
@@ -1175,7 +1168,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   function _instructionSetup(text) {
-    logger("Rajat _instructionSetup called");
     t = 0;
     instructionsClock.reset(); // clock
     frameN = -1;
@@ -1192,7 +1184,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     wrapWidth = window.innerWidth / 4,
     pos = [-window.innerWidth / 2 + 5, window.innerHeight / 2 - 5]
   ) {
-    logger("Rajat _instructionBeforeStimulusSetup called");
     t = 0;
     instructionsClock.reset(); // clock
     frameN = -1;
@@ -1206,7 +1197,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function _instructionRoutineEachFrame() {
-    logger("Rajat _instructionRoutineEachFrame called");
     /* --- SIMULATED --- */
     if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
     /* --- /SIMULATED --- */
@@ -1228,11 +1218,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     if (!continueRoutine || clickedContinue.current) {
       logger(
-        "Rajat inside if statement of _instructionRoutineEachFrame continueRoutine",
+        "Inside if statement of _instructionRoutineEachFrame - continueRoutine",
         continueRoutine
       );
       logger(
-        "Rajat inside if statement of _instructionRoutineEachFrame clickedContinue.current",
+        "Inside if statement of _instructionRoutineEachFrame - clickedContinue.current",
         clickedContinue.current
       );
       continueRoutine = true;
@@ -1244,13 +1234,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     switchKind(targetKind.current, {
       letter: () => {
-        //logger("Rajat inside switch (letter) statement of _instructionRoutineEachFrame")
         if (
           canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
         ) {
-          logger(
-            "Rajat inside switch's (letter) if statement of _instructionRoutineEachFrame"
+          loggerText(
+            "Inside switchKind [letter] if statement of _instructionRoutineEachFrame"
           );
           continueRoutine = false;
           removeProceedButton();
@@ -1315,7 +1304,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     return async function () {
-      logger("Rajat return blocksLoopBegin called");
+      loggerText("blocksLoopBegin");
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
 
       // set up handler to look after randomisation of conditions etc
@@ -1561,7 +1550,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
               });
-              logger("Rajat trials", trials);
+              logger("trials", trials);
               fixationConfig.show = true;
             },
           });
@@ -2130,7 +2119,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   /* ------------------------- Block Init Instructions ------------------------ */
   // BLOCK 1st INSTRUCTION
   function initInstructionRoutineBegin(snapshot) {
-    logger("Rajat initInstructionRoutineBegin called");
+    loggerText("initInstructionRoutineBegin");
     return async function () {
       loggerText(
         `initInstructionRoutineBegin targetKind ${targetKind.current}`
@@ -2152,6 +2141,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("responseMustClickCrosshairBool", status.block)[0],
         paramReader.read("responseSpokenToExperimenterBool", status.block)[0]
       );
+
+      // set default background color for instructions
+      psychoJS.window.color = new util.Color(
+        colorRGBSnippetToRGB(screenBackground.defaultColorRGBA)
+      );
+      psychoJS.window._needUpdate = true; // ! dangerous
 
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
@@ -2243,10 +2238,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingPageIndex.current = 0;
 
           // FONT
+          ////
           font.name = paramReader.read("font", status.block)[0];
           font.source = paramReader.read("fontSource", status.block)[0];
           if (font.source === "file") font.name = cleanFontName(font.name);
+          ////
+          font.colorRGBA = paramReader.read("fontColorRGBA", status.block)[0];
+          ////
           readingParagraph.setFont(font.name);
+          readingParagraph.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
+
+          // ? background do we need it here?
+          screenBackground.colorRGB = paramReader.read(
+            "screenColorRGB",
+            status.block
+          )[0];
+          // psychoJS.window.color = new util.Color(colorRGBSnippetToRGB(
+          //   screenBackground.colorRGB
+          // ))
+          // psychoJS.window._needUpdate = true; // ! dangerous
 
           fontCharacterSet.current = String(
             paramReader.read("fontCharacterSet", status.block)[0]
@@ -2420,18 +2430,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.setPos([D, 0]);
           target.setText("R");
           target.setHeight(h);
+          target.setColor(colorRGBASnippetToRGBA(font.defaultColorRGBA));
 
           flanker1.setFont(instructionFont.current);
           flanker1.setPos([D - g, 0]);
           flanker1.setText("H");
           flanker1.setHeight(h);
+          flanker1.setColor(colorRGBASnippetToRGBA(font.defaultColorRGBA));
 
           flanker2.setFont(instructionFont.current);
           flanker2.setPos([D + g, 0]);
           flanker2.setText("C");
           flanker2.setHeight(h);
+          flanker2.setColor(colorRGBASnippetToRGBA(font.defaultColorRGBA));
 
-          fixation.setVertices(getFixationVerticies(h));
+          fixation.setVertices(getFixationVertices(h));
           fixation.setLineWidth(5);
           fixation.setPos([0, 0]);
 
@@ -2440,7 +2453,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker1.setAutoDraw(true);
           flanker2.setAutoDraw(true);
         },
-        rsvpReading: () => logger("TODO rsvpLetter eduInstructionRoutineBegin"),
+        rsvpReading: () =>
+          loggerText("TODO rsvpLetter eduInstructionRoutineBegin"),
       });
 
       psychoJS.eventManager.clearKeys();
@@ -2477,7 +2491,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         rsvpReading: () => {
-          logger("TODO rsvpReading eduInstructionRoutineEnd");
+          loggerText("TODO rsvpReading eduInstructionRoutineEnd");
         },
       });
 
@@ -2575,8 +2589,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
-          // console.log("vocoderConditions",snapshot.handler.getConditions())
-          // console.log("currentStaircase",trials._currentStaircase._name)
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
@@ -2685,6 +2697,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (font.source === "file") font.name = cleanFontName(font.name);
       font.ltr = reader.read("fontLeftToRightBool", BC);
 
+      font.colorRGBA = reader.read("fontColorRGBA", BC);
+      screenBackground.colorRGB = reader.read("screenColorRGB", BC);
+
       showCounterBool = reader.read("showCounterBool", BC);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
 
@@ -2723,6 +2738,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "responseCharacterHasMedialShapeBool",
         BC
       );
+
+      /* -------------------------------------------------------------------------- */
+      // set background color
+      psychoJS.window.color = new util.Color(
+        colorRGBSnippetToRGB(screenBackground.colorRGB)
+      );
+      psychoJS.window._needUpdate = true; // ! dangerous
+      /* -------------------------------------------------------------------------- */
 
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
@@ -2845,7 +2868,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
-          console.log("trialCounter", trialCounter);
         },
 
         reading: () => {
@@ -2908,6 +2930,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             reader.read("spacingDirection", BC)
           );
           psychoJS.experiment.addData("font", reader.read("font", BC));
+          // TODO
+          // ! where are the other font information?
+
+          psychoJS.experiment.addData(
+            "fontColorRGBA",
+            reader.read("fontColorRGBA", BC)
+          );
+          psychoJS.experiment.addData(
+            "screenColorRGB",
+            reader.read("screenColorRGB", BC)
+          );
+
           // update component parameters for each repeat
           displayOptions.windowWidthCm = rc.screenWidthCm
             ? rc.screenWidthCm.value
@@ -2969,6 +3003,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           target.setPos(targetEccentricityXYPx);
           target.setFont(font.name);
+          target.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
 
           psychoJS.experiment.addData(
             "spacingRelationToSize",
@@ -3054,6 +3089,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                   flanker1.setFont(font.name);
                   flanker2.setFont(font.name);
+                  flanker1.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
+                  flanker2.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
                   flanker1.setHeight(flankersHeightPx);
                   flanker2.setHeight(flankersHeightPx);
                   flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
@@ -3108,8 +3145,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     stimulusParameters.widthPx
                   );
                   target.setPadding(font.padding);
+
                   flanker1.setAutoDraw(false);
                   flanker2.setAutoDraw(false);
+
                   break;
               }
               break;
@@ -3520,9 +3559,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current
       );
       trialCounter.setText(trialCounterStr);
-      // console.log("trialCounterStr", trialCounterStr);
-      // console.log("status.trial", status.trial);
-      // console.log("totalTrialsThisBlock.current", totalTrialsThisBlock.current);
       trialCounter.setFont(instructionFont.current);
       trialCounter.setHeight(trialCounterConfig.height);
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
@@ -3901,7 +3937,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetSpecs.setAutoDraw(true);
             }
           }
-          // console.log("status.block_condition,", status.block_condition);
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
               trialSoundBuffer,
@@ -4018,6 +4053,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
       instructions.setAutoDraw(false);
+
+      // // ! set background color
+      // psychoJS.window.color = new util.Color(
+      //   colorRGBSnippetToRGB(screenBackground.colorRGB)
+      // )
 
       /* -------------------------------------------------------------------------- */
       // ! TEMP set reading text
@@ -4479,7 +4519,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Play the movie here
           logger("len videoblob", videoblob.length);
           if (videoblob.length > 0 && video_flag == 1) {
-            logger("Running ");
+            loggerText("Running");
             // document.querySelector("canvas").style.display = "none";
             // document.getElementById("root").style.display = "none";
             loader.style.display = "none";
@@ -4496,7 +4536,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // continueRoutine = false;
             video_flag = 1;
             videoblob = [];
-            logger("played");
+            loggerText("played");
             document.body.removeChild(video);
           };
           break;
@@ -5008,9 +5048,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               );
             }
             // console.log("currentLoop", currentLoop);
-            //psychoJS.experiment.addData("targetWasPresent", targetIsPresentBool.current);
-            //name of masker
-            //psychoJS.experiment.addData();
+            // psychoJS.experiment.addData("targetWasPresent", targetIsPresentBool.current);
+            // name of masker
           },
           reading: () => {
             addReadingStatsToOutput(trials.thisRepN, psychoJS);

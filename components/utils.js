@@ -45,6 +45,32 @@ export const cleanFileName = (filename) => {
   return name;
 };
 
+// export const colorRGBStringToHex = (rgbString) => {
+//   let rgb = rgbString.match(/\d+/g);
+//   let hex = "#";
+//   for (let i = 0; i < 3; i++) {
+//     hex += ("0" + parseInt(rgb[i]).toString(16)).slice(-2);
+//   }
+//   return hex;
+// }
+
+export const colorRGBASnippetToRGBA = (rgbaSnippet) => {
+  // 0.8,0.8,0.8,1 to rgba(0.8 * 255,0.8 * 255,0.8 * 255,1)
+  let rgba = rgbaSnippet.split(",");
+  let rgbaString = "rgba(";
+  for (let i = 0; i < 3; i++) {
+    rgbaString += parseFloat(rgba[i]) * 255 + ",";
+  }
+  rgbaString += rgba[3] + ")";
+  return rgbaString;
+};
+
+export const colorRGBSnippetToRGB = (rgbSnippet) => {
+  // 0.8,0.8,0.8 to rgb(0.8 * 255,0.8 * 255,0.8 * 255)
+  let rgb = rgbSnippet.split(",").map((v) => parseFloat(v) * 255);
+  return `rgb(${rgb.join(",")})`;
+};
+
 /**
  * Create a mapping between an arbitrary set of strings, ie `possibleResponses`,
  * and a set of ascii-supported keys, ie [0,1,...,9,A,B,...Z].

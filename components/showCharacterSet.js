@@ -6,7 +6,7 @@ import {
   readingConfig,
   font as globalFont,
 } from "./global";
-import { safeExecuteFunc } from "./utils";
+import { colorRGBASnippetToRGBA, safeExecuteFunc } from "./utils";
 
 function getCharacterSetShowPos(ele, showWhere) {
   switch (showWhere) {
@@ -37,6 +37,7 @@ export function setupClickableCharacterSet(
   characterSetHolder.className = "characterSet-holder";
 
   characterSetHolder.style.fontFamily = `"${font}"`;
+  characterSetHolder.style.color = colorRGBASnippetToRGBA(globalFont.colorRGBA);
   characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
 
   if (targetKind == "sound") {

@@ -85,11 +85,18 @@ export const font = {
   source: undefined,
   style: undefined,
   ltr: undefined,
+  colorRGBA: undefined,
+  defaultColorRGBA: "0,0,0,1",
   instructionFont: undefined,
   instructionFontSource: undefined,
   padding: undefined,
 };
 export const fontCharacterSet = { current: undefined, where: undefined };
+
+export const screenBackground = {
+  defaultColorRGBA: "0.92,0.92,0.92",
+  colorRGB: undefined,
+};
 
 export const fixationConfig = {
   nominalPos: [0, 0], // Nominal, scientist specified position. Only used as a reference point when gyrating fixation.

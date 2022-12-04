@@ -125,7 +125,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "??? _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; its value is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
+      "NOT YET IMPLEMENTED. _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; its value is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
     type: "integer",
     default: "",
     categories: "",
@@ -155,7 +155,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "http://xyz?cc=123",
     explanation:
-      "_daisyChainURLAfterEasyEyes is a URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
+      "NOT YET IMPLEMENTED. _daisyChainURLAfterEasyEyes is a URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
     type: "text",
     default: "",
     categories: "",
@@ -165,7 +165,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "http://xyz?cc=123",
     explanation:
-      "_daisyChainURLBeforeEasyEyes is a URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), signaling the participant's eligibility for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Thanks to Becca Hirst at Open Science Tools for suggesting daisy chaining.",
+      "NOT YET IMPLEMENTED. _daisyChainURLBeforeEasyEyes is a URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), signaling the participant's eligibility for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Thanks to Becca Hirst at Open Science Tools for suggesting daisy chaining.",
     type: "text",
     default: "",
     categories: "",
@@ -235,7 +235,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "At the end of the experiment, invite the participant to make parting comments. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "NOT YET IMPLEMENTED. At the end of the experiment, invite the participant to make parting comments. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -245,7 +245,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "Expected duration, in minutes, in the offer to participants. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "NOT YET IMPLEMENTED. Expected duration, in minutes, in the offer to participants. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "numerical",
     default: "30",
     categories: "",
@@ -275,7 +275,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "7.5",
     explanation:
-      "Payment to offer to each participant. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "NOT YET IMPLEMENTED. Payment to offer to each participant. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "numerical",
     default: "7.5",
     categories: "",
@@ -285,7 +285,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "USDollar",
     explanation:
-      "Currency of payment amount: USDollar, Euro, etc. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "NOT YET IMPLEMENTED. Currency of payment amount: USDollar, Euro, etc. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "categorical",
     default: "USDollar",
     categories: "USDollar, Euro, UKPound",
@@ -305,7 +305,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "123ABC",
     explanation:
-      "Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "NOT YET IMPLEMENTED. Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "text",
     default: "",
     categories: "",
@@ -315,7 +315,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "20",
     explanation:
-      "Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "NOT YET IMPLEMENTED. Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
     type: "integer",
     default: "1",
     categories: "",
@@ -335,7 +335,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
+      "NOT YET IMPLEMENTED. This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
     type: "text",
     default: "",
     categories: "",
@@ -355,7 +355,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "US_REP_SAMPLE",
     explanation:
-      "Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
+      "NOT YET IMPLEMENTED. Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
     type: "categorical",
     default: "US_REP_SAMPLE",
     categories: "UK_REP_SAMPLE, US_REP_SAMPLE, SINGLE",
@@ -636,7 +636,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "To test the far periphery, with help from the participant, it may be worth the trouble of setting up an off-screen fixation mark. Set fixationRequestedOffscreenBool TRUE and EasyEyes will ask the participant to put tape on a bottle or box and draw a crosshair on it. To figure out where the crosshair is, EasyEyes will display arrows on the display and ask the participant to drag the arrow heads to point to the crosshair.",
+      "NOT YET IMPLEMENTED. To test the far periphery, with help from the participant, it may be worth the trouble of setting up an off-screen fixation mark. Set fixationRequestedOffscreenBool TRUE and EasyEyes will ask the participant to put tape on a bottle or box and draw a crosshair on it. To figure out where the crosshair is, EasyEyes will display arrows on the display and ask the participant to drag the arrow heads to point to the crosshair.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -722,6 +722,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontColorRGBA",
+    availability: "now",
+    example: "",
+    explanation:
+      "The color of the targets, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
+    type: "text",
+    default: "0.6,0,0,1",
+    categories: "",
+  },
+  {
     name: "fontFeatureSettings",
     availability: "now",
     example: "",
@@ -736,7 +746,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "fontKerning (default auto) uses the fontKerning Canvas command to enable or disable kerning: auto (yes/no as dictated by browser), normal (yes), or none (no).\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fontKerning",
+      "NOT YET IMPLEMENTED. fontKerning (default auto) uses the fontKerning Canvas command to enable or disable kerning: auto (yes/no as dictated by browser), normal (yes), or none (no).\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fontKerning",
     type: "",
     default: "normal",
     categories: "",
@@ -782,21 +792,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "regular, bold, italic, boldItalic",
   },
   {
-    name: "fontTrackingLetter",
+    name: "fontTrackingForLetters",
     availability: "now",
     example: "",
     explanation:
-      'fontTrackingLetter (default 0) uses the "letterSpacing" Canvas command to adjust the spacing between letters.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing\nIt adds a positive or negative value to whatever the font would do otherwise. This is closely related to what Microsoft Word calls "tracking". The distance inserted (in px) is the product of the value provided and the point side of the font. "letterSpacing" is part of the new CanvasRenderingContext2D, which is available for Chrome, Edge, and Samsung, not for Safari and Firefox. That\'s ok.',
+      'NOT YET IMPLEMENTED. fontTrackingLetter (default 0) uses the "letterSpacing" Canvas command to adjust the spacing between letters.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing\nIt adds a positive or negative value to whatever the font would do otherwise. This is closely related to what Microsoft Word calls "tracking". The distance inserted (in px) is the product of the value provided and the point side of the font. "letterSpacing" is part of the new CanvasRenderingContext2D, which is available for Chrome, Edge, and Samsung, not for Safari and Firefox.',
     type: "",
     default: "0",
     categories: "",
   },
   {
-    name: "fontTrackingWord",
+    name: "fontTrackingForWords",
     availability: "now",
     example: "",
     explanation:
-      'fontTrackingWord (default 0) uses the "wordSpacing" Canvas command to adjust the spacing between words.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/wordSpacing\nThe distance inserted (in px) is the product of the value provided and the point side of the font. This works for Chrome, Edge, and Samsung, not for Safari and Firefox.',
+      'NOT YET IMPLEMENTED. fontTrackingWord (default 0) uses the "wordSpacing" Canvas command to adjust the spacing between words.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/wordSpacing\nThe distance inserted (in px) is the product of the value provided and the point side of the font. This works for Chrome, Edge, and Samsung, not for Safari and Firefox.',
     type: "",
     default: "0",
     categories: "",
@@ -896,7 +906,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Italian",
     explanation:
-      'English name for the language used for instructions to the participant. It must be "participant" or match one of the entries in the second row of the EasyEyes International phrases sheet. If you enter "participant", then the participant will be allowed to select the instruction language from a pull-down menu.',
+      'NOT YET IMPLEMENTED. English name for the language used for instructions to the participant. It must be "participant" or match one of the entries in the second row of the EasyEyes International phrases sheet. If you enter "participant", then the participant will be allowed to select the instruction language from a pull-down menu.',
     type: "categorical",
     default: "English",
     categories: "",
@@ -1436,7 +1446,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "responseSpokenToExperimenterBool requires the participant to respond verbally to the experimenter sitting alongside, e.g. by verbally naming the target. This is used to test children. The experimenter will use the laptop keyboard to discreetly score the verbal response. ",
+      "NOT YET IMPLEMENTED. responseSpokenToExperimenterBool requires the participant to respond verbally to the experimenter sitting alongside, e.g. by verbally naming the target. This is used to test children. The experimenter will use the laptop keyboard to discreetly score the verbal response. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1446,7 +1456,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "responseSpokenBool allows participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
+      "NOT YET IMPLEMENTED. responseSpokenBool allows participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1466,7 +1476,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "responseTypedEasyEyesKeypadBool allows participant to respond at every occasion by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
+      "NOT YET IMPLEMENTED. responseTypedEasyEyesKeypadBool allows participant to respond at every occasion by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1522,11 +1532,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "screenColorRGB",
+    availability: "now",
+    example: "",
+    explanation:
+      "The background color for the condition, in RGB, on a scale of 0 to 1 for each dimension.",
+    type: "text",
+    default: "0.92,0.92,0.92",
+    categories: "",
+  },
+  {
     name: "screenshotBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      'screenshotBool requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to show the stimuli in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n     Can we save these files to a "Screenshots" folder in the participant computer\'s Download folder or in the experiment repository on Pavlovia? ',
+      'NOT YET IMPLEMENTED. screenshotBool requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to show the stimuli in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n     Can we save these files to a "Screenshots" folder in the participant computer\'s Download folder or in the experiment repository on Pavlovia? ',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1536,7 +1556,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "25",
     explanation:
-      "setResolutionPxPerCm sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. Ignored if value is empty or zero. For reference, the 2022 MacBook Pro screens have 98 px/cm. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
+      "NOT YET IMPLEMENTED. setResolutionPxPerCm sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. Ignored if value is empty or zero. For reference, the 2022 MacBook Pro screens have 98 px/cm. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
     type: "numerical",
     default: "",
     categories: "",
@@ -1546,7 +1566,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      "setResolutionPxPerDeg sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. Ignored if value is empty or zero. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
+      "NOT YET IMPLEMENTED. setResolutionPxPerDeg sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. Ignored if value is empty or zero. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
     type: "numerical",
     default: "",
     categories: "",
@@ -1596,7 +1616,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "For foreign or symbol characterSets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
+      "NOT YET IMPLEMENTED. For foreign or symbol characterSets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1832,9 +1852,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "13",
     explanation:
-      "soundGainDBSPL (default 80) is the assumed gain (dB SPL) at 1000 Hz from digital sound to physical sound in the linear part of the transfer function (i.e. at digital sound levels below T-W/2, where T and W are explained below in soundGainTWR). For a sound vector with low level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a sound vector is 10*log(P) dB, where P is the power, P=mean(S^2), where S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant's computer at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz), over the linear range of the loudspeaker, i.e. at digital sound levels below T-W/2.",
+      "soundGainDBSPL (default 80) is the assumed gain (dB SPL) at 1000 Hz from digital sound to physical sound in the linear part of the transfer function (i.e. inDb+soundGainDbSpl < T-W/2, where T and W are explained below in soundGainTWR. For a sound vector with low digital level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a sound vector is 10*log(P) dB, where the power, P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant's computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz), over the linear range of the loudspeaker, i.e. at digital sound levels below T-W/2.",
     type: "numerical",
-    default: "80",
+    default: "125",
     categories: "",
   },
   {
@@ -1842,9 +1862,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'soundGainTWR (default 0,0,1) is a comma-separated list of 3 numbers that is used with soundGainDBSPL to specifies the remaining parameters of our model for the participant computer\'s dynamic range compression of sound gain: T (in dB), W (in dB), and R (dimensionless). Typically each number will have one digit after the decimal, e.g. "-10.1,-15.1,11.0".\nT is the "threshold" sound level (dB) at the knee in the curve of outDbSPL vs inDb. The curve is straight at low and high sound levels (inDB<T-W/2 or inDb>T+W/2). Those lines would intersect at T, but the curve rounds the knee, as controlled by W.\nW is the "width" of the knee. The rounded knee extends from T-W/2 to T+W/2.\nR is the reciprocal of the slope of outDbSPL vs inDb at sound levels above T+W/2.\nIf calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. \nOur compression model (using T, W, and R) is Eq. 4 in Giannoulis et al. (2012).\nGiannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss (2012). Digital Dynamic Range Compressor Design –– A Tutorial and Analysis. Journal of Audio Engineering Society. Vol. 60, Issue 6, pp. 399–408.\nhttp://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf',
+      'soundGainTWR (default 100,10,100) is a comma-separated list of 3 numbers that is used with soundGainDBSPL to specifies the parameters of our model of dynamic range compression of sound in the iPhone microphone: T (in dB SPL), W (in dB), and R (dimensionless). Typically each number will have one digit after the decimal, e.g. "-100.1,-15.1,30.0".\nT is the "threshold" sound level (dB SPL) at the knee in the curve of outDbSPL vs inDb. The curve is straight at low and high sound levels (inDB+soundGainDbSpl<T-W/2 or inDb+soundGainDbSpl>T+W/2). Those lines would intersect at T, but the curve rounds the knee, as controlled by W.\nW is the "width" of the knee. The rounded knee extends from T-W/2 to T+W/2.\nR is the reciprocal of the slope of outDbSPL vs inDb at sound levels above T+W/2.\nIf calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. \nOur compression model (using T, W, and R) is Eq. 4 in Giannoulis et al. (2012).\nGiannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss (2012). Digital Dynamic Range Compressor Design –– A Tutorial and Analysis. Journal of Audio Engineering Society. Vol. 60, Issue 6, pp. 399–408.\nhttp://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf',
     type: "text",
-    default: "0,0,1",
+    default: "100,10,100",
     categories: "",
   },
   {
@@ -2012,7 +2032,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "faces",
     explanation:
-      "The name of a folder of images, to be used when targetKind==image. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+      "NOT YET IMPLEMENTED. The name of a folder of images, to be used when targetKind==image. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
     type: "text",
     default: "",
     categories: "",
@@ -2239,7 +2259,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetWhenSec (default 0) indicates when the middle time of the target occurs relative to the middle of the movie.",
+      "NOT YET IMPLEMENTED. targetWhenSec (default 0) indicates when the middle time of the target occurs relative to the middle of the movie.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2380,7 +2400,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      'If true, and this condition\'s threshold is "bad" (see below), then the block will be run again (only once even if again bad). The criterion for "bad" is that QuestSD>0.25. Several conditions in a block may make this request and be bad, but we still repeat the block only once. When we add a block, we should adjust the trial/block counter to reflect the change. (The 0.25 criterion is right for 35 trials, beta=2.3, and many possible targets. Later i\'ll write a more general formula and provide a way for the scientist to specify an arbitrary criterion value of QuestSD.)',
+      'NOT YET IMPLEMENTED. If true, and this condition\'s threshold is "bad" (see below), then the block will be run again (only once even if again bad). The criterion for "bad" is that QuestSD>0.25. Several conditions in a block may make this request and be bad, but we still repeat the block only once. When we add a block, we should adjust the trial/block counter to reflect the change. (The 0.25 criterion is right for 35 trials, beta=2.3, and many possible targets. Later i\'ll write a more general formula and provide a way for the scientist to specify an arbitrary criterion value of QuestSD.)',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2410,7 +2430,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.02",
     explanation:
-      "viewingDistanceLargeEnoughToAllowTargetSizeDeg (default 0.1 deg) places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix.",
+      "NOT YET IMPLEMENTED. viewingDistanceLargeEnoughToAllowTargetSizeDeg (default 0.1 deg) places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2430,7 +2450,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "viewingDistanceSmallEnoughToAllowScreenHeightDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.",
+      "NOT YET IMPLEMENTED. viewingDistanceSmallEnoughToAllowScreenHeightDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.",
     type: "numerical",
     default: "",
     categories: "",
@@ -2440,7 +2460,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "viewingDistanceSmallEnoughToAllowScreenWidthDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px compatibility requirement before the experiment begins.",
+      "NOT YET IMPLEMENTED. viewingDistanceSmallEnoughToAllowScreenWidthDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px compatibility requirement before the experiment begins.",
     type: "numerical",
     default: "",
     categories: "",
