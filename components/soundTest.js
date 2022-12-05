@@ -771,6 +771,7 @@ export const displayParameters = (
 
   // model should start from min of soundLevels and end at max of soundLevels with 0.1 interval
   const model = [];
+  const modelWithOutBackground = [];
   const minM = Math.min(...soundLevels);
   const maxM = Math.max(...soundLevels);
   for (let i = minM; i <= maxM; i += 0.1) {
@@ -785,55 +786,23 @@ export const displayParameters = (
         parameters.R
       ),
     });
-  }
-  // sort the data points by x
-  model.sort((a, b) => a.x - b.x);
-
-  const modelWithOutBackground = soundLevels.map((x, i) => {
-    return {
-      x: x,
+    modelWithOutBackground.push({
+      x: i,
       y: SoundLevelModel(
-        Number(x),
+        Number(i),
         -Infinity,
         parameters.gainDBSPL,
         parameters.T,
         parameters.W,
         parameters.R
       ),
-    };
-  });
+    });
+  }
+  // sort the data points by x
+  model.sort((a, b) => a.x - b.x);
 
   // sort the data points by x
   modelWithOutBackground.sort((a, b) => a.x - b.x);
-
-  // min of y values
-  // const min = Math.min(
-  //   ...mergedDataPoints.map(({ y }) => y),
-  //   ...model.map(({ y }) => y),
-  //   ...modelWithOutBackground.map(({ y }) => y)
-  // );
-  // const minValue = Math.floor(min/10)*10;
-  // // console.log("minValue", minValue);
-  // const max = Math.max(
-  //   ...mergedDataPoints.map(({ y }) => y),
-  //   ...model.map(({ y }) => y),
-  //   ...modelWithOutBackground.map(({ y }) => y)
-  // );
-  // const maxValue = Math.ceil(max/10)*10;
-
-  // //min of x values
-  // const minx = Math.min(
-  //   ...mergedDataPoints.map(({ x }) => x),
-  //   ...model.map(({ x }) => x),
-  //   ...modelWithOutBackground.map(({ x }) => x)
-  // );
-  // const minValueX = Math.floor(minx/10)*10;
-  // const maxx = Math.max(
-  //   ...mergedDataPoints.map(({ x }) => x),
-  //   ...model.map(({ x }) => x),
-  //   ...modelWithOutBackground.map(({ x }) => x)
-  // );
-  // const maxValueX = Math.ceil(maxx/10)*10;
 
   // plot both the data points (dot) and the model (line)
   const data = {
@@ -854,7 +823,7 @@ export const displayParameters = (
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
         borderWidth: 1,
-        pointRadius: 0.5,
+        pointRadius: 0,
         pointHoverRadius: 2,
         showLine: true,
         tension: 0.1,
@@ -866,7 +835,7 @@ export const displayParameters = (
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
         borderWidth: 1,
-        pointRadius: 1,
+        pointRadius: 0,
         pointHoverRadius: 2,
         showLine: true,
         borderDash: [5, 5],
