@@ -211,6 +211,8 @@ export const calibrateAudio = async (reader) => {
       clickToStart: phrases.RC_soundCalibrationClickToStart[lang],
       done: phrases.RC_soundCalibrationDone[lang],
       test: "Test", //include in phrases doc
+      citation:
+        'Measured sound power is modeled as sum of background sound power and power gain times digital sound power. Microphone compression modeled by Eq. 4 of Giannoulis, Massberg, & Reiss (2012). "Digital Dynamic Range Compressor Design — A Tutorial and Analysis." Journal of Audio Engineering Society. 60 (6): 399–408.',
     };
 
     const elems = _addSoundCalibrationElems(copy);
@@ -303,6 +305,7 @@ const _addSoundCalibrationElems = (copy) => {
   const displayContainer = document.createElement("div");
   const displayQR = document.createElement("div");
   const displayUpdate = document.createElement("div");
+  const citation = document.createElement("div");
   const navContainer = document.createElement("div");
   const yesButton = document.createElement("button");
   const noButton = document.createElement("button");
@@ -332,6 +335,7 @@ const _addSoundCalibrationElems = (copy) => {
     soundTestContainer,
     downloadButton,
     buttonAndParametersContainer,
+    citation,
   };
 
   title.setAttribute("id", "soundTitle");
@@ -352,6 +356,7 @@ const _addSoundCalibrationElems = (copy) => {
   );
   soundTestPlots.setAttribute("id", "soundTestPlots");
   soundTestContainer.setAttribute("id", "soundTestContainer");
+  citation.setAttribute("id", "citation");
 
   title.innerHTML = copy.soundCalibration;
   subtitle.innerHTML = copy.title;
@@ -359,6 +364,8 @@ const _addSoundCalibrationElems = (copy) => {
   yesButton.innerHTML = copy.yes;
   noButton.innerHTML = copy.no;
   testButton.innerHTML = copy.test;
+  citation.innerHTML = copy.citation;
+  citation.style.fontSize = "0.8em";
 
   background.classList.add(...["popup", "rc-panel"]);
   container.classList.add(...["container"]);
@@ -379,12 +386,13 @@ const _addSoundCalibrationElems = (copy) => {
   container.appendChild(displayContainer);
   displayContainer.appendChild(displayQR);
   displayContainer.appendChild(displayUpdate);
-  container.appendChild(soundLevelsTable);
   buttonAndParametersContainer.appendChild(soundParametersFromCalibration);
   buttonAndParametersContainer.appendChild(downloadButton);
+  container.appendChild(soundLevelsTable);
   soundTestContainer.appendChild(buttonAndParametersContainer);
   soundTestContainer.appendChild(soundTestPlots);
   container.appendChild(soundTestContainer);
+  container.appendChild(citation);
   document.body.appendChild(background);
 
   _addSoundCss();
@@ -405,8 +413,6 @@ const _addSoundCss = () => {
     margin: auto;
   }
   #soundContainer {
-    height: 100%;
-    width: 100%;
     padding-left: 10px;
     padding-right: 10px;
   }

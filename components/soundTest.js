@@ -6,6 +6,7 @@ import {
   soundCalibrationLevelDBSPL,
   soundCalibrationResults,
   soundGainTWR,
+  ICalibDBSPL,
 } from "./global";
 import {
   adjustSoundDbSPL,
@@ -659,6 +660,7 @@ export const displayParameters = (
   soundLevels,
   soundCalibrationResults
 ) => {
+  elems.background.style.top = "70%";
   elems.soundParametersFromCalibration.style.whiteSpace = "pre";
   // reduce the spacing between the lines for soundParametersFromCalibration
   // elems.soundParametersFromCalibration.style.lineHeight = "0.8";
@@ -673,11 +675,12 @@ export const displayParameters = (
   const th3 = document.createElement("th");
   const th4 = document.createElement("th");
   const th5 = document.createElement("th");
-  th1.innerHTML = "in (dB SPL)";
-  th2.innerHTML = "Gain (dB SPL)";
+  th1.innerHTML = "in (dB)";
+  th2.innerHTML = "out - in (dB SPL)";
   th3.innerHTML = "out (dB SPL)";
   th4.innerHTML = "THD (%)";
   th5.innerHTML = "out @all Hz (dB SPL)";
+
   // padding between the three columns
   th1.style.paddingRight = "20px";
   th2.style.paddingRight = "20px";
@@ -718,6 +721,13 @@ export const displayParameters = (
     td3.style.paddingRight = "20px";
     td4.style.paddingRight = "20px";
 
+    // the dots in a vertical column should be aligned to the right
+    td1.style.textAlign = "right";
+    td2.style.textAlign = "right";
+    td3.style.textAlign = "right";
+    td4.style.textAlign = "right";
+    td5.style.textAlign = "right";
+
     tr.appendChild(td1);
     tr.appendChild(td3);
     tr.appendChild(td2);
@@ -727,13 +737,14 @@ export const displayParameters = (
   }
   // display the parameters used for the calibration
   elems.soundParametersFromCalibration.innerHTML = `
-  Parameters:\n
-  T: ${parameters.T.toFixed(1)}\n
-  R: ${parameters.R.toFixed(1)}\n
-  W: ${parameters.W.toFixed(1)}\n
+  Dynamic Range Compression Model:\n
+  T: ${parameters.T.toFixed(1) + " dB SPL"}\n
+  W: ${parameters.W.toFixed(1) + " dB"}\n
+  1/R: ${1 / Number(parameters.R.toFixed(1))}\n
   gainDBSPL: ${parameters.gainDBSPL.toFixed(1)}\n
   backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}\n
-  RMSError: ${parameters.RMSError.toFixed(1)}
+  RMSError: ${parameters.RMSError.toFixed(1) + " dB"}\n
+  iCalib: ${ICalibDBSPL.current.toFixed(1)} 
   `;
 
   elems.downloadButton.style.visibility = "visible";
@@ -902,7 +913,7 @@ export const displayParameters = (
           position: "bottom",
           title: {
             display: true,
-            text: "in (dB SPL)",
+            text: "in (dB)",
           },
           ticks: {
             stepSize: 10,
