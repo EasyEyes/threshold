@@ -408,7 +408,7 @@ const _removeSoundCalibrationElems = (elems) => {
 const _addSoundCss = () => {
   const styles = `
   #background {
-    width: 60%;
+    width: fit-content;
     height: fit-content;
     margin: auto;
   }

@@ -938,6 +938,8 @@ export const displayParameters = (
     },
   };
   const plot = new Chart(plotCanvas, config);
+  // fit plotCanvas to parent
+  plotCanvas.style.width = "100%";
 };
 
 const SoundLevelModel = (inDb, backgroundDbSpl, gainDbSpl, T, W, R) => {
