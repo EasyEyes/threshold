@@ -3969,7 +3969,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showCursor();
         },
         reading: () => {
-          readingSound.play();
+          // readingSound.play();
         },
         letter: () => {
           if (snapshot.getCurrentTrial().trialsVal)
