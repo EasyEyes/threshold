@@ -10,6 +10,7 @@ import {
   fillNumberLength,
   getTripletCharacters,
   ifTrue,
+  log,
   norm,
   sleep,
 } from "./components/utils.js";
@@ -3476,7 +3477,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
 
-          // thresholdParameter = reader.read("thresholdParameter", BC);
+          thresholdParameter = reader.read("thresholdParameter", BC);
 
           validAns = String(reader.read("fontCharacterSet", BC))
             .toLowerCase()
@@ -3502,8 +3503,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
 
+          // TODO
+          // switch(thresholdParameter) {
+          //   case "targetContrast":
+          // }
+
           //generate movie
-          // loggerText("Generate movie here");
+          loggerText("Generate movie here");
           //var F = new Function(paramReader.read("computeImageJS", BC))();
           evaluateJSCode(paramReader, status, displayOptions).then(
             (imageNit) => {
@@ -5130,6 +5136,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           movie: () => {
             //TODO
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+            if (
+              currentLoop instanceof MultiStairHandler &&
+              currentLoop.nRemaining !== 0
+            ) {
+              // TODO only give to QUEST if acceptable
+              const giveToQuest = true;
+              psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
+              switch (thresholdParameter) {
+                case "targetContrast":
+                  const tragetContrast = paramReader.read(
+                    thresholdParameter,
+                    status.block_condition
+                  );
+                  currentLoop.addResponse(
+                    key_resp.corr,
+                    // intensity
+                    log(tragetContrast, 10)
+                  );
+              }
+            }
           },
         });
 
