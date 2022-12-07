@@ -477,7 +477,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. The iPhone microphone does severe dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. The iPhone and its dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration.",
     type: "text",
-    default: "-60, -50, -40, -30, -20, -15,- 10, -3.1",
+    default: "-60, -50, -40, -30, -20, -15, -10, -3.1",
     categories: "",
   },
   {

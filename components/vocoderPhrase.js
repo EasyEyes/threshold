@@ -123,7 +123,7 @@ export const getVocoderPhraseTrialData = async (
       targetVolumeDbSPLFromQuest,
       soundGainDBSPL,
       targetAudioData,
-      targetCeiling
+      1 - maskerMaxOverRms * maskerGain - noiseMaxOverRms * noiseGain
     );
 
   adjustSoundDbSPL(targetAudioData, correctedValuesForTarget.inDB);

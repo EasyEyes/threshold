@@ -185,6 +185,12 @@ export const calibrateAudio = async (reader) => {
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
     .split(",");
+  // console.log("soundLevels", soundLevels)
+  // convert soundLevels to numbers
+  for (let i = 0; i < soundLevels.length; i++) {
+    soundLevels[i] = parseFloat(soundLevels[i]);
+  }
+  // const soundLevels = [-60, -50, -40, -30, -20, -15,-10, -3.1]
   // const soundLevels = [-3.1, -13.1];
   // const soundLevels = [-3.1, -10,-20,-30,-40, -50]
   // change sound Levels to gain values
