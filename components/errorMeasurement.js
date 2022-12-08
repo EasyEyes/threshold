@@ -24,8 +24,8 @@ export const readAllowedTolerances = (tolerances, reader, BC) => {
     "thresholdAllowedGazeYErrorDeg",
     BC
   );
-  tolerances.allowed.thresholdAllowedLatencySec = reader.read(
-    "thresholdAllowedLatencySec",
+  tolerances.allowed.thresholdAllowedLatenessSec = reader.read(
+    "thresholdAllowedLatenessSec",
     BC
   );
 };
@@ -84,7 +84,8 @@ export const calculateError = async (
   letterTiming,
   tolerances,
   targetDurationSec,
-  targetStim
+  targetStim,
+  requestedLateness
 ) => {
   const targetFrameTimingReport = _reportTargetTimingFrames(targetStim);
 
@@ -109,10 +110,11 @@ export const calculateError = async (
       measuredTargetDurationSec < targetDurationSec
         ? targetDurationSec / measuredTargetDurationSec
         : measuredTargetDurationSec / targetDurationSec;
-    tolerances.measured.targetMeasuredLatencySec =
+    tolerances.measured.targetMeasuredLatenessSec =
       (letterTiming.targetDrawnConfirmedTimestamp -
         letterTiming.crosshairClickedTimestamp) /
-      1000;
+        1000 -
+      requestedLateness;
   }
 };
 
@@ -134,8 +136,8 @@ export const addResponseIfTolerableError = (
     tolerances.allowed
   );
   const latencyAcceptable = _targetLatencyAcceptable(
-    tolerances.measured.targetMeasuredLatencySec,
-    tolerances.allowed.thresholdAllowedLatencySec
+    tolerances.measured.targetMeasuredLatenessSec,
+    tolerances.allowed.thresholdAllowedLatenessSec
   );
   const relevantChecks = trackGaze
     ? [durationAcceptable, latencyAcceptable, gazeAcceptable]
@@ -156,7 +158,7 @@ const addMeasuredErrorToOutput = (psychoJS, tolerances) => {
     "gazeMeasuredRDeg",
     "gazeMeasuredRawDeg",
     "gazeMeasurementLatencySec",
-    "targetMeasuredLatencySec",
+    "targetMeasuredLatenessSec",
     "targetMeasuredDurationSec",
     "targetMeasuredDurationFrames",
   ];

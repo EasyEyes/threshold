@@ -167,7 +167,7 @@ export const tolerances = Object.seal({
     thresholdAllowedGazeXErrorDeg: undefined,
     thresholdAllowedGazeYErrorDeg: undefined,
     thresholdAllowedGazeRErrorDeg: undefined,
-    thresholdAllowedLatencySec: undefined,
+    thresholdAllowedLatenessSec: undefined,
   },
   measured: {
     thresholdDurationRatio: undefined,
@@ -176,7 +176,7 @@ export const tolerances = Object.seal({
     gazeMeasuredRDeg: undefined,
     gazeMeasuredRawDeg: [],
     gazeMeasurementLatencySec: undefined,
-    targetMeasuredLatencySec: undefined,
+    targetMeasuredLatenessSec: undefined,
     targetMeasuredDurationSec: undefined,
     targetMeasuredDurationFrames: undefined,
   },

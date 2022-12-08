@@ -72,7 +72,8 @@ export const _letter_trialRoutineEnd = (
       letterTiming,
       tolerances,
       letterConfig.targetDurationSec,
-      target
+      target,
+      letterConfig.delayBeforeStimOnsetSec
     );
   }
 
