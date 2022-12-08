@@ -409,7 +409,10 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
       }
 
       //load target
-      if (condition["targetSoundFolder"]) {
+      if (
+        condition["targetSoundFolder"] &&
+        condition["targetSoundFolder"] !== condition["maskerSoundFolder"]
+      ) {
         //console.log(`folders/${condition["targetSoundFolder"]}.zip`);
         await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
           // await fetch(`folders/VocodedWord.zip`)
@@ -506,6 +509,9 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
               );
             });
           });
+      } else {
+        targetList[condition["block_condition"]] =
+          maskerList[condition["block_condition"]];
       }
     })
   );

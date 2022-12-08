@@ -178,10 +178,10 @@ export const prepareExperimentFileForThreshold = async (
   }
 
   const keys = Object.keys(maskerAndTargetFolders);
-  const requestedFolderList: any[] = [];
+  const allRequestedFolderList: any[] = [];
   keys.map((key) => {
     maskerAndTargetFolders[key].forEach((requestedFolder: any) => {
-      requestedFolderList.push(requestedFolder + ".zip");
+      allRequestedFolderList.push(requestedFolder + ".zip");
     });
   });
 
@@ -196,6 +196,10 @@ export const prepareExperimentFileForThreshold = async (
       errors.push(...folderStructureErrors);
     }
   }
+  // remove duplicates from allRequestedFolderList
+  const requestedFolderList = allRequestedFolderList.filter(
+    (item, index) => allRequestedFolderList.indexOf(item) === index
+  );
   // console.log("requestedFolderList", requestedFolderList);
 
   // ! validate requested code files

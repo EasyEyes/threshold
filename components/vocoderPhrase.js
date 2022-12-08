@@ -62,22 +62,27 @@ export const getVocoderPhraseTrialData = async (
     );
   // console.log("categoriesChosen", categoriesChosen);
   var maskerKeys = Object.keys(maskerList[blockCondition]);
-  const maskerSentenceAudio = getMaskerSentenceAudio(
-    maskerKeys,
-    maskerPhrase,
-    maskerChannels,
-    maskerList[blockCondition],
-    talker,
-    categoriesChosen
-  );
+  const maskerIsGiven = maskerKeys.length > 0 ? true : false;
+  const maskerSentenceAudio = maskerIsGiven
+    ? getMaskerSentenceAudio(
+        maskerKeys,
+        maskerPhrase,
+        maskerChannels,
+        maskerList[blockCondition],
+        talker,
+        categoriesChosen
+      )
+    : null;
   // align target and masker audio buffers
   const { targetAudioBuffersAligned, maskerAudioBuffersAligned } =
     alignTargetAndMaskerAudioBuffers(targetSentenceAudio, maskerSentenceAudio);
 
   const targetAudio = combineAudioBuffers(targetAudioBuffersAligned, audioCtx);
-  const maskerAudio = combineAudioBuffers(maskerAudioBuffersAligned, audioCtx);
+  const maskerAudio = maskerIsGiven
+    ? combineAudioBuffers(maskerAudioBuffersAligned, audioCtx)
+    : null;
   const targetAudioData = targetAudio.getChannelData(0);
-  const maskerAudioData = maskerAudio.getChannelData(0);
+  const maskerAudioData = maskerIsGiven ? maskerAudio.getChannelData(0) : null;
   //add white noise
   const whiteNoise = audioCtx.createBuffer(
     1,
@@ -90,7 +95,7 @@ export const getVocoderPhraseTrialData = async (
   }
 
   setWaveFormToZeroDbSPL(targetAudioData);
-  setWaveFormToZeroDbSPL(maskerAudioData);
+  if (maskerIsGiven) setWaveFormToZeroDbSPL(maskerAudioData);
   setWaveFormToZeroDbSPL(whiteNoiseData);
   // check noise and masker levels
   const noiseDB = whiteNoiseLevel - soundGainDBSPL;
@@ -101,8 +106,9 @@ export const getVocoderPhraseTrialData = async (
   if (noiseMaxOverRms * noiseGain > 1) {
     throw "The noise level given is too high to play without distortion";
   }
-  const maskerMaxOverRms =
-    getMaxValueOfAbsoluteValueOfBuffer(maskerAudioData) / 1;
+  const maskerMaxOverRms = maskerIsGiven
+    ? getMaxValueOfAbsoluteValueOfBuffer(maskerAudioData) / 1
+    : 0;
   const maskerDB = maskerVolumeDbSPL - soundGainDBSPL;
   const maskerGain = getGainValue(maskerDB);
   if (maskerMaxOverRms * maskerGain > 1) {
@@ -114,7 +120,7 @@ export const getVocoderPhraseTrialData = async (
 
   //adjust masker volume and white noise volumes
   adjustSoundDbSPL(whiteNoiseData, noiseDB);
-  adjustSoundDbSPL(maskerAudioData, maskerDB);
+  if (maskerIsGiven) adjustSoundDbSPL(maskerAudioData, maskerDB);
 
   // adjust target volume
   // const parameters = soundCalibrationResults.current.parameters;
@@ -129,9 +135,10 @@ export const getVocoderPhraseTrialData = async (
   adjustSoundDbSPL(targetAudioData, correctedValuesForTarget.inDB);
 
   return {
-    trialSound: maskerChannels.length
-      ? mergeBuffers([targetAudio, maskerAudio, whiteNoise], audioCtx)
-      : mergeBuffers([targetAudio, whiteNoise], audioCtx),
+    trialSound:
+      maskerChannels.length && maskerIsGiven
+        ? mergeBuffers([targetAudio, maskerAudio, whiteNoise], audioCtx)
+        : mergeBuffers([targetAudio, whiteNoise], audioCtx),
     categoriesChosen: categoriesChosen,
     allCategories: allCategories,
     targetVolumeDbSPL: correctedValuesForTarget.correctedSoundDBSPL,
