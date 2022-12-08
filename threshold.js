@@ -3482,16 +3482,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           validAns = String(reader.read("fontCharacterSet", BC))
             .toLowerCase()
             .split("");
-          var [targetOrientation] = sampleWithoutReplacement(
+          var [targetCharacter] = sampleWithoutReplacement(
             fontCharacterSet.current,
             1
           );
           if (debug)
             console.log(
-              `%c${targetOrientation}`,
+              `%c${targetCharacter}`,
               `color: red; font-size: 1.5rem; font-family: "${font.name}"`
             );
-          correctAns.current = [targetOrientation.toLowerCase()];
+          correctAns.current = [targetCharacter.toLowerCase()];
           /* -------------------------------------------------------------------------- */
 
           fixation.update(
@@ -3511,13 +3511,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //generate movie
           loggerText("Generate movie here");
           //var F = new Function(paramReader.read("computeImageJS", BC))();
-          evaluateJSCode(paramReader, status, displayOptions).then(
-            (imageNit) => {
-              generate_video(imageNit).then((data) => {
-                videoblob = data;
-              });
-            }
-          );
+          evaluateJSCode(
+            paramReader,
+            status,
+            displayOptions,
+            targetCharacter
+          ).then((imageNit) => {
+            generate_video(imageNit).then((data) => {
+              videoblob = data;
+            });
+          });
           // loader.setAttribute("id", "loader");
           // loaderText.setAttribute("id", "loaderText");
           // document.body.appendChild(loader);

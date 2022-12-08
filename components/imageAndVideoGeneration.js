@@ -139,7 +139,12 @@ const readJS = async (filename) => {
   return code;
 };
 
-export async function evaluateJSCode(paramReader, status, displayOptions) {
+export async function evaluateJSCode(
+  paramReader,
+  status,
+  displayOptions,
+  targetCharacter
+) {
   const BC = status.block_condition;
   const targetEccentrictyXDeg = paramReader.read("targetEccentricityXDeg", BC);
   const targetEccentrictyYDeg = paramReader.read("targetEccentricityYDeg", BC);
@@ -186,10 +191,11 @@ export async function evaluateJSCode(paramReader, status, displayOptions) {
     );
     //console.log(`Received code: ${jsCode}`);
     var args =
-      "XYPixOfXYDeg, XYDegOfXYPix, IsRectInRect,movieRectDeg,movieRectPxContainsDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentrictyXDeg,targetEccentrictyYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetPhase,targetContrast";
+      "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, IsRectInRect,movieRectDeg,movieRectPxContainsDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentrictyXDeg,targetEccentrictyYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetPhase,targetContrast";
     logger("jsCode", jsCode);
     var myFunc = new Function(args, jsCode);
     var imageNit = myFunc(
+      targetCharacter,
       XYPixOfXYDeg,
       XYDegOfXYPix,
       isRectInRect,
