@@ -44,7 +44,7 @@ export const getVocoderPhraseTrialData = async (
   maskerPhrase,
   blockCondition,
   targetVolumeDbSPLFromQuest = 10,
-  whiteNoiseLevel = 70,
+  whiteNoiseLevel = 40,
   soundGainDBSPL = 0,
   maskerVolumeDbSPL = 10,
   numberOfChannels = 9
