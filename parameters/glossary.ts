@@ -1514,6 +1514,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.1",
   },
+  thresholdAllowedLatenessSec: {
+    name: "thresholdAllowedLatenessSec",
+    availability: "now",
+    type: "",
+    default: "",
+  },
   thresholdBeta: {
     name: "thresholdBeta",
     availability: "now",

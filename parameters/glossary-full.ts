@@ -575,7 +575,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "40",
     explanation:
-      "conditionTrials is the number of trials of this condition to run in this block. Each condition can have a different number of trials. They are all randomly interleaved. IMPORTANT: We have parameters, e.g. thresholdAllowedDuration, that can reject trials for various reasons, e.g. bad duration. When a trial is rejected, it is not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the rejected trial's result so you could reanalyze your data including the rejected trials. In principle, it would be nice to add a new trial to make up for each rejected trial, but the PsychoJS MultiStair code has no provision for adding a trial to an ongoing loop. We hope to add that capability in the future.",
+      "conditionTrials is the number of trials of this condition to run in this block. Each condition can have a different number of trials. They are all randomly interleaved. IMPORTANT: We have parameters, e.g. thresholdAllowedDuration and thresholdAllowedLateness, that can reject trials for various reasons, e.g. bad duration or delay. When a trial is rejected, it is not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the rejected trial's result so you could reanalyze your data including the rejected trials. FUTURE: In principle, it would be nice to add a new trial to make up for each rejected trial, but the PsychoJS MultiStair code has no provision for adding a trial to an ongoing loop. We hope to add that capability in the future.",
     type: "integer",
     default: "35",
     categories: "",
@@ -1852,7 +1852,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "13",
     explanation:
-      "soundGainDBSPL (default 80) is the assumed gain (dB SPL) at 1000 Hz from digital sound to physical sound in the linear part of the transfer function (i.e. inDb+soundGainDbSpl < T-W/2, where T and W are explained below in soundGainTWR. For a sound vector with low digital level L (in dB), the output sound will have a level L+soundGainDBSPL (in dB SPL). The level of a sound vector is 10*log(P) dB, where the power, P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant's computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz), over the linear range of the loudspeaker, i.e. at digital sound levels below T-W/2.",
+      "soundGainDBSPL (default 125) is the assumed gain (dB SPL) at 1000 Hz from digital sound (inDb) to physical sound (outDbSpl),\noutDbSpl=inDb+soundGainDbSpl.\nThe level of a sound vector is 10*log(P) dB, where the power is P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant's computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL as the default. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz).",
     type: "numerical",
     default: "125",
     categories: "",
@@ -2269,7 +2269,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1.5",
     explanation:
-      "thresholdAllowedDurationRatio. QUEST receives the trial's response only if measured duration is in the range [targetDurationSec/r targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. (Also see conditionTrials.)",
+      "thresholdAllowedDurationRatio. QUEST receives the trial's response only if measured duration is in the range [targetDurationSec/r targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. Using _compatibleProcessorCoresMinimum to require at least 6 cores has more or less eliminated the bad durations. (Also see conditionTrials.)",
     type: "numerical",
     default: "1.5",
     categories: "",
@@ -2312,6 +2312,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "thresholdAllowedLatencySec. QUEST receives the trial's response only if measured target latency is less than or equal to thresholdAllowedLatencySec. (Also see conditionTrials.)",
     type: "numerical",
     default: "0.1",
+    categories: "",
+  },
+  {
+    name: "thresholdAllowedLatenessSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "thresholdAllowedLatenessSec. QUEST receives the trial's response only if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _compatibleProcessorCoresMinimum to require at least 6 cores has more or less eliminated excessive lateness.  (Also see conditionTrials.)",
+    type: "",
+    default: "",
     categories: "",
   },
   {
