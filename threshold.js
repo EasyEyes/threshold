@@ -3852,6 +3852,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const soundGainParameters = soundCalibrationResults.current
             ? soundCalibrationResults.current.parameters
             : soundGainTWR;
+          // temporary: get ProposedVolumeLevelFromQuest.current from the file if tresholdParameter is not "targetSoundDBSPL"
+          if (
+            paramReader.read("thresholdParameter", status.block_condition) !==
+            "targetSoundDBSPL"
+          ) {
+            ProposedVolumeLevelFromQuest.current = paramReader.read(
+              "targetSoundDBSPL",
+              status.block_condition
+            );
+            // console.log("ProposedVolumeLevelFromQuest.current", ProposedVolumeLevelFromQuest.current);
+          }
 
           const {
             trialSound,
