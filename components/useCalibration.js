@@ -179,7 +179,7 @@ export const calibrateAudio = async (reader) => {
   ];
 
   ICalibDBSPL.current = reader.read(
-    GLOSSARY.calibrateSoundAssumingThisICalibDBSPL.name
+    GLOSSARY._calibrateSoundAssumingThisICalibDBSPL.name
   )[0];
   // console.log("ICalibDBSPL", ICalibDBSPL);
   const soundLevels = reader

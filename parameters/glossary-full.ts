@@ -39,6 +39,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundAssumingThisICalibDBSPL",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundAssumingICalibDBSPL (default 76) is a calibration factor for iPhone recordings. The physical sound level (in dB SPL) is iCalib+20*log10(rms), where rms is the root mean square of the digital sound recording. The value we got from the internet was 104.9. The value we use is based on our calibration of an iPhone 12 Pro by the UMIK-1 digital microphone and the REW software, which reads the (90 deg, i.e. vertically oriented) factory calibration of the UMIK-1 microphone. The scientist can override the current default by setting this parameter in the experiment table. The compiler allows you to provide a different value for each condition, but in fact it's used only once, during calibration, and I suppose we use the value provided for the first condition. The value of iCalib is included in the Sound Calibration report, both on screen, and in the CSV file that you can optionally download.",
+    type: "numerical",
+    default: "76",
+    categories: "",
+  },
+  {
     name: "_compatibleBrowser",
     availability: "now",
     example: "Chrome",
@@ -498,16 +508,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "calibrateSoundAllHzDB, used with calibrateSoundAllHzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -23.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes since gain will drop at high sound levels. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
     type: "text",
     default: "-13.1",
-    categories: "",
-  },
-  {
-    name: "calibrateSoundAssumingThisICalibDBSPL",
-    availability: "now",
-    example: "",
-    explanation:
-      "calibrateSoundAssumingICalibDBSPL is a calibration factor for iPhone recordings. The physical sound level (in dB SPL) is iCalib+20*log10(rms), where rms is the root mean square of the digital sound recording. The value we got from the internet seems to be about 14 dB SPL too high. This allows the scientist to override the current default.",
-    type: "numerical",
-    default: "104.9",
     categories: "",
   },
   {

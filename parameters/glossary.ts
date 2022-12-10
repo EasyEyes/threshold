@@ -21,6 +21,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  _calibrateSoundAssumingThisICalibDBSPL: {
+    name: "_calibrateSoundAssumingThisICalibDBSPL",
+    availability: "now",
+    type: "numerical",
+    default: "76",
+  },
   _compatibleBrowser: {
     name: "_compatibleBrowser",
     availability: "now",
@@ -384,12 +390,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "-13.1",
-  },
-  calibrateSoundAssumingThisICalibDBSPL: {
-    name: "calibrateSoundAssumingThisICalibDBSPL",
-    availability: "now",
-    type: "numerical",
-    default: "104.9",
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
