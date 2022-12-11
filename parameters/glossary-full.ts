@@ -1164,7 +1164,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "movieRectPxContainsRectDegBool",
     availability: "now",
-    example: "",
+    example: "FALSE",
     explanation:
       "If movieRectPxContainsRectDegBool (default FALSE) is FALSE then movieRectPx is the bounding box of the four screen points that correspond to the four midpoints (on the retina) of the four sides of movieRectDeg. If it's TRUE then movieRectPx is the screen bounding box containing the four midpoints and the four corners of movieRectDeg. So movieRectPx will contain practically all the pixels in movieRectDeg. The issue, of course, is that a rect on the screen (px coordinates) when mapped to the retina (deg coordinates) is not a rect, all four sides are curved. Similarly, a rect on the retina (deg coordinates) when mapped to the screen (px coordinates) is not a rect, all four sides are curved. Despite the imprerfect correspondence, rects are convenient, so movieRectPxContainsRectDegBool selects how to approximate the correspondence. Usually the scientist will want to specify in deg coordinates, but want the efficiciency of implementation in px coordinates.",
     type: "boolean",
@@ -1174,7 +1174,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "movieTargetDelaySec",
     availability: "now",
-    example: "",
+    example: "0",
     explanation:
       "movieTargetDelaySec (default is 0) specified the target delay (positive or negative) relative to being centered in the movie duration movieSec.",
     type: "numerical",
@@ -1184,7 +1184,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "movieSec",
     availability: "now",
-    example: "",
+    example: "60",
     explanation:
       "movieSec is the desired duration of the movie. The actual duration will be an integer number of frames. EasyEyes will compute n=round(movieHz*movieSec) frames, with a duration of n/movieHz.",
     type: "numerical",
