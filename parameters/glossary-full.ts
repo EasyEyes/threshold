@@ -583,7 +583,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "errorBool",
     availability: "now",
-    example: "",
+    example: "FALSE",
     explanation:
       "errorBool (default FALSE) throws a fatal error in the first condition for which this parameter is TRUE. This is used to check out the EasyEyes error reporting.",
     type: "boolean",
@@ -724,7 +724,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "fontColorRGBA",
     availability: "now",
-    example: "",
+    example: "0,0,0,1",
     explanation:
       "The color of the targets, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
     type: "text",
@@ -744,7 +744,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "fontKerning",
     availability: "now",
-    example: "",
+    example: "normal",
     explanation:
       "NOT YET IMPLEMENTED. fontKerning (default auto) uses the fontKerning Canvas command to enable or disable kerning: auto (yes/no as dictated by browser), normal (yes), or none (no).\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fontKerning",
     type: "",
@@ -894,7 +894,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "instructionForStimulusLocation",
     availability: "now",
-    example: "",
+    example: "upperLeft",
     explanation:
       "instructionForStimulusLocation (empty default, which has no effect) indicates where the stimulus instructions should be placed on the screen: top, upperLeft, or upperRight. If you select top, then the text will be at the top of the screen, using the full width of the screen (allowing modest right and left margins), aligned with the left or right side of the display, as guided by whether instructionFontLeftToRightBool is TRUE or FALSE. When you select upperLeft or upperRight, EasyEyes will break the text up into short lines of text, to present it as a roughly square block of text in the upper left or right corner, which may help keep the text far from the target.",
     type: "categorical",
