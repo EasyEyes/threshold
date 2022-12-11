@@ -2320,8 +2320,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "thresholdAllowedLatenessSec. QUEST receives the trial's response only if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _compatibleProcessorCoresMinimum to require at least 6 cores has more or less eliminated excessive lateness.  (Also see conditionTrials.)",
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "0.1",
     categories: "",
   },
   {

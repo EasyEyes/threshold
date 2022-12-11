@@ -1517,8 +1517,8 @@ export const GLOSSARY: Glossary = {
   thresholdAllowedLatenessSec: {
     name: "thresholdAllowedLatenessSec",
     availability: "now",
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "0.1",
   },
   thresholdBeta: {
     name: "thresholdBeta",
