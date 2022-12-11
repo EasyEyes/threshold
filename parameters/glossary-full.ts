@@ -794,7 +794,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "fontTrackingForLetters",
     availability: "now",
-    example: "",
+    example: "0",
     explanation:
       'NOT YET IMPLEMENTED. fontTrackingLetter (default 0) uses the "letterSpacing" Canvas command to adjust the spacing between letters.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing\nIt adds a positive or negative value to whatever the font would do otherwise. This is closely related to what Microsoft Word calls "tracking". The distance inserted (in px) is the product of the value provided and the point side of the font. "letterSpacing" is part of the new CanvasRenderingContext2D, which is available for Chrome, Edge, and Samsung, not for Safari and Firefox.',
     type: "",
@@ -804,7 +804,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "fontTrackingForWords",
     availability: "now",
-    example: "",
+    example: "0",
     explanation:
       'NOT YET IMPLEMENTED. fontTrackingWord (default 0) uses the "wordSpacing" Canvas command to adjust the spacing between words.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/wordSpacing\nThe distance inserted (in px) is the product of the value provided and the point side of the font. This works for Chrome, Edge, and Samsung, not for Safari and Firefox.',
     type: "",
@@ -2257,7 +2257,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "targetWhenSec",
     availability: "now",
-    example: "",
+    example: "0",
     explanation:
       "NOT YET IMPLEMENTED. targetWhenSec (default 0) indicates when the middle time of the target occurs relative to the middle of the movie.",
     type: "numerical",
