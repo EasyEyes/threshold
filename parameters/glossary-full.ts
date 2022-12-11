@@ -1084,7 +1084,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "maskerBaseFrequencyMultiplier",
     availability: "now",
-    example: "",
+    example: "2",
     explanation:
       "Compute base frequency of a mask melody by multiplying the target frequency by this factor. If there are two melodies then the second melody has base frequency given by target frequency divided by this factor.",
     type: "numerical",
@@ -1094,7 +1094,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "maskerSoundDBSPL",
     availability: "now",
-    example: "",
+    example: "-100",
     explanation:
       "maskerSoundDBSPL (default -100) is sound level of the masker in dB SPL.",
     type: "",
@@ -1654,7 +1654,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "showExperimentNameBool",
     availability: "now",
-    example: "",
+    example: "FALSE",
     explanation:
       "showExperimentNameBool (default FALSE) is useful when making screenshots to show the experimentName (i.e. the name of the Pavlovia repository, e.g. crowding3). It should go in the lower left corner. We have several text messages that stack up there. If all four are present, then **showText** on top, above **showConditionNameBool**, above **showExperimentNameBool**, above **showTargetSpecsBool**.",
     type: "boolean",
