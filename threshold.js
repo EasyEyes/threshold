@@ -3466,13 +3466,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // trialComponents.push(...rsvpReadingFeedback.stims);
         },
         movie: () => {
-          fixation.tStart = t;
-          fixation.frameNStart = frameN;
-          clickedContinue.current = false;
-
-          document.addEventListener("click", _takeFixationClick);
-          document.addEventListener("touchend", _takeFixationClick);
-
+          document.querySelector("canvas").style.display = "none";
+          document.getElementById("root").style.display = "none";
           level = currentLoop._currentStaircase.getQuestValue();
 
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
@@ -3494,6 +3489,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           correctAns.current = [targetCharacter.toLowerCase()];
           /* -------------------------------------------------------------------------- */
 
+          // TODO
+          // switch(thresholdParameter) {
+          //   case "targetContrast":
+          // }
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
+          clickedContinue.current = false;
           fixation.update(
             paramReader,
             BC,
@@ -3503,11 +3505,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
 
-          // TODO
-          // switch(thresholdParameter) {
-          //   case "targetContrast":
-          // }
-
+          loader.setAttribute("id", "loader");
+          loaderText.setAttribute("id", "loaderText");
+          document.body.appendChild(loader);
+          document.body.appendChild(loaderText);
+          loaderText.innerHTML = "Generating movie";
           //generate movie
           loggerText("Generate movie here");
           //var F = new Function(paramReader.read("computeImageJS", BC))();
@@ -3519,13 +3521,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ).then((imageNit) => {
             generate_video(imageNit).then((data) => {
               videoblob = data;
+              document.body.removeChild(loader);
+              document.body.removeChild(loaderText);
+              document.querySelector("canvas").style.display = "block";
+              document.getElementById("root").style.display = "block";
+              document.addEventListener("click", _takeFixationClick);
+              document.addEventListener("touchend", _takeFixationClick);
             });
           });
-          // loader.setAttribute("id", "loader");
-          // loaderText.setAttribute("id", "loaderText");
-          // document.body.appendChild(loader);
-          // document.body.appendChild(loaderText);
-          // loaderText.innerHTML = "Generating movie";
+
           // generate_video(imageNit).then((data) => {
           //   videoblob = data;
           //   logger("data", data);
@@ -4565,8 +4569,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             loggerText("Running");
             // document.querySelector("canvas").style.display = "none";
             // document.getElementById("root").style.display = "none";
-            loader.style.display = "none";
-            loaderText.style.display = "none";
             video.setAttribute("src", videoblob);
             document.body.appendChild(video);
             video.play();
