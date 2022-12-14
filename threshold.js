@@ -2951,22 +2951,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-          psychoJS.experiment.addData(
-            "flankerOrientation",
-            reader.read("spacingDirection", BC)
-          );
-          psychoJS.experiment.addData("font", reader.read("font", BC));
           // TODO
           // ! where are the other font information?
-
-          psychoJS.experiment.addData(
-            "fontColorRGBA",
-            reader.read("fontColorRGBA", BC)
-          );
-          psychoJS.experiment.addData(
-            "screenColorRGB",
-            reader.read("screenColorRGB", BC)
-          );
 
           // update component parameters for each repeat
           displayOptions.windowWidthCm = rc.screenWidthCm
