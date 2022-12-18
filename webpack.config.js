@@ -99,10 +99,10 @@ module.exports = (env, options) => {
           directory: path.join(__dirname, `examples/${options.name}`),
           publicPath: `/`,
         },
-        headers: {
-          "Cross-Origin-Embedder-Policy": "require-corp",
-          "Cross-Origin-Opener-Policy": "same-origin",
-        },
+        // headers: {
+        //   "Cross-Origin-Embedder-Policy": "require-corp",
+        //   "Cross-Origin-Opener-Policy": "same-origin",
+        // },
       },
     });
   } else if (env.production) {

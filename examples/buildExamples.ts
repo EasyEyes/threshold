@@ -135,6 +135,8 @@ const constructForEXperiment = async (d: string) => {
       mkdirSync(`${dir}/js`);
       copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);
 
+      copyFileSync("../coi-serviceworker.js", `${dir}/coi-serviceworker.js`);
+
       copyFileSync(
         "../js/reading-page-flip.mp3",
         `${dir}/js/reading-page-flip.mp3`
