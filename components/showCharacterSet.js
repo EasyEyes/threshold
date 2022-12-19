@@ -60,6 +60,7 @@ export function setupClickableCharacterSet(
   );
 
   document.body.appendChild(characterSetHolder);
+  scaleFontSizeToFit(characterSetHolder, "characterSet");
 
   return characterSetHolder;
 }
@@ -165,4 +166,37 @@ export const toggleClickedCharacters = () => {
     e.style.border = "2px solid black";
     e.style.backgroundColor = "lightgray";
   });
+};
+
+/**
+ * Scale children font size to maximize space within a container.
+ * Specifically, given an element (elem), scale the font-size of
+ * elem's children (specified as all elems with class=childrenClass)
+ * such that elem takes up all the space of its parent.
+ * Used to scale the clickable character set used for responses.
+ * @param {HTMLElement} elem
+ * @param {string} childrenClass
+ */
+const scaleFontSizeToFit = (elem, childrenClass) => {
+  // TODO support multidimensional?
+  const parent = elem.parentNode;
+  const startingWidth = elem.offsetWidth;
+  const startingSize = window
+    .getComputedStyle(elem, null)
+    .getPropertyValue("font-size");
+  const containingWidth = parent.offsetWidth;
+  const unit = 5;
+  let newSize = parseFloat(startingSize);
+  if (startingWidth === containingWidth) return;
+  const scale = (x) =>
+    document
+      .querySelectorAll("." + childrenClass)
+      .forEach((e) => (e.style["font-size"] = String(x) + "px"));
+  elem.style["overflow"] = "hidden";
+  elem.style["white-space"] = "nowrap";
+  while (elem.offsetWidth < containingWidth) {
+    scale(newSize + unit);
+    newSize += unit;
+  }
+  scale(newSize);
 };
