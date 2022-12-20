@@ -1983,7 +1983,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetDelaySec (default 0) delays presentation of the target in a movie. By default, time is zero at the middle of the movie. EasyEyes will subtract targetDelaySec from that default to produce the time coordinate used to compute the target.",
+      "targetDelaySec (default 0) delays presentation of the target in a movie. By default, time is zero at the middle of the movie. EasyEyes will subtract targetDelaySec from that default to produce the time coordinate used to compute the target (and envelope). This is unlike targetPhaseTemporalDeg which affects only the target, not the envelope.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2065,6 +2065,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "targetOrientationDeg (default 0) is the orientation of the target, clockwise from vertical.",
     type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
+    name: "targetPhaseSpatialDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetPhaseSpatialDeg (default 0) is the target spatial phase in degrees.",
+    type: "",
+    default: "0",
+    categories: "",
+  },
+  {
+    name: "targetPhaseTemporalDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetPhaseTemporalDeg (default 0) is the target temporal phase in degrees.",
+    type: "",
     default: "0",
     categories: "",
   },
