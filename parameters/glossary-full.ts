@@ -2240,7 +2240,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetPhaseTemporalDeg (default 0) is the target temporal phase in degrees.",
+      "targetPhaseSpatialDeg (default 0) is the target spatial phase in degrees.",
     type: "numerical",
     default: "0",
     categories: "",
