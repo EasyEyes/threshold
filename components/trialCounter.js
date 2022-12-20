@@ -63,6 +63,15 @@ export function getTrialInfoStr(
             blockCount
           );
         },
+        movie: () => {
+          res = replacePlaceholders(
+            phrases.T_counterTrialBlock[L],
+            currentTrialIndex,
+            currentTrialLength,
+            currentBlockIndex,
+            blockCount
+          );
+        },
       });
     } else {
       // ...but on block instructions, just show block#

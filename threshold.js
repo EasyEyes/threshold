@@ -3515,14 +3515,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               document.addEventListener("touchend", _takeFixationClick);
             });
           });
-
+          trialCounter.setAutoDraw(showCounterBool);
           // generate_video(imageNit).then((data) => {
           //   videoblob = data;
           //   logger("data", data);
           // });
           showCharacterSet.setPos([0, 0]);
-          showCharacterSet.setText("");
-          //showCharacterSet.setText(getCharacterSetShowText(validAns));
 
           trialComponents = [];
           trialComponents.push(key_resp);
