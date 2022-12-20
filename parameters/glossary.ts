@@ -1363,6 +1363,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
   },
+  targetPhaseDeg: {
+    name: "targetPhaseDeg",
+    availability: "now",
+    type: "",
+    default: "0",
+  },
   targetPhaseSpatialDeg: {
     name: "targetPhaseSpatialDeg",
     availability: "now",

@@ -2069,6 +2069,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "targetPhaseDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "WILL SOON BE OBSOLETE: targetPhaseDeg (default 0) is the target spatial phase in degrees.",
+    type: "",
+    default: "0",
+    categories: "",
+  },
+  {
     name: "targetPhaseSpatialDeg",
     availability: "now",
     example: "",
