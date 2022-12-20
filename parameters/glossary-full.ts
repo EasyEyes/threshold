@@ -2074,7 +2074,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "WILL SOON BE OBSOLETE: targetPhaseDeg (default 0) is the target spatial phase in degrees.",
-    type: "",
+    type: "numerical",
     default: "0",
     categories: "",
   },
@@ -2084,7 +2084,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "targetPhaseSpatialDeg (default 0) is the target spatial phase in degrees.",
-    type: "",
+    type: "numerical",
     default: "0",
     categories: "",
   },
@@ -2094,7 +2094,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "targetPhaseTemporalDeg (default 0) is the target temporal phase in degrees.",
-    type: "",
+    type: "numerical",
     default: "0",
     categories: "",
   },
