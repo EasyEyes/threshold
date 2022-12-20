@@ -2069,15 +2069,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "targetPhaseDeg",
-    availability: "now",
-    example: "",
-    explanation: "targetPhaseDeg (default 0) is the target phase in degrees.",
-    type: "numerical",
-    default: "0",
-    categories: "",
-  },
-  {
     name: "targetRepeatsBool",
     availability: "now",
     example: "FALSE",
@@ -2243,6 +2234,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "identify",
     categories: "identify, detect, questionAndAnswer",
+  },
+  {
+    name: "targetPhaseSpatialDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetPhaseTemporalDeg (default 0) is the target temporal phase in degrees.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
+    name: "targetPhaseTemporalDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetPhaseTemporalDeg (default 0) is the target temporal phase in degrees.",
+    type: "numerical",
+    default: "0",
+    categories: "",
   },
   {
     name: "targetTimeConstantSec",

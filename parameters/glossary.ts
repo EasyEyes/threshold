@@ -1363,12 +1363,6 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
   },
-  targetPhaseDeg: {
-    name: "targetPhaseDeg",
-    availability: "now",
-    type: "numerical",
-    default: "0",
-  },
   targetRepeatsBool: {
     name: "targetRepeatsBool",
     availability: "now",
@@ -1471,6 +1465,18 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "identify",
     categories: ["identify", "detect", "questionAndAnswer"],
+  },
+  targetPhaseSpatialDeg: {
+    name: "targetPhaseSpatialDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+  },
+  targetPhaseTemporalDeg: {
+    name: "targetPhaseTemporalDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0",
   },
   targetTimeConstantSec: {
     name: "targetTimeConstantSec",
