@@ -221,6 +221,7 @@ import {
   showConditionName,
   updateConditionNameConfig,
   updateTargetSpecsForLetter,
+  updateTargetSpecsForMovie,
   updateTargetSpecsForRepeatedLetters,
   updateTargetSpecsForReading,
   updateTargetSpecsForRsvpReading,
@@ -3498,6 +3499,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           loaderText.innerHTML = "Generating movie";
           //generate movie
           loggerText("Generate movie here");
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecsForMovie(paramReader, status.block_condition);
           //var F = new Function(paramReader.read("computeImageJS", BC))();
           evaluateJSCode(
             paramReader,

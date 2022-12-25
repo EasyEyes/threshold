@@ -1,5 +1,6 @@
 /* ----------------------------- Condition Name ----------------------------- */
 
+import { paramReader } from "../threshold";
 import {
   conditionNameConfig,
   font,
@@ -69,6 +70,25 @@ export const updateTargetSpecsForLetter = (
   }\ntargetEccentricityXYDeg: ${
     letterConfig.targetEccentricityXYDeg
   }\nviewingDistanceCm: ${viewingDistanceCm.current}`;
+};
+
+export const updateTargetSpecsForMovie = (paramReader, BC) => {
+  showConditionNameConfig.targetSpecs = `targetEccentricityXDeg: ${paramReader.read(
+    "targetEccentricityXDeg",
+    BC
+  )}\ntargetEccentricityYDeg: ${paramReader.read(
+    "targetEccentricityYDeg",
+    BC
+  )}\ntargetContrast: ${paramReader.read(
+    "targetContrast",
+    BC
+  )}\ntargetCyclePerDeg: ${paramReader.read(
+    "targetCyclePerDeg",
+    BC
+  )}\ntargetHz: ${paramReader.read(
+    "targetHz",
+    BC
+  )}\nthresholdParameter: ${paramReader.read("thresholdParameter", BC)}`;
 };
 
 export const updateTargetSpecsForRepeatedLetters = (
