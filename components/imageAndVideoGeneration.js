@@ -37,10 +37,11 @@ export async function generate_image(bitmapArray) {
     });
     uIntArray.push(image.toBuffer());
   }
+  logger("uIntArray", uIntArray);
   return uIntArray;
 }
 
-export async function generate_video(imageArray) {
+export async function generate_video(imageArray, movieHz) {
   const { createFFmpeg, fetchFile } = FFmpeg;
   const ffmpeg = createFFmpeg({ log: false });
 
@@ -66,7 +67,7 @@ export async function generate_video(imageArray) {
       "-pattern_type",
       "glob",
       "-framerate",
-      "2",
+      String(movieHz),
       "-i",
       "*.png",
       "-tag:v",
@@ -92,7 +93,7 @@ export async function generate_video(imageArray) {
       "-pattern_type",
       "glob",
       "-framerate",
-      "2",
+      String(movieHz),
       "-i",
       "*.png",
       "-tag:v",
@@ -183,6 +184,8 @@ export async function evaluateJSCode(
   const targetHz = paramReader.read("targetHz", BC);
   //var jsCode = paramReader.read("computeImageJS", BC);
   const filename = paramReader.read("movieComputeJS", BC);
+  const targetPhaseSpatialDeg = paramReader.read("targetPhaseSpatialDeg", BC);
+  const targetPhaseTemporalDeg = paramReader.read("targetPhaseTemporalDeg", BC);
   return readJS(filename).then((response) => {
     logger("last index", response.lastIndexOf("}"));
     var jsCode = response.substring(
@@ -191,8 +194,8 @@ export async function evaluateJSCode(
     );
     //console.log(`Received code: ${jsCode}`);
     var args =
-      "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, IsRectInRect,movieRectDeg,movieRectPxContainsDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentrictyXDeg,targetEccentrictyYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetPhase,targetContrast";
-    logger("jsCode", jsCode);
+      "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, IsRectInRect,movieRectDeg,movieRectPxContainsDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentrictyXDeg,targetEccentrictyYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetPhase,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
+    // logger("jsCode", jsCode);
     var myFunc = new Function(args, jsCode);
     var imageNit = myFunc(
       targetCharacter,
@@ -213,8 +216,10 @@ export async function evaluateJSCode(
       targetSpaceConstantDeg,
       targetCyclePerDeg,
       targetPhase,
-      targetContrast
+      targetContrast,
+      targetPhaseSpatialDeg,
+      targetPhaseTemporalDeg
     );
-    return imageNit;
+    return [imageNit, movieHz];
   });
 }

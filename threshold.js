@@ -3507,8 +3507,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status,
             displayOptions,
             targetCharacter
-          ).then((imageNit) => {
-            generate_video(imageNit).then((data) => {
+          ).then(([imageNit, movieHz]) => {
+            generate_video(imageNit, movieHz).then((data) => {
               videoblob = data;
               document.body.removeChild(loader);
               document.body.removeChild(loaderText);
