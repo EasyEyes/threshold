@@ -1136,7 +1136,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "movieHz is the desired frame rate of the movie. Most displays run at 60 Hz, some are faster, and some have variable frame rate. movieHz controls the number of computed movie frames. Each computed frame could be displayed for several display frames. For example, one might save computation time by setting movieHz to 15 for display on a 60 Hz display.",
+      "movieHz is the desired frame rate of the movie. Most displays run at 60 Hz, some are faster, and some have variable frame rate. movieHz controls the number of computed movie frames. Each computed frame could be displayed for several display frames. For example, one might save computation time by setting movieHz to 15 for display on a 60 Hz display. Not to be confused with the desired flicker frequency of the target, targetHz, which is independent.",
     type: "numerical",
     default: "60",
     categories: "",
@@ -2022,7 +2022,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "targetHz",
     availability: "now",
     example: "",
-    explanation: "targetHz (default 0) is the target temporal frequency in Hz.",
+    explanation:
+      "targetHz (default 0) is the target temporal frequency in Hz. Not to be confused with the movie's frame rate, which is independent.",
     type: "numerical",
     default: "0",
     categories: "",

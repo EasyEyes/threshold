@@ -224,7 +224,10 @@ export const calibrateAudio = async (reader) => {
     const elems = _addSoundCalibrationElems(copy);
 
     document.querySelector("#soundYes").addEventListener("click", async (e) => {
-      document.querySelector("#soundMessage").innerHTML = copy.qr;
+      document.querySelector("#soundMessage").innerHTML = copy.qr.replace(
+        /\n/g,
+        "<br>"
+      );
       document.querySelector("#soundNavContainer").style.display = "none";
       document.querySelector("#soundNo").style.display = "none";
 
@@ -374,6 +377,8 @@ const _addSoundCalibrationElems = (copy) => {
   citation.style.fontSize = "0.8em";
 
   background.classList.add(...["popup", "rc-panel"]);
+  // avoid background being clipped from the top
+  background.style.marginTop = "5vh";
   container.classList.add(...["container"]);
   yesButton.classList.add(...["btn", "btn-primary"]);
   noButton.classList.add(...["btn", "btn-secondary"]);
