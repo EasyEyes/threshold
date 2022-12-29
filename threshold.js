@@ -1337,10 +1337,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Schedule all the trials in the trialList:
       for (const _thisBlock of blocks) {
         const snapshot = blocks.getSnapshot();
+        const conditions = TrialHandler.importConditions(
+          psychoJS.serverManager,
+          `conditions/block_${_thisBlock.block + 1}.csv`
+        );
+
         blocksLoopScheduler.add(importConditions(snapshot, "block"));
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
+
+        if (
+          !conditions.some(
+            (c) => c["conditionEnabledBool"].toLowerCase() === "true"
+          )
+        )
+          continue;
 
         // only when not answering questions
         switchTask(_thisBlock.targetTask, {
@@ -1406,9 +1418,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.serverManager,
         thisConditionsFile
       );
-      trialsConditions = trialsConditions.map((condition) =>
-        Object.assign(condition, { label: condition["block_condition"] })
-      );
+      trialsConditions = trialsConditions
+        .map((condition) =>
+          Object.assign(condition, { label: condition["block_condition"] })
+        )
+        .filter((condition) =>
+          paramReader.read("conditionEnabledBool", condition["block_condition"])
+        );
 
       // nTrialsTotal
       // totalTrialsThisBlock.current = trialsConditions
@@ -1923,6 +1939,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
         );
       /* -------------------------------------------------------------------------- */
+      const getTotalTrialsThisBlock = () => {
+        const possibleTrials = paramReader
+          .read("conditionTrials", status.block)
+          .filter(
+            (c, i) => paramReader.read("conditionEnabledBool", status.block)[i]
+          );
+        return possibleTrials.reduce((a, b) => a + b, 0);
+      };
       // Get total trials for this block
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
@@ -1943,24 +1967,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         identify: () => {
           switchKind(targetKind.current, {
             vocoderPhrase: () => {
-              const possibleTrials = paramReader.read(
-                "conditionTrials",
-                status.block
-              );
-              totalTrialsThisBlock.current = possibleTrials.reduce(
-                (a, b) => a + b,
-                0
-              );
+              totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
             sound: () => {
-              const possibleTrials = paramReader.read(
-                "conditionTrials",
-                status.block
-              );
-              totalTrialsThisBlock.current = possibleTrials.reduce(
-                (a, b) => a + b,
-                0
-              );
+              totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
             reading: () => {
               totalTrialsThisBlock.current = paramReader.read(
@@ -1969,60 +1979,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               )[0];
             },
             letter: () => {
-              const possibleTrials = paramReader.read(
-                "conditionTrials",
-                status.block
-              );
-              totalTrialsThisBlock.current = possibleTrials.reduce(
-                (a, b) => a + b,
-                0
-              );
+              totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
             repeatedLetters: () => {
-              const possibleTrials = paramReader.read(
-                "conditionTrials",
-                status.block
-              );
-              // Since each requested trial (from the scientist) requires two trials (on for each response)
-              // when targetKind === repeatedLetters.
-              totalTrialsThisBlock.current = possibleTrials.reduce(
-                (a, b) => a + b,
-                0
-              );
+              totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
             rsvpReading: () => {
-              const possibleTrials = paramReader.read(
-                "conditionTrials",
-                status.block
-              );
-              totalTrialsThisBlock.current = possibleTrials.reduce(
-                (a, b) => a + b,
-                0
-              );
+              // TODO BF each response should probably count on its own.
+              totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
             movie: () => {
-              const possibleTrials = paramReader.read(
-                "conditionTrials",
-                status.block
-              );
-              totalTrialsThisBlock.current = possibleTrials.reduce(
-                (a, b) => a + b,
-                0
-              );
+              totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
           });
         },
         detect: () => {
           switchKind(targetKind.current, {
             sound: () => {
-              const possibleTrials = paramReader.read(
-                "conditionTrials",
-                status.block
-              );
-              totalTrialsThisBlock.current = possibleTrials.reduce(
-                (a, b) => a + b,
-                0
-              );
+              totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
           });
         },

@@ -27,6 +27,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "76",
   },
+  _calibrateTimingNumberAndSecs: {
+    name: "_calibrateTimingNumberAndSecs",
+    availability: "now",
+    type: "",
+    default: "",
+  },
   _compatibleBrowser: {
     name: "_compatibleBrowser",
     availability: "now",
@@ -170,6 +176,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "integer",
     default: "",
+  },
+  _compatibleTimingToleranceSec: {
+    name: "_compatibleTimingToleranceSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.05",
   },
   _compileAsNewExperimentBool: {
     name: "_compileAsNewExperimentBool",
@@ -623,6 +635,13 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  instructionForResponseWhere: {
+    name: "instructionForResponseWhere",
+    availability: "now",
+    type: "categorical",
+    default: "topLeft",
+    categories: ["none", "topLeft", "bottomLeft"],
+  },
   instructionForStimulus: {
     name: "instructionForStimulus",
     availability: "now",
@@ -799,17 +818,17 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  movieTargetDelaySec: {
-    name: "movieTargetDelaySec",
-    availability: "now",
-    type: "numerical",
-    default: "0",
-  },
   movieSec: {
     name: "movieSec",
     availability: "now",
     type: "numerical",
     default: "60",
+  },
+  movieTargetDelaySec: {
+    name: "movieTargetDelaySec",
+    availability: "now",
+    type: "numerical",
+    default: "0",
   },
   notes: { name: "notes", availability: "now", type: "text", default: "" },
   "questionAndAnswer@@": {
@@ -958,14 +977,14 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  responseSpokenToExperimenterBool: {
-    name: "responseSpokenToExperimenterBool",
+  responseSpokenBool: {
+    name: "responseSpokenBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
   },
-  responseSpokenBool: {
-    name: "responseSpokenBool",
+  responseSpokenToExperimenterBool: {
+    name: "responseSpokenToExperimenterBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
@@ -982,17 +1001,17 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  rsvpReadingFlankTargetWithLettersBool: {
-    name: "rsvpReadingFlankTargetWithLettersBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
   rsvpReadingFlankerCharacterSet: {
     name: "rsvpReadingFlankerCharacterSet",
     availability: "now",
     type: "text",
     default: "",
+  },
+  rsvpReadingFlankTargetWithLettersBool: {
+    name: "rsvpReadingFlankTargetWithLettersBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
   },
   rsvpReadingNumberOfResponseOptions: {
     name: "rsvpReadingNumberOfResponseOptions",
@@ -1128,13 +1147,6 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "disabled",
     categories: ["px", "cm", "deg", "mm", "none", "disabled"],
-  },
-  showInstructionsWhere: {
-    name: "showInstructionsWhere",
-    availability: "now",
-    type: "categorical",
-    default: "topLeft",
-    categories: ["none", "topLeft", "bottomLeft"],
   },
   showPercentCorrectBool: {
     name: "showPercentCorrectBool",
@@ -1363,12 +1375,6 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
   },
-  targetPhaseDeg: {
-    name: "targetPhaseDeg",
-    availability: "now",
-    type: "numerical",
-    default: "0",
-  },
   targetPhaseSpatialDeg: {
     name: "targetPhaseSpatialDeg",
     availability: "now",
@@ -1519,12 +1525,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "1.00E+10",
-  },
-  thresholdAllowedLatencySec: {
-    name: "thresholdAllowedLatencySec",
-    availability: "now",
-    type: "numerical",
-    default: "0.1",
   },
   thresholdAllowedLatenessSec: {
     name: "thresholdAllowedLatenessSec",

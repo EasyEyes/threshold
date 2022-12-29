@@ -49,6 +49,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateTimingNumberAndSecs",
+    availability: "now",
+    example: "",
+    explanation:
+      'NOT YET IMPLEMENTED. _calibrateTimingNumberAndSecs accepts a text string containing an even number of comma-separated arguments, n1,s1,n2,s2, etc. Each pair of arguments n,s, requests that EasyEyes generate n intervals of duration s, where s is in seconds, and measure how long each interval actually was, in seconds. Save the results in the CSV file. Use one column per series. Name each column by the duration in sec, e.g. "timing0.15". The column length will be n. This should run during the compatibility phase, before the experiment, since its sole purpose is to work out the parameters of a compatibility test.',
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
     name: "_compatibleBrowser",
     availability: "now",
     example: "Chrome",
@@ -94,7 +104,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "hdrMovie",
     explanation:
-      "NOT YET IMPLEMENTED. _compatibleDisplay requires support for key display features:\nHDRMovie: Browser supports HDR movies.\ntenBit: Display supports 10-bit imaging. https://trello.com/c/VxGHyxDa\n\nNOTE ON CODEC. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, and we might not support it. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying compatible browsers. It might be better to specify compatible codecs. However when we reject a participant's computer it would be more helpful to tell them what browsers we support, rather than which codecs. ",
+      "NOT YET IMPLEMENTED. _compatibleDisplay requires support for key display features:\nHDRMovie: Browser supports HDR movies.\ntenBit: Display supports 10-bit imaging. https://trello.com/c/VxGHyxDa\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, and we might not support it. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs. Hardly anyone knows which browsers support any given codecs. I wonder if there is any online machine readable table that reports which browsers support each video codec. Then we could read that to update our browser compatibility. We can add any codec that FFMPEG supports, but that may require a bit of code that is custom to the codec.",
     type: "multicategorical",
     default: "",
     categories: "hdrMovie, tenBit",
@@ -138,6 +148,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "NOT YET IMPLEMENTED. _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; its value is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
     type: "integer",
     default: "",
+    categories: "",
+  },
+  {
+    name: "_compatibleTimingToleranceSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "NOT YET IMPLEMENTED. _compatibleTimingToleranceSec (default 0.05) is the largest acceptable RMS error in generating a 0.15-second interval. We suspect that this depends on both the CPU speed and the number of processes being timeshared, and thus can be reduced by closing other browser windows, and quitting other apps.",
+    type: "numerical",
+    default: "0.05",
     categories: "",
   },
   {
@@ -882,6 +902,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "instructionForResponseWhere",
+    availability: "now",
+    example: "topLeft",
+    explanation:
+      'NOT YET IMPLEMENTED: instructionForResponseWhere can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
+    type: "categorical",
+    default: "topLeft",
+    categories: "none, topLeft, bottomLeft",
+  },
+  {
     name: "instructionForStimulus",
     availability: "now",
     example: "",
@@ -1172,16 +1202,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "movieTargetDelaySec",
-    availability: "now",
-    example: "0",
-    explanation:
-      "movieTargetDelaySec (default is 0) specified the target delay (positive or negative) relative to being centered in the movie duration movieSec.",
-    type: "numerical",
-    default: "0",
-    categories: "",
-  },
-  {
     name: "movieSec",
     availability: "now",
     example: "60",
@@ -1189,6 +1209,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "movieSec is the desired duration of the movie. The actual duration will be an integer number of frames. EasyEyes will compute n=round(movieHz*movieSec) frames, with a duration of n/movieHz.",
     type: "numerical",
     default: "60",
+    categories: "",
+  },
+  {
+    name: "movieTargetDelaySec",
+    availability: "now",
+    example: "0",
+    explanation:
+      "movieTargetDelaySec (default is 0) specified the target delay (positive or negative) relative to being centered in the movie duration movieSec.",
+    type: "numerical",
+    default: "0",
     categories: "",
   },
   {
@@ -1442,21 +1472,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "responseSpokenToExperimenterBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "NOT YET IMPLEMENTED. responseSpokenToExperimenterBool requires the participant to respond verbally to the experimenter sitting alongside, e.g. by verbally naming the target. This is used to test children. The experimenter will use the laptop keyboard to discreetly score the verbal response. ",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "responseSpokenBool",
     availability: "now",
     example: "FALSE",
     explanation:
       "NOT YET IMPLEMENTED. responseSpokenBool allows participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "responseSpokenToExperimenterBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "NOT YET IMPLEMENTED. responseSpokenToExperimenterBool requires the participant to respond verbally to the experimenter sitting alongside, e.g. by verbally naming the target. This is used to test children. The experimenter will use the laptop keyboard to discreetly score the verbal response. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1482,16 +1512,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "rsvpReadingFlankTargetWithLettersBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "OBSOLETE. RETAINED SOLELY FOR REPLICATION OF BUG REPORTED IN TRELLO CARD. https://trello.com/c/xKZaBnEV",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "rsvpReadingFlankerCharacterSet",
     availability: "now",
     example: "x",
@@ -1499,6 +1519,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "rsvpReadingFlankerCharacterSet is a possibly empty (the default) string of characters. If empty then there are no flankers. If nonempty then the target is surrounded with independent random samples from this string. Thus, if the string is only one character then the flankers are all the same character.",
     type: "text",
     default: "",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingFlankTargetWithLettersBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "OBSOLETE. RETAINED SOLELY FOR REPLICATION OF BUG REPORTED IN TRELLO CARD. https://trello.com/c/xKZaBnEV",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -1714,20 +1744,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "deg",
     explanation:
-      "showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially after a moving crosshair, which might compromise stimulus timing (high stimulus latency and wrong duration). So turn off grids when you collect human data and when you check timing.",
+      "showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). Set showGrid to 'px' for a pixel grid, 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially after a moving crosshair, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you collect human data and when you check timing.",
     type: "categorical",
     default: "disabled",
     categories: "px, cm, deg, mm, none, disabled",
-  },
-  {
-    name: "showInstructionsWhere",
-    availability: "now",
-    example: "topLeft",
-    explanation:
-      'showInstructionsWhere can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
-    type: "categorical",
-    default: "topLeft",
-    categories: "none, topLeft, bottomLeft",
   },
   {
     name: "showPercentCorrectBool",
@@ -2023,7 +2043,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetHz (default 0) is the target temporal frequency in Hz. Not to be confused with the movie's frame rate, which is independent.",
+      "targetHz (default 0) is the target temporal frequency in Hz. Not to be confused with the movie's frame rate, movieHz, which is independent.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2065,16 +2085,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "targetOrientationDeg (default 0) is the orientation of the target, clockwise from vertical.",
-    type: "numerical",
-    default: "0",
-    categories: "",
-  },
-  {
-    name: "targetPhaseDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "WILL SOON BE OBSOLETE: targetPhaseDeg (default 0) is the target spatial phase in degrees.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2267,26 +2277,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "identify, detect, questionAndAnswer",
   },
   {
-    name: "targetPhaseSpatialDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "targetPhaseSpatialDeg (default 0) is the target spatial phase in degrees.",
-    type: "numerical",
-    default: "0",
-    categories: "",
-  },
-  {
-    name: "targetPhaseTemporalDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "targetPhaseTemporalDeg (default 0) is the target temporal phase in degrees.",
-    type: "numerical",
-    default: "0",
-    categories: "",
-  },
-  {
     name: "targetTimeConstantSec",
     availability: "now",
     example: "",
@@ -2344,16 +2334,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "thresholdAllowedGazeYErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg. (Also see conditionTrials.)",
     type: "numerical",
     default: "1.00E+10",
-    categories: "",
-  },
-  {
-    name: "thresholdAllowedLatencySec",
-    availability: "now",
-    example: "0.1",
-    explanation:
-      "thresholdAllowedLatencySec. QUEST receives the trial's response only if measured target latency is less than or equal to thresholdAllowedLatencySec. (Also see conditionTrials.)",
-    type: "numerical",
-    default: "0.1",
     categories: "",
   },
   {
