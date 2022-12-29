@@ -151,7 +151,6 @@ export async function evaluateJSCode(
   const targetEccentrictyYDeg = paramReader.read("targetEccentricityYDeg", BC);
   const targetSpaceConstantDeg = paramReader.read("targetSpaceConstantDeg", BC);
   const targetCyclePerDeg = paramReader.read("targetCyclePerDeg", BC);
-  const targetPhase = paramReader.read("targetPhaseDeg", BC);
   const movieLuminanceNit = paramReader.read("movieLuminanceNit", BC);
   const targetContrast = paramReader.read("targetContrast", BC);
   // const computeRectDegString = paramReader.read("computeRectDeg", BC);
@@ -194,7 +193,7 @@ export async function evaluateJSCode(
     );
     //console.log(`Received code: ${jsCode}`);
     var args =
-      "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, IsRectInRect,movieRectDeg,movieRectPxContainsDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentrictyXDeg,targetEccentrictyYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetPhase,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
+      "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, IsRectInRect,movieRectDeg,movieRectPxContainsDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentrictyXDeg,targetEccentrictyYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
     // logger("jsCode", jsCode);
     var myFunc = new Function(args, jsCode);
     var imageNit = myFunc(
@@ -215,7 +214,6 @@ export async function evaluateJSCode(
       targetEccentrictyYDeg,
       targetSpaceConstantDeg,
       targetCyclePerDeg,
-      targetPhase,
       targetContrast,
       targetPhaseSpatialDeg,
       targetPhaseTemporalDeg
