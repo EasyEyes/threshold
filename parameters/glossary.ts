@@ -415,12 +415,6 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  computeImageJS: {
-    name: "computeImageJS",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
   conditionEnabledBool: {
     name: "conditionEnabledBool",
     availability: "now",

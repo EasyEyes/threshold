@@ -1348,8 +1348,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         blocksLoopScheduler.add(filterRoutineEnd());
 
         if (
-          !conditions.some(
-            (c) => c["conditionEnabledBool"].toLowerCase() === "true"
+          conditions.every(
+            (c) => c["conditionEnabledBool"]?.toLowerCase() === "false"
           )
         )
           continue;

@@ -551,16 +551,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "computeImageJS",
-    availability: "now",
-    example: "",
-    explanation:
-      "DEPRECATED. USE movieComputeJS INSTEAD. computeImageJS (default empty) is JavaScript code to compute a static image array (imageNit) from the vectors xDeg and yDeg, which have one point per pixel. The imageNit(y,x) value  is in nits (cd/m^2). The code can use the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), and luminanceNit. For example\n\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length)\n  .fill(0)\n  .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n  gx.push(\n    Math.exp(-1 * ((x - targetEccentrictyYDeg) / targetSpaceConstantDeg) ** 2)\n  );\n}\nfor (const y of yDeg) {\n  gy.push(\n    Math.exp(-1 * ((y - targetEccentrictyYDeg) / targetSpaceConstantDeg) ** 2)\n  );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n  fx[i] =\n    gx[i] *\n    Math.sin(\n      2 * Math.PI * (xDeg[i] - targetEccentrictyYDeg) * targetCyclePerDeg +\n        (2 * Math.PI * targetPhase) / 360\n    );\n}\nfor (j = 0; j < yDeg.length; j++) {\n  for (i = 0; i < xDeg.length; i++) {\n    imageNit[i][j] = (255 / 2) * (1 + targetContrast * gy[j] * fx[i]);\n  }\n}",
-    type: "text",
-    default: "",
-    categories: "",
-  },
-  {
     name: "conditionEnabledBool",
     availability: "now",
     example: "FALSE",
