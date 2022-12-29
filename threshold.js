@@ -1349,7 +1349,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         if (
           conditions.every(
-            (c) => c["conditionEnabledBool"]?.toLowerCase() === "false"
+            (c) =>
+              typeof c["conditionEnabledBool"] !== "undefined" &&
+              String(c["conditionEnabledBool"]).toLowerCase() === "false"
           )
         )
           continue;

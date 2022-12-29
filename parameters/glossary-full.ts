@@ -145,7 +145,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "NOT YET IMPLEMENTED. _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; its value is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
+      "NOT YET IMPLEMENTED. _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
     type: "integer",
     default: "",
     categories: "",
@@ -411,6 +411,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "%",
+    availability: "now",
+    example: "",
+    explanation:
+      "An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row. Alphabetization is not checked. This ignores a row; to ignore a column see conditionEnabledBool.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
     name: "block",
     availability: "now",
     example: "1",
@@ -555,7 +565,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "When conditionEnabledBool is FALSE, (default is TRUE) the condition (column in experiment table) does not run, but the block number is treated normally. Thus even if all the conditions of a block are disabled, the block is still counted by the block counter. This makes it easy to skip conditions during development and debugging without removing their details from the experiment table. ",
+      "When conditionEnabledBool is FALSE (default is TRUE), the condition (column in experiment table) is ignored, except for block numbering. Thus even if all the conditions of a block are disabled, the block is still counted by the block counter. This makes it easy to skip conditions during development and debugging without removing their details from the experiment table. This ignores a column; to ignore a row insert an initial % before the parameter name in column A.",
     type: "boolean",
     default: "TRUE",
     categories: "",
