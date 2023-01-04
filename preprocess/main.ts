@@ -90,11 +90,107 @@ export const prepareExperimentFileForThreshold = async (
   if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
 
   // ! Recruitment
+  // Remove after all CSVs use the new _online1RecruitmentService named field. Maintaining backward compatibility.
   if (
     parsed.data.find((i: string[]) => i[0] == "_participantRecruitmentService")
   ) {
     user.currentExperiment.participantRecruitmentServiceName = parsed.data.find(
       (i: string[]) => i[0] == "_participantRecruitmentService"
+    )?.[1];
+  }
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online1RecruitmentService")
+  ) {
+    user.currentExperiment.participantRecruitmentServiceName = parsed.data.find(
+      (i: string[]) => i[0] == "_online1RecruitmentService"
+    )?.[1];
+  }
+
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online1Title")
+  ) {
+    user.currentExperiment.titleOfStudy = parsed.data.find(
+      (i: string[]) => i[0] == "_online1Title"
+    )?.[1];
+  }
+
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online2Description")
+  ) {
+    user.currentExperiment.descriptionOfStudy = parsed.data.find(
+      (i: string[]) => i[0] == "_online2Description"
+    )?.[1];
+  }
+
+  // Remove after all CSVs use the new _online2Minutes named field. Maintaining backward compatibility.
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_participantDurationMinutes")
+  ) {
+    user.currentExperiment._participantDurationMinutes = parsed.data.find(
+      (i: string[]) => i[0] == "_participantDurationMinutes"
+    )?.[1];
+  }
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online2Minutes")
+  ) {
+    user.currentExperiment._participantDurationMinutes = parsed.data.find(
+      (i: string[]) => i[0] == "_online2Minutes"
+    )?.[1];
+  }
+
+  // Remove after all CSVs use the new _online2Participants named field. Maintaining backward compatibility.
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_participantsHowMany")
+  ) {
+    user.currentExperiment._participantsHowMany = parsed.data.find(
+      (i: string[]) => i[0] == "_participantsHowMany"
+    )?.[1];
+  }
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online2Participants")
+  ) {
+    user.currentExperiment._participantsHowMany = parsed.data.find(
+      (i: string[]) => i[0] == "_online2Participants"
+    )?.[1];
+  }
+
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online5LanguageFluent")
+  ) {
+    user.currentExperiment._online5LanguageFluent = parsed.data.find(
+      (i: string[]) => i[0] == "_online5LanguageFluent"
+    )?.[1];
+  }
+
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online5LanguageFirst")
+  ) {
+    user.currentExperiment._online5LanguageFirst = parsed.data.find(
+      (i: string[]) => i[0] == "_online5LanguageFirst"
+    )?.[1];
+  }
+
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online3DeviceKind")
+  ) {
+    user.currentExperiment._online3DeviceKind = parsed.data.find(
+      (i: string[]) => i[0] == "_online3DeviceKind"
+    )?.[1];
+  }
+
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online3RequiredServices")
+  ) {
+    user.currentExperiment._online3RequiredServices = parsed.data.find(
+      (i: string[]) => i[0] == "_online3RequiredServices"
+    )?.[1];
+  }
+
+  if (
+    parsed.data.find((i: string[]) => i[0] == "_online2Pay")
+  ) {
+    user.currentExperiment._online2Pay = parsed.data.find(
+      (i: string[]) => i[0] == "_online2Pay"
     )?.[1];
   }
 
@@ -112,10 +208,20 @@ export const prepareExperimentFileForThreshold = async (
   }
 
   // ! if the prolific account, if any, is in workspace mode or not
+  // Remove after all CSVs use the new _online2Participants named field. Maintaining backward compatibility.
   if (parsed.data.find((i: string[]) => i[0] == "_prolificProjectID")) {
     // if there's a project id, the account is in workspace mode
     user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
       (i: string[]) => i[0] == "_prolificProjectID"
+    )?.[1];
+    user.currentExperiment.prolificWorkspaceModeBool = true;
+  } else {
+    user.currentExperiment.prolificWorkspaceModeBool = false;
+  }
+  if (parsed.data.find((i: string[]) => i[0] == "_online2ProlificProjectID")) {
+    // if there's a project id, the account is in workspace mode
+    user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
+      (i: string[]) => i[0] == "_online2ProlificProjectID"
     )?.[1];
     user.currentExperiment.prolificWorkspaceModeBool = true;
   } else {

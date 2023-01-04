@@ -231,6 +231,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  _descriptionOfStudy: {
+    name: "_descriptionOfStudy",
+    availability: "now",
+    type: "text",
+    default: "Description of the study",
+  },
   _experimentFilename: {
     name: "_experimentFilename",
     availability: "now",
@@ -266,6 +272,18 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "FALSE",
+  },
+  _participantLanguageFluent: {
+    name: "_participantLanguageFluent",
+    availability: "now",
+    type: "text",
+    default: "English",
+  },
+  _participantLanguageNative: {
+    name: "_participantLanguageNative",
+    availability: "now",
+    type: "text",
+    default: "English",
   },
   _participantPay: {
     name: "_participantPay",
@@ -337,6 +355,12 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
   },
   "%": { name: "%", availability: "now", type: "", default: "" },
+  _titleOfStudy: {
+    name: "_titleOfStudy",
+    type: "text",
+    default: "default title",
+    availability: "now",
+  },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
   calibrateBlindSpotBool: {
     name: "calibrateBlindSpotBool",
