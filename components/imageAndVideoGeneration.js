@@ -136,7 +136,6 @@ const readJS = async (filename) => {
     console.error(`Error loading text from this source (./code/${filename})!`);
 
   var code = preprocessRawCorpus(response.data);
-  // logger(code)
   return code;
 };
 
@@ -147,28 +146,7 @@ export async function evaluateJSCode(
   targetCharacter
 ) {
   const BC = status.block_condition;
-  const targetEccentrictyXDeg = paramReader.read("targetEccentricityXDeg", BC);
-  const targetEccentrictyYDeg = paramReader.read("targetEccentricityYDeg", BC);
-  const targetSpaceConstantDeg = paramReader.read("targetSpaceConstantDeg", BC);
-  const targetCyclePerDeg = paramReader.read("targetCyclePerDeg", BC);
-  const movieLuminanceNit = paramReader.read("movieLuminanceNit", BC);
-  const targetContrast = paramReader.read("targetContrast", BC);
-  // const computeRectDegString = paramReader.read("computeRectDeg", BC);
-  // const computeRectDeg = computeRectDegString.split(",").map((element) => {
-  //   return Number(element);
-  // });
-  const thresholdParameter = paramReader.read("thresholdParameter", BC);
-  const movieRectPxContainsDegBool = paramReader.read(
-    "movieRectPxContainsRectDegBool",
-    BC
-  );
-  const targetDurationSec = paramReader.read("targetDurationSec", BC);
-  const movieRectDegString = paramReader.read("movieRectDeg", BC);
-  const movieRectDeg = movieRectDegString.split(",").map((element) => {
-    return Number(element);
-  });
   const movieHz = paramReader.read("movieHz", BC);
-  const movieSec = paramReader.read("movieSec", BC);
   const screenLowerLeft = [
     -displayOptions.window._size[0] / 2,
     -displayOptions.window._size[1] / 2,
@@ -177,47 +155,47 @@ export async function evaluateJSCode(
     displayOptions.window._size[0] / 2,
     displayOptions.window._size[1] / 2,
   ];
-  const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
-  const targetDelaySec = paramReader.read("targetDelaySec", BC);
-  const targetTimeConstantSec = paramReader.read("targetTimeConstantSec", BC);
-  const targetHz = paramReader.read("targetHz", BC);
-  //var jsCode = paramReader.read("computeImageJS", BC);
   const filename = paramReader.read("movieComputeJS", BC);
-  const targetPhaseSpatialDeg = paramReader.read("targetPhaseSpatialDeg", BC);
-  const targetPhaseTemporalDeg = paramReader.read("targetPhaseTemporalDeg", BC);
   return readJS(filename).then((response) => {
     logger("last index", response.lastIndexOf("}"));
     var jsCode = response.substring(
       response.indexOf("{") + 1,
       response.lastIndexOf("}")
     );
-    //console.log(`Received code: ${jsCode}`);
-    var args =
-      "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, IsRectInRect,movieRectDeg,movieRectPxContainsDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentrictyXDeg,targetEccentrictyYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
-    // logger("jsCode", jsCode);
-    var myFunc = new Function(args, jsCode);
-    var imageNit = myFunc(
-      targetCharacter,
-      XYPixOfXYDeg,
-      XYDegOfXYPix,
-      isRectInRect,
-      movieRectDeg,
-      movieRectPxContainsDegBool,
-      screenRectPx,
-      movieHz,
-      movieSec,
-      targetDelaySec,
-      targetTimeConstantSec,
-      targetHz,
-      displayOptions,
-      targetEccentrictyXDeg,
-      targetEccentrictyYDeg,
-      targetSpaceConstantDeg,
-      targetCyclePerDeg,
-      targetContrast,
-      targetPhaseSpatialDeg,
-      targetPhaseTemporalDeg
+    var parameters_string = response.substring(
+      response.indexOf("(") + 1,
+      response.indexOf(")")
     );
+    var parameters_arr = parameters_string.split(",").map(function (item) {
+      return item.trim();
+    });
+    logger("parameters_arr", parameters_arr);
+    var parameters = {};
+    parameters["targetCharacter"] = targetCharacter;
+    parameters["displayOptions"] = displayOptions;
+    parameters["XYPixOfXYDeg"] = XYPixOfXYDeg;
+    parameters["XYDegOfXYPix"] = XYDegOfXYPix;
+    parameters["isRectInRect"] = isRectInRect;
+    parameters["screenRectPx"] = new Rectangle(
+      screenLowerLeft,
+      screenUpperRight
+    );
+    for (let index in parameters_arr) {
+      if (parameters_arr[index] in parameters) {
+        logger("parameter found", parameters_arr[index]);
+      } else {
+        logger("parameter not found", parameters_arr[index]);
+        parameters[parameters_arr[index]] = paramReader.read(
+          parameters_arr[index],
+          BC
+        );
+      }
+    }
+    logger("parameters deconstructed", Object.keys(parameters));
+    var args =
+      "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, isRectInRect,movieRectDeg,movieRectPxContainsRectDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentricityXDeg,targetEccentricityYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
+    var myFunc = new Function(...Object.keys(parameters), jsCode);
+    var imageNit = myFunc(...Object.values(parameters));
     return [imageNit, movieHz];
   });
 }
