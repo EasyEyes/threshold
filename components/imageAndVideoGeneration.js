@@ -143,7 +143,8 @@ export async function evaluateJSCode(
   paramReader,
   status,
   displayOptions,
-  targetCharacter
+  targetCharacter,
+  questSuggestedLevel
 ) {
   const BC = status.block_condition;
   const movieHz = paramReader.read("movieHz", BC);
@@ -180,6 +181,7 @@ export async function evaluateJSCode(
       screenLowerLeft,
       screenUpperRight
     );
+    parameters["questSuggestedLevel"] = questSuggestedLevel;
     for (let index in parameters_arr) {
       if (parameters_arr[index] in parameters) {
         logger("parameter found", parameters_arr[index]);
@@ -192,10 +194,12 @@ export async function evaluateJSCode(
       }
     }
     logger("parameters deconstructed", Object.keys(parameters));
-    var args =
-      "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, isRectInRect,movieRectDeg,movieRectPxContainsRectDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentricityXDeg,targetEccentricityYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
+    // var args =
+    //   "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, isRectInRect,movieRectDeg,movieRectPxContainsRectDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentricityXDeg,targetEccentricityYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
     var myFunc = new Function(...Object.keys(parameters), jsCode);
-    var imageNit = myFunc(...Object.values(parameters));
-    return [imageNit, movieHz];
+    var returnedValues = myFunc(...Object.values(parameters));
+    var imageNit = returnedValues[0];
+    var actualStimulusLevel = returnedValues[1];
+    return [imageNit, movieHz, actualStimulusLevel];
   });
 }

@@ -372,6 +372,7 @@ import {
 /* -------------------------------------------------------------------------- */
 
 var videoblob = [];
+var actualStimulusLevel;
 const video = document.createElement("video");
 video.style.position = "absolute";
 video.style.zIndex = 20000;
@@ -3478,12 +3479,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForMovie(paramReader, status.block_condition);
           //var F = new Function(paramReader.read("computeImageJS", BC))();
+          var questSuggestedLevel = currentLoop._currentStaircase.quantile(
+            currentLoop._currentStaircase._jsQuest.quantileOrder
+          );
           evaluateJSCode(
             paramReader,
             status,
             displayOptions,
-            targetCharacter
-          ).then(([imageNit, movieHz]) => {
+            targetCharacter,
+            questSuggestedLevel
+          ).then(([imageNit, movieHz, actualStimulusLevelTemp]) => {
+            //observer should not be allowed to respond before actualStimulusLevel has retured.
+            //i.e. before the movie has generated
+            actualStimulusLevel = actualStimulusLevelTemp;
             generate_video(imageNit, movieHz).then((data) => {
               videoblob = data;
               document.body.removeChild(loader);
@@ -5113,7 +5121,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             phraseIdentificationResponse.correct = [];
           },
           movie: () => {
-            //TODO
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);
             if (
               currentLoop instanceof MultiStairHandler &&
@@ -5122,18 +5129,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               // TODO only give to QUEST if acceptable
               const giveToQuest = true;
               psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
-              switch (thresholdParameter) {
-                case "targetContrast":
-                  const tragetContrast = paramReader.read(
-                    thresholdParameter,
-                    status.block_condition
-                  );
-                  currentLoop.addResponse(
-                    key_resp.corr,
-                    // intensity
-                    log(tragetContrast, 10)
-                  );
-              }
+              // switch (thresholdParameter) {
+              //   case "targetContrast":
+              // const targetContrast = paramReader.read(
+              //   thresholdParameter,
+              //   status.block_condition
+              // );
+              currentLoop.addResponse(
+                key_resp.corr,
+                // intensity
+                //Math.log10(targetContrast)
+                actualStimulusLevel
+              );
+              // }
             }
           },
         });
