@@ -13,7 +13,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Effect of font on crowding.",
     explanation:
-      "Optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -23,7 +23,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "dp3@nyu.edu",
     explanation:
-      "Optional, semicolon-separated email addresses of the authors.  The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional, semicolon-separated email addresses of the authors.  The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -33,7 +33,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Denis Pelli",
     explanation:
-      "Optional, names of all the authors, separated by semicolons. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty.",
+      "Optional, names of all the authors, separated by semicolons. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -165,7 +165,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without institutional Pavlovia licenses. When TRUE (the default), when EasyEyes compiles your experiment, EasyEyes appends the smallest possible integer (at least 1) to the spreadsheet filename (without extension) to create a unique (unused) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users who need tokens, Pavlovia requires that tokens be assigned to a specific experiment (repo). For them, every time EasyEyes changes the repo name, they must visit Pavlovia to assign tokens to the new repo, which can be a nuisance. Token users can eliminate the nuisance by setting _compileAsNewExperimentBool FALSE to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the data files will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists only need to assign tokens the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting Pavlovia, until the experiment runs out of tokens. Note that this flag doen't affect PILOTING mode, which is always free and can only be used from within Pavlovia. Also, any users concerned over the huge proliferation of repos might like to set _compileAsNewExperimentBool FALSE to minimize the number of repos created by EasyEyes.",
+      "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without an institutional Pavlovia license. Without that license, Pavlovia requires assigning tokens (money) to each experiment before it can run in RUNNING mode. If _compileAsNewExperimentBool=TRUE (the default), then, when EasyEyes compiles your experiment, EasyEyes appends the smallest possible integer (at least 1) to the spreadsheet filename (without extension) to create a unique (unused) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users without a site license, Pavlovia requires that tokens be assigned in advance to the specific experiment (repo). For them, every time EasyEyes changes the repo name, they must visit Pavlovia to assign tokens to the new repo, which can be a nuisance. Token users (i.e. without a site license) can minimize the token-assignment nuisance by setting _compileAsNewExperimentBool=FALSE to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the data files will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists only need to assign tokens the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting Pavlovia, until the experiment runs out of tokens. Note that this flag doen't affect PILOTING mode, which is always free and can only be used from within Pavlovia. Also, any users concerned over the huge proliferation of repos might like to set _compileAsNewExperimentBool FALSE to minimize the number of repos created by EasyEyes.\nSee _pavloviaPreferRUNNINGModeBool for a more advice on working without an institutional Pavlovia site license.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -175,7 +175,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "adultConsent2021.pdf",
     explanation:
-      "_consentForm is the file name of your PDF (or plain-text Markdown with extension MD) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. When checking your experiment table, the compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Scientific Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -205,7 +205,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "8/1/2021",
     explanation:
-      "Optional date of creation. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional date of creation. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "date",
     default: " ",
     categories: "",
@@ -215,7 +215,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "8/15/2021",
     explanation:
-      "Optional date of latest modification. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional date of latest modification. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "date",
     default: " ",
     categories: "",
@@ -225,7 +225,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "debrief2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -253,9 +253,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "_experimentName",
     availability: "now",
-    example: "crowding",
+    example: "crowding11",
     explanation:
-      '_experimentName specifies the name for the GitLab repository, which Pavlovia calls your "experiment". If empty, the compiler provides a default, which is the the table filename (without extension) plus the smallest integer greater than zero that results in an unused repo name in your Pavlovia account. Note that if the specified name corresponds to an existing repository, EasyEyes uses it, and new study files will replace old ones and results will accumulate. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.',
+      '_experimentName specifies the name for the GitLab repository, which Pavlovia calls your "experiment". If empty, the compiler provides a default, which is the the table filename (without extension) plus the smallest integer greater than zero that results in an unused repo name in your Pavlovia account. Note that if the specified name corresponds to an existing repository, EasyEyes uses it, and new study files will replace old ones and results will accumulate. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.',
     type: "text",
     default: "",
     categories: "",
@@ -265,19 +265,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "NOT YET IMPLEMENTED. At the end of the experiment, invite the participant to make parting comments. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "NOT YET IMPLEMENTED. At the end of the experiment, invite the participant to make parting comments. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "boolean",
     default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "_participantDurationMinutes",
-    availability: "now",
-    example: "30",
-    explanation:
-      "NOT YET IMPLEMENTED. Expected duration, in minutes, in the offer to participants. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
-    type: "numerical",
-    default: "30",
     categories: "",
   },
   {
@@ -301,53 +291,23 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_participantPay",
-    availability: "now",
-    example: "7.5",
-    explanation:
-      "NOT YET IMPLEMENTED. Payment to offer to each participant. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
-    type: "numerical",
-    default: "7.5",
-    categories: "",
-  },
-  {
-    name: "_participantPayCurrency",
-    availability: "now",
-    example: "USDollar",
-    explanation:
-      "NOT YET IMPLEMENTED. Currency of payment amount: USDollar, Euro, etc. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
-    type: "categorical",
-    default: "USDollar",
-    categories: "USDollar, Euro, UKPound",
-  },
-  {
     name: "_participantRecruitmentService",
     availability: "now",
     example: "Prolific",
     explanation:
-      'Name of recruitment service: none, Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
+      "Name of the recruitment service to be used: Prolific, SONA, MTurk. Only Prolific is currently available.  The key idea is two URLs that carry URL query parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. \nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nWe hope to add more recruitment services (especially MTurk and SONA). Right now we are focused on enhancing integration with Prolific, so as much as possible is specified in the experiment table, minimizing the required manual interaction with the Prolific web site.\nThe leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "categorical",
-    default: "none",
-    categories: "none, Prolific, MTurk, SONA",
+    default: "",
+    categories: "Prolific",
   },
   {
     name: "_participantRecruitmentServiceAccount",
     availability: "now",
     example: "123ABC",
     explanation:
-      "NOT YET IMPLEMENTED. Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "NOT YET IMPLEMENTED. Account number. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
-    categories: "",
-  },
-  {
-    name: "_participantsHowMany",
-    availability: "now",
-    example: "20",
-    explanation:
-      "NOT YET IMPLEMENTED. Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
-    type: "integer",
-    default: "1",
     categories: "",
   },
   {
@@ -355,19 +315,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, and cannot be deployed to anywhere else. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can deploy to anyone. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. If your experiment is already in RUNNING mode you can still convert to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
+      "NEW EXPLATION. Pavlovia offers two modes (RUNNING and PILOTING) for running your study. Remote data collection requires RUNNING mode. PILOTING mode is meant for checking and debugging and runs only from the Pavlovia console on the scientist's computer. The only advantage of the PILOTING mode is that it's always free. Unless your institution has a Pavlovia site license, RUNNING mode costs 20 pence per participant, and requires assigning tokens (money) in advance to each experiment. (Setting _compileAsNewExperiment=FALSE allows you to request that EasyEyes keep reusing the same experiment name, as you compile new versions, so you can assign tokens once to the experiment, at the beginng testing, instead of before each compile.) Thus scientists with a site license will always prefer RUNNING mode. Without that license, scientists can save money by using PILOTING mode during development, and switch to RUNNING mode to test remote participants. _pavloviaPreferRunningModeBool allows you to express your preference. With an institutional site license, you'll always want the default TRUE. Without an institutional site license, you can save money by setting _pavloviaPreferRunningModeBool=FALSE during development, and TRUE for the actual remote testing. Without a site license, if you don't mind the 20 p expense, you can use RUNNING mode throughout (use the default _pavloviaPreferRunningModeBool=TRUE), and set _compileAsNewExperiment=FALSE to minimize the frequency at which you must assign tokens to the experiment.\n\nOLD EXPLANATION. Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, which prevents remote testing. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can send to your online participants. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. Thus, for most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. (Pavlovia has no API by which EasyEyes could do this for you.) If your experiment is already in RUNNING mode you can still switch to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
     type: "boolean",
     default: "TRUE",
-    categories: "",
-  },
-  {
-    name: "_prolificEligibilityRequirements",
-    availability: "now",
-    example: "",
-    explanation:
-      "NOT YET IMPLEMENTED. This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
-    type: "text",
-    default: "",
     categories: "",
   },
   {
@@ -375,20 +325,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _prolificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _prolificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, you can switch your Prolific  from pre-Workspace into Workspace mode, but you can never switch it back to pre-Workspace mode.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
+      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _prolificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _prolificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to switch your Prolific account from pre-Workspace into Workspace mode, but you can never switch it back to pre-Workspace mode. But that's ok as Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
     type: "text",
     default: "",
     categories: "",
-  },
-  {
-    name: "_prolificStudyType",
-    availability: "now",
-    example: "US_REP_SAMPLE",
-    explanation:
-      "NOT YET IMPLEMENTED. Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
-    type: "categorical",
-    default: "US_REP_SAMPLE",
-    categories: "UK_REP_SAMPLE, US_REP_SAMPLE, SINGLE",
   },
   {
     name: "_requestEasyEyesIDBool",
@@ -408,6 +348,231 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "CHANGING FROM: _participantIDPutBool\nEasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _requestEasyEyesIDSaveToFileBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _requestEasyEyesIDBool above.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_studyDescription",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyDescription is a (typically long) description of the study, used to recruit new participants. In deciding whether to participate, Prolific members will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. However, several Prolific participants told me that when the pay exceeds $15/hour, the jobs are filled quickly, so they often accept these without reading the study description. So you might want to have your study verify that participants actually satisfy any requirements stated in your description. The EasyEyes _compatibilityXXX parameters may be helpful in this regard. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_studyDevices",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyDevices is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nMobile\nTablet\nDesktop\nThe parameter value will be a comma-separated list of none to all of: Mobile, Table, Desktop.\n",
+    type: "multicategorical",
+    default: "Desktop",
+    categories: "Mobile, Table, Desktop",
+  },
+  {
+    name: "_studyDistribution",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyDistribution is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution\nHow do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nThe parameter value will be one of: UK, USA, Balanced, Standard\nThe scientist thus chooses a sample of participants: (representative of) USA, (representative of) UK, (50/50 sex) Balanced, or (whoever is available) Standard. Note that Prolific charges more for representative (i.e. US or UK) samples.",
+    type: "categorical",
+    default: "Standard",
+    categories: "UK, USA, Balanced, Standard",
+  },
+  {
+    name: "_studyLocation",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyLocation is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\nMore\nThe answer can include many countries, which are combined by an OR rule.",
+    type: "categorical",
+    default: "All countries available",
+    categories:
+      "All countries available, USA, UK, Ireland, Germany, France, Spain, Afghanistan, Aland Islands, Albania, Algeria, American Samoa, Andorra, Angola, Anguilla, Antarctica, Antigua and Barbuda, Argentina, Armenia, Aruba, Australia, Austria, Azerbaijan, Bahamas, Bahrain, Bangladesh, Barbados, Belarus, Belgium, Belize, Benin, Bermuda, Bhutan, Bolivia, Bonaire, Bosnia and Herzegovina, Botswana, Bouvet Island, Brazil, British Indian Ocean Territory, Brunei Darussalam, Bulgaria, Burkina Faso, Burundi, Cambodia, Cameroon, Canada, Cape Verde, Cayman Islands, Central African Republic, Chad, Chile, China, Christmas Island, Cocos (Keeling) Islands, Colombia, Comoros, Congo, Congo the Democratic Republic of the, Cook Islands, Costa Rica, Cote d'Ivoire, Croatia, Cuba, Curacao, Cyprus, Czech Republic, Denmark, Djibouti, Dominica, Dominican Republic, Ecuador, Egypt, El Salvador, Equatorial Guinea, Eritrea, Estonia, Ethiopia, Falkland Islands (Malvinas), Faroe Islands, Fiji, Finland, French Guiana, French Polynesia, French Southern Territories, Gabon, Gambia, Georgia, Ghana, Gibraltar, Greece, Greenland, Grenada, Guadeloupe, Guam, Guatemala, Guernsey, Guinea, Guinea-Bissau, Guyana, Haiti, Heard Island and McDonald Islands, Holy See (Vatican City State), Honduras, Hong Kong, Hungary, Iceland, India, Indonesia, Iran, Iraq, Isle of Man, Israel, Italy, Jamaica, Japan, Jersey, Jordan, Kazakhstan, Kenya, Kiribati, Korea, Kuwait, Kyrgyzstan, Lao People's Democratic Republic, Latvia, Lebanon, Lesotho, Liberia, Libya, Liechtenstein, Lithuania, Luxembourg, Macao, Macedonia, Madagascar, Malawi, Malaysia, Maldives, Mali, Malta, Marshall Islands, Martinique, Mauritania, Mauritius, Mayotte, Mexico, Micronesia, Moldova, Monaco, Mongolia, Montenegro, Montserrat, Morocco, Mozambique, Myanmar, Namibia, Nauru, Nepal, Netherlands, New Caledonia, New Zealand, Nicaragua, Niger, Nigeria, Niue, Norfolk Island, Northern Mariana Islands, Norway, Oman, Pakistan, Palau, Palestinian Territory, Panama, Papua New Guinea, Paraguay, Peru, Philippines, Pitcairn, Poland, Portugal, Puerto Rico, Qatar, Reunion, Romania, Russian Federation, Rwanda, Saint Barthelemy, Saint Helena, Saint Kitts and Nevis, Saint Lucia, Saint Martin (French part), Saint Pierre and Miquelon, Saint Vincent and the Grenadines, Samoa, San Marino, Sao Tome and Principe, Saudi Arabia, Senegal, Serbia, Seychelles, Sierra Leone, Singapore, Sint Maarten (Dutch part), Slovakia, Slovenia, Solomon Islands, Somalia, South Africa, South Georgia and the South Sandwich Islands, South Sudan, Sri Lanka, Sudan, Suriname, Svalbard and Jan Mayen, Swaziland, Sweden, Switzerland, Syrian Arab Republic, Taiwan, Tajikistan, Tanzania, Thailand, Timor-Leste, Togo, Tokelau, Tonga, Trinidad and Tobago, Tunisia, Turkey, Turkmenistan, Turks and Caicos Islands, Tuvalu, Uganda, Ukraine, United Arab Emirates, United States Minor Outlying Islands, Uruguay, Uzbekistan, Vanuatu, Venezuela, Bolivarian Republic of, Vietnam, Wallis and Futuna, Western Sahara, Yemen, Zambia, Zimbabwe",
+  },
+  {
+    name: "_studyMinutes",
+    availability: "now",
+    example: "30",
+    explanation:
+      "_studyMinutes (no default) is the expected study duration, in minutes, in the offer to potential participants. In deciding whether to participate, potential participants will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+    type: "numerical",
+    default: "30",
+    categories: "",
+  },
+  {
+    name: "_studyParticipants",
+    availability: "now",
+    example: "20",
+    explanation:
+      "_studyParticipants (default 1). Number of people you want to test.",
+    type: "integer",
+    default: "1",
+    categories: "",
+  },
+  {
+    name: "_studyPay",
+    availability: "now",
+    example: "7.5",
+    explanation:
+      "_studyPay (no default) specifies the payment (a number) to offer to each participant. The currency is specified by _studyPayCurrency.  The experiment can specify _studyPay or _studyPayPerHour, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_studyPayPerHour",
+    availability: "now",
+    example: "7.5",
+    explanation:
+      "_studyPayPerHour (no default) specifies the hourly rate (a number) that will determine (with _studyMinutes) the payment to offer to each participant. The currency is specified by _studyPayCurrency. The experiment can specify _studyPayPerHour or _studyPay, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour), which Prolific computes and displays.",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_studyPayCurrency",
+    availability: "now",
+    example: "USDollar",
+    explanation:
+      "_studyPayCurrency (default USDollar) specifies the currency of the payment: USDollar, Euro, etc. ",
+    type: "categorical",
+    default: "USDollar",
+    categories: "USDollar, Euro, UKPound",
+  },
+  {
+    name: "_studyPrescreenCochlearImplant",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyPrescreenCochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Rather not say",
+  },
+  {
+    name: "_studyPrescreenDyslexia",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyPrescreenDyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
+    type: "multicategorical",
+    default: "",
+    categories: "diagnosed, being diagnosed, suspect, no, not saying",
+  },
+  {
+    name: "_studyPrescreenHearingDifficulties",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyPrescreenHearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Rather not say",
+  },
+  {
+    name: "_studyPrescreenLanguageFirst",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyPrescreenLanguageFirst (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
+  },
+  {
+    name: "_studyPrescreenLanguageFluent",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyPrescreenLanguageFluent (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; most participants are fluent in English.\n",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
+  },
+  {
+    name: "_studyPrescreenLanguagePrimary",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyPrescreenLanguagePrimary (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
+  },
+  {
+    name: "_studyPrescreenLanguageRelatedDisorders",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyPrescreenLanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDo you have any language related disorders?\n\nSelect all\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "reading difficulty, writing difficulty, other language related disorder, none, not applicable",
+  },
+  {
+    name: "_studyPrescreenVision",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyPrescreenVision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision\nParticipants were asked the following question: Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Rather not say",
+  },
+  {
+    name: "_studyPrescreenVisionCorrection",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyPrescreenVisionCorrection (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCorrected vision\nParticipants were asked the following question: I currently use glasses or contact lenses to correct my vision\nI mainly use glasses\nI mainly use contact lenses\nI use both glasses and contact lenses\nI do not use glasses or contact lenses",
+    type: "multicategorical",
+    default: "",
+    categories: "glasses, contacts, both, neither",
+  },
+  {
+    name: "_studyRecruitmentService",
+    availability: "now",
+    example: "Prolific",
+    explanation:
+      '_studyRecruitmentService (no default). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
+    type: "categorical",
+    default: "none",
+    categories: "none, Prolific, MTurk, SONA",
+  },
+  {
+    name: "_studyRecruitmentServiceAccount",
+    availability: "now",
+    example: "123ABC",
+    explanation:
+      "NOT YET IMPLEMENTED: _studyRecruitmentServiceAccount (no default). Account number. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_studyRequires",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyRequires (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
+    type: "multicategorical",
+    default: "",
+    categories: "Audio, Camera, Microphone, Download software",
+  },
+  {
+    name: "_studyTitle",
+    availability: "now",
+    example: "",
+    explanation:
+      "_studyTitle is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+    type: "text",
+    default: "",
     categories: "",
   },
   {
@@ -455,7 +620,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calbrateFrameRateUnderStressBool TRUE (default FALSE) to ask the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
+      "Set calibrateFrameRateUnderStressBool TRUE (default FALSE) to ask the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1699,24 +1864,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "NOT YET IMPLEMENTED: Whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
     type: "boolean",
     default: "TRUE",
-    categories: "",
-  },
-  {
-    name: "showFPSBool",
-    availability: "now",
-    example: "TRUE",
-    explanation: "Show the frame rate in Hz. OBSOLETE",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "showFrameRateBool",
-    availability: "now",
-    example: "TRUE",
-    explanation: "Show the frame rate in Hz. OBSOLETE",
-    type: "boolean",
-    default: "FALSE",
     categories: "",
   },
   {
