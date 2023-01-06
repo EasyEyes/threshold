@@ -249,77 +249,78 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  _participantIDGetBool: {
-    name: "_participantIDGetBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  _participantIDPutBool: {
-    name: "_participantIDPutBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  _participantRecruitmentService: {
-    name: "_participantRecruitmentService",
+  _online1RecruitmentService: {
+    name: "_online1RecruitmentService",
     availability: "now",
     type: "categorical",
-    default: "",
-    categories: ["Prolific"],
+    default: "none",
+    categories: ["none", "Prolific", "MTurk", "SONA"],
   },
-  _participantRecruitmentServiceAccount: {
-    name: "_participantRecruitmentServiceAccount",
+  _online1Title: {
+    name: "_online1Title",
     availability: "now",
     type: "text",
     default: "",
   },
-  _pavloviaPreferRunningModeBool: {
-    name: "_pavloviaPreferRunningModeBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-  },
-  _prolificProjectID: {
-    name: "_prolificProjectID",
+  _online2Description: {
+    name: "_online2Description",
     availability: "now",
     type: "text",
     default: "",
   },
-  _requestEasyEyesIDBool: {
-    name: "_requestEasyEyesIDBool",
+  _online2Minutes: {
+    name: "_online2Minutes",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
+    type: "numerical",
+    default: "30",
   },
-  _requestEasyEyesIDSaveToFileBool: {
-    name: "_requestEasyEyesIDSaveToFileBool",
+  _online2Participants: {
+    name: "_online2Participants",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
+    type: "integer",
+    default: "1",
   },
-  _studyDescription: {
-    name: "_studyDescription",
+  _online2Pay: {
+    name: "_online2Pay",
+    availability: "now",
+    type: "numerical",
+    default: "",
+  },
+  _online2PayCurrency: {
+    name: "_online2PayCurrency",
+    availability: "now",
+    type: "categorical",
+    default: "USDollar",
+    categories: ["USDollar", "Euro", "UKPound"],
+  },
+  _online2PayPerHour: {
+    name: "_online2PayPerHour",
+    availability: "now",
+    type: "numerical",
+    default: "",
+  },
+  _online2ProlificProjectID: {
+    name: "_online2ProlificProjectID",
     availability: "now",
     type: "text",
     default: "",
   },
-  _studyDevices: {
-    name: "_studyDevices",
+  _online3DeviceKind: {
+    name: "_online3DeviceKind",
     availability: "now",
     type: "multicategorical",
     default: "Desktop",
     categories: ["Mobile", "Table", "Desktop"],
   },
-  _studyDistribution: {
-    name: "_studyDistribution",
+  _online3Requires: {
+    name: "_online3Requires",
     availability: "now",
-    type: "categorical",
-    default: "Standard",
-    categories: ["UK", "USA", "Balanced", "Standard"],
+    type: "multicategorical",
+    default: "",
+    categories: ["Audio", "Camera", "Microphone", "Download software"],
   },
-  _studyLocation: {
-    name: "_studyLocation",
+  _online4Location: {
+    name: "_online4Location",
     availability: "now",
     type: "categorical",
     default: "All countries available",
@@ -574,60 +575,36 @@ export const GLOSSARY: Glossary = {
       "Zimbabwe",
     ],
   },
-  _studyMinutes: {
-    name: "_studyMinutes",
-    availability: "now",
-    type: "numerical",
-    default: "30",
-  },
-  _studyParticipants: {
-    name: "_studyParticipants",
-    availability: "now",
-    type: "integer",
-    default: "1",
-  },
-  _studyPay: {
-    name: "_studyPay",
-    availability: "now",
-    type: "numerical",
-    default: "",
-  },
-  _studyPayPerHour: {
-    name: "_studyPayPerHour",
-    availability: "now",
-    type: "numerical",
-    default: "",
-  },
-  _studyPayCurrency: {
-    name: "_studyPayCurrency",
+  _online4Sample: {
+    name: "_online4Sample",
     availability: "now",
     type: "categorical",
-    default: "USDollar",
-    categories: ["USDollar", "Euro", "UKPound"],
+    default: "Standard",
+    categories: ["UK", "USA", "Balanced", "Standard"],
   },
-  _studyPrescreenCochlearImplant: {
-    name: "_studyPrescreenCochlearImplant",
+  _online5CochlearImplant: {
+    name: "_online5CochlearImplant",
     availability: "now",
     type: "multicategorical",
     default: "",
     categories: ["Yes", "No", "Rather not say"],
   },
-  _studyPrescreenDyslexia: {
-    name: "_studyPrescreenDyslexia",
+  _online5Dyslexia: {
+    name: "_online5Dyslexia",
     availability: "now",
     type: "multicategorical",
     default: "",
     categories: ["diagnosed", "being diagnosed", "suspect", "no", "not saying"],
   },
-  _studyPrescreenHearingDifficulties: {
-    name: "_studyPrescreenHearingDifficulties",
+  _online5HearingDifficulties: {
+    name: "_online5HearingDifficulties",
     availability: "now",
     type: "multicategorical",
     default: "",
     categories: ["Yes", "No", "Rather not say"],
   },
-  _studyPrescreenLanguageFirst: {
-    name: "_studyPrescreenLanguageFirst",
+  _online5LanguageFirst: {
+    name: "_online5LanguageFirst",
     availability: "now",
     type: "multicategorical",
     default: "",
@@ -721,8 +698,8 @@ export const GLOSSARY: Glossary = {
       "Other",
     ],
   },
-  _studyPrescreenLanguageFluent: {
-    name: "_studyPrescreenLanguageFluent",
+  _online5LanguageFluent: {
+    name: "_online5LanguageFluent",
     availability: "now",
     type: "multicategorical",
     default: "",
@@ -816,8 +793,8 @@ export const GLOSSARY: Glossary = {
       "Other",
     ],
   },
-  _studyPrescreenLanguagePrimary: {
-    name: "_studyPrescreenLanguagePrimary",
+  _online5LanguagePrimary: {
+    name: "_online5LanguagePrimary",
     availability: "now",
     type: "multicategorical",
     default: "",
@@ -911,8 +888,8 @@ export const GLOSSARY: Glossary = {
       "Other",
     ],
   },
-  _studyPrescreenLanguageRelatedDisorders: {
-    name: "_studyPrescreenLanguageRelatedDisorders",
+  _online5LanguageRelatedDisorders: {
+    name: "_online5LanguageRelatedDisorders",
     availability: "now",
     type: "multicategorical",
     default: "",
@@ -924,45 +901,68 @@ export const GLOSSARY: Glossary = {
       "not applicable",
     ],
   },
-  _studyPrescreenVision: {
-    name: "_studyPrescreenVision",
+  _online5Vision: {
+    name: "_online5Vision",
     availability: "now",
     type: "multicategorical",
     default: "",
     categories: ["Yes", "No", "Rather not say"],
   },
-  _studyPrescreenVisionCorrection: {
-    name: "_studyPrescreenVisionCorrection",
+  _online5VisionCorrection: {
+    name: "_online5VisionCorrection",
     availability: "now",
     type: "multicategorical",
     default: "",
     categories: ["glasses", "contacts", "both", "neither"],
   },
-  _studyRecruitmentService: {
-    name: "_studyRecruitmentService",
+  _participantIDGetBool: {
+    name: "_participantIDGetBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  _participantIDPutBool: {
+    name: "_participantIDPutBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  _participantRecruitmentService: {
+    name: "_participantRecruitmentService",
     availability: "now",
     type: "categorical",
-    default: "none",
-    categories: ["none", "Prolific", "MTurk", "SONA"],
+    default: "",
+    categories: ["Prolific"],
   },
-  _studyRecruitmentServiceAccount: {
-    name: "_studyRecruitmentServiceAccount",
+  _participantRecruitmentServiceAccount: {
+    name: "_participantRecruitmentServiceAccount",
     availability: "now",
     type: "text",
     default: "",
   },
-  _studyRequires: {
-    name: "_studyRequires",
+  _pavloviaPreferRunningModeBool: {
+    name: "_pavloviaPreferRunningModeBool",
     availability: "now",
-    type: "multicategorical",
-    default: "",
-    categories: ["Audio", "Camera", "Microphone", "Download software"],
+    type: "boolean",
+    default: "TRUE",
   },
-  _studyTitle: {
-    name: "_studyTitle",
+  _prolificProjectID: {
+    name: "_prolificProjectID",
     availability: "now",
     type: "text",
     default: "",
+  },
+  _requestEasyEyesIDBool: {
+    name: "_requestEasyEyesIDBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  _requestEasyEyesIDSaveToFileBool: {
+    name: "_requestEasyEyesIDSaveToFileBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
   },
   "%": { name: "%", availability: "now", type: "", default: "" },
   block: { name: "block", availability: "now", type: "integer", default: "1" },

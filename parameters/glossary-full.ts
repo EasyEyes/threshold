@@ -271,6 +271,231 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_online1RecruitmentService",
+    availability: "now",
+    example: "Prolific",
+    explanation:
+      '_online1RecruitmentService (no default). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
+    type: "categorical",
+    default: "none",
+    categories: "none, Prolific, MTurk, SONA",
+  },
+  {
+    name: "_online1Title",
+    availability: "now",
+    example: "Vision test",
+    explanation:
+      "_online1Title is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants will consider _online1Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online2Description",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online2Description is a (typically long) description of the study, used to recruit new participants. In deciding whether to participate, Prolific members will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. However, several Prolific participants told me that when the pay exceeds $15/hour, the jobs are filled quickly, so they often accept these without reading the study description. So you might want to have your study verify that participants actually satisfy any requirements stated in your description. The EasyEyes _compatibilityXXX parameters may be helpful in this regard. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online2Minutes",
+    availability: "now",
+    example: "30",
+    explanation:
+      "_online2Minutes (no default) is the expected study duration, in minutes, in the offer to potential participants. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+    type: "numerical",
+    default: "30",
+    categories: "",
+  },
+  {
+    name: "_online2Participants",
+    availability: "now",
+    example: "20",
+    explanation:
+      "_online2Participants (default 1). Number of people you want to test.",
+    type: "integer",
+    default: "1",
+    categories: "",
+  },
+  {
+    name: "_online2Pay",
+    availability: "now",
+    example: "7.5",
+    explanation:
+      "_online2Pay (no default) specifies the payment (a number) to offer to each participant. The currency is specified by _online2PayCurrency.  The experiment can specify _online2Pay or _online2PayPerHour, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online2PayCurrency",
+    availability: "now",
+    example: "USDollar",
+    explanation:
+      "_online2PayCurrency (default USDollar) specifies the currency of the payment: USDollar, Euro, etc. ",
+    type: "categorical",
+    default: "USDollar",
+    categories: "USDollar, Euro, UKPound",
+  },
+  {
+    name: "_online2PayPerHour",
+    availability: "now",
+    example: "15",
+    explanation:
+      "_online2PayPerHour (no default) specifies the hourly rate (a number) that will determine (with _online2Minutes) the payment to offer to each participant. The currency is specified by _online2PayCurrency. The experiment can specify _online2PayPerHour or _online2Pay, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour), which Prolific computes and displays.",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online2ProlificProjectID",
+    availability: "now",
+    example: "",
+    explanation:
+      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _online2ProlificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _online2ProlificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to switch your Prolific account from pre-Workspace into Workspace mode, but you can never switch it back to pre-Workspace mode. But that's ok as Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online3DeviceKind",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online3DeviceKind is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nMobile\nTablet\nDesktop\nThe parameter value will be a comma-separated list of none to all of: Mobile, Table, Desktop.\n",
+    type: "multicategorical",
+    default: "Desktop",
+    categories: "Mobile, Table, Desktop",
+  },
+  {
+    name: "_online3Requires",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online2Requires (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
+    type: "multicategorical",
+    default: "",
+    categories: "Audio, Camera, Microphone, Download software",
+  },
+  {
+    name: "_online4Location",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online4Location is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\nMore\nThe answer can include many countries, which are combined by an OR rule.",
+    type: "categorical",
+    default: "All countries available",
+    categories:
+      "All countries available, USA, UK, Ireland, Germany, France, Spain, Afghanistan, Aland Islands, Albania, Algeria, American Samoa, Andorra, Angola, Anguilla, Antarctica, Antigua and Barbuda, Argentina, Armenia, Aruba, Australia, Austria, Azerbaijan, Bahamas, Bahrain, Bangladesh, Barbados, Belarus, Belgium, Belize, Benin, Bermuda, Bhutan, Bolivia, Bonaire, Bosnia and Herzegovina, Botswana, Bouvet Island, Brazil, British Indian Ocean Territory, Brunei Darussalam, Bulgaria, Burkina Faso, Burundi, Cambodia, Cameroon, Canada, Cape Verde, Cayman Islands, Central African Republic, Chad, Chile, China, Christmas Island, Cocos (Keeling) Islands, Colombia, Comoros, Congo, Congo the Democratic Republic of the, Cook Islands, Costa Rica, Cote d'Ivoire, Croatia, Cuba, Curacao, Cyprus, Czech Republic, Denmark, Djibouti, Dominica, Dominican Republic, Ecuador, Egypt, El Salvador, Equatorial Guinea, Eritrea, Estonia, Ethiopia, Falkland Islands (Malvinas), Faroe Islands, Fiji, Finland, French Guiana, French Polynesia, French Southern Territories, Gabon, Gambia, Georgia, Ghana, Gibraltar, Greece, Greenland, Grenada, Guadeloupe, Guam, Guatemala, Guernsey, Guinea, Guinea-Bissau, Guyana, Haiti, Heard Island and McDonald Islands, Holy See (Vatican City State), Honduras, Hong Kong, Hungary, Iceland, India, Indonesia, Iran, Iraq, Isle of Man, Israel, Italy, Jamaica, Japan, Jersey, Jordan, Kazakhstan, Kenya, Kiribati, Korea, Kuwait, Kyrgyzstan, Lao People's Democratic Republic, Latvia, Lebanon, Lesotho, Liberia, Libya, Liechtenstein, Lithuania, Luxembourg, Macao, Macedonia, Madagascar, Malawi, Malaysia, Maldives, Mali, Malta, Marshall Islands, Martinique, Mauritania, Mauritius, Mayotte, Mexico, Micronesia, Moldova, Monaco, Mongolia, Montenegro, Montserrat, Morocco, Mozambique, Myanmar, Namibia, Nauru, Nepal, Netherlands, New Caledonia, New Zealand, Nicaragua, Niger, Nigeria, Niue, Norfolk Island, Northern Mariana Islands, Norway, Oman, Pakistan, Palau, Palestinian Territory, Panama, Papua New Guinea, Paraguay, Peru, Philippines, Pitcairn, Poland, Portugal, Puerto Rico, Qatar, Reunion, Romania, Russian Federation, Rwanda, Saint Barthelemy, Saint Helena, Saint Kitts and Nevis, Saint Lucia, Saint Martin (French part), Saint Pierre and Miquelon, Saint Vincent and the Grenadines, Samoa, San Marino, Sao Tome and Principe, Saudi Arabia, Senegal, Serbia, Seychelles, Sierra Leone, Singapore, Sint Maarten (Dutch part), Slovakia, Slovenia, Solomon Islands, Somalia, South Africa, South Georgia and the South Sandwich Islands, South Sudan, Sri Lanka, Sudan, Suriname, Svalbard and Jan Mayen, Swaziland, Sweden, Switzerland, Syrian Arab Republic, Taiwan, Tajikistan, Tanzania, Thailand, Timor-Leste, Togo, Tokelau, Tonga, Trinidad and Tobago, Tunisia, Turkey, Turkmenistan, Turks and Caicos Islands, Tuvalu, Uganda, Ukraine, United Arab Emirates, United States Minor Outlying Islands, Uruguay, Uzbekistan, Vanuatu, Venezuela, Bolivarian Republic of, Vietnam, Wallis and Futuna, Western Sahara, Yemen, Zambia, Zimbabwe",
+  },
+  {
+    name: "_online4Sample",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online4Sample is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution\nHow do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nThe parameter value will be one of: UK, USA, Balanced, Standard\nThe scientist thus chooses a sample of participants: (representative of) USA, (representative of) UK, (50/50 sex) Balanced, or (whoever is available) Standard. Note that Prolific charges more for representative (i.e. US or UK) samples.",
+    type: "categorical",
+    default: "Standard",
+    categories: "UK, USA, Balanced, Standard",
+  },
+  {
+    name: "_online5CochlearImplant",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5CochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Rather not say",
+  },
+  {
+    name: "_online5Dyslexia",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5Dyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
+    type: "multicategorical",
+    default: "",
+    categories: "diagnosed, being diagnosed, suspect, no, not saying",
+  },
+  {
+    name: "_online5HearingDifficulties",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5HearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Rather not say",
+  },
+  {
+    name: "_online5LanguageFirst",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5LanguageFirst (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
+  },
+  {
+    name: "_online5LanguageFluent",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5LanguageFluent (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; most participants are fluent in English.\n",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
+  },
+  {
+    name: "_online5LanguagePrimary",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5LanguagePrimary (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
+  },
+  {
+    name: "_online5LanguageRelatedDisorders",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5LanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nDo you have any language related disorders?\n\nSelect all\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "reading difficulty, writing difficulty, other language related disorder, none, not applicable",
+  },
+  {
+    name: "_online5Vision",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nVision\nParticipants were asked the following question: Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Rather not say",
+  },
+  {
+    name: "_online5VisionCorrection",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5VisionCorrection (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nCorrected vision\nParticipants were asked the following question: I currently use glasses or contact lenses to correct my vision\nI mainly use glasses\nI mainly use contact lenses\nI use both glasses and contact lenses\nI do not use glasses or contact lenses",
+    type: "multicategorical",
+    default: "",
+    categories: "glasses, contacts, both, neither",
+  },
+  {
     name: "_participantIDGetBool",
     availability: "now",
     example: "TRUE",
@@ -348,231 +573,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "CHANGING FROM: _participantIDPutBool\nEasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _requestEasyEyesIDSaveToFileBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _requestEasyEyesIDBool above.",
     type: "boolean",
     default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "_studyDescription",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyDescription is a (typically long) description of the study, used to recruit new participants. In deciding whether to participate, Prolific members will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. However, several Prolific participants told me that when the pay exceeds $15/hour, the jobs are filled quickly, so they often accept these without reading the study description. So you might want to have your study verify that participants actually satisfy any requirements stated in your description. The EasyEyes _compatibilityXXX parameters may be helpful in this regard. ",
-    type: "text",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_studyDevices",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyDevices is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nMobile\nTablet\nDesktop\nThe parameter value will be a comma-separated list of none to all of: Mobile, Table, Desktop.\n",
-    type: "multicategorical",
-    default: "Desktop",
-    categories: "Mobile, Table, Desktop",
-  },
-  {
-    name: "_studyDistribution",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyDistribution is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution\nHow do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nThe parameter value will be one of: UK, USA, Balanced, Standard\nThe scientist thus chooses a sample of participants: (representative of) USA, (representative of) UK, (50/50 sex) Balanced, or (whoever is available) Standard. Note that Prolific charges more for representative (i.e. US or UK) samples.",
-    type: "categorical",
-    default: "Standard",
-    categories: "UK, USA, Balanced, Standard",
-  },
-  {
-    name: "_studyLocation",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyLocation is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\nMore\nThe answer can include many countries, which are combined by an OR rule.",
-    type: "categorical",
-    default: "All countries available",
-    categories:
-      "All countries available, USA, UK, Ireland, Germany, France, Spain, Afghanistan, Aland Islands, Albania, Algeria, American Samoa, Andorra, Angola, Anguilla, Antarctica, Antigua and Barbuda, Argentina, Armenia, Aruba, Australia, Austria, Azerbaijan, Bahamas, Bahrain, Bangladesh, Barbados, Belarus, Belgium, Belize, Benin, Bermuda, Bhutan, Bolivia, Bonaire, Bosnia and Herzegovina, Botswana, Bouvet Island, Brazil, British Indian Ocean Territory, Brunei Darussalam, Bulgaria, Burkina Faso, Burundi, Cambodia, Cameroon, Canada, Cape Verde, Cayman Islands, Central African Republic, Chad, Chile, China, Christmas Island, Cocos (Keeling) Islands, Colombia, Comoros, Congo, Congo the Democratic Republic of the, Cook Islands, Costa Rica, Cote d'Ivoire, Croatia, Cuba, Curacao, Cyprus, Czech Republic, Denmark, Djibouti, Dominica, Dominican Republic, Ecuador, Egypt, El Salvador, Equatorial Guinea, Eritrea, Estonia, Ethiopia, Falkland Islands (Malvinas), Faroe Islands, Fiji, Finland, French Guiana, French Polynesia, French Southern Territories, Gabon, Gambia, Georgia, Ghana, Gibraltar, Greece, Greenland, Grenada, Guadeloupe, Guam, Guatemala, Guernsey, Guinea, Guinea-Bissau, Guyana, Haiti, Heard Island and McDonald Islands, Holy See (Vatican City State), Honduras, Hong Kong, Hungary, Iceland, India, Indonesia, Iran, Iraq, Isle of Man, Israel, Italy, Jamaica, Japan, Jersey, Jordan, Kazakhstan, Kenya, Kiribati, Korea, Kuwait, Kyrgyzstan, Lao People's Democratic Republic, Latvia, Lebanon, Lesotho, Liberia, Libya, Liechtenstein, Lithuania, Luxembourg, Macao, Macedonia, Madagascar, Malawi, Malaysia, Maldives, Mali, Malta, Marshall Islands, Martinique, Mauritania, Mauritius, Mayotte, Mexico, Micronesia, Moldova, Monaco, Mongolia, Montenegro, Montserrat, Morocco, Mozambique, Myanmar, Namibia, Nauru, Nepal, Netherlands, New Caledonia, New Zealand, Nicaragua, Niger, Nigeria, Niue, Norfolk Island, Northern Mariana Islands, Norway, Oman, Pakistan, Palau, Palestinian Territory, Panama, Papua New Guinea, Paraguay, Peru, Philippines, Pitcairn, Poland, Portugal, Puerto Rico, Qatar, Reunion, Romania, Russian Federation, Rwanda, Saint Barthelemy, Saint Helena, Saint Kitts and Nevis, Saint Lucia, Saint Martin (French part), Saint Pierre and Miquelon, Saint Vincent and the Grenadines, Samoa, San Marino, Sao Tome and Principe, Saudi Arabia, Senegal, Serbia, Seychelles, Sierra Leone, Singapore, Sint Maarten (Dutch part), Slovakia, Slovenia, Solomon Islands, Somalia, South Africa, South Georgia and the South Sandwich Islands, South Sudan, Sri Lanka, Sudan, Suriname, Svalbard and Jan Mayen, Swaziland, Sweden, Switzerland, Syrian Arab Republic, Taiwan, Tajikistan, Tanzania, Thailand, Timor-Leste, Togo, Tokelau, Tonga, Trinidad and Tobago, Tunisia, Turkey, Turkmenistan, Turks and Caicos Islands, Tuvalu, Uganda, Ukraine, United Arab Emirates, United States Minor Outlying Islands, Uruguay, Uzbekistan, Vanuatu, Venezuela, Bolivarian Republic of, Vietnam, Wallis and Futuna, Western Sahara, Yemen, Zambia, Zimbabwe",
-  },
-  {
-    name: "_studyMinutes",
-    availability: "now",
-    example: "30",
-    explanation:
-      "_studyMinutes (no default) is the expected study duration, in minutes, in the offer to potential participants. In deciding whether to participate, potential participants will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
-    type: "numerical",
-    default: "30",
-    categories: "",
-  },
-  {
-    name: "_studyParticipants",
-    availability: "now",
-    example: "20",
-    explanation:
-      "_studyParticipants (default 1). Number of people you want to test.",
-    type: "integer",
-    default: "1",
-    categories: "",
-  },
-  {
-    name: "_studyPay",
-    availability: "now",
-    example: "7.5",
-    explanation:
-      "_studyPay (no default) specifies the payment (a number) to offer to each participant. The currency is specified by _studyPayCurrency.  The experiment can specify _studyPay or _studyPayPerHour, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
-    type: "numerical",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_studyPayPerHour",
-    availability: "now",
-    example: "7.5",
-    explanation:
-      "_studyPayPerHour (no default) specifies the hourly rate (a number) that will determine (with _studyMinutes) the payment to offer to each participant. The currency is specified by _studyPayCurrency. The experiment can specify _studyPayPerHour or _studyPay, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour), which Prolific computes and displays.",
-    type: "numerical",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_studyPayCurrency",
-    availability: "now",
-    example: "USDollar",
-    explanation:
-      "_studyPayCurrency (default USDollar) specifies the currency of the payment: USDollar, Euro, etc. ",
-    type: "categorical",
-    default: "USDollar",
-    categories: "USDollar, Euro, UKPound",
-  },
-  {
-    name: "_studyPrescreenCochlearImplant",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyPrescreenCochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
-    type: "multicategorical",
-    default: "",
-    categories: "Yes, No, Rather not say",
-  },
-  {
-    name: "_studyPrescreenDyslexia",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyPrescreenDyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
-    type: "multicategorical",
-    default: "",
-    categories: "diagnosed, being diagnosed, suspect, no, not saying",
-  },
-  {
-    name: "_studyPrescreenHearingDifficulties",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyPrescreenHearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
-    type: "multicategorical",
-    default: "",
-    categories: "Yes, No, Rather not say",
-  },
-  {
-    name: "_studyPrescreenLanguageFirst",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyPrescreenLanguageFirst (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
-    type: "multicategorical",
-    default: "",
-    categories:
-      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
-  },
-  {
-    name: "_studyPrescreenLanguageFluent",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyPrescreenLanguageFluent (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; most participants are fluent in English.\n",
-    type: "multicategorical",
-    default: "",
-    categories:
-      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
-  },
-  {
-    name: "_studyPrescreenLanguagePrimary",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyPrescreenLanguagePrimary (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
-    type: "multicategorical",
-    default: "",
-    categories:
-      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
-  },
-  {
-    name: "_studyPrescreenLanguageRelatedDisorders",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyPrescreenLanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDo you have any language related disorders?\n\nSelect all\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
-    type: "multicategorical",
-    default: "",
-    categories:
-      "reading difficulty, writing difficulty, other language related disorder, none, not applicable",
-  },
-  {
-    name: "_studyPrescreenVision",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyPrescreenVision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision\nParticipants were asked the following question: Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
-    type: "multicategorical",
-    default: "",
-    categories: "Yes, No, Rather not say",
-  },
-  {
-    name: "_studyPrescreenVisionCorrection",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyPrescreenVisionCorrection (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCorrected vision\nParticipants were asked the following question: I currently use glasses or contact lenses to correct my vision\nI mainly use glasses\nI mainly use contact lenses\nI use both glasses and contact lenses\nI do not use glasses or contact lenses",
-    type: "multicategorical",
-    default: "",
-    categories: "glasses, contacts, both, neither",
-  },
-  {
-    name: "_studyRecruitmentService",
-    availability: "now",
-    example: "Prolific",
-    explanation:
-      '_studyRecruitmentService (no default). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
-    type: "categorical",
-    default: "none",
-    categories: "none, Prolific, MTurk, SONA",
-  },
-  {
-    name: "_studyRecruitmentServiceAccount",
-    availability: "now",
-    example: "123ABC",
-    explanation:
-      "NOT YET IMPLEMENTED: _studyRecruitmentServiceAccount (no default). Account number. ",
-    type: "text",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_studyRequires",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyRequires (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
-    type: "multicategorical",
-    default: "",
-    categories: "Audio, Camera, Microphone, Download software",
-  },
-  {
-    name: "_studyTitle",
-    availability: "now",
-    example: "",
-    explanation:
-      "_studyTitle is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants will consider _studyTitle, _studyPay, _studyMinutes, and _studyDescription. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
-    type: "text",
-    default: "",
     categories: "",
   },
   {
