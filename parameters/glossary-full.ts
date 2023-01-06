@@ -1958,6 +1958,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "showFPSBool",
+    availability: "now",
+    example: "",
+    explanation: "Obsolete, but EasyEyes crashes if we remove it.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "showGazeBool",
     availability: "now",
     example: "TRUE",

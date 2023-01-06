@@ -1805,6 +1805,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  showFPSBool: {
+    name: "showFPSBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   showGazeBool: {
     name: "showGazeBool",
     availability: "now",
