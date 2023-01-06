@@ -312,12 +312,37 @@ export const GLOSSARY: Glossary = {
     default: "Desktop",
     categories: ["Mobile", "Table", "Desktop"],
   },
-  _online3Requires: {
-    name: "_online3Requires",
+  _online3PhoneOperatingSystem: {
+    name: "_online3PhoneOperatingSystem",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    categories: ["Android", "iOS", "Windows", "Other", "Don't Know"],
+  },
+  _online3RequiredServices: {
+    name: "_online3RequiredServices",
     availability: "now",
     type: "multicategorical",
     default: "",
     categories: ["Audio", "Camera", "Microphone", "Download software"],
+  },
+  _online4ApprovalRate: {
+    name: "_online4ApprovalRate",
+    availability: "now",
+    type: "text",
+    default: " 0,100",
+  },
+  _online4CustomAllowList: {
+    name: "_online4CustomAllowList",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  _online4CustomBlockList: {
+    name: "_online4CustomBlockList",
+    availability: "now",
+    type: "",
+    default: "",
   },
   _online4Location: {
     name: "_online4Location",
@@ -574,6 +599,18 @@ export const GLOSSARY: Glossary = {
       "Zambia",
       "Zimbabwe",
     ],
+  },
+  _online4ParticipantInPreviousStudyExclude: {
+    name: "_online4ParticipantInPreviousStudyExclude",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  _online4ParticipantInPreviousStudyInclude: {
+    name: "_online4ParticipantInPreviousStudyInclude",
+    availability: "now",
+    type: "",
+    default: "",
   },
   _online4Sample: {
     name: "_online4Sample",
@@ -901,6 +938,13 @@ export const GLOSSARY: Glossary = {
       "not applicable",
     ],
   },
+  _online5MusicalInstrumentExperience: {
+    name: "_online5MusicalInstrumentExperience",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    categories: ["No", "0-1", "1-2", "2-3", "3-4", "5+"],
+  },
   _online5Vision: {
     name: "_online5Vision",
     availability: "now",
@@ -914,6 +958,33 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "",
     categories: ["glasses", "contacts", "both", "neither"],
+  },
+  _online5VRExperiences: {
+    name: "_online5VRExperiences",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    categories: [
+      "Virtual reality",
+      "Augmented reality",
+      "Mixed reality",
+      "Other",
+      "Not applicable",
+    ],
+  },
+  _online5VRHeadset: {
+    name: "_online5VRHeadset",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    categories: ["Yes", "No", "Don't know", "Not applicable"],
+  },
+  _online5VRHeadsetUsage: {
+    name: "_online5VRHeadsetUsage",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    categories: ["0، 1-5، 6-10، 11-15", "more than 15", "Not applicable"],
   },
   _participantIDGetBool: {
     name: "_participantIDGetBool",
@@ -933,12 +1004,6 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "",
     categories: ["Prolific"],
-  },
-  _participantRecruitmentServiceAccount: {
-    name: "_participantRecruitmentServiceAccount",
-    availability: "now",
-    type: "text",
-    default: "",
   },
   _pavloviaPreferRunningModeBool: {
     name: "_pavloviaPreferRunningModeBool",

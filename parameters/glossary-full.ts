@@ -305,7 +305,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "_online2Minutes (no default) is the expected study duration, in minutes, in the offer to potential participants. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+      "_online2Minutes (no default) is the expected study duration, in minutes, in the offer to each potential participant. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Prolific prticipants have often mentioned selecting one or another of my studies by how interesting it sounds or by its pay rate ($15/hour).",
     type: "numerical",
     default: "30",
     categories: "",
@@ -365,20 +365,60 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online3DeviceKind is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nMobile\nTablet\nDesktop\nThe parameter value will be a comma-separated list of none to all of: Mobile, Table, Desktop.\n",
+      "_online3DeviceKind is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nMobile\nTablet\nDesktop\nThe parameter value will be a comma-separated list of none to all of: Mobile, Table, Desktop.",
     type: "multicategorical",
     default: "Desktop",
     categories: "Mobile, Table, Desktop",
   },
   {
-    name: "_online3Requires",
+    name: "_online3PhoneOperatingSystem",
     availability: "now",
     example: "",
     explanation:
-      "_online2Requires (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
+      "_online5PhoneOperatingSystem is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nPhone Operating System\nParticipants were asked the following question: What operating system (OS) does your primary mobile phone have?\nAndroid\niOS (iPhone)\nWindows\nOther/Not Applicable\nDon't Know\n\nNOTE: This selector is in the _online3 group because it's important for EasyEyes sound experiments. EasyEyes uses the participant's smartphone to calibrate the loudspeaker of the participant's desktop.\n",
+    type: "multicategorical",
+    default: "",
+    categories: "Android, iOS, Windows, Other, Don't Know",
+  },
+  {
+    name: "_online3RequiredServices",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online2RequiredServices (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
     type: "multicategorical",
     default: "",
     categories: "Audio, Camera, Microphone, Download software",
+  },
+  {
+    name: "_online4ApprovalRate",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5ApprovalRate (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)",
+    type: "text",
+    default: " 0,100",
+    categories: "",
+  },
+  {
+    name: "_online4CustomAllowList",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online4CustomAllowList (no default) is a comma-separated list of Prolific participant IDs. ONLY these participants will be eligible for this study.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online4CustomBlockList",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online4CustomBlockList (no default) is a comma-separated list of Prolific participant IDs who will not be invited to this study.",
+    type: "",
+    default: "",
+    categories: "",
   },
   {
     name: "_online4Location",
@@ -390,6 +430,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     default: "All countries available",
     categories:
       "All countries available, USA, UK, Ireland, Germany, France, Spain, Afghanistan, Aland Islands, Albania, Algeria, American Samoa, Andorra, Angola, Anguilla, Antarctica, Antigua and Barbuda, Argentina, Armenia, Aruba, Australia, Austria, Azerbaijan, Bahamas, Bahrain, Bangladesh, Barbados, Belarus, Belgium, Belize, Benin, Bermuda, Bhutan, Bolivia, Bonaire, Bosnia and Herzegovina, Botswana, Bouvet Island, Brazil, British Indian Ocean Territory, Brunei Darussalam, Bulgaria, Burkina Faso, Burundi, Cambodia, Cameroon, Canada, Cape Verde, Cayman Islands, Central African Republic, Chad, Chile, China, Christmas Island, Cocos (Keeling) Islands, Colombia, Comoros, Congo, Congo the Democratic Republic of the, Cook Islands, Costa Rica, Cote d'Ivoire, Croatia, Cuba, Curacao, Cyprus, Czech Republic, Denmark, Djibouti, Dominica, Dominican Republic, Ecuador, Egypt, El Salvador, Equatorial Guinea, Eritrea, Estonia, Ethiopia, Falkland Islands (Malvinas), Faroe Islands, Fiji, Finland, French Guiana, French Polynesia, French Southern Territories, Gabon, Gambia, Georgia, Ghana, Gibraltar, Greece, Greenland, Grenada, Guadeloupe, Guam, Guatemala, Guernsey, Guinea, Guinea-Bissau, Guyana, Haiti, Heard Island and McDonald Islands, Holy See (Vatican City State), Honduras, Hong Kong, Hungary, Iceland, India, Indonesia, Iran, Iraq, Isle of Man, Israel, Italy, Jamaica, Japan, Jersey, Jordan, Kazakhstan, Kenya, Kiribati, Korea, Kuwait, Kyrgyzstan, Lao People's Democratic Republic, Latvia, Lebanon, Lesotho, Liberia, Libya, Liechtenstein, Lithuania, Luxembourg, Macao, Macedonia, Madagascar, Malawi, Malaysia, Maldives, Mali, Malta, Marshall Islands, Martinique, Mauritania, Mauritius, Mayotte, Mexico, Micronesia, Moldova, Monaco, Mongolia, Montenegro, Montserrat, Morocco, Mozambique, Myanmar, Namibia, Nauru, Nepal, Netherlands, New Caledonia, New Zealand, Nicaragua, Niger, Nigeria, Niue, Norfolk Island, Northern Mariana Islands, Norway, Oman, Pakistan, Palau, Palestinian Territory, Panama, Papua New Guinea, Paraguay, Peru, Philippines, Pitcairn, Poland, Portugal, Puerto Rico, Qatar, Reunion, Romania, Russian Federation, Rwanda, Saint Barthelemy, Saint Helena, Saint Kitts and Nevis, Saint Lucia, Saint Martin (French part), Saint Pierre and Miquelon, Saint Vincent and the Grenadines, Samoa, San Marino, Sao Tome and Principe, Saudi Arabia, Senegal, Serbia, Seychelles, Sierra Leone, Singapore, Sint Maarten (Dutch part), Slovakia, Slovenia, Solomon Islands, Somalia, South Africa, South Georgia and the South Sandwich Islands, South Sudan, Sri Lanka, Sudan, Suriname, Svalbard and Jan Mayen, Swaziland, Sweden, Switzerland, Syrian Arab Republic, Taiwan, Tajikistan, Tanzania, Thailand, Timor-Leste, Togo, Tokelau, Tonga, Trinidad and Tobago, Tunisia, Turkey, Turkmenistan, Turks and Caicos Islands, Tuvalu, Uganda, Ukraine, United Arab Emirates, United States Minor Outlying Islands, Uruguay, Uzbekistan, Vanuatu, Venezuela, Bolivarian Republic of, Vietnam, Wallis and Futuna, Western Sahara, Yemen, Zambia, Zimbabwe",
+  },
+  {
+    name: "_online4ParticipantInPreviousStudyExclude",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5ParticipantInPreviousStudyExclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nExclude participants from previous studies\nThis screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online4ParticipantInPreviousStudyInclude",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5ParticipantInPreviousStudyInclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nInclude participants from previous studies\nOnly participants with approved submissions will be included. To add participants whose responses weren't approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.\n\n",
+    type: "",
+    default: "",
+    categories: "",
   },
   {
     name: "_online4Sample",
@@ -406,7 +466,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5CochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
+      "_online5CochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",
@@ -416,7 +476,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5Dyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
+      "_online5Dyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
     type: "multicategorical",
     default: "",
     categories: "diagnosed, being diagnosed, suspect, no, not saying",
@@ -426,7 +486,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5HearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+      "_online5HearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",
@@ -469,18 +529,28 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5LanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nDo you have any language related disorders?\n\nSelect all\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
+      "_online5LanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDo you have any language related disorders?\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
     type: "multicategorical",
     default: "",
     categories:
       "reading difficulty, writing difficulty, other language related disorder, none, not applicable",
   },
   {
+    name: "_online5MusicalInstrumentExperience",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5MusicalInstrumentExperience (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nExperience with musical instruments\nParticipants were asked the following question: Do you play a musical instument, if so for how many years?\n\nNo. I don't play a musical instrument\nYes. For 0-1 years.\nYes. For 1-2 years.\nYes. For 2-3 years.\nYes. For 3-4 years.\nYes. For 5+ years.",
+    type: "multicategorical",
+    default: "",
+    categories: "No, 0-1, 1-2, 2-3, 3-4, 5+",
+  },
+  {
     name: "_online5Vision",
     availability: "now",
     example: "",
     explanation:
-      "_online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nVision\nParticipants were asked the following question: Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+      "_online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision\nParticipants were asked the following question: Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",
@@ -490,10 +560,41 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5VisionCorrection (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific 4ing query:\nCorrected vision\nParticipants were asked the following question: I currently use glasses or contact lenses to correct my vision\nI mainly use glasses\nI mainly use contact lenses\nI use both glasses and contact lenses\nI do not use glasses or contact lenses",
+      "_online5VisionCorrection (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCorrected vision\nParticipants were asked the following question: I currently use glasses or contact lenses to correct my vision\nI mainly use glasses\nI mainly use contact lenses\nI use both glasses and contact lenses\nI do not use glasses or contact lenses",
     type: "multicategorical",
     default: "",
     categories: "glasses, contacts, both, neither",
+  },
+  {
+    name: "_online5VRExperiences",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5VRExperiences (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nSimulated Experiences\nParticipants were asked the following question: Have you engaged in any of the following simulated experiences before? Choose all that apply:\nVirtual reality\nAugmented reality\nMixed reality\nOther\nNot applicable / rather not say",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Virtual reality, Augmented reality, Mixed reality, Other, Not applicable",
+  },
+  {
+    name: "_online5VRHeadset",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5VRHeadset (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (ownership)\nParticipants were asked the following question: Do you own a VR (Virtual Reality) headset?\nYes\nNo\nDon't know / other\nNot applicable / rather not say",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Don't know, Not applicable",
+  },
+  {
+    name: "_online5VRHeadsetUsage",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5VRHeadsetUsage (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (frequency)\nParticipants were asked the following question: In a given month, how frequently do you use a VR headset?\n0 times\n1-5 times\n6-10 times\n11-15 times\nmore than 15 times\nNot applicable / rather not say",
+    type: "multicategorical",
+    default: "",
+    categories: "0، 1-5، 6-10، 11-15, more than 15, Not applicable",
   },
   {
     name: "_participantIDGetBool",
@@ -524,16 +625,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "",
     categories: "Prolific",
-  },
-  {
-    name: "_participantRecruitmentServiceAccount",
-    availability: "now",
-    example: "123ABC",
-    explanation:
-      "NOT YET IMPLEMENTED. Account number. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
-    type: "text",
-    default: "",
-    categories: "",
   },
   {
     name: "_pavloviaPreferRunningModeBool",
