@@ -4535,9 +4535,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           break;
         case "movie":
           // Play the movie here
-          logger("len videoblob", videoblob.length);
+          // logger("len videoblob", videoblob.length);
           if (videoblob.length > 0 && video_flag == 1) {
-            loggerText("Running");
+            // loggerText("Running");
             // document.querySelector("canvas").style.display = "none";
             // document.getElementById("root").style.display = "none";
             video.setAttribute("src", videoblob);
@@ -4552,7 +4552,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // continueRoutine = false;
             video_flag = 1;
             videoblob = [];
-            loggerText("played");
+            // loggerText("played");
             document.body.removeChild(video);
           };
           break;

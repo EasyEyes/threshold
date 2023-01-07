@@ -37,7 +37,7 @@ export async function generate_image(bitmapArray) {
     });
     uIntArray.push(image.toBuffer());
   }
-  logger("uIntArray", uIntArray);
+  //logger("uIntArray", uIntArray);
   return uIntArray;
 }
 
@@ -122,6 +122,8 @@ export async function generate_video(imageArray, movieHz) {
     var num = `newfile${i}`;
     ffmpeg.FS("unlink", `tmp${num}.png`);
   }
+  ffmpeg.FS("unlink", "out.mp4");
+  await ffmpeg.exit();
   let videoBlob = URL.createObjectURL(
     new Blob([data.buffer], { type: "video/mp4" })
   );
@@ -158,7 +160,7 @@ export async function evaluateJSCode(
   ];
   const filename = paramReader.read("movieComputeJS", BC);
   return readJS(filename).then((response) => {
-    logger("last index", response.lastIndexOf("}"));
+    //logger("last index", response.lastIndexOf("}"));
     var jsCode = response.substring(
       response.indexOf("{") + 1,
       response.lastIndexOf("}")
@@ -170,7 +172,7 @@ export async function evaluateJSCode(
     var parameters_arr = parameters_string.split(",").map(function (item) {
       return item.trim();
     });
-    logger("parameters_arr", parameters_arr);
+    //logger("parameters_arr", parameters_arr);
     var parameters = {};
     parameters["targetCharacter"] = targetCharacter;
     parameters["displayOptions"] = displayOptions;
@@ -184,16 +186,16 @@ export async function evaluateJSCode(
     parameters["questSuggestedLevel"] = questSuggestedLevel;
     for (let index in parameters_arr) {
       if (parameters_arr[index] in parameters) {
-        logger("parameter found", parameters_arr[index]);
+        //logger("parameter found", parameters_arr[index]);
       } else {
-        logger("parameter not found", parameters_arr[index]);
+        //logger("parameter not found", parameters_arr[index]);
         parameters[parameters_arr[index]] = paramReader.read(
           parameters_arr[index],
           BC
         );
       }
     }
-    logger("parameters deconstructed", Object.keys(parameters));
+    //logger("parameters deconstructed", Object.keys(parameters));
     // var args =
     //   "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, isRectInRect,movieRectDeg,movieRectPxContainsRectDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentricityXDeg,targetEccentricityYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
     var myFunc = new Function(...Object.keys(parameters), jsCode);
