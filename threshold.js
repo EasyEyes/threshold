@@ -372,6 +372,7 @@ import {
 /* -------------------------------------------------------------------------- */
 
 var videoblob = [];
+var video_generated = false;
 var actualStimulusLevel;
 const video = document.createElement("video");
 video.style.position = "absolute";
@@ -3430,8 +3431,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // trialComponents.push(...rsvpReadingFeedback.stims);
         },
         movie: () => {
-          document.querySelector("canvas").style.display = "none";
-          document.getElementById("root").style.display = "none";
           level = currentLoop._currentStaircase.getQuestValue();
 
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
@@ -3463,7 +3462,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // );
           // fixationConfig.pos = fixationConfig.nominalPos;
           // fixation.setPos(fixationConfig.pos);
-
+          video_generated = false;
           loader.setAttribute("id", "loader");
           loaderText.setAttribute("id", "loaderText");
           document.body.appendChild(loader);
@@ -3491,8 +3490,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               videoblob = data;
               document.body.removeChild(loader);
               document.body.removeChild(loaderText);
-              document.querySelector("canvas").style.display = "block";
-              document.getElementById("root").style.display = "block";
+              video_generated = true;
               fixation.tStart = t;
               fixation.frameNStart = frameN;
               clickedContinue.current = false;
@@ -3650,7 +3648,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: letterEachFrame,
         repeatedLetters: letterEachFrame,
         rsvpReading: letterEachFrame,
-        movie: letterEachFrame,
+        movie: () => {
+          if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
+          /* --- /SIMULATED --- */
+          t = instructionsClock.getTime();
+          frameN = frameN + 1;
+
+          if (showConditionNameConfig.showTargetSpecs) {
+            targetSpecsConfig.pos[0] = -window.innerWidth / 2;
+            targetSpecsConfig.pos[1] = -window.innerHeight / 2;
+            if (targetSpecs.status === PsychoJS.Status.NOT_STARTED) {
+              // keep track of start time/frame for later
+              targetSpecs.tStart = t; // (not accounting for frame time here)
+              targetSpecs.frameNStart = frameN; // exact frame index
+            }
+            targetSpecs.setAutoDraw(true);
+          }
+          if (video_generated == true) {
+            if (fixationConfig.markingFixationMotionRadiusDeg > 0)
+              gyrateFixation(fixation, t, displayOptions);
+            fixation.setAutoDraw(true);
+          }
+        },
       });
 
       if (showConditionNameConfig.show) {
