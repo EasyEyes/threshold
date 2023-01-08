@@ -3451,23 +3451,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               `color: red; font-size: 1.5rem; font-family: "${font.name}"`
             );
           correctAns.current = [targetCharacter.toLowerCase()];
-          /* -------------------------------------------------------------------------- */
 
-          // TODO
-          // switch(thresholdParameter) {
-          //   case "targetContrast":
-          // }
-          fixation.tStart = t;
-          fixation.frameNStart = frameN;
-          clickedContinue.current = false;
-          fixation.update(
-            paramReader,
-            BC,
-            100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
-          );
-          fixationConfig.pos = fixationConfig.nominalPos;
-          fixation.setPos(fixationConfig.pos);
+          // fixation.tStart = t;
+          // fixation.frameNStart = frameN;
+          // clickedContinue.current = false;
+          // fixation.update(
+          //   paramReader,
+          //   BC,
+          //   100, // stimulusParameters.heightPx,
+          //   XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+          // );
+          // fixationConfig.pos = fixationConfig.nominalPos;
+          // fixation.setPos(fixationConfig.pos);
 
           loader.setAttribute("id", "loader");
           loaderText.setAttribute("id", "loaderText");
@@ -3498,15 +3493,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               document.body.removeChild(loaderText);
               document.querySelector("canvas").style.display = "block";
               document.getElementById("root").style.display = "block";
+              fixation.tStart = t;
+              fixation.frameNStart = frameN;
+              clickedContinue.current = false;
+              fixation.update(
+                paramReader,
+                BC,
+                100,
+                XYPixOfXYDeg(
+                  letterConfig.targetEccentricityXYDeg,
+                  displayOptions
+                )
+              );
+              fixationConfig.pos = fixationConfig.nominalPos;
+              fixation.setPos(fixationConfig.pos);
               document.addEventListener("click", _takeFixationClick);
               document.addEventListener("touchend", _takeFixationClick);
             });
           });
           trialCounter.setAutoDraw(showCounterBool);
-          // generate_video(imageNit).then((data) => {
-          //   videoblob = data;
-          //   logger("data", data);
-          // });
           showCharacterSet.setPos([0, 0]);
 
           trialComponents = [];
