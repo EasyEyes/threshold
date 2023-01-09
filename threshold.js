@@ -345,11 +345,6 @@ import {
   vocoderPhraseSetupClickableCategory,
 } from "./components/vocoderPhrase.js";
 import { readTrialLevelLetterParams } from "./components/letter.js";
-// import {
-//   setInitialData,
-//   updateBlockCompleted,
-//   updateCurrentBlockCondition,
-// } from "./components/temporaryLogger.js";
 import {
   readTrialLevelRepeatedLetterParams,
   generateRepeatedLettersStims,
@@ -397,35 +392,8 @@ const paramReaderInitialized = async (reader) => {
 
   buildWindowErrorHandling(reader);
 
-  // if (rc.concurrency.value <= 0) {
-  //   await rc.performance();
-  // }
-
-  const compMsg = checkSystemCompatibility(
-    reader.read("_compatibleBrowser")[0].split(","),
-    rc.browser.value,
-    reader.read("_compatibleBrowserVersionMinimum")[0],
-    rc.browserVersion.value,
-    reader.read("_compatibleDeviceType")[0].split(","),
-    rc.deviceType.value,
-    reader.read("_compatibleOperatingSystem")[0].split(","),
-    rc.systemFamily.value,
-    reader.read("_compatibleProcessorCoresMinimum")[0],
-    rc.concurrency.value,
-    rc.computeRandomMHz ? rc.computeRandomMHz.value : 0,
-    rc.language.value
-  );
-  //temporary logger for debugging
-  // setInitialData(
-  //   window.location.toString(),
-  //   "",
-  //   "",
-  //   compMsg["proceed"],
-  //   rc.concurrency.value,
-  //   rc.browser.value,
-  //   Date.now(),
-  //   rc.id.value
-  // );
+  // ! check system compatibility
+  const compMsg = checkSystemCompatibility(reader, rc);
   const proceed = await displayCompatibilityMessage(
     compMsg["msg"],
     rc.language.value
@@ -860,28 +828,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     prepareTrialBreakProgressBar();
 
     /* -------------------------------------------------------------------------- */
-
-    //initialize sound experiment files
-    //edit - use list of sound targetKinds instead of sound
-    // if (paramReader.read("targetKind", "__ALL_BLOCKS__").includes("sound")) {
-    //   //read masker andtarget sound folders
-    //   var MaskerFolders = paramReader.read(
-    //     "maskerSoundFolder",
-    //     "__ALL_BLOCKS__"
-    //   );
-
-    //   var targetFolders = paramReader.read(
-    //     "targetSoundFolder",
-    //     "__ALL_BLOCKS__"
-    //   );
-
-    //   //only unique folders
-    //   MaskerFolders = [...new Set(MaskerFolders)];
-    //   targetFolders = [...new Set(targetFolders)];
-
-    //   await initSoundFiles(MaskerFolders, targetFolders);
-    // }
-
     fixation = new Fixation();
     // fixationConfig.stim = fixation;
 
@@ -5208,16 +5154,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
       else hideTrialBreakProgressBar();
-
-      //initiate temporary logger
-      // updateBlockCompleted(
-      //   rc.id.value,
-      //   { blockCompleted: status.block + "_" + status.trial, time: Date.now() },
-      //   window.location.toString()
-      // );
-      // console.log("used block", status.block + "_" + status.trial);
-      // console.log("used block", status.block);
-      // console.log("used block", status);
 
       // Check if trialBreak should be triggered
       if (
