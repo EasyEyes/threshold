@@ -55,8 +55,9 @@ export async function generate_video(imageArray, movieHz) {
   );
   await ffmpeg.load();
   var startTime = performance.now();
-  var uIntArray = [];
-  await generate_image(imageArray).then((data) => (uIntArray = data));
+  // var uIntArray = [];
+  //await generate_image(imageArray).then((data) => (uIntArray = data));
+  let uIntArray = await generate_image(imageArray);
   let countImages = uIntArray.length;
   for (let i = 0; i < countImages; i += 1) {
     var num = `newfile${i}`;
