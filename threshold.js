@@ -4,6 +4,7 @@
 
 import {
   arraysEqual,
+  centerAt,
   colorRGBASnippetToRGBA,
   colorRGBSnippetToRGB,
   debug,
@@ -13,6 +14,7 @@ import {
   log,
   norm,
   sleep,
+  trueCenter,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -844,6 +846,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -7.0,
+      alignVert: "center",
+      alignHoriz: "center",
     });
 
     target = new visual.TextStim({
@@ -859,6 +863,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -8.0,
+      alignVert: "center",
+      alignHoriz: "center",
     });
 
     flanker2 = new visual.TextStim({
@@ -874,6 +880,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       color: new util.Color("black"),
       opacity: 1.0,
       depth: -9.0,
+      alignVert: "center",
+      alignHoriz: "center",
     });
 
     showCharacterSet = new visual.TextStim({
@@ -2929,6 +2937,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // DISPLAY OPTIONS
           displayOptions.window = psychoJS.window;
 
+          // QUESTION does `stimulusParameters.targetAndFlankersXYPx` differ
+          //          from `letterConfig.targetEccentricityXYDeg`??
           const targetEccentricityXYPx = XYPixOfXYDeg(
             letterConfig.targetEccentricityXYDeg,
             displayOptions
@@ -2972,7 +2982,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           fixation.setPos(fixationConfig.pos);
 
-          target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+          // target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
           psychoJS.experiment.addData(
             "targetLocationPx",
             stimulusParameters.targetAndFlankersXYPx[0]
@@ -2997,7 +3007,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
               target.setPadding(font.padding);
 
-              target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+              // target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
               flanker1.setAutoDraw(false);
               flanker2.setAutoDraw(false);
@@ -3006,8 +3016,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               switch (letterConfig.spacingRelationToSize) {
                 case "none":
                 case "ratio":
-                  target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
-
                   targetText = targetCharacter;
                   target.setText(targetText);
 
@@ -3019,6 +3027,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       stimulusParameters.widthPx
                     );
                   }
+                  // NOTE set position *after* setting text and scaling to size
+                  // target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
                   var flankersHeightPx = target.getHeight();
                   const f1Text = firstFlankerCharacter;
@@ -3028,18 +3038,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   flanker2.setFont(font.name);
                   flanker1.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
                   flanker2.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
-                  flanker1.setHeight(flankersHeightPx);
-                  flanker2.setHeight(flankersHeightPx);
-                  flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
-                  flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
                   // flanker1 === outer flanker
                   flanker1.setText(f1Text);
                   // flanker2 === inner flanker
                   flanker2.setText(f2Text);
-
+                  flanker1.setHeight(flankersHeightPx);
+                  flanker2.setHeight(flankersHeightPx);
                   target.setPadding(font.padding);
                   flanker1.setPadding(font.padding);
                   flanker2.setPadding(font.padding);
+                  flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
+                  flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
                   psychoJS.experiment.addData("flankerLocationsPx", [
                     stimulusParameters.targetAndFlankersXYPx[1],
                     stimulusParameters.targetAndFlankersXYPx[2],
@@ -3474,6 +3483,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(renderObj.tinyHint);
         },
       });
+
+      if (targetKind.current === "letter") {
+        const forcePositionStartTime = performance.now();
+        await centerAt(target, stimulusParameters.targetAndFlankersXYPx[0]);
+        if (
+          thresholdParameter === "spacing" &&
+          letterConfig.spacingRelationToSize !== "typographic"
+        ) {
+          await centerAt(flanker1, stimulusParameters.targetAndFlankersXYPx[1]);
+          await centerAt(flanker2, stimulusParameters.targetAndFlankersXYPx[2]);
+        }
+        const forcePositionStopTime = performance.now();
+        const forcePositionDuration =
+          forcePositionStopTime - forcePositionStartTime;
+        psychoJS.experiment.addData(
+          "iterativePositioningMs",
+          forcePositionDuration
+        );
+      }
 
       const customInstructions = getCustomInstructionText(
         "stimulus",
