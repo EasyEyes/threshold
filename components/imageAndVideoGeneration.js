@@ -1,4 +1,4 @@
-import * as FFmpeg from "./addons/ffmpeg.min.js";
+//import * as FFmpeg from "./addons/ffmpeg.min.js";
 import { Image } from "image-js";
 import axios from "axios";
 
@@ -42,7 +42,8 @@ export async function generate_image(bitmapArray) {
 }
 
 export async function generate_video(imageArray, movieHz) {
-  const { createFFmpeg, fetchFile } = FFmpeg;
+  // const { createFFmpeg, fetchFile } = FFmpeg;
+  const { createFFmpeg } = require("@ffmpeg/ffmpeg");
   const ffmpeg = createFFmpeg({ log: false });
 
   RemoteCalibrator.init({ id: "session_022" });
