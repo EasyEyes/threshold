@@ -3419,6 +3419,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForMovie(paramReader, status.block_condition);
           //var F = new Function(paramReader.read("computeImageJS", BC))();
+          let computeTotalSecStartTime = performance.now();
           var questSuggestedLevel = currentLoop._currentStaircase.quantile(
             currentLoop._currentStaircase._jsQuest.quantileOrder
           );
@@ -3427,13 +3428,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status,
             displayOptions,
             targetCharacter,
-            questSuggestedLevel
+            questSuggestedLevel,
+            psychoJS
           ).then(([imageNit, movieHz, actualStimulusLevelTemp]) => {
             //observer should not be allowed to respond before actualStimulusLevel has retured.
             //i.e. before the movie has generated
             actualStimulusLevel = actualStimulusLevelTemp;
-            generate_video(imageNit, movieHz).then((data) => {
+            generate_video(imageNit, movieHz, psychoJS).then((data) => {
               videoblob = data;
+              let computeTotalSecEndTime = performance.now();
+              psychoJS.experiment.addData(
+                "computeTotalSec",
+                computeTotalSecEndTime - computeTotalSecStartTime
+              );
               document.body.removeChild(loader);
               document.body.removeChild(loaderText);
               video_generated = true;
