@@ -568,7 +568,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   logger("fontsRequired", fontsRequired);
   for (let i in fontsRequired) {
     logger(i, fontsRequired[i]);
-    _resources.push({ name: i, path: fontsRequired[i] });
+    // console.log("",fontsRequired[i].length);
+    let fontSplit = fontsRequired[i].split(".");
+    let fontSplit1 = fontSplit[0].split("/");
+    fontSplit1.push(fontSplit[1]);
+    let fontName = fontSplit1[1] + "." + fontSplit1[2];
+    _resources.push({ name: fontName, path: fontsRequired[i] });
   }
 
   /* ---------------------------------- Sound --------------------------------- */
@@ -679,7 +684,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }, 300);
     });
-
   // Get canvas
   // const [canvas, canvasContext] = getCanvasContext();
   // initPixelsArray(canvasContext);
