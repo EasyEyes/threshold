@@ -3426,7 +3426,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           loaderText.setAttribute("id", "loaderText");
           document.body.appendChild(loader);
           document.body.appendChild(loaderText);
-          loaderText.innerHTML = "Generating movie";
+          loaderText.innerHTML = phrases.T_generatingMovie[rc.language.value];
           //generate movie
           loggerText("Generate movie here");
           if (showConditionNameConfig.showTargetSpecs)
