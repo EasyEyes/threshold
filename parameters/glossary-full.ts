@@ -1218,6 +1218,27 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "language",
+    availability: "now",
+    example: "",
+    explanation:
+      "Native name of initial language of EasyEyes participant page. Note that the scientist here uses the English name of each language.",
+    type: "categorical",
+    default: "English",
+    categories:
+      "English,German,French,Spanish,Portuguese,Italian,Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
+  },
+  {
+    name: "languageSelectionByParticipantBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "If languageSelectionByParticipantBool is TRUE (default TRUE), then there will be at least one opportunity for the participant to use a pull down menu to select any language for the rest of the experiment. Note that the participant selects among the native names of the languages.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "markingBlankedNearTargetBool",
     availability: "now",
     example: "TRUE",

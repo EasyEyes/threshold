@@ -186,10 +186,8 @@ export const checkSystemCompatibility = (reader, rc) => {
   const screenHeightPx = window.screen.height;
   const minScreenWidthPx = [];
   const minScreenHeightPx = [];
-  // number of blocks
-  const nBlocks = reader.read(
-    "viewingDistanceLargeEnoughToAllowTargetSizeDeg"
-  ).length;
+  // read blocks
+  const nBlocks = Math.max(...reader.read("block", "__ALL_BLOCKS__"));
   for (let i = 1; i <= nBlocks; i++) {
     // Define Short names:
     // compute across all conditions
