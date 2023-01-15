@@ -249,6 +249,21 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  _language: {
+    name: "_language",
+    availability: "now",
+    type: "categorical",
+    default: "English",
+    categories: [
+      "English,German,French,Spanish,Portuguese,Italian,Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
+    ],
+  },
+  _languageSelectionByParticipantBool: {
+    name: "_languageSelectionByParticipantBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
   _online1RecruitmentService: {
     name: "_online1RecruitmentService",
     availability: "now",
@@ -1361,21 +1376,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "FALSE",
-  },
-  language: {
-    name: "language",
-    availability: "now",
-    type: "categorical",
-    default: "English",
-    categories: [
-      "English,German,French,Spanish,Portuguese,Italian,Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
-    ],
-  },
-  languageSelectionByParticipantBool: {
-    name: "languageSelectionByParticipantBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
   },
   markingBlankedNearTargetBool: {
     name: "markingBlankedNearTargetBool",

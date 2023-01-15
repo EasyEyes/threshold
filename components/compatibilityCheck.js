@@ -200,10 +200,10 @@ export const checkSystemCompatibility = (reader, rc) => {
       ...viewingDistanceLargeEnoughToAllowTargetSizeDeg
     );
     const minScreenWidthDeg = Math.max(
-      reader.read("viewingDistanceSmallEnoughToAllowScreenWidthDeg", i)
+      ...reader.read("viewingDistanceSmallEnoughToAllowScreenWidthDeg", i)
     );
     const minScreenHeightDeg = Math.max(
-      reader.read("viewingDistanceSmallEnoughToAllowScreenHeightDeg", i)
+      ...reader.read("viewingDistanceSmallEnoughToAllowScreenHeightDeg", i)
     );
 
     const widthPx = [];
@@ -236,7 +236,7 @@ export const checkSystemCompatibility = (reader, rc) => {
       /111/g,
       minWidthPx.toString()
     ).replace(/222/g, minHeightPx.toString());
-    screenSizeMsg.push(ssMsg);
+    screenSizeMsg.push(ssMsg + ".");
     deviceIsCompatibleBool =
       deviceIsCompatibleBool &&
       screenWidthPx >= minWidthPx &&
@@ -248,7 +248,7 @@ export const checkSystemCompatibility = (reader, rc) => {
       /111/g,
       minWidthPx.toString()
     );
-    screenSizeMsg.push(ssMsg);
+    screenSizeMsg.push(ssMsg + ".");
     deviceIsCompatibleBool =
       deviceIsCompatibleBool && screenWidthPx >= minWidthPx;
   } else if (minHeightPx > 0) {
@@ -258,7 +258,7 @@ export const checkSystemCompatibility = (reader, rc) => {
       /111/g,
       minHeightPx.toString()
     );
-    screenSizeMsg.push(ssMsg);
+    screenSizeMsg.push(ssMsg + ".");
     deviceIsCompatibleBool =
       deviceIsCompatibleBool && screenHeightPx >= minHeightPx;
   }

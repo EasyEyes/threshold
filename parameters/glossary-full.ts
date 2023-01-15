@@ -271,6 +271,27 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_language",
+    availability: "now",
+    example: "",
+    explanation:
+      "_language (default English) is the English name of the initial language of the experiment, e.g. English, German, or Arabic. We currently support 28 languages, and it would be very easy to add more. Bear in mind that the translations, mostly by Google Translate, are far from perfect, but we will consider pasting in better translations for key phrases.",
+    type: "categorical",
+    default: "English",
+    categories:
+      "English,German,French,Spanish,Portuguese,Italian,Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
+  },
+  {
+    name: "_languageSelectionByParticipantBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "If _languageSelectionByParticipantBool is TRUE (default TRUE), then there will be at least one opportunity for the participant to use a pull down menu to select any language for the rest of the experiment. (If FALSE then the language will be as set by _language for the whole experiment.) The participant will select among the native names of the languages, e.g. English, Deutsch, عربي. We currently offer 28 languages, and it would be very easy to add more. If there's demand, we could add another parameter to select a subset of languages to offer to the participant.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_online1RecruitmentService",
     availability: "now",
     example: "Prolific",
@@ -1215,27 +1236,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "NOT YET IMPLEMENTED. Setting invitePartingCommentsBool (default FALSE) TRUE tells EasyEyes, at the end of this block, to invite the participant to make parting comments. ",
     type: "boolean",
     default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "language",
-    availability: "now",
-    example: "",
-    explanation:
-      "Native name of initial language of EasyEyes participant page. Note that the scientist here uses the English name of each language.",
-    type: "categorical",
-    default: "English",
-    categories:
-      "English,German,French,Spanish,Portuguese,Italian,Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
-  },
-  {
-    name: "languageSelectionByParticipantBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "If languageSelectionByParticipantBool is TRUE (default TRUE), then there will be at least one opportunity for the participant to use a pull down menu to select any language for the rest of the experiment. Note that the participant selects among the native names of the languages.",
-    type: "boolean",
-    default: "TRUE",
     categories: "",
   },
   {
