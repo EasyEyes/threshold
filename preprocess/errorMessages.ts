@@ -136,9 +136,9 @@ export const FONT_FILES_MISSING = (
     htmlList += `<li>${fileName}</li>`;
   });
   return {
-    name: "Font file is missing",
-    message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Submit the file(s) to the drop box above ↑`,
+    name: "Font file not found",
+    message: `<ul>${htmlList}</ul><br />${parameter} not found in <b>fontSource</b> "file"`,
+    hint: `Are both font source and name correct?`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -154,9 +154,9 @@ export const FONT_FILES_MISSING_WEB = (
     htmlList += `<li>${fileName}</li>`;
   });
   return {
-    name: "Font file is missing",
-    message: `We could not find the following file specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Check if font is spelled correctly. Browse through Google fonts to get the correct name`,
+    name: "Font file not found",
+    message: `<ul>${htmlList}</ul><br />${parameter} not found in <b>fontSource</b> "google"`,
+    hint: `Are both font source and name correct, you can browse through Google Fonts (fonts.google.com) to make sure?`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
