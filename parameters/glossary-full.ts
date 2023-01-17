@@ -13,7 +13,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Effect of font on crowding.",
     explanation:
-      "Optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -23,7 +23,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "dp3@nyu.edu",
     explanation:
-      "Optional, semicolon-separated email addresses of the authors.  The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional, semicolon-separated email addresses of the authors.  The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -33,7 +33,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Denis Pelli",
     explanation:
-      "Optional, names of all the authors, separated by semicolons. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must all be empty.",
+      "Optional, names of all the authors, separated by semicolons. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -165,7 +165,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without institutional Pavlovia licenses. When TRUE (the default), when EasyEyes compiles your experiment, EasyEyes appends the smallest possible integer (at least 1) to the spreadsheet filename (without extension) to create a unique (unused) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users who need tokens, Pavlovia requires that tokens be assigned to a specific experiment (repo). For them, every time EasyEyes changes the repo name, they must visit Pavlovia to assign tokens to the new repo, which can be a nuisance. Token users can eliminate the nuisance by setting _compileAsNewExperimentBool FALSE to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the data files will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists only need to assign tokens the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting Pavlovia, until the experiment runs out of tokens. Note that this flag doen't affect PILOTING mode, which is always free and can only be used from within Pavlovia. Also, any users concerned over the huge proliferation of repos might like to set _compileAsNewExperimentBool FALSE to minimize the number of repos created by EasyEyes.",
+      "NOT YET IMPLEMENTED. _compileAsNewExperimentBool (default TRUE) can be set to FALSE to accommodate users without an institutional Pavlovia license. Without that license, Pavlovia requires assigning tokens (money) to each experiment before it can run in RUNNING mode. If _compileAsNewExperimentBool=TRUE (the default), then, when EasyEyes compiles your experiment, EasyEyes appends the smallest possible integer (at least 1) to the spreadsheet filename (without extension) to create a unique (unused) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. However, for users without a site license, Pavlovia requires that tokens be assigned in advance to the specific experiment (repo). For them, every time EasyEyes changes the repo name, they must visit Pavlovia to assign tokens to the new repo, which can be a nuisance. Token users (i.e. without a site license) can minimize the token-assignment nuisance by setting _compileAsNewExperimentBool=FALSE to reuse the old repo, instead of creating a new repo every time they compile. The downside is that if you collect data, edit the table, and collect more data, the data files will all be together in the same repo, distinguished only by date. When _compileAsNewExperimentBool is FALSE, scientists only need to assign tokens the first time they compile (when it's a new repo). Once it has tokens, provided the name of the spreadsheet file is unchanged, they can keep testing, through countless compiles, without visiting Pavlovia, until the experiment runs out of tokens. Note that this flag doen't affect PILOTING mode, which is always free and can only be used from within Pavlovia. Also, any users concerned over the huge proliferation of repos might like to set _compileAsNewExperimentBool FALSE to minimize the number of repos created by EasyEyes.\nSee _pavloviaPreferRUNNINGModeBool for a more advice on working without an institutional Pavlovia site license.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -175,7 +175,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "adultConsent2021.pdf",
     explanation:
-      "_consentForm is the file name of your PDF (or plain-text Markdown with extension MD) consent document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your consent form(s) to that folder. When checking your experiment table, the compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Scientific Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -205,7 +205,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "8/1/2021",
     explanation:
-      "Optional date of creation. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional date of creation. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "date",
     default: " ",
     categories: "",
@@ -215,7 +215,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "8/15/2021",
     explanation:
-      "Optional date of latest modification. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "Optional date of latest modification. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "date",
     default: " ",
     categories: "",
@@ -225,7 +225,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "debrief2021.pdf",
     explanation:
-      "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "The file name of your PDF (or plain-text Markdown with extension MD) debrief document in the folder EasyEyesResources/ConsentForms/ in your Pavlovia account. The EasyEyes.app/threshold page makes it easy to upload your debrief form(s) to that folder. The compiler will check that a file with this name is present in your EasyEyesResources/ConsentForms folder on Pavlovia. See consent in Glossary for information about testing minors and children. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -253,9 +253,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "_experimentName",
     availability: "now",
-    example: "crowding",
+    example: "crowding11",
     explanation:
-      '_experimentName specifies the name for the GitLab repository, which Pavlovia calls your "experiment". If empty, the compiler provides a default, which is the the table filename (without extension) plus the smallest integer greater than zero that results in an unused repo name in your Pavlovia account. Note that if the specified name corresponds to an existing repository, EasyEyes uses it, and new study files will replace old ones and results will accumulate. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.',
+      '_experimentName specifies the name for the GitLab repository, which Pavlovia calls your "experiment". If empty, the compiler provides a default, which is the the table filename (without extension) plus the smallest integer greater than zero that results in an unused repo name in your Pavlovia account. Note that if the specified name corresponds to an existing repository, EasyEyes uses it, and new study files will replace old ones and results will accumulate. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.',
     type: "text",
     default: "",
     categories: "",
@@ -265,27 +265,364 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "NOT YET IMPLEMENTED. At the end of the experiment, invite the participant to make parting comments. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "NOT YET IMPLEMENTED. At the end of the experiment, invite the participant to make parting comments. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "boolean",
     default: "FALSE",
     categories: "",
   },
   {
-    name: "_participantDurationMinutes",
+    name: "_language",
+    availability: "now",
+    example: "",
+    explanation:
+      "_language (default English) is the English name of the initial language of the experiment, e.g. English, German, or Arabic. We currently support 28 languages, and it would be very easy to add more. Bear in mind that the translations, mostly by Google Translate, are far from perfect, but we will consider pasting in better translations for key phrases.",
+    type: "categorical",
+    default: "English",
+    categories:
+      "English,German,French,Spanish,Portuguese,Italian,Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
+  },
+  {
+    name: "_languageSelectionByParticipantBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "If _languageSelectionByParticipantBool is TRUE (default TRUE), then there will be at least one opportunity for the participant to use a pull down menu to select any language for the rest of the experiment. (If FALSE then the language will be as set by _language for the whole experiment.) The participant will select among the native names of the languages, e.g. English, Deutsch, عربي. We currently offer 28 languages, and it would be very easy to add more. If there's demand, we could add another parameter to select a subset of languages to offer to the participant.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "_online1RecruitmentService",
+    availability: "now",
+    example: "Prolific",
+    explanation:
+      '_online1RecruitmentService (no default). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
+    type: "categorical",
+    default: "none",
+    categories: "none, Prolific, MTurk, SONA",
+  },
+  {
+    name: "_online1Title",
+    availability: "now",
+    example: "Vision test",
+    explanation:
+      "_online1Title is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants will consider _online1Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online2Description",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online2Description is a (typically long) description of the study, used to recruit new participants. In deciding whether to participate, Prolific members will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. However, several Prolific participants told me that when the pay exceeds $15/hour, the jobs are filled quickly, so they often accept these without reading the study description. So you might want to have your study verify that participants actually satisfy any requirements stated in your description. The EasyEyes _compatibilityXXX parameters may be helpful in this regard. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online2Minutes",
     availability: "now",
     example: "30",
     explanation:
-      "NOT YET IMPLEMENTED. Expected duration, in minutes, in the offer to participants. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
+      "_online2Minutes (no default) is the expected study duration, in minutes, in the offer to each potential participant. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Prolific prticipants have often mentioned selecting one or another of my studies by how interesting it sounds or by its pay rate ($15/hour).",
     type: "numerical",
     default: "30",
     categories: "",
+  },
+  {
+    name: "_online2Participants",
+    availability: "now",
+    example: "20",
+    explanation:
+      "_online2Participants (default 1). Number of people you want to test.",
+    type: "integer",
+    default: "1",
+    categories: "",
+  },
+  {
+    name: "_online2Pay",
+    availability: "now",
+    example: "7.5",
+    explanation:
+      "_online2Pay (no default) specifies the payment (a number) to offer to each participant. The currency is specified by _online2PayCurrency.  The experiment can specify _online2Pay or _online2PayPerHour, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online2PayCurrency",
+    availability: "now",
+    example: "USDollar",
+    explanation:
+      "_online2PayCurrency (default USDollar) specifies the currency of the payment: USDollar, Euro, etc. ",
+    type: "categorical",
+    default: "USDollar",
+    categories: "USDollar, Euro, UKPound",
+  },
+  {
+    name: "_online2PayPerHour",
+    availability: "now",
+    example: "15",
+    explanation:
+      "_online2PayPerHour (no default) specifies the hourly rate (a number) that will determine (with _online2Minutes) the payment to offer to each participant. The currency is specified by _online2PayCurrency. The experiment can specify _online2PayPerHour or _online2Pay, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour), which Prolific computes and displays.",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online2ProlificProjectID",
+    availability: "now",
+    example: "",
+    explanation:
+      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _online2ProlificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _online2ProlificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to switch your Prolific account from pre-Workspace into Workspace mode, but you can never switch it back to pre-Workspace mode. But that's ok as Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online3DeviceKind",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online3DeviceKind is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nMobile\nTablet\nDesktop\nThe parameter value will be a comma-separated list of none to all of: Mobile, Table, Desktop.",
+    type: "multicategorical",
+    default: "Desktop",
+    categories: "Mobile, Table, Desktop",
+  },
+  {
+    name: "_online3PhoneOperatingSystem",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5PhoneOperatingSystem is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nPhone Operating System\nParticipants were asked the following question: What operating system (OS) does your primary mobile phone have?\nAndroid\niOS (iPhone)\nWindows\nOther/Not Applicable\nDon't Know\n\nNOTE: This selector is in the _online3 group because it's important for EasyEyes sound experiments. EasyEyes uses the participant's smartphone to calibrate the loudspeaker of the participant's desktop.\n",
+    type: "multicategorical",
+    default: "",
+    categories: "Android, iOS, Windows, Other, Don't Know",
+  },
+  {
+    name: "_online3RequiredServices",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online2RequiredServices (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
+    type: "multicategorical",
+    default: "",
+    categories: "Audio, Camera, Microphone, Download software",
+  },
+  {
+    name: "_online4ApprovalRate",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5ApprovalRate (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)",
+    type: "text",
+    default: " 0,100",
+    categories: "",
+  },
+  {
+    name: "_online4CustomAllowList",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online4CustomAllowList (no default) is a comma-separated list of Prolific participant IDs. ONLY these participants will be eligible for this study.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online4CustomBlockList",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online4CustomBlockList (no default) is a comma-separated list of Prolific participant IDs who will not be invited to this study.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online4Location",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online4Location is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\nMore\nThe answer can include many countries, which are combined by an OR rule.",
+    type: "categorical",
+    default: "All countries available",
+    categories:
+      "All countries available, USA, UK, Ireland, Germany, France, Spain, Afghanistan, Aland Islands, Albania, Algeria, American Samoa, Andorra, Angola, Anguilla, Antarctica, Antigua and Barbuda, Argentina, Armenia, Aruba, Australia, Austria, Azerbaijan, Bahamas, Bahrain, Bangladesh, Barbados, Belarus, Belgium, Belize, Benin, Bermuda, Bhutan, Bolivia, Bonaire, Bosnia and Herzegovina, Botswana, Bouvet Island, Brazil, British Indian Ocean Territory, Brunei Darussalam, Bulgaria, Burkina Faso, Burundi, Cambodia, Cameroon, Canada, Cape Verde, Cayman Islands, Central African Republic, Chad, Chile, China, Christmas Island, Cocos (Keeling) Islands, Colombia, Comoros, Congo, Congo the Democratic Republic of the, Cook Islands, Costa Rica, Cote d'Ivoire, Croatia, Cuba, Curacao, Cyprus, Czech Republic, Denmark, Djibouti, Dominica, Dominican Republic, Ecuador, Egypt, El Salvador, Equatorial Guinea, Eritrea, Estonia, Ethiopia, Falkland Islands (Malvinas), Faroe Islands, Fiji, Finland, French Guiana, French Polynesia, French Southern Territories, Gabon, Gambia, Georgia, Ghana, Gibraltar, Greece, Greenland, Grenada, Guadeloupe, Guam, Guatemala, Guernsey, Guinea, Guinea-Bissau, Guyana, Haiti, Heard Island and McDonald Islands, Holy See (Vatican City State), Honduras, Hong Kong, Hungary, Iceland, India, Indonesia, Iran, Iraq, Isle of Man, Israel, Italy, Jamaica, Japan, Jersey, Jordan, Kazakhstan, Kenya, Kiribati, Korea, Kuwait, Kyrgyzstan, Lao People's Democratic Republic, Latvia, Lebanon, Lesotho, Liberia, Libya, Liechtenstein, Lithuania, Luxembourg, Macao, Macedonia, Madagascar, Malawi, Malaysia, Maldives, Mali, Malta, Marshall Islands, Martinique, Mauritania, Mauritius, Mayotte, Mexico, Micronesia, Moldova, Monaco, Mongolia, Montenegro, Montserrat, Morocco, Mozambique, Myanmar, Namibia, Nauru, Nepal, Netherlands, New Caledonia, New Zealand, Nicaragua, Niger, Nigeria, Niue, Norfolk Island, Northern Mariana Islands, Norway, Oman, Pakistan, Palau, Palestinian Territory, Panama, Papua New Guinea, Paraguay, Peru, Philippines, Pitcairn, Poland, Portugal, Puerto Rico, Qatar, Reunion, Romania, Russian Federation, Rwanda, Saint Barthelemy, Saint Helena, Saint Kitts and Nevis, Saint Lucia, Saint Martin (French part), Saint Pierre and Miquelon, Saint Vincent and the Grenadines, Samoa, San Marino, Sao Tome and Principe, Saudi Arabia, Senegal, Serbia, Seychelles, Sierra Leone, Singapore, Sint Maarten (Dutch part), Slovakia, Slovenia, Solomon Islands, Somalia, South Africa, South Georgia and the South Sandwich Islands, South Sudan, Sri Lanka, Sudan, Suriname, Svalbard and Jan Mayen, Swaziland, Sweden, Switzerland, Syrian Arab Republic, Taiwan, Tajikistan, Tanzania, Thailand, Timor-Leste, Togo, Tokelau, Tonga, Trinidad and Tobago, Tunisia, Turkey, Turkmenistan, Turks and Caicos Islands, Tuvalu, Uganda, Ukraine, United Arab Emirates, United States Minor Outlying Islands, Uruguay, Uzbekistan, Vanuatu, Venezuela, Bolivarian Republic of, Vietnam, Wallis and Futuna, Western Sahara, Yemen, Zambia, Zimbabwe",
+  },
+  {
+    name: "_online4ParticipantInPreviousStudyExclude",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5ParticipantInPreviousStudyExclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nExclude participants from previous studies\nThis screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online4ParticipantInPreviousStudyInclude",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5ParticipantInPreviousStudyInclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nInclude participants from previous studies\nOnly participants with approved submissions will be included. To add participants whose responses weren't approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.\n\n",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online4Sample",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online4Sample is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution\nHow do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nThe parameter value will be one of: UK, USA, Balanced, Standard\nThe scientist thus chooses a sample of participants: (representative of) USA, (representative of) UK, (50/50 sex) Balanced, or (whoever is available) Standard. Note that Prolific charges more for representative (i.e. US or UK) samples.",
+    type: "categorical",
+    default: "Standard",
+    categories: "UK, USA, Balanced, Standard",
+  },
+  {
+    name: "_online5CochlearImplant",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5CochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Rather not say",
+  },
+  {
+    name: "_online5Dyslexia",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5Dyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
+    type: "multicategorical",
+    default: "",
+    categories: "diagnosed, being diagnosed, suspect, no, not saying",
+  },
+  {
+    name: "_online5HearingDifficulties",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5HearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Rather not say",
+  },
+  {
+    name: "_online5LanguageFirst",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5LanguageFirst (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
+  },
+  {
+    name: "_online5LanguageFluent",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5LanguageFluent (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; most participants are fluent in English.\n",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
+  },
+  {
+    name: "_online5LanguagePrimary",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5LanguagePrimary (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Afrikaans, Albanian, Amharic, Arabic, Armenian, Basque, Belarusian, Bengali, Bulgarian, Burmese, Cantonese, Catalan, Chinese, Croatian, Czech, Danish, Dari, Dutch, Dzongkha, English, Esperanto, Estonian, Faroese, Farsi, Finnish, French, Gaelic, Galician, Georgian, German, Greek, Gujarati, Hakka, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Inuktitut, Italian, Japanese, Khmer, Korean, Kurdish, Laotian, Lappish, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Maltese, Mandarin, Nepali, Norwegian, Papiamento, Pashto, Polish, Portuguese, Punjabi, Romanian, Russian, Scots, Serbian, Slovak, Slovenian, Somali, Spanish, Swahili, Swedish, Tagalog-Filipino, Tajik, Tamil, Telugu, Thai, Tibetan, Tigrinya, Tongan, Turkish, Turkmen, Twi, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Other",
+  },
+  {
+    name: "_online5LanguageRelatedDisorders",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5LanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDo you have any language related disorders?\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "reading difficulty, writing difficulty, other language related disorder, none, not applicable",
+  },
+  {
+    name: "_online5MusicalInstrumentExperience",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5MusicalInstrumentExperience (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nExperience with musical instruments\nParticipants were asked the following question: Do you play a musical instument, if so for how many years?\n\nNo. I don't play a musical instrument\nYes. For 0-1 years.\nYes. For 1-2 years.\nYes. For 2-3 years.\nYes. For 3-4 years.\nYes. For 5+ years.",
+    type: "multicategorical",
+    default: "",
+    categories: "No, 0-1, 1-2, 2-3, 3-4, 5+",
+  },
+  {
+    name: "_online5Vision",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision\nParticipants were asked the following question: Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Rather not say",
+  },
+  {
+    name: "_online5VisionCorrection",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5VisionCorrection (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCorrected vision\nParticipants were asked the following question: I currently use glasses or contact lenses to correct my vision\nI mainly use glasses\nI mainly use contact lenses\nI use both glasses and contact lenses\nI do not use glasses or contact lenses",
+    type: "multicategorical",
+    default: "",
+    categories: "glasses, contacts, both, neither",
+  },
+  {
+    name: "_online5VRExperiences",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5VRExperiences (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nSimulated Experiences\nParticipants were asked the following question: Have you engaged in any of the following simulated experiences before? Choose all that apply:\nVirtual reality\nAugmented reality\nMixed reality\nOther\nNot applicable / rather not say",
+    type: "multicategorical",
+    default: "",
+    categories:
+      "Virtual reality, Augmented reality, Mixed reality, Other, Not applicable",
+  },
+  {
+    name: "_online5VRHeadset",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5VRHeadset (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (ownership)\nParticipants were asked the following question: Do you own a VR (Virtual Reality) headset?\nYes\nNo\nDon't know / other\nNot applicable / rather not say",
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Don't know, Not applicable",
+  },
+  {
+    name: "_online5VRHeadsetUsage",
+    availability: "now",
+    example: "",
+    explanation:
+      "_online5VRHeadsetUsage (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (frequency)\nParticipants were asked the following question: In a given month, how frequently do you use a VR headset?\n0 times\n1-5 times\n6-10 times\n11-15 times\nmore than 15 times\nNot applicable / rather not say",
+    type: "multicategorical",
+    default: "",
+    categories: "0، 1-5، 6-10، 11-15, more than 15, Not applicable",
   },
   {
     name: "_participantIDGetBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      "MIGHT CHANGE TO: _requestEasyEyesIDBool\nMulti-session experiments require a way to link a participant's several sessions. When _participantIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID. If EasyEyes cannot get an approved EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
+      "Multi-session experiments require a way to link a participant's several sessions. When _participantIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID, or type in any ASCII alphanumeric string without whitespace to use as their EasyEyesID. If EasyEyes cannot get an EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -295,78 +632,38 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "MIGHT CHANGE TO: _requestEasyEyesIDSaveToFileBool\nEasyEyes always saves an EasyEyesID cookie in browser local storage (which can get lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantIDGetBool above.",
+      "EasyEyes always saves an EasyEyesID cookie in browser local storage (which can be lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantIDGetBool above.",
     type: "boolean",
     default: "FALSE",
     categories: "",
-  },
-  {
-    name: "_participantPay",
-    availability: "now",
-    example: "7.5",
-    explanation:
-      "NOT YET IMPLEMENTED. Payment to offer to each participant. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
-    type: "numerical",
-    default: "7.5",
-    categories: "",
-  },
-  {
-    name: "_participantPayCurrency",
-    availability: "now",
-    example: "USDollar",
-    explanation:
-      "NOT YET IMPLEMENTED. Currency of payment amount: USDollar, Euro, etc. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
-    type: "categorical",
-    default: "USDollar",
-    categories: "USDollar, Euro, UKPound",
   },
   {
     name: "_participantRecruitmentService",
     availability: "now",
     example: "Prolific",
     explanation:
-      'Name of recruitment service: none, Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
+      "Name of the recruitment service to be used: Prolific, SONA, MTurk. Only Prolific is currently available.  The key idea is two URLs that carry URL query parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. \nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nWe hope to add more recruitment services (especially MTurk and SONA). Right now we are focused on enhancing integration with Prolific, so as much as possible is specified in the experiment table, minimizing the required manual interaction with the Prolific web site.\nThe leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "categorical",
-    default: "none",
-    categories: "none, Prolific, MTurk, SONA",
-  },
-  {
-    name: "_participantRecruitmentServiceAccount",
-    availability: "now",
-    example: "123ABC",
-    explanation:
-      "NOT YET IMPLEMENTED. Account number. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
-    type: "text",
     default: "",
-    categories: "",
-  },
-  {
-    name: "_participantsHowMany",
-    availability: "now",
-    example: "20",
-    explanation:
-      "NOT YET IMPLEMENTED. Number of people you want to test. The leading underscore makes the pre-processor copy the value from the first condition to the rest, which must be empty.",
-    type: "integer",
-    default: "1",
-    categories: "",
+    categories: "Prolific",
   },
   {
     name: "_pavloviaPreferRunningModeBool",
     availability: "now",
     example: "FALSE",
     explanation:
-      "Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, and cannot be deployed to anywhere else. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can deploy to anyone. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. For most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. If your experiment is already in RUNNING mode you can still convert to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
+      "NEW EXPLATION. Pavlovia offers two modes (RUNNING and PILOTING) for running your study. Remote data collection requires RUNNING mode. PILOTING mode is meant for checking and debugging and runs only from the Pavlovia console on the scientist's computer. The only advantage of the PILOTING mode is that it's always free. Unless your institution has a Pavlovia site license, RUNNING mode costs 20 pence per participant, and requires assigning tokens (money) in advance to each experiment. (Setting _compileAsNewExperiment=FALSE allows you to request that EasyEyes keep reusing the same experiment name, as you compile new versions, so you can assign tokens once to the experiment, when you begin testing, instead of before each compile.) Thus scientists with a site license will always prefer RUNNING mode. Without that license, scientists can save money by using PILOTING mode during development, and switch to RUNNING mode to test remote participants. _pavloviaPreferRunningModeBool allows you to express your preference. With an institutional site license, you'll always want the default TRUE. Without an institutional site license, you can save money by setting _pavloviaPreferRunningModeBool=FALSE during development, and TRUE for the actual remote testing. Without a site license, if you don't mind the 20 p expense, you can use RUNNING mode throughout (use the default _pavloviaPreferRunningModeBool=TRUE), and set _compileAsNewExperiment=FALSE to minimize the frequency at which you must assign tokens to the experiment.\n\nOLD EXPLANATION. Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, which prevents remote testing. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can send to your online participants. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. Thus, for most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. (Pavlovia has no API by which EasyEyes could do this for you.) If your experiment is already in RUNNING mode you can still switch to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
     type: "boolean",
     default: "TRUE",
     categories: "",
   },
   {
-    name: "_prolificEligibilityRequirements",
+    name: "_prolificWebToken",
     availability: "now",
     example: "",
     explanation:
-      "NOT YET IMPLEMENTED. This Prolific page shows some of their prescreening options: \nhttps://researcher-help.prolific.co/hc/en-gb/articles/360009221093-How-do-I-use-Prolific-s-demographic-prescreening-\nThe Prolific API is still in the beta stage of development. To specify eligibility requirements through the API, they say to contact Prolific at integrations@prolific.co. We have written to Prolific and we will enhance this when they tell us how to. https://prolificapi.docs.apiary.io/",
-    type: "text",
+      "TEMPORARY. Confidential token from Prolific that authenticates the user. This is a security risk because any having this token can access all your data on Prolific. This will soon be replaced by a more secure scheme.",
+    type: "",
     default: "",
     categories: "",
   },
@@ -375,20 +672,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _prolificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _prolificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, you can switch your Prolific  from pre-Workspace into Workspace mode, but you can never switch it back to pre-Workspace mode.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
+      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _prolificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _prolificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to switch your Prolific account from pre-Workspace into Workspace mode, but you can never switch it back to pre-Workspace mode. But that's ok as Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
     type: "text",
     default: "",
     categories: "",
-  },
-  {
-    name: "_prolificStudyType",
-    availability: "now",
-    example: "US_REP_SAMPLE",
-    explanation:
-      "NOT YET IMPLEMENTED. Can be UK_REP_SAMPLE, US_REP_SAMPLE, or SINGLE. This is a field in the Prolific API for recruiting participants. There are two types of study:\n• Representative sample: UK_REP_SAMPLE or US_REP_SAMPLE\n• Normal study: SINGLE",
-    type: "categorical",
-    default: "US_REP_SAMPLE",
-    categories: "UK_REP_SAMPLE, US_REP_SAMPLE, SINGLE",
   },
   {
     name: "_requestEasyEyesIDBool",
@@ -415,7 +702,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row. Alphabetization is not checked. This ignores a row; to ignore a column see conditionEnabledBool.",
+      "An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row regardless of where it appears in the alphabetic sequency of parameter names. This ignores a row; to ignore a column see conditionEnabledBool.",
     type: "",
     default: "",
     categories: "",
@@ -455,7 +742,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calbrateFrameRateUnderStressBool TRUE (default FALSE) to ask the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
+      "Set calibrateFrameRateUnderStressBool TRUE (default FALSE) to ask the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -726,7 +1013,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Sloan.woff2",
     explanation:
-      'font specifies the font for the target and for reading. How you specify it depends on the chosen fontSource:\n\nfile: font is the filename (including the extension: woff2, woff, otf, ttf, or svg) of a font file in your EasyEyes Resources:Fonts folder in your Pavlovia account. Web font experts strongly recommend that you use the WOFF2 format, if you have it, instead of any other, because it\'s the smallest, by far (half of OTF), for fast download, and is supported by all modern browsers. The compiler will download the font file from your Fonts folder to your temporary local Experiment folder, which is then uploaded to a new Pavlovlia repo for your experiment.  (The list of allowed font types is copied from the Mozilla documentation of the @font-face command. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  font is the filename (without extension) of a font file provided by the free Google Font server. \n\nCOMING SOON: server: font is a URL pointing to the desired font on a font server. For example, many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". \n\nbrowser: The experiment will pass the font preference string that you place in font to the participant\'s browser and accept whatever the browser provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "fontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nEasyEyes preloads all fonts. At the beginning of the experimen, EasyEyes preloads all needed fonts, for the whole experiment (all conditions), so, after preload, the experiment runs with no font-loading delay and no need for internet, except to save data at the end. ',
+      'font specifies the font for the target and for reading. How you specify it depends on the chosen fontSource:\n\nfile: font is the filename (including the extension: .woff2, .woff, .otf, or .ttf) of a font file in your EasyEyes Resources:Fonts folder in your Pavlovia account. Web font experts strongly recommend that you use the WOFF2 format, if you have it, instead of any other, because it\'s the smallest, by far (half of OTF), for fast download, and is supported by all modern browsers. The compiler will download the font file from your Fonts folder to your temporary local Experiment folder, which is then uploaded to a new Pavlovlia repo for your experiment.  (The list of allowed font types is copied from the Mozilla documentation of the @font-face command. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  font is the filename (without extension) of a font file provided by the free Google Font server. \n\nCOMING SOON: server: font is a URL pointing to the desired font on a font server. For example, many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". \n\nbrowser: The experiment will pass the font preference string that you place in font to the participant\'s browser and accept whatever the browser provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "fontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nEasyEyes preloads all fonts. At the beginning of the experimen, EasyEyes preloads all needed fonts, for the whole experiment (all conditions), so, after preload, the experiment runs with no font-loading delay and no need for internet, except to save data at the end. ',
     type: "text",
     default: "Roboto Mono",
     categories: "",
@@ -856,7 +1143,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Georgia",
     explanation:
-      'instructionFont (default empty string) sets the font used to display instructions to the participant. The font parameter applies to the target and stimulus text. instructionFont does the same thing for the instructional text. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \ngoogle: instructionFont is a filename (including extension) of a font on the Google Fonts server.\nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Adobe. ("server" support is coming.)\nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
+      'instructionFont (default empty string) sets the font used to display instructions to the participant. The font parameter applies to the target and stimulus text. instructionFont does the same thing for the instructional text. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension .woff2, .woff, .otf, or .ttf) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \ngoogle: instructionFont is a filename (including extension) of a font on the Google Fonts server.\nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Adobe. ("server" support is coming.)\nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
     type: "text",
     default: "Verdana",
     categories: "",
@@ -1156,7 +1443,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute an HDR movie. A one-frame movie will display a static image for the specified targetDurationSec. movieComputeJS is used if and only if the targetKind is movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box. The program must define and fill the “movieNit” array. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. \n\nxyDeg is a 2*width*height float array, which provides the exact x,y visual coordinate of each screen pixel in movieRectPx. \nxDeg and yDeg are float vectors, which provide approximate visual coordinates of the screen pixels in movieRectPx. \nTo compute a (possibly one-frame) movie as a visual stimulus, we usually need the visual coordinate of each pixel. EasyEyes provides the width*height*2 array xyDeg[i,j,k], where each 2-number element (indexed by k) is the x,y position in deg of pixel i,j. Use of the xyDeg array does not allow speed up by computational separation of x and y, so you may prefer to use the separable approximation provided by the width-long vector xDeg and height-long vector yDeg, which provide approximate visual coordinates of the pixels in movieRectPx. (Note: xyDeg takes time and space for EasyEyes to compute, and not all movieComputeJS programs need it, so EasyEyes skips making xyDeg if the string  "xyDeg" is not found in the movieComputeJS file.)\n\nEXAMPLE: movieComputeJS might contain the filename "VerticalGrating.js", and that file might contain:\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length).fill(0)\n        .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n        gx.push(\n                Math.exp(-((x-targetEccentrictyXDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nfor (const y of yDeg) {\n        gy.push(\n                Math.exp(-((y-targetEccentrictyYDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n        fx[i]=gx[i]*Math.sin(\n                2*Math.PI*((xDeg[i]-targetEccentrictyXDeg)*targetCyclePerDeg + targetPhase/360)\n        )\n}\nfor (j = 0; j < yDeg.length; j++) {\n        for (i = 0; i < xDeg.length; i++) {\n                imageNit[i][j] = (255/2) * (1 + targetContrast * gy[j] * fx[i]);\n        }\n}',
+      'movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute an HDR movie. A one-frame movie will display a static image for the specified targetDurationSec. movieComputeJS is used if and only if the targetKind is movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box. The program must define and fill the “movieNit” array. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. When EasyEyes reads your compute js file, it processes the list of argument in the function definition. You can include any of the INPUT PARAMETERS defined this GLOSSARY in your list of arguments. At runtime, EasyEyes will retrieve their values and provide whichever input parameters your code specifies.\n\nTIMING: Each movie trial reports timing data in the CSV results file. Each movie trial, computes a movie by first running the scientist\'s movieComputeJS and then passing it through the ffMPEG encoder. Here are some results using tiltedFlickeringGrating.js on Chrome on a MacBook Pro (13-inch, M1, 2020), asking ffMPEG to use the avc1 : libx264 codec. Total prep time (watching the wait icon) grows linearly with the product of pixels per frame and number of frames. \ntimeSec = 1 + MPix*frames/4\nwhere timeSec is the prep time in seconds, MPix means a mega pixel, i.e. one million pixels, and frames is the number of frames in the movie. 25% of this is the runtime of the tiltedFlickeringGrating.js, and 75% is ffMPEG. The formula for just ffMPEG is\nffMpegSec = 0.7 + MPix*frames/6\nThe 6 MPix/s rate seems fine. The fixed 0.7 s overhead is surprising. We don\'t yet know what it\'s doing during that time.\n\nTIMING DATA IN CSV FILE, for each trial\ncomputeMovieArraySec, e.g. 1.1. The time (in sec) spent in the scientist’s movie.js to prepare compute the movie for this trial.\ncomputeFfmpegSec, e.g. 2.1, The time (in sec) spent in ffMPEG to encode the movie for this trial\ncomputeTotalSec, e.g. 3.2, Total time (in sec) preparing the movie for this trial.\ncomputePixels, e.g., 1000000, The number of pixels in each frame.\ncomputeFrames, e.g. 10, The number of frames in the movie.\ncomputeCodec is the name is of the codec, different for Chrome and Safari.\n\n(NOT UP TO DATE) ADVICE ON HOW TO WRITE YOUR JavaScript MOVIE ROUTINE\nxyDeg is a 2*width*height float array, which provides the exact x,y visual coordinate of each screen pixel in movieRectPx. \nxDeg and yDeg are float vectors, which provide approximate visual coordinates of the screen pixels in movieRectPx. \nTo compute a (possibly one-frame) movie as a visual stimulus, we usually need the visual coordinate of each pixel. EasyEyes provides the width*height*2 array xyDeg[i,j,k], where each 2-number element (indexed by k) is the x,y position in deg of pixel i,j. Use of the xyDeg array does not allow speed up by computational separation of x and y, so you may prefer to use the separable approximation provided by the width-long vector xDeg and height-long vector yDeg, which provide approximate visual coordinates of the pixels in movieRectPx. (Note: xyDeg takes time and space for EasyEyes to compute, and not all movieComputeJS programs need it, so EasyEyes skips making xyDeg if the string  "xyDeg" is not found in the movieComputeJS file.)\n\nEXAMPLE: movieComputeJS might contain the filename "VerticalGrating.js", and that file might contain:\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length).fill(0)\n        .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n        gx.push(\n                Math.exp(-((x-targetEccentrictyXDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nfor (const y of yDeg) {\n        gy.push(\n                Math.exp(-((y-targetEccentrictyYDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n        fx[i]=gx[i]*Math.sin(\n                2*Math.PI*((xDeg[i]-targetEccentrictyXDeg)*targetCyclePerDeg + targetPhase/360)\n        )\n}\nfor (j = 0; j < yDeg.length; j++) {\n        for (i = 0; i < xDeg.length; i++) {\n                imageNit[i][j] = (255/2) * (1 + targetContrast * gy[j] * fx[i]);\n        }\n}',
     type: "text",
     default: "",
     categories: "",
@@ -1217,6 +1504,36 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "0",
     explanation:
       "movieTargetDelaySec (default is 0) specified the target delay (positive or negative) relative to being centered in the movie duration movieSec.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
+    name: "needScreenHeightUpToDeg",
+    availability: "now",
+    example: "30",
+    explanation:
+      "needScreenHeightUpToDeg (default 0) is used in the initial compatibility test at the beginning of the experiment to make sure the screen has enough pixels (resolution), and, again NOT YET IMPLEMENTED, at the beginning of each block, places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "needScreenWidthUpToDeg",
+    availability: "now",
+    example: "30",
+    explanation:
+      "needScreenWidthUpToDeg (default 0) is used in the initial compatibility test at the beginning of the experiment to make sure the screen has enough pixels (resolution), and, again, NOT YET IMPLEMENTED at the beginning of each block, to place an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px compatibility requirement before the experiment begins.",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "needTargetSizeDownToDeg",
+    availability: "now",
+    example: "0.05",
+    explanation:
+      "needTargetSizeDownToDeg (default 0.1 deg) is used (with targetMinimumPix) in the initial compatibility test at the beginning of the experiment to make sure the screen has enough pixels (resolution), and, again, NOT YET IMPLEMENTED at the beginning of each block, to place a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses targetMinimumPix. Besides helping to set viewing distance block by block (EasyEyes imposes equal viewing distance across conditions in a block), the viewingDistanceSmallXXX and viewingDistanceLargeXXX parameters are also combined across all conditions in the experiment to require an adequate screen width and height (in pixels) in the initial compatibility check that determines whether the experiment will begin.\n\nEasyEyes will require sufficient screen width, in pixels, if and only if at least one block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenWidthDeg. \nSimilarly, a sufficient screen height, in pixels, is required if and only if, some block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenHeightDeg. \n\nTo compute minimum screen size for the experiment, first we combine values in deg across conditions in each block: minTargetSizeDeg is min of viewingDistanceLargeEnoughtoAllowTargetSizeDeg across conditions, minScreenHeightDeg is max of viewingDistanceSmallEnoughToAllowScreenHeightDeg across conditions, and minScreenWidthDeg is max of viewingDistanceSmallEnoughToAllowScreenWidthDeg across conditions. From these variables, for each block, without knowing the viewing distance, we then express the minimum screen height (and width) in pixels as a multiple of the min target size in pixels,\nscreenHeightToTargetRatio=tand(0.5\\*minScreenHeightDeg) / tand(0.5\\*minSizeDeg)\nand similarly for screenWidthToTargetRatio. Then, for each condition, we multiply by the input parameter **targetMinPx** to get minimum screen width and height in pixels for that condition. The min height for the experiment is the max of min height across all conditions, and similarly for min width.\n",
     type: "numerical",
     default: "0",
     categories: "",
@@ -1616,7 +1933,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "showCharacterSetBoundingBoxBool shows the bounding box of the whole fontCharacterSet.",
+      "showCharacterSetBoundingBoxBool displays the bounding box of the whole fontCharacterSet.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1704,17 +2021,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "showFPSBool",
     availability: "now",
-    example: "TRUE",
-    explanation: "Show the frame rate in Hz. OBSOLETE",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "showFrameRateBool",
-    availability: "now",
-    example: "TRUE",
-    explanation: "Show the frame rate in Hz. OBSOLETE",
+    example: "",
+    explanation: "Obsolete, but EasyEyes crashes if we remove it.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2144,7 +2452,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "IMPORTANT: Currently targetSafetyMarginSec only affects the after-target delay, from target offset to response screen onset. The participant cannot respond during that delay. targetSafetyMarginSec has no effect on the before-target delay. Use markingOffsetBeforeTargetOnsetSecs to control the delay between clicking the crosshair and display of the target.\n****************************\nEasyEyes guarantees a blank time of targetSafetyMarginSec before and after the target presentation to minimize forward and backward masking of the target by instructions and other non-stimulus elements, including the characterSet and nudger. \n     OFFSET: After target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the characterSet. (Nudging isn't allowed until after the participant responds.)\n\nNOT YET IMPLEMENTED:\n     ONSET: Since target onset is almost immediately after trial initiation, initiation of a trial is disabled until targetSafetyMarginSec has passed since the nudger and instructions were erased. \n     Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to characterSet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves from the response characterSet to the crosshair, the instruction contrast will initally be 1 when the cursor is at the characterSet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). ",
+      "IMPORTANT: At the moment, only the OFFSET portion of this parameter is implemented. IMPORTANT: Currently targetSafetyMarginSec only affects the after-target delay, from target offset to response screen onset. The participant cannot respond during that delay. targetSafetyMarginSec has no effect on the before-target delay. Use markingOffsetBeforeTargetOnsetSecs to control the delay between clicking the crosshair and display of the target.\n****************************\nEasyEyes guarantees a blank time of targetSafetyMarginSec before and after the target presentation to minimize forward and backward masking of the target by instructions and other non-stimulus elements, including the characterSet and nudger. \n     OFFSET: After target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the characterSet. (Nudging isn't allowed until after the participant responds.)\n\nNOT YET IMPLEMENTED:\n     ONSET: Since target onset is almost immediately after trial initiation, initiation of a trial is disabled until targetSafetyMarginSec has passed since the nudger and instructions were erased. \n     Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to characterSet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves from the response characterSet to the crosshair, the instruction contrast will initally be 1 when the cursor is at the characterSet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). ",
     type: "numerical",
     default: "0.7",
     categories: "",
@@ -2460,9 +2768,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "viewingDistanceLargeEnoughToAllowTargetSizeDeg",
     availability: "now",
-    example: "0.02",
+    example: "",
     explanation:
-      "NOT YET IMPLEMENTED. viewingDistanceLargeEnoughToAllowTargetSizeDeg (default 0.1 deg) places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix.",
+      "CURRENTLY USED SOLELY TO DETERMINE REQUIRED SCREEN SIZE FOR COMPATIBILITY. viewingDistanceLargeEnoughToAllowTargetSizeDeg (default 0.1 deg) places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix. Besides helping to set viewing distance block by block (EasyEyes imposes equal viewing distance across conditions in a block), the viewingDistanceSmallXXX and viewingDistanceLargeXXX parameters are also combined across all conditions in the experiment to require an adequate screen width and height (in pixels) in the initial compatibility check that determines whether the experiment will begin.\n\nEasyEyes will require sufficient screen width, in pixels, if and only if at least one block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenWidthDeg. \nSimilarly, a sufficient screen height, in pixels, is required if and only if, some block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenHeightDeg. \n\nTo compute minimum screen size for the experiment, first we combine values in deg across conditions in each block: minTargetSizeDeg is min of viewingDistanceLargeEnoughtoAllowTargetSizeDeg across conditions, minScreenHeightDeg is max of viewingDistanceSmallEnoughToAllowScreenHeightDeg across conditions, and minScreenWidthDeg is max of viewingDistanceSmallEnoughToAllowScreenWidthDeg across conditions. From these variables, for each block, without knowing the viewing distance, we then express the minimum screen height (and width) in pixels as a multiple of the min target size in pixels,\nscreenHeightToTargetRatio=tand(0.5\\*minScreenHeightDeg) / tand(0.5\\*minSizeDeg)\nand similarly for screenWidthToTargetRatio. Then, for each condition, we multiply by the input parameter **targetMinPx** to get minimum screen width and height in pixels for that condition. The min height for the experiment is the max of min height across all conditions, and similarly for min width.\n",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2482,7 +2790,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "NOT YET IMPLEMENTED. viewingDistanceSmallEnoughToAllowScreenHeightDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.",
+      "CURRENTLY USED SOLELY TO DETERMINE REQUIRED SCREEN SIZE FOR COMPATIBILITY. viewingDistanceSmallEnoughToAllowScreenHeightDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.",
     type: "numerical",
     default: "",
     categories: "",
@@ -2492,7 +2800,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "NOT YET IMPLEMENTED. viewingDistanceSmallEnoughToAllowScreenWidthDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px compatibility requirement before the experiment begins.",
+      "CURRENTLY USED SOLELY TO DETERMINE REQUIRED SCREEN SIZE FOR COMPATIBILITY. viewingDistanceSmallEnoughToAllowScreenWidthDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px compatibility requirement before the experiment begins.",
     type: "numerical",
     default: "",
     categories: "",
