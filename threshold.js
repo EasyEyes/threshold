@@ -124,6 +124,7 @@ import {
   soundGainTWR,
   debugBool,
   screenBackground,
+  customInstructionText,
 } from "./components/global.js";
 
 import {
@@ -2287,19 +2288,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialCounter.setText(trialCounterStr);
       trialCounter.setAutoDraw(true);
 
-      const customInstructions = getCustomInstructionText(
+      customInstructionText.current = getCustomInstructionText(
         "block",
         paramReader,
         status.block
       );
-      if (customInstructions.length) _instructionSetup(customInstructions);
+      if (customInstructionText.current.length)
+        _instructionSetup(customInstructionText.current);
 
       return Scheduler.Event.NEXT;
     };
   }
 
   function initInstructionRoutineEachFrame() {
-    return _instructionRoutineEachFrame;
+    return () => {
+      if (customInstructionText.current.includes("#NONE")) {
+        return Scheduler.Event.NEXT;
+      }
+      return _instructionRoutineEachFrame();
+    };
   }
 
   function initInstructionRoutineEnd() {
@@ -2426,7 +2433,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   function eduInstructionRoutineEachFrame() {
-    return _instructionRoutineEachFrame;
+    return () => {
+      if (customInstructionText.current) {
+        customInstructionText.current = "";
+        return Scheduler.Event.NEXT;
+      }
+      return _instructionRoutineEachFrame();
+    };
   }
 
   function eduInstructionRoutineEnd() {
