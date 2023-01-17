@@ -658,6 +658,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_prolificWebToken",
+    availability: "now",
+    example: "",
+    explanation:
+      "TEMPORARY. Confidential token from Prolific that authenticates the user. This is a security risk because any having this token can access all your data on Prolific. This will soon be replaced by a more secure scheme.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
     name: "_prolificProjectID",
     availability: "now",
     example: "",
@@ -692,7 +702,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row. Alphabetization is not checked. This ignores a row; to ignore a column see conditionEnabledBool.",
+      "An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row regardless of where it appears in the alphabetic sequency of parameter names. This ignores a row; to ignore a column see conditionEnabledBool.",
     type: "",
     default: "",
     categories: "",
@@ -1433,7 +1443,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute an HDR movie. A one-frame movie will display a static image for the specified targetDurationSec. movieComputeJS is used if and only if the targetKind is movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box. The program must define and fill the “movieNit” array. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. \n\nxyDeg is a 2*width*height float array, which provides the exact x,y visual coordinate of each screen pixel in movieRectPx. \nxDeg and yDeg are float vectors, which provide approximate visual coordinates of the screen pixels in movieRectPx. \nTo compute a (possibly one-frame) movie as a visual stimulus, we usually need the visual coordinate of each pixel. EasyEyes provides the width*height*2 array xyDeg[i,j,k], where each 2-number element (indexed by k) is the x,y position in deg of pixel i,j. Use of the xyDeg array does not allow speed up by computational separation of x and y, so you may prefer to use the separable approximation provided by the width-long vector xDeg and height-long vector yDeg, which provide approximate visual coordinates of the pixels in movieRectPx. (Note: xyDeg takes time and space for EasyEyes to compute, and not all movieComputeJS programs need it, so EasyEyes skips making xyDeg if the string  "xyDeg" is not found in the movieComputeJS file.)\n\nEXAMPLE: movieComputeJS might contain the filename "VerticalGrating.js", and that file might contain:\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length).fill(0)\n        .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n        gx.push(\n                Math.exp(-((x-targetEccentrictyXDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nfor (const y of yDeg) {\n        gy.push(\n                Math.exp(-((y-targetEccentrictyYDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n        fx[i]=gx[i]*Math.sin(\n                2*Math.PI*((xDeg[i]-targetEccentrictyXDeg)*targetCyclePerDeg + targetPhase/360)\n        )\n}\nfor (j = 0; j < yDeg.length; j++) {\n        for (i = 0; i < xDeg.length; i++) {\n                imageNit[i][j] = (255/2) * (1 + targetContrast * gy[j] * fx[i]);\n        }\n}',
+      'movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute an HDR movie. A one-frame movie will display a static image for the specified targetDurationSec. movieComputeJS is used if and only if the targetKind is movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box. The program must define and fill the “movieNit” array. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. When EasyEyes reads your compute js file, it processes the list of argument in the function definition. You can include any of the INPUT PARAMETERS defined this GLOSSARY in your list of arguments. At runtime, EasyEyes will retrieve their values and provide whichever input parameters your code specifies.\n\nTIMING: Each movie trial reports timing data in the CSV results file. Each movie trial, computes a movie by first running the scientist\'s movieComputeJS and then passing it through the ffMPEG encoder. Here are some results using tiltedFlickeringGrating.js on Chrome on a MacBook Pro (13-inch, M1, 2020), asking ffMPEG to use the avc1 : libx264 codec. Total prep time (watching the wait icon) grows linearly with the product of pixels per frame and number of frames. \ntimeSec = 1 + MPix*frames/4\nwhere timeSec is the prep time in seconds, MPix means a mega pixel, i.e. one million pixels, and frames is the number of frames in the movie. 25% of this is the runtime of the tiltedFlickeringGrating.js, and 75% is ffMPEG. The formula for just ffMPEG is\nffMpegSec = 0.7 + MPix*frames/6\nThe 6 MPix/s rate seems fine. The fixed 0.7 s overhead is surprising. We don\'t yet know what it\'s doing during that time.\n\nTIMING DATA IN CSV FILE, for each trial\ncomputeMovieArraySec, e.g. 1.1. The time (in sec) spent in the scientist’s movie.js to prepare compute the movie for this trial.\ncomputeFfmpegSec, e.g. 2.1, The time (in sec) spent in ffMPEG to encode the movie for this trial\ncomputeTotalSec, e.g. 3.2, Total time (in sec) preparing the movie for this trial.\ncomputePixels, e.g., 1000000, The number of pixels in each frame.\ncomputeFrames, e.g. 10, The number of frames in the movie.\ncomputeCodec is the name is of the codec, different for Chrome and Safari.\n\n(NOT UP TO DATE) ADVICE ON HOW TO WRITE YOUR JavaScript MOVIE ROUTINE\nxyDeg is a 2*width*height float array, which provides the exact x,y visual coordinate of each screen pixel in movieRectPx. \nxDeg and yDeg are float vectors, which provide approximate visual coordinates of the screen pixels in movieRectPx. \nTo compute a (possibly one-frame) movie as a visual stimulus, we usually need the visual coordinate of each pixel. EasyEyes provides the width*height*2 array xyDeg[i,j,k], where each 2-number element (indexed by k) is the x,y position in deg of pixel i,j. Use of the xyDeg array does not allow speed up by computational separation of x and y, so you may prefer to use the separable approximation provided by the width-long vector xDeg and height-long vector yDeg, which provide approximate visual coordinates of the pixels in movieRectPx. (Note: xyDeg takes time and space for EasyEyes to compute, and not all movieComputeJS programs need it, so EasyEyes skips making xyDeg if the string  "xyDeg" is not found in the movieComputeJS file.)\n\nEXAMPLE: movieComputeJS might contain the filename "VerticalGrating.js", and that file might contain:\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length).fill(0)\n        .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n        gx.push(\n                Math.exp(-((x-targetEccentrictyXDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nfor (const y of yDeg) {\n        gy.push(\n                Math.exp(-((y-targetEccentrictyYDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n        fx[i]=gx[i]*Math.sin(\n                2*Math.PI*((xDeg[i]-targetEccentrictyXDeg)*targetCyclePerDeg + targetPhase/360)\n        )\n}\nfor (j = 0; j < yDeg.length; j++) {\n        for (i = 0; i < xDeg.length; i++) {\n                imageNit[i][j] = (255/2) * (1 + targetContrast * gy[j] * fx[i]);\n        }\n}',
     type: "text",
     default: "",
     categories: "",
@@ -1494,6 +1504,36 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "0",
     explanation:
       "movieTargetDelaySec (default is 0) specified the target delay (positive or negative) relative to being centered in the movie duration movieSec.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
+    name: "needScreenHeightUpToDeg",
+    availability: "now",
+    example: "30",
+    explanation:
+      "needScreenHeightUpToDeg (default 0) is used in the initial compatibility test at the beginning of the experiment to make sure the screen has enough pixels (resolution), and, again NOT YET IMPLEMENTED, at the beginning of each block, places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "needScreenWidthUpToDeg",
+    availability: "now",
+    example: "30",
+    explanation:
+      "needScreenWidthUpToDeg (default 0) is used in the initial compatibility test at the beginning of the experiment to make sure the screen has enough pixels (resolution), and, again, NOT YET IMPLEMENTED at the beginning of each block, to place an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px compatibility requirement before the experiment begins.",
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "needTargetSizeDownToDeg",
+    availability: "now",
+    example: "0.05",
+    explanation:
+      "needTargetSizeDownToDeg (default 0.1 deg) is used (with targetMinimumPix) in the initial compatibility test at the beginning of the experiment to make sure the screen has enough pixels (resolution), and, again, NOT YET IMPLEMENTED at the beginning of each block, to place a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses targetMinimumPix. Besides helping to set viewing distance block by block (EasyEyes imposes equal viewing distance across conditions in a block), the viewingDistanceSmallXXX and viewingDistanceLargeXXX parameters are also combined across all conditions in the experiment to require an adequate screen width and height (in pixels) in the initial compatibility check that determines whether the experiment will begin.\n\nEasyEyes will require sufficient screen width, in pixels, if and only if at least one block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenWidthDeg. \nSimilarly, a sufficient screen height, in pixels, is required if and only if, some block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenHeightDeg. \n\nTo compute minimum screen size for the experiment, first we combine values in deg across conditions in each block: minTargetSizeDeg is min of viewingDistanceLargeEnoughtoAllowTargetSizeDeg across conditions, minScreenHeightDeg is max of viewingDistanceSmallEnoughToAllowScreenHeightDeg across conditions, and minScreenWidthDeg is max of viewingDistanceSmallEnoughToAllowScreenWidthDeg across conditions. From these variables, for each block, without knowing the viewing distance, we then express the minimum screen height (and width) in pixels as a multiple of the min target size in pixels,\nscreenHeightToTargetRatio=tand(0.5\\*minScreenHeightDeg) / tand(0.5\\*minSizeDeg)\nand similarly for screenWidthToTargetRatio. Then, for each condition, we multiply by the input parameter **targetMinPx** to get minimum screen width and height in pixels for that condition. The min height for the experiment is the max of min height across all conditions, and similarly for min width.\n",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2728,7 +2768,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "viewingDistanceLargeEnoughToAllowTargetSizeDeg",
     availability: "now",
-    example: "U",
+    example: "",
     explanation:
       "CURRENTLY USED SOLELY TO DETERMINE REQUIRED SCREEN SIZE FOR COMPATIBILITY. viewingDistanceLargeEnoughToAllowTargetSizeDeg (default 0.1 deg) places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix. Besides helping to set viewing distance block by block (EasyEyes imposes equal viewing distance across conditions in a block), the viewingDistanceSmallXXX and viewingDistanceLargeXXX parameters are also combined across all conditions in the experiment to require an adequate screen width and height (in pixels) in the initial compatibility check that determines whether the experiment will begin.\n\nEasyEyes will require sufficient screen width, in pixels, if and only if at least one block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenWidthDeg. \nSimilarly, a sufficient screen height, in pixels, is required if and only if, some block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenHeightDeg. \n\nTo compute minimum screen size for the experiment, first we combine values in deg across conditions in each block: minTargetSizeDeg is min of viewingDistanceLargeEnoughtoAllowTargetSizeDeg across conditions, minScreenHeightDeg is max of viewingDistanceSmallEnoughToAllowScreenHeightDeg across conditions, and minScreenWidthDeg is max of viewingDistanceSmallEnoughToAllowScreenWidthDeg across conditions. From these variables, for each block, without knowing the viewing distance, we then express the minimum screen height (and width) in pixels as a multiple of the min target size in pixels,\nscreenHeightToTargetRatio=tand(0.5\\*minScreenHeightDeg) / tand(0.5\\*minSizeDeg)\nand similarly for screenWidthToTargetRatio. Then, for each condition, we multiply by the input parameter **targetMinPx** to get minimum screen width and height in pixels for that condition. The min height for the experiment is the max of min height across all conditions, and similarly for min width.\n",
     type: "numerical",
