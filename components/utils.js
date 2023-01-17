@@ -874,3 +874,31 @@ export const duplicateConditionsOfTargetKind = (
   });
   return newConditions;
 };
+
+export const trueCenter = (textStim) => {
+  const bb = textStim.getBoundingBox(true);
+  return [bb.x, bb.y];
+};
+
+export const offsetToTrueCenter = (textStim, nominal = undefined) => {
+  if (typeof nominal === "undefined") nominal = textStim.getPos();
+  const xy = trueCenter(textStim);
+  const offsets = nominal.map((z, i) => z - xy[i]);
+  const shifted = nominal.map((n, i) => n + offsets[i]);
+  return shifted;
+};
+
+export const centerAt = async (textStim, nominalPos) => {
+  let tries = 50;
+  textStim.setPos(nominalPos);
+  while (
+    JSON.stringify(trueCenter(textStim)) !== JSON.stringify(nominalPos) &&
+    tries > 0
+  ) {
+    tries -= 1;
+    textStim.setPos(offsetToTrueCenter(textStim, nominalPos));
+  }
+  // Just in case, we can do no worse than .setPos(nominal)
+  if (JSON.stringify(trueCenter(textStim)) !== JSON.stringify(nominalPos))
+    textStim.setPos(nominalPos);
+};

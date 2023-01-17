@@ -1,4 +1,4 @@
-import * as FFmpeg from "./addons/ffmpeg.min.js";
+//import * as FFmpeg from "./addons/ffmpeg.min.js";
 import { Image } from "image-js";
 import axios from "axios";
 
@@ -13,14 +13,17 @@ import {
 } from "./utils";
 
 import { displayOptions } from "./global";
-export async function generate_image(bitmapArray) {
+export async function generate_image(bitmapArray, psychoJS) {
   let uIntArray = [];
+  let width = bitmapArray.length;
+  let height = bitmapArray[0].length;
+  psychoJS.experiment.addData("computePixels", width * height);
+  psychoJS.experiment.addData("computeFrames", bitmapArray[0][0].length);
+
   for (let t = 0; t < bitmapArray[0][0].length; t++) {
     let i = 0;
     // logger("bitmapArray.length",bitmapArray.length)
     // logger("bitmapArray[0].length",bitmapArray[0].length)
-    let width = bitmapArray.length;
-    let height = bitmapArray[0].length;
     let data = new Uint16Array(width * height * 4);
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -37,14 +40,15 @@ export async function generate_image(bitmapArray) {
     });
     uIntArray.push(image.toBuffer());
   }
-  logger("uIntArray", uIntArray);
+  //logger("uIntArray", uIntArray);
   return uIntArray;
 }
 
-export async function generate_video(imageArray, movieHz) {
-  const { createFFmpeg, fetchFile } = FFmpeg;
+export async function generate_video(imageArray, movieHz, psychoJS) {
+  // const { createFFmpeg, fetchFile } = FFmpeg;
+  const { createFFmpeg } = require("@ffmpeg/ffmpeg");
   const ffmpeg = createFFmpeg({ log: false });
-
+  let computeFfmpegSecStartTime = performance.now();
   RemoteCalibrator.init({ id: "session_022" });
   const browser = RemoteCalibrator.browser.value;
   const isHVC1Supported = MediaSource.isTypeSupported(
@@ -54,9 +58,9 @@ export async function generate_video(imageArray, movieHz) {
     'video/mp4; codecs="avc1.6e0033"'
   );
   await ffmpeg.load();
-  var startTime = performance.now();
-  var uIntArray = [];
-  await generate_image(imageArray).then((data) => (uIntArray = data));
+  // var uIntArray = [];
+  //await generate_image(imageArray).then((data) => (uIntArray = data));
+  let uIntArray = await generate_image(imageArray, psychoJS);
   let countImages = uIntArray.length;
   for (let i = 0; i < countImages; i += 1) {
     var num = `newfile${i}`;
@@ -88,6 +92,7 @@ export async function generate_video(imageArray, movieHz) {
       "yuv444p10le",
       "out.mp4"
     );
+    psychoJS.experiment.addData("computeCodec", "hvc1 : libx265");
   } else if (isAVC1Supported == true) {
     await ffmpeg.run(
       "-pattern_type",
@@ -114,20 +119,31 @@ export async function generate_video(imageArray, movieHz) {
       "yuv444p10le",
       "out.mp4"
     );
+    psychoJS.experiment.addData("computeCodec", "avc1 : libx264");
   } else {
     logger("Both hvc1 and avc1.6e0033 codecs not supported by your browser");
+    psychoJS.experiment.addData("computeCodec", "None");
   }
   const data = ffmpeg.FS("readFile", "out.mp4");
   for (let i = 0; i < countImages; i += 1) {
     var num = `newfile${i}`;
     ffmpeg.FS("unlink", `tmp${num}.png`);
   }
+  ffmpeg.FS("unlink", "out.mp4");
+  await ffmpeg.exit();
   let videoBlob = URL.createObjectURL(
     new Blob([data.buffer], { type: "video/mp4" })
   );
-  var endTime = performance.now();
-  console.log(`Call to generateVideo took ${endTime - startTime} milliseconds`);
-
+  let computeFfmpegSecEndTime = performance.now();
+  console.log(
+    `Call to generateVideo took ${
+      computeFfmpegSecEndTime - computeFfmpegSecStartTime
+    } milliseconds`
+  );
+  psychoJS.experiment.addData(
+    "computeFfmpegSec",
+    computeFfmpegSecEndTime - computeFfmpegSecStartTime
+  );
   return videoBlob;
 }
 const readJS = async (filename) => {
@@ -143,8 +159,11 @@ export async function evaluateJSCode(
   paramReader,
   status,
   displayOptions,
-  targetCharacter
+  targetCharacter,
+  questSuggestedLevel,
+  psychoJS
 ) {
+  let computeMovieArraySecStartTime = performance.now();
   const BC = status.block_condition;
   const movieHz = paramReader.read("movieHz", BC);
   const screenLowerLeft = [
@@ -157,7 +176,7 @@ export async function evaluateJSCode(
   ];
   const filename = paramReader.read("movieComputeJS", BC);
   return readJS(filename).then((response) => {
-    logger("last index", response.lastIndexOf("}"));
+    //logger("last index", response.lastIndexOf("}"));
     var jsCode = response.substring(
       response.indexOf("{") + 1,
       response.lastIndexOf("}")
@@ -169,7 +188,7 @@ export async function evaluateJSCode(
     var parameters_arr = parameters_string.split(",").map(function (item) {
       return item.trim();
     });
-    logger("parameters_arr", parameters_arr);
+    //logger("parameters_arr", parameters_arr);
     var parameters = {};
     parameters["targetCharacter"] = targetCharacter;
     parameters["displayOptions"] = displayOptions;
@@ -180,22 +199,30 @@ export async function evaluateJSCode(
       screenLowerLeft,
       screenUpperRight
     );
+    parameters["questSuggestedLevel"] = questSuggestedLevel;
     for (let index in parameters_arr) {
       if (parameters_arr[index] in parameters) {
-        logger("parameter found", parameters_arr[index]);
+        //logger("parameter found", parameters_arr[index]);
       } else {
-        logger("parameter not found", parameters_arr[index]);
+        //logger("parameter not found", parameters_arr[index]);
         parameters[parameters_arr[index]] = paramReader.read(
           parameters_arr[index],
           BC
         );
       }
     }
-    logger("parameters deconstructed", Object.keys(parameters));
-    var args =
-      "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, isRectInRect,movieRectDeg,movieRectPxContainsRectDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentricityXDeg,targetEccentricityYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
+    //logger("parameters deconstructed", Object.keys(parameters));
+    // var args =
+    //   "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, isRectInRect,movieRectDeg,movieRectPxContainsRectDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentricityXDeg,targetEccentricityYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
     var myFunc = new Function(...Object.keys(parameters), jsCode);
-    var imageNit = myFunc(...Object.values(parameters));
-    return [imageNit, movieHz];
+    var returnedValues = myFunc(...Object.values(parameters));
+    var imageNit = returnedValues[0];
+    var actualStimulusLevel = returnedValues[1];
+    let computeMovieArraySecEndTime = performance.now();
+    psychoJS.experiment.addData(
+      "computeMovieArraySec",
+      computeMovieArraySecEndTime - computeMovieArraySecStartTime
+    );
+    return [imageNit, movieHz, actualStimulusLevel];
   });
 }

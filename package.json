@@ -63,6 +63,8 @@
     "*.{js,css,html,md,ts}": "prettier --write"
   },
   "dependencies": {
+    "@ffmpeg/core": "^0.11.0",
+    "@ffmpeg/ffmpeg": "^0.11.6",
     "arraybuffer-to-audiobuffer": "^0.0.5",
     "axios": "^1.2.2",
     "buffer": "^6.0.3",

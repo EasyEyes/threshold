@@ -1,20 +1,24 @@
 import { isProlificPreviewExperiment } from "./externalServices";
 import { phrases } from "./i18n";
 
-export const checkSystemCompatibility = (
-  compatibleBrowser,
-  deviceBrowser,
-  compatibleBrowserVersionMinimum,
-  deviceBrowserVersion,
-  compatibleDevice,
-  deviceType,
-  compatibleOS,
-  deviceSysFamily,
-  compatibleProcessorCoresMinimum,
-  hardwareConcurrency,
-  computeRandomMHz,
-  Language
-) => {
+export const checkSystemCompatibility = (reader, rc) => {
+  var compatibleBrowser = reader.read("_compatibleBrowser")[0].split(",");
+  var deviceBrowser = rc.browser.value;
+  var compatibleBrowserVersionMinimum = reader.read(
+    "_compatibleBrowserVersionMinimum"
+  )[0];
+  var deviceBrowserVersion = rc.browserVersion.value;
+  var compatibleDevice = reader.read("_compatibleDeviceType")[0].split(",");
+  var deviceType = rc.deviceType.value;
+  var compatibleOS = reader.read("_compatibleOperatingSystem")[0].split(",");
+  var deviceSysFamily = rc.systemFamily.value;
+  var compatibleProcessorCoresMinimum = reader.read(
+    "_compatibleProcessorCoresMinimum"
+  )[0];
+  var hardwareConcurrency = rc.concurrency.value;
+  var computeRandomMHz = rc.computeRandomMHz ? rc.computeRandomMHz.value : 0;
+  var Language = rc.language.value;
+
   if (hardwareConcurrency <= 0)
     hardwareConcurrency = Math.round(2 * computeRandomMHz);
 
@@ -176,7 +180,96 @@ export const checkSystemCompatibility = (
   msg = msg.replace(/OS X/g, "macOS");
   msg = msg.replace(/Microsoft Edge/g, "Edge");
 
+  // add screen size to compatibility test
+  // Get screenWidthPx and screenHeightPx of the participant's screen
+  const screenWidthPx = window.screen.width;
+  const screenHeightPx = window.screen.height;
+  const minScreenWidthPx = [];
+  const minScreenHeightPx = [];
+  // read blocks
+  const nBlocks = Math.max(...reader.read("block", "__ALL_BLOCKS__"));
+  for (let i = 1; i <= nBlocks; i++) {
+    // Define Short names:
+    // compute across all conditions
+    const viewingDistanceLargeEnoughToAllowTargetSizeDeg = reader.read(
+      "viewingDistanceLargeEnoughToAllowTargetSizeDeg",
+      i
+    );
+    const nConditions = viewingDistanceLargeEnoughToAllowTargetSizeDeg.length;
+    const minSizeDeg = Math.min(
+      ...viewingDistanceLargeEnoughToAllowTargetSizeDeg
+    );
+    const minScreenWidthDeg = Math.max(
+      ...reader.read("viewingDistanceSmallEnoughToAllowScreenWidthDeg", i)
+    );
+    const minScreenHeightDeg = Math.max(
+      ...reader.read("viewingDistanceSmallEnoughToAllowScreenHeightDeg", i)
+    );
+
+    const widthPx = [];
+    const heightPx = [];
+    for (let j = 1; j <= nConditions; j++) {
+      const targetMinPx = reader.read("targetMinimumPix", i + "_" + j);
+      const widthFactor =
+        Math.tan((0.5 * minScreenWidthDeg * Math.PI) / 180) /
+        Math.tan((0.5 * minSizeDeg * Math.PI) / 180);
+      const heightFactor =
+        Math.tan((0.5 * minScreenHeightDeg * Math.PI) / 180) /
+        Math.tan((0.5 * minSizeDeg * Math.PI) / 180);
+      widthPx.push(targetMinPx * widthFactor);
+      heightPx.push(targetMinPx * heightFactor);
+    }
+
+    minScreenWidthPx.push(Math.max(...widthPx));
+    minScreenHeightPx.push(Math.max(...heightPx));
+  }
+
+  const minWidthPx = Math.ceil(Math.max(...minScreenWidthPx));
+  const minHeightPx = Math.ceil(Math.max(...minScreenHeightPx));
+
+  // require minimum screen width, or height, or both, and say so
+  const screenSizeMsg = [];
+  if (minWidthPx > 0 && minHeightPx > 0) {
+    // non-zero minimum width and height
+    // Internation phrase EE_compatibileScreenSize - replace 111 with minWidthPx and 222 with minHeightPx
+    const ssMsg = phrases.EE_compatibleScreenSize[Language].replace(
+      /111/g,
+      minWidthPx.toString()
+    ).replace(/222/g, minHeightPx.toString());
+    screenSizeMsg.push(ssMsg + ".");
+    deviceIsCompatibleBool =
+      deviceIsCompatibleBool &&
+      screenWidthPx >= minWidthPx &&
+      screenHeightPx >= minHeightPx;
+  } else if (minWidthPx > 0) {
+    // non-zero minimum width
+    // Internation phrase EE_compatibileScreenWidth - replace 111 with minWidthPx
+    const ssMsg = phrases.EE_compatibleScreenWidth[Language].replace(
+      /111/g,
+      minWidthPx.toString()
+    );
+    screenSizeMsg.push(ssMsg + ".");
+    deviceIsCompatibleBool =
+      deviceIsCompatibleBool && screenWidthPx >= minWidthPx;
+  } else if (minHeightPx > 0) {
+    // non-zero minimum height
+    // Internation phrase EE_compatibileScreenHeight - replace 111 with minHeightPx
+    const ssMsg = phrases.EE_compatibleScreenHeight[Language].replace(
+      /111/g,
+      minHeightPx.toString()
+    );
+    screenSizeMsg.push(ssMsg + ".");
+    deviceIsCompatibleBool =
+      deviceIsCompatibleBool && screenHeightPx >= minHeightPx;
+  }
+
+  const describeScreenSize = phrases.EE_describeScreenSize[Language].replace(
+    /111/g,
+    screenWidthPx.toString()
+  ).replace(/222/g, screenHeightPx.toString());
+  msg += describeScreenSize;
   const describeDevice = msg;
+  compatibilityRequirements.push(...screenSizeMsg);
 
   //create our message
   if (deviceIsCompatibleBool) msg = [phrases.EE_compatible[Language]];
