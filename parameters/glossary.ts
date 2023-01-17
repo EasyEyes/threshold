@@ -249,6 +249,21 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  _language: {
+    name: "_language",
+    availability: "now",
+    type: "categorical",
+    default: "English",
+    categories: [
+      "English,German,French,Spanish,Portuguese,Italian,Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
+    ],
+  },
+  _languageSelectionByParticipantBool: {
+    name: "_languageSelectionByParticipantBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
   _online1RecruitmentService: {
     name: "_online1RecruitmentService",
     availability: "now",
@@ -1011,6 +1026,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  _prolificWebToken: {
+    name: "_prolificWebToken",
+    availability: "now",
+    type: "",
+    default: "",
+  },
   _prolificProjectID: {
     name: "_prolificProjectID",
     availability: "now",
@@ -1514,6 +1535,24 @@ export const GLOSSARY: Glossary = {
   },
   movieTargetDelaySec: {
     name: "movieTargetDelaySec",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+  },
+  needScreenHeightUpToDeg: {
+    name: "needScreenHeightUpToDeg",
+    availability: "now",
+    type: "numerical",
+    default: "",
+  },
+  needScreenWidthUpToDeg: {
+    name: "needScreenWidthUpToDeg",
+    availability: "now",
+    type: "numerical",
+    default: "",
+  },
+  needTargetSizeDownToDeg: {
+    name: "needTargetSizeDownToDeg",
     availability: "now",
     type: "numerical",
     default: "0",
