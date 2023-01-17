@@ -81,6 +81,8 @@ const _loadNameFromSource = (
 //   return name.includes("http") && name.includes("woff");
 // };
 
+// removing the regex to fix a bug about fonts not being displayed on the experiment page
+// https://stackoverflow.com/questions/15230223/css-font-face-not-working-on-chrome
 export const cleanFontName = (name) => {
-  return name.replace(/\./g, "").replace(/ /g, "");
+  return name;
 };
