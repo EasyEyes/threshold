@@ -1,7 +1,7 @@
 //targetKind: sound
 /*
     Example folder structure:
-    
+
         -{NameOfFolder}.zip
             -{NameOfFile1}.wav
             -{NameOfFile2}.wav
@@ -14,6 +14,7 @@
 
 /*
     Example folder structure for targetPhrase - "Ready #CallSign GoTo #Color #Number Now"
+
         -{NameOfFolder}.zip
             -NameOfFolder
                 -Talker1
@@ -66,9 +67,9 @@ export const test = async () => {
   // console.log("userRepoFiles", userRepoFiles) //userRepoFiles.requestedFolders
   console.log("tempAccessToken", tempAccessToken);
   if (!tempAccessToken.t) return;
-  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const [user, resources, prolificToken] = await getUserInfo(tempAccessToken.t);
   console.log("user", user);
-  console.log("resources", resources); //resources.folders
+  console.log("resources", resources); // resources.folders
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     user.projectList,
     "EasyEyesResources"
