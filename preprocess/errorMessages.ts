@@ -156,7 +156,7 @@ export const FONT_FILES_MISSING_WEB = (
   return {
     name: "Font file not found",
     message: `<ul>${htmlList}</ul><br />${parameter} not found in <b>fontSource</b> "google"`,
-    hint: `Are both font source and name correct?`,
+    hint: `Are both font source and name correct, you can browse through Google Fonts (fonts.google.com) to make sure?`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
