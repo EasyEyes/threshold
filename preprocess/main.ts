@@ -89,33 +89,74 @@ export const prepareExperimentFileForThreshold = async (
 
   if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
 
+  const fillCurrentExperiment = (field: string, parameterName: string) => {
+    if (parsed.data.find((i: string[]) => i[0] === parameterName)) {
+      user.currentExperiment[field] = parsed.data.find(
+        (i: string[]) => i[0] === parameterName
+      )?.[1];
+    }
+  };
+
   // ! Recruitment
-  if (
-    parsed.data.find((i: string[]) => i[0] == "_participantRecruitmentService")
-  ) {
-    user.currentExperiment.participantRecruitmentServiceName = parsed.data.find(
-      (i: string[]) => i[0] == "_participantRecruitmentService"
-    )?.[1];
-  }
+  // Remove after all CSVs use the new _online1RecruitmentService named field. Maintaining backward compatibility.
+  fillCurrentExperiment(
+    "participantRecruitmentServiceName",
+    "_participantRecruitmentService"
+  );
+  fillCurrentExperiment(
+    "participantRecruitmentServiceName",
+    "_online1RecruitmentService"
+  );
+
+  fillCurrentExperiment("titleOfStudy", "_online1Title");
+  fillCurrentExperiment("descriptionOfStudy", "_online2Description");
+
+  // Remove after all CSVs use the new _online2Minutes named field. Maintaining backward compatibility.
+  fillCurrentExperiment(
+    "_participantDurationMinutes",
+    "_participantDurationMinutes"
+  );
+  fillCurrentExperiment("_participantDurationMinutes", "_online2Minutes");
+
+  // Remove after all CSVs use the new _online2Participants named field. Maintaining backward compatibility.
+  fillCurrentExperiment("_participantsHowMany", "_participantsHowMany");
+  fillCurrentExperiment("_participantsHowMany", "_online2Participants");
+
+  fillCurrentExperiment("_online5LanguageFluent", "_online5LanguageFluent");
+  fillCurrentExperiment("_online5LanguageFirst", "_online5LanguageFirst");
+  fillCurrentExperiment("_online3DeviceKind", "_online3DeviceKind");
+  fillCurrentExperiment("_online3RequiredServices", "_online3RequiredServices");
+  fillCurrentExperiment("_online2Pay", "_online2Pay");
 
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
   if (
-    parsed.data.find((i: string[]) => i[0] == "_pavloviaPreferRunningModeBool")
+    parsed.data.find((i: string[]) => i[0] === "_pavloviaPreferRunningModeBool")
   ) {
     user.currentExperiment.pavloviaPreferRunningModeBool =
       parsed.data.find(
-        (i: string[]) => i[0] == "_pavloviaPreferRunningModeBool"
-      )?.[1] == "TRUE";
+        (i: string[]) => i[0] === "_pavloviaPreferRunningModeBool"
+      )?.[1] === "TRUE";
   } else {
     user.currentExperiment.pavloviaPreferRunningModeBool = true;
   }
 
   // ! if the prolific account, if any, is in workspace mode or not
-  if (parsed.data.find((i: string[]) => i[0] == "_prolificProjectID")) {
+  // Remove after all CSVs use the new _online2Participants named field. Maintaining backward compatibility.
+  if (parsed.data.find((i: string[]) => i[0] === "_prolificProjectID")) {
     // if there's a project id, the account is in workspace mode
     user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
-      (i: string[]) => i[0] == "_prolificProjectID"
+      (i: string[]) => i[0] === "_prolificProjectID"
+    )?.[1];
+    user.currentExperiment.prolificWorkspaceModeBool = true;
+  } else {
+    user.currentExperiment.prolificWorkspaceModeBool = false;
+  }
+  if (parsed.data.find((i: string[]) => i[0] === "_online2ProlificProjectID")) {
+    // if there's a project id, the account is in workspace mode
+    // ! prolificWorkspaceProjectId
+    user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
+      (i: string[]) => i[0] === "_online2ProlificProjectID"
     )?.[1];
     user.currentExperiment.prolificWorkspaceModeBool = true;
   } else {
