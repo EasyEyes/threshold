@@ -1,7 +1,11 @@
 import { isProlificPreviewExperiment } from "./externalServices";
 import { phrases } from "./i18n";
+// import { rc } from "./global";
 
-export const checkSystemCompatibility = (reader, rc) => {
+export const checkSystemCompatibility = (reader, lang, rc) => {
+  // handle language
+  handleLanguage(lang, rc);
+
   var compatibleBrowser = reader.read("_compatibleBrowser")[0].split(",");
   var deviceBrowser = rc.browser.value;
   var compatibleBrowserVersionMinimum = reader.read(
@@ -280,7 +284,7 @@ export const checkSystemCompatibility = (reader, rc) => {
   if (deviceIsCompatibleBool && isProlificPreviewExperiment())
     msg.push(phrases.EE_incompatibleReturnToProlific[Language]);
 
-  msg.push(`\n [Study URL: ${window.location.toString()} ]`);
+  msg.push(`\n Study URL: ${window.location.toString()} \n`);
   return { msg: msg, proceed: deviceIsCompatibleBool };
 };
 
@@ -318,7 +322,7 @@ const StringOfItems = (items) => {
   return itemString;
 };
 
-export const displayCompatibilityMessage = async (msg, Language) => {
+export const displayCompatibilityMessage = async (msg, reader, rc) => {
   return new Promise(async (resolve) => {
     //message wrapper
     const messageWrapper = document.createElement("div");
@@ -331,43 +335,76 @@ export const displayCompatibilityMessage = async (msg, Language) => {
 
     // //create title msg
     let titleMsg = document.createElement("h3");
-    titleMsg.innerHTML = phrases.EE_compatibilityTitle[Language];
+    titleMsg.innerHTML = phrases.EE_compatibilityTitle[rc.language.value];
+    titleMsg.id = "compatibility-title";
     let titleContainer = document.createElement("div");
-    titleContainer.style.textAlign = "center";
-    titleContainer.style.margin = "20px";
+    titleContainer.style.textAlign = "left";
+    titleContainer.style.marginBottom = "20px";
     titleContainer.appendChild(titleMsg);
     messageWrapper.appendChild(titleContainer);
 
     //create msg items
-
-    // msg.forEach((item) => {
-    //   let elem = document.createElement("span");
-    //   elem.innerHTML = item;
-    //   messageWrapper.appendChild(elem);
-    //   const sp = document.createElement("hr");
-    //   messageWrapper.appendChild(sp);
-    // });
     var displayMsg = "";
     msg.forEach((item) => {
-      // if(item.includes('Study URL'))
-      //   displayMsg+="\n";
       displayMsg += item;
       displayMsg += " ";
     });
     let elem = document.createElement("span");
+    elem.style.textAlign = "left";
     elem.style.whiteSpace = "pre-line";
     elem.innerHTML = displayMsg;
+    elem.id = "compatibility-message";
     messageWrapper.appendChild(elem);
+
+    if (reader.read("_languageSelectionByParticipantBool")[0]) {
+      // create language selection dropdown
+      const languageWrapper = document.createElement("div");
+
+      const LanguageTitle = document.createElement("h3");
+      LanguageTitle.innerHTML = phrases.EE_languageChoose[rc.language.value];
+      LanguageTitle.id = "language-title";
+      LanguageTitle.style.marginTop = "40px";
+      languageWrapper.appendChild(LanguageTitle);
+
+      const languageDropdown = document.createElement("select");
+      languageDropdown.id = "language-dropdown";
+      languageDropdown.style.width = "12rem";
+      languageDropdown.style.backgroundColor = "#ddd";
+      languageDropdown.style.fontWeight = "bold";
+
+      const languages = phrases.EE_languageNameNative;
+      const languageOptions = Object.keys(languages).map((language) => {
+        const option = document.createElement("option");
+        option.value = languages[language];
+        option.innerHTML = languages[language];
+        return option;
+      });
+      languageOptions.forEach((option) => languageDropdown.appendChild(option));
+      languageDropdown.value = languages[rc.language.value];
+
+      languageDropdown.addEventListener("change", () => {
+        const language = languageDropdown.value;
+        const newMsg = checkSystemCompatibility(reader, language, rc);
+        handleNewMessage(
+          newMsg.msg,
+          "compatibility-message",
+          rc.language.value
+        );
+      });
+
+      languageWrapper.appendChild(languageDropdown);
+      messageWrapper.appendChild(languageWrapper);
+    }
 
     //create proceed button
     const buttonWrapper = document.createElement("div");
     buttonWrapper.style.textAlign = "center";
     const proceedButton = document.createElement("button");
     proceedButton.classList.add("form-input-btn");
-    proceedButton.style.width = "7rem";
+    proceedButton.style.width = "fit-content";
     proceedButton.style.margin = "3rem 0";
     proceedButton.id = "procced-btn";
-    proceedButton.innerHTML = "Proceed";
+    proceedButton.innerHTML = phrases.T_proceed[rc.language.value];
     proceedButton.addEventListener("click", () => {
       document.getElementById("root").style.display = "";
       resolve(true);
@@ -381,4 +418,36 @@ export const displayCompatibilityMessage = async (msg, Language) => {
 
 export const hideCompatibilityMessage = () => {
   document.getElementById("msg-container")?.remove();
+};
+
+const handleLanguage = (lang, rc) => {
+  // convert to language code
+  const Languages = phrases.EE_languageNameNative;
+  const languageCode = Object.keys(Languages).find(
+    (key) => Languages[key] === lang
+  );
+
+  // set language code
+  if (languageCode) {
+    rc.newLanguage(languageCode);
+  }
+};
+
+const handleNewMessage = (msg, msgID, lang) => {
+  var displayMsg = "";
+  msg.forEach((item) => {
+    displayMsg += item;
+    displayMsg += " ";
+  });
+  let elem = document.getElementById(msgID);
+  elem.innerHTML = displayMsg;
+
+  let titleElem = document.getElementById("compatibility-title");
+  titleElem.innerHTML = phrases.EE_compatibilityTitle[lang];
+
+  let languageTitleElem = document.getElementById("language-title");
+  languageTitleElem.innerHTML = phrases.EE_languageChoose[lang];
+
+  let proceedButton = document.getElementById("procced-btn");
+  proceedButton.innerHTML = phrases.T_proceed[lang];
 };

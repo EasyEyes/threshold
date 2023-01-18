@@ -396,14 +396,14 @@ const paramReaderInitialized = async (reader) => {
   buildWindowErrorHandling(reader);
 
   // ! check system compatibility
-  const compMsg = checkSystemCompatibility(reader, rc);
-  const proceed = await displayCompatibilityMessage(
-    compMsg["msg"],
-    rc.language.value
+  const compMsg = checkSystemCompatibility(
+    reader,
+    reader.read("_language")[0],
+    rc
   );
+  const proceed = await displayCompatibilityMessage(compMsg["msg"], reader, rc);
 
   hideCompatibilityMessage();
-
   if (proceed && !compMsg["proceed"]) {
     showExperimentEnding();
     return;
