@@ -154,6 +154,7 @@ export const prepareExperimentFileForThreshold = async (
   }
   if (parsed.data.find((i: string[]) => i[0] === "_online2ProlificProjectID")) {
     // if there's a project id, the account is in workspace mode
+    // ! prolificWorkspaceProjectId
     user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
       (i: string[]) => i[0] === "_online2ProlificProjectID"
     )?.[1];

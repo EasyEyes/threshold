@@ -389,7 +389,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_online3DeviceKind is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nMobile\nTablet\nDesktop\nThe parameter value will be a comma-separated list of none to all of: Mobile, Table, Desktop.",
     type: "multicategorical",
     default: "Desktop",
-    categories: "Mobile, Table, Desktop",
+    categories: "mobile, table, desktop",
   },
   {
     name: "_online3PhoneOperatingSystem",
@@ -409,7 +409,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_online2RequiredServices (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
     type: "multicategorical",
     default: "",
-    categories: "Audio, Camera, Microphone, Download software",
+    categories: "audio, camera, microphone, download",
   },
   {
     name: "_online4ApprovalRate",

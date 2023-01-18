@@ -325,7 +325,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "multicategorical",
     default: "Desktop",
-    categories: ["Mobile", "Table", "Desktop"],
+    categories: ["mobile", "table", "desktop"],
   },
   _online3PhoneOperatingSystem: {
     name: "_online3PhoneOperatingSystem",
@@ -339,7 +339,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "multicategorical",
     default: "",
-    categories: ["Audio", "Camera", "Microphone", "Download software"],
+    categories: ["audio", "camera", "microphone", "download"],
   },
   _online4ApprovalRate: {
     name: "_online4ApprovalRate",
