@@ -1,4 +1,3 @@
-import { paramReader } from "../threshold";
 import { switchKind } from "./blockTargetKind";
 import {
   showCharacterSetResponse,
@@ -109,8 +108,8 @@ const pushCharacterSet = (
   extraCharClassName = "",
   targetKind = ""
 ) => {
-  for (let a of ans) {
-    let characterSet = document.createElement("span");
+  for (const a of ans) {
+    const characterSet = document.createElement("span");
 
     if (targetKind == "sound") {
       characterSet.style.fontSize = "1rem";
@@ -181,6 +180,7 @@ const scaleFontSizeToFit = (elem, childrenClass) => {
   // TODO support multidimensional?
   const parent = elem.parentNode;
   const startingWidth = elem.offsetWidth;
+  const maxNonOverlapSizeForFont = 360; // adding this to avoid thinner fonts like pelli to cover the entire window, as their width woud be <<< screen width and loop will increase the font-size.
   const startingSize = window
     .getComputedStyle(elem, null)
     .getPropertyValue("font-size");
@@ -194,7 +194,10 @@ const scaleFontSizeToFit = (elem, childrenClass) => {
       .forEach((e) => (e.style["font-size"] = String(x) + "px"));
   elem.style["overflow"] = "hidden";
   elem.style["white-space"] = "nowrap";
-  while (elem.offsetWidth < containingWidth) {
+  while (
+    elem.offsetWidth < containingWidth &&
+    newSize + unit < maxNonOverlapSizeForFont
+  ) {
     scale(newSize + unit);
     newSize += unit;
   }
