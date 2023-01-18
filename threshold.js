@@ -2303,6 +2303,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function initInstructionRoutineEachFrame() {
     return () => {
       if (customInstructionText.current.includes("#NONE")) {
+        removeProceedButton();
         return Scheduler.Event.NEXT;
       }
       return _instructionRoutineEachFrame();
@@ -2436,6 +2437,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return () => {
       if (customInstructionText.current) {
         customInstructionText.current = "";
+        removeProceedButton();
         return Scheduler.Event.NEXT;
       }
       return _instructionRoutineEachFrame();
