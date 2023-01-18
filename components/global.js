@@ -161,6 +161,8 @@ export const repeatedLettersResponse = Object.seal({
 
 export const instructionFont = { current: undefined };
 
+export const customInstructionText = { current: undefined };
+
 export const tolerances = Object.seal({
   allowed: {
     thresholdAllowedDurationRatio: undefined,
