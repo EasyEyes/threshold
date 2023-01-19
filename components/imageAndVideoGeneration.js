@@ -142,7 +142,7 @@ export async function generate_video(imageArray, movieHz, psychoJS) {
   );
   psychoJS.experiment.addData(
     "computeFfmpegSec",
-    computeFfmpegSecEndTime - computeFfmpegSecStartTime
+    (computeFfmpegSecEndTime - computeFfmpegSecStartTime) / 1000
   );
   return videoBlob;
 }
@@ -221,7 +221,7 @@ export async function evaluateJSCode(
     let computeMovieArraySecEndTime = performance.now();
     psychoJS.experiment.addData(
       "computeMovieArraySec",
-      computeMovieArraySecEndTime - computeMovieArraySecStartTime
+      (computeMovieArraySecEndTime - computeMovieArraySecStartTime) / 1000
     );
     return [imageNit, movieHz, actualStimulusLevel];
   });
