@@ -255,7 +255,10 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "English",
     categories: [
-      "English,German,French,Spanish,Portuguese,Italian,Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
+      "English",
+      "German,French,Spanish,Portuguese",
+      "Italian",
+      "Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
     ],
   },
   _languageSelectionByParticipantBool: {
