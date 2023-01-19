@@ -14,6 +14,7 @@ import {
 
 import { displayOptions } from "./global";
 export async function generate_image(bitmapArray, psychoJS) {
+  let computeImageSecStartTime = performance.now();
   let uIntArray = [];
   let width = bitmapArray.length;
   let height = bitmapArray[0].length;
@@ -40,6 +41,11 @@ export async function generate_image(bitmapArray, psychoJS) {
     });
     uIntArray.push(image.toBuffer());
   }
+  let computeImageSecEndTime = performance.now();
+  psychoJS.experiment.addData(
+    "computeImageSec",
+    (computeImageSecEndTime - computeImageSecStartTime) / 1000
+  );
   //logger("uIntArray", uIntArray);
   return uIntArray;
 }
@@ -48,7 +54,6 @@ export async function generate_video(imageArray, movieHz, psychoJS) {
   // const { createFFmpeg, fetchFile } = FFmpeg;
   const { createFFmpeg } = require("@ffmpeg/ffmpeg");
   const ffmpeg = createFFmpeg({ log: false });
-  let computeFfmpegSecStartTime = performance.now();
   RemoteCalibrator.init({ id: "session_022" });
   const browser = RemoteCalibrator.browser.value;
   const isHVC1Supported = MediaSource.isTypeSupported(
@@ -58,9 +63,8 @@ export async function generate_video(imageArray, movieHz, psychoJS) {
     'video/mp4; codecs="avc1.6e0033"'
   );
   await ffmpeg.load();
-  // var uIntArray = [];
-  //await generate_image(imageArray).then((data) => (uIntArray = data));
   let uIntArray = await generate_image(imageArray, psychoJS);
+  let computeFfmpegSecStartTime = performance.now();
   let countImages = uIntArray.length;
   for (let i = 0; i < countImages; i += 1) {
     var num = `newfile${i}`;
