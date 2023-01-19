@@ -3467,7 +3467,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               let computeTotalSecEndTime = performance.now();
               psychoJS.experiment.addData(
                 "computeTotalSec",
-                computeTotalSecEndTime - computeTotalSecStartTime
+                (computeTotalSecEndTime - computeTotalSecStartTime) / 1000
               );
               document.body.removeChild(loader);
               document.body.removeChild(loaderText);
