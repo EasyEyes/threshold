@@ -279,7 +279,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "English",
     categories:
-      "English, German,French,Spanish,Portuguese, Italian, Romanian,Polish,Russian,Armenian,Finnish,Georgian,Hebrew,Arabic,Urdu,Hindi,Tamil,Malayalam,Telugu,Kannada,Bangla,Indonesian,Simplified Chinese,Traditional Chinese,Japanese,Korean",
+      "English, German, French, español, Portuguese, Italiano, Romanian, Polish, Russian, Armenian, Finnish, Georgian, Hebrew, Arabic, Urdu, Hindi, Tamil, Malayalam, Telugu, Kannada, Bangla, Indonesian, Simplified Chinese, Traditional Chinese, Japanese, Korean",
   },
   {
     name: "_languageSelectionByParticipantBool",
