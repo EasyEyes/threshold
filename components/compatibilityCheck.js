@@ -207,6 +207,12 @@ export const checkSystemCompatibility = (
   // read blocks
   const nBlocks = Math.max(...reader.read("block", "__ALL_BLOCKS__"));
   for (let i = 1; i <= nBlocks; i++) {
+    const conditionEnabled = reader.read("conditionEnabledBool", i);
+    const blockEnabledBool = conditionEnabled.includes(true);
+    if (!blockEnabledBool) {
+      continue;
+    }
+
     // Define Short names:
     // compute across all conditions
     const needTargetSizeDownToDeg = reader.read("needTargetSizeDownToDeg", i);
@@ -222,6 +228,13 @@ export const checkSystemCompatibility = (
     const widthPx = [];
     const heightPx = [];
     for (let j = 1; j <= nConditions; j++) {
+      const conditionEnabledBool = reader.read(
+        "conditionEnabledBool",
+        i + "_" + j
+      );
+      if (!conditionEnabledBool) {
+        continue;
+      }
       const targetMinPx = reader.read("targetMinimumPix", i + "_" + j);
       const widthFactor =
         Math.tan((0.5 * minScreenWidthDeg * Math.PI) / 180) /
@@ -290,13 +303,6 @@ export const checkSystemCompatibility = (
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
   }
 
-  //  if the study is compatible except for screen size, prompt to refresh
-  if (promptRefresh) {
-    screenSizeMsg.push(
-      phrases.EE_compatibleExceptForScreenResolution[Language]
-    );
-  }
-
   const describeScreenSize = phrases.EE_describeScreenSize[Language].replace(
     /111/g,
     screenWidthPx.toString()
@@ -313,6 +319,19 @@ export const checkSystemCompatibility = (
 
   if (deviceIsCompatibleBool && isProlificPreviewExperiment())
     msg.push(phrases.EE_incompatibleReturnToProlific[Language]);
+
+  //  if the study is compatible except for screen size, prompt to refresh
+  if (promptRefresh) {
+    msg.push(
+      phrases.EE_compatibleExceptForScreenResolution[Language].replace(
+        /111/g,
+        screenWidthPx.toString()
+      )
+        .replace(/222/g, screenHeightPx.toString())
+        .replace(/333/g, minWidthPx.toString())
+        .replace(/444/g, minHeightPx.toString())
+    );
+  }
 
   msg.push(`\n Study URL: ${window.location.toString()} \n`);
   return {
