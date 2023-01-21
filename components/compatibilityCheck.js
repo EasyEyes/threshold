@@ -2,9 +2,14 @@ import { isProlificPreviewExperiment } from "./externalServices";
 import { phrases } from "./i18n";
 // import { rc } from "./global";
 
-export const checkSystemCompatibility = (reader, lang, rc) => {
+export const checkSystemCompatibility = (
+  reader,
+  lang,
+  rc,
+  useEnglishNamesForLanguage = true
+) => {
   // handle language
-  handleLanguage(lang, rc);
+  handleLanguage(lang, rc, useEnglishNamesForLanguage);
 
   var compatibleBrowser = reader.read("_compatibleBrowser")[0].split(",");
   var deviceBrowser = rc.browser.value;
@@ -148,9 +153,18 @@ export const checkSystemCompatibility = (reader, lang, rc) => {
     arr[idx] = arr[idx].replace(/ooo/g, StringOfNotItems(compatibleOS));
 
     //Compatible with items connected by OR.
-    arr[idx] = arr[idx].replace(/BBB/g, StringOfItems(compatibleBrowser));
-    arr[idx] = arr[idx].replace(/OOO/g, StringOfItems(compatibleOS));
-    arr[idx] = arr[idx].replace(/DDD/g, StringOfItems(compatibleDevice));
+    arr[idx] = arr[idx].replace(
+      /BBB/g,
+      StringOfItems(compatibleBrowser, rc.language.value)
+    );
+    arr[idx] = arr[idx].replace(
+      /OOO/g,
+      StringOfItems(compatibleOS, rc.language.value)
+    );
+    arr[idx] = arr[idx].replace(
+      /DDD/g,
+      StringOfItems(compatibleDevice, rc.language.value)
+    );
     arr[idx] = arr[idx].replace(
       /111/g,
       compatibleBrowserVersionMinimum.toString()
@@ -195,19 +209,14 @@ export const checkSystemCompatibility = (reader, lang, rc) => {
   for (let i = 1; i <= nBlocks; i++) {
     // Define Short names:
     // compute across all conditions
-    const viewingDistanceLargeEnoughToAllowTargetSizeDeg = reader.read(
-      "viewingDistanceLargeEnoughToAllowTargetSizeDeg",
-      i
-    );
-    const nConditions = viewingDistanceLargeEnoughToAllowTargetSizeDeg.length;
-    const minSizeDeg = Math.min(
-      ...viewingDistanceLargeEnoughToAllowTargetSizeDeg
-    );
+    const needTargetSizeDownToDeg = reader.read("needTargetSizeDownToDeg", i);
+    const nConditions = needTargetSizeDownToDeg.length;
+    const minSizeDeg = Math.min(...needTargetSizeDownToDeg);
     const minScreenWidthDeg = Math.max(
-      ...reader.read("viewingDistanceSmallEnoughToAllowScreenWidthDeg", i)
+      ...reader.read("needScreenWidthUpToDeg", i)
     );
     const minScreenHeightDeg = Math.max(
-      ...reader.read("viewingDistanceSmallEnoughToAllowScreenHeightDeg", i)
+      ...reader.read("needScreenHeightUpToDeg", i)
     );
 
     const widthPx = [];
@@ -233,6 +242,7 @@ export const checkSystemCompatibility = (reader, lang, rc) => {
 
   // require minimum screen width, or height, or both, and say so
   const screenSizeMsg = [];
+  let promptRefresh = false;
   if (minWidthPx > 0 && minHeightPx > 0) {
     // non-zero minimum width and height
     // Internation phrase EE_compatibileScreenSize - replace 111 with minWidthPx and 222 with minHeightPx
@@ -241,10 +251,14 @@ export const checkSystemCompatibility = (reader, lang, rc) => {
       minWidthPx.toString()
     ).replace(/222/g, minHeightPx.toString());
     screenSizeMsg.push(ssMsg + ".");
-    deviceIsCompatibleBool =
-      deviceIsCompatibleBool &&
-      screenWidthPx >= minWidthPx &&
-      screenHeightPx >= minHeightPx;
+    const screenSizeCompatible =
+      screenWidthPx >= minWidthPx && screenHeightPx >= minHeightPx;
+
+    if (deviceIsCompatibleBool && !screenSizeCompatible) {
+      promptRefresh = true;
+    }
+
+    deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
   } else if (minWidthPx > 0) {
     // non-zero minimum width
     // Internation phrase EE_compatibileScreenWidth - replace 111 with minWidthPx
@@ -253,8 +267,13 @@ export const checkSystemCompatibility = (reader, lang, rc) => {
       minWidthPx.toString()
     );
     screenSizeMsg.push(ssMsg + ".");
-    deviceIsCompatibleBool =
-      deviceIsCompatibleBool && screenWidthPx >= minWidthPx;
+
+    const screenSizeCompatible = screenWidthPx >= minWidthPx;
+    if (deviceIsCompatibleBool && !screenSizeCompatible) {
+      promptRefresh = true;
+    }
+
+    deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
   } else if (minHeightPx > 0) {
     // non-zero minimum height
     // Internation phrase EE_compatibileScreenHeight - replace 111 with minHeightPx
@@ -263,8 +282,19 @@ export const checkSystemCompatibility = (reader, lang, rc) => {
       minHeightPx.toString()
     );
     screenSizeMsg.push(ssMsg + ".");
-    deviceIsCompatibleBool =
-      deviceIsCompatibleBool && screenHeightPx >= minHeightPx;
+    const screenSizeCompatible = screenHeightPx >= minHeightPx;
+    if (deviceIsCompatibleBool && !screenSizeCompatible) {
+      promptRefresh = true;
+    }
+
+    deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
+  }
+
+  //  if the study is compatible except for screen size, prompt to refresh
+  if (promptRefresh) {
+    screenSizeMsg.push(
+      phrases.EE_compatibleExceptForScreenResolution[Language]
+    );
   }
 
   const describeScreenSize = phrases.EE_describeScreenSize[Language].replace(
@@ -285,7 +315,11 @@ export const checkSystemCompatibility = (reader, lang, rc) => {
     msg.push(phrases.EE_incompatibleReturnToProlific[Language]);
 
   msg.push(`\n Study URL: ${window.location.toString()} \n`);
-  return { msg: msg, proceed: deviceIsCompatibleBool };
+  return {
+    msg: msg,
+    proceed: deviceIsCompatibleBool,
+    promptRefresh: promptRefresh,
+  };
 };
 
 const StringOfNotItems = (items) => {
@@ -305,9 +339,11 @@ const StringOfNotItems = (items) => {
   return notItemString;
 };
 
-const StringOfItems = (items) => {
+const StringOfItems = (items, Language) => {
   //Listing items that we are compatible with, they are joined by OR.
   var itemString;
+  const Or = phrases.EE_or[Language];
+  const space = phrases.EE_languageUseSpace[Language] === "1" ? " " : "";
   switch (items.length) {
     case 0:
       itemString = "";
@@ -316,13 +352,18 @@ const StringOfItems = (items) => {
     default:
       itemString = items[0].trim();
       for (var i = 1; i < items.length; i++) {
-        itemString += " or " + items[i].trim();
+        itemString += Or + space + items[i].trim();
       }
   }
   return itemString;
 };
 
-export const displayCompatibilityMessage = async (msg, reader, rc) => {
+export const displayCompatibilityMessage = async (
+  msg,
+  reader,
+  rc,
+  promptRefresh
+) => {
   return new Promise(async (resolve) => {
     //message wrapper
     const messageWrapper = document.createElement("div");
@@ -356,6 +397,27 @@ export const displayCompatibilityMessage = async (msg, reader, rc) => {
     elem.id = "compatibility-message";
     messageWrapper.appendChild(elem);
 
+    // create refresh button to recalculate compatibility
+    if (promptRefresh) {
+      const refreshButton = document.createElement("button");
+      refreshButton.classList.add("form-input-btn");
+      refreshButton.style.width = "fit-content";
+      refreshButton.style.marginTop = "10px";
+      refreshButton.style.marginLeft = "0";
+      refreshButton.id = "refresh-btn";
+      refreshButton.innerHTML = phrases.EE_refresh[rc.language.value];
+      refreshButton.addEventListener("click", () => {
+        const language = phrases.EE_languageNameEnglish[rc.language.value];
+        const newMsg = checkSystemCompatibility(reader, language, rc);
+        handleNewMessage(
+          newMsg.msg,
+          "compatibility-message",
+          rc.language.value
+        );
+      });
+      messageWrapper.appendChild(refreshButton);
+    }
+
     if (reader.read("_languageSelectionByParticipantBool")[0]) {
       // create language selection dropdown
       const languageWrapper = document.createElement("div");
@@ -384,7 +446,7 @@ export const displayCompatibilityMessage = async (msg, reader, rc) => {
 
       languageDropdown.addEventListener("change", () => {
         const language = languageDropdown.value;
-        const newMsg = checkSystemCompatibility(reader, language, rc);
+        const newMsg = checkSystemCompatibility(reader, language, rc, false);
         handleNewMessage(
           newMsg.msg,
           "compatibility-message",
@@ -420,9 +482,11 @@ export const hideCompatibilityMessage = () => {
   document.getElementById("msg-container")?.remove();
 };
 
-const handleLanguage = (lang, rc) => {
+const handleLanguage = (lang, rc, useEnglishNames = true) => {
   // convert to language code
-  const Languages = phrases.EE_languageNameNative;
+  const Languages = useEnglishNames
+    ? phrases.EE_languageNameEnglish
+    : phrases.EE_languageNameNative;
   const languageCode = Object.keys(Languages).find(
     (key) => Languages[key] === lang
   );

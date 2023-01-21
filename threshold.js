@@ -400,7 +400,12 @@ const paramReaderInitialized = async (reader) => {
     reader.read("_language")[0],
     rc
   );
-  const proceed = await displayCompatibilityMessage(compMsg["msg"], reader, rc);
+  const proceed = await displayCompatibilityMessage(
+    compMsg["msg"],
+    reader,
+    rc,
+    compMsg["promptRefresh"]
+  );
 
   hideCompatibilityMessage();
   if (proceed && !compMsg["proceed"]) {
