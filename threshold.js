@@ -3149,7 +3149,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             characterSetBoundingRects[BC],
             {
               heightPx:
-                letterConfig.spacingRelationToSize === "ratio"
+                ["none", "ratio"].includes(
+                  letterConfig.spacingRelationToSize
+                ) && thresholdParameter === "spacing"
                   ? flankersHeightPx
                   : stimulusParameters.heightPx,
               spacingRelationToSize: letterConfig.spacingRelationToSize,
