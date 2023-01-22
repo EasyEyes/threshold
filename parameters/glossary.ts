@@ -2356,29 +2356,11 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "50",
   },
-  viewingDistanceLargeEnoughToAllowTargetSizeDeg: {
-    name: "viewingDistanceLargeEnoughToAllowTargetSizeDeg",
-    availability: "now",
-    type: "numerical",
-    default: "0",
-  },
   viewingDistanceNudgingBool: {
     name: "viewingDistanceNudgingBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
-  },
-  viewingDistanceSmallEnoughToAllowScreenHeightDeg: {
-    name: "viewingDistanceSmallEnoughToAllowScreenHeightDeg",
-    availability: "now",
-    type: "numerical",
-    default: "",
-  },
-  viewingDistanceSmallEnoughToAllowScreenWidthDeg: {
-    name: "viewingDistanceSmallEnoughToAllowScreenWidthDeg",
-    availability: "now",
-    type: "numerical",
-    default: "",
   },
   wirelessKeyboardNeededBool: {
     name: "wirelessKeyboardNeededBool",
