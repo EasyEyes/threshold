@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GLOSSARY } from "../parameters/glossary";
-import { getNumericalSuffix, verballyEnumerate } from "./utils";
+import { getNumericalSuffix, toColumnName, verballyEnumerate } from "./utils";
 
 export interface EasyEyesError {
   name: string;
@@ -63,10 +63,10 @@ export const INCORRECT_PARAMETER_TYPE = (
     | "multicategorical",
   categories?: string[]
 ): EasyEyesError => {
-  const offendingMessage = offendingValues.map(
-    (offending) =>
-      ` "${offending.value}" [column ${Number(offending.block) + 1}]`
-  );
+  const offendingMessage = offendingValues.map((offending) => {
+    const columnLabel = toColumnName(Number(offending.block) + 2);
+    return ` "${offending.value}" [column ${columnLabel}]`;
+  });
   let message = `All values for the parameter <span class="error-parameter">${parameter}</span> must be ${correctType}.`;
   if (categories) {
     message = message + ` Valid categories are: ${categories.join(", ")}.`;

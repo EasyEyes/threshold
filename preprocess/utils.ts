@@ -413,3 +413,18 @@ export const populateUnderscoreValues = (df: any): any => {
   // Return the modified df
   return df;
 };
+
+/**
+ * Takes a positive integer and returns the corresponding column name.
+ * @SOURCE https://cwestblog.com/2013/09/05/javascript-snippet-convert-number-to-column-name/
+ * @param {number} num  The positive integer to convert to a column name.
+ * @return {string}  The column name.
+ */
+export const toColumnName = (num: number): string => {
+  for (var ret = "", a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) {
+    const z = (num % b) / a;
+    const y = parseInt(z.toString()) + 65;
+    ret = String.fromCharCode(y) + ret;
+  }
+  return ret;
+};
