@@ -206,35 +206,58 @@ export const checkSystemCompatibility = (
   const minScreenHeightPx = [];
   // read blocks
   const nBlocks = Math.max(...reader.read("block", "__ALL_BLOCKS__"));
+
+  const disabledBlocks = [];
+  const disabledConditions = [];
+  for (let i = 1; i <= nBlocks; i++) {
+    const conditionEnabled = reader.read("conditionEnabledBool", i);
+    const blockEnabledBool = conditionEnabled.includes(true);
+    if (!blockEnabledBool) {
+      disabledBlocks.push(i);
+    }
+
+    for (let j = 1; j <= conditionEnabled.length; j++) {
+      if (!conditionEnabled[j - 1]) {
+        disabledConditions.push(i + "_" + j);
+      }
+    }
+  }
+
   for (let i = 1; i <= nBlocks; i++) {
     const conditionEnabled = reader.read("conditionEnabledBool", i);
     const blockEnabledBool = conditionEnabled.includes(true);
     if (!blockEnabledBool) {
       continue;
     }
-
-    // Define Short names:
     // compute across all conditions
-    const needTargetSizeDownToDeg = reader.read("needTargetSizeDownToDeg", i);
-    const nConditions = needTargetSizeDownToDeg.length;
-    const minSizeDeg = Math.min(...needTargetSizeDownToDeg);
+    const needTargetSizeDownToDegAll = reader.read(
+      "needTargetSizeDownToDeg",
+      i
+    );
+    const minScreenWidthDegAll = reader.read("needScreenWidthUpToDeg", i);
+    const minScreenHeightDegAll = reader.read("needScreenHeightUpToDeg", i);
+
+    // remove disabled blocks
+    const needTargetSizeDownToDeg = needTargetSizeDownToDegAll.filter(
+      (item, index) => !disabledConditions.includes(i + "_" + (index + 1))
+    );
     const minScreenWidthDeg = Math.max(
-      ...reader.read("needScreenWidthUpToDeg", i)
+      ...minScreenWidthDegAll.filter(
+        (item, index) => !disabledConditions.includes(i + "_" + (index + 1))
+      )
     );
     const minScreenHeightDeg = Math.max(
-      ...reader.read("needScreenHeightUpToDeg", i)
+      ...minScreenHeightDegAll.filter(
+        (item, index) => !disabledConditions.includes(i + "_" + (index + 1))
+      )
     );
+
+    const nConditions = needTargetSizeDownToDeg.length;
+    const minSizeDeg = Math.min(...needTargetSizeDownToDeg);
 
     const widthPx = [];
     const heightPx = [];
     for (let j = 1; j <= nConditions; j++) {
-      const conditionEnabledBool = reader.read(
-        "conditionEnabledBool",
-        i + "_" + j
-      );
-      if (!conditionEnabledBool) {
-        continue;
-      }
       const targetMinPx = reader.read("targetMinimumPix", i + "_" + j);
       const widthFactor =
         Math.tan((0.5 * minScreenWidthDeg * Math.PI) / 180) /
@@ -381,7 +404,8 @@ export const displayCompatibilityMessage = async (
   msg,
   reader,
   rc,
-  promptRefresh
+  promptRefresh,
+  proceedBool
 ) => {
   return new Promise(async (resolve) => {
     //message wrapper
@@ -433,6 +457,8 @@ export const displayCompatibilityMessage = async (
           "compatibility-message",
           rc.language.value
         );
+        // update proceedBool
+        proceedBool = newMsg.proceed;
       });
       messageWrapper.appendChild(refreshButton);
     }
@@ -488,7 +514,7 @@ export const displayCompatibilityMessage = async (
     proceedButton.innerHTML = phrases.T_proceed[rc.language.value];
     proceedButton.addEventListener("click", () => {
       document.getElementById("root").style.display = "";
-      resolve(true);
+      resolve({ proceedButtonClicked: true, proceedBool: proceedBool });
     });
     buttonWrapper.appendChild(proceedButton);
     messageWrapper.appendChild(buttonWrapper);

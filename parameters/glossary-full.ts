@@ -396,7 +396,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5PhoneOperatingSystem is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nPhone Operating System\nParticipants were asked the following question: What operating system (OS) does your primary mobile phone have?\nAndroid\niOS (iPhone)\nWindows\nOther/Not Applicable\nDon't Know\n\nNOTE: This selector is in the _online3 group because it's important for EasyEyes sound experiments. EasyEyes uses the participant's smartphone to calibrate the loudspeaker of the participant's desktop.\n",
+      "_online3PhoneOperatingSystem is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nPhone Operating System\nParticipants were asked the following question: What operating system (OS) does your primary mobile phone have?\nAndroid\niOS (iPhone)\nWindows\nOther/Not Applicable\nDon't Know\n\nNOTE: This selector is in the _online3 group because it's important for EasyEyes sound experiments. EasyEyes uses the participant's smartphone to calibrate the loudspeaker of the participant's desktop.\n",
     type: "multicategorical",
     default: "",
     categories: "Android, iOS, Windows, Other, Don't Know",
@@ -406,7 +406,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online2RequiredServices (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
+      "_online3RequiredServices (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
     type: "multicategorical",
     default: "",
     categories: "audio, camera, microphone, download",
@@ -416,7 +416,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5ApprovalRate (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)",
+      "_online4ApprovalRate (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)",
     type: "text",
     default: " 0,100",
     categories: "",
@@ -825,6 +825,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "calibrateSoundAllHzDB, used with calibrateSoundAllHzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -23.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes since gain will drop at high sound levels. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
     type: "text",
     default: "-13.1",
+    categories: "",
+  },
+  {
+    name: "calibrateSoundSaveToCSVBool",
+    availability: "now",
+    example: "",
+    explanation: "",
+    type: "",
+    default: "",
     categories: "",
   },
   {
@@ -2766,16 +2775,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "viewingDistanceLargeEnoughToAllowTargetSizeDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "CURRENTLY USED SOLELY TO DETERMINE REQUIRED SCREEN SIZE FOR COMPATIBILITY. viewingDistanceLargeEnoughToAllowTargetSizeDeg (default 0.1 deg) places a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses  targetMinimumPix. Besides helping to set viewing distance block by block (EasyEyes imposes equal viewing distance across conditions in a block), the viewingDistanceSmallXXX and viewingDistanceLargeXXX parameters are also combined across all conditions in the experiment to require an adequate screen width and height (in pixels) in the initial compatibility check that determines whether the experiment will begin.\n\nEasyEyes will require sufficient screen width, in pixels, if and only if at least one block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenWidthDeg. \nSimilarly, a sufficient screen height, in pixels, is required if and only if, some block specifies both minTargetSizeDeg and viewingDistanceSmallEnoughToAllowScreenHeightDeg. \n\nTo compute minimum screen size for the experiment, first we combine values in deg across conditions in each block: minTargetSizeDeg is min of viewingDistanceLargeEnoughtoAllowTargetSizeDeg across conditions, minScreenHeightDeg is max of viewingDistanceSmallEnoughToAllowScreenHeightDeg across conditions, and minScreenWidthDeg is max of viewingDistanceSmallEnoughToAllowScreenWidthDeg across conditions. From these variables, for each block, without knowing the viewing distance, we then express the minimum screen height (and width) in pixels as a multiple of the min target size in pixels,\nscreenHeightToTargetRatio=tand(0.5\\*minScreenHeightDeg) / tand(0.5\\*minSizeDeg)\nand similarly for screenWidthToTargetRatio. Then, for each condition, we multiply by the input parameter **targetMinPx** to get minimum screen width and height in pixels for that condition. The min height for the experiment is the max of min height across all conditions, and similarly for min width.\n",
-    type: "numerical",
-    default: "0",
-    categories: "",
-  },
-  {
     name: "viewingDistanceNudgingBool",
     availability: "now",
     example: "TRUE",
@@ -2783,26 +2782,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "Setting viewingDistanceNudgingBool TRUE (deafult is FALSE) enables the nudger. The nudger compares measured viewing distance to desired viewing distance, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range. The viewing-distance nudger (\"Closer!\", \"Farther!\") gets the participant to the right distance. \n     We protect the stimulus from nudging. The nudger will never occlude, or forward or backward mask, the stimulus. Think of the trial as beginning at the participant's click (or keypress) requesting the stimulus and ending at the click (or keypress) response. This leaves a pre-trial interval from the response until the click requesting the next trial. EasyEyes nudges only before and between trials. Furthermore, to prevent forward masking, EasyEyes ignores attempts to click (or key press) during nudging and until targetSafetyMarginSec after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n    For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial, and sets nudgingCancelsTrialBool to always be FALSE. \n\n     FUTURE. To make sure that the stimulus is never obscured by nudging, we designate three intevals:\nPRE-TRIAL INTERVAL. From time of response to the previous trial (click or keypress) until the participant requests a new trial (space bar or click on crosshair) we allow nudging. \nSTIMULUS INTERVAL. From the participant's request for a new trial (space bar or click on crosshair) until the end of the stimulus, we protect the stimulus by suspending nudging. \nRESPONSE INTERVAL. From the end of the stimulus until the observer responds, we also suspend nudging, so the nudge won't interfere with remembering the target. \nIf we acquire the possibility of canceling a trial, then we could allow nudging during the stimulus interval, and immediately cancel that trial. Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. The current version of MultistairHandler doesn't cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial interval, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during the stimulus interval we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. \n",
     type: "boolean",
     default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "viewingDistanceSmallEnoughToAllowScreenHeightDeg",
-    availability: "now",
-    example: "30",
-    explanation:
-      "CURRENTLY USED SOLELY TO DETERMINE REQUIRED SCREEN SIZE FOR COMPATIBILITY. viewingDistanceSmallEnoughToAllowScreenHeightDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.",
-    type: "numerical",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "viewingDistanceSmallEnoughToAllowScreenWidthDeg",
-    availability: "now",
-    example: "30",
-    explanation:
-      "CURRENTLY USED SOLELY TO DETERMINE REQUIRED SCREEN SIZE FOR COMPATIBILITY. viewingDistanceSmallEnoughToAllowScreenWidthDeg (default 0) places an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px compatibility requirement before the experiment begins.",
-    type: "numerical",
-    default: "",
     categories: "",
   },
   {

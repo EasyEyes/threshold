@@ -400,15 +400,17 @@ const paramReaderInitialized = async (reader) => {
     reader.read("_language")[0],
     rc
   );
-  const proceed = await displayCompatibilityMessage(
-    compMsg["msg"],
-    reader,
-    rc,
-    compMsg["promptRefresh"]
-  );
+  const { proceedButtonClicked, proceedBool } =
+    await displayCompatibilityMessage(
+      compMsg["msg"],
+      reader,
+      rc,
+      compMsg["promptRefresh"],
+      compMsg["proceed"]
+    );
 
   hideCompatibilityMessage();
-  if (proceed && !compMsg["proceed"]) {
+  if (proceedButtonClicked && !proceedBool) {
     showExperimentEnding();
     return;
   }
