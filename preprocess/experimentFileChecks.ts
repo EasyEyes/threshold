@@ -398,6 +398,9 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
             block: x.block,
           };
         });
+      // Only report the single, relevant column for underscore parameters
+      if (columnName[0] === "_")
+        offendingValues.splice(1, offendingValues.length - 1);
       errors.push(
         INCORRECT_PARAMETER_TYPE(
           offendingValues,
