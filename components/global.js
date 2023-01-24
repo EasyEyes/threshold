@@ -1,4 +1,5 @@
 // ! AVOID IMPORTS HERE
+import { phrases } from "./i18n";
 
 export const thisExperimentInfo = {
   name: "threshold",
@@ -50,7 +51,9 @@ export const localStorageKey = "__EASYEYES__";
 export const useRC = true;
 // eslint-disable-next-line no-undef
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
-rc.init();
+rc.init({
+  languagePhrasesJSON: phrases,
+});
 
 // stats.js
 export const stats = { current: undefined, on: false };
