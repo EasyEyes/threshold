@@ -59,7 +59,8 @@ export function setupClickableCharacterSet(
   );
 
   document.body.appendChild(characterSetHolder);
-  scaleFontSizeToFit(characterSetHolder, "characterSet");
+  if (targetKind !== "sound")
+    scaleFontSizeToFit(characterSetHolder, "characterSet");
 
   return characterSetHolder;
 }
