@@ -2,18 +2,16 @@ import { localStorageKey } from "./global";
 
 export const checkCrossSessionId = async (callback) => {
   const localStorageInfo = JSON.parse(localStorage.getItem(localStorageKey));
-
   let storedId = undefined;
   if (localStorageInfo && localStorageInfo.EasyEyesID)
     storedId = localStorageInfo.EasyEyesID;
   const hasStoredId = storedId !== undefined;
-
   let id = await Swal.fire({
     title: "EasyEyes ID Requested",
     html: hasStoredId
-      ? `We found that you participated in a previous session at <b>${preprocessPsychoJSTime(
+      ? `A unique ID is needed to link data across sessions. This computer previously participated in a session at <b>${preprocessPsychoJSTime(
           localStorageInfo.date
-        )}</b>. The EasyEyes ID is <b>${storedId}</b>. Press OK if it's correct, or enter a new one and continue.`
+        )}</b> with EasyEyes ID <b>${storedId}</b>. Press OK if that's you. Otherwise, if you have an EasyEyes ID file, press the browse button below to open it. If you don't have a file, but know your EasyEyes ID, then type it. Otherwise, just make up your own ID. It can be any alphanumeric string at least 5 characters long. We'll remember it for you on this computer, but if you go to another computer, please take your EasyEyes ID file (the most recent file in your Downloads folder), or at least write down your EasyEyes ID. Using it every time links your data from session to session.`
       : "The researcher requested you to provide your EasyEyes ID from the previous session, please type it here, or upload the file downloaded when the last session ends.",
     // inputLabel:
     input: "text",
@@ -22,13 +20,13 @@ export const checkCrossSessionId = async (callback) => {
       autocapitalize: "off",
     },
     showCancelButton: true,
-    showDenyButton: true,
+    showDenyButton: false,
     showConfirmButton: true,
     allowEnterKey: false,
     allowOutsideClick: false,
     allowEscapeKey: false,
 
-    cancelButtonText: "Upload EasyEyes ID file", // grey
+    cancelButtonText: "Browse for EasyEyesID file", // grey
     denyButtonText: `I don't have EasyEyes ID`, // red
 
     customClass: {
@@ -56,11 +54,9 @@ export const checkCrossSessionId = async (callback) => {
         );
         return false;
       }
-
-      return true;
+      return id;
     },
   });
-
   if (id.isDenied) {
     return false;
   } else if (id.isConfirmed) {
