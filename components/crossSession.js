@@ -2,7 +2,6 @@ import { localStorageKey } from "./global";
 import { phrases } from "./i18n.js";
 
 export const checkCrossSessionId = async (callback, language) => {
-  language = "ur";
   const localStorageInfo = JSON.parse(localStorage.getItem(localStorageKey));
   let storedId = undefined;
   let detailInformation = phrases.EE_ID[language];
