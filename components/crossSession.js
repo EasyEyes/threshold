@@ -2,6 +2,7 @@ import { localStorageKey } from "./global";
 import { phrases } from "./i18n.js";
 
 export const checkCrossSessionId = async (callback, language) => {
+  language = "ur";
   const localStorageInfo = JSON.parse(localStorage.getItem(localStorageKey));
   let storedId = undefined;
   let detailInformation = phrases.EE_ID[language];
@@ -34,8 +35,19 @@ export const checkCrossSessionId = async (callback, language) => {
       "** SSS **",
       "<b>" + storedId + "</b>"
     );
+    if (languageDirection == "LTR") {
+      detailInformation =
+        "<div dir='ltr' style='text-align:left'>" +
+        detailInformation +
+        "</div>";
+    } else if (languageDirection == "RTL") {
+      detailInformation =
+        "<div dir='rtl' style='text-align:right'>" +
+        detailInformation +
+        "</div>";
+    }
   }
-  console.log("phrases", phrases);
+  console.log("detailInformation", detailInformation);
   let id = await Swal.fire({
     title: phrases.EE_IDRequested[language],
     html: hasStoredId
