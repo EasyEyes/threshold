@@ -433,7 +433,10 @@ const paramReaderInitialized = async (reader) => {
         thisExperimentInfo.EasyEyesID = participant;
       }
     };
-    const result = await checkCrossSessionId(gotParticipantId);
+    const result = await checkCrossSessionId(
+      gotParticipantId,
+      rc.language.value
+    );
     if (!result) {
       showExperimentEnding();
       return;

@@ -1,17 +1,45 @@
 import { localStorageKey } from "./global";
+import { phrases } from "./i18n.js";
 
-export const checkCrossSessionId = async (callback) => {
+export const checkCrossSessionId = async (callback, language) => {
   const localStorageInfo = JSON.parse(localStorage.getItem(localStorageKey));
   let storedId = undefined;
+  let detailInformation = phrases.EE_ID[language];
+  const languageDirection = phrases.EE_languageDirection[language];
   if (localStorageInfo && localStorageInfo.EasyEyesID)
     storedId = localStorageInfo.EasyEyesID;
   const hasStoredId = storedId !== undefined;
+  if (hasStoredId) {
+    detailInformation = detailInformation.replace(
+      "**ddd**",
+      "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>"
+    );
+    detailInformation = detailInformation.replace(
+      "** DDD **",
+      "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>"
+    );
+    detailInformation = detailInformation.replace(
+      "** ddd **",
+      "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>"
+    );
+    detailInformation = detailInformation.replace(
+      "** sss **",
+      "<b>" + storedId + "</b>"
+    );
+    detailInformation = detailInformation.replace(
+      "**sss**",
+      "<b>" + storedId + "</b>"
+    );
+    detailInformation = detailInformation.replace(
+      "** SSS **",
+      "<b>" + storedId + "</b>"
+    );
+  }
+  console.log("phrases", phrases);
   let id = await Swal.fire({
-    title: "EasyEyes ID Requested",
+    title: phrases.EE_IDRequested[language],
     html: hasStoredId
-      ? `A unique ID is needed to link data across sessions. This computer previously participated in a session at <b>${preprocessPsychoJSTime(
-          localStorageInfo.date
-        )}</b> with EasyEyes ID <b>${storedId}</b>. Press OK if that's you. Otherwise, if you have an EasyEyes ID file, press the browse button below to open it. If you don't have a file, but know your EasyEyes ID, then type it. Otherwise, just make up your own ID. It can be any alphanumeric string at least 5 characters long. We'll remember it for you on this computer, but if you go to another computer, please take your EasyEyes ID file (the most recent file in your Downloads folder), or at least write down your EasyEyes ID. Using it every time links your data from session to session.`
+      ? detailInformation
       : "The researcher requested you to provide your EasyEyes ID from the previous session, please type it here, or upload the file downloaded when the last session ends.",
     // inputLabel:
     input: "text",
@@ -26,15 +54,16 @@ export const checkCrossSessionId = async (callback) => {
     allowOutsideClick: false,
     allowEscapeKey: false,
 
-    cancelButtonText: "Browse for EasyEyesID file", // grey
-    denyButtonText: `I don't have EasyEyes ID`, // red
+    cancelButtonText: phrases.EE_browseForID[language], // grey
+    //denyButtonText: `I don't have EasyEyes ID`, // red
+    confirmButtonText: phrases.EE_ok[language],
 
     customClass: {
       popup: "narrow-popup id-collection-popup",
       title: "centered-title",
       confirmButton: `threshold-button order-1`,
       cancelButton: `threshold-button order-2`,
-      denyButton: `threshold-button order-3`,
+      //denyButton: `threshold-button order-3`,
     },
     showClass: {
       popup: "fade-in",
@@ -109,7 +138,7 @@ export const checkCrossSessionId = async (callback) => {
     });
 
     if (idFromFile.isDenied) {
-      return false;
+      return checkCrossSessionId(callback, language);
     } else {
       const reader = new FileReader();
       reader.onload = (e) => {
