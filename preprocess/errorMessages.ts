@@ -361,20 +361,19 @@ export const NO_RESPONSE_POSSIBLE = (
   zeroIndexed = false,
   totalNumberOfConditions = 0
 ): EasyEyesError => {
-  const startingCondition = zeroIndexed ? 0 : 1;
-  const plural = conditionsLacking.length > 1 ? "s" : "";
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const whereNotPermitted =
-    conditionsLacking.length &&
-    conditionsLacking.length !== totalNumberOfConditions
-      ? `the ${verballyEnumerate(
-          conditionsLacking.map(
-            (x) =>
-              String(x + startingCondition) +
-              getNumericalSuffix(x + startingCondition)
-          )
-        )} condition${plural}.`
-      : `any condition.`;
+  // const startingCondition = zeroIndexed ? 0 : 1;
+  // const plural = conditionsLacking.length > 1 ? "s" : "";
+  // const whereNotPermitted =
+  //   conditionsLacking.length &&
+  //   conditionsLacking.length !== totalNumberOfConditions
+  //     ? `the ${verballyEnumerate(
+  //         conditionsLacking.map(
+  //           (x) =>
+  //             String(x + startingCondition) +
+  //             getNumericalSuffix(x + startingCondition)
+  //         )
+  //       )} condition${plural}.`
+  //     : `any condition.`;
   // const hintBlob = `If you intend to collect data from participant, make sure that, in each condition, at least one of <span class="error-parameter">responseClickedBool</span>, <span class="error-parameter">responseTypedBool</span>, or <span class="error-parameter">responseEasyEyesKeypadBool</span> is true. If you'd like to simulate a participant, set <span class="error-parameter">simulateParticipantBool</span> to true instead. In your case, no response modality was permitted in ${whereNotPermitted}`;
   return {
     name: "Experiment lacks any response",
@@ -408,5 +407,24 @@ export const NONUNIQUE_WITHIN_BLOCK = (
     context: "preprocessor",
     kind: "error",
     parameters: [offendingParameter],
+  };
+};
+
+export const CONDITION_PARAMETERS_IN_FIRST_COLUMN = (
+  offendingParameters: string[],
+  offendingValues: string[]
+): EasyEyesError => {
+  const offendingValueParameterPairs = offendingValues.map(
+    (v, i) => `${v} (${offendingParameters[i]})`
+  );
+  return {
+    name: "Non-underscore parameters provided in underscore parameter column.",
+    message: `The first column of values (Column B) is reserved for parameters that begin with an underscore; these parameters provide information relavent to the whole experiment. All other parameters -- which are specific to the current condition -- should begin in Column C.`,
+    hint: `Condition parameters found in Column B are: ${verballyEnumerate(
+      offendingValueParameterPairs
+    )}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: offendingParameters,
   };
 };

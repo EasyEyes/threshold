@@ -24,6 +24,7 @@ import {
   getCodeList,
   addNewUnderscoreParam,
   getFolderNames,
+  dropFirstColumn,
 } from "./utils";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
@@ -278,7 +279,8 @@ export const prepareExperimentFileForThreshold = async (
     df = addNewUnderscoreParam(df, "_experimentFilename", filename);
   }
   df = addUniqueLabelsToDf(df);
-  df = populateUnderscoreValues(df);
+  df = populateUnderscoreValues(df); // _params copied from Column B
+  df = dropFirstColumn(df); // Conditions start in Column C
   df = populateDefaultValues(df);
 
   /* --------------------------------- Errors --------------------------------- */

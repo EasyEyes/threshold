@@ -428,3 +428,13 @@ export const toColumnName = (num: number): string => {
   }
   return ret;
 };
+
+/**
+ * Drop the first column of values (ie Column B) from a df
+ * @param {dfjs.DataFrame} df
+ * @returns {dfjs.DataFrame}
+ */
+export const dropFirstColumn = (df: any): any => {
+  const originalColumns = df.listColumns();
+  return df.transpose().drop("0").transpose().renameAll(originalColumns);
+};

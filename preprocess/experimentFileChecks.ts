@@ -28,9 +28,10 @@ import {
   TEXT_FILES_MISSING,
   SOUND_FOLDER_MISSING,
   CODE_FILES_MISSING,
+  CONDITION_PARAMETERS_IN_FIRST_COLUMN,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
-import { isNumeric, levDist, arraysEqual } from "./utils";
+import { isNumeric, levDist, arraysEqual, dropFirstColumn } from "./utils";
 // import { Modal } from "bootstrap";
 
 let zeroIndexed: boolean;
@@ -83,7 +84,7 @@ export const validatedCommas = (
 
 /**
  * Check that the experiment file is correctly structured; provide errors for any problems
- * @param {DateFrame} experimentDf dataframe-js dataframe of the experiment file content
+ * @param {any} experimentDf dataframe-js dataframe of the experiment file content
  * @returns {Object[]} Array of all errors found with the experiment file
  */
 export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
@@ -101,6 +102,9 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   errors.push(...areAllPresentParametersRecognized(parametersToCheck));
   errors.push(...areAllPresentParametersCurrentlySupported(parametersToCheck));
 
+  // Enforce using Column B for the underscore parameters, and Column C and on for conditions
+  errors.push(...doConditionsBeginInTheSecondColumn(experimentDf));
+
   // Alphabetize experimentDf
   experimentDf = experimentDf.select(...parametersToCheck).restructure(
     experimentDf
@@ -117,6 +121,9 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   [experimentDf, underscoreErrors] =
     checkAndCorrectUnderscoreParams(experimentDf);
   errors.push(...underscoreErrors);
+
+  // Enforce using Column B for the underscore parameters, and Column C and on for conditions
+  experimentDf = dropFirstColumn(experimentDf);
 
   // Populate missing (non-underscore) values with defaults
   experimentDf = populateDefaultValues(experimentDf);
@@ -256,6 +263,8 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
     .select("block")
     .toArray()
     .map((x: any) => Number(x[0]));
+  // Start conditions (ie first block) in Column C
+  blockValues.splice(0, 1);
   // Array to accumulate the errors we encounter; to be returned
   const blockValueErrors: EasyEyesError[] = [];
 
@@ -723,4 +732,37 @@ const areBlockUniqueValuesConsistent = (
     }
   }
   return errors;
+};
+
+/**
+ * Check that there are no condition-level parameters (ie non-underscore parameters) in the first
+ * column (Column B). The converse, that no experiment-level parameters (ie underscore parameters)
+ * in later columns (Column C and beyond), is checked in checkAndCorrectUnderscoreParams
+ * @param {any} experiment
+ * @returns {EasyEyesError[]}
+ */
+const doConditionsBeginInTheSecondColumn = (
+  experiment: any
+): EasyEyesError[] => {
+  const columnNames = experiment.listColumns();
+  const columns = experiment.toArray();
+  let offendingParameters = [];
+  let offendingValues = [];
+  for (let i = 0; i < columnNames.length; i++) {
+    const underscoreRow = columnNames[i][0] === "_";
+    // Correctness of underscore parameters is checked in `checkAndCorrectUnderscoreParams`
+    const valueMisplaced = !underscoreRow && columns[0][i] !== "";
+    if (valueMisplaced) {
+      offendingParameters.push(columnNames[i]);
+      offendingValues.push(columns[0][i]);
+    }
+  }
+  if (offendingParameters.length)
+    return [
+      CONDITION_PARAMETERS_IN_FIRST_COLUMN(
+        offendingParameters,
+        offendingValues
+      ),
+    ];
+  return [];
 };
