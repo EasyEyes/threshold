@@ -331,7 +331,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "USDollar",
-    categories: ["USDollar", "Euro", "UKPound"],
+    categories: ["USDollar", "UKPound"],
   },
   _online2PayPerHour: {
     name: "_online2PayPerHour",
@@ -345,12 +345,19 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  _online2SubmissionApproval: {
+    name: "_online2SubmissionApproval",
+    availability: "now",
+    type: "categorical",
+    default: "manual",
+    categories: ["manual", "automatic"],
+  },
   _online3DeviceKind: {
     name: "_online3DeviceKind",
     availability: "now",
     type: "multicategorical",
     default: "Desktop",
-    categories: ["mobile", "table", "desktop"],
+    categories: ["mobile", "tablet", "desktop"],
   },
   _online3PhoneOperatingSystem: {
     name: "_online3PhoneOperatingSystem",

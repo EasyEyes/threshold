@@ -356,10 +356,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "USDollar",
     explanation:
-      "_online2PayCurrency (default USDollar) specifies the currency of the payment: USDollar, Euro, etc. ",
+      "_online2PayCurrency (default USDollar) specifies the currency of the payment: USDollar or UKPound. Prolific has no API to change this, but EasyEyes will confirm that Prolific is using the currency declared by _online2PayCurrency. Prolific allows your user account to be in USDollar or UKPound, and can change an account's currency in response to a written request, but only rarely. Some users of EasyEyes will be in UK and will naturally prefer to pay Prolific and participants in UKPounds. EasyEyes can't change Prolific's choice of currency, but by setting this parameter you can ask EasyEyes to make sure that Prolific is using the currency assumed by the spreadsheet. If not, then EasyEyes will flag this as a fatal error before deployment. You can then fix the currency in your experiment, and adjust the numeric pay to provide the desired compensation. ",
     type: "categorical",
     default: "USDollar",
-    categories: "USDollar, Euro, UKPound",
+    categories: "USDollar, UKPound",
   },
   {
     name: "_online2PayPerHour",
@@ -382,14 +382,24 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_online2SubmissionApproval",
+    availability: "now",
+    example: "",
+    explanation:
+      "Prolific requires that the study declare whether approval of the participant submissions will manual (the EasyEyes default) or automatic.",
+    type: "categorical",
+    default: "manual",
+    categories: "manual, automatic",
+  },
+  {
     name: "_online3DeviceKind",
     availability: "now",
     example: "",
     explanation:
-      "_online3DeviceKind is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nMobile\nTablet\nDesktop\nThe parameter value will be a comma-separated list of none to all of: Mobile, Table, Desktop.",
+      "_online3DeviceKind is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nmobile\ntablet\ndesktop\nThe parameter value will be a comma-separated list of none to all of: mobile, tablet, desktop.",
     type: "multicategorical",
     default: "Desktop",
-    categories: "mobile, table, desktop",
+    categories: "mobile, tablet, desktop",
   },
   {
     name: "_online3PhoneOperatingSystem",
