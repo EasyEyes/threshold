@@ -47,7 +47,66 @@ export const checkCrossSessionId = async (callback, language) => {
     }
   }
   console.log("detailInformation", detailInformation);
-  let id = await Swal.fire({
+
+  let result = await Swal.fire({
+    title: phrases.EE_IDRequested[language],
+    html: hasStoredId
+      ? detailInformation +
+        `<center><input type="text" value="` +
+        storedId +
+        `" id="textInput" class="swal2-input"></center><input type="file" accept=".txt" id="fileInput" class="swal2-file">`
+      : `The researcher requested you to provide your EasyEyes ID from the previous session, please type it here, or upload the file downloaded when the last session ends.<input type="text" id="textInput" class="swal2-input"><input type="file" accept=".txt" id="fileInput" class="swal2-file">`,
+    confirmButtonText: phrases.EE_ok[language],
+    customClass: {
+      popup: "narrow-popup id-collection-popup",
+      title: "centered-title",
+    },
+    showClass: {
+      popup: "fade-in",
+    },
+    hideClass: {
+      popup: "",
+    },
+    preConfirm: (id) => {
+      let text = textInput.value;
+      let file = fileInput.files[0];
+      console.log("text", text);
+      if (!file) {
+        if (!text || text.length < 1) {
+          Swal.showValidationMessage(
+            "Please either upload a file or enter a valid EasyEyes ID."
+          );
+          return false;
+        }
+        if (!/^[A-Za-z0-9]*$/.test(text)) {
+          Swal.showValidationMessage(
+            "The EasyEyes ID contains invalid characters. Only letters and numbers are allowed."
+          );
+          return false;
+        }
+        callback(
+          text,
+          localStorageInfo ? localStorageInfo.session : null,
+          storedId
+        );
+        return true;
+      } else {
+        console.log("file", file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const participant = e.target.result.split("\n")[2].split(/\s+/g)[1];
+          const session = e.target.result.split("\n")[3].split(/\s+/g)[1];
+          callback(participant, session, participant);
+        };
+        reader.readAsText(file);
+        return true;
+      }
+    },
+  });
+  if (result.isConfirmed) {
+    return true;
+  }
+  /*let id = await Swal.fire({
     title: phrases.EE_IDRequested[language],
     html: hasStoredId
       ? detailInformation
@@ -160,7 +219,7 @@ export const checkCrossSessionId = async (callback, language) => {
       reader.readAsText(idFromFile.value);
       return true;
     }
-  }
+  }*/
 };
 
 const preprocessPsychoJSTime = (date, hasSecond = false) => {
