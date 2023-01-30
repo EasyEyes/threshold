@@ -722,9 +722,29 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1",
     explanation:
-      "The block number is required in every condition. There is no default. The first condition (currently second column, soon will be third column) must have block=1. After the first condition, each successive condition (column) must have the same block number as the one preceding it, or increased by +1.",
+      "The block number is required in every condition. There is no default. The first condition (column C) must have block==1. After the first condition, each successive condition (column) rightward must have the same block number as the one preceding it, or increased by +1.\n\nShuffling preserves the total number of blocks and conditions. Despite block and group shuffling by block_shuffleBlocksInEachGroup and block_shuffleGroups, each block retains its original block number in the CSV results file. Blocks are performed and reported in the shuffled column order, left to right, so in the CSV results, the block number sequence will be nonmonotonic and will vary across participants.",
     type: "integer",
     default: "1",
+    categories: "",
+  },
+  {
+    name: "block_shuffleBlocksInEachGroup",
+    availability: "now",
+    example: "",
+    explanation:
+      'block_shuffleBlocksInEachGroup (default is empty cell) allows the scientist to group blocks by assigning them the same group name (an alphanumeric string), and requests shuffling the order of blocks within each group. \n\nA "group" is defined by assigning the same group name to all the conditions in several contiguous blocks. There can be many groups, each with a unique name. These group names are used solely by blockShuffleBlocksInEachGroup. Each cell in this row must be empty or have a group name, and all the cells in a block must be the same. A "group" consists of all the blocks (and their conditions) with the same group name in this row. All the blocks in a group must be contiguous. \n\nShuffling preserves the total number of blocks and conditions. Despite block and group shuffling, each block retains its original block number in the CSV results file. Blocks are performed and reported in the shuffled column order, left to right, so in the CSV results, the block number sequence will be nonmonotonic and will vary across participants.',
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "block_shuffleGroups",
+    availability: "now",
+    example: "",
+    explanation:
+      'block_shuffleGroups (default is empty cell) allows the scientist to group blocks (and their conditions) by giving them the same group name (an alphanumeric string), and requests that EasyEyes shuffle the order of those groups. Order is expressed by the left-to-right position of the columns. EasyEyes counts the groups (from left to right), and creates a shuffled list of the numbers from 1 to n, where n is the total count. Then EasyEyes replaces the i-th group by the group whose index is i-th in the shuffled list. The groups will have various numbers of conditions and blocks. \n\nA "group" is defined by assigning the same group name to all the conditions in one or more contiguous blocks. There can be many groups, each with a unique name. These group names are used solely by block_shuffleGroups. Each cell in this row must be empty or have a group name, and all the cells in a block must be the same. A "group" consists of all the blocks (and their conditions) with the same group name in this row. All the blocks in a group must be contiguous. \n\nWhen both block_shuffleBlocksInEachGroup and block_shuffleGroups parameters are present, block shuffling is performed before group shuffling.\n\nShuffling preserves the total number of blocks and conditions. Despite block and group shuffling, each block retains its original block number in the CSV results file. Blocks are performed and reported in the shuffled column order, left to right, so in the CSV results, the block number sequence will be nonmonotonic and will vary across participants.',
+    type: "text",
+    default: "",
     categories: "",
   },
   {

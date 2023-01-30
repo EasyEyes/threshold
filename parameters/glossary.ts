@@ -1084,6 +1084,18 @@ export const GLOSSARY: Glossary = {
   },
   "%": { name: "%", availability: "now", type: "", default: "" },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
+  block_shuffleBlocksInEachGroup: {
+    name: "block_shuffleBlocksInEachGroup",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
+  block_shuffleGroups: {
+    name: "block_shuffleGroups",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   calibrateBlindSpotBool: {
     name: "calibrateBlindSpotBool",
     availability: "now",
