@@ -56,7 +56,7 @@ export const checkCrossSessionId = async (callback, language) => {
         ? detailInformation +
           `<center><input type="text" value="` +
           storedId +
-          `" id="textInput" class="swal2-input"></center><input type="file" accept=".txt" id="fileInput" class="swal2-file">`
+          `" id="textInput" class="swal2-input"></center><input type="file" title="" accept=".txt" id="fileInput" class="swal2-file">`
         : briefInformation +
           `<center><input type="text" id="textInput" class="swal2-input"></center><input type="file" accept=".txt" id="fileInput" class="swal2-file">`,
       confirmButtonText: phrases.EE_ok[language],
