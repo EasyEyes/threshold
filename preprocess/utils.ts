@@ -209,7 +209,9 @@ export const fileListContainsFileOfName = (
  * @returns {dfjs.DataFrame}
  */
 export const dataframeFromPapaParsed = (parsedContent: any): any => {
-  const parsedData = parsedContent.data;
+  let parsedData = parsedContent.data;
+  // Lack of a trailing comma was causing problems in some csv's. Pad with empty strings to fix.
+  parsedData = padToLongestLength(parsedData);
   // Transpose, to get from Denis's row-major convention to the usual column-major
   const transposed = parsedData[0].map((_: any, colIndex: number) =>
     parsedData.map((row: any) => row[colIndex])
@@ -437,4 +439,22 @@ export const toColumnName = (num: number): string => {
 export const dropFirstColumn = (df: any): any => {
   const originalColumns = df.listColumns();
   return df.transpose().drop("0").transpose().renameAll(originalColumns);
+};
+
+/**
+ * Given an array of arrays which may not be of the same length, pad each so that they are.
+ * @param arrays {unknown[][]} Array of arrays
+ * @param paddingValue {unknown} The value used to pad arrays to length
+ * @returns {unknown[][]} Array of arrays, all of equal length
+ */
+const padToLongestLength = (
+  arrays: unknown[][],
+  paddingValue = ""
+): unknown[][] => {
+  const longestLength = Math.max(...arrays.map((array) => array.length));
+  const paddedArrays = arrays.map((array) => [
+    ...array,
+    ...new Array(longestLength - array.length).fill(paddingValue),
+  ]);
+  return paddedArrays;
 };
