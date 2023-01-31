@@ -104,7 +104,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "hdrMovie",
     explanation:
-      "NOT YET IMPLEMENTED. _compatibleDisplay requires support for key display features:\nHDRMovie: Browser supports HDR movies.\ntenBit: Display supports 10-bit imaging. https://trello.com/c/VxGHyxDa\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, and we might not support it. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs. Hardly anyone knows which browsers support any given codecs. I wonder if there is any online machine readable table that reports which browsers support each video codec. Then we could read that to update our browser compatibility. We can add any codec that FFMPEG supports, but that may require a bit of code that is custom to the codec.",
+      "NOT YET IMPLEMENTED. _compatibleDisplay requires support for key display features:\nHDRMovie: Browser supports HDR movies.\ntenBit: Display supports 10-bit imaging. https://trello.com/c/VxGHyxDa\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
     type: "multicategorical",
     default: "",
     categories: "hdrMovie, tenBit",
@@ -145,7 +145,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "NOT YET IMPLEMENTED. _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
+      "NOT YET IMPLEMENTED. _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever needScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever needScreenHeightDeg is greater than zero.",
     type: "integer",
     default: "",
     categories: "",
@@ -346,29 +346,29 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "7.5",
     explanation:
-      "_online2Pay (no default) specifies the payment (a number) to offer to each participant. The currency is specified by _online2PayCurrency.  The experiment can specify _online2Pay or _online2PayPerHour, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+      "_online2Pay (default 0) specifies the payment (a number) to offer to each participant. The currency is specified by _online2PayCurrency.  If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. In deciding whether to participate, potential participants will consider _online1Title, _online2Description, _online2Minutes, and the pay. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
     type: "numerical",
-    default: "",
+    default: "0",
     categories: "",
   },
   {
     name: "_online2PayCurrency",
     availability: "now",
-    example: "USDollar",
+    example: "USD",
     explanation:
-      "_online2PayCurrency (default USDollar) specifies the currency of the payment: USDollar or UKPound. Prolific has no API to change this, but EasyEyes will confirm that Prolific is using the currency declared by _online2PayCurrency. Prolific allows your user account to be in USDollar or UKPound, and can change an account's currency in response to a written request, but only rarely. Some users of EasyEyes will be in UK and will naturally prefer to pay Prolific and participants in UKPounds. EasyEyes can't change Prolific's choice of currency, but by setting this parameter you can ask EasyEyes to make sure that Prolific is using the currency assumed by the spreadsheet. If not, then EasyEyes will flag this as a fatal error before deployment. You can then fix the currency in your experiment, and adjust the numeric pay to provide the desired compensation. ",
+      "_online2PayCurrency (default USD) specifies the currency of the payment: US Dollars (USD) or Great Britain Pounds (GBP). Prolific has no API to change this, but EasyEyes will confirm that Prolific is using the currency declared by _online2PayCurrency. Prolific allows your user account to be in USD or GBP, and can change an account's currency in response to a written request, but only rarely. Some users of EasyEyes will be in UK and will likely prefer to pay Prolific and participants in GBP. EasyEyes can't change Prolific's choice of currency, but by setting this parameter you can ask EasyEyes to make sure that Prolific is using the currency assumed by your spreadsheet. If not, then EasyEyes will flag this as a fatal error before deployment. You can then fix the currency in your experiment, and adjust the numeric pay to provide the desired compensation. ",
     type: "categorical",
-    default: "USDollar",
-    categories: "USDollar, UKPound",
+    default: "USD",
+    categories: "USD, GBP",
   },
   {
     name: "_online2PayPerHour",
     availability: "now",
     example: "15",
     explanation:
-      "_online2PayPerHour (no default) specifies the hourly rate (a number) that will determine (with _online2Minutes) the payment to offer to each participant. The currency is specified by _online2PayCurrency. The experiment can specify _online2PayPerHour or _online2Pay, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour), which Prolific computes and displays.",
+      "_online2PayPerHour (default zero) specifies the hourly rate (a number) that will determine (with _online2Minutes) the payment to offer to each participant. The currency is specified by _online2PayCurrency.  If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. In deciding whether to participate, potential participants will consider _online1Title, _online2Description, _online2Minutes, and the pay. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour), which Prolific computes and displays.",
     type: "numerical",
-    default: "",
+    default: "0",
     categories: "",
   },
   {
