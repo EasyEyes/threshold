@@ -121,7 +121,6 @@ export const checkCrossSessionId = async (callback, language) => {
           // const session = e.target.result.split("\n")[3].split(/\s+/g)[1];
           textField.value = participant;
         } else {
-          textField.value = "";
           const invalidFileError = phrases.EE_ID_invalidFile[language];
           Swal.showValidationMessage(invalidFileError);
         }
