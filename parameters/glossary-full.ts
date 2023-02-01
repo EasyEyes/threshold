@@ -752,7 +752,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      'Set calibrateBlindSpotBool TRUE (default FALSE) to make an initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position.',
+      'Set calibrateBlindSpotBool TRUE (default FALSE) to make an initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position. Use calibrateTrackDistanceBool or calibrateBlindSpotBool, not both.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -872,7 +872,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackDistanceBool=TRUE. \n\nFUTURE PLANS: calibrateBlindSpotBool??. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
+      "Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackDistanceBool=TRUE. Use calibrateTrackDistanceBool or calibrateBlindSpotBool, not both.\n\nFUTURE PLANS: calibrateBlindSpotBool??. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1956,6 +1956,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "NOT YET IMPLEMENTED. setResolutionPxPerDeg sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. Ignored if value is empty or zero. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
     type: "numerical",
     default: "",
+    categories: "",
+  },
+  {
+    name: "showBeepButtonOnBlockInstructionBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "NOT YET IMPLEMENTED. showBeepButtonOnBlockInstructionBool (default TRUE) shows a Beep button in the upper right corner of the block-instruction page. Typically every trial beeps when the response was correct, so it's good to give the participant a chance to get the sound working before beginning the block. However, some tasks, e.g. rating, do not use sound at all, and then the Beep button is superfluous.",
+    type: "boolean",
+    default: "TRUE",
     categories: "",
   },
   {

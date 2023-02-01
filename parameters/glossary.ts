@@ -1832,6 +1832,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "",
   },
+  showBeepButtonOnBlockInstructionBool: {
+    name: "showBeepButtonOnBlockInstructionBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
   showBoundingBoxBool: {
     name: "showBoundingBoxBool",
     availability: "now",
