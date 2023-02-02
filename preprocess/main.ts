@@ -128,6 +128,7 @@ export const prepareExperimentFileForThreshold = async (
   fillCurrentExperiment("_online3DeviceKind", "_online3DeviceKind");
   fillCurrentExperiment("_online3RequiredServices", "_online3RequiredServices");
   fillCurrentExperiment("_online2Pay", "_online2Pay");
+  fillCurrentExperiment("_online2PayPerHour", "_online2PayPerHour");
 
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
