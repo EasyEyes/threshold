@@ -1084,8 +1084,8 @@ export const GLOSSARY: Glossary = {
   },
   "%": { name: "%", availability: "now", type: "", default: "" },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
-  block_shuffleBlocksInEachGroup: {
-    name: "block_shuffleBlocksInEachGroup",
+  block_shuffleBlocksWithinGroups: {
+    name: "block_shuffleBlocksWithinGroups",
     availability: "now",
     type: "text",
     default: "",
@@ -1388,10 +1388,22 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  instructionForExperiment: {
+    name: "instructionForExperiment",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   instructionForResponse: {
     name: "instructionForResponse",
     availability: "now",
     type: "text",
+    default: "",
+  },
+  internationalPhrasesURL: {
+    name: "internationalPhrasesURL",
+    availability: "now",
+    type: "",
     default: "",
   },
   instructionForResponseWhere: {

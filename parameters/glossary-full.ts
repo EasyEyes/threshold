@@ -712,7 +712,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row regardless of where it appears in the alphabetic sequency of parameter names. This ignores a row; to ignore a column see conditionEnabledBool.",
+      "An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row. To ignore a column see conditionEnabledBool.",
     type: "",
     default: "",
     categories: "",
@@ -728,11 +728,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "block_shuffleBlocksInEachGroup",
+    name: "block_shuffleBlocksWithinGroups",
     availability: "now",
     example: "A",
     explanation:
-      'NOT YET IMPLEMENTED. block_shuffleBlocksInEachGroup (default is empty cell) allows the scientist to group blocks by assigning them the same group name (an alphanumeric string), and requests shuffling the order of blocks within each group. \n\nA "group" is defined by assigning the same group name to all the conditions in several contiguous blocks.  There can be many groups, each with a different name. Each cell in this row must be empty or have a group name, all the cells in a block must be the same, and all the blocks in a group must be contiguous and have the same group name. These group names are used solely by block_shuffleBlocksInEachGroup. \n\nShuffling preserves the total number of blocks and conditions. To ease analysis, despite block and group shuffling, each block retains its original block number in the CSV results file. Blocks are performed and reported in the shuffled column order, left to right, so in the CSV results, the block number sequence will be nonmonotonic and will vary across participants.',
+      'NOT YET IMPLEMENTED. block_shuffleBlocksWithinGroups (default is empty cell) allows the scientist to group blocks by assigning them the same group name (an alphanumeric string), and requests shuffling the order of blocks within each group. \n\nA "group" is defined by assigning the same group name to all the conditions in several contiguous blocks.  There can be many groups, each with a different name. Each cell in this row must be empty or have a group name, all the cells in a block must be the same (either empty or same group name), and all the blocks in a group must be contiguous and have the same group name. These group names are used solely by block_shuffleBlocksWithinGroups. \n\nShuffling preserves the total number of blocks and conditions. To ease analysis, despite block and group shuffling, each block retains its original block number in the CSV results file. Blocks are performed and reported in the shuffled column order, left to right, so in the CSV results, the block number sequence will be nonmonotonic and will vary across participants.',
     type: "text",
     default: "",
     categories: "",
@@ -1213,7 +1213,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "instructionForBlock (empty default, which has no effect) is instructional text to be presented once at the beginning of the block, before running any trial of any condition. This text replaces whatever were the condition's default instructions, which depend on targetTask and targetKind. An empty field requests the default text, so write #NONE to suppress block instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. Use the string #PAGE_BREAK to insert a page break. You can use an unlimited number of pages. You should normally end each page with the symbol #PROCEED, which will be replaced by text telling the participant how to continue to the next page: offering one or both of hitting RETURN and clicking the PROCEED button, as appropriate given the setting of the responseClickedBool and responseTypedBool parameters (see https://trello.com/c/OI2CzqX6). If the block has multiple conditions, then EasyEyes will present every unique set of block instructions, one after another, before the first trial. FUTURE: Support Markdown to allow simple formatting, including italic and bold. FUTURE: If the participant has requested translation to another language, then we use Google Translate to do so. ",
+      "instructionForBlock (empty default, which has no effect) is instructional text to be presented once at the beginning of the block, before running any trial of any condition. This text replaces whatever were the condition's default instructions, which depend on targetTask and targetKind. An empty field requests the default text, so write #NONE to suppress block instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. Use the string #PAGE_BREAK to insert a page break. You can use an unlimited number of pages. You should normally end each page with the symbol #PROCEED, which will be replaced by text telling the participant how to continue to the next page: offering one or both of hitting RETURN and clicking the PROCEED button, as appropriate given the setting of the responseClickedBool and responseTypedBool parameters (see https://trello.com/c/OI2CzqX6). If the block has multiple conditions, then EasyEyes will present every unique set of block instructions, one after another, before the first trial. FUTURE: Support Markdown to allow simple formatting, including italic and bold. FUTURE: We add a new parameter instructionURL that accepts a URL to a Google Sheets doc, similar to EasyEyes International Phrases, but set up by the Scientist, and when it's provided, instructionForXXX, rather than text, expects a phrase name, like EE_Welcome, and  pulls from that Sheets doc the named phrase in the current language. \n",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "instructionForExperiment",
+    availability: "now",
+    example: "",
+    explanation:
+      "NOT YET IMPLEMENTED. instructionForExperiment (empty default, which has no effect) is instructional text to be presented once at the beginning of the whole experiment, before beginning the first block. It can appear in any condition, e.g. in the last condition of the last block, but is presented first, before the first first block. If instructionForExperiment is defined in more than one condition in the experiment, then the several instances are concatenated, in their order of appearance in the experiment spreadsheet after shuffling. ",
     type: "text",
     default: "",
     categories: "",
@@ -1229,11 +1239,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "internationalPhrasesURL",
+    availability: "now",
+    example: "",
+    explanation:
+      "NOT YET IMPLEMENTED. internationalPhrasesURL accepts a URL to a Google Sheets doc, similar to EasyEyes International Phrases, but set up by the Scientist. When it's provided in a condition, the instructionForXXX parameters for that condition, rather than literal text, accept a phrase name, like EE_Welcome, and pull the named phrase in the current language from the Sheets doc pointed to by internationalPhrasesURL. internationalPhrasesURL can provide a URL (same or different) for each condition that needs it. Each condition operates independently of the rest. For the table to be valid it must include the first 4 rows of the EasyEyes International Phrases: language, EE_languageDirection, EE_languageUseSpace, EE_languageFont. Allowing multiple phrase tables with different language coverage seems needlessly confusing for all concerned, so just copy the first four rows (all the columns) of the EasyEyes International Phrases spreadsheet, and add new rows below, one for each new phrase. Our international phrases doc is designed to make it easy for us to add new languages (by adding a new column for each language). Please send your request to denis.pelli@nyu.edu. He will need to know: the ISO two-letter code for the language (https://www.sitepoint.com/iso-2-letter-language-codes/), the language direction (left to right or right to left), and whether it uses spaces. Once EasyEyes adds a new language, the EasyEyes compiler will insist that every scientist's internationalPhrasesURL Google Sheets doc also include that language. ",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
     name: "instructionForResponseWhere",
     availability: "now",
     example: "topLeft",
     explanation:
-      'NOT YET IMPLEMENTED: instructionForResponseWhere can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
+      'NOT YET IMPLEMENTED. instructionForResponseWhere can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
     type: "categorical",
     default: "topLeft",
     categories: "none, topLeft, bottomLeft",
@@ -2411,7 +2431,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "faces",
     explanation:
-      "NOT YET IMPLEMENTED. The name of a folder of images, to be used when targetKind==image. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+      "NOT YET IMPLEMENTED. The name of a folder of images, to be used when targetKind==image. On each trial, the target is sampled randomly, without replacement from the images in the image folder. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
     type: "text",
     default: "",
     categories: "",
@@ -2629,7 +2649,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "identify",
     explanation:
-      'Can be one or more of the following categories, separated by commas,\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant will be presented a question.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'Can be one or more of the following categories, separated by commas,\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant is asked a question, using a questionAndAnswerXXX parameter.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.\nNOT YET IMPLEMENTED: \n• rate. The participant is invited to rate on a scale of 1 to 7. The targetKind can be reading, image, or sound.',
     type: "categorical",
     default: "identify",
     categories: "identify, detect, questionAndAnswer",
