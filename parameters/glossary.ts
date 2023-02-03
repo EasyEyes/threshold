@@ -324,20 +324,20 @@ export const GLOSSARY: Glossary = {
     name: "_online2Pay",
     availability: "now",
     type: "numerical",
-    default: "",
+    default: "0",
   },
   _online2PayCurrency: {
     name: "_online2PayCurrency",
     availability: "now",
     type: "categorical",
-    default: "USDollar",
-    categories: ["USDollar", "UKPound"],
+    default: "USD",
+    categories: ["USD", "GBP"],
   },
   _online2PayPerHour: {
     name: "_online2PayPerHour",
     availability: "now",
     type: "numerical",
-    default: "",
+    default: "0",
   },
   _online2ProlificProjectID: {
     name: "_online2ProlificProjectID",
@@ -1084,8 +1084,8 @@ export const GLOSSARY: Glossary = {
   },
   "%": { name: "%", availability: "now", type: "", default: "" },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
-  block_shuffleBlocksInEachGroup: {
-    name: "block_shuffleBlocksInEachGroup",
+  block_shuffleBlocksWithinGroups: {
+    name: "block_shuffleBlocksWithinGroups",
     availability: "now",
     type: "text",
     default: "",
@@ -1388,10 +1388,22 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  instructionForExperiment: {
+    name: "instructionForExperiment",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   instructionForResponse: {
     name: "instructionForResponse",
     availability: "now",
     type: "text",
+    default: "",
+  },
+  internationalPhrasesURL: {
+    name: "internationalPhrasesURL",
+    availability: "now",
+    type: "",
     default: "",
   },
   instructionForResponseWhere: {
@@ -1831,6 +1843,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "",
+  },
+  showBeepButtonOnBlockInstructionBool: {
+    name: "showBeepButtonOnBlockInstructionBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
   },
   showBoundingBoxBool: {
     name: "showBoundingBoxBool",

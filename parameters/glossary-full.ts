@@ -104,7 +104,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "hdrMovie",
     explanation:
-      "NOT YET IMPLEMENTED. _compatibleDisplay requires support for key display features:\nHDRMovie: Browser supports HDR movies.\ntenBit: Display supports 10-bit imaging. https://trello.com/c/VxGHyxDa\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, and we might not support it. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs. Hardly anyone knows which browsers support any given codecs. I wonder if there is any online machine readable table that reports which browsers support each video codec. Then we could read that to update our browser compatibility. We can add any codec that FFMPEG supports, but that may require a bit of code that is custom to the codec.",
+      "NOT YET IMPLEMENTED. _compatibleDisplay requires support for key display features:\nHDRMovie: Browser supports HDR movies.\ntenBit: Display supports 10-bit imaging. https://trello.com/c/VxGHyxDa\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
     type: "multicategorical",
     default: "",
     categories: "hdrMovie, tenBit",
@@ -145,7 +145,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "NOT YET IMPLEMENTED. _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever viewingDistanceSmallEnoughToAllowScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever viewingDistanceSmallEnoughToAllowScreenHeightDeg is greater than zero.",
+      "NOT YET IMPLEMENTED. _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever needScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever needScreenHeightDeg is greater than zero.",
     type: "integer",
     default: "",
     categories: "",
@@ -346,29 +346,29 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "7.5",
     explanation:
-      "_online2Pay (no default) specifies the payment (a number) to offer to each participant. The currency is specified by _online2PayCurrency.  The experiment can specify _online2Pay or _online2PayPerHour, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+      "_online2Pay (default zero) specifies the payment (a number) to offer to each participant. The currency is specified by _online2PayCurrency.  If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. In deciding whether to participate, potential participants will consider _online1Title, _online2Description, _online2Minutes, and the pay. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
     type: "numerical",
-    default: "",
+    default: "0",
     categories: "",
   },
   {
     name: "_online2PayCurrency",
     availability: "now",
-    example: "USDollar",
+    example: "USD",
     explanation:
-      "_online2PayCurrency (default USDollar) specifies the currency of the payment: USDollar or UKPound. Prolific has no API to change this, but EasyEyes will confirm that Prolific is using the currency declared by _online2PayCurrency. Prolific allows your user account to be in USDollar or UKPound, and can change an account's currency in response to a written request, but only rarely. Some users of EasyEyes will be in UK and will naturally prefer to pay Prolific and participants in UKPounds. EasyEyes can't change Prolific's choice of currency, but by setting this parameter you can ask EasyEyes to make sure that Prolific is using the currency assumed by the spreadsheet. If not, then EasyEyes will flag this as a fatal error before deployment. You can then fix the currency in your experiment, and adjust the numeric pay to provide the desired compensation. ",
+      "_online2PayCurrency (default USD) specifies the currency of the payment: US Dollars (USD) or Great Britain Pounds (GBP). Prolific has no API to change this, but EasyEyes will confirm that Prolific is using the currency declared by _online2PayCurrency. Prolific allows your user account to be in USD or GBP, and can change an account's currency in response to a written request, but only rarely. Some users of EasyEyes will be in UK and will likely prefer to pay Prolific and participants in GBP. EasyEyes can't change Prolific's choice of currency, but by setting this parameter you can ask EasyEyes to make sure that Prolific is using the currency assumed by your spreadsheet. If not, then EasyEyes will flag this as a fatal error before deployment. You can then fix the currency in your experiment, and adjust the numeric pay to provide the desired compensation. ",
     type: "categorical",
-    default: "USDollar",
-    categories: "USDollar, UKPound",
+    default: "USD",
+    categories: "USD, GBP",
   },
   {
     name: "_online2PayPerHour",
     availability: "now",
     example: "15",
     explanation:
-      "_online2PayPerHour (no default) specifies the hourly rate (a number) that will determine (with _online2Minutes) the payment to offer to each participant. The currency is specified by _online2PayCurrency. The experiment can specify _online2PayPerHour or _online2Pay, not both. The compiler will enforce this. In deciding whether to participate, potential participants will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour), which Prolific computes and displays.",
+      "_online2PayPerHour (default zero) specifies the hourly rate (a number) that will determine (with _online2Minutes) the payment to offer to each participant. The currency is specified by _online2PayCurrency.  If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. In deciding whether to participate, potential participants will consider _online1Title, _online2Description, _online2Minutes, and the pay. Participants often mention selecting a study by how interesting it sounds and its pay rate (dollars per hour), which Prolific computes and displays.",
     type: "numerical",
-    default: "",
+    default: "0",
     categories: "",
   },
   {
@@ -376,7 +376,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _online2ProlificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _online2ProlificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to switch your Prolific account from pre-Workspace into Workspace mode, but you can never switch it back to pre-Workspace mode. But that's ok as Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
+      "_online2ProlificProjectID. To use Prolific with EasyEyes, you must figure out whether Prolific is in its new (since mid-2022) \"Workspace\" mode or it's older non-Workspace mode (which may become obsolete). \nhttps://researcher-help.prolific.co/hc/en-gb/articles/4500057146140-Workspaces-\nBefore Prolific's Workspace mode arrived, there was no Project ID. In Workspace mode you assign funds to a folder which has a name and a project ID (a roughly 24-digit hexadecimal number). You can have  multiple studies in one project folder; they all share the same project ID. If your experiment table includes an _online2ProlificProjectID number, then EasyEyes will use it and call Prolific in Workspace mode. If _online2ProlificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode.  If you provide a wrong Project ID then you'll get an invalid address (404) when EasyEyes tries to access your Prolific workspace. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to upgrade your Prolific account from pre-Workspace into Workspace mode, but you cannot downgrade, which is fine since Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode your Prolific account is in, and expects you to provide a _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
     type: "text",
     default: "",
     categories: "",
@@ -386,7 +386,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "Prolific requires that the study declare whether approval of the participant submissions will manual (the EasyEyes default) or automatic.",
+      '_online2SubmissionApproval (default "manual") declares to Prolific whether evaluation of the  participant submissions (performance of the study) will be manual (the EasyEyes default) or automatic.',
     type: "categorical",
     default: "manual",
     categories: "manual, automatic",
@@ -712,7 +712,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row regardless of where it appears in the alphabetic sequency of parameter names. This ignores a row; to ignore a column see conditionEnabledBool.",
+      "An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row. To ignore a column see conditionEnabledBool.",
     type: "",
     default: "",
     categories: "",
@@ -728,11 +728,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "block_shuffleBlocksInEachGroup",
+    name: "block_shuffleBlocksWithinGroups",
     availability: "now",
     example: "A",
     explanation:
-      'NOT YET IMPLEMENTED. block_shuffleBlocksInEachGroup (default is empty cell) allows the scientist to group blocks by assigning them the same group name (an alphanumeric string), and requests shuffling the order of blocks within each group. \n\nA "group" is defined by assigning the same group name to all the conditions in several contiguous blocks.  There can be many groups, each with a different name. Each cell in this row must be empty or have a group name, all the cells in a block must be the same, and all the blocks in a group must be contiguous and have the same group name. These group names are used solely by block_shuffleBlocksInEachGroup. \n\nShuffling preserves the total number of blocks and conditions. To ease analysis, despite block and group shuffling, each block retains its original block number in the CSV results file. Blocks are performed and reported in the shuffled column order, left to right, so in the CSV results, the block number sequence will be nonmonotonic and will vary across participants.',
+      'NOT YET IMPLEMENTED. block_shuffleBlocksWithinGroups (default is empty cell) allows the scientist to group blocks by assigning them the same group name (an alphanumeric string), and requests shuffling the order of blocks within each group. \n\nA "group" is defined by assigning the same group name to all the conditions in several contiguous blocks.  There can be many groups, each with a different name. Each cell in this row must be empty or have a group name, all the cells in a block must be the same (either empty or same group name), and all the blocks in a group must be contiguous and have the same group name. These group names are used solely by block_shuffleBlocksWithinGroups. \n\nShuffling preserves the total number of blocks and conditions. To ease analysis, despite block and group shuffling, each block retains its original block number in the CSV results file. Blocks are performed and reported in the shuffled column order, left to right, so in the CSV results, the block number sequence will be nonmonotonic and will vary across participants.',
     type: "text",
     default: "",
     categories: "",
@@ -752,7 +752,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      'Set calibrateBlindSpotBool TRUE (default FALSE) to make an initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position.',
+      'Set calibrateBlindSpotBool TRUE (default FALSE) to make an initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position. Use calibrateTrackDistanceBool or calibrateBlindSpotBool, not both.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -872,7 +872,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackDistanceBool=TRUE. \n\nFUTURE PLANS: calibrateBlindSpotBool??. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
+      "Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackDistanceBool=TRUE. Use calibrateTrackDistanceBool or calibrateBlindSpotBool, not both.\n\nFUTURE PLANS: calibrateBlindSpotBool??. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1213,7 +1213,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "instructionForBlock (empty default, which has no effect) is instructional text to be presented once at the beginning of the block, before running any trial of any condition. This text replaces whatever were the condition's default instructions, which depend on targetTask and targetKind. An empty field requests the default text, so write #NONE to suppress block instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. Use the string #PAGE_BREAK to insert a page break. You can use an unlimited number of pages. You should normally end each page with the symbol #PROCEED, which will be replaced by text telling the participant how to continue to the next page: offering one or both of hitting RETURN and clicking the PROCEED button, as appropriate given the setting of the responseClickedBool and responseTypedBool parameters (see https://trello.com/c/OI2CzqX6). If the block has multiple conditions, then EasyEyes will present every unique set of block instructions, one after another, before the first trial. FUTURE: Support Markdown to allow simple formatting, including italic and bold. FUTURE: If the participant has requested translation to another language, then we use Google Translate to do so. ",
+      "instructionForBlock (empty default, which has no effect) is instructional text to be presented once at the beginning of the block, before running any trial of any condition. This text replaces whatever were the condition's default instructions, which depend on targetTask and targetKind. An empty field requests the default text, so write #NONE to suppress block instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. Use the string #PAGE_BREAK to insert a page break. You can use an unlimited number of pages. You should normally end each page with the symbol #PROCEED, which will be replaced by text telling the participant how to continue to the next page: offering one or both of hitting RETURN and clicking the PROCEED button, as appropriate given the setting of the responseClickedBool and responseTypedBool parameters (see https://trello.com/c/OI2CzqX6). If the block has multiple conditions, then EasyEyes will present every unique set of block instructions, one after another, before the first trial. FUTURE: Support Markdown to allow simple formatting, including italic and bold. FUTURE: We add a new parameter instructionURL that accepts a URL to a Google Sheets doc, similar to EasyEyes International Phrases, but set up by the Scientist, and when it's provided, instructionForXXX, rather than text, expects a phrase name, like EE_Welcome, and  pulls from that Sheets doc the named phrase in the current language. \n",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "instructionForExperiment",
+    availability: "now",
+    example: "",
+    explanation:
+      "NOT YET IMPLEMENTED. instructionForExperiment (empty default, which has no effect) is instructional text to be presented once at the beginning of the whole experiment, before beginning the first block. It can appear in any condition, e.g. in the last condition of the last block, but is presented first, before the first first block. If instructionForExperiment is defined in more than one condition in the experiment, then the several instances are concatenated, in their order of appearance in the experiment spreadsheet after shuffling. ",
     type: "text",
     default: "",
     categories: "",
@@ -1229,11 +1239,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "internationalPhrasesURL",
+    availability: "now",
+    example: "",
+    explanation:
+      "NOT YET IMPLEMENTED. internationalPhrasesURL accepts a URL to a Google Sheets doc, similar to EasyEyes International Phrases, but set up by the Scientist. When it's provided in a condition, the instructionForXXX parameters for that condition, rather than literal text, accept a phrase name, like EE_Welcome, and pull the named phrase in the current language from the Sheets doc pointed to by internationalPhrasesURL. internationalPhrasesURL can provide a URL (same or different) for each condition that needs it. Each condition operates independently of the rest. For the table to be valid it must include the first 4 rows of the EasyEyes International Phrases: language, EE_languageDirection, EE_languageUseSpace, EE_languageFont. Allowing multiple phrase tables with different language coverage seems needlessly confusing for all concerned, so just copy the first four rows (all the columns) of the EasyEyes International Phrases spreadsheet, and add new rows below, one for each new phrase. Our international phrases doc is designed to make it easy for us to add new languages (by adding a new column for each language). Please send your request to denis.pelli@nyu.edu. He will need to know: the ISO two-letter code for the language (https://www.sitepoint.com/iso-2-letter-language-codes/), the language direction (left to right or right to left), and whether it uses spaces. Once EasyEyes adds a new language, the EasyEyes compiler will insist that every scientist's internationalPhrasesURL Google Sheets doc also include that language. ",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
     name: "instructionForResponseWhere",
     availability: "now",
     example: "topLeft",
     explanation:
-      'NOT YET IMPLEMENTED: instructionForResponseWhere can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
+      'NOT YET IMPLEMENTED. instructionForResponseWhere can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
     type: "categorical",
     default: "topLeft",
     categories: "none, topLeft, bottomLeft",
@@ -1959,6 +1979,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "showBeepButtonOnBlockInstructionBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "NOT YET IMPLEMENTED. showBeepButtonOnBlockInstructionBool (default TRUE) shows a Beep button in the upper right corner of the block-instruction page. Typically every trial beeps when the response was correct, so it's good to give the participant a chance to get the sound working before beginning the block. However, some tasks, e.g. rating, do not use sound at all, and then the Beep button is superfluous.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "showBoundingBoxBool",
     availability: "now",
     example: "TRUE",
@@ -2401,7 +2431,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "faces",
     explanation:
-      "NOT YET IMPLEMENTED. The name of a folder of images, to be used when targetKind==image. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+      "NOT YET IMPLEMENTED. The name of a folder of images, to be used when targetKind==image. On each trial, the target is sampled randomly, without replacement from the images in the image folder. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
     type: "text",
     default: "",
     categories: "",
@@ -2619,7 +2649,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "identify",
     explanation:
-      'Can be one or more of the following categories, separated by commas,\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant will be presented a question.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.',
+      'Can be one or more of the following categories, separated by commas,\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant is asked a question, using a questionAndAnswerXXX parameter.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.\nNOT YET IMPLEMENTED: \n• rate. The participant is invited to rate on a scale of 1 to 7. The targetKind can be reading, image, or sound.',
     type: "categorical",
     default: "identify",
     categories: "identify, detect, questionAndAnswer",

@@ -11,192 +11,12 @@ export const checkSystemCompatibility = (
   // handle language
   handleLanguage(lang, rc, useEnglishNamesForLanguage);
 
-  var compatibleBrowser = reader.read("_compatibleBrowser")[0].split(",");
-  var deviceBrowser = rc.browser.value;
-  var compatibleBrowserVersionMinimum = reader.read(
-    "_compatibleBrowserVersionMinimum"
-  )[0];
-  var deviceBrowserVersion = rc.browserVersion.value;
-  var compatibleDevice = reader.read("_compatibleDeviceType")[0].split(",");
-  var deviceType = rc.deviceType.value;
-  var compatibleOS = reader.read("_compatibleOperatingSystem")[0].split(",");
-  var deviceSysFamily = rc.systemFamily.value;
-  var compatibleProcessorCoresMinimum = reader.read(
-    "_compatibleProcessorCoresMinimum"
-  )[0];
-  var hardwareConcurrency = rc.concurrency.value;
-  var computeRandomMHz = rc.computeRandomMHz ? rc.computeRandomMHz.value : 0;
   var Language = rc.language.value;
 
-  if (hardwareConcurrency <= 0)
-    hardwareConcurrency = Math.round(2 * computeRandomMHz);
-
-  deviceBrowserVersion = deviceBrowserVersion.split(".");
-  if (deviceBrowserVersion.length >= 2)
-    deviceBrowserVersion = Number(
-      deviceBrowserVersion[0] +
-        "." +
-        Math.round(deviceBrowserVersion[1] * 10) / 10
-    );
-  else deviceBrowserVersion = Number(deviceBrowserVersion[0]);
-
-  if (deviceSysFamily == "Mac") deviceSysFamily = "macOS";
-  if (deviceBrowser == "Microsoft Edge") deviceBrowser = "Edge";
-  var deviceIsCompatibleBool = true;
-  var msg = [];
-  // compatibilityType ----> all, not, or a browser name
-  const browserCompatibilityType = compatibleBrowser[0].trim().slice(0, 3);
-  const OSCompatibilityType = compatibleOS[0].trim().slice(0, 3);
-
-  // COMPUTE deviceIsCompatibleBool and compatibilityRequirements
-  switch (browserCompatibilityType) {
-    case "all": // ignore browser
-      switch (OSCompatibilityType) {
-        case "all": //ignore OSes
-          msg.push(phrases.EE_compatibleDeviceCores[Language]);
-          break;
-        case "not": // report incompatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool &&
-            !compatibleOS.includes("not" + deviceSysFamily);
-          msg.push(phrases.EE_compatibleNotOSDeviceCores[Language]);
-          break;
-        default: // report compatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool && compatibleOS.includes(deviceSysFamily);
-          msg.push(phrases.EE_compatibleOSDeviceCores[Language]);
-          break;
-      }
-      break;
-    case "not": //report incompatible browsers, ignore browser version
-      deviceIsCompatibleBool =
-        deviceIsCompatibleBool &&
-        !compatibleBrowser.includes("not" + deviceBrowser);
-      switch (OSCompatibilityType) {
-        case "all": //ignore OSes
-          msg.push(phrases.EE_compatibleBrowserDeviceCores[Language]);
-          break;
-        case "not": //report incompatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool &&
-            !compatibleOS.includes("not" + deviceSysFamily);
-          msg.push(phrases.EE_compatibleNotBrowserNotOSDeviceCores[Language]);
-          break;
-        default: //report compatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool && compatibleOS.includes(deviceSysFamily);
-          msg.push(phrases.EE_compatibleNotBrowserOSDeviceCores[Language]);
-          break;
-      }
-      break;
-    default: // report compatible browsers
-      deviceIsCompatibleBool =
-        deviceIsCompatibleBool && compatibleBrowser.includes(deviceBrowser);
-      switch (OSCompatibilityType) {
-        case "all":
-          if (compatibleBrowserVersionMinimum > 0) {
-            //report browser version
-            deviceIsCompatibleBool =
-              deviceIsCompatibleBool &&
-              deviceBrowserVersion >= compatibleBrowserVersionMinimum;
-            msg.push(phrases.EE_compatibleBrowserVersionDeviceCores[Language]);
-          } //ignore browser version
-          else msg.push(phrases.EE_compatibleBrowserDeviceCores[Language]);
-          break;
-        case "not": //report incompatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool &&
-            !compatibleOS.includes("not" + deviceSysFamily);
-          if (compatibleBrowserVersionMinimum > 0) {
-            //report browser version
-            deviceIsCompatibleBool =
-              deviceIsCompatibleBool &&
-              deviceBrowserVersion >= compatibleBrowserVersionMinimum;
-            msg.push(phrases.EE_compatibleBrowserNotOSDeviceCores[Language]);
-          } //ignore browser version
-          else msg.push(phrases.EE_compatibleBrowserNotOSDeviceCores[Language]);
-          break;
-        default: //report compatible browsers
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool && compatibleOS.includes(deviceSysFamily);
-          if (compatibleBrowserVersionMinimum > 0) {
-            //report browser version
-            deviceIsCompatibleBool =
-              deviceIsCompatibleBool &&
-              deviceBrowserVersion >= compatibleBrowserVersionMinimum;
-            msg.push(
-              phrases.EE_compatibleBrowserVersionOSDeviceCores[Language]
-            );
-          } //ignore browser version
-          else msg.push(phrases.EE_compatibleBrowserOSDeviceCores[Language]);
-          break;
-      }
-      break;
-  }
-  deviceIsCompatibleBool =
-    deviceIsCompatibleBool && compatibleDevice.includes(deviceType);
-  deviceIsCompatibleBool =
-    deviceIsCompatibleBool &&
-    hardwareConcurrency >= compatibleProcessorCoresMinimum;
-  // Do substitutions to plug in the requirements.
-  // BBB = allowed browser(s), separated by "or"
-  // 111 = minimum version
-  // OOO = allowed operating system(s), , separated by "or"
-  // DDD = allowed deviceType(s) , separated by "or"s
-  // 222 = minimum number of cpu cores
-  // Each allowed field can hold one, e.g. "Chrome", or several possibilities, e.g. "Chrome or Firefox".
-  // Source code for StringOfItems and StringOfNotItems below.
-
-  msg.forEach((item, idx, arr) => {
-    // Incompatible with items connected by AND.
-    arr[idx] = arr[idx].replace(/bbb/g, StringOfNotItems(compatibleBrowser));
-    arr[idx] = arr[idx].replace(/ooo/g, StringOfNotItems(compatibleOS));
-
-    //Compatible with items connected by OR.
-    arr[idx] = arr[idx].replace(
-      /BBB/g,
-      StringOfItems(compatibleBrowser, rc.language.value)
-    );
-    arr[idx] = arr[idx].replace(
-      /OOO/g,
-      StringOfItems(compatibleOS, rc.language.value)
-    );
-    arr[idx] = arr[idx].replace(
-      /DDD/g,
-      StringOfItems(compatibleDevice, rc.language.value)
-    );
-    arr[idx] = arr[idx].replace(
-      /111/g,
-      compatibleBrowserVersionMinimum.toString()
-    );
-    arr[idx] = arr[idx].replace(
-      /222/g,
-      compatibleProcessorCoresMinimum.toString()
-    );
-  });
-
-  const compatibilityRequirements = msg;
-  //Create describeDevice, a sentence describing the participant's device.
-  msg = phrases.EE_describeDevice[Language];
-  // Do substitutions to describe the actual device.
-  // BBB = browser
-  // 111 = version
-  // OOO = operating system
-  // DDD = deviceType
-  // 222 = number of cpu cores
-  msg = msg.replace(/BBB/g, deviceBrowser);
-  msg = msg.replace(/111/g, deviceBrowserVersion.toString());
-  msg = msg.replace(/OOO/g, deviceSysFamily);
-  msg = msg.replace(/DDD/g, deviceType);
-  msg = msg.replace(
-    /222/g,
-    hardwareConcurrency > 0
-      ? hardwareConcurrency
-      : Math.round(2 * computeRandomMHz)
-  );
-  msg = msg.replace(/Mac/g, "macOS");
-  msg = msg.replace(/OS X/g, "macOS");
-  msg = msg.replace(/Microsoft Edge/g, "Edge");
+  const requirements = getCompatibilityRequirements(reader, Language, true, rc);
+  const compatibilityRequirements = requirements.compatibilityRequirements;
+  var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
+  var msg = requirements.describeDevice;
 
   // add screen size to compatibility test
   // Get screenWidthPx and screenHeightPx of the participant's screen
@@ -361,6 +181,249 @@ export const checkSystemCompatibility = (
     msg: msg,
     proceed: deviceIsCompatibleBool,
     promptRefresh: promptRefresh,
+  };
+};
+
+export const getCompatibilityRequirements = (
+  reader,
+  Language,
+  includeDeviceIsCompatibleBool,
+  rc = null
+) => {
+  //  If includeDeviceIsCompatibleBool is true, then the returned data will include deviceIsCompatibleBool.
+  //  If includeDeviceIsCompatibleBool is false, then the returned data will not include deviceIsCompatibleBool - only the compatibility requirements as an array of strings (used in scientist page) - no rc is needed in this case.
+
+  //values from the experiment table
+  var compatibleBrowser = reader.read("_compatibleBrowser")[0].split(",");
+  var compatibleBrowserVersionMinimum = reader.read(
+    "_compatibleBrowserVersionMinimum"
+  )[0];
+  var compatibleDevice = reader.read("_compatibleDeviceType")[0].split(",");
+  var compatibleOS = reader.read("_compatibleOperatingSystem")[0].split(",");
+  var compatibleProcessorCoresMinimum = reader.read(
+    "_compatibleProcessorCoresMinimum"
+  )[0];
+
+  const deviceInfo = {};
+  // if includeDeviceIsCompatibleBool is false, then we don't need to get the device info
+  if (includeDeviceIsCompatibleBool) {
+    deviceInfo["deviceBrowser"] = rc.browser.value;
+    deviceInfo["deviceBrowserVersion"] = rc.browserVersion.value;
+    deviceInfo["deviceType"] = rc.deviceType.value;
+    deviceInfo["deviceSysFamily"] = rc.systemFamily.value;
+    deviceInfo["hardwareConcurrency"] = rc.concurrency.value;
+    deviceInfo["computeRandomMHz"] = rc.computeRandomMHz
+      ? rc.computeRandomMHz.value
+      : 0;
+  } else {
+    // default values
+    // will be ignored in the return value
+    deviceInfo["deviceBrowser"] = "";
+    deviceInfo["deviceBrowserVersion"] = "";
+    deviceInfo["deviceType"] = "";
+    deviceInfo["deviceSysFamily"] = "";
+    deviceInfo["hardwareConcurrency"] = 0;
+    deviceInfo["computeRandomMHz"] = 0;
+  }
+
+  // some adjustments to the device info
+  if (deviceInfo["hardwareConcurrency"] <= 0)
+    deviceInfo["hardwareConcurrency"] = Math.round(2 * computeRandomMHz);
+
+  deviceInfo["deviceBrowserVersion"] =
+    deviceInfo["deviceBrowserVersion"]?.split(".");
+  if (deviceInfo["deviceBrowserVersion"]?.length >= 2)
+    deviceInfo["deviceBrowserVersion"] = Number(
+      deviceInfo["deviceBrowserVersion"][0] +
+        "." +
+        Math.round(deviceInfo["deviceBrowserVersion"][1] * 10) / 10
+    );
+  else
+    deviceInfo["deviceBrowserVersion"] = Number(
+      deviceInfo["deviceBrowserVersion"][0]
+    );
+
+  if (deviceInfo["deviceSysFamily"] == "Mac")
+    deviceInfo["deviceSysFamily"] = "macOS";
+  if (deviceInfo["deviceBrowser"] == "Microsoft Edge")
+    deviceInfo["deviceBrowser"] = "Edge";
+
+  var deviceIsCompatibleBool = true;
+  var msg = [];
+  // compatibilityType ----> all, not, or a browser name
+  const browserCompatibilityType = compatibleBrowser[0].trim().slice(0, 3);
+  const OSCompatibilityType = compatibleOS[0].trim().slice(0, 3);
+
+  // COMPUTE deviceIsCompatibleBool and compatibilityRequirements
+  switch (browserCompatibilityType) {
+    case "all": // ignore browser
+      switch (OSCompatibilityType) {
+        case "all": //ignore OSes
+          msg.push(phrases.EE_compatibleDeviceCores[Language]);
+          break;
+        case "not": // report incompatible OSes
+          deviceIsCompatibleBool =
+            deviceIsCompatibleBool &&
+            !compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
+          msg.push(phrases.EE_compatibleNotOSDeviceCores[Language]);
+          break;
+        default: // report compatible OSes
+          deviceIsCompatibleBool =
+            deviceIsCompatibleBool &&
+            compatibleOS.includes(deviceInfo["deviceSysFamily"]);
+          msg.push(phrases.EE_compatibleOSDeviceCores[Language]);
+          break;
+      }
+      break;
+    case "not": //report incompatible browsers, ignore browser version
+      deviceIsCompatibleBool =
+        deviceIsCompatibleBool &&
+        !compatibleBrowser.includes("not" + deviceInfo["deviceBrowser"]);
+      switch (OSCompatibilityType) {
+        case "all": //ignore OSes
+          msg.push(phrases.EE_compatibleBrowserDeviceCores[Language]);
+          break;
+        case "not": //report incompatible OSes
+          deviceIsCompatibleBool =
+            deviceIsCompatibleBool &&
+            !compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
+          msg.push(phrases.EE_compatibleNotBrowserNotOSDeviceCores[Language]);
+          break;
+        default: //report compatible OSes
+          deviceIsCompatibleBool =
+            deviceIsCompatibleBool &&
+            compatibleOS.includes(deviceInfo["deviceSysFamily"]);
+          msg.push(phrases.EE_compatibleNotBrowserOSDeviceCores[Language]);
+          break;
+      }
+      break;
+    default: // report compatible browsers
+      deviceIsCompatibleBool =
+        deviceIsCompatibleBool &&
+        compatibleBrowser.includes(deviceInfo["deviceBrowser"]);
+      switch (OSCompatibilityType) {
+        case "all":
+          if (compatibleBrowserVersionMinimum > 0) {
+            //report browser version
+            deviceIsCompatibleBool =
+              deviceIsCompatibleBool &&
+              deviceInfo["deviceBrowserVersion"] >=
+                compatibleBrowserVersionMinimum;
+            msg.push(phrases.EE_compatibleBrowserVersionDeviceCores[Language]);
+          } //ignore browser version
+          else msg.push(phrases.EE_compatibleBrowserDeviceCores[Language]);
+          break;
+        case "not": //report incompatible OSes
+          deviceIsCompatibleBool =
+            deviceIsCompatibleBool &&
+            !compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
+          if (compatibleBrowserVersionMinimum > 0) {
+            //report browser version
+            deviceIsCompatibleBool =
+              deviceIsCompatibleBool &&
+              deviceInfo["deviceBrowserVersion"] >=
+                compatibleBrowserVersionMinimum;
+            msg.push(phrases.EE_compatibleBrowserNotOSDeviceCores[Language]);
+          } //ignore browser version
+          else msg.push(phrases.EE_compatibleBrowserNotOSDeviceCores[Language]);
+          break;
+        default: //report compatible browsers
+          deviceIsCompatibleBool =
+            deviceIsCompatibleBool &&
+            compatibleOS.includes(deviceInfo["deviceSysFamily"]);
+          if (compatibleBrowserVersionMinimum > 0) {
+            //report browser version
+            deviceIsCompatibleBool =
+              deviceIsCompatibleBool &&
+              deviceInfo["deviceBrowserVersion"] >=
+                compatibleBrowserVersionMinimum;
+            msg.push(
+              phrases.EE_compatibleBrowserVersionOSDeviceCores[Language]
+            );
+          } //ignore browser version
+          else msg.push(phrases.EE_compatibleBrowserOSDeviceCores[Language]);
+          break;
+      }
+      break;
+  }
+
+  deviceIsCompatibleBool =
+    deviceIsCompatibleBool &&
+    compatibleDevice.includes(deviceInfo["deviceType"]);
+  deviceIsCompatibleBool =
+    deviceIsCompatibleBool &&
+    deviceInfo["hardwareConcurrency"] >= compatibleProcessorCoresMinimum;
+
+  // Do substitutions to plug in the requirements.
+  // BBB = allowed browser(s), separated by "or"
+  // 111 = minimum version
+  // OOO = allowed operating system(s), , separated by "or"
+  // DDD = allowed deviceType(s) , separated by "or"s
+  // 222 = minimum number of cpu cores
+  // Each allowed field can hold one, e.g. "Chrome", or several possibilities, e.g. "Chrome or Firefox".
+  // Source code for StringOfItems and StringOfNotItems below.
+
+  msg.forEach((item, idx, arr) => {
+    // Incompatible with items connected by AND.
+    arr[idx] = arr[idx].replace(/bbb/g, StringOfNotItems(compatibleBrowser));
+    arr[idx] = arr[idx].replace(/ooo/g, StringOfNotItems(compatibleOS));
+
+    //Compatible with items connected by OR.
+    arr[idx] = arr[idx].replace(
+      /BBB/g,
+      StringOfItems(compatibleBrowser, rc.language.value)
+    );
+    arr[idx] = arr[idx].replace(
+      /OOO/g,
+      StringOfItems(compatibleOS, rc.language.value)
+    );
+    arr[idx] = arr[idx].replace(
+      /DDD/g,
+      StringOfItems(compatibleDevice, rc.language.value)
+    );
+    arr[idx] = arr[idx].replace(
+      /111/g,
+      compatibleBrowserVersionMinimum.toString()
+    );
+    arr[idx] = arr[idx].replace(
+      /222/g,
+      compatibleProcessorCoresMinimum.toString()
+    );
+  });
+
+  //Create describeDevice, a sentence describing the participant's device.
+  let describeDevice = phrases.EE_describeDevice[Language];
+  // Do substitutions to describe the actual device.
+  // BBB = browser
+  // 111 = version
+  // OOO = operating system
+  // DDD = deviceType
+  // 222 = number of cpu cores
+  describeDevice = describeDevice.replace(/BBB/g, deviceInfo["deviceBrowser"]);
+  describeDevice = describeDevice.replace(
+    /111/g,
+    deviceInfo["deviceBrowserVersion"].toString()
+  );
+  describeDevice = describeDevice.replace(
+    /OOO/g,
+    deviceInfo["deviceSysFamily"]
+  );
+  describeDevice = describeDevice.replace(/DDD/g, deviceInfo["deviceType"]);
+  describeDevice = describeDevice.replace(
+    /222/g,
+    deviceInfo["hardwareConcurrency"] > 0
+      ? deviceInfo["hardwareConcurrency"]
+      : Math.round(2 * deviceInfo["computeRandomMHz"])
+  );
+  describeDevice = describeDevice.replace(/Mac/g, "macOS");
+  describeDevice = describeDevice.replace(/OS X/g, "macOS");
+  describeDevice = describeDevice.replace(/Microsoft Edge/g, "Edge");
+  return {
+    deviceIsCompatibleBool: includeDeviceIsCompatibleBool
+      ? deviceIsCompatibleBool
+      : undefined,
+    compatibilityRequirements: msg,
+    describeDevice: describeDevice,
   };
 };
 
