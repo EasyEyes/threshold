@@ -44,7 +44,7 @@ export const ILL_FORMED_UNDERSCORE_PARAM = (
 ): EasyEyesError => {
   return {
     name: `_Underscore parameter incorrectly formatted`,
-    message: `Experiment-scope parameters, such as <span class="error-parameter">${parameter}</span>, start with an underscore and require exactly one value, as they don't vary across conditions.`,
+    message: `Experiment-scope parameters, such as <span class="error-parameter">${parameter}</span>, start with an underscore and require at most one value, as they don't vary across conditions.`,
     hint: `Make sure that you give <span class="error-parameter">${parameter}</span> a value for only the first column.`,
     kind: "error",
     context: "preprocessor",

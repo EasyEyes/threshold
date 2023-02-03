@@ -333,9 +333,7 @@ const checkAndCorrectUnderscoreParams = (df: any): [any, EasyEyesError[]] => {
 const _valueOnlyInFirstPosition = (a: any[], parameter: string): boolean => {
   const unregulatedParameters = ["_about"];
   if (unregulatedParameters.includes(parameter)) return true;
-  return !a.some(
-    (value: any, i: number) => (i === 0 && !value) || (i !== 0 && value)
-  );
+  return !a.some((value: any, i: number) => i !== 0 && value !== "");
 };
 
 export const populateDefaultValues = (df: any): any => {

@@ -5,7 +5,7 @@ import {
   readingConfig,
   font as globalFont,
 } from "./global";
-import { colorRGBASnippetToRGBA, safeExecuteFunc } from "./utils";
+import { colorRGBASnippetToRGBA, safeExecuteFunc, sleep } from "./utils";
 
 function getCharacterSetShowPos(ele, showWhere) {
   switch (showWhere) {
@@ -181,26 +181,24 @@ const scaleFontSizeToFit = (elem, childrenClass) => {
   // TODO support multidimensional?
   const parent = elem.parentNode;
   const startingWidth = elem.offsetWidth;
-  const maxNonOverlapSizeForFont = 360; // adding this to avoid thinner fonts like pelli to cover the entire window, as their width woud be <<< screen width and loop will increase the font-size.
-  const startingSize = window
-    .getComputedStyle(elem, null)
-    .getPropertyValue("font-size");
   const containingWidth = parent.offsetWidth;
-  const unit = 5;
-  let newSize = parseFloat(startingSize);
   if (startingWidth === containingWidth) return;
   const scale = (x) =>
     document
       .querySelectorAll("." + childrenClass)
       .forEach((e) => (e.style["font-size"] = String(x) + "px"));
+  const unit = 1;
+  const maxNonOverlapSizeForFont = 360; // adding this to avoid thinner fonts like pelli to cover the entire window, as their width woud be <<< screen width and loop will increase the font-size.
+  let newSize = 12; // Start with smallest ADA complient font
   elem.style["overflow"] = "hidden";
   elem.style["white-space"] = "nowrap";
   while (
     elem.offsetWidth < containingWidth &&
     newSize + unit < maxNonOverlapSizeForFont
   ) {
-    scale(newSize + unit);
     newSize += unit;
+    scale(newSize);
   }
-  scale(newSize);
+  // Scale back down to the last size that fits
+  scale(newSize - unit);
 };
