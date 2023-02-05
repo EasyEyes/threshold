@@ -39,6 +39,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibratePhoneMicBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "_calibratePhoneMicBool (default FALSE) enables calibration of a new smartphone microphone. This is intended solely for use by scientists, and requires a calibrated reference microphone, initially just the miniDSP UMIK-1 (available from miniDSP for $79). The new calibration file will be added to the EasyEyes library of phone calibrations.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundAssumingThisICalibDBSPL",
     availability: "now",
     example: "",
