@@ -80,7 +80,33 @@ export const checkCrossSessionId = async (callback, language) => {
             </div>
           </div>`
         : briefInformation +
-          `<center><input type="text" id="textInput" class="swal2-input"></center><input type="file" accept=".txt" id="fileInput" class="swal2-file">`,
+          `<div style="margin:2% 0% 2% 0%" class="row align-items-center">
+            <div class="col-9">
+              <input type="text" id="textInput" style="max-width: 100%; font-size:larger" class="form-control" aria-label="Larger">
+            </div>
+            <div class="col-3">
+              <button id="okaybtn" class="btn btn-lg btn-dark">` +
+          phrases.EE_ok[language] +
+          `</button>
+            </div>
+          </div>
+          <div class="row" style="font-size:large; text-align:left; margin:2% 0% 2% 0.5%">
+            <div class="col-12" style="padding:1%">
+              <input type="file" style="display:none;" title="" accept=".txt" id="fileInput" class="swal2-file">
+              <button class="btn btn-secondary" style="padding:0.5% 2% 0.5% 2%;align-items: center;">
+                <label style="padding:0px" for="fileInput">` +
+          phrases.EE_browseForID[language] +
+          `</label>
+              </button>
+              <span id="labelFile" style="margin-left:1%">` +
+          phrases.EE_noFileSelected[language] +
+          `</span
+            </div>
+          </div>`,
+      // `<center>
+      //   <input type="text" id="textInput" class="swal2-input">
+      // </center>
+      // <input type="file" accept=".txt" id="fileInput" class="swal2-file">`,
       //confirmButtonText: phrases.EE_ok[language],
       showConfirmButton: false,
       customClass: {
