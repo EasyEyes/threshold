@@ -14,7 +14,6 @@ import { removeBeepButton, removeProceedButton } from "./instructions.js";
 import { recruitmentServiceData } from "./recruitmentService";
 import { downloadTextFile } from "./saveFile.js";
 import { removeClickableCharacterSet } from "./showCharacterSet";
-// import { logPsychoJSQuit } from "./temporaryLogger.js";
 import { showCursor, sleep } from "./utils";
 
 export async function quitPsychoJS(message = "", isCompleted, paramReader) {
