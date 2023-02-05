@@ -21,6 +21,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  _calibratePhoneMicBool: {
+    name: "_calibratePhoneMicBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   _calibrateSoundAssumingThisICalibDBSPL: {
     name: "_calibrateSoundAssumingThisICalibDBSPL",
     availability: "now",

@@ -39,6 +39,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibratePhoneMicBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "_calibratePhoneMicBool (default FALSE) enables calibration of a new smartphone microphone. This is intended solely for use by scientists, and requires a calibrated reference microphone, initially just the miniDSP UMIK-1 (available from miniDSP for $79). The new calibration file will be added to the EasyEyes library of phone calibrations.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundAssumingThisICalibDBSPL",
     availability: "now",
     example: "",
@@ -346,7 +356,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "7.5",
     explanation:
-      "_online2Pay (default 0) specifies the payment (a number) to offer to each participant. The currency is specified by _online2PayCurrency.  If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. In deciding whether to participate, potential participants will consider _online1Title, _online2Description, _online2Minutes, and the pay. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
+      "_online2Pay (default zero) specifies the payment (a number) to offer to each participant. The currency is specified by _online2PayCurrency.  If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. In deciding whether to participate, potential participants will consider _online1Title, _online2Description, _online2Minutes, and the pay. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour).",
     type: "numerical",
     default: "0",
     categories: "",
@@ -366,7 +376,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "15",
     explanation:
-      "_online2PayPerHour (default zero) specifies the hourly rate (a number) that will determine (with _online2Minutes) the payment to offer to each participant. The currency is specified by _online2PayCurrency.  If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. In deciding whether to participate, potential participants will consider _online1Title, _online2Description, _online2Minutes, and the pay. Participants often mention selecting my study by how interesting it sounds and by its pay rate (dollars per hour), which Prolific computes and displays.",
+      "_online2PayPerHour (default zero) specifies the hourly rate (a number) that will determine (with _online2Minutes) the payment to offer to each participant. The currency is specified by _online2PayCurrency.  If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. In deciding whether to participate, potential participants will consider _online1Title, _online2Description, _online2Minutes, and the pay. Participants often mention selecting a study by how interesting it sounds and its pay rate (dollars per hour), which Prolific computes and displays.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -376,7 +386,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _online2ProlificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _online2ProlificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to switch your Prolific account from pre-Workspace into Workspace mode, but you can never switch it back to pre-Workspace mode. But that's ok as Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
+      "_online2ProlificProjectID. To use Prolific with EasyEyes, you must figure out whether Prolific is in its new (since mid-2022) \"Workspace\" mode or it's older non-Workspace mode (which may become obsolete). \nhttps://researcher-help.prolific.co/hc/en-gb/articles/4500057146140-Workspaces-\nBefore Prolific's Workspace mode arrived, there was no Project ID. In Workspace mode you assign funds to a folder which has a name and a project ID (a roughly 24-digit hexadecimal number). You can have  multiple studies in one project folder; they all share the same project ID. If your experiment table includes an _online2ProlificProjectID number, then EasyEyes will use it and call Prolific in Workspace mode. If _online2ProlificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode.  If you provide a wrong Project ID then you'll get an invalid address (404) when EasyEyes tries to access your Prolific workspace. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to upgrade your Prolific account from pre-Workspace into Workspace mode, but you cannot downgrade, which is fine since Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode your Prolific account is in, and expects you to provide a _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
     type: "text",
     default: "",
     categories: "",
@@ -386,7 +396,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "Prolific requires that the study declare whether approval of the participant submissions will manual (the EasyEyes default) or automatic.",
+      '_online2SubmissionApproval (default "manual") declares to Prolific whether evaluation of the  participant submissions (performance of the study) will be manual (the EasyEyes default) or automatic.',
     type: "categorical",
     default: "manual",
     categories: "manual, automatic",
