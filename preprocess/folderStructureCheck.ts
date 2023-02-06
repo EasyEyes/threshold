@@ -57,7 +57,6 @@ import { EasyEyesError, INVALID_FOLDER_STRUCTURE } from "./errorMessages";
 import { getProjectByNameInProjectList } from "../../source/components/gitlabUtils";
 import { getUserInfo } from "../../source/components/user";
 
-// import {tempAccessToken} from "../../source/TemporaryLog"
 // const tempAccessToken = require("../../source/components/global").tempAccessToken;
 // es6 import tempAccessToken from "../../source/components/global"
 import { tempAccessToken } from "../../source/components/global";

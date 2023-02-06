@@ -54,12 +54,61 @@ export const checkCrossSessionId = async (callback, language) => {
       title: phrases.EE_IDRequested[language],
       html: hasStoredId
         ? detailInformation +
-          `<center><input type="text" value="` +
+          `<div style="margin:2% 0% 2% 0%" class="row align-items-center">
+            <div class="col-9">
+              <input type="text" value="` +
           storedId +
-          `" id="textInput" class="swal2-input"></center><input type="file" title="" accept=".txt" id="fileInput" class="swal2-file">`
+          `" id="textInput" style="max-width: 100%; font-size:larger" class="form-control" aria-label="Larger">
+            </div>
+            <div class="col-3">
+              <button id="okaybtn" class="btn btn-lg btn-dark">` +
+          phrases.EE_ok[language] +
+          `</button>
+            </div>
+          </div>
+          <div class="row" style="font-size:large; text-align:left; margin:2% 0% 2% 0.5%">
+            <div class="col-12" style="padding:1%">
+              <input type="file" style="display:none;" title="" accept=".txt" id="fileInput" class="swal2-file">
+              <button class="btn btn-secondary" style="padding:0.5% 2% 0.5% 2%;align-items: center;">
+                <label style="padding:0px" for="fileInput">` +
+          phrases.EE_browseForID[language] +
+          `</label>
+              </button>
+              <span id="labelFile" style="margin-left:1%">` +
+          phrases.EE_noFileSelected[language] +
+          `</span
+            </div>
+          </div>`
         : briefInformation +
-          `<center><input type="text" id="textInput" class="swal2-input"></center><input type="file" accept=".txt" id="fileInput" class="swal2-file">`,
-      confirmButtonText: phrases.EE_ok[language],
+          `<div style="margin:2% 0% 2% 0%" class="row align-items-center">
+            <div class="col-9">
+              <input type="text" id="textInput" style="max-width: 100%; font-size:larger" class="form-control" aria-label="Larger">
+            </div>
+            <div class="col-3">
+              <button id="okaybtn" class="btn btn-lg btn-dark">` +
+          phrases.EE_ok[language] +
+          `</button>
+            </div>
+          </div>
+          <div class="row" style="font-size:large; text-align:left; margin:2% 0% 2% 0.5%">
+            <div class="col-12" style="padding:1%">
+              <input type="file" style="display:none;" title="" accept=".txt" id="fileInput" class="swal2-file">
+              <button class="btn btn-secondary" style="padding:0.5% 2% 0.5% 2%;align-items: center;">
+                <label style="padding:0px" for="fileInput">` +
+          phrases.EE_browseForID[language] +
+          `</label>
+              </button>
+              <span id="labelFile" style="margin-left:1%">` +
+          phrases.EE_noFileSelected[language] +
+          `</span
+            </div>
+          </div>`,
+      // `<center>
+      //   <input type="text" id="textInput" class="swal2-input">
+      // </center>
+      // <input type="file" accept=".txt" id="fileInput" class="swal2-file">`,
+      //confirmButtonText: phrases.EE_ok[language],
+      showConfirmButton: false,
       customClass: {
         popup: "narrow-popup id-collection-popup",
         title: "centered-title",
@@ -70,38 +119,38 @@ export const checkCrossSessionId = async (callback, language) => {
       hideClass: {
         popup: "",
       },
-      preConfirm: (id) => {
-        let text = textInput.value;
-        let file = fileInput.files[0];
-        if (!file) {
-          if (!text || text.length < 1) {
-            const uploadOrValidIDError =
-              phrases.EE_ID_uploadOrValidID[language];
-            Swal.showValidationMessage(uploadOrValidIDError);
-            return false;
-          }
-          if (!/^[A-Za-z0-9]*$/.test(text)) {
-            const invalidIDError = phrases.EE_ID_invalidID[language];
-            Swal.showValidationMessage(invalidIDError);
-            return false;
-          }
-          callback(
-            text,
-            localStorageInfo ? localStorageInfo.session : null,
-            storedId
-          );
-          return true;
-        } else {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const participant = e.target.result.split("\n")[2].split(/\s+/g)[1];
-            const session = e.target.result.split("\n")[3].split(/\s+/g)[1];
-            callback(participant, session, participant);
-          };
-          reader.readAsText(file);
-          return true;
-        }
-      },
+      // preConfirm: (id) => {
+      //   let text = textInput.value;
+      //   let file = fileInput.files[0];
+      //   if (!file) {
+      //     if (!text || text.length < 1) {
+      //       const uploadOrValidIDError =
+      //         phrases.EE_ID_uploadOrValidID[language];
+      //       Swal.showValidationMessage(uploadOrValidIDError);
+      //       return false;
+      //     }
+      //     if (!/^[A-Za-z0-9]*$/.test(text)) {
+      //       const invalidIDError = phrases.EE_ID_invalidID[language];
+      //       Swal.showValidationMessage(invalidIDError);
+      //       return false;
+      //     }
+      //     callback(
+      //       text,
+      //       localStorageInfo ? localStorageInfo.session : null,
+      //       storedId
+      //     );
+      //     return true;
+      //   } else {
+      //     const reader = new FileReader();
+      //     reader.onload = (e) => {
+      //       const participant = e.target.result.split("\n")[2].split(/\s+/g)[1];
+      //       const session = e.target.result.split("\n")[3].split(/\s+/g)[1];
+      //       callback(participant, session, participant);
+      //     };
+      //     reader.readAsText(file);
+      //     return true;
+      //   }
+      // },
     }).then((result) => {
       if (result.isConfirmed) {
         resolve(true);
@@ -109,8 +158,33 @@ export const checkCrossSessionId = async (callback, language) => {
     });
     let fileInput = document.getElementById("fileInput");
     let textField = document.getElementById("textInput");
+    let okayBtn = document.getElementById("okaybtn");
+    okayBtn.onclick = () => {
+      console.log("Okay pressed");
+      let text = document.getElementById("textInput").value;
+      let file = document.getElementById("fileInput").files[0];
+      if (!text || text.length < 1) {
+        const uploadOrValidIDError = phrases.EE_ID_uploadOrValidID[language];
+        Swal.showValidationMessage(uploadOrValidIDError);
+        // return false;
+      } else if (!/^[A-Za-z0-9]*$/.test(text)) {
+        const invalidIDError = phrases.EE_ID_invalidID[language];
+        Swal.showValidationMessage(invalidIDError);
+        // return false;
+      } else {
+        callback(
+          text,
+          localStorageInfo ? localStorageInfo.session : null,
+          storedId
+        );
+        // return true;
+        Swal.clickConfirm();
+      }
+    };
     fileInput.onchange = () => {
       let file = fileInput.files[0];
+      let labelFile = document.getElementById("labelFile");
+      labelFile.innerHTML = file.name;
       const reader = new FileReader();
       reader.onload = (e) => {
         if (
@@ -120,6 +194,7 @@ export const checkCrossSessionId = async (callback, language) => {
           const participant = e.target.result.split("\n")[2].split(/\s+/g)[1];
           // const session = e.target.result.split("\n")[3].split(/\s+/g)[1];
           textField.value = participant;
+          Swal.resetValidationMessage();
         } else {
           const invalidFileError = phrases.EE_ID_invalidFile[language];
           Swal.showValidationMessage(invalidFileError);
