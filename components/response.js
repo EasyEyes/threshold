@@ -19,7 +19,8 @@
  * 15
  */
 
-import { phraseIdentificationResponse } from "./global";
+import { getFontFamilyName } from "./fonts";
+import { phraseIdentificationResponse, font } from "./global";
 import { logger, showCursor } from "./utils";
 
 export const _responseTypes = {
@@ -131,6 +132,8 @@ export const setupPhraseIdentification = (categories, reader, BC) => {
       categoryItem.id = `phrase-identification-category-item-${categoryChild}`;
       categoryItem.className = `phrase-identification-category-item`;
       categoryItem.innerHTML = categoryChild;
+      const fontFamily = getFontFamilyName(font.name);
+      categoryItem.style.fontFamily = fontFamily;
       categoryItem.onclick = () => {
         // Only register one response per category
         if (
@@ -153,7 +156,7 @@ export const setupPhraseIdentification = (categories, reader, BC) => {
           );
           correspondingFeedbackText.innerHTML = categoryChild;
           correspondingFeedbackText.classList.add(
-            categoryChild === targetWord
+            answerIsCorrect
               ? "phrase-identification-item-correct"
               : "phrase-identification-item-incorrect"
           );
