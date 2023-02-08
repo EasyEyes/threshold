@@ -261,13 +261,13 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_experimentName",
+    name: "_experimentSavePartialResultsBool",
     availability: "now",
-    example: "crowding11",
+    example: "",
     explanation:
-      '_experimentName specifies the name for the GitLab repository, which Pavlovia calls your "experiment". If empty, the compiler provides a default, which is the the table filename (without extension) plus the smallest integer greater than zero that results in an unused repo name in your Pavlovia account. Note that if the specified name corresponds to an existing repository, EasyEyes uses it, and new study files will replace old ones and results will accumulate. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.',
-    type: "text",
-    default: "",
+      "NOT YET IMPLEMENTED. _experimentSavePartialResultsBool (default TRUE) determines whether partial results are saved. This is a feature in Pavlovia that should be enabled or disabled by EasyEyes using the Pavlovia API. Pavlovia (and EasyEyes) charges one token per saved session. Incomplete sessions are free if they are not saved.",
+    type: "boolean",
+    default: "TRUE",
     categories: "",
   },
   {
@@ -285,7 +285,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_language (default English) is the English name of the initial language of the experiment, e.g. English, German, or Arabic. We currently support 28 languages, and it would be very easy to add more. Bear in mind that the translations, mostly by Google Translate, are far from perfect, but we will consider pasting in better translations for key phrases.",
+      "_language (default English) is the English name of the initial language of the experiment, e.g. English, German, or Arabic. We currently support 28 languages, and it would be very easy to add more. Bear in mind that the translations, mostly by Google Translate, are far from perfect, but we occasionally paste in better translations for key phrases.",
     type: "categorical",
     default: "English",
     categories:
@@ -658,16 +658,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_participantRecruitmentService",
-    availability: "now",
-    example: "Prolific",
-    explanation:
-      "Name of the recruitment service to be used: Prolific, SONA, MTurk. Only Prolific is currently available.  The key idea is two URLs that carry URL query parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. \nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nWe hope to add more recruitment services (especially MTurk and SONA). Right now we are focused on enhancing integration with Prolific, so as much as possible is specified in the experiment table, minimizing the required manual interaction with the Prolific web site.\nThe leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
-    type: "categorical",
-    default: "",
-    categories: "Prolific",
-  },
-  {
     name: "_pavloviaPreferRunningModeBool",
     availability: "now",
     example: "FALSE",
@@ -675,26 +665,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "NEW EXPLATION. Pavlovia offers two modes (RUNNING and PILOTING) for running your study. Remote data collection requires RUNNING mode. PILOTING mode is meant for checking and debugging and runs only from the Pavlovia console on the scientist's computer. The only advantage of the PILOTING mode is that it's always free. Unless your institution has a Pavlovia site license, RUNNING mode costs 20 pence per participant, and requires assigning tokens (money) in advance to each experiment. (Setting _compileAsNewExperiment=FALSE allows you to request that EasyEyes keep reusing the same experiment name, as you compile new versions, so you can assign tokens once to the experiment, when you begin testing, instead of before each compile.) Thus scientists with a site license will always prefer RUNNING mode. Without that license, scientists can save money by using PILOTING mode during development, and switch to RUNNING mode to test remote participants. _pavloviaPreferRunningModeBool allows you to express your preference. With an institutional site license, you'll always want the default TRUE. Without an institutional site license, you can save money by setting _pavloviaPreferRunningModeBool=FALSE during development, and TRUE for the actual remote testing. Without a site license, if you don't mind the 20 p expense, you can use RUNNING mode throughout (use the default _pavloviaPreferRunningModeBool=TRUE), and set _compileAsNewExperiment=FALSE to minimize the frequency at which you must assign tokens to the experiment.\n\nOLD EXPLANATION. Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, which prevents remote testing. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can send to your online participants. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. Thus, for most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. (Pavlovia has no API by which EasyEyes could do this for you.) If your experiment is already in RUNNING mode you can still switch to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
     type: "boolean",
     default: "TRUE",
-    categories: "",
-  },
-  {
-    name: "_prolificWebToken",
-    availability: "now",
-    example: "",
-    explanation:
-      "TEMPORARY. Confidential token from Prolific that authenticates the user. This is a security risk because any having this token can access all your data on Prolific. This will soon be replaced by a more secure scheme.",
-    type: "",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_prolificProjectID",
-    availability: "now",
-    example: "",
-    explanation:
-      "To use Prolific with EasyEyes, you must figure out whether Prolific is in its new \"Workspace\" mode or not. In Prolific's Workspace mode each study has a project ID, otherwise there are no project IDs. (There can be multiple studies in one project; they all share the same project ID.) If your experiment table includes a _prolificProjectID number then EasyEyes will use it and call Prolific in Workspace mode. If _prolificProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to switch your Prolific account from pre-Workspace into Workspace mode, but you can never switch it back to pre-Workspace mode. But that's ok as Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode Prolific is in, and expects you to provide a  _prolificProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about Prolific's mode. Does your study in Prolific have a Prolific Project ID? If yes, then Prolific is in Workspace mode, otherwise not. You can run all studies with the same _prolificProjectID, or have several projects and choose the best one for each study. ",
-    type: "text",
-    default: "",
     categories: "",
   },
   {
@@ -1629,6 +1599,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "readingCorpusShuffleBool",
+    availability: "now",
+    example: "",
+    explanation:
+      'NOT YET IMPLEMENTED. readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace character is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. ',
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "readingCorpus",
     availability: "now",
     example: "the-phantom-tollbooth.txt",
@@ -2441,7 +2421,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "faces",
     explanation:
-      "NOT YET IMPLEMENTED. The name of a folder of images, to be used when targetKind==image. On each trial, the target is sampled randomly, without replacement from the images in the image folder. The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetImageFolder. We could also allow our submit box to accept a folder, which it copies, including all the enclosed files, ignoring any enclosed folders.",
+      "NOT YET IMPLEMENTED. targetImageFolder (empty default) names a folder of images (each file must have extension APNG, AVIF, GIF, JPEG, JPG, JP2, PNG, SVG, or WebP) that may be used when targetKind==image. (JPG is just an abbreviation of the JPEG extension; JP2 indicates JPEG 2000.) On each trial, the target image is sampled randomly, without replacement, from the images in the image folder. (\"Without replacement\" considers all the trials of this condition of this block. Other conditions and blocks are independent.) The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the EasyEyesResources repository of the scientist's Pavlovia account. To be clear: The scientist creates a suitably named folder full of images, and zips that; the zip archive inherits the name of the folder. Each file in the folder must have one of the allowed image-file extensions. Different files can have different extensions. No subfolders are allowed. An experiment uses the folder by setting targetImageFolder to the name of the zip archive, without the extension.\n\nEach image with embedded icc color profile will be color managed. 10-bit rendering and HDR are automatic, but require use of 16-bit png or jpeg2000. Parameters allow the scientist to specify eccentricity, size, and duration. When the images have diverse size the scientist can instead specify image pixels per degree. \nCOLOR MANAGEMENT. The browser's color-managed rendering will take into account the ICC color profiles of the image and display. For accurate image rendering, each image should have an embedded ICC color profile. (The informal convention of assuming an sRGB profile when none is embedded seems too unreliable, across browsers, for research-grade stimuli.) \n\nHDR. A large proportion of computer displays produced in recent years support 10 bits per color channel, and most browsers now use the 10 bits when displaying HDR (High dynamic range) images using the HTML <img> tag. Several Netflix engineers studied how to achieve 10-bit display on current browsers using available image formats. \nhttps://netflixtechblog.com/enhancing-the-netflix-ui-experience-with-hdr-1e7506ad3e8\nThey recommend using 16-bit PNG or JPEG 2000. 16-bit PNG is supported by the several browsers we tested. As of September 2022, Safari was the only browser supporting JPEG 2000.\nhttps://caniuse.com/jpeg2000\nSurprisingly, another web page claims that JPEG2000 is also supported by Chrome and Firefox.\nhttps://fileinfo.com/extension/jp2\n\n[FUTURE: Instead of the zip archive, we could also allow our submit box to accept a folder, which it copies, including all the directly enclosed files.]",
     type: "text",
     default: "",
     categories: "",
@@ -2582,7 +2562,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "sounds",
     explanation:
-      "The name of a zip archive of sound files (each file can be in WAV or AAC format), to be used when targetKind==sound. The the zip archive is submitted to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the directly enclosed files.\n    For speech in noise (targetKind - sound and targetTask- identify) and tone in melody (targetKind- sound and targetTask- detect) experiments, the sound files must be directly inside the zip files and not in another folder within the zip files. Please refer to the example files.\n    Both WAV and AAC sound files can include multiple channels. Because of browser limitations, EasyEyes can use only up to 8 channels per file. AAC files are much more compact (about 10% the bytes as WAV, depending on data rate) but lossy. AAC files are as compact as MP3 files, with much better sound quality. We suggest starting with WAV, and switching to AAC only if you experience an undesirably long delay in loading your sounds. Switching to AAC will reduce your loading time ten-fold (or more, depending on data rate), but may reduce the sound quality slightly.",
+      "The name of a zip archive of sound files (each file can be in WAV or AAC format), to be used when targetKind==sound. The zip archive is submitted to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the directly enclosed files.]\n    For speech in noise (targetKind - sound and targetTask- identify) and tone in melody (targetKind- sound and targetTask- detect) experiments, the sound files must be directly inside the zip files and not in another folder within the zip files. Please refer to the example files.\n    Both WAV and AAC sound files can include multiple channels. Because of browser limitations, EasyEyes can use only up to 8 channels per file. AAC files are much more compact (about 10% the bytes as WAV, depending on data rate) but lossy. AAC files are as compact as MP3 files, with much better sound quality. We suggest starting with WAV, and switching to AAC only if you experience an undesirably long delay in loading your sounds. Switching to AAC will reduce your loading time ten-fold (or more, depending on data rate), but may reduce the sound quality slightly.",
     type: "text",
     default: "",
     categories: "",
