@@ -61,37 +61,6 @@ import { getUserInfo } from "../../source/components/user";
 // es6 import tempAccessToken from "../../source/components/global"
 import { tempAccessToken } from "../../source/components/global";
 
-export const test = async () => {
-  console.log("test");
-  // console.log("userRepoFiles", userRepoFiles) //userRepoFiles.requestedFolders
-  console.log("tempAccessToken", tempAccessToken);
-  if (!tempAccessToken.t) return;
-  const [user, resources, prolificToken] = await getUserInfo(tempAccessToken.t);
-  console.log("user", user);
-  console.log("resources", resources); // resources.folders
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    user.projectList,
-    "EasyEyesResources"
-  );
-  const encodedFilePath = encodeGitlabFilePath(`folders/Sines.zip`);
-  const repoID = parseInt(easyEyesResourcesRepo.id);
-  // Create auth header
-  const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
-
-  // Create Gitlab API request options
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-  const response = await fetch(
-    `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-    requestOptions
-  );
-  console.log("response", response);
-};
-
 export const getRequestedFoldersForStructureCheck = async (
   folderAndTargetKindObjectList: any[]
 ): Promise<any[]> => {
@@ -109,7 +78,7 @@ export const getRequestedFoldersForStructureCheck = async (
     allowEnterKey: false,
     didOpen: () => {
       // Question: does it do anything here? - PJ
-      Swal.showLoading(null);
+      Swal.showLoading();
     },
   });
 

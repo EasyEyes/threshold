@@ -243,11 +243,11 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  _experimentName: {
-    name: "_experimentName",
+  _experimentSavePartialResultsBool: {
+    name: "_experimentSavePartialResultsBool",
     availability: "now",
-    type: "text",
-    default: "",
+    type: "boolean",
+    default: "TRUE",
   },
   _invitePartingCommentsBool: {
     name: "_invitePartingCommentsBool",
@@ -1051,30 +1051,11 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  _participantRecruitmentService: {
-    name: "_participantRecruitmentService",
-    availability: "now",
-    type: "categorical",
-    default: "",
-    categories: ["Prolific"],
-  },
   _pavloviaPreferRunningModeBool: {
     name: "_pavloviaPreferRunningModeBool",
     availability: "now",
     type: "boolean",
     default: "TRUE",
-  },
-  _prolificWebToken: {
-    name: "_prolificWebToken",
-    availability: "now",
-    type: "",
-    default: "",
-  },
-  _prolificProjectID: {
-    name: "_prolificProjectID",
-    availability: "now",
-    type: "text",
-    default: "",
   },
   _requestEasyEyesIDBool: {
     name: "_requestEasyEyesIDBool",
@@ -1631,6 +1612,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "",
+  },
+  readingCorpusShuffleBool: {
+    name: "readingCorpusShuffleBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
   },
   readingCorpus: {
     name: "readingCorpus",

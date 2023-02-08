@@ -1,3 +1,4 @@
+import { GLOSSARY } from "../parameters/glossary";
 import { isProlificPreviewExperiment } from "./externalServices";
 import { phrases } from "./i18n";
 // import { rc } from "./global";
@@ -185,28 +186,25 @@ export const checkSystemCompatibility = (
 };
 
 export const getCompatibilityRequirements = (
-  reader,
+  reader = null,
   Language,
-  includeDeviceIsCompatibleBool,
-  rc = null
+  isForScientistPage,
+  rc = null,
+  parsed
 ) => {
-  //  If includeDeviceIsCompatibleBool is true, then the returned data will include deviceIsCompatibleBool.
-  //  If includeDeviceIsCompatibleBool is false, then the returned data will not include deviceIsCompatibleBool - only the compatibility requirements as an array of strings (used in scientist page) - no rc is needed in this case.
+  //  If isForScientistPage is true, then the returned data will include deviceIsCompatibleBool.
+  //  If isForScientistPage is false, then the returned data will not include deviceIsCompatibleBool - only the compatibility requirements as an array of strings (used in scientist page) - no rc is needed in this case.
 
   //values from the experiment table
-  var compatibleBrowser = reader.read("_compatibleBrowser")[0].split(",");
-  var compatibleBrowserVersionMinimum = reader.read(
-    "_compatibleBrowserVersionMinimum"
-  )[0];
-  var compatibleDevice = reader.read("_compatibleDeviceType")[0].split(",");
-  var compatibleOS = reader.read("_compatibleOperatingSystem")[0].split(",");
-  var compatibleProcessorCoresMinimum = reader.read(
-    "_compatibleProcessorCoresMinimum"
-  )[0];
+  var compatibleBrowser,
+    compatibleBrowserVersionMinimum,
+    compatibleDevice,
+    compatibleOS,
+    compatibleProcessorCoresMinimum;
 
   const deviceInfo = {};
-  // if includeDeviceIsCompatibleBool is false, then we don't need to get the device info
-  if (includeDeviceIsCompatibleBool) {
+  // if isForScientistPage is false, then we don't need to get the device info
+  if (!isForScientistPage) {
     deviceInfo["deviceBrowser"] = rc.browser.value;
     deviceInfo["deviceBrowserVersion"] = rc.browserVersion.value;
     deviceInfo["deviceType"] = rc.deviceType.value;
@@ -215,6 +213,16 @@ export const getCompatibilityRequirements = (
     deviceInfo["computeRandomMHz"] = rc.computeRandomMHz
       ? rc.computeRandomMHz.value
       : 0;
+
+    compatibleBrowser = reader.read("_compatibleBrowser")[0].split(",");
+    compatibleBrowserVersionMinimum = reader.read(
+      "_compatibleBrowserVersionMinimum"
+    )[0];
+    compatibleDevice = reader.read("_compatibleDeviceType")[0].split(",");
+    compatibleOS = reader.read("_compatibleOperatingSystem")[0].split(",");
+    compatibleProcessorCoresMinimum = reader.read(
+      "_compatibleProcessorCoresMinimum"
+    )[0];
   } else {
     // default values
     // will be ignored in the return value
@@ -224,11 +232,22 @@ export const getCompatibilityRequirements = (
     deviceInfo["deviceSysFamily"] = "";
     deviceInfo["hardwareConcurrency"] = 0;
     deviceInfo["computeRandomMHz"] = 0;
+
+    const compatibilityInfo = getCompatibilityInfoForScientistPage(parsed);
+    compatibleBrowser = compatibilityInfo.compatibleBrowser;
+    compatibleBrowserVersionMinimum =
+      compatibilityInfo.compatibleBrowserVersionMinimum;
+    compatibleDevice = compatibilityInfo.compatibleDevice;
+    compatibleOS = compatibilityInfo.compatibleOS;
+    compatibleProcessorCoresMinimum =
+      compatibilityInfo.compatibleProcessorCoresMinimum;
   }
 
   // some adjustments to the device info
   if (deviceInfo["hardwareConcurrency"] <= 0)
-    deviceInfo["hardwareConcurrency"] = Math.round(2 * computeRandomMHz);
+    deviceInfo["hardwareConcurrency"] = Math.round(
+      2 * deviceInfo["computeRandomMHz"]
+    );
 
   deviceInfo["deviceBrowserVersion"] =
     deviceInfo["deviceBrowserVersion"]?.split(".");
@@ -371,15 +390,12 @@ export const getCompatibilityRequirements = (
     //Compatible with items connected by OR.
     arr[idx] = arr[idx].replace(
       /BBB/g,
-      StringOfItems(compatibleBrowser, rc.language.value)
+      StringOfItems(compatibleBrowser, Language)
     );
-    arr[idx] = arr[idx].replace(
-      /OOO/g,
-      StringOfItems(compatibleOS, rc.language.value)
-    );
+    arr[idx] = arr[idx].replace(/OOO/g, StringOfItems(compatibleOS, Language));
     arr[idx] = arr[idx].replace(
       /DDD/g,
-      StringOfItems(compatibleDevice, rc.language.value)
+      StringOfItems(compatibleDevice, Language)
     );
     arr[idx] = arr[idx].replace(
       /111/g,
@@ -390,6 +406,11 @@ export const getCompatibilityRequirements = (
       compatibleProcessorCoresMinimum.toString()
     );
   });
+
+  if (isForScientistPage) {
+    // remove the phrase "As stated in its description, t" and make the t Uppercase
+    msg[0] = msg[0].replace(/As stated in its description, t/g, "T");
+  }
 
   //Create describeDevice, a sentence describing the participant's device.
   let describeDevice = phrases.EE_describeDevice[Language];
@@ -419,7 +440,7 @@ export const getCompatibilityRequirements = (
   describeDevice = describeDevice.replace(/OS X/g, "macOS");
   describeDevice = describeDevice.replace(/Microsoft Edge/g, "Edge");
   return {
-    deviceIsCompatibleBool: includeDeviceIsCompatibleBool
+    deviceIsCompatibleBool: isForScientistPage
       ? deviceIsCompatibleBool
       : undefined,
     compatibilityRequirements: msg,
@@ -622,4 +643,54 @@ const handleNewMessage = (msg, msgID, lang) => {
 
   let proceedButton = document.getElementById("procced-btn");
   proceedButton.innerHTML = phrases.T_proceed[lang];
+};
+
+export const getCompatibilityInfoForScientistPage = (parsed) => {
+  const compatibilityInfo = {
+    compatibleBrowser: [],
+    compatibleBrowserVersionMinimum: "",
+    compatibleDevice: [],
+    compatibleOS: [],
+    compatibleProcessorCoresMinimum: "",
+  };
+  // console.log("parsed", parsed.data)
+  for (let i = 0; i < parsed.data.length; i++) {
+    if (parsed.data[i][0] == "_compatibleBrowser") {
+      compatibilityInfo.compatibleBrowser = parsed.data[i][1].split(",");
+    } else if (parsed.data[i][0] == "_compatibleBrowserVersionMinimum") {
+      compatibilityInfo.compatibleBrowserVersionMinimum = parsed.data[i][1];
+    } else if (parsed.data[i][0] == "_compatibleDeviceType") {
+      compatibilityInfo.compatibleDevice = parsed.data[i][1].split(",");
+    } else if (parsed.data[i][0] == "_compatibleOperatingSystem") {
+      compatibilityInfo.compatibleOS = parsed.data[i][1].split(",");
+    } else if (parsed.data[i][0] == "_compatibleProcessorCoresMinimum") {
+      compatibilityInfo.compatibleProcessorCoresMinimum = parsed.data[i][1];
+    }
+  }
+
+  if (compatibilityInfo.compatibleBrowser.length == 0) {
+    compatibilityInfo.compatibleBrowser = [
+      GLOSSARY["_compatibleBrowser"].default,
+    ];
+  }
+  if (compatibilityInfo.compatibleBrowserVersionMinimum == "") {
+    compatibilityInfo.compatibleBrowserVersionMinimum =
+      GLOSSARY["_compatibleBrowserVersionMinimum"].default;
+  }
+  if (compatibilityInfo.compatibleDevice.length == 0) {
+    compatibilityInfo.compatibleDevice = [
+      GLOSSARY["_compatibleDeviceType"].default,
+    ];
+  }
+  if (compatibilityInfo.compatibleOS.length == 0) {
+    compatibilityInfo.compatibleOS = [
+      GLOSSARY["_compatibleOperatingSystem"].default,
+    ];
+  }
+  if (compatibilityInfo.compatibleProcessorCoresMinimum == "") {
+    compatibilityInfo.compatibleProcessorCoresMinimum =
+      GLOSSARY["_compatibleProcessorCoresMinimum"].default;
+  }
+
+  return compatibilityInfo;
 };

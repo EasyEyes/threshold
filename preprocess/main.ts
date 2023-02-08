@@ -30,6 +30,8 @@ import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import { webFontChecker } from "./fontCheck";
 import { getRequestedFoldersForStructureCheck } from "./folderStructureCheck";
+import { getCompatibilityRequirements } from "../components/compatibilityCheck";
+import { compatibilityRequirements } from "../../source/components/global";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -298,6 +300,13 @@ export const prepareExperimentFileForThreshold = async (
       errors
     );
   } else {
+    compatibilityRequirements.t = getCompatibilityRequirements(
+      null,
+      "en-US",
+      true,
+      null,
+      parsed
+    ).compatibilityRequirements[0];
     callback(
       user,
       requestedForms,
