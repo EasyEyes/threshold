@@ -40,6 +40,8 @@ export const loadFonts = (reader, fontList) => {
       timeout: 3000,
     });
   }
+
+  addFontFaces(fontList);
 };
 
 const _loadNameFromSource = (
@@ -85,4 +87,41 @@ const _loadNameFromSource = (
 // https://stackoverflow.com/questions/15230223/css-font-face-not-working-on-chrome
 export const cleanFontName = (name) => {
   return name;
+};
+
+/**
+ * Add the required file-specified fonts to the document as css font-faces.
+ * @param {Object} fontsRequired
+ */
+export const addFontFaces = (fontsRequired) => {
+  for (let name in fontsRequired) {
+    addCSSFontFace(name, fontsRequired[name]);
+  }
+};
+
+/**
+ * Given a font name, remove the extension if present
+ * eg fontName.woff2 => fontName
+ * @param {string} font
+ * @returns string
+ */
+export const getFontFamilyName = (font) => {
+  if (font.split(".").length === 1) return font;
+  return font.split(".")[0];
+};
+
+/**
+ * SEE https://stackoverflow.com/questions/11355147/font-face-changing-via-javascript
+ * @param {string} name
+ * @param {string} filename
+ */
+const addCSSFontFace = (name, filename) => {
+  const familyName = getFontFamilyName(name);
+  var newStyle = document.createElement("style");
+  newStyle.appendChild(
+    document.createTextNode(
+      "@font-face{font-family: " + familyName + "; src: url(" + filename + ");}"
+    )
+  );
+  document.head.appendChild(newStyle);
 };

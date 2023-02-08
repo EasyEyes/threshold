@@ -180,7 +180,7 @@ export class Category {
     this.target = targetWord;
     this.foils = foils;
     // The list of all possible responses for each set, the target word mixed in with the foils.
-    this.elements = [this.target, ...this.foils].sort();
+    this.elements = shuffle([this.target, ...this.foils]);
   }
 }
 
