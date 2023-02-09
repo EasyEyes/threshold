@@ -233,7 +233,7 @@ export const getCompatibilityRequirements = (
     deviceInfo["hardwareConcurrency"] = 0;
     deviceInfo["computeRandomMHz"] = 0;
 
-    const compatibilityInfo = getCompatibilityInfoForScientistPage(parsed);
+    const compatibilityInfo = parsed;
     compatibleBrowser = compatibilityInfo.compatibleBrowser;
     compatibleBrowserVersionMinimum =
       compatibilityInfo.compatibleBrowserVersionMinimum;
@@ -407,10 +407,10 @@ export const getCompatibilityRequirements = (
     );
   });
 
-  if (isForScientistPage) {
-    // remove the phrase "As stated in its description, t" and make the t Uppercase
-    msg[0] = msg[0].replace(/As stated in its description, t/g, "T");
-  }
+  // if (isForScientistPage) {
+  //   // remove the phrase "As stated in its description, t" and make the t Uppercase
+  //   msg[0] = msg[0].replace(/As stated in its description, t/g, "T");
+  // }
 
   //Create describeDevice, a sentence describing the participant's device.
   let describeDevice = phrases.EE_describeDevice[Language];
@@ -652,6 +652,7 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
     compatibleDevice: [],
     compatibleOS: [],
     compatibleProcessorCoresMinimum: "",
+    language: "",
   };
   // console.log("parsed", parsed.data)
   for (let i = 0; i < parsed.data.length; i++) {
@@ -665,6 +666,8 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
       compatibilityInfo.compatibleOS = parsed.data[i][1].split(",");
     } else if (parsed.data[i][0] == "_compatibleProcessorCoresMinimum") {
       compatibilityInfo.compatibleProcessorCoresMinimum = parsed.data[i][1];
+    } else if (parsed.data[i][0] == "_language") {
+      compatibilityInfo.language = parsed.data[i][1];
     }
   }
 
@@ -690,6 +693,9 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   if (compatibilityInfo.compatibleProcessorCoresMinimum == "") {
     compatibilityInfo.compatibleProcessorCoresMinimum =
       GLOSSARY["_compatibleProcessorCoresMinimum"].default;
+  }
+  if (compatibilityInfo.language == "") {
+    compatibilityInfo.language = GLOSSARY["_language"].default;
   }
 
   return compatibilityInfo;
