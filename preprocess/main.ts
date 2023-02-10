@@ -276,12 +276,6 @@ export const prepareExperimentFileForThreshold = async (
   }
 
   if (filename) {
-    const extensionOmitted = /(.*\/)*(.*)(\.csv|\.xlsx)/g;
-    const experimentNameMatches = [...filename.matchAll(extensionOmitted)][0];
-    const _experimentName = experimentNameMatches
-      ? experimentNameMatches[experimentNameMatches.length - 2]
-      : "";
-    df = addNewUnderscoreParam(df, "_experimentName", _experimentName);
     df = addNewUnderscoreParam(df, "_experimentFilename", filename);
   }
   df = addUniqueLabelsToDf(df);

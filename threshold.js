@@ -570,10 +570,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     "_experimentFilename",
     "__ALL_BLOCKS__"
   )[0];
-  thisExperimentInfo.experimentName = paramReader.read(
-    "_experimentName",
-    "__ALL_BLOCKS__"
-  )[0];
 
   logger("fontsRequired", fontsRequired);
   for (let i in fontsRequired) {
@@ -658,10 +654,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   dialogCancelScheduler.add(quitPsychoJS, "", false, paramReader);
 
   logger("_resources", _resources);
-
-  thisExperimentInfo.name = thisExperimentInfo.expName = getPavloviaProjectName(
-    thisExperimentInfo.experimentName
-  );
 
   // ! START EXPERIMENT
   psychoJS

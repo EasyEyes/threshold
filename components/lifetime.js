@@ -98,9 +98,6 @@ participant             ${thisExperimentInfo.participant}
 file                    ${thisExperimentInfo.experimentFileName
         .split("/")
         .pop()}
-experimentName          ${getPavloviaProjectName(
-        thisExperimentInfo.experimentName
-      )}
 date                    ${thisExperimentInfo.date.toString()}` +
         (isProlificExperiment()
           ? `
@@ -117,9 +114,6 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       localStorageKey,
       JSON.stringify({
         ...thisExperimentInfo,
-        experimentName: getPavloviaProjectName(
-          thisExperimentInfo.experimentName
-        ),
       })
     );
 
