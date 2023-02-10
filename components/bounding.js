@@ -284,7 +284,7 @@ export const restrictSizeDeg = (
   // If the stimulus extends beyond the screen, then we'll need 2 iterations. We allow
   // a 3rd iteration to allow for the case that the 2nd iteration isn't quite right, and
   // it homes in on the third.
-  for (const iteration of [0, 1, 2]) {
+  for (const iteration of [0, 1, 2, 3, 4, 5]) {
     // SET TARGET SIZE
     heightDeg = targetSizeIsHeightBool
       ? targetSizeDeg
@@ -305,6 +305,13 @@ export const restrictSizeDeg = (
       // heightPx / characterSetRectPx.height
     );
     stimulusRectPx = stimulusRectPx.offset(targetXYPx);
+
+    // Compute lower bound
+    const sizePx = targetSizeIsHeightBool ? heightPx : widthPx;
+    if (sizePx < letterConfig.targetMinimumPix) {
+      targetSizeDeg = targetSizeDeg * (letterConfig.targetMinimumPix / sizePx);
+      continue;
+    }
 
     // WE'RE DONE IF STIMULUS FITS
     if (isRectInRect(stimulusRectPx, screenRectPx)) {
