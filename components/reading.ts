@@ -153,10 +153,21 @@ export const preprocessCorpusToWordList = (text: string) => {
   /**
    * Arabic \u0600-\u06ff
    * Chinese \u4e00-\u9fff
+   *
+   * Replace anything that's:
+   *  NOT (arabic, or not chinese, or not a word char, or a space char, or an apostrophe, or a hyphen)
+   *  OR
+   *    that's a hyphen followed by something other than a-zA-Z0-9
+   *    OR a (space then hyphen) at the end of the string
+   * with an empty string, ie remove matching characters.
+   * So the only hyphen we remove is that which is not followed by an alphanumeric.
    */
   if (text === "") return [];
   return text
-    .replace(/[^\u0600-\u06ff\u4e00-\u9fff\w\s'-]|-(?=[^a-zA-Z0-9])/g, "")
+    .replace(
+      /[^\u0600-\u06ff\u4e00-\u9fff\w\s'-]|-(?=[^a-zA-Z0-9])|(\s-)$/g,
+      ""
+    )
     .split(" ")
     .filter((w) => w.length > 0);
 };
