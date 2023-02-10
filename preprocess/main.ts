@@ -30,10 +30,10 @@ import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import { webFontChecker } from "./fontCheck";
 import { getRequestedFoldersForStructureCheck } from "./folderStructureCheck";
-import {
-  getCompatibilityInfoForScientistPage,
-  getCompatibilityRequirements,
-} from "../components/compatibilityCheck";
+// import {
+//   getCompatibilityInfoForScientistPage,
+//   getCompatibilityRequirements,
+// } from "../components/compatibilityCheck";
 import { compatibilityRequirements } from "../../source/components/global";
 
 export const preprocessExperimentFile = async (
@@ -303,15 +303,15 @@ export const prepareExperimentFileForThreshold = async (
       errors
     );
   } else {
-    compatibilityRequirements.parsedInfo =
-      getCompatibilityInfoForScientistPage(parsed);
-    compatibilityRequirements.t = getCompatibilityRequirements(
-      null,
-      "en-US",
-      true,
-      null,
-      compatibilityRequirements.parsedInfo
-    ).compatibilityRequirements[0];
+    // compatibilityRequirements.parsedInfo =
+    //   getCompatibilityInfoForScientistPage(parsed);
+    // compatibilityRequirements.t = getCompatibilityRequirements(
+    //   null,
+    //   "en-US",
+    //   true,
+    //   null,
+    //   compatibilityRequirements.parsedInfo
+    // ).compatibilityRequirements[0];
     callback(
       user,
       requestedForms,

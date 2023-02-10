@@ -14,7 +14,12 @@ export const checkSystemCompatibility = (
 
   var Language = rc.language.value;
 
-  const requirements = getCompatibilityRequirements(reader, Language, true, rc);
+  const requirements = getCompatibilityRequirements(
+    reader,
+    Language,
+    false,
+    rc
+  );
   const compatibilityRequirements = requirements.compatibilityRequirements;
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
   var msg = requirements.describeDevice;
