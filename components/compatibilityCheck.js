@@ -445,7 +445,7 @@ export const getCompatibilityRequirements = (
   describeDevice = describeDevice.replace(/OS X/g, "macOS");
   describeDevice = describeDevice.replace(/Microsoft Edge/g, "Edge");
   return {
-    deviceIsCompatibleBool: isForScientistPage
+    deviceIsCompatibleBool: !isForScientistPage
       ? deviceIsCompatibleBool
       : undefined,
     compatibilityRequirements: msg,
