@@ -243,6 +243,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  _experimentName: {
+    name: "_experimentName",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   _experimentSavePartialResultsBool: {
     name: "_experimentSavePartialResultsBool",
     availability: "now",

@@ -261,6 +261,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_experimentName",
+    availability: "now",
+    example: "",
+    explanation: "",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "_experimentSavePartialResultsBool",
     availability: "now",
     example: "",
