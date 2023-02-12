@@ -219,14 +219,14 @@ export const getCompatibilityRequirements = (
       ? rc.computeRandomMHz.value
       : 0;
 
-    compatibleBrowser = reader.read("_compatibleBrowser")[0].split(",");
+    compatibleBrowser = reader.read("_needBrowser")[0].split(",");
     compatibleBrowserVersionMinimum = reader.read(
-      "_compatibleBrowserVersionMinimum"
+      "_needBrowserVersionMinimum"
     )[0];
-    compatibleDevice = reader.read("_compatibleDeviceType")[0].split(",");
-    compatibleOS = reader.read("_compatibleOperatingSystem")[0].split(",");
+    compatibleDevice = reader.read("_needDeviceType")[0].split(",");
+    compatibleOS = reader.read("_needOperatingSystem")[0].split(",");
     compatibleProcessorCoresMinimum = reader.read(
-      "_compatibleProcessorCoresMinimum"
+      "_needProcessorCoresMinimum"
     )[0];
   } else {
     // default values
@@ -661,15 +661,15 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   };
   // console.log("parsed", parsed.data)
   for (let i = 0; i < parsed.data.length; i++) {
-    if (parsed.data[i][0] == "_compatibleBrowser") {
+    if (parsed.data[i][0] == "_needBrowser") {
       compatibilityInfo.compatibleBrowser = parsed.data[i][1].split(",");
-    } else if (parsed.data[i][0] == "_compatibleBrowserVersionMinimum") {
+    } else if (parsed.data[i][0] == "_needBrowserVersionMinimum") {
       compatibilityInfo.compatibleBrowserVersionMinimum = parsed.data[i][1];
-    } else if (parsed.data[i][0] == "_compatibleDeviceType") {
+    } else if (parsed.data[i][0] == "_needDeviceType") {
       compatibilityInfo.compatibleDevice = parsed.data[i][1].split(",");
-    } else if (parsed.data[i][0] == "_compatibleOperatingSystem") {
+    } else if (parsed.data[i][0] == "_needOperatingSystem") {
       compatibilityInfo.compatibleOS = parsed.data[i][1].split(",");
-    } else if (parsed.data[i][0] == "_compatibleProcessorCoresMinimum") {
+    } else if (parsed.data[i][0] == "_needProcessorCoresMinimum") {
       compatibilityInfo.compatibleProcessorCoresMinimum = parsed.data[i][1];
     } else if (parsed.data[i][0] == "_language") {
       compatibilityInfo.language = parsed.data[i][1];
@@ -677,27 +677,21 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   }
 
   if (compatibilityInfo.compatibleBrowser.length == 0) {
-    compatibilityInfo.compatibleBrowser = [
-      GLOSSARY["_compatibleBrowser"].default,
-    ];
+    compatibilityInfo.compatibleBrowser = [GLOSSARY["_needBrowser"].default];
   }
   if (compatibilityInfo.compatibleBrowserVersionMinimum == "") {
     compatibilityInfo.compatibleBrowserVersionMinimum =
-      GLOSSARY["_compatibleBrowserVersionMinimum"].default;
+      GLOSSARY["_needBrowserVersionMinimum"].default;
   }
   if (compatibilityInfo.compatibleDevice.length == 0) {
-    compatibilityInfo.compatibleDevice = [
-      GLOSSARY["_compatibleDeviceType"].default,
-    ];
+    compatibilityInfo.compatibleDevice = [GLOSSARY["_needDeviceType"].default];
   }
   if (compatibilityInfo.compatibleOS.length == 0) {
-    compatibilityInfo.compatibleOS = [
-      GLOSSARY["_compatibleOperatingSystem"].default,
-    ];
+    compatibilityInfo.compatibleOS = [GLOSSARY["_needOperatingSystem"].default];
   }
   if (compatibilityInfo.compatibleProcessorCoresMinimum == "") {
     compatibilityInfo.compatibleProcessorCoresMinimum =
-      GLOSSARY["_compatibleProcessorCoresMinimum"].default;
+      GLOSSARY["_needProcessorCoresMinimum"].default;
   }
   if (compatibilityInfo.language == "") {
     compatibilityInfo.language = GLOSSARY["_language"].default;

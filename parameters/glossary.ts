@@ -243,12 +243,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  _experimentName: {
-    name: "_experimentName",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
   _experimentSavePartialResultsBool: {
     name: "_experimentSavePartialResultsBool",
     availability: "now",
@@ -1218,18 +1212,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "TRUE",
-  },
-  _requestEasyEyesIDBool: {
-    name: "_requestEasyEyesIDBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  _requestEasyEyesIDSaveToFileBool: {
-    name: "_requestEasyEyesIDSaveToFileBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
   },
   "%": { name: "%", availability: "now", type: "", default: "" },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
