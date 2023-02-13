@@ -69,108 +69,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_compatibleBrowser",
-    availability: "now",
-    example: "Chrome",
-    explanation:
-      '_compatibleBrowser is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be \'all\', or just compatible browsers by name, or just incompatible browsers each preceded by "not". No mixing allowed. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If the particiapant\'s device is incompatible, we reject it by issuing a fatal explanatory error message to the participant (asking the Prolific participant to "return" this study), which ends the session (with no pay) before asking for consent. ',
-    type: "multicategorical",
-    default: "Chrome",
-    categories:
-      "all, Chrome, Safari, Firefox, Opera, Edge, Chromium, Tor, Duckduckgo, Brave, Vivaldi, Midori, SamsungInternet, UCBrowser, Android, Firefox, QQBrowser, Instabridge, WhaleBrowser, Puffin, YandexBrowser, EdgeLegacy, Edge, CocCoc, notChrome, notSafari, notFirefox, notOpera, notEdge, notChromium, notTor, notDuckduckgo, notBrave, notVivaldi, notMidori, notSamsungInternet, notUCBrowser, notAndroid, notFirefox, notQQBrowser, notInstabridge, notWhaleBrowser, notPuffin, notYandexBrowser, notEdgeLegacy, notEdge, notCocCoc",
-  },
-  {
-    name: "_compatibleBrowserVersionMinimum",
-    availability: "now",
-    example: "100",
-    explanation:
-      "_compatibleBrowserVersionMinimum (default 0) is the minimum integer version number of the browser for compatibility. ",
-    type: "integer",
-    default: "0",
-    categories: "",
-  },
-  {
-    name: "_compatibleCameraBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "NOT YET IMPLEMENTED. _compatibleCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and pupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier compatibility check so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.)",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
-    name: "_compatibleDeviceType",
-    availability: "now",
-    example: "desktop",
-    explanation:
-      '_compatibleDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. NOTE: The value "all" is not yet implemented.',
-    type: "multicategorical",
-    default: "desktop",
-    categories: "all, desktop, tablet, mobile",
-  },
-  {
-    name: "_compatibleDisplay",
-    availability: "now",
-    example: "hdrMovie",
-    explanation:
-      "NOT YET IMPLEMENTED. _compatibleDisplay requires support for key display features:\nHDRMovie: Browser supports HDR movies.\ntenBit: Display supports 10-bit imaging. https://trello.com/c/VxGHyxDa\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
-    type: "multicategorical",
-    default: "",
-    categories: "hdrMovie, tenBit",
-  },
-  {
-    name: "_compatibleIPhoneTooBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "NOT YET IMPLEMENTED. If TRUE, _compatibleIPhoneTooBool (default FALSE) asks the participant if, in addition to whatever device is running the experiment, they have an iPhone/iPad to use for sound calibration. EasyEyes just asks, without verifying. Verification will happen later, when the QR code is shown to recruit the iPhone/iPad. \n[We have not yet considered, in the case of an experiment running on an iPad or iPhone, whether we could use its built-in mic to calibrate its loudspeaker, eliminating the need for a second device.] ",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "_compatibleOperatingSystem",
-    availability: "now",
-    example: "macOS,Windows",
-    explanation:
-      "_compatibleOperatingSystem is a comma-separated list either of compatible or incompatible operating systems. The list can be 'all', or compatible OSes by name, or incompatible OSes each preceded by \"not\". No mixing allowed. The default is 'all'. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to \"return\" this study), which ends the session before asking for consent. ",
-    type: "multicategorical",
-    default: "all",
-    categories:
-      "all, macOS, Windows, ChromeOS, ChromiumOS, AndroidOS, iOS, SamsungOS, KaiOS, NokiaOS, Series40OS, Linux, Ubuntu, FreeBSD, Debian, Fedora, Solaris, CentOS, Deepin, notmacOS, notWindows, notChromeOS, notChromiumOS, notAndroidOS, notiOS, notSamsungOS, notKaiOS, notNokiaOS, notSeries40OS, notLinux, notUbuntu, notFreeBSD, notDebian, notFedora, notSolaris, notCentOS, notDeepin",
-  },
-  {
-    name: "_compatibleProcessorCoresMinimum",
-    availability: "now",
-    example: "6",
-    explanation:
-      "_compatibleProcessorCoresMinimum is a positive integer. It's value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the speed of generating random numbers (in MHz). https://en.wikipedia.org/wiki/Multi-core_processor ",
-    type: "integer",
-    default: "6",
-    categories: "",
-  },
-  {
-    name: "_compatibleScreenSizeMinimumPx",
-    availability: "now",
-    example: "",
-    explanation:
-      "NOT YET IMPLEMENTED. _compatibleScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever needScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever needScreenHeightDeg is greater than zero.",
-    type: "integer",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_compatibleTimingToleranceSec",
-    availability: "now",
-    example: "",
-    explanation:
-      "NOT YET IMPLEMENTED. _compatibleTimingToleranceSec (default 0.05) is the largest acceptable RMS error in generating a 0.15-second interval. We suspect that this depends on both the CPU speed and the number of processes being timeshared, and thus can be reduced by closing other browser windows, and quitting other apps.",
-    type: "numerical",
-    default: "0.05",
-    categories: "",
-  },
-  {
     name: "_compileAsNewExperimentBool",
     availability: "now",
     example: "FALSE",
@@ -256,6 +154,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "crowding.csv",
     explanation:
       "_experimentFilename is the filename of the experiment table, including the extension, typically XLSX or CSV.",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_experimentName",
+    availability: "now",
+    example: "",
+    explanation: "Obsolete, but EasyEyes crashes if we remove it.",
     type: "text",
     default: "",
     categories: "",
