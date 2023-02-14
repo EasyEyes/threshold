@@ -658,6 +658,7 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
     compatibleOS: [],
     compatibleProcessorCoresMinimum: "",
     language: "",
+    online2Description: "",
   };
   // console.log("parsed", parsed.data)
   for (let i = 0; i < parsed.data.length; i++) {
@@ -697,5 +698,20 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
     compatibilityInfo.language = GLOSSARY["_language"].default;
   }
 
+  //convert language to language code
+  // const Languages = phrases.EE_languageNameEnglish;
+  // const languageCode = Object.keys(Languages).find(
+  //   (key) => Languages[key] === compatibilityInfo.language
+  // );
+  // compatibilityInfo.language = languageCode? languageCode : "en-US"
+
   return compatibilityInfo;
+};
+
+export const convertLanguageToLanguageCode = (language) => {
+  const Languages = phrases.EE_languageNameEnglish;
+  const languageCode = Object.keys(Languages).find(
+    (key) => Languages[key] === language
+  );
+  return languageCode ? languageCode : "en-US";
 };

@@ -2,6 +2,7 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "downlevelIteration": true,
+    "allowJs": true
   },
-  "include": ["../preprocess/main.ts", "../node_modules/dataframe-js/dataframe-js.d.ts",]
+  "include": ["../preprocess/main.ts", "../node_modules/dataframe-js/dataframe-js.d.ts",],
 }
