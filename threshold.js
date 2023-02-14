@@ -3974,7 +3974,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showCursor();
         },
         reading: () => {
-          readingSound.play();
+          // skip if using Safari
+          if (rc.browser.value !== "Safari") readingSound.play();
         },
         letter: () => {
           if (snapshot.getCurrentTrial().trialsVal)
