@@ -1936,12 +1936,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  showProgressBarWhere: {
-    name: "showProgressBarWhere",
+  showProgressBarBool: {
+    name: "showProgressBarBool",
     availability: "now",
     type: "categorical",
-    default: "none",
-    categories: ["none", "right"],
+    default: "FALSE",
+    categories: [""],
   },
   showTakeABreakCreditBool: {
     name: "showTakeABreakCreditBool",
