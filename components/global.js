@@ -158,6 +158,7 @@ export const repeatedLettersConfig = Object.seal({
 });
 export const repeatedLettersResponse = Object.seal({
   current: [],
+  clickTime: [],
   rt: [],
   correct: [],
 });

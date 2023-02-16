@@ -225,7 +225,7 @@ export const _repeatedLetters_trialRoutineEachFrame = (
       fontCharacterSet.current,
       font.name,
       fontCharacterSet.where,
-      showCharacterSetResponse,
+      repeatedLettersResponse,
       null,
       "",
       targetKind.current
@@ -237,7 +237,8 @@ export const _repeatedLetters_trialRoutineEachFrame = (
   }
   // Check if routine should continue
   // TODO test ending criteria
-  return repeatedLettersResponse.current.length === 2 ? false : true;
+  const enoughResponsesReceived = repeatedLettersResponse.current.length === 2;
+  return enoughResponsesReceived ? false : true;
 };
 
 export const _letter_trialRoutineFirstFrame = (

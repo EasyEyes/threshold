@@ -75,6 +75,8 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
       color: new Color("black"),
       opacity: 1.0,
       depth: -8.0,
+      padding: font.padding,
+      characterSet: fontCharacterSet.current.join(""),
     });
   });
   return stims;
