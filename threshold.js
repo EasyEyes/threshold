@@ -124,6 +124,7 @@ import {
   debugBool,
   screenBackground,
   customInstructionText,
+  targetTextStimConfig,
 } from "./components/global.js";
 
 import {
@@ -799,9 +800,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   var key_resp;
   var fixation; ////
-  var flanker1;
+  var flanker1, flanker2, flanker3, flanker4;
   var target;
-  var flanker2;
   var showCharacterSet;
 
   var routineTimer, routineClock;
@@ -839,55 +839,33 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     fixation = new Fixation();
     // fixationConfig.stim = fixation;
 
-    flanker1 = new visual.TextStim({
+    const psychojsTextStimConfig = {
       win: psychoJS.window,
-      name: "flanker1",
-      text: "",
-      font: "Arial",
-      units: "pix",
-      pos: [0, 0],
-      height: 1.0,
-      wrapWidth: undefined,
-      ori: 0.0,
       color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -7.0,
-      alignVert: "center",
-      alignHoriz: "center",
-    });
-
+    };
     target = new visual.TextStim({
-      win: psychoJS.window,
       name: "target",
-      text: "",
-      font: "Arial",
-      units: "pix",
-      pos: [0, 0],
-      height: 1.0,
-      wrapWidth: undefined,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -8.0,
-      alignVert: "center",
-      alignHoriz: "center",
+      ...psychojsTextStimConfig,
+      ...targetTextStimConfig,
     });
-
+    flanker1 = new visual.TextStim({
+      name: "flanker1",
+      ...psychojsTextStimConfig,
+      ...targetTextStimConfig,
+    });
     flanker2 = new visual.TextStim({
-      win: psychoJS.window,
+      ...psychojsTextStimConfig,
+      ...targetTextStimConfig,
+    });
+    flanker3 = new visual.TextStim({
       name: "flanker2",
-      text: "",
-      font: "Arial",
-      units: "pix",
-      pos: [0, 0],
-      height: 1.0,
-      wrapWidth: undefined,
-      ori: 0.0,
-      color: new util.Color("black"),
-      opacity: 1.0,
-      depth: -9.0,
-      alignVert: "center",
-      alignHoriz: "center",
+      ...psychojsTextStimConfig,
+      ...targetTextStimConfig,
+    });
+    flanker4 = new visual.TextStim({
+      name: "flanker2",
+      ...psychojsTextStimConfig,
+      ...targetTextStimConfig,
     });
 
     showCharacterSet = new visual.TextStim({
@@ -2379,6 +2357,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.setHeight(h);
           target.setColor(colorRGBASnippetToRGBA(font.defaultColorRGBA));
 
+          // TODO maybe show four flankers in instructions, if radialAndTangential or horizontalAndVertical
           flanker1.setFont(instructionFont.current);
           flanker1.setPos([D - g, 0]);
           flanker1.setText("H");
@@ -2520,6 +2499,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var _key_resp_allKeys;
   var _responsesWithinCardinal, _responsesAcrossCardinals;
   var trialComponents;
+  var allFlankers, flankersUsed;
 
   // Credit
   var currentBlockCreditForTrialBreak = 0;
@@ -2685,7 +2665,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       fontCharacterSet.current = String(
         reader.read("fontCharacterSet", BC)
       ).split("");
-      [target, flanker1, flanker2].forEach((s) =>
+      [target, flanker1, flanker2, flanker3, flanker4].forEach((s) =>
         s.setCharacterSet(fontCharacterSet.current.join(""))
       );
 
@@ -2944,14 +2924,33 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             BC
           );
 
+          const atLeastTwoFlankersNeeded =
+            thresholdParameter === "spacing" &&
+            letterConfig.spacingRelationToSize !== "typographic";
+          const fourFlankersNeeded = [
+            "horizontalAndVertical",
+            "radialAndTangential",
+          ].includes(letterConfig.spacingDirection);
+          const numFlankersNeeded = atLeastTwoFlankersNeeded
+            ? fourFlankersNeeded
+              ? 4
+              : 2
+            : 0;
+          allFlankers = [flanker1, flanker2, flanker3, flanker4];
+          flankersUsed = allFlankers.slice(0, numFlankersNeeded);
+
+          const numberOfTargetsAndFlankers = fourFlankersNeeded ? 5 : 3;
           /* ------------------------------ Pick triplets ----------------------------- */
-          if (fontCharacterSet.current.length < 3)
-            throw `[EasyEyes experiment configuration error] You must have 3 characters in your character set for this block_condition, however, the researcher only put ${fontCharacterSet.current.length}.`;
-          var [firstFlankerCharacter, targetCharacter, secondFlankerCharacter] =
-            getTripletCharacters(fontCharacterSet.current);
+          if (fontCharacterSet.current.length < numberOfTargetsAndFlankers)
+            throw `[EasyEyes experiment configuration error] You must have ${numberOfTargetsAndFlankers} characters in your character set for this block_condition, however, the researcher only put ${fontCharacterSet.current.length}.`;
+          var [targetCharacter, ...flankerCharacters] =
+            sampleWithoutReplacement(
+              fontCharacterSet.current,
+              numberOfTargetsAndFlankers
+            );
           if (debug)
             console.log(
-              `%c${firstFlankerCharacter} ${targetCharacter} ${secondFlankerCharacter}`,
+              `%c${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`,
               `color: red; font-size: 1.5rem; font-family: "${font.name}"`
             );
           correctAns.current = [targetCharacter.toLowerCase()];
@@ -3032,8 +3031,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
-              flanker1.setAutoDraw(false);
-              flanker2.setAutoDraw(false);
+              allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
               break;
             case "spacing":
               switch (letterConfig.spacingRelationToSize) {
@@ -3054,27 +3052,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
                   var flankersHeightPx = target.getHeight();
-                  const f1Text = firstFlankerCharacter;
-                  const f2Text = secondFlankerCharacter;
-
-                  flanker1.setFont(font.name);
-                  flanker2.setFont(font.name);
-                  flanker1.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
-                  flanker2.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
                   // flanker1 === outer flanker
-                  flanker1.setText(f1Text);
                   // flanker2 === inner flanker
-                  flanker2.setText(f2Text);
-                  flanker1.setHeight(flankersHeightPx);
-                  flanker2.setHeight(flankersHeightPx);
-                  flanker1.setPadding(font.padding);
-                  flanker2.setPadding(font.padding);
-                  flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
-                  flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
-                  psychoJS.experiment.addData("flankerLocationsPx", [
-                    stimulusParameters.targetAndFlankersXYPx[1],
-                    stimulusParameters.targetAndFlankersXYPx[2],
-                  ]);
+                  flankersUsed.forEach((f, i) => {
+                    f.setFont(font.name);
+                    f.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
+                    f.setText(flankerCharacters[i]);
+                    f.setHeight(flankersHeightPx);
+                    f.setPadding(font.padding);
+                    f.setPos(stimulusParameters.targetAndFlankersXYPx[i + 1]);
+                  });
+
+                  psychoJS.experiment.addData(
+                    "flankerLocationsPx",
+                    stimulusParameters.targetAndFlankersXYPx.slice(1)
+                  );
                   const targetSpacingPx = spacingForRatioIsOuterBool
                     ? norm([
                         stimulusParameters.targetAndFlankersXYPx[0][0] -
@@ -3095,14 +3087,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   break;
                 case "typographic":
                   // ...include the flankers in the same string/stim as the target.
-                  // const flankersAndTargetString =
-                  //   firstFlankerCharacter +
-                  //   targetCharacter +
-                  //   secondFlankerCharacter;
                   const tripletCharacters =
-                    firstFlankerCharacter +
+                    flankerCharacters[0] +
                     targetCharacter +
-                    secondFlankerCharacter;
+                    flankerCharacters[1];
 
                   targetText = tripletCharacters;
                   target.setText(targetText);
@@ -3123,8 +3111,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
           [
             target,
-            flanker1,
-            flanker2,
+            ...flankersUsed,
             fixation,
             showCharacterSet,
             trialCounter,
@@ -3143,6 +3130,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulus: boundingBoxPolies,
             characterSet: characterSetBoundingBoxPolies,
           };
+          // TODO add bounding boxes for flankers 3&4
           sizeAndPositionBoundingBoxes(
             boundingBools,
             tripletBoundingStims,
@@ -3176,9 +3164,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(key_resp);
           trialComponents.push(...fixation.stims);
           trialComponents.push(target);
-          trialComponents.push(flanker1);
-          trialComponents.push(flanker2);
-
+          trialComponents.push(...flankersUsed);
           trialComponents.push(showCharacterSet);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
@@ -4214,8 +4200,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetSpecs,
               conditionName,
               target,
-              flanker1,
-              flanker2
+              flankersUsed
             );
           },
           repeatedLetters: () => {
@@ -4621,50 +4606,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showCursor();
           }, 500);
         }
-        // *flanker1* updates
-        if (
-          t >= delayBeforeStimOnsetSec &&
-          flanker1.status === PsychoJS.Status.NOT_STARTED
-        ) {
-          // keep track of start time/frame for later
-          flanker1.tStart = t; // (not accounting for frame time here)
-          flanker1.frameNStart = frameN; // exact frame index
-
+        // flankers update
+        flankersUsed.forEach((f) => {
           if (
-            letterConfig.spacingRelationToSize === "typographic" ||
-            thresholdParameter === "size"
+            t >= delayBeforeStimOnsetSec &&
+            f.status === PsychoJS.Status.NOT_STARTED
           ) {
-            flanker1.setAutoDraw(false);
-          } else {
-            flanker1.setAutoDraw(true);
+            // keep track of start time/frame for later
+            f.tStart = t; // (not accounting for frame time here)
+            f.frameNStart = frameN; // exact frame index
+            f.setAutoDraw(true);
           }
-        }
-        if (flanker1.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-          flanker1.setAutoDraw(false);
-        }
-
-        // *flanker2* updates
-        if (
-          t >= delayBeforeStimOnsetSec &&
-          flanker2.status === PsychoJS.Status.NOT_STARTED
-        ) {
-          // keep track of start time/frame for later
-          flanker2.tStart = t; // (not accounting for frame time here)
-          flanker2.frameNStart = frameN; // exact frame index
-
-          if (
-            letterConfig.spacingRelationToSize === "typographic" ||
-            thresholdParameter === "size"
-          ) {
-            flanker2.setAutoDraw(false);
-          } else {
-            flanker2.setAutoDraw(true);
+          if (f.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+            f.setAutoDraw(false);
           }
-        }
-
-        if (flanker2.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-          flanker2.setAutoDraw(false);
-        }
+        });
       }
 
       // check for quit (typically the Esc key)

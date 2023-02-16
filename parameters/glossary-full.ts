@@ -285,7 +285,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "6",
     explanation:
-      "_needProcessorCoresMinimum is a positive integer. It's value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the speed of generating random numbers (in MHz). https://en.wikipedia.org/wiki/Multi-core_processor ",
+      "_needProcessorCoresMinimum is a positive integer. It's value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the speed of generating random numbers \n(in MHz). https://en.wikipedia.org/wiki/Multi-core_processor\nNOTE: To make your computer harder to track, the Chrome extension DuckDuckGo spoofs the number of cores to 2. So any experiment requiring 3 or more cores will reject any participant whose computer spoofs having 2 cores.",
     type: "integer",
     default: "6",
     categories: "",
@@ -405,7 +405,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "NOT YET IMPLEMENTED: _online2SaveIncompleteResponsesBool (default TRUE) sets the corresponding option in Pavlovia. Note that if you don’t have a Pavlovia site license, and you’re not in PILOTING mode, then you pay 20 pence for each response (i.e. data file) that you save. We don't know yet whether Pavlovia provides an API for this.",
+      "NOT YET IMPLEMENTED: _online2SaveIncompleteResponsesBool (default TRUE) sets the corresponding option in Pavlovia. Note that if you don’t have a Pavlovia site license, and you’re not in PILOTING mode, then you pay 20 pence for each response (i.e. data file) that you save, so you save money by not saving (and paying for) incomplete studies. We don't know yet whether Pavlovia provides an API for this.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -435,7 +435,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online3PhoneOperatingSystem is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nPhone Operating System\nParticipants were asked the following question: What operating system (OS) does your primary mobile phone have?\nAndroid\niOS (iPhone)\nWindows\nOther/Not Applicable\nDon't Know\n\nNOTE: This selector is in the _online3 group because it's important for EasyEyes sound experiments. EasyEyes uses the participant's smartphone to calibrate the loudspeaker of the participant's desktop.\n",
+      "NOT YET IMPLEMENTED: _online3PhoneOperatingSystem is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nPhone Operating System\nParticipants were asked the following question: What operating system (OS) does your primary mobile phone have?\nAndroid\niOS (iPhone)\nWindows\nOther/Not Applicable\nDon't Know\n\nNOTE: This selector is in the _online3 group because it's important for EasyEyes sound experiments. EasyEyes uses the participant's smartphone to calibrate the loudspeaker of the participant's desktop.\n",
     type: "multicategorical",
     default: "",
     categories: "Android, iOS, Windows, Other, Don't Know",
@@ -451,11 +451,41 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "audio, camera, microphone, download",
   },
   {
+    name: "_online4AllowList",
+    availability: "now",
+    example: "",
+    explanation:
+      "WILL NOT IMPLEMENET. _online4AllowList (default empty) accepts a comma-separated “allowList” of Prolific participant IDs identifying people who are invited to participate. If _online2AllowList is not empty, then participants are recruited solely through the allowList. If _online2CompletedExperiment is not empty, then it adds its IDs to the allowList.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online4AllowCompletedExperiment",
+    availability: "now",
+    example: "",
+    explanation:
+      "MIGHT IMPLEMENET. _online4AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _online2MinHoursSinceCompletion after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _online2CompletedExperiment is not empty, then participants are recruited solely through the allowList. If _online2AllowList is not empty, then it adds its IDs to the allowList.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_online4AllowAfterHours",
+    availability: "now",
+    example: "",
+    explanation:
+      "MIGHT IMPLEMENET. _online4AllowAfterHours (default 0) requires that at least the specified (floating) number of hours pass since completion of the _online2CompletedExperiment before the participant’s ID is added to the allowList.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
     name: "_online4ApprovalRate",
     availability: "now",
     example: "",
     explanation:
-      "_online4ApprovalRate (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)",
+      "NOT YET IMPLEMENTED: _online4ApprovalRate (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)",
     type: "text",
     default: " 0,100",
     categories: "",
@@ -465,7 +495,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online4CustomAllowList (no default) is a comma-separated list of Prolific participant IDs. ONLY these participants will be eligible for this study.",
+      "NOT YET IMPLEMENTED: _online4CustomAllowList (no default) is a comma-separated list of Prolific participant IDs. ONLY these participants will be eligible for this study.",
     type: "",
     default: "",
     categories: "",
@@ -475,7 +505,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online4CustomBlockList (no default) is a comma-separated list of Prolific participant IDs who will not be invited to this study.",
+      "NOT YET IMPLEMENTED: _online4CustomBlockList (no default) is a comma-separated list of Prolific participant IDs who will not be invited to this study.",
     type: "",
     default: "",
     categories: "",
@@ -496,7 +526,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5ParticipantInPreviousStudyExclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nExclude participants from previous studies\nThis screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.",
+      "NOT YET IMPLEMENTED: _online4ParticipantInPreviousStudyExclude (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.",
     type: "",
     default: "",
     categories: "",
@@ -506,7 +536,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5ParticipantInPreviousStudyInclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nInclude participants from previous studies\nOnly participants with approved submissions will be included. To add participants whose responses weren't approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.\n\n",
+      "NOT YET IMPLEMENTED: _online4ParticipantInPreviousStudyInclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren't approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.\n\n",
     type: "",
     default: "",
     categories: "",
@@ -516,7 +546,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online4Sample is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution\nHow do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nThe parameter value will be one of: UK, USA, Balanced, Standard\nThe scientist thus chooses a sample of participants: (representative of) USA, (representative of) UK, (50/50 sex) Balanced, or (whoever is available) Standard. Note that Prolific charges more for representative (i.e. US or UK) samples.",
+      "NOT YET IMPLEMENTED: _online4Sample is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution\nHow do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nThe parameter value will be one of: UK, USA, Balanced, Standard\nThe scientist thus chooses a sample of participants: (representative of) USA, (representative of) UK, (50/50 sex) Balanced, or (whoever is available) Standard. Note that Prolific charges more for representative (i.e. US or UK) samples.",
     type: "categorical",
     default: "Standard",
     categories: "UK, USA, Balanced, Standard",
@@ -526,7 +556,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5CochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
+      "NOT YET IMPLEMENTED: _online5CochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",
@@ -536,7 +566,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5Dyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
+      "NOT YET IMPLEMENTED: _online5Dyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
     type: "multicategorical",
     default: "",
     categories: "diagnosed, being diagnosed, suspect, no, not saying",
@@ -546,7 +576,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5HearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+      "NOT YET IMPLEMENTED: _online5HearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",
@@ -556,7 +586,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5LanguageFirst (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
+      "NOT YET IMPLEMENTED: _online5LanguageFirst (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
     type: "multicategorical",
     default: "",
     categories:
@@ -589,7 +619,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5LanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDo you have any language related disorders?\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
+      "NOT YET IMPLEMENTED: _online5LanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDo you have any language related disorders?\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
     type: "multicategorical",
     default: "",
     categories:
@@ -600,7 +630,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5MusicalInstrumentExperience (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nExperience with musical instruments\nParticipants were asked the following question: Do you play a musical instument, if so for how many years?\n\nNo. I don't play a musical instrument\nYes. For 0-1 years.\nYes. For 1-2 years.\nYes. For 2-3 years.\nYes. For 3-4 years.\nYes. For 5+ years.",
+      "NOT YET IMPLEMENTED: _online5MusicalInstrumentExperience (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nExperience with musical instruments\nParticipants were asked the following question: Do you play a musical instument, if so for how many years?\n\nNo. I don't play a musical instrument\nYes. For 0-1 years.\nYes. For 1-2 years.\nYes. For 2-3 years.\nYes. For 3-4 years.\nYes. For 5+ years.",
     type: "multicategorical",
     default: "",
     categories: "No, 0-1, 1-2, 2-3, 3-4, 5+",
@@ -610,7 +640,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision\nParticipants were asked the following question: Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+      "_NOT YET IMPLEMENTED: online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision\nParticipants were asked the following question: Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",
@@ -620,7 +650,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5VisionCorrection (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCorrected vision\nParticipants were asked the following question: I currently use glasses or contact lenses to correct my vision\nI mainly use glasses\nI mainly use contact lenses\nI use both glasses and contact lenses\nI do not use glasses or contact lenses",
+      "NOT YET IMPLEMENTED: _online5VisionCorrection (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCorrected vision\nParticipants were asked the following question: I currently use glasses or contact lenses to correct my vision\nI mainly use glasses\nI mainly use contact lenses\nI use both glasses and contact lenses\nI do not use glasses or contact lenses",
     type: "multicategorical",
     default: "",
     categories: "glasses, contacts, both, neither",
@@ -630,7 +660,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5VRExperiences (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nSimulated Experiences\nParticipants were asked the following question: Have you engaged in any of the following simulated experiences before? Choose all that apply:\nVirtual reality\nAugmented reality\nMixed reality\nOther\nNot applicable / rather not say",
+      "NOT YET IMPLEMENTED: _online5VRExperiences (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nSimulated Experiences\nParticipants were asked the following question: Have you engaged in any of the following simulated experiences before? Choose all that apply:\nVirtual reality\nAugmented reality\nMixed reality\nOther\nNot applicable / rather not say",
     type: "multicategorical",
     default: "",
     categories:
@@ -641,7 +671,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5VRHeadset (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (ownership)\nParticipants were asked the following question: Do you own a VR (Virtual Reality) headset?\nYes\nNo\nDon't know / other\nNot applicable / rather not say",
+      "NOT YET IMPLEMENTED: _online5VRHeadset (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (ownership)\nParticipants were asked the following question: Do you own a VR (Virtual Reality) headset?\nYes\nNo\nDon't know / other\nNot applicable / rather not say",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Don't know, Not applicable",
@@ -651,7 +681,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_online5VRHeadsetUsage (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (frequency)\nParticipants were asked the following question: In a given month, how frequently do you use a VR headset?\n0 times\n1-5 times\n6-10 times\n11-15 times\nmore than 15 times\nNot applicable / rather not say",
+      "NOT YET IMPLEMENTED: _online5VRHeadsetUsage (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (frequency)\nParticipants were asked the following question: In a given month, how frequently do you use a VR headset?\n0 times\n1-5 times\n6-10 times\n11-15 times\nmore than 15 times\nNot applicable / rather not say",
     type: "multicategorical",
     default: "",
     categories: "0، 1-5، 6-10، 11-15, more than 15, Not applicable",
@@ -972,7 +1002,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "abc",
     explanation:
-      "flankerCharacterSet (default is the fontCharacterSet) is like fontCharacterSet but for the flankers. ",
+      "NOT YET IMPLEMENTED: flankerCharacterSet (default is the fontCharacterSet) is like fontCharacterSet but for the flankers. ",
     type: "text",
     default: "abcdefghijklmnopqrstuvwxyz",
     categories: "",
@@ -982,7 +1012,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Sloan.woff2",
     explanation:
-      "flankerFont (default is the font) is like font, but for the flankers. ",
+      "NOT YET IMPLEMENTED: flankerFont (default is the font) is like font, but for the flankers. ",
     type: "text",
     default: "Roboto Mono",
     categories: "",
@@ -992,7 +1022,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "file",
     explanation:
-      "flankerFontSource (default is the fontSource) is like fontSource, but for the flankers. ",
+      "NOT YET IMPLEMENTED: flankerFontSource (default is the fontSource) is like fontSource, but for the flankers. ",
     type: "categorical",
     default: "google",
     categories: "file, google, browser",
@@ -1002,7 +1032,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "2",
     explanation:
-      "flankerNumber (default 1) is the number of flanker characters on each side of the target. Flankers are added on radial lines radiating from the target and going through each initial flanker. Each flanker is a random sample without replacement from flankerCharacterSet, if defined, otherwise from fontCharacterSet. Note that when drawing from fontCharacterSet the flankers are all different from the target. When drawing from flankerCharacterSet there is no target-based restriction.",
+      "NOT YET IMPLEMENTED: flankerNumber (default 1) is the number of flanker characters on each side of the target. Flankers are added on radial lines radiating from the target and going through each initial flanker. Each flanker is a random sample without replacement from flankerCharacterSet, if defined, otherwise from fontCharacterSet. Note that when drawing from fontCharacterSet the flankers are all different from the target. When drawing from flankerCharacterSet there is no target-based restriction.",
     type: "integer",
     default: "1",
     categories: "",
@@ -1012,7 +1042,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "flankerSpacingDeg (default is the spacingDeg) is the center-to-center spacing between repeated flankers, as determined by flankerNumber. This is independent of spacingDeg, which specifies the center-to-center spacing of the target and each adjacent flanker.",
+      "NOT YET IMPLEMENTED: flankerSpacingDeg (default is the spacingDeg) is the center-to-center spacing between repeated flankers, as determined by flankerNumber. This is independent of spacingDeg, which specifies the center-to-center spacing of the target and each adjacent flanker.",
     type: "numerical",
     default: "",
     categories: "",

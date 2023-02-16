@@ -195,10 +195,16 @@ export const restrictLevel = (
   targetSizeIsHeightBool,
   spacingForRatioIsOuterBool
 ) => {
+  // TODO are these necessary? Should be (I think are?) compiler checks
   if (
-    !["radial", "tangential", "horizontal", "vertical"].includes(
-      spacingDirection
-    )
+    ![
+      "radial",
+      "tangential",
+      "horizontal",
+      "vertical",
+      "horizontalAndVertical",
+      "radialAndTangential",
+    ].includes(spacingDirection)
   )
     throw `spacingDirection must equal 'radial', 'tangential', 'horizontal', or 'vertical', not '${spacingDirection}'`;
   if (!["none", "ratio", "typographic"].includes(spacingRelationToSize))
@@ -383,13 +389,8 @@ export const restrictSpacingDeg = (
   */
   let spacingDeg = Math.pow(10, proposedLevel);
   let stimulusRectPx,
-    flanker1XYDeg,
-    flanker1XYPx,
-    flanker2XYPx,
-    flanker2XYDeg,
-    spacingInnerDeg,
+    flankerXYPxs,
     maxSpacingDeg,
-    spacingOuterDeg,
     sizeDeg,
     heightDeg,
     widthDeg,
@@ -428,7 +429,7 @@ export const restrictSpacingDeg = (
   // If the stimulus extends beyond the screen, then we'll need 2 iterations. We allow
   // a 3rd iteration to allow for the case that the 2nd iteration isn't quite right, and
   // it homes in on the third.
-  let v1XY, v2XY;
+  let v1XY, v2XY, v3XY, v4XY;
   for (let iteration of [...new Array(200).keys()]) {
     // SET TARGET SIZE
     switch (spacingRelationToSize) {
@@ -587,81 +588,57 @@ export const restrictSpacingDeg = (
         switch (letterConfig.spacingDirection) {
           case "radial":
             if (targetIsFoveal) throw "Radial flankers are undefined at fovea.";
-            spacingOuterDeg = spacingDeg;
-            // Given the outer spacing, the inner spacing depends on the kind of
-            // symmetry specified. flanker1 is outer. flanker2 is inner.
-            switch (spacingSymmetry) {
-              case "screen":
-                flanker1XYDeg = [
-                  targetXYDeg[0] + spacingDeg * radialXY[0],
-                  targetXYDeg[1] + spacingDeg * radialXY[1],
-                ];
-                flanker1XYPx = XYPixOfXYDeg(flanker1XYDeg, displayOptions);
-                var deltaXYPx = [
-                  flanker1XYPx[0] - targetXYPx[0],
-                  flanker1XYPx[1] - targetXYPx[1],
-                ];
-                flanker2XYPx = [
-                  targetXYPx[0] - deltaXYPx[0],
-                  targetXYPx[1] - deltaXYPx[1],
-                ];
-                flanker2XYDeg = XYDegOfXYPix(flanker2XYPx, displayOptions);
-                var deltaXYDeg = [
-                  flanker2XYDeg[0] - targetXYDeg[0],
-                  flanker2XYDeg[1] - targetXYDeg[1],
-                ];
-                spacingInnerDeg = norm(deltaXYDeg);
-                break;
-              case "retina":
-                spacingInnerDeg = spacingOuterDeg;
-                break;
-              case "cortex":
-                var eccDeg = norm(targetXYDeg);
-                var cortical =
-                  Math.log10(eccDeg + spacingOuterDeg + 0.15) -
-                  Math.log10(eccDeg + 0.15);
-                var innerEccDeg =
-                  Math.pow(10, Math.log10(eccDeg + 0.15) - cortical) - 0.15;
-                spacingInnerDeg = eccDeg - innerEccDeg;
-                break;
-            }
-            v1XY = radialXY.map((z) => z * spacingOuterDeg);
-            v2XY = radialXY.map((z) => z * -spacingInnerDeg);
+            ({ v1XY, v2XY } = _getRadialVectors(
+              spacingDeg,
+              spacingSymmetry,
+              targetXYDeg,
+              radialXY,
+              targetXYPx
+            ));
             break;
           case "tangential":
             if (targetIsFoveal)
               throw "Tangential flankers are undefined at fovea.";
-            v1XY = tangentialXY.map((z) => z * -spacingDeg);
-            v2XY = tangentialXY.map((z) => z * spacingDeg);
+            ({ v1XY, v2XY } = _getTangentialVectors(tangentialXY, spacingDeg));
+            break;
+          case "radialAndTangential":
+            if (targetIsFoveal)
+              throw "Radial and tangential flankers are undefined at fovea.";
+            ({ v1XY, v2XY } = _getRadialVectors(
+              spacingDeg,
+              spacingSymmetry,
+              targetXYDeg,
+              radialXY,
+              targetXYPx
+            ));
+            ({ v1XY: v3XY, v2XY: v4XY } = _getTangentialVectors(
+              tangentialXY,
+              spacingDeg
+            ));
             break;
           case "horizontal":
             // TODO check in compiler
             if (!targetIsFoveal)
               throw "Horizontal flankers are undefined in the periphery.";
-            v1XY = horizontalXY.map((z) => z * -spacingDeg);
-            v2XY = horizontalXY.map((z) => z * spacingDeg);
+            ({ v1XY, v2XY } = _getHorizontalVectors(horizontalXY, spacingDeg));
             break;
           case "vertical":
             if (!targetIsFoveal)
               throw "Vertical flankers are undefined in the periphery.";
-            v1XY = verticalXY.map((z) => z * -spacingDeg);
-            v2XY = verticalXY.map((z) => z * spacingDeg);
+            ({ v1XY, v2XY } = _getVerticalVectors(verticalXY, spacingDeg));
+            break;
+          case "horizontalAndVertical":
+            if (!targetIsFoveal)
+              throw "Horizontal and vertical flankers are undefined in the periphery.";
+            ({ v1XY, v2XY } = _getHorizontalVectors(horizontalXY, spacingDeg));
+            ({ v1XY: v3XY, v2XY: v4XY } = _getVerticalVectors(
+              verticalXY,
+              spacingDeg
+            ));
             break;
         }
-        flanker1XYDeg = [targetXYDeg[0] + v1XY[0], targetXYDeg[1] + v1XY[1]];
-        flanker2XYDeg = [targetXYDeg[0] + v2XY[0], targetXYDeg[1] + v2XY[1]];
-        flanker1XYPx = XYPixOfXYDeg(flanker1XYDeg, displayOptions);
-        flanker2XYPx = XYPixOfXYDeg(flanker2XYDeg, displayOptions);
-        stimulusRectPx = new Rectangle(
-          [
-            Math.min(flanker1XYPx[0], flanker2XYPx[0]),
-            Math.min(flanker1XYPx[1], flanker2XYPx[1]),
-          ],
-          [
-            Math.max(flanker1XYPx[0], flanker2XYPx[0]),
-            Math.max(flanker1XYPx[1], flanker2XYPx[1]),
-          ]
-        );
+        flankerXYPxs = _getFlankerXYPxs(targetXYDeg, [v1XY, v2XY, v3XY, v4XY]);
+        stimulusRectPx = _getRectAroundFlankers(flankerXYPxs);
         stimulusRectPx = stimulusRectPx.inset(-widthPx / 2, -heightPx / 2);
         break;
     }
@@ -700,8 +677,8 @@ export const restrictSpacingDeg = (
           } QUEST's proposed spacing. Largest bounds ratio: ${largestBoundsRatio}.`
         );
       const targetAndFlankerLocationsPx = [targetXYPx];
-      if (spacingRelationToSize === "ratio")
-        targetAndFlankerLocationsPx.push(flanker1XYPx, flanker2XYPx);
+      if (spacingRelationToSize !== "typographic")
+        targetAndFlankerLocationsPx.push(...flankerXYPxs);
       // const characterSetUnitHeightScalar = 1 / characterSetRectPx.height;
       const stimulusParameters = {
         widthPx: Math.round(widthPx),
@@ -793,4 +770,88 @@ export const getLargestBoundsRatio = (
   const largestBoundsRatio = Math.max(...Object.values(ratios));
   if (largestBoundsRatio <= 0) throw "Largest ratio is non-positive.";
   return largestBoundsRatio;
+};
+
+const _getRectAroundFlankers = (flankersPoints) => {
+  const xValues = flankersPoints.map((coord) => coord[0]);
+  const yValues = flankersPoints.map((coord) => coord[1]);
+  return new Rectangle(
+    [Math.min(...xValues), Math.min(...yValues)],
+    [Math.max(...xValues), Math.max(...xValues)]
+  );
+};
+function _getRadialVectors(
+  spacingDeg,
+  spacingSymmetry,
+  targetXYDeg,
+  radialXY,
+  targetXYPx
+) {
+  let flanker1XYDeg, flanker1XYPx, flanker2XYDeg, flanker2XYPx, spacingInnerDeg;
+  let spacingOuterDeg = spacingDeg;
+  // Given the outer spacing, the inner spacing depends on the kind of
+  // symmetry specified. flanker1 is outer. flanker2 is inner.
+  switch (spacingSymmetry) {
+    case "screen":
+      flanker1XYDeg = [
+        targetXYDeg[0] + spacingDeg * radialXY[0],
+        targetXYDeg[1] + spacingDeg * radialXY[1],
+      ];
+      flanker1XYPx = XYPixOfXYDeg(flanker1XYDeg, displayOptions);
+      var deltaXYPx = [
+        flanker1XYPx[0] - targetXYPx[0],
+        flanker1XYPx[1] - targetXYPx[1],
+      ];
+      flanker2XYPx = [
+        targetXYPx[0] - deltaXYPx[0],
+        targetXYPx[1] - deltaXYPx[1],
+      ];
+      flanker2XYDeg = XYDegOfXYPix(flanker2XYPx, displayOptions);
+      var deltaXYDeg = [
+        flanker2XYDeg[0] - targetXYDeg[0],
+        flanker2XYDeg[1] - targetXYDeg[1],
+      ];
+      spacingInnerDeg = norm(deltaXYDeg);
+      break;
+    case "retina":
+      spacingInnerDeg = spacingOuterDeg;
+      break;
+    case "cortex":
+      const eccDeg = norm(targetXYDeg);
+      const cortical =
+        Math.log10(eccDeg + spacingOuterDeg + 0.15) - Math.log10(eccDeg + 0.15);
+      const innerEccDeg =
+        Math.pow(10, Math.log10(eccDeg + 0.15) - cortical) - 0.15;
+      spacingInnerDeg = eccDeg - innerEccDeg;
+      break;
+  }
+  const v1XY = radialXY.map((z) => z * spacingOuterDeg);
+  const v2XY = radialXY.map((z) => z * -spacingInnerDeg);
+  return { v1XY, v2XY };
+}
+
+const _getTangentialVectors = (tangentialXY, spacingDeg) => {
+  const v1XY = tangentialXY.map((z) => z * -spacingDeg);
+  const v2XY = tangentialXY.map((z) => z * spacingDeg);
+  return { v1XY, v2XY };
+};
+const _getHorizontalVectors = (horizontalXY, spacingDeg) => {
+  const v1XY = horizontalXY.map((z) => z * -spacingDeg);
+  const v2XY = horizontalXY.map((z) => z * spacingDeg);
+  return { v1XY, v2XY };
+};
+const _getVerticalVectors = (verticalXY, spacingDeg) => {
+  const v1XY = verticalXY.map((z) => z * -spacingDeg);
+  const v2XY = verticalXY.map((z) => z * spacingDeg);
+  return { v1XY, v2XY };
+};
+
+const _getFlankerXYPxs = (targetXYDeg, flankerPositionVectors) => {
+  const flankerXYPxs = flankerPositionVectors
+    .filter((x) => x !== undefined)
+    .map((v) => {
+      const flankerXYDeg = [targetXYDeg[0] + v[0], targetXYDeg[1] + v[1]];
+      return XYPixOfXYDeg(flankerXYDeg, displayOptions);
+    });
+  return flankerXYPxs;
 };

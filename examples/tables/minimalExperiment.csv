@@ -1,5 +1,5 @@
 ﻿_about,"simple threshold, one block, no binary files, no calibration"
-%_compatibleBrowser,"Chrome,Firefox,Edge"
+_needBrowser,"Chrome,Firefox,Edge"
 block,,"1"
 calibrateTrackDistanceBool,,"FALSE"
 conditionName,,"triplet"

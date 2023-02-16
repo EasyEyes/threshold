@@ -318,14 +318,6 @@ export const _takeFixationClick = (e) => {
     psychoJS.window,
     true
   );
-  // Verify positions are consistent
-  if (cX !== pX || cY !== pY)
-    console.error(
-      `[cX,cY] are inconsistent with mouse position registered by psychoJS, [cX,cY] ${[
-        cX,
-        cY,
-      ]}, [pX, pY] ${[pX, pY]}`
-    );
   const clickDistanceFromFixation = Math.hypot(
     cX - fixationConfig.pos[0],
     cY - fixationConfig.pos[1]

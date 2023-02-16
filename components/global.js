@@ -346,6 +346,21 @@ export const trialCounterConfig = {
   autoDraw: false,
 };
 
+export const targetTextStimConfig = {
+  text: "",
+  font: "Arial",
+  units: "pix",
+  pos: [0, 0],
+  height: 1.0,
+  wrapWidth: undefined,
+  ori: 0.0,
+  opacity: 1.0,
+  depth: -7.0,
+  alignVert: "center",
+  alignHoriz: "center",
+  isInstruction: false,
+};
+
 /* -------------------------------------------------------------------------- */
 /* ------------------------------- Sound ------------------------------------ */
 /* -------------------------------------------------------------------------- */

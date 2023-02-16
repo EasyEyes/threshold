@@ -246,8 +246,7 @@ export const _letter_trialRoutineFirstFrame = (
   targetSpecs,
   conditionName,
   target,
-  flanker1,
-  flanker2
+  flankersUsed
 ) => {
   if (paramReader.read("calibrateTrackGazeBool", status.block_condition))
     measureGazeError(
@@ -262,20 +261,12 @@ export const _letter_trialRoutineFirstFrame = (
       "targetBoundingBox",
       prettyPrintPsychojsBoundingBox(target.getBoundingBox(true))
     );
-  if (
-    letterConfig.spacingRelationToSize === "ratio" &&
-    thresholdParameter === "spacing" &&
-    targetKind.current === "letter"
-  ) {
+  flankersUsed.forEach((f, i) =>
     psychoJS.experiment.addData(
-      "flanker1BoundingBox",
-      prettyPrintPsychojsBoundingBox(flanker1.getBoundingBox(true))
-    );
-    psychoJS.experiment.addData(
-      "flanker2BoundingBox",
-      prettyPrintPsychojsBoundingBox(flanker2.getBoundingBox(true))
-    );
-  }
+      `flanker${i}BoundingBox`,
+      prettyPrintPsychojsBoundingBox(f.getBoundingBox(true))
+    )
+  );
   /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
 
   // ? Should allow for reading?

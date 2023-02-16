@@ -391,6 +391,24 @@ export const GLOSSARY: Glossary = {
     default: "",
     categories: ["audio", "camera", "microphone", "download"],
   },
+  _online4AllowList: {
+    name: "_online4AllowList",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  _online4AllowCompletedExperiment: {
+    name: "_online4AllowCompletedExperiment",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  _online4AllowAfterHours: {
+    name: "_online4AllowAfterHours",
+    availability: "now",
+    type: "",
+    default: "",
+  },
   _online4ApprovalRate: {
     name: "_online4ApprovalRate",
     availability: "now",
