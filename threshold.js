@@ -2517,7 +2517,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Number of responses required before the current (psychojs) trial ends
       // For all current targetKinds this is 1.
-      responseType.numberOfResponses = 1;
+      responseType.numberOfResponses =
+        targetKind.current === "repeatedLetters" ? 2 : 1;
 
       const letterSetResponseType = () => {
         // ! responseType
@@ -4271,7 +4272,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           key_resp.frameNStart = frameN; // exact frame index
           // TODO Use PsychoJS clock if possible
           // Reset together with PsychoJS
-          // ??? why are we using showCharacterSetResponse in this key_resp section?
           showCharacterSetResponse.onsetTime = performance.now();
 
           // keyboard checking is just starting
@@ -4312,12 +4312,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           if (targetKind.current === "rsvpReading")
             registerKeypressForRSVPReading(theseKeys);
-          // if (targetKind.current === "repeatedLetters"){
-          //   theseKeys.forEach(k => {
-          //     logger("correctAns", correctAns.current);
-          //     correctAns.current = registerResponseForRepeatedLetters(k.name,k.rt, correctAns.current);
-          //   });
-          // }
+          if (targetKind.current === "repeatedLetters") {
+            theseKeys.forEach((k) => {
+              registerResponseForRepeatedLetters(
+                k.name,
+                k.rt,
+                correctAns.current,
+                correctSynth,
+                showCharacterSetResponse.alreadyClickedCharacters
+              );
+            });
+          }
+          showCharacterSetResponse.alreadyClickedCharacters.push(
+            ...theseKeys.map((k) => k.name)
+          );
         }
       }
       // Input from clickable character set
@@ -4340,12 +4348,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         _key_resp_allKeys.push(...clickedKeypresses);
 
-        // if (targetKind.current === "repeatedLetters"){
-        //   showCharacterSetResponse.current.forEach((r,i) => {
-        //     logger("correctAns", correctAns.current);
-        //     correctAns.current = registerResponseForRepeatedLetters(r, rts[i], correctAns.current);
-        //   });
-        // }
+        if (targetKind.current === "repeatedLetters") {
+          showCharacterSetResponse.current.forEach((r, i) => {
+            registerResponseForRepeatedLetters(
+              r,
+              rts[i],
+              correctAns.current,
+              correctSynth,
+              showCharacterSetResponse.alreadyClickedCharacters
+            );
+          });
+        }
 
         // TODO update how already clicked characters are shown, ie for repeatedLetters
         showCharacterSetResponse.alreadyClickedCharacters.push(
@@ -4367,33 +4380,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const uniqueResponses = new Set(_key_resp_allKeys.map((k) => k.name));
       if (
         uniqueResponses.size >= responseType.numberOfResponses &&
-        targetKind.current !== "rsvpReading" &&
-        targetKind.current !== "repeatedLetters"
+        targetKind.current !== "rsvpReading"
       ) {
         // The characters with which the participant responded
         const participantResponse = [...uniqueResponses].slice(
           uniqueResponses.size - responseType.numberOfResponses
         );
-        // if (targetKind.current === "repeatedLetters") {
-        //   // Each response given this trial is a correct answer
-        //   responseCorrect = participantResponse.every((r) =>
-        //     correctAns.current.includes(r)
-        //   );
-        //   // Remove the registerd response(s) from the set of possible correct answers
-        //   correctAns.current = correctAns.current.filter(
-        //     (a) => !participantResponse.includes(a)
-        //   );
-        // } else {
-        const responseCorrect =
-          targetKind.current === "vocoderPhrase"
-            ? arraysEqual(
-                vocoderPhraseCorrectResponse.current.sort(),
-                correctAns.current.sort()
-              )
-            : arraysEqual(
-                participantResponse.sort(),
-                correctAns.current.sort()
-              );
+        let responseCorrect;
+        if (targetKind.current === "vocoderPhrase") {
+          responseCorrect = arraysEqual(
+            vocoderPhraseCorrectResponse.current.sort(),
+            correctAns.current.sort()
+          );
+        } else if (targetKind.current === "repeatedLetters") {
+          responseCorrect = participantResponse.some((r) =>
+            correctAns.current.includes(r)
+          );
+        } else {
+          responseCorrect = arraysEqual(
+            participantResponse.sort(),
+            correctAns.current.sort()
+          );
+        }
 
         // Was this correct?
         if (responseCorrect) {
@@ -4424,6 +4432,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           });
           // CORRECT
           key_resp.corr = 1;
+          if (targetKind.current === "repeatedLetters")
+            key_resp.corr = participantResponse.map((r) =>
+              correctAns.current.includes(r) ? 1 : 0
+            );
         } else {
           if (
             paramReader.read(
@@ -4437,11 +4449,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // wrongSynth.play();
           }
 
+          if (targetKind.current === "repeatedLetters") {
+            key_resp.corr = participantResponse.map((r) => 0);
+          } else {
+            status.trialCompleted_thisBlock++;
+            // INCORRECT
+            key_resp.corr = 0;
+          }
           // Play wrong audio
           // wrongSynth.play();
-          status.trialCompleted_thisBlock++;
-          // INCORRECT
-          key_resp.corr = 0;
         }
 
         removeClickableCharacterSet(showCharacterSetResponse);
@@ -4511,7 +4527,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switch (targetKind.current) {
         case "repeatedLetters":
           // Continue after done displaying stimuli, when enough responses have been registered
-          continueRoutine = _repeatedLetters_trialRoutineEachFrame(
+          _repeatedLetters_trialRoutineEachFrame(
             t,
             frameN,
             delayBeforeStimOnsetSec,
@@ -5113,7 +5129,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
         });
 
-        psychoJS.experiment.addData("key_resp.keys", key_resp.keys.toString());
+        psychoJS.experiment.addData(
+          "key_resp.keys",
+          _key_resp_allKeys.map((k) => k.name).toString()
+        );
         psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
         psychoJS.experiment.addData("correctAns", correctAns.current);
         // console.log("key_resp.keys", key_resp.keys);

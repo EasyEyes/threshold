@@ -21,21 +21,6 @@ import { getLargestBoundsRatio } from "./bounding";
 import { TextStim } from "../psychojs/src/visual";
 import { Color } from "../psychojs/src/util";
 
-export const duplicateRepeatedLetterConditions = (conditions) => {
-  const newConditions = [];
-  conditions.forEach((c) => {
-    if (c.targetKind === "repeatedLetters") {
-      const c1 = Object.assign({ _duplicatedConditionCardinal: 1 }, c);
-      const c2 = Object.assign({ _duplicatedConditionCardinal: 2 }, c);
-      newConditions.push(c1);
-      newConditions.push(c2);
-    } else {
-      newConditions.push(c);
-    }
-  });
-  return newConditions;
-};
-
 export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
   // TODO add a preprocessor check that the border character isn't found in the target character set
   repeatedLettersConfig.targetRepeatsBorderCharacter = reader.read(
@@ -212,15 +197,14 @@ export const restrictRepeatedLettersSpacing = (
         displayOptions
       )[0];
 
-    // At least three lines, up to targetRepeatsMaxLines
+    // At least one line, up to targetRepeatsMaxLines
     let possibleNumbersOfLines = [
       ...new Array(
-        Math.max(1, repeatedLettersConfig.targetRepeatsMaxLines - 2)
+        Math.max(1, repeatedLettersConfig.targetRepeatsMaxLines)
       ).keys(),
     ]
-      .map((i) => i + 3)
+      .map((i) => i + 1)
       .reverse();
-
     let largestBoundsRatio, numberOfColumns;
     for (const lineNumbers of possibleNumbersOfLines) {
       const stimulusLocations = [];
@@ -281,11 +265,15 @@ export const restrictRepeatedLettersSpacing = (
             (displayOptions.window._size[0] - stimuliFieldExtentXPx) / 2 +
             widthPx / 2;
           for (const columnId of [...new Array(numberOfColumns).keys()]) {
+            let borderCharcter, endCharacter;
+            if ([1, 2].includes(lineNumbers)) {
+              borderCharcter = rowId !== 0;
+            } else {
+              borderCharcter = rowId === 0 || rowId === lineNumbers - 1;
+            }
+            endCharacter = columnId === 0 || columnId === numberOfColumns - 1;
             const currentCharacterType =
-              rowId === 0 ||
-              rowId === lineNumbers - 1 ||
-              columnId === 0 ||
-              columnId === numberOfColumns - 1
+              borderCharcter || endCharacter
                 ? "border"
                 : (columnId + (rowId % 2 === 0 ? 0 : 1)) % 2 === 0
                 ? "target1"
@@ -319,10 +307,12 @@ export const registerResponseForRepeatedLetters = (
   responseCharacter,
   rt,
   correctAnswers,
-  correctSynth
+  correctSynth,
+  recievedResponses
 ) => {
-  repeatedLettersResponse.current.push(responseCharacter);
-  repeatedLettersResponse.rt.push(rt);
+  // repeatedLettersResponse.current.push(responseCharacter);
+  // repeatedLettersResponse.rt.push(rt);
+  if (recievedResponses.includes(responseCharacter)) return;
   const correct = correctAnswers.includes(responseCharacter) ? 1 : 0;
   logger("correct?", correct);
   repeatedLettersResponse.correct.push(correct);
@@ -332,8 +322,5 @@ export const registerResponseForRepeatedLetters = (
   if (correct) {
     correctSynth.play();
     status.trialCorrect_thisBlock++;
-    return correctAnswers.filter((a) => a !== responseCharacter);
   }
-  // Incorrect
-  return correctAnswers;
 };
