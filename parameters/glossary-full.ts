@@ -2162,7 +2162,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "TRUE",
     explanation:
       "NOT YET IMPLEMENTED: showProgressBarBool can be FALSE (default) or TRUE. Meant for children. Graphically displays a vertical green bar that tracks the trial count. The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the block. Sometimes we call the green liquid spaceship fuel for Jamie the astronaut.",
-    type: "categorical",
+    type: "boolean",
     default: "FALSE",
     categories: "",
   },

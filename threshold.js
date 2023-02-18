@@ -366,6 +366,12 @@ import {
   removeRevealableTargetWordsToAidSpokenScoring,
   addRsvpReadingTrialResponsesToData,
 } from "./components/rsvpReading.js";
+import {
+  createProgressBar,
+  hideProgressBar,
+  showProgressBar,
+  updateProgressBar,
+} from "./components/progressBar.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -395,6 +401,10 @@ const paramReaderInitialized = async (reader) => {
 
   buildWindowErrorHandling(reader);
 
+  // if rc is not defined, reload the page
+  if (!rc) {
+    window.location.reload();
+  }
   // ! check system compatibility
   const compMsg = checkSystemCompatibility(
     reader,
@@ -1019,6 +1029,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     grid.current = new Grid("disabled", displayOptions, psychoJS);
 
+    // create progress bar
+    createProgressBar();
+    updateProgressBar(0);
+    hideProgressBar();
+
     return Scheduler.Event.NEXT;
   }
 
@@ -1367,7 +1382,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         .filter((condition) =>
           paramReader.read("conditionEnabledBool", condition["block_condition"])
         );
-
+      updateProgressBar(0);
       // nTrialsTotal
       // totalTrialsThisBlock.current = trialsConditions
       //   .map((c) => paramReader.read("conditionTrials", c.block_condition))
@@ -2042,7 +2057,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       loggerText(
         `initInstructionRoutineBegin targetKind ${targetKind.current}`
       );
-
+      hideProgressBar();
       TrialHandler.fromSnapshot(snapshot);
       initInstructionClock.reset(); // clock
       frameN = -1;
@@ -2511,7 +2526,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         rc.getFullscreen();
         await sleep(1000);
       }
-
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
@@ -2611,6 +2625,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterSetResponseType();
         },
       });
+
+      //if showProgressBarBool, show status bar
+      const showProgressBarBool = paramReader.read(
+        "showProgressBarBool",
+        status.block_condition
+      );
+      if (showProgressBarBool) showProgressBar();
 
       const parametersToExcludeFromData = [];
       addConditionToData(
@@ -3691,7 +3712,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       loggerText("trialInstructionRoutineEnd");
 
       rc.pauseDistance();
-
       if (toShowCursor()) {
         showCursor();
         return Scheduler.Event.NEXT;
@@ -3789,7 +3809,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       // rc.pauseNudger();
       // await sleep(100);
-
       if (toShowCursor()) {
         showCursor();
         return Scheduler.Event.NEXT;
@@ -5165,7 +5184,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "takeABreakTrialCredit",
         status.block_condition
       );
-
+      //update the progress bar
+      updateProgressBar((status.trial / totalTrialsThisBlock.current) * 100);
       // Toggle takeABreak credit progressBar
       if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
@@ -5264,13 +5284,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // ! update trial counter
         // dangerous
         status.trial = currentLoopSnapshot.thisN;
-        // console.log("block_condition",status.block + "_" + status.trial );
-        // updateCurrentBlockCondition(
-        //   window.location.toString(),
-        //   status.block + "_" + status.trial,
-        //   Date.now(),
-        //   rc.id.value
-        // );
       } else {
         console.log(
           "%c====== Unknown Snapshot ======",

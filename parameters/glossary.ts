@@ -1957,9 +1957,8 @@ export const GLOSSARY: Glossary = {
   showProgressBarBool: {
     name: "showProgressBarBool",
     availability: "now",
-    type: "categorical",
+    type: "boolean",
     default: "FALSE",
-    categories: [""],
   },
   showTakeABreakCreditBool: {
     name: "showTakeABreakCreditBool",
