@@ -3300,7 +3300,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               stimulusParameters,
               thisExperimentInfo.experimentFileName
             );
-
+          repeatedLettersConfig.stims.forEach((s) => {
+            s.setPadding(font.padding);
+            s.setCharacterSet(String(fontCharacterSet.current.join("")));
+            s._updateIfNeeded();
+          });
           // Add stims to trialComponents
           trialComponents = [];
           trialComponents.push(...repeatedLettersConfig.stims);

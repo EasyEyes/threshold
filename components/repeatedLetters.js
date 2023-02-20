@@ -23,9 +23,8 @@ import { Color } from "../psychojs/src/util";
 
 export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
   // TODO add a preprocessor check that the border character isn't found in the target character set
-  repeatedLettersConfig.targetRepeatsBorderCharacter = reader.read(
-    "targetRepeatsBorderCharacter",
-    BC
+  repeatedLettersConfig.targetRepeatsBorderCharacter = String(
+    reader.read("targetRepeatsBorderCharacter", BC)
   );
   repeatedLettersConfig.targetRepeatsMaxLines = reader.read(
     "targetRepeatsMaxLines",
@@ -91,54 +90,18 @@ export const restrictRepeatedLettersSpacing = (
 
   // Loop
   for (const _ of [...new Array(200).keys()]) {
-    let sizeDeg, heightDeg, widthDeg, heightPx, widthPx;
+    let sizeDeg, heightDeg, widthDeg, heightPx, widthPx, lineSpacingPx;
     // Get character sizes
     switch (letterConfig.spacingRelationToSize) {
       case "none":
-        // Use specified targetSizeDeg
-        sizeDeg = letterConfig.targetSizeDeg;
-        if (letterConfig.targetSizeIsHeightBool) {
-          heightDeg = sizeDeg;
-          const [, topPx] = XYPixOfXYDeg(
-            [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
-            displayOptions
-          );
-          const [, bottomPx] = XYPixOfXYDeg(
-            [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
-            displayOptions
-          );
-          heightPx = topPx - bottomPx;
-          widthPx =
-            (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
-        } else {
-          widthDeg = sizeDeg;
-          heightDeg =
-            widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
-          const [leftPx] = XYPixOfXYDeg(
-            [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
-            displayOptions
-          );
-          const [rightPx] = XYPixOfXYDeg(
-            [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
-            displayOptions
-          );
-          widthPx = rightPx - leftPx;
-          heightPx =
-            widthPx * (characterSetRectPx.height / characterSetRectPx.width);
-          heightDeg =
-            XYDegOfXYPix(
-              [fixationConfig.pos[0], fixationConfig.pos[1] + heightPx / 2],
-              displayOptions
-            )[1] -
-            XYDegOfXYPix(
-              [fixationConfig.pos[0], fixationConfig.pos[1] - heightPx / 2],
-              displayOptions
-            )[1];
-        }
-        break;
       case "ratio":
-        // Use spacingDeg and spacingOverSizeRatio to set size.
-        sizeDeg = spacingDeg / letterConfig.spacingOverSizeRatio;
+        if (letterConfig.spacingRelationToSize === "none") {
+          // Use specified targetSizeDeg
+          sizeDeg = letterConfig.targetSizeDeg;
+        } else {
+          // Use spacingDeg and spacingOverSizeRatio to set size.
+          sizeDeg = spacingDeg / letterConfig.spacingOverSizeRatio;
+        }
 
         if (letterConfig.targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
@@ -176,8 +139,10 @@ export const restrictRepeatedLettersSpacing = (
               displayOptions
             )[1];
         }
+        lineSpacingPx = heightPx * letterConfig.spacingOverSizeRatio;
         break;
       case "typographic":
+        // TODO is this enforced by a compiler check?
         throw "typographic spacingRelationToSize undefined when targetKind is repeatedLetters";
     }
 
@@ -187,6 +152,7 @@ export const restrictRepeatedLettersSpacing = (
       continue;
     }
 
+    // Horizontal (column) spacing
     const approxSpacingPx =
       XYPixOfXYDeg(
         [targetXYDeg[0] + spacingDeg / 2, targetXYDeg[1]],
@@ -198,12 +164,10 @@ export const restrictRepeatedLettersSpacing = (
       )[0];
 
     // At least one line, up to targetRepeatsMaxLines
-    let possibleNumbersOfLines = [
-      ...new Array(
-        Math.max(1, repeatedLettersConfig.targetRepeatsMaxLines)
-      ).keys(),
-    ]
-      .map((i) => i + 1)
+    const maxLines = Math.max(1, repeatedLettersConfig.targetRepeatsMaxLines);
+    const minLines = maxLines < 3 ? maxLines : 3;
+    let possibleNumbersOfLines = [...new Array(maxLines - minLines + 1).keys()]
+      .map((i) => i + minLines)
       .reverse();
     let largestBoundsRatio, numberOfColumns;
     for (const lineNumbers of possibleNumbersOfLines) {
@@ -224,7 +188,7 @@ export const restrictRepeatedLettersSpacing = (
       const stimuliFieldExtentXPx =
         (numberOfColumns - 1) * approxSpacingPx + widthPx;
       const stimuliFieldExtentYPx =
-        (lineNumbers - 1) * approxSpacingPx + heightPx;
+        (lineNumbers - 1) * lineSpacingPx + heightPx;
       const lowerLeftOfStimFieldPx = [
         -stimuliFieldExtentXPx / 2,
         targetXYPx[1] - stimuliFieldExtentYPx / 2,
@@ -258,7 +222,7 @@ export const restrictRepeatedLettersSpacing = (
           const yPointer =
             targetXYPx[1] +
             stimuliFieldExtentYPx / 2 -
-            Math.round(approxSpacingPx * rowId) -
+            Math.round(lineSpacingPx * rowId) -
             heightPx / 2;
           let xPointer =
             -displayOptions.window._size[0] / 2 +

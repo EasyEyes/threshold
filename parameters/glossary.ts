@@ -27,6 +27,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  _calibrateScreenSizeCookieBool: {
+    name: "_calibrateScreenSizeCookieBool",
+    availability: "now",
+    type: "",
+    default: "",
+  },
   _calibrateSoundAssumingThisICalibDBSPL: {
     name: "_calibrateSoundAssumingThisICalibDBSPL",
     availability: "now",
