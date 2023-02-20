@@ -36,6 +36,10 @@ import {
   getCompatibilityRequirements,
 } from "../components/compatibilityCheck.js";
 import { compatibilityRequirements } from "../../source/components/global";
+import {
+  durations,
+  EstimateDurationForScientistPage,
+} from "../../source/components/getDuration";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -299,6 +303,16 @@ export const prepareExperimentFileForThreshold = async (
       errors
     );
   } else {
+    durations.currentDuration = EstimateDurationForScientistPage(parsed);
+    const durationInMin = Math.round(durations.currentDuration / 60);
+    if (durationInMin > 1) {
+      durations.durationForStatusline = durationInMin + " minutes";
+    } else if (durationInMin == 1) {
+      durations.durationForStatusline = durationInMin + " minute";
+    } else {
+      durations.durationForStatusline = "less than 1 minute";
+    }
+    console.log(durations.durationForStatusline);
     compatibilityRequirements.parsedInfo =
       getCompatibilityInfoForScientistPage(parsed);
     compatibilityRequirements.L = convertLanguageToLanguageCode(
