@@ -32,4 +32,4 @@ You may then open Live Server (a VSCode extension) to preview lively. You need t
 
 ## PsychoJS Version
 
-We build EasyEyes Threshold with PsychoJS `2022.2.3`.
+We build EasyEyes Threshold with PsychoJS `2022.1.3`.

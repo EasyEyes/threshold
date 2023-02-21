@@ -155,7 +155,7 @@ export const GLOSSARY: Glossary = {
     name: "_languageSelectionByParticipantBool",
     availability: "now",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
   _needBrowser: {
     name: "_needBrowser",
