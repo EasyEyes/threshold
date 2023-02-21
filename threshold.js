@@ -1174,14 +1174,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     if (!continueRoutine || clickedContinue.current) {
-      logger(
-        "Inside if statement of _instructionRoutineEachFrame - continueRoutine",
-        continueRoutine
-      );
-      logger(
-        "Inside if statement of _instructionRoutineEachFrame - clickedContinue.current",
-        clickedContinue.current
-      );
       continueRoutine = true;
       clickedContinue.current = false;
       return Scheduler.Event.NEXT;

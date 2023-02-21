@@ -493,7 +493,6 @@ export const restrictSpacingDeg = (
         //   sizeDeg = innerSpacing / spacingOverSizeRatio;
         // }
         sizeDeg = spacingDeg / spacingOverSizeRatio;
-
         if (targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
           [, topPx] = XYPixOfXYDeg(
@@ -777,7 +776,7 @@ const _getRectAroundFlankers = (flankersPoints) => {
   const yValues = flankersPoints.map((coord) => coord[1]);
   return new Rectangle(
     [Math.min(...xValues), Math.min(...yValues)],
-    [Math.max(...xValues), Math.max(...xValues)]
+    [Math.max(...xValues), Math.max(...yValues)]
   );
 };
 function _getRadialVectors(
