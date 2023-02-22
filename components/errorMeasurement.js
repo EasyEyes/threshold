@@ -124,13 +124,15 @@ export const addResponseIfTolerableError = (
   level,
   tolerances,
   trackGaze,
-  psychoJS
+  psychoJS,
+  respondedEarly
 ) => {
   addMeasuredErrorToOutput(psychoJS, tolerances);
-  const durationAcceptable = _targetDurationAcceptable(
-    tolerances.measured.thresholdDurationRatio,
-    tolerances.allowed.thresholdAllowedDurationRatio
-  );
+  const durationAcceptable =
+    _targetDurationAcceptable(
+      tolerances.measured.thresholdDurationRatio,
+      tolerances.allowed.thresholdAllowedDurationRatio
+    ) || respondedEarly;
   const gazeAcceptable = _gazeErrorAcceptable(
     tolerances.measured,
     tolerances.allowed

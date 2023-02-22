@@ -3795,6 +3795,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
   }
 
+  var letterRespondedEarly;
   function trialRoutineBegin(snapshot) {
     return async function () {
       trialClock.reset(); // clock
@@ -4025,6 +4026,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
       });
+      letterRespondedEarly = false;
 
       ////
 
@@ -4416,6 +4418,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             participantResponse.sort(),
             correctAns.current.sort()
           );
+        }
+
+        // In letter&repeatedLetter, mark target end time if
+        // response was given before specified target duration.
+        if (
+          letterTiming.targetFinishSec === undefined &&
+          ["letter", "repeatedLetters"].includes(targetKind.current)
+        ) {
+          const targetStim =
+            targetKind.current === "letter"
+              ? target
+              : repeatedLettersConfig.stims[0];
+          letterRespondedEarly = true;
+          letterTiming.targetFinishSec = t;
+          targetStim.frameNEnd = frameN;
+          targetStim.frameNFinishConfirmed = frameN;
         }
 
         // Was this correct?
@@ -5074,7 +5092,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop,
               simulated,
               key_resp.corr,
-              level
+              level,
+              letterRespondedEarly
             );
           },
           repeatedLetters: () => {
@@ -5096,7 +5115,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop,
               simulated,
               repeatedLettersResponse.correct,
-              level
+              level,
+              letterRespondedEarly
             );
             repeatedLettersResponse.current = [];
             repeatedLettersResponse.correct = [];

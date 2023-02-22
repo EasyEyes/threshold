@@ -58,7 +58,8 @@ export const _letter_trialRoutineEnd = (
   currentLoop,
   simulated,
   responseCorrect,
-  level
+  level,
+  respondedEarly
 ) => {
   // letterTiming.targetFinishSec and letterTiming.targetStartSec are undefined for simulated observer
   if (
@@ -105,7 +106,8 @@ export const _letter_trialRoutineEnd = (
         level,
         tolerances,
         usingGaze.current,
-        psychoJS
+        psychoJS,
+        respondedEarly
       ) &&
       usingGaze.current
     ) {
