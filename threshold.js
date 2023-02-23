@@ -4636,7 +4636,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             const thisDuration =
               letterTiming.targetFinishSec - letterTiming.targetStartSec;
             showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
-              Math.round(thisDuration * 100000.0) / 100000
+              Math.round(thisDuration * 100.0) / 100
             } [${isTimingOK(
               Math.abs(thisDuration - letterConfig.targetDurationSec),
               0.02

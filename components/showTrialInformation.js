@@ -47,123 +47,88 @@ export const updateTargetSpecsForLetter = (
   stimulusParameters,
   experimentFileName
 ) => {
-  showConditionNameConfig.targetSpecs = `sizeDeg: ${
-    Math.round(10 * stimulusParameters.sizeDeg) / 10
-  }\n${
-    stimulusParameters.spacingDeg
-      ? `spacingDeg: ${Math.round(10 * stimulusParameters.spacingDeg) / 10}`
-      : ""
-  }\nheightDeg: ${
-    Math.round(10 * stimulusParameters.heightDeg) / 10
-  }\nheightPx: ${Math.round(
-    stimulusParameters.heightPx
-  )}\nfilename: ${experimentFileName}\nfont: ${
-    font.name
-  }\nspacingRelationToSize: ${
-    letterConfig.spacingRelationToSize
-  }\nspacingOverSizeRatio: ${
-    letterConfig.spacingOverSizeRatio
-  }\nspacingSymmetry: ${letterConfig.spacingSymmetry}\ntargetDurationSec: ${
-    letterConfig.targetDurationSec
-  }\ntargetSizeIsHeightBool: ${
-    letterConfig.targetSizeIsHeightBool
-  }\ntargetEccentricityXYDeg: ${
-    letterConfig.targetEccentricityXYDeg
-  }\nviewingDistanceCm: ${viewingDistanceCm.current}`;
+  const specs = {
+    filename: experimentFileName,
+    sizeDeg: stimulusParameters.sizeDeg,
+    heightDeg: stimulusParameters.heightDeg,
+    heightPx: stimulusParameters.heightPx,
+    font: font.name,
+    spacingRelationToSize: letterConfig.spacingRelationToSize,
+    spacingOverSizeRatio: letterConfig.spacingOverSizeRatio,
+    spacingSymmetry: letterConfig.spacingSymmetry,
+    targetDurationSec: letterConfig.targetDurationSec,
+    targetSizeIsHeightBool: letterConfig.targetSizeIsHeightBool,
+    targetEccentricityXYDegs: letterConfig.targetEccentricityXYDeg,
+    viewingDistanceCm: viewingDistanceCm.current,
+  };
+  if (stimulusParameters.spacingDeg !== undefined)
+    specs["spacingDeg"] = stimulusParameters.spacingDeg;
+  showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 
 export const updateTargetSpecsForMovie = (paramReader, BC) => {
-  showConditionNameConfig.targetSpecs = `targetEccentricityXDeg: ${paramReader.read(
-    "targetEccentricityXDeg",
-    BC
-  )}\ntargetEccentricityYDeg: ${paramReader.read(
-    "targetEccentricityYDeg",
-    BC
-  )}\ntargetContrast: ${paramReader.read(
-    "targetContrast",
-    BC
-  )}\ntargetCyclePerDeg: ${paramReader.read(
-    "targetCyclePerDeg",
-    BC
-  )}\ntargetHz: ${paramReader.read(
-    "targetHz",
-    BC
-  )}\nthresholdParameter: ${paramReader.read("thresholdParameter", BC)}`;
+  const specs = {
+    targetEccentricityXDeg: paramReader.read("targetEccentricityXDeg", BC),
+    targetEccentricityYDeg: paramReader.read("targetEccentricityYDeg", BC),
+    targetContrast: paramReader.read("targetContrast", BC),
+    targetCyclePerDeg: paramReader.read("targetCyclePerDeg", BC),
+    targetHz: paramReader.read("targetHz", BC),
+    thresholdParameter: paramReader.read("thresholdParameter", BC),
+  };
+  showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 
 export const updateTargetSpecsForRepeatedLetters = (
   stimulusParameters,
   experimentFileName
 ) => {
-  logger("stimulusParameters", stimulusParameters);
-  showConditionNameConfig.targetSpecs = `sizeDeg: ${
-    Math.round(10 * stimulusParameters.sizeDeg) / 10
-  }\n${
-    stimulusParameters.spacingDeg
-      ? `spacingDeg: ${Math.round(10 * stimulusParameters.spacingDeg) / 10}`
-      : ""
-  }\nheightDeg: ${
-    Math.round(10 * stimulusParameters.heightDeg) / 10
-  }\nheightPx: ${Math.round(
-    stimulusParameters.heightPx
-  )}\nfilename: ${experimentFileName}\nfont: ${
-    font.name
-  }\nspacingRelationToSize: ${
-    letterConfig.spacingRelationToSize
-  }\nspacingOverSizeRatio: ${
-    letterConfig.spacingOverSizeRatio
-  }\ntargetSizeIsHeightBool: ${
-    letterConfig.targetSizeIsHeightBool
-  }\nviewingDistanceCm: ${viewingDistanceCm.current}`;
+  const { stimulusLocations, ...stimulusParametersToShow } = stimulusParameters;
+  const specs = Object.assign(
+    {
+      filename: experimentFileName,
+      spacingRelationToSize: letterConfig.spacingRelationToSize,
+      spacingOverSizeRatio: letterConfig.spacingOverSizeRatio,
+      targetSizeIsHeightBool: letterConfig.targetSizeIsHeightBool,
+      viewingDistanceCm: viewingDistanceCm.current,
+    },
+    stimulusParametersToShow
+  );
+  showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 
 export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
-  showConditionNameConfig.targetSpecs = `filename: ${experimentFileName}\nreadingCorpus: ${reader.read(
-    "readingCorpus",
-    BC
-  )}\nreadingFirstFewWords: ${
-    readingPageStats.readingPageSkipCorpusWords.length
+  const specs = {
+    filename: experimentFileName,
+    readingCorpus: reader.read("readingCorpus", BC),
+    readingFirstFewWords: readingPageStats.readingPageSkipCorpusWords.length
       ? readingPageStats.readingPageSkipCorpusWords[
           readingPageStats.readingPageSkipCorpusWords.length - 1
         ]
-      : 0
-  }\nreadingDefineSingleLineSpacingAs: ${reader.read(
-    "readingDefineSingleLineSpacingAs",
-    BC
-  )}\nfont: ${reader.read("font", BC)}\nreadingLinesPerPage: ${reader.read(
-    "readingLinesPerPage",
-    BC
-  )}\nreadingMaxCharactersPerLine: ${reader.read(
-    "readingMaxCharactersPerLine",
-    BC
-  )}\nreadingMultipleOfSingleLineSpacing: ${reader.read(
-    "readingMultipleOfSingleLineSpacing",
-    BC
-  )}\nreadingNominalSizeDeg: ${reader.read(
-    "readingNominalSizeDeg",
-    BC
-  )}\nreadingNumberOfPossibleAnswers: ${reader.read(
-    "readingNumberOfPossibleAnswers",
-    BC
-  )}\nreadingNumberOfQuestions: ${reader.read(
-    "readingNumberOfQuestions",
-    BC
-  )}\nreadingPages: ${reader.read(
-    "readingPages",
-    BC
-  )}\nreadingSetSizeBy: ${reader.read(
-    "readingSetSizeBy",
-    BC
-  )}\nreadingSingleLineSpacingDeg: ${reader.read(
-    "readingSingleLineSpacingDeg",
-    BC
-  )}\nreadingSpacingDeg: ${reader.read(
-    "readingSpacingDeg",
-    BC
-  )}\nreadingXHeightDeg: ${reader.read(
-    "readingXHeightDeg",
-    BC
-  )}\nviewingDistanceCm: ${viewingDistanceCm.current}`;
+      : 0,
+    readingDefineSingleLineSpacingAs: reader.read(
+      "readingDefineSingleLineSpacingAs",
+      BC
+    ),
+    font: reader.read("font", BC),
+    readingLinesPerPage: reader.read("readingLinesPerPage", BC),
+    readingMaxCharactersPerLine: reader.read("readingMaxCharactersPerLine", BC),
+    readingMultipleOfSingleLineSpacing: reader.read(
+      "readingMultipleOfSingleLineSpacing",
+      BC
+    ),
+    readingNominalSizeDeg: reader.read("readingNominalSizeDeg", BC),
+    readingNumberOfPossibleAnswers: reader.read(
+      "readingNumberOfPossibleAnswers",
+      BC
+    ),
+    readingNumberOfQuestions: reader.read("readingNumberOfQuestions", BC),
+    readingSetSizeBy: reader.read("readingSetSizeBy", BC),
+    readingSingleLineSpacingDeg: reader.read("readingSingleLineSpacingDeg", BC),
+    readingSpacingDeg: reader.read("readingSpacingDeg", BC),
+    readingXHeightDeg: reader.read("readingXHeightDeg", BC),
+    viewingDistanceCm: viewingDistanceCm.current,
+  };
+  showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 
 export const updateTargetSpecsForSound = (
@@ -174,9 +139,15 @@ export const updateTargetSpecsForSound = (
   targetSoundFolder,
   maskerSoundFolder
 ) => {
-  showConditionNameConfig.targetSpecs = `targetLevel: ${
-    Math.round(10 * targetLevel) / 10
-  }\nmaskerLevel: ${maskerLevel}\nsoundGainDBSPL: ${soundGain}\nnoiseLevel: ${noiseLevel}\ntargetSoundFolder: ${targetSoundFolder}\nmaskerSoundFolder ${maskerSoundFolder}`;
+  const specs = {
+    targetLevel: toFixedNumber(targetLevel, 1),
+    maskerLevel: maskerLevel,
+    soundGainDBSPL: soundGain,
+    noiseLevel: noiseLevel, // noiseLevelDBSPL? why is it named differently from in soundDetect, soundIdent?
+    targetSoundFolder: targetSoundFolder,
+    maskerSoundFolder: maskerSoundFolder,
+  };
+  showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 
 export const updateTargetSpecsForRsvpReading = (
@@ -240,9 +211,15 @@ export const updateTargetSpecsForSoundDetect = (
   targetSoundFolder,
   maskerSoundFolder
 ) => {
-  showConditionNameConfig.targetSpecs = `targetSoundDBSPL: ${
-    targetLevel ? Math.round(10 * targetLevel) / 10 : "****"
-  }\nmaskerSoundDBSPL: ${maskerLevel}\nsoundGainDBSPL: ${soundGain}\nnoiseSoundDBSPL: ${noiseLevel}\ntargetSoundFolder: ${targetSoundFolder}\nmaskerSoundFolder: ${maskerSoundFolder}`;
+  const specs = {
+    targetSoundDBSPL: targetLevel,
+    maskerSoundDBSPL: maskerLevel,
+    soundGainDBSPL: soundGain,
+    noiseSoundDBSPL: noiseLevel,
+    targetSoundFolder: targetSoundFolder,
+    maskerSoundFolder: maskerSoundFolder,
+  };
+  showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 
 export const updateTargetSpecsForSoundIdentify = (
@@ -251,9 +228,13 @@ export const updateTargetSpecsForSoundIdentify = (
   noiseLevel,
   targetSoundFolder
 ) => {
-  showConditionNameConfig.targetSpecs = `targetSoundDBSPL: ${
-    targetLevel ? Math.round(10 * targetLevel) / 10 : "****"
-  }\nsoundGainDBSPL: ${soundGain}\nnoiseSoundDBSPL: ${noiseLevel}\ntargetSoundFolder: ${targetSoundFolder}`;
+  const specs = {
+    targetSoundDBSPL: targetLevel,
+    soundGainDBSPL: soundGain,
+    noiseSoundDBSPL: noiseLevel,
+    targetSoundFolder: targetSoundFolder,
+  };
+  showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 
 export const isTimingOK = (measured, target) => {
@@ -266,16 +247,23 @@ export const isTimingOK = (measured, target) => {
  * @returns {string}
  */
 const enumerateProvidedTargetSpecs = (specs) => {
+  const desiredDigits = { Deg: 2, Cm: 2, Px: 0, Sec: 2, DBSPL: 1 };
+  const toRound = (propName) =>
+    propName.match(/.*(Cm$)|(Deg$)|(Px$)|(Sec$)|(DBSPL$)/);
+  const getSpecString = (propName) => {
+    const isRounded = toRound(propName);
+    const digitsToKeep = isRounded ? desiredDigits[isRounded[0]] : 0;
+    const valueString = new String(
+      toRound(propName)
+        ? toFixedNumber(specs[propName], digitsToKeep)
+        : specs[propName]
+    );
+    const specString = propName + ": " + valueString;
+    return specString;
+  };
   const enumeratedProps = Object.getOwnPropertyNames(specs)
     .sort()
-    .map(
-      (prop) =>
-        prop +
-        ": " +
-        new String(
-          !isNaN(specs[prop]) ? toFixedNumber(specs[prop], 2) : specs[prop]
-        )
-    )
+    .map(getSpecString)
     .join("\n");
   return enumeratedProps;
 };
