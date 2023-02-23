@@ -28,7 +28,7 @@ npm run examples [tableName].[xlsx] # you may also run `npm run examples` to pre
 npm start -- --name=[tableName] # start hot-reload development
 ```
 
-You may then open Live Server (a VSCode extension) to preview lively. You need to rerun `npm run examples [your table name]` every time you edit the HTML file.
+You need to rerun `npm run examples [your table name]` every time you edit the HTML or table files.
 
 ## PsychoJS Version
 
