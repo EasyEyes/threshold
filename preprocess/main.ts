@@ -13,7 +13,6 @@ import {
   isCodeMissing,
 } from "./experimentFileChecks";
 
-import { FONT_FILES_MISSING_WEB } from "./errorMessages";
 import {
   addUniqueLabelsToDf,
   populateUnderscoreValues,
@@ -35,11 +34,8 @@ import {
   getCompatibilityInfoForScientistPage,
   getCompatibilityRequirements,
 } from "../components/compatibilityCheck.js";
-import { compatibilityRequirements } from "../../source/components/global";
-import {
-  durations,
-  EstimateDurationForScientistPage,
-} from "../../source/components/getDuration";
+import { compatibilityRequirements } from "./global";
+import { durations, EstimateDurationForScientistPage } from "./getDuration";
 
 export const preprocessExperimentFile = async (
   file: File,

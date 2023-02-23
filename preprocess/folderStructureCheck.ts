@@ -52,14 +52,10 @@
 import JSZip from "jszip";
 import Swal from "sweetalert2";
 
-// import {userRepoFiles} from "../../source/components/constants"
 import { EasyEyesError, INVALID_FOLDER_STRUCTURE } from "./errorMessages";
-import { getProjectByNameInProjectList } from "../../source/components/gitlabUtils";
-import { getUserInfo } from "../../source/components/user";
-
-// const tempAccessToken = require("../../source/components/global").tempAccessToken;
-// es6 import tempAccessToken from "../../source/components/global"
-import { tempAccessToken } from "../../source/components/global";
+import { getProjectByNameInProjectList } from "./gitlabUtils";
+import { getUserInfo } from "./user";
+import { tempAccessToken } from "./global";
 
 export const getRequestedFoldersForStructureCheck = async (
   folderAndTargetKindObjectList: any[]
