@@ -3368,6 +3368,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           correctAns.current = targetSets.map((t) => t.word.toLowerCase());
           rsvpReadingTargetSets.past = [];
 
+          psychoJS.experiment.addData(
+            "rsvpReadingTargetNumberOfSets",
+            rsvpReadingTargetSets.numberOfSets
+          );
+          psychoJS.experiment.addData(
+            "rsvpReadingTargetSets",
+            targetSets.toString()
+          );
+
           rsvpReadingResponse.categories = rsvpReadingTargetSets.upcoming.map(
             (s) => new Category(s.word, s.foilWords)
           );
@@ -3376,6 +3385,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rsvpReadingResponse.categories,
               paramReader,
               BC
+            );
+            psychoJS.experiment.addData(
+              "rsvpReadingResponseCategories",
+              rsvpReadingResponse.categories.toString()
+            );
+            psychoJS.experiment.addData(
+              "rsvpReadingResponseScreenHTML",
+              rsvpReadingResponse.screen.innerHTML
             );
           }
 
@@ -5136,7 +5153,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           rsvpReading: () => {
             addRsvpReadingTrialResponsesToData();
-            clearPhraseIdentificationRegisters();
             removeRevealableTargetWordsToAidSpokenScoring();
 
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);
@@ -5148,7 +5164,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               level,
               giveToQuest
             );
-            phraseIdentificationResponse.correct = [];
+            clearPhraseIdentificationRegisters();
           },
           movie: () => {
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);

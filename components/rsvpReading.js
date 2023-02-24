@@ -354,7 +354,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       rsvpReadingTargetSets.numberOfSets
     ) {
       // Ensure a small delay after the last response, so the participant sees feedback for every response
-      rsvpEndRoutineAtT = rsvpEndRoutineAtT ?? t + 0.5;
+      rsvpEndRoutineAtT ??= t + 0.5;
       if (t >= rsvpEndRoutineAtT) {
         if (rsvpReadingResponse.responseType === "typed")
           removeScientistKeypressFeedback();

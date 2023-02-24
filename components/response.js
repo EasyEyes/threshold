@@ -21,7 +21,9 @@
 
 import { getFontFamilyName } from "./fonts";
 import { phraseIdentificationResponse, font } from "./global";
-import { logger, showCursor } from "./utils";
+import { psychoJS } from "./globalPsychoJS";
+import { scaleFontSizeToFit } from "./showCharacterSet";
+import { logger, showCursor, toFixedNumber } from "./utils";
 
 export const _responseTypes = {
   // [click, type, keypad, speak]
@@ -174,6 +176,29 @@ export const setupPhraseIdentification = (categories, reader, BC) => {
 
 export const showPhraseIdentification = (responseScreen) => {
   document.body.appendChild(responseScreen);
+  const windowSize = document.body.offsetWidth;
+  const responseSize = responseScreen.offsetWidth;
+  if (responseSize > windowSize) {
+    const startTime = performance.now();
+
+    const fontSize = scaleFontSizeToFit(
+      responseScreen,
+      "phrase-identification-category-column"
+    );
+    if (fontSize === 12) {
+      document.body.style.overflow = "hidden";
+      responseScreen.style.overflowX = "scroll";
+      responseScreen.style.backgroundColor = "#ccc";
+      responseScreen.style.justifyContent = "left";
+    }
+    const stopTime = performance.now();
+    const timeSpentScaling = stopTime - startTime;
+    const timeSpentScalingSec = toFixedNumber(timeSpentScaling / 1000, 3);
+    psychoJS.experiment.addData(
+      "delayFromScalingPhraseIdentificationScreenSec",
+      timeSpentScalingSec
+    );
+  }
   showCursor();
 };
 
@@ -190,6 +215,7 @@ export const getPhraseIdentificationReactionTimes = () => {
 
 export const clearPhraseIdentificationRegisters = () => {
   phraseIdentificationResponse.current = [];
+  phraseIdentificationResponse.correct = [];
   phraseIdentificationResponse.targetWord = [];
   phraseIdentificationResponse.clickTime = [];
   phraseIdentificationResponse.categoriesResponded = [];

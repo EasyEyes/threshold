@@ -4,8 +4,14 @@ import {
   letterConfig,
   readingConfig,
   font as globalFont,
+  displayOptions,
 } from "./global";
-import { colorRGBASnippetToRGBA, safeExecuteFunc, sleep } from "./utils";
+import {
+  colorRGBASnippetToRGBA,
+  safeExecuteFunc,
+  XYPixOfXYDeg,
+  logger,
+} from "./utils";
 
 function getCharacterSetShowPos(ele, showWhere) {
   switch (showWhere) {
@@ -177,11 +183,15 @@ export const toggleClickedCharacters = () => {
  * @param {HTMLElement} elem
  * @param {string} childrenClass
  */
-const scaleFontSizeToFit = (elem, childrenClass) => {
+export const scaleFontSizeToFit = (elem, childrenClass) => {
   // TODO support multidimensional?
+  const minFontSize = getMinFontSize();
+  logger("minFontSize", minFontSize);
+  const allowedHeightRatio = 0.8;
   const parent = elem.parentNode;
   const startingWidth = elem.offsetWidth;
   const containingWidth = parent.offsetWidth;
+  const containingHeight = parent.offsetHeight;
   if (startingWidth === containingWidth) return;
   const scale = (x) =>
     document
@@ -189,16 +199,28 @@ const scaleFontSizeToFit = (elem, childrenClass) => {
       .forEach((e) => (e.style["font-size"] = String(x) + "px"));
   const unit = 1;
   const maxNonOverlapSizeForFont = 360; // adding this to avoid thinner fonts like pelli to cover the entire window, as their width woud be <<< screen width and loop will increase the font-size.
-  let newSize = 12; // Start with smallest ADA complient font
+  let newSize = minFontSize; // Start with smallest ADA complient font
+  scale(newSize);
   elem.style["overflow"] = "hidden";
   elem.style["white-space"] = "nowrap";
   while (
     elem.offsetWidth < containingWidth &&
+    elem.offsetHeight < containingHeight * allowedHeightRatio &&
     newSize + unit < maxNonOverlapSizeForFont
   ) {
     newSize += unit;
     scale(newSize);
   }
   // Scale back down to the last size that fits
-  scale(newSize - unit);
+  const sizeToUse = Math.max(minFontSize, newSize - unit);
+  scale(sizeToUse);
+  return sizeToUse;
+};
+
+const getMinFontSize = () => {
+  try {
+    return Math.ceil(XYPixOfXYDeg([0.4, 0], displayOptions)[0]);
+  } catch (e) {
+    return 12;
+  }
 };

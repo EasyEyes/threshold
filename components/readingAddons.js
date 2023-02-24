@@ -21,6 +21,7 @@ import {
   getWordFrequencies,
   processWordFreqToFreqToWords,
 } from "./reading.ts";
+import { psychoJS } from "./globalPsychoJS";
 
 export const loadReadingCorpus = async (paramReader) => {
   // return new Promise((resolve, reject) => {
@@ -307,14 +308,19 @@ export const getSizeForXHeight = (readingParagraph, targetDeg) => {
   readingParagraph.setText("x");
 
   let height = 0.5;
+  let testHeight;
   while (height < window.innerHeight * 0.5) {
     readingParagraph.setHeight(height);
-    const testHeight = readingParagraph.getBoundingBox(true).height;
+    testHeight = readingParagraph.getBoundingBox(true).height;
     if (testHeight > targetPix) return height;
 
     height += 0.5;
   }
-  throw "Failed to set reading paragraph height using [xHeight]";
+  psychoJS.experiment.addData(
+    "readingParagraphSetHeightUsingxHeightError",
+    `height: ${height}, window height: ${window.innerHeight}, testHeight: ${testHeight}, targetPix: ${targetPix}`
+  );
+  throw `Failed to set reading paragraph height using [xHeight]. height: ${height}, window height: ${window.innerHeight}, testHeight: ${testHeight}, targetPix: ${targetPix}`;
 };
 
 export const getSizeForSpacing = (
@@ -330,15 +336,20 @@ export const getSizeForSpacing = (
   readingParagraph.setText(testingString);
 
   let height = 0.5;
+  let testWidth;
   while (height < window.innerHeight * 0.5) {
     readingParagraph.setHeight(height);
-    const testWidth =
+    testWidth =
       readingParagraph.getBoundingBox(true).width / testingString.length;
     if (testWidth > targetPix) return height;
 
     height += 0.5;
   }
-  throw "Failed to set reading paragraph height using [spacing]";
+  psychoJS.experiment.addData(
+    "readingParagraphSetHeightUsingSpacingError",
+    `height: ${height}, windowHeight: ${window.innerHeight}, testWidth: ${testWidth}, testingString.length: ${testingString.length}, targetPix: ${targetPix}`
+  );
+  throw `Failed to set reading paragraph height using [spacing]. height: ${height}, windowHeight: ${window.innerHeight}, testWidth: ${testWidth}, testingString.length: ${testingString.length}, targetPix: ${targetPix}`;
 };
 
 export const addReadingStatsToOutput = (pageN, psychoJS) => {
