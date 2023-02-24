@@ -1230,6 +1230,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
+      movie: () => {
+        if (
+          canType(responseType.current) &&
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+        ) {
+          loggerText(
+            "Inside switchKind [movie] if statement of _instructionRoutineEachFrame"
+          );
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
     });
 
     return Scheduler.Event.FLIP_REPEAT;
