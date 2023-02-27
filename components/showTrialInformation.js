@@ -185,7 +185,7 @@ export const updateTargetSpecsForRsvpReading = (
       "rsvpReadingFlankTargetWithLettersBool",
       BC
     ),
-    rsvpReadingFLankerCharacterSet: reader.read(
+    rsvpReadingFlankerCharacterSet: reader.read(
       "rsvpReadingFlankerCharacterSet",
       BC
     ),
