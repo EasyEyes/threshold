@@ -54,6 +54,16 @@ export function getTrialInfoStr(
             blockCount
           );
         },
+        repeatedLetters: () => {
+          // On trial routines, show the trial# and block#...
+          res = replacePlaceholders(
+            phrases.T_counterTrialBlock[L],
+            currentTrialIndex,
+            currentTrialLength,
+            currentBlockIndex,
+            blockCount
+          );
+        },
         rsvpReading: () => {
           res = replacePlaceholders(
             phrases.T_counterTrialBlock[L],
