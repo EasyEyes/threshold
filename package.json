@@ -35,6 +35,7 @@
   "homepage": "https://github.com/EasyEyes/threshold#readme",
   "devDependencies": {
     "@babel/core": "^7.21.0",
+    "@types/file-saver": "^2.0.5",
     "@types/papaparse": "^5.3.7",
     "@types/webfontloader": "^1.6.35",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
@@ -45,6 +46,7 @@
     "dataframe-js": "^1.4.4",
     "eslint": "^8.34.0",
     "file-loader": "^6.2.0",
+    "file-saver": "^2.0.5",
     "googleapis": "^111.0.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.1.2",
