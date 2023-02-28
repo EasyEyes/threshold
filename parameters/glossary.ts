@@ -1093,6 +1093,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  _saveBeforeEachBlockBool: {
+    name: "_saveBeforeEachBlockBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   "%": { name: "%", availability: "now", type: "", default: "" },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
   block_shuffleBlocksWithinGroups: {
