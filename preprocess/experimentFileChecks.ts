@@ -103,7 +103,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   errors.push(...areAllPresentParametersCurrentlySupported(parametersToCheck));
 
   // Enforce using Column B for the underscore parameters, and Column C and on for conditions
-  errors.push(...doConditionsBeginInTheSecondColumn(experimentDf));
+  errors.unshift(...doConditionsBeginInTheSecondColumn(experimentDf));
 
   // Alphabetize experimentDf
   experimentDf = experimentDf.select(...parametersToCheck).restructure(
@@ -745,22 +745,13 @@ const doConditionsBeginInTheSecondColumn = (
   const columnNames = experiment.listColumns();
   const columns = experiment.toArray();
   let offendingParameters = [];
-  let offendingValues = [];
   for (let i = 0; i < columnNames.length; i++) {
     const underscoreRow = columnNames[i][0] === "_";
     // Correctness of underscore parameters is checked in `checkAndCorrectUnderscoreParams`
     const valueMisplaced = !underscoreRow && columns[0][i] !== "";
-    if (valueMisplaced) {
-      offendingParameters.push(columnNames[i]);
-      offendingValues.push(columns[0][i]);
-    }
+    if (valueMisplaced) offendingParameters.push(columnNames[i]);
   }
   if (offendingParameters.length)
-    return [
-      CONDITION_PARAMETERS_IN_FIRST_COLUMN(
-        offendingParameters,
-        offendingValues
-      ),
-    ];
+    return [CONDITION_PARAMETERS_IN_FIRST_COLUMN(offendingParameters)];
   return [];
 };

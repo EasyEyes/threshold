@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GLOSSARY } from "../parameters/glossary";
-import { getNumericalSuffix, toColumnName, verballyEnumerate } from "./utils";
+import {
+  getNumericalSuffix,
+  limitedEnumerate,
+  toColumnName,
+  verballyEnumerate,
+} from "./utils";
 
 export interface EasyEyesError {
   name: string;
@@ -411,18 +416,14 @@ export const NONUNIQUE_WITHIN_BLOCK = (
 };
 
 export const CONDITION_PARAMETERS_IN_FIRST_COLUMN = (
-  offendingParameters: string[],
-  offendingValues: string[]
+  offendingParameters: string[]
 ): EasyEyesError => {
-  const offendingValueParameterPairs = offendingValues.map(
-    (v, i) => `${v} (${offendingParameters[i]})`
-  );
   return {
     name: "Non-underscore parameters provided in underscore parameter column.",
-    message: `The first column of values (Column B) is reserved for parameters that begin with an underscore; these parameters provide information relavent to the whole experiment. All other parameters -- which are specific to the current condition -- should begin in Column C.`,
-    hint: `Condition parameters found in Column B are: ${verballyEnumerate(
-      offendingValueParameterPairs
-    )}`,
+    message: `These parameters are forbidden to use column B. Column B is reserved for underscore parameters.`,
+    hint: `For parameters ${limitedEnumerate(
+      offendingParameters
+    )}, select all the cells from column B and rightward, and shift them all one column to the right, to begin at column C.`,
     context: "preprocessor",
     kind: "error",
     parameters: offendingParameters,

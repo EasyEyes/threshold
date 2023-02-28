@@ -360,6 +360,14 @@ export const verballyEnumerate = (individuals: string[]): string => {
   return enumeratedString;
 };
 
+export const limitedEnumerate = (
+  individuals: string[],
+  lengthLimit: number = 4
+): string => {
+  if (individuals.length <= lengthLimit) return verballyEnumerate(individuals);
+  return individuals.slice(0, lengthLimit).join(", ") + "...";
+};
+
 export const getNumericalSuffix = (n: number): string => {
   switch (Math.abs(Number(n))) {
     case 1:
