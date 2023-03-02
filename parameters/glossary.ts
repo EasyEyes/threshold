@@ -1093,8 +1093,8 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  _saveBeforeEachBlockBool: {
-    name: "_saveBeforeEachBlockBool",
+  _saveFirstInEachBlockBool: {
+    name: "_saveFirstInEachBlockBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",

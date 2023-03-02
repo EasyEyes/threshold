@@ -308,7 +308,7 @@ export const prepareExperimentFileForThreshold = async (
     } else {
       durations.durationForStatusline = "less than 1 minute";
     }
-    console.log(durations.durationForStatusline);
+    // console.log(durations.durationForStatusline);
     compatibilityRequirements.parsedInfo =
       getCompatibilityInfoForScientistPage(parsed);
     compatibilityRequirements.L = convertLanguageToLanguageCode(

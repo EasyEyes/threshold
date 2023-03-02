@@ -3,6 +3,7 @@
  **********************/
 
 import {
+  addBlockParametersToData,
   arraysEqual,
   centerAt,
   colorRGBASnippetToRGBA,
@@ -1860,6 +1861,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       status.block = snapshot.block + 1;
       totalBlocks.current = snapshot.nTotal;
+
+      addBlockParametersToData(paramReader, status.block, psychoJS.experiment);
 
       updateInstructionFont(paramReader, status.block, [
         instructions,

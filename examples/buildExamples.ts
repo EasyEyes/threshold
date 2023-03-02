@@ -109,7 +109,7 @@ const constructForEXperiment = async (d: string) => {
       fileStringList.forEach((file) => {
         writeFile(`${dir}/conditions/${file[1]}`, file[0], (err) => {
           if (err) throw err;
-          console.log(`${file[1]} created.`);
+          // console.log(`${file[1]} created.`);
         });
       });
 

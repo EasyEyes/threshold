@@ -89,11 +89,11 @@ export const EstimateDurationForScientistPage = (parsed: any) => {
     }
     if (targetKind[i] == "reading") {
       // 0.05 sec/character + 3 s/question for ordinary reading
-      console.log(readingNumberOfQuestions[i]);
-      console.log("conditionEnabledBool", conditionEnabledBool);
-      console.log(getConditionEnable(i));
-      console.log(readingLinesPerPage[i]);
-      console.log(readingPages[i]);
+      // console.log(readingNumberOfQuestions[i]);
+      // console.log("conditionEnabledBool", conditionEnabledBool);
+      // console.log(getConditionEnable(i));
+      // console.log(readingLinesPerPage[i]);
+      // console.log(readingPages[i]);
       duration += getConditionEnable(i) * readingNumberOfQuestions[i] * 6;
       // (The condition has charactersPerLine*linesPerPage*numberOFPages characters.)
       duration +=

@@ -728,11 +728,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_saveBeforeEachBlockBool",
+    name: "_saveFirstInEachBlockBool",
     availability: "now",
     example: "",
     explanation:
-      "When _saveBeforeEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always record what was the last block begun. Usually _saveBeforeEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (this avoids delay and makes the experiment more robust). But scientists will enable it when they want to know which block failed.",
+      "When _saveFirstInEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always display the active block. Usually _saveFirstInEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (this avoids delay and makes the experiment more robust). But scientists will enable it when they want to know which block failed.",
     type: "boolean",
     default: "FALSE",
     categories: "",
