@@ -4,6 +4,8 @@ import { Buffer } from "buffer";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
+import Papa from "papaparse";
+import { DataFrame } from "dataframe-js";
 
 import {
   acceptableExtensions,
@@ -658,6 +660,75 @@ export const downloadDataFolder = async (user: User, project: any) => {
         saveAs(content, zipFileName);
         Swal.close();
       });
+    },
+  });
+};
+
+// read experiment data folder and return a list of dataframes
+export const getExperimentDataFrames = async (user: User, project: any) => {
+  const headers = new Headers();
+  headers.append("Authorization", `bearer ${user.accessToken}`);
+  const requestOptions: any = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+
+  await Swal.fire({
+    title: `Accessing data from ${project.name} ...`,
+    // html: `<p>This might take a while, depending on the number of participants and the length of the experiment.</p>`,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: async () => {
+      // @ts-ignore
+      Swal.showLoading(null);
+
+      const dataFolder = await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=100`,
+        requestOptions
+      )
+        .then((response) => {
+          return response.json();
+        })
+        .then((result) => {
+          return result;
+        });
+
+      if (dataFolder.length === 0) {
+        Swal.close();
+        Swal.fire({
+          icon: "error",
+          title: `No data found for ${project.name}.`,
+          text: `We can't find any data for the experiment. This might due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
+          confirmButtonColor: "#666",
+        });
+        return;
+      }
+
+      const dataframe = [];
+
+      for (const file of dataFolder) {
+        const fileName = file.name;
+        if (fileName.includes(".csv")) {
+          const fileContent = await fetch(
+            `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
+            requestOptions
+          )
+            .then((response) => {
+              return response.json();
+            })
+            .then((result) => {
+              return Buffer.from(result.content, "base64");
+            });
+          const parsed = Papa.parse(fileContent.toString());
+          console.log(parsed.data);
+          const data = parsed.data.slice(1); // Rows
+          const columns = parsed.data[0]; // Header
+          const df = new DataFrame(data, columns);
+          dataframe.push(df);
+        }
+      }
+      return dataframe;
     },
   });
 };
