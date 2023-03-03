@@ -940,7 +940,12 @@ export const saveDataOnWindowClose = (experiment) => {
         " experiment.extraInfo['dataSaved']",
         experiment.extraInfo["dataSaved"]
       );
-      if (!experiment.extraInfo["dataSaved"]) experiment.save({ sync: true });
+      experiment.save({ sync: true });
+      // Below would fail in the case the participant moves focus from the window,
+      // but then the experiment hangs and they close it, as it would have already
+      // saved once so we wouldn't save the second, more important time. Instead
+      // just always save when page loses visibility.
+      // if (!experiment.extraInfo["dataSaved"]) experiment.save({ sync: true });
     }
   });
   // window.addEventListener("beforeunload", (e) => {
