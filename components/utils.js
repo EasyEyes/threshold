@@ -933,7 +933,6 @@ export const centerAt = async (textStim, nominalPos) => {
  */
 export const saveDataOnWindowClose = (experiment) => {
   // https://www.igvita.com/2015/11/20/dont-lose-user-and-app-state-use-page-visibility/
-  experiment.extraInfo["dataSaved"] = false;
   window.addEventListener("visibilitychange", (e) => {
     if (document.visibilityState === "hidden") {
       console.log(
@@ -941,16 +940,11 @@ export const saveDataOnWindowClose = (experiment) => {
         experiment.extraInfo["dataSaved"]
       );
       experiment.save({ sync: true });
-      // Below would fail in the case the participant moves focus from the window,
-      // but then the experiment hangs and they close it, as it would have already
-      // saved once so we wouldn't save the second, more important time. Instead
-      // just always save when page loses visibility.
-      // if (!experiment.extraInfo["dataSaved"]) experiment.save({ sync: true });
     }
   });
-  // window.addEventListener("beforeunload", (e) => {
-  //   if (!experiment.extraInfo["dataSaved"]) experiment.save({ sync: true });
-  //   e.preventDefault();
-  //   return null;
-  // });
+  window.addEventListener("beforeunload", (e) => {
+    experiment.save({ sync: true });
+    e.preventDefault();
+    return null;
+  });
 };
