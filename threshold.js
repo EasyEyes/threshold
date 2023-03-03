@@ -14,6 +14,7 @@ import {
   ifTrue,
   log,
   norm,
+  saveDataOnWindowClose,
   sleep,
 } from "./components/utils.js";
 
@@ -845,6 +846,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // ! POPUPS for take a break & proportion correct
     preparePopup(rc.language.value, thisExperimentInfo.name); // Try to use only one popup ele for both (or even more) popup features
     prepareTrialBreakProgressBar();
+
+    saveDataOnWindowClose(psychoJS.experiment);
 
     /* -------------------------------------------------------------------------- */
     fixation = new Fixation();
@@ -1863,6 +1866,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       totalBlocks.current = snapshot.nTotal;
 
       addBlockParametersToData(paramReader, status.block, psychoJS.experiment);
+
+      if (
+        status.block === 1 ||
+        paramReader.read("_saveFirstInEachBlockBool", "__ALL_BLOCKS__")[0]
+      ) {
+        logger("Saving csv at start of block!");
+        psychoJS.experiment.save();
+      }
 
       updateInstructionFont(paramReader, status.block, [
         instructions,

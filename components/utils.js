@@ -924,3 +924,28 @@ export const centerAt = async (textStim, nominalPos) => {
   if (JSON.stringify(trueCenter(textStim)) !== JSON.stringify(nominalPos))
     textStim.setPos(nominalPos);
 };
+
+/**
+ * Add an event listener to save the experiment data when the pare closes
+ * (literally, when the pages loses visibility, for best coverage of browsers,
+ * ie mobile browsers)
+ * @param {*} experiment
+ */
+export const saveDataOnWindowClose = (experiment) => {
+  // https://www.igvita.com/2015/11/20/dont-lose-user-and-app-state-use-page-visibility/
+  experiment.extraInfo["dataSaved"] = false;
+  window.addEventListener("visibilitychange", (e) => {
+    if (document.visibilityState === "hidden") {
+      console.log(
+        " experiment.extraInfo['dataSaved']",
+        experiment.extraInfo["dataSaved"]
+      );
+      if (!experiment.extraInfo["dataSaved"]) experiment.save({ sync: true });
+    }
+  });
+  // window.addEventListener("beforeunload", (e) => {
+  //   if (!experiment.extraInfo["dataSaved"]) experiment.save({ sync: true });
+  //   e.preventDefault();
+  //   return null;
+  // });
+};
