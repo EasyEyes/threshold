@@ -1459,10 +1459,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               fixationConfig.show = true;
             },
             rsvpReading: () => {
-              const numberOfWordsPerSeries = paramReader.read(
-                "rsvpReadingNumberOfWords",
-                trialsConditions.block
-              )[0];
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
                 paramReader
