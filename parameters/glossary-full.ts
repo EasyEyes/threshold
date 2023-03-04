@@ -306,7 +306,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _needScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. EasyEyes compatibility requires a minimum screen width (px) whenever needScreenWidthDeg is greater than zero, and a minimum screen height (px) whenever needScreenHeightDeg is greater than zero.",
+      "⏳ _needScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. In each block, needScreenHeightUpToDeg and needScreenWidthUpToDeg are each combined with needTargetSizeDownToDeg to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. ",
     type: "integer",
     default: "",
     categories: "",
@@ -356,9 +356,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "⭐ _online2Minutes (no default) is the expected study duration, in minutes, in your offer to each potential participant. EasyEyes uses a rule of thumb to estimate the duration of your study and displays it on the scientist page so you can copy it and paste it here. In deciding whether to participate, potential participants will consider _online2PayPerHour, _online0Title, _online2Description, and _online2Minutes. The total payment is fixed when the study begins. If the median duration of your study is much greater than your estimate then Prolific will invite you to proportionally increase the pay. But we suspect that participants are happier if your time estimate is accurate, because that makes the deal businesslike, whereas the increase, since it's not enforced, may seem like charity.",
+      "⭐ _online2Minutes (default 0) is the expected study duration, in minutes, in your offer to each potential participant. EasyEyes uses a rule of thumb to estimate the duration of your study and displays it on the scientist page so you can copy it and paste it here. In deciding whether to participate, potential participants will consider _online2PayPerHour, _online0Title, _online2Description, and _online2Minutes. The total payment is fixed when the study begins. If the median duration of your study is much greater than your estimate then Prolific will invite you to proportionally increase the pay. But we suspect that participants are happier if your time estimate is accurate, because that makes the deal businesslike, whereas the increase, since it's not enforced, may seem like charity.",
     type: "numerical",
-    default: "30",
+    default: "0",
     categories: "",
   },
   {
@@ -1559,6 +1559,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "moviePQEncodedBool",
+    availability: "now",
+    example: "",
+    explanation: "moviePQEncodedBool",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "movieRectDeg",
     availability: "now",
     example: "",
@@ -1603,7 +1612,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "30",
     explanation:
-      "needScreenHeightUpToDeg (default 0) is optionally specified for each condition. needScreenHeightUpToDeg and needTargetSizeDownToDeg are combined in each block to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. NOT YET IMPLEMENTED, needScreenHeightUpToDeg is used again at the beginning of each block, places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.\n\nFor more details see: needScreenHeightUpToDeg.\n                                                                    ",
+      "needScreenHeightUpToDeg (default 0) is optionally specified for each condition. needScreenHeightUpToDeg and needTargetSizeDownToDeg are combined in each block to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. \nNOT YET IMPLEMENTED, needScreenHeightUpToDeg is used again at the beginning of each block, places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.\n\nFor more details see: needScreenHeightUpToDeg.\n                                                                    ",
     type: "numerical",
     default: "",
     categories: "",

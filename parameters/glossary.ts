@@ -330,7 +330,7 @@ export const GLOSSARY: Glossary = {
     name: "_online2Minutes",
     availability: "now",
     type: "numerical",
-    default: "30",
+    default: "0",
   },
   _online2Participants: {
     name: "_online2Participants",
@@ -1593,6 +1593,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "-1",
+  },
+  moviePQEncodedBool: {
+    name: "moviePQEncodedBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
   },
   movieRectDeg: {
     name: "movieRectDeg",
