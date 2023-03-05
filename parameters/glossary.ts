@@ -30,8 +30,8 @@ export const GLOSSARY: Glossary = {
   _calibrateScreenSizeCookieBool: {
     name: "_calibrateScreenSizeCookieBool",
     availability: "now",
-    type: "",
-    default: "",
+    type: "boolean",
+    default: "FALSE",
   },
   _calibrateSoundAssumingThisICalibDBSPL: {
     name: "_calibrateSoundAssumingThisICalibDBSPL",
@@ -42,7 +42,7 @@ export const GLOSSARY: Glossary = {
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   _compileAsNewExperimentBool: {

@@ -54,8 +54,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "_calibrateScreenSizeCookieBool (default TRUE) when TRUE enables EasyEyes reading and saving of a cookie (on the participant computer) containing the screen resolution (px) and size (cm),  e.g. 3024 px x 1964 px, 24.5 cm x 16 cm. The cookie is read only if it's present and calibrateScreenSizeCookieBool==TRUE. If read, the cookie is considered valid only if it reports a screen resolution (width x height px) that matches the current resolution. If valid then EasyEyes takes the screen size (width x height cm) from the cookie instead of doing the calibration normally provoked by calibrateScreenSizeBool==TRUE. Lacking a valid cookie, then calibrateScreenSizeBool==TRUE will provoke size calibration. If size is actually calibrated, and calibrateScreenSizeCookieBool==TRUE, then a cookie is saved, holding the screen resolution and size. The reason to check for validity is that the computer might have several screens, and the browser window could be opened on any of them. The chances are low that a given computer will have two screens with different sizes and the same resolution. Set calibrateScreenSizeCookieBool=FALSE to rule out the small chance of mistaking a new display for a same-resolution but differently sized one that was calibrated on a previous occasion.",
-    type: "",
-    default: "",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -74,7 +74,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       '⏳ _calibrateTimingNumberAndSecs accepts a text string containing an even number of comma-separated arguments, n1,s1,n2,s2, etc. Each pair of arguments n,s, requests that EasyEyes generate n intervals of duration s, where s is in seconds, and measure how long each interval actually was, in seconds. Save the results in the CSV file. Use one column per series. Name each column by the duration in sec, e.g. "timing0.15". The column length will be n. This should run during the compatibility phase, before the experiment, since its sole purpose is to work out the parameters of a compatibility test.',
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
