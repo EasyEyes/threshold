@@ -224,7 +224,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Chrome",
     explanation:
-      '⭐ _needBrowser is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be \'all\', or just compatible browsers by name, or just incompatible browsers each preceded by "not". No mixing allowed. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If the particiapant\'s device is incompatible, we reject it by issuing a fatal explanatory error message to the participant (asking the Prolific participant to "return" this study), which ends the session (with no pay) before asking for consent. ',
+      "⭐ _needBrowser is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be 'all', or just compatible browsers by name, or just incompatible browsers each preceded by \"not\". No mixing allowed. In a list of compatibles, then anything not listed is deemed incompatible. In an incompatible list, then anything not listed is deemed compatible. Before asking for consent, if the participant's device is incompatible, we reject it by issuing a fatal explanatory error message to the participant (asking the Prolific participant to \"return\" this study), which ends the session (with no pay). \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
     type: "multicategorical",
     default: "Chrome",
     categories:
@@ -235,7 +235,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "100",
     explanation:
-      "_needBrowserVersionMinimum (default 0) is the minimum integer version number of the browser for compatibility. ",
+      "_needBrowserVersionMinimum (default 0) is the needed minimum integer version number of the browser. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
     type: "integer",
     default: "0",
     categories: "",
@@ -245,7 +245,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "⏳ _needCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and pupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier compatibility check so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.)",
+      "⏳ _needCameraBool (default TRUE) tells EasyEyes whether to insist on the presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and pupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier compatibility check so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.) \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -255,7 +255,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "desktop",
     explanation:
-      '⭐ _needDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. NOTE: The value "all" is not yet implemented.',
+      '⭐ _needDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. NOTE: The value "all" is not yet implemented. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific\'s rule that all study requirements be declared in the study\'s Description.',
     type: "multicategorical",
     default: "desktop",
     categories: "all, desktop, tablet, mobile",
@@ -265,7 +265,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "hdrMovie",
     explanation:
-      "⏳ _needDisplay demands support for key display features:\nHDRMovie: Browser must support HDR movies.\ntenBit: Display must support 10-bit imaging. https://trello.com/c/VxGHyxDa\ncodec: I'm not sure whether we should explicitly list the codecs we support or just write \"codec\" and have EasyEyes check that the browser supports at least one of the video codecs supported by EasyEyes. EasyEyes's list of compatible codecs may grow.\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
+      "⏳ _needDisplay demands support for key display features:\nHDRMovie: Browser must support HDR movies.\ntenBit: Display must support 10-bit imaging. https://trello.com/c/VxGHyxDa\ncodec: I'm not sure whether we should explicitly list the codecs we support or just write \"codec\" and have EasyEyes check that the browser supports at least one of the video codecs supported by EasyEyes. EasyEyes's list of compatible codecs may grow. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
     type: "multicategorical",
     default: "",
     categories: "hdrMovie, tenBit",
@@ -275,7 +275,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⏳ If TRUE, _needIPhoneTooBool (default FALSE) asks the participant if, in addition to whatever device is running the experiment, they have an iPhone/iPad to use for sound calibration. EasyEyes just asks, without verifying. Verification will happen later, when the QR code is shown to recruit the iPhone/iPad. \n[We have not yet considered, in the case of an experiment running on an iPad or iPhone, whether we could use its built-in mic to calibrate its loudspeaker, eliminating the need for a second device.] ",
+      "⏳ If TRUE, _needIPhoneTooBool (default FALSE) asks the participant if, in addition to whatever device is running the experiment, they have an iPhone/iPad to use for sound calibration. EasyEyes just asks, without verifying. Verification will happen later, when the QR code is shown to recruit the iPhone/iPad. \n[We have not yet considered, in the case of an experiment running on an iPad or iPhone, whether we could use its built-in mic to calibrate its loudspeaker, eliminating the need for a second device.] \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -285,7 +285,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "macOS,Windows",
     explanation:
-      "⭐ _needOperatingSystem is a comma-separated list either of compatible or incompatible operating systems. The list can be 'all', or compatible OSes by name, or incompatible OSes each preceded by \"not\". No mixing allowed. The default is 'all'. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to \"return\" this study), which ends the session before asking for consent. ",
+      "⭐ _needOperatingSystem is a comma-separated list either of compatible or incompatible operating systems. The list can be 'all', or compatible OSes by name, or incompatible OSes each preceded by \"not\". No mixing allowed. The default is 'all'. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to \"return\" this study), which ends the session before asking for consent. After compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
     type: "multicategorical",
     default: "all",
     categories:
@@ -296,7 +296,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "6",
     explanation:
-      '⭐ _needProcessorCoresMinimum excludes slow computers without testing. The number of cores is a positive integer, also called "processorConcurrency," whose value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the rate (in MHz) at which the computer generates random numbers. https://en.wikipedia.org/wiki/Multi-core_processor\nUsing Prolific, our experiments are occasionally assigned to slow computers that produce inaccurate stimulus timing. EasyEyes measures lateness and duration and reports them as targetMeasuredLatenessSec and targetMeasuredDurationSec in the CSV file. We find that setting _needProcessorCoresMinimum=6 nearly eliminated bad timing, but it also eliminates quite a few computers with good timing. You may prefer to set _needProcessorCoresMinimum lower, e.g. 4, to include most computers, and weed out the slow computers later, during data analysis, based on mean and SD of  targetMeasuredLatenessSec and targetMeasuredDurationSec. NOTE: To make your computer harder to track, the Chrome extension DuckDuckGo spoofs the number of cores to 2. Any experiment requiring 3 or more cores will reject any participant whose computer spoofs having 2 cores.',
+      "⭐ _needProcessorCoresMinimum tries to exclude slow computers without testing speed. The number of cores is a positive integer, also called \"hardwareConcurrency,\" whose value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the rate (in MHz) at which the computer generates random numbers. https://en.wikipedia.org/wiki/Multi-core_processor\nUsing Prolific, our experiments are occasionally assigned to slow computers that produce inaccurate stimulus timing. EasyEyes measures lateness and duration and reports them as targetMeasuredLatenessSec and targetMeasuredDurationSec in the CSV file. We find that setting _needProcessorCoresMinimum=6 nearly eliminated bad timing, but it also eliminates quite a few computers with good timing. You may prefer to set _needProcessorCoresMinimum lower, e.g. 4, to include most computers, and weed out the slow computers later, during data analysis, based on mean and SD of  targetMeasuredLatenessSec and targetMeasuredDurationSec. \nNOTE: To make your computer harder to track, the Chrome extension DuckDuckGo spoofs the number of cores to 2. Any experiment requiring 3 or more cores will reject any participant whose computer spoofs having 2 cores. \n\nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
     type: "integer",
     default: "6",
     categories: "",
@@ -316,7 +316,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _needTimingToleranceSec (default 0.05) is the largest acceptable RMS error in generating a 0.15-second interval. We suspect that this depends on both the CPU speed and the number of processes being timeshared, and thus can be reduced by closing other browser windows, and quitting other apps.",
+      "⏳ _needTimingToleranceSec (default 0.05) is the largest acceptable RMS error in generating a 0.15-second interval. We suspect that this depends on both the CPU speed and the number of processes being timeshared, and thus can be reduced by closing other browser windows, and quitting other apps. ",
     type: "numerical",
     default: "0.05",
     categories: "",
@@ -326,10 +326,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Prolific",
     explanation:
-      '⭐ _online1RecruitmentService (no default). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.\nnone - Just produce a study URL.\nProlific - integrate with Prolific as suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nMTurk - currently equivalent to "none".\nSONA - currenlty equivalent to "none".',
+      '⭐ _online1RecruitmentService (no default). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. \nnone - Just produce a study URL.\nProlific - integrate with Prolific, which is suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nNOT YET IMPLEMENTED: MTurk - currently equivalent to "none".\nNOT YET IMPLEMENTED: SONA - currenlty equivalent to "none".',
     type: "categorical",
     default: "none",
-    categories: "none, Prolific, MTurk, SONA",
+    categories: "none, Prolific",
   },
   {
     name: "_online1Title",
@@ -462,22 +462,12 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "audio, camera, microphone, download",
   },
   {
-    name: "_online4AllowList",
-    availability: "now",
-    example: "",
-    explanation:
-      "WILL NOT IMPLEMENET. _online4AllowList (default empty) accepts a comma-separated “allowList” of Prolific participant IDs identifying people who are invited to participate. If _online2AllowList is not empty, then participants are recruited solely through the allowList. If _online2CompletedExperiment is not empty, then it adds its IDs to the allowList.",
-    type: "",
-    default: "",
-    categories: "",
-  },
-  {
     name: "_online4AllowCompletedExperiment",
     availability: "now",
     example: "",
     explanation:
       "⏳ _online4AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _online2MinHoursSinceCompletion after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _online2CompletedExperiment is not empty, then participants are recruited solely through the allowList. If _online2AllowList is not empty, then it adds its IDs to the allowList.",
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
@@ -487,8 +477,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "⏳ _online4AllowAfterHours (default 0) requires that at least the specified (floating) number of hours pass since completion of the _online2CompletedExperiment before the participant’s ID is added to the allowList.",
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "0",
     categories: "",
   },
   {
@@ -507,7 +497,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "⏳ _online4CustomAllowList (no default) is a comma-separated list of Prolific participant IDs. ONLY these participants will be eligible for this study.",
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
@@ -517,7 +507,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "⏳ _online4CustomBlockList (no default) is a comma-separated list of Prolific participant IDs who will not be invited to this study.",
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
@@ -538,7 +528,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "⏳ _online4ParticipantInPreviousStudyExclude (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.",
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
@@ -548,7 +538,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "⏳ _online4ParticipantInPreviousStudyInclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren't approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.\n\n",
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
@@ -725,6 +715,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_pavloviaPreferRunningModeBool helps EasyEyes optimize its behavior by indicating your preference for use of RUNNING or PILOTING mode while testing. Pavlovia offers two modes (RUNNING and PILOTING) for running your study. Remote data collection requires RUNNING mode. PILOTING mode is meant for checking and debugging and runs only from the Pavlovia console on the scientist's computer. The only advantage of the PILOTING mode is that it's always free. Unless your institution has a Pavlovia site license, RUNNING mode costs 20 pence per participant, and requires assigning tokens (money) in advance to each experiment. (Setting _compileAsNewExperiment=FALSE allows you to request that EasyEyes keep reusing the same experiment name, as you compile new versions, so you can assign tokens once to the experiment, when you begin testing, instead of before each compile.) Thus scientists with a site license will always prefer RUNNING mode. Without that license, scientists can save money by using PILOTING mode during development, and switch to RUNNING mode to test remote participants. _pavloviaPreferRunningModeBool allows you to express your preference. With an institutional site license, you'll always want the default TRUE. Without an institutional site license, you can save money by setting _pavloviaPreferRunningModeBool=FALSE during development, and TRUE for the actual remote testing. Without a site license, if you don't mind the 20 p expense, you can use RUNNING mode throughout (use the default _pavloviaPreferRunningModeBool=TRUE), and set _compileAsNewExperiment=FALSE to minimize the frequency at which you must assign tokens to the experiment.\n\nOLD EXPLANATION. Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, which prevents remote testing. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can send to your online participants. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. Thus, for most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. (Pavlovia has no API by which EasyEyes could do this for you.) If your experiment is already in RUNNING mode you can still switch to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
     type: "boolean",
     default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "_saveEachBlockBool",
+    availability: "now",
+    example: "",
+    explanation:
+      'When _saveEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always include the last active block. Usually _saveEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (to minimize delay and make the experiment more robust). But scientists will enable it when they want to know which block failed. \nSAVING. The extra saves enabled by _saveEachBlockBool are in addition to the always-performed saves at the beginning and "end" of the session. ("End" includes a shift of attention aways from the EasyEyes page, which is not the end if the participant returns.) All saves are alike in saving all currently known rows and parameters to the CSV file, and all saves are cumulative, only adding new data. The CSV file on Pavlovia is readable throughout, and grows in length with successive saves. EasyEyes first saves after the compatibility check, before the remote calibration (regardless of whether the remote calibrator runs), which is before the first block, and again at the "end," which includes four cases: 1. completion, 2. orderly termination through an error message or the escape mechanism including waiting out the "saving" window at the end, 3. closing the EasyEyes window before completion or termination, and 4. shift of browser focus away from the EasyEyes page before completion or termination. Saving does not end the experiment.  After shifting attention away, the participant can shift attention back to EasyEyes and continue the experiment, which will save again in any of the four ways. This can happen again and again. ',
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -1124,7 +1124,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "normal",
     explanation:
       "⏳ fontKerning (default auto) uses the fontKerning Canvas command to enable or disable kerning: auto (yes/no as dictated by browser), normal (yes), or none (no).\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fontKerning",
-    type: "",
+    type: "text",
     default: "normal",
     categories: "",
   },
@@ -1174,7 +1174,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "0",
     explanation:
       '⏳ fontTrackingLetter (default 0) uses the "letterSpacing" Canvas command to adjust the spacing between letters.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing\nIt adds a positive or negative value to whatever the font would do otherwise. This is closely related to what Microsoft Word calls "tracking". The distance inserted (in px) is the product of the value provided and the point side of the font. "letterSpacing" is part of the new CanvasRenderingContext2D, which is available for Chrome, Edge, and Samsung, not for Safari and Firefox.',
-    type: "",
+    type: "numerical",
     default: "0",
     categories: "",
   },
@@ -1184,7 +1184,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "0",
     explanation:
       '⏳ fontTrackingWord (default 0) uses the "wordSpacing" Canvas command to adjust the spacing between words.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/wordSpacing\nThe distance inserted (in px) is the product of the value provided and the point side of the font. This works for Chrome, Edge, and Samsung, not for Safari and Firefox.',
-    type: "",
+    type: "numerical",
     default: "0",
     categories: "",
   },
@@ -1274,7 +1274,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "⏳ internationalPhrasesURL accepts a URL to a Google Sheets doc, similar to EasyEyes International Phrases, but set up by the Scientist. When it's provided in a condition, the instructionForXXX parameters for that condition, rather than literal text, accept a phrase name, like EE_Welcome, and pull the named phrase in the current language from the Sheets doc pointed to by internationalPhrasesURL. internationalPhrasesURL can provide a URL (same or different) for each condition that needs it. Each condition operates independently of the rest. For the table to be valid it must include the first 4 rows of the EasyEyes International Phrases: language, EE_languageDirection, EE_languageUseSpace, EE_languageFont. Allowing multiple phrase tables with different language coverage seems needlessly confusing for all concerned, so just copy the first four rows (all the columns) of the EasyEyes International Phrases spreadsheet, and add new rows below, one for each new phrase. Our international phrases doc is designed to make it easy for us to add new languages (by adding a new column for each language). Please send your request to denis.pelli@nyu.edu. He will need to know: the ISO two-letter code for the language (https://www.sitepoint.com/iso-2-letter-language-codes/), the language direction (left to right or right to left), and whether it uses spaces. Once EasyEyes adds a new language, the EasyEyes compiler will insist that every scientist's internationalPhrasesURL Google Sheets doc also include that language. ",
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
@@ -1504,7 +1504,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "-100",
     explanation:
       "⭐ maskerSoundDBSPL (default -100) is sound level of the masker in dB SPL.",
-    type: "",
+    type: "numerical",
     default: "-100",
     categories: "",
   },

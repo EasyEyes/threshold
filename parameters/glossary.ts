@@ -312,7 +312,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "none",
-    categories: ["none", "Prolific", "MTurk", "SONA"],
+    categories: ["none", "Prolific"],
   },
   _online1Title: {
     name: "_online1Title",
@@ -397,23 +397,17 @@ export const GLOSSARY: Glossary = {
     default: "",
     categories: ["audio", "camera", "microphone", "download"],
   },
-  _online4AllowList: {
-    name: "_online4AllowList",
-    availability: "now",
-    type: "",
-    default: "",
-  },
   _online4AllowCompletedExperiment: {
     name: "_online4AllowCompletedExperiment",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   _online4AllowAfterHours: {
     name: "_online4AllowAfterHours",
     availability: "now",
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "0",
   },
   _online4ApprovalRate: {
     name: "_online4ApprovalRate",
@@ -424,13 +418,13 @@ export const GLOSSARY: Glossary = {
   _online4CustomAllowList: {
     name: "_online4CustomAllowList",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   _online4CustomBlockList: {
     name: "_online4CustomBlockList",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   _online4Location: {
@@ -692,13 +686,13 @@ export const GLOSSARY: Glossary = {
   _online4ParticipantInPreviousStudyExclude: {
     name: "_online4ParticipantInPreviousStudyExclude",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   _online4ParticipantInPreviousStudyInclude: {
     name: "_online4ParticipantInPreviousStudyInclude",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   _online4Sample: {
@@ -1093,6 +1087,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  _saveEachBlockBool: {
+    name: "_saveEachBlockBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   _saveFirstInEachBlockBool: {
     name: "_saveFirstInEachBlockBool",
     availability: "now",
@@ -1327,7 +1327,7 @@ export const GLOSSARY: Glossary = {
   fontKerning: {
     name: "fontKerning",
     availability: "now",
-    type: "",
+    type: "text",
     default: "normal",
   },
   fontLeftToRightBool: {
@@ -1359,13 +1359,13 @@ export const GLOSSARY: Glossary = {
   fontTrackingForLetters: {
     name: "fontTrackingForLetters",
     availability: "now",
-    type: "",
+    type: "numerical",
     default: "0",
   },
   fontTrackingForWords: {
     name: "fontTrackingForWords",
     availability: "now",
-    type: "",
+    type: "numerical",
     default: "0",
   },
   fontVariationSettings: {
@@ -1420,7 +1420,7 @@ export const GLOSSARY: Glossary = {
   internationalPhrasesURL: {
     name: "internationalPhrasesURL",
     availability: "now",
-    type: "",
+    type: "text",
     default: "",
   },
   instructionForResponseWhere: {
@@ -1561,7 +1561,7 @@ export const GLOSSARY: Glossary = {
   maskerSoundDBSPL: {
     name: "maskerSoundDBSPL",
     availability: "now",
-    type: "",
+    type: "numerical",
     default: "-100",
   },
   maskerSoundFolder: {
