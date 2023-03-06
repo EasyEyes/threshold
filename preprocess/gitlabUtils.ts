@@ -674,63 +674,40 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
     redirect: "follow",
   };
 
-  await Swal.fire({
-    title: `Accessing data from ${project.name} ...`,
-    // html: `<p>This might take a while, depending on the number of participants and the length of the experiment.</p>`,
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    didOpen: async () => {
-      // @ts-ignore
-      Swal.showLoading(null);
+  const dataFolder = await fetch(
+    `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=100`,
+    requestOptions
+  )
+    .then((response) => {
+      return response.json();
+    })
+    .then((result) => {
+      return result;
+    });
 
-      const dataFolder = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=100`,
+  const dataframes = [];
+
+  for (const file of dataFolder) {
+    const fileName = file.name;
+    if (fileName.includes(".csv")) {
+      const fileContent = await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
         requestOptions
       )
         .then((response) => {
           return response.json();
         })
         .then((result) => {
-          return result;
+          return Buffer.from(result.content, "base64");
         });
-
-      if (dataFolder.length === 0) {
-        Swal.close();
-        Swal.fire({
-          icon: "error",
-          title: `No data found for ${project.name}.`,
-          text: `We can't find any data for the experiment. This might due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
-          confirmButtonColor: "#666",
-        });
-        return;
-      }
-
-      const dataframe = [];
-
-      for (const file of dataFolder) {
-        const fileName = file.name;
-        if (fileName.includes(".csv")) {
-          const fileContent = await fetch(
-            `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
-            requestOptions
-          )
-            .then((response) => {
-              return response.json();
-            })
-            .then((result) => {
-              return Buffer.from(result.content, "base64");
-            });
-          const parsed = Papa.parse(fileContent.toString());
-          console.log(parsed.data);
-          const data = parsed.data.slice(1); // Rows
-          const columns = parsed.data[0]; // Header
-          const df = new DataFrame(data, columns);
-          dataframe.push(df);
-        }
-      }
-      return dataframe;
-    },
-  });
+      const parsed = Papa.parse(fileContent.toString());
+      const data = parsed.data.slice(1); // Rows
+      const columns = parsed.data[0]; // Header
+      const df = new DataFrame(data, columns);
+      dataframes.push(df);
+    }
+  }
+  return dataframes;
 };
 
 // fetch data folder
