@@ -6,7 +6,7 @@ import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
 import Papa from "papaparse";
 import { DataFrame } from "dataframe-js";
-import { preprocessDataframe } from "../../source/components/ErrorReport";
+// import { preprocessDataframe } from "../../source/components/ErrorReport";
 
 import {
   acceptableExtensions,
@@ -665,6 +665,17 @@ export const downloadDataFolder = async (user: User, project: any) => {
   });
 };
 
+const preprocessDataframe = (df: any) => {
+  if (!df.listColumns().includes("error")) {
+    return df.head(1);
+  }
+  df = df.filter((row: any) => row.get("error") !== "");
+  if (df.count() > 0) {
+    console.log("found error");
+    return df;
+  }
+  return df.head(1);
+};
 // read experiment data folder and return a list of dataframes
 export const getExperimentDataFrames = async (user: User, project: any) => {
   const headers = new Headers();
@@ -706,6 +717,7 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
       const columns = parsed.data[0]; // Header
       let df = new DataFrame(data, columns);
       console.log("preprocess: ", file.name);
+
       df = preprocessDataframe(df);
       dataframes.push(df);
     }
