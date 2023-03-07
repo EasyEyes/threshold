@@ -6,6 +6,7 @@ import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
 import Papa from "papaparse";
 import { DataFrame } from "dataframe-js";
+import { preprocessDataframe } from "../../source/components/ErrorReport";
 
 import {
   acceptableExtensions,
@@ -703,7 +704,9 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
       const parsed = Papa.parse(fileContent.toString());
       const data = parsed.data.slice(1); // Rows
       const columns = parsed.data[0]; // Header
-      const df = new DataFrame(data, columns);
+      let df = new DataFrame(data, columns);
+      console.log("preprocess: ", file.name);
+      df = preprocessDataframe(df);
       dataframes.push(df);
     }
   }
