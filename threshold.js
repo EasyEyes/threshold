@@ -1390,6 +1390,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         .filter((condition) =>
           paramReader.read("conditionEnabledBool", condition["block_condition"])
         );
+      if (targetKind.current === "reading")
+        trialsConditions = trialsConditions.slice(0, 1);
       updateProgressBar(0);
       // nTrialsTotal
       // totalTrialsThisBlock.current = trialsConditions
@@ -1956,7 +1958,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
             rsvpReading: () => {
-              // TODO BF each response should probably count on its own.
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
             movie: () => {

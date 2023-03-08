@@ -13,7 +13,7 @@ import {
   status,
   timing,
 } from "./global";
-import { degreesToPixels, getRandomInt, logger } from "./utils";
+import { degreesToPixels, getRandomInt, logger, XYPixOfXYDeg } from "./utils";
 
 import {
   preprocessRawCorpus,
@@ -328,9 +328,8 @@ export const getSizeForSpacing = (
   targetDeg,
   testingString
 ) => {
-  const targetPix = degreesToPixels(targetDeg, {
-    pixPerCm: displayOptions.pixPerCm,
-  });
+  // TODO calculate spacing at fixation location, not just [0,0]?
+  const targetPix = XYPixOfXYDeg([targetDeg, 0], displayOptions)[0];
 
   readingParagraph.setWrapWidth(999999);
   readingParagraph.setText(testingString);
