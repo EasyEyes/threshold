@@ -2526,7 +2526,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var wirelessKeyboardNeededBool;
 
   var _key_resp_allKeys;
-  var _responsesWithinCardinal, _responsesAcrossCardinals;
   var trialComponents;
   var allFlankers, flankersUsed;
 
@@ -3367,7 +3366,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             rsvpReadingWordsForThisBlock.current[
               status.block_condition
             ].shift();
-          rsvpReadingTargetSets.numberOfSets = numberOfWords;
+          const actualNumberOfWords = thisTrialWords.targetWords.length;
+          if (actualNumberOfWords !== numberOfWords)
+            psychoJS.experiment.addData(
+              "rsvpReadingMistakenNumberOfWordsParsed",
+              thisTrialWords.targetWords.join(",")
+            );
+          rsvpReadingTargetSets.numberOfSets = actualNumberOfWords;
           const targetSets = generateRSVPReadingTargetSets(
             thisTrialWords,
             durationSec,
