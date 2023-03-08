@@ -669,6 +669,19 @@ const preprocessDataframe = (df: any) => {
   if (!df.listColumns().includes("error")) {
     return df.head(1);
   }
+  if (!df.listColumns().includes("screenHeightPx")) {
+    df = df.withColumn("screenHeightPx", () => NaN);
+  }
+  if (!df.listColumns().includes("screenWidthPx")) {
+    df = df.withColumn("screenWidthPx", () => NaN);
+  }
+  df = df
+    .withColumn("screenWidthPx", () =>
+      df.select("screenWidthPx").toArray()[0][0].toString()
+    )
+    .withColumn("screenHeightPx", () =>
+      df.select("screenHeightPx").toArray()[0][0].toString()
+    );
   df = df.filter((row: any) => row.get("error") !== "");
   if (df.count() > 0) {
     console.log("found error");
