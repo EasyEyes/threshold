@@ -88,3 +88,21 @@ export const buildWindowErrorHandling = (paramReader) => {
     return true;
   };
 };
+
+/**
+ * Log a non-fatal error as a warning, so the experimenter can know that some unspecified behavior occured.
+ * @param {string} message Message describing this non-fatal error
+ */
+export const warning = (message) => {
+  try {
+    psychoJS.experiment.addData("warning", message);
+  } catch (exception) {
+    // TODO should failure to log a warning result in a fatal error?
+    console.error(
+      "Failed to add warning: " +
+        message +
+        " to experiment data. Perhaps psychoJS.experiment is undefined.",
+      exception
+    );
+  }
+};

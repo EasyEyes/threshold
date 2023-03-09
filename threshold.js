@@ -161,7 +161,10 @@ import {
   addBlockStaircaseSummariesToData,
   addApparatusInfoToData,
 } from "./components/utils.js";
-import { buildWindowErrorHandling } from "./components/errorHandling.js";
+import {
+  buildWindowErrorHandling,
+  warning,
+} from "./components/errorHandling.js";
 
 import {
   formCalibrationList,
@@ -3369,9 +3372,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ].shift();
           const actualNumberOfWords = thisTrialWords.targetWords.length;
           if (actualNumberOfWords !== numberOfWords)
-            psychoJS.experiment.addData(
-              "rsvpReadingMistakenNumberOfWordsParsed",
-              thisTrialWords.targetWords.join(",")
+            warning(
+              "rsvpReading parsed the incorrect number of words. Using the target sequence: " +
+                thisTrialWords.targetWords.join(",")
             );
           rsvpReadingTargetSets.numberOfSets = actualNumberOfWords;
           const targetSets = generateRSVPReadingTargetSets(
