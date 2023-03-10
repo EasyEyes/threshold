@@ -667,25 +667,28 @@ export const downloadDataFolder = async (user: User, project: any) => {
 
 const preprocessDataframe = (df: any) => {
   if (!df.listColumns().includes("error")) {
-    return df.head(1);
+    df = df.withColumn("error", () => "");
   }
-  if (!df.listColumns().includes("screenHeightPx")) {
-    df = df.withColumn("screenHeightPx", () => NaN);
-  }
-  if (!df.listColumns().includes("screenWidthPx")) {
-    df = df.withColumn("screenWidthPx", () => NaN);
-  }
-  df = df
-    .withColumn("screenWidthPx", () =>
-      df.select("screenWidthPx").toArray()[0][0].toString()
-    )
-    .withColumn("screenHeightPx", () =>
-      df.select("screenHeightPx").toArray()[0][0].toString()
+  if (
+    df.listColumns().includes("screenHeightPx") &&
+    df.listColumns().includes("screenWidthPx")
+  ) {
+    const resolution =
+      df.select("screenWidthPx").toArray()[0][0].toString() +
+      "x" +
+      df.select("screenHeightPx").toArray()[0][0].toString();
+    df = df.withColumn("resolution", () => resolution);
+  } else if (df.listColumns().includes("psychojsWindowDimensions")) {
+    df = df.withColumn("resolution", (row: any) =>
+      row.get("psychojsWindowDimensions")
     );
-  df = df.filter((row: any) => row.get("error") !== "");
-  if (df.count() > 0) {
+  } else {
+    df.withColumn("resolution", () => "NaN x NaN");
+  }
+  const error = df.filter((row: any) => row.get("error") !== "");
+  if (error.count() > 0) {
     console.log("found error");
-    return df;
+    return error;
   }
   return df.head(1);
 };
