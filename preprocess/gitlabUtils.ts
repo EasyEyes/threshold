@@ -671,7 +671,8 @@ const preprocessDataframe = (df: any) => {
   }
   if (
     df.listColumns().includes("screenHeightPx") &&
-    df.listColumns().includes("screenWidthPx")
+    df.listColumns().includes("screenWidthPx") &&
+    df.select("screenWidthPx").toArray()[0][0].toString() != ""
   ) {
     const resolution =
       df.select("screenWidthPx").toArray()[0][0].toString() +
