@@ -1336,6 +1336,18 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  fontMaxDrawPt: {
+    name: "fontMaxDrawPt",
+    availability: "now",
+    type: "",
+    default: "",
+  },
+  fontMaxMeasurePt: {
+    name: "fontMaxMeasurePt",
+    availability: "now",
+    type: "numerical",
+    default: "10000",
+  },
   fontPadding: {
     name: "fontPadding",
     availability: "now",

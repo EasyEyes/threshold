@@ -1139,6 +1139,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontMaxDrawPt",
+    availability: "now",
+    example: "",
+    explanation:
+      "fontMaxDrawPt (default 10000) sets an upper limit on the nominal point size of the font. We added this to avoid some crashes that seem to result from trying to draw or measure huge characters.",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "fontMaxMeasurePt",
+    availability: "now",
+    example: "",
+    explanation:
+      "fontMaxMeasurePt (default 10000) sets an upper limit on the nominal point size of the font to be measured. We added this to avoid some crashes that seem to result from trying to draw or measure huge characters.",
+    type: "numerical",
+    default: "10000",
+    categories: "",
+  },
+  {
     name: "fontPadding",
     availability: "now",
     example: "3",
