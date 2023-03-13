@@ -23,6 +23,6 @@ export const readTrialLevelLetterParams = (reader, BC) => {
     targetEccentricityXDeg,
     targetEccentricityYDeg,
   ];
-
   letterConfig.targetSafetyMarginSec = reader.read("targetSafetyMarginSec", BC);
+  letterConfig.fontMaxPx = reader.read("fontMaxPx", BC);
 };

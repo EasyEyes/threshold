@@ -3139,6 +3139,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     stimulusParameters.heightPx,
                     stimulusParameters.widthPx
                   );
+                  console.log("stimulus [height, width]", [
+                    stimulusParameters.heightPx,
+                    stimulusParameters.widthPx,
+                  ]);
                   target.setPadding(font.padding);
 
                   flanker1.setAutoDraw(false);
@@ -3154,7 +3158,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             fixation,
             showCharacterSet,
             trialCounter,
-          ].forEach((c) => c._updateIfNeeded());
+          ].forEach((c) => {
+            logger("c", c);
+            c._updateIfNeeded();
+            c.refresh();
+          });
 
           const tripletStims = {
             target: target,

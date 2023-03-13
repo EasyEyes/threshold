@@ -318,6 +318,13 @@ export const restrictSizeDeg = (
       targetSizeDeg = targetSizeDeg * (letterConfig.targetMinimumPix / sizePx);
       continue;
     }
+    // Compute upper px bound
+    if (heightPx > letterConfig.fontMaxPx) {
+      const newTargetSizeDeg =
+        targetSizeDeg * (letterConfig.fontMaxPx / heightPx);
+      targetSizeDeg = newTargetSizeDeg;
+      continue;
+    }
 
     // WE'RE DONE IF STIMULUS FITS
     if (isRectInRect(stimulusRectPx, screenRectPx)) {
@@ -572,6 +579,12 @@ export const restrictSpacingDeg = (
     // Compute lower bound
     if (heightPx < letterConfig.targetMinimumPix) {
       spacingDeg = spacingDeg * (letterConfig.targetMinimumPix / heightPx);
+      continue;
+    }
+    // Compute upper px bound
+    if (heightPx > letterConfig.fontMaxPx) {
+      const newSpacingDeg = spacingDeg * (letterConfig.fontMaxPx / heightPx);
+      spacingDeg = newSpacingDeg;
       continue;
     }
 

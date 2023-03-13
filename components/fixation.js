@@ -183,6 +183,9 @@ export class Fixation {
   _updateIfNeeded() {
     this.stims.forEach((stim) => stim._updateIfNeeded());
   }
+  refresh() {
+    this.stims.forEach((stim) => stim.refresh());
+  }
   setLineWidth(width) {
     this.stims.forEach((stim) => stim.setLineWidth(width));
   }

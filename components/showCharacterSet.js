@@ -219,7 +219,10 @@ export const scaleFontSizeToFit = (elem, childrenClass) => {
 
 const getMinFontSize = () => {
   try {
-    return Math.ceil(XYPixOfXYDeg([0.4, 0], displayOptions)[0]);
+    const distanceBasedMinSize = Math.ceil(
+      XYPixOfXYDeg([0.4, 0], displayOptions)[0]
+    );
+    return Math.max(distanceBasedMinSize, 12);
   } catch (e) {
     return 12;
   }

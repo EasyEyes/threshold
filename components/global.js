@@ -147,6 +147,7 @@ export const letterConfig = Object.seal({
   targetSafetyMarginSec: undefined,
   ////
   responseCharacterHasMedialShape: undefined,
+  fontMaxPx: undefined,
 });
 
 export const repeatedLettersConfig = Object.seal({
