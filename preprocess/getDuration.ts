@@ -36,6 +36,7 @@ export const EstimateDurationForScientistPage = (parsed: any) => {
   for (let i = 0; i < parsedData.length; i++) {
     if (parsedData[i][0] == "conditionTrials") {
       conditionTrials = parsedData[i];
+      console.log("conditionTrials", conditionTrials);
     } else if (parsedData[i][0] == "readingLinesPerPage") {
       readingLinesPerPage = parsedData[i];
     } else if (parsedData[i][0] == "readingPages") {
@@ -78,7 +79,7 @@ export const EstimateDurationForScientistPage = (parsed: any) => {
   // 40 s for soundAllHz calibration
   duration += 40 * getCalibration(calibrateSound1000HzBool);
   const getConditionEnable = (index: number) => {
-    return conditionEnabledBool[index] === "TRUE" ? 1 : 0;
+    return conditionEnabledBool[index] === "FALSE" ? 0 : 1;
   };
   for (let i = 0; i < n; i++) {
     // CONDITIONS
@@ -86,14 +87,15 @@ export const EstimateDurationForScientistPage = (parsed: any) => {
       // 6 sec/trial when targetTask=identify or detect
       duration += getConditionEnable(i) * conditionTrials[i] * 6;
       // console.log("identify");
+      // console.log("conditionTrials",conditionTrials[i]);
     }
     if (targetKind[i] == "reading") {
       // 0.05 sec/character + 3 s/question for ordinary reading
-      // console.log(readingNumberOfQuestions[i]);
+      // console.log("readingNumberOfQuestions",readingNumberOfQuestions[i]);
       // console.log("conditionEnabledBool", conditionEnabledBool);
-      // console.log(getConditionEnable(i));
-      // console.log(readingLinesPerPage[i]);
-      // console.log(readingPages[i]);
+      // console.log("getConditionEnable",getConditionEnable(i));
+      // console.log("readingLinesPerPage", readingLinesPerPage[i]);
+      // console.log("readingPages",readingPages[i]);
       duration += getConditionEnable(i) * readingNumberOfQuestions[i] * 6;
       // (The condition has charactersPerLine*linesPerPage*numberOFPages characters.)
       duration +=
