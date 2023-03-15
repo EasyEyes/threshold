@@ -2083,6 +2083,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  spacingIsOuterBool: {
+    name: "spacingIsOuterBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   spacingOverSizeRatio: {
     name: "spacingOverSizeRatio",
     availability: "now",

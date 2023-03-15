@@ -2339,7 +2339,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "radial",
     explanation:
-      'spacingDirection. When eccentricity is nonzero then spacingDirection can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then spacingDirection can be horizontal, vertical, or horizontalAndVertical. The "And" options display four flankers, distributed around the target. It is an error to request radial or tangential spacingDirection at eccentricity zero, because they are undefined there.',
+      'spacingDirection. When eccentricity is nonzero then spacingDirection can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then spacingDirection can be horizontal, vertical, or horizontalAndVertical. The "...And..." options display four flankers, distributed around the target. It is an error to request radial or tangential  or radialAndTangential spacingDirection at eccentricity zero, because they are undefined there.',
     type: "categorical",
     default: "radial",
     categories:
@@ -2351,6 +2351,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "TRUE",
     explanation:
       "spacingForRatioIsOuterBool. When spacingDirection is radial, there are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. To replicate CriticalSpacing data, when thresholdPameter is spacing, spacingSymmetry is cortex, and spacingRelationToSize is ratio, spacingForRatioIsOuterBool (default FALSE) determines whether target size is based on inner (FALSE) or outer (TRUE) spacing. ",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "spacingIsOuterBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "spacingIsOuterBool. When spacingDirection is radial, there are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. To replicate CriticalSpacing data, when thresholdPameter is spacing, spacingSymmetry is cortex, and spacingRelationToSize is ratio or typographic, spacingForRatioIsOuterBool (default FALSE) determines whether target size is based on inner (FALSE) or outer (TRUE) spacing. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
