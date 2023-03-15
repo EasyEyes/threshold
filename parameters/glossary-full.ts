@@ -1349,6 +1349,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "logQuestBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "logQuestBool (default FALSE) enables logging of Quest activity in the browser Console",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "markingBlankedNearTargetBool",
     availability: "now",
     example: "TRUE",
@@ -2344,16 +2354,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     default: "radial",
     categories:
       "horizontal, vertical, horizontalAndVertical, radial, tangential, radialAndTangential",
-  },
-  {
-    name: "spacingForRatioIsOuterBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "spacingForRatioIsOuterBool. When spacingDirection is radial, there are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. To replicate CriticalSpacing data, when thresholdPameter is spacing, spacingSymmetry is cortex, and spacingRelationToSize is ratio, spacingForRatioIsOuterBool (default FALSE) determines whether target size is based on inner (FALSE) or outer (TRUE) spacing. ",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
   },
   {
     name: "spacingIsOuterBool",

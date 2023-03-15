@@ -1468,6 +1468,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  logQuestBool: {
+    name: "logQuestBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   markingBlankedNearTargetBool: {
     name: "markingBlankedNearTargetBool",
     availability: "now",
@@ -2076,12 +2082,6 @@ export const GLOSSARY: Glossary = {
       "tangential",
       "radialAndTangential",
     ],
-  },
-  spacingForRatioIsOuterBool: {
-    name: "spacingForRatioIsOuterBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
   },
   spacingIsOuterBool: {
     name: "spacingIsOuterBool",
