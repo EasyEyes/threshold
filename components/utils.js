@@ -948,3 +948,6 @@ export const saveDataOnWindowClose = (experiment) => {
     return null;
   });
 };
+
+export const tand = (deg) => Math.tan((deg * Math.PI) / 180);
+export const atand = (x) => (Math.atan(x) * 180) / Math.PI;

@@ -6,6 +6,7 @@ import {
   letterConfig,
   repeatedLettersConfig,
   targetKind,
+  viewingDistanceDesiredCm,
 } from "./global.js";
 
 import { psychoJS } from "./globalPsychoJS.js";
@@ -18,6 +19,8 @@ import {
   norm,
   Rectangle,
   validateRectPoints,
+  tand,
+  atand,
 } from "./utils.js";
 
 export const generateCharacterSetBoundingRects = (
@@ -193,7 +196,7 @@ export const restrictLevel = (
   spacingSymmetry,
   spacingOverSizeRatio,
   targetSizeIsHeightBool,
-  spacingForRatioIsOuterBool
+  spacingIsOuterBool
 ) => {
   // TODO are these necessary? Should be (I think are?) compiler checks
   if (
@@ -251,8 +254,7 @@ export const restrictLevel = (
         spacingOverSizeRatio,
         spacingSymmetry,
         thresholdParameter,
-        displayOptions,
-        spacingForRatioIsOuterBool
+        spacingIsOuterBool
       );
       level = Math.log10(spacingDeg);
       break;
@@ -374,8 +376,7 @@ export const restrictSpacingDeg = (
   spacingOverSizeRatio,
   spacingSymmetry,
   thresholdParameter,
-  displayOption,
-  spacingForRatioIsOuterBool
+  spacingIsOuterBool
 ) => {
   // TODO make sure rects are valid, ie height&width are nonnegative
   /* 
@@ -489,7 +490,7 @@ export const restrictSpacingDeg = (
         // FIX intended to swap inner and outer (??) flanker as the default, but is broken.
         // Ex. given spacingOverSizeRatio = 1, spacing does not equal size
         // if (
-        //   spacingForRatioIsOuterBool ||
+        //   spacingIsOuterBool ||
         //   norm(targetXYDeg) === 0 ||
         //   letterConfig.spacingDirection !== "radial"
         // ) {
@@ -557,11 +558,9 @@ export const restrictSpacingDeg = (
       case "typographic":
         // Use spacingDeg to set size.
         widthDeg = 3 * spacingDeg;
-        sizeDeg = targetSizeIsHeightBool
-          ? widthDeg * (characterSetRectPx.height / characterSetRectPx.width)
-          : widthDeg;
         heightDeg =
           widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
+        sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
         var [leftPx] = XYPixOfXYDeg(
           [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
           displayOptions
@@ -583,8 +582,36 @@ export const restrictSpacingDeg = (
     }
     // Compute upper px bound
     if (heightPx > letterConfig.fontMaxPx) {
-      const newSpacingDeg = spacingDeg * (letterConfig.fontMaxPx / heightPx);
-      spacingDeg = newSpacingDeg;
+      let flankerEccDeg;
+      const targetEccDeg = Math.sqrt(targetXYDeg[0] ** 2 + targetXYDeg[1] ** 2);
+      if (spacingIsOuterBool) {
+        flankerEccDeg = targetEccDeg + spacingDeg;
+      } else {
+        flankerEccDeg = targetEccDeg - spacingDeg;
+      }
+      const targetEccPx =
+        tand(targetEccDeg) *
+        viewingDistanceDesiredCm.current *
+        displayOptions.pixPerCm;
+      let flankerEccPx =
+        tand(flankerEccDeg) *
+        viewingDistanceDesiredCm.current *
+        displayOptions.pixPerCm;
+      let spacingPx =
+        (flankerEccPx - targetEccPx) * (letterConfig.fontMaxPx / heightPx);
+      flankerEccPx = targetEccPx + spacingPx;
+      flankerEccDeg = atand(
+        flankerEccPx /
+          (viewingDistanceDesiredCm.current * displayOptions.pixPerCm)
+      );
+      spacingDeg = Math.abs(flankerEccDeg - targetEccDeg);
+      if (spacingIsOuterBool) {
+        spacingDeg = flankerEccDeg - targetEccDeg;
+      } else {
+        spacingDeg = targetEccDeg - flankerEccDeg;
+      }
+      if (spacingDeg < 0)
+        throw "Mistake in fontMaxPx restricting code. spacingDeg < 0";
       continue;
     }
 

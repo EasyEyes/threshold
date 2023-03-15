@@ -3017,10 +3017,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "spacingRelationToSize",
             letterConfig.spacingRelationToSize
           );
-          var spacingForRatioIsOuterBool = reader.read(
-            "spacingForRatioIsOuterBool",
-            BC
-          );
+          var spacingIsOuterBool = reader.read("spacingIsOuterBool", BC);
           [level, stimulusParameters] = restrictLevel(
             proposedLevel,
             thresholdParameter,
@@ -3030,7 +3027,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.spacingSymmetry,
             letterConfig.spacingOverSizeRatio,
             letterConfig.targetSizeIsHeightBool,
-            spacingForRatioIsOuterBool
+            spacingIsOuterBool
           );
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
@@ -3088,6 +3085,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       stimulusParameters.widthPx
                     );
                   }
+                  logger("QUEST. target heightPx", stimulusParameters.heightPx);
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
                   var flankersHeightPx = target.getHeight();
@@ -3106,7 +3104,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     "flankerLocationsPx",
                     stimulusParameters.targetAndFlankersXYPx.slice(1)
                   );
-                  const targetSpacingPx = spacingForRatioIsOuterBool
+                  const targetSpacingPx = spacingIsOuterBool
                     ? norm([
                         stimulusParameters.targetAndFlankersXYPx[0][0] -
                           stimulusParameters.targetAndFlankersXYPx[1][0],

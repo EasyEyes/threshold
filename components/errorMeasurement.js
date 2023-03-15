@@ -127,6 +127,7 @@ export const addResponseIfTolerableError = (
   psychoJS,
   respondedEarly
 ) => {
+  logger("QUEST. level given quest", level);
   addMeasuredErrorToOutput(psychoJS, tolerances);
   const durationAcceptable =
     _targetDurationAcceptable(
@@ -146,7 +147,8 @@ export const addResponseIfTolerableError = (
     : [durationAcceptable, latencyAcceptable];
 
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x);
-
+  logger("QUEST. level given to quest? bool", validTrialToGiveToQUEST);
+  logger("QUEST. was answer correct?", answerCorrect);
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
   loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
 
