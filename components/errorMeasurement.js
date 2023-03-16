@@ -1,4 +1,5 @@
 import { rc, fixationConfig } from "./global";
+import { logQuest } from "./logging";
 import {
   XYDegOfXYPix,
   norm,
@@ -127,7 +128,6 @@ export const addResponseIfTolerableError = (
   psychoJS,
   respondedEarly
 ) => {
-  logger("QUEST. level given quest", level);
   addMeasuredErrorToOutput(psychoJS, tolerances);
   const durationAcceptable =
     _targetDurationAcceptable(
@@ -147,8 +147,8 @@ export const addResponseIfTolerableError = (
     : [durationAcceptable, latencyAcceptable];
 
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x);
-  logger("QUEST. level given to quest? bool", validTrialToGiveToQUEST);
-  logger("QUEST. was answer correct?", answerCorrect);
+  logQuest("Was trial given to QUEST?", validTrialToGiveToQUEST);
+  logQuest("Was answer correct?", answerCorrect ? true : false);
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
   loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
 

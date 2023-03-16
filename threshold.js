@@ -377,6 +377,7 @@ import {
   showProgressBar,
   updateProgressBar,
 } from "./components/progressBar.js";
+import { logQuest } from "./components/logging.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -2551,6 +2552,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       responseType.numberOfResponses =
         targetKind.current === "repeatedLetters" ? 2 : 1;
 
+      logQuest("NEW TRIAL");
+
       const letterSetResponseType = () => {
         // ! responseType
         responseType.original = responseType.current;
@@ -3085,7 +3088,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       stimulusParameters.widthPx
                     );
                   }
-                  logger("QUEST. target heightPx", stimulusParameters.heightPx);
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
 
                   var flankersHeightPx = target.getHeight();
@@ -3150,6 +3152,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
               break;
           }
+          logQuest("Target heightPx", stimulusParameters.heightPx, BC);
           [
             target,
             ...flankersUsed,

@@ -32,6 +32,7 @@ import {
   logger,
   showCursor,
   addTrialStaircaseSummariesToData,
+  toFixedNumber,
 } from "./utils.js";
 import { isTimingOK, showConditionName } from "./showTrialInformation.js";
 import { setupClickableCharacterSet } from "./showCharacterSet";
@@ -40,6 +41,7 @@ import { psychoJS } from "./globalPsychoJS";
 
 import * as core from "../psychojs/src/core/index.js";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
+import { logQuest } from "./logging.js";
 const { PsychoJS } = core;
 
 export const _identify_trialInstructionRoutineEnd = (
@@ -99,6 +101,7 @@ export const _letter_trialRoutineEnd = (
   logger("tolerances", tolerances);
   if (currentLoop instanceof MultiStairHandler) {
     // currentLoop.addResponse(key_resp.corr, level);
+    logQuest("Level given quest", toFixedNumber(level, 3));
     if (
       !addResponseIfTolerableError(
         currentLoop,
