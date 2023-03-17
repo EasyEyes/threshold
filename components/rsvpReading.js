@@ -24,7 +24,11 @@ import {
 } from "./utils";
 import { Color } from "../psychojs/src/util";
 import { findReadingSize, getThisBlockPages } from "./readingAddons";
-import { prepareReadingQuestions, preprocessCorpusToWordList } from "./reading";
+import {
+  prepareReadingQuestions,
+  preprocessCorpusToWordList,
+  tokenizeWordsIndividually,
+} from "./reading";
 import { showCursor } from "./utils";
 import {
   getPhraseIdentificationReactionTimes,
@@ -187,7 +191,7 @@ export class Category {
 class rsvpReadingTrialWords {
   constructor(sequence, responseOptions) {
     this.sequence = sequence;
-    const keys = preprocessCorpusToWordList(sequence);
+    const keys = tokenizeWordsIndividually(sequence);
     const remainingResponseOptions = responseOptions.slice();
 
     // Make sure that response options are in sequence order
@@ -230,13 +234,13 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
   const targetsAndFoils = sequences.map((conditionTrials, i) =>
     conditionTrials.map((trial) => {
       const BC = conditions[i]["block_condition"];
-      const targetSequence = preprocessCorpusToWordList(trial);
-      const nQuestions = targetSequence.length;
+      const individuallyTokenizedWords = tokenizeWordsIndividually(trial);
+      const nQuestions = individuallyTokenizedWords.length;
       const nAnswers = reader.read("rsvpReadingNumberOfResponseOptions", BC);
       const questions = prepareReadingQuestions(
         nQuestions,
         nAnswers,
-        targetSequence,
+        individuallyTokenizedWords,
         readingFrequencyToWordArchive[reader.read("readingCorpus", BC)],
         "rsvpReading"
       );
@@ -244,6 +248,12 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
         q.correctAnswer,
         ...q.foils,
       ]);
+      const sortByArray = individuallyTokenizedWords.map((w) =>
+        w.toLowerCase()
+      );
+      responseOptions.sort(
+        (a, b) => sortByArray.indexOf(a[0]) - sortByArray.indexOf(b[0])
+      );
       return responseOptions;
     })
   );

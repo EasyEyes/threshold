@@ -1403,7 +1403,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.05",
     explanation:
-      "markingFixationHotSpotRadiusDeg is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
+      "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
     type: "numerical",
     default: "0.3",
     categories: "",
@@ -1413,7 +1413,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "5",
     explanation:
-      "markingFixationMotionPeriodSec is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
+      "markingFixationMotionPeriodSec (default 10 s) is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
     type: "numerical",
     default: "10",
     categories: "",
@@ -1423,7 +1423,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "markingFixationMotionRadiusDeg is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
+      "markingFixationMotionRadiusDeg (default 0.5 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
     type: "numerical",
     default: "0.5",
     categories: "",
@@ -1433,7 +1433,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1",
     explanation:
-      "⭐ markingFixationStrokeLengthDeg specifies the stroke length in the fixation cross. The cross consists of two strokes, one horizontal, one vertical. Thus this is a diameter, unless the other marking parameters, which are mostly radii. Setting this to a large value (e.g. 100) will produce a fixation cross that extends from edge to edge of the display, which may help restore salience of a cross despite blanking of the cross near possible target locations. You can avoid colliding with a peripheral target by setting this short, or by leaving it long and setting markingBlankingRadiusReTargetHeight.",
+      "⭐ markingFixationStrokeLengthDeg (default 2 deg) specifies the stroke length in the fixation cross. The cross consists of two strokes, one horizontal, one vertical. Thus this is a diameter, unless the other marking parameters, which are mostly radii. Setting this to a large value (e.g. 100) will produce a fixation cross that extends from edge to edge of the display, which may help restore salience of a cross despite blanking of the cross near possible target locations. You can avoid colliding with a peripheral target by setting this short, or by leaving it long and setting markingBlankingRadiusReTargetHeight.",
     type: "numerical",
     default: "2",
     categories: "",
@@ -1443,7 +1443,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.03",
     explanation:
-      "markingFixationStrokeThicknessDeg sets stroke thickness in the fixation cross.",
+      "markingFixationStrokeThicknessDeg (default 0.05 deg) sets stroke thickness in the fixation cross.",
     type: "numerical",
     default: "0.05",
     categories: "",

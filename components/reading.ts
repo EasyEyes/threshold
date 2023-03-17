@@ -1,3 +1,4 @@
+import { warning } from "./errorHandling";
 import { logger, sampleWithReplacement } from "./utils";
 
 interface ReadingQuestionAnswers {
@@ -11,7 +12,7 @@ export const prepareReadingQuestions = (
   freqToWords: FrequencyToWords,
   targetKind?: string
 ) => {
-  const usablePages = [...textPages];
+  let usablePages = [...textPages];
   if (targetKind !== "rsvpReading") {
     if (usablePages.length > 2) usablePages.shift();
     if (usablePages.length > 1) usablePages.pop();
@@ -32,15 +33,25 @@ export const prepareReadingQuestions = (
   }
 
   const questions: ReadingQuestionAnswers[] = [];
+  let remaining = [...usablePages];
   for (let i = 0; i < numberOfQ; i++) {
-    const [correctAnswer, correctAnswerFreq] = getCorrectAnswer(
+    let [correctAnswer, correctAnswerFreq] = getCorrectAnswer(
       usablePages,
       freqToWords,
       questions,
       targetKind
     );
-    if (correctAnswerFreq === 0)
-      throw "Failed to construct a new question. [no correct answer]";
+    if (correctAnswerFreq !== 0 && targetKind === "rsvpReading")
+      remaining = remaining.filter((p) => p.toLowerCase() !== correctAnswer);
+    if (correctAnswerFreq === 0) {
+      if (targetKind === "rsvpReading") {
+        warning("Failed to construct a new question. [no correct answer].");
+        correctAnswer = remaining.shift() as string;
+        correctAnswerFreq = Math.min(...Object.keys(freqToWords).map(Number));
+      } else {
+        throw "Failed to construct a new question. [no correct answer].";
+      }
+    }
 
     const newQuestion: ReadingQuestionAnswers = {
       correctAnswer: correctAnswer,
@@ -263,3 +274,23 @@ export const shuffle = (array: any[]) => {
 
 const onlyAlphabets = (str: string) =>
   /^[a-zA-Z\u0600-\u06ff\u4e00-\u9fff]+$/.test(str);
+
+/**
+ * Directive from Denis:
+ * To be safe, I think we should rely on the first tokenizer for counting words.
+ * When we apply the second tokenizer, it’d be better to apply it to one word at a time.
+ * If the second tokenizer fails to return exactly one word,
+ *  then we reject the second tokenizer and use the word as it was
+ *  before the second tokenizer was applied.
+ *
+ * This scheme will always conserve word number.
+ * This will also handle the case of one word becoming two,
+ *  eg. “don’t” becoming don and t. We’ll keep “don’t”.
+ */
+export const tokenizeWordsIndividually = (sentence: string): string[] => {
+  const wordsKinda = sentence.split(" ").filter((w) => w.length > 0);
+  return wordsKinda.map((wordMaybe) => {
+    const tokenizedWord = preprocessCorpusToWordList(wordMaybe);
+    return tokenizedWord.length ? tokenizedWord[0] : wordMaybe;
+  });
+};
