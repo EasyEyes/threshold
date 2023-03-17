@@ -20,3 +20,4 @@ readingPages,,4
 readingSetSizeBy,,nominal
 showCounterBool,,TRUE
 targetKind,,reading
+targetTask,,identify
