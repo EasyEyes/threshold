@@ -1179,11 +1179,29 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "-13.1",
   },
+  calibrateSoundMaxHz: {
+    name: "calibrateSoundMaxHz",
+    availability: "now",
+    type: "numerical",
+    default: "10000",
+  },
+  calibrateSoundMinHz: {
+    name: "calibrateSoundMinHz",
+    availability: "now",
+    type: "numerical",
+    default: "40",
+  },
   calibrateSoundSaveToCSVBool: {
     name: "calibrateSoundSaveToCSVBool",
     availability: "now",
-    type: "",
-    default: "",
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateSoundToleranceDB: {
+    name: "calibrateSoundToleranceDB",
+    availability: "now",
+    type: "numerical",
+    default: "3",
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
@@ -1226,6 +1244,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "FALSE",
+  },
+  errorEndsExperimentBool: {
+    name: "errorEndsExperimentBool",
+    availability: "now",
+    type: "",
+    default: "",
   },
   fixationCheckBool: {
     name: "fixationCheckBool",

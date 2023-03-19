@@ -888,13 +888,43 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "calibrateSoundMaxHz",
+    availability: "now",
+    example: "",
+    explanation:
+      "calibrateSoundMaxHz (default 10000) is the upper cut-off frequency applied to the inverse impuse response function. That's a low-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. ",
+    type: "numerical",
+    default: "10000",
+    categories: "",
+  },
+  {
+    name: "calibrateSoundMinHz",
+    availability: "now",
+    example: "",
+    explanation:
+      "calibrateSoundMinHz (default 40) is the lower cut-off frequency applied to the inverse impuse response function. That's a high-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. ",
+    type: "numerical",
+    default: "40",
+    categories: "",
+  },
+  {
     name: "calibrateSoundSaveToCSVBool",
     availability: "now",
     example: "",
     explanation:
       "If calibrateSoundSaveToCSVBool==TRUE (default FALSE) then save the digital sound stimuli and sound recordings in the CSV file for further analysis.",
-    type: "",
-    default: "",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "calibrateSoundToleranceDB",
+    availability: "now",
+    example: "",
+    explanation:
+      "calibrateSoundToleranceDB specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
+    type: "numerical",
+    default: "3",
     categories: "",
   },
   {
@@ -965,6 +995,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "FOR DEBUGGING. errorBool (default FALSE) throws a fatal error in the first condition for which this parameter is TRUE. This is used to check out the EasyEyes error reporting.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "errorEndsExperimentBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "⏳ errorEndsExperimentBool (default FALSE) determines what happens after the participant hits the only button in the pop up error message. If TRUE then then button tells EasyEyes to terminate the experiment. If FALSE then the button tells EasyEyes to continue at the next block. The participant is not offered any choice. The scientist can set this independently for each condition throughout the experiment.\n\nCOMPLETE CODE AT END OF EXPERIMENT WITH ERROR. We’re going to change our handling of the completion code. Currently when there’s a fatal error, EasyEyes does NOT return a completion code. That makes the participant’s contribution seem suspect in the Prolific dash board, even though the error is practically always due to a fault in EasyEyes marring a best-faith effort by the participant. That denial of “completion” seems unfair to the participant. NEW POLICY: If we have an error in the middle, but eventually finish normally (including the case of an error in the last block), EasyEyes will consider the experiment “complete”, and return the completion code. That’s more fair to participants, graphically confirming that they did the work. Thus “completion” will refer to the orderly return from EasyEyes back to the caller (e.g. Prolific), even though some blocks (conceivably all blocks) may have been skipped due to errors. Prolific will declare the experiment as complete, and give it a green check. Properly handled errors will be invisible to Prolific. NOT YET IMPLEMENTED: When we issue the completion code we also set a new flag in the CSV file, indicating that it ended normally. Simon needs this for the Summary Report.",
+    type: "",
+    default: "",
     categories: "",
   },
   {
