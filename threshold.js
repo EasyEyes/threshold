@@ -1007,7 +1007,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       autoDraw: false,
       autoLog: false,
       padding: paramReader.read("fontPadding", "__ALL_BLOCKS__")[0],
-      letterSpacing: 0,
+      // letterSpacing: 0,
     });
     /* -------------------------------------------------------------------------- */
 
@@ -1312,10 +1312,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       for (const _thisBlock of blocks) {
         // TODO currently only works if identify is set explicitly as the target task.
         // Use thisTargetTask to use identify as the default
-        const thisTargetTask = paramReader.read(
-          "targetTask",
-          _thisBlock.block
-        )[0];
+        // const thisTargetTask = paramReader.read(
+        //   "targetTask",
+        //   _thisBlock.block
+        // )[0];
         const snapshot = blocks.getSnapshot();
         const conditions = TrialHandler.importConditions(
           psychoJS.serverManager,
@@ -2209,14 +2209,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (font.source === "file") font.name = cleanFontName(font.name);
           ////
           font.colorRGBA = paramReader.read("fontColorRGBA", status.block)[0];
-          font.letterSpacing = paramReader.read(
-            "fontTrackingForLetters",
-            status.block
-          )[0];
+          // font.letterSpacing = paramReader.read(
+          //   "fontTrackingForLetters",
+          //   status.block
+          // )[0];
 
           readingParagraph.setFont(font.name);
           readingParagraph.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
-          readingParagraph.setLetterSpacing(font.letterSpacing);
+          // readingParagraph.setLetterSpacing(font.letterSpacing);
 
           // ? background do we need it here?
           screenBackground.colorRGB = paramReader.read(
@@ -2718,7 +2718,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       font.ltr = reader.read("fontLeftToRightBool", BC);
 
       font.colorRGBA = reader.read("fontColorRGBA", BC);
-      font.letterSpacing = reader.read("fontTrackingForLetters", BC); // Not in sure if this is necessary
+      // font.letterSpacing = reader.read("fontTrackingForLetters", BC); // Not in sure if this is necessary
       screenBackground.colorRGB = reader.read("screenColorRGB", BC);
 
       showCounterBool = reader.read("showCounterBool", BC);
@@ -3035,7 +3035,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.setPos(targetEccentricityXYPx);
           target.setFont(font.name);
           target.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
-          target.setLetterSpacing(font.letterSpacing); // Not in sure if this is necessary
+          // target.setLetterSpacing(font.letterSpacing); // Not in sure if this is necessary
 
           psychoJS.experiment.addData(
             "spacingRelationToSize",
@@ -3100,7 +3100,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   targetText = targetCharacter;
                   target.setText(targetText);
                   target.setPadding(font.padding);
-                  target.setLetterSpacing(font.letterSpacing); // Not in sure if this is necessary
+                  // target.setLetterSpacing(font.letterSpacing); // Not in sure if this is necessary
 
                   if (letterConfig.targetSizeIsHeightBool)
                     target.scaleToHeightPx(stimulusParameters.heightPx);
@@ -3118,7 +3118,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   flankersUsed.forEach((f, i) => {
                     f.setFont(font.name);
                     f.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
-                    f.setLetterSpacing(font.letterSpacing); // Not in sure if this is necessary
+                    // f.setLetterSpacing(font.letterSpacing); // Not in sure if this is necessary
                     f.setText(flankerCharacters[i]);
                     f.setHeight(flankersHeightPx);
                     f.setPadding(font.padding);
@@ -4183,9 +4183,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setText(
             readingThisBlockPages[readingPageIndex.current]
           );
-          readingParagraph.setLetterSpacing(
-            paramReader.read("fontTrackingForLetters", status.block_condition)
-          );
+          // readingParagraph.setLetterSpacing(
+          //   paramReader.read("fontTrackingForLetters", status.block_condition)
+          // );
 
           // AUTO DRAW
           readingParagraph.setAutoDraw(true);
