@@ -2717,7 +2717,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       font.ltr = reader.read("fontLeftToRightBool", BC);
 
       font.colorRGBA = reader.read("fontColorRGBA", BC);
-      // font.letterSpacing = reader.read("fontTrackingForLetters", BC); // Not in sure if this is necessary
+      font.letterSpacing = reader.read("fontTrackingForLetters", BC);
       screenBackground.colorRGB = reader.read("screenColorRGB", BC);
 
       showCounterBool = reader.read("showCounterBool", BC);
@@ -3153,6 +3153,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                   targetText = tripletCharacters;
                   target.setText(targetText);
+                  console.log("Chianna Letter Spacing " + font.letterSpacing);
+                  target.setLetterSpacing(font.letterSpacing);
 
                   // target.setHeight(stimulusParameters.heightPx);
                   target.scaleToWidthPx(
@@ -4172,6 +4174,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // readingParagraph.setText()
 
       // Controls changes at the trial level
+      // A trial for reading is a "page" which  means the only thing
+      // that should change here is the text on the page, allgi
+      // other attributes remaining constant
       switchKind(targetKind.current, {
         reading: () => {
           // TEXT
