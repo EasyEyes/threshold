@@ -1,5 +1,6 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
+import { warning } from "./errorHandling.js";
 import {
   displayOptions,
   fixationConfig,
@@ -582,6 +583,14 @@ export const restrictSpacingDeg = (
     }
     // Compute upper px bound
     if (heightPx > letterConfig.fontMaxPx) {
+      if (spacingDeg <= 0)
+        warning(
+          `Illegal spacingDeg, spacingDeg <= 0. spacingDeg: ${spacingDeg}`
+        );
+      if (viewingDistanceDesiredCm.current <= 0 || displayOptions.pixPerCm <= 0)
+        warning(
+          `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceDesiredCm.current}, pixPerCm: ${displayOptions.pixPerCm}`
+        );
       let flankerEccDeg;
       const targetEccDeg = Math.sqrt(targetXYDeg[0] ** 2 + targetXYDeg[1] ** 2);
       if (spacingIsOuterBool) {
@@ -597,21 +606,29 @@ export const restrictSpacingDeg = (
         tand(flankerEccDeg) *
         viewingDistanceDesiredCm.current *
         displayOptions.pixPerCm;
+      if (targetEccDeg > flankerEccDeg !== targetEccPx > flankerEccPx)
+        warning(
+          `Inconsistent ranking. targetEccDeg: ${targetEccDeg}, flankerEccDeg: ${flankerEccDeg}, targetEccPx: ${targetEccPx}, flankerEccPx: ${flankerEccPx}`
+        );
       let spacingPx =
         (flankerEccPx - targetEccPx) * (letterConfig.fontMaxPx / heightPx);
+      if (spacingIsOuterBool !== spacingPx > 0)
+        warning(
+          `spacingPx has wrong sign. targetEccDeg: ${targetEccDeg}, targetEccPx: ${targetEccPx}, spacingPx: ${spacingPx}, spacingIsOuterBool: ${spacingIsOuterBool}`
+        );
+      const oldSpacingPx = flankerEccPx - targetEccPx;
       flankerEccPx = targetEccPx + spacingPx;
       flankerEccDeg = atand(
         flankerEccPx /
           (viewingDistanceDesiredCm.current * displayOptions.pixPerCm)
       );
-      spacingDeg = Math.abs(flankerEccDeg - targetEccDeg);
       if (spacingIsOuterBool) {
         spacingDeg = flankerEccDeg - targetEccDeg;
       } else {
         spacingDeg = targetEccDeg - flankerEccDeg;
       }
       if (spacingDeg < 0)
-        throw "Mistake in fontMaxPx restricting code. spacingDeg < 0";
+        throw `Mistake in fontMaxPx restricting code. spacingDeg < 0. spacingIsOuterBool: ${spacingIsOuterBool}, oldSpacingPx: ${oldSpacingPx}, spacingPx: ${spacingPx}, spacingDeg: ${spacingDeg}, targetEccDeg: ${targetEccDeg}, targetEccPx: ${targetEccPx}, flankerEccDeg: ${flankerEccDeg}, flankerEccPx: ${flankerEccPx}`;
       continue;
     }
 

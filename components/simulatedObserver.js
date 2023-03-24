@@ -37,11 +37,17 @@ tActual=log10(simulationThreshold) is the true threshold of the simulation
 rand(1) returns a random sample from the uniform distribution from 0 to 1.
 */
 
-// TODO add dependent parameter checks to preprocessor
-// eg If simulateParticipantBool -> simulationModel
-//    If simulationModel[Weibull] -> simulationBeta, simulationDelta
-
 // TODO simulateWithDisplayBool
+/*
+ * TODO:
+ * - add dependent parameter checks to preprocessor
+ *   eg If simulateParticipantBool -> simulationModel
+ *      If simulationModel[Weibull] -> simulationBeta, simulationDelta
+ * - make simulateObserverResponse a SimulatedObserver method, ie `respond()`
+ * - make `proceed` a method, ie skip routine fn if simulated
+ *      if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
+ * - clean up `simulated` map in threshold, and see if actually necessary
+ */
 
 import * as core from "../psychojs/src/core/index.js";
 import * as util from "../psychojs/src/util/index.js";
@@ -343,7 +349,6 @@ class WeibullObserver {
   simulateTrial() {
     const tTest = this.trial.stimulusIntensity;
     const tActual = log(this.simulationThreshold, 10);
-    //    t=tTest-tActual+q.epsilon;
     const t = tTest - tActual + this.epsilon;
 
     //    P=q.deltaq.gamma+(1-q.delta)(1-(1-q.gamma)exp(-10.^(q.betat)));

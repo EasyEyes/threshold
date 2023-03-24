@@ -76,10 +76,11 @@ export class RSVPReadingTargetSet {
       case "typographic":
         return this._generateTypographicStims(strings);
       default:
+        // TODO add compiler check to ensure spacingRelationToSize in [ratio, typographic] for rsvpReading
         console.error(
           `Unsupported spacingRelationToSize: ${letterConfig.spacingRelationToSize}`
         );
-        break;
+        return this._generateRatioStims(strings);
     }
   }
   _generateStimStrings() {

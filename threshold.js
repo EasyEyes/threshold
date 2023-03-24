@@ -3668,15 +3668,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCursor();
         return Scheduler.Event.NEXT;
       }
+      /* --- SIMULATED --- */
+      if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
+      /* --- /SIMULATED --- */
 
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
       const letterEachFrame = () => {
         // IDENTIFY
-        /* --- SIMULATED --- */
-        if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
-        /* --- /SIMULATED --- */
         t = instructionsClock.getTime();
         frameN = frameN + 1;
 
@@ -3719,8 +3719,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         repeatedLetters: letterEachFrame,
         rsvpReading: letterEachFrame,
         movie: () => {
-          if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
-          /* --- /SIMULATED --- */
           t = instructionsClock.getTime();
           frameN = frameN + 1;
 
