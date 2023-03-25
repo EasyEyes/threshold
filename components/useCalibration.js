@@ -512,8 +512,8 @@ const _runLoudspeakerCalibration = async (elems) => {
 
   const calibratorParams = {
     numCaptures: 3,
-    numMLSPerCapture: 3,
-    download: false,
+    numMLSPerCapture: 4,
+    download: true,
   };
 
   const calibrator = new ImpulseResponseCalibration(calibratorParams);
