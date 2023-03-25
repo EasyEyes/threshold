@@ -18,6 +18,7 @@ import { removeClickableCharacterSet } from "./showCharacterSet";
 import { showCursor, sleep } from "./utils";
 
 export async function quitPsychoJS(message = "", isCompleted, paramReader) {
+  psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
   removeClickableCharacterSet(showCharacterSetResponse);
   removeBeepButton();
   removeProceedButton();
