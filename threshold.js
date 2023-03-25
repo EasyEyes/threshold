@@ -434,7 +434,7 @@ const paramReaderInitialized = async (reader) => {
 
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
-  thisExperimentInfo.experiment = getPavloviaProjectName();
+
   if (reader.read("_participantIDGetBool")[0]) {
     const gotParticipantId = (participant, session = null, storedId) => {
       if (participant) {
@@ -792,6 +792,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     window.console.log("ENV NAME", psychoJS.getEnvironment());
     window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
     window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
+    thisExperimentInfo.experiment = getPavloviaProjectName();
 
     return Scheduler.Event.NEXT;
   }
