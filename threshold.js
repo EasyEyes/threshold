@@ -434,6 +434,7 @@ const paramReaderInitialized = async (reader) => {
 
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
+  thisExperimentInfo.experiment = getPavloviaProjectName();
   if (reader.read("_participantIDGetBool")[0]) {
     const gotParticipantId = (participant, session = null, storedId) => {
       if (participant) {
