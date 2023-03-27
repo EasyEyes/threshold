@@ -45,9 +45,13 @@ export const prepareReadingQuestions = (
       remaining = remaining.filter((p) => p.toLowerCase() !== correctAnswer);
     if (correctAnswerFreq === 0) {
       if (targetKind === "rsvpReading") {
-        warning("Failed to construct a new question. [no correct answer].");
         correctAnswer = remaining.shift() as string;
         correctAnswerFreq = Math.min(...Object.keys(freqToWords).map(Number));
+        warning(
+          `rsvpReading failed to correctly tokenize one of the strings "${usablePages.join(
+            ", "
+          )}". Using the string "${correctAnswer}" as the target, and drawing foils of the lowest word frequency."`
+        );
       } else {
         throw "Failed to construct a new question. [no correct answer].";
       }
