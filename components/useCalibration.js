@@ -10,7 +10,11 @@ import {
   ICalibDBSPL,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
-import { addSoundTestElements, displayParameters } from "./soundTest";
+import {
+  addSoundTestElements,
+  displayParameters1000Hz,
+  displayParametersAllHz,
+} from "./soundTest";
 import { getSoundCalibrationLevelDBSPLFromIIR } from "./soundUtils";
 
 export const useCalibration = (reader) => {
@@ -276,7 +280,9 @@ export const calibrateAudio = async (reader) => {
       //   }
       // }
       if (calibrateSoundLevel && soundCalibrationResults.current) {
-        displayParameters(elems, soundLevels, soundCalibrationResults);
+        displayParameters1000Hz(elems, soundLevels, soundCalibrationResults);
+      } else if (calibrateLoudspeaker && invertedImpulseResponse.current) {
+        displayParametersAllHz(elems, invertedImpulseResponse.current);
       }
 
       elems.yesButton.innerHTML = "Continue to experiment.";
@@ -284,11 +290,11 @@ export const calibrateAudio = async (reader) => {
       document.querySelector("#soundYes").style.display = "block";
 
       if (debugBool.current) {
-        elems.testButton.style.visibility = "visible";
-        elems.testButton.addEventListener("click", async (e) => {
-          addSoundTestElements(reader);
-          $("#soundTestModal").modal("show");
-        });
+        //elems.testButton.style.visibility = "visible";
+        // elems.testButton.addEventListener("click", async (e) => {
+        //   addSoundTestElements(reader);
+        //   $("#soundTestModal").modal("show");
+        // });
       }
 
       elems.yesButton.addEventListener("click", async (e) => {
@@ -531,7 +537,8 @@ const _runLoudspeakerCalibration = async (elems) => {
   } else {
     invertedImpulseResponse.current = await Speaker.startCalibration(
       speakerParameters,
-      calibrator
+      calibrator,
+      500000
     );
   }
   const { normalizedIIR, calibrationLevel } =
@@ -539,8 +546,11 @@ const _runLoudspeakerCalibration = async (elems) => {
   // console.log("invertedImpulseResponse", invertedImpulseResponse.current);
   invertedImpulseResponse.current = normalizedIIR;
   soundCalibrationLevelDBSPL.current = calibrationLevel;
-  // console.log("soundCalibrationLevelDBSPL.current", soundCalibrationLevelDBSPL.current);
-  // console.log("normalizedIIR", normalizedIIR);
+  console.log(
+    "soundCalibrationLevelDBSPL.current",
+    soundCalibrationLevelDBSPL.current
+  );
+  console.log("normalizedIIR", normalizedIIR);
 };
 
 const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
