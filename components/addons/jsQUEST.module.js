@@ -1,3 +1,5 @@
+import { warning } from "../errorHandling";
+
 let numeric = {};
 numeric.version = "1.2.6";
 
@@ -5339,7 +5341,7 @@ function QuestRecompute(q, plotIt, chart_width, chart_height) {
   //     q.gamma=0.5;
   // end
   if (q.gamma > q.pThreshold) {
-    alert(`reducing gamma from ${q.gamma} to 0.5`);
+    warning(`reducing gamma from ${q.gamma} to 0.5`);
     q.gamma = 0.5;
   }
 

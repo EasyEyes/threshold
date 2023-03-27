@@ -434,6 +434,7 @@ const paramReaderInitialized = async (reader) => {
 
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
+
   if (reader.read("_participantIDGetBool")[0]) {
     const gotParticipantId = (participant, session = null, storedId) => {
       if (participant) {
@@ -791,6 +792,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     window.console.log("ENV NAME", psychoJS.getEnvironment());
     window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
     window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
+    thisExperimentInfo.experiment = getPavloviaProjectName();
 
     return Scheduler.Event.NEXT;
   }
@@ -1648,7 +1650,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current == "sound" ||
         targetKind.current === "repeatedLetters" ||
         targetKind.current === "rsvpReading" ||
-        targetKind.current === "movie")
+        targetKind.current === "movie") &&
+      paramReader.read("showPercentCorrectBool", status.block_condition)
     ) {
       // Proportion correct
       showPopup(
@@ -1665,11 +1668,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         false
       );
       await addPopupLogic(thisExperimentInfo.name, responseType.current, null);
-
-      // Reset trial counter
-      status.trialCorrect_thisBlock = 0;
-      status.trialCompleted_thisBlock = 0;
     }
+    // Reset trial counter
+    status.trialCorrect_thisBlock = 0;
+    status.trialCompleted_thisBlock = 0;
     if (currentLoop instanceof MultiStairHandler)
       addBlockStaircaseSummariesToData(currentLoop, psychoJS, displayOptions);
 

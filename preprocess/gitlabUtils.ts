@@ -1258,8 +1258,8 @@ export const createPavloviaExperiment = async (
   let successful = false;
 
   await Swal.fire({
-    title: "Uploading experiment ...",
-    html: `<p>Uploaded <span id="uploading-count">${Math.round(
+    title: "Uploading ...",
+    html: `<p><span id="uploading-count">${Math.round(
       Math.min(uploadedFileCount.current / totalFileCount, 1) * 100
     )}</span>%</p>`,
     allowOutsideClick: false,

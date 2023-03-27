@@ -19,6 +19,7 @@ export const thisExperimentInfo = {
 
   experimentFileName: undefined,
   experimentName: undefined,
+  experiment: undefined,
 
   date: undefined,
 

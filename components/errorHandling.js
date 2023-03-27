@@ -96,6 +96,7 @@ export const buildWindowErrorHandling = (paramReader) => {
 export const warning = (message) => {
   try {
     psychoJS.experiment.addData("warning", message);
+    console.warn(message);
   } catch (exception) {
     // TODO should failure to log a warning result in a fatal error?
     console.error(
