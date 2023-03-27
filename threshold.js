@@ -1650,7 +1650,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current == "sound" ||
         targetKind.current === "repeatedLetters" ||
         targetKind.current === "rsvpReading" ||
-        targetKind.current === "movie")
+        targetKind.current === "movie") &&
+      paramReader.read("showPercentCorrectBool", status.block_condition)
     ) {
       // Proportion correct
       showPopup(
@@ -1667,11 +1668,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         false
       );
       await addPopupLogic(thisExperimentInfo.name, responseType.current, null);
-
-      // Reset trial counter
-      status.trialCorrect_thisBlock = 0;
-      status.trialCompleted_thisBlock = 0;
     }
+    // Reset trial counter
+    status.trialCorrect_thisBlock = 0;
+    status.trialCompleted_thisBlock = 0;
     if (currentLoop instanceof MultiStairHandler)
       addBlockStaircaseSummariesToData(currentLoop, psychoJS, displayOptions);
 

@@ -627,8 +627,8 @@ export const restrictSpacingDeg = (
       } else {
         spacingDeg = targetEccDeg - flankerEccDeg;
       }
-      if (spacingDeg < 0)
-        throw `Mistake in fontMaxPx restricting code. spacingDeg < 0. spacingIsOuterBool: ${spacingIsOuterBool}, oldSpacingPx: ${oldSpacingPx}, spacingPx: ${spacingPx}, spacingDeg: ${spacingDeg}, targetEccDeg: ${targetEccDeg}, targetEccPx: ${targetEccPx}, flankerEccDeg: ${flankerEccDeg}, flankerEccPx: ${flankerEccPx}`;
+      if (spacingDeg <= 0)
+        throw `Mistake in fontMaxPx restricting code. spacingDeg <= 0. spacingIsOuterBool: ${spacingIsOuterBool}, oldSpacingPx: ${oldSpacingPx}, spacingPx: ${spacingPx}, spacingDeg: ${spacingDeg}, targetEccDeg: ${targetEccDeg}, targetEccPx: ${targetEccPx}, flankerEccDeg: ${flankerEccDeg}, flankerEccPx: ${flankerEccPx}`;
       continue;
     }
 
@@ -749,6 +749,9 @@ export const restrictSpacingDeg = (
 
     // REDUCE SPACINGDEG TO MAKE STIMULUS FIT, AND TRY AGAIN
     spacingDeg = maxSpacingDeg;
+    logger("spacingDeg", spacingDeg);
+    logger("maxSpacingDeg", maxSpacingDeg);
+    logger("iteration", `${iteration}\n\n`);
   }
   throw `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${letterConfig.targetMinimumPix}`;
 };
