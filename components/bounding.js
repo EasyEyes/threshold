@@ -8,7 +8,10 @@ import {
   repeatedLettersConfig,
   targetKind,
   viewingDistanceDesiredCm,
+  status,
 } from "./global.js";
+
+import { paramReader } from "../threshold.js";
 
 import { psychoJS } from "./globalPsychoJS.js";
 import {
@@ -591,45 +594,37 @@ export const restrictSpacingDeg = (
         warning(
           `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceDesiredCm.current}, pixPerCm: ${displayOptions.pixPerCm}`
         );
-      let flankerEccDeg;
-      const targetEccDeg = Math.sqrt(targetXYDeg[0] ** 2 + targetXYDeg[1] ** 2);
-      if (spacingIsOuterBool) {
-        flankerEccDeg = targetEccDeg + spacingDeg;
-      } else {
-        flankerEccDeg = targetEccDeg - spacingDeg;
-      }
-      const targetEccPx =
-        tand(targetEccDeg) *
-        viewingDistanceDesiredCm.current *
-        displayOptions.pixPerCm;
-      let flankerEccPx =
-        tand(flankerEccDeg) *
-        viewingDistanceDesiredCm.current *
-        displayOptions.pixPerCm;
-      if (targetEccDeg > flankerEccDeg !== targetEccPx > flankerEccPx)
-        warning(
-          `Inconsistent ranking. targetEccDeg: ${targetEccDeg}, flankerEccDeg: ${flankerEccDeg}, targetEccPx: ${targetEccPx}, flankerEccPx: ${flankerEccPx}`
-        );
-      let spacingPx =
-        (flankerEccPx - targetEccPx) * (letterConfig.fontMaxPx / heightPx);
-      if (spacingIsOuterBool !== spacingPx > 0)
-        warning(
-          `spacingPx has wrong sign. targetEccDeg: ${targetEccDeg}, targetEccPx: ${targetEccPx}, spacingPx: ${spacingPx}, spacingIsOuterBool: ${spacingIsOuterBool}`
-        );
-      const oldSpacingPx = flankerEccPx - targetEccPx;
-      flankerEccPx = targetEccPx + spacingPx;
-      flankerEccDeg = atand(
-        flankerEccPx /
-          (viewingDistanceDesiredCm.current * displayOptions.pixPerCm)
+      const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
+      const targetMaxXYDeg = XYDegOfXYPix(
+        [targetXYPx[0], targetXYPx[1] + letterConfig.fontMaxPx],
+        displayOptions
       );
-      if (spacingIsOuterBool) {
-        spacingDeg = flankerEccDeg - targetEccDeg;
-      } else {
-        spacingDeg = targetEccDeg - flankerEccDeg;
+      // Deg equivalent (height) to fontMaxPx
+      const targetMaxDeg = targetMaxXYDeg[1] - targetXYDeg[1];
+      switch (spacingRelationToSize) {
+        case "none":
+          const targetSizeDeg = paramReader.read(
+            "targetSizeDeg",
+            status.block_condition
+          );
+          if (targetSizeDeg > targetMaxDeg)
+            throw `targetSizeDeg ${targetSizeDeg} greater than targetMaxDeg ${targetMaxDeg}, from fontMaxPx ${letterConfig.fontMaxPx}`;
+          break;
+        case "ratio":
+          spacingDeg = Math.min(
+            spacingDeg,
+            spacingOverSizeRatio * targetMaxDeg
+          );
+          break;
+        case "typographic":
+          spacingDeg = Math.min(
+            spacingDeg,
+            (targetMaxDeg * characterSetRectPx.width) / 3
+          );
+          break;
+        default:
+          throw `Unknown value of spacingRelationToSize: ${spacingRelationToSize}`;
       }
-      if (spacingDeg <= 0)
-        throw `Mistake in fontMaxPx restricting code. spacingDeg <= 0. spacingIsOuterBool: ${spacingIsOuterBool}, oldSpacingPx: ${oldSpacingPx}, spacingPx: ${spacingPx}, spacingDeg: ${spacingDeg}, targetEccDeg: ${targetEccDeg}, targetEccPx: ${targetEccPx}, flankerEccDeg: ${flankerEccDeg}, flankerEccPx: ${flankerEccPx}`;
-      continue;
     }
 
     // COMPUTE STIMULUS RECT
