@@ -508,7 +508,13 @@ export const displayCompatibilityMessage = async (
 
     // //create title msg
     let titleMsg = document.createElement("h3");
-    titleMsg.innerHTML = phrases.EE_compatibilityTitle[rc.language.value];
+    let T = phrases.EE_compatibilityTitle[rc.language.value];
+    // replace "xxx"  or "XXX" or "Xxx" with "EasyEyes"
+    T = T.replace(/xxx/g, "EasyEyes");
+    T = T.replace(/XXX/g, "EasyEyes");
+    T = T.replace(/Xxx/g, "EasyEyes");
+    titleMsg.innerHTML = T;
+
     titleMsg.id = "compatibility-title";
     let titleContainer = document.createElement("div");
     titleContainer.style.textAlign = "left";
