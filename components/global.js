@@ -422,6 +422,9 @@ export const rsvpReadingTiming = {
 };
 export const dummyStim = { current: undefined };
 
+// Global record of font size, to be reported in the case of an error
+export const fontSize = { current: "Uninitiated" };
+
 // export const speechRecognizer = {
 //   recognition: undefined,
 //   status: undefined,

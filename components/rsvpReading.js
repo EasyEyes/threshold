@@ -12,6 +12,7 @@ import {
   phraseIdentificationResponse,
   dummyStim,
   rsvpReadingResponse,
+  fontSize,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -174,6 +175,7 @@ export class RSVPReadingTargetSet {
       this.paramReader,
       readingStim
     );
+    fontSize.current = readingConfig.height;
     readingStim.setHeight(readingConfig.height);
     readingStim.setText(text);
     return [readingStim];

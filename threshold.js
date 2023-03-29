@@ -127,6 +127,7 @@ import {
   screenBackground,
   customInstructionText,
   targetTextStimConfig,
+  fontSize,
 } from "./components/global.js";
 
 import {
@@ -2241,6 +2242,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             readingParagraph
           );
           readingParagraph.setHeight(readingConfig.height);
+          fontSize.current = readingConfig.height;
 
           // LTR or RTL
           let readingDirectionLTR = paramReader.read(
@@ -3057,6 +3059,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
+          fontSize.current = stimulusParameters.heightPx;
 
           fixation.update(
             paramReader,
@@ -5331,6 +5334,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // if trialBreak is ongoing
       else if (totalTrialsThisBlock.current === status.trial)
         hideTrialBreakProgressBar();
+
+      fontSize.current = "Reset at end of trial.";
+
       return Scheduler.Event.NEXT;
     };
   }
