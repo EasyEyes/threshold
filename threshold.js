@@ -408,7 +408,7 @@ const paramReaderInitialized = async (reader) => {
   buildWindowErrorHandling(reader);
 
   // if rc is not defined, reload the page
-  if (!rc) {
+  if (!rc?.browser?.value) {
     window.location.reload();
   }
   // ! check system compatibility

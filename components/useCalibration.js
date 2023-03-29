@@ -290,11 +290,11 @@ export const calibrateAudio = async (reader) => {
       document.querySelector("#soundYes").style.display = "block";
 
       if (debugBool.current) {
-        //elems.testButton.style.visibility = "visible";
-        // elems.testButton.addEventListener("click", async (e) => {
-        //   addSoundTestElements(reader);
-        //   $("#soundTestModal").modal("show");
-        // });
+        elems.testButton.style.visibility = "visible";
+        elems.testButton.addEventListener("click", async (e) => {
+          addSoundTestElements(reader);
+          $("#soundTestModal").modal("show");
+        });
       }
 
       elems.yesButton.addEventListener("click", async (e) => {
@@ -418,8 +418,11 @@ const _addSoundCalibrationElems = (copy) => {
 };
 
 const _removeSoundCalibrationElems = (elems) => {
+  console.log("removing sound calibration elements");
   Object.values(elems).forEach((elem) => elem.remove());
+  console.log("removed sound calibration elements");
   document.querySelector("#root").style.visibility = "visible";
+  console.log("removed sound calibration elements");
 };
 
 const _addSoundCss = () => {
@@ -546,11 +549,11 @@ const _runLoudspeakerCalibration = async (elems) => {
   // console.log("invertedImpulseResponse", invertedImpulseResponse.current);
   invertedImpulseResponse.current = normalizedIIR;
   soundCalibrationLevelDBSPL.current = calibrationLevel;
-  console.log(
-    "soundCalibrationLevelDBSPL.current",
-    soundCalibrationLevelDBSPL.current
-  );
-  console.log("normalizedIIR", normalizedIIR);
+  // console.log(
+  //   "soundCalibrationLevelDBSPL.current",
+  //   soundCalibrationLevelDBSPL.current
+  // );
+  // console.log("normalizedIIR", normalizedIIR);
 };
 
 const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (

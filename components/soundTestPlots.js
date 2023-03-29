@@ -1,4 +1,6 @@
 import { Chart } from "chart.js/auto";
+import { SoundLevelModel } from "./soundTest";
+
 export const plotSoundLevels1000Hz = (
   plotCanvas,
   parameters,

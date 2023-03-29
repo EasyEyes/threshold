@@ -7,6 +7,7 @@ import {
   soundGainTWR,
   ICalibDBSPL,
 } from "./global";
+import { plotSoundLevels1000Hz } from "./soundTestPlots";
 import {
   adjustSoundDbSPL,
   connectAudioNodes,
@@ -232,7 +233,7 @@ export const addSoundTestElements = (reader) => {
   document.body.appendChild(modal);
   addSoundTestCss();
 
-  //populateSoundFiles(reader, modalBody, toggleElements.toggleSwitchInput);
+  populateSoundFiles(reader, modalBody, toggleElements.toggleSwitchInput);
 };
 
 const addSoundTestCss = () => {
@@ -379,7 +380,7 @@ const populateSoundFiles = async (reader, modalBody, toggleInput) => {
     })
   );
 
-  // addSoundFileElements(targetSoundFiles, modalBody, toggleInput, reader);
+  addSoundFileElements(targetSoundFiles, modalBody, toggleInput, reader);
 };
 
 const addSoundFileElements = (
@@ -766,6 +767,7 @@ export const displayParameters1000Hz = (
 
   // function call to plot the sound levels
   plotSoundLevels1000Hz(
+    // plotSoundLevels(
     plotCanvas,
     parameters,
     soundLevels,
@@ -776,7 +778,7 @@ export const displayParameters1000Hz = (
   plotCanvas.style.width = "100%";
 };
 
-const SoundLevelModel = (inDb, backgroundDbSpl, gainDbSpl, T, W, R) => {
+export const SoundLevelModel = (inDb, backgroundDbSpl, gainDbSpl, T, W, R) => {
   // % We play a sine wave through a speaker and use an iPhone to measure the
   // % sound level. The level of the digital source is RMS expressed in dB.
   // % Because digital sound exceeding the range -1 to +1 may be clipped we do
