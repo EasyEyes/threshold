@@ -1010,7 +1010,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       autoDraw: false,
       autoLog: false,
       padding: paramReader.read("fontPadding", "__ALL_BLOCKS__")[0],
-      // letterSpacing: 0,
+      letterSpacing: 0,
     });
     /* -------------------------------------------------------------------------- */
 
@@ -2174,6 +2174,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 .read("conditionTrials", status.block)
                 .reduce((a, b) => a + b)
             );
+          font.letterSpacing = paramReader.read(
+            "fontTrackingForLetters",
+            status.block
+          )[0];
           _instructionSetup(rsvpReadingBlockInstructs);
           rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
@@ -2215,6 +2219,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           readingParagraph.setFont(font.name);
           readingParagraph.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
+          readingParagraph.setLetterSpacing(font.letterSpacing);
 
           // ? background do we need it here?
           screenBackground.colorRGB = paramReader.read(
@@ -2718,6 +2723,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       font.colorRGBA = reader.read("fontColorRGBA", BC);
       font.letterSpacing = reader.read("fontTrackingForLetters", BC);
+
       screenBackground.colorRGB = reader.read("screenColorRGB", BC);
 
       showCounterBool = reader.read("showCounterBool", BC);
@@ -3153,8 +3159,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                   targetText = tripletCharacters;
                   target.setText(targetText);
-                  console.log("Chianna Letter Spacing " + font.letterSpacing);
-                  target.setLetterSpacing(font.letterSpacing);
+
+                  // currently letterSpacing messes up spacing for arabic fonts even when not set
+                  if (font.letterSpacing) {
+                    target.setLetterSpacing(font.letterSpacing);
+                  }
 
                   // target.setHeight(stimulusParameters.heightPx);
                   target.scaleToWidthPx(

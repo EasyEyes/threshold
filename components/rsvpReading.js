@@ -178,6 +178,9 @@ export class RSVPReadingTargetSet {
     fontSize.current = readingConfig.height;
     readingStim.setHeight(readingConfig.height);
     readingStim.setText(text);
+    if (font.letterSpacing) {
+      readingStim.setLetterSpacing(font.letterSpacing);
+    }
     return [readingStim];
   }
 }
