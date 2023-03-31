@@ -906,6 +906,7 @@ export const commitMessages = {
   addExperimentFile: "🖼️ add experiment file",
   addRecruitmentService: "📝 add recruitment service",
   addProlificToken: "🔑 add Prolific token",
+  addProlificStudyId: "📝 add Prolific study id for the experiment",
 };
 
 export const defaultBranch = "master";
@@ -1456,4 +1457,32 @@ export const generateAndUploadCompletionURL = async (
       return completionCode;
     }
   }
+};
+
+/**
+ * stores prolific study-id on specified gitlab repository
+ * @param gitlabRepo target repository
+ * @param user gitlabRepo is owned by this user
+ */
+export const createProlificStudyIdFile = async (
+  gitlabRepo: Repository,
+  user: User,
+  studyId: string
+): Promise<void> => {
+  const commitActionList: ICommitAction[] = [];
+
+  commitActionList.push({
+    action: "create",
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    file_path: "ProlificStudyId.txt",
+    content: studyId,
+  });
+
+  return await pushCommits(
+    user,
+    gitlabRepo,
+    commitActionList,
+    commitMessages.addProlificStudyId,
+    defaultBranch
+  );
 };
