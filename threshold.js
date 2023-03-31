@@ -278,6 +278,7 @@ import {
   loadReadingCorpus,
   addReadingStatsToOutput,
   findReadingSize,
+  reportWordCounts,
 } from "./components/readingAddons.js";
 
 // POPUP
@@ -4065,6 +4066,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         reading: () => {
           // skip if using Safari
           if (rc.browser.value !== "Safari") readingSound.play();
+          reportWordCounts(paramReader, psychoJS.experiment);
         },
         letter: () => {
           if (snapshot.getCurrentTrial().trialsVal)
@@ -4100,6 +4102,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             )
           );
+          reportWordCounts(paramReader, psychoJS.experiment);
         },
         movie: () => {
           responseType.current = resetResponseType(

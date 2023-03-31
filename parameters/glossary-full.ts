@@ -1738,6 +1738,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "readingCorpusEndlessBool",
+    availability: "now",
+    example: "",
+    explanation: "readingCorpusEndlessBool",
+    type: "boolean",
+    default: "",
+    categories: "",
+  },
+  {
     name: "readingDefineSingleLineSpacingAs",
     availability: "now",
     example: "nominalSize",

@@ -411,3 +411,14 @@ const removeLastSpace = (str) => {
 const removeLastLineBreak = (text) => {
   return text.replace(/\n$/, "");
 };
+
+export const reportWordCounts = (reader, experiment) => {
+  const BC = status.block_condition;
+  const corpus = reader.read("readingCorpus", BC);
+  const laxWordCount = readingCorpusArchive[corpus]
+    .split(" ")
+    .filter((x) => x.length > 0).length;
+  const strictWordCount = readingWordListArchive[corpus].length;
+  experiment.addData("readingCorpusWordsLax", laxWordCount);
+  experiment.addData("readingCorpusWordsStrict", strictWordCount);
+};

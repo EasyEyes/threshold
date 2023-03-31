@@ -1697,6 +1697,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  readingCorpusEndlessBool: {
+    name: "readingCorpusEndlessBool",
+    availability: "now",
+    type: "boolean",
+    default: "",
+  },
   readingDefineSingleLineSpacingAs: {
     name: "readingDefineSingleLineSpacingAs",
     availability: "now",
