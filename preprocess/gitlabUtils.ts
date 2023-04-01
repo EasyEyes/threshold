@@ -1486,3 +1486,33 @@ export const createProlificStudyIdFile = async (
     defaultBranch
   );
 };
+
+// fetch prolific study-id
+export const getProlificStudyId = async (user: User, id: any) => {
+  if (!id) {
+    return "";
+  }
+  const headers = new Headers();
+  headers.append("Authorization", `bearer ${user.accessToken}`);
+
+  const requestOptions: any = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+
+  const response =
+    (await fetch(
+      `https://gitlab.pavlovia.org/api/v4/projects/${id}/repository/files/ProlificStudyId.txt/raw?ref=master`,
+      requestOptions
+    )
+      .then((response) => {
+        return response.text();
+      })
+      .catch((error) => {
+        console.error(error);
+      })) || "";
+
+  if (response.includes("404 File Not Found")) return "";
+  return response;
+};
