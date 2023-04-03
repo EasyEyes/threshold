@@ -1622,7 +1622,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "moviePQEncodedBool",
     availability: "now",
     example: "",
-    explanation: "moviePQEncodedBool",
+    explanation:
+      "moviePQEncodedBool (default FALSE) determines whether to use the PQ transfer function. With PQ each pixels specified its own absolute l",
     type: "boolean",
     default: "FALSE",
     categories: "",

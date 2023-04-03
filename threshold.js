@@ -3,7 +3,7 @@
  **********************/
 
 import {
-  addBlockParametersToData,
+  reportStartOfNewBlock,
   arraysEqual,
   centerAt,
   colorRGBASnippetToRGBA,
@@ -1884,7 +1884,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       status.block = snapshot.block + 1;
       totalBlocks.current = snapshot.nTotal;
 
-      addBlockParametersToData(paramReader, status.block, psychoJS.experiment);
+      reportStartOfNewBlock(status.block, psychoJS.experiment);
 
       if (
         status.block === 1 ||

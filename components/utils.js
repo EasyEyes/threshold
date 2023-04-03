@@ -329,26 +329,9 @@ export const addConditionToData = (
   }
 };
 
-/**
- * Add all the information about this block to the data
- * @param {ParameterReader} reader EasyEyes parameter reader
- * @param {PsychoJS.experiment} experiment Experiment object currently running
- * @param {Object} condition Parameters from the current staircase, as specified by the experimenter in experiment.csv
- * @param {Array} [exclude=[]] List of parameter names which should NOT be added to data
- */
-export const addBlockParametersToData = (
-  reader,
-  blockNumer,
-  experiment,
-  exclude = []
-) => {
-  for (const parameter of Object.keys(GLOSSARY)) {
-    if (!exclude.includes(parameter))
-      experiment.addData(
-        parameter,
-        reader.read(parameter, blockNumer).join(" ")
-      );
-  }
+export const reportStartOfNewBlock = (blockNumer, experiment) => {
+  experiment.addData("blockNumber", blockNumer);
+  experiment.nextEntry();
 };
 
 export const addObjectItemsToData = (object, experiment) => {
