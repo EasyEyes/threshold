@@ -8,14 +8,12 @@ import {
   validatedCommas,
   validateExperimentDf,
   isTextMissing,
-  populateDefaultValues,
   isSoundFolderMissing,
   isCodeMissing,
 } from "./experimentFileChecks";
 
 import {
   addUniqueLabelsToDf,
-  populateUnderscoreValues,
   dataframeFromPapaParsed,
   getFontNameListBySource,
   getFormNames,
@@ -23,8 +21,8 @@ import {
   getCodeList,
   addNewUnderscoreParam,
   getFolderNames,
-  dropFirstColumn,
 } from "./utils";
+import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import { webFontChecker } from "./fontCheck";
@@ -90,9 +88,9 @@ export const prepareExperimentFileForThreshold = async (
   space: string,
   filename?: string
 ) => {
+  parsed.data = discardCommentedLines(parsed);
   parsed.data = discardTrailingWhitespaceLines(parsed);
   parsed.data = discardTrailingWhitespaceColumns(parsed);
-  parsed.data = discardCommentedLines(parsed);
 
   if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
 
@@ -281,9 +279,9 @@ export const prepareExperimentFileForThreshold = async (
     df = addNewUnderscoreParam(df, "_experimentFilename", filename);
   }
   df = addUniqueLabelsToDf(df);
-  df = populateUnderscoreValues(df); // _params copied from Column B
-  df = dropFirstColumn(df); // Conditions start in Column C
-  df = populateDefaultValues(df);
+
+  // Populate underscore params, drop first column, populate defaults
+  df = normalizeExperimentDfShape(df);
 
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {

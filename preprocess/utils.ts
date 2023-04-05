@@ -404,27 +404,6 @@ export const addNewUnderscoreParam = (
 };
 
 /**
- * Return a new dataframe in which, for each parameter starting with an underscore, the first value is copied to every column
- * @param {dfjs.DataFrame} df Dataframe describing the experiment
- * @returns  {dfjs.DataFrame}
- * */
-export const populateUnderscoreValues = (df: any): any => {
-  // Get all the underscore parameters
-  const underscoreParams = df.listColumns().filter((s: string) => s[0] === "_");
-  // For each one...
-  for (const underscoreParameter of underscoreParams) {
-    // Get the first value
-    const firstValue = df.select(underscoreParameter).toArray()[0][0];
-    // And use it, or a blank string if there isn't a defined first value
-    const valueToUse = firstValue ? firstValue : "";
-    // Set the corresponding column to be all this value
-    df = df.withColumn(underscoreParameter, () => valueToUse);
-  }
-  // Return the modified df
-  return df;
-};
-
-/**
  * Takes a positive integer and returns the corresponding column name.
  * @SOURCE https://cwestblog.com/2013/09/05/javascript-snippet-convert-number-to-column-name/
  * @param {number} num  The positive integer to convert to a column name.
@@ -437,16 +416,6 @@ export const toColumnName = (num: number): string => {
     ret = String.fromCharCode(y) + ret;
   }
   return ret;
-};
-
-/**
- * Drop the first column of values (ie Column B) from a df
- * @param {dfjs.DataFrame} df
- * @returns {dfjs.DataFrame}
- */
-export const dropFirstColumn = (df: any): any => {
-  const originalColumns = df.listColumns();
-  return df.transpose().drop("0").transpose().renameAll(originalColumns);
 };
 
 /**
@@ -474,4 +443,21 @@ export const getDateAndTimeString = () => {
     .replace(/\//g, "-")
     .replace(/:/g, "-")
     .replace(/ /g, "_");
+};
+
+/**
+ * Predicate function, determine whether given parameter is an underscore (ie experiment-level) parameter
+ * @param paramterName
+ * @returns {boolean}
+ */
+export const isUnderscoreParameter = (paramterName: string): boolean => {
+  return paramterName[0] === "_";
+};
+
+// Return a column as a flat array
+export const getColumnValues = (df: any, columnName: string): string[] => {
+  return df
+    .select(columnName)
+    .toArray()
+    .map((x: any[]): any => x[0]);
 };

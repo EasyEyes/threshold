@@ -3,10 +3,6 @@
 /* eslint-disable no-prototype-builtins */
 /**
  * @file Validate a Threshold experiment file
- * ## Alphabetical parameters
- * ## Check for duplicate parameters
- * ## All parameters are recognized
- * ## All parameters present are implemented
  */
 
 import {
@@ -31,8 +27,8 @@ import {
   CONDITION_PARAMETERS_IN_FIRST_COLUMN,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
-import { isNumeric, levDist, arraysEqual, dropFirstColumn } from "./utils";
-// import { Modal } from "bootstrap";
+import { isNumeric, levDist, arraysEqual, getColumnValues } from "./utils";
+import { normalizeExperimentDfShape } from "./transformExperimentTable";
 
 let zeroIndexed: boolean;
 
@@ -113,20 +109,14 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
       .sort()
   );
 
+  // Check for properly formatted _param values, and populate underscore param values to all columns
+  errors.push(...checkUnderscoreParams(experimentDf));
+
+  // populate underscores, drop first column, populate defaults
+  experimentDf = normalizeExperimentDfShape(experimentDf);
+
   // Check for properly formatted "block" parameter values
   errors.push(...isBlockPresentAndProper(experimentDf));
-
-  // Check for properly formatted _param values
-  let underscoreErrors: EasyEyesError[];
-  [experimentDf, underscoreErrors] =
-    checkAndCorrectUnderscoreParams(experimentDf);
-  errors.push(...underscoreErrors);
-
-  // Enforce using Column B for the underscore parameters, and Column C and on for conditions
-  experimentDf = dropFirstColumn(experimentDf);
-
-  // Populate missing (non-underscore) values with defaults
-  experimentDf = populateDefaultValues(experimentDf);
 
   // Check parameter values
   errors.push(...areParametersOfTheCorrectType(experimentDf));
@@ -259,47 +249,33 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   if (!blockPresent) return [NO_BLOCK_PARAMETER];
 
   // Array of the experiment-provided block values
-  const blockValues = df
-    .select("block")
-    .toArray()
-    .map((x: any) => Number(x[0]));
-  // Start conditions (ie first block) in Column C
-  blockValues.splice(0, 1);
+  const blockValues = getColumnValues(df, "block");
+
   // Array to accumulate the errors we encounter; to be returned
   const blockValueErrors: EasyEyesError[] = [];
 
   // Check the first value
-  // TODO use paramReader -- handling booleans again here is hacky
-  zeroIndexed =
-    (df.listColumns().includes("zeroBasedNumberingBool") &&
-      df.getRow(0).get("zeroBasedNumberingBool").toLowerCase() === "true") ||
-    (df.listColumns().includes("_zeroBasedNumberingBool") &&
-      df.getRow(0).get("_zeroBasedNumberingBool").toLowerCase() === "true");
-  if (
-    (!zeroIndexed && blockValues[0] !== 1) ||
-    (zeroIndexed && blockValues[0] !== 0)
-  ) {
-    blockValueErrors.push(
-      INVALID_STARTING_BLOCK(blockValues[0], zeroIndexed ? 0 : 1)
-    );
+  if (blockValues[0] !== "1") {
+    blockValueErrors.push(INVALID_STARTING_BLOCK(blockValues[0]));
   }
 
   // Check that each value is sequential
-  let previous = blockValues[0];
+  let previous = Number(blockValues[0]);
   const nonsequentialValues: {
     value: number;
     previous: number;
     index: number;
   }[] = [];
-  blockValues.forEach((value: number, i: number) => {
-    if (value < previous || value - previous > 1) {
+  blockValues.forEach((value: string, i: number) => {
+    const current = Number(value);
+    if (current < previous || current - previous > 1) {
       nonsequentialValues.push({
-        value: value,
+        value: current,
         previous: previous,
         index: i,
       });
     }
-    previous = value;
+    previous = current;
   });
   if (nonsequentialValues.length) {
     blockValueErrors.push(
@@ -309,68 +285,21 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   return blockValueErrors;
 };
 
-const checkAndCorrectUnderscoreParams = (df: any): [any, EasyEyesError[]] => {
+const checkUnderscoreParams = (df: any): EasyEyesError[] => {
   const underscoreParams = df.listColumns().filter((s: string) => s[0] === "_");
-  const underscoreDf = df.select(...underscoreParams);
   const offendingParams = underscoreParams.filter(
     (parameter: string): boolean => {
-      const values = underscoreDf
-        .select(parameter)
-        .toArray()
-        .map((x: string[]) => x[0]);
+      const values = getColumnValues(df, parameter);
       return !_valueOnlyInFirstPosition(values, parameter);
     }
   );
-  underscoreParams.forEach((p: string) => {
-    df = df.withColumn(p, () => underscoreDf.select(p).toArray()[0][0]);
-  });
-  const errors: EasyEyesError[] = offendingParams.map(
-    ILL_FORMED_UNDERSCORE_PARAM
-  );
-  return [df, errors];
+  return offendingParams.map(ILL_FORMED_UNDERSCORE_PARAM);
 };
 
 const _valueOnlyInFirstPosition = (a: any[], parameter: string): boolean => {
   const unregulatedParameters = ["_about"];
   if (unregulatedParameters.includes(parameter)) return true;
   return !a.some((value: any, i: number) => i !== 0 && value !== "");
-};
-
-export const populateDefaultValues = (df: any): any => {
-  let populatedDf = df;
-  df.listColumns().forEach((columnName: string) => {
-    if (GLOSSARY.hasOwnProperty(columnName)) {
-      if (
-        !arraysEqual(
-          df
-            .select(columnName)
-            .toArray()
-            .map((x: any[]): any => x[0]),
-          df
-            .select(columnName)
-            .toArray()
-            .map((x: any[]): any => x[0])
-            .filter((x: any) => x)
-        )
-      ) {
-        // console.error(
-        //   `Undefined values in ${columnName}. Make sure that comma's are balanced across all rows.`
-        // );
-      }
-      const column: string[] = df
-        .select(columnName)
-        .toArray()
-        .map((x: any[]): any => x[0]);
-      const populatedColumn = column.map((x) =>
-        x === "" ? GLOSSARY[columnName].default : x
-      );
-      populatedDf = populatedDf.withColumn(
-        columnName,
-        (r: any, i: number) => populatedColumn[i]
-      );
-    }
-  });
-  return populatedDf;
 };
 
 const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
