@@ -2414,7 +2414,7 @@ export const phrases = {
     id: "Saya memiliki xxx dengan saya.",
     "zh-CN": "我有xxx。",
     "zh-HK": "我有xxx。",
-    ja: "私はxxxを持っています。",
+    ja: "私は私と一緒にxxxを持っています。",
     ko: "나는 나와 xxx를 가지고있다.",
   },
   RC_screenSizeIntro: {
