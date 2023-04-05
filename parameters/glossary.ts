@@ -1364,7 +1364,7 @@ export const GLOSSARY: Glossary = {
     name: "fontMaxPx",
     availability: "now",
     type: "numerical",
-    default: "10000",
+    default: "600",
   },
   fontPadding: {
     name: "fontPadding",
