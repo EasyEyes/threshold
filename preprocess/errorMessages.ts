@@ -303,15 +303,12 @@ export const NO_BLOCK_PARAMETER: EasyEyesError = {
 };
 
 export const INVALID_STARTING_BLOCK = (
-  actualStartingValue: number,
-  correctStartingValue: 0 | 1
+  actualStartingValue: string
 ): EasyEyesError => {
-  const zeroBasedNumberingBool = correctStartingValue ? false : true;
-  const complementaryStart = correctStartingValue ? 0 : 1;
   return {
     name: "Invalid initial value",
-    message: `The first value in your <span class="error-parameter">block</span> row isn't correct; it is <em>${actualStartingValue}</em>, when it ought to be <em>${correctStartingValue}</em>.`,
-    hint: `Change your <span class="error-parameter">block</span> row to start with ${correctStartingValue}, with each value either the same &#8212 or one larger &#8212 than the previous. If you'd like the blocks to start from ${complementaryStart} instead, set <span class="error-parameter">_zeroBasedNumberingBool</span> to ${!zeroBasedNumberingBool}.`,
+    message: `The first value in your <span class="error-parameter">block</span> row isn't correct; it is <em>${actualStartingValue}</em>, when it ought to be <em>1</em>.`,
+    hint: `Change your <span class="error-parameter">block</span> row to start with 1, with each subsequent value either the same &#8212 or one larger &#8212 than the previous.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["block"],
@@ -320,7 +317,7 @@ export const INVALID_STARTING_BLOCK = (
 
 export const NONSEQUENTIAL_BLOCK_VALUE = (
   nonsequentials: { value: number; previous: number; index: number }[],
-  blockValues: number[]
+  blockValues: string[]
 ): EasyEyesError => {
   // let problemStatement: string;
   const illustratedValues =
@@ -345,8 +342,7 @@ export const NONSEQUENTIAL_BLOCK_VALUE = (
   const hintBlob = `<span class="error-parameter">block,${illustratedValues}</span><br/>
                     The ${verballyEnumerate(nonsequentialIndicies)} value${
     plural ? "s are" : " is"
-  } nonsequential, as highlighted in 
-                    <span style="color: #e02401;">red</span>.`;
+  } nonsequential.`;
   return {
     name: `Nonsequential value${plural ? "s" : ""}`,
     message: `Looks like we've got ${

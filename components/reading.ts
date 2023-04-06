@@ -48,7 +48,7 @@ export const prepareReadingQuestions = (
         correctAnswer = remaining.shift() as string;
         correctAnswerFreq = Math.min(...Object.keys(freqToWords).map(Number));
         warning(
-          `rsvpReading failed to correctly tokenize one of the strings "${usablePages.join(
+          `rsvpReading failed to correctly tokenize the string "${usablePages.join(
             ", "
           )}". Using the string "${correctAnswer}" as the target, and drawing foils of the lowest word frequency."`
         );

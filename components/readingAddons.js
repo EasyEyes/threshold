@@ -268,8 +268,10 @@ export const preprocessCorpusToSentenceList = (
         while (thisLineWordCount > 0 && usedTextList.length > 0) {
           // WORD
           const newWord = usedTextList.shift();
-          thisLineTempWordList.push(newWord);
-          thisLineWordCount--;
+          if (!["-", ".", "'", '"'].includes(newWord)) {
+            thisLineTempWordList.push(newWord);
+            thisLineWordCount--;
+          }
         }
         thisLineText = thisLineTempWordList.join(" ") + "\n";
         thisPageText += thisLineText;
