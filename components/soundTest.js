@@ -7,7 +7,7 @@ import {
   soundGainTWR,
   ICalibDBSPL,
 } from "./global";
-import { plotSoundLevels1000Hz } from "./soundTestPlots";
+import { plotForAllHz, plotSoundLevels1000Hz } from "./soundTestPlots";
 import {
   adjustSoundDbSPL,
   connectAudioNodes,
@@ -754,13 +754,13 @@ export const displayParameters1000Hz = (
   downloadCalibrationData(elems.downloadButton, parameters);
 
   // plot
-  elems.soundTestContainer.style.display = "flex";
+  // elems.soundTestContainer.style.display = "flex";
 
   // plot the sound levels
   // create plot canvas
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
-  plotCanvas.width = 450;
+  plotCanvas.width = 500;
   plotCanvas.height = 500;
 
   elems.soundTestPlots.appendChild(plotCanvas);
@@ -775,7 +775,8 @@ export const displayParameters1000Hz = (
   );
 
   // fit plotCanvas to parent
-  plotCanvas.style.width = "100%";
+  // plotCanvas.style.width = "100%";
+  // plotCanvas.style.height = "100%";
 };
 
 export const SoundLevelModel = (inDb, backgroundDbSpl, gainDbSpl, T, W, R) => {
@@ -864,4 +865,13 @@ const downloadCalibrationData = (downloadButton, parameters) => {
   });
 };
 
-export const displayParametersAllHz = (elems, iir) => {};
+export const displayParametersAllHz = (elems, iir, calibrationResults) => {
+  const plotCanvas = document.createElement("canvas");
+  plotCanvas.setAttribute("id", "plotCanvas");
+  plotCanvas.width = 500;
+  plotCanvas.height = 500;
+
+  elems.soundTestPlots.appendChild(plotCanvas);
+
+  plotForAllHz(plotCanvas, iir, calibrationResults);
+};

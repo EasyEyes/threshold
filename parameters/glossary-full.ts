@@ -1183,7 +1183,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "fontMaxPx (default 10000) sets an upper limit on the nominal point size of the font to be drawn. We added this to avoid some crashes that seem to result from trying to draw or measure huge characters. We've never needed this with Roman fonts (including English), but it seems to be necessary with Arabic fonts.",
+      "fontMaxPx (default 600) sets an upper limit on the nominal font size. We added this to avoid some crashes that seem to result from trying to draw or measure huge characters. The crash is a stack overflow while trying to measure font size. We have only a rough estimate of the threshold for trouble. Introducing a limit of 900 helped a lot, but didn't eliminate all cases. Setting it to 600 has made this event rare. In April 2023 we beefed up all error messages to include the font size, so any future crashes will tell us what font size causes the crash.",
     type: "numerical",
     default: "600",
     categories: "",

@@ -392,6 +392,12 @@ export const vocoderPhraseShowClickable = { current: true };
 export const vocoderPhraseCorrectResponse = { current: undefined };
 export const soundCalibrationLevelDBSPL = { current: undefined };
 export const soundCalibrationResults = { current: undefined };
+export const allHzCalibrationResults = {
+  x_unconv: undefined,
+  y_unconv: undefined,
+  x_conv: undefined,
+  y_conv: undefined,
+};
 export const soundGainTWR = { T: undefined, W: undefined, R: undefined };
 export const debugBool = { current: false };
 export const ICalibDBSPL = { current: undefined };

@@ -66,6 +66,13 @@
   background-color: #111;
 }
 
+.sound-calibration-background {
+  background-color: #fff;
+  position: absolute;
+  width: 40%;
+  top: 10% !important;
+}
+
 /* -------------------------------------------------------------------------- */
 
 /* question and answer */

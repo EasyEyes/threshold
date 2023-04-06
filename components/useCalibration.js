@@ -8,6 +8,7 @@ import {
   soundCalibrationResults,
   debugBool,
   ICalibDBSPL,
+  allHzCalibrationResults,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -185,11 +186,9 @@ export const calibrateAudio = async (reader) => {
   ICalibDBSPL.current = reader.read(
     GLOSSARY._calibrateSoundAssumingThisICalibDBSPL.name
   )[0];
-  // console.log("ICalibDBSPL", ICalibDBSPL);
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
     .split(",");
-  // console.log("soundLevels", soundLevels)
   // convert soundLevels to numbers
   for (let i = 0; i < soundLevels.length; i++) {
     soundLevels[i] = parseFloat(soundLevels[i]);
@@ -201,8 +200,6 @@ export const calibrateAudio = async (reader) => {
   const gains = soundLevels.map((soundLevel) => {
     return Math.pow(10, soundLevel / 20);
   });
-  // console.log("gains", gains)
-  // console.log("soundLevels", soundLevels)
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
 
@@ -260,29 +257,28 @@ export const calibrateAudio = async (reader) => {
 
       elems.displayQR.style.display = "none";
       elems.message.innerHTML = copy.done;
-      // +
-      // (calibrateSoundLevel
-      //   ? "\nMeasured soundGainDBSPL " + String(soundGainDBSPL.current)
-      //   : "");
       // display sound levels and soundGainDbSPL.current in a table
       // test
-      // soundCalibrationResults.current = {
-      //   outDBSPL1000Values: [103.3,102.9,102.0,95.3,85.2,75],
-      //   thdValues:[85.7, 82.1, 79.3, 78.2, 76.4,74.5, 73.4,70.3, 63.0,-60.1, 47.8, 11.4],
-      //   outDBSPLValues:[85.7, 82.1, 79.3, 78.2, 76.4,74.5, 73.4,70.3, 63.0,-60.1, 47.8, 11.4],
-      //   parameters:{
-      //     T: 100,
-      //     W: 10,
-      //     R: 1000,
-      //     backgroundDBSPL: 18.6,
-      //     gainDBSPL: 125,
-      //     RMSError:0.1,
-      //   }
-      // }
-      if (calibrateSoundLevel && soundCalibrationResults.current) {
+
+      if (
+        calibrateSoundLevel &&
+        soundCalibrationResults.current &&
+        invertedImpulseResponse.current
+      ) {
         displayParameters1000Hz(elems, soundLevels, soundCalibrationResults);
+        displayParametersAllHz(
+          elems,
+          invertedImpulseResponse.current,
+          allHzCalibrationResults
+        );
       } else if (calibrateLoudspeaker && invertedImpulseResponse.current) {
-        displayParametersAllHz(elems, invertedImpulseResponse.current);
+        displayParametersAllHz(
+          elems,
+          invertedImpulseResponse.current,
+          allHzCalibrationResults
+        );
+      } else if (calibrateSoundLevel && soundCalibrationResults.current) {
+        displayParameters1000Hz(elems, soundLevels, soundCalibrationResults);
       }
 
       elems.yesButton.innerHTML = "Continue to experiment.";
@@ -382,9 +378,9 @@ const _addSoundCalibrationElems = (copy) => {
   citation.innerHTML = copy.citation;
   citation.style.fontSize = "0.8em";
 
-  background.classList.add(...["popup", "rc-panel"]);
+  background.classList.add(...["sound-calibration-background", "rc-panel"]);
   // avoid background being clipped from the top
-  background.style.marginTop = "5vh";
+  // background.style.marginTop = "5vh";
   container.classList.add(...["container"]);
   yesButton.classList.add(...["btn", "btn-primary"]);
   noButton.classList.add(...["btn", "btn-secondary"]);
@@ -491,17 +487,38 @@ const _runSoundLevelCalibration = async (elems, gains) => {
     elems.displayUpdate.innerHTML = message;
   });
 
-  soundCalibrationResults.current = await Speaker.startCalibration(
-    speakerParameters,
-    calibrator
-  );
+  const debug = false;
+
+  if (debug) {
+    soundCalibrationResults.current = {
+      outDBSPL1000Values: [103.3, 102.9, 102.0, 95.3, 85.2, 75],
+      thdValues: [
+        85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1, 47.8, 11.4,
+      ],
+      outDBSPLValues: [
+        85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1, 47.8, 11.4,
+      ],
+      parameters: {
+        T: 100,
+        W: 10,
+        R: 1000,
+        backgroundDBSPL: 18.6,
+        gainDBSPL: 125,
+        RMSError: 0.1,
+      },
+    };
+  } else {
+    soundCalibrationResults.current = await Speaker.startCalibration(
+      speakerParameters,
+      calibrator
+    );
+  }
+
   if (soundCalibrationResults.current) {
     soundGainDBSPL.current =
       soundCalibrationResults.current.parameters.gainDBSPL;
     soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
   }
-
-  console.log("results", soundCalibrationResults.current);
 };
 
 const _runLoudspeakerCalibration = async (elems) => {
@@ -538,22 +555,21 @@ const _runLoudspeakerCalibration = async (elems) => {
       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     ];
   } else {
-    invertedImpulseResponse.current = await Speaker.startCalibration(
+    const calibrationResults = await Speaker.startCalibration(
       speakerParameters,
       calibrator,
       500000
     );
+    invertedImpulseResponse.current = calibrationResults.iir;
+    allHzCalibrationResults.x_conv = calibrationResults.x_conv;
+    allHzCalibrationResults.y_conv = calibrationResults.y_conv;
+    allHzCalibrationResults.x_unconv = calibrationResults.x_unconv;
+    allHzCalibrationResults.y_unconv = calibrationResults.y_unconv;
   }
   const { normalizedIIR, calibrationLevel } =
     getSoundCalibrationLevelDBSPLFromIIR(invertedImpulseResponse.current);
-  // console.log("invertedImpulseResponse", invertedImpulseResponse.current);
   invertedImpulseResponse.current = normalizedIIR;
   soundCalibrationLevelDBSPL.current = calibrationLevel;
-  // console.log(
-  //   "soundCalibrationLevelDBSPL.current",
-  //   soundCalibrationLevelDBSPL.current
-  // );
-  // console.log("normalizedIIR", normalizedIIR);
 };
 
 const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
