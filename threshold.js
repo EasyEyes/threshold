@@ -1,4 +1,4 @@
-﻿/**********************
+/**********************
  * EasyEyes Threshold *
  **********************/
 
@@ -128,6 +128,7 @@ import {
   customInstructionText,
   targetTextStimConfig,
   fontSize,
+  blockOrder,
 } from "./components/global.js";
 
 import {
@@ -380,6 +381,7 @@ import {
   updateProgressBar,
 } from "./components/progressBar.js";
 import { logQuest } from "./components/logging.js";
+import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
 
 /* -------------------------------------------------------------------------- */
 
@@ -578,8 +580,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Resources
   initializeEscHandlingDiv();
   const _resources = [];
-  const blockNumbers = paramReader._experiment.map((block) => block.block);
-  for (const i of blockNumbers) {
+  blockOrder.current = getBlockOrder(paramReader);
+  for (const i of blockOrder.current) {
     _resources.push({
       name: `conditions/block_${i}.csv`,
       path: `conditions/block_${i}.csv`,
@@ -841,6 +843,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructionsClock = new util.Clock();
 
     status.block = 0; // +1 at the beginning of each block
+    status.nthBlock = 0; // +1 at the beginning of each block
     thisConditionsFile = `conditions/block_${status.block + 1}.csv`;
 
     // Initialize components for Routine "trial"
@@ -1288,13 +1291,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
 
       // set up handler to look after randomisation of conditions etc
+      const blockTrialList = getBlocksTrialList(
+        paramReader,
+        blockOrder.current
+      );
       blocks = new TrialHandler({
         psychoJS: psychoJS,
         nReps: 1,
         method: TrialHandler.Method.SEQUENTIAL,
         extraInfo: thisExperimentInfo,
         originPath: undefined,
-        trialList: "conditions/blockCount.csv",
+        trialList: blockTrialList,
         seed: Math.round(performance.now()),
         name: "blocks",
       });
@@ -1746,7 +1753,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showViewingDistanceBool,
         readingCurrentQuestionIndex.current + 1,
         paramReader.read("readingNumberOfQuestions", status.block)[0],
-        status.block,
+        status.nthBlock,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current === "reading" ? "letter" : targetKind.current
@@ -1882,12 +1889,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       showCursor();
 
       status.block = snapshot.block + 1;
+      status.nthBlock += 1;
       totalBlocks.current = snapshot.nTotal;
 
       reportStartOfNewBlock(status.block, psychoJS.experiment);
 
       if (
-        status.block === 1 ||
+        status.nthBlock === 1 ||
         paramReader.read("_saveFirstInEachBlockBool", "__ALL_BLOCKS__")[0]
       ) {
         logger("Saving csv at start of block!");
@@ -2316,7 +2324,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("showViewingDistanceBool", status.block)[0],
         undefined,
         undefined,
-        status.block,
+        status.nthBlock,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current
@@ -3644,7 +3652,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showViewingDistanceBool,
         status.trial,
         totalTrialsThisBlock.current,
-        status.block,
+        status.nthBlock,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current

@@ -77,6 +77,7 @@ export const grid = { current: undefined };
 /* ------------------------------- Exp Configs ------------------------------ */
 export const totalBlocks = { current: undefined };
 export const totalTrialsThisBlock = { current: undefined };
+export const blockOrder = { current: undefined };
 
 export const targetTask = { current: undefined };
 export const targetKind = { current: undefined };
@@ -193,7 +194,8 @@ export const tolerances = Object.seal({
 /* --------------------------- Exp Current Status --------------------------- */
 
 export const status = {
-  block: undefined, // Current block number, starting from 1
+  block: undefined, // Current block number, starting from 1. Corresponds to "block" scientist parameter; may occur out of order due to shuffling
+  nthBlock: undefined, // Sequential count of block in this experiment run. Always sequential, regardless of shuffling. Used to indicate, eg this is the first block (ie even if block 3 was shuffled to go first)
   trial: undefined, // Current trial number, starting from 1
   block_condition: undefined,
   condition: undefined, // [Object] currently running condition
