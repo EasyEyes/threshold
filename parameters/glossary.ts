@@ -1125,8 +1125,14 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  blockShuffleSubsubgroups: {
-    name: "blockShuffleSubsubgroups",
+  blockShuffleSub2groups: {
+    name: "blockShuffleSub2groups",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
+  blockShuffleSub3groups: {
+    name: "blockShuffleSub3groups",
     availability: "now",
     type: "text",
     default: "",
