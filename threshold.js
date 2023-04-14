@@ -129,6 +129,7 @@ import {
   targetTextStimConfig,
   fontSize,
   blockOrder,
+  _key_resp_allKeys,
 } from "./components/global.js";
 
 import {
@@ -382,6 +383,7 @@ import {
 } from "./components/progressBar.js";
 import { logQuest } from "./components/logging.js";
 import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
+import { KeypadHandler } from "./components/keypad.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -824,6 +826,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var readingParagraph;
 
   var key_resp;
+  var keypad;
   var fixation; ////
   var flanker1, flanker2, flanker3, flanker4;
   var target;
@@ -854,6 +857,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       clock: new util.Clock(),
       waitForStart: true,
     });
+
+    keypad = new KeypadHandler(paramReader);
 
     /* -------------------------------------------------------------------------- */
 
@@ -2559,9 +2564,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var stimulusParameters;
   var thresholdParameter;
 
-  var wirelessKeyboardNeededBool;
-
-  var _key_resp_allKeys;
   var trialComponents;
   var allFlankers, flankersUsed;
 
@@ -2744,6 +2746,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       [target, flanker1, flanker2, flanker3, flanker4].forEach((s) =>
         s.setCharacterSet(fontCharacterSet.current.join(""))
       );
+
+      if (keypad.keypadRequired(BC)) {
+        const keypadAlphabet = [...fontCharacterSet.current, "space"];
+        await keypad.update(keypadAlphabet, font.name);
+        keypad.start();
+      }
 
       showConditionNameConfig.show = paramReader.read(
         "showConditionNameBool",
@@ -2992,11 +3000,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showBoundingBox = reader.read("showBoundingBoxBool", BC) || false;
           showCharacterSetBoundingBox = reader.read(
             "showCharacterSetBoundingBoxBool",
-            BC
-          );
-
-          wirelessKeyboardNeededBool = reader.read(
-            "wirelessKeyboardNeededBool",
             BC
           );
 
@@ -3787,8 +3790,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       continueRoutine = true;
       if (
-        canType(responseType.current) &&
-        psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
+        (canType(responseType.current) &&
+          psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) ||
+        keypad.endRoutine(status.block_condition)
       ) {
         continueRoutine = false;
         movePastFixation();
@@ -3801,6 +3805,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialInstructionRoutineEnd() {
     return async function () {
       loggerText("trialInstructionRoutineEnd");
+
+      keypad.clearKeys(status.block_condition);
+      // TODO if this call hurts timing, remove it and just ignore "space" lentries at trial response time
+      keypad.removeSpaceKey();
+      keypad.setSensitive();
+      keypad.stop();
+      keypad.updateKeypadMessage("Continue the experiment as instructed.");
 
       rc.pauseDistance();
       if (toShowCursor()) {
@@ -4135,7 +4146,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       key_resp.status = PsychoJS.Status.NOT_STARTED; // ? Why we don't need this to run before?
       key_resp.keys = [];
       key_resp.rt = [];
-      _key_resp_allKeys = [];
+      _key_resp_allKeys.current = [];
 
       // TODO disassemble and restructure repeatedLetter inputs to not be built on duplicates/cardinals
       showCharacterSetResponse.alreadyClickedCharacters = [];
@@ -4370,6 +4381,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       /* -------------------------------------------------------------------------- */
 
+      if (
+        t >= timeWhenRespondable &&
+        keypad.keypadRequired(status.block_condition)
+      ) {
+        keypad.start();
+        keypad.setNonSensitive();
+        keypad.updateKeypadMessage("Respond now!");
+      }
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
       // response type more independent
@@ -4427,7 +4446,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             keyList: keyList,
             waitRelease: false,
           });
-          _key_resp_allKeys.push(...theseKeys);
+          _key_resp_allKeys.current.push(...theseKeys);
 
           if (targetKind.current === "rsvpReading")
             registerKeypressForRSVPReading(theseKeys);
@@ -4465,7 +4484,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const clickedKeypresses = showCharacterSetResponse.current.map(
           (letter) => new KeyPress(undefined, undefined, letter)
         );
-        _key_resp_allKeys.push(...clickedKeypresses);
+        _key_resp_allKeys.current.push(...clickedKeypresses);
 
         if (targetKind.current === "repeatedLetters") {
           showCharacterSetResponse.current.forEach((r, i) => {
@@ -4496,7 +4515,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Check if the (set of clickable charset and keyboard) inputs constitute an end-of-trial
       // for regimes which require a single response to QUEST
       // TODO consolidate all endtrial/correctness logic into one place, ie generalize to include rsvpReading,repeatedLetters
-      const uniqueResponses = new Set(_key_resp_allKeys.map((k) => k.name));
+      const uniqueResponses = new Set(
+        _key_resp_allKeys.current.map((k) => k.name)
+      );
+      if (uniqueResponses.size > 0) logger("uniqueResponses", uniqueResponses);
       if (
         uniqueResponses.size >= responseType.numberOfResponses &&
         targetKind.current !== "rsvpReading"
@@ -4968,6 +4990,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       vocoderPhraseShowClickable.current = true;
       grid.current.hide();
 
+      keypad.stop();
+
       if (fixationConfig.nominalPos)
         fixationConfig.pos = fixationConfig.nominalPos;
 
@@ -5267,7 +5291,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         psychoJS.experiment.addData(
           "key_resp.keys",
-          _key_resp_allKeys.map((k) => k.name).toString()
+          _key_resp_allKeys.current.map((k) => k.name).toString()
         );
         psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
         psychoJS.experiment.addData("correctAns", correctAns.current);
