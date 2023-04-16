@@ -1,4 +1,4 @@
-/**********************
+﻿/**********************
  * EasyEyes Threshold *
  **********************/
 
@@ -2228,7 +2228,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           readingParagraph.setFont(font.name);
           readingParagraph.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
-          readingParagraph.setLetterSpacing(font.letterSpacing);
+          readingParagraph.setLetterSpacingByProportion(font.letterSpacing);
 
           // ? background do we need it here?
           screenBackground.colorRGB = paramReader.read(
@@ -3171,7 +3171,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                   // currently letterSpacing messes up spacing for arabic fonts even when not set
                   if (font.letterSpacing) {
-                    target.setLetterSpacing(font.letterSpacing);
+                    target.setLetterSpacingByProportion(font.letterSpacing);
                   }
 
                   // target.setHeight(stimulusParameters.heightPx);
