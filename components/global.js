@@ -234,6 +234,9 @@ export const viewingDistanceDesiredCm = { current: 40 };
 export const viewingDistanceCm = { current: 40 };
 
 /* ------------------------------ Interactions ------------------------------ */
+export const _key_resp_allKeys = {
+  current: [],
+};
 
 export const responseType = {
   current: 2,
