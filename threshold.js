@@ -128,6 +128,8 @@ import {
   customInstructionText,
   targetTextStimConfig,
   fontSize,
+  blockOrder,
+  _key_resp_allKeys,
 } from "./components/global.js";
 
 import {
@@ -380,6 +382,8 @@ import {
   updateProgressBar,
 } from "./components/progressBar.js";
 import { logQuest } from "./components/logging.js";
+import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
+import { KeypadHandler } from "./components/keypad.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -578,8 +582,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Resources
   initializeEscHandlingDiv();
   const _resources = [];
-  const blockNumbers = paramReader._experiment.map((block) => block.block);
-  for (const i of blockNumbers) {
+  blockOrder.current = getBlockOrder(paramReader);
+  for (const i of blockOrder.current) {
     _resources.push({
       name: `conditions/block_${i}.csv`,
       path: `conditions/block_${i}.csv`,
@@ -822,6 +826,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var readingParagraph;
 
   var key_resp;
+  var keypad;
   var fixation; ////
   var flanker1, flanker2, flanker3, flanker4;
   var target;
@@ -841,6 +846,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructionsClock = new util.Clock();
 
     status.block = 0; // +1 at the beginning of each block
+    status.nthBlock = 0; // +1 at the beginning of each block
     thisConditionsFile = `conditions/block_${status.block + 1}.csv`;
 
     // Initialize components for Routine "trial"
@@ -851,6 +857,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       clock: new util.Clock(),
       waitForStart: true,
     });
+
+    keypad = new KeypadHandler(paramReader);
 
     /* -------------------------------------------------------------------------- */
 
@@ -1288,13 +1296,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
 
       // set up handler to look after randomisation of conditions etc
+      const blockTrialList = getBlocksTrialList(
+        paramReader,
+        blockOrder.current
+      );
       blocks = new TrialHandler({
         psychoJS: psychoJS,
         nReps: 1,
         method: TrialHandler.Method.SEQUENTIAL,
         extraInfo: thisExperimentInfo,
         originPath: undefined,
-        trialList: "conditions/blockCount.csv",
+        trialList: blockTrialList,
         seed: Math.round(performance.now()),
         name: "blocks",
       });
@@ -1746,7 +1758,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showViewingDistanceBool,
         readingCurrentQuestionIndex.current + 1,
         paramReader.read("readingNumberOfQuestions", status.block)[0],
-        status.block,
+        status.nthBlock,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current === "reading" ? "letter" : targetKind.current
@@ -1882,12 +1894,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       showCursor();
 
       status.block = snapshot.block + 1;
+      status.nthBlock += 1;
       totalBlocks.current = snapshot.nTotal;
 
       reportStartOfNewBlock(status.block, psychoJS.experiment);
 
       if (
-        status.block === 1 ||
+        status.nthBlock === 1 ||
         paramReader.read("_saveFirstInEachBlockBool", "__ALL_BLOCKS__")[0]
       ) {
         logger("Saving csv at start of block!");
@@ -2220,7 +2233,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           readingParagraph.setFont(font.name);
           readingParagraph.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
-          readingParagraph.setLetterSpacing(font.letterSpacing);
+          readingParagraph.setLetterSpacingByProportion(font.letterSpacing);
 
           // ? background do we need it here?
           screenBackground.colorRGB = paramReader.read(
@@ -2316,7 +2329,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("showViewingDistanceBool", status.block)[0],
         undefined,
         undefined,
-        status.block,
+        status.nthBlock,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current
@@ -2551,9 +2564,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var stimulusParameters;
   var thresholdParameter;
 
-  var wirelessKeyboardNeededBool;
-
-  var _key_resp_allKeys;
   var trialComponents;
   var allFlankers, flankersUsed;
 
@@ -2736,6 +2746,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       [target, flanker1, flanker2, flanker3, flanker4].forEach((s) =>
         s.setCharacterSet(fontCharacterSet.current.join(""))
       );
+
+      if (keypad.keypadRequired(BC)) {
+        const keypadAlphabet = [...fontCharacterSet.current, "space"];
+        await keypad.update(keypadAlphabet, font.name);
+        keypad.start();
+      }
 
       showConditionNameConfig.show = paramReader.read(
         "showConditionNameBool",
@@ -2987,11 +3003,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             BC
           );
 
-          wirelessKeyboardNeededBool = reader.read(
-            "wirelessKeyboardNeededBool",
-            BC
-          );
-
           const atLeastTwoFlankersNeeded =
             thresholdParameter === "spacing" &&
             letterConfig.spacingRelationToSize !== "typographic";
@@ -3163,7 +3174,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                   // currently letterSpacing messes up spacing for arabic fonts even when not set
                   if (font.letterSpacing) {
-                    target.setLetterSpacing(font.letterSpacing);
+                    target.setLetterSpacingByProportion(font.letterSpacing);
                   }
 
                   // target.setHeight(stimulusParameters.heightPx);
@@ -3644,7 +3655,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showViewingDistanceBool,
         status.trial,
         totalTrialsThisBlock.current,
-        status.block,
+        status.nthBlock,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current
@@ -3779,8 +3790,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       continueRoutine = true;
       if (
-        canType(responseType.current) &&
-        psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0
+        (canType(responseType.current) &&
+          psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) ||
+        keypad.endRoutine(status.block_condition)
       ) {
         continueRoutine = false;
         movePastFixation();
@@ -3793,6 +3805,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialInstructionRoutineEnd() {
     return async function () {
       loggerText("trialInstructionRoutineEnd");
+
+      keypad.clearKeys(status.block_condition);
+      // TODO if this call hurts timing, remove it and just ignore "space" lentries at trial response time
+      keypad.removeSpaceKey();
+      keypad.setSensitive();
+      keypad.stop();
+      keypad.updateKeypadMessage("Continue the experiment as instructed.");
 
       rc.pauseDistance();
       if (toShowCursor()) {
@@ -4127,7 +4146,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       key_resp.status = PsychoJS.Status.NOT_STARTED; // ? Why we don't need this to run before?
       key_resp.keys = [];
       key_resp.rt = [];
-      _key_resp_allKeys = [];
+      _key_resp_allKeys.current = [];
 
       // TODO disassemble and restructure repeatedLetter inputs to not be built on duplicates/cardinals
       showCharacterSetResponse.alreadyClickedCharacters = [];
@@ -4362,6 +4381,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       /* -------------------------------------------------------------------------- */
 
+      if (
+        t >= timeWhenRespondable &&
+        keypad.keypadRequired(status.block_condition)
+      ) {
+        keypad.start();
+        keypad.setNonSensitive();
+        keypad.updateKeypadMessage("Respond now!");
+      }
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
       // response type more independent
@@ -4419,7 +4446,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             keyList: keyList,
             waitRelease: false,
           });
-          _key_resp_allKeys.push(...theseKeys);
+          _key_resp_allKeys.current.push(...theseKeys);
 
           if (targetKind.current === "rsvpReading")
             registerKeypressForRSVPReading(theseKeys);
@@ -4457,7 +4484,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const clickedKeypresses = showCharacterSetResponse.current.map(
           (letter) => new KeyPress(undefined, undefined, letter)
         );
-        _key_resp_allKeys.push(...clickedKeypresses);
+        _key_resp_allKeys.current.push(...clickedKeypresses);
 
         if (targetKind.current === "repeatedLetters") {
           showCharacterSetResponse.current.forEach((r, i) => {
@@ -4488,7 +4515,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Check if the (set of clickable charset and keyboard) inputs constitute an end-of-trial
       // for regimes which require a single response to QUEST
       // TODO consolidate all endtrial/correctness logic into one place, ie generalize to include rsvpReading,repeatedLetters
-      const uniqueResponses = new Set(_key_resp_allKeys.map((k) => k.name));
+      const uniqueResponses = new Set(
+        _key_resp_allKeys.current.map((k) => k.name)
+      );
+      if (uniqueResponses.size > 0) logger("uniqueResponses", uniqueResponses);
       if (
         uniqueResponses.size >= responseType.numberOfResponses &&
         targetKind.current !== "rsvpReading"
@@ -4960,6 +4990,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       vocoderPhraseShowClickable.current = true;
       grid.current.hide();
 
+      keypad.stop();
+
       if (fixationConfig.nominalPos)
         fixationConfig.pos = fixationConfig.nominalPos;
 
@@ -5259,7 +5291,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         psychoJS.experiment.addData(
           "key_resp.keys",
-          _key_resp_allKeys.map((k) => k.name).toString()
+          _key_resp_allKeys.current.map((k) => k.name).toString()
         );
         psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
         psychoJS.experiment.addData("correctAns", correctAns.current);
