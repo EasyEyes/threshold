@@ -116,6 +116,7 @@ export const getAllProjects = async (user: User) => {
   );
   const firstResponseData = await firstResponse.json();
   projectList.push(...firstResponseData);
+  console.log(firstResponseData);
 
   // check if header is present
   const pageCountHeader = await firstResponse.headers.get("x-total-pages");
@@ -140,6 +141,7 @@ export const getAllProjects = async (user: User) => {
   const paginationResponseList = await Promise.all(pageList);
   for (let idx = 0; idx < paginationResponseList.length; idx++) {
     const ithResponseData = await paginationResponseList[idx].json();
+    console.log(ithResponseData);
     projectList.push(...ithResponseData);
   }
 
