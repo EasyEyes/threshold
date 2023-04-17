@@ -561,6 +561,11 @@ const _runLoudspeakerCalibration = async (elems) => {
       500000
     );
     invertedImpulseResponse.current = calibrationResults.iir;
+    // only use the first 100 values
+    // invertedImpulseResponse.current = invertedImpulseResponse.current.slice(
+    //   0,
+    //   100
+    // );
     allHzCalibrationResults.x_conv = calibrationResults.x_conv;
     allHzCalibrationResults.y_conv = calibrationResults.y_conv;
     allHzCalibrationResults.x_unconv = calibrationResults.x_unconv;
