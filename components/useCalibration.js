@@ -9,6 +9,8 @@ import {
   debugBool,
   ICalibDBSPL,
   allHzCalibrationResults,
+  calibrateSoundMinHz,
+  calibrateSoundMaxHz,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -182,6 +184,13 @@ export const calibrateAudio = async (reader) => {
       reader.read(GLOSSARY.calibrateSoundAllHzBool.name, "__ALL_BLOCKS__")
     ),
   ];
+
+  calibrateSoundMinHz.current = reader.read(
+    GLOSSARY.calibrateSoundMinHz.name
+  )[0];
+  calibrateSoundMaxHz.current = reader.read(
+    GLOSSARY.calibrateSoundMaxHz.name
+  )[0];
 
   ICalibDBSPL.current = reader.read(
     GLOSSARY._calibrateSoundAssumingThisICalibDBSPL.name
@@ -540,6 +549,8 @@ const _runLoudspeakerCalibration = async (elems) => {
     numCaptures: 3,
     numMLSPerCapture: 4,
     download: true,
+    lowHz: calibrateSoundMinHz.current,
+    highHz: calibrateSoundMaxHz.current,
   };
 
   const calibrator = new ImpulseResponseCalibration(calibratorParams);

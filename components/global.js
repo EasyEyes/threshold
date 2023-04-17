@@ -403,6 +403,8 @@ export const allHzCalibrationResults = {
   x_conv: undefined,
   y_conv: undefined,
 };
+export const calibrateSoundMaxHz = { current: undefined };
+export const calibrateSoundMinHz = { current: undefined };
 export const soundGainTWR = { T: undefined, W: undefined, R: undefined };
 export const debugBool = { current: false };
 export const ICalibDBSPL = { current: undefined };
