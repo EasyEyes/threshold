@@ -1107,32 +1107,26 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  block_shuffleGroups: {
-    name: "block_shuffleGroups",
+  blockShuffleGroups1: {
+    name: "blockShuffleGroups1",
     availability: "now",
     type: "text",
     default: "",
   },
-  blockShuffleGroups: {
-    name: "blockShuffleGroups",
+  blockShuffleGroups2: {
+    name: "blockShuffleGroups2",
     availability: "now",
     type: "text",
     default: "",
   },
-  blockShuffleSubgroups: {
-    name: "blockShuffleSubgroups",
+  blockShuffleGroups3: {
+    name: "blockShuffleGroups3",
     availability: "now",
     type: "text",
     default: "",
   },
-  blockShuffleSub2groups: {
-    name: "blockShuffleSub2groups",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
-  blockShuffleSub3groups: {
-    name: "blockShuffleSub3groups",
+  blockShuffleGroups4: {
+    name: "blockShuffleGroups4",
     availability: "now",
     type: "text",
     default: "",
