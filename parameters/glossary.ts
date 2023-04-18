@@ -1101,12 +1101,6 @@ export const GLOSSARY: Glossary = {
   },
   "%": { name: "%", availability: "now", type: "", default: "" },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
-  block_shuffleBlocksWithinGroups: {
-    name: "block_shuffleBlocksWithinGroups",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
   blockShuffleGroups1: {
     name: "blockShuffleGroups1",
     availability: "now",
