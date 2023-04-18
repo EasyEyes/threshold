@@ -1,5 +1,69 @@
 import { ParamReader } from "../parameters/paramReader.js";
+import { paramReader } from "../threshold.js";
 import { logger, shuffle } from "./utils.js";
+
+// TODO read from glossary, ie /blockShuffleSub\d+groups
+// const groupingParameters = ["blockShuffleGroups", "blockShuffleSubgroups", "blockShuffleSub2groups", "blockShuffleSub3groups"];
+const groupingParameters = [
+  "blockShuffleGroups1",
+  "blockShuffleGroups2",
+  "blockShuffleGroups3",
+  "blockShuffleGroups4",
+];
+const GroupLevels = new Map(groupingParameters.map((p, i) => [i, p]));
+
+type GroupDefinition = Map<string, number[]>;
+
+const groupShuffle = (
+  depth: number,
+  blocks: number[],
+  parentGroupLabel?: string
+): number[] => {
+  logger(
+    `shuffling group. depth ${depth}, blocks: ${blocks.toString()}, parentGroupLabel:${parentGroupLabel}`
+  );
+  if (depth === GroupLevels.size || blocks.length === 1) return blocks;
+  // Get the (sub)group label for every block, including empty strings for non-labels blocks; same length as `blocks`
+  const groupLabels = getGroupLabels(depth, blocks);
+  // Establish the mapping from group label to the blocks which make it up
+  const oldGroupDefinitions = mapBlocksToGroupLabels(blocks, groupLabels);
+  // Group blocks of the same group into a single string, ie group label
+  const blocksAndGroups = groupBlocksByLabel(blocks, groupLabels);
+  // Get just the groups, excluding the block numbers, and shuffle
+  const shuffledGroups = shuffle(
+    blocksAndGroups.filter((v) => typeof v === "string")
+  );
+  // Fill in the now-shuffled groups back into their spaces amongst the blocks
+  const blocksAndShuffledGroups = blocksAndGroups.map((v) =>
+    typeof v === "string" ? shuffledGroups.pop() : v
+  );
+  logger("blocksAndShuffledGroups", blocksAndShuffledGroups);
+  // Shuffle the blocks within each group, recursively based on subgrouping
+  const uniqueGroups = [...new Set(groupLabels.filter((s) => s))]; // Unique group labels
+  const recursivelyShuffledGroupDefinitions: GroupDefinition = new Map(
+    uniqueGroups.map((group) => {
+      const blocksInThisGroup = oldGroupDefinitions.get(group) as number[];
+      const blocksInThisGroupShuffled = groupShuffle(
+        depth + 1,
+        blocksInThisGroup,
+        group
+      );
+      return [group, blocksInThisGroupShuffled];
+    })
+  );
+  // Replace group labels with these now-shuffled block definitions
+  const blocksInGroupShuffledOrder = blocksAndShuffledGroups
+    .map((x) =>
+      typeof x === "string" ? recursivelyShuffledGroupDefinitions.get(x) : x
+    )
+    .flat();
+  return blocksInGroupShuffledOrder;
+};
+
+const getGroupLabels = (depth: number, blocks: number[]): string[] => {
+  const param = GroupLevels.get(depth);
+  return blocks.map((b) => paramReader.read(param, b)[0]);
+};
 
 export const getBlockOrder = (paramReader: ParamReader): number[] => {
   let experiment = paramReader._experiment;
@@ -8,82 +72,9 @@ export const getBlockOrder = (paramReader: ParamReader): number[] => {
   // TODO verify if necessary
   experiment = experiment.sort((a, b) => a.block - b.block);
   let blockNumbers = experiment.map((b) => b.block);
-
-  const block_shuffleBlocksWithinGroups = experiment.map(
-    (block) => block.block_shuffleBlocksWithinGroups
-  );
-  let block_shuffleGroups = experiment.map(
-    (block) => block.block_shuffleGroups
-  );
-
-  const shuffleBlocksWithinGroups = block_shuffleBlocksWithinGroups?.some(
-    (s) => s !== undefined && s !== ""
-  );
-  const shuffleGroups = block_shuffleGroups?.some(
-    (s) => s !== undefined && s !== ""
-  );
-
-  // shuffleBlocksWithinGroups before shuffleGroups
-  if (shuffleBlocksWithinGroups) {
-    const blockNumbersShuffledWithinGroups =
-      getBlocksFromShufflingBlocksWithinGroups(
-        blockNumbers,
-        block_shuffleBlocksWithinGroups
-      );
-    block_shuffleGroups = shuffleToMatch(
-      blockNumbersShuffledWithinGroups,
-      blockNumbers,
-      block_shuffleGroups
-    );
-    blockNumbers = blockNumbersShuffledWithinGroups;
-  }
-  if (shuffleGroups) {
-    blockNumbers = getBlocksFromShufflingGroups(
-      blockNumbers,
-      block_shuffleGroups
-    );
-  }
-
+  blockNumbers = groupShuffle(0, blockNumbers);
+  logger("blockNumber", blockNumbers);
   return blockNumbers;
-};
-
-const getBlocksFromShufflingGroups = (
-  blocks: number[],
-  groups: string[]
-): number[] => {
-  if (blocks.length !== groups.length)
-    throw new Error("Group labeling isn't same length as block numbers.");
-  // Group blocks of the same group into a single string, ie group label
-  const blocksAndGroups = groupBlocksByLabel(blocks, groups);
-  // Get just the groups, excluding the block numbers, and shuffle
-  const shuffledGroups = shuffle(
-    blocksAndGroups.filter((v) => typeof v === "string")
-  );
-  // Fill in the, now shuffled, groups back into their spaces amongst the blocks
-  const blocksAndShuffledGroups = blocksAndGroups.map((v) =>
-    typeof v === "string" ? shuffledGroups.pop() : v
-  );
-  // Replace group labels with the block numbers they represent
-  const groupToBlockMap = mapBlocksToGroupLabels(blocks, groups);
-  const groupShuffledBlocks = blocksAndShuffledGroups
-    .map((v) => (typeof v === "string" ? groupToBlockMap.get(v) : v))
-    .flat();
-  // Leaving us with our block numbers, shuffled based on group
-  return groupShuffledBlocks;
-};
-const getBlocksFromShufflingBlocksWithinGroups = (
-  blocks: number[],
-  groups: string[]
-): number[] => {
-  if (blocks.length !== groups.length)
-    throw new Error("Group labeling isn't same length as block numbers.");
-  // Group blocks of the same group into a single string, ie group label
-  const blocksAndGroups = groupBlocksByLabel(blocks, groups);
-  const groupToBlockMap = mapBlocksToGroupLabels(blocks, groups);
-  const blocksShuffledWithinGroups = blocksAndGroups
-    .map((v) => (typeof v === "string" ? shuffle(groupToBlockMap.get(v)) : v))
-    .flat();
-  return blocksShuffledWithinGroups;
 };
 
 /**
@@ -112,7 +103,7 @@ const groupBlocksByLabel = (
 };
 
 /**
- * e
+ * eg
  *   blocks -> [1,2,3,4,5,6]
  *   groups -> ["","A","A","A","","B"]
  *   return Map("A":[2,3,4], "B":[6])
@@ -132,19 +123,19 @@ const mapBlocksToGroupLabels = (
   return groupToBlocks;
 };
 
-/**
- * Shuffle array `b` to preserve the original `a` -> `b` correspondence, reflecting the new
- * ordering of `a` given by `aShuffled`. ie shuffle `b` in the exact same way `a` was shuffled.
- * */
-const shuffleToMatch = (
-  aShuffled: typeof a,
-  a: unknown[],
-  b: unknown[]
-): typeof b => {
-  const aToB = new Map(a.map((x, i) => [x, b[i]]));
-  const bShuffled = aShuffled.map((x) => aToB.get(x));
-  return bShuffled;
-};
+// /**
+//  * Shuffle array `b` to preserve the original `a` -> `b` correspondence, reflecting the new
+//  * ordering of `a` given by `aShuffled`. ie shuffle `b` in the exact same way `a` was shuffled.
+//  * */
+// const shuffleToMatch = (
+//   aShuffled: typeof a,
+//   a: unknown[],
+//   b: unknown[]
+// ): typeof b => {
+//   const aToB = new Map(a.map((x, i) => [x, b[i]]));
+//   const bShuffled = aShuffled.map((x) => aToB.get(x));
+//   return bShuffled;
+// };
 
 interface BlockDescription {
   block: number;
