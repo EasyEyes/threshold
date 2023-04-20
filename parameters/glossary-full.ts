@@ -2012,7 +2012,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      'responseTypedBool allows participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. But responseMustClickCrosshairBool overrides all other settings while the crosshair is available for clicking.',
+      'responseTypedBool allows participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. But responseMustClickCrosshairBool overrides all other settings while the crosshair is available for clicking.\n',
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -2022,7 +2022,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "responseTypedEasyEyesKeypadBool allows participant to respond at every occasion by pressing a key in EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.\n\nGus April 14, 2023: I pushed the keypad support, excited for you to test it and find what needs improving. Some things I already know are:\n1. supporting arbitrary fonts, \n2. making sure it works with targetKinds other than “letter”, \n3. adding a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed), and \n4. display a message when the keypad is no longer needed and they can put their phone away.\n\n\n\n\n",
+      'responseTypedEasyEyesKeypadBool (default FALSE) = TRUE allows participant to provide any "typed" response by pressing a key in the EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings. \nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis\'s requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone\'s keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say "Connection lost." and offer a "Reconnect" button.\n\n',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2984,11 +2984,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "wirelessKeyboardNeededBool",
+    name: "needSmartphoneBool",
     availability: "now",
     example: "FALSE",
     explanation:
       "⏳ Needed at viewing distances beyond 60 cm. Could be a commercial wireless keyboard or an EasyEyes keypad emulator running on any smartphone. ",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "wirelessKeyboardNeededBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "❌wirelessKeyboardNeededBool (default FALSE)=TRUE alerts EasyEyes that the experiment needs a wireless keyboard. (That's increasingly true at viewing distances beyond 60 cm.) The wireless device could be a commercial wireless keyboard or an EasyEyes keypad emulator running on any smartphone. ",
     type: "boolean",
     default: "FALSE",
     categories: "",

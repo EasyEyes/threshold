@@ -2487,6 +2487,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  needSmartphoneBool: {
+    name: "needSmartphoneBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   wirelessKeyboardNeededBool: {
     name: "wirelessKeyboardNeededBool",
     availability: "now",

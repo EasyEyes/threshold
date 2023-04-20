@@ -25,9 +25,18 @@ import {
   SOUND_FOLDER_MISSING,
   CODE_FILES_MISSING,
   CONDITION_PARAMETERS_IN_FIRST_COLUMN,
+  NONCONTIGUOUS_GROUPING_VALUES,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
-import { isNumeric, levDist, arraysEqual, getColumnValues } from "./utils";
+import {
+  isNumeric,
+  levDist,
+  arraysEqual,
+  getColumnValues,
+  valuesContiguous,
+  getNoncontiguousValues,
+  isBlockShuffleGroupingParam,
+} from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 
 let zeroIndexed: boolean;
@@ -125,6 +134,9 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   errors.push(...isResponsePossible(experimentDf));
 
   // Check that relevant parameters have unique values within blocks (ie one value per block)
+  const blockShuffleGroupParams = experimentDf
+    .listColumns()
+    .filter(isBlockShuffleGroupingParam);
   errors.push(
     ...areBlockUniqueValuesConsistent(experimentDf, [
       "viewingDistanceDesiredCm",
@@ -132,8 +144,12 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
       "fixationLocationXScreen",
       "fixationLocationYScreen",
       "targetKind",
+      ...blockShuffleGroupParams,
     ])
   );
+
+  // Check that block groupings are contiguous
+  errors.push(...areShuffleGroupsContiguous(experimentDf));
 
   // Remove empty errors (FUTURE ought to be unnecessary, find root cause)
   errors = errors
@@ -683,4 +699,39 @@ const doConditionsBeginInTheSecondColumn = (
   if (offendingParameters.length)
     return [CONDITION_PARAMETERS_IN_FIRST_COLUMN(offendingParameters)];
   return [];
+};
+
+/**
+ * Check that all shuffle groups are contiguous.
+ * @param experiment
+ * @returns {EasyEyesError[]}
+ */
+const areShuffleGroupsContiguous = (experiment: any): EasyEyesError[] => {
+  const allColumns = experiment.listColumns();
+  const groupingParameters = [
+    "blockShuffleGroups1",
+    "blockShuffleGroups2",
+    "blockShuffleGroups3",
+    "blockShuffleGroups4",
+  ];
+  const presentGroupingParameters = groupingParameters.filter((p) =>
+    allColumns.includes(p)
+  );
+  const groupings = presentGroupingParameters.map((c) =>
+    getColumnValues(experiment, c)
+  );
+  const groupingsContiguous: boolean[] = groupings.map(valuesContiguous);
+  const noncontiguousGroupingParameters = presentGroupingParameters.filter(
+    (v, i) => !groupingsContiguous[i]
+  );
+  const noncontiguousGroupings = groupings
+    .filter((v, i) => !groupingsContiguous[i])
+    .map((g) => [...getNoncontiguousValues(g)]);
+  if (!noncontiguousGroupingParameters.length) return [];
+  return [
+    NONCONTIGUOUS_GROUPING_VALUES(
+      noncontiguousGroupings,
+      noncontiguousGroupingParameters
+    ),
+  ];
 };

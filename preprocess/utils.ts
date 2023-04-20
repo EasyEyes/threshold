@@ -347,6 +347,8 @@ export const arraysEqual = <T>(a: T[], b: T[]): boolean => {
 
 export const verballyEnumerate = (individuals: string[]): string => {
   if (individuals.length === 1) return individuals[0];
+  if (individuals.length === 2)
+    return individuals[0] + " and " + individuals[1];
   let enumeratedString = "";
   for (let i = 0; i < individuals.length; i++) {
     if (i !== individuals.length - 1) {
@@ -460,4 +462,43 @@ export const getColumnValues = (df: any, columnName: string): string[] => {
     .select(columnName)
     .toArray()
     .map((x: any[]): any => x[0]);
+};
+
+/**
+ * Get set of all elements which aren't contiguous
+ * @param a Array of values
+ * @returns
+ */
+export const getNoncontiguousValues = <T>(a: T[]): Set<T> => {
+  let previous = a[0];
+  const seen = new Set();
+  const noncontiguous: Set<T> = new Set();
+  for (let i = 0; i < a.length; i++) {
+    let current = a[i];
+    if (current === "") {
+      previous = current;
+      continue;
+    }
+    if (current !== previous && seen.has(current)) noncontiguous.add(current);
+    seen.add(current);
+    previous = current;
+  }
+  return noncontiguous;
+};
+/**
+ * Predicate. Does there exists some element in the array which repeats noncontiguously?
+ * @param a Array of values
+ * @returns {boolean}
+ */
+export const valuesContiguous = (a: unknown[]): boolean => {
+  return getNoncontiguousValues(a).size === 0;
+};
+
+/**
+ * Predicate. Is the given string the name of a blockShuffleGroups parameter?
+ * @param s {string}
+ * @returns {boolean}
+ */
+export const isBlockShuffleGroupingParam = (s: string): boolean => {
+  return /blockShuffleGroups\d$/.test(s);
 };

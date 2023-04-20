@@ -425,3 +425,27 @@ export const CONDITION_PARAMETERS_IN_FIRST_COLUMN = (
     parameters: offendingParameters,
   };
 };
+
+export const NONCONTIGUOUS_GROUPING_VALUES = (
+  values: string[][],
+  parameters: string[]
+): EasyEyesError => {
+  const multiple = values.length > 1 || values[0].length > 1;
+  const offendingValues = values.map(
+    (v, i) =>
+      `${verballyEnumerate(
+        v.map((s) => `<I>${s}</I>`)
+      )} (<span class="error-parameter">${parameters[i]}</span>)`
+  );
+  const offendingValuesStr = limitedEnumerate(offendingValues);
+  return {
+    name: "Block shuffle groups aren't contiguous.",
+    message: `The ${multiple ? "groups" : "group"} ${offendingValuesStr} ${
+      multiple ? "were" : "was"
+    } found to be non-contiguous.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: parameters,
+  };
+};
