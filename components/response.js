@@ -86,7 +86,12 @@ export const _onlyClick = (responseType) => {
  * @param {Category[]} categories Keys are target words, and values are arrays of distractor words
  * @returns {HTMLElement} Response screen element, parent of feedback and response buttons
  */
-export const setupPhraseIdentification = (categories, reader, BC) => {
+export const setupPhraseIdentification = (
+  categories,
+  reader,
+  BC,
+  fontSize = undefined
+) => {
   const responseScreen = document.createElement("div");
   responseScreen.id = "phrase-identification-response-screen";
   responseScreen.classList.add("responseScreen");
@@ -136,6 +141,7 @@ export const setupPhraseIdentification = (categories, reader, BC) => {
       categoryItem.innerHTML = categoryChild;
       const fontFamily = getFontFamilyName(font.name);
       categoryItem.style.fontFamily = fontFamily;
+      if (fontSize) categoryItem.style.fontSize = String(fontSize) + "px";
       categoryItem.onclick = () => {
         // Only register one response per category
         if (
@@ -176,14 +182,16 @@ export const setupPhraseIdentification = (categories, reader, BC) => {
 
 export const showPhraseIdentification = (responseScreen) => {
   document.body.appendChild(responseScreen);
-  const windowSize = document.body.offsetWidth;
-  const responseSize = responseScreen.offsetWidth;
-  if (responseSize > windowSize) {
+  const windowWidth = document.body.offsetWidth;
+  const responseWidth = responseScreen.offsetWidth;
+  const windowHeight = document.body.offsetHeight;
+  const responseHeight = responseScreen.offsetHeight;
+  if (responseWidth > windowWidth || responseHeight > windowHeight) {
     const startTime = performance.now();
 
     const fontSize = scaleFontSizeToFit(
       responseScreen,
-      "phrase-identification-category-column"
+      "phrase-identification-category-item"
     );
     if (fontSize === 12) {
       document.body.style.overflow = "hidden";

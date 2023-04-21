@@ -186,8 +186,7 @@ export const toggleClickedCharacters = () => {
 export const scaleFontSizeToFit = (elem, childrenClass) => {
   // TODO support multidimensional?
   const minFontSize = getMinFontSize();
-  logger("minFontSize", minFontSize);
-  const allowedHeightRatio = 0.8;
+  const allowedHeightRatio = 0.85;
   const parent = elem.parentNode;
   const startingWidth = elem.offsetWidth;
   const containingWidth = parent.offsetWidth;

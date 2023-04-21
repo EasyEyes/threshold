@@ -3455,7 +3455,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             rsvpReadingResponse.screen = setupPhraseIdentification(
               rsvpReadingResponse.categories,
               paramReader,
-              BC
+              BC,
+              rsvpReadingTargetSets.upcoming[0]._heightPx
             );
             psychoJS.experiment.addData(
               "rsvpReadingResponseCategories",
