@@ -3000,7 +3000,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "❌wirelessKeyboardNeededBool (default FALSE)=TRUE alerts EasyEyes that the experiment needs a wireless keyboard. (That's increasingly true at viewing distances beyond 60 cm.) The wireless device could be a commercial wireless keyboard or an EasyEyes keypad emulator running on any smartphone. ",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
     categories: "",
   },
 ];

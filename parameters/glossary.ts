@@ -2497,7 +2497,7 @@ export const GLOSSARY: Glossary = {
     name: "wirelessKeyboardNeededBool",
     availability: "now",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
   },
 };
 
