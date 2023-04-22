@@ -752,7 +752,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1",
     explanation:
-      "⭐ The block number (default 1) is required in every condition. The first condition (column C) must have block==1. After the first condition, each successive condition (column) rightward must have the same block number as the one preceding it, or increased by +1.\n\nSHUFFLING. Shuffling preserves the total number of blocks and conditions. Despite shuffling by blockShuffleGroups(N), each block retains its original block number in the CSV results file. Blocks are performed and reported in the shuffled column order, left to right, so in the CSV results, the block number sequence will be nonmonotonic and will vary across participants, but the block numbers will correspond between the experiment spreadsheet and results files.",
+      "⭐ The block number (default 1) is required in every condition. The first condition (column C) must have block==1. After the first condition, each successive condition (column) rightward must have the same block number as the one preceding it, or increased by +1.\n\nSHUFFLING. Shuffling preserves the total number of blocks and conditions. Despite shuffling by blockShuffleGroups1, blockShuffleGroups2, etc., each block retains its original block number in the CSV results file. Blocks are performed and reported in the shuffled column order, left to right, so in the CSV results, the block number sequence will be nonmonotonic and will vary across participants, but the block numbers will correspond between the experiment spreadsheet and results files.",
     type: "integer",
     default: "1",
     categories: "",
