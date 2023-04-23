@@ -235,7 +235,8 @@ export const prepareExperimentFileForThreshold = async (
 
   if (
     folderList.folderAndTargetKindObjectList.length > 0 &&
-    missingFolderErrors.length === 0
+    missingFolderErrors.length === 0 &&
+    errors.length === 0
   ) {
     const folderStructureErrors = await getRequestedFoldersForStructureCheck(
       folderList.folderAndTargetKindObjectList
