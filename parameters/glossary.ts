@@ -238,8 +238,8 @@ export const GLOSSARY: Glossary = {
     default: "",
     categories: ["hdrMovie", "tenBit"],
   },
-  _needIPhoneTooBool: {
-    name: "_needIPhoneTooBool",
+  _needSmartphoneTooBool: {
+    name: "_needSmartphoneTooBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
@@ -1869,6 +1869,12 @@ export const GLOSSARY: Glossary = {
   },
   responseTypedEasyEyesKeypadBool: {
     name: "responseTypedEasyEyesKeypadBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  needEasyEyesKeypadBeyondCm: {
+    name: "needEasyEyesKeypadBeyondCm",
     availability: "now",
     type: "boolean",
     default: "FALSE",

@@ -548,7 +548,7 @@ const _runLoudspeakerCalibration = async (elems) => {
   const calibratorParams = {
     numCaptures: 3,
     numMLSPerCapture: 4,
-    download: true,
+    download: debugBool.current,
     lowHz: calibrateSoundMinHz.current,
     highHz: calibrateSoundMaxHz.current,
   };
