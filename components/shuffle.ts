@@ -77,10 +77,21 @@ export const getBlockOrder = (paramReader: ParamReader): number[] => {
 
   // TODO verify if necessary
   experiment = experiment.sort((a, b) => a.block - b.block);
-  let blockNumbers = experiment.map((b) => b.block);
+  let blockNumbers = getUniqueBlocks(experiment.map((b) => b.block));
+
   blockNumbers = groupShuffle(0, blockNumbers);
   logger("blockNumber", blockNumbers);
   return blockNumbers;
+};
+
+const getUniqueBlocks = (potentiallyRepeatedBlocks: number[]): number[] => {
+  const seen = new Set();
+  const uniqueBlocks: number[] = [];
+  potentiallyRepeatedBlocks.forEach((b) => {
+    if (!seen.has(b)) uniqueBlocks.push(b);
+    seen.add(b);
+  });
+  return uniqueBlocks;
 };
 
 /**
