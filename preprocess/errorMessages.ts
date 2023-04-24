@@ -15,6 +15,8 @@ export interface EasyEyesError {
   kind: "error" | "warning" | "correct";
   parameters: string[];
 }
+const parameter = (paramName: string): string =>
+  `<span class="error-parameter">${paramName}</span>`;
 
 export const UNBALANCED_COMMAS = (
   offendingParameters: {
@@ -433,9 +435,9 @@ export const NONCONTIGUOUS_GROUPING_VALUES = (
   const multiple = values.length > 1 || values[0].length > 1;
   const offendingValues = values.map(
     (v, i) =>
-      `${verballyEnumerate(
-        v.map((s) => `<I>${s}</I>`)
-      )} (<span class="error-parameter">${parameters[i]}</span>)`
+      `${verballyEnumerate(v.map((s) => `<I>${s}</I>`))} (${parameter(
+        parameters[i]
+      )})`
   );
   const offendingValuesStr = limitedEnumerate(offendingValues);
   return {
@@ -443,6 +445,34 @@ export const NONCONTIGUOUS_GROUPING_VALUES = (
     message: `The ${multiple ? "groups" : "group"} ${offendingValuesStr} ${
       multiple ? "were" : "was"
     } found to be non-contiguous.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: parameters,
+  };
+};
+
+export const NONSUBSET_GROUPING_VALUES = (
+  labels: string[][],
+  parameters: string[]
+): EasyEyesError => {
+  const multiple = labels.length > 1 || labels[0].length > 1;
+  const offendingValues = labels.map(
+    (l, i) =>
+      `${verballyEnumerate(l.map((s) => `<I>${s}</I>`))} (${parameter(
+        parameters[i]
+      )})`
+  );
+  const offendingValuesStr = limitedEnumerate(offendingValues);
+  return {
+    name: "Block shuffle groups not a subset of containing groups.",
+    message: `Every ${parameter(
+      "blockShuffleGroupN"
+    )} group must belong to some ${parameter(
+      "blockShuffleGroupN-1"
+    )} group. The ${multiple ? "groups" : "group"} ${offendingValuesStr} ${
+      multiple ? "were" : "was"
+    } found to not be a subset of a containing group.`,
     hint: "",
     context: "preprocessor",
     kind: "error",

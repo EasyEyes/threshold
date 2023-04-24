@@ -26,6 +26,7 @@ import {
   CODE_FILES_MISSING,
   CONDITION_PARAMETERS_IN_FIRST_COLUMN,
   NONCONTIGUOUS_GROUPING_VALUES,
+  NONSUBSET_GROUPING_VALUES,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -148,8 +149,9 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
     ])
   );
 
-  // Check that block groupings are contiguous
+  // Check that block groupings are contiguous and subsets of outer groups
   errors.push(...areShuffleGroupsContiguous(experimentDf));
+  errors.push(...areShuffleGroupsSubsets(experimentDf));
 
   // Remove empty errors (FUTURE ought to be unnecessary, find root cause)
   errors = errors
@@ -707,21 +709,14 @@ const doConditionsBeginInTheSecondColumn = (
  * @returns {EasyEyesError[]}
  */
 const areShuffleGroupsContiguous = (experiment: any): EasyEyesError[] => {
-  const allColumns = experiment.listColumns();
-  const groupingParameters = [
-    "blockShuffleGroups1",
-    "blockShuffleGroups2",
-    "blockShuffleGroups3",
-    "blockShuffleGroups4",
-  ];
-  const presentGroupingParameters = groupingParameters.filter((p) =>
-    allColumns.includes(p)
-  );
-  const groupings = presentGroupingParameters.map((c) =>
+  const groupingParameters: string[] = experiment
+    .listColumns()
+    .filter(isBlockShuffleGroupingParam);
+  const groupings = groupingParameters.map((c) =>
     getColumnValues(experiment, c)
   );
   const groupingsContiguous: boolean[] = groupings.map(valuesContiguous);
-  const noncontiguousGroupingParameters = presentGroupingParameters.filter(
+  const noncontiguousGroupingParameters = groupingParameters.filter(
     (v, i) => !groupingsContiguous[i]
   );
   const noncontiguousGroupings = groupings
@@ -733,5 +728,58 @@ const areShuffleGroupsContiguous = (experiment: any): EasyEyesError[] => {
       noncontiguousGroupings,
       noncontiguousGroupingParameters
     ),
+  ];
+};
+
+const areShuffleGroupsSubsets = (experiment: any): EasyEyesError[] => {
+  const allGroupingParameters = Object.keys(GLOSSARY).filter(
+    isBlockShuffleGroupingParam
+  );
+  const presentGroupingParameters: string[] = allGroupingParameters.filter(
+    (p) => experiment.listColumns().includes(p)
+  );
+  const unique = (x: string, i: number, arr: string[]) =>
+    x && arr.indexOf(x) === i;
+  const getNonSubsetGroups = (
+    childParam: string,
+    parentParam: string
+  ): string[] => {
+    const childGroups = getColumnValues(experiment, childParam);
+    if (!experiment.listColumns().includes(parentParam))
+      return childGroups.filter(unique);
+    const parentGroups = getColumnValues(experiment, parentParam);
+    return childGroups
+      .map((childGroupLabel, i) => {
+        const parentGroupLabel = parentGroups[i];
+        if (childGroupLabel !== "" && parentGroupLabel === "")
+          return childGroupLabel;
+        return "";
+      })
+      .filter(unique);
+  };
+  const allGroupsAreSubsets = (
+    childParam: string,
+    parentParam: string
+  ): boolean => {
+    return getNonSubsetGroups(childParam, parentParam).length === 0;
+  };
+  const nonSubsetGroupings = [];
+  const nonSubsetGroupingParams = [];
+  for (let i = 1; i < allGroupingParameters.length; i++) {
+    const currentGroup = allGroupingParameters[i];
+    const outerGroup = allGroupingParameters[i - 1];
+    if (presentGroupingParameters.includes(currentGroup)) {
+      if (
+        !presentGroupingParameters.includes(outerGroup) ||
+        !allGroupsAreSubsets(currentGroup, outerGroup)
+      ) {
+        nonSubsetGroupingParams.push(currentGroup);
+        nonSubsetGroupings.push(getNonSubsetGroups(currentGroup, outerGroup));
+      }
+    }
+  }
+  if (!nonSubsetGroupings.length) return [];
+  return [
+    NONSUBSET_GROUPING_VALUES(nonSubsetGroupings, nonSubsetGroupingParams),
   ];
 };
