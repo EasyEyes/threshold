@@ -2230,6 +2230,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (font.source === "file") font.name = cleanFontName(font.name);
           ////
           font.colorRGBA = paramReader.read("fontColorRGBA", status.block)[0];
+          font.letterSpacing = paramReader.read(
+            "fontTrackingForLetters",
+            status.block
+          )[0];
 
           readingParagraph.setFont(font.name);
           readingParagraph.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
