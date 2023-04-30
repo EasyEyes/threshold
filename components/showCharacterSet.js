@@ -47,7 +47,7 @@ export function setupClickableCharacterSet(
 
   if (targetKind == "sound") {
     characterSetHolder.style.display = "grid";
-    //characterSetHolder.style.flexWrap = "wrap";
+    // characterSetHolder.style.flexWrap = "wrap";
     characterSetHolder.style.gridTemplateColumns = "repeat(4,20vw)";
     characterSetHolder.style.gridTemplateRows = "repeat(7,7vh)";
     characterSetHolder.style.gridAutoFlow = "column";
@@ -117,12 +117,6 @@ const pushCharacterSet = (
 ) => {
   for (const a of ans) {
     const characterSet = document.createElement("span");
-
-    if (targetKind == "sound") {
-      characterSet.style.fontSize = "1rem";
-      characterSet.style.textAlign = "left";
-    }
-
     characterSet.id = `clickableCharacter-${a.toLowerCase()}`;
     characterSet.className = "characterSet";
     if (extraCharClassName.length)
@@ -149,6 +143,10 @@ const pushCharacterSet = (
         if (readingConfig.height !== undefined)
           characterSet.style.fontSize = `${readingConfig.height}px`;
         else characterSet.style.fontSize = "2rem";
+      },
+      sound: () => {
+        characterSet.style.fontSize = "1rem";
+        characterSet.style.textAlign = "left";
       },
     });
 
