@@ -71,10 +71,14 @@ export function setupClickableCharacterSet(
   return characterSetHolder;
 }
 
-export function removeClickableCharacterSet(responseRegister) {
+export function removeClickableCharacterSet(
+  responseRegister,
+  characterSetStim
+) {
   responseRegister.current = [];
   responseRegister.onsetTime = 0;
   responseRegister.clickTime = [];
+  characterSetStim?.setAutoDraw(false);
 
   const ele = document.querySelectorAll(".characterSet-holder");
   ele.forEach((e) => {
@@ -167,8 +171,10 @@ export const toggleClickedCharacters = () => {
       document.getElementById(`clickableCharacter-${c.toLowerCase()}`)
     );
   clickedCharacterElems.forEach((e) => {
-    e.style.border = "2px solid black";
-    e.style.backgroundColor = "lightgray";
+    if (e) {
+      e.style.border = "2px solid black";
+      e.style.backgroundColor = "lightgray";
+    }
   });
 };
 

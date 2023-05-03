@@ -1876,7 +1876,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function blockSchedulerFinalRoutineEnd() {
     return async function () {
       loggerText("blockSchedulerFinalRoutineEnd");
-      removeClickableCharacterSet(showCharacterSetResponse);
+      removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
       vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
       return Scheduler.Event.NEXT;
     };
@@ -4258,7 +4258,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (toShowCursor()) {
         showCursor();
-        removeClickableCharacterSet(showCharacterSetResponse);
+        removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
         vocoderPhraseRemoveClickableCategory(showCategoryResponse);
         return Scheduler.Event.NEXT;
       }
@@ -4622,7 +4622,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // wrongSynth.play();
         }
 
-        removeClickableCharacterSet(showCharacterSetResponse);
+        removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
         vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
         continueRoutine = false;
       }
@@ -4937,7 +4937,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // check if the Routine should terminate
       if (!continueRoutine) {
         // a component has requested a forced-end of Routine
-        removeClickableCharacterSet(showCharacterSetResponse);
+        removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
         vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
         continueRoutine = true;
         return Scheduler.Event.NEXT;
