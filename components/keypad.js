@@ -1,5 +1,6 @@
 import { KeyPress } from "../psychojs/src/core/index.js";
-import { _key_resp_allKeys, thisExperimentInfo } from "./global";
+import { rc, _key_resp_allKeys, thisExperimentInfo } from "./global";
+import { phrases } from "./i18n.js";
 import { logger } from "./utils";
 import { Receiver } from "virtual-keypad";
 
@@ -35,7 +36,7 @@ export class KeypadHandler {
     for (let condition of this.reader.conditions) {
       const BC = condition.block_condition;
       const keypadRequested = this.reader.read(
-        "wirelessKeyboardNeededBool",
+        "responseTypedEasyEyesKeypadBool",
         BC
       );
       conditionsNeedingKeypad.set(BC, keypadRequested);
@@ -65,11 +66,11 @@ export class KeypadHandler {
     this.connection = undefined;
   }
   updateKeypadMessage(message) {
-    logger(
-      `updating message, from ${this.message} to ${message}`,
-      this.message !== message
-    );
     if (this.message !== message && this.connection) {
+      logger(
+        `updating message, from ${this.message} to ${message}`,
+        this.message !== message
+      );
       this.receiver?.updateDisplayMessage(message);
       this.message = message;
     }
@@ -77,7 +78,7 @@ export class KeypadHandler {
   async initKeypad() {
     const handshakeCallback = () => {
       this.updateKeypadMessage(
-        "Keypad connected! Please keep this page open, until the experiment prompts you to use it."
+        phrases.T_keypadConnectedAndKeepReady[rc.language.value]
       );
       this.hideQRPopup();
     };
@@ -145,9 +146,9 @@ export class KeypadHandler {
       container.style.display = "block";
       container.style.zIndex = Infinity;
       subtitle.style.display = "block";
-      title.innerHTML = "Use your phone to scan the QR code below!";
+      title.innerHTML = phrases.T_keypadScanQRCode[rc.language.value];
       subtitle.innerHTML =
-        "This will allow you to respond using your phone as a keyboard, allowing you to sit away from your computer keyboard.";
+        phrases.T_keypadScanQRCodeSubtitle[rc.language.value];
       title.appendChild(qrImage);
       if (this.reattemptPopupInterval)
         clearInterval(this.reattemptPopupInterval);
@@ -158,7 +159,6 @@ export class KeypadHandler {
     const container = document.getElementById(`${expName}-container`);
 
     container.style.display = "none";
-    logger("hiding qr code popup!");
   }
   endRoutine(BC) {
     const shouldEndRoutine =
@@ -175,10 +175,8 @@ export class KeypadHandler {
   }
   setSensitive() {
     this.sensitive = true;
-    logger("KEYPAD setting sensitive to true");
   }
   setNonSensitive() {
     this.sensitive = false;
-    logger("KEYPAD setting sensitive to false");
   }
 }

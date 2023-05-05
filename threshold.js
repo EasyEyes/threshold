@@ -3816,7 +3816,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       keypad.removeSpaceKey();
       keypad.setSensitive();
       keypad.stop();
-      keypad.updateKeypadMessage("Continue the experiment as instructed.");
+      keypad.updateKeypadMessage(
+        phrases.T_keypadContinueExperiment[rc.language.value]
+      );
 
       rc.pauseDistance();
       if (toShowCursor()) {
@@ -4392,7 +4394,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         keypad.start();
         keypad.setNonSensitive();
-        keypad.updateKeypadMessage("Respond now!");
+        keypad.updateKeypadMessage(
+          phrases.T_keypadReadyForResponse[rc.language.value]
+        );
       }
       // *key_resp* updates
       // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
