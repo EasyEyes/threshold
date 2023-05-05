@@ -1921,6 +1921,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       fixationConfig.pos = fixationConfig.nominalPos;
       ////
 
+      // Turn off distance nudger if not needed this block
+      if (
+        !ifTrue(paramReader.read("viewingDistanceNudgingBool", status.block))
+      ) {
+        rc.pauseNudger();
+      }
+
       //------Prepare to start Routine 'filter'-------
       t = 0;
       filterClock.reset(); // clock
@@ -2720,6 +2727,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         if (rc.setDistanceDesired)
           rc.setDistanceDesired(viewingDistanceDesiredCm.current);
+
+        // Distance nudging
+        if (
+          paramReader.read("viewingDistanceNudgingBool", status.block_condition)
+        ) {
+          rc.resumeNudger();
+        } else {
+          rc.pauseNudger();
+        }
       }
 
       const reader = paramReader;
