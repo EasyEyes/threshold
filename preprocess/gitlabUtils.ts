@@ -370,7 +370,7 @@ export const getCompatibilityRequirementsForProject = async (
 export const getDurationForProject = async (
   user: User,
   repoName: string
-): Promise<string> => {
+): Promise<string | number> => {
   const repo = getProjectByNameInProjectList(user.projectList, repoName);
 
   const headers = new Headers();
@@ -392,16 +392,23 @@ export const getDurationForProject = async (
       return response.json();
     })
     .then((result) => {
-      if (result != "") {
+      if (typeof result == "number") {
         // console.log("duration in secs: ", result);
         const durationInMin = Math.round(result / 60);
-        if (durationInMin > 1) {
-          return durationInMin + " minutes";
-        } else if (durationInMin == 1) {
-          return durationInMin + " minute";
+        if (durationInMin >= 1) {
+          return durationInMin;
         } else {
-          return "less than 1 minute";
+          return "less than 1";
         }
+      } else if (result != "") {
+        const durationInMin = Math.round(result.currentDuration / 60);
+        let durationline =
+          "EasyEyes: " +
+          durationInMin +
+          ", " +
+          "_online2Minutes: " +
+          result._online2Minutes;
+        return durationline;
       }
       return "";
     })
@@ -950,7 +957,7 @@ export const getGitlabBodyForCompatibilityRequirementFile = (req: object) => {
   return res;
 };
 
-export const getGitlabBodyForDurationText = (req: number) => {
+export const getGitlabBodyForDurationText = (req: object) => {
   const res: ICommitAction[] = [];
   const content = JSON.stringify(req);
   res.push({
@@ -1038,7 +1045,7 @@ const createThresholdCoreFilesOnRepo = async (
   await compatibilityPromise; // fails if added to promiseList
 
   const durationPromise = new Promise(async (resolve) => {
-    const rootContent = getGitlabBodyForDurationText(durations.currentDuration);
+    const rootContent = getGitlabBodyForDurationText(durations);
     pushCommits(
       user,
       gitlabRepo,

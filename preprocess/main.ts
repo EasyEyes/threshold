@@ -299,14 +299,21 @@ export const prepareExperimentFileForThreshold = async (
     );
   } else {
     durations.currentDuration = EstimateDurationForScientistPage(parsed);
-    const durationInMin = Math.round(durations.currentDuration / 60);
-    if (durationInMin > 1) {
-      durations.durationForStatusline = durationInMin + " minutes";
-    } else if (durationInMin == 1) {
-      durations.durationForStatusline = durationInMin + " minute";
+    if (parsed.data.find((i: string[]) => i[0] === "_online2Minutes")) {
+      durations._online2Minutes = parsed.data.find(
+        (i: string[]) => i[0] === "_online2Minutes"
+      )?.[1];
     } else {
-      durations.durationForStatusline = "less than 1 minute";
+      durations._online2Minutes = "unknown";
     }
+    console.log("_online2Minutes", durations._online2Minutes);
+    const durationInMin = Math.round(durations.currentDuration / 60);
+    durations.durationForStatusline =
+      "EasyEyes: " +
+      durationInMin +
+      ", " +
+      "_online2Minutes: " +
+      durations._online2Minutes;
     // console.log(durations.durationForStatusline);
     compatibilityRequirements.parsedInfo =
       getCompatibilityInfoForScientistPage(parsed);

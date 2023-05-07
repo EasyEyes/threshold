@@ -1,5 +1,6 @@
 export const durations = {
   currentDuration: 0,
+  _online2Minutes: "unknown",
   durationForStatusline: "",
 };
 
