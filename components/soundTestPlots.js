@@ -166,7 +166,7 @@ export const plotForAllHz = (plotCanvas, iir = [], calibrationResults) => {
   });
 
   const convMergedDataPoints = calibrationResults.x_conv.map((x, i) => {
-    return { x: calibrationResults.y_unconv[i], y: 10 * Math.log10(x) };
+    return { x: calibrationResults.y_conv[i], y: 10 * Math.log10(x) };
   });
 
   // sort the data points by x
