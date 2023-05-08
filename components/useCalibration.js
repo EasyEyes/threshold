@@ -388,6 +388,7 @@ const _addSoundCalibrationElems = (copy) => {
   testButton.innerHTML = copy.test;
   citation.innerHTML = copy.citation;
   citation.style.fontSize = "0.8em";
+  citation.style.visibility = "hidden";
 
   background.classList.add(...["sound-calibration-background", "rc-panel"]);
   // avoid background being clipped from the top

@@ -661,6 +661,7 @@ export const displayParameters1000Hz = (
   soundLevels,
   soundCalibrationResults
 ) => {
+  elems.citation.style.visibility = "visible";
   elems.background.style.top = "70%";
   elems.soundParametersFromCalibration.style.whiteSpace = "pre";
   // reduce the spacing between the lines for soundParametersFromCalibration
@@ -872,6 +873,8 @@ export const displayParametersAllHz = (elems, iir, calibrationResults) => {
   plotCanvas.height = 500;
 
   elems.soundTestPlots.appendChild(plotCanvas);
+
+  elems.citation.style.visibility = "visible";
 
   plotForAllHz(plotCanvas, iir, calibrationResults);
 };
