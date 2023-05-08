@@ -16,6 +16,7 @@ export class KeypadHandler {
     this.alphabet = [];
     this.font = "";
     this.message = "";
+    this.BC = undefined;
 
     this.receiver = undefined;
     this.acceptingResponses = false;
@@ -30,6 +31,7 @@ export class KeypadHandler {
         _key_resp_allKeys.current.push(responseKeypress);
       }
     };
+    if (this.keypadRequiredInExperiment()) this.initKeypad();
   }
   readKeypadParams() {
     const conditionsNeedingKeypad = new Map();
@@ -46,9 +48,13 @@ export class KeypadHandler {
   keypadRequired(BC) {
     return this.conditionsRequiringKeypad.get(BC);
   }
-  async update(alphabet, font) {
+  keypadRequiredInExperiment() {
+    return [...this.conditionsRequiringKeypad.values()].some((x) => x);
+  }
+  async update(alphabet, font, BC) {
     this.alphabet = alphabet ?? this.alphabet;
     this.font = font ?? this.font;
+    this.BC = BC ?? this.BC;
     if (!this.receiver) {
       await this.initKeypad();
     } else {

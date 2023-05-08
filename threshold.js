@@ -524,6 +524,8 @@ const paramReaderInitialized = async (reader) => {
       if (document.querySelector("#rc-panel-holder"))
         document.querySelector("#rc-panel-holder").remove();
 
+      rc.pauseNudger();
+
       // ! Start actual experiment
       experiment(reader.blockCount);
     }
@@ -858,8 +860,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       waitForStart: true,
     });
 
-    keypad = new KeypadHandler(paramReader);
-
     /* -------------------------------------------------------------------------- */
 
     // ! POPUPS for take a break & proportion correct
@@ -1060,6 +1060,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     createProgressBar();
     updateProgressBar(0);
     hideProgressBar();
+
+    keypad = new KeypadHandler(paramReader);
 
     return Scheduler.Event.NEXT;
   }
@@ -2769,7 +2771,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (keypad.keypadRequired(BC)) {
         const keypadAlphabet = [...fontCharacterSet.current, "space"];
-        await keypad.update(keypadAlphabet, font.name);
+        await keypad.update(keypadAlphabet, font.name, BC);
         keypad.start();
       }
 
