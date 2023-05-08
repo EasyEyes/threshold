@@ -207,7 +207,7 @@ export const plotForAllHz = (plotCanvas, iir = [], calibrationResults) => {
       plugins: {
         title: {
           display: true,
-          text: "PSD of unfiltered and filtered MLS recording",
+          text: "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers.",
         },
         legend: {
           labels: {
