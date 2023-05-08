@@ -105,7 +105,8 @@ export const getThisBlockPages = (
       readingLinesPerPage ?? paramReader.read("readingLinesPerPage", block)[0],
       numberOfPages ?? paramReader.read("readingPages", block)[0],
       readingParagraph,
-      paramReader.read("targetKind", block)[0]
+      paramReader.read("targetKind", block)[0],
+      paramReader.read("fontTrackingForLetters", block)[0]
     );
     readingUsedText[thisURL] = preparedSentences.readingUsedText;
 
@@ -155,7 +156,8 @@ export const preprocessCorpusToSentenceList = (
   lineNumber,
   numberOfPages,
   readingParagraphStimulus,
-  targetKind = "reading"
+  targetKind = "reading",
+  letterSpacing
 ) => {
   // Extended for use in rsvpReading by allowing lineBuffer,lineNumber to either be scalars or arrays
   if (lineBuffer instanceof Array && lineNumber instanceof Array) {
@@ -196,8 +198,18 @@ export const preprocessCorpusToSentenceList = (
           thisLineCharCount -= newWord.length;
 
           const tempLineText = thisLineText + newWord;
+
           readingParagraphStimulus.setText(tempLineText);
-          const testWidth = readingParagraphStimulus.getBoundingBox(true).width;
+          // Chianna: Not sure why this is, but it only takes into account letterSpacing for fonts like Sloan
+          // if you both set the text to the scientist set letter spacing and calculate the added
+          // pixels. Seems to be a bit of a hacky way to do this, so feel free to play around with it
+          readingParagraphStimulus.setLetterSpacingByProportion(letterSpacing);
+          const pixelsAdded =
+            letterSpacing *
+            readingParagraphStimulus.height *
+            (tempLineText.length - 1);
+          const testWidth =
+            readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
 
           if (
             (testWidth > window.innerWidth * 0.8 || thisLineCharCount < -5) &&
@@ -228,6 +240,7 @@ export const preprocessCorpusToSentenceList = (
         }
 
         readingParagraphStimulus.setText(thisLineText);
+        console.log();
         const newTestHeight =
           readingParagraphStimulus.getBoundingBox(true).height;
 
