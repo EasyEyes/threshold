@@ -128,7 +128,7 @@ export const checkSystemCompatibility = (
       /111/g,
       minWidthPx.toString()
     );
-    screenSizeMsg.push(ssMsg + ".");
+    screenSizeMsg.push(ssMsg + ".\n\n");
 
     const screenSizeCompatible = screenWidthPx >= minWidthPx;
     if (deviceIsCompatibleBool && !screenSizeCompatible) {
@@ -143,13 +143,18 @@ export const checkSystemCompatibility = (
       /111/g,
       minHeightPx.toString()
     );
-    screenSizeMsg.push(ssMsg + ".");
+    screenSizeMsg.push(ssMsg + ".\n\n");
     const screenSizeCompatible = screenHeightPx >= minHeightPx;
     if (deviceIsCompatibleBool && !screenSizeCompatible) {
       promptRefresh = true;
     }
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
+  } else {
+    // terminate the last sentence in compatibilityRequirements array with a period
+    if (compatibilityRequirements.length > 0)
+      compatibilityRequirements[compatibilityRequirements.length - 1] +=
+        ".\n\n";
   }
 
   const describeScreenSize = phrases.EE_describeScreenSize[Language].replace(
