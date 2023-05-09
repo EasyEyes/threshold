@@ -116,7 +116,10 @@ export const getAllProjects = async (user: User) => {
   );
   const firstResponseData = await firstResponse.json();
   projectList.push(...firstResponseData);
-  console.log(firstResponseData);
+  console.log(
+    firstResponseData,
+    "first 100 - experiments list from gitlab projects api endpoint"
+  );
 
   // check if header is present
   const pageCountHeader = await firstResponse.headers.get("x-total-pages");
@@ -141,7 +144,10 @@ export const getAllProjects = async (user: User) => {
   const paginationResponseList = await Promise.all(pageList);
   for (let idx = 0; idx < paginationResponseList.length; idx++) {
     const ithResponseData = await paginationResponseList[idx].json();
-    console.log(ithResponseData);
+    console.log(
+      ithResponseData,
+      "paginated - experiments list from gitlab projects api endpoint"
+    );
     projectList.push(...ithResponseData);
   }
 
