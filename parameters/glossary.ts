@@ -326,6 +326,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  _online2InternalName: {
+    name: "_online2InternalName",
+    availability: "now",
+    type: "",
+    default: "",
+  },
   _online2Minutes: {
     name: "_online2Minutes",
     availability: "now",
@@ -430,7 +436,7 @@ export const GLOSSARY: Glossary = {
   _online4Location: {
     name: "_online4Location",
     availability: "now",
-    type: "categorical",
+    type: "multicategorical",
     default: "All countries available",
     categories: [
       "All countries available",
