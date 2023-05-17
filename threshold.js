@@ -551,8 +551,7 @@ const paramReaderInitialized = async (reader) => {
 
           await startExperiment();
         } else {
-          psychoJS?.experiment?.addData(
-            "warning",
+          warning(
             "Participant re-calibrated. You may consider discarding the trials before."
           );
         }
