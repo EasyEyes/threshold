@@ -9,6 +9,7 @@ import {
   viewingDistanceCm,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
+import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -323,6 +324,7 @@ export const addConditionToData = (
   experiment,
   exclude = []
 ) => {
+  experiment.addData("block_condition", conditionName);
   for (const parameter of Object.keys(GLOSSARY)) {
     if (!exclude.includes(parameter))
       experiment.addData(parameter, reader.read(parameter, conditionName));
@@ -374,68 +376,77 @@ export const addBlockStaircaseSummariesToData = (
   psychoJS,
   displayOptions
 ) => {
-  loop._staircases.forEach((staircase, i) => {
-    // TODO What to do when data saving is rejected?
-    if (staircase) {
-      psychoJS.experiment.addData("staircaseName", staircase._name);
-      psychoJS.experiment.addData(
-        "questMeanAtEndOfTrialsLoop",
-        staircase.mean()
-      );
+  if (loop instanceof MultiStairHandler) {
+    loop._staircases.forEach((staircase, i) => {
+      // TODO What to do when data saving is rejected?
+      if (staircase) {
+        psychoJS.experiment.addData("staircaseName", staircase._name);
+        psychoJS.experiment.addData(
+          "questMeanAtEndOfTrialsLoop",
+          staircase.mean()
+        );
 
-      //=============report innerSpacingFromQuestMean.==========
-      var innerSpacingFromQuestMean;
-      if (loop._conditions[i]["thresholdParameter"] === "spacing") {
-        //Convert outer to inner spacing
-        //eDeg = radial eccentricity in deg
-        //innerSpacingDeg = inner spacing in deg
-        //outerSpacingDeg = outer spacing in deg
-        var innerSpacingDeg;
-        var outerSpacingDeg = Math.pow(10, staircase.mean());
-        var targetXDeg = loop._conditions[i]["targetEccentricityXDeg"];
-        var targetYDeg = loop._conditions[i]["targetEccentricityYDeg"];
-        var eDeg = Math.sqrt(targetXDeg * targetXDeg + targetYDeg * targetYDeg);
-        switch (loop._conditions[i]["spacingSymmetry"]) {
-          case "cortex":
-            innerSpacingDeg = eDeg - (eDeg * eDeg) / (eDeg + outerSpacingDeg);
-            break;
-          case "retina":
-            innerSpacingDeg = outerSpacingDeg;
-            break;
-          case "screen":
-            //Simplify Calculation by pretending we're on positive X axis. We imagine a target at (e,0) deg.
-            var targetDeg = eDeg;
-            var outerFlankerDeg = eDeg + outerSpacingDeg;
-            //Using just X, convert deg to pixels.
-            var targetPx = XYPixOfXYDeg([targetDeg, 0], displayOptions);
-            var outerFlankerPx = XYPixOfXYDeg(
-              [outerFlankerDeg, 0],
-              displayOptions
-            );
-            var outerSpacingPx = outerFlankerPx[0] - targetPx[0];
-            var innerSpacingPx = outerSpacingPx;
-            var innerFlankerPx = targetPx[0] - innerSpacingPx;
-            //Using just X, convert pixels to deg
-            var innerFlankerDeg = XYDegOfXYPix(
-              [innerFlankerPx, 0],
-              displayOptions
-            );
-            innerSpacingDeg = targetDeg - innerFlankerDeg[0];
-            break;
-        }
-      } else innerSpacingDeg = Math.pow(10, staircase.mean());
-      psychoJS.experiment.addData("innerSpacingThresholdDeg", innerSpacingDeg);
-      //========================================================
-      psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", staircase.sd());
-      psychoJS.experiment.addData(
-        "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
-        staircase.quantile(staircase._jsQuest.quantileOrder)
-      );
-      if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
-    } else {
-      throw "undefined staircase [add BLOCK data failed]";
-    }
-  });
+        //=============report innerSpacingFromQuestMean.==========
+        var innerSpacingFromQuestMean;
+        if (loop._conditions[i]["thresholdParameter"] === "spacing") {
+          //Convert outer to inner spacing
+          //eDeg = radial eccentricity in deg
+          //innerSpacingDeg = inner spacing in deg
+          //outerSpacingDeg = outer spacing in deg
+          var innerSpacingDeg;
+          var outerSpacingDeg = Math.pow(10, staircase.mean());
+          var targetXDeg = loop._conditions[i]["targetEccentricityXDeg"];
+          var targetYDeg = loop._conditions[i]["targetEccentricityYDeg"];
+          var eDeg = Math.sqrt(
+            targetXDeg * targetXDeg + targetYDeg * targetYDeg
+          );
+          switch (loop._conditions[i]["spacingSymmetry"]) {
+            case "cortex":
+              innerSpacingDeg = eDeg - (eDeg * eDeg) / (eDeg + outerSpacingDeg);
+              break;
+            case "retina":
+              innerSpacingDeg = outerSpacingDeg;
+              break;
+            case "screen":
+              //Simplify Calculation by pretending we're on positive X axis. We imagine a target at (e,0) deg.
+              var targetDeg = eDeg;
+              var outerFlankerDeg = eDeg + outerSpacingDeg;
+              //Using just X, convert deg to pixels.
+              var targetPx = XYPixOfXYDeg([targetDeg, 0], displayOptions);
+              var outerFlankerPx = XYPixOfXYDeg(
+                [outerFlankerDeg, 0],
+                displayOptions
+              );
+              var outerSpacingPx = outerFlankerPx[0] - targetPx[0];
+              var innerSpacingPx = outerSpacingPx;
+              var innerFlankerPx = targetPx[0] - innerSpacingPx;
+              //Using just X, convert pixels to deg
+              var innerFlankerDeg = XYDegOfXYPix(
+                [innerFlankerPx, 0],
+                displayOptions
+              );
+              innerSpacingDeg = targetDeg - innerFlankerDeg[0];
+              break;
+          }
+        } else innerSpacingDeg = Math.pow(10, staircase.mean());
+        psychoJS.experiment.addData(
+          "innerSpacingThresholdDeg",
+          innerSpacingDeg
+        );
+        //========================================================
+        psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", staircase.sd());
+        psychoJS.experiment.addData(
+          "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
+          staircase.quantile(staircase._jsQuest.quantileOrder)
+        );
+        if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
+      } else {
+        throw "undefined staircase [add BLOCK data failed]";
+      }
+    });
+  } else {
+    // TODO anything to do for "reading"? Is QUEST in use in this case?
+  }
 };
 
 /**

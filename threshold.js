@@ -1688,8 +1688,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // Reset trial counter
     status.trialCorrect_thisBlock = 0;
     status.trialCompleted_thisBlock = 0;
-    if (currentLoop instanceof MultiStairHandler)
-      addBlockStaircaseSummariesToData(currentLoop, psychoJS, displayOptions);
+    addBlockStaircaseSummariesToData(currentLoop, psychoJS, displayOptions);
 
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
@@ -1806,6 +1805,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "readWordIdentifiedBool",
               correct ? "TRUE" : "FALSE"
             );
+            addConditionToData(
+              paramReader,
+              status.block_condition,
+              psychoJS.experiment
+            );
             psychoJS.experiment.nextEntry();
             if (correct) correctSynth.play();
           },
@@ -1843,7 +1847,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "readWordIdentifiedBool",
               correct ? "TRUE" : "FALSE"
             );
-            // TODO don't call nextEntry() on the last question
+            // TODO don't call nextEntry() on the last question?
+            addConditionToData(
+              paramReader,
+              status.block_condition,
+              psychoJS.experiment
+            );
             psychoJS.experiment.nextEntry();
             if (correct) correctSynth.play();
           },
@@ -2700,14 +2709,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       if (showProgressBarBool) showProgressBar();
 
-      const parametersToExcludeFromData = [];
-      addConditionToData(
-        paramReader,
-        status.block_condition,
-        psychoJS.experiment,
-        parametersToExcludeFromData
-      );
-      psychoJS.experiment.addData("block_condition", status.block_condition);
       /* --------------------------------- PUBLIC --------------------------------- */
 
       // ! distance
@@ -5455,6 +5456,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // ! update trial counter
         // dangerous
         status.trial = currentLoopSnapshot.thisN;
+
+        const parametersToExcludeFromData = [];
+        const currentTrial = currentLoopSnapshot.getCurrentTrial();
+        // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
+        const BC = currentTrial["trials.label"] ?? currentTrial["label"];
+        addConditionToData(
+          paramReader,
+          BC,
+          psychoJS.experiment,
+          parametersToExcludeFromData
+        );
       } else {
         console.log(
           "%c====== Unknown Snapshot ======",

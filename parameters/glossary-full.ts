@@ -322,6 +322,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_online1InternalName",
+    availability: "now",
+    example: "",
+    explanation:
+      "⏳ _online1InternalName (default is beginning of your study URL: net id and experiment name) specifies the internal name, as a text string, instead of letting Prolific assign it from your study URL. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "_online1RecruitmentService",
     availability: "now",
     example: "Prolific",
@@ -348,16 +358,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "⭐ _online2Description is a (typically long) description of the study, used to recruit new participants. In deciding whether to participate, Prolific members will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. However, several Prolific participants told me that when the pay exceeds $15/hour, the jobs are filled quickly, so they often accept these without reading the study description. So you might want to have your study verify that participants actually satisfy any requirements stated in your description. The EasyEyes _needXXX parameters may be helpful in this regard. IMPORTANT: Prolific's recruitment policy demands advance statement of the study's requirements before the participant accepts. Thus any _needXXX should be mentioned in your study's Description in Prolific, which is copied from this parameter. EasyEyes helps you to do this, by offering a plain English statement of the needs on the scientist page that you can copy and include here.",
     type: "text",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_online2InternalName",
-    availability: "now",
-    example: "",
-    explanation:
-      "⏳ _online2InternalName (default net id with experiment name) specifies the internal name instead of letting Prolific assign it. ",
-    type: "",
     default: "",
     categories: "",
   },
@@ -476,7 +476,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online4AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _online2MinHoursSinceCompletion after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _online2CompletedExperiment is not empty, then participants are recruited solely through the allowList. If _online2AllowList is not empty, then it adds its IDs to the allowList.",
+      "⏳ _online4AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _online4AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _online4AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _online4CustomAllowList is not empty, then it adds its IDs to the allowList.",
     type: "text",
     default: "",
     categories: "",
@@ -486,7 +486,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online4AllowAfterHours (default 0) requires that at least the specified (floating) number of hours pass since completion of the _online2CompletedExperiment before the participant’s ID is added to the allowList.",
+      "⏳ _online4AllowAfterHours (default 0) requires that at least the specified (floating) number of hours pass since completion of the _online4AllowCompletedExperiment before the participant’s ID is added to the allowList.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -506,7 +506,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online4CustomAllowList (no default) is a comma-separated list of Prolific participant IDs. ONLY these participants will be eligible for this study.",
+      "⏳ _online4CustomAllowList (no default) is a comma-separated list of Prolific participant IDs. ONLY these participants will be eligible for this study, unless _online4AllowCompletedExperiment is not empty, in which case both contribute to the allowList of participants.",
     type: "text",
     default: "",
     categories: "",

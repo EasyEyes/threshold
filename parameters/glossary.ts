@@ -307,6 +307,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.05",
   },
+  _online1InternalName: {
+    name: "_online1InternalName",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   _online1RecruitmentService: {
     name: "_online1RecruitmentService",
     availability: "now",
@@ -324,12 +330,6 @@ export const GLOSSARY: Glossary = {
     name: "_online2Description",
     availability: "now",
     type: "text",
-    default: "",
-  },
-  _online2InternalName: {
-    name: "_online2InternalName",
-    availability: "now",
-    type: "",
     default: "",
   },
   _online2Minutes: {
