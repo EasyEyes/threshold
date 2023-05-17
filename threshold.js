@@ -1852,8 +1852,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition,
               psychoJS.experiment
             );
-            psychoJS.experiment.nextEntry();
             if (correct) correctSynth.play();
+            const lastQuestion =
+              readingCurrentQuestionIndex.current ===
+              readingQuestions.current.length;
+            if (!lastQuestion) psychoJS.experiment.nextEntry();
           },
           "readingAnswer",
           targetKind.current

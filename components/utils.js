@@ -10,6 +10,7 @@ import {
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
+import { paramReader } from "../threshold";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -380,7 +381,12 @@ export const addBlockStaircaseSummariesToData = (
     loop._staircases.forEach((staircase, i) => {
       // TODO What to do when data saving is rejected?
       if (staircase) {
-        psychoJS.experiment.addData("staircaseName", staircase._name);
+        const BC = staircase._name;
+        psychoJS.experiment.addData("block_condition", BC);
+        if (BC) {
+          const cName = paramReader.read("conditionName", BC);
+          psychoJS.experiment.addData("conditionName", cName);
+        }
         psychoJS.experiment.addData(
           "questMeanAtEndOfTrialsLoop",
           staircase.mean()
@@ -439,6 +445,7 @@ export const addBlockStaircaseSummariesToData = (
           "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
           staircase.quantile(staircase._jsQuest.quantileOrder)
         );
+        psychoJS.experiment.addData("addBlockStaircaseSummariesToData", true);
         if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
       } else {
         throw "undefined staircase [add BLOCK data failed]";
@@ -446,6 +453,13 @@ export const addBlockStaircaseSummariesToData = (
     });
   } else {
     // TODO anything to do for "reading"? Is QUEST in use in this case?
+    const c = loop?._snapshots?.at(-1);
+    const BC = c["block_condition"];
+    const cName = c["conditionName"];
+    psychoJS.experiment.addData("block_condition", BC);
+    psychoJS.experiment.addData("conditionName", cName);
+    psychoJS.experiment.addData("addBlockStaircaseSummariesToData", true);
+    psychoJS.experiment.nextEntry();
   }
 };
 
