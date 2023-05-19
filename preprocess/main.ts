@@ -115,6 +115,7 @@ export const prepareExperimentFileForThreshold = async (
 
   fillCurrentExperiment("titleOfStudy", "_online1Title");
   fillCurrentExperiment("descriptionOfStudy", "_online2Description");
+  fillCurrentExperiment("_online1InternalName", "_online1InternalName");
 
   // Remove after all CSVs use the new _online2Minutes named field. Maintaining backward compatibility.
   fillCurrentExperiment(
