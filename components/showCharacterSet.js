@@ -223,13 +223,16 @@ export const scaleFontSizeToFit = (
   return sizeToUse;
 };
 
-const getMinFontSize = () => {
+export const getMinFontSize = () => {
   try {
-    // TODO use targetMinPix
-    const distanceBasedMinSize = Math.ceil(
-      XYPixOfXYDeg([0.15, 0], displayOptions)[0]
-    );
-    return Math.max(distanceBasedMinSize, 12);
+    if (letterConfig.targetMinimumPix) {
+      return letterConfig.targetMinimumPix;
+    } else {
+      const distanceBasedMinSize = Math.ceil(
+        XYPixOfXYDeg([0.15, 0], displayOptions)[0]
+      );
+      return Math.max(distanceBasedMinSize, 12);
+    }
   } catch (e) {
     return 12;
   }

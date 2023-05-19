@@ -22,7 +22,7 @@
 import { getFontFamilyName } from "./fonts";
 import { phraseIdentificationResponse, font } from "./global";
 import { psychoJS } from "./globalPsychoJS";
-import { scaleFontSizeToFit } from "./showCharacterSet";
+import { scaleFontSizeToFit, getMinFontSize } from "./showCharacterSet";
 import { logger, showCursor, toFixedNumber } from "./utils";
 
 export const _responseTypes = {
@@ -194,7 +194,7 @@ export const showPhraseIdentification = (responseScreen) => {
       "phrase-identification-category-item",
       0.8
     );
-    if (fontSize === 12) {
+    if (fontSize === getMinFontSize()) {
       // document.body.style.overflow = "hidden";
       // responseScreen.style.overflowX = "scroll";
       // responseScreen.style.backgroundColor = "#ccc";
