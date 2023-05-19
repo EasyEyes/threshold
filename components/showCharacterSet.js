@@ -187,14 +187,17 @@ export const toggleClickedCharacters = () => {
  * @param {HTMLElement} elem
  * @param {string} childrenClass
  */
-export const scaleFontSizeToFit = (elem, childrenClass) => {
+export const scaleFontSizeToFit = (
+  elem,
+  childrenClass,
+  allowedHeightRatio = 0.85
+) => {
   // TODO support multidimensional?
   const minFontSize = getMinFontSize();
-  const allowedHeightRatio = 0.85;
   const parent = elem.parentNode;
   const startingWidth = elem.offsetWidth;
-  const containingWidth = parent.offsetWidth;
-  const containingHeight = parent.offsetHeight;
+  const containingWidth = parent.clientWidth;
+  const containingHeight = parent.clientHeight;
   if (startingWidth === containingWidth) return;
   const scale = (x) =>
     document
@@ -222,8 +225,9 @@ export const scaleFontSizeToFit = (elem, childrenClass) => {
 
 const getMinFontSize = () => {
   try {
+    // TODO use targetMinPix
     const distanceBasedMinSize = Math.ceil(
-      XYPixOfXYDeg([0.4, 0], displayOptions)[0]
+      XYPixOfXYDeg([0.15, 0], displayOptions)[0]
     );
     return Math.max(distanceBasedMinSize, 12);
   } catch (e) {

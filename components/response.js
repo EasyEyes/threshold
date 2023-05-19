@@ -191,13 +191,17 @@ export const showPhraseIdentification = (responseScreen) => {
 
     const fontSize = scaleFontSizeToFit(
       responseScreen,
-      "phrase-identification-category-item"
+      "phrase-identification-category-item",
+      0.8
     );
     if (fontSize === 12) {
-      document.body.style.overflow = "hidden";
-      responseScreen.style.overflowX = "scroll";
-      responseScreen.style.backgroundColor = "#ccc";
-      responseScreen.style.justifyContent = "left";
+      // document.body.style.overflow = "hidden";
+      // responseScreen.style.overflowX = "scroll";
+      // responseScreen.style.backgroundColor = "#ccc";
+      // responseScreen.style.justifyContent = "left";
+      document.body.style.overflow = "scroll";
+    } else {
+      document.body.style.overflow = "visible";
     }
     const stopTime = performance.now();
     const timeSpentScaling = stopTime - startTime;
