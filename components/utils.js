@@ -381,6 +381,7 @@ export const addBlockStaircaseSummariesToData = (
     loop._staircases.forEach((staircase, i) => {
       // TODO What to do when data saving is rejected?
       if (staircase) {
+        psychoJS.experiment.addData("staircaseName", staircase._name);
         const BC = staircase._name;
         psychoJS.experiment.addData("block_condition", BC);
         if (BC) {
