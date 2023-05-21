@@ -195,7 +195,7 @@ export const FORM_FILES_MISSING = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
-    htmlList += `<li>${fileName}</li>`;
+    htmlList += `<li><b>${fileName}</b></li>`;
   });
   return {
     name: "Form file is missing",
