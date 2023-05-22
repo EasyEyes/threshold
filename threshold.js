@@ -1795,6 +1795,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         setupClickableCharacterSet(
           [thisQuestion.correctAnswer, ...thisQuestion.foils].sort(),
           font.name,
+          font.letterSpacing,
           "bottom",
           showCharacterSetResponse,
           (clickedWord) => {
@@ -4887,6 +4888,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             setupClickableCharacterSet(
               speechInNoiseTargetList.current,
               font.name,
+              0, // letter spacing not applicable
               "bottom",
               showCharacterSetResponse,
               null,
@@ -4912,6 +4914,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             setupClickableCharacterSet(
               fontCharacterSet.current,
               font.name,
+              0, // letter spacing not applicable
               fontCharacterSet.where,
               showCharacterSetResponse,
               null,
@@ -4940,6 +4943,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             setupClickableCharacterSet(
               fontCharacterSet.current,
               font.name,
+              0, // letter spacing not applicable
               fontCharacterSet.where,
               showCharacterSetResponse,
               null,

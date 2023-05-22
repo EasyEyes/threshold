@@ -132,6 +132,7 @@ export const setupPhraseIdentification = (
     categoryColumn.id = `phrase-identification-category-column-${categoryId}`;
     categoryColumn.style.display = "flex";
     categoryColumn.style.flexDirection = "column";
+    categoryColumn.style.letterSpacing = String(font.letterSpacing) + "em";
 
     // categoryChild aka distractor word
     category.elements.forEach((categoryChild) => {

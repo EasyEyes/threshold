@@ -31,6 +31,7 @@ export function getCharacterSetShowText(valid) {
 export function setupClickableCharacterSet(
   ans,
   font,
+  letterSpacing,
   where,
   responseRegister,
   extraFunction = null,
@@ -44,6 +45,7 @@ export function setupClickableCharacterSet(
   characterSetHolder.style.fontFamily = `"${font}"`;
   characterSetHolder.style.color = colorRGBASnippetToRGBA(globalFont.colorRGBA);
   characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
+  characterSetHolder.style.letterSpacing = String(letterSpacing) + "em";
 
   if (targetKind == "sound") {
     characterSetHolder.style.display = "grid";
