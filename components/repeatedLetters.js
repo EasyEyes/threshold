@@ -142,7 +142,7 @@ export const restrictRepeatedLettersSpacing = (
         lineSpacingPx = heightPx * letterConfig.spacingOverSizeRatio;
         break;
       case "typographic":
-        // TODO is this enforced by a compiler check?
+        // TODO enforce by a compiler check
         throw "typographic spacingRelationToSize undefined when targetKind is repeatedLetters";
     }
 

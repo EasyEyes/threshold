@@ -1837,6 +1837,18 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
+  responseMustTrackCrosshairBool: {
+    name: "responseMustTrackCrosshairBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
+  responseMustTrackMaxDelaySec: {
+    name: "responseMustTrackMaxDelaySec",
+    availability: "now",
+    type: "",
+    default: "",
+  },
   responseNegativeFeedbackBool: {
     name: "responseNegativeFeedbackBool",
     availability: "now",

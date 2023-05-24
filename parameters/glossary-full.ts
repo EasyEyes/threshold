@@ -1962,9 +1962,29 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭐ Setting responseMustClickCrosshairBool TRUE overrules all other response boolean parameters to enable clicking, and ONLY clicking, of the crosshair, to request the next trial. We suppose that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. (Pressing the ESCAPE key is always allowed.) REQUESTED BY MANY PARTICIPANTS (This grants the frequent request from our participants that they prefer to type the letter, even if they're required to click on the crosshair to begin each trial.) ",
+      "⭐ Setting responseMustClickCrosshairBool TRUE overrules all other response boolean parameters to enable clicking, and ONLY clicking, of the crosshair, to request the next trial. We suppose that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool.",
     type: "boolean",
     default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "responseMustTrackCrosshairBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "⭐ Setting responseMustTrackCrosshairBool TRUE overrules all other response boolean parameters to enable tracking, and ONLY tracking, of the crosshair, to request the next trial. We suppose that tracking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "responseMustTrackMaxDelaySec",
+    availability: "now",
+    example: "",
+    explanation:
+      "The delay time of target presentation is a random sample from the interval 0 to responseMustTrackMaxDelaySec. Relevant only when responseMustTrackCrosshairBool=TRUE. ",
+    type: "",
+    default: "",
     categories: "",
   },
   {

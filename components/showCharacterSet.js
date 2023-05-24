@@ -45,7 +45,8 @@ export function setupClickableCharacterSet(
   characterSetHolder.style.fontFamily = `"${font}"`;
   characterSetHolder.style.color = colorRGBASnippetToRGBA(globalFont.colorRGBA);
   characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
-  characterSetHolder.style.letterSpacing = String(letterSpacing) + "em";
+  if (letterSpacing)
+    characterSetHolder.style.letterSpacing = String(letterSpacing) + "em";
 
   if (targetKind == "sound") {
     characterSetHolder.style.display = "grid";

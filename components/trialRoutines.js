@@ -231,6 +231,7 @@ export const _repeatedLetters_trialRoutineEachFrame = (
       fontCharacterSet.current,
       font.name,
       fontCharacterSet.where,
+      undefined,
       showCharacterSetResponse,
       null,
       "",
