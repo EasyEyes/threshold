@@ -438,9 +438,9 @@ const padToLongestLength = (
   return paddedArrays;
 };
 
-export const getDateAndTimeString = () => {
+export const getDateAndTimeString = (date: Date) => {
   // new Date() -> e.g., 2022-6-13_12-34-56
-  return new Date()
+  return date
     .toLocaleString("zh-CN", { hour12: false })
     .replace(/\//g, "-")
     .replace(/:/g, "-")

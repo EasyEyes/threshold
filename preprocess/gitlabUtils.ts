@@ -653,10 +653,20 @@ export const downloadDataFolder = async (user: User, project: any) => {
       }
 
       const zip = new JSZip();
-      const zipFileName = `${project.name}_${getDateAndTimeString()}.zip`;
+      let zipFileDate; // it is the date of the latest file in the data folder.
 
       for (const file of dataFolder) {
         const fileName = file.name;
+        const fileNameDateArray = fileName.split("_").slice(-2);
+        const date =
+          fileNameDateArray?.[0] +
+          " " +
+          fileNameDateArray?.[1]?.split(".")?.[0]?.replace("h", ":");
+        if (!zipFileDate) {
+          zipFileDate = new Date(date);
+        } else if (new Date(date) > zipFileDate) {
+          zipFileDate = new Date(date);
+        }
 
         const fileContent = await fetch(
           `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
@@ -671,6 +681,10 @@ export const downloadDataFolder = async (user: User, project: any) => {
 
         zip.file(fileName, fileContent);
       }
+      zipFileDate = zipFileDate
+        ? getDateAndTimeString(zipFileDate)
+        : getDateAndTimeString(new Date());
+      const zipFileName = `${project.name}_${zipFileDate}.zip`;
 
       zip.generateAsync({ type: "blob" }).then((content) => {
         saveAs(content, zipFileName);
