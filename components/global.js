@@ -124,6 +124,8 @@ export const fixationConfig = {
   markingOffsetBeforeTargetOnsetSecs: undefined,
   markingOnsetAfterTargetOffsetSecs: undefined,
   stims: undefined, // psychoJS shapeStim
+
+  trackingTimeAfterDelay: undefined,
 };
 
 export const showConditionNameConfig = {

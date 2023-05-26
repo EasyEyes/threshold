@@ -204,7 +204,8 @@ import {
   removeBeepButton,
   removeProceedButton,
   updateInstructionFont,
-  _takeFixationClick,
+  checkIfCursorIsTrackingFixation,
+  addHandlerForClickingFixation,
 } from "./components/instructions.js";
 
 import {
@@ -2989,8 +2990,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // fixation.setAutoDraw(true);
 
           clickedContinue.current = false;
-          document.addEventListener("click", _takeFixationClick);
-          document.addEventListener("touchend", _takeFixationClick);
+          addHandlerForClickingFixation(reader);
 
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
@@ -3358,8 +3358,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           clickedContinue.current = false;
-          document.addEventListener("click", _takeFixationClick);
-          document.addEventListener("touchend", _takeFixationClick);
+          addHandlerForClickingFixation(reader);
 
           // Get level from quest
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
@@ -3417,8 +3416,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readTrialLevelLetterParams(reader, BC);
           clickedContinue.current = false;
           rsvpReadingResponse.displayStatus = false;
-          document.addEventListener("click", _takeFixationClick);
-          document.addEventListener("touchend", _takeFixationClick);
+          addHandlerForClickingFixation(reader);
 
           rsvpReadingResponse.responseType =
             (paramReader.read("responseTypedBool", BC) &&
@@ -3622,8 +3620,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               );
               fixationConfig.pos = fixationConfig.nominalPos;
               fixation.setPos(fixationConfig.pos);
-              document.addEventListener("click", _takeFixationClick);
-              document.addEventListener("touchend", _takeFixationClick);
+              addHandlerForClickingFixation(paramReader);
             });
           });
           trialCounter.setAutoDraw(showCounterBool);
@@ -3740,6 +3737,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (fixationConfig.markingFixationMotionRadiusDeg > 0)
           gyrateFixation(fixation, t, displayOptions);
         fixation.setAutoDraw(true);
+
+        if (
+          paramReader.read(
+            "responseMustTrackCrosshairBool",
+            status.block_condition
+          )
+        )
+          checkIfCursorIsTrackingFixation(t, paramReader);
       };
 
       switchKind(targetKind.current, {
@@ -3860,11 +3865,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           return Scheduler.Event.NEXT;
         },
         letter: () => {
-          _identify_trialInstructionRoutineEnd(
-            instructions,
-            _takeFixationClick,
-            fixation
-          );
+          _identify_trialInstructionRoutineEnd(instructions, fixation);
           if (fixationConfig.markingFixationMotionRadiusDeg) {
             const stimsToOffset =
               letterConfig.spacingRelationToSize !== "typographic" &&
@@ -3884,20 +3885,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         },
         repeatedLetters: () => {
-          _identify_trialInstructionRoutineEnd(
-            instructions,
-            _takeFixationClick,
-            fixation
-          );
+          _identify_trialInstructionRoutineEnd(instructions, fixation);
           if (fixationConfig.markingFixationMotionRadiusDeg)
             offsetStimsToFixationPos(repeatedLettersConfig.stims);
         },
         rsvpReading: () => {
-          _identify_trialInstructionRoutineEnd(
-            instructions,
-            _takeFixationClick,
-            fixation
-          );
+          _identify_trialInstructionRoutineEnd(instructions, fixation);
           if (fixationConfig.markingFixationMotionRadiusDeg) {
             const stimsToOffset = [
               ...rsvpReadingTargetSets.current.stims,
@@ -3907,11 +3900,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         },
         movie: () => {
-          _identify_trialInstructionRoutineEnd(
-            instructions,
-            _takeFixationClick,
-            fixation
-          );
+          _identify_trialInstructionRoutineEnd(instructions, fixation);
         },
       });
 

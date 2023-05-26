@@ -42,15 +42,14 @@ import { psychoJS } from "./globalPsychoJS";
 import * as core from "../psychojs/src/core/index.js";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { logQuest } from "./logging.js";
+import { removeHandlerForClickingFixation } from "./instructions.js";
 const { PsychoJS } = core;
 
 export const _identify_trialInstructionRoutineEnd = (
   instructions,
-  _takeFixationClick,
   fixation
 ) => {
-  document.removeEventListener("click", _takeFixationClick);
-  document.removeEventListener("touchend", _takeFixationClick);
+  removeHandlerForClickingFixation();
   instructions.setAutoDraw(false);
   fixation.setAutoDraw(false);
 };

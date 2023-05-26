@@ -5,6 +5,7 @@ import {
   instructionFont,
   modalButtonTriggeredViaKeyboard,
   targetKind,
+  status,
 } from "./global.js";
 import { cleanFontName } from "./fonts.js";
 import { replacePlaceholders } from "./multiLang.js";
@@ -281,7 +282,7 @@ export const removeProceedButton = () => {
 
 /* ----------------------------- CLICK FIXATION ----------------------------- */
 // On LETTER trial instructions
-export const _takeFixationClick = (e) => {
+const _takeFixationClick = (e) => {
   if (String(e.target.tagName).toLowerCase() !== "canvas") return;
 
   if (modalButtonTriggeredViaKeyboard.current) {
@@ -311,20 +312,7 @@ export const _takeFixationClick = (e) => {
   }
   cX -= Math.round(psychoJS._window._size[0] / 2);
   cY = -cY + Math.round(psychoJS._window._size[1] / 2);
-  // Analogs to [cX, cY], as determined by psychojs
-  const [pX, pY] = to_px(
-    psychojsMouse.getPos(),
-    "height",
-    psychoJS.window,
-    true
-  );
-  const clickDistanceFromFixation = Math.hypot(
-    cX - fixationConfig.pos[0],
-    cY - fixationConfig.pos[1]
-  );
-  const clickingInFixation =
-    clickDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx;
-  if (clickingInFixation) {
+  if (cursorNearFixation(cX, cY)) {
     // Clicked on fixation
     movePastFixation();
   } else {
@@ -333,9 +321,59 @@ export const _takeFixationClick = (e) => {
   }
 };
 
+export const addHandlerForClickingFixation = (reader) => {
+  // If fixation is to be clicked (ie not tracked) then add a handler
+  if (!reader.read("responseMustTrackCrosshairBool", status.block_condition)) {
+    document.addEventListener("click", _takeFixationClick);
+    document.addEventListener("touchend", _takeFixationClick);
+  }
+};
+export const removeHandlerForClickingFixation = () => {
+  document.removeEventListener("click", _takeFixationClick);
+  document.removeEventListener("touchend", _takeFixationClick);
+};
+
+const cursorNearFixation = (cX, cY) => {
+  const cursorDistanceFromFixation = Math.hypot(
+    cX - fixationConfig.pos[0],
+    cY - fixationConfig.pos[1]
+  );
+  return (
+    cursorDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx
+  );
+};
+
+export const checkIfCursorIsTrackingFixation = (t, reader) => {
+  // Analog to [cX, cY] (see _takeFixationClick), as determined by psychojs
+  const [pX, pY] = to_px(
+    psychojsMouse.getPos(),
+    "height",
+    psychoJS.window,
+    true
+  );
+  // When cursor is near fixation...
+  if (cursorNearFixation(pX, pY)) {
+    // ...set a time at which to move on (if still near fixation), if one isn't set already
+    if (typeof fixationConfig.trackingTimeAfterDelay === "undefined") {
+      const maxDelaySec = reader.read(
+        "responseMustTrackMaxDelaySec",
+        status.block_condition
+      );
+      const delaySec = Math.random() * maxDelaySec;
+      fixationConfig.trackingTimeAfterDelay = t + delaySec;
+      // ... else end the routine if it is that time.
+    } else if (t >= fixationConfig.trackingTimeAfterDelay) {
+      fixationConfig.trackingTimeAfterDelay = undefined;
+      movePastFixation();
+    }
+    // And reset that time if the cursor moves away from fixation.
+  } else if (t >= fixationConfig.trackingTimeAfterDelay) {
+    fixationConfig.trackingTimeAfterDelay = undefined;
+  }
+};
+
 export const movePastFixation = () => {
   hideCursor();
-  if (fixationConfig.stim) fixationConfig.stim.setAutoDraw(false);
   clickedContinue.current = true;
   clickedContinue.timestamps.push(performance.now());
 };
