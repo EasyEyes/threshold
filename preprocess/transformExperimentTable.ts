@@ -1,5 +1,9 @@
 import { GLOSSARY } from "../parameters/glossary";
-import { getColumnValues, isUnderscoreParameter } from "./utils";
+import {
+  getColumnValues,
+  isUnderscoreParameter,
+  addUniqueLabelsToDf,
+} from "./utils";
 
 /**
  * @file Perform transformations on the shape of the dataframe representing an experiment table
@@ -12,6 +16,8 @@ import { getColumnValues, isUnderscoreParameter } from "./utils";
  * @returns
  */
 export const normalizeExperimentDfShape = (df: any): any => {
+  // Add block_condition label to every condition of experiment
+  df = addUniqueLabelsToDf(df);
   // Spread underscore param values to all cells
   df = populateUnderscoreValues(df); // _params copied from Column B
   // Enforce using Column B for the underscore parameters, and Column C and on for conditions

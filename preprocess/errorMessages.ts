@@ -479,3 +479,26 @@ export const NONSUBSET_GROUPING_VALUES = (
     parameters: parameters,
   };
 };
+
+export const CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS = (
+  parameters: string[][],
+  columns: string[]
+): EasyEyesError => {
+  const parameterStrings = parameters.map((params) =>
+    verballyEnumerate(params)
+  );
+  const parameterAndConditionsStrings = parameterStrings.map(
+    (paramString, i) => paramString + ` (column ${columns[i]})`
+  );
+  const offendingParametersAndConditions: string = verballyEnumerate(
+    parameterAndConditionsStrings
+  );
+  return {
+    name: "Multiple mutually exclusive parameters are true in the same condition.",
+    message: `Certain groups of parameters can't have multiple set to TRUE. ${offendingParametersAndConditions} are mutually exclusive.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: [...new Set(parameters.flat())],
+  };
+};

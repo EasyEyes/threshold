@@ -13,7 +13,6 @@ import {
 } from "./experimentFileChecks";
 
 import {
-  addUniqueLabelsToDf,
   dataframeFromPapaParsed,
   getFontNameListBySource,
   getFormNames,
@@ -282,9 +281,8 @@ export const prepareExperimentFileForThreshold = async (
   if (filename) {
     df = addNewUnderscoreParam(df, "_experimentFilename", filename);
   }
-  df = addUniqueLabelsToDf(df);
 
-  // Populate underscore params, drop first column, populate defaults
+  // Add block_condition labels, populate underscore params, drop first column, populate defaults
   df = normalizeExperimentDfShape(df);
 
   /* --------------------------------- Errors --------------------------------- */

@@ -27,6 +27,7 @@ import {
   CONDITION_PARAMETERS_IN_FIRST_COLUMN,
   NONCONTIGUOUS_GROUPING_VALUES,
   NONSUBSET_GROUPING_VALUES,
+  CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -37,6 +38,7 @@ import {
   valuesContiguous,
   getNoncontiguousValues,
   isBlockShuffleGroupingParam,
+  toColumnName,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 
@@ -111,18 +113,10 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   // Enforce using Column B for the underscore parameters, and Column C and on for conditions
   errors.unshift(...doConditionsBeginInTheSecondColumn(experimentDf));
 
-  // Alphabetize experimentDf
-  experimentDf = experimentDf.select(...parametersToCheck).restructure(
-    experimentDf
-      .select(...parametersToCheck)
-      .listColumns()
-      .sort()
-  );
-
   // Check for properly formatted _param values, and populate underscore param values to all columns
   errors.push(...checkUnderscoreParams(experimentDf));
 
-  // populate underscores, drop first column, populate defaults
+  // Add block_condition labels, populate underscores, drop first column, populate defaults
   experimentDf = normalizeExperimentDfShape(experimentDf);
 
   // Check for properly formatted "block" parameter values
@@ -152,6 +146,13 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   // Check that block groupings are contiguous and subsets of outer groups
   errors.push(...areShuffleGroupsContiguous(experimentDf));
   errors.push(...areShuffleGroupsSubsets(experimentDf));
+
+  // Check
+  errors.push(
+    ...areMutuallyExclusiveParametersNonconflicting(experimentDf, [
+      ["responseMustTrackCrosshairBool", "responseMustClickCrosshairBool"],
+    ])
+  );
 
   // Remove empty errors (FUTURE ought to be unnecessary, find root cause)
   errors = errors
@@ -731,12 +732,12 @@ const areShuffleGroupsContiguous = (experiment: any): EasyEyesError[] => {
   ];
 };
 
-const areShuffleGroupsSubsets = (experiment: any): EasyEyesError[] => {
+const areShuffleGroupsSubsets = (experimentDf: any): EasyEyesError[] => {
   const allGroupingParameters = Object.keys(GLOSSARY).filter(
     isBlockShuffleGroupingParam
   );
   const presentGroupingParameters: string[] = allGroupingParameters.filter(
-    (p) => experiment.listColumns().includes(p)
+    (p) => experimentDf.listColumns().includes(p)
   );
   const unique = (x: string, i: number, arr: string[]) =>
     x && arr.indexOf(x) === i;
@@ -744,10 +745,10 @@ const areShuffleGroupsSubsets = (experiment: any): EasyEyesError[] => {
     childParam: string,
     parentParam: string
   ): string[] => {
-    const childGroups = getColumnValues(experiment, childParam);
-    if (!experiment.listColumns().includes(parentParam))
+    const childGroups = getColumnValues(experimentDf, childParam);
+    if (!experimentDf.listColumns().includes(parentParam))
       return childGroups.filter(unique);
-    const parentGroups = getColumnValues(experiment, parentParam);
+    const parentGroups = getColumnValues(experimentDf, parentParam);
     return childGroups
       .map((childGroupLabel, i) => {
         const parentGroupLabel = parentGroups[i];
@@ -782,4 +783,44 @@ const areShuffleGroupsSubsets = (experiment: any): EasyEyesError[] => {
   return [
     NONSUBSET_GROUPING_VALUES(nonSubsetGroupings, nonSubsetGroupingParams),
   ];
+};
+
+const areMutuallyExclusiveParametersNonconflicting = (
+  experimentDf: any,
+  mutuallyExclusiveParameterGroups: string[][]
+): EasyEyesError[] => {
+  // !. TODO check each param group for each block_condition, keep list of clashing params (from group) and block_conditions
+  const presentColumns = experimentDf.listColumns();
+  let offendingParamsInConditions: [string[], string][] = [];
+  mutuallyExclusiveParameterGroups.forEach((mutuallyExclusiveParams) => {
+    const theseColumns = mutuallyExclusiveParams.filter((p) =>
+      presentColumns.includes(p)
+    );
+    // const theseColumns = ["block_condition", ...mutuallyExclusiveParams.filter(p => presentColumns.includes(p))];
+    const rows: string[][] = experimentDf.select(...theseColumns).toArray();
+    // TODO generalize way, across the various checks, to account for conditions not being enabled
+    const rowsEnabledMap: boolean[] = presentColumns.includes(
+      "conditionEnabledBool"
+    )
+      ? experimentDf
+          .select("conditionEnabledBool")
+          .toArray()
+          .flat()
+          .map((s: string) => s.toLowerCase() === "true")
+      : rows.map((r) => true);
+    rows.forEach((r: string[], i: number) => {
+      // const values = r.slice(1);
+      // const params = theseColumns.slice(1);
+      // Start at Column C, and 1 indexed, so +3
+      const spreadsheetColumn = toColumnName(i + 3);
+      const valuesMap = r.map((v) => (v.toLowerCase() === "true" ? 1 : 0));
+      const trueParams = theseColumns.filter((p, i) => valuesMap[i]);
+      if (trueParams.length > 1 && rowsEnabledMap[i])
+        offendingParamsInConditions.push([trueParams, spreadsheetColumn]);
+    });
+  });
+  if (!offendingParamsInConditions.length) return [];
+  const parameters = offendingParamsInConditions.map((x) => x[0]);
+  const conditions = offendingParamsInConditions.map((x) => x[1]);
+  return [CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS(parameters, conditions)];
 };

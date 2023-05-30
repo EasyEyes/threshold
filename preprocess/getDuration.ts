@@ -37,7 +37,7 @@ export const EstimateDurationForScientistPage = (parsed: any) => {
   for (let i = 0; i < parsedData.length; i++) {
     if (parsedData[i][0] == "conditionTrials") {
       conditionTrials = parsedData[i];
-      console.log("conditionTrials", conditionTrials);
+      // console.log("conditionTrials", conditionTrials);
     } else if (parsedData[i][0] == "readingLinesPerPage") {
       readingLinesPerPage = parsedData[i];
     } else if (parsedData[i][0] == "readingPages") {
