@@ -31,6 +31,8 @@ export const spaceOrCrosshair = (L, responseType, prev = "") => {
         return prev + phrases.T_readyPressSpaceRepeatedLetters[L];
       case 1:
         return prev + phrases.T_readyClickCrosshairRepeatedLetters[L];
+      case 3:
+        return prev + phrases.T_readyTrackCrosshairRepeatedLetters[L];
       default:
         return (
           prev + phrases.T_readyPressSpaceOrClickCrosshairRepeatedLetters[L]
@@ -42,6 +44,8 @@ export const spaceOrCrosshair = (L, responseType, prev = "") => {
         return prev + phrases.T_readyPressSpaceRsvpReading[L];
       case 1:
         return prev + phrases.T_readyClickCrosshairRsvpReading[L];
+      case 3:
+        return prev + phrases.T_readyTrackCrosshairRsvpReading[L];
       default:
         return prev + phrases.T_readyPressSpaceOrClickCrosshairRsvpReading[L];
     }
@@ -51,6 +55,8 @@ export const spaceOrCrosshair = (L, responseType, prev = "") => {
         return prev + phrases.T_readyPressSpace[L];
       case 1:
         return prev + phrases.T_readyClickCrosshair[L];
+      case 3:
+        return prev + phrases.T_readyTrackCrosshair[L];
       default:
         return prev + phrases.T_readyPressSpaceOrClickCrosshair[L];
     }

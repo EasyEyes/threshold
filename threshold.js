@@ -2978,10 +2978,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
 
+          // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacing"](
               rc.language.value,
-              responseType.current
+              paramReader.read("responseMustTrackCrosshairBool", BC)
+                ? 3
+                : responseType.current
             )
           );
 
@@ -3350,10 +3353,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             .split("");
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
           // Set up instructions
+          // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacing"](
               rc.language.value,
-              responseType.current
+              paramReader.read("responseMustTrackCrosshairBool", BC)
+                ? 3
+                : responseType.current
             )
           );
 
@@ -3497,10 +3503,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
           // Set up instructions
+          // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacing"](
               rc.language.value,
-              responseType.current
+              paramReader.read("responseMustTrackCrosshairBool", BC)
+                ? 3
+                : responseType.current
             )
           );
 
