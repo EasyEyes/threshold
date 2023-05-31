@@ -1846,8 +1846,8 @@ export const GLOSSARY: Glossary = {
   responseMustTrackMaxDelaySec: {
     name: "responseMustTrackMaxDelaySec",
     availability: "now",
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "1",
   },
   responseNegativeFeedbackBool: {
     name: "responseNegativeFeedbackBool",

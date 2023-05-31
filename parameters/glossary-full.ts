@@ -326,7 +326,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online1InternalName (default is beginning of your study URL: net id and experiment name) specifies the internal name, as a text string, instead of letting Prolific assign it from your study URL. ",
+      "_online1InternalName (default is beginning of your study URL: net id and experiment name) specifies the internal name, as a text string, instead of letting Prolific assign it from your study URL. ",
     type: "text",
     default: "",
     categories: "",
@@ -476,7 +476,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online4AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _online4AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _online4AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _online4CustomAllowList is not empty, then it adds its IDs to the allowList.",
+      "_online4AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _online4AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _online4AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _online4CustomAllowList is not empty, then it adds its IDs to the allowList.",
     type: "text",
     default: "",
     categories: "",
@@ -506,7 +506,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online4CustomAllowList (no default) is a comma-separated list of Prolific participant IDs. ONLY these participants will be eligible for this study, unless _online4AllowCompletedExperiment is not empty, in which case both contribute to the allowList of participants.",
+      "_online4CustomAllowList (no default) is a comma-separated list of Prolific participant IDs. ONLY these participants will be eligible for this study, unless _online4AllowCompletedExperiment is not empty, in which case both contribute to the allowList of participants.",
     type: "text",
     default: "",
     categories: "",
@@ -516,7 +516,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online4CustomBlockList (no default) is a comma-separated list of Prolific participant IDs who will not be invited to this study.",
+      "_online4CustomBlockList (no default) is a comma-separated list of Prolific participant IDs who will not be invited to this study.",
     type: "text",
     default: "",
     categories: "",
@@ -537,7 +537,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online4ParticipantInPreviousStudyExclude (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.",
+      "_online4ParticipantInPreviousStudyExclude (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.",
     type: "text",
     default: "",
     categories: "",
@@ -547,7 +547,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online4ParticipantInPreviousStudyInclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren't approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.\n\n",
+      "_online4ParticipantInPreviousStudyInclude (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren't approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.\n\n",
     type: "text",
     default: "",
     categories: "",
@@ -651,7 +651,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⏳ _online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision\nParticipants were asked the following question: Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+      "_online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision. Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",
@@ -832,7 +832,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "❌ IT WORKS BUT HAS NOT PROVED TO BE PREDICTIVE OF TIMING PROBLEMS. Set calibrateFrameRateUnderStressBool TRUE (default FALSE) to ask the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
+      "❌ WORKS BUT FAILS TO PREDICT TIMING PROBLEMS. Set calibrateFrameRateUnderStressBool TRUE (default FALSE) to ask the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -972,7 +972,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG, AND IT REQUIRES FREQUENT RECALIBRATION WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
+      "❌ NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG, AND IT REQUIRES FREQUENT RECALIBRATION WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1983,8 +1983,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "The delay time of target presentation is a random sample from the interval 0 to responseMustTrackMaxDelaySec. Relevant only when responseMustTrackCrosshairBool=TRUE. ",
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "1",
     categories: "",
   },
   {
