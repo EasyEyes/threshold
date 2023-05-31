@@ -1509,6 +1509,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "markingFixationStrokeThickening",
+    availability: "now",
+    example: "",
+    explanation:
+      'markingFixationStrokeThickening (default 1) specifies a thickness multiplier when the fixation mark is "bold". Currently the bold effect is only used to indicate that the cursor is in the hotspot (i.e. the cursor tip is within markingFixationHotSpotRadiusDeg of the center of the crosshair). The multiplier is greater than or equal to zero; it can shrink or expand the cursor strokes. Setting it to 1, the default, disables bolding. ',
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
     name: "markingFixationStrokeThicknessDeg",
     availability: "now",
     example: "0.03",
@@ -1972,7 +1982,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭐ Setting responseMustTrackCrosshairBool TRUE overrules all other response boolean parameters to enable tracking, and ONLY tracking, of the crosshair, to request the next trial. We suppose that tracking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool.",
+      "⭐ For the participant to get target presentation, responseMustTrackCrosshairBool=TRUE overrules all other response boolean parameters, and target presentation can be requested only by cursor tracking of the crosshair center. We suppose good fixation of the crosshair while it is tracked. responseMustTrackCrosshairBool has no effect on other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool. \n     If responseMustTrackCrosshairBool=TRUE, when EasyEyes begins a trial, it enters a loop. First it loads a countdown timer with the required tracking duration, which is randomly sampled from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The countdown begins when the cursor is first within markingFixationHotSpotRadiusDeg of the crosshair center. When the countdown reaches zero, EasyEyes again checks whether the cursor is within markingFixationHotSpotRadiusDeg of the crosshair center. If yes, then EasyEyes exits the loop, and the target is immediately presented. If not, then EasyEyes returns to the beginning of the loop, selecting a new random tracking duration.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1982,7 +1992,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "The delay time of target presentation is a random sample from the interval 0 to responseMustTrackMaxDelaySec. Relevant only when responseMustTrackCrosshairBool=TRUE. ",
+      "❌ The delay time of target presentation is a random sample from the interval 0 to responseMustTrackMaxDelaySec. Relevant only when responseMustTrackCrosshairBool=TRUE. ",
     type: "numerical",
     default: "1",
     categories: "",
@@ -1992,7 +2002,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "The delay time of target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. Relevant only when responseMustTrackCrosshairBool=TRUE. ",
+      "When responseMustTrackCrosshairBool=TRUE, the participant’s required tracking time to get target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The EasyEyes compiler requires that\nresponseMustTrackMaxDelaySec ≥ responseMustTrackMinDelaySec ≥ 0.",
     type: "numerical",
     default: "1",
     categories: "",
@@ -2002,7 +2012,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "The delay time of target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. Relevant only when responseMustTrackCrosshairBool=TRUE. ",
+      "When responseMustTrackCrosshairBool=TRUE, the participant’s required tracking time to get target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The EasyEyes compiler requires that\nresponseMustTrackMaxDelaySec ≥ responseMustTrackMinDelaySec ≥ 0.",
     type: "numerical",
     default: "0.5",
     categories: "",

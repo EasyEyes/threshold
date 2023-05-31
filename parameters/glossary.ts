@@ -1564,6 +1564,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
   },
+  markingFixationStrokeThickening: {
+    name: "markingFixationStrokeThickening",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+  },
   markingFixationStrokeThicknessDeg: {
     name: "markingFixationStrokeThicknessDeg",
     availability: "now",
