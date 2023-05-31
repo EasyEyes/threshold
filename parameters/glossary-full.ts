@@ -1982,9 +1982,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "The delay time of target presentation is a random sample from the interval 0 to responseMustTrackMaxDelaySec. Relevant only when responseMustTrackCrosshairBool=TRUE. ",
+      "The delay time of target presentation is a random sample from the interval responseMustTrackMinDelaySec to responseMustTrackMaxDelaySec. Relevant only when responseMustTrackCrosshairBool=TRUE. ",
     type: "numerical",
     default: "1",
+    categories: "",
+  },
+  {
+    name: "responseMustTrackMinDelaySec",
+    availability: "now",
+    example: "",
+    explanation:
+      "The delay time of target presentation is a random sample from the interval responseMustTrackMinDelaySec to responseMustTrackMaxDelaySec. Relevant only when responseMustTrackCrosshairBool=TRUE. ",
+    type: "numerical",
+    default: "0.5",
     categories: "",
   },
   {
