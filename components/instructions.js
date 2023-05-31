@@ -356,10 +356,15 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
     // ...set a time at which to move on (if still near fixation), if one isn't set already
     if (typeof fixationConfig.trackingTimeAfterDelay === "undefined") {
       const maxDelaySec = reader.read(
-        "responseMustTrackMaxDelaySec",
+        "responseMustTrackMaxSec",
         status.block_condition
       );
-      const delaySec = Math.random() * maxDelaySec;
+      const minDelaySec = reader.read(
+        "responseMustTrackMinSec",
+        status.block_condition
+      );
+      const delaySec =
+        Math.random() * (maxDelaySec - minDelaySec) + minDelaySec;
       fixationConfig.trackingTimeAfterDelay = t + delaySec;
       // ... else end the routine if it is that time.
     } else if (t >= fixationConfig.trackingTimeAfterDelay) {
