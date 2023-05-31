@@ -1849,8 +1849,14 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
   },
-  responseMustTrackMinDelaySec: {
-    name: "responseMustTrackMinDelaySec",
+  responseMustTrackMaxSec: {
+    name: "responseMustTrackMaxSec",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+  },
+  responseMustTrackMinSec: {
+    name: "responseMustTrackMinSec",
     availability: "now",
     type: "numerical",
     default: "0.5",
