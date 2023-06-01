@@ -595,10 +595,69 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   elems,
   gains
 ) => {
-  await _runSoundLevelCalibration(elems, gains);
-  (elems.subtitle.innerHTML =
-    phrases.RC_soundCalibrationTitleAllHz[rc.language.value]),
-    await _runLoudspeakerCalibration(elems);
+  // await _runSoundLevelCalibration(elems, gains);
+  // (elems.subtitle.innerHTML =
+  //   phrases.RC_soundCalibrationTitleAllHz[rc.language.value]),
+  //   await _runLoudspeakerCalibration(elems);
+  const {
+    Speaker,
+    CombinationCalibration,
+    UnsupportedDeviceError,
+    MissingSpeakerIdError,
+    CalibrationTimedOutError,
+  } = speakerCalibrator;
+
+  const speakerParameters = {
+    siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
+    targetElementId: "displayQR",
+    debug: debugBool.current,
+    ICalib: ICalibDBSPL.current,
+    gainValues: gains,
+  };
+
+  const calibratorParams = {
+    numCaptures: 3,
+    numMLSPerCapture: 4,
+    download: debugBool.current,
+    lowHz: calibrateSoundMinHz.current,
+    highHz: calibrateSoundMaxHz.current,
+  };
+
+  const calibrator = new CombinationCalibration(calibratorParams);
+
+  calibrator.on("update", ({ message, ...rest }) => {
+    elems.displayUpdate.innerHTML = message;
+  });
+
+  const debug = false;
+
+  if (debug) {
+    invertedImpulseResponse.current = [
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    ];
+  } else {
+    soundCalibrationResults.current = await Speaker.startCalibration(
+      speakerParameters,
+      calibrator,
+      500000
+    );
+
+    // console.log("calibrationResults", soundCalibrationResults.current);
+
+    invertedImpulseResponse.current = soundCalibrationResults.current.iir;
+    allHzCalibrationResults.x_conv = soundCalibrationResults.current.x_conv;
+    allHzCalibrationResults.y_conv = soundCalibrationResults.current.y_conv;
+    allHzCalibrationResults.x_unconv = soundCalibrationResults.current.x_unconv;
+    allHzCalibrationResults.y_unconv = soundCalibrationResults.current.y_unconv;
+
+    soundGainDBSPL.current =
+      soundCalibrationResults.current.parameters.gainDBSPL;
+    soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
+  }
+  const { normalizedIIR, calibrationLevel } =
+    getSoundCalibrationLevelDBSPLFromIIR(invertedImpulseResponse.current);
+  invertedImpulseResponse.current = normalizedIIR;
+  soundCalibrationLevelDBSPL.current = calibrationLevel;
 };
 /* -------------------------------------------------------------------------- */
 
