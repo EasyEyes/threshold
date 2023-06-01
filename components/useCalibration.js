@@ -599,6 +599,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   // (elems.subtitle.innerHTML =
   //   phrases.RC_soundCalibrationTitleAllHz[rc.language.value]),
   //   await _runLoudspeakerCalibration(elems);
+  elems.subtitle.innerHTML = "";
   const {
     Speaker,
     CombinationCalibration,
