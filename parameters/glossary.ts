@@ -419,7 +419,7 @@ export const GLOSSARY: Glossary = {
     name: "_online4ApprovalRate",
     availability: "now",
     type: "text",
-    default: " 0, 100",
+    default: " 0,100",
   },
   _online4CustomAllowList: {
     name: "_online4CustomAllowList",

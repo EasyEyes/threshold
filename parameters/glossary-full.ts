@@ -498,7 +498,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "⏳ _online4ApprovalRate (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)",
     type: "text",
-    default: " 0, 100",
+    default: " 0,100",
     categories: "",
   },
   {
