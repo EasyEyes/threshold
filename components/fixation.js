@@ -2,7 +2,7 @@ import { Polygon, ShapeStim } from "../psychojs/src/visual";
 import { Color, to_px } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
 import { displayOptions, fixationConfig, letterConfig } from "./global";
-import { logger, XYPixOfXYDeg } from "./utils";
+import { logger, XYPixOfXYDeg, cursorNearFixation } from "./utils";
 
 export const getFixationPos = (blockN, paramReader) => {
   const locationStrategy = paramReader.read(
@@ -40,6 +40,7 @@ export class Fixation {
         depth: -6.0,
       }),
     ];
+    this.bold = false;
   }
 
   update(reader, BC, targetHeightPx, targetXYPx) {
@@ -82,11 +83,16 @@ export class Fixation {
       "markingOffsetBeforeTargetOnsetSecs",
       BC
     );
+    fixationConfig.markingFixationStrokeThickening = reader.read(
+      "markingFixationStrokeThickening",
+      BC
+    );
     if (
       ["pixPerCm", "nearPointXYDeg", "nearPointXYPix"].every(
         (s) => displayOptions[s]
       )
     ) {
+      // Diameter
       fixationConfig.strokeLength =
         XYPixOfXYDeg(
           [fixationConfig.markingFixationStrokeLengthDeg, 0],
@@ -180,6 +186,25 @@ export class Fixation {
       }
     });
   }
+  setBold(on = true) {
+    const multiplier = fixationConfig.markingFixationStrokeThickening;
+    if (typeof multiplier !== "undefined") {
+      if (on) {
+        this.setLineWidth(fixationConfig.strokeWidth * multiplier);
+        this.bold = true;
+      } else {
+        this.setLineWidth(fixationConfig.strokeWidth);
+        this.bold = false;
+      }
+    }
+  }
+  boldIfCursorNearFixation() {
+    if (cursorNearFixation() && !this.bold) {
+      this.setBold(true);
+    } else if (!cursorNearFixation() && this.bold) {
+      this.setBold(false);
+    }
+  }
   _updateIfNeeded() {
     this.stims.forEach((stim) => stim._updateIfNeeded());
   }
@@ -210,20 +235,20 @@ export class Fixation {
 }
 
 export const getFixationVertices = (
-  strokeLength,
+  strokeDiameterPx,
   targetHeightPx,
   targetXYPx
 ) => {
-  const half = Math.round(strokeLength / 2);
+  const strokeRadiusPx = Math.round(strokeDiameterPx / 2);
   const vertices = [
     [
-      [-half, 0],
+      [-strokeRadiusPx, 0],
       [0, 0],
-      [half, 0],
+      [strokeRadiusPx, 0],
       [0, 0],
-      [0, -half],
+      [0, -strokeRadiusPx],
       [0, 0],
-      [0, half],
+      [0, strokeRadiusPx],
     ],
   ];
   // If we should blank near the target...

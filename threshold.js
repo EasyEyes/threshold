@@ -1932,6 +1932,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       targetKind.current = paramReader.read("targetKind", status.block)[0];
       // TODO support more
       targetTask.current = paramReader.read("targetTask", status.block)[0];
+      // TODO move to per-trial location when (if?) move to supporting fixation pos by condition rather than just per block
       fixationConfig.nominalPos = getFixationPos(status.block, paramReader);
       fixationConfig.pos = fixationConfig.nominalPos;
       ////
@@ -3822,6 +3823,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           return Scheduler.Event.NEXT;
         }
       }
+
+      if (
+        fixationConfig.show &&
+        paramReader.read(
+          "markingFixationStrokeThickening",
+          status.block_condition
+        ) !== 1
+      )
+        fixation.boldIfCursorNearFixation();
 
       if (!continueRoutine || clickedContinue.current) {
         continueRoutine = true;

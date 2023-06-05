@@ -8,6 +8,7 @@ import {
   status,
   viewingDistanceCm,
 } from "./global";
+import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { paramReader } from "../threshold";
@@ -960,3 +961,22 @@ export const saveDataOnWindowClose = (experiment) => {
 
 export const tand = (deg) => Math.tan((deg * Math.PI) / 180);
 export const atand = (x) => (Math.atan(x) * 180) / Math.PI;
+
+export const cursorNearFixation = (cX, cY) => {
+  // Analog to [cX, cY] (see _takeFixationClick), as determined by psychojs
+  const [pX, pY] = to_px(
+    psychojsMouse.getPos(),
+    "height",
+    psychoJS.window,
+    true
+  );
+  const x = cX ?? pX;
+  const y = cY ?? pY;
+  const cursorDistanceFromFixation = Math.hypot(
+    x - fixationConfig.pos[0],
+    y - fixationConfig.pos[1]
+  );
+  const cursorIsNearFixation =
+    cursorDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx;
+  return cursorIsNearFixation;
+};

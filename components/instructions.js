@@ -10,8 +10,8 @@ import {
 import { cleanFontName } from "./fonts.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { _onlyClick } from "./response.js";
-import { hideCursor, logger } from "./utils.js";
-import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS.js";
+import { hideCursor, logger, cursorNearFixation } from "./utils.js";
+import { psychoJS } from "./globalPsychoJS.js";
 
 export const returnOrClickProceed = (L, responseType, prev = "") => {
   switch (responseType) {
@@ -339,26 +339,9 @@ export const removeHandlerForClickingFixation = () => {
   document.removeEventListener("touchend", _takeFixationClick);
 };
 
-const cursorNearFixation = (cX, cY) => {
-  const cursorDistanceFromFixation = Math.hypot(
-    cX - fixationConfig.pos[0],
-    cY - fixationConfig.pos[1]
-  );
-  return (
-    cursorDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx
-  );
-};
-
 export const checkIfCursorIsTrackingFixation = (t, reader) => {
-  // Analog to [cX, cY] (see _takeFixationClick), as determined by psychojs
-  const [pX, pY] = to_px(
-    psychojsMouse.getPos(),
-    "height",
-    psychoJS.window,
-    true
-  );
   // When cursor is near fixation...
-  if (cursorNearFixation(pX, pY)) {
+  if (cursorNearFixation()) {
     // ...set a time at which to move on (if still near fixation), if one isn't set already
     if (typeof fixationConfig.trackingTimeAfterDelay === "undefined") {
       const maxDelaySec = reader.read(
