@@ -680,7 +680,6 @@ export const GLOSSARY: Glossary = {
       "Uzbekistan",
       "Vanuatu",
       "Venezuela",
-      "Bolivarian Republic of",
       "Vietnam",
       "Wallis and Futuna",
       "Western Sahara",
@@ -1073,7 +1072,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "multicategorical",
     default: "",
-    categories: ["0، 1-5، 6-10، 11-15", "more than 15", "Not applicable"],
+    categories: ["0", "1-5", "6-10", "11-15", "more than 15", "Not applicable"],
   },
   _participantIDGetBool: {
     name: "_participantIDGetBool",
