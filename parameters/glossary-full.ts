@@ -1475,7 +1475,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
     type: "numerical",
-    default: "0.3",
+    default: "0.1",
     categories: "",
   },
   {
@@ -1515,7 +1515,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'markingFixationStrokeThickening (default 1) specifies a thickness multiplier when the fixation mark is "bold". Currently the bold effect is only used to indicate that the cursor is in the hotspot (i.e. the cursor tip is within markingFixationHotSpotRadiusDeg of the center of the crosshair). The multiplier is greater than or equal to zero, so it can shrink or expand the crosshair stroke thickness. Setting it to 1, the default, disables bolding. ',
     type: "numerical",
-    default: "1",
+    default: "1.4",
     categories: "",
   },
   {

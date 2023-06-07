@@ -1543,7 +1543,7 @@ export const GLOSSARY: Glossary = {
     name: "markingFixationHotSpotRadiusDeg",
     availability: "now",
     type: "numerical",
-    default: "0.3",
+    default: "0.1",
   },
   markingFixationMotionPeriodSec: {
     name: "markingFixationMotionPeriodSec",
@@ -1567,7 +1567,7 @@ export const GLOSSARY: Glossary = {
     name: "markingFixationStrokeThickening",
     availability: "now",
     type: "numerical",
-    default: "1",
+    default: "1.4",
   },
   markingFixationStrokeThicknessDeg: {
     name: "markingFixationStrokeThicknessDeg",
