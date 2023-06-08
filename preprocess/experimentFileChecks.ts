@@ -174,7 +174,7 @@ const areParametersAlphabetical = (
   const originalOrder = [...parameters];
   let previousParameter = originalOrder[0];
   for (let i = 1; i < originalOrder.length; i++) {
-    if (originalOrder[i] < previousParameter) {
+    if (originalOrder[i].toLowerCase() < previousParameter.toLowerCase()) {
       return PARAMETERS_NOT_ALPHABETICAL(originalOrder[i]);
     }
     previousParameter = originalOrder[i];
@@ -348,6 +348,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
           return {
             value: x.value
               .split(",")
+              .map((s) => s.trimStart()) // Allow split by ", " (like how the glossary is parsed) or ","
               .filter((s) => !categories?.includes(s))
               .join(","),
             block: x.block,
@@ -424,6 +425,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
           const validMulti = (s: string): boolean =>
             s
               .split(",")
+              .map((s) => s.trimStart())
               .filter((x) => x)
               .every((s) => GLOSSARY[columnName]["categories"].includes(s));
           checkType(

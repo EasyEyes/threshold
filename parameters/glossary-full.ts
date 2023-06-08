@@ -526,7 +526,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⭑ _online4Location is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\nMore\nThe answer can include many countries, which are combined by an OR rule.",
+      '⭑ _online4Location is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\n...\nThe answer can include many countries, which are combined by an OR rule.\nLIMITATION: Our categories include "Venezuela", whereas Prolific recognizes only "Venezuela, Bolivarian Republic of", which includes a comma. We use a comma to separate items, so special code is required to handle this case. Our compiler already allows you to specify "Venezuela". We just need for the EasyEyes code that interfaces to Prolific to expand "Venezuela" to "Venezuela, Bolivarian Republic of". We haven\'t yet needed to select Venezuela. Let me know if you need to. denis.pelli@nyu.edu',
     type: "multicategorical",
     default: "All countries available",
     categories:
