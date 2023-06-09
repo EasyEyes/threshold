@@ -752,7 +752,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "When _trackGazeIndependentlyBool is TRUE (default is FALSE), then when presenting a letter target, EasyEyes should use a RESTful node to turn on gaze tracking at onset of experiment and turn it off at end of experiment. And EasyEyes should save a CSV file to the Download folder in which each row records the absolute time, the crosshair position, cursor position, and target position.",
+      "When _trackGazeExternallyBool is TRUE (default is FALSE), then when presenting a letter target, EasyEyes should use a RESTful node to turn on gaze tracking at onset of experiment and turn it off at end of experiment. And EasyEyes should save a CSV file to the Download folder in which each row records the absolute time, the crosshair position, cursor position, and target position.",
     type: "boolean",
     default: "FALSE",
     categories: "",
