@@ -472,16 +472,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "audio, camera, microphone, download",
   },
   {
-    name: "_online4AllowCompletedExperiment",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 _online4AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _online4AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _online4AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _online4CustomAllowList is not empty, then it adds its IDs to the allowList.",
-    type: "text",
-    default: "",
-    categories: "",
-  },
-  {
     name: "_online4AllowAfterHours",
     availability: "now",
     example: "",
@@ -489,6 +479,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "🕑 _online4AllowAfterHours (default 0) requires that at least the specified (floating) number of hours pass since completion of the _online4AllowCompletedExperiment before the participant’s ID is added to the allowList.",
     type: "numerical",
     default: "0",
+    categories: "",
+  },
+  {
+    name: "_online4AllowCompletedExperiment",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _online4AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _online4AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _online4AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _online4CustomAllowList is not empty, then it adds its IDs to the allowList.",
+    type: "text",
+    default: "",
     categories: "",
   },
   {
@@ -526,7 +526,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ _online4Location is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\n...\nThe answer can include many countries, which are combined by an OR rule.\nLIMITATION: Our categories include "Venezuela", whereas Prolific recognizes only "Venezuela, Bolivarian Republic of", which includes a comma. We use a comma to separate items, so special code is required to handle this case. Our compiler already allows you to specify "Venezuela". We just need for the EasyEyes code that interfaces to Prolific to expand "Venezuela" to "Venezuela, Bolivarian Republic of". We haven\'t yet needed to select Venezuela. Let me know if you need to. denis.pelli@nyu.edu',
+      '⭑ _online4Location is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\n...\nThe answer can include many countries, which are combined by an OR rule.\nNOTE: _online4Location accepts "Venezuela" which is automatically converted to Prolific\'s "Venezuela, Bolivarian Republic of". ',
     type: "multicategorical",
     default: "All countries available",
     categories:
@@ -743,6 +743,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "When _saveFirstInEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always display the active block. Usually _saveFirstInEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (this avoids delay and makes the experiment more robust). But scientists will enable it when they want to know which block failed.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_trackGazeIndependentlyBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "When _trackGazeIndependentlyBool is TRUE (default is FALSE), then when presenting a letter target, EasyEyes should use a RESTful node to turn on gaze tracking at onset of experiment and turn it off at end of experiment. And EasyEyes should save a CSV file to the Download folder in which each row records the absolute time, the crosshair position, cursor position, and target position.",
     type: "boolean",
     default: "FALSE",
     categories: "",

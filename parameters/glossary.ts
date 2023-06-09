@@ -403,17 +403,17 @@ export const GLOSSARY: Glossary = {
     default: "",
     categories: ["audio", "camera", "microphone", "download"],
   },
-  _online4AllowCompletedExperiment: {
-    name: "_online4AllowCompletedExperiment",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
   _online4AllowAfterHours: {
     name: "_online4AllowAfterHours",
     availability: "now",
     type: "numerical",
     default: "0",
+  },
+  _online4AllowCompletedExperiment: {
+    name: "_online4AllowCompletedExperiment",
+    availability: "now",
+    type: "text",
+    default: "",
   },
   _online4ApprovalRate: {
     name: "_online4ApprovalRate",
@@ -1100,6 +1100,12 @@ export const GLOSSARY: Glossary = {
   },
   _saveFirstInEachBlockBool: {
     name: "_saveFirstInEachBlockBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  _trackGazeIndependentlyBool: {
+    name: "_trackGazeIndependentlyBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
