@@ -752,7 +752,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "When _trackGazeExternallyBool is TRUE (default is FALSE), then when presenting a letter target, EasyEyes should use a RESTful node to turn on gaze tracking at onset of experiment and turn it off at end of experiment. And EasyEyes should save a CSV file to the Download folder in which each row records the absolute time, the crosshair position, cursor position, and target position.",
+      "When _trackGazeExternallyBool is TRUE (default is FALSE), then EasyEyes uses a RESTful node to turn on gaze tracking at onset of experiment and turn it off at end of experiment. And, at the end of the experiment, EasyEyes saves a CSV file to the Download folder. \nSTIMULUS CSV TABLE. Each row of the EasyEyes CSV “stimulus” table will record absolute time (in secs, floating point), x,y position (pix) of the crosshair, x,y of the cursor, and (if present) x,y of the target. (We’ll also include viewing distance (cm), x,y of near point (pix), experiment name, Pavlovia name, block number, condition number, conditionName, and trial number.) \nGAZE CSV TABLE. We assume that the external gaze tracker creates another csv file. Each row of the MATLAB CSV “gaze” table will record absolute time (in secs, floating point) and x,y gaze position (pix), roughly every 50 ms. Just as a matter of good practice, this file should also include viewing distance (cm), x,y of near point (pix). \n\nEasyEyes and MATLAB will drop their CSV tables into the Download folder. EasyEyes (“stimulus”) and MATLAB (“gaze”) will each generate one file for the whole experiment.",
     type: "boolean",
     default: "FALSE",
     categories: "",
