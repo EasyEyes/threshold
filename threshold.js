@@ -130,6 +130,7 @@ import {
   fontSize,
   blockOrder,
   _key_resp_allKeys,
+  allHzCalibrationResults,
 } from "./components/global.js";
 
 import {
@@ -775,6 +776,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "THD",
         soundCalibrationResults.current.thdValues
       );
+    }
+    if (allHzCalibrationResults.x_conv) {
+      psychoJS.experiment.addData(
+        "allHzCalibrationFiltered_x",
+        allHzCalibrationResults.x_conv
+      );
+      psychoJS.experiment.addData(
+        "allHzCalibrationFiltered_y",
+        allHzCalibrationResults.y_conv
+      );
+      psychoJS.experiment.addData(
+        "allHzCalibrationUnfiltered_x",
+        allHzCalibrationResults.y_unconv
+      ); // x and y are swapped
+      psychoJS.experiment.addData(
+        "allHzCalibrationUnfiltered_y",
+        allHzCalibrationResults.x_unconv
+      ); // x and y are swapped
     }
     if (rc.stressFps) {
       psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
