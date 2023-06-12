@@ -99,12 +99,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  _experimentName: {
-    name: "_experimentName",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
   _experimentSavePartialResultsBool: {
     name: "_experimentSavePartialResultsBool",
     availability: "now",
@@ -1104,8 +1098,8 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  _trackGazeIndependentlyBool: {
-    name: "_trackGazeIndependentlyBool",
+  _trackGazeExternallyBool: {
+    name: "_trackGazeExternallyBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
@@ -1228,6 +1222,18 @@ export const GLOSSARY: Glossary = {
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  calibrateTrackDistanceCheckCm: {
+    name: "calibrateTrackDistanceCheckCm",
+    availability: "now",
+    type: "text",
+    default: "25, 35, 50, 70, 100, 140, 160, 180",
+  },
+  calibrateTrackDistanceCheckBool: {
+    name: "calibrateTrackDistanceCheckBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
@@ -2524,18 +2530,6 @@ export const GLOSSARY: Glossary = {
   },
   viewingDistanceNudgingBool: {
     name: "viewingDistanceNudgingBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  needSmartphoneBool: {
-    name: "needSmartphoneBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  wirelessKeyboardNeededBool: {
-    name: "wirelessKeyboardNeededBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
