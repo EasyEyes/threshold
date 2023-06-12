@@ -71,10 +71,6 @@ const getCurrentPositionsRecord = (
   conditionName = showConditionNameConfig.name as unknown as string;
   trialNumber = status.trial as unknown as number;
   timeSec = Date.now() / 1000;
-  console.log(
-    "!. ~ file: eyeTrackingFacilitation.ts:50 ~ getCurrentPositionsRecord ~ timeSec:",
-    timeSec
-  );
 
   const thisRecord: positionsRecord = {
     experimentName: experimentName,

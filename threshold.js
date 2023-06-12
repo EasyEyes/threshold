@@ -2177,7 +2177,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("responseTypedEasyEyesKeypadBool", status.block)[0],
         paramReader.read("responseSpokenBool", status.block)[0],
         undefined,
-        paramReader.read("responseSpokenToExperimenterBool", status.block)[0]
+        paramReader.read("responseSpokenBool", status.block)[0]
       );
 
       // set default background color for instructions
@@ -2663,10 +2663,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "responseMustClickCrosshairBool",
             status.block_condition
           ),
-          paramReader.read(
-            "responseSpokenToExperimenterBool",
-            status.block_condition
-          )
+          paramReader.read("responseSpokenBool", status.block_condition)
         );
         logger(
           "responseType trialInstructionRoutineBegin",
@@ -3467,7 +3464,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingResponse.responseType =
             (paramReader.read("responseTypedBool", BC) &&
               !paramReader.read("responseClickedBool", BC)) ||
-            paramReader.read("responseSpokenToExperimenterBool", BC)
+            paramReader.read("responseSpokenBool", BC)
               ? "typed"
               : "clicked";
 
