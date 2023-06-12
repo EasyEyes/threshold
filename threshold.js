@@ -273,6 +273,8 @@ import {
   updateBoundingBoxPolies,
 } from "./components/boundingBoxes.js";
 
+import { recordStimulusPositionsForEyetracking } from "./components/eyeTrackingFacilitation.ts";
+
 // READING
 import { prepareReadingQuestions } from "./components/reading.ts";
 import {
@@ -1948,10 +1950,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       reportStartOfNewBlock(status.block, psychoJS.experiment);
 
-      if (
-        status.nthBlock === 1 ||
-        paramReader.read("_saveFirstInEachBlockBool", "__ALL_BLOCKS__")[0]
-      ) {
+      if (status.nthBlock === 1 || paramReader.read("_saveEachBlockBool")[0]) {
         logger("Saving csv at start of block!");
         psychoJS.experiment.save();
       }
@@ -3324,6 +3323,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
 
+          if (paramReader.read("_trackGazeExternallyBool")[0])
+            recordStimulusPositionsForEyetracking(
+              target,
+              "trialInstructionRoutineBegin"
+            );
+
           // /* --- BOUNDING BOX --- */
           addBoundingBoxesToComponents(
             showBoundingBox,
@@ -3768,6 +3773,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         t = instructionsClock.getTime();
         frameN = frameN + 1;
 
+        if (paramReader.read("_trackGazeExternallyBool")[0])
+          recordStimulusPositionsForEyetracking(
+            target,
+            "trialInstructionRoutineEachFrame"
+          );
+
         if (showConditionNameConfig.showTargetSpecs) {
           targetSpecsConfig.pos[0] = -window.innerWidth / 2;
           targetSpecsConfig.pos[1] = -window.innerHeight / 2;
@@ -3935,6 +3946,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ];
             stimsToOffset.push(...boundingBoxStims);
             offsetStimsToFixationPos(stimsToOffset);
+            if (paramReader.read("_trackGazeExternallyBool")[0])
+              recordStimulusPositionsForEyetracking(
+                target,
+                "trialInstructionRoutineEnd"
+              );
           }
         },
         repeatedLetters: () => {
@@ -4171,6 +4187,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             )
           );
+          if (paramReader.read("_trackGazeExternallyBool")[0])
+            recordStimulusPositionsForEyetracking(target, "trialRoutineBegin");
         },
         repeatedLetters: () => {
           // TODO Same as letter. factor out?
@@ -4802,6 +4820,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (targetKind.current === "letter") {
         // *target* updates
+        if (paramReader.read("_trackGazeExternallyBool")[0])
+          recordStimulusPositionsForEyetracking(
+            target,
+            "trialRoutineEachFrame"
+          );
         if (
           target.status === PsychoJS.Status.STARTED &&
           !letterTiming.targetStartSec
@@ -5297,6 +5320,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               level,
               letterRespondedEarly
             );
+            if (paramReader.read("_trackGazeExternallyBool")[0])
+              recordStimulusPositionsForEyetracking(target, "trialRoutineEnd");
           },
           repeatedLetters: () => {
             const numberOfResponses = repeatedLettersResponse.current.length;

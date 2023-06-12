@@ -446,3 +446,5 @@ export const fontSize = { current: "Uninitiated" };
 //   status: undefined,
 //   responses: [],
 // };
+
+export const eyeTrackingStimulusRecords = [];

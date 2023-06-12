@@ -4,6 +4,7 @@ import { isProlificExperiment } from "./externalServices.js";
 
 import { hideForm, showForm } from "./forms";
 import {
+  eyeTrackingStimulusRecords,
   localStorageKey,
   rc,
   showCharacterSetResponse,
@@ -132,12 +133,15 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     //   window.location.toString(),
     //   rc.id.value
     // );
-    psychoJS.quit({
+    const quitOptions = {
       message: message + additionalMessage,
       isCompleted: isCompleted,
       okText: "Go to Prolific to complete the experiment",
       okUrl: recruitmentServiceData.url,
-    });
+    };
+    if (eyeTrackingStimulusRecords.length)
+      quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
+    psychoJS.quit(quitOptions);
     // logPsychoJSQuit(
     //   "_afterQuitFunction",
     //   window.location.toString(),
@@ -149,7 +153,14 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     //   window.location.toString(),
     //   rc.id.value
     // );
-    psychoJS.quit({ message: message, isCompleted: isCompleted, okText: "OK" });
+    const quitOptions = {
+      message: message,
+      isCompleted: isCompleted,
+      okText: "OK",
+    };
+    if (eyeTrackingStimulusRecords.length)
+      quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
+    psychoJS.quit(quitOptions);
     // logPsychoJSQuit(
     //   "_afterQuitFunction",
     //   window.location.toString(),

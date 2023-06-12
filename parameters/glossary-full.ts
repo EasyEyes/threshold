@@ -426,7 +426,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ _online2SubmissionApproval (default "manual") declares to Prolific whether evaluation of the  participant submissions (performance of the study) will be manual (the EasyEyes default) or automatic.',
+      '🕑 _online2SubmissionApproval (default "manual") declares to Prolific whether evaluation of the  participant submissions (performance of the study) will be manual (the EasyEyes default) or automatic.',
     type: "categorical",
     default: "manual",
     categories: "manual, automatic",
@@ -992,7 +992,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "❌ NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG, AND IT REQUIRES FREQUENT RECALIBRATION WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
+      "❌ WORKS BUT NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG, AND IT REQUIRES FREQUENT RECALIBRATION, WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1802,7 +1802,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "readingCorpusEndlessBool",
     availability: "now",
     example: "",
-    explanation: "readingCorpusEndlessBool",
+    explanation: "🕑 readingCorpusEndlessBool",
     type: "boolean",
     default: "",
     categories: "",
@@ -2068,16 +2068,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "responseSpokenToExperimenterBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "🕑 responseSpokenToExperimenterBool requires the participant to respond verbally to the experimenter sitting alongside, e.g. by verbally naming the target. This is used to test children. The experimenter will use the laptop keyboard to discreetly score the verbal response. ",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "responseTypedBool",
     availability: "now",
     example: "TRUE",
@@ -2102,7 +2092,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "40",
     explanation:
-      "NOT YET IMPLEMENTED: needEasyEyesKeypadBeyondCm (default 60). If the required viewingDistanceCm exceeds this threshold then EasyEyes will recruit the participant's smartphone (at the beginning of the experiment) and activate a keypad/trackpad on that smartphone during each block that requires it. The phone will be recruited at the beginning of the experiment (on the compatibility page), and will remain connected until the end of the experiment.The keypad will be activate only for blocks with a viewingDistanceCm that exceeds the threshold. While the keypad is active, the participant is free to click or type on either or both the standard and EasyEyes keypad/trackpad. Setting this to zero will always provide the remote keypad. Setting it to a large value, greater than all viewing distances used, will never provide it.\n\nCurrently we recruit the phone at the beginning of the first block that needs it. Let's change that to recruit the phone at the beginning of the experiment, on the compatibility page. If we can't recruit it, there's no point in running the experiment. \n\nI don't know if we disconnect at the end of the block, or the end of the last block that needs it, or just leave it connected until the end of the experiment. I think I prefer disconnecting after the last block that needs it. Some experiments will use the smartphone both as keypad AND for sound calibration. Sound calibration is done before the first block, so it will always come first. Requiring separate recruitment for each use is tolerable, but it would be nicer if participant could just recruit the smartphone once for the whole experiment. \n\nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis's requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone's keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say \"Connection lost.\" and offer a \"Reconnect\" button.\n\n",
+      "🕑 needEasyEyesKeypadBeyondCm (default 60). If the required viewingDistanceCm exceeds this threshold then EasyEyes will recruit the participant's smartphone (at the beginning of the experiment) and activate a keypad/trackpad on that smartphone during each block that requires it. The phone will be recruited at the beginning of the experiment (on the compatibility page), and will remain connected until the end of the experiment.The keypad will be activate only for blocks with a viewingDistanceCm that exceeds the threshold. While the keypad is active, the participant is free to click or type on either or both the standard and EasyEyes keypad/trackpad. Setting this to zero will always provide the remote keypad. Setting it to a large value, greater than all viewing distances used, will never provide it.\n\nCurrently we recruit the phone at the beginning of the first block that needs it. Let's change that to recruit the phone at the beginning of the experiment, on the compatibility page. If we can't recruit it, there's no point in running the experiment. \n\nI don't know if we disconnect at the end of the block, or the end of the last block that needs it, or just leave it connected until the end of the experiment. I think I prefer disconnecting after the last block that needs it. Some experiments will use the smartphone both as keypad AND for sound calibration. Sound calibration is done before the first block, so it will always come first. Requiring separate recruitment for each use is tolerable, but it would be nicer if participant could just recruit the smartphone once for the whole experiment. \n\nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis's requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone's keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say \"Connection lost.\" and offer a \"Reconnect\" button.\n\n",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2122,7 +2112,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "OBSOLETE. RETAINED SOLELY FOR REPLICATION OF BUG REPORTED IN TRELLO CARD. https://trello.com/c/xKZaBnEV",
+      "❌ OBSOLETE. RETAINED SOLELY FOR REPLICATION OF BUG REPORTED IN TRELLO CARD. https://trello.com/c/xKZaBnEV",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2704,15 +2694,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "targetPhaseTemporalDeg (default 0) is the target temporal phase in degrees.",
     type: "numerical",
     default: "0",
-    categories: "",
-  },
-  {
-    name: "targetRepeatsBool",
-    availability: "now",
-    example: "FALSE",
-    explanation: "NOT IMPLEMENTED. USE targetKind=repeatedLetters instead. ",
-    type: "boolean",
-    default: "FALSE",
     categories: "",
   },
   {

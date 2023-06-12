@@ -3,6 +3,7 @@ export const debug = process.env.debug;
 // export const debug = true;
 
 import {
+  eyeTrackingStimulusRecords,
   fixationConfig,
   skipTrialOrBlock,
   status,
@@ -950,10 +951,14 @@ export const saveDataOnWindowClose = (experiment) => {
         experiment.extraInfo["dataSaved"]
       );
       experiment.save({ sync: true });
+      if (eyeTrackingStimulusRecords.length)
+        experiment.saveCSV(eyeTrackingStimulusRecords);
     }
   });
   window.addEventListener("beforeunload", (e) => {
     experiment.save({ sync: true });
+    if (eyeTrackingStimulusRecords.length)
+      experiment.saveCSV(eyeTrackingStimulusRecords);
     e.preventDefault();
     return null;
   });
@@ -962,14 +967,13 @@ export const saveDataOnWindowClose = (experiment) => {
 export const tand = (deg) => Math.tan((deg * Math.PI) / 180);
 export const atand = (x) => (Math.atan(x) * 180) / Math.PI;
 
-export const cursorNearFixation = (cX, cY) => {
+export const getCursorLocation = () => {
   // Analog to [cX, cY] (see _takeFixationClick), as determined by psychojs
-  const [pX, pY] = to_px(
-    psychojsMouse.getPos(),
-    "height",
-    psychoJS.window,
-    true
-  );
+  return to_px(psychojsMouse.getPos(), "height", psychoJS.window, true);
+};
+
+export const cursorNearFixation = (cX, cY) => {
+  const [pX, pY] = getCursorLocation();
   const x = cX ?? pX;
   const y = cY ?? pY;
   const cursorDistanceFromFixation = Math.hypot(

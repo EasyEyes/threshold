@@ -1896,12 +1896,6 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  responseSpokenToExperimenterBool: {
-    name: "responseSpokenToExperimenterBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
   responseTypedBool: {
     name: "responseTypedBool",
     availability: "now",
@@ -2304,12 +2298,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "0",
-  },
-  targetRepeatsBool: {
-    name: "targetRepeatsBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
   },
   targetRepeatsBorderCharacter: {
     name: "targetRepeatsBorderCharacter",
