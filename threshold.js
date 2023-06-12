@@ -416,8 +416,7 @@ var simulated;
 const paramReaderInitialized = async (reader) => {
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
-  // useMatlab.current = reader.read("_trackGazeExternallyBool")[0];
-  useMatlab.current = true;
+  useMatlab.current = reader.read("_trackGazeExternallyBool")[0];
   // get debug mode from reader
   debugBool.current = reader.read("_debugBool")[0];
 
