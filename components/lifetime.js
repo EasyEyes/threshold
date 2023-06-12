@@ -16,9 +16,14 @@ import { recruitmentServiceData } from "./recruitmentService";
 import { downloadTextFile } from "./saveFile.js";
 import { removeClickableCharacterSet } from "./showCharacterSet";
 import { showCursor, sleep } from "./utils";
+import { useMatlab, closeMatlab } from "./connectMatlab";
 
 export async function quitPsychoJS(message = "", isCompleted, paramReader) {
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
+  if (useMatlab.current) {
+    closeMatlab();
+  }
+
   removeClickableCharacterSet(showCharacterSetResponse);
   removeBeepButton();
   removeProceedButton();
