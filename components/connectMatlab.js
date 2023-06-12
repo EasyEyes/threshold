@@ -6,9 +6,9 @@ export const useMatlab = { current: false };
 
 export async function closeMatlab() {
   //send message to nodejs server to save matlab file and reset messages
-  await sendMessage("save");
+  await sendMessage("Save");
   //wait for matlab saving data
-  waitForSignal("saved", () => {
+  waitForSignal("Saved", () => {
     resetAllMessages();
   });
 }
@@ -51,6 +51,7 @@ export const sendFileName = async (fileName) => {
   axios
     .post(url + "filename", fileName)
     .then((response) => {
+      sendMessage("Record");
       console.log(response.data);
     })
     .catch((error) => {

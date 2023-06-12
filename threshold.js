@@ -390,7 +390,6 @@ import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
 import { KeypadHandler } from "./components/keypad.js";
 import {
   useMatlab,
-  sendMessage,
   waitForSignal,
   sendFileName,
 } from "./components/connectMatlab.js";
@@ -417,7 +416,8 @@ var simulated;
 const paramReaderInitialized = async (reader) => {
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
-  useMatlab.current = reader.read("_trackGazeExternallyBool")[0];
+  // useMatlab.current = reader.read("_trackGazeExternallyBool")[0];
+  useMatlab.current = true;
   // get debug mode from reader
   debugBool.current = reader.read("_debugBool")[0];
 
@@ -1092,9 +1092,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // start matlab
     if (useMatlab.current) {
-      sendFileName(thisExperimentInfo.experiment);
-      waitForSignal("Recording", () => {
-        sendMessage("record");
+      await sendFileName(thisExperimentInfo.experiment);
+      await waitForSignal("Recording", () => {
         console.log("matlab start recording");
       });
     }
