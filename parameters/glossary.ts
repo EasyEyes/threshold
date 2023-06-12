@@ -1427,8 +1427,8 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
   },
-  fontVariationSettings: {
-    name: "fontVariationSettings",
+  fontVariableSettings: {
+    name: "fontVariableSettings",
     availability: "now",
     type: "text",
     default: "",
