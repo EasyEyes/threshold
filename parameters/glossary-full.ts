@@ -728,16 +728,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_saveFirstInEachBlockBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "❌ When _saveFirstInEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always display the active block. Usually _saveFirstInEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (this avoids delay and makes the experiment more robust). But scientists will enable it when they want to know which block failed.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "_trackGazeExternallyBool",
     availability: "now",
     example: "",
@@ -2850,7 +2840,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       '⭑ Can be one or more of the following categories, separated by commas,\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant is asked a question, using a questionAndAnswerXXX parameter.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.\n🕑 \n• rate. The participant is invited to rate on a scale of 1 to 7. The targetKind can be reading, image, or sound.',
     type: "categorical",
-    default: "identify",
+    default: "UNDEFINED",
     categories: "identify, detect, questionAndAnswer",
   },
   {

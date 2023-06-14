@@ -1092,12 +1092,6 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  _saveFirstInEachBlockBool: {
-    name: "_saveFirstInEachBlockBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
   _trackGazeExternallyBool: {
     name: "_trackGazeExternallyBool",
     availability: "now",
@@ -2393,7 +2387,7 @@ export const GLOSSARY: Glossary = {
     name: "targetTask",
     availability: "now",
     type: "categorical",
-    default: "identify",
+    default: "UNDEFINED",
     categories: ["identify", "detect", "questionAndAnswer"],
   },
   targetTimeConstantSec: {
