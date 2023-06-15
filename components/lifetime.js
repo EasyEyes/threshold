@@ -21,10 +21,12 @@ import { useMatlab, closeMatlab } from "./connectMatlab";
 
 export async function quitPsychoJS(message = "", isCompleted, paramReader) {
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
+  console.log("!. psychoJS.experiment", psychoJS.experiment);
+  console.log("!. psychoJS.experiment?.saveCSV", psychoJS.experiment?.saveCSV);
   if (useMatlab.current) {
     closeMatlab();
     console.log("!. eyetracking records", eyeTrackingStimulusRecords);
-    psychoJS.experiment.saveCSV(eyeTrackingStimulusRecords);
+    // psychoJS.experiment.saveCSV(eyeTrackingStimulusRecords);
   }
 
   removeClickableCharacterSet(showCharacterSetResponse);
