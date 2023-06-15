@@ -24,6 +24,7 @@ export async function quitPsychoJS(message = "", isCompleted, paramReader) {
   if (useMatlab.current) {
     closeMatlab();
     console.log("!. eyetracking records", eyeTrackingStimulusRecords);
+    psychoJS.experiment.saveCSV(eyeTrackingStimulusRecords);
   }
 
   removeClickableCharacterSet(showCharacterSetResponse);
