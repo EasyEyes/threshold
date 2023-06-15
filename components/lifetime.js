@@ -23,6 +23,7 @@ export async function quitPsychoJS(message = "", isCompleted, paramReader) {
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
   if (useMatlab.current) {
     closeMatlab();
+    console.log("!. eyetracking records", eyeTrackingStimulusRecords);
   }
 
   removeClickableCharacterSet(showCharacterSetResponse);
