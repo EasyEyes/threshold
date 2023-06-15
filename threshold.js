@@ -391,7 +391,7 @@ import { KeypadHandler } from "./components/keypad.js";
 import {
   useMatlab,
   waitForSignal,
-  sendFileName,
+  sendMessage,
 } from "./components/connectMatlab.js";
 
 /* -------------------------------------------------------------------------- */
@@ -1091,7 +1091,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // start matlab
     if (useMatlab.current) {
-      await sendFileName(thisExperimentInfo.experiment);
+      await sendMessage(
+        "Record " + thisExperimentInfo.experiment + "-",
+        thisExperimentInfo.participant,
+        "-gaze"
+      );
       await waitForSignal("Recording", () => {
         console.log("matlab start recording");
       });
