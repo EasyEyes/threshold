@@ -2516,6 +2516,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  nearPointEccentricitySetting: {
+    name: "nearPointEccentricitySetting",
+    availability: "now",
+    type: "",
+    default: "",
+  },
 };
 
 export const SUPER_MATCHING_PARAMS: string[] = ["questionAndAnswer@@"];

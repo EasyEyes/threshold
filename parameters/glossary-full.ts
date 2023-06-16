@@ -3034,6 +3034,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     default: "FALSE",
     categories: "",
   },
+  {
+    name: "nearPointEccentricitySetting",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 VIEWING GEOMETRY\nviewingDistanceCm = distance from eye to near point.\nnearPointXYInUnitSquare=[0.8 0.5]; % Rough location of near point in screenRect re lower left corner.\nnearPointXYPix % screen coordinate of point on screen closest to viewer's eyes. Y goes down.\nnearPointXYDeg % eccentricity of near point re fixation. Y goes up.\nnearPointEccentricitySetting\n1. Set nearPointXYPix according to nearPointXYInUnitSquare.\n2. If nearPointEccentricitySetting==\n'target', then set nearPointXYDeg=eccentricityXYDeg\n'fixation', then set nearPointXYDeg=[0 0].\n'value', then assume nearPointXYDeg is already set.\n3. Ask viewer to adjust display so desired near point is at desired\nviewing distance and orthogonal to line of sight from eye.\n4. If using off-screen fixation, put fixation at same distance from eye\nas the near point, and compute its position relative to near point.",
+    type: "",
+    default: "",
+    categories: "",
+  },
 ];
 
 export const SUPER_MATCHING_PARAMS: string[] = ["questionAndAnswer@@"];

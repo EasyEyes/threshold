@@ -10,21 +10,27 @@ import {
   showConditionNameConfig,
   status,
   thisExperimentInfo,
+  viewingDistanceCm,
 } from "./global";
 import { getCursorLocation } from "./utils";
 
 interface positionsRecord {
-  timeSec: string;
+  posixTimeSec: string;
   cursorPositionXYPx: string;
   crosshairPositionXYPx: string;
   targetPositionXYPx: string;
-  experimentName: string;
-  pavloviaName: string;
+  experiment: string;
+  pavloviaSessionId: string;
   blockNumber: number;
   block_condition: string;
   conditionName: string;
   trialNumber: number;
   easyEyesFunction: string;
+  pxPerCm: string;
+  viewingDistanceCm: string;
+  nearpointXYPx: string;
+  screenWidthPx: number;
+  screenHeightPx: number;
 }
 
 /**
@@ -37,16 +43,21 @@ const getCurrentPositionsRecord = (
   stimulus: any = undefined,
   easyEyesFunction = ""
 ): positionsRecord => {
-  let timeSec,
+  let posixTimeSec,
     cursorPositionXYApplePx,
     crosshairPositionXYApplePx,
     targetPositionXYApplePx,
-    experimentName,
+    experiment,
     blockNumber,
     block_condition,
     conditionName,
-    pavloviaName,
-    trialNumber;
+    pavloviaSessionId,
+    trialNumber,
+    pxPerCm,
+    viewingDistanceCmNum,
+    screenDimensions,
+    nearPointX,
+    nearPointY;
 
   if (typeof stimulus !== "undefined" && stimulus._autoDraw === true) {
     const [x, y] = stimulus._pos;
@@ -64,18 +75,24 @@ const getCurrentPositionsRecord = (
     fixationConfig.pos[0],
     fixationConfig.pos[1]
   ).toString();
-  experimentName = thisExperimentInfo.experimentFileName as unknown as string;
-  pavloviaName = thisExperimentInfo.experiment as unknown as string;
+  experiment = thisExperimentInfo.experiment as unknown as string;
+  pavloviaSessionId = thisExperimentInfo.participant as unknown as string;
+  thisExperimentInfo as unknown as string;
   blockNumber = status.block as unknown as number;
   block_condition = status.block_condition as unknown as string;
   conditionName = showConditionNameConfig.name as unknown as string;
   trialNumber = status.trial as unknown as number;
-  timeSec = Date.now() / 1000;
+  posixTimeSec = Date.now() / 1000;
+  pxPerCm = displayOptions.pixPerCm as unknown as number;
+  viewingDistanceCmNum = viewingDistanceCm.current;
+  screenDimensions = getScreenDimensions();
+  nearPointX = displayOptions.nearPointXYPix[0] as unknown as number;
+  nearPointY = displayOptions.nearPointXYPix[1] as unknown as number;
 
   const thisRecord: positionsRecord = {
-    experimentName: experimentName,
-    pavloviaName: pavloviaName,
-    timeSec: timeSec.toString(),
+    experiment: experiment,
+    pavloviaSessionId: pavloviaSessionId,
+    posixTimeSec: posixTimeSec.toString(),
     cursorPositionXYPx: cursorPositionXYApplePx,
     crosshairPositionXYPx: crosshairPositionXYApplePx,
     targetPositionXYPx: targetPositionXYApplePx,
@@ -84,6 +101,14 @@ const getCurrentPositionsRecord = (
     conditionName: conditionName,
     trialNumber: trialNumber,
     easyEyesFunction: easyEyesFunction,
+    pxPerCm: pxPerCm.toString(),
+    viewingDistanceCm: viewingDistanceCmNum.toString(),
+    screenWidthPx: screenDimensions[0],
+    screenHeightPx: screenDimensions[1],
+    nearpointXYPx: getAppleCoordinatePosition(
+      nearPointX,
+      nearPointY
+    ).toString(),
   };
   return thisRecord;
 };
@@ -107,19 +132,24 @@ export const recordStimulusPositionsForEyetracking = (
  * @param y in px
  * @returns [x,y] in px
  */
-const getAppleCoordinatePosition = (x: number, y: number): number[] => {
-  let screenDimensions;
-  if (displayOptions && displayOptions.window) {
-    const win = displayOptions.window as unknown as any;
-    screenDimensions = win._size as unknown as number[];
-
-    // TODO verify _size is [width, height]
-  } else {
-    screenDimensions = [window.innerWidth, window.innerHeight];
-  }
+export const getAppleCoordinatePosition = (x: number, y: number): number[] => {
+  const screenDimensions = getScreenDimensions();
   const windowWidth = screenDimensions[0];
   const windowHeight = screenDimensions[1];
   const appleX = Math.floor(x + windowWidth / 2);
   const appleY = Math.floor(-y + windowHeight / 2);
   return [appleX, appleY];
+};
+
+/**
+ * Get the width,height of the screen, defaulting to psychoJS' values and falling back on window inner dimensions
+ * @returns [widthPx, heightPx]
+ */
+const getScreenDimensions = (): number[] => {
+  if (displayOptions && displayOptions.window) {
+    const win = displayOptions.window as unknown as any;
+    return win._size as unknown as number[];
+  } else {
+    return [window.innerWidth, window.innerHeight];
+  }
 };

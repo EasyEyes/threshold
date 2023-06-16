@@ -3,6 +3,7 @@ export const debug = process.env.debug;
 // export const debug = true;
 
 import {
+  displayOptions,
   eyeTrackingStimulusRecords,
   fixationConfig,
   skipTrialOrBlock,
@@ -13,6 +14,7 @@ import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { paramReader } from "../threshold";
+import { getAppleCoordinatePosition } from "./eyeTrackingFacilitation";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -332,6 +334,14 @@ export const addConditionToData = (
     if (!exclude.includes(parameter))
       experiment.addData(parameter, reader.read(parameter, conditionName));
   }
+  experiment.addData(
+    "nearpointXYPxPsychoJS",
+    displayOptions.nearPointXYPix.toString()
+  );
+  experiment.addData(
+    "nearpointXYPxAppleCoords",
+    getAppleCoordinatePosition(...displayOptions.nearPointXYPix).toString()
+  );
 };
 
 export const reportStartOfNewBlock = (blockNumer, experiment) => {
