@@ -456,7 +456,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⭑ _online3RequiredServices (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownload software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Download software",
+      "⭑ _online3RequiredServices (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownloads software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Downloads software",
     type: "multicategorical",
     default: "",
     categories: "audio, camera, microphone, download",
@@ -702,7 +702,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ EasyEyes always saves an EasyEyesID cookie in browser local storage (which can be lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Download Folder of the  participant's computer. Also see _participantIDGetBool above.",
+      "⭑ EasyEyes always saves an EasyEyesID cookie in browser local storage (which can be lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Downloads Folder of the  participant's computer. Also see _participantIDGetBool above.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -732,7 +732,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "When _trackGazeExternallyBool is TRUE (default is FALSE), then EasyEyes uses a RESTful node to turn on gaze tracking at onset of experiment and turn it off at end of experiment. And, at the end of the experiment, EasyEyes saves a CSV file to the Download folder. \nSTIMULUS CSV TABLE. Each row of the EasyEyes CSV “stimulus” table will record absolute time (in secs, floating point), x,y position (pix) of the crosshair, x,y of the cursor, and (if present) x,y of the target. (We’ll also include viewing distance (cm), x,y of near point (pix), experiment name, Pavlovia name, block number, condition number, conditionName, and trial number.) \nGAZE CSV TABLE. We assume that the external gaze tracker creates another csv file. Each row of the MATLAB CSV “gaze” table will record absolute time (in secs, floating point) and x,y gaze position (pix), roughly every 50 ms. Just as a matter of good practice, this file should also include viewing distance (cm), x,y of near point (pix). \n\nEasyEyes and MATLAB will drop their CSV tables into the Download folder. EasyEyes (“stimulus”) and MATLAB (“gaze”) will each generate one file for the whole experiment.",
+      "When _trackGazeExternallyBool is TRUE (default is FALSE), then EasyEyes uses a RESTful node to turn on gaze tracking at onset of experiment and turn it off at end of experiment. And, at the end of the experiment, EasyEyes saves a CSV file to the Downloads folder. \nSTIMULUS CSV TABLE. Each row of the EasyEyes CSV “stimulus” table records posix time (in secs, floating point), x,y position (px) of the: crosshair, cursor, and (if present) target. We also include viewing distance (cm), x,y of closest point (px), experiment name, Pavlovia session ID, block number, condition number, conditionName, and trial number.\nGAZE CSV TABLE. We assume that the external gaze tracker creates another csv file. We have a MATLAB program for this. Each row of that “gaze” table records posix time (in secs, floating point) and x,y gaze position (px), roughly every 10 ms. \n\nEasyEyes and MATLAB drop their CSV tables into the Downloads folder. EasyEyes (“stimulus”) and MATLAB (“gaze”) each generate one file for the whole experiment.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1153,7 +1153,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "🕑 Set flipScreenHorizontallyBool TRUE (default is FALSE) when the display is seen through a mirror.",
+      "🕑 Set flipScreenHorizontallyBool to TRUE (default is FALSE) when the display is seen through a mirror.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1163,7 +1163,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Sloan.woff2",
     explanation:
-      '⭑ font specifies the font for the target and for reading. How you specify it depends on the chosen fontSource:\n\nREQUIRED. file: font is the filename (including the extension: .woff2, .woff, .otf, or .ttf) of a font file in your EasyEyes Resources:Fonts folder in your Pavlovia account. Web font experts strongly recommend that you use the WOFF2 format, if you have it, instead of any other, because it\'s the smallest, by far (half of OTF), for fast download, and is supported by all modern browsers. The compiler will download the font file from your Fonts folder to your temporary local Experiment folder, which is then uploaded to a new Pavlovlia repo for your experiment.  (The list of allowed font types is copied from the Mozilla documentation of the @font-face command. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  font is the filename (without extension) of a font file provided by the free Google Font server. \n\nCOMING SOON: server: font is a URL pointing to the desired font on a font server. For example, many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". \n\nbrowser: The experiment will pass the font preference string that you place in font to the participant\'s browser and accept whatever the browser provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "fontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nEasyEyes preloads all fonts. At the beginning of the experimen, EasyEyes preloads all needed fonts, for the whole experiment (all conditions), so, after preload, the experiment runs with no font-loading delay and no need for internet, except to save data at the end. ',
+      '⭑ font specifies the font for the target and for reading. How you specify it depends on the chosen fontSource:\n\nfile: font is the filename (including the extension: .woff2, .woff, .otf, or .ttf) of a font file in your EasyEyes Resources:Fonts folder in your Pavlovia account. Web font experts strongly recommend that you use the WOFF2 format, if you have it, instead of any other, because it\'s the smallest, by far (half of OTF), for fast download, and is supported by all modern browsers. The compiler will download the font file from your Fonts folder to your temporary local Experiment folder, which is then uploaded to a new Pavlovlia repo for your experiment.  (The list of allowed font types is copied from the Mozilla documentation of the @font-face command. https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face)\n\ngoogle:  font is the filename (without extension) of a font file provided by the free Google Font server. \n\n🕑 COMING SOON: server: font is a URL pointing to the desired font on a font server. For example, many fonts are served for free by the Google Fonts server.  https://fonts.google.com/  At that website, use "Search for font". Having found your font, select the style you want. In the "Selected Family" pop-up window, click the "@import" button. From within the revealed CSS code, copy the URL from inside the "url(. )". \n\nbrowser: The experiment will pass the font preference string that you place in font to the participant\'s browser and accept whatever the browser provides.  Your string can include several font names, separated by commas, first choice first, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error.  Specify just the family name, like "Verdana", and use the "fontStyle" to select italic, bold, or bold-italic. Some "web safe" fonts (e.g. Arial, Verdana, Helvetica, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New, Brush Script MT) are available in most browsers. In ordinary browsing, it\'s helpful that browsers freely substitute fonts so that you almost always get something readable in the web page you\'re reading. In the scientific study of perception, we usually don\'t want data with a substituted font. So, normally, you should specify "file" or "server" so you\'ll know exactly what was shown to the participant. \n\nEasyEyes preloads all fonts. At the beginning of the experimen, EasyEyes preloads all needed fonts, for the whole experiment (all conditions), so, after preload, the experiment runs with no font-loading delay and no need for internet, except to save data at the end. ',
     type: "text",
     default: "Roboto Mono",
     categories: "",
@@ -1223,7 +1223,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "fontMaxPx (default 600) sets an upper limit on the nominal font size. We added this to avoid some crashes that seem to result from trying to draw or measure huge characters. The crash is a stack overflow while trying to measure font size. We have only a rough estimate of the threshold for trouble. Introducing a limit of 900 helped a lot, but didn't eliminate all cases. Setting it to 600 has made this event rare. In April 2023 we beefed up all error messages to include the font size, so any future crashes will tell us what font size causes the crash.",
+      "fontMaxPx (default 600) sets an upper limit on the nominal font size. We added this to avoid some crashes that seem to result from trying to draw or measure huge characters. The crash is a stack overflow while trying to measure font size. We have only a rough estimate of the threshold for trouble. Introducing a limit of 900 helped a lot, but didn't eliminate all cases. Setting it to 600 seems to have elimintated this problem. In April 2023 we beefed up all error messages to include the font size, so any future crashes will tell us what font and size causes the crash.",
     type: "numerical",
     default: "600",
     categories: "",
@@ -1273,7 +1273,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0",
     explanation:
-      '🕑 fontTrackingWord (default 0) uses the "wordSpacing" Canvas command to adjust the spacing between words.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/wordSpacing\nThe distance inserted (in px) is the product of the value provided and the point side of the font. This works for Chrome, Edge, and Samsung, not for Safari and Firefox.',
+      '🕑 fontTrackingForWords (default 0) uses the "wordSpacing" Canvas command to adjust the spacing between words.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/wordSpacing\nThe distance inserted (in px) is the product of the value provided and the point side of the font. This works for Chrome, Edge, and Samsung, not for Safari and Firefox.',
     type: "numerical",
     default: "0",
     categories: "",
@@ -1283,7 +1283,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 fontVariableSettings accepts a string to control a variable font (default is the empty string). You set all the axes at once. Any axis you don\'t set will be set to its default. Every axis has a four-character name. Standard axes have all-lowercase names, like \'wght\' for weight. Novel axes have ALL-UPPERCASE names. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/ For an introduction to variable fonts: https://abcdinamo.com/news/using-variable-fonts-on-the-web Variable fonts have one or more axes of variation, and we can pick any value along each axis to control the font rendering. fontVariableSettings receives a string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nThe string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation that is defined for this variable font. "wght" is weight, which allows you to select any weight from extra thin to regular to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. Some axes are standard, with lowercase names. Any font can have unique axes, with uppercase names. To discover which axes a variable font supports, you can consult the webpage https://fontgauntlet.com/ or the individual font\'s documentation. Variable fonts are supported by all modern browsers, and not by Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
+      '🕑 fontVariableSettings accepts a string to control a variable font (default is the empty string). When you set this parameter, the EasyEyes compiler will flag an error if it determines that the target font is not variable. Variable fonts have one or more axes of variation, and fontVariableSettings allows you to pick any value along each axis to control the font rendering. You set all the axes at once. Any axis you don\'t set will be set to its default. Each axis has a four-character name. Standard axes have all-lowercase names, like \'wght\' for weight. Novel axes are called "unique" and have ALL-UPPERCASE names, like \'GRAD\', which (in Roboto Flex) adjusts letter weight without affecting line length. fontVariableSettings receives a string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nYou pass the whole line as a string, INCLUDING the quote marks, but not the RETURN. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation supported by the particular variable font. "wght" is weight, which allows you to select any weight from extra thin, to regular, to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. (We\'re not sure, but we anticipate no error and no effect of using an unsupported axis name.) All modern browsers support variable fonts. Internet Explorer does not.\n\nYOUR FONT\'S AXES. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/. Or assign your font to some text in Adobe Illustrator. Illustrator\'s Character pane (in the Properties window) has a tiny variable-font icon consisting of a narrow and a wide T above a slider. Clicking that icon pops up a panel with a slider for each of your font\'s variable axes. Adobe\'s Roboto Flex variable font has 11 axes.\n\nFURTHER READING\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web \nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
     type: "text",
     default: "",
     categories: "",
@@ -1293,7 +1293,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "550",
     explanation:
-      "🕑 fontWeight (default is regular weight) accepts a positive integer that sets the weight of a variable font. (IMPLEMENTATION: myText.style.fontWeight = fontWeight.)\nNOTE: If you set this parameter, then the EasyEyes compiler will flag an error if it determines that the target font is not variable.\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web",
+      "🕑 fontWeight (default is regular weight) accepts a positive integer that sets the weight of a variable font. When you set this parameter, the EasyEyes compiler will flag an error if it determines that the target font is not variable. \nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web\n[IMPLEMENTATION: myText.style.fontWeight = fontWeight.]",
     type: "numerical",
     default: "",
     categories: "",
@@ -1563,7 +1563,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1",
     explanation:
-      "Stroke length in the X marking the possible target location. ",
+      "markingTargetStrokeLengthDeg (default 1) set the stroke length in the X marking the possible target location. ",
     type: "numerical",
     default: "1",
     categories: "",
@@ -1573,7 +1573,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.03",
     explanation:
-      "Stroke thickness in the X marking the possible target location.",
+      "markingTargetStrokeThicknessDeg (default 0.03) set the atroke thickness in the X marking the possible target location.",
     type: "numerical",
     default: "0.03",
     categories: "",
@@ -1603,7 +1603,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "2",
     explanation:
-      "Compute base frequency of a mask melody by multiplying the target frequency by this factor. If there are two melodies then the second melody has base frequency given by target frequency divided by this factor.",
+      "maskerBaseFrequencyMultiplier (default 2). Compute base frequency of a mask melody by multiplying the target frequency by this factor. If there are two melodies then the second melody has base frequency given by target frequency divided by this factor.",
     type: "numerical",
     default: "2",
     categories: "",
@@ -2152,7 +2152,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      '🕑 screenshotBool requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to show the stimuli in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n     Can we save these files to a "Screenshots" folder in the participant computer\'s Download folder or in the experiment repository on Pavlovia? ',
+      '🕑 screenshotBool requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to show the stimuli in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n     Can we save these files to a "Screenshots" folder in the participant computer\'s Downloads folder or in the experiment repository on Pavlovia? ',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3035,11 +3035,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "nearPointEccentricitySetting",
+    name: "closestPointEccentricitySetting",
     availability: "now",
     example: "",
     explanation:
-      "🕑 VIEWING GEOMETRY\nviewingDistanceCm = distance from eye to near point.\nnearPointXYInUnitSquare=[0.8 0.5]; % Rough location of near point in screenRect re lower left corner.\nnearPointXYPix % screen coordinate of point on screen closest to viewer's eyes. Y goes down.\nnearPointXYDeg % eccentricity of near point re fixation. Y goes up.\nnearPointEccentricitySetting\n1. Set nearPointXYPix according to nearPointXYInUnitSquare.\n2. If nearPointEccentricitySetting==\n'target', then set nearPointXYDeg=eccentricityXYDeg\n'fixation', then set nearPointXYDeg=[0 0].\n'value', then assume nearPointXYDeg is already set.\n3. Ask viewer to adjust display so desired near point is at desired\nviewing distance and orthogonal to line of sight from eye.\n4. If using off-screen fixation, put fixation at same distance from eye\nas the near point, and compute its position relative to near point.",
+      "🕑 VIEWING GEOMETRY\nviewingDistanceCm = distance from eye to closest point.\nclosestPointXYInUnitSquare=[0.8 0.5]; % Rough location of closest point in screenRect re lower left corner.\nclosestPointXYPix % screen coordinate of point on screen closest to viewer's eyes. Y goes down.\nclosestPointXYDeg % eccentricity of closest point re fixation. Y goes up.\nclosestPointEccentricitySetting\n1. Set closestPointXYPix according to closestPointXYInUnitSquare.\n2. If closestPointEccentricitySetting==\n'target', then set closestPointXYDeg=eccentricityXYDeg\n'fixation', then set closestPointXYDeg=[0 0].\n'value', then assume closestPointXYDeg is already set.\n3. Ask viewer to adjust display so desired closest point is at desired\nviewing distance and orthogonal to line of sight from eye.\n4. If using off-screen fixation, put fixation at same distance from eye\nas the closest point, and compute its position relative to closest point.",
     type: "",
     default: "",
     categories: "",

@@ -2516,8 +2516,8 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  nearPointEccentricitySetting: {
-    name: "nearPointEccentricitySetting",
+  closestPointEccentricitySetting: {
+    name: "closestPointEccentricitySetting",
     availability: "now",
     type: "",
     default: "",

@@ -696,6 +696,12 @@ export const displayParameters1000Hz = (
   thead.appendChild(tr);
   elems.soundLevelsTable.appendChild(thead);
   elems.soundLevelsTable.appendChild(tbody);
+  //add title to the table
+  const title = document.createElement("h6");
+  title.innerHTML = "Sound Level at 1000 Hz";
+  elems.soundLevelsTable.insertBefore(title, thead);
+  // center the title
+  title.style.textAlign = "center";
   const parameters = soundCalibrationResults.current.parameters;
   const outDBSPL1000Values = soundCalibrationResults.current.outDBSPL1000Values;
   const outDBSPLValues = soundCalibrationResults.current.outDBSPLValues;
@@ -737,6 +743,7 @@ export const displayParameters1000Hz = (
     tr.appendChild(td5);
     tbody.appendChild(tr);
   }
+
   // display the parameters used for the calibration
   elems.soundParametersFromCalibration.innerHTML = `
   Dynamic Range Compression Model:\n
@@ -751,6 +758,7 @@ export const displayParameters1000Hz = (
 
   elems.downloadButton.style.visibility = "visible";
   elems.downloadButton.classList.add(...["btn", "btn-success"]);
+
   // button to download the soundLevelsTable and the parameters as a csv file
   downloadCalibrationData(elems.downloadButton, parameters);
 
@@ -832,7 +840,7 @@ const downloadCalibrationData = (downloadButton, parameters) => {
   downloadButton.style.marginTop = "10px";
   downloadButton.style.marginBottom = "10px";
   downloadButton.addEventListener("click", () => {
-    // traspose the soundLevelsTable
+    // transpose the soundLevelsTable
     const table = document.getElementById("soundLevelsTable");
     const tableRows = table.rows;
     const tableColumns = tableRows[0].cells.length;
@@ -844,8 +852,14 @@ const downloadCalibrationData = (downloadButton, parameters) => {
         tableData[i][j] = tableRows[j].cells[i].innerHTML;
       }
     }
+
+    //rename items in the first column
+    tableData[0][0] = "1000 Hz in(dB)";
+    tableData[1][0] = "1000 Hz out(dB SPL)";
+    tableData[4][0] = "All Hz out(dB SPL)";
+
     // add the parameters to the tableData
-    tableData.push(["\nParameters"]);
+    tableData.push(["\nSound gain parameters"]);
     tableData.push(["backgroundDbSpl", parameters.backgroundDBSPL.toFixed(1)]);
     tableData.push(["gainDbSpl", parameters.gainDBSPL.toFixed(1)]);
     tableData.push(["T", parameters.T.toFixed(1)]);
