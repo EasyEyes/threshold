@@ -630,7 +630,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
     elems.displayUpdate.innerHTML = message;
   });
 
-  const debug = fasle;
+  const debug = false;
 
   if (debug) {
     invertedImpulseResponse.current = [
