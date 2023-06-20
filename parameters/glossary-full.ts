@@ -2004,7 +2004,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "When responseMustTrackCrosshairBool=TRUE, the participant’s required tracking time to get target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The EasyEyes compiler requires that\nresponseMustTrackMaxDelaySec ≥ responseMustTrackMinDelaySec ≥ 0.",
     type: "numerical",
-    default: "1",
+    default: "1.25",
     categories: "",
   },
   {
@@ -2014,7 +2014,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "When responseMustTrackCrosshairBool=TRUE, the participant’s required tracking time to get target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The EasyEyes compiler requires that\nresponseMustTrackMaxDelaySec ≥ responseMustTrackMinDelaySec ≥ 0.",
     type: "numerical",
-    default: "0.5",
+    default: "0.75",
     categories: "",
   },
   {

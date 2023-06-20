@@ -1858,13 +1858,13 @@ export const GLOSSARY: Glossary = {
     name: "responseMustTrackMaxSec",
     availability: "now",
     type: "numerical",
-    default: "1",
+    default: "1.25",
   },
   responseMustTrackMinSec: {
     name: "responseMustTrackMinSec",
     availability: "now",
     type: "numerical",
-    default: "0.5",
+    default: "0.75",
   },
   responseNegativeFeedbackBool: {
     name: "responseNegativeFeedbackBool",
