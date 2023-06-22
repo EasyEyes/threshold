@@ -362,7 +362,12 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
     }
     // And reset that time if the cursor moves away from fixation.
   } else {
-    fixationConfig.trackingTimeAfterDelay = undefined;
+    if (
+      t >= fixationConfig.trackingTimeAfterDelay ||
+      reader.read("responseMustTrackContinuouslyBool", status.block_condition)
+    ) {
+      fixationConfig.trackingTimeAfterDelay = undefined;
+    }
   }
 };
 
