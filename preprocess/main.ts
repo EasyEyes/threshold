@@ -129,6 +129,7 @@ export const prepareExperimentFileForThreshold = async (
 
   fillCurrentExperiment("_online5LanguageFluent", "_online5LanguageFluent");
   fillCurrentExperiment("_online5LanguageFirst", "_online5LanguageFirst");
+  fillCurrentExperiment("_online5LanguagePrimary", "_online5LanguagePrimary");
   fillCurrentExperiment("_online3DeviceKind", "_online3DeviceKind");
   fillCurrentExperiment("_online3RequiredServices", "_online3RequiredServices");
   fillCurrentExperiment("_online2Pay", "_online2Pay");
