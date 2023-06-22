@@ -142,6 +142,7 @@ export const prepareExperimentFileForThreshold = async (
     "_online3PhoneOperatingSystem"
   );
   fillCurrentExperiment("_online5Vision", "_online5Vision");
+  fillCurrentExperiment("_online5Dyslexia", "_online5Dyslexia");
 
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
