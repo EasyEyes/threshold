@@ -151,6 +151,10 @@ export const prepareExperimentFileForThreshold = async (
     "_online5MusicalInstrumentExperience",
     "_online5MusicalInstrumentExperience"
   );
+  fillCurrentExperiment(
+    "_online5LanguageRelatedDisorders",
+    "_online5LanguageRelatedDisorders"
+  );
 
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
