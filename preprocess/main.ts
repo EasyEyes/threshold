@@ -137,6 +137,10 @@ export const prepareExperimentFileForThreshold = async (
   fillCurrentExperiment("_online4Location", "_online4Location");
   fillCurrentExperiment("_online4CustomAllowList", "_online4CustomAllowList");
   fillCurrentExperiment("_online4CustomBlockList", "_online4CustomBlockList");
+  fillCurrentExperiment(
+    "_online3PhoneOperatingSystem",
+    "_online3PhoneOperatingSystem"
+  );
 
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
