@@ -44,6 +44,7 @@ export class Fixation {
   }
 
   update(reader, BC, targetHeightPx, targetXYPx) {
+    this.bold = false;
     fixationConfig.markingBlankedNearTargetBool = reader.read(
       "markingBlankedNearTargetBool",
       BC

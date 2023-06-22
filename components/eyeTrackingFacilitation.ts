@@ -61,7 +61,6 @@ const getCurrentPositionsRecord = (
 
   if (typeof stimulus !== "undefined" && stimulus._autoDraw === true) {
     const [x, y] = stimulus._pos;
-    console.log("!. [x,y] of stimulus", x, y);
     targetPositionXYApplePx = getAppleCoordinatePosition(x, y).toString();
   } else {
     targetPositionXYApplePx = "";
