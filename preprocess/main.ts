@@ -141,6 +141,7 @@ export const prepareExperimentFileForThreshold = async (
     "_online3PhoneOperatingSystem",
     "_online3PhoneOperatingSystem"
   );
+  fillCurrentExperiment("_online5Vision", "_online5Vision");
 
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
