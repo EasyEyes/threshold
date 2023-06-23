@@ -446,7 +446,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _online3PhoneOperatingSystem is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nPhone Operating System\nParticipants were asked the following question: What operating system (OS) does your primary mobile phone have?\nAndroid\niOS (iPhone)\nWindows\nOther/Not Applicable\nDon't Know\n\nNOTE: This selector is in the _online3 group because it's important for EasyEyes sound experiments. EasyEyes uses the participant's smartphone to calibrate the loudspeaker of the participant's desktop.\n",
+      "_online3PhoneOperatingSystem is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nPhone Operating System\nParticipants were asked the following question: What operating system (OS) does your primary mobile phone have?\nAndroid\niOS (iPhone)\nWindows\nOther/Not Applicable\nDon't Know\n\nNOTE: This selector is in the _online3 group because it's important for EasyEyes sound experiments. EasyEyes uses the participant's smartphone to calibrate the loudspeaker of the participant's desktop.\n",
     type: "multicategorical",
     default: "",
     categories: "Android, iOS, Windows, Other, Don't Know",
@@ -557,7 +557,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _online5CochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
+      "_online5CochlearImplant (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nCochlear implant\nParticipants were asked the following question: Do you have a cochlear implant?\nYes\nNo\nRather not say",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",
@@ -567,7 +567,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _online5Dyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
+      "_online5Dyslexia (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDyslexia\nParticipants were asked the following question: Have you received a medical diagnosis for dyslexia?\n\nYes, I have been medically diagnosed with dyslexia\nNo, but I am in the process of being diagnosed\nNo, but I strongly suspect I have undiagnosed dyslexia\nNo\nRather not say\nThe value will be a comma-separated list of none or any number of: diagnosed, being diagnosed, suspect but undiagnosed, no, not saying",
     type: "multicategorical",
     default: "",
     categories: "diagnosed, being diagnosed, suspect, no, not saying",
@@ -577,7 +577,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _online5HearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+      "_online5HearingDifficulties (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nHearing difficulties\nParticipants were asked the following question: Do you have any hearing loss or hearing difficulties?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",
@@ -609,7 +609,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _online5LanguagePrimary (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
+      "_online5LanguagePrimary (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.",
     type: "multicategorical",
     default: "",
     categories:
@@ -620,7 +620,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _online5LanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDo you have any language related disorders?\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
+      "_online5LanguageRelatedDisorders (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nDo you have any language related disorders?\nreading difficulty\nwriting difficulty\nother language related disorder\nnone\nnot applicable",
     type: "multicategorical",
     default: "",
     categories:
@@ -631,7 +631,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _online5MusicalInstrumentExperience (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nExperience with musical instruments\nParticipants were asked the following question: Do you play a musical instument, if so for how many years?\n\nNo. I don't play a musical instrument\nYes. For 0-1 years.\nYes. For 1-2 years.\nYes. For 2-3 years.\nYes. For 3-4 years.\nYes. For 5+ years.",
+      "_online5MusicalInstrumentExperience (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nExperience with musical instruments\nParticipants were asked the following question: Do you play a musical instument, if so for how many years?\n\nNo. I don't play a musical instrument\nYes. For 0-1 years.\nYes. For 1-2 years.\nYes. For 2-3 years.\nYes. For 3-4 years.\nYes. For 5+ years.",
     type: "multicategorical",
     default: "",
     categories: "No, 0-1, 1-2, 2-3, 3-4, 5+",
@@ -641,7 +641,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision. Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
+      "_online5Vision (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query:\nVision. Do you have normal or corrected-to-normal vision?\nYes\nNo\nRather not say\n• The parameter value will be a comma-separated list of: Yes, No, Rather not say.",
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Rather not say",

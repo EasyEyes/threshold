@@ -131,6 +131,7 @@ import {
   blockOrder,
   _key_resp_allKeys,
   allHzCalibrationResults,
+  ICalibDBSPL,
 } from "./components/global.js";
 
 import {
@@ -785,6 +786,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "THD",
         soundCalibrationResults.current.thdValues
       );
+      psychoJS.experiment.addData("iCalib", ICalibDBSPL.current);
     }
     if (allHzCalibrationResults.x_conv) {
       psychoJS.experiment.addData(
