@@ -464,6 +464,7 @@ const paramReaderInitialized = async (reader) => {
         }
 
         thisExperimentInfo.EasyEyesID = participant;
+        thisExperimentInfo.PavloviaSessionID = participant;
       }
     };
     const result = await checkCrossSessionId(
@@ -479,6 +480,7 @@ const paramReaderInitialized = async (reader) => {
     thisExperimentInfo.setSession(1);
 
     thisExperimentInfo.EasyEyesID = rc.id.value;
+    thisExperimentInfo.PavloviaSessionID = rc.id.value;
   }
 
   // show screens before actual experiment begins

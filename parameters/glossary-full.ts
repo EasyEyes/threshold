@@ -2002,9 +2002,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "responseMustTrackContinuouslyBool (default FALSE) when TRUE requires that the cursor be within the hotspot for the entire (random) waiting interval, not just the beginning and end. If the cursor is ever outside the hotspot during the waiting interval then the software begins, again, waiting for the cursor to enter the hotspot, to begin a new waiting intevale (whose duration is a fresh random sample).",
+      "responseMustTrackContinuouslyBool (default TRUE) when TRUE requires that the cursor be within the hotspot for the entire (random) waiting interval, not just the beginning and end. If the cursor is ever outside the hotspot during the waiting interval then the software begins, again, waiting for the cursor to enter the hotspot, to begin a new waiting intevale (whose duration is a fresh random sample).",
     type: "boolean",
-    default: "FALSE",
+    default: "TRUE",
     categories: "",
   },
   {

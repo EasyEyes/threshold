@@ -12,13 +12,13 @@ export const thisExperimentInfo = {
   _s: 1, // session
 
   EasyEyesID: undefined,
+  PavloviaSessionID: undefined,
 
   ProlificParticipantID: undefined,
   ProlificSessionID: undefined,
   ProlificStudyID: undefined,
 
   experimentFileName: undefined,
-  experimentName: undefined,
   experiment: undefined,
 
   date: undefined,
