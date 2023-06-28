@@ -45,10 +45,10 @@ export const updateConditionNameConfig = (
 
 export const updateTargetSpecsForLetter = (
   stimulusParameters,
-  experimentFileName
+  experimentFilename
 ) => {
   const specs = {
-    filename: experimentFileName,
+    filename: experimentFilename,
     sizeDeg: stimulusParameters.sizeDeg,
     heightDeg: stimulusParameters.heightDeg,
     heightPx: stimulusParameters.heightPx,
@@ -80,12 +80,12 @@ export const updateTargetSpecsForMovie = (paramReader, BC) => {
 
 export const updateTargetSpecsForRepeatedLetters = (
   stimulusParameters,
-  experimentFileName
+  experimentFilename
 ) => {
   const { stimulusLocations, ...stimulusParametersToShow } = stimulusParameters;
   const specs = Object.assign(
     {
-      filename: experimentFileName,
+      filename: experimentFilename,
       spacingRelationToSize: letterConfig.spacingRelationToSize,
       spacingOverSizeRatio: letterConfig.spacingOverSizeRatio,
       targetSizeIsHeightBool: letterConfig.targetSizeIsHeightBool,
@@ -96,9 +96,9 @@ export const updateTargetSpecsForRepeatedLetters = (
   showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 
-export const updateTargetSpecsForReading = (reader, BC, experimentFileName) => {
+export const updateTargetSpecsForReading = (reader, BC, experimentFilename) => {
   const specs = {
-    filename: experimentFileName,
+    filename: experimentFilename,
     readingCorpus: reader.read("readingCorpus", BC),
     readingFirstFewWords: readingPageStats.readingPageSkipCorpusWords.length
       ? readingPageStats.readingPageSkipCorpusWords[
@@ -153,11 +153,11 @@ export const updateTargetSpecsForSound = (
 export const updateTargetSpecsForRsvpReading = (
   reader,
   BC,
-  experimentFileName,
+  experimentFilename,
   otherSpecs
 ) => {
   const readingSpecs = {
-    filename: experimentFileName,
+    filename: experimentFilename,
     readingCorpus: reader.read("readingCorpus", BC),
     readingFirstFewWords: readingPageStats.readingPageSkipCorpusWords.length
       ? readingPageStats.readingPageSkipCorpusWords[

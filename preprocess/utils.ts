@@ -405,6 +405,16 @@ export const addNewUnderscoreParam = (
   );
 };
 
+export const addNewInternalParam = (
+  df: any,
+  paramName: string,
+  paramValue: any
+): any => {
+  const columnName = paramName[0] !== "!" ? "!" + paramName : paramName;
+  if (df.listColumns().includes(columnName)) return df;
+  return df.withColumn(columnName, (_: any, i: number) => paramValue);
+};
+
 /**
  * Takes a positive integer and returns the corresponding column name.
  * @SOURCE https://cwestblog.com/2013/09/05/javascript-snippet-convert-number-to-column-name/

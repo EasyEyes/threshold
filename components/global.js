@@ -18,7 +18,7 @@ export const thisExperimentInfo = {
   ProlificSessionID: undefined,
   ProlificStudyID: undefined,
 
-  experimentFileName: undefined,
+  experimentFilename: undefined,
   experiment: undefined,
 
   date: undefined,

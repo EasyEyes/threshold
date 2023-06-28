@@ -159,16 +159,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_experimentFilename",
-    availability: "now",
-    example: "crowding.csv",
-    explanation:
-      "❌ _experimentFilename is the filename of the experiment table, including the extension, typically XLSX or CSV. THIS IS OVERWRITTEN BY EASYEYES. DO NOT INCLUDE IT IN YOUR SPREADSHEET.",
-    type: "text",
-    default: "",
-    categories: "",
-  },
-  {
     name: "_experimentSavePartialResultsBool",
     availability: "now",
     example: "",

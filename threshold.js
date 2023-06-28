@@ -603,9 +603,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     });
   }
 
-  thisExperimentInfo.experimentFileName = paramReader.read(
-    "_experimentFilename",
-    "__ALL_BLOCKS__"
+  thisExperimentInfo.experimentFilename = paramReader.read(
+    "!experimentFilename"
   )[0];
 
   logger("fontsRequired", fontsRequired);
@@ -2997,7 +2996,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             updateTargetSpecsForReading(
               reader,
               BC,
-              thisExperimentInfo.experimentFileName
+              thisExperimentInfo.experimentFilename
             );
 
           trialComponents = [];
@@ -3314,7 +3313,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForLetter(
               stimulusParameters,
-              thisExperimentInfo.experimentFileName
+              thisExperimentInfo.experimentFilename
             );
 
           trialComponents = [];
@@ -3441,7 +3440,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForRepeatedLetters(
               stimulusParameters,
-              thisExperimentInfo.experimentFileName
+              thisExperimentInfo.experimentFilename
             );
           repeatedLettersConfig.stims.forEach((s) => {
             s.setPadding(font.padding);
@@ -3572,7 +3571,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             updateTargetSpecsForRsvpReading(
               paramReader,
               BC,
-              thisExperimentInfo.experimentFileName,
+              thisExperimentInfo.experimentFilename,
               {
                 targetWordDurationSec: durationSec,
                 rsvpReadingNumberOfWords: numberOfWords,

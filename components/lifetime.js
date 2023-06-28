@@ -105,7 +105,7 @@ EasyEyesID              ${thisExperimentInfo.EasyEyesID}
 EasyEyesSession         ${thisExperimentInfo.session}
 participant             ${thisExperimentInfo.participant}
 
-file                    ${thisExperimentInfo.experimentFileName
+file                    ${thisExperimentInfo.experimentFilename
         .split("/")
         .pop()}
 date                    ${thisExperimentInfo.date.toString()}` +
