@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GLOSSARY } from "../parameters/glossary";
 import {
+  conditionIndexToColumnName,
   getNumericalSuffix,
   limitedEnumerate,
   toColumnName,
@@ -296,7 +297,7 @@ export const NOT_YET_SUPPORTED_PARAMETER = (
 };
 
 export const NO_BLOCK_PARAMETER: EasyEyesError = {
-  name: "Parameter is not present.",
+  name: "Parameter is not present",
   message: `We weren't able to find a parameter named <span class="error-parameter">block</span>. This parameter is required, as it tells us how to organize your study.`,
   hint: `Be sure to include a <span class="error-parameter">block</span>block parameter in your experiment file. The values should be increasing from 1 (or 0, if <span class="error-parameter">zeroBasedNumberingBool</span> is set to true). Each condition, ie column, needs one block number, but a block can have any number of conditions.`,
   context: "preprocessor",
@@ -417,7 +418,7 @@ export const CONDITION_PARAMETERS_IN_FIRST_COLUMN = (
   offendingParameters: string[]
 ): EasyEyesError => {
   return {
-    name: "Non-underscore parameters provided in underscore parameter column.",
+    name: "Non-underscore parameters provided in underscore parameter column",
     message: `These parameters are forbidden to use column B. Column B is reserved for underscore parameters.`,
     hint: `For parameters ${limitedEnumerate(
       offendingParameters
@@ -441,7 +442,7 @@ export const NONCONTIGUOUS_GROUPING_VALUES = (
   );
   const offendingValuesStr = limitedEnumerate(offendingValues);
   return {
-    name: "Block shuffle groups aren't contiguous.",
+    name: "Block shuffle groups aren't contiguous",
     message: `The ${multiple ? "groups" : "group"} ${offendingValuesStr} ${
       multiple ? "were" : "was"
     } found to be non-contiguous.`,
@@ -465,7 +466,7 @@ export const NONSUBSET_GROUPING_VALUES = (
   );
   const offendingValuesStr = limitedEnumerate(offendingValues);
   return {
-    name: "Block shuffle groups not a subset of containing groups.",
+    name: "Block shuffle groups not a subset of containing groups",
     message: `Every ${parameter(
       "blockShuffleGroupN"
     )} group must belong to some ${parameter(
@@ -494,11 +495,59 @@ export const CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS = (
     parameterAndConditionsStrings
   );
   return {
-    name: "Multiple mutually exclusive parameters are true in the same condition.",
+    name: "Multiple mutually exclusive parameters are true in the same condition",
     message: `Certain groups of parameters can't have multiple set to TRUE. ${offendingParametersAndConditions} are mutually exclusive.`,
     hint: "",
     context: "preprocessor",
     kind: "error",
     parameters: [...new Set(parameters.flat())],
+  };
+};
+
+export const NEGATIVE_MARKING_FIXATION_STROKE_THICKENING = (
+  valuesAndConditions: [string, number][]
+): EasyEyesError => {
+  const parameterAndConditionStrings = valuesAndConditions.map(
+    ([badThickeningValue, conditionNumber]) =>
+      `${badThickeningValue} (column ${conditionIndexToColumnName(
+        conditionNumber
+      )})`
+  );
+  const offendingParametersAndColumns = verballyEnumerate(
+    parameterAndConditionStrings
+  );
+  const plural = valuesAndConditions.length > 1;
+  return {
+    name: "Negative marking fixation stroke thickening value",
+    message: `Values for markingFixationStrokeThickening must be non-negative multipliers. ${offendingParametersAndColumns} ${
+      plural ? "are" : "is"
+    } negative`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["markingFixationStrokeThickening"],
+  };
+};
+
+export const ILLDEFINED_TRACKING_INTERVALS = (
+  minMaxSecAndConditions: [string[], number][]
+): EasyEyesError => {
+  const parameterAndConditionStrings = minMaxSecAndConditions.map(
+    ([[min, max], conditionNumber]) =>
+      `[${min}, ${max}] (column ${conditionIndexToColumnName(conditionNumber)})`
+  );
+  const offendingParametersAndColumns = verballyEnumerate(
+    parameterAndConditionStrings
+  );
+  const plural = minMaxSecAndConditions.length > 1;
+  return {
+    name: "Ill-defined fixation tracking interval",
+    message: `For each condition, it is required that <span class="error-parameter">responseMustTrackMinSec <= responseMustTrackMaxSec</span>. The interval${
+      plural ? "s" : ""
+    } ${offendingParametersAndColumns} ${plural ? "are" : "is"} poorly-formed.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["responstMustTrackMinSec", "responseMustTrackMaxSec"],
   };
 };

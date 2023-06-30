@@ -28,6 +28,8 @@ import {
   NONCONTIGUOUS_GROUPING_VALUES,
   NONSUBSET_GROUPING_VALUES,
   CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS,
+  NEGATIVE_MARKING_FIXATION_STROKE_THICKENING,
+  ILLDEFINED_TRACKING_INTERVALS,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -39,6 +41,7 @@ import {
   getNoncontiguousValues,
   isBlockShuffleGroupingParam,
   toColumnName,
+  conditionIndexToColumnName,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 
@@ -122,7 +125,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   // Check for properly formatted "block" parameter values
   errors.push(...isBlockPresentAndProper(experimentDf));
 
-  // Check parameter values
+  // Check types of parameter values
   errors.push(...areParametersOfTheCorrectType(experimentDf));
 
   // Verify there is at least one response method turned on
@@ -147,12 +150,14 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   errors.push(...areShuffleGroupsContiguous(experimentDf));
   errors.push(...areShuffleGroupsSubsets(experimentDf));
 
-  // Check
+  // Check mutually exclusive parameters. Add additional mutually exclusive groups as arrays of parameters.
   errors.push(
     ...areMutuallyExclusiveParametersNonconflicting(experimentDf, [
       ["responseMustTrackCrosshairBool", "responseMustClickCrosshairBool"],
     ])
   );
+
+  errors.push(...checkSpecificParameterValues(experimentDf));
 
   // Remove empty errors (FUTURE ought to be unnecessary, find root cause)
   errors = errors
@@ -791,7 +796,6 @@ const areMutuallyExclusiveParametersNonconflicting = (
   experimentDf: any,
   mutuallyExclusiveParameterGroups: string[][]
 ): EasyEyesError[] => {
-  // !. TODO check each param group for each block_condition, keep list of clashing params (from group) and block_conditions
   const presentColumns = experimentDf.listColumns();
   let offendingParamsInConditions: [string[], string][] = [];
   mutuallyExclusiveParameterGroups.forEach((mutuallyExclusiveParams) => {
@@ -810,11 +814,12 @@ const areMutuallyExclusiveParametersNonconflicting = (
           .flat()
           .map((s: string) => s.toLowerCase() === "true")
       : rows.map((r) => true);
+    // TODO does this break when checking mutually exclusive underscore params?? or not check them at all?
     rows.forEach((r: string[], i: number) => {
       // const values = r.slice(1);
       // const params = theseColumns.slice(1);
       // Start at Column C, and 1 indexed, so +3
-      const spreadsheetColumn = toColumnName(i + 3);
+      const spreadsheetColumn = conditionIndexToColumnName(i);
       const valuesMap = r.map((v) => (v.toLowerCase() === "true" ? 1 : 0));
       const trueParams = theseColumns.filter((p, i) => valuesMap[i]);
       if (trueParams.length > 1 && rowsEnabledMap[i])
@@ -825,4 +830,58 @@ const areMutuallyExclusiveParametersNonconflicting = (
   const parameters = offendingParamsInConditions.map((x) => x[0]);
   const conditions = offendingParamsInConditions.map((x) => x[1]);
   return [CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS(parameters, conditions)];
+};
+
+const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
+  const errors: EasyEyesError[] = [];
+
+  errors.push(..._checkCrosshairTrackingValues(experimentDf));
+  return errors;
+};
+
+const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {
+  // responseMustTrackMaxSec ≥ responseMustTrackMinSec ≥ 0, andmarkingFixationStrokeThickening ≥ 0.
+  const errors = [];
+
+  const presentParameters: string[] = experimentDf.listColumns();
+  const BCs = getColumnValues(experimentDf, "block_condition");
+
+  // TODO should this be the behavior of getColumnValues? ie how should getColumnValues behave if that column isn't specified in the experiment table?
+  const getColumnValuesOrDefaults = (param: string) =>
+    presentParameters.includes(param)
+      ? getColumnValues(experimentDf, param)
+      : new Array(BCs.length).fill(GLOSSARY[param].default);
+
+  const responseMustTrackMaxSec = getColumnValuesOrDefaults(
+    "responseMustTrackMaxSec"
+  );
+  const responseMustTrackMinSec = getColumnValuesOrDefaults(
+    "responseMustTrackMinSec"
+  );
+  const markingFixationStrokeThickening = getColumnValuesOrDefaults(
+    "markingFixationStrokeThickening"
+  );
+
+  const negativeThickenings: [string, number][] = [];
+  const trackingIntervalImpossible: [string[], number][] = [];
+  BCs.forEach((BC: string, i) => {
+    if (Number(markingFixationStrokeThickening[i]) < 0)
+      negativeThickenings.push([markingFixationStrokeThickening[i], i]);
+    if (
+      Number(responseMustTrackMaxSec[i]) < Number(responseMustTrackMinSec[i]) ||
+      Number(responseMustTrackMinSec[i]) < 0
+    )
+      trackingIntervalImpossible.push([
+        [responseMustTrackMinSec[i], responseMustTrackMaxSec[i]],
+        i,
+      ]);
+  });
+  if (negativeThickenings.length)
+    errors.push(
+      NEGATIVE_MARKING_FIXATION_STROKE_THICKENING(negativeThickenings)
+    );
+  if (trackingIntervalImpossible.length)
+    errors.push(ILLDEFINED_TRACKING_INTERVALS(trackingIntervalImpossible));
+
+  return errors;
 };

@@ -431,6 +431,17 @@ export const toColumnName = (num: number): string => {
 };
 
 /**
+ * Given a (zero-indexed) condition index (ie position in an array of all the block_condition values),
+ * return the corresponding column name (where the first condition is found in column C of the experiment
+ * table, following column A with the parameter name and column B with underscore parameter values).
+ * @param conditionN
+ * @return {string}
+ */
+export const conditionIndexToColumnName = (conditionN: number): string => {
+  return toColumnName(conditionN + 3);
+};
+
+/**
  * Given an array of arrays which may not be of the same length, pad each so that they are.
  * @param arrays {unknown[][]} Array of arrays
  * @param paddingValue {unknown} The value used to pad arrays to length
