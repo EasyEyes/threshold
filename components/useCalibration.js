@@ -11,6 +11,7 @@ import {
   allHzCalibrationResults,
   calibrateSoundMinHz,
   calibrateSoundMaxHz,
+  calibratePhoneMicBool,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -187,6 +188,11 @@ export const calibrateAudio = async (reader) => {
     ),
   ];
 
+  calibratePhoneMicBool.current = ifTrue(
+    reader.read(GLOSSARY._calibratePhoneMicBool.name, "__ALL_BLOCKS__")
+  );
+  console.log("calibratePhoneMicBool.current", calibratePhoneMicBool.current);
+
   calibrateSoundMinHz.current = reader.read(
     GLOSSARY.calibrateSoundMinHz.name
   )[0];
@@ -231,6 +237,7 @@ export const calibrateAudio = async (reader) => {
       test: "Test", //include in phrases doc
       citation:
         'Measured sound power is modeled as sum of background sound power and power gain times digital sound power. Microphone compression modeled by Eq. 4 of Giannoulis, Massberg, & Reiss (2012). "Digital Dynamic Range Compressor Design — A Tutorial and Analysis." Journal of Audio Engineering Society. 60 (6): 399–408.',
+      calibrateMicrophone: "Calibrate a Microphone",
     };
 
     const elems = _addSoundCalibrationElems(copy);
@@ -245,10 +252,12 @@ export const calibrateAudio = async (reader) => {
 
       try {
         if (calibrateSoundLevel && calibrateLoudspeaker) {
-          await _runSoundLevelCalibrationAndLoudspeakerCalibration(
-            elems,
-            gains
-          );
+          const response =
+            await _runSoundLevelCalibrationAndLoudspeakerCalibration(
+              elems,
+              gains
+            );
+          if (response === false) resolve(false);
         } else if (calibrateSoundLevel) {
           await _runSoundLevelCalibration(elems, gains);
         } else {
@@ -263,13 +272,158 @@ export const calibrateAudio = async (reader) => {
           alert(`${e}: Something went wrong during this step`);
           resolve(false);
         }
+
         console.error(e);
       }
 
       elems.displayQR.style.display = "none";
       elems.message.innerHTML = copy.done;
-      // display sound levels and soundGainDbSPL.current in a table
-      // test
+      elems.yesButton.style.display = "none";
+      // Now that loudspeaker calibration is done, present users with two options: continue to experiment or calibrate microphone
+
+      // if calibratePhoneMicBool is true, then provide the option to calibrate the phone mic or to continue.
+      // if user chooses to calibrate mic, then at the end of the calibration, user will be presented with the option to calibrate another mic or to continue.
+      // for now simulate the mic calibration by 5 seconds pause then provide the option to calibrate another mic or to continue.
+      // do this until the user chooses to continue.
+
+      while (calibratePhoneMicBool.current) {
+        // provide the option to calibrate another mic or to continue.
+        elems.calibrateMicrophoneButton.style.display = "block";
+        elems.continueButton.style.display = "block";
+        document.querySelector("#soundNavContainer").style.display = "flex";
+
+        await new Promise(async (resolve) => {
+          elems.calibrateMicrophoneButton.addEventListener(
+            "click",
+            async (e) => {
+              elems.message.innerHTML = copy.qr.replace(/\n/g, "<br>");
+              elems.calibrateMicrophoneButton.style.display = "none";
+              elems.continueButton.style.display = "none";
+
+              // provide an input field for the user to enter an id(name) for the mic
+              // create an input field
+              const input = document.createElement("input");
+              input.setAttribute("type", "text");
+              input.setAttribute("id", "micId");
+              input.setAttribute("placeholder", "Enter a name for the mic");
+              input.setAttribute(
+                "style",
+                "margin-top: 10px; margin-bottom: 10px;"
+              );
+              input.style.size = 20;
+              input.style.width = "50%";
+              elems.message.appendChild(input);
+              // create a button to submit the input
+              const proceedButton = document.createElement("button");
+              proceedButton.setAttribute("id", "proceedButtonMicName");
+              proceedButton.classList.add(...["btn", "btn-primary"]);
+              proceedButton.innerHTML = "Proceed";
+              elems.message.appendChild(proceedButton);
+
+              // when the button is clicked, get the value of the input field and store it in the micId variable
+              await new Promise((resolve) => {
+                proceedButton.addEventListener("click", async (e) => {
+                  elems.displayQR.style.display = "block";
+                  const micId = input.value;
+                  if (micId !== "") {
+                    // remove the input field and the button
+                    input.remove();
+                    proceedButton.remove();
+                    // simulate the mic calibration by 5 seconds pause
+                    // await new Promise((resolve) => {
+                    //   setTimeout(() => {
+                    //     resolve();
+                    //   }, 5000);
+                    // })
+                    const {
+                      Speaker,
+                      CombinationCalibration,
+                      UnsupportedDeviceError,
+                      MissingSpeakerIdError,
+                      CalibrationTimedOutError,
+                    } = speakerCalibrator;
+
+                    const speakerParameters = {
+                      siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
+                      targetElementId: "displayQR",
+                      debug: debugBool.current,
+                      ICalib: ICalibDBSPL.current,
+                      gainValues: gains,
+                      knownIR: allHzCalibrationResults.knownIr,
+                    };
+
+                    const calibratorParams = {
+                      numCaptures: 3,
+                      numMLSPerCapture: 4,
+                      download: debugBool.current,
+                      lowHz: calibrateSoundMinHz.current,
+                      highHz: calibrateSoundMaxHz.current,
+                    };
+
+                    const calibrator = new CombinationCalibration(
+                      calibratorParams
+                    );
+
+                    calibrator.on("update", ({ message, ...rest }) => {
+                      elems.displayUpdate.innerHTML = message;
+                    });
+
+                    const debug = false;
+
+                    if (debug) {
+                      invertedImpulseResponse.current = [
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1,
+                      ];
+                      soundCalibrationResults.current = {
+                        outDBSPL1000Values: [
+                          103.3, 102.9, 102.0, 95.3, 85.2, 75,
+                        ],
+                        thdValues: [
+                          85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0,
+                          -60.1, 47.8, 11.4,
+                        ],
+                        outDBSPLValues: [
+                          85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0,
+                          -60.1, 47.8, 11.4,
+                        ],
+                        parameters: {
+                          T: 100,
+                          W: 10,
+                          R: 1000,
+                          backgroundDBSPL: 18.6,
+                          gainDBSPL: 125,
+                          RMSError: 0.1,
+                        },
+                      };
+                    } else {
+                      speakerParameters.microphoneName = micId;
+                      const result = await Speaker.startCalibration(
+                        speakerParameters,
+                        calibrator,
+                        500000
+                      );
+
+                      console.log("resultttt: ", result);
+                    }
+                    console.log("before resolve()");
+                    resolve();
+                  }
+                });
+              });
+
+              resolve();
+            }
+          );
+
+          elems.continueButton.addEventListener("click", async (e) => {
+            elems.calibrateMicrophoneButton.style.display = "none";
+            elems.continueButton.style.display = "none";
+            calibratePhoneMicBool.current = false;
+            resolve();
+          });
+        });
+      }
 
       if (
         calibrateSoundLevel &&
@@ -297,6 +451,7 @@ export const calibrateAudio = async (reader) => {
       document.querySelector("#soundYes").style.display = "block";
 
       if (debugBool.current) {
+        elems.testButton.style.display = "block";
         elems.testButton.style.visibility = "visible";
         elems.testButton.addEventListener("click", async (e) => {
           addSoundTestElements(reader);
@@ -338,6 +493,8 @@ const _addSoundCalibrationElems = (copy) => {
   const soundTestPlots = document.createElement("div");
   const downloadButton = document.createElement("button");
   const buttonAndParametersContainer = document.createElement("div");
+  const calibrateMicrophoneButton = document.createElement("button");
+  const continueButton = document.createElement("button");
   const elems = {
     background,
     title,
@@ -358,6 +515,8 @@ const _addSoundCalibrationElems = (copy) => {
     downloadButton,
     buttonAndParametersContainer,
     citation,
+    calibrateMicrophoneButton,
+    continueButton,
   };
 
   title.setAttribute("id", "soundTitle");
@@ -372,6 +531,8 @@ const _addSoundCalibrationElems = (copy) => {
   yesButton.setAttribute("id", "soundYes");
   noButton.setAttribute("id", "soundNo");
   testButton.setAttribute("id", "soundTest");
+  calibrateMicrophoneButton.setAttribute("id", "calibrateMicrophone");
+  continueButton.setAttribute("id", "continueButton");
   soundParametersFromCalibration.setAttribute(
     "id",
     "soundParametersFromCalibration"
@@ -386,9 +547,14 @@ const _addSoundCalibrationElems = (copy) => {
   yesButton.innerHTML = copy.yes;
   noButton.innerHTML = copy.no;
   testButton.innerHTML = copy.test;
+  testButton.style.display = "none";
   citation.innerHTML = copy.citation;
   citation.style.fontSize = "0.8em";
   citation.style.visibility = "hidden";
+  calibrateMicrophoneButton.innerHTML = copy.calibrateMicrophone;
+  calibrateMicrophoneButton.style.display = "none";
+  continueButton.innerHTML = "Continue";
+  continueButton.style.display = "none";
 
   background.classList.add(...["sound-calibration-background", "rc-panel"]);
   // avoid background being clipped from the top
@@ -397,6 +563,8 @@ const _addSoundCalibrationElems = (copy) => {
   yesButton.classList.add(...["btn", "btn-primary"]);
   noButton.classList.add(...["btn", "btn-secondary"]);
   testButton.classList.add(...["btn", "btn-success"]);
+  calibrateMicrophoneButton.classList.add(...["btn", "btn-primary"]);
+  continueButton.classList.add(...["btn", "btn-success"]);
   //make download button invisible
   downloadButton.style.visibility = "hidden";
 
@@ -408,6 +576,8 @@ const _addSoundCalibrationElems = (copy) => {
   navContainer.appendChild(yesButton);
   navContainer.appendChild(noButton);
   navContainer.appendChild(testButton);
+  navContainer.appendChild(calibrateMicrophoneButton);
+  navContainer.appendChild(continueButton);
   container.appendChild(displayContainer);
   displayContainer.appendChild(displayQR);
   displayContainer.appendChild(displayUpdate);
@@ -599,7 +769,10 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   // (elems.subtitle.innerHTML =
   //   phrases.RC_soundCalibrationTitleAllHz[rc.language.value]),
   //   await _runLoudspeakerCalibration(elems);
+
   elems.subtitle.innerHTML = "";
+  // hide elems.message
+  elems.message.style.display = "none";
   const {
     Speaker,
     CombinationCalibration,
@@ -614,6 +787,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
     debug: debugBool.current,
     ICalib: ICalibDBSPL.current,
     gainValues: gains,
+    knownIR: null,
   };
 
   const calibratorParams = {
@@ -630,53 +804,126 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
     elems.displayUpdate.innerHTML = message;
   });
 
-  const debug = false;
+  //show a dropdown menu to select a mic from list of mics in our database
 
-  if (debug) {
-    invertedImpulseResponse.current = [
-      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    ];
-    soundCalibrationResults.current = {
-      outDBSPL1000Values: [103.3, 102.9, 102.0, 95.3, 85.2, 75],
-      thdValues: [
-        85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1, 47.8, 11.4,
-      ],
-      outDBSPLValues: [
-        85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1, 47.8, 11.4,
-      ],
-      parameters: {
-        T: 100,
-        W: 10,
-        R: 1000,
-        backgroundDBSPL: 18.6,
-        gainDBSPL: 125,
-        RMSError: 0.1,
-      },
-    };
-  } else {
-    soundCalibrationResults.current = await Speaker.startCalibration(
-      speakerParameters,
-      calibrator,
-      500000
-    );
+  const micList = await Speaker.getMicrophoneNamesFromDatabase();
+  // create a dropdown menu
+  const instructions = document.createElement("p");
+  instructions.innerHTML = "Select a microphone to calibrate with:";
+  const dropdown = document.createElement("select");
+  dropdown.id = "micList";
+  dropdown.name = "micList";
+  // pick the first mic as default
+  const defaultMic = micList[0];
+  // add options to the dropdown menu
+  micList.forEach((mic) => {
+    const option = document.createElement("option");
+    option.value = mic;
+    option.text = mic;
+    if (mic === defaultMic) {
+      option.selected = true;
+    }
+    dropdown.appendChild(option);
+  });
 
-    // console.log("calibrationResults", soundCalibrationResults.current);
+  // css
+  dropdown.style.width = "25%";
+  dropdown.style.height = "100%";
+  dropdown.style.fontSize = "1rem";
+  dropdown.style.fontWeight = "bold";
+  dropdown.style.color = "black";
+  dropdown.style.backgroundColor = "white";
+  dropdown.style.border = "none";
+  dropdown.style.borderRadius = "0.5rem";
 
-    invertedImpulseResponse.current = soundCalibrationResults.current.iir;
-    allHzCalibrationResults.x_conv = soundCalibrationResults.current.x_conv;
-    allHzCalibrationResults.y_conv = soundCalibrationResults.current.y_conv;
-    allHzCalibrationResults.x_unconv = soundCalibrationResults.current.x_unconv;
-    allHzCalibrationResults.y_unconv = soundCalibrationResults.current.y_unconv;
+  instructions.style.width = "100%";
+  instructions.style.fontSize = "1.2rem";
 
-    soundGainDBSPL.current =
-      soundCalibrationResults.current.parameters.gainDBSPL;
-    soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
-  }
-  const { normalizedIIR, calibrationLevel } =
-    getSoundCalibrationLevelDBSPLFromIIR(invertedImpulseResponse.current);
-  invertedImpulseResponse.current = normalizedIIR;
-  soundCalibrationLevelDBSPL.current = calibrationLevel;
+  // add the dropdown menu to the page
+  elems.subtitle.appendChild(instructions);
+  elems.subtitle.appendChild(dropdown);
+
+  // add a proceed button
+  const proceedButton = document.createElement("button");
+  proceedButton.innerHTML = "Proceed";
+  proceedButton.classList.add(...["btn", "btn-primary"]);
+
+  elems.subtitle.appendChild(proceedButton);
+
+  // add event listener to the proceed button
+  return await new Promise((resolve) => {
+    proceedButton.addEventListener("click", async () => {
+      elems.message.style.display = "block";
+      // get the selected mic
+      const selectedMic = dropdown.options[dropdown.selectedIndex].value;
+      // hide the dropdown menu and proceed button
+      dropdown.style.display = "none";
+      instructions.style.display = "none";
+      proceedButton.style.display = "none";
+
+      const debug = false;
+
+      if (debug) {
+        invertedImpulseResponse.current = [
+          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        ];
+        soundCalibrationResults.current = {
+          outDBSPL1000Values: [103.3, 102.9, 102.0, 95.3, 85.2, 75],
+          thdValues: [
+            85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1, 47.8,
+            11.4,
+          ],
+          outDBSPLValues: [
+            85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1, 47.8,
+            11.4,
+          ],
+          parameters: {
+            T: 100,
+            W: 10,
+            R: 1000,
+            backgroundDBSPL: 18.6,
+            gainDBSPL: 125,
+            RMSError: 0.1,
+          },
+        };
+      } else {
+        speakerParameters.microphoneName = selectedMic;
+        soundCalibrationResults.current = await Speaker.startCalibration(
+          speakerParameters,
+          calibrator,
+          500000
+        );
+
+        if (soundCalibrationResults.current === false) {
+          resolve(false);
+        }
+
+        // console.log("calibrationResults", soundCalibrationResults.current);
+
+        invertedImpulseResponse.current = soundCalibrationResults.current.iir;
+        allHzCalibrationResults.x_conv = soundCalibrationResults.current.x_conv;
+        allHzCalibrationResults.y_conv = soundCalibrationResults.current.y_conv;
+        allHzCalibrationResults.x_unconv =
+          soundCalibrationResults.current.x_unconv;
+        allHzCalibrationResults.y_unconv =
+          soundCalibrationResults.current.y_unconv;
+        allHzCalibrationResults.knownIr =
+          soundCalibrationResults.current.componentIR;
+
+        soundGainDBSPL.current =
+          soundCalibrationResults.current.parameters.gainDBSPL;
+        soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
+      }
+      const { normalizedIIR, calibrationLevel } =
+        getSoundCalibrationLevelDBSPLFromIIR(invertedImpulseResponse.current);
+      invertedImpulseResponse.current = normalizedIIR;
+      soundCalibrationLevelDBSPL.current = calibrationLevel;
+
+      resolve(true);
+    });
+  });
 };
+
 /* -------------------------------------------------------------------------- */
 
 const getCmValue = (numericalValue, unit) => {

@@ -93,12 +93,6 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  _experimentFilename: {
-    name: "_experimentFilename",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
   _experimentSavePartialResultsBool: {
     name: "_experimentSavePartialResultsBool",
     availability: "now",
