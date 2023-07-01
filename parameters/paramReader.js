@@ -1,5 +1,6 @@
 import Papa from "papaparse";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "./glossary.ts";
+import { INTERNAL_GLOSSARY } from "./internal.ts";
 
 export class ParamReader {
   constructor(experimentFilePath = "conditions", callback) {
@@ -17,7 +18,11 @@ export class ParamReader {
     )
       throw "[READER] Invalid Block Number";
 
-    if (!(name in GLOSSARY) && !this._superMatchParam(name))
+    if (
+      !(name in GLOSSARY) &&
+      !this._superMatchParam(name) &&
+      !this._matchInternalParam(name)
+    )
       throw `[paramReader.read] Invalid parameter name ${name}`;
 
     if (this.has(name)) return this._getParam(name, blockOrConditionName);
@@ -76,6 +81,10 @@ export class ParamReader {
         return true;
     }
     return false;
+  }
+
+  _matchInternalParam(parameter) {
+    return parameter in INTERNAL_GLOSSARY;
   }
 
   _getParamGlossary(name, blockOrConditionName) {

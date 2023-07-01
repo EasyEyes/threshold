@@ -405,6 +405,16 @@ export const addNewUnderscoreParam = (
   );
 };
 
+export const addNewInternalParam = (
+  df: any,
+  paramName: string,
+  paramValue: any
+): any => {
+  const columnName = paramName[0] !== "!" ? "!" + paramName : paramName;
+  if (df.listColumns().includes(columnName)) return df;
+  return df.withColumn(columnName, (_: any, i: number) => paramValue);
+};
+
 /**
  * Takes a positive integer and returns the corresponding column name.
  * @SOURCE https://cwestblog.com/2013/09/05/javascript-snippet-convert-number-to-column-name/
@@ -418,6 +428,17 @@ export const toColumnName = (num: number): string => {
     ret = String.fromCharCode(y) + ret;
   }
   return ret;
+};
+
+/**
+ * Given a (zero-indexed) condition index (ie position in an array of all the block_condition values),
+ * return the corresponding column name (where the first condition is found in column C of the experiment
+ * table, following column A with the parameter name and column B with underscore parameter values).
+ * @param conditionN
+ * @return {string}
+ */
+export const conditionIndexToColumnName = (conditionN: number): string => {
+  return toColumnName(conditionN + 3);
 };
 
 /**

@@ -20,6 +20,7 @@ import {
   getCodeList,
   addNewUnderscoreParam,
   getFolderNames,
+  addNewInternalParam,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { EasyEyesError } from "./errorMessages";
@@ -298,12 +299,12 @@ export const prepareExperimentFileForThreshold = async (
     // if (unbalancedCommasError) errors.push(unbalancedCommasError);
   }
 
-  if (filename) {
-    df = addNewUnderscoreParam(df, "_experimentFilename", filename);
-  }
-
   // Add block_condition labels, populate underscore params, drop first column, populate defaults
   df = normalizeExperimentDfShape(df);
+
+  if (filename) {
+    df = addNewInternalParam(df, "!experimentFilename", filename);
+  }
 
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
