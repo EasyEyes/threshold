@@ -12,6 +12,7 @@ import {
   calibrateSoundMinHz,
   calibrateSoundMaxHz,
   calibratePhoneMicBool,
+  microphoneCalibrationResults,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -279,6 +280,7 @@ export const calibrateAudio = async (reader) => {
       elems.displayQR.style.display = "none";
       elems.message.innerHTML = copy.done;
       elems.yesButton.style.display = "none";
+      elems.displayUpdate.style.display = "none";
       // Now that loudspeaker calibration is done, present users with two options: continue to experiment or calibrate microphone
 
       // if calibratePhoneMicBool is true, then provide the option to calibrate the phone mic or to continue.
@@ -397,6 +399,7 @@ export const calibrateAudio = async (reader) => {
                         },
                       };
                     } else {
+                      elems.displayUpdate.style.display = "block";
                       speakerParameters.microphoneName = micId;
                       const result = await Speaker.startCalibration(
                         speakerParameters,
@@ -405,6 +408,10 @@ export const calibrateAudio = async (reader) => {
                       );
 
                       console.log("resultttt: ", result);
+                      microphoneCalibrationResults.push({
+                        micId: micId,
+                        result: result,
+                      });
                     }
                     console.log("before resolve()");
                     resolve();
@@ -430,12 +437,32 @@ export const calibrateAudio = async (reader) => {
         soundCalibrationResults.current &&
         invertedImpulseResponse.current
       ) {
-        displayParameters1000Hz(elems, soundLevels, soundCalibrationResults);
+        displayParameters1000Hz(
+          elems,
+          soundLevels,
+          soundCalibrationResults.current
+        );
         displayParametersAllHz(
           elems,
           invertedImpulseResponse.current,
           allHzCalibrationResults
         );
+        if (microphoneCalibrationResults.length > 0) {
+          microphoneCalibrationResults.forEach((micResult) => {
+            displayParameters1000Hz(
+              elems,
+              soundLevels,
+              micResult.result,
+              "1000 Hz Calibration Results for " + micResult.micId
+            );
+            displayParametersAllHz(
+              elems,
+              micResult.result.iir,
+              micResult.result,
+              "All Hz Calibration Results for " + micResult.micId
+            );
+          });
+        }
       } else if (calibrateLoudspeaker && invertedImpulseResponse.current) {
         displayParametersAllHz(
           elems,
@@ -443,7 +470,11 @@ export const calibrateAudio = async (reader) => {
           allHzCalibrationResults
         );
       } else if (calibrateSoundLevel && soundCalibrationResults.current) {
-        displayParameters1000Hz(elems, soundLevels, soundCalibrationResults);
+        displayParameters1000Hz(
+          elems,
+          soundLevels,
+          soundCalibrationResults.current
+        );
       }
 
       elems.yesButton.innerHTML = "Continue to experiment.";

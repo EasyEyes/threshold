@@ -407,6 +407,8 @@ export const allHzCalibrationResults = {
   y_conv: undefined,
   knownIr: undefined,
 };
+
+export const microphoneCalibrationResults = [];
 export const calibrateSoundMaxHz = { current: undefined };
 export const calibrateSoundMinHz = { current: undefined };
 export const soundGainTWR = { T: undefined, W: undefined, R: undefined };

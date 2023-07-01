@@ -5,7 +5,8 @@ export const plotSoundLevels1000Hz = (
   plotCanvas,
   parameters,
   soundLevels,
-  outDBSPL1000Values
+  outDBSPL1000Values,
+  title
 ) => {
   const mergedDataPoints = soundLevels.map((x, i) => {
     return { x: x, y: outDBSPL1000Values[i] };
@@ -102,7 +103,7 @@ export const plotSoundLevels1000Hz = (
       plugins: {
         title: {
           display: true,
-          text: "Sound Level at 1000 Hz",
+          text: title,
         },
         legend: {
           labels: {
@@ -160,7 +161,12 @@ export const plotSoundLevels1000Hz = (
   const plot = new Chart(plotCanvas, config);
 };
 
-export const plotForAllHz = (plotCanvas, iir = [], calibrationResults) => {
+export const plotForAllHz = (
+  plotCanvas,
+  iir = [],
+  calibrationResults,
+  title
+) => {
   const unconvMergedDataPoints = calibrationResults.x_unconv.map((x, i) => {
     return { x: calibrationResults.y_unconv[i], y: 10 * Math.log10(x) };
   });
@@ -207,7 +213,7 @@ export const plotForAllHz = (plotCanvas, iir = [], calibrationResults) => {
       plugins: {
         title: {
           display: true,
-          text: "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers.",
+          text: title,
         },
         legend: {
           labels: {

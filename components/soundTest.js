@@ -659,7 +659,8 @@ export const getCorrectedInDbAndSoundDBSPL = (
 export const displayParameters1000Hz = (
   elems,
   soundLevels,
-  soundCalibrationResults
+  soundCalibrationResults,
+  PlotTitle = "Sound Level at 1000 Hz"
 ) => {
   elems.citation.style.visibility = "visible";
   elems.background.style.top = "70%";
@@ -702,10 +703,10 @@ export const displayParameters1000Hz = (
   elems.soundLevelsTable.insertBefore(title, thead);
   // center the title
   title.style.textAlign = "center";
-  const parameters = soundCalibrationResults.current.parameters;
-  const outDBSPL1000Values = soundCalibrationResults.current.outDBSPL1000Values;
-  const outDBSPLValues = soundCalibrationResults.current.outDBSPLValues;
-  const THDValues = soundCalibrationResults.current.thdValues;
+  const parameters = soundCalibrationResults.parameters;
+  const outDBSPL1000Values = soundCalibrationResults.outDBSPL1000Values;
+  const outDBSPLValues = soundCalibrationResults.outDBSPLValues;
+  const THDValues = soundCalibrationResults.thdValues;
   for (let i = 0; i < soundLevels.length; i++) {
     const tr = document.createElement("tr");
     const td1 = document.createElement("td");
@@ -780,7 +781,8 @@ export const displayParameters1000Hz = (
     plotCanvas,
     parameters,
     soundLevels,
-    outDBSPL1000Values
+    outDBSPL1000Values,
+    PlotTitle
   );
 
   // fit plotCanvas to parent
@@ -880,7 +882,12 @@ const downloadCalibrationData = (downloadButton, parameters) => {
   });
 };
 
-export const displayParametersAllHz = (elems, iir, calibrationResults) => {
+export const displayParametersAllHz = (
+  elems,
+  iir,
+  calibrationResults,
+  title = "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers."
+) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
   plotCanvas.width = 500;
@@ -890,5 +897,5 @@ export const displayParametersAllHz = (elems, iir, calibrationResults) => {
 
   elems.citation.style.visibility = "visible";
 
-  plotForAllHz(plotCanvas, iir, calibrationResults);
+  plotForAllHz(plotCanvas, iir, calibrationResults, title);
 };
