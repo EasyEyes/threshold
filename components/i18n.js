@@ -31,6 +31,8 @@ export const phrases = {
     "zh-HK": "LTR",
     ja: "LTR",
     ko: "LTR",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_languageUseSpace: {
     "en-US": "1",
@@ -59,6 +61,8 @@ export const phrases = {
     "zh-HK": "0",
     ja: "0",
     ko: "0",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_languageUsesSpaces: {
     "en-US": "1",
@@ -87,6 +91,8 @@ export const phrases = {
     "zh-HK": "0",
     ja: "0",
     ko: "0",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_languageFont: {
     "en-US": "Noto Serif",
@@ -115,6 +121,8 @@ export const phrases = {
     "zh-HK": "Noto Serif TC",
     ja: "Noto Serif JP",
     ko: "Noto Serif KR",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_languageNameEnglish: {
     "en-US": "English",
@@ -143,6 +151,8 @@ export const phrases = {
     "zh-HK": "Traditional Chinese",
     ja: "Japanese",
     ko: "Korean",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_languageNameNative: {
     "en-US": "English",
@@ -171,6 +181,8 @@ export const phrases = {
     "zh-HK": "繁體中文",
     ja: "日本",
     ko: "한국인",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_languageChoose: {
     "en-US": "Choose a language for this study.",
@@ -199,6 +211,8 @@ export const phrases = {
     "zh-HK": "為這項研究選擇一種語言。",
     ja: "この調査の言語を選択してください。",
     ko: "이 연구에 대한 언어를 선택하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_phraseSource: {
     "en-US":
@@ -228,6 +242,8 @@ export const phrases = {
     "zh-HK": "Google Translate from Simplified Chinese",
     ja: "Google Translate from English",
     ko: "Google Translate from English",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibilityTitle: {
     "en-US": "Needs",
@@ -256,6 +272,8 @@ export const phrases = {
     "zh-HK": "需要",
     ja: "ニーズ",
     ko: "필요합니다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatible: {
     "en-US": "✅ Excellent! This study can proceed. ",
@@ -284,6 +302,8 @@ export const phrases = {
     "zh-HK": "✅好！這項研究可以進行。",
     ja: "✅素晴らしい！この研究は進むことができます。",
     ko: "✅ 우수! 이 연구는 진행될 수 있습니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleBrowserDeviceCores: {
     "en-US":
@@ -313,8 +333,10 @@ export const phrases = {
       "如其描述中所述，这项研究需要在DDD上运行至少222个CPU内核的BBB浏览器",
     "zh-HK":
       "如其描述中所述，這項研究需要在DDD上運行至少222個CPU內核的BBB瀏覽器",
-    ja: "その説明で述べたように、この研究では、少なくとも222のCPUコアでDDDで実行されるBBBブラウザが必要です",
+    ja: "その説明で述べたように、この調査では、少なくとも222のCPUコアでDDDで実行されるBBBブラウザが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어로 DDD에서 실행되는 BBB 브라우저가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleBrowserNotOSDeviceCores: {
     "en-US":
@@ -344,20 +366,22 @@ export const phrases = {
       "如其描述中所述，这项研究与OOO不相容，并且需要在DDD上运行至少222个CPU内核的BBB浏览器",
     "zh-HK":
       "如其描述中所述，這項研究與OOO不相容，並且需要在DDD上運行至少222個CPU內核的BBB瀏覽器",
-    ja: "その説明で述べたように、この研究はOOOと互換性があり、少なくとも222のCPUコアでDDDで実行されるBBBブラウザーが必要です",
+    ja: "その説明で述べたように、この研究はOOOと互換性があり、少なくとも222のCPUコアでDDDで実行されるBBBブラウザが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 OOO와 호환되지 않으며 최소 222 CPU 코어로 DDD에서 실행되는 BBB 브라우저가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleBrowserOSDeviceCores: {
     "en-US":
       "As stated in its description, this study needs the BBB browser running on a OOO DDD with at least 222 CPU cores",
-    de: "Wie in ihrer Beschreibung angegeben, muss diese Studie den BBB -Browser auf einer OOO DDD mit mindestens 222 CPU -Kernen benötigen",
+    de: "Wie in ihrer Beschreibung angegeben, muss diese Studie der BBB -Browser auf einer OOO DDD mit mindestens 222 CPU -Kernen benötigen",
     fr: "Comme indiqué dans sa description, cette étude a besoin du navigateur BBB fonctionnant sur un DDD OOO avec au moins 222 cœurs de CPU",
     es: "Como se indica en su descripción, este estudio necesita el navegador BBB que se ejecuta en un OOO DDD con al menos 222 núcleos de CPU",
     pt: "Conforme declarado em sua descrição, este estudo precisa do navegador BBB em execução em um DDD OOO com pelo menos 222 núcleos da CPU",
     it: "Come affermato nella sua descrizione, questo studio ha bisogno del browser BBB in esecuzione su un DDD OOO con almeno 222 core CPU",
     ro: "După cum s -a menționat în descrierea sa, acest studiu are nevoie de browserul BBB care rulează pe un OOO DDD cu cel puțin 222 de nuclee de procesor",
-    pl: "Jak stwierdzono w opisie, badanie to wymaga przeglądarki BBB działającej na OOO DDD z co najmniej 222 rdzeniami procesora",
-    ru: "Как указано в его описании, этому исследованию нужен браузер BBB, работающий на OOO DDD с не менее 222 ядрами ЦП",
+    pl: "Jak stwierdzono w opisie, badanie to wymaga przeglądarki BBB działającej na DDD OOO z co najmniej 222 rdzeniami procesora",
+    ru: "Как указано в его описании, этому исследованию нужен браузер BBB, работающий на OOO DDD с не менее 222 ядрами процессора",
     hy: "Ինչպես նշված է իր նկարագրության մեջ, այս ուսումնասիրությանը անհրաժեշտ է BBB զննարկիչը, որն աշխատում է OOO DDD- ով `առնվազն 222 պրոցեսորի միջուկով",
     fi: "Kuten kuvauksessaan todetaan, tämä tutkimus tarvitsee BBB",
     ka: "როგორც აღწერა აღწერა, ამ კვლევას სჭირდება BBB ბრაუზერი, რომელიც მუშაობს OOO DDD– ზე მინიმუმ 222 CPU ბირთვით",
@@ -374,9 +398,11 @@ export const phrases = {
     "zh-CN":
       "如其描述中所述，本研究需要在OOO DDD上运行至少222 CPU内核的BBB浏览器",
     "zh-HK":
-      "如其描述中所述，本研究需要在OOO DDD上運行至少222 CPU內核的BBB瀏覽器",
+      "如其描述中所述，這項研究需要在OOO DDD上運行至少222個CPU內核的BBB瀏覽器",
     ja: "その説明で述べたように、この研究では、少なくとも222のCPUコアを使用してOOO DDDで実行されるBBBブラウザが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어가있는 OOO DDD에서 실행되는 BBB 브라우저가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleBrowserVersionDeviceCores: {
     "en-US":
@@ -406,8 +432,10 @@ export const phrases = {
       "如其描述中所述，这项研究需要在DDD上运行至少222个CPU内核的BBB浏览器（版本至少为111）",
     "zh-HK":
       "如其描述中所述，這項研究需要在DDD上運行至少222個CPU內核的BBB瀏覽器（版本至少為111）",
-    ja: "その説明で述べたように、この調査では、少なくとも222 CPUコアを使用してDDDで実行されるBBBブラウザ（少なくとも111バージョン）が必要です。",
+    ja: "その説明に記載されているように、この調査では、少なくとも222 CPUコアのあるDDDで実行されているBBBブラウザ（少なくとも111バージョン）が必要です。",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어가있는 DDD에서 실행되는 BBB 브라우저 (111 개 이상)가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleBrowserVersionNotOSDeviceCores: {
     "en-US":
@@ -437,8 +465,10 @@ export const phrases = {
       "如其描述中所述，这项研究与OOO不相容，并且需要在DDD上运行至少222 CPU内核的BBB浏览器（版本至少为111）",
     "zh-HK":
       "如其描述中所述，這項研究與OOO不相容，並且需要在DDD上運行至少222 CPU內核的BBB瀏覽器（版本至少為111）",
-    ja: "その説明で述べたように、この研究はOOOと互換性があり、少なくとも222 CPUコアのDDDで実行されているBBBブラウザー（少なくとも111バージョン）が必要です",
+    ja: "その説明で述べたように、この研究はOOOと互換性があり、少なくとも222 CPUコアを持つDDDで実行されているBBBブラウザ（少なくとも111バージョン）が必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 OOO와 호환되지 않으며 222 개 이상의 CPU 코어가있는 DDD에서 실행되는 BBB 브라우저 (111 개 이상)가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleBrowserVersionOSDeviceCores: {
     "en-US":
@@ -448,8 +478,8 @@ export const phrases = {
     es: "Como se indica en su descripción, este estudio necesita el navegador BBB (versión al menos 111) que se ejecuta en un OOO DDD con al menos 222 núcleos de CPU",
     pt: "Conforme declarado em sua descrição, este estudo precisa do navegador BBB (versão pelo menos 111) em execução em um DDD OOO com pelo menos 222 núcleos da CPU",
     it: "Come indicato nella sua descrizione, questo studio richiede il browser BBB (versione almeno 111) in esecuzione su un DDD OOO con almeno 222 core CPU",
-    ro: "După cum s -a menționat în descrierea sa, acest studiu are nevoie de browserul BBB (versiunea cel puțin 111) care rulează pe un OOO DDD cu cel puțin 222 de nuclee de procesare",
-    pl: "Jak stwierdzono w opisie, badanie to wymaga przeglądarki BBB (wersja co najmniej 111) działająca na OOO DDD z co najmniej 222 rdzeniami procesora",
+    ro: "După cum s -a menționat în descrierea sa, acest studiu are nevoie de browserul BBB (versiunea cel puțin 111) care rulează pe un OOO DDD cu cel puțin 222 de nuclee CPU",
+    pl: "Jak stwierdzono w opisie, badanie to wymaga przeglądarki BBB (wersja co najmniej 111) działająca na DDD OOO z co najmniej 222 rdzeniami procesora",
     ru: "Как указано в его описании, этому исследованию нужен браузер BBB (версия не менее 111), работающий на OOO DDD с не менее 222 ядрами ЦП",
     hy: "Ինչպես նշված է իր նկարագրության մեջ, այս ուսումնասիրությանը անհրաժեշտ է BBB զննարկիչ (տարբերակ առնվազն 111) վազում է OOO DDD- ով առնվազն 222 պրոցեսորի միջուկով",
     fi: "Kuten kuvauksessaan todetaan, tämä tutkimus tarvitsee BBB -selaimen (Versio vähintään 111), joka toimii OOO -DDD: llä vähintään 222 CPU -ytimellä",
@@ -462,7 +492,7 @@ export const phrases = {
     ml: "അതിന്റെ വിവരണത്തിൽ പറഞ്ഞിരിക്കുന്നതുപോലെ, ഈ പഠനത്തിന് ബിബിബി ബ്ര browser സർ (കുറഞ്ഞത് 111 എന്നെങ്കിലും കുറഞ്ഞത് 222 സിപിയു കോറുകളും ഓടുന്നു",
     te: "దాని వర్ణనలో చెప్పినట్లుగా, ఈ అధ్యయనానికి BBB బ్రౌజర్ (వెర్షన్ కనీసం 111) అవసరం, కనీసం 222 CPU కోర్లతో OOO DDD లో నడుస్తుంది",
     kn: "ಅದರ ವಿವರಣೆಯಲ್ಲಿ ಹೇಳಿರುವಂತೆ, ಈ ಅಧ್ಯಯನಕ್ಕೆ ಬಿಬಿಬಿ ಬ್ರೌಸರ್ (ಕನಿಷ್ಠ 111 ಆವೃತ್ತಿ) OOO ಡಿಡಿಡಿಯಲ್ಲಿ ಕನಿಷ್ಠ 222 ಸಿಪಿಯು ಕೋರ್ಗಳೊಂದಿಗೆ ಚಲಿಸುವ ಅಗತ್ಯವಿದೆ",
-    bn: "এর বর্ণনায় যেমন বলা হয়েছে, এই অধ্যয়নের জন্য বিবিবি ব্রাউজার (কমপক্ষে 111 সংস্করণ) প্রয়োজন একটি ওও ডিডিডি -তে কমপক্ষে 222 সিপিইউ কোর সহ চলছে",
+    bn: "এর বর্ণনায় যেমন বলা হয়েছে, এই অধ্যয়নের জন্য বিবিবি ব্রাউজার (কমপক্ষে 111 সংস্করণ) প্রয়োজন একটি ওও ডিডিডি -তে কমপক্ষে 222 সিপিইউ কোর সহ চলমান",
     id: "Seperti yang dinyatakan dalam deskripsinya, penelitian ini membutuhkan browser BBB (versi setidaknya 111) yang berjalan pada ooo DDD dengan setidaknya 222 core CPU",
     "zh-CN":
       "如其描述中所述，这项研究需要在OOO DDD上运行至少222个CPU内核的BBB浏览器（版本至少为111）",
@@ -470,6 +500,8 @@ export const phrases = {
       "如其描述中所述，這項研究需要在OOO DDD上運行至少222個CPU內核的BBB瀏覽器（版本至少為111）",
     ja: "その説明で述べたように、この調査では、少なくとも222のCPUコアを使用してOOO DDDで実行されるBBBブラウザ（少なくとも111バージョン）が必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어가있는 OOO DDD에서 실행되는 BBB 브라우저 (111 개)가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleDeviceCores: {
     "en-US":
@@ -494,16 +526,18 @@ export const phrases = {
     te: "దాని వర్ణనలో చెప్పినట్లుగా, ఈ అధ్యయనానికి కనీసం 222 CPU కోర్లతో DDD అవసరం",
     kn: "ಅದರ ವಿವರಣೆಯಲ್ಲಿ ಹೇಳಿರುವಂತೆ, ಈ ಅಧ್ಯಯನಕ್ಕೆ ಕನಿಷ್ಠ 222 ಸಿಪಿಯು ಕೋರ್ಗಳೊಂದಿಗೆ ಡಿಡಿಡಿ ಅಗತ್ಯವಿದೆ",
     bn: "এর বর্ণনায় যেমন বলা হয়েছে, এই অধ্যয়নের জন্য কমপক্ষে 222 সিপিইউ কোর সহ একটি ডিডিডি দরকার",
-    id: "Seperti yang dinyatakan dalam deskripsinya, penelitian ini membutuhkan DDD dengan setidaknya 222 core CPU",
-    "zh-CN": "如其描述中所述，这项研究需要至少具有222个CPU核心的DDD",
+    id: "Seperti yang dinyatakan dalam deskripsinya, penelitian ini membutuhkan DDD dengan setidaknya 222 inti CPU",
+    "zh-CN": "如其描述中所述，这项研究需要至少222个CPU核心的DDD",
     "zh-HK": "如其描述中所述，這項研究需要至少具有222個CPU核心的DDD",
     ja: "その説明で述べたように、この研究には少なくとも222のCPUコアを持つDDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 개의 CPU 코어를 가진 DDD가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleExceptForScreenResolution: {
     "en-US":
       "This computer will become compatible if you increase the screen resolution to at least 333⨉444 pixels.",
-    de: "Dieser Computer wird kompatibel, wenn Sie die Bildschirmauflösung auf mindestens 333 ° C444 Pixel erhöhen.",
+    de: "Dieser Computer wird kompatibel, wenn Sie die Bildschirmauflösung auf mindestens 333⨉444 Pixel erhöhen.",
     fr: "Cet ordinateur deviendra compatible si vous augmentez la résolution de l'écran à au moins 333⨉444 pixels.",
     es: "Esta computadora se volverá compatible si aumenta la resolución de la pantalla a al menos 333⨉444 píxeles.",
     pt: "Este computador se tornará compatível se você aumentar a resolução da tela para pelo menos 333⨉444 pixels.",
@@ -528,16 +562,18 @@ export const phrases = {
     "zh-HK": "如果將屏幕分辨率提高到至少333⨉444像素，則該計算機將變得兼容。",
     ja: "このコンピューターは、画面の解像度を少なくとも333⨉444ピクセルに増やすと互換性があります。",
     ko: "화면 해상도를 최소 333⨉444 픽셀로 늘리면이 컴퓨터가 호환됩니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleNotBrowserDeviceCores: {
     "en-US":
       "As stated in its description, this study is incompatible with the bbb browser(s), and needs a DDD with at least 222 CPU cores",
-    de: "Wie in ihrer Beschreibung angegeben, ist diese Studie mit dem BBB -Browser (s) unvereinbar und benötigt eine DDD mit mindestens 222 CPU -Kernen",
+    de: "Wie in ihrer Beschreibung angegeben, ist diese Studie nicht mit dem BBB -Browser (en) kompatibel und benötigt eine DDD mit mindestens 222 CPU -Kernen",
     fr: "Comme indiqué dans sa description, cette étude est incompatible avec le (s) navigateur (s) BBB et a besoin d'un DDD avec au moins 222 cœurs CPU",
     es: "Como se indica en su descripción, este estudio es incompatible con los navegadores BBB, y necesita un DDD con al menos 222 núcleos de CPU",
     pt: "Conforme declarado em sua descrição, este estudo é incompatível com o (s) navegador (s) BBB (s) e precisa de um DDD com pelo menos 222 núcleos da CPU",
     it: "Come affermato nella sua descrizione, questo studio è incompatibile con il browser BBB e ha bisogno di un DDD con almeno 222 core CPU",
-    ro: "După cum s -a menționat în descrierea sa, acest studiu este incompatibil cu browserul (browserul) BBB și are nevoie de un DDD cu cel puțin 222 de nuclee de procesare",
+    ro: "După cum s -a menționat în descrierea sa, acest studiu este incompatibil cu browserul (browserul) BBB și are nevoie de un DDD cu cel puțin 222 de nuclee de procesor",
     pl: "Jak stwierdzono w opisie, badanie to jest niezgodne z przeglądarką (-ów) BBB i wymaga DDD z co najmniej 222 rdzeniami procesora",
     ru: "Как указано в его описании, это исследование несовместимо с браузером BBB и нуждается в DDD с не менее 222 ядрами процессора",
     hy: "Ինչպես նշված է իր նկարագրության մեջ, այս ուսումնասիրությունը անհամատեղելի է BBB զննարկչի (ներ) ի հետ եւ կարիք ունի առնվազն 222 պրոցեսորի միջուկներով DDD",
@@ -554,11 +590,13 @@ export const phrases = {
     bn: "এর বর্ণনায় যেমন বলা হয়েছে, এই গবেষণাটি বিবিবি ব্রাউজারের সাথে বেমানান, এবং কমপক্ষে 222 সিপিইউ কোর সহ একটি ডিডিডি প্রয়োজন",
     id: "Seperti yang dinyatakan dalam deskripsinya, penelitian ini tidak sesuai dengan browser BBB, dan membutuhkan DDD dengan setidaknya 222 core CPU",
     "zh-CN":
-      "如其描述中所述，这项研究与BBB浏览器不相容，并且需要至少具有222个CPU核心的DDD",
+      "如其描述中所述，这项研究与BBB浏览器不兼容，并且需要至少222个CPU核心的DDD",
     "zh-HK":
       "如其描述中所述，這項研究與BBB瀏覽器不兼容，並且需要至少222個CPU核心的DDD",
-    ja: "その説明に記載されているように、この研究はBBBブラウザと互換性があり、少なくとも222のCPUコアを持つDDDが必要です",
+    ja: "その説明に記載されているように、この研究はBBBブラウザと互換性がなく、少なくとも222のCPUコアを持つDDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 BBB 브라우저와 호환되지 않으며 최소 222 CPU 코어가있는 DDD가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleNotBrowserNotOSDeviceCores: {
     "en-US":
@@ -569,10 +607,10 @@ export const phrases = {
     pt: "Conforme declarado em sua descrição, este estudo é incompatível com o (s) navegador (s) BBB (s) e também incompatível com o OOO. Precisa de um DDD com pelo menos 222 núcleos da CPU",
     it: "Come affermato nella sua descrizione, questo studio è incompatibile con il browser BBB e anche incompatibile con OOO. Ha bisogno di un DDD con almeno 222 core CPU",
     ro: "După cum s -a menționat în descrierea sa, acest studiu este incompatibil cu browserul (browserul) BBB și, de asemenea, incompatibil cu OOO. Are nevoie de un DDD cu cel puțin 222 nuclee de procesare",
-    pl: "Jak stwierdzono w jego opisie, badanie to jest niezgodne z przeglądarką BBB, a także niezgodne z OOO. Potrzebuje DDD z co najmniej 222 rdzeniami procesora",
-    ru: "Как указано в его описании, это исследование несовместимо с браузером BBB, а также несовместимо с OOO. Ему нужен DDD с не менее 222 ядрами процессора",
+    pl: "Jak stwierdzono w opisie, badanie to jest niezgodne z przeglądarką (-ów) BBB, a także niezgodne z OOO. Potrzebuje DDD z co najmniej 222 rdzeniami procesora",
+    ru: "Как указано в его описании, это исследование несовместимо с браузером (ы) BBB, а также несовместимо с OOO. Ему нужен DDD с не менее 222 ядрами процессора",
     hy: "Ինչպես նշված է իր նկարագրության մեջ, այս ուսումնասիրությունը անհամատեղելի է BBB զննարկչի (ներ) ի հետ եւ նաեւ անհամատեղելի OOO- ի հետ: Անհրաժեշտ է DDD, առնվազն 222 պրոցեսորի միջուկներով",
-    fi: "Kuten kuvauksessaan todetaan, tämä tutkimus ei ole yhteensopiva BBB -selaimen (Selaimen) kanssa ja myös yhteensopimattomana OOO: n kanssa. Se tarvitsee DDD: n, jossa on vähintään 222 CPU -ydintä",
+    fi: "Kuten kuvauksessaan todetaan, tämä tutkimus ei ole yhteensopiva BBB -selaimen (t) kanssa ja myös yhteensopimattomana OOO: n kanssa. Se tarvitsee DDD: n, jossa on vähintään 222 CPU -ydintä",
     ka: "როგორც აღწერა აღწერა, ეს კვლევა შეუთავსებელია BBB ბრაუზერთან (ებ) ს და ასევე შეუთავსებელია OOO- სთან. მას სჭირდება DDD მინიმუმ 222 CPU ბირთვით",
     he: "כאמור בתיאורו, מחקר זה אינו תואם את דפדפן ה- BBB וגם אינו תואם את OOO. הוא זקוק ל- DDD עם לפחות 222 ליבות מעבד",
     ar: "كما ذكر في وصفها ، لا تتوافق هذه الدراسة مع متصفح (متصفح) BBB وأيضًا غير متوافق مع OOO. يحتاج إلى DDD مع 222 نوى وحدة المعالجة المركزية على الأقل",
@@ -588,8 +626,10 @@ export const phrases = {
       "如其描述中所述，这项研究与BBB浏览器不兼容，并且与OOO也不兼容。它需要一个至少222个CPU内核的DDD",
     "zh-HK":
       "如其描述中所述，這項研究與BBB瀏覽器不兼容，並且與OOO也不兼容。它需要一個至少222個CPU內核的DDD",
-    ja: "その説明で述べたように、この研究はBBBブラウザーと互換性があり、OOOとも互換性がありません。少なくとも222のCPUコアを持つDDDが必要です",
+    ja: "その説明で述べたように、この研究はBBBブラウザーと互換性がなく、OOOとも互換性がありません。少なくとも222のCPUコアを持つDDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 BBB 브라우저와 호환되지 않으며 OOO와 호환되지 않습니다. 최소 222 CPU 코어가있는 DDD가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleNotBrowserOSDeviceCores: {
     "en-US":
@@ -599,7 +639,7 @@ export const phrases = {
     es: "Como se indica en su descripción, este estudio es incompatible con los navegadores BBB y necesita un OOO DDD con al menos 222 núcleos de CPU",
     pt: "Conforme declarado em sua descrição, este estudo é incompatível com o (s) navegador (s) BBB (s) e precisa de um DDD OOO com pelo menos 222 núcleos da CPU",
     it: "Come affermato nella sua descrizione, questo studio è incompatibile con il browser BBB e ha bisogno di un DDD OOO con almeno 222 core CPU",
-    ro: "După cum s -a menționat în descrierea sa, acest studiu este incompatibil cu browserul (browser -ul) BBB și are nevoie de un OOO DDD cu cel puțin 222 de nuclee de procesare",
+    ro: "După cum s -a menționat în descrierea sa, acest studiu este incompatibil cu browserul (browserul) BBB și are nevoie de un OOO DDD cu cel puțin 222 de nuclee de procesare",
     pl: "Jak stwierdzono w opisie, badanie to jest niezgodne z przeglądarką (-ów) BBB i wymaga DDD OOO z co najmniej 222 rdzeniami procesora",
     ru: "Как указано в его описании, это исследование несовместимо с браузером BBB и нуждается в OOO DDD с не менее 222 ядрами процессора",
     hy: "Ինչպես նշված է իր նկարագրության մեջ, այս ուսումնասիրությունը անհամատեղելի է BBB զննարկչի (ներ) ի հետ եւ անհրաժեշտ է OOO DDD, առնվազն 222 պրոցեսորի միջուկներով",
@@ -616,11 +656,13 @@ export const phrases = {
     bn: "এর বর্ণনায় যেমন বলা হয়েছে, এই গবেষণাটি বিবিবি ব্রাউজারের সাথে বেমানান এবং কমপক্ষে 222 সিপিইউ কোর সহ একটি ওও ডিডিডি প্রয়োজন",
     id: "Seperti yang dinyatakan dalam deskripsinya, penelitian ini tidak sesuai dengan browser BBB dan membutuhkan DDD OOO dengan setidaknya 222 core CPU",
     "zh-CN":
-      "如其描述中所述，这项研究与BBB浏览器不兼容，并且需要至少222个CPU核心的OOO DDD",
+      "如其描述中所述，这项研究与BBB浏览器不相容，并且需要至少222个CPU核心的OOO DDD",
     "zh-HK":
-      "如其描述中所述，這項研究與BBB瀏覽器不兼容，並且需要至少222個CPU核心的OOO DDD",
+      "如其描述中所述，這項研究與BBB瀏覽器不相容，並且需要至少222個CPU核心的OOO DDD",
     ja: "その説明に記載されているように、この研究はBBBブラウザーと互換性がなく、少なくとも222のCPUコアを備えたOOO DDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 BBB 브라우저와 호환되지 않으며 최소 222 CPU 코어가있는 OOO DDD가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleNotOSDeviceCores: {
     "en-US":
@@ -652,18 +694,20 @@ export const phrases = {
       "如其描述中所述，這項研究與OOO不相容。它需要一個至少222個CPU內核的DDD",
     ja: "その説明で述べたように、この研究はOOOと互換性がありません。少なくとも222のCPUコアを持つDDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 OOO와 호환되지 않습니다. 최소 222 CPU 코어가있는 DDD가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleOSDeviceCores: {
     "en-US":
       "As stated in its description, this study needs a OOO DDD with at least 222 CPU cores",
-    de: "Wie in ihrer Beschreibung angegeben, erfordert diese Studie eine OOO DDD mit mindestens 222 CPU -Kernen",
+    de: "Wie in ihrer Beschreibung angegeben, benötigt diese Studie eine OOO DDD mit mindestens 222 CPU -Kernen",
     fr: "Comme indiqué dans sa description, cette étude a besoin d'un DDD OOO avec au moins 222 cœurs CPU",
     es: "Como se indica en su descripción, este estudio necesita un OOO DDD con al menos 222 núcleos de CPU",
     pt: "Conforme declarado em sua descrição, este estudo precisa de um DDD OOO com pelo menos 222 núcleos da CPU",
     it: "Come affermato nella sua descrizione, questo studio ha bisogno di un OOO DDD con almeno 222 core CPU",
     ro: "După cum s -a menționat în descrierea sa, acest studiu are nevoie de un OOO DDD cu cel puțin 222 de nuclee de procesare",
     pl: "Jak stwierdzono w opisie, badanie to wymaga DDD OOO z co najmniej 222 rdzeniami procesora",
-    ru: "Как указано в его описании, это исследование нуждается в OOO DDD, по крайней мере, 222 ядра процессора",
+    ru: "Как указано в его описании, это исследование нуждается в OOO DDD, по крайней мере, с 222 ядрами процессора",
     hy: "Ինչպես նշված է իր նկարագրության մեջ, այս ուսումնասիրությանը անհրաժեշտ է OOO DDD, առնվազն 222 պրոցեսորի միջուկներով",
     fi: "Kuten kuvauksessaan todetaan, tämä tutkimus tarvitsee OOO -DDD: n, jossa on vähintään 222 CPU -ytimiä",
     ka: "როგორც აღწერა აღწერა, ამ კვლევას სჭირდება OOO DDD მინიმუმ 222 CPU ბირთვით",
@@ -681,6 +725,8 @@ export const phrases = {
     "zh-HK": "如其描述中所述，這項研究需要一個至少222個CPU核心的OOO DDD",
     ja: "その説明で述べたように、この研究には少なくとも222のCPUコアを持つOOO DDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 개의 CPU 코어를 가진 OOO DDD가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleScreenHeight: {
     "en-US": " and a screen at least 222 pixels high",
@@ -709,6 +755,8 @@ export const phrases = {
     "zh-HK": " 屏幕至少高222像素",
     ja: " 少なくとも222ピクセルの画面",
     ko: " 그리고 최소 222 픽셀의 스크린",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleScreenSize: {
     "en-US": " and a screen resolution of at least 111⨉222 pixels",
@@ -726,7 +774,7 @@ export const phrases = {
     he: " ורזולוציית מסך של לפחות 111⨉222 פיקסלים",
     ar: " ودقة شاشة لا تقل عن 1111222 بكسل",
     ur: " اور کم از کم 111⨉222 پکسلز کی اسکرین ریزولوشن",
-    hi: " और कम से कम 111⨉222 पिक्सल का स्क्रीन रिज़ॉल्यूशन",
+    hi: " और कम से कम 111⨉222 पिक्सल का एक स्क्रीन रिज़ॉल्यूशन",
     ta: " மற்றும் குறைந்தது 111⨉222 பிக்சல்களின் திரை தெளிவுத்திறன்",
     ml: " കൂടാതെ കുറഞ്ഞത് 111⨉222 പിക്സലുകളുടെ ഒരു സ്ക്രീൻ മിഴിവ്",
     te: " మరియు కనీసం 111⨉222 పిక్సెల్స్ యొక్క స్క్రీన్ రిజల్యూషన్",
@@ -737,6 +785,8 @@ export const phrases = {
     "zh-HK": " 和至少111⨉222像素的屏幕分辨率",
     ja: " 少なくとも111⨉222ピクセルの画面解像度",
     ko: " 및 최소 111 ℃ 픽셀의 스크린 해상도",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_compatibleScreenWidth: {
     "en-US": " and a screen at least 111 pixels wide",
@@ -765,6 +815,8 @@ export const phrases = {
     "zh-HK": " 和屏幕至少111像素寬",
     ja: " 少なくとも111ピクセルの画面",
     ko: " 그리고 최소 111 픽셀의 스크린",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_ok: {
     "en-US": "Ok",
@@ -793,6 +845,8 @@ export const phrases = {
     "zh-HK": "好的",
     ja: "Ok",
     ko: "좋아요",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_or: {
     "en-US": " or",
@@ -821,6 +875,8 @@ export const phrases = {
     "zh-HK": " 或者",
     ja: " また",
     ko: " 또는",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_refresh: {
     "en-US": "Refresh",
@@ -849,6 +905,8 @@ export const phrases = {
     "zh-HK": "刷新",
     ja: "リフレッシュします",
     ko: "새로 고치다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_describeDevice: {
     "en-US":
@@ -880,6 +938,8 @@ export const phrases = {
       "看來當前的瀏覽器是BBB（版本111），在具有222個CPU內核的OOO DDD上運行。",
     ja: "現在のブラウザはBBB（バージョン111）であり、222 CPUコアを備えたOOO DDDで実行されているようです。",
     ko: "현재 브라우저는 BBB (버전 111)이며 222 CPU 코어가있는 OOO DDD에서 실행됩니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_describeScreenSize: {
     "en-US": " And a 111⨉222 pixel screen.",
@@ -890,7 +950,7 @@ export const phrases = {
     it: " E uno schermo pixel 111⨉222.",
     ro: " Și un ecran de 111⨉222 pixeli.",
     pl: " I ekran piksela 111⨉222.",
-    ru: " И экран пикселей 111⨉222.",
+    ru: " И экран 111⨉222 пикселей.",
     hy: " Եւ 111⨉222 պիքսելային էկրան:",
     fi: " Ja 111⨉222 pikselin näyttö.",
     ka: " და 111⨉222 პიქსელის ეკრანი.",
@@ -906,8 +966,10 @@ export const phrases = {
     id: " Dan layar piksel 111⨉222.",
     "zh-CN": " 和111⨉222像素屏幕。",
     "zh-HK": " 和111⨉222像素屏幕。",
-    ja: " および111⨉222ピクセル画面。",
+    ja: " 111⨉222ピクセル画面。",
     ko: " 및 1112222 픽셀 화면.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_IDRequested: {
     "en-US": "EasyEyes ID requested",
@@ -924,7 +986,7 @@ export const phrases = {
     ka: "Easyeyes ID მოითხოვა",
     he: "מזהה EasyEyes מבוקש",
     ar: "easyeyes معرف طلب",
-    ur: "ایزیئس آئی ڈی نے درخواست کی",
+    ur: "ایزیئس ID نے درخواست کی",
     hi: "Easyeyes आईडी अनुरोध किया",
     ta: "எளிதான ஐடி கோரப்பட்டது",
     ml: "എളുപ്പമുള്ള ഐഡി അഭ്യർത്ഥിച്ചു",
@@ -936,6 +998,8 @@ export const phrases = {
     "zh-HK": "請求EasyEyes ID",
     ja: "Easyeyes IDが要求されました",
     ko: "EasyEyes ID가 요청되었습니다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_noFileSelected: {
     "en-US": "No file selected",
@@ -964,6 +1028,8 @@ export const phrases = {
     "zh-HK": "未選擇文件",
     ja: "ファイルが選択されていません",
     ko: "파일이 선택되지 않았습니다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_browseForID: {
     "en-US": "Select EasyEyes ID file",
@@ -992,6 +1058,8 @@ export const phrases = {
     "zh-HK": "選擇EasyEyes ID文件",
     ja: "EasyEyes IDファイルを選択します",
     ko: "Easyeyes ID 파일을 선택하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_ID_noLocalStorage: {
     "en-US":
@@ -1023,6 +1091,8 @@ export const phrases = {
       "研究人員請求您從上一個會話中提供易於眼睛的ID，請在此處輸入，或在上次會話結束時上傳下載的文件。",
     ja: "研究者は、前のセッションからEasyEyes IDを提供することを要求します。ここに入力するか、最後のセッションが終了したらダウンロードしたファイルをアップロードしてください。",
     ko: "연구원은 이전 세션에서 EasyEeyes ID를 제공하도록 요청하고 여기에 입력하거나 마지막 세션이 종료되면 다운로드 한 파일을 업로드하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_ID: {
     "en-US":
@@ -1033,7 +1103,7 @@ export const phrases = {
     pt: 'É necessário um ID exclusivo para vincular dados nas sessões. Este computador participou anteriormente de uma sessão em ** ddd ** com o Easyeyes ID “** SSS **”. Pressione OK se for você. Caso contrário, se você tiver um arquivo de identificação easyeyes, pressione o botão Seleção de arquivo abaixo para abri -lo. (O nome do arquivo começa com "easyeyes", termina com ".txt" e normalmente está na sua pasta de downloads.) Se você não tiver um arquivo, mas conheça o seu ID easyeyes, digite -o. Caso contrário, basta criar seu próprio ID, que pode ser qualquer corda alfanumérica com pelo menos 5 caracteres. Pode ser o seu nome, se você quiser. Lembraremos disso para você neste computador, mas se você for a outro computador, pegue seu arquivo de identificação Easyeyes (o arquivo mais recente na sua pasta de downloads) ou pelo menos anote o seu ID easyeyes. Use -o sempre para vincular seus dados de sessão à sessão.',
     it: 'È necessario un ID univoco per collegare i dati tra le sessioni. Questo computer aveva precedentemente partecipato a una sessione su ** DDD ** con ID EasyEyes “** sss **”. Premi OK se sei tu. Altrimenti, se si dispone di un file ID EasyEyes, premere il pulsante di selezione del file in basso per aprirlo. (Il nome file inizia con "EasyEyes", termina con ".txt" ed è in genere nella cartella dei download.) Se non hai un file, ma conosci il tuo ID EasyEyes, quindi digitalo. Altrimenti, basta creare il tuo ID, che può essere lungo qualsiasi stringa alfanumerica di almeno 5 caratteri. Può essere il tuo nome, se vuoi. Lo ricorderemo per te su questo computer, ma se vai a un altro computer, prendi il tuo file ID EasyEyes (il file più recente nella cartella dei download) o almeno scrivi il tuo ID EasyEyes. Usalo ogni volta per collegare i tuoi dati da sessione a sessione.',
     ro: "Este necesar un ID unic pentru a conecta datele în sesiuni. Acest computer a participat anterior la o sesiune pe ** DDD ** cu ID -ul EasyEyes „** SSS **”. Apăsați OK dacă sunteți tu. În caz contrar, dacă aveți un fișier ID EAYEYES, apăsați butonul de selecție a fișierului de mai jos pentru a -l deschide. (Numele de fișier începe cu „EasyEyes”, se încheie cu „.txt” și este de obicei în folderul de descărcări.) Dacă nu aveți un fișier, dar cunoașteți ID -ul dvs. EasyEs, atunci tastați -l. În caz contrar, doar alcătuiește -ți propriul ID, care poate fi orice șir alfanumeric de cel puțin 5 caractere. Poate fi numele tău, dacă vrei. Ne vom aminti pentru dvs. pe acest computer, dar dacă mergeți la un alt computer, vă rugăm să luați fișierul dvs. de ID EasyEs (cel mai recent fișier din folderul dvs. de descărcări) sau cel puțin să scrieți ID -ul dvs. EasyEs. Utilizați -l de fiecare dată pentru a conecta datele de la sesiune la sesiune.",
-    pl: "Potrzebny jest unikalny identyfikator, aby połączyć dane między sesjami. Ten komputer wcześniej uczestniczył w sesji na ** DDD ** z ID Easyeyes „** SSS **”. Naciśnij OK, jeśli to ty. W przeciwnym razie, jeśli masz plik ID Easyeyes, naciśnij poniższy przycisk Plik, aby go otworzyć. (Nazwa pliku zaczyna się od „Easyeyes”, kończy „.txt” i zazwyczaj znajduje się w folderze pobierania.) Jeśli nie masz pliku, ale znasz identyfikator Easyeyes, wpisz go. W przeciwnym razie po prostu zrób własny identyfikator, który może być dowolnym ciągiem alfanumerycznym co najmniej 5 znaków. To może być twoje imię, jeśli chcesz. Zapamiętamy to dla Ciebie na tym komputerze, ale jeśli przejdziesz do innego komputera, weź plik ID Easyeyes (najnowszy plik w folderze do pobrania) lub przynajmniej zapisz swój identyfikator Easyeyes. Użyj go za każdym razem, aby połączyć dane z sesji do sesji.",
+    pl: "Potrzebny jest unikalny identyfikator, aby połączyć dane między sesjami. Ten komputer wcześniej uczestniczył w sesji na ** DDD ** z ID Easyeyes „** SSS **”. Naciśnij OK, jeśli to ty. W przeciwnym razie, jeśli masz plik ID Easyeyes, naciśnij poniższy przycisk Plik, aby go otworzyć. (Nazwa pliku zaczyna się od „Easyeyes”, kończy „.txt” i zwykle znajduje się w folderze pobierania.) Jeśli nie masz pliku, ale znasz identyfikator Easyeyes, wpisz go. W przeciwnym razie po prostu zrób własny identyfikator, który może być dowolnym ciągiem alfanumerycznym co najmniej 5 znaków. To może być twoje imię, jeśli chcesz. Zapamiętamy to dla Ciebie na tym komputerze, ale jeśli przejdziesz do innego komputera, weź plik ID Easyeyes (najnowszy plik w folderze do pobrania) lub przynajmniej zapisz swój identyfikator Easyeyes. Użyj go za każdym razem, aby połączyć dane z sesji do sesji.",
     ru: "Уникальный идентификатор необходим для связи данных в разных сессиях. Этот компьютер ранее участвовал в сеансе на ** ddd ** с easyeyes id «** sss **». Нажмите ОК, если это ты. В противном случае, если у вас есть файл идентификатора easyeyes, нажмите кнопку выбора файла ниже, чтобы открыть его. (Имя файла начинается с «Easyeyes», заканчивается «.txt» и обычно находится в папке загрузки.) Если у вас нет файла, но вы знаете свой идентификатор easyeyes, то введите его. В противном случае, просто составьте свой собственный идентификатор, который может быть любой буквенно -цифровой строкой, по крайней мере, 5 символов. Это может быть ваше имя, если хотите. Мы запомним это для вас на этом компьютере, но если вы зайдете на другой компьютер, пожалуйста, возьмите свой файл идентификатора easteyes (самый последний файл в папке загрузки) или, по крайней мере, запишите свой идентификатор easyeyes. Используйте его каждый раз, чтобы связать ваши данные из сеанса с сеансом.",
     hy: "Նիստերը կապելու համար անհրաժեշտ է եզակի ID: Այս համակարգիչը նախկինում մասնակցել է «DDD ** - ին,« ** SSS ** »- ին ** DDD ** նիստին: Սեղմեք OK, եթե դա ձեզ է: Հակառակ դեպքում, եթե ունեք EasyEyes ID ֆայլ, սեղմեք ներքեւի ֆայլի ընտրության կոճակը, այն բացելու համար: (Անունը սկսվում է «EasyEyes» - ի հետ, ավարտվում է «.txt» - ով եւ սովորաբար ձեր ներբեռնումների պանակում է :) Եթե ֆայլ չունեք, բայց մուտքագրեք ձեր EasyEnes ID- ն, ապա մուտքագրեք այն: Հակառակ դեպքում, պարզապես կազմեք ձեր սեփական ID- ն, որը կարող է լինել ցանկացած այբբենական լար առնվազն 5 նիշ: Դա կարող է լինել ձեր անունը, եթե ցանկանում եք: Մենք դա կհիշենք ձեզ համար այս համակարգչում, բայց եթե մեկ այլ համակարգիչ եք գնում, խնդրում ենք վերցրեք ձեր EasyEyes ID ֆայլը (ձեր ներբեռնման պանակում ամենավերջին ֆայլը), կամ գոնե գրեք ձեր EasyEyes ID- ն: Օգտագործեք այն ամեն անգամ `ձեր տվյալները նիստից նիստին կապելու համար:",
     fi: 'Tietojen linkittämiseen tarvitaan yksilöivä tunnus. Tämä tietokone osallistui aiemmin ** DDD **: n istuntoon, jossa on Easyeyes ID “** SSS **”. Paina OK, jos se olet sinä. Muuten, jos sinulla on Easyeyes -tunnustiedosto, painamalla alla olevaa tiedostovalintapainiketta. (Tiedostonimi alkaa "Easyeyes", päättyy ".txt", ja se on tyypillisesti latauskansiossa.) Jos sinulla ei ole tiedostoa, mutta tunnet Easyeyes -tunnuksesi, kirjoita se sitten. Muutoin muodosta vain oma henkilöllisyystodistus, joka voi olla mikä tahansa aakkosnumeerinen merkkijono vähintään 5 merkkiä pitkä. Se voi olla nimesi, jos haluat. Muistamme sen sinulle tällä tietokoneella, mutta jos siirryt toiseen tietokoneeseen, ota Easyeyes -ID -tiedosto (viimeisin tiedosto latauskansioon) tai ainakin kirjoita Easyeyes -tunnus. Käytä sitä joka kerta linkittääksesi tietosi istunnosta toiseen.',
@@ -1054,6 +1124,8 @@ export const phrases = {
       "需要一個唯一的ID來鏈接跨會話的數據。這台計算機先前參加了有關** ddd **的會話，並帶有EasyEyes ID“ ** sss **”。如果是你，請按確定。否則，如果您有EasyEyes ID文件，請按下面的文件選擇按鈕打開它。 （該文件名以“ EasyEyes”開頭，以“ .txt”結尾，通常在您的下載文件夾中。）如果您沒有文件，但是知道您的EasyEyes ID，請輸入。否則，只需構成自己的ID，即至少有5個字符的字符串長。如果您願意，可以是您的名字。我們會在這台計算機上為您記住它，但是如果您轉到另一台計算機，請獲取您的EasyEyes ID文件（您的下載文件夾中的最新文件），或者至少寫下您的EasyEyes ID。每次使用它將您的數據從會話鏈接到會話。",
     ja: "セッション全体でデータをリンクするには、一意のIDが必要です。このコンピューターは、以前に** ddd **のセッションに参加していました。それがあなたである場合、OKを押してください。それ以外の場合、EasyEyes IDファイルがある場合は、下のファイル選択ボタンを押して開きます。 （ファイル名は「easyeyes」で始まり、「.txt」で終わり、通常はダウンロードフォルダーにあります。）ファイルを持っていないが、easeyeyes IDを知っている場合は、入力します。それ以外の場合は、独自のIDを構成するだけです。これは、少なくとも5文字の英数字の文字列になります。必要に応じて、それはあなたの名前かもしれません。このコンピューターでは覚えていますが、別のコンピューターにアクセスした場合は、EasyEyes IDファイル（ダウンロードフォルダーの最新のファイル）を使用するか、少なくともEasyEyes IDを書き留めてください。セッションからセッションにデータをリンクするために毎回使用してください。",
     ko: '세션에서 데이터를 연결하려면 고유 한 ID가 필요합니다. 이 컴퓨터는 이전에 EasyEyes id“** sss **”와 함께 ** ddd ** 세션에 참여했습니다. 당신이라면 확인을 누릅니다. 그렇지 않으면 EasyEeyes ID 파일이있는 경우 아래 파일 선택 버튼을 눌러 열어줍니다. (파일 이름은 "easyeyes"로 시작하여 ".txt"로 끝나고 일반적으로 다운로드 폴더에 있습니다.) 파일이 없지만 Easyeyes ID를 알고 있다면 입력하십시오. 그렇지 않으면, 자신의 ID를 구성하십시오. 이는 최소 5 자 이상의 영숫자 문자열 일 수 있습니다. 당신이 좋아한다면 그것은 당신의 이름 일 수 있습니다. 이 컴퓨터에서는 기억하겠습니다. 그러나 다른 컴퓨터로 이동하면 Easyeyes ID 파일 (다운로드 폴더의 최신 파일)을 가져 가거나 easyeyes ID를 적어도 적어 두십시오. 데이터를 세션에서 세션으로 연결하는 데마다 사용하십시오.',
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_ID_uploadOrValidID: {
     "en-US": "Please either upload a file or enter a valid EasyEyes ID.",
@@ -1077,11 +1149,13 @@ export const phrases = {
     te: "దయచేసి ఫైల్‌ను అప్‌లోడ్ చేయండి లేదా చెల్లుబాటు అయ్యే ఈజీస్ ఐడిని నమోదు చేయండి.",
     kn: "ದಯವಿಟ್ಟು ಫೈಲ್ ಅನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ಮಾನ್ಯ ಈಸಿ ಐಇಎಸ್ ಐಡಿಯನ್ನು ನಮೂದಿಸಿ.",
     bn: "হয় হয় একটি ফাইল আপলোড করুন বা একটি বৈধ ইজিয়েয়েস আইডি লিখুন।",
-    id: "Harap unggah file atau masukkan ID EyyEyes yang valid.",
+    id: "Harap unggah file atau masukkan ID EXYEYES yang valid.",
     "zh-CN": "请上传文件或输入有效的EasyEyes ID。",
     "zh-HK": "請上傳文件或輸入有效的EasyEyes ID。",
     ja: "ファイルをアップロードするか、有効なEasyEyes IDを入力してください。",
     ko: "파일을 업로드하거나 유효한 EasyEyes ID를 입력하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_ID_invalidID: {
     "en-US":
@@ -1111,6 +1185,8 @@ export const phrases = {
     "zh-HK": "EasyEyes ID包含無效的字符。只允許字母和數字",
     ja: "EasyEyes IDには無効な文字が含まれています。文字と番号のみが許可されています",
     ko: "EasyEyes ID에는 잘못된 문자가 포함되어 있습니다. 글자와 숫자 만 허용됩니다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_ID_invalidFile: {
     "en-US":
@@ -1142,6 +1218,8 @@ export const phrases = {
       "對不起。 easyeyes ID文件的錯誤格式。嘗試另一個文件，或鍵入某些內容。",
     ja: "ごめん。 EasyEyes IDファイルの間違った形式。別のファイルを試すか、何かを入力してください。",
     ko: "죄송합니다. EasyEyes ID 파일에 대한 잘못된 형식. 다른 파일을 시도하거나 무언가를 입력하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_incompatible: {
     "en-US": "❌ INCOMPATIBLE. Sorry. Please return this study to Prolific.co.",
@@ -1170,6 +1248,8 @@ export const phrases = {
     "zh-HK": "❌不相容。對不起。請將這項研究退還給Prolific.co。",
     ja: "of互換性がありません。ごめん。この調査をProlific.coに返送してください。",
     ko: "❌ 양립 할 수 없습니다. 죄송합니다. 이 연구를 Prolific.co로 돌려주십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_incompatibleReturnToProlific: {
     "en-US":
@@ -1201,6 +1281,8 @@ export const phrases = {
       "這項研究與您的計算機或瀏覽器不兼容，因此請將其退還給Prolific.co。提交的付款將被拒絕（這會損害您的聲譽），因此請退還。",
     ja: "この調査はコンピューターまたはブラウザと互換性がないため、Prolific.coに返送してください。支払いの提出は拒否されます（あなたの評判は損傷します）ので、返品してください。",
     ko: "이 연구는 컴퓨터 나 브라우저와 호환되지 않으므로 Prolific.co로 반환하십시오. 지불 제출은 거부됩니다 (평판이 손상됨).",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   EE_studyURL: {
     "en-US": "Study link: xxx",
@@ -1229,6 +1311,8 @@ export const phrases = {
     "zh-HK": "研究鏈接：xxx",
     ja: "調査リンク：xxx",
     ko: "학습 링크 : xxx",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_angleDistanceIntro: {
     "en-US":
@@ -1260,6 +1344,8 @@ export const phrases = {
       "只需轉身，我們就會找到您的觀看距離！當被問到時，請授予您對相機的訪問權限。",
     ja: "振り向くだけで、視聴距離が見つかります！尋ねられたら、カメラへのアクセスを許可してください。",
     ko: "그냥 돌아 서면 시청 거리를 찾을 수 있습니다! 요청하면 카메라에 액세스 할 수 있습니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_angleDistanceTitle: {
     "en-US": "Measure Viewing Distance",
@@ -1288,6 +1374,8 @@ export const phrases = {
     "zh-HK": "測量觀看距離",
     ja: "表示距離を測定します",
     ko: "시청 거리를 측정하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_cancel: {
     "en-US": "Restart this calibration",
@@ -1316,6 +1404,8 @@ export const phrases = {
     "zh-HK": "重做此校準",
     ja: "キャンセル",
     ko: "이 교정을 다시 시작하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTracking: {
     "en-US": "Distance Tracking",
@@ -1344,13 +1434,15 @@ export const phrases = {
     "zh-HK": "視距追踪",
     ja: "距離追跡",
     ko: "거리 추적",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTrackingCloseL: {
     "en-US":
       "1. Close your LEFT eye. (This is the left side of the screen.)\n2. Use ▶ arrow key to slide the flickering dot. (Or just drag it, if it's not responding to the arrow key.) While looking at the cross hairs, monitor the flickering dot in the corner of your eye, and slide it left and right until it disappears into your blindspot.\n3. Hit RETURN.\nNOTE: Keep your eye on the cross hairs. The flickering dot won't disappear while your eye follows it. ",
     de: "1. Schließen Sie Ihr linkes Auge. (Dies ist die linke Seite des Bildschirms.)\n2. Verwenden Sie ▶ Pfeiltaste, um den flackernden Punkt zu schieben. (Oder ziehen Sie es einfach, wenn es nicht auf den Pfeilschlüssel reagiert.) Beim Betrachten der Kreuzhaare den flackernden Punkt in Ihrem Augenwinkel und schieben Sie ihn nach links und rechts, bis er in Ihren Blindpot verschwindet.\n3. Return to Return.\nHinweis: Behalten Sie die Kreuzhaare im Auge. Der flackernde Punkt wird nicht verschwinden, während Ihr Auge ihm folgt.",
     fr: "1. Fermez votre œil gauche. (C'est le côté gauche de l'écran.)\n2. Utilisez ▶ Clé flèche pour faire glisser le point scintillant. (Ou faites-le simplement glisser, s'il ne répond pas à la clé de flèche.) En regardant les poils, surveillez le point scintillant dans le coin de votre œil et faites-le glisser à gauche et à droite jusqu'à ce qu'il disparaisse dans votre point mort.\n3. Appuyez sur Retour.\nRemarque: Gardez l'œil sur les poils. Le point vacillant ne disparaîtra pas pendant que votre œil le suit.",
-    es: "1. Cierre el ojo izquierdo. (Este es el lado izquierdo de la pantalla).\n2. Use la tecla de flecha ▶ para deslizar el punto parpadeante. (O simplemente arrástrelo, si no está respondiendo a la llave de flecha). Mientras mira los pelos de la cruz, monitoree el punto parpadeante en la esquina de su ojo y deslicela a la izquierda y a la derecha hasta que desaparezca en su punto ciego.\n3. Golpee el regreso.\nNota: Mantén tu ojo en la cruz. El punto parpadeante no desaparecerá mientras su ojo lo sigue.",
+    es: "1. Cierre el ojo izquierdo. (Este es el lado izquierdo de la pantalla).\n2. Use la tecla de flecha ▶ para deslizar el punto parpadeante. (O simplemente arrástrelo, si no está respondiendo a la llave de flecha). Mientras mira los pelos transversales, monitoree el punto parpadeante en la esquina de su ojo y deslicela a la izquierda y a la derecha hasta que desaparezca en su punto ciego.\n3. Golpee el regreso.\nNota: Mantén tu ojo en la cruz. El punto parpadeante no desaparecerá mientras su ojo lo sigue.",
     pt: "1. Feche o olho esquerdo. (Este é o lado esquerdo da tela.)\n2. Use ▶ Tecla de seta para deslizar o ponto de tremeling. (Ou simplesmente arraste -o, se não estiver respondendo à tecla de seta.) Enquanto olha os cabelos cruzados, monitore o ponto de tremeling no canto do olho e deslize -o para a esquerda e para a direita até desaparecer no seu ponto cego.\n3. Bata o retorno.\nNota: Fique de olho nos cabelos cruzados. O ponto piscador não desaparecerá enquanto seu olho o segue.",
     it: "1. Chiudi l'occhio sinistro. (Questo è il lato sinistro dello schermo.)\n2. Utilizzare ▶ Tasto freccia per far scorrere il punto tremolante. (O semplicemente trascinalo, se non risponde alla chiave freccia.) Mentre guarda i peli incrociati, monitora il punto tremolo nell'angolo dell'occhio e fai scorrere a sinistra e a destra fino a quando non scompare nel tuo cieco.\n3. Colpire il ritorno.\nNota: tieni d'occhio i capelli incrociati. Il punto tremolante non scomparirà mentre il tuo occhio lo segue.",
     ro: "1. Închideți ochiul stâng. (Aceasta este partea stângă a ecranului.)\n2. Utilizați ▶ Tasta săgeată pentru a glisa punctul pâlpâit. (Sau pur și simplu trageți -l, dacă nu răspunde la cheia săgeată.) În timp ce priviți părul încrucișat, monitorizați punctul pâlpâit din colțul ochiului și glisați -l la stânga și la dreapta până când va dispărea în blindspot.\n3. Apăsați Return.\nNotă: Fii cu ochii pe firele de păr. Punctul pâlpâit nu va dispărea în timp ce ochiul tău îl urmărește.",
@@ -1375,13 +1467,15 @@ export const phrases = {
       "1.閉上左眼。 （這是屏幕的左側。）\n2.使用▶箭頭鍵滑動閃爍的點。 （或者只是將其拖動，如果它沒有響應箭頭鑰匙。）看著十字頭髮時，監視眼角的閃爍點，然後向左和向右滑動，直到它消失在盲點中。\n3.命中返回。\n注意：請密切關註十字頭髮。當您的眼睛跟隨它時，閃爍的點不會消失。",
     ja: "1.左目を閉じます。 （これは画面の左側です。）\n2.▶矢印キーを使用して、ちらつきのドットをスライドさせます。 （または、矢印キーに応答しない場合は、ドラッグしてください。）交差毛を見ながら、目の隅にあるちらつきのドットを監視し、盲点に消えるまで左右にスライドさせます。\n3.返信をヒットします。\n注：十字毛に目を向けてください。目が続く間、ちらつきのドットは消えません。",
     ko: "1. 왼쪽 눈을 닫습니다. (이것은 화면의 왼쪽입니다.)\n2. ▶ 화살표 키를 사용하여 깜박 거리는 점을 밀어냅니다. (또는 화살표 키에 응답하지 않으면 드래그하십시오.) 십자 머리카락을 보면서 눈 모서리의 깜박 거리는 점을 모니터링하고 사각 지대로 사라질 때까지 왼쪽과 오른쪽으로 밀어 넣으십시오.\n3. 반환을 누르십시오.\n참고 : 크로스 털을 주시하십시오. 눈이 뒤 따르는 동안 깜박 거리는 점은 사라지지 않습니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTrackingCloseR: {
     "en-US":
       "1. Close your RIGHT eye. (This is the right side of the screen.)\n2. Use ◀ arrow key to slide the flickering dot. While looking at the cross hairs, monitor the flickering dot in the corner of your eye, and slide it left and right until it disappears into your blindspot.\n3. Hit RETURN.\nNOTE: Keep your eye on the cross hairs. The flickering dot won't disappear while your eye follows it. ",
     de: "1. Schließen Sie Ihr rechtes Auge. (Dies ist die rechte Seite des Bildschirms.)\n2. Verwenden Sie ◀ Pfeilschlüssel, um den flackernden Punkt zu schieben. Überwachen Sie beim Betrachten der Kreuzhaare den flackernden Punkt in Ihrem Augenwinkel und schieben Sie ihn nach links und rechts, bis er in Ihren Blindspot verschwindet.\n3. Return to Return.\nHinweis: Behalten Sie die Kreuzhaare im Auge. Der flackernde Punkt wird nicht verschwinden, während Ihr Auge ihm folgt.",
     fr: "1. Fermez votre œil droit. (C'est le côté droit de l'écran.)\n2. Utilisez la touche flèche ◀ pour faire glisser le point scintillant. Tout en regardant les poils, surveillez le point scintillant dans le coin de votre œil et faites-le glisser à gauche et à droite jusqu'à ce qu'il disparaisse dans votre point mort.\n3. Appuyez sur Retour.\nRemarque: Gardez l'œil sur les poils. Le point vacillant ne disparaîtra pas pendant que votre œil le suit.",
-    es: "1. Cierre el ojo derecho. (Este es el lado derecho de la pantalla).\n2. Use la tecla de flecha ◀ para deslizar el punto parpadeante. Mientras mira los pelos transversales, monitoree el punto parpadeante en la esquina de su ojo y deslicelo a la izquierda y a la derecha hasta que desaparezca en su punto ciego.\n3. Golpee el regreso.\nNota: Mantén tu ojo en la cruz. El punto parpadeante no desaparecerá mientras su ojo lo sigue.",
+    es: "1. Cierre el ojo derecho. (Este es el lado derecho de la pantalla).\n2. Use la tecla de flecha ◀ para deslizar el punto parpadeante. Mientras mira los pelos de la cruz, monitoree el punto parpadeante en la esquina de su ojo y deslicelo hacia la izquierda y hacia la derecha hasta que desaparezca en su punto ciego.\n3. Golpee el regreso.\nNota: Mantén tu ojo en la cruz. El punto parpadeante no desaparecerá mientras su ojo lo sigue.",
     pt: "1. Feche o olho direito. (Este é o lado direito da tela.)\n2. Use ◀ Tecla de seta para deslizar o ponto de tremeling. Enquanto olha para os cabelos cruzados, monitore o ponto trêmulo no canto do olho e deslize -o para a esquerda e para a direita até desaparecer no seu ponto cego.\n3. Bata o retorno.\nNota: Fique de olho nos cabelos cruzados. O ponto piscador não desaparecerá enquanto seu olho o segue.",
     it: "1. Chiudi l'occhio destro. (Questo è il lato destro dello schermo.)\n2. Utilizzare il tasto freccia ◀ per far scorrere il punto tremolante. Mentre guardi i peli incrociati, monitora il punto tremolo nell'angolo dell'occhio e fai scorrere a sinistra e a destra fino a quando non scompare nel tuo cieco.\n3. Colpire il ritorno.\nNota: tieni d'occhio i capelli incrociati. Il punto tremolante non scomparirà mentre il tuo occhio lo segue.",
     ro: "1. Închideți ochiul drept. (Aceasta este partea dreaptă a ecranului.)\n2. Utilizați ◀ tasta săgeată pentru a glisa punctul pâlpâit. În timp ce te uiți la părul încrucișat, monitorizează punctul pâlpâitor din colțul ochiului și glisează -l la stânga și la dreapta până când dispare în Blindspot.\n3. Apăsați Return.\nNotă: Fii cu ochii pe firele de păr. Punctul pâlpâit nu va dispărea în timp ce ochiul tău îl urmărește.",
@@ -1406,6 +1500,8 @@ export const phrases = {
       "1.閉上右眼。 （這是屏幕的右側。）\n2.使用◀箭頭鍵滑動閃爍的點。看著十字頭髮時，請監視眼角的閃爍點，然後向左和向右滑動，直到它消失在盲點中。\n3.命中返回。\n注意：請密切關註十字頭髮。當您的眼睛跟隨它時，閃爍的點不會消失。",
     ja: "1.右目を閉じます。 （これは画面の右側です。）\n2.◀矢印キーを使用して、ちらつきのドットをスライドさせます。交差毛を見ながら、目の隅にあるちらつきのドットを監視し、盲点に消えるまで左右にスライドさせます。\n3.返信をヒットします。\n注：十字毛に目を向けてください。目が続く間、ちらつきのドットは消えません。",
     ko: "1. 오른쪽 눈을 감습니다. (이것은 화면의 오른쪽입니다.)\n2. ◀ 화살표 키를 사용하여 깜박 거리는 점을 밀어냅니다. 십자 머리카락을 보면서 눈의 모서리에 깜박 거리는 점을 모니터링하고 사각 지대로 사라질 때까지 왼쪽과 오른쪽으로 밀어 넣으십시오.\n3. 반환을 누르십시오.\n참고 : 크로스 털을 주시하십시오. 눈이 뒤 따르는 동안 깜박 거리는 점은 사라지지 않습니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTrackingGuide: {
     "en-US":
@@ -1437,11 +1533,13 @@ export const phrases = {
       "您的眼睛離屏幕約 xx1 厘米，但我們需要大約 xx2 厘米。 當您移動到接近的距離後實驗將會繼續進行。",
     ja: "あなたの目は画面からxx1 cmですが、実験ではおよそxx2 cmを必要とします。適切な距離になると実験が再開されます。",
     ko: "눈은 화면에서 xx1 cm이지만 실험은 대략 xx2 cm가 필요합니다. 올바른 거리에 도달하면 실험이 재개됩니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTrackingIntroEnd: {
     "en-US": "Once you're done, distance tracking will begin.",
     de: "Sobald Sie fertig sind, beginnt die Distanzverfolgung.",
-    fr: "Une fois que vous avez terminé, le suivi à distance commencera.",
+    fr: "Une fois que vous aurez terminé, le suivi à distance commencera.",
     es: "Una vez que haya terminado, comenzará el seguimiento de distancia.",
     pt: "Quando terminar, o rastreamento da distância começará.",
     it: "Una volta che hai finito, inizierà il monitoraggio della distanza.",
@@ -1465,6 +1563,8 @@ export const phrases = {
     "zh-HK": "在您完成後，視距追踪將開始。",
     ja: "完了したら、距離追跡が開始されます。",
     ko: "완료되면 거리 추적이 시작됩니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTrackingIntroStart: {
     "en-US": "",
@@ -1493,6 +1593,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTrackingMoveCloser: {
     "en-US": "Move closer",
@@ -1521,6 +1623,8 @@ export const phrases = {
     "zh-HK": "靠近一點。",
     ja: "もっと近づいてください。",
     ko: "더 가까이 움직입니다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTrackingMoveFurther: {
     "en-US": "Move farther",
@@ -1549,6 +1653,8 @@ export const phrases = {
     "zh-HK": "離遠一點。",
     ja: "もっと離れてください。",
     ko: "더 멀리 움직입니다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTrackingRedo: {
     "en-US":
@@ -1580,6 +1686,8 @@ export const phrases = {
       "問題？如果距離似乎非常錯誤，請單擊此處重新校準，然後重新啟動此塊。",
     ja: "問題？距離がひどく間違っているように見える場合は、ここをクリックして再調整し、このブロックを再起動してください。",
     ko: "문제? 거리가 끔찍한 것처럼 보이면 여기를 클릭하여 다시 교정 하고이 블록을 다시 시작하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_distanceTrackingTitle: {
     "en-US": "Find Your Blindspot",
@@ -1590,7 +1698,7 @@ export const phrases = {
     it: "Trova il tuo cieco",
     ro: "Configurați pentru urmărirea distanței",
     pl: "Skonfiguruj śledzenie odległości ",
-    ru: "Найдите свою слепую точку",
+    ru: "Найдите свой слепой точку",
     hy: "Գտեք ձեր կուր կետը",
     fi: "Löydä blindspot",
     ka: "იპოვნეთ თქვენი ჟალუზის წერტილი",
@@ -1608,6 +1716,8 @@ export const phrases = {
     "zh-HK": "視距追踪初始化",
     ja: "距離追跡を設定します。",
     ko: "블라인드 스팟을 찾으십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_environment: {
     "en-US": "System Information",
@@ -1636,6 +1746,8 @@ export const phrases = {
     "zh-HK": "系統信息",
     ja: "システム情報",
     ko: "시스템 정보",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_errorCameraUseDenied: {
     "en-US":
@@ -1665,8 +1777,10 @@ export const phrases = {
       "如其描述中所述，这项研究与OOO不相容，并且需要在DDD上运行至少222个CPU内核的BBB浏览器",
     "zh-HK":
       "如其描述中所述，這項研究與OOO不相容，並且需要在DDD上運行至少222個CPU內核的BBB瀏覽器",
-    ja: "その説明で述べたように、この研究はOOOと互換性があり、少なくとも222のCPUコアでDDDで実行されるBBBブラウザーが必要です",
+    ja: "その説明で述べたように、この研究はOOOと互換性があり、少なくとも222のCPUコアでDDDで実行されるBBBブラウザが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 OOO와 호환되지 않으며 최소 222 CPU 코어로 DDD에서 실행되는 BBB 브라우저가 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_errorNoCamera: {
     "en-US":
@@ -1696,6 +1810,8 @@ export const phrases = {
     "zh-HK": "我們找不到您的攝像頭。",
     ja: "この調査では、ウェブカメラを使用する必要があります。ウェブカメラへのアクセスを許可することはオプションですが、それなしでは継続することはできません。誤ってノーと言って、カメラにアクセスできるようにしたい場合は、アドレスバーにカメラアイコンを見つけて、クリックしてカメラにアクセスできるようにし、ページを更新してください。",
     ko: "이 연구는 웹캠을 사용해야합니다. 웹캠에 대한 액세스 권한을 부여하는 것은 선택 사항이지만, 우리는 그 없이는 계속할 수 없습니다. 실수로 거절하지 말고 카메라에 액세스 할 수 있으시면 주소 표시 줄에서 카메라 아이콘을 찾아 클릭하고 카메라 액세스 허용 및 페이지를 새로 고치십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_gazeTracking: {
     "en-US": "Gaze Tracking",
@@ -1724,6 +1840,8 @@ export const phrases = {
     "zh-HK": "眼動追踪",
     ja: "視線追跡",
     ko: "시선 추적",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_gazeTrackingIntro: {
     "en-US":
@@ -1755,6 +1873,8 @@ export const phrases = {
       "播放“趕十字架！”現在，我們將設置凝視跟踪，以監視眼睛位置。在視頻提要中保持臉部（見下文）。無論何處，單擊十字頭髮的中心。單擊它時，請確保您的眼睛在上面。當您單擊它時，十字頭髮將移至新位置。在每個新位置單擊它，直到完成校準。遊戲而已。抓住十字架！",
     ja: "「Catch the Cross！」を再生しますこれで、目の位置を監視するために、視線追跡を設定します。ビデオフィードに顔を入れてください（以下を参照）。どこにいても、交差毛の中心をクリックします。クリックしたときに目がそれにあることを確認してください。クリックすると、クロスヘアが新しい場所に移動します。キャリブレーションが完了するまで、新しい場所ごとにクリックします。それはゲームです。十字架をキャッチ！",
     ko: '"Catch the Cross!" 이제 눈 위치를 모니터링하기 위해 시선 추적을 설정합니다. 비디오 피드에 얼굴을 유지하십시오 (아래 참조). 크로스 털의 중앙을 어디에 있든 클릭하십시오. 클릭하면 눈이 켜져 있는지 확인하십시오. 클릭하면 크로스 헤어가 새로운 위치로 이동합니다. 교정이 완료 될 때까지 각 새 위치에서 클릭하십시오. 그것은 게임이다. 십자가를 잡아라!',
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_gazeTrackingNudge: {
     "en-US":
@@ -1784,12 +1904,14 @@ export const phrases = {
       "抓住十字架！我们需要你的帮助。眼神跟踪器需要更多的培训。如箭头所示，当您单击时，跟踪器认为您的目光远非叉毛。请单击每个新位置的杂毛。游戏而已。抓住十字架！",
     "zh-HK":
       "抓住十字架！我們需要你的幫助。眼神跟踪器需要更多的培訓。如箭頭所示，當您單擊時，跟踪器認為您的目光遠非叉毛。請單擊每個新位置的雜毛。遊戲而已。抓住十字架！",
-    ja: "十字架をキャッチ！君の力が必要なんだ。アイトラッカーにはさらにトレーニングが必要です。矢印で示されているように、クリックしたとき、トラッカーはあなたの視線が十字毛からはほど遠いと思った。新しい位置ごとにクロスヘアをクリックしてください。それはゲームです。十字架をキャッチ！",
+    ja: "十字架をキャッチ！君の力が必要なんだ。アイトラッカーにはさらにトレーニングが必要です。矢印で示されているように、クリックしたとき、トラッカーはあなたの視線が十字毛からはほど遠いと思った。それぞれの新しい位置でクロスヘアをクリックしてください。それはゲームです。十字架をキャッチ！",
     ko: "십자가를 잡아라! 우리는 너의 도움이 필요해. 눈 추적기에는 더 많은 훈련이 필요합니다. 화살표에서 볼 수 있듯이, 클릭했을 때 트래커는 시선이 십자 머리카락과는 거리가 멀다고 생각했습니다. 각각의 새로운 위치에서 십자 머리카락을 클릭하십시오. 그것은 게임이다. 십자가를 잡아라!",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_gazeTrackingTitle: {
     "en-US": "Set Up Gaze Tracking",
-    de: "Bauen Sie eine Blickverfolgung auf",
+    de: "Bauen Sie die Blickverfolgung auf",
     fr: "Configuration pour le suivi du regard",
     es: "Configuración para seguimiento de mirada",
     pt: "Configuração para visualização",
@@ -1814,6 +1936,8 @@ export const phrases = {
     "zh-HK": "眼動追踪初始化",
     ja: "視線追跡を設定します。",
     ko: "시선 추적을 설정하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_ifStuckPleaseReturn: {
     "en-US":
@@ -1845,6 +1969,8 @@ export const phrases = {
       "這很少見，但是如果您的計算機被卡在校準中，請將您的書房歸還Pollific.co。",
     ja: "まれですが、コンピューターがキャリブレーションで詰まっている場合は、勉強をProlific.coに返送してください。",
     ko: "드물지만 컴퓨터가 교정에 갇히면 연구를 Prolific.co로 반환하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_nearPointIntro: {
     "en-US":
@@ -1876,6 +2002,8 @@ export const phrases = {
       "我們將測量您的眼睛之間的距離。使用視頻圖像觀看您的眼睛。水平握在眼前的臉上。將您的左右拇指指甲與左右學生的中心對齊。然後將筆帶到屏幕上的統治者，以測量拇指之間的分離。用零左右拇指，並註意右拇指在哪裡。放下筆，然後單擊標尺。最後，單擊確定繼續。",
     ja: "目の間の距離を測定します。ビデオ画像を使用して目を見る。目の前で顔に水平にペンを保持します。右と左の親指の爪を右と左の生徒の中心に合わせます。次に、画面上の定規にペンを持ってきて、親指の分離を測定します。左手の親指をゼロで割り当て、右親指がどこにあるかに注意してください。ペンを置いて、その時点で定規をクリックします。最後に、[OK]をクリックして続行します。",
     ko: "우리는 당신의 눈 사이의 거리를 측정 할 것입니다. 비디오 이미지를 사용하여 눈을보십시오. 눈 앞에서 얼굴에 수평으로 펜을 잡으십시오. 오른쪽과 왼쪽 엄지 손톱을 오른쪽과 왼쪽 학생의 중심과 정렬하십시오. 그런 다음 펜을 화면 통치자에게 가져와 엄지 손가락 사이의 분리를 측정하십시오. 왼쪽 엄지 손가락을 0으로 동조하고 오른쪽 엄지 손가락이 어디에 있는지 확인하십시오. 펜을 내려 놓고 그 시점에서 통치자를 클릭하십시오. 마지막으로 확인을 클릭하여 계속하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_nearPointTitle: {
     "en-US": "Measure Pupillary Distance",
@@ -1904,6 +2032,8 @@ export const phrases = {
     "zh-HK": "測量瞳孔距離",
     ja: "瞳孔距離を測定します",
     ko: "동공 거리를 측정하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_ok: {
     "en-US": "OK",
@@ -1932,6 +2062,8 @@ export const phrases = {
     "zh-HK": "確認",
     ja: "確認",
     ko: "좋아요",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_panelButton: {
     "en-US": "Done",
@@ -1960,6 +2092,8 @@ export const phrases = {
     "zh-HK": "完畢",
     ja: "終わり",
     ko: "완료",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_panelIntro: {
     "en-US": "",
@@ -1988,6 +2122,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_panelIntroNext: {
     "en-US": "",
@@ -2016,6 +2152,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_panelTitle: {
     "en-US": "Please press a button to calibrate",
@@ -2044,6 +2182,8 @@ export const phrases = {
     "zh-HK": "請按按鈕校準",
     ja: "ボタンを押して調整してください",
     ko: "버튼을 눌러 교정하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_panelTitleNext: {
     "en-US": "Thanks for calibrating. Hit the button to continue.",
@@ -2055,7 +2195,7 @@ export const phrases = {
     ro: "Mulțumesc pentru calibrare. Apăsați butonul pentru a continua.",
     pl: "Dzięki za kalibrację. Naciśnij przycisk, aby kontynuować.",
     ru: "Спасибо за калибровку. Нажмите кнопку, чтобы продолжить.",
-    hy: "Շնորհակալություն տրամաչափի համար: Հարվածեք կոճակին շարունակելու համար:",
+    hy: "Շնորհակալություն տրամաչափման համար: Հարվածեք կոճակին շարունակելու համար:",
     fi: "Kiitos kalibroinnista. Napsauta painiketta jatkaaksesi.",
     ka: "მადლობა კალიბრაციისთვის. დააჭირეთ ღილაკს გასაგრძელებლად.",
     he: "תודה שכיול. לחץ על הכפתור כדי להמשיך.",
@@ -2072,6 +2212,8 @@ export const phrases = {
     "zh-HK": "感謝您的校準。點擊按鈕繼續。",
     ja: "キャリブレーションしてくれてありがとう。ボタンを押して続行します。",
     ko: "교정 해주셔서 감사합니다. 계속하려면 버튼을 누르십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_panelUsesWebcam: {
     "en-US": "uses webcam",
@@ -2100,15 +2242,17 @@ export const phrases = {
     "zh-HK": "使用網絡攝像頭",
     ja: "ウェブカメラを使用します",
     ko: "웹캠을 사용합니다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_panelUsesWebcamPhone: {
     "en-US": "uses webcam and phone",
     de: "Verwendet Webcam und Telefon",
     fr: "utilise la webcam et le téléphone",
     es: "Utiliza cámara web y teléfono",
-    pt: "usa webcam e telefone",
+    pt: "Usa webcam e telefone",
     it: "Utilizza webcam e telefono",
-    ro: "utilizează webcam și telefon",
+    ro: "Utilizează webcam și telefon",
     pl: "używa kamery internetowej i telefonu",
     ru: "использует веб -камеру и телефон",
     hy: "Օգտագործում է վեբ-տեսախցիկ եւ հեռախոս",
@@ -2128,6 +2272,8 @@ export const phrases = {
     "zh-HK": "使用網絡攝像頭和電話",
     ja: "ウェブカメラと電話を使用します",
     ko: "웹캠과 전화를 사용합니다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_performance: {
     "en-US": "Graphics Performance",
@@ -2156,6 +2302,8 @@ export const phrases = {
     "zh-HK": "圖形性能",
     ja: "グラフィックパフォーマンス",
     ko: "그래픽 성능",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_performanceIntro: {
     "en-US":
@@ -2185,6 +2333,8 @@ export const phrases = {
     "zh-HK": "請不要打擾。繪製圖形以評估Web瀏覽器性能...",
     ja: "邪魔しないでください。 Webブラウザのパフォーマンスを評価するためのグラフィックを描く...",
     ko: "방해하지 마십시오. 웹 브라우저 성능을 평가하기위한 그래픽 그리기 ...",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_performanceTitle: {
     "en-US": "Graphics Performance",
@@ -2213,6 +2363,8 @@ export const phrases = {
     "zh-HK": "圖形性能",
     ja: "グラフィックパフォーマンス",
     ko: "그래픽 성능",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_privacyCamera: {
     "en-US":
@@ -2235,7 +2387,7 @@ export const phrases = {
     ta: "கேமரா தனியுரிமையின் உறுதி. புகைப்படங்கள் அல்லது வீடியோ எதுவும் பதிவு செய்யப்படவில்லை. ஒவ்வொரு வெப்கேம் சட்டமும் இந்த கணினிக்குள் மட்டுமே பயன்படுத்தப்படுகிறது, இது கண் மற்றும் பார்வை நிலைகளை மதிப்பிடுவதற்கு மட்டுமே, பின்னர் 10 வினாடிகளுக்குள் அழிக்கப்படுகிறது. கண் மற்றும் பார்வை நிலைகள் மட்டுமே தக்கவைக்கப்படுகின்றன.",
     ml: "ക്യാമറ സ്വകാര്യതയുടെ ഉറപ്പ്. ഫോട്ടോകളോ വീഡിയോയോ രേഖപ്പെടുത്തിയിട്ടില്ല. ഓരോ വെബ്ക്യാം ഫ്രെയിം ഈ കമ്പ്യൂട്ടറിനുള്ളിൽ മാത്രമേ ഉപയോഗിക്കുന്നുള്ളൂ, കണ്ണ്, നോട്ടങ്ങൾ സ്ഥാനങ്ങൾ കണക്കാക്കാൻ മാത്രം, തുടർന്ന് 10 സെക്കൻഡിനുള്ളിൽ മായ്ച്ചുകളഞ്ഞു. കണ്ണ്, നോട്ടം സ്ഥാനങ്ങൾ മാത്രം നിലനിർത്തുന്നു.",
     te: "కెమెరా గోప్యత యొక్క భరోసా. ఫోటోలు లేదా వీడియో రికార్డ్ చేయబడలేదు. ప్రతి వెబ్‌క్యామ్ ఫ్రేమ్ ఈ కంప్యూటర్ లోపల మాత్రమే ఉపయోగించబడుతుంది, ఇది కంటి మరియు చూపుల స్థానాలను అంచనా వేయడానికి మాత్రమే, ఆపై 10 సెకన్లలోపు తొలగించబడుతుంది. కంటి మరియు చూపుల స్థానాలు మాత్రమే అలాగే ఉంచబడతాయి.",
-    kn: "ಕ್ಯಾಮೆರಾ ಗೌಪ್ಯತೆಯ ಭರವಸೆ. ಯಾವುದೇ ಫೋಟೋಗಳು ಅಥವಾ ವೀಡಿಯೊವನ್ನು ದಾಖಲಿಸಲಾಗುವುದಿಲ್ಲ. ಪ್ರತಿಯೊಂದು ವೆಬ್‌ಕ್ಯಾಮ್ ಫ್ರೇಮ್ ಅನ್ನು ಈ ಕಂಪ್ಯೂಟರ್ ಒಳಗೆ ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ, ಕೇವಲ ಕಣ್ಣು ಮತ್ತು ನೋಟದ ಸ್ಥಾನಗಳನ್ನು ಅಂದಾಜು ಮಾಡಲು, ಮತ್ತು ನಂತರ 10 ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಅಳಿಸಿಹಾಕಲಾಗುತ್ತದೆ. ಕಣ್ಣು ಮತ್ತು ನೋಟದ ಸ್ಥಾನಗಳನ್ನು ಮಾತ್ರ ಉಳಿಸಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.",
+    kn: "ಕ್ಯಾಮೆರಾ ಗೌಪ್ಯತೆಯ ಭರವಸೆ. ಯಾವುದೇ ಫೋಟೋಗಳು ಅಥವಾ ವೀಡಿಯೊವನ್ನು ದಾಖಲಿಸಲಾಗಿಲ್ಲ. ಪ್ರತಿಯೊಂದು ವೆಬ್‌ಕ್ಯಾಮ್ ಫ್ರೇಮ್ ಅನ್ನು ಈ ಕಂಪ್ಯೂಟರ್ ಒಳಗೆ ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ, ಕೇವಲ ಕಣ್ಣು ಮತ್ತು ನೋಟದ ಸ್ಥಾನಗಳನ್ನು ಅಂದಾಜು ಮಾಡಲು, ಮತ್ತು ನಂತರ 10 ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಅಳಿಸಿಹಾಕಲಾಗುತ್ತದೆ. ಕಣ್ಣು ಮತ್ತು ನೋಟದ ಸ್ಥಾನಗಳನ್ನು ಮಾತ್ರ ಉಳಿಸಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.",
     bn: "ক্যামেরার গোপনীয়তার আশ্বাস। কোনও ফটো বা ভিডিও রেকর্ড করা হয় না। প্রতিটি ওয়েবক্যাম ফ্রেম কেবলমাত্র এই কম্পিউটারের ভিতরে ব্যবহৃত হয়, কেবলমাত্র চোখ এবং দৃষ্টিতে অবস্থানগুলি অনুমান করার জন্য এবং তারপরে 10 সেকেন্ডের মধ্যে মুছে ফেলা হয়। কেবল চোখ এবং দৃষ্টিতে অবস্থানগুলি ধরে রাখা হয়।",
     id: "Jaminan privasi kamera. Tidak ada foto atau video yang direkam. Setiap bingkai webcam hanya digunakan di dalam komputer ini, semata -mata untuk memperkirakan posisi mata dan pandangan, dan kemudian dihapus, dalam 10 detik. Hanya posisi mata dan tatapan yang dipertahankan.",
     "zh-CN":
@@ -2244,6 +2396,8 @@ export const phrases = {
       "保證相機隱私。沒有錄製照片或視頻。每個網絡攝像頭框架僅在該計算機內使用，僅用於估計眼睛和凝視位置，然後在10秒內刪除。只保留了眼睛和凝視位置。",
     ja: "カメラのプライバシーの保証。写真やビデオは記録されていません。各ウェブカメラフレームは、目と視線の位置を推定するためだけにこのコンピューター内でのみ使用され、10秒以内に消去されます。目と視線の位置のみが保持されます。",
     ko: "카메라 프라이버시의 보증. 사진이나 비디오가 녹음되지 않습니다. 각 웹캠 프레임은이 컴퓨터 내부에서만 사용되며 눈과 시선 위치를 추정 한 다음 10 초 이내에 지워집니다. 눈과 시선 위치 만 유지됩니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_privacyIphoneMicrophone: {
     "en-US":
@@ -2275,6 +2429,8 @@ export const phrases = {
       "保證麥克風隱私。 EasyEyes使用您的iPhone/iPad麥克風，而不是台式機的內置麥克風，因為iPhone/iPad麥克風是製造商校準的。麥克風僅在台式計算機揚聲器上播放麥克風時，並且台式計算機都顯著地顯示“請安靜！現在正在錄製”。該錄製僅用於估計揚聲器特徵，然後在30秒內刪除。僅保留揚聲器特性。",
     ja: "マイクのプライバシーの保証。 Easyeyesは、iPhone/iPadマイクがメーカーキャリブレーションされているため、デスクトップの内蔵マイクではなく、iPhone/iPadマイクを使用します。マイクは、デスクトップコンピュータースピーカーを通じて大きなサウンドが再生され、両方のデスクトップコンピューターが「静かにお願いします！今録音」を際立たせている間にのみ記録します。録音は、スピーカーの特性を推定するためだけに使用され、30秒以内に消去されます。スピーカーの特性のみが保持されます。",
     ko: '마이크 프라이버시의 보증. EasyEyes는 iPhone/iPad 마이크가 제조업체 계산되기 때문에 데스크탑의 내장 마이크 대신 iPhone/iPad 마이크를 사용합니다. 마이크는 데스크탑 컴퓨터 라우드 스피커를 통해 큰 소리가 재생되는 동안에 만 기록되며, 데스크탑 컴퓨터는 "조용히 해주세요! 지금 녹음"을 표시합니다. 기록은 라우드 스피커 특성을 추정하는 데만 사용 된 다음 30 초 이내에 지워집니다. 라우드 스피커 특성 만 유지됩니다.',
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_requestCamera: {
     "en-US": "To proceed, this study needs your permission to use the camera. ",
@@ -2303,6 +2459,8 @@ export const phrases = {
     "zh-HK": "為了進行，這項研究需要您使用相機的許可。",
     ja: "続行するには、この調査にはカメラを使用する許可が必要です。",
     ko: "진행하려면이 연구는 카메라 사용 권한이 필요합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_screenSize: {
     "en-US": "Screen Size",
@@ -2331,6 +2489,8 @@ export const phrases = {
     "zh-HK": "屏幕尺寸",
     ja: "画面サイズ",
     ko: "화면 크기",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_screenSizeCredit: {
     "en-US":
@@ -2360,6 +2520,8 @@ export const phrases = {
     "zh-HK": "Li等人建議的信用卡。 （2020）“虛擬Chinrest”紙。",
     ja: "Li et alが提案したクレジットカード。 （2020）「仮想チンレスト」論文。",
     ko: 'Li et al. (2020) "Virtual Chinrest"용지.',
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_screenSizeCreditCard: {
     "en-US": "a credit card",
@@ -2388,6 +2550,8 @@ export const phrases = {
     "zh-HK": "一張信用卡",
     ja: "クレジットカード",
     ko: "신용 카드",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_screenSizeHave: {
     "en-US": "I have xxx with me.",
@@ -2412,10 +2576,12 @@ export const phrases = {
     kn: "ನನ್ನೊಂದಿಗೆ xxx ಇದೆ.",
     bn: "আমার সাথে xxx আছে।",
     id: "Saya memiliki xxx dengan saya.",
-    "zh-CN": "我和我在一起。",
+    "zh-CN": "我有xxx。",
     "zh-HK": "我有xxx。",
-    ja: "私は私と一緒にxxxを持っています。",
+    ja: "私はxxxを持っています。",
     ko: "나는 나와 xxx를 가지고있다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_screenSizeIntro: {
     "en-US":
@@ -2447,10 +2613,12 @@ export const phrases = {
       "我們將測量此屏幕的大小。使用下拉菜單選擇方便的東西。您可以使用任何常見的USB連接器（包括為計算機提供電源的連接器）或信用卡（或任何相同尺寸的卡）。將對象放在屏幕上，然後移動滑塊以調整圖像以匹配對象的大小。匹配時，按返回（或單擊“確定”）繼續進行。",
     ja: "この画面のサイズを測定します。プルダウンメニューを使用して、便利なものを選択します。一般的なUSBコネクタ（コンピューターに電力を提供するものを含む）またはクレジットカード（または同じサイズのカード）を使用できます。オブジェクトを画面に配置し、スライダーを移動して、オブジェクトのサイズに合わせて画像を調整します。一致したら、return（またはクリックOK）を押して続行します。",
     ko: "이 화면의 크기를 측정합니다. 풀다운 메뉴를 사용하여 편리한 것을 선택하십시오. 공통 USB 커넥터 (컴퓨터에 전원을 공급하는 것) 또는 신용 카드 (또는 동일한 크기의 카드)를 사용할 수 있습니다. 화면에 객체를 놓고 슬라이더를 이동하여 객체의 크기에 맞게 이미지를 조정하십시오. 그들이 일치하면 반환 (또는 확인을 클릭)을 눌러 진행하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_screenSizeTitle: {
     "en-US": "Screen Size Calibration",
-    de: "Bildschirmgröße Kalibrierung",
+    de: "Kalibrierung der Bildschirmgröße",
     fr: "Étalonnage de la taille de l'écran",
     es: "Calibración del tamaño de la pantalla",
     pt: "Calibração do tamanho da tela",
@@ -2475,6 +2643,8 @@ export const phrases = {
     "zh-HK": "屏幕尺寸校準",
     ja: "画面サイズのキャリブレーション",
     ko: "화면 크기 교정",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_screenSizeUSBA: {
     "en-US": "a USB Type A connector",
@@ -2503,6 +2673,8 @@ export const phrases = {
     "zh-HK": "USB A 型接口",
     ja: "USB コネクタ　タイプA",
     ko: "USB 유형 A 커넥터",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_screenSizeUSBC: {
     "en-US": "a USB Type C connector",
@@ -2531,6 +2703,8 @@ export const phrases = {
     "zh-HK": "USB C 型接口",
     ja: "USB コネクタ　タイプC",
     ko: "USB 유형 C 커넥터",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibration: {
     "en-US": "Sound Calibration",
@@ -2559,34 +2733,257 @@ export const phrases = {
     "zh-HK": "聲音校準",
     ja: "サウンドキャリブレーション",
     ko: "음향 교정",
+    __EMPTY: "#VALUE!",
+    __EMPTY_1: "#VALUE!",
+  },
+  RC_selectMicrophone: {
+    "en-US":
+      'To enable loudspeaker calibration, if you have a smartphone (or USB microphone) handy, do you see its make and model in the list below? If so, select it. Otherwise, select "No match".\n',
+    de: 'Wenn Sie ein Smartphone (oder ein USB -Mikrofon) haben, sehen Sie, dass es in der folgenden Liste die Lautsprecherkalibrierung ermöglicht, wenn Sie ein Smartphone (oder USB -Mikrofon) haben? Wenn ja, wählen Sie es aus. Ansonsten wählen Sie "No Match".\n',
+    fr: "Pour activer l'étalonnage des haut-parleurs, si vous avez un smartphone (ou un microphone USB) à portée de main, voyez-vous sa marque et son modèle dans la liste ci-dessous? Si c'est le cas, sélectionnez-le. Sinon, sélectionnez \"Pas de correspondance\".\n",
+    es: 'Para habilitar la calibración del altavoz, si tiene un teléfono inteligente (o micrófono USB) a mano, ¿ve su marca y modelo en la lista a continuación? Si es así, seleccione. De lo contrario, seleccione "Sin coincidencia".\n',
+    pt: 'Para ativar a calibração do alto -falante, se você possui um smartphone (ou microfone USB), você vê sua marca e modelo na lista abaixo? Nesse caso, selecione -o. Caso contrário, selecione "sem correspondência".\n',
+    it: 'Per abilitare la calibrazione degli altoparlanti, se hai uno smartphone (o un microfono USB) a portata di mano, vedi la sua marca e il modello nell\'elenco qui sotto? In tal caso, selezionalo. Altrimenti, selezionare "Nessuna corrispondenza".\n',
+    ro: "Pentru a activa calibrarea difuzorului, dacă aveți la îndemână un smartphone (sau microfon USB), vedeți make -ul și modelul său în lista de mai jos? Dacă da, selectați -l. În caz contrar, selectați „Fără potrivire”.\n",
+    pl: "Aby włączyć kalibrację głośników, jeśli masz pod ręką smartfon (lub mikrofon USB), czy widać jego markę i model na poniższej liście? Jeśli tak, wybierz to. W przeciwnym razie wybierz „Brak dopasowania”.\n",
+    ru: "Чтобы включить калибровку громкоговорителей, если у вас удобен смартфон (или USB -микрофон), вы видите его марку и модель в списке ниже? Если так, выберите это. В противном случае выберите «Нет совпадения».\n",
+    hy: "Բարձրախոսի տրամաչափումը միացնելու համար, եթե ունեք սմարթֆոն (կամ USB միկրոֆոն) հարմար, տեսնում եք դրա կազմը եւ մոդելը ներքեւում: Եթե ​​այդպես է, ընտրեք այն: Հակառակ դեպքում ընտրեք «Ոչ մի համընկնում»:\n",
+    fi: 'Kaiutinkalibroinnin mahdollistamiseksi, jos sinulla on kätevä älypuhelin (tai USB -mikrofoni), näetkö sen mallin ja mallin alla olevassa luettelossa? Jos näin on, valitse se. Muussa tapauksessa valitse "Ei ottelua".\n',
+    ka: 'დინამიკის კალიბრაციის გასააქტიურებლად, თუ თქვენ გაქვთ სმარტფონი (ან USB მიკროფონი) მოსახერხებელი, ხედავთ თუ არა მის დამზადებას და მოდელს ქვემოთ მოცემულ სიაში? თუ ასეა, შეარჩიეთ იგი. წინააღმდეგ შემთხვევაში, აირჩიეთ "No Match".\n',
+    he: 'כדי לאפשר כיול רמקול, אם יש לך סמארטפון (או מיקרופון USB) שימושי, האם אתה רואה את היוצר והדגם שלו ברשימה למטה? אם כן, בחר אותו. אחרת, בחר "ללא התאמה".\n',
+    ar: 'لتمكين معايرة مكبرات الصوت ، إذا كان لديك هاتف ذكي (أو ميكروفون USB) في متناول يديك ، هل ترى طرازه ونموذجه في القائمة أدناه؟ إذا كان الأمر كذلك ، حدده. خلاف ذلك ، حدد "لا تطابق".\n',
+    ur: 'لاؤڈ اسپیکر انشانکن کو قابل بنانے کے ل if ، اگر آپ کے پاس اسمارٹ فون (یا USB مائکروفون) آسان ہے تو ، کیا آپ نیچے کی فہرست میں اس کا میک اور ماڈل دیکھتے ہیں؟ اگر ایسا ہے تو ، اسے منتخب کریں۔ بصورت دیگر ، "کوئی میچ نہیں" منتخب کریں۔\n',
+    hi: 'लाउडस्पीकर अंशांकन को सक्षम करने के लिए, यदि आपके पास एक स्मार्टफोन (या यूएसबी माइक्रोफोन) है, तो क्या आप नीचे दी गई सूची में इसका मेक और मॉडल देखते हैं? यदि हां, तो इसे चुनें। अन्यथा, "नो मैच" चुनें।\n',
+    ta: 'ஒலிபெருக்கி அளவுத்திருத்தத்தை இயக்க, உங்களிடம் ஸ்மார்ட்போன் (அல்லது யூ.எஸ்.பி மைக்ரோஃபோன்) எளிதாக இருந்தால், அதன் தயாரிப்பையும் மாதிரியையும் கீழே உள்ள பட்டியலில் பார்க்கிறீர்களா? அப்படியானால், அதைத் தேர்ந்தெடுக்கவும். இல்லையெனில், "பொருந்தவில்லை" என்பதைத் தேர்ந்தெடுக்கவும்.\n',
+    ml: 'ഉച്ചത്തിലുള്ള കാലിബ്രേഷൻ പ്രാപ്തമാക്കുന്നതിന്, നിങ്ങൾക്ക് ഒരു സ്മാർട്ട്ഫോൺ (അല്ലെങ്കിൽ യുഎസ്ബി മൈക്രോഫോൺ) ഹാൻഡി ഉണ്ടെങ്കിൽ, ചുവടെയുള്ള പട്ടികയിൽ അതിന്റെ ആറ്റും മോഡലും നിങ്ങൾ കാണുന്നുണ്ടോ? അങ്ങനെയാണെങ്കിൽ, അത് തിരഞ്ഞെടുക്കുക. അല്ലെങ്കിൽ, "പൊരുത്തമില്ല" തിരഞ്ഞെടുക്കുക.\n',
+    te: 'లౌడ్‌స్పీకర్ క్రమాంకనాన్ని ప్రారంభించడానికి, మీకు స్మార్ట్‌ఫోన్ (లేదా యుఎస్‌బి మైక్రోఫోన్) సులభ ఉంటే, ఈ క్రింది జాబితాలో దాని మేక్ మరియు మోడల్‌ను మీరు చూస్తున్నారా? అలా అయితే, దాన్ని ఎంచుకోండి. లేకపోతే, "మ్యాచ్ లేదు" ఎంచుకోండి.\n',
+    kn: 'ಧ್ವನಿವರ್ಧಕ ಮಾಪನಾಂಕ ನಿರ್ಣಯವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು, ನೀವು ಸ್ಮಾರ್ಟ್‌ಫೋನ್ (ಅಥವಾ ಯುಎಸ್‌ಬಿ ಮೈಕ್ರೊಫೋನ್) ಅನ್ನು ಹೊಂದಿದ್ದರೆ, ಕೆಳಗಿನ ಪಟ್ಟಿಯಲ್ಲಿ ಅದರ ತಯಾರಿಕೆ ಮತ್ತು ಮಾದರಿಯನ್ನು ನೀವು ನೋಡುತ್ತೀರಾ? ಹಾಗಿದ್ದಲ್ಲಿ, ಅದನ್ನು ಆಯ್ಕೆಮಾಡಿ. ಇಲ್ಲದಿದ್ದರೆ, "ಹೊಂದಾಣಿಕೆ ಇಲ್ಲ" ಆಯ್ಕೆಮಾಡಿ.\n',
+    bn: 'লাউডস্পিকারের ক্রমাঙ্কন সক্ষম করতে, আপনার যদি স্মার্টফোন (বা ইউএসবি মাইক্রোফোন) সহজ থাকে তবে আপনি কি নীচের তালিকায় এর মেক এবং মডেলটি দেখতে পাচ্ছেন? যদি তা হয় তবে এটি নির্বাচন করুন। অন্যথায়, "কোনও মিল নেই" নির্বাচন করুন।\n',
+    id: 'Untuk mengaktifkan kalibrasi loudspeaker, jika Anda memiliki smartphone (atau mikrofon USB), apakah Anda melihat membuat dan modelnya dalam daftar di bawah ini? Jika demikian, pilihnya. Jika tidak, pilih "No Match".\n',
+    "zh-CN":
+      "为了启用扬声器校准，如果您有智能手机（或USB麦克风）方便，您是否在下面的列表中看到了它的品牌和型号？如果是这样，请选择它。否则，选择“无匹配”。\n",
+    "zh-HK":
+      "為了啟用揚聲器校準，如果您有智能手機（或USB麥克風）方便，您是否在下面的列表中看到了它的品牌和型號？如果是這樣，請選擇它。否則，選擇“無匹配”。\n",
+    ja: "スピーカーのキャリブレーションを有効にするために、スマートフォン（またはUSBマイク）が手元にある場合、以下のリストにそのメーカーとモデルが表示されますか？もしそうなら、それを選択してください。それ以外の場合は、「一致なし」を選択します。\n",
+    ko: '라우드 스피커 교정을 가능하게하려면 스마트 폰 (또는 USB 마이크)이 편리한 경우 아래 목록에 제조사 및 모델이 표시됩니까? 그렇다면 선택하십시오. 그렇지 않으면 "없음 일치"를 선택하십시오.\n',
+    __EMPTY: "#VALUE!",
+    __EMPTY_1: "#VALUE!",
+  },
+  RC_removeHeadphones: {
+    "en-US":
+      "1. Remove and disconnect any headphones. This calibration won't work with headphones.\n",
+    de: "1. Kopfhörer entfernen und trennen. Diese Kalibrierung funktioniert nicht mit Kopfhörern.\n",
+    fr: "1. Retirez et déconnectez tous les écouteurs. Cet étalonnage ne fonctionnera pas avec des écouteurs.\n",
+    es: "1. Retire y desconecte los auriculares. Esta calibración no funcionará con auriculares.\n",
+    pt: "1. Remova e desconecte todos os fones de ouvido. Essa calibração não funcionará com fones de ouvido.\n",
+    it: "1. Rimuovere e scollegare eventuali cuffie. Questa calibrazione non funzionerà con le cuffie.\n",
+    ro: "1. Scoateți și deconectați orice căști. Această calibrare nu va funcționa cu căști.\n",
+    pl: "1. Wyjmij i odłącz wszelkie słuchawki. Ta kalibracja nie będzie działać z słuchawkami.\n",
+    ru: "1. Снимите и отключите любые наушники. Эта калибровка не будет работать с наушниками.\n",
+    hy: "1. Հեռացրեք եւ անջատեք որեւէ ականջակալ: Այս տրամաչափումը չի աշխատի ականջակալների հետ:\n",
+    fi: "1. Poista ja katkaise kaikki kuulokkeet. Tämä kalibrointi ei toimi kuulokkeiden kanssa.\n",
+    ka: "1. ამოიღეთ და გათიშეთ ნებისმიერი ყურსასმენი. ეს კალიბრაცია არ იმუშავებს ყურსასმენებით.\n",
+    he: "1. הסר ונתק את כל האוזניות. כיול זה לא יעבוד עם אוזניות.\n",
+    ar: "1. إزالة وقطع أي سماعات. لن تعمل هذه المعايرة مع سماعات الرأس.\n",
+    ur: "1. کسی بھی ہیڈ فون کو ہٹا دیں اور منقطع کریں۔ یہ انشانکن ہیڈ فون کے ساتھ کام نہیں کرے گا۔\n",
+    hi: "1. किसी भी हेडफ़ोन को हटा दें और डिस्कनेक्ट करें। यह अंशांकन हेडफ़ोन के साथ काम नहीं करेगा।\n",
+    ta: "1. எந்த ஹெட்ஃபோன்களையும் அகற்றி துண்டிக்கவும். இந்த அளவுத்திருத்தம் ஹெட்ஃபோன்களுடன் வேலை செய்யாது.\n",
+    ml: "1. ഏതെങ്കിലും ഹെഡ്ഫോണുകൾ നീക്കം ചെയ്ത് വിച്ഛേദിക്കുക. ഈ കാലിബ്രേഷൻ ഹെഡ്ഫോണുകളുമായി പ്രവർത്തിക്കില്ല.\n",
+    te: "1. ఏదైనా హెడ్‌ఫోన్‌లను తొలగించి డిస్‌కనెక్ట్ చేయండి. ఈ క్రమాంకనం హెడ్‌ఫోన్‌లతో పనిచేయదు.\n",
+    kn: "1. ಯಾವುದೇ ಹೆಡ್‌ಫೋನ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಿ ಮತ್ತು ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಿ. ಈ ಮಾಪನಾಂಕ ನಿರ್ಣಯವು ಹೆಡ್‌ಫೋನ್‌ಗಳೊಂದಿಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ.\n",
+    bn: "1. কোনও হেডফোন সরান এবং সংযোগ বিচ্ছিন্ন করুন। এই ক্রমাঙ্কন হেডফোনগুলির সাথে কাজ করবে না।\n",
+    id: "1. Lepaskan dan lepaskan headphone apa pun. Kalibrasi ini tidak akan berfungsi dengan headphone.\n",
+    "zh-CN": "1.卸下并断开所有耳机。这种校准无法与耳机一起使用。\n",
+    "zh-HK": "1.卸下並斷開所有耳機。這種校準無法與耳機一起使用。\n",
+    ja: "1.ヘッドフォンを取り外して切断します。このキャリブレーションはヘッドフォンでは機能しません。\n",
+    ko: "1. 헤드폰을 제거하고 분리하십시오. 이 교정은 헤드폰과 함께 작동하지 않습니다.\n",
+    __EMPTY: "#VALUE!",
+    __EMPTY_1: "#VALUE!",
+  },
+  RC_getPhoneMicrophoneReady: {
+    "en-US":
+      "2. When your phone is held upright, its microphone is in its bottom edge.\n3. Expose your phone's microphone by removing any protective case.\n4. Fold a hand towel in half three times and place it on the table between you and your laptop.\n5. Point your phone camera at the QR code below (black and white checks), and click on the link that appears in the phone's viewfinder.",
+    de: "2. Wenn Ihr Telefon aufrecht gehalten wird, befindet sich sein Mikrofon in der unteren Kante.\n3. Stellen Sie das Mikrofon Ihres Telefons aus, indem Sie einen Schutzhülle entfernen.\n4. Falten Sie ein Handtuch in zweimal dreimal und legen Sie es auf den Tisch zwischen Ihnen und Ihrem Laptop.\n5. Zeigen Sie Ihre Telefonkamera im folgenden QR -Code (Schwarzweißkontrollen) und klicken Sie auf den Link, der im Sucher des Telefons angezeigt wird.",
+    fr: "2. Lorsque votre téléphone est maintenu en position verticale, son microphone est dans son bord inférieur.\n3. Exposer le microphone de votre téléphone en supprimant tout cas de protection.\n4. Pliez une serviette à main en deux fois trois fois et placez-la sur la table entre vous et votre ordinateur portable.\n5. Pointez votre appareil photo de téléphone au code QR ci-dessous (vérifications en noir et blanc), puis cliquez sur le lien qui apparaît dans le viseur du téléphone.",
+    es: "2. Cuando su teléfono se mantiene en posición vertical, su micrófono está en su borde inferior.\n3. Exponga el micrófono de su teléfono eliminando cualquier caso de protección.\n4. Dobla una toalla de mano por la mitad tres veces y colóquela sobre la mesa entre usted y su computadora portátil.\n5. Apunte la cámara de su teléfono en el código QR a continuación (verificaciones en blanco y negro) y haga clic en el enlace que aparece en el visor del teléfono.",
+    pt: "2. Quando o telefone é mantido na vertical, o microfone está na borda inferior.\n3. Exponha o microfone do seu telefone removendo qualquer caso de proteção.\n4. Dobre uma toalha de mão ao meio três vezes e coloque -a na mesa entre você e seu laptop.\n5. Aponte a câmera do seu telefone no código QR abaixo (cheques em preto e branco) e clique no link que aparece no visor do telefone.",
+    it: "2. Quando il telefono viene tenuto in posizione verticale, il suo microfono è nel bordo inferiore.\n3. Esporre il microfono del telefono rimuovendo qualsiasi custodia protettiva.\n4. Piega un asciugamano a metà tre volte e posizionalo sul tavolo tra te e il tuo laptop.\n5. Puntare la fotocamera del telefono sul codice QR in basso (controlli in bianco e nero) e fai clic sul collegamento che appare nel mirino del telefono.",
+    ro: "2. Când telefonul dvs. este ținut în poziție verticală, microfonul său este în marginea de jos.\n3. Expuneți microfonul telefonului dvs. eliminând orice caz de protecție.\n4. Îndoiți un prosop de mână în jumătate de trei ori și așezați -l pe masa dintre dvs. și laptop.\n5. Indicați camera telefonului la codul QR de mai jos (verificări alb -negru) și faceți clic pe linkul care apare în vizor de telefon al telefonului.",
+    pl: "2. Gdy telefon jest przytrzymany pionowo, jego mikrofon znajduje się w dolnej krawędzi.\n3. Odsłaniaj mikrofon telefonu, usuwając dowolną sprawę ochronną.\n4. Złóż ręcznik na pół trzy razy i umieść go na stole między tobą a laptopem.\n5. Wskaż aparat telefoniczny na poniższy kod QR (czarno -białe czeki) i kliknij link, który pojawi się w wizjerze telefonu.",
+    ru: "2. Когда ваш телефон удерживается в вертикальном положении, его микрофон находится на нижнем краю.\n3. Выставьте микрофон вашего телефона, удалив любой защитный чехол.\n4. Сложите полотенце рук за половину три раза и поместите его на стол между вами и вашим ноутбуком.\n5. Укажите камеру телефона на QR -код ниже (черно -белые проверки) и нажмите на ссылку, которая появляется в видоискателе телефона.",
+    hy: "2. Երբ ձեր հեռախոսն անցնում է ուղիղ, դրա խոսափողը իր ներքեւի եզրին է:\n3. Բացահայտեք ձեր հեռախոսի խոսափողը `հեռացնելով ցանկացած պաշտպանիչ դեպք:\n4. Ձեռքի սրբիչ ծալեք կես երեք անգամ եւ տեղադրեք այն սեղանի շուրջ ձեր եւ ձեր նոութբուքի միջեւ:\n5. Ձեռք բերեք ձեր հեռախոսի տեսախցիկը ստորեւ նշված QR կոդով (սեւ եւ սպիտակ ստուգումներ) եւ կտտացրեք հղմանը, որը հայտնվում է հեռախոսի տեսադաշտում:",
+    fi: "2. Kun puhelimesi pidetään pystyssä, sen mikrofoni on sen alareunassa.\n3. Paljasta puhelimen mikrofoni poistamalla kaikki suojatapaukset.\n4. Taita käsipyyhe puoliksi kolme kertaa ja aseta se pöydälle sinun ja kannettavan tietokoneen väliin.\n5. Osoita puhelinkamera alla olevassa QR -koodissa (mustavalkoiset tarkistukset) ja napsauta puhelimen etsimessä näkyvää linkkiä.",
+    ka: "2. როდესაც თქვენი ტელეფონი ვერ ხერხდება თავდაყირა, მისი მიკროფონი მისი ქვედა ზღვარზეა.\n3. გამოავლინეთ თქვენი ტელეფონის მიკროფონი ნებისმიერი დამცავი საქმის ამოღებით.\n4. ჩამოყარეთ ხელის პირსახოცი ნახევარჯერ და მოათავსეთ მაგიდაზე თქვენსა და თქვენს ლეპტოპს შორის.\n5. მიუთითეთ თქვენი ტელეფონის კამერა QR კოდზე ქვემოთ (შავი და თეთრი ჩეკები) და დააჭირეთ ბმულს, რომელიც გამოჩნდება ტელეფონის სანახავად.",
+    he: "2. כאשר הטלפון שלך מוחזק זקוף, המיקרופון שלו נמצא בקצה התחתון שלו.\n3. חשוף את המיקרופון של הטלפון שלך על ידי הסרת כל מקרה מגן.\n4. קפלו מגבת יד לחצי שלוש פעמים והניחו אותה על השולחן בינך לבין המחשב הנייד.\n.",
+    ar: "2. عندما يكون هاتفك مستقيماً ، يكون الميكروفون الخاص به في الحافة السفلية.\n3. فضح ميكروفون هاتفك عن طريق إزالة أي حالة وقائية.\n4. قم بطي منشفة اليد في نصف ثلاث مرات ووضعها على الطاولة بينك وبين الكمبيوتر المحمول.\n5. قم بإشارة كاميرا هاتفك على رمز الاستجابة السريعة أدناه (الشيكات بالأبيض والأسود) ، وانقر على الرابط الذي يظهر في عدسة الكاميرا للهاتف.",
+    ur: "When. جب آپ کا فون سیدھا ہوتا ہے تو ، اس کا مائکروفون اس کے نچلے حصے میں ہوتا ہے۔\n3. کسی بھی حفاظتی کیس کو ہٹا کر اپنے فون کے مائکروفون کو بے نقاب کریں۔\n4. آدھے تین بار ہاتھ کا تولیہ جوڑیں اور اسے اپنے اور اپنے لیپ ٹاپ کے درمیان ٹیبل پر رکھیں۔\n5. اپنے فون کیمرہ کو نیچے کیو آر کوڈ (سیاہ اور سفید چیک) پر نشاندہی کریں ، اور فون کے ویو فائنڈر میں ظاہر ہونے والے لنک پر کلک کریں۔",
+    hi: "2. जब आपका फोन सीधा आयोजित किया जाता है, तो इसका माइक्रोफोन इसके निचले किनारे में होता है।\n3. किसी भी सुरक्षात्मक मामले को हटाकर अपने फोन के माइक्रोफोन को उजागर करें।\n4. एक हाथ तौलिया को तीन बार में मोड़ो और इसे आप और आपके लैपटॉप के बीच की मेज पर रखें।\n5. नीचे दिए गए क्यूआर कोड (ब्लैक एंड व्हाइट चेक) पर अपना फोन कैमरा इंगित करें, और फोन के दृश्यदर्शी में दिखाई देने वाले लिंक पर क्लिक करें।",
+    ta: "2. உங்கள் தொலைபேசி நிமிர்ந்து நிற்கும்போது, ​​அதன் மைக்ரோஃபோன் அதன் கீழ் விளிம்பில் உள்ளது.\n3. எந்தவொரு பாதுகாப்பு வழக்கையும் அகற்றுவதன் மூலம் உங்கள் தொலைபேசியின் மைக்ரோஃபோனை அம்பலப்படுத்துங்கள்.\n4. ஒரு கை துண்டுகளை பாதி மூன்று முறை மடித்து உங்களுக்கும் உங்கள் மடிக்கணினிக்கும் இடையில் மேசையில் வைக்கவும்.\n5. உங்கள் தொலைபேசி கேமராவை கீழே உள்ள QR குறியீட்டில் (கருப்பு மற்றும் வெள்ளை காசோலைகள்) சுட்டிக்காட்டவும், தொலைபேசியின் வ்யூஃபைண்டரில் தோன்றும் இணைப்பைக் கிளிக் செய்யவும்.",
+    ml: "2. നിങ്ങളുടെ ഫോൺ നിവർന്നുനിൽക്കുമ്പോൾ അതിന്റെ മൈക്രോഫോൺ അതിന്റെ താഴത്തെ അരികിലാണ്.\n3. ഏതെങ്കിലും സംരക്ഷണ കേസ് നീക്കംചെയ്ത് നിങ്ങളുടെ ഫോണിന്റെ മൈക്രോഫോൺ തുറന്നുകാട്ടുക.\n4. ഒരു കൈ തൂവാല പകുതി മൂന്ന് തവണ മടക്കിക്കളയുക, നിങ്ങൾക്കും നിങ്ങളുടെ ലാപ്ടോപ്പിനും ഇടയിലുള്ള മേശപ്പുറത്ത് വയ്ക്കുക.\n5. നിങ്ങളുടെ ഫോൺ ക്യാമറ ചുവടെയുള്ള QR കോഡിൽ (കറുപ്പും വെളുപ്പും ചെക്കുകൾ), ഫോണിന്റെ വ്യൂഫൈൻഡറിൽ ദൃശ്യമാകുന്ന ലിങ്കിൽ ക്ലിക്കുചെയ്യുക.",
+    te: "2. మీ ఫోన్ నిటారుగా ఉన్నప్పుడు, దాని మైక్రోఫోన్ దాని దిగువ అంచున ఉంటుంది.\n3. ఏదైనా రక్షిత కేసును తొలగించడం ద్వారా మీ ఫోన్ యొక్క మైక్రోఫోన్‌ను బహిర్గతం చేయండి.\n4. హ్యాండ్ టవల్ ను సగం మూడు సార్లు మడవండి మరియు మీకు మరియు మీ ల్యాప్‌టాప్‌కు మధ్య ఉన్న టేబుల్‌పై ఉంచండి.\n5. మీ ఫోన్ కెమెరాను దిగువ QR కోడ్ (బ్లాక్ అండ్ వైట్ చెక్కులు) వద్ద సూచించండి మరియు ఫోన్ యొక్క వ్యూఫైండర్‌లో కనిపించే లింక్‌పై క్లిక్ చేయండి.",
+    kn: "2. ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ಹಿಡಿದಿಟ್ಟುಕೊಂಡಾಗ, ಅದರ ಮೈಕ್ರೊಫೋನ್ ಅದರ ಕೆಳ ಅಂಚಿನಲ್ಲಿದೆ.\n3. ಯಾವುದೇ ರಕ್ಷಣಾತ್ಮಕ ಪ್ರಕರಣವನ್ನು ತೆಗೆದುಹಾಕುವ ಮೂಲಕ ನಿಮ್ಮ ಫೋನ್‌ನ ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಬಹಿರಂಗಪಡಿಸಿ.\n4. ಹ್ಯಾಂಡ್ ಟವೆಲ್ ಅನ್ನು ಅರ್ಧ ಮೂರು ಬಾರಿ ಮಡಿಸಿ ಮತ್ತು ಅದನ್ನು ನಿಮ್ಮ ಮತ್ತು ನಿಮ್ಮ ಲ್ಯಾಪ್‌ಟಾಪ್ ನಡುವೆ ಮೇಜಿನ ಮೇಲೆ ಇರಿಸಿ.\n5. ನಿಮ್ಮ ಫೋನ್ ಕ್ಯಾಮೆರಾವನ್ನು ಕೆಳಗಿನ ಕ್ಯೂಆರ್ ಕೋಡ್‌ನಲ್ಲಿ (ಕಪ್ಪು ಮತ್ತು ಬಿಳಿ ಚೆಕ್‌ಗಳು) ಸೂಚಿಸಿ, ಮತ್ತು ಫೋನ್‌ನ ವ್ಯೂಫೈಂಡರ್‌ನಲ್ಲಿ ಕಂಡುಬರುವ ಲಿಂಕ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ.",
+    bn: "২. যখন আপনার ফোনটি সোজা হয়ে থাকে, তখন এর মাইক্রোফোনটি তার নীচের প্রান্তে থাকে।\n৩. কোনও প্রতিরক্ষামূলক কেস সরিয়ে আপনার ফোনের মাইক্রোফোনটি প্রকাশ করুন।\n৪. আধা তিনবার একটি হাতের তোয়ালে ভাঁজ করুন এবং এটি আপনার এবং আপনার ল্যাপটপের মধ্যে টেবিলে রাখুন।\n৫. নীচের কিউআর কোডে আপনার ফোন ক্যামেরাটি নির্দেশ করুন (কালো এবং সাদা চেক), এবং ফোনের ভিউফাইন্ডারে প্রদর্শিত লিঙ্কটিতে ক্লিক করুন।",
+    id: "2. Saat ponsel Anda ditahan tegak, mikrofonnya berada di tepi bawahnya.\n3. Ekspos mikrofon ponsel Anda dengan menghapus kasus pelindung apa pun.\n4. Lipat handuk tangan menjadi setengah tiga kali dan letakkan di atas meja di antara Anda dan laptop Anda.\n5. Arahkan kamera ponsel Anda ke kode QR di bawah ini (cek hitam dan putih), dan klik tautan yang muncul di jendela bidik ponsel.",
+    "zh-CN":
+      "2.当您的手机直立时，其麦克风处于其底部边缘。\n3.通过删除任何保护性案例来暴露手机的麦克风。\n4.将手巾折成三倍，然后将其放在您和笔记本电脑之间的桌子上。\n5.将手机摄像机指向下面的QR码（黑白检查），然后单击手机取景器中出现的链接。",
+    "zh-HK":
+      "2.當您的手機直立時，其麥克風處於其底部邊緣。\n3.通過刪除任何保護性案例來暴露手機的麥克風。\n4.將手巾折成三倍，然後將其放在您和筆記本電腦之間的桌子上。\n5.將手機攝像機指向下面的QR碼（黑白檢查），然後單擊手機取景器中出現的鏈接。",
+    ja: "2.携帯電話が直立していると、マイクが下端にあります。\n3.保護ケースを削除して、携帯電話のマイクを公開します。\n4.ハンドタオルを半分3回折り、あなたとあなたのラップトップの間のテーブルに置きます。\n5.下のQRコード（黒と白のチェック）で携帯電話カメラを向け、電話のViewFinderに表示されるリンクをクリックします。",
+    ko: "2. 휴대 전화가 똑바로 잡히면 마이크가 바닥 가장자리에 있습니다.\n3. 보호 케이스를 제거하여 휴대 전화의 마이크를 노출시킵니다.\n4. 핸드 타월을 반으로 3 번 접고 당신과 노트북 사이에 테이블에 놓습니다.\n5. 전화 카메라를 아래 QR 코드 (흑백 체크)로 가리키고 전화기의 뷰 파인더에 나타나는 링크를 클릭하십시오.",
+    __EMPTY: "#VALUE!",
+    __EMPTY_1: "#VALUE!",
+  },
+  RC_getUSBMicrophoneReady: {
+    "en-US":
+      "2. Set up the microphone on its tripod, and click Ok or hit RETURN.",
+    de: "2. Richten Sie das Mikrofon auf dem Stativ ein und klicken Sie auf OK oder klicken Sie auf die Rückgabe.",
+    fr: "2. Configurez le microphone sur son trépied et cliquez sur OK ou appuyez sur Retour.",
+    es: "",
+    pt: "",
+    it: "",
+    ro: "",
+    pl: "",
+    ru: "",
+    hy: "",
+    fi: "",
+    ka: "",
+    he: "",
+    ar: "",
+    ur: "",
+    hi: "",
+    ta: "",
+    ml: "",
+    te: "",
+    kn: "",
+    bn: "",
+    id: "",
+    "zh-CN": "",
+    "zh-HK": "",
+    ja: "",
+    ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
+  },
+  RC_identifyMicrophone: {
+    "en-US":
+      "2. Type the make and model of the smartphone or USB microphone, e.g. iPhone 12 Pro.\n",
+    de: "2. Geben Sie das Make und das Modell des Smartphones oder des USB -Mikrofons ein, z. iPhone 12 Pro.\n",
+    fr: "2. Tapez la marque et le modèle du smartphone ou du microphone USB, par ex. iPhone 12 Pro.\n",
+    es: "",
+    pt: "",
+    it: "",
+    ro: "",
+    pl: "",
+    ru: "",
+    hy: "",
+    fi: "",
+    ka: "",
+    he: "",
+    ar: "",
+    ur: "",
+    hi: "",
+    ta: "",
+    ml: "",
+    te: "",
+    kn: "",
+    bn: "",
+    id: "",
+    "zh-CN": "",
+    "zh-HK": "",
+    ja: "",
+    ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
+  },
+  RC_loudspeakerCalibration: {
+    "en-US": "Loudspeaker Calibration (page 11 of 22)",
+    de: "Lautsprecherkalibrierung (Seite 11 von 22)",
+    fr: "Calibration des haut-parleurs (page 11 sur 22)",
+    es: "Calibración del altavoz (página 11 de 22)",
+    pt: "Calibração do alto -falante (página 11 de 22)",
+    it: "Calibrazione degli altoparlanti (pagina 11 di 22)",
+    ro: "Calibrarea difuzoarelor (pagina 11 din 22)",
+    pl: "Kalibracja głośnika (strona 11 z 22)",
+    ru: "Калибровка громкоговорителей (стр. 11 из 22)",
+    hy: "Բարձրախոսի տրամաչափում (էջ 11, 22)",
+    fi: "Kaiutinkalibrointi (sivu 11/22)",
+    ka: "დინამიკის კალიბრაცია (22 გვერდი 11)",
+    he: "כיול הרמקול (עמוד 11 מתוך 22)",
+    ar: "معايرة مكبرات الصوت (صفحة 11 من 22)",
+    ur: "لاؤڈ اسپیکر انشانکن (صفحہ 11 کا 22)",
+    hi: "लाउडस्पीकर अंशांकन (22 का पृष्ठ 11)",
+    ta: "ஒலிபெருக்கி அளவுத்திருத்தம் (பக்கம் 11 இன் 22)",
+    ml: "ഉച്ചഭാഷിണി കാലിബ്രേഷൻ (22-ാം പേജ് 11)",
+    te: "లౌడ్‌స్పీకర్ క్రమాంకనం (పేజీ 11 యొక్క 22)",
+    kn: "ಧ್ವನಿವರ್ಧಕ ಮಾಪನಾಂಕ ನಿರ್ಣಯ (ಪುಟ 11 ರಲ್ಲಿ 22)",
+    bn: "লাউডস্পিকার ক্রমাঙ্কন (22 এর পৃষ্ঠা 11)",
+    id: "Kalibrasi Loudspeaker (halaman 11 dari 22)",
+    "zh-CN": "扬声器校准（第11页，共22页）",
+    "zh-HK": "揚聲器校準（第11頁，共22頁）",
+    ja: "スピーカーキャリブレーション（22ページ）",
+    ko: "라우드 스피커 교정 (11/22 페이지)",
+    __EMPTY: "",
+    __EMPTY_1: "",
+  },
+  RC_microphoneCalibration: {
+    "en-US": "Microphone Calibration (page 11 of 22)",
+    de: "Mikrofonkalibrierung (Seite 11 von 22)",
+    fr: "Calibration des microphones (page 11 sur 22)",
+    es: "Calibración de micrófonos (página 11 de 22)",
+    pt: "Calibração do microfone (página 11 de 22)",
+    it: "Calibrazione del microfono (pagina 11 di 22)",
+    ro: "Calibrarea microfonului (pagina 11 din 22)",
+    pl: "Kalibracja mikrofonu (strona 11 z 22)",
+    ru: "Калибровка микрофона (стр. 11 из 22)",
+    hy: "Խոսափողի տրամաչափում (էջ 11, 22)",
+    fi: "Mikrofonin kalibrointi (sivu 11/22)",
+    ka: "მიკროფონის კალიბრაცია (22 გვერდი 11)",
+    he: "כיול מיקרופון (עמוד 11 מתוך 22)",
+    ar: "معايرة الميكروفون (صفحة 11 من 22)",
+    ur: "مائکروفون انشانکن (صفحہ 11 کا 22)",
+    hi: "माइक्रोफोन अंशांकन (22 का पृष्ठ 11)",
+    ta: "மைக்ரோஃபோன் அளவுத்திருத்தம் (பக்கம் 11 இன் 22)",
+    ml: "മൈക്രോഫോൺ കാലിബ്രേഷൻ (22-ാം പേജ് 11)",
+    te: "మైక్రోఫోన్ క్రమాంకనం (పేజీ 11 యొక్క 22)",
+    kn: "ಮೈಕ್ರೊಫೋನ್ ಮಾಪನಾಂಕ ನಿರ್ಣಯ (ಪುಟ 11 ಆಫ್ 22)",
+    bn: "মাইক্রোফোন ক্রমাঙ্কন (22 এর 11 পৃষ্ঠা)",
+    id: "Kalibrasi mikrofon (halaman 11 dari 22)",
+    "zh-CN": "麦克风校准（第11页，共22页）",
+    "zh-HK": "麥克風校準（第11頁，共22頁）",
+    ja: "マイクのキャリブレーション（22ページ）",
+    ko: "마이크 교정 (11/12 페이지)",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationClickToStart: {
-    "en-US": "Click Ok on your iPhone/iPad, and follow the instructions there.",
-    de: "Klicken Sie auf OK auf Ihrem iPhone/iPad und befolgen Sie die Anweisungen dort.",
-    fr: "Cliquez sur OK sur votre iPhone / iPad et suivez les instructions là-bas.",
-    es: "Haga clic en Aceptar en su iPhone/iPad y siga las instrucciones allí.",
-    pt: "Clique em OK no seu iPhone/iPad e siga as instruções lá.",
-    it: "Fai clic su OK sul tuo iPhone/iPad e segui le istruzioni lì.",
-    ro: "Faceți clic pe OK pe iPhone/iPad și urmați instrucțiunile de acolo.",
-    pl: "Kliknij OK na iPhonie/iPadzie i postępuj zgodnie z instrukcjami.",
-    ru: "Нажмите OK на своем iPhone/iPad и следуйте инструкциям там.",
-    hy: "Կտտացրեք OK ձեր iPhone / iPad- ում եւ հետեւեք այնտեղ հրահանգներին:",
-    fi: "Napsauta OK iPhone/iPadissa ja noudata siellä olevia ohjeita.",
-    ka: "დააჭირეთ OK თქვენს iPhone/iPad- ზე და მიჰყევით იქ მითითებებს.",
-    he: "לחץ על אישור ב- iPhone/iPad שלך, ועקוב אחר ההוראות שם.",
-    ar: 'انقر فوق "موافق" على جهاز iPhone/iPad الخاص بك ، واتبع التعليمات هناك.',
-    ur: "اپنے آئی فون/آئی پیڈ پر اوکے پر کلک کریں ، اور وہاں کی ہدایات پر عمل کریں۔",
-    hi: "अपने iPhone/iPad पर ठीक क्लिक करें, और वहां के निर्देशों का पालन करें।",
-    ta: "உங்கள் ஐபோன்/ஐபாடில் சரி என்பதைக் கிளிக் செய்து, அங்குள்ள வழிமுறைகளைப் பின்பற்றவும்.",
-    ml: "നിങ്ങളുടെ iPhone / iPad- ൽ ശരി ക്ലിക്കുചെയ്യുക, അവിടെയുള്ള നിർദ്ദേശങ്ങൾ പാലിക്കുക.",
-    te: "మీ ఐఫోన్/ఐప్యాడ్‌లో సరే క్లిక్ చేసి, అక్కడ సూచనలను అనుసరించండి.",
-    kn: "ನಿಮ್ಮ ಐಫೋನ್/ಐಪ್ಯಾಡ್ ಮೇಲೆ ಸರಿ ಕ್ಲಿಕ್ ಮಾಡಿ ಮತ್ತು ಅಲ್ಲಿನ ಸೂಚನೆಗಳನ್ನು ಅನುಸರಿಸಿ.",
-    bn: "আপনার আইফোন/আইপ্যাডে ওকে ক্লিক করুন এবং সেখানে নির্দেশাবলী অনুসরণ করুন।",
-    id: "Klik OK di iPhone/iPad Anda, dan ikuti instruksi di sana.",
-    "zh-CN": "单击iPhone/iPad上的确定，然后按照此处的说明进行操作。",
-    "zh-HK": "單擊iPhone/iPad上的確定，然後按照此處的說明進行操作。",
-    ja: "iPhone/iPadの[OK]をクリックして、そこの指示に従ってください。",
-    ko: "iPhone/iPad에서 확인을 클릭하고 그 지침을 따르십시오.",
+    "en-US": "Click Ok on your smartphone, and follow the instructions there.",
+    de: "Klicken Sie auf OK auf Ihrem Smartphone und befolgen Sie die Anweisungen dort.",
+    fr: "Cliquez sur OK sur votre smartphone et suivez les instructions là-bas.",
+    es: "Haga clic en Aceptar en su teléfono inteligente y siga las instrucciones allí.",
+    pt: "Clique em OK no seu smartphone e siga as instruções lá.",
+    it: "Fai clic su OK sul tuo smartphone e segui le istruzioni lì.",
+    ro: "Faceți clic pe OK pe smartphone -ul dvs. și urmați instrucțiunile de acolo.",
+    pl: "Kliknij OK na smartfonie i postępuj zgodnie z instrukcjami.",
+    ru: "Нажмите OK на своем смартфоне и следуйте инструкциям там.",
+    hy: "Կտտացրեք OK ձեր սմարթֆոնի վրա եւ հետեւեք այնտեղ հրահանգներին:",
+    fi: "Napsauta älypuhelimesi OK ja noudata siellä olevia ohjeita.",
+    ka: "დააჭირეთ ღილაკს OK თქვენს სმარტფონზე და მიჰყევით იქ მითითებებს.",
+    he: "לחץ על אישור בסמארטפון שלך, ועקוב אחר ההוראות שם.",
+    ar: 'انقر فوق "موافق" على هاتفك الذكي ، واتبع التعليمات هناك.',
+    ur: "اپنے اسمارٹ فون پر اوکے پر کلک کریں ، اور وہاں کی ہدایات پر عمل کریں۔",
+    hi: "अपने स्मार्टफोन पर ठीक क्लिक करें, और वहां के निर्देशों का पालन करें।",
+    ta: "உங்கள் ஸ்மார்ட்போனில் சரி என்பதைக் கிளிக் செய்து, அங்குள்ள வழிமுறைகளைப் பின்பற்றவும்.",
+    ml: "നിങ്ങളുടെ സ്മാർട്ട്ഫോണിൽ ശരി ക്ലിക്കുചെയ്യുക, കൂടാതെ അവിടെയുള്ള നിർദ്ദേശങ്ങൾ പാലിക്കുക.",
+    te: "మీ స్మార్ట్‌ఫోన్‌లో సరే క్లిక్ చేసి, అక్కడి సూచనలను అనుసరించండి.",
+    kn: "ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್‌ಫೋನ್‌ನಲ್ಲಿ ಸರಿ ಕ್ಲಿಕ್ ಮಾಡಿ, ಮತ್ತು ಅಲ್ಲಿನ ಸೂಚನೆಗಳನ್ನು ಅನುಸರಿಸಿ.",
+    bn: "আপনার স্মার্টফোনে ওকে ক্লিক করুন এবং সেখানে নির্দেশাবলী অনুসরণ করুন।",
+    id: "Klik OK di ponsel cerdas Anda, dan ikuti instruksi di sana.",
+    "zh-CN": "单击智能手机上的确定，然后按照那里的说明进行操作。",
+    "zh-HK": "單擊智能手機上的確定，然後按照那裡的說明進行操作。",
+    ja: "スマートフォンの[OK]をクリックして、そこの指示に従ってください。",
+    ko: "스마트 폰에서 확인을 클릭하고 그 지침을 따르십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationDone: {
     "en-US":
@@ -2618,6 +3015,8 @@ export const phrases = {
       "謝謝。校準已經完成，您可以收起iPhone/iPad。重要的是：在實驗完成之前，請勿觸摸音量控制。更改音量會破壞校準並使所有結果無效。",
     ja: "ありがとう。キャリブレーションが行われ、iPhone/iPadを片付けることができます。重要：実験が完了するまで、ボリュームコントロールに触れないでください。ボリュームを変更すると、キャリブレーションが台無しになり、すべての結果が無効になります。",
     ko: "감사해요. 교정이 완료되며 iPhone/iPad를 제거 할 수 있습니다. 중요 : 실험이 완료 될 때까지 볼륨 컨트롤에 닿지 마십시오. 볼륨을 변경하면 교정이 파괴되고 모든 결과가 무효화됩니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationHoldIPhoneOk: {
     "en-US": "Press Ok to continue. \n\n",
@@ -2646,6 +3045,8 @@ export const phrases = {
     "zh-HK": "按確定繼續。\n\n",
     ja: "OKを押して続行します。\n\n",
     ko: "계속하려면 확인을 누르십시오.\n\n",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationNeedsIPhone: {
     "en-US":
@@ -2656,7 +3057,7 @@ export const phrases = {
     pt: "Para produzir som preciso, o experimento precisa calibrar os alto -falantes. Isso requer um iPhone ou iPad conectado à Internet. Você tem um útil?\n",
     it: "Per produrre un suono accurato, l'esperimento deve calibrare gli altoparlanti. Ciò richiede un iPhone o un iPad connesso a Internet. Hai uno a portata di mano?\n",
     ro: "Pentru a produce un sunet precis, experimentul trebuie să calibreze difuzoarele. Acest lucru necesită un iPhone sau un iPad conectat la internet. Ai unul la îndemână?\n",
-    pl: "Aby uzyskać dokładny dźwięk, eksperyment musi skalibrować głośniki. Wymaga to iPhone'a lub iPada, które są połączone z Internetem. Czy masz jeden poręczny?\n",
+    pl: "Aby uzyskać dokładny dźwięk, eksperyment musi skalibrować głośniki. Wymaga to iPhone'a lub iPada, które są połączone z Internetem. Czy masz jeden przydatny?\n",
     ru: "Чтобы получить точный звук, эксперимент должен калибровать громкоговорители. Это требует iPhone или iPad, который подключен к Интернету. У тебя есть одна удобная?\n",
     hy: "Acc շգրիտ ձայն տալու համար փորձը պետք է տրամաչափի բարձրախոսները: Սա պահանջում է iPhone կամ iPad, որը միացված է ինտերնետին: Դուք ունեք մեկ հարմար:\n",
     fi: "Tarkan äänen tuottamiseksi kokeen on kalibroida kaiuttimet. Tämä vaatii Internetiin kytketyn iPhonen tai iPadin. Onko sinulla yksi kätevä?\n",
@@ -2677,6 +3078,8 @@ export const phrases = {
       "為了產生準確的聲音，實驗需要校準揚聲器。這需要連接到Internet的iPhone或iPad。你有方便嗎？\n",
     ja: "正確なサウンドを生成するには、実験ではスピーカーを調整する必要があります。これには、インターネットに接続されているiPhoneまたはiPadが必要です。便利ですか？\n",
     ko: "정확한 사운드를 생성하려면 실험은 라우드 스피커를 교정해야합니다. 인터넷에 연결된 iPhone 또는 iPad가 필요합니다. 편리한 사람이 있습니까?\n",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationNo: {
     "en-US": "No, end experiment now.",
@@ -2705,6 +3108,8 @@ export const phrases = {
     "zh-HK": "不，現在結束實驗。",
     ja: "いいえ、実験を終えてください。",
     ko: "아니요, 이제 실험을 끝내십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationQR: {
     "en-US":
@@ -2729,13 +3134,15 @@ export const phrases = {
     te: "ఈ ధ్వని క్రమాంకనం లో ఉత్తమ ఫలితాల కోసం, దయచేసి క్రమాంకనానికి ముందు, ఇప్పుడు మీ కంప్యూటర్ యొక్క ధ్వని వాల్యూమ్‌ను పెంచుకోండి, ఆపై ప్రయోగం ముగిసే వరకు వాల్యూమ్‌ను తాకవద్దు.\nQR కోడ్ క్రింద కనిపించినప్పుడు, మీ ఐఫోన్ లేదా ఐప్యాడ్ కెమెరాను దానిపై సూచించండి మరియు మీ ఐఫోన్/ఐప్యాడ్ స్క్రీన్‌లో కనిపించే లింక్‌ను క్లిక్ చేయండి. అప్పుడు ఐఫోన్/ఐప్యాడ్ స్క్రీన్‌లో ఇన్‌స్టక్షన్లను అనుసరించండి.\n——————————————————————————————————————————————\nదయచేసి నిశ్శబ్ధంగా ఉండండి! ఇప్పుడు రికార్డింగ్. వాల్యూమ్ నియంత్రణను తాకవద్దు.\n——————————————————————————————————————————————\nసమస్య?\n1. దీనికి వైఫై అవసరం. మీ ఫోన్ మరియు కంప్యూటర్ రెండూ ఒకే వైఫై నెట్‌వర్క్‌లో లేకపోతే, మైక్రోఫోన్‌ను ఉపయోగించమని మీ అనుమతి అడిగినంతవరకు ఐఫోన్ లభించదు మరియు మీరు ఎప్పటికీ వేచి ఉంటారు. కాబట్టి కంప్యూటర్ మరియు ఐఫోన్‌ను అదే వైఫైకి కనెక్ట్ చేయండి లేదా నిష్క్రమించండి.\n                                                                                                                                 \n2. ఐఫోన్ కనెక్షన్‌లో లోపం నివేదిస్తే, ఐఫోన్ బ్రౌజర్‌ను విడిచిపెట్టడానికి మరియు పున art ప్రారంభించడానికి లేదా ఐఫోన్‌ను పున art ప్రారంభించడానికి ప్రయత్నించండి.\n                                                                                                                             \n3. ఇది చాలా అరుదు, కానీ, ధ్వని ఆడకపోతే, లేదా, అది ఆడిన తర్వాత, కొనసాగిన బటన్ కనిపించదు, దీని అర్థం క్రమాంకనం విఫలమైంది. ఈ బ్రౌజర్ పేజీని రిఫ్రెష్ చేయడం ద్వారా మీరు మళ్ళీ ప్రయత్నించవచ్చు. అది సాధారణంగా ట్రిక్ చేస్తుంది.",
     kn: "ಈ ಧ್ವನಿ ಮಾಪನಾಂಕ ನಿರ್ಣಯದಲ್ಲಿ ಉತ್ತಮ ಫಲಿತಾಂಶಗಳಿಗಾಗಿ, ದಯವಿಟ್ಟು ಮಾಪನಾಂಕ ನಿರ್ಣಯದ ಮೊದಲು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‌ನ ಧ್ವನಿ ಪರಿಮಾಣವನ್ನು ಗರಿಷ್ಠಗೊಳಿಸಿ, ತದನಂತರ ಪ್ರಯೋಗದ ಅಂತ್ಯದವರೆಗೆ ಪರಿಮಾಣವನ್ನು ಮುಟ್ಟಬೇಡಿ.\nಕ್ಯೂಆರ್ ಕೋಡ್ ಕೆಳಗೆ ಕಾಣಿಸಿಕೊಂಡಾಗ, ನಿಮ್ಮ ಐಫೋನ್ ಅಥವಾ ಐಪ್ಯಾಡ್ ಕ್ಯಾಮೆರಾವನ್ನು ಅದರಲ್ಲಿ ತೋರಿಸಿ, ಮತ್ತು ನಿಮ್ಮ ಐಫೋನ್/ಐಪ್ಯಾಡ್ ಪರದೆಯಲ್ಲಿ ಗೋಚರಿಸುವ ಲಿಂಕ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ. ನಂತರ ಐಫೋನ್/ಐಪ್ಯಾಡ್ ಪರದೆಯಲ್ಲಿ ಇನ್ಸ್ಟಕ್ಷನ್ಗಳನ್ನು ಅನುಸರಿಸಿ.\n———————————————————————————————————————————————\nದಯವಿಟ್ಟು ನಿಷ್ಯಬ್ಧವಾಗಿರಿ! ಈಗ ರೆಕಾರ್ಡಿಂಗ್. ಪರಿಮಾಣ ನಿಯಂತ್ರಣವನ್ನು ಮುಟ್ಟಬೇಡಿ.\n———————————————————————————————————————————————\nಸಮಸ್ಯೆ?\n1. ಇದಕ್ಕೆ ವೈಫೈ ಅಗತ್ಯವಿದೆ. ನಿಮ್ಮ ಫೋನ್ ಮತ್ತು ಕಂಪ್ಯೂಟರ್ ಒಂದೇ ವೈಫೈ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ಇಲ್ಲದಿದ್ದರೆ, ಮೈಕ್ರೊಫೋನ್ ಬಳಸಲು ನಿಮ್ಮ ಅನುಮತಿಯನ್ನು ಕೇಳುವಷ್ಟು ಐಫೋನ್ ಸಿಗುವುದಿಲ್ಲ, ಮತ್ತು ನೀವು ಶಾಶ್ವತವಾಗಿ ಕಾಯುತ್ತೀರಿ. ಆದ್ದರಿಂದ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ಐಫೋನ್ ಅನ್ನು ಒಂದೇ ವೈಫೈಗೆ ಸಂಪರ್ಕಪಡಿಸಿ ಅಥವಾ ತ್ಯಜಿಸಿ.\n                                                                                                                                 \n2. ಸಂಪರ್ಕದಲ್ಲಿ ಐಫೋನ್ ದೋಷವನ್ನು ವರದಿ ಮಾಡಿದರೆ, ಐಫೋನ್ ಬ್ರೌಸರ್ ಅನ್ನು ತ್ಯಜಿಸಲು ಮತ್ತು ಮರುಪ್ರಾರಂಭಿಸಲು ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಐಫೋನ್ ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ.\n                                                                                                                             \n3. ಇದು ಅಪರೂಪ, ಆದರೆ, ಧ್ವನಿ ಆಡದಿದ್ದರೆ, ಅಥವಾ, ಅದು ಆಡಿದ ನಂತರ, ಯಾವುದೇ ಮುಂದುವರಿಕೆ ಬಟನ್ ಕಾಣಿಸುವುದಿಲ್ಲ, ಇದರರ್ಥ ಮಾಪನಾಂಕ ನಿರ್ಣಯ ವಿಫಲವಾಗಿದೆ. ಈ ಬ್ರೌಸರ್ ಪುಟವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡುವ ಮೂಲಕ ನೀವು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಬಹುದು. ಅದು ಸಾಮಾನ್ಯವಾಗಿ ಟ್ರಿಕ್ ಮಾಡುತ್ತದೆ.",
     bn: "এই শব্দ ক্রমাঙ্কনটিতে সেরা ফলাফলের জন্য, দয়া করে আপনার কম্পিউটারের শব্দ ভলিউমটি এখনই ক্রমাঙ্কনের আগে সর্বাধিক করুন এবং তারপরে পরীক্ষার শেষ না হওয়া পর্যন্ত ভলিউমটি স্পর্শ করবেন না।\nযখন কিউআর কোডটি নীচে প্রদর্শিত হবে, আপনার আইফোন বা আইপ্যাড ক্যামেরা এটিতে নির্দেশ করুন এবং আপনার আইফোন/আইপ্যাড স্ক্রিনে প্রদর্শিত লিঙ্কটি ক্লিক করুন। তারপরে আইফোন/আইপ্যাড স্ক্রিনে ইনস্টরশনগুলি অনুসরণ করুন।\n——————————————————————————————————————————————————————————————————————————————————————————————— আছে—————————————————————————————————— আছে—————————————————————————————————————— আছে——————————————————————————————————— আছে————————————————————————————————————————— আছে——————————————————— -\nশান্ত দয়া করে! এখন রেকর্ডিং। ভলিউম নিয়ন্ত্রণ স্পর্শ করবেন না।\n——————————————————————————————————————————————————————————————————————————————————————————————— আছে—————————————————————————————————— আছে—————————————————————————————————————— আছে——————————————————————————————————— আছে————————————————————————————————————————— আছে——————————————————— -\nসমস্যা?\n1. এটি ওয়াইফাই প্রয়োজন। যদি আপনার ফোন এবং কম্পিউটার উভয়ই একই ওয়াইফাই নেটওয়ার্কে না থাকে তবে আইফোনটি মাইক্রোফোনটি ব্যবহার করার জন্য আপনার অনুমতি চেয়ে যতটা পাবে না এবং আপনি চিরকালের জন্য অপেক্ষা করবেন। সুতরাং কম্পিউটার এবং আইফোনটিকে একই ওয়াইফাইয়ের সাথে সংযুক্ত করুন বা প্রস্থান করুন।\n                                                                                                                                 \n২. যদি আইফোন সংযোগে কোনও ত্রুটির প্রতিবেদন করে তবে আইফোন ব্রাউজারটি ছাড়তে এবং পুনরায় চালু করার চেষ্টা করুন, বা এমনকি আইফোনটি পুনরায় চালু করার চেষ্টা করুন।\n                                                                                                                             \n৩. এটি বিরল, তবে, যদি শব্দটি বাজায় না, বা এটি বাজানোর পরে, কোনও প্রসেস বোতাম উপস্থিত না হয়, এর অর্থ ক্রমাঙ্কন ব্যর্থ হয়েছে। আপনি এই ব্রাউজার পৃষ্ঠাটি সতেজ করে আবার চেষ্টা করতে পারেন। যে সাধারণত কৌতুক আছে।",
-    id: "Untuk hasil terbaik dalam kalibrasi suara ini, silakan memaksimalkan volume suara komputer Anda sekarang, sebelum kalibrasi, dan kemudian jangan menyentuh volume sampai akhir percobaan.\nKetika kode QR muncul di bawah, arahkan kamera iPhone atau iPad Anda ke sana, dan klik tautan yang muncul di layar iPhone/iPad Anda. Kemudian ikuti Instipsi di layar iPhone/iPad.\n—————————————————————————————————————————————-\nHARAP TENANG! Sekarang merekam. Jangan menyentuh kontrol volume.\n—————————————————————————————————————————————-\nMASALAH?\n1. Ini membutuhkan wifi. Jika ponsel dan komputer Anda tidak keduanya berada di jaringan WiFi yang sama maka iPhone tidak akan mendapatkan izin Anda untuk menggunakan mikrofon, dan Anda akan menunggu selamanya. Jadi hubungkan komputer dan iPhone ke wifi yang sama atau berhenti.\n                                                                                                                                 \n2. Jika iPhone melaporkan kesalahan dalam koneksi, cobalah berhenti dan restart browser iPhone, atau bahkan restart iPhone.\n                                                                                                                             \n3. Ini jarang, tetapi, jika suaranya tidak diputar, atau, setelah diputar, tidak ada tombol proses yang muncul, itu berarti kalibrasi gagal. Anda dapat mencoba lagi dengan menyegarkan halaman browser ini. Itu biasanya triknya.",
+    id: "Untuk hasil terbaik dalam kalibrasi suara ini, silakan memaksimalkan volume suara komputer Anda sekarang, sebelum kalibrasi, dan kemudian jangan menyentuh volume sampai akhir percobaan.\nKetika kode QR muncul di bawah, arahkan kamera iPhone atau iPad Anda ke sana, dan klik tautan yang muncul di layar iPhone/iPad Anda. Kemudian ikuti Instipsi di layar iPhone/iPad.\n—————————————————————————————————————————————-\nHARAP TENANG! Sekarang merekam. Jangan menyentuh kontrol volume.\n—————————————————————————————————————————————-\nMASALAH?\n1. Ini membutuhkan wifi. Jika ponsel dan komputer Anda tidak keduanya berada di jaringan WiFi yang sama maka iPhone tidak akan mendapatkan izin Anda untuk menggunakan mikrofon, dan Anda akan menunggu selamanya. Jadi hubungkan komputer dan iPhone ke wifi yang sama atau berhenti.\n                                                                                                                                 \n2. Jika iPhone melaporkan kesalahan dalam koneksi, cobalah berhenti dan restart browser iPhone, atau bahkan restart iPhone.\n                                                                                                                             \n3. Ini jarang, tetapi, jika suara tidak diputar, atau, setelah diputar, tidak ada tombol proses yang muncul, itu berarti kalibrasi gagal. Anda dapat mencoba lagi dengan menyegarkan halaman browser ini. Itu biasanya triknya.",
     "zh-CN":
       "为了在此声音校准中获得最佳结果，请在校准之前最大化计算机的声音音量，然后在实验结束之前触摸音量。\n当QR码出现在下面的QR码时，将iPhone或iPad摄像头指向其，然后单击iPhone/iPad屏幕上出现的链接。然后在iPhone/iPad屏幕上关注介绍。\n—————————————————————————————————————————\n请安静！现在录制。不要触摸音量控制。\n—————————————————————————————————————————\n问题？\n1.这需要WiFi。如果您的手机和计算机都不在同一WiFi网络上，那么iPhone就不会征得您使用麦克风的许可，您将永远等待。因此，将计算机和iPhone连接到相同的WiFi或退出。\n                                                                                                                                 \n2.如果iPhone报告了连接中的错误，请尝试退出和重新启动iPhone浏览器，甚至重新启动iPhone。\n                                                                                                                             \n3.很少见，但是，如果声音不播放，或者在播放后，没有出现“继续”按钮，则意味着校准失败。您可以通过刷新此浏览器页面来重试。通常可以解决问题。",
     "zh-HK":
       "為了在此聲音校準中獲得最佳結果，請在校準之前最大化計算機的聲音音量，然後在實驗結束之前觸摸音量。\n當QR碼出現在下面的QR碼時，將iPhone或iPad攝像頭指向其，然後單擊iPhone/iPad屏幕上出現的鏈接。然後在iPhone/iPad屏幕上關注介紹。\n—————————————————————————————————————————\n請安靜！現在錄製。不要觸摸音量控制。\n—————————————————————————————————————————\n問題？\n1.這需要WiFi。如果您的手機和計算機都不在同一WiFi網絡上，那麼iPhone就不會徵得您使用麥克風的許可，您將永遠等待。因此，將計算機和iPhone連接到相同的WiFi或退出。\n                                                                                                                                 \n2.如果iPhone報告了連接中的錯誤，請嘗試退出和重新啟動iPhone瀏覽器，甚至重新啟動iPhone。\n                                                                                                                             \n3.很少見，但是，如果聲音不播放，或者在播放後，沒有出現“繼續”按鈕，則意味著校準失敗。您可以通過刷新此瀏覽器頁面來重試。通常可以解決問題。",
     ja: "このサウンドキャリブレーションで最良の結果を得るには、キャリブレーション前にコンピューターのサウンドボリュームを最大化してから、実験の終了までボリュームに触れないでください。\nQRコードが以下に表示されたら、iPhoneまたはiPadカメラをポイントし、iPhone/iPad画面に表示されるリンクをクリックします。次に、iPhone/iPad画面のインスタンスに従ってください。\n—————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————\nしずかにしてください！今録音。ボリュームコントロールに触れないでください。\n—————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————\n問題？\n1.これにはwifiが必要です。携帯電話とコンピューターが同じWiFiネットワーク上にない場合、iPhoneはマイクを使用する許可を求める限りは得られず、永遠に待ちます。したがって、コンピューターとiPhoneを同じWiFiに接続するか、終了します。\n                                                                                                                                 \n2. iPhoneが接続にエラーを報告している場合は、iPhoneブラウザを終了して再起動するか、iPhoneを再起動してみてください。\n                                                                                                                             \n3.まれですが、サウンドが再生されない場合、または再生後、続行ボタンが表示されない場合、キャリブレーションが失敗したことを意味します。このブラウザページを更新して、再試行できます。それは通常、トリックを行います。",
     ko: "이 사운드 교정에서 최상의 결과를 얻으려면 교정 전에 컴퓨터의 사운드 볼륨을 최대화 한 다음 실험이 끝날 때까지 볼륨을 만지지 마십시오.\nQR 코드가 아래에 나타나면 iPhone 또는 iPad 카메라를 가리키고 iPhone/iPad 화면에 나타나는 링크를 클릭하십시오. 그런 다음 iPhone/iPad 화면의 인stuctions를 따르십시오.\n——————————————————————————————————————————\n조용해! 이제 녹음. 볼륨 컨트롤에 닿지 마십시오.\n——————————————————————————————————————————\n문제?\n1. 이것은 Wi -Fi가 필요합니다. 휴대 전화와 컴퓨터가 동일한 Wi -Fi 네트워크에 있지 않은 경우 iPhone은 마이크 사용 권한을 요구하지 않으며 영원히 기다릴 것입니다. 따라서 컴퓨터와 iPhone을 동일한 WiFi 또는 종료에 연결하십시오.\n                                                                                                                                 \n2. iPhone이 연결에 오류가보고되면 iPhone 브라우저를 종료하고 다시 시작하거나 iPhone을 다시 시작하십시오.\n                                                                                                                             \n3. 드물지만 사운드가 재생되지 않거나 재생 후 진행 버튼이 나타나지 않으면 교정이 실패 함을 의미합니다. 이 브라우저 페이지를 새로 고쳐서 다시 시도 할 수 있습니다. 그것은 일반적으로 속임수를합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationRedo: {
     "en-US":
@@ -2765,8 +3172,10 @@ export const phrases = {
       "las，RMS拟合误差为111 dB超过222 dB的公差，因此必须再次校准扬声器。",
     "zh-HK":
       "las，RMS擬合誤差為111 dB超過222 dB的公差，因此必須再次校準揚聲器。",
-    ja: "残念ながら、111 dBのRMSフィッティングエラーは222 dB許容範囲を超えているため、スピーカーを再度調整する必要があります。",
+    ja: "残念ながら、111 dBのRMSフィッティングエラーは222 dB許容度を超えているため、スピーカーを再度調整する必要があります。",
     ko: "아아, 111 dB의 RMS 피팅 오류는 222dB 공차를 초과하므로 라우드 스피커를 다시 보정해야합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationTitle: {
     "en-US": "Measure Sound Level at 1000 Hz",
@@ -2795,6 +3204,8 @@ export const phrases = {
     "zh-HK": "測量1000 Hz的聲音水平",
     ja: "1000 Hzで音レベルを測定します",
     ko: "1000Hz에서 사운드 레벨을 측정하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationTitle1000Hz: {
     "en-US": "Measure Sound Level at 1000 Hz",
@@ -2823,6 +3234,8 @@ export const phrases = {
     "zh-HK": "測量1000 Hz的聲音水平",
     ja: "1000 Hzで音レベルを測定します",
     ko: "1000Hz에서 사운드 레벨을 측정하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationTitleAllHz: {
     "en-US": "Measure Sound Level at All Frequencies",
@@ -2851,6 +3264,8 @@ export const phrases = {
     "zh-HK": "測量所有頻率的聲音",
     ja: "すべての周波数でサウンドレベルを測定します",
     ko: "모든 주파수에서 사운드 레벨을 측정하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_soundCalibrationYes: {
     "en-US": "Yes, continue.",
@@ -2879,6 +3294,8 @@ export const phrases = {
     "zh-HK": "是的，繼續。",
     ja: "はい、続行します。",
     ko: "예, 계속하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_starting: {
     "en-US": "Starting ...",
@@ -2888,7 +3305,7 @@ export const phrases = {
     pt: "Iniciando ...",
     it: "A partire da ...",
     ro: "Începând ...",
-    pl: "Rozpoczęcie ...",
+    pl: "Rozpoczynając ...",
     ru: "Начало ...",
     hy: "Սկսելով ...",
     fi: "Aloita ...",
@@ -2907,6 +3324,8 @@ export const phrases = {
     "zh-HK": "開始...",
     ja: "開始...",
     ko: "시작 ...",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_viewingBlindSpotCredit: {
     "en-US":
@@ -2936,6 +3355,8 @@ export const phrases = {
     "zh-HK": "我們增強了Li等人的盲點映射。 （2020）通過添加閃爍和手動控制。",
     ja: "Li et alのブラインドスポットマッピングを強化しました。 （2020）フリッカーと手動制御を追加することにより。",
     ko: "우리는 Li et al. (2020) 깜박임 및 수동 제어를 추가함으로써.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_viewingBlindSpotRejected: {
     "en-US":
@@ -2967,6 +3388,8 @@ export const phrases = {
       "抱歉，最新的左和右測量值不一致。我們可以再試一次嗎？閉上眼睛。專注於十字頭髮，並從眼角監視閃爍的點。向左和向右滑動點，直到它消失在盲點中，然後擊中返回。在測試雙眼時，保持觀看距離。",
     ja: "申し訳ありませんが、最新の左右の測定値は一貫していませんでした。もう一度やり直してもいいですか？片目を閉じてください。交差毛に焦点を合わせ、目の隅から点滅するドットを監視します。ブラインドスポットに消えてしまうまで、ドットを左右にスライドさせ、リターンを押します。両目をテストするときに、視聴距離を維持します。",
     ko: "죄송합니다. 가장 최근의 왼쪽 및 오른쪽 측정은 일관성이 없었습니다. 다시 시도해도 될까요? 한쪽 눈을 닫으십시오. 십자 머리카락에 초점을 맞추고 눈 구석에서 번쩍이는 점을 모니터링하십시오. 점을 왼쪽과 오른쪽으로 맹목 스팟으로 사라질 때까지 왼쪽과 오른쪽으로 밀어 넣은 다음 리턴을 누르십시오. 양쪽 눈을 테스트 할 때 시청 거리를 유지하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_viewingDistance: {
     "en-US": "Viewing Distance",
@@ -2995,6 +3418,8 @@ export const phrases = {
     "zh-HK": "觀看距離",
     ja: "距離の表示",
     ko: "보기 거리",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_viewingDistanceIntro: {
     "en-US":
@@ -3005,7 +3430,7 @@ export const phrases = {
     pt: "Para produzir som preciso, o experimento precisa calibrar os alto -falantes. Isso requer um iPhone ou iPad conectado à Internet. Você tem um útil?\n",
     it: "Per produrre un suono accurato, l'esperimento deve calibrare gli altoparlanti. Ciò richiede un iPhone o un iPad connesso a Internet. Hai uno a portata di mano?\n",
     ro: "Pentru a produce un sunet precis, experimentul trebuie să calibreze difuzoarele. Acest lucru necesită un iPhone sau un iPad conectat la internet. Ai unul la îndemână?\n",
-    pl: "Aby uzyskać dokładny dźwięk, eksperyment musi skalibrować głośniki. Wymaga to iPhone'a lub iPada, które są połączone z Internetem. Czy masz jeden poręczny?\n",
+    pl: "Aby uzyskać dokładny dźwięk, eksperyment musi skalibrować głośniki. Wymaga to iPhone'a lub iPada, które są połączone z Internetem. Czy masz jeden przydatny?\n",
     ru: "Чтобы получить точный звук, эксперимент должен калибровать громкоговорители. Это требует iPhone или iPad, который подключен к Интернету. У тебя есть одна удобная?\n",
     hy: "Acc շգրիտ ձայն տալու համար փորձը պետք է տրամաչափի բարձրախոսները: Սա պահանջում է iPhone կամ iPad, որը միացված է ինտերնետին: Դուք ունեք մեկ հարմար:\n",
     fi: "Tarkan äänen tuottamiseksi kokeen on kalibroida kaiuttimet. Tämä vaatii Internetiin kytketyn iPhonen tai iPadin. Onko sinulla yksi kätevä?\n",
@@ -3026,6 +3451,8 @@ export const phrases = {
       "為了產生準確的聲音，實驗需要校準揚聲器。這需要連接到Internet的iPhone或iPad。你有方便嗎？\n",
     ja: "正確なサウンドを生成するには、実験ではスピーカーを調整する必要があります。これには、インターネットに接続されているiPhoneまたはiPadが必要です。便利ですか？\n",
     ko: "정확한 사운드를 생성하려면 실험은 라우드 스피커를 교정해야합니다. 인터넷에 연결된 iPhone 또는 iPad가 필요합니다. 편리한 사람이 있습니까?\n",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_viewingDistanceIntroTitle: {
     "en-US": "Explanation",
@@ -3054,6 +3481,8 @@ export const phrases = {
     "zh-HK": "解釋",
     ja: "説明",
     ko: "설명",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_viewingDistanceIntroLiMethod: {
     "en-US":
@@ -3085,6 +3514,8 @@ export const phrases = {
       "解釋。對於此步驟，如有必要，靠近，因此您的寬度不超過屏幕寬度的兩倍。每隻眼睛都有一個盲點。我們會找到您的，以發現您的眼睛離屏幕有多遠。您會被要求閉上或遮住一隻眼睛以隔離另一隻眼睛。當您專注於十字頭髮時，請觀察眼角閃爍的點，並在盲點消失時擊中返回。根據查看距離和屏幕尺寸，閃爍的點通常會在盲點到達屏幕中間之前到達盲點。您將用每隻眼睛交替進行此操作，直到最後兩個測量一致。測試雙眼時，請保持觀看距離。筆記。如果點永遠不會消失，則意味著您的眼睛正在跟隨點，而不是呆在十字頭髮上。該測試需要您在監視眼角的閃爍點時密切關注叉頭髮。一開始很難，但是練習變得更加容易。",
     ja: "説明。このステップでは、必要に応じて近づくと、画面幅の2倍よりも遠くないことになります。すべての目には盲点があります。画面からあなたの目がどれだけ離れているかを発見するためにあなたのものを見つけます。片方の目を閉じたり覆ったりするように求められます。交差毛に焦点を合わせている間、目の隅からちらつきのドットを見て、それがあなたの盲点に消えたときに戻ってきてください。距離と画面のサイズの表示に応じて、通常、画面の中央に到達する前に、ちらつきのドットが盲点に到達します。最後の2つの測定が一貫するまで、それぞれの目でこれを交互に行うことになります。両目をテストするときに、視聴距離を維持してください。ノート。ドットが消えない場合、それはあなたの目が十字毛にとどまるのではなく、ドットに続いていることを意味します。このテストでは、目の隅にあるちらつきのドットを監視しながら、十字毛に目を向ける必要があります。最初は難しいですが、練習すると簡単になります。",
     ko: "설명. 이 단계에서는 필요한 경우 더 가까워 지므로 화면 너비의 두 배 이상이 아닙니다. 모든 눈에는 사각 지대가 있습니다. 우리는 당신의 눈이 화면에서 얼마나 멀리 떨어져 있는지 알게 될 것입니다. 다른 눈을 닫거나 덮으려면 다른 눈을 분리해야합니다. 십자 머리카락에 집중하는 동안 눈 모퉁이에서 깜박 거리는 점을보고, 사각 지대로 사라질 때 귀환하십시오. 볼거리와 화면 크기에 따라 깜박 거리는 점은 일반적으로 화면 중앙에 도달하기 전에 블라인드 스팟에 도달합니다. 마지막 두 측정이 일관되게 될 때까지 번갈아 가며 각 눈 으로이 작업을 수행합니다. 두 눈을 테스트 할 때 시청 거리를 유지하십시오. 메모. 점이 사라지지 않으면, 십자 머리카락에 머무르는 대신 눈이 점을 따르고 있음을 의미합니다. 이 테스트는 눈 구석에 깜박 거리는 점을 모니터링하면서 십자 머리카락을 주시해야합니다. 처음에는 어렵지만 연습으로 더 쉬워집니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_viewingDistanceRedo: {
     "en-US": "Redo last response",
@@ -3113,6 +3544,8 @@ export const phrases = {
     "zh-HK": "重做上一個",
     ja: "最後の回答をやり直す",
     ko: "마지막 응답을 다시하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   RC_viewingDistanceTitle: {
     "en-US": "Measure Viewing Distance",
@@ -3141,6 +3574,8 @@ export const phrases = {
     "zh-HK": "測量觀看距離",
     ja: "表示距離を測定します",
     ko: "시청 거리를 측정하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_beep: {
     "en-US": "Beep",
@@ -3169,6 +3604,8 @@ export const phrases = {
     "zh-HK": "嗶",
     ja: "ピー",
     ko: "삑 하는 소리",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_cancel: {
     "en-US": "Cancel",
@@ -3197,6 +3634,8 @@ export const phrases = {
     "zh-HK": "取消",
     ja: "キャンセル",
     ko: "취소",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_clickingLetter: {
     "en-US": "by clicking it in the displayed list of letters.",
@@ -3225,6 +3664,8 @@ export const phrases = {
     "zh-HK": "通過點擊給出文字中的相應字母。",
     ja: "表示されている文字のリストをクリックすることで",
     ko: "표시된 문자 목록에서 클릭하여.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_clickingLetterRepeatedLetters: {
     "en-US": "by clicking them in the list of letters.",
@@ -3253,6 +3694,8 @@ export const phrases = {
     "zh-HK": "通過在字母列表中單擊它們。",
     ja: "文字のリストでそれらをクリックします。",
     ko: "문자 목록에서 클릭하여.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_clickingWordRsvpReading: {
     "en-US": "by clicking them in a list of words.",
@@ -3281,6 +3724,8 @@ export const phrases = {
     "zh-HK": "通過在單詞列表中單擊它們。",
     ja: "単語のリストでそれらをクリックします。",
     ko: "단어 목록에서 클릭하여.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_continueClickProceed: {
     "en-US": "To continue, click PROCEED.",
@@ -3309,6 +3754,8 @@ export const phrases = {
     "zh-HK": "點擊PROCEED以繼續。",
     ja: "続行するには、[続行]をクリックします。",
     ko: "계속하려면 진행을 클릭하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_continueHitReturn: {
     "en-US": "To continue, hit RETURN.",
@@ -3337,10 +3784,12 @@ export const phrases = {
     "zh-HK": "按回車鍵以繼續。",
     ja: "続行するには、Returnキーを押してください。",
     ko: "계속하려면 반환을 누르십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_continueHitReturnOrClickProceed: {
     "en-US": "To continue, hit RETURN or click PROCEED.",
-    de: "Drücken Sie zum Fortsetzung der Rückgabe oder klicken Sie auf Fahren.",
+    de: "Klicken Sie zum Fortsetzung zurück oder klicken Sie auf Fahren.",
     fr: "Pour continuer, appuyez sur Retour ou cliquez sur Procéder.",
     es: "Para continuar, presione la devolución o haga clic en continuar.",
     pt: "Para continuar, pressione o retorno ou clique em prosseguir.",
@@ -3365,6 +3814,8 @@ export const phrases = {
     "zh-HK": "按回車鍵或者點擊PROCEED以繼續。",
     ja: "続行するには、Returnを押すか、[続行]をクリックします。",
     ko: "계속하려면 반품을 누르거나 진행을 클릭하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_continueNeitherClickNorType: {
     "en-US":
@@ -3394,6 +3845,8 @@ export const phrases = {
     "zh-HK": "無法進行，因為ResponseTypedBool和ResponseClickedBool都是錯誤的。",
     ja: "ResponseTypedBoolとResponseClickedBoolが両方とも虚偽であるため、続行できません。",
     ko: "ResponseTypedBool과 ResponseClickedBool은 모두 거짓이므로 진행할 수 없습니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_counterBlock: {
     "en-US": "Block xx1 of xx2.",
@@ -3417,11 +3870,13 @@ export const phrases = {
     te: "xx2 యొక్క xx1 ని బ్లాక్ చేయండి.",
     kn: "xx2 ನ xx1 ಅನ್ನು ನಿರ್ಬಂಧಿಸಿ.",
     bn: "Xx2 এর xx1 ব্লক করুন।",
-    id: "Blok xx1 dari xx2.",
+    id: "Blokir xx1 dari xx2.",
     "zh-CN": "xx2的xx1块。",
     "zh-HK": "xx2的xx1塊。",
     ja: "xx2のブロックxx1。",
     ko: "xx2의 블록 xx1.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_counterCm: {
     "en-US": " At xxx cm.",
@@ -3450,6 +3905,8 @@ export const phrases = {
     "zh-HK": " xxx 厘米遠。",
     ja: "xxx cmの距離で。",
     ko: " xxx cm에서.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_counterReadingPageBlock: {
     "en-US": "Page xx1 of xx2. Block xx3 of xx4.",
@@ -3478,6 +3935,8 @@ export const phrases = {
     "zh-HK": "xx2的第xx1頁。 xx4的xx3塊。",
     ja: "xx2のページxx1。 xx4のブロックxx3。",
     ko: "xx2의 xx1 페이지. xx4의 블록 xx3.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_counterTrialBlock: {
     "en-US": "Trial xx1 of xx2. Block xx3 of xx4.",
@@ -3506,17 +3965,19 @@ export const phrases = {
     "zh-HK": "試驗xx1，共xx2次試驗。區組xx3，共xx4個區組。",
     ja: "xx2のテストxx1。 xx4のブロックxx3。",
     ko: "xx2의 시험 xx1. xx4의 블록 xx3.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_escapeToQuit: {
     "en-US": "(Quit anytime by pressing ESCAPE.)",
     de: "(Beenden Sie jederzeit mit ESCAPE.)",
     fr: "(Arrêtez à tout moment en appuyant sur Escape.)",
     es: "(Deja en cualquier momento presionando Escape).",
-    pt: "(Saia a qualquer momento pressionando Escape.)",
+    pt: "(Saia a qualquer momento pressionando a fuga.)",
     it: "(Smettila in qualsiasi momento premendo la fuga.)",
     ro: "(Renunță oricând apăsând Escape.)",
-    pl: "(Odejdź w dowolnym momencie, naciskając ucieczkę.)",
-    ru: "(Встань в любое время, нажимая на побег.)",
+    pl: "(Rzuć w dowolnym momencie, naciskając Escape.)",
+    ru: "(Выйти в любое время, нажимая побег.)",
     hy: "(Հանգստացեք ցանկացած պահի `սեղմելով փախուստը):",
     fi: "(Lopeta milloin tahansa painamalla Escape.)",
     ka: "(დატოვეთ ნებისმიერ დროს გაქცევის დაჭერით.)",
@@ -3534,6 +3995,8 @@ export const phrases = {
     "zh-HK": "（在任何時候按Esc鍵以退出。）",
     ja: "（エスケープを押すことでいつでも辞めます。）",
     ko: "(탈출을 눌러 언제든지 종료하십시오.)",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_generatingMovie: {
     "en-US": "Making movie.",
@@ -3562,21 +4025,23 @@ export const phrases = {
     "zh-HK": "製作電影。",
     ja: "映画を作る。",
     ko: "영화 제작.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_guessingGame: {
     "en-US":
       "The letter size and spacing vary from big and easy down to tiny and hard or impossible. You can't get much more than two-thirds right, so relax. Think of it as a guessing game, and just get as many as you can. You'll hear a beep whenever you're right.",
     de: "Die Buchstabengröße und der Buchstaben variieren von groß und einfach bis zu winzig und hart oder unmöglich. Sie können nicht viel mehr als zwei Drittel richtig bekommen, also entspannen Sie sich. Betrachten Sie es als ein Ratenspiel und holen Sie sich so viele wie möglich. Sie werden einen Piepton hören, wenn Sie Recht haben.",
-    fr: "La taille de la lettre et l'espacement varient de grand et facile à minuscule et difficile ou impossible. Vous ne pouvez pas obtenir beaucoup plus des deux tiers à droite, alors détendez-vous. Considérez-le comme un jeu de supposition et obtenez-en autant que vous le pouvez. Vous entendrez un bip quand vous avez raison.",
+    fr: "La taille de la lettre et l'espacement varient de gros et facile à minuscule et difficile ou impossible. Vous ne pouvez pas obtenir beaucoup plus des deux tiers à droite, alors détendez-vous. Considérez-le comme un jeu de supposition et obtenez-en autant que vous le pouvez. Vous entendrez un bip quand vous avez raison.",
     es: "El tamaño y el espacio de la letra varían de grande y fácil hasta pequeño y duro o imposible. No puedes tener mucho más de dos tercios, así que relájate. Piense en ello como un juego de adivinanzas, y simplemente obtenga tantos como pueda. Escucharás un pitido siempre que tengas razón.",
-    pt: "O tamanho da letra e o espaçamento variam de grande e fácil para baixo a minúsculo, duro ou impossível. Você não pode acertar muito mais do que dois terços, então relaxe. Pense nisso como um jogo de adivinhação e pegue o máximo que puder. Você ouvirá um sinal sonoro sempre que estiver certo.",
+    pt: "O tamanho da letra e o espaçamento variam de grande e fácil para baixo a minúsculo, duro ou impossível. Você não pode acertar muito mais do que dois terços, então relaxe. Pense nisso como um jogo de adivinhação e obtenha o máximo possível. Você ouvirá um sinal sonoro sempre que estiver certo.",
     it: "Le dimensioni e lo spazio della lettera variano grandi e facili fino a quando non sono piccoli e difficili o impossibili. Non puoi avere molto più di due terzi, quindi rilassati. Pensaci come un gioco di indovinello e ottieni semplicemente il maggior numero possibile. Sentirai un segnale acustico ogni volta che hai ragione.",
     ro: "Mărimea și spațiul literei variază mari și ușoare până la mici și dure sau imposibile. Nu poți avea mult mai mult de două treimi, așa că relaxează -te. Gândiți -vă la asta ca la un joc de ghicitoare și pur și simplu obțineți cât pot. Vei auzi un bip ori de câte ori ai dreptate.",
     pl: "Czasami litera będzie łatwa do zidentyfikowania. Czasami będzie to prawie niemożliwe. Nie odpowiesz poprawnie na więcej niż połowę prób, więc zrelaksuj się. Pomyśl o tym jak o grze do zgadywania i po prostu odpowiedz poprawnie na tyle ile możesz. (Przerwij w dowolnym momencie, naciskając Escape.)\n ",
     ru: "Размер букв и расстояние между буквами изменяется между большими и легкими до крошечного и тяжелого или невозможного. Вы не можете получить гораздо более двух третей, так что расслабьтесь. Подумайте об этом как об угадывании и просто получите столько, сколько сможете. Вы услышите звуковой сигнал, когда вы правы.",
     hy: "Նամակների չափը եւ տառերի միջեւ եղած հեռավորությունը տատանվում է մեծ եւ թոքերի միջեւ դեպի մանր եւ ծանր կամ անհնար: Դուք չեք կարող շատ ավելին ստանալ, քան երկուսը, այնպես էլ հանգստացեք: Մտածեք դրա մասին, որպես կռահում եւ պարզապես հնարավորինս ստացեք: Դուք կլսեք ձայնային ազդանշան, երբ ճիշտ եք:",
     fi: "Kirjeen koko ja etäisyys vaihtelevat suuresta ja helposta alas pieneen ja kovaan tai mahdottomaan. Et voi saada paljon enemmän kuin kaksi kolmasosaa oikein, joten rentoudu. Ajattele sitä arvauspelinä ja saat vain niin monta kuin pystyt. Kuulet piippauksen aina kun olet oikeassa.",
-    ka: "ასოების ზომა და ინტერვალი განსხვავდება დიდი და მარტივად, პატარა და მძიმე და შეუძლებელი. თქვენ ვერ მიიღებთ ბევრად მეტს ორ მესამედზე, ასე რომ დაისვენეთ. იფიქრეთ მასზე, როგორც გამოცნობის თამაში და უბრალოდ მიიღეთ რაც შეიძლება მეტი. თქვენ მოისმენთ beep, როდესაც მართალი ხართ.",
+    ka: "ასოების ზომა და ინტერვალი განსხვავდება დიდი და მარტივი და რთული და რთული ან შეუძლებელი. თქვენ ვერ მიიღებთ ბევრად მეტს ორ მესამედზე, ასე რომ დაისვენეთ. იფიქრეთ, როგორც გამოცნობის თამაში, და უბრალოდ მიიღეთ რაც შეიძლება მეტი. თქვენ მოისმენთ beep, როდესაც მართალი ხართ.",
     he: "גודל המכתב והמרווח משתנים מגדול וקל למטה לזעיר וקשה או בלתי אפשרי. אתה לא יכול להשיג הרבה יותר משני שלישים נכון, אז תירגע. חשוב על זה כמשחק ניחוש, ופשוט קבל כמה שיותר. תשמע צפצוף בכל פעם שאתה צודק.",
     ar: "يختلف حجم الحرف وتباعده من كبير وسهلين إلى صغير وصعب أو مستحيل. لا يمكنك الحصول على أكثر من ثلثي بشكل صحيح ، لذا استرخ. فكر في الأمر على أنه لعبة تخمين ، واحصل على أكبر عدد ممكن من الأشياء. ستسمع صوتًا كلما كنت على حق.",
     ur: "خط کا سائز اور خالی جگہ بڑے اور آسان سے چھوٹے اور سخت یا ناممکن سے مختلف ہے۔ آپ کو دو تہائی سے زیادہ نہیں مل سکتے ہیں ، لہذا آرام کریں۔ اس کو تخمینہ کھیل کے طور پر سوچیں ، اور زیادہ سے زیادہ حاصل کریں۔ جب بھی آپ ٹھیک کہتے ہیں ، آپ کو بیپ سنی جائے گی۔",
@@ -3593,6 +4058,8 @@ export const phrases = {
       "字母的大小和間隔是多種多樣的，從大而簡單到小而困難或不可能。您的正確率不會比三分之二高太多，所以請不要擔心。請把這個實驗看作一個猜謎遊戲，盡您所能即可。當您提供了正確答案時，您將聽到“嗶”的提示音。",
     ja: "文字の識別が容易な時も、不可能な時もあります。半分以上も識別することはできないでしょう。ですから、リラックスしてください。推測ゲームのような感覚で、できる限り多く正解してください。（ESCAPEキーでいつでも中止できます。）",
     ko: "문자 크기와 간격은 크고 쉽게 다르고 작고 단단하거나 불가능합니다. 3 분의 2 이상을 얻을 수 없으므로 긴장을 풀어주십시오. 그것을 추측 게임으로 생각하고 가능한 한 많은 것을 얻으십시오. 당신이 옳을 때마다 경고음이 들립니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyClickIt: {
     "en-US": "Please identify the middle letter by clicking it below.",
@@ -3621,6 +4088,8 @@ export const phrases = {
     "zh-HK": "請點擊下方的字母來報告您認出的中間字母。",
     ja: "下をクリックして、認識した真ん中の文字を報告してください。",
     ko: "아래를 클릭하여 중간 편지를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyClickItRepeatedLetters: {
     "en-US": "Please identify the two middle letters by clicking them below.",
@@ -3647,8 +4116,10 @@ export const phrases = {
     id: "Harap identifikasi dua huruf tengah dengan mengkliknya di bawah ini.",
     "zh-CN": "请单击下面的两个中间字母。",
     "zh-HK": "請單擊下面的兩個中間字母。",
-    ja: "以下をクリックして、2つの中央の文字を特定してください。",
+    ja: "以下をクリックして、2つの中間文字を特定してください。",
     ko: "아래를 클릭하여 두 개의 중간 문자를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyClickItSentence: {
     "en-US":
@@ -3678,6 +4149,8 @@ export const phrases = {
     "zh-HK": "顯示所有可能的句子。單擊您聽到的或最好的猜測。",
     ja: "考えられるすべての文が表示されます。聞いたものまたは最善の推測をクリックしてください。",
     ko: "가능한 모든 문장이 표시됩니다. 듣거나 가장 좋은 추측을 클릭하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyMiddleLetterClickIt: {
     "en-US": "Please identify the middle letter by clicking it below.",
@@ -3685,7 +4158,7 @@ export const phrases = {
     fr: "Veuillez identifier la lettre du milieu en cliquant dessus ci-dessous.",
     es: "Identifique la letra central haciendo clic a continuación.",
     pt: "Identifique a carta do meio clicando nela abaixo.",
-    it: "Si prega di identificare la lettera centrale facendo clic di seguito.",
+    it: "Identifica la lettera centrale facendo clic di seguito.",
     ro: "Vă rugăm să identificați scrisoarea de mijloc făcând clic mai jos.",
     pl: "Zidentyfikuj środkową literę, klikając ją poniżej.",
     ru: "Пожалуйста, определите среднюю букву, нажав на нее ниже.",
@@ -3706,6 +4179,8 @@ export const phrases = {
     "zh-HK": "請通過在下面單擊它來確定中間字母。",
     ja: "下をクリックして、中央の文字を特定してください。",
     ko: "아래를 클릭하여 중간 편지를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyMiddleLetterPressIt: {
     "en-US": "Please identify the middle letter by pressing its keyboard key.",
@@ -3734,6 +4209,8 @@ export const phrases = {
     "zh-HK": "請按鍵盤鍵來確定中間字母。",
     ja: "キーボードキーを押して、中央の文字を特定してください。",
     ko: "키보드 키를 눌러 중간 문자를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyMiddleLetterPressItOrClickIt: {
     "en-US":
@@ -3762,7 +4239,9 @@ export const phrases = {
     "zh-CN": "请通过在下面单击它或在键盘中按下中间字母。",
     "zh-HK": "請通過在下面單擊它或在鍵盤中按下中間字母。",
     ja: "下の文字を下にクリックするか、キーボードに押して、中央の文字を識別してください。",
-    ko: "아래를 클릭하거나 키보드에 누르면 중간 편지를 식별하십시오.",
+    ko: "아래를 클릭하거나 키보드에 누르면 중간 문자를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyLetterClickIt: {
     "en-US": "Please identify the letter by clicking it below.",
@@ -3773,7 +4252,7 @@ export const phrases = {
     it: "Si prega di identificare la lettera facendo clic di seguito.",
     ro: "Vă rugăm să identificați scrisoarea făcând clic mai jos.",
     pl: "Zidentyfikuj list, klikając go poniżej.",
-    ru: "Пожалуйста, определите букву, нажав ее ниже.",
+    ru: "Пожалуйста, определите письмо, нажав на нее ниже.",
     hy: "Խնդրում ենք նույնականացնել նամակը `կտտացնելով ներքեւում:",
     fi: "Tunnista kirjain napsauttamalla sitä alla.",
     ka: "გთხოვთ, დაასახელოთ წერილი ქვემოთ, დააჭირეთ მას ქვემოთ.",
@@ -3791,13 +4270,15 @@ export const phrases = {
     "zh-HK": "請通過在下面單擊它來確定該信。",
     ja: "以下をクリックして、文字を特定してください。",
     ko: "아래를 클릭하여 편지를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyLetterPressIt: {
     "en-US": "Please identify the letter by pressing its keyboard key.",
     de: "Bitte identifizieren Sie den Brief, indem Sie die Tastaturtaste drücken.",
     fr: "Veuillez identifier la lettre en appuyant sur sa touche de clavier.",
     es: "Identifique la carta presionando su tecla de teclado.",
-    pt: "Identifique a carta pressionando sua tecla do teclado.",
+    pt: "Identifique a carta pressionando sua tecla de teclado.",
     it: "Si prega di identificare la lettera premendo il tasto tastiera.",
     ro: "Vă rugăm să identificați scrisoarea apăsând tasta tastatură.",
     pl: "Zidentyfikuj list, naciskając klawisz klawiatury.",
@@ -3819,6 +4300,8 @@ export const phrases = {
     "zh-HK": "請按鍵盤鍵來確定該信。",
     ja: "キーボードキーを押して手紙を特定してください。",
     ko: "키보드 키를 눌러 편지를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyLetterPressItOrClickIt: {
     "en-US":
@@ -3827,10 +4310,10 @@ export const phrases = {
     fr: "Veuillez identifier la lettre en cliquant dessus ci-dessous ou en appuyant sur lui dans le clavier.",
     es: "Identifique la letra haciendo clic a continuación o presionándola en el teclado.",
     pt: "Identifique a carta clicando abaixo ou pressionando -a no teclado.",
-    it: "Identifica la lettera facendo clic di seguito o premendola nella tastiera.",
+    it: "Si prega di identificare la lettera facendo clic di seguito o premendola nella tastiera.",
     ro: "Vă rugăm să identificați scrisoarea făcând clic mai jos sau apăsându -l pe tastatură.",
-    pl: "Zidentyfikuj list, klikając ją poniżej lub naciskając na klawiaturę.",
-    ru: "Пожалуйста, определите букву, нажав ее ниже или нажав ее на клавиатуре.",
+    pl: "Zidentyfikuj list, klikając go poniżej lub naciskając na klawiaturę.",
+    ru: "Пожалуйста, определите букву, нажав на нее ниже или нажав ее на клавиатуре.",
     hy: "Խնդրում ենք նույնականացնել նամակը `կտտացնելով այն ստորեւ կամ սեղմելով ստեղնաշարի մեջ:",
     fi: "Tunnista kirjain napsauttamalla sitä alla tai painamalla sitä näppäimistössä.",
     ka: "გთხოვთ, დაასახელოთ წერილი ქვემოთ, დააჭირეთ მას ქვემოთ ან დააჭირეთ მას კლავიატურაზე.",
@@ -3843,11 +4326,13 @@ export const phrases = {
     te: "దయచేసి అక్షరాన్ని క్రింద క్లిక్ చేయడం ద్వారా లేదా కీబోర్డ్‌లో నొక్కడం ద్వారా గుర్తించండి.",
     kn: "ಅಕ್ಷರವನ್ನು ಕೆಳಗೆ ಕ್ಲಿಕ್ ಮಾಡುವುದರ ಮೂಲಕ ಅಥವಾ ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿ ಒತ್ತುವ ಮೂಲಕ ದಯವಿಟ್ಟು ಗುರುತಿಸಿ.",
     bn: "নীচে ক্লিক করে বা কীবোর্ডে টিপে চিঠিটি সনাক্ত করুন।",
-    id: "Harap identifikasi surat itu dengan mengkliknya di bawah ini atau menekannya di keyboard.",
+    id: "Harap identifikasi surat itu dengan mengkliknya di bawah atau menekannya di keyboard.",
     "zh-CN": "请通过在下面单击它或在键盘中按下字母。",
     "zh-HK": "請通過在下面單擊它或在鍵盤中按下字母。",
     ja: "下をクリックするか、キーボードに押して文字を識別してください。",
     ko: "아래를 클릭하거나 키보드에 누르면 문자를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyClickItRsvpReading: {
     "en-US":
@@ -3864,19 +4349,21 @@ export const phrases = {
     fi: "",
     ka: "",
     he: "",
-    ar: "يرجى تحديد الكلمات التي تم عرضها من خلال النقر على كلمة واحدة من كل عمود أدناه.",
+    ar: "يرجى تحديد الكلمات التي تم عرضها بالنقر فوق كلمة واحدة من كل عمود أدناه.",
     ur: "براہ کرم ان الفاظ کی نشاندہی کریں جو ذیل میں ہر کالم سے ایک لفظ پر کلک کرکے دکھائے گئے تھے۔",
     hi: "कृपया उन शब्दों को पहचानें जो नीचे प्रत्येक कॉलम से एक शब्द पर क्लिक करके दिखाए गए थे।",
     ta: "கீழே உள்ள ஒவ்வொரு நெடுவரிசையிலிருந்தும் ஒரு வார்த்தையை கிளிக் செய்வதன் மூலம் காட்டப்பட்ட சொற்களை அடையாளம் காணவும்.",
     ml: "ചുവടെയുള്ള ഓരോ നിരയിൽ നിന്നും ഒരു വാക്ക് ക്ലിക്കുചെയ്ത് കാണിച്ച വാക്കുകൾ ദയവായി തിരിച്ചറിയുക.",
     te: "దయచేసి దిగువ ప్రతి కాలమ్ నుండి ఒక పదాన్ని క్లిక్ చేయడం ద్వారా చూపిన పదాలను గుర్తించండి.",
     kn: "ಕೆಳಗಿನ ಪ್ರತಿಯೊಂದು ಕಾಲಮ್‌ನಿಂದ ಒಂದು ಪದವನ್ನು ಕ್ಲಿಕ್ ಮಾಡುವುದರ ಮೂಲಕ ತೋರಿಸಿರುವ ಪದಗಳನ್ನು ದಯವಿಟ್ಟು ಗುರುತಿಸಿ.",
-    bn: "দয়া করে নীচের প্রতিটি কলাম থেকে একটি শব্দ ক্লিক করে প্রদর্শিত শব্দগুলি সনাক্ত করুন।",
+    bn: "নীচের প্রতিটি কলাম থেকে একটি শব্দ ক্লিক করে প্রদর্শিত শব্দগুলি সনাক্ত করুন।",
     id: "Harap identifikasi kata -kata yang ditunjukkan dengan mengklik satu kata dari setiap kolom di bawah ini.",
     "zh-CN": "请通过单击下面的每一列单击一个单词来识别显示的单词。",
     "zh-HK": "請通過單擊下面的每一列單擊一個單詞來識別顯示的單詞。",
     ja: "以下の各列から1つの単語をクリックして表示された単語を特定してください。",
     ko: "아래 각 열에서 한 단어를 클릭하여 표시된 단어를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyPressIt: {
     "en-US": "Please identify the middle letter by pressing its keyboard key.",
@@ -3905,6 +4392,8 @@ export const phrases = {
     "zh-HK": "請按下鍵盤上的對應按鍵來報告您認出的中間字母。",
     ja: "キーボードで対応するキーを押して、認識した真ん中の文字を報告してください。",
     ko: "키보드 키를 눌러 중간 문자를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyPressItRsvpReading: {
     "en-US":
@@ -3934,6 +4423,8 @@ export const phrases = {
     "zh-HK": "確定大聲說出來時顯示的單詞。",
     ja: "大声で話すときに示された単語を特定します。",
     ko: "큰 소리로 말할 때 표시된 단어를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyPressItOrClickIt: {
     "en-US":
@@ -3962,7 +4453,9 @@ export const phrases = {
     "zh-CN": "请按下键盘上的对应按键或者点击下方的字母来报告您认出的中间字母。",
     "zh-HK": "請按下鍵盤上的對應按鍵或者點擊下方的字母來報告您認出的中間字母。",
     ja: "キーボードで対応するキーを押すか、下をクリックして、認識した真ん中の文字を報告してください。",
-    ko: "아래를 클릭하거나 키보드에 누르면 중간 편지를 식별하십시오.",
+    ko: "아래를 클릭하거나 키보드에 누르면 중간 문자를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyPressItOrClickItRepeatedLetters: {
     "en-US":
@@ -3992,6 +4485,8 @@ export const phrases = {
     "zh-HK": "通過單擊或在鍵盤上按下兩個中間字母。",
     ja: "キーボードでそれらをクリックまたは押すことにより、2つの中間文字を識別します。",
     ko: "키보드에서 클릭하거나 눌러 두 개의 중간 문자를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_identifyPressItRepeatedLetters: {
     "en-US":
@@ -4021,6 +4516,8 @@ export const phrases = {
     "zh-HK": "識別兩個中間字母，將它們按在鍵盤上。",
     ja: "2つの中間文字を識別し、キーボードに押し付けます。",
     ko: "두 개의 중간 문자를 식별하여 키보드에 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_keypadContinueExperiment: {
     "en-US": "Continue the experiment as instructed.",
@@ -4049,6 +4546,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_keypadReadyForResponse: {
     "en-US": "Respond now.",
@@ -4077,6 +4576,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_keypadConnectedAndKeepReady: {
     "en-US":
@@ -4106,6 +4607,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_keypadScanQRCode: {
     "en-US":
@@ -4135,6 +4638,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_keypadScanQRCodeSubtitle: {
     "en-US":
@@ -4164,6 +4669,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_letterPopularDemandFeatures: {
     "en-US": "  ",
@@ -4192,6 +4699,8 @@ export const phrases = {
     "zh-HK": "  ",
     ja: "  ",
     ko: "  ",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_loadingSounds: {
     "en-US": "Loading sounds ...",
@@ -4222,6 +4731,8 @@ export const phrases = {
       "我們會定期暫停讓您休息，以防您過於疲勞。休息時間會出現在區組之間和區組之中。",
     ja: "こんにちは。ピーボタンをクリックしてこのコンピュータの音が機能していることを確認してください。ちなみに、テストでは正解する度にこの音が鳴ります。",
     ko: "소리로드 ...",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_middleLetterBrief: {
     "en-US":
@@ -4253,6 +4764,8 @@ export const phrases = {
       "這是一個 R。因為字母一直顯示在屏幕上，所以您只需移動一下視線就能輕鬆認出它。在接下來的試驗中，字母都將一閃而過，所以您不會有時間來調整您的視線。",
     ja: "これはRです。この画面は動いていないため、目を文字の位置に動かして確認するのは容易でしょう。本番のテストでは、文字は一瞬しか映されないので、目を動かす時間はないでしょう。",
     ko: "이 디스플레이는 정적이므로 눈을 편지로 이동하여 식별하기가 쉽습니다. 그러나 실제 시험에서는 편지가 번쩍이므로 눈을 움직일 시간이 없습니다. 시험을 시작할 때 십자 머리카락을 보는 것이 중요합니다. 편지는 즉시 플래시됩니다. 플래시 후 눈이 어디로 가는지는 중요하지 않습니다. 테스트의 첫 번째 블록은 우리가 본격적으로 시작하기 전에 몇 가지 실무 시험입니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_middleLetterDemo: {
     "en-US":
@@ -4274,7 +4787,7 @@ export const phrases = {
     hi: "प्रत्येक परीक्षण पर, जब आप क्रॉस हेयर को देखते हैं, तो तीन यादृच्छिक अक्षरों का एक ट्रिपल आपकी आंख के कोने में चमक जाएगा। बस एक झलक। कार्य को जानने के लिए, इसे पहले एक स्थिर प्रदर्शन के साथ आज़माएं। अपनी आँखों को हिलाने के बिना, नीचे, नीचे के बालों को देखते हुए, मध्य पत्र की पहचान करने का प्रयास करें।",
     ta: "ஒவ்வொரு சோதனையிலும், நீங்கள் குறுக்கு முடிகளைப் பார்க்கும்போது, ​​மூன்று சீரற்ற எழுத்துக்களின் மும்மடங்கு உங்கள் கண்ணின் மூலையில் ஒளிரும். ஒரு ஃபிளாஷ். பணியைக் கற்றுக்கொள்ள, நிலையான காட்சியுடன் முதலில் முயற்சிப்போம். குறுக்கு முடிகளைப் பார்க்கும்போது, ​​கீழே, கண்களை நகர்த்தாமல், நடுத்தர கடிதத்தை அடையாளம் காண முயற்சிக்கவும்.",
     ml: "ഓരോ വിചാരണയിലും, നിങ്ങൾ ക്രോസ് ഹെയർ നോക്കുമ്പോൾ, ക്രമരഹിതമായ മൂന്ന് അക്ഷരങ്ങളുടെ ഒരു മൂന്നിരട്ടി നിങ്ങളുടെ കണ്ണിന്റെ മൂലയിൽ മിന്നുമാകും. ഒരു ഫ്ലാഷ് മാത്രം. ടാസ്ക് പഠിക്കാൻ, ഒരു സ്റ്റാറ്റിക് ഡിസ്പ്ലേ ഉപയോഗിച്ച് ആദ്യം ഇത് പരീക്ഷിക്കാം. നിങ്ങളുടെ കണ്ണുകൾ നീക്കാതെ, ചുവടെയുള്ള രോമങ്ങൾ നോക്കുമ്പോൾ, മധ്യ അക്ഷരം തിരിച്ചറിയാൻ ശ്രമിക്കുക.",
-    te: "ప్రతి ట్రయల్‌లో, మీరు క్రాస్ హెయిర్స్ వైపు చూస్తున్నప్పుడు, మూడు యాదృచ్ఛిక అక్షరాల యొక్క మూడు రెట్లు మీ కంటి మూలలో మెరుస్తుంది. కేవలం ఒక ఫ్లాష్. పనిని తెలుసుకోవడానికి, మొదట స్టాటిక్ డిస్ప్లేతో దీన్ని ప్రయత్నిద్దాం. కళ్ళు కదిలించకుండా, క్రింద, క్రింద ఉన్న క్రాస్ హెయిర్స్ వైపు చూస్తున్నప్పుడు, మధ్య అక్షరాన్ని గుర్తించడానికి ప్రయత్నించండి.",
+    te: "ప్రతి ట్రయల్‌లో, మీరు క్రాస్ హెయిర్స్ వైపు చూస్తున్నప్పుడు, మూడు యాదృచ్ఛిక అక్షరాల త్రిపాది మీ కంటి మూలలో మెరుస్తుంది. కేవలం ఒక ఫ్లాష్. పనిని తెలుసుకోవడానికి, మొదట స్టాటిక్ డిస్ప్లేతో దీన్ని ప్రయత్నిద్దాం. కళ్ళు కదిలించకుండా, క్రింద, క్రింద ఉన్న క్రాస్ హెయిర్స్ వైపు చూస్తున్నప్పుడు, మధ్య అక్షరాన్ని గుర్తించడానికి ప్రయత్నించండి.",
     kn: "ಪ್ರತಿ ಪ್ರಯೋಗದಲ್ಲೂ, ನೀವು ಅಡ್ಡ ಕೂದಲನ್ನು ನೋಡುವಾಗ, ನಿಮ್ಮ ಕಣ್ಣಿನ ಮೂಲೆಯಲ್ಲಿ ಮೂರು ಯಾದೃಚ್ leters ಿಕ ಅಕ್ಷರಗಳ ತ್ರಿವಳಿಗಳು ಮಿಂಚುತ್ತವೆ. ಕೇವಲ ಒಂದು ಫ್ಲ್ಯಾಷ್. ಕಾರ್ಯವನ್ನು ಕಲಿಯಲು, ಸ್ಥಿರ ಪ್ರದರ್ಶನದೊಂದಿಗೆ ಮೊದಲು ಇದನ್ನು ಪ್ರಯತ್ನಿಸೋಣ. ಅಡ್ಡ ಕೂದಲನ್ನು ನೋಡುವಾಗ, ಕೆಳಗೆ, ನಿಮ್ಮ ಕಣ್ಣುಗಳನ್ನು ಚಲಿಸದೆ, ಮಧ್ಯದ ಅಕ್ಷರವನ್ನು ಗುರುತಿಸಲು ಪ್ರಯತ್ನಿಸಿ.",
     bn: "প্রতিটি পরীক্ষায়, আপনি ক্রস চুলের দিকে তাকানোর সময়, তিনটি এলোমেলো অক্ষরের একটি ট্রিপলেট আপনার চোখের কোণে ফ্ল্যাশ হয়ে যাবে। শুধু একটা ঝলকানি. টাস্কটি শিখতে, আসুন প্রথমে এটি একটি স্থির প্রদর্শন দিয়ে চেষ্টা করি। আপনার চোখ না সরিয়ে নীচে ক্রস চুলের দিকে তাকানোর সময়, মাঝের অক্ষরটি সনাক্ত করার চেষ্টা করুন।",
     id: "Pada setiap percobaan, saat Anda melihat rambut silang, kembar tiga dari tiga huruf acak akan berkedip di sudut mata Anda. Hanya sekejap. Untuk mempelajari tugas ini, mari kita coba terlebih dahulu dengan tampilan statis. Saat melihat rambut salib, di bawah, tanpa menggerakkan mata Anda, cobalah untuk mengidentifikasi huruf tengah.",
@@ -4284,6 +4797,8 @@ export const phrases = {
       "每次試驗中，在您注視十字準線的某個時刻，三個隨機字母將短暫地出現在您的視野邊緣。讓我們來試一試。請注視十字準線，保持視線不動並試著認出中間的字母。",
     ja: "各テストでは、あなたが十字線を見ている間に3つのランダムな文字があなたの目の端に短く表示されます。この場で試してみましょう。\n目を動かさずに十字線を見なが、真ん中の文字を識別してみてください。",
     ko: "각 시험에서 십자형 머리카락을 보면서 3 개의 임의의 문자가 눈의 모퉁이에서 번쩍입니다. 단지 플래시. 작업을 배우려면 먼저 정적 디스플레이를 사용하여 시도해 봅시다. 눈을 움직이지 않고 아래의 십자 머리카락을 보면서 중간 문자를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_letterBrief: {
     "en-US":
@@ -4315,6 +4830,8 @@ export const phrases = {
       "這是一個R。這個顯示器是靜態的，因此將您的眼睛移到字母上並識別它很容易。但是，在一個真正的審判中，這封信閃爍了，所以沒有時間動眼睛。當您啟動試驗時，看一下十字頭髮很重要。這封信將立即閃爍。在閃光之後，您的眼睛走到哪裡都沒關係。在認真開始之前，第一個測試只是進行幾次實踐試驗。",
     ja: "RはRです。このディスプレイは静的なので、目を文字に移動して識別するのは簡単です。しかし、実際の裁判では、手紙が点滅するので、目を動かす時間はありません。試練を開始するときに、十字毛を見ることが重要です。手紙はすぐに点滅します。フラッシュの後に目がどこに行くかは関係ありません。テストの最初のブロックは、本格的に始める前のほんの数回の実践試験です。",
     ko: "이 디스플레이는 정적이므로 눈을 편지로 이동하여 식별하기가 쉽습니다. 그러나 실제 시험에서는 편지가 번쩍이므로 눈을 움직일 시간이 없습니다. 시험을 시작할 때 십자 머리카락을 보는 것이 중요합니다. 편지가 즉시 플래시됩니다. 플래시 후 눈이 어디로 가는지는 중요하지 않습니다. 테스트의 첫 번째 블록은 우리가 본격적으로 시작하기 전에 몇 가지 실무 시험입니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_letterDemo: {
     "en-US":
@@ -4346,6 +4863,8 @@ export const phrases = {
       "在每個試驗中，隨機字母將在您的眼角閃爍。只是一個閃光。要學習任務，讓我們先嘗試使用靜態顯示器。在看下面的十字頭髮時，沒有動眼睛，請嘗試識別這封信。",
     ja: "各トライアルでは、ランダムな文字が目の隅に点滅します。ちょっとしたフラッシュ。タスクを学ぶには、静的ディスプレイで最初に試してみましょう。下の毛を見ながら、目を動かすことなく、手紙を特定してみてください。",
     ko: "각 시험에서, 임의의 편지는 당신의 눈의 모퉁이에서 번쩍입니다. 단지 플래시. 작업을 배우려면 먼저 정적 디스플레이를 사용하여 시도해 봅시다. 눈을 움직이지 않고 아래의 십자 머리카락을 보면서 편지를 식별하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_ok: {
     "en-US": "OK",
@@ -4374,6 +4893,8 @@ export const phrases = {
     "zh-HK": "確認",
     ja: "確認",
     ko: "좋아요",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_participant: {
     "en-US": "Participant",
@@ -4402,6 +4923,8 @@ export const phrases = {
     "zh-HK": "被試",
     ja: "参加者",
     ko: "참가자",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_pressingKey: {
     "en-US": "by pressing it in the keyboard.",
@@ -4429,7 +4952,9 @@ export const phrases = {
     "zh-CN": "通过按下键盘上的对应按键",
     "zh-HK": "通過按下鍵盤上的對應按鍵",
     ja: "キーボードで対応するキーを押すことで",
-    ko: "키보드에 눌러서.",
+    ko: "키보드에 눌러.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_pressingKeyOrClickingLetter: {
     "en-US":
@@ -4459,6 +4984,8 @@ export const phrases = {
     "zh-HK": "通過按下鍵盤上的對應按鍵或者點擊給出文字中的相應字母。",
     ja: "キーボードで対応するキーを押すか、表示されている文字のリストをクリックすることで",
     ko: "표시된 문자 목록에서 클릭하거나 키보드에 누르면됩니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_pressingKeyOrClickingLetterRepeatedLetters: {
     "en-US":
@@ -4486,8 +5013,10 @@ export const phrases = {
     id: "Dengan mengkliknya pada daftar huruf yang ditampilkan, atau menekannya pada keyboard.",
     "zh-CN": "通过在显示的字母列表中单击它们，或在键盘上按下它们。",
     "zh-HK": "通過在顯示的字母列表中單擊它們，或在鍵盤上按下它們。",
-    ja: "表示されている文字のリストでクリックするか、キーボードで押します。",
+    ja: "表示された文字のリストでそれらをクリックするか、キーボードで押します。",
     ko: "표시된 문자 목록에서 클릭하거나 키보드에 누르면됩니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_pressingKeyRepeatedLetters: {
     "en-US": "by pressing them on the keyboard.",
@@ -4511,11 +5040,13 @@ export const phrases = {
     te: "కీబోర్డ్‌లో వాటిని నొక్కడం ద్వారా.",
     kn: "ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿ ಅವುಗಳನ್ನು ಒತ್ತುವ ಮೂಲಕ.",
     bn: "তাদের কীবোর্ডে টিপে।",
-    id: "Dengan menekannya di keyboard.",
+    id: "dengan menekannya di keyboard.",
     "zh-CN": "通过在键盘上按下它们。",
     "zh-HK": "通過在鍵盤上按下它們。",
     ja: "キーボードでそれらを押すことにより。",
     ko: "키보드에 눌러서.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_pressingKeyRsvpReading: {
     "en-US": "by saying the words aloud.",
@@ -4544,6 +5075,8 @@ export const phrases = {
     "zh-HK": "大聲說出這些字。",
     ja: "言葉を声に出して言うことによって。",
     ko: "말을 큰 소리로 말함으로써.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_PROCEED: {
     "en-US": "PROCEED",
@@ -4572,6 +5105,8 @@ export const phrases = {
     "zh-HK": "繼續",
     ja: "続行",
     ko: "진행하다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_proceed: {
     "en-US": "Proceed",
@@ -4600,6 +5135,8 @@ export const phrases = {
     "zh-HK": "繼續",
     ja: "続行",
     ko: "진행하다",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_proportionCorrectPopup: {
     "en-US": "Nice work! You got xxx% right.",
@@ -4628,6 +5165,8 @@ export const phrases = {
     "zh-HK": "做得好！您的xxx％正確。",
     ja: "よくやった！ xxx％が正しくなりました。",
     ko: "잘 하셨어요! 당신은 xxx%가 맞습니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readingNextPage: {
     "en-US": "Press SPACE for next page.",
@@ -4635,7 +5174,7 @@ export const phrases = {
     fr: "Appuyez sur l'espace pour la page suivante.",
     es: "Presione el espacio para la página siguiente.",
     pt: "Pressione espaço para a próxima página.",
-    it: "Premere lo spazio per la pagina successiva.",
+    it: "Premere Space per la pagina successiva.",
     ro: "Apăsați spațiul pentru pagina următoare.",
     pl: "Naciśnij miejsce na następną stronę.",
     ru: "Нажмите пространство для следующей страницы.",
@@ -4656,6 +5195,8 @@ export const phrases = {
     "zh-HK": "按下下一頁的空間。",
     ja: "次のページのスペースを押します。",
     ko: "다음 페이지를 위해 공간을 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_rsvpReadingTask: {
     "en-US":
@@ -4666,13 +5207,13 @@ export const phrases = {
     pt: "Você está prestes a iniciar um bloco de ensaios xxx. Você será uma história de leitura, algumas palavras de cada vez. Cada julgamento mostrará rapidamente sobre uma frase de palavras, uma após a outra, e depois pedirá que você se lembre de quais palavras você lê.",
     it: "Stai per avviare un blocco di prove xxx. Letturete una storia, alcune parole alla volta. Ogni prova ti mostrerà rapidamente una pena di parole, una dopo l'altra, e poi ti chiederà di ricordare quali parole leggi.",
     ro: "Sunteți pe cale să începeți un bloc de încercări xxx. Vei citi o poveste, câteva cuvinte la un moment dat. Fiecare proces vă va arăta rapid despre o propoziție de cuvinte, una după alta, apoi vă va cere să vă amintiți ce cuvinte citiți.",
-    pl: "Zaraz rozpoczniesz blok prób xxx. Będziesz czytać historię, kilka słów na raz. Każda próba szybko pokaże ci o wartości zdania, jeden po drugiej, a następnie poprosi o pamiętanie, jakie słowa przeczytasz.",
+    pl: "Zaraz rozpoczniesz blok prób xxx. Będziesz czytać historię, kilka słów na raz. Każda próba szybko pokaże ci o wartości zdania, jeden po drugim, a następnie poprosi o pamiętanie, jakie słowa przeczytasz.",
     ru: "Вы собираетесь начать блок xxx испытаний. Вы станете чтением историей, по нескольким словам за раз. Каждое судебное разбирательство быстро покажет вам о поставленной предложении слов, один за другим, а затем попросит вас вспомнить, какие слова вы читаете.",
     hy: "Դուք պատրաստվում եք սկսել xxx փորձարկումների բլոկ: Դուք ընթերցում եք մի պատմություն, միանգամից մի քանի բառ: Յուրաքանչյուր փորձություն արագորեն ցույց կտա ձեզ մի նախադասության մասին բառերի մասին, մեկը մյուսի հետեւից, եւ հետո խնդրեք հիշել, թե ինչ բառեր եք կարդում:",
     fi: "Olet aloittamassa xxx -kokeiden lohkon. Lukut tarinan, muutama sana kerrallaan. Jokainen kokeilu näyttää sinulle nopeasti lauseen arvosta sanoja peräkkäin ja pyydä sitten muistamaan, mitä sanoja olet lukenut.",
     ka: "თქვენ აპირებთ xxx კვლევების ბლოკის დაწყებას. თქვენ კითხულობთ მოთხრობას, ერთდროულად რამდენიმე სიტყვას. თითოეული სასამართლო პროცესი სწრაფად გაჩვენებთ სიტყვების წინადადებას, ერთი მეორის მიყოლებით, შემდეგ კი მოგთხოვთ გახსოვდეთ რა სიტყვები წაიკითხეთ.",
     he: "אתה עומד להתחיל בלוק של ניסויים ב- xxx. אתה תהיה קריאה סיפור, כמה מילים בכל פעם. כל משפט יראה לך במהירות על שווי משפט של מילים, בזה אחר זה, ואז יבקש מכם לזכור אילו מילים קראת.",
-    ar: "أنت على وشك بدء كتلة من تجارب xxx. سوف تكون قراءات قصة ، بضع كلمات في وقت واحد. ستعرضك كل تجربة بسرعة حول قيمة الكلمات ، واحدة تلو الأخرى ، ثم تطلب منك أن تتذكر الكلمات التي تقرأها.",
+    ar: "أنت على وشك بدء كتلة من تجارب xxx. سوف تكون قراءات قصة ، بضع كلمات في وقت واحد. ستظهر لك كل تجربة بسرعة حول قيمة الكلمات ، واحدة تلو الأخرى ، ثم تطلب منك أن تتذكر الكلمات التي تقرأها.",
     ur: "آپ xxx ٹرائلز کا ایک بلاک شروع کرنے والے ہیں۔ آپ ایک وقت میں ایک کہانی ، کچھ الفاظ پڑھیں گے۔ ہر مقدمے کی سماعت آپ کو ایک جملے کے قابل الفاظ کے بارے میں جلدی سے دکھائے گی ، ایک کے بعد ایک ، اور پھر آپ سے یہ یاد کرنے کے لئے کہے کہ آپ کیا الفاظ پڑھتے ہیں۔",
     hi: "आप xxx परीक्षणों का एक ब्लॉक शुरू करने वाले हैं। आप एक कहानी, एक समय में कुछ शब्द पढ़ेंगे। प्रत्येक परीक्षण आपको जल्दी से शब्दों के एक वाक्य-मूल्य के बारे में दिखाएगा, एक के बाद एक, और फिर आपको याद करने के लिए कहेगा कि आप कौन से शब्द पढ़ते हैं।",
     ta: "நீங்கள் xxx சோதனைகளின் ஒரு தொகுதியைத் தொடங்க உள்ளீர்கள். நீங்கள் ஒரு கதையை வாசிப்பீர்கள், ஒரு நேரத்தில் சில சொற்கள். ஒவ்வொரு சோதனையும் ஒரு வாக்கிய மதிப்புள்ள சொற்களைப் பற்றி விரைவாக உங்களுக்குக் காண்பிக்கும், ஒன்றன் பின் ஒன்றாக, பின்னர் நீங்கள் என்ன சொற்களைப் படித்தீர்கள் என்பதை நினைவில் கொள்ளும்படி கேட்கும்.",
@@ -4687,6 +5228,8 @@ export const phrases = {
       "您即將開始一個xxx試驗。您會讀一個故事，一次讀幾句話。每個審判都會迅速向您展示一個值得一句話的句子，然後要求您記住您閱讀的單詞。",
     ja: "xxxトライアルのブロックを開始しようとしています。あなたは一度にいくつかの言葉を読むでしょう。各トライアルは、次々と文章のある言葉についてすぐに表示され、あなたが読んだ言葉を覚えておくように頼みます。",
     ko: "xxx 시험 블록을 시작하려고합니다. 한 번에 몇 마디 씩 이야기를 읽을 수 있습니다. 각 시험은 다른 사람의 문장 가치에 대해 신속하게 보여준 다음, 어떤 단어를 읽는 지 기억하도록 요청합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readingTask: {
     "en-US":
@@ -4717,7 +5260,9 @@ export const phrases = {
     "zh-HK":
       "講故事的時間！您會從一本書中閱讀111頁。一旦開始，請盡可能快地靜靜地閱讀所有頁面，同時保持完全理解，直到到達末尾。然後，我們會問您有關這個故事的幾個問題。在每個頁面上，按下下一頁的空格欄。準備就緒時，請按空格。",
     ja: "ストーリータイム！本から111ページを読みます。開始したら、最後に到達するまで、完全な理解を維持しながら、できるだけ早くすべてのページを静かに読んでください。次に、ストーリーについていくつか質問します。各ページで、次のページのスペースバーを押します。準備ができたら、スペースを押します。",
-    ko: "이야기 시간! 책에서 111 페이지를 읽을 것입니다. 시작하면 끝까지 도달 할 때까지 모든 이해를 유지하면서 최대한 빨리 모든 페이지를 조용히 읽으십시오. 그런 다음 이야기에 대해 몇 가지 질문을 할 것입니다. 각 페이지에서 다음 페이지의 공간 표시 줄을 누릅니다. 준비가되면 공간을 누릅니다.",
+    ko: "이야기 시간! 책에서 111 페이지를 읽을 것입니다. 일단 시작되면 끝까지 도달 할 때까지 모든 이해를 유지하면서 최대한 빨리 모든 페이지를 조용히 읽으십시오. 그런 다음 이야기에 대해 몇 가지 질문을 할 것입니다. 각 페이지에서 다음 페이지의 공간 표시 줄을 누릅니다. 준비가되면 공간을 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readingTaskQuestionPrompt: {
     "en-US":
@@ -4745,8 +5290,10 @@ export const phrases = {
     id: "Manakah dari kata -kata berikut yang muncul di bagian yang baru saja Anda baca?",
     "zh-CN": "您刚刚阅读的段落中出现了以下哪个单词？",
     "zh-HK": "您剛剛閱讀的段落中出現了以下哪個單詞？",
-    ja: "次の単語のどれがあなたが読んだパッセージに登場しましたか？",
+    ja: "次の単語のうち、あなたが読んだばかりのパッセージに登場したのはどれですか？",
     ko: "방금 읽은 구절에 다음 중 어떤 단어가 나타 났습니까?",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readingTheEnd: {
     "en-US": "THE END",
@@ -4775,6 +5322,8 @@ export const phrases = {
     "zh-HK": "結束",
     ja: "終わり",
     ko: "끝",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyClickCrosshair: {
     "en-US":
@@ -4804,6 +5353,8 @@ export const phrases = {
     "zh-HK": "準備好了嗎？保持注視十字準線，並點擊十字準線。",
     ja: "準備はできましたか？十字線を直視しながら、十字線をクリックしてください。",
     ko: "준비가 된? 크로스 털의 중앙을 클릭하여 문자를 나타냅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyTrackCrosshair: {
     "en-US":
@@ -4833,6 +5384,8 @@ export const phrases = {
     "zh-HK": "準備好？跟踪十字頭髮的中心，直到字母出現為止。",
     ja: "準備？文字が表示されるまで、交差毛の中心を追跡します。",
     ko: "준비가 된? 문자가 나타날 때까지 십자 머리카락의 중심을 추적하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyClickCrosshairRepeatedLetters: {
     "en-US":
@@ -4860,8 +5413,10 @@ export const phrases = {
     id: "Siap mengidentifikasi surat -surat itu? Klik tengah rambut silang.",
     "zh-CN": "准备识别字母了吗？单击十字头发的中心。",
     "zh-HK": "準備識別字母了嗎？單擊十字頭髮的中心。",
-    ja: "手紙を識別する準備はできましたか？交差毛の中心をクリックします。",
+    ja: "手紙を識別する準備はできましたか？クロスヘアの中心をクリックします。",
     ko: "글자를 식별 할 준비가 되셨습니까? 십자 머리카락의 중앙을 클릭하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyTrackCrosshairRepeatedLetters: {
     "en-US":
@@ -4891,6 +5446,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyClickCrosshairRsvpReading: {
     "en-US": "Ready to read some words? Click the center of the cross hairs.",
@@ -4917,8 +5474,10 @@ export const phrases = {
     id: "Siap membaca beberapa kata? Klik tengah rambut silang.",
     "zh-CN": "准备阅读一些单词了吗？单击十字头发的中心。",
     "zh-HK": "準備閱讀一些單詞了嗎？單擊十字頭髮的中心。",
-    ja: "いくつかの言葉を読む準備はできましたか？交差毛の中心をクリックします。",
+    ja: "いくつかの言葉を読む準備はできましたか？クロスヘアの中心をクリックします。",
     ko: "단어를 읽을 준비가 되셨습니까? 십자 머리카락의 중앙을 클릭하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyTrackCrosshairRsvpReading: {
     "en-US":
@@ -4948,6 +5507,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyPressSpace: {
     "en-US":
@@ -4977,6 +5538,8 @@ export const phrases = {
     "zh-HK": "準備好了嗎？保持注視十字準線，並按下空格鍵。",
     ja: "準備はできましたか？十字線を直視しながら、スペースキーを押してください。",
     ko: "편지를 식별 할 준비가 되셨습니까? 크로스 털의 중앙을 직접 보면서 우주 막대를 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyPressSpaceRepeatedLetters: {
     "en-US":
@@ -5006,6 +5569,8 @@ export const phrases = {
     "zh-HK": "準備識別字母了嗎？直接看著十字頭髮的中心時，請按太空棒。",
     ja: "手紙を識別する準備はできましたか？交差毛の中心を直接見ながら、スペースバーを押してください。",
     ko: "글자를 식별 할 준비가 되셨습니까? 크로스 털의 중앙을 직접 보면서 우주 막대를 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyPressSpaceRsvpReading: {
     "en-US":
@@ -5035,6 +5600,8 @@ export const phrases = {
     "zh-HK": "準備閱讀一些單詞了嗎？直接看著十字頭髮的中心時，請按太空棒。",
     ja: "いくつかの言葉を読む準備はできましたか？交差毛の中心を直接見ながら、スペースバーを押してください。",
     ko: "단어를 읽을 준비가 되셨습니까? 크로스 털의 중앙을 직접 보면서 우주 막대를 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyPressSpaceOrClickCrosshair: {
     "en-US":
@@ -5048,7 +5615,7 @@ export const phrases = {
     pl: "Gotowy? Patrząc bezpośrednio na krzyżyk, naciśnij spację albo kliknij na krzyżyk",
     ru: "Готовый? Глядя прямо на перекрестие, нажмите пробел или щелкните на перекрестии.",
     hy: "Պատրաստ? Նայելով ճիշտ խաչմերուկին, կտտացրեք բացը կամ կտտացրեք խաչմերուկում:",
-    fi: "Oletko valmis tunnistamaan kirjeen? Kun tarkastellaan suoraan ristikäsien keskustaa, napsauta sitä tai paina välilyöntiä.",
+    fi: "Oletko valmis tunnistamaan kirjeen? Kun tarkastellaan suoraan ristikäsien keskustaa, napsauta sitä tai paina avaruuspalkkia.",
     ka: "მზად ხართ წერილის იდენტიფიცირებისთვის? ჯვრის თმას ცენტრის პირდაპირ დათვალიერებისას, გთხოვთ, დააჭირეთ მას, ან დააჭირეთ კოსმოსურ ზოლს.",
     he: "מוּכָן? תוך התבוננות ישירה על הכוונת, לחץ על מקש הרווח או לחץ על הכוונת.",
     ar: "مستعد؟ أثناء النظر مباشرة إلى علامة التقاطع ، يرجى الضغط على زر المسافة أو الضغط على علامة التقاطع.",
@@ -5064,6 +5631,8 @@ export const phrases = {
     "zh-HK": "準備好了嗎？保持注視十字準線，並按下空格鍵或者點擊十字準線。",
     ja: "準備はできましたか？十字線を直視しながら、スペースキーを押すか、十字線をクリックしてください。",
     ko: "편지를 식별 할 준비가 되셨습니까? 십자 머리카락의 중앙을 직접 보면서 클릭하거나 우주 막대를 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyPressSpaceOrClickCrosshairRepeatedLetters: {
     "en-US":
@@ -5093,6 +5662,8 @@ export const phrases = {
     "zh-HK": "準備識別字母了嗎？直接看著十字頭髮的中心時，請單擊或按太空欄。",
     ja: "手紙を識別する準備はできましたか？交差毛の中心を直接見ながら、クリックするか、スペースバーを押してください。",
     ko: "글자를 식별 할 준비가 되셨습니까? 십자 머리카락의 중앙을 직접 보면서 클릭하거나 우주 막대를 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_readyPressSpaceOrClickCrosshairRsvpReading: {
     "en-US":
@@ -5122,6 +5693,8 @@ export const phrases = {
     "zh-HK": "準備閱讀一些單詞了嗎？直接看著十字頭髮的中心時，請按太空棒。",
     ja: "いくつかの言葉を読む準備はできましたか？交差毛の中心を直接見ながら、スペースバーを押してください。",
     ko: "단어를 읽을 준비가 되셨습니까? 크로스 털의 중앙을 직접 보면서 우주 막대를 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_sentenceGuessingGame: {
     "en-US":
@@ -5129,14 +5702,14 @@ export const phrases = {
     de: "Die Verständlichkeit des Satzes variiert von einfach bis schwer oder unmöglich. Sie können nicht viel mehr als zwei Drittel richtig bekommen, also entspannen Sie sich. Betrachten Sie es als ein Ratenspiel und holen Sie sich so viele wie möglich. Sie werden einen Piepton hören, wenn Sie Recht haben.",
     fr: "L'intelligibilité de la phrase variera de la dure ou impossible de la dure ou l'impossible. Vous ne pouvez pas obtenir beaucoup plus des deux tiers à droite, alors détendez-vous. Considérez-le comme un jeu de supposition et obtenez-en autant que vous le pouvez. Vous entendrez un bip quand vous avez raison.",
     es: "La inteligibilidad de la oración variará desde fácil hasta difícil o imposible. No puedes tener mucho más de dos tercios, así que relájate. Piense en ello como un juego de adivinanzas, y simplemente obtenga tantos como pueda. Escucharás un pitido siempre que tengas razón.",
-    pt: "A inteligibilidade da frase variará de fácil para difícil ou impossível. Você não pode acertar muito mais do que dois terços, então relaxe. Pense nisso como um jogo de adivinhação e pegue o máximo que puder. Você ouvirá um sinal sonoro sempre que estiver certo.",
+    pt: "A inteligibilidade da frase variará de fácil para difícil ou impossível. Você não pode acertar muito mais do que dois terços, então relaxe. Pense nisso como um jogo de adivinhação e obtenha o máximo possível. Você ouvirá um sinal sonoro sempre que estiver certo.",
     it: "L'intelligibilità della frase varierà da facile fino a difficile o impossibile. Non puoi ottenere molto più di due terzi, quindi rilassati. Pensalo come un gioco di ipotesi e ottieni il maggior numero possibile. Sentirai un segnale acustico ogni volta che hai ragione.",
     ro: "Intelibilitatea propoziției va varia de la ușor până la greu sau imposibil. Nu puteți obține mult mai mult de două treimi corect, așa că relaxați-vă. Gândiți -vă la el ca la un joc de ghicire și obțineți doar cât puteți. Veți auzi un bip ori de câte ori ai dreptate.",
     pl: "Zrozumiałość zdania będzie się różnić od łatwego do trudnego lub niemożliwego. Nie możesz uzyskać znacznie więcej niż dwie trzecie, więc zrelaksuj się. Pomyśl o tym jak o zgadywaniu i po prostu zdobądź tyle, ile możesz. Usłyszysz sygnał dźwiękowy, gdy masz rację.",
     ru: "Разборчивость предложения будет варьироваться от легкого до жесткого или невозможного. Вы не можете получить гораздо более двух третей правильно, так что расслабьтесь. Думайте об этом как об игре догадков, и просто получите как можно больше. Вы услышите звуковой сигнал, когда вы правы.",
     hy: "Պատժի խելամտությունը կտարբերվի հեշտից մինչեւ ծանր կամ անհնար: Դուք չեք կարող ստանալ շատ ավելին, քան երկու երրորդը ճիշտ, այնպես որ հանգստացեք: Մտածեք դրա մասին որպես գուշակության խաղ եւ պարզապես հնարավորինս շատ ստացեք: Դուք կօգտագործեք փղուկը, երբ ճիշտ եք:",
     fi: "Lauseen ymmärrettävyys vaihtelee helposti alas tai mahdotonta. Et voi saada paljon enemmän kuin kaksi kolmasosaa oikein, joten rentoudu. Ajattele sitä arvauspelinä ja saat vain niin monta kuin pystyt. Kuulet piippauksen aina kun olet oikeassa.",
-    ka: "სასჯელის გააზრება განსხვავდება მარტივად ქვემოთ ან შეუძლებლად. თქვენ ვერ მიიღებთ ბევრად მეტს ორ მესამედზე, ასე რომ დაისვენეთ. იფიქრეთ მასზე, როგორც გამოცნობის თამაში და უბრალოდ მიიღეთ რაც შეიძლება მეტი. თქვენ მოისმენთ beep, როდესაც მართალი ხართ.",
+    ka: "სასჯელის გააზრება განსხვავდება მარტივად ქვემოთ ან შეუძლებლად. თქვენ ვერ მიიღებთ ბევრად მეტს ორ მესამედზე, ასე რომ დაისვენეთ. იფიქრეთ, როგორც გამოცნობის თამაში, და უბრალოდ მიიღეთ რაც შეიძლება მეტი. თქვენ მოისმენთ beep, როდესაც მართალი ხართ.",
     he: "הבנת המשפט תשתנה מקלות למטה לקשה או בלתי אפשרית. אתה לא יכול להשיג הרבה יותר משני שלישים נכון, אז תירגע. חשוב על זה כמשחק ניחוש, ופשוט קבל כמה שיותר. תשמע צפצוף בכל פעם שאתה צודק.",
     ar: "سوف تختلف وضوح الجملة من السهل إلى الصلبة أو المستحيلة. لا يمكنك الحصول على أكثر من ثلثي بشكل صحيح ، لذا استرخ. فكر في الأمر على أنه لعبة تخمين ، واحصل على أكبر عدد ممكن من الأشياء. ستسمع صوتًا كلما كنت على حق.",
     ur: "جملہ کی سمجھداری آسانی سے مشکل سے مختلف ہوگی یا ناممکن تک۔ آپ کو دو تہائی سے زیادہ ٹھیک نہیں مل سکتا ، لہذا آرام کریں۔ اس کو ایک اندازہ لگانے والا کھیل سمجھیں ، اور جتنا ہو سکے حاصل کریں۔ جب بھی آپ ٹھیک ہوں گے آپ کو بیپ سنیں گے۔",
@@ -5153,6 +5726,8 @@ export const phrases = {
       "該句子的可理解性將從輕鬆到硬或不可能不等。您不能獲得超過三分之二的正確，所以放鬆。將其視為一個猜測遊戲，只需獲得盡可能多的遊戲。每當您正確時，您都會聽到蜂鳴聲。",
     ja: "文の明瞭度は、簡単なダウンからハードまたは不可能までさまざまです。 3分の2を超えることはできないので、リラックスしてください。それを推測ゲームと考えて、できるだけ多くのことを手に入れてください。あなたが正しいときはいつでもビープ音が聞こえます。",
     ko: "문장의 명료성은 쉬운 곳에서 단단하거나 불가능한 곳에 달라집니다. 3 분의 2 이상을 얻을 수 없으므로 긴장을 풀어주십시오. 그것을 추측 게임으로 생각하고 가능한 한 많은 것을 얻으십시오. 당신이 옳을 때마다 경고음이 들립니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_sentenceIdentifyClick: {
     "en-US":
@@ -5184,6 +5759,8 @@ export const phrases = {
       "下面的列表顯示了句子中每個單詞的所有可能性。通過單擊您聽到的單詞來報告句子或最好的猜測。",
     ja: "以下のリストは、文の各単語のすべての可能性を示しています。聞いた言葉をクリックして、文または最善の推測を報告してください。",
     ko: "아래 목록은 문장의 각 단어에 대한 모든 가능성을 보여줍니다. 들었던 단어를 클릭하여 문장이나 최선의 추측을보고하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_sentenceProcedure: {
     "en-US":
@@ -5215,6 +5792,8 @@ export const phrases = {
       "在每個審判中，通常會在噪音中聽到一個句子。然後，您將看到句子中每個單詞的所有可能性列表。通過單擊您聽到的單詞來報告句子或最好的猜測。",
     ja: "各トライアルでは、通常はノイズで文が聞こえます。次に、文の各単語のすべての可能性のリストが表示されます。聞いた言葉をクリックして、文または最善の推測を報告してください。",
     ko: "각 시험에서는 일반적으로 소음으로 문장이 들립니다. 그런 다음 문장의 각 단어에 대한 모든 가능성 목록이 표시됩니다. 들었던 단어를 클릭하여 문장이나 최선의 추측을보고하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_session: {
     "en-US": "",
@@ -5243,6 +5822,8 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_soundPhraseBlock: {
     "en-US":
@@ -5272,8 +5853,10 @@ export const phrases = {
       "在每个审判中，您都会听到一句话，然后您会被要求记住两个单词。声音被扭曲，可能很难识别，因此您无法使它们正确。不用担心。只需将其视为游戏，并尽力而为。祝你好运。点击返回或单击继续继续进行。\n\n继续按钮将立即消失，一旦加载声音，实验将开始，这取决于Internet连接的速度，需要40秒或更长时间。我们正在努力在以后的版本中缩短这一延迟。\n\n加载声音...",
     "zh-HK":
       "在每個審判中，您都會聽到一句話，然後您會被要求記住兩個單詞。聲音被扭曲，可能很難識別，因此您無法使它們正確。不用擔心。只需將其視為遊戲，並儘力而為。祝你好運。點擊返回或單擊繼續繼續進行。\n\n繼續按鈕將立即消失，一旦加載聲音，實驗將開始，這取決於Internet連接的速度，需要40秒或更長時間。我們正在努力在以後的版本中縮短這一延遲。\n\n加載聲音...",
-    ja: "各トライアルで、文が聞こえると、2つの単語を覚えておくように求められます。音は歪んでおり、認識が難しいかもしれないので、それらをすべて正しくすることはできません。心配しないで。それをゲームとして扱って、最善を尽くしてください。幸運を。戻るかクリックして続行して続行します。\n\n続行ボタンはすぐに消え、インターネット接続の速度に応じて、サウンドがロードされると実験が開始されます。将来のリリースでこの遅延を短縮するために取り組んでいます。\n\n音の読み込み...",
-    ko: "각 재판에서 문장이 들리면 두 가지 단어를 기억하도록 요청받을 것입니다. 소리가 왜곡되어 인식하기 어려울 수 있으므로 올바르게 얻을 수는 없습니다. 괜찮아요. 게임으로 취급하고 최선을 다하십시오. 행운을 빌어요. 반품을 누르거나 계속 진행하려면 진행하십시오.\n\n진행 버튼은 즉시 사라지고 사운드가로드되면 실험이 시작되며 인터넷 연결 속도에 따라 40 초 이상이 걸립니다. 우리는 향후 릴리스 에서이 지연을 단축하기 위해 노력하고 있습니다.\n\n소리로드 ...",
+    ja: "各トライアルで、文が聞こえると、2つの単語を覚えておくように求められます。音は歪んでおり、認識が難しいかもしれないので、それらをすべて正しくすることはできません。心配しないで。それをゲームとして扱って、最善を尽くしてください。幸運を。戻るかクリックして続行して続行します。\n\n進行ボタンはすぐに消え、インターネット接続の速度に応じて、サウンドがロードされると実験が開始されます。将来のリリースでこの遅延を短縮するために取り組んでいます。\n\n音の読み込み...",
+    ko: "각 시험에서 문장을 듣고 두 단어를 기억하도록 요청받을 것입니다. 소리가 왜곡되어 인식하기 어려울 수 있으므로 올바르게 얻을 수는 없습니다. 괜찮아요. 게임으로 취급하고 최선을 다하십시오. 행운을 빌어요. 반품을 누르거나 계속 진행하려면 진행하십시오.\n\n진행 버튼은 즉시 사라지고 사운드가로드되면 실험이 시작되며 인터넷 연결 속도에 따라 40 초 이상이 걸립니다. 우리는 향후 릴리스 에서이 지연을 단축하기 위해 노력하고 있습니다.\n\n소리로드 ...",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_soundPhraseResponse: {
     "en-US":
@@ -5303,6 +5886,8 @@ export const phrases = {
     "zh-HK": "您剛剛聽到這句話。請從兩個菜單中選擇單詞以填寫缺失的單詞。",
     ja: "この文章を聞いたばかりです。 2つのメニューから単語を選択して、不足している単語を入力してください。",
     ko: "방금이 문장을 들었습니다. 누락 된 단어를 채우려면 두 메뉴에서 단어를 선택하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_soundPhraseTrial: {
     "en-US": "Hit the SPACE bar to hear the next sentence",
@@ -5312,7 +5897,7 @@ export const phrases = {
     pt: "Bata na barra de espaço para ouvir a próxima frase",
     it: "Colpisci la barra spaziale per ascoltare la frase successiva",
     ro: "Loviți bara spațială pentru a auzi următoarea propoziție",
-    pl: "Uderz w pasek kosmiczny, aby usłyszeć następne zdanie",
+    pl: "Uderz w kosmos, aby usłyszeć następne zdanie",
     ru: "Ударьте космический планку, чтобы услышать следующее предложение",
     hy: "Հարվածեք տիեզերական սանդղակը `հաջորդ նախադասությունը լսելու համար",
     fi: "Osu avaruuspalkki kuullaksesi seuraavan lauseen",
@@ -5331,6 +5916,8 @@ export const phrases = {
     "zh-HK": "登上太空酒吧聽下一句話",
     ja: "次の文を聞くためにスペースバーを押してください",
     ko: "다음 문장을 들으려면 우주 막대를 치십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_takeABreakPopup: {
     "en-US": "Good work! Please take a moment to relax and blink.",
@@ -5359,6 +5946,8 @@ export const phrases = {
     "zh-HK": "幹得好！請短暫的休息一下，眨眨眼放輕鬆。",
     ja: "よくできました！少し時間をかけてリラックスして点滅してください。",
     ko: "잘 했어! 잠시 휴식을 취하고 깜박이십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdBeginBlock: {
     "en-US":
@@ -5366,7 +5955,7 @@ export const phrases = {
     de: "Sie sind dabei, einen Block von xxx-Testversionen zu beginnen. Jeder Versuch enthält drei Buchstaben, wie z. B.: Z R N. Bitte melden Sie nur den mittleren Buchstaben,",
     fr: "Vous êtes sur le point de commencer un bloc d'essais xxx. Chaque essai présentera trois lettres, comme ceci : Z R N. Veuillez ne signaler que la lettre du milieu,",
     es: "Estas a punto de comenzar un bloque de xxx ensayos. En cada ensayo, presentaremos tres letras, asi: Z R N. Por favor, reporta solo la letra del medio,",
-    pt: "Você está prestes a iniciar um bloco de testes xxx. Em cada ensaio, apresentaremos três letras também: Z R N. Por favor, relate apenas a letra do meio,",
+    pt: "Você está prestes a iniciar um bloco de ensaios xxx. Em cada ensaio, apresentaremos três letras também: Z R N. Por favor, relate apenas a letra do meio,",
     it: "Stai per iniziare un blocco di xxx prove. Ogni prova presenterà tre lettere, in questo modo: Z R N. Devi riportare solo la lettera centrale,",
     ro: "Sunteți pe cale să începeți un bloc de încercări xxx. În fiecare eseu, vom prezenta și trei scrisori: Z R N. Vă rugăm să raportați doar scrisoarea mediului,",
     pl: "Zamierzasz rozpocząć blok testów xxx. Każda próba zawiera trzy litery, takie jak: Z R N. Proszę podać tylko środkową literę",
@@ -5383,13 +5972,15 @@ export const phrases = {
     te: "మీరు xxx ట్రయల్స్ యొక్క బ్లాక్‌ను ప్రారంభించబోతున్నారు. ప్రతి ట్రయల్‌లో మూడు అక్షరాల త్రిపాది కనిపిస్తుంది, ఉదాహరణకు: Z R N. దయచేసి మధ్య లేఖను మాత్రమే నివేదించండి,",
     kn: "ನೀವು xxx ಪ್ರಯೋಗಗಳ ಬ್ಲಾಕ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲಿದ್ದೀರಿ. ಪ್ರತಿ ಪ್ರಯೋಗದಲ್ಲಿ ಮೂರು ಅಕ್ಷರಗಳ ತ್ರಿವಳಿಗಳು ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ, ಉದಾಹರಣೆಗೆ: z r n. ದಯವಿಟ್ಟು ಮಧ್ಯಮ ಅಕ್ಷರವನ್ನು ಮಾತ್ರ ವರದಿ ಮಾಡಿ,",
     bn: "আপনি xxx ট্রায়ালগুলির একটি ব্লক শুরু করতে চলেছেন। প্রতিটি পরীক্ষায় তিনটি চিঠির একটি ট্রিপলেট উপস্থিত হবে, উদাহরণস্বরূপ: জেড আর এন। দয়া করে কেবল মাঝের চিঠির প্রতিবেদন করুন,",
-    id: "Anda akan memulai blok uji coba xxx. Triplet dari tiga huruf akan muncul di setiap percobaan, misalnya: Z R N. Harap laporkan hanya surat tengah,",
+    id: "Anda akan memulai blok uji coba xxx. Triplet dari tiga huruf akan muncul di setiap percobaan, misalnya: Z R N. Harap hanya melaporkan huruf tengahnya,",
     "zh-CN":
       "您即将开始进行一个含有xxx次试验的区组。每次试验将会有三个字母出现，比如：Z R N。请只报告中间的字母。",
     "zh-HK":
       "您即將開始進行一個含有xxx次試驗的區組。每次試驗將會有三個字母出現，比如：Z R N。請只報告中間的字母。",
     ja: "あなたはxxxテストのブロックを始めようとしています。各テストではこのように3文字が表示されます：Z R N。真ん中の文字だけを報告してください。",
     ko: "xxx 시험 블록을 시작하려고합니다. 예를 들어 Z R N. 중간 편지 만보 고하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdMiddleLetterBeginBlock: {
     "en-US":
@@ -5421,6 +6012,8 @@ export const phrases = {
       "您即將開始一個xxx試驗。每個試驗中將出現三個字母的三胞胎，例如：z r n。請僅報告中間字母，",
     ja: "xxxトライアルのブロックを開始しようとしています。たとえば、各試行に3文字のトリプレットが表示されます。",
     ko: "xxx 시험 블록을 시작하려고합니다. 예를 들어 Z R N. 중간 편지 만보 고하십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdLetterBeginBlock: {
     "en-US":
@@ -5449,7 +6042,9 @@ export const phrases = {
     "zh-CN": "您即将开始一个xxx试验。每个审判都会出现一个信件。请报告，",
     "zh-HK": "您即將開始一個xxx試驗。每個審判都會出現一個信件。請報告，",
     ja: "xxxトライアルのブロックを開始しようとしています。各トライアルに文字が表示されます。報告してください、",
-    ko: "xxx 시험 블록을 시작하려고합니다. 각 시험에 편지가 나타납니다. 보고 해주세요.",
+    ko: "xxx 시험 블록을 시작하려고합니다. 각 시험에는 편지가 나타납니다. 보고 해주세요.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdRsvpReadingBeginBlock: {
     "en-US":
@@ -5473,7 +6068,7 @@ export const phrases = {
     ml: "നിങ്ങൾ xxx ട്രയലുകളുടെ ഒരു ബ്ലോക്ക് ആരംഭിക്കാൻ പോകുന്നു. ഓരോ ട്രയലും നിങ്ങൾക്ക് വാക്കുകൾ വേഗത്തിൽ കാണിക്കും, മറ്റൊന്ന്, നിങ്ങൾ വായിച്ച കാര്യങ്ങൾ റിപ്പോർട്ടുചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും",
     te: "మీరు xxx ట్రయల్స్ యొక్క బ్లాక్‌ను ప్రారంభించబోతున్నారు. ప్రతి ట్రయల్ మీకు త్వరగా పదాలను చూపిస్తుంది, ఒకదాని తరువాత ఒకటి, మరియు మీరు చదివిన వాటిని నివేదించమని అడుగుతుంది",
     kn: "ನೀವು xxx ಪ್ರಯೋಗಗಳ ಬ್ಲಾಕ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲಿದ್ದೀರಿ. ಪ್ರತಿ ಪ್ರಯೋಗವು ಒಂದರ ನಂತರ ಒಂದರಂತೆ ಪದಗಳನ್ನು ತೋರಿಸುತ್ತದೆ, ಮತ್ತು ನೀವು ಓದಿದ್ದನ್ನು ವರದಿ ಮಾಡಲು ಕೇಳಿಕೊಳ್ಳಿ",
-    bn: "আপনি xxx ট্রায়ালগুলির একটি ব্লক শুরু করতে চলেছেন। প্রতিটি পরীক্ষা আপনাকে একের পর এক শব্দগুলি দ্রুত প্রদর্শন করবে এবং আপনি কী পড়েন তা আপনাকে জানাতে জিজ্ঞাসা করুন",
+    bn: "আপনি xxx ট্রায়ালগুলির একটি ব্লক শুরু করতে চলেছেন। প্রতিটি পরীক্ষা আপনাকে একের পর এক শব্দগুলি দ্রুত প্রদর্শন করবে এবং আপনি যা পড়েছেন তা আপনাকে জানাতে জিজ্ঞাসা করুন",
     id: "Anda akan memulai blok uji coba xxx. Setiap percobaan akan dengan cepat menunjukkan kepada Anda kata -kata, satu demi satu, dan meminta Anda untuk melaporkan apa yang Anda baca",
     "zh-CN":
       "您即将开始一个xxx试验。每个审判都会迅速向您展示单词，一个接一个地，要求您报告您阅读的内容",
@@ -5481,6 +6076,8 @@ export const phrases = {
       "您即將開始一個xxx試驗。每個審判都會迅速向您展示單詞，一個接一個地，要求您報告您閱讀的內容",
     ja: "xxxトライアルのブロックを開始しようとしています。各トライアルは次々と単語をすぐに表示し、読んだものを報告するように頼みます",
     ko: "xxx 시험 블록을 시작하려고합니다. 각 시험은 당신에게 다른 말을하면 신속하게 말하고, 당신이 읽은 내용을보고하도록 요청합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdRepeatedLettersBeginBlock: {
     "en-US":
@@ -5512,6 +6109,8 @@ export const phrases = {
       "您即將開始一個xxx試驗。每個審判中都會出現一個字母字段。報告您看到的兩個中間字符",
     ja: "xxxトライアルのブロックを開始しようとしています。各トライアルに文字のフィールドが表示されます。あなたが見る2つの中間文字を報告してください",
     ko: "xxx 시험 블록을 시작하려고합니다. 각 시험에서 편지 분야가 나타납니다. 당신이 보는 두 개의 중간 문자를보고하십시오",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdSoundBeginBlock: {
     "en-US":
@@ -5533,7 +6132,7 @@ export const phrases = {
     hi: 'ध्वनि का पता लगाना। आप कई परीक्षणों का एक ब्लॉक शुरू करने वाले हैं। आप एक विशेष लक्ष्य ध्वनि का पता लगाने की कोशिश कर रहे हैं: एक नोट, 8 बार दोहराया, हमेशा एक ही नोट। यह लक्ष्य केवल आधे परीक्षणों पर मौजूद है, बेतरतीब ढंग से। प्रत्येक परीक्षण पर, आपका काम यह सुनना और तय करना है कि यह मौजूद था, हाँ या नहीं। जैसा कि आप परीक्षण से परीक्षण तक आगे बढ़ते हैं, आपकी प्रतिक्रियाओं के आधार पर, लक्ष्य ध्वनि की मात्रा अनुकूल होगी ताकि यह मुश्किल से पता लगाने योग्य हो। प्रारंभिक अभ्यास ब्लॉक में, लक्ष्य अकेले होगा। बाद के ब्लॉकों में, अन्य ध्वनियों के कारण लक्ष्य का पता लगाना कठिन होगा। हमेशा अन्य ध्वनियों को अनदेखा करें, और रिपोर्ट करने की कोशिश करें, हाँ या नहीं, क्या लक्ष्य ध्वनि मौजूद थी। हां के लिए "Y" कुंजी और "N" कुंजी के लिए उपयोग करें।\n\nरिटर्न हिट करें या तैयार होते ही आगे बढ़ें। आगे बटन तुरंत गायब हो जाएगा, और ध्वनि लोड होने के बाद प्रयोग शुरू हो जाएगा, जिसमें इंटरनेट कनेक्शन की गति के आधार पर 40 सेकंड या उससे अधिक समय लगता है। हम भविष्य की रिलीज में इस देरी को कम करने के लिए काम कर रहे हैं।\n\nलोड हो रहा है ...',
     ta: 'ஒலி கண்டறிதல். நீங்கள் பல சோதனைகளின் ஒரு தொகுதியைத் தொடங்க உள்ளீர்கள். நீங்கள் ஒரு குறிப்பிட்ட இலக்கு ஒலியைக் கண்டறிய முயற்சிக்கிறீர்கள்: ஒரு குறிப்பு, 8 முறை மீண்டும் மீண்டும், எப்போதும் ஒரே குறிப்பு. அந்த இலக்கு தோராயமாக பாதி சோதனைகளில் மட்டுமே உள்ளது. ஒவ்வொரு சோதனையிலும், உங்கள் வேலை அது இருக்கிறதா, ஆம் அல்லது இல்லை என்று கேட்பதும் தீர்மானிப்பதும் ஆகும். உங்கள் பதில்களின் அடிப்படையில், சோதனையிலிருந்து சோதனைக்கு நீங்கள் முன்னேறும்போது, ​​இலக்கு ஒலி அளவு மாற்றியமைக்கும், இதனால் அது கண்டறிய முடியாதது. ஆரம்ப பயிற்சி தொகுதியில், இலக்கு தனியாக இருக்கும். பிற்கால தொகுதிகளில், மற்ற ஒலிகளின் காரணமாக இலக்கு கண்டறிவது கடினமாக இருக்கும். மற்ற ஒலிகளை எப்போதும் புறக்கணித்து, இலக்கு ஒலி இருக்கிறதா என்று ஆம் அல்லது இல்லை என்று புகாரளிக்க முயற்சிக்கவும். ஆம் என்ற "y" விசையையும், இல்லை என்பதற்கு "N" விசையையும் பயன்படுத்தவும்.\n\nதிரும்பவும் அல்லது நீங்கள் தயாரானவுடன் தொடரவும் என்பதைக் கிளிக் செய்யவும். தொடர பொத்தானை உடனடியாக மறைந்துவிடும், மேலும் ஒலிகள் ஏற்றப்பட்டவுடன் சோதனை தொடங்கும், இது இணைய இணைப்பின் வேகத்தைப் பொறுத்து 40 வினாடிகள் அல்லது அதற்கு மேற்பட்ட நேரம் ஆகும். எதிர்கால வெளியீட்டில் இந்த தாமதத்தை குறைக்க நாங்கள் பணியாற்றி வருகிறோம்.\n\nஒலிகளை ஏற்றுகிறது ...',
     ml: 'ശബ്ദ കണ്ടെത്തൽ. നിങ്ങൾ നിരവധി പരീക്ഷണങ്ങളുടെ ഒരു ബ്ലോക്ക് ആരംഭിക്കാൻ പോകുന്നു. നിങ്ങൾ ഒരു പ്രത്യേക ടാർഗെറ്റ് ശബ്ദം കണ്ടെത്തുന്നതിന് ശ്രമിക്കുക: ഒരു കുറിപ്പ്, 8 തവണ ആവർത്തിച്ചു, എല്ലായ്പ്പോഴും സമാന കുറിപ്പ്. ആ ലക്ഷ്യം പകുതി പരീക്ഷണങ്ങളിൽ മാത്രമേ ക്രമരഹിതമായിട്ടുള്ളൂ. ഓരോ വിചാരണയിലും, അത് നിലവിലുണ്ടോ, അതെ അല്ലെങ്കിൽ ഇല്ല എന്ന് ശ്രദ്ധിക്കുക എന്നതാണ് നിങ്ങളുടെ ജോലി. നിങ്ങളുടെ പ്രതികരണങ്ങളെ അടിസ്ഥാനമാക്കി, ട്രയലിലേക്ക് നിങ്ങൾ ട്രയലിലേക്ക് പുരോഗമിക്കുമ്പോൾ, ടാർഗെറ്റ് ശബ്ദ വോളിയം പൊരുത്തപ്പെടും, അതിനാൽ ഇത് കഷ്ടിച്ച് കണ്ടെത്താനാകും. പ്രാരംഭ പരിശീലനത്തിൽ, ലക്ഷ്യം ഒറ്റയ്ക്ക് ആയിരിക്കും. പിന്നീടുള്ള ബ്ലോക്കുകളിൽ, മറ്റ് ശബ്ദങ്ങൾ കാരണം ടാർഗെറ്റ് കണ്ടെത്തുന്നതിന് ബുദ്ധിമുട്ടായിരിക്കും. എപ്പോഴും മറ്റ് ശബ്ദങ്ങൾ അവഗണിക്കുക, ടാർഗെറ്റ് ശബ്ദം നിലവിലുണ്ടോ എന്ന് റിപ്പോർട്ടുചെയ്യാൻ ശ്രമിക്കുക. അതെ, ഇല്ല എന്നതിനായുള്ള "y" കീ എന്നിവയും ഇല്ല.\n\nമടങ്ങിവരവ് അമർത്തുക അല്ലെങ്കിൽ നിങ്ങൾ തയ്യാറായ ഉടൻ തുടരുക ക്ലിക്കുചെയ്യുക. ആംവർ ബട്ടൺ ഉടനടി അപ്രത്യക്ഷമാകും, മാത്രമല്ല ഇത് ഇന്റർനെറ്റ് കണക്ഷന്റെ വേഗതയെ ആശ്രയിച്ച് 40 സെക്കൻഡോ അതിൽ കൂടുതലോ എടുക്കും. ഭാവിയിലെ ഒരു റിലീസിൽ ഈ കാലതാമസം ചുരുക്കുന്നതിന് ഞങ്ങൾ പ്രവർത്തിക്കുന്നു.\n\nലോഡുചെയ്യുന്നു ...',
-    te: 'ధ్వని గుర్తింపు. మీరు చాలా ట్రయల్స్ బ్లాక్‌ను ప్రారంభించబోతున్నారు. మీరు ఒక నిర్దిష్ట లక్ష్య ధ్వనిని గుర్తించడానికి ప్రయత్నిస్తున్నారు: ఒక గమనిక, 8 సార్లు పునరావృతం, ఎల్లప్పుడూ ఒకే గమనిక. ఆ లక్ష్యం యాదృచ్ఛికంగా సగం ట్రయల్స్‌లో మాత్రమే ఉంటుంది. ప్రతి ట్రయల్‌లో, మీ పని వినడం మరియు అది హాజరైనదా అని నిర్ణయించుకోవడం, అవును లేదా కాదు. మీరు ట్రయల్ నుండి ట్రయల్ వరకు అభివృద్ధి చెందుతున్నప్పుడు, మీ ప్రతిస్పందనల ఆధారంగా, టార్గెట్ సౌండ్ వాల్యూమ్ అనుగుణంగా ఉంటుంది, తద్వారా ఇది గుర్తించదగినది. ప్రారంభ ప్రాక్టీస్ బ్లాక్‌లో, లక్ష్యం ఒంటరిగా ఉంటుంది. తరువాతి బ్లాకులలో, ఇతర శబ్దాల కారణంగా లక్ష్యం గుర్తించడం కష్టం. ఇతర శబ్దాలను ఎల్లప్పుడూ విస్మరించండి మరియు లక్ష్య శబ్దం ఉందా అని నివేదించడానికి ప్రయత్నించండి. అవును కోసం "Y" కీని మరియు NO కోసం "N" కీని ఉపయోగించండి.\n\nరిటర్న్ నొక్కండి లేదా మీరు సిద్ధంగా ఉన్న వెంటనే కొనసాగండి క్లిక్ చేయండి. ఇంటర్నెట్ కనెక్షన్ యొక్క వేగాన్ని బట్టి శబ్దాలు లోడ్ అయిన తర్వాత ప్రయోగం వెంటనే అదృశ్యమవుతుంది మరియు శబ్దాలు లోడ్ అయిన తర్వాత ప్రయోగం ప్రారంభమవుతుంది. భవిష్యత్ విడుదలలో ఈ ఆలస్యాన్ని తగ్గించడానికి మేము కృషి చేస్తున్నాము.\n\nశబ్దాలు లోడ్ అవుతోంది ...',
+    te: 'ధ్వని గుర్తింపు. మీరు చాలా ట్రయల్స్ బ్లాక్‌ను ప్రారంభించబోతున్నారు. మీరు ఒక నిర్దిష్ట లక్ష్య ధ్వనిని గుర్తించడానికి ప్రయత్నిస్తున్నారు: ఒక గమనిక, 8 సార్లు పునరావృతం, ఎల్లప్పుడూ ఒకే గమనిక. ఆ లక్ష్యం యాదృచ్ఛికంగా సగం ట్రయల్స్‌లో మాత్రమే ఉంటుంది. ప్రతి ట్రయల్‌లో, మీ పని వినడం మరియు అది హాజరైనదా అని నిర్ణయించడం, అవును లేదా కాదు. మీరు ట్రయల్ నుండి ట్రయల్ వరకు అభివృద్ధి చెందుతున్నప్పుడు, మీ ప్రతిస్పందనల ఆధారంగా, టార్గెట్ సౌండ్ వాల్యూమ్ అనుగుణంగా ఉంటుంది, తద్వారా ఇది గుర్తించదగినది. ప్రారంభ ప్రాక్టీస్ బ్లాక్‌లో, లక్ష్యం ఒంటరిగా ఉంటుంది. తరువాతి బ్లాకులలో, ఇతర శబ్దాల కారణంగా లక్ష్యం గుర్తించడం కష్టం. ఇతర శబ్దాలను ఎల్లప్పుడూ విస్మరించండి మరియు లక్ష్య శబ్దం ఉందా అని నివేదించడానికి ప్రయత్నించండి. అవును కోసం "Y" కీని మరియు NO కోసం "N" కీని ఉపయోగించండి.\n\nరిటర్న్ నొక్కండి లేదా మీరు సిద్ధంగా ఉన్న వెంటనే కొనసాగండి క్లిక్ చేయండి. ఇంటర్నెట్ కనెక్షన్ యొక్క వేగాన్ని బట్టి శబ్దాలు లోడ్ అయిన తర్వాత ప్రయోగం వెంటనే అదృశ్యమవుతుంది మరియు శబ్దాలు లోడ్ అయిన తర్వాత ప్రయోగం ప్రారంభమవుతుంది. భవిష్యత్ విడుదలలో ఈ ఆలస్యాన్ని తగ్గించడానికి మేము కృషి చేస్తున్నాము.\n\nశబ్దాలు లోడ్ అవుతోంది ...',
     kn: 'ಧ್ವನಿ ಪತ್ತೆ. ನೀವು ಅನೇಕ ಪ್ರಯೋಗಗಳ ಬ್ಲಾಕ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲಿದ್ದೀರಿ. ನೀವು ನಿರ್ದಿಷ್ಟ ಗುರಿ ಧ್ವನಿಯನ್ನು ಕಂಡುಹಿಡಿಯಲು ಪ್ರಯತ್ನಿಸುತ್ತಿದ್ದೀರಿ: ಒಂದು ಟಿಪ್ಪಣಿ, 8 ಬಾರಿ ಪುನರಾವರ್ತಿಸಲಾಗಿದೆ, ಯಾವಾಗಲೂ ಒಂದೇ ಟಿಪ್ಪಣಿ. ಆ ಗುರಿ ಯಾದೃಚ್ ly ಿಕವಾಗಿ ಅರ್ಧ ಪ್ರಯೋಗಗಳಲ್ಲಿ ಮಾತ್ರ ಇರುತ್ತದೆ. ಪ್ರತಿ ಪ್ರಯೋಗದಲ್ಲೂ, ನಿಮ್ಮ ಕೆಲಸವೆಂದರೆ ಅದು ಇದೆಯೇ ಎಂದು ಆಲಿಸಿ ಮತ್ತು ನಿರ್ಧರಿಸುವುದು, ಹೌದು ಅಥವಾ ಇಲ್ಲ. ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಗಳ ಆಧಾರದ ಮೇಲೆ ನೀವು ವಿಚಾರಣೆಯಿಂದ ವಿಚಾರಣೆಗೆ ಪ್ರಗತಿಯಲ್ಲಿರುವಾಗ, ಗುರಿ ಧ್ವನಿ ಪರಿಮಾಣವು ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ ಇದರಿಂದ ಅದು ಪತ್ತೆಹಚ್ಚಲಾಗುವುದಿಲ್ಲ. ಆರಂಭಿಕ ಅಭ್ಯಾಸ ಬ್ಲಾಕ್‌ನಲ್ಲಿ, ಗುರಿ ಏಕಾಂಗಿಯಾಗಿರುತ್ತದೆ. ನಂತರದ ಬ್ಲಾಕ್‌ಗಳಲ್ಲಿ, ಇತರ ಶಬ್ದಗಳ ಕಾರಣದಿಂದಾಗಿ ಗುರಿ ಪತ್ತೆಹಚ್ಚಲು ಕಷ್ಟವಾಗುತ್ತದೆ. ಇತರ ಶಬ್ದಗಳನ್ನು ಯಾವಾಗಲೂ ನಿರ್ಲಕ್ಷಿಸಿ, ಮತ್ತು ಗುರಿ ಧ್ವನಿ ಇದೆಯೇ ಎಂದು ವರದಿ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ. ಹೌದು ಗಾಗಿ "Y" ಕೀಲಿಯನ್ನು ಮತ್ತು "N" ಕೀಲಿಯನ್ನು ಇಲ್ಲ.\n\nರಿಟರ್ನ್ ಒತ್ತಿರಿ ಅಥವಾ ನೀವು ಸಿದ್ಧವಾದ ತಕ್ಷಣ ಮುಂದುವರಿಯಿರಿ ಕ್ಲಿಕ್ ಮಾಡಿ. ಮುಂದುವರಿಯುವ ಬಟನ್ ತಕ್ಷಣವೇ ಕಣ್ಮರೆಯಾಗುತ್ತದೆ, ಮತ್ತು ಶಬ್ದಗಳನ್ನು ಲೋಡ್ ಮಾಡಿದ ನಂತರ ಪ್ರಯೋಗವು ಪ್ರಾರಂಭವಾಗುತ್ತದೆ, ಇದು ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕದ ವೇಗವನ್ನು ಅವಲಂಬಿಸಿ 40 ಸೆಕೆಂಡುಗಳು ಅಥವಾ ಅದಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ. ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಯಲ್ಲಿ ಈ ವಿಳಂಬವನ್ನು ಕಡಿಮೆ ಮಾಡಲು ನಾವು ಕೆಲಸ ಮಾಡುತ್ತಿದ್ದೇವೆ.\n\nಶಬ್ದಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ...',
     bn: 'শব্দ সনাক্তকরণ। আপনি অনেক পরীক্ষার একটি ব্লক শুরু করতে চলেছেন। আপনি একটি নির্দিষ্ট টার্গেট শব্দ সনাক্ত করার চেষ্টা করছেন: একটি নোট, 8 বার পুনরাবৃত্তি, সর্বদা একই নোট। এই লক্ষ্যটি কেবল এলোমেলোভাবে অর্ধেক ট্রায়ালগুলিতে উপস্থিত রয়েছে। প্রতিটি পরীক্ষায়, আপনার কাজটি হ\'ল এটি উপস্থিত ছিল কিনা তা শুনতে এবং সিদ্ধান্ত নেওয়া, হ্যাঁ বা না। আপনার প্রতিক্রিয়াগুলির উপর ভিত্তি করে আপনি যখন ট্রায়াল থেকে বিচারে অগ্রগতি করেন, তখন লক্ষ্য সাউন্ড ভলিউমটি এমনভাবে মানিয়ে নেবে যাতে এটি সবে সনাক্তযোগ্য। প্রাথমিক অনুশীলন ব্লকে, লক্ষ্যটি একা থাকবে। পরবর্তী ব্লকগুলিতে, অন্যান্য শব্দগুলির কারণে লক্ষ্যটি সনাক্ত করা আরও শক্ত হবে। সর্বদা অন্যান্য শব্দগুলি উপেক্ষা করুন এবং হ্যাঁ বা না, লক্ষ্য শব্দটি উপস্থিত ছিল কিনা তা প্রতিবেদন করার চেষ্টা করুন। হ্যাঁ জন্য "y" কী এবং নং এর জন্য "এন" কী ব্যবহার করুন।\n\nহিট রিটার্ন বা আপনি প্রস্তুত হওয়ার সাথে সাথে এগিয়ে যান ক্লিক করুন। প্রসেস বোতামটি অবিলম্বে অদৃশ্য হয়ে যাবে এবং শব্দগুলি লোড হয়ে গেলে পরীক্ষাটি শুরু হবে, যা ইন্টারনেট সংযোগের গতির উপর নির্ভর করে 40 সেকেন্ড বা তার বেশি সময় নেয়। আমরা ভবিষ্যতের প্রকাশে এই বিলম্বটি সংক্ষিপ্ত করার জন্য কাজ করছি।\n\nলোডিং শব্দ ...',
     id: 'Deteksi suara. Anda akan memulai satu blok dari banyak uji coba. Anda mencoba mendeteksi suara target tertentu: satu catatan, diulangi 8 kali, selalu nada yang sama. Target itu hanya hadir pada setengah uji coba, secara acak. Pada setiap percobaan, pekerjaan Anda adalah mendengarkan dan memutuskan apakah itu ada, ya atau tidak. Saat Anda maju dari percobaan ke percobaan, berdasarkan tanggapan Anda, volume suara target akan beradaptasi sehingga hampir tidak terdeteksi. Di blok latihan awal, target akan sendirian. Di blok selanjutnya, target akan lebih sulit dideteksi karena suara lainnya. Selalu abaikan suara lainnya, dan coba laporkan, ya atau tidak, apakah suara target ada. Gunakan tombol "y" untuk Ya dan tombol "n" untuk tidak.\n\nTekan kembali atau klik lanjutkan segera setelah Anda siap. Tombol Prosed akan segera hilang, dan percobaan akan dimulai setelah suara dimuat, yang membutuhkan waktu 40 detik atau lebih, tergantung pada kecepatan koneksi internet. Kami berupaya mempersingkat penundaan ini dalam rilis di masa mendatang.\n\nMemuat suara ...',
@@ -5541,8 +6140,10 @@ export const phrases = {
       "声音检测。您将开始进行许多试验。您正在尝试检测特定的目标声音：一个音符，重复8次，总是相同的音符。该目标仅在一半的试验中存在。在每个试验中，您的工作是倾听并确定是否在场，是还是否。随着您从试验的进行，根据您的响应，目标声音量将适应，因此几乎无法检测到。在最初的练习块中，目标将是一个人。在以后的块中，由于其他声音，目标将很难检测到。始终忽略其他声音，并尝试报告，是或否，是否存在目标声音。使用“是”的“ y”键，而“ n”键否。\n\n点击返回或单击，请尽快进行。继续按钮将立即消失，一旦加载声音，实验将开始，这取决于Internet连接的速度，需要40秒或更长时间。我们正在努力在以后的版本中缩短这一延迟。\n\n加载声音...",
     "zh-HK":
       "聲音檢測。您將開始進行許多試驗。您正在嘗試檢測特定的目標聲音：一個音符，重複8次，總是相同的音符。該目標僅在一半的試驗中存在。在每個試驗中，您的工作是傾聽並確定是否在場，是還是否。隨著您從試驗的進行，根據您的響應，目標聲音量將適應，因此幾乎無法檢測到。在最初的練習塊中，目標將是一個人。在以後的塊中，由於其他聲音，目標將很難檢測到。始終忽略其他聲音，並嘗試報告，是或否，是否存在目標聲音。使用“是”的“ y”鍵，而“ n”鍵否。\n\n點擊返回或單擊，請盡快進行。繼續按鈕將立即消失，一旦加載聲音，實驗將開始，這取決於Internet連接的速度，需要40秒或更長時間。我們正在努力在以後的版本中縮短這一延遲。\n\n加載聲音...",
-    ja: "音の検出。多くの試験のブロックを開始しようとしています。特定のターゲットサウンドを検出しようとしています。1つのメモ、8回繰り返され、常に同じメモです。そのターゲットは、ランダムに試行の半分にのみ存在します。各トライアルでは、あなたの仕事は、それが存在するかどうかを聞いて決定することです。応答に基づいて、試用から試用へと進むにつれて、ターゲットの音量が適応して、ほとんど検出できません。最初の練習ブロックでは、ターゲットは単独で行われます。後のブロックでは、他の音のためにターゲットを検出するのが難しくなります。常に他の音を無視し、ターゲットサウンドが存在するかどうかを報告してみてください。はいのために「Y」キーを使用し、「n」キーを使用します。\n\n返品を押すか、準備ができたらすぐにクリックしてください。続行ボタンはすぐに消え、インターネット接続の速度に応じて、サウンドがロードされると実験が開始されます。将来のリリースでこの遅延を短縮するために取り組んでいます。\n\n音の読み込み...",
+    ja: "音の検出。多くの試験のブロックを開始しようとしています。特定のターゲットサウンドを検出しようとしています。1つのメモ、8回繰り返され、常に同じメモです。そのターゲットは、ランダムに試行の半分にのみ存在します。各トライアルでは、あなたの仕事は、それが存在するかどうかを聞いて決定することです。応答に基づいて、試用から試用へと進むにつれて、ターゲットの音量が適応して、ほとんど検出できません。最初の練習ブロックでは、ターゲットは単独で行われます。後のブロックでは、他の音のためにターゲットを検出するのが難しくなります。常に他の音を無視し、ターゲットサウンドが存在するかどうかを報告してみてください。はいのために「Y」キーを使用し、「n」キーを使用します。\n\n返品を押すか、準備ができたらすぐにクリックしてください。進行ボタンはすぐに消え、インターネット接続の速度に応じて、サウンドがロードされると実験が開始されます。将来のリリースでこの遅延を短縮するために取り組んでいます。\n\n音の読み込み...",
     ko: '소리 감지. 많은 시련의 블록을 시작하려고합니다. 특정 대상 사운드를 감지하려고합니다. 하나의 음표, 8 번 반복, 항상 같은 음표입니다. 그 목표는 시험의 절반에만 존재합니다. 각 재판에서 귀하의 임무는 예, 그렇지 않은지를 듣고 결정하는 것입니다. 응답에 따라 시험에서 시험으로 진행하면 대상 사운드 볼륨이 거의 감지 할 수 있도록 적응합니다. 초기 연습 블록에서는 대상이 혼자가됩니다. 이후 블록에서는 다른 소리 때문에 대상이 감지하기가 더 어려워집니다. 항상 다른 소리를 무시하고 대상 사운드가 있는지 여부를보고하십시오. 예에 "y"키를 사용하고 "n"키를 사용하십시오.\n\n준비 되 자마자 반품을 누르거나 클릭하십시오. 진행 버튼은 즉시 사라지고 사운드가로드되면 실험이 시작되며 인터넷 연결 속도에 따라 40 초 이상이 걸립니다. 우리는 향후 릴리스 에서이 지연을 단축하기 위해 노력하고 있습니다.\n\n소리로드 ...',
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdSoundCheck: {
     "en-US":
@@ -5574,10 +6175,12 @@ export const phrases = {
       "您好。請點擊“嗶”以確認此電腦的聲音播放功能沒有問題。順帶一提，當您每正確完成一次試驗時，您將聽到相同的“嗶”聲。",
     ja: "こんにちは。ピーボタンをクリックしてこのコンピュータの音が機能していることを確認してください。ちなみに、テストでは正解する度にこの音が鳴ります。",
     ko: "안녕하세요. 경고음 버튼을 클릭 하여이 컴퓨터의 사운드가 작동하는지 확인하십시오. 당신은 당신의 대답이 옳을 때마다 그런 경고음을들을 것입니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdSoundNewTrial: {
     "en-US": "Hit the SPACE bar to hear the next trial.",
-    de: "Schlagen Sie die Space Bar, um den nächsten Prozess zu hören.",
+    de: "Schlagen Sie die Space Bar, um den nächsten Versuch zu hören.",
     fr: "Frappez la barre spatiale pour entendre le prochain essai.",
     es: "Golpea la barra espacial para escuchar la próxima prueba.",
     pt: "Bata na barra de espaço para ouvir o próximo julgamento.",
@@ -5602,6 +6205,8 @@ export const phrases = {
     "zh-HK": "登上太空酒吧，聽到下一個審判。",
     ja: "次のトライアルを聞くためにスペースバーを押してください。",
     ko: "다음 시험을 들으려면 우주 막대를 치십시오.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdSoundResponse: {
     "en-US": "Was the target sound present? Press y or n.",
@@ -5630,10 +6235,12 @@ export const phrases = {
     "zh-HK": "目標聲音存在嗎？按y或n。",
     ja: "ターゲットサウンドは存在していましたか？ yまたはnを押します。",
     ko: "대상 사운드가 존재 했습니까? y 또는 n을 누릅니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_thresholdTitle: {
     "en-US": "Welcome to EasyEyes Threshold.",
-    de: "Willkommen bei Easyeyes -Schwellenwert.",
+    de: "Willkommen bei Easyeyes -Schwelle.",
     fr: "Bienvenue dans le seuil EasyEyes.",
     es: "Bienvenido a EasyEyes Threshold.",
     pt: "Bem -vindo ao limiar easyeyes.",
@@ -5658,6 +6265,8 @@ export const phrases = {
     "zh-HK": "歡迎使用 EasyEyes Threshold。",
     ja: "EasyEyes Thresholdへようこそ。",
     ko: "Easyeyes 임계 값에 오신 것을 환영합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
   T_whyClick: {
     "en-US":
@@ -5689,5 +6298,7 @@ export const phrases = {
       "在此區組中請使用鼠標而非鍵盤，因為點擊鼠標可以讓您在合適的時機看合適的位置。",
     ja: "このブロックでは、キーボードの代わりにクリックを使用します。クリックが適切なタイミングで適切な場所に目を向けるためです。",
     ko: "이 블록에서는 키보드 대신 클릭을 사용합니다.",
+    __EMPTY: "",
+    __EMPTY_1: "",
   },
 };
