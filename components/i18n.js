@@ -34,7 +34,7 @@ export const phrases = {
     __EMPTY: "",
     __EMPTY_1: "",
   },
-  xEE_languageUseSpace: {
+  EE_languageUseSpace: {
     "en-US": "1",
     de: "1",
     fr: "1",
@@ -433,7 +433,7 @@ export const phrases = {
     "zh-HK":
       "如其描述中所述，這項研究需要在DDD上運行至少222個CPU內核的BBB瀏覽器（版本至少為111）",
     ja: "その説明に記載されているように、この調査では、少なくとも222 CPUコアのあるDDDで実行されているBBBブラウザ（少なくとも111バージョン）が必要です。",
-    ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어가있는 DDD에서 실행되는 BBB 브라우저 (111 개 이상)가 필요합니다.",
+    ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어가있는 DDD에서 실행되는 BBB 브라우저 (111 개)가 필요합니다.",
     __EMPTY: "",
     __EMPTY_1: "",
   },
@@ -1566,7 +1566,7 @@ export const phrases = {
     __EMPTY: "",
     __EMPTY_1: "",
   },
-  xRC_distanceTrackingIntroStart: {
+  RC_distanceTrackingIntroStart: {
     "en-US": "",
     de: "",
     fr: "",
@@ -2638,7 +2638,7 @@ export const phrases = {
     ml: "ഈ സ്ക്രീനിന്റെ വലുപ്പം ഞങ്ങൾ അളക്കും. ഹാൻഡി തിരഞ്ഞെടുക്കാൻ പുൾ-ഡ menu ൺ മെനു ഉപയോഗിക്കുക. നിങ്ങൾക്ക് ഏതെങ്കിലും സാധാരണ യുഎസ്ബി കണക്റ്റർ (നിങ്ങളുടെ കമ്പ്യൂട്ടറിന് നൽകുന്ന ഒന്ന് ഉൾപ്പെടെ) അല്ലെങ്കിൽ ഒരു ക്രെഡിറ്റ് കാർഡ് (അല്ലെങ്കിൽ ഒരേ വലുപ്പത്തിലുള്ള ഏതെങ്കിലും കാർഡ്) ഉപയോഗിക്കാം. നിങ്ങളുടെ ഒബ്ജക്റ്റ് സ്ക്രീനിൽ വയ്ക്കുക നിങ്ങളുടെ ഒബ്ജക്റ്റിന്റെ വലുപ്പവുമായി പൊരുത്തപ്പെടുന്നതിന് ഇമേജ് ക്രമീകരിക്കുന്നതിന് സ്ലൈഡർ നീക്കുക. തുടരുമ്പോൾ, തുടരുന്നതിന് റിട്ടേൺ അമർത്തുക (അല്ലെങ്കിൽ ശരി ക്ലിക്കുചെയ്യുക).",
     te: "మేము ఈ స్క్రీన్ పరిమాణాన్ని కొలుస్తాము. సులభమైనదాన్ని ఎంచుకోవడానికి పుల్-డౌన్ మెనుని ఉపయోగించండి. మీరు ఏదైనా సాధారణ USB కనెక్టర్‌ను (మీ కంప్యూటర్‌కు శక్తితో అందించే వాటితో సహా) లేదా క్రెడిట్ కార్డు (లేదా ఒకే పరిమాణంలోని ఏదైనా కార్డు) ఉపయోగించవచ్చు. మీ వస్తువు యొక్క పరిమాణానికి సరిపోయేలా మీ వస్తువును తెరపై ఉంచండి మరియు చిత్రాన్ని సర్దుబాటు చేయడానికి స్లైడర్‌ను తరలించండి. అవి సరిపోలినప్పుడు, కొనసాగడానికి రిటర్న్ నొక్కండి (లేదా సరే క్లిక్ చేయండి).",
     kn: "ನಾವು ಈ ಪರದೆಯ ಗಾತ್ರವನ್ನು ಅಳೆಯುತ್ತೇವೆ. ಸೂಕ್ತವಾದದ್ದನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಪುಲ್-ಡೌನ್ ಮೆನು ಬಳಸಿ. ನೀವು ಯಾವುದೇ ಸಾಮಾನ್ಯ ಯುಎಸ್‌ಬಿ ಕನೆಕ್ಟರ್ (ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‌ಗೆ ಶಕ್ತಿಯನ್ನು ಒದಗಿಸುವ ಒಂದು ಸೇರಿದಂತೆ) ಅಥವಾ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ (ಅಥವಾ ಒಂದೇ ಗಾತ್ರದ ಯಾವುದೇ ಕಾರ್ಡ್) ಅನ್ನು ಬಳಸಬಹುದು. ನಿಮ್ಮ ವಸ್ತುವಿನ ಗಾತ್ರವನ್ನು ಹೊಂದಿಸಲು ಚಿತ್ರವನ್ನು ಹೊಂದಿಸಲು ನಿಮ್ಮ ವಸ್ತುವನ್ನು ಪರದೆಯ ಮೇಲೆ ಇರಿಸಿ ಮತ್ತು ಸ್ಲೈಡರ್ ಅನ್ನು ಸರಿಸಿ. ಅವರು ಹೊಂದಿಕೆಯಾದಾಗ, ಮುಂದುವರಿಯಲು ರಿಟರ್ನ್ ಒತ್ತಿರಿ (ಅಥವಾ ಸರಿ ಕ್ಲಿಕ್ ಮಾಡಿ).",
-    bn: "আমরা এই পর্দার আকার পরিমাপ করব। সহজ কিছু চয়ন করতে পুল-ডাউন মেনু ব্যবহার করুন। আপনি যে কোনও সাধারণ ইউএসবি সংযোগকারী (আপনার কম্পিউটারে পাওয়ার সরবরাহকারী একটি সহ) বা ক্রেডিট কার্ড (বা একই আকারের কোনও কার্ড) ব্যবহার করতে পারেন। আপনার অবজেক্টটি স্ক্রিনে রাখুন এবং আপনার বস্তুর আকারের সাথে মেলে চিত্রটি সামঞ্জস্য করতে স্লাইডারটি সরান। যখন তারা মেলে, এগিয়ে যেতে রিটার্ন (বা ওকে ক্লিক করুন) টিপুন।",
+    bn: "আমরা এই পর্দার আকার পরিমাপ করব। সহজ কিছু চয়ন করতে পুল-ডাউন মেনুটি ব্যবহার করুন। আপনি যে কোনও সাধারণ ইউএসবি সংযোগকারী (আপনার কম্পিউটারে পাওয়ার সরবরাহকারী একটি সহ) বা ক্রেডিট কার্ড (বা একই আকারের কোনও কার্ড) ব্যবহার করতে পারেন। আপনার অবজেক্টটি স্ক্রিনে রাখুন এবং আপনার বস্তুর আকারের সাথে মেলে চিত্রটি সামঞ্জস্য করতে স্লাইডারটি সরান। যখন তারা মেলে, এগিয়ে যেতে রিটার্ন (বা ওকে ক্লিক করুন) টিপুন।",
     id: "Kami akan mengukur ukuran layar ini. Gunakan menu pull-down untuk memilih sesuatu yang berguna. Anda dapat menggunakan konektor USB umum apa pun (termasuk yang memberikan daya ke komputer Anda) atau kartu kredit (atau kartu apa pun dengan ukuran yang sama). Tempatkan objek Anda di layar dan pindahkan slider untuk menyesuaikan gambar agar sesuai dengan ukuran objek Anda. Saat mereka cocok, tekan kembali (atau klik OK) untuk melanjutkan.",
     "zh-CN":
       "我们将测量此屏幕的大小。使用下拉菜单选择方便的东西。您可以使用任何常见的USB连接器（包括为计算机提供电源的连接器）或信用卡（或任何相同尺寸的卡）。将对象放在屏幕上，然后移动滑块以调整图像以匹配对象的大小。匹配时，按返回（或单击“确定”）继续进行。",
@@ -3275,7 +3275,7 @@ export const phrases = {
     __EMPTY: "",
     __EMPTY_1: "",
   },
-  xRC_soundCalibrationTitle: {
+  RC_soundCalibrationTitle: {
     "en-US": "Measure Sound Level at 1000 Hz",
     de: "Messen Sie den Schallpegel bei 1000 Hz",
     fr: "Mesurer le niveau sonore à 1000 Hz",
@@ -5644,7 +5644,7 @@ export const phrases = {
   T_readyPressSpaceRepeatedLetters: {
     "en-US":
       "Ready to identify the letters? While looking directly at the center of the cross hairs, please press the SPACE bar.",
-    de: "Bereit, die Buchstaben zu identifizieren? Während Sie direkt in die Mitte der Cross -Haare schauen, drücken Sie bitte die Raumleiste.",
+    de: "Bereit, die Buchstaben zu identifizieren? Während Sie direkt in die Mitte der Cross -Haare schauen, drücken Sie bitte die Weltraumleiste.",
     fr: "Prêt à identifier les lettres? Tout en regardant directement le centre des poils, veuillez appuyer sur la barre d'espace.",
     es: "¿Listo para identificar las letras? Mientras mira directamente al centro de la cruz, presione la barra espacial.",
     pt: "Pronto para identificar as letras? Enquanto olha diretamente para o centro dos cabelos cruzados, pressione a barra de espaço.",
@@ -5675,7 +5675,7 @@ export const phrases = {
   T_readyPressSpaceRsvpReading: {
     "en-US":
       "Ready to read some words? While looking directly at the center of the cross hairs, please press the SPACE bar.",
-    de: "Bereit, ein paar Wörter zu lesen? Während Sie direkt in die Mitte der Cross -Haare schauen, drücken Sie bitte die Raumleiste.",
+    de: "Bereit, ein paar Wörter zu lesen? Während Sie direkt in die Mitte der Cross -Haare schauen, drücken Sie bitte die Weltraumleiste.",
     fr: "Prêt à lire quelques mots? Tout en regardant directement le centre des poils, veuillez appuyer sur la barre d'espace.",
     es: "¿Listo para leer algunas palabras? Mientras mira directamente al centro de la cruz, presione la barra espacial.",
     pt: "Pronto para ler algumas palavras? Enquanto olha diretamente para o centro dos cabelos cruzados, pressione a barra de espaço.",
@@ -5768,7 +5768,7 @@ export const phrases = {
   T_readyPressSpaceOrClickCrosshairRsvpReading: {
     "en-US":
       "Ready to read some words? While looking directly at the center of the cross hairs, please press the SPACE bar.",
-    de: "Bereit, ein paar Wörter zu lesen? Während Sie direkt in die Mitte der Cross -Haare schauen, drücken Sie bitte die Raumleiste.",
+    de: "Bereit, ein paar Wörter zu lesen? Während Sie direkt in die Mitte der Cross -Haare schauen, drücken Sie bitte die Weltraumleiste.",
     fr: "Prêt à lire quelques mots? Tout en regardant directement le centre des poils, veuillez appuyer sur la barre d'espace.",
     es: "¿Listo para leer algunas palabras? Mientras mira directamente al centro de la cruz, presione la barra espacial.",
     pt: "Pronto para ler algumas palavras? Enquanto olha diretamente para o centro dos cabelos cruzados, pressione a barra de espaço.",
