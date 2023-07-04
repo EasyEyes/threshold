@@ -39,11 +39,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateMicrophonesBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "🕑 _calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibratePhoneMicBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      "_calibratePhoneMicBool (default FALSE) enables calibration of a new smartphone microphone. This is intended solely for use by scientists, and requires a calibrated reference microphone, initially just the miniDSP UMIK-1 (available from miniDSP for $79). The new calibration file will be added to the EasyEyes library of phone calibrations.",
+      "_calibratePhoneMicBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -63,7 +73,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundAssumingICalibDBSPL (default 76) is a calibration factor for iPhone recordings. The physical sound level (in dB SPL) is iCalib+20*log10(rms), where rms is the root mean square of the digital sound recording. The value we got from the internet was 104.9. The value we use is based on our calibration of an iPhone 12 Pro by the UMIK-1 digital microphone and the REW software, which reads the (90 deg, i.e. vertically oriented) factory calibration of the UMIK-1 microphone. The scientist can override the current default by setting this parameter in the experiment table. The compiler allows you to provide a different value for each condition, but in fact it's used only once, during calibration, and I suppose we use the value provided for the first condition. The value of iCalib is included in the Sound Calibration report, both on screen, and in the CSV file that you can optionally download.",
+      "❌ _calibrateSoundAssumingICalibDBSPL (default 76) is a calibration factor for iPhone recordings. The physical sound level (in dB SPL) is iCalib+20*log10(rms), where rms is the root mean square of the digital sound recording. The value we got from the internet was 104.9. The value we use is based on our calibration of an iPhone 12 Pro by the UMIK-1 digital microphone and the REW software, which reads the (90 deg, i.e. vertically oriented) factory calibration of the UMIK-1 microphone. The scientist can override the current default by setting this parameter in the experiment table. The compiler allows you to provide a different value for each condition, but in fact it's used only once, during calibration, and I suppose we use the value provided for the first condition. The value of iCalib is included in the Sound Calibration report, both on screen, and in the CSV file that you can optionally download.",
     type: "numerical",
     default: "76",
     categories: "",
@@ -251,16 +261,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "hdrMovie, tenBit",
   },
   {
-    name: "_needSmartphoneTooBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "🕑 If TRUE, _needSmartphoneTooBool (default FALSE) asks the participant if, in addition to whatever device is running the experiment, they have a smartphone available for use by EasyEyes (either for sound calibration or remote keypad). EasyEyes just asks, without verifying. Verification will happen later, when the QR code is shown to recruit the smartphone. \n[We have not yet considered, in the case of an experiment running on an iPad or iPhone, whether we could use its built-in mic to calibrate its loudspeaker, eliminating the need for a second device.] \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "_needOperatingSystem",
     availability: "now",
     example: "macOS,Windows",
@@ -289,6 +289,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "🕑 _needScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. In each block, needScreenHeightUpToDeg and needScreenWidthUpToDeg are each combined with needTargetSizeDownToDeg to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. ",
     type: "integer",
     default: "",
+    categories: "",
+  },
+  {
+    name: "_needSmartphoneTooBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "🕑 If TRUE, _needSmartphoneTooBool (default FALSE) asks the participant if, in addition to whatever device is running the experiment, they have a smartphone available for use by EasyEyes (either for sound calibration or remote keypad). EasyEyes just asks, without verifying. Verification will happen later, when the QR code is shown to recruit the smartphone. \n[We have not yet considered, in the case of an experiment running on a smartphone, whether we could use its built-in mic to calibrate its loudspeaker, eliminating the need for a second device.] \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -718,6 +728,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_showSoundCalibrationResultsBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_showSoundCalibrationResultsBool (default TRUE) requests displaying the plots and tables of the calibration results immediately after each sound calibration (the loudspeaker and each microphone). These plots and tables are impressive, and might interest the participant. If that seems distracting, this switch allows the scientist to disable that display. Each sound calibration includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "_showSoundTestPageBool",
+    availability: "now",
+    example: "",
+    explanation:
+      '_showSoundTestPageBool (default FALSE) requests the Sound Test page, after each sound calibration, to allow the "participant" (typically the scientist) to check the accuracy of sound calibration by using a control panel to produce several sounds at arbitrary sound levels, typically while measuring with a sound level meter. Each sound calibration (of the loudspeaker and each microphone) includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).',
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_trackGazeExternallyBool",
     availability: "now",
     example: "",
@@ -862,7 +892,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ Set calibrateSound1000HzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's internet-connected iPhone. Testing can be done at many sound levels to calibrate the effect of dynamic gain control, which is commonly used in laptops to protect small speakers. Early exit if no iPhone is available. Calibration is done only once, at the beginning, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses the calibration if and only if it sets calibrateSound1000HzBool TRUE. The parameters calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the all-Hz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. ",
+      "⭑ Set calibrateSound1000HzBool TRUE (default FALSE) to request loudspeaker (and possibly _calibrateMicrophonesBool) sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's pre-calibrated microphone (either in a smartphone or a USB-connected microphone). If the participant offers a smartphone, EasyEyes checks its library for that model in its library of microphone calibrations. Many sound levels are tested to calibrate the effect of clipping and dynamic gain control. Early exit if no calibrated microphone is available. Calibration is done only once, at the beginning, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses the 1000 Hz calibration if and only if it sets calibrateSound1000HzBool TRUE. The parameters calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the all-Hz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. Once, the loudspeaker is calibrated, if _calibrateMicrophonesBool is TRUE, then EasyEyes offers to calibrate microphones, one at a time.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -872,7 +902,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "-3",
     explanation:
-      "⭑ calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. The iPhone microphone does severe dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. The iPhone and its dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration.",
+      "⭑ calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
     type: "text",
     default: "-60, -50, -40, -30, -20, -15, -10, -3.1",
     categories: "",
@@ -882,7 +912,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ Set calibrateSoundAllHzBool TRUE (default FALSE) to request sound gain calibration (db SPL re numerical dB) at all frequencies, relative to 1000 Hz, using the participant's internet-connected iPhone/iPad. This is done by using the iPhone/iPad to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no iPhone/iPad is available. It's ok for the pariticipant try several devices before finding an iPhone/iPad that's compatible. Calibration is done once, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateSoundAllHzBool TRUE.  calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the allHz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. ",
+      "⭑ Set calibrateSoundAllHzBool TRUE (default FALSE) to request loudspeaker (and possibly _calibrateMicrophonesBool) sound gain calibration (db SPL re numerical dB) at all frequencies, relative to 1000 Hz, using the participant's pre-calibrated smartphone microphone or USB-connected microphone. If the participant offers a smartphone, EasyEyes checks our library for that smartphone model in its library of microphone calibrations. The microphone is used to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no pre-calibrated microphone is available. It's ok for the pariticipant try several smartphones before finding one that's in the EasyEyes microphone calibration library. Calibration is done once, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateSoundAllHzBool TRUE.  calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the allHz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. Once, the loudspeaker is calibrated, if _calibrateMicrophonesBool is TRUE, then EasyEyes offers to calibrate microphones, one at a time.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -948,16 +978,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibrateTrackDistanceCheckCm",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 calibrateTrackDistanceCheckCm (default 25, 35, 50, 70, 100, 140, 160, 180) is a comma-separated list of viewing distances (in cm) that will be checked if calibrateTrackDistanceCheckBool=TRUE. ",
-    type: "text",
-    default: "25, 35, 50, 70, 100, 140, 160, 180",
-    categories: "",
-  },
-  {
     name: "calibrateTrackDistanceCheckBool",
     availability: "now",
     example: "FALSE",
@@ -968,6 +988,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "calibrateTrackDistanceCheckCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 calibrateTrackDistanceCheckCm (default 25, 35, 50, 70, 100, 140, 160, 180) is a comma-separated list of viewing distances (in cm) that will be checked if calibrateTrackDistanceCheckBool=TRUE. ",
+    type: "text",
+    default: "25, 35, 50, 70, 100, 140, 160, 180",
+    categories: "",
+  },
+  {
     name: "calibrateTrackGazeBool",
     availability: "now",
     example: "FALSE",
@@ -975,6 +1005,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "❌ WORKS BUT NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG, AND IT REQUIRES FREQUENT RECALIBRATION, WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "closestPointEccentricitySetting",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 VIEWING GEOMETRY\nviewingDistanceCm = distance from eye to closest point.\nclosestPointXYInUnitSquare=[0.8 0.5]; % Rough location of closest point in screenRect re lower left corner.\nclosestPointXYPix % screen coordinate of point on screen closest to viewer's eyes. Y goes down.\nclosestPointXYDeg % eccentricity of closest point re fixation. Y goes up.\nclosestPointEccentricitySetting\n1. Set closestPointXYPix according to closestPointXYInUnitSquare.\n2. If closestPointEccentricitySetting==\n'target', then set closestPointXYDeg=eccentricityXYDeg\n'fixation', then set closestPointXYDeg=[0 0].\n'value', then assume closestPointXYDeg is already set.\n3. Ask viewer to adjust display so desired closest point is at desired\nviewing distance and orthogonal to line of sight from eye.\n4. If using off-screen fixation, put fixation at same distance from eye\nas the closest point, and compute its position relative to closest point.",
+    type: "",
+    default: "",
     categories: "",
   },
   {
@@ -1349,16 +1389,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "internationalPhrasesURL",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 internationalPhrasesURL accepts a URL to a Google Sheets doc, similar to EasyEyes International Phrases, but set up by the Scientist. When it's provided in a condition, the instructionForXXX parameters for that condition, rather than literal text, accept a phrase name, like EE_Welcome, and pull the named phrase in the current language from the Sheets doc pointed to by internationalPhrasesURL. internationalPhrasesURL can provide a URL (same or different) for each condition that needs it. Each condition operates independently of the rest. For the table to be valid it must include the first 4 rows of the EasyEyes International Phrases: language, EE_languageDirection, EE_languageUseSpace, EE_languageFont. Allowing multiple phrase tables with different language coverage seems needlessly confusing for all concerned, so just copy the first four rows (all the columns) of the EasyEyes International Phrases spreadsheet, and add new rows below, one for each new phrase. Our international phrases doc is designed to make it easy for us to add new languages (by adding a new column for each language). Please send your request to denis.pelli@nyu.edu. He will need to know: the ISO two-letter code for the language (https://www.sitepoint.com/iso-2-letter-language-codes/), the language direction (left to right or right to left), and whether it uses spaces. Once EasyEyes adds a new language, the EasyEyes compiler will insist that every scientist's internationalPhrasesURL Google Sheets doc also include that language. ",
-    type: "text",
-    default: "",
-    categories: "",
-  },
-  {
     name: "instructionForResponseWhere",
     availability: "now",
     example: "topLeft",
@@ -1396,6 +1426,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '🕑 English name for the language used for instructions to the participant. It must be "participant" or match one of the entries in the second row of the EasyEyes International phrases sheet. If you enter "participant", then the participant will be allowed to select the instruction language from a pull-down menu.',
     type: "categorical",
     default: "English",
+    categories: "",
+  },
+  {
+    name: "internationalPhrasesURL",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 internationalPhrasesURL accepts a URL to a Google Sheets doc, similar to EasyEyes International Phrases, but set up by the Scientist. When it's provided in a condition, the instructionForXXX parameters for that condition, rather than literal text, accept a phrase name, like EE_Welcome, and pull the named phrase in the current language from the Sheets doc pointed to by internationalPhrasesURL. internationalPhrasesURL can provide a URL (same or different) for each condition that needs it. Each condition operates independently of the rest. For the table to be valid it must include the first 4 rows of the EasyEyes International Phrases: language, EE_languageDirection, EE_languageUseSpace, EE_languageFont. Allowing multiple phrase tables with different language coverage seems needlessly confusing for all concerned, so just copy the first four rows (all the columns) of the EasyEyes International Phrases spreadsheet, and add new rows below, one for each new phrase. Our international phrases doc is designed to make it easy for us to add new languages (by adding a new column for each language). Please send your request to denis.pelli@nyu.edu. He will need to know: the ISO two-letter code for the language (https://www.sitepoint.com/iso-2-letter-language-codes/), the language direction (left to right or right to left), and whether it uses spaces. Once EasyEyes adds a new language, the EasyEyes compiler will insist that every scientist's internationalPhrasesURL Google Sheets doc also include that language. ",
+    type: "text",
+    default: "",
     categories: "",
   },
   {
@@ -1709,6 +1749,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "needEasyEyesKeypadBeyondCm",
+    availability: "now",
+    example: "40",
+    explanation:
+      "🕑 needEasyEyesKeypadBeyondCm (default 60). If the required viewingDistanceCm exceeds this threshold then EasyEyes will recruit the participant's smartphone (at the beginning of the experiment) and activate a keypad/trackpad on that smartphone during each block that requires it. The phone will be recruited at the beginning of the experiment (on the compatibility page), and will remain connected until the end of the experiment.The keypad will be activate only for blocks with a viewingDistanceCm that exceeds the threshold. While the keypad is active, the participant is free to click or type on either or both the standard and EasyEyes keypad/trackpad. Setting this to zero will always provide the remote keypad. Setting it to a large value, greater than all viewing distances used, will never provide it.\n\nCurrently we recruit the phone at the beginning of the first block that needs it. Let's change that to recruit the phone at the beginning of the experiment, on the compatibility page. If we can't recruit it, there's no point in running the experiment. \n\nI don't know if we disconnect at the end of the block, or the end of the last block that needs it, or just leave it connected until the end of the experiment. I think I prefer disconnecting after the last block that needs it. Some experiments will use the smartphone both as keypad AND for sound calibration. Sound calibration is done before the first block, so it will always come first. Requiring separate recruitment for each use is tolerable, but it would be nicer if participant could just recruit the smartphone once for the whole experiment. \n\nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis's requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone's keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say \"Connection lost.\" and offer a \"Reconnect\" button.\n\n",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "needScreenHeightUpToDeg",
     availability: "now",
     example: "30",
@@ -1759,16 +1809,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "readingCorpusShuffleBool",
-    availability: "now",
-    example: "",
-    explanation:
-      '🕑 readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace character is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. WE SHOULD REMOVE TRAILING PUNCTUATION FROM EACH WORD.',
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "readingCorpus",
     availability: "now",
     example: "the-phantom-tollbooth.txt",
@@ -1785,6 +1825,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation: "🕑 readingCorpusEndlessBool",
     type: "boolean",
     default: "",
+    categories: "",
+  },
+  {
+    name: "readingCorpusShuffleBool",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑 readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace character is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. WE SHOULD REMOVE TRAILING PUNCTUATION FROM EACH WORD.',
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -1978,21 +2028,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "responseMustTrackCrosshairBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "⭑ For the participant to get target presentation, responseMustTrackCrosshairBool=TRUE overrules all other response boolean parameters, and target presentation can be requested only by cursor tracking of the crosshair center. We suppose good fixation of the crosshair while it is tracked. responseMustTrackCrosshairBool has no effect on other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool. \n     If responseMustTrackCrosshairBool=TRUE, when EasyEyes begins a trial, it enters a loop. First it loads a countdown timer with the required tracking duration, which is randomly sampled from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The countdown begins when the cursor is first within markingFixationHotSpotRadiusDeg of the crosshair center. When the countdown reaches zero, EasyEyes again checks whether the cursor is within markingFixationHotSpotRadiusDeg of the crosshair center. If yes, then EasyEyes exits the loop, and the target is immediately presented. If not, then EasyEyes returns to the beginning of the loop, selecting a new random tracking duration.",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
     name: "responseMustTrackContinuouslyBool",
     availability: "now",
     example: "",
     explanation:
       "responseMustTrackContinuouslyBool (default TRUE) when TRUE requires that the cursor be within the hotspot for the entire (random) waiting interval, not just the beginning and end. If the cursor is ever outside the hotspot during the waiting interval then the software begins, again, waiting for the cursor to enter the hotspot, to begin a new waiting intevale (whose duration is a fresh random sample).",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "responseMustTrackCrosshairBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "⭑ For the participant to get target presentation, responseMustTrackCrosshairBool=TRUE overrules all other response boolean parameters, and target presentation can be requested only by cursor tracking of the crosshair center. We suppose good fixation of the crosshair while it is tracked. responseMustTrackCrosshairBool has no effect on other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool. \n     If responseMustTrackCrosshairBool=TRUE, when EasyEyes begins a trial, it enters a loop. First it loads a countdown timer with the required tracking duration, which is randomly sampled from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The countdown begins when the cursor is first within markingFixationHotSpotRadiusDeg of the crosshair center. When the countdown reaches zero, EasyEyes again checks whether the cursor is within markingFixationHotSpotRadiusDeg of the crosshair center. If yes, then EasyEyes exits the loop, and the target is immediately presented. If not, then EasyEyes returns to the beginning of the loop, selecting a new random tracking duration.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -2073,16 +2123,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "FALSE",
     explanation:
       'responseTypedEasyEyesKeypadBool (default FALSE) = TRUE allows participant to provide any "typed" response by pressing a key in the EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings. \nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis\'s requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone\'s keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say "Connection lost." and offer a "Reconnect" button.\n\n',
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "needEasyEyesKeypadBeyondCm",
-    availability: "now",
-    example: "40",
-    explanation:
-      "🕑 needEasyEyesKeypadBeyondCm (default 60). If the required viewingDistanceCm exceeds this threshold then EasyEyes will recruit the participant's smartphone (at the beginning of the experiment) and activate a keypad/trackpad on that smartphone during each block that requires it. The phone will be recruited at the beginning of the experiment (on the compatibility page), and will remain connected until the end of the experiment.The keypad will be activate only for blocks with a viewingDistanceCm that exceeds the threshold. While the keypad is active, the participant is free to click or type on either or both the standard and EasyEyes keypad/trackpad. Setting this to zero will always provide the remote keypad. Setting it to a large value, greater than all viewing distances used, will never provide it.\n\nCurrently we recruit the phone at the beginning of the first block that needs it. Let's change that to recruit the phone at the beginning of the experiment, on the compatibility page. If we can't recruit it, there's no point in running the experiment. \n\nI don't know if we disconnect at the end of the block, or the end of the last block that needs it, or just leave it connected until the end of the experiment. I think I prefer disconnecting after the last block that needs it. Some experiments will use the smartphone both as keypad AND for sound calibration. Sound calibration is done before the first block, so it will always come first. Requiring separate recruitment for each use is tolerable, but it would be nicer if participant could just recruit the smartphone once for the whole experiment. \n\nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis's requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone's keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say \"Connection lost.\" and offer a \"Reconnect\" button.\n\n",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2459,7 +2499,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'soundGainTWR (default 100,10,100) is a comma-separated list of 3 numbers that is used with soundGainDBSPL to specifies the parameters of our model of dynamic range compression of sound in the iPhone microphone: T (in dB SPL), W (in dB), and R (dimensionless). Typically each number will have one digit after the decimal, e.g. "-100.1,-15.1,30.0".\nT is the "threshold" sound level (dB SPL) at the knee in the curve of outDbSPL vs inDb. The curve is straight at low and high sound levels (inDB+soundGainDbSpl<T-W/2 or inDb+soundGainDbSpl>T+W/2). Those lines would intersect at T, but the curve rounds the knee, as controlled by W.\nW is the "width" of the knee. The rounded knee extends from T-W/2 to T+W/2.\nR is the reciprocal of the slope of outDbSPL vs inDb at sound levels above T+W/2.\nIf calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. \nOur compression model (using T, W, and R) is Eq. 4 in Giannoulis et al. (2012).\nGiannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss (2012). Digital Dynamic Range Compressor Design –– A Tutorial and Analysis. Journal of Audio Engineering Society. Vol. 60, Issue 6, pp. 399–408.\nhttp://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf',
+      '❌ soundGainTWR (default 100,10,100) is a comma-separated list of 3 numbers that is used with soundGainDBSPL to specifies the parameters of our model of dynamic range compression of sound in the iPhone microphone: T (in dB SPL), W (in dB), and R (dimensionless). Typically each number will have one digit after the decimal, e.g. "-100.1,-15.1,30.0".\nT is the "threshold" sound level (dB SPL) at the knee in the curve of outDbSPL vs inDb. The curve is straight at low and high sound levels (inDB+soundGainDbSpl<T-W/2 or inDb+soundGainDbSpl>T+W/2). Those lines would intersect at T, but the curve rounds the knee, as controlled by W.\nW is the "width" of the knee. The rounded knee extends from T-W/2 to T+W/2.\nR is the reciprocal of the slope of outDbSPL vs inDb at sound levels above T+W/2.\nIf calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. \nOur compression model (using T, W, and R) is Eq. 4 in Giannoulis et al. (2012).\nGiannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss (2012). Digital Dynamic Range Compressor Design –– A Tutorial and Analysis. Journal of Audio Engineering Society. Vol. 60, Issue 6, pp. 399–408.\nhttp://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf',
     type: "text",
     default: "100,10,100",
     categories: "",
@@ -3032,16 +3072,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ Setting viewingDistanceNudgingBool TRUE (deafult is FALSE) enables the nudger. The nudger compares measured viewing distance to desired viewing distance, and if the ratio exceeds the range allowed by viewingDistanceAllowedRatio then it puts up a display (covering the whole screen) telling the participant to MOVE CLOSER or FARTHER, as appropriate. The display goes away when the participant is again within the allowed range. The viewing-distance nudger (\"Closer\", \"Farther\") gets the participant to the right distance. \n     We protect the stimulus from nudging. The nudger will never occlude, or forward or backward mask, the stimulus. Think of the trial as beginning at the participant's request for the stimulus (by keypress or clicking or tracking the crosshair) and ending at the click (or keypress) response. This leaves a pre-trial interval from the response until the click requesting the next trial. EasyEyes nudges only before and between trials. Furthermore, to prevent forward masking, EasyEyes ignores attempts to click (or press a key) during nudging and until targetSafetyMarginSec after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n\nPRE-TRIAL INTERVAL. We allow nudging from the time of response to the previous trial (click or keypress) until the participant requests a new trial (press space bar or click or track crosshair). \n\nSTIMULUS & RESPONSE INTERVALS. The stimulus and its memory are protected by disabling nudging from the moment of the participant's request for a new trial until the observer responds. \n\nFor now, the trial software sets the internal parameter nudgingAllowedBool to TRUE only during the pre-trial, and sets nudgingCancelsTrialBool to always be FALSE.  The scientist has no control over nudgingAllowedBool and nudgingCancelsTrialBool.\n\nIf we acquire the possibility of canceling a trial, then we could allow nudging during the stimulus interval, and immediately cancel that trial. Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. The current version of MultistairHandler doesn't cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial interval, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during the stimulus interval we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. \n",
     type: "boolean",
     default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "closestPointEccentricitySetting",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 VIEWING GEOMETRY\nviewingDistanceCm = distance from eye to closest point.\nclosestPointXYInUnitSquare=[0.8 0.5]; % Rough location of closest point in screenRect re lower left corner.\nclosestPointXYPix % screen coordinate of point on screen closest to viewer's eyes. Y goes down.\nclosestPointXYDeg % eccentricity of closest point re fixation. Y goes up.\nclosestPointEccentricitySetting\n1. Set closestPointXYPix according to closestPointXYInUnitSquare.\n2. If closestPointEccentricitySetting==\n'target', then set closestPointXYDeg=eccentricityXYDeg\n'fixation', then set closestPointXYDeg=[0 0].\n'value', then assume closestPointXYDeg is already set.\n3. Ask viewer to adjust display so desired closest point is at desired\nviewing distance and orthogonal to line of sight from eye.\n4. If using off-screen fixation, put fixation at same distance from eye\nas the closest point, and compute its position relative to closest point.",
-    type: "",
-    default: "",
     categories: "",
   },
 ];

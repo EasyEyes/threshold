@@ -21,6 +21,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  _calibrateMicrophonesBool: {
+    name: "_calibrateMicrophonesBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   _calibratePhoneMicBool: {
     name: "_calibratePhoneMicBool",
     availability: "now",
@@ -226,12 +232,6 @@ export const GLOSSARY: Glossary = {
     default: "",
     categories: ["hdrMovie", "tenBit"],
   },
-  _needSmartphoneTooBool: {
-    name: "_needSmartphoneTooBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
   _needOperatingSystem: {
     name: "_needOperatingSystem",
     availability: "now",
@@ -288,6 +288,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "integer",
     default: "",
+  },
+  _needSmartphoneTooBool: {
+    name: "_needSmartphoneTooBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
   },
   _needTimingToleranceSec: {
     name: "_needTimingToleranceSec",
@@ -1086,6 +1092,18 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  _showSoundCalibrationResultsBool: {
+    name: "_showSoundCalibrationResultsBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+  },
+  _showSoundTestPageBool: {
+    name: "_showSoundTestPageBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   _trackGazeExternallyBool: {
     name: "_trackGazeExternallyBool",
     availability: "now",
@@ -1214,23 +1232,29 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  calibrateTrackDistanceCheckCm: {
-    name: "calibrateTrackDistanceCheckCm",
-    availability: "now",
-    type: "text",
-    default: "25, 35, 50, 70, 100, 140, 160, 180",
-  },
   calibrateTrackDistanceCheckBool: {
     name: "calibrateTrackDistanceCheckBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
   },
+  calibrateTrackDistanceCheckCm: {
+    name: "calibrateTrackDistanceCheckCm",
+    availability: "now",
+    type: "text",
+    default: "25, 35, 50, 70, 100, 140, 160, 180",
+  },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
+  },
+  closestPointEccentricitySetting: {
+    name: "closestPointEccentricitySetting",
+    availability: "now",
+    type: "",
+    default: "",
   },
   conditionEnabledBool: {
     name: "conditionEnabledBool",
@@ -1464,12 +1488,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  internationalPhrasesURL: {
-    name: "internationalPhrasesURL",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
   instructionForResponseWhere: {
     name: "instructionForResponseWhere",
     availability: "now",
@@ -1496,6 +1514,12 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "English",
     categories: [""],
+  },
+  internationalPhrasesURL: {
+    name: "internationalPhrasesURL",
+    availability: "now",
+    type: "text",
+    default: "",
   },
   internationalTableURL: {
     name: "internationalTableURL",
@@ -1683,6 +1707,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
   },
+  needEasyEyesKeypadBeyondCm: {
+    name: "needEasyEyesKeypadBeyondCm",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
   needScreenHeightUpToDeg: {
     name: "needScreenHeightUpToDeg",
     availability: "now",
@@ -1708,12 +1738,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  readingCorpusShuffleBool: {
-    name: "readingCorpusShuffleBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
   readingCorpus: {
     name: "readingCorpus",
     availability: "now",
@@ -1725,6 +1749,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "",
+  },
+  readingCorpusShuffleBool: {
+    name: "readingCorpusShuffleBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
   },
   readingDefineSingleLineSpacingAs: {
     name: "readingDefineSingleLineSpacingAs",
@@ -1842,14 +1872,14 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
   },
-  responseMustTrackCrosshairBool: {
-    name: "responseMustTrackCrosshairBool",
+  responseMustTrackContinuouslyBool: {
+    name: "responseMustTrackContinuouslyBool",
     availability: "now",
     type: "boolean",
     default: "TRUE",
   },
-  responseMustTrackContinuouslyBool: {
-    name: "responseMustTrackContinuouslyBool",
+  responseMustTrackCrosshairBool: {
+    name: "responseMustTrackCrosshairBool",
     availability: "now",
     type: "boolean",
     default: "TRUE",
@@ -1898,12 +1928,6 @@ export const GLOSSARY: Glossary = {
   },
   responseTypedEasyEyesKeypadBool: {
     name: "responseTypedEasyEyesKeypadBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  needEasyEyesKeypadBeyondCm: {
-    name: "needEasyEyesKeypadBeyondCm",
     availability: "now",
     type: "boolean",
     default: "FALSE",
@@ -2515,12 +2539,6 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "FALSE",
-  },
-  closestPointEccentricitySetting: {
-    name: "closestPointEccentricitySetting",
-    availability: "now",
-    type: "",
-    default: "",
   },
 };
 
