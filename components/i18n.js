@@ -2798,7 +2798,7 @@ export const phrases = {
     "zh-HK":
       "為了啟用揚聲器校準，如果您有智能手機（或USB麥克風）方便，您是否在下面的列表中看到了它的品牌和型號？如果是這樣，請選擇它。否則，選擇“無匹配”。\n",
     ja: "スピーカーのキャリブレーションを有効にするために、スマートフォン（またはUSBマイク）が手元にある場合、以下のリストにそのメーカーとモデルが表示されますか？もしそうなら、それを選択してください。それ以外の場合は、「一致なし」を選択します。\n",
-    ko: '라우드 스피커 교정을 가능하게하려면 스마트 폰 (또는 USB 마이크)이 편리한 경우 아래 목록에 제조사 및 모델이 표시됩니까? 그렇다면 선택하십시오. 그렇지 않으면 "없음 일치"를 선택하십시오.\n',
+    ko: '라우드 스피커 교정을 가능하게하려면 스마트 폰 (또는 USB 마이크)이 편리한 경우 아래 목록에 제조사 및 모델이 표시됩니까? 그렇다면 선택하십시오. 그렇지 않으면 "없음"을 선택하십시오.\n',
     __EMPTY: "#VALUE!",
     __EMPTY_1: "#VALUE!",
   },
@@ -4014,7 +4014,7 @@ export const phrases = {
     pt: "Página xx1 de xx2. Bloco xx3 de xx4.",
     it: "Pagina xx1 di xx2. BLOCCO xx3 di xx4.",
     ro: "Pagina xx1 din xx2. Blocul xx3 din xx4.",
-    pl: "Strona xx1 z xx2. Blok xx3 xx4.",
+    pl: "Strona xx1 z xx2. Blok xx3 z xx4.",
     ru: "Страница xx1 xx2. Блок xx3 xx4.",
     hy: "Xx2 էջ xx1: Արգելափակել xx4- ի xx3- ը:",
     fi: "xx2: n sivu xx1. xx4: n lohko xx3.",
