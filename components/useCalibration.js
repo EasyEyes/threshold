@@ -244,7 +244,7 @@ export const calibrateAudio = async (reader) => {
       yes: phrases.RC_soundCalibrationYes[lang],
       no: phrases.RC_soundCalibrationNo[lang],
       qr: phrases.RC_soundCalibrationQR[lang],
-      holdiPhoneOK: phrases.RC_soundCalibrationHoldIPhoneOk[lang],
+      holdiPhoneOK: phrases.RC_soundCalibrationContinue[lang],
       clickToStart: phrases.RC_soundCalibrationClickToStart[lang],
       done: phrases.RC_soundCalibrationDone[lang],
       test: "Test", //include in phrases doc
