@@ -1,6 +1,6 @@
 import { KeyPress } from "../psychojs/src/core/index.js";
 import { rc, _key_resp_allKeys, thisExperimentInfo } from "./global";
-import { phrases } from "./i18n.js";
+import { readi18nPhrases } from "./readPhrases.js";
 import { logger } from "./utils";
 import { Receiver } from "virtual-keypad";
 
@@ -84,7 +84,7 @@ export class KeypadHandler {
   async initKeypad() {
     const handshakeCallback = () => {
       this.updateKeypadMessage(
-        phrases.T_keypadConnectedAndKeepReady[rc.language.value]
+        readi18nPhrases("T_keypadConnectedAndKeepReady", rc.language.value)
       );
       this.hideQRPopup();
     };
@@ -152,9 +152,14 @@ export class KeypadHandler {
       container.style.display = "block";
       container.style.zIndex = Infinity;
       subtitle.style.display = "block";
-      title.innerHTML = phrases.T_keypadScanQRCode[rc.language.value];
-      subtitle.innerHTML =
-        phrases.T_keypadScanQRCodeSubtitle[rc.language.value];
+      title.innerHTML = readi18nPhrases(
+        "T_keypadScanQRCode",
+        rc.language.value
+      );
+      subtitle.innerHTML = readi18nPhrases(
+        "T_keypadScanQRCodeSubtitle",
+        rc.language.value
+      );
       title.appendChild(qrImage);
       if (this.reattemptPopupInterval)
         clearInterval(this.reattemptPopupInterval);

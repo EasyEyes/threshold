@@ -1,6 +1,6 @@
 // Prepare and show/hide popups for takeABreak, proportionCorrect, etc.
 
-import { phrases } from "./i18n";
+import { readi18nPhrases } from "./readPhrases";
 import { canClick, canType } from "./response";
 import { safeExecuteFunc, showCursor } from "./utils";
 
@@ -34,7 +34,7 @@ export const preparePopup = (L, keyName) => {
   const continueButtonEle = document.createElement("button");
   continueButtonEle.id = `${keyName}-continue-button`;
   continueButtonEle.className = "popup-continue-button";
-  continueButtonEle.innerHTML = phrases.T_proceed[L];
+  continueButtonEle.innerHTML = readi18nPhrases("T_proceed", L);
   popupEle.appendChild(continueButtonEle);
 
   wrapperEle.appendChild(popupEle);

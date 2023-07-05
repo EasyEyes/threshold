@@ -1,4 +1,3 @@
-import { phrases } from "./i18n.js";
 import {
   clickedContinue,
   fixationConfig,
@@ -12,15 +11,16 @@ import { replacePlaceholders } from "./multiLang.js";
 import { _onlyClick } from "./response.js";
 import { hideCursor, logger, cursorNearFixation } from "./utils.js";
 import { psychoJS } from "./globalPsychoJS.js";
+import { readi18nPhrases } from "./readPhrases.js";
 
 export const returnOrClickProceed = (L, responseType, prev = "") => {
   switch (responseType) {
     case 0:
-      return prev + phrases.T_continueHitReturn[L];
+      return prev + readi18nPhrases("T_continueHitReturn", L);
     case 1:
-      return prev + phrases.T_continueClickProceed[L];
+      return prev + readi18nPhrases("T_continueClickProceed", L);
     default:
-      return prev + phrases.T_continueHitReturnOrClickProceed[L];
+      return prev + readi18nPhrases("T_continueHitReturnOrClickProceed", L);
   }
 };
 
@@ -28,114 +28,129 @@ export const spaceOrCrosshair = (L, responseType, prev = "") => {
   if (targetKind.current === "repeatedLetters") {
     switch (responseType) {
       case 0:
-        return prev + phrases.T_readyPressSpaceRepeatedLetters[L];
+        return prev + readi18nPhrases("T_readyPressSpaceRepeatedLetters", L);
       case 1:
-        return prev + phrases.T_readyClickCrosshairRepeatedLetters[L];
+        return (
+          prev + readi18nPhrases("T_readyClickCrosshairRepeatedLetters", L)
+        );
       case 3:
-        return prev + phrases.T_readyTrackCrosshairRepeatedLetters[L];
+        return (
+          prev + readi18nPhrases("T_readyTrackCrosshairRepeatedLetters", L)
+        );
       default:
         return (
-          prev + phrases.T_readyPressSpaceOrClickCrosshairRepeatedLetters[L]
+          prev +
+          readi18nPhrases("T_readyPressSpaceOrClickCrosshairRepeatedLetters", L)
         );
     }
   } else if (targetKind.current === "rsvpReading") {
     switch (responseType) {
       case 0:
-        return prev + phrases.T_readyPressSpaceRsvpReading[L];
+        return prev + readi18nPhrases("T_readyPressSpaceRsvpReading", L);
       case 1:
-        return prev + phrases.T_readyClickCrosshairRsvpReading[L];
+        return prev + readi18nPhrases("T_readyClickCrosshairRsvpReading", L);
       case 3:
-        return prev + phrases.T_readyTrackCrosshairRsvpReading[L];
+        return prev + readi18nPhrases("T_readyTrackCrosshairRsvpReading", L);
       default:
-        return prev + phrases.T_readyPressSpaceOrClickCrosshairRsvpReading[L];
+        return (
+          prev +
+          readi18nPhrases("T_readyPressSpaceOrClickCrosshairRsvpReading", L)
+        );
     }
   } else {
     switch (responseType) {
       case 0:
-        return prev + phrases.T_readyPressSpace[L];
+        return prev + readi18nPhrases("T_readyPressSpace", L);
       case 1:
-        return prev + phrases.T_readyClickCrosshair[L];
+        return prev + readi18nPhrases("T_readyClickCrosshair", L);
       case 3:
-        return prev + phrases.T_readyTrackCrosshair[L];
+        return prev + readi18nPhrases("T_readyTrackCrosshair", L);
       default:
-        return prev + phrases.T_readyPressSpaceOrClickCrosshair[L];
+        return prev + readi18nPhrases("T_readyPressSpaceOrClickCrosshair", L);
     }
   }
 };
 
 export const instructionsText = {
   initial: (L) => {
-    return phrases.T_thresholdSoundCheck[L] + `\n\n`;
+    return readi18nPhrases("T_thresholdSoundCheck", L) + `\n\n`;
   },
   vocoderPhraseBegin: (L) => {
-    return phrases.T_soundPhraseBlock[L] + "\n\n";
+    return readi18nPhrases("T_soundPhraseBlock", L) + "\n\n";
   },
   soundBegin: (L) => {
-    return phrases.T_thresholdSoundBeginBlock[L] + "\n\n";
+    return readi18nPhrases("T_thresholdSoundBeginBlock", L) + "\n\n";
   },
   speechInNoiseBegin: (L) => {
     return (
-      phrases.T_sentenceProcedure[L] +
+      readi18nPhrases("T_sentenceProcedure", L) +
       "\n\n" +
-      phrases.T_sentenceGuessingGame[L] +
+      readi18nPhrases("T_sentenceGuessingGame", L) +
       "\n\n"
     );
   },
   popularFeatures: (L, takeABreakTrialCreditsThisBlock = 0) => {
     return takeABreakTrialCreditsThisBlock === 0
       ? ""
-      : phrases.T_letterPopularDemandFeatures[L] + "\n\n";
+      : readi18nPhrases("T_letterPopularDemandFeatures", L) + "\n\n";
   },
   initialByThresholdParameter: {
     spacing: (L, responseType = 2, trialsThisBlock = 0) => {
-      const extraSpace = phrases.EE_languageUseSpace[L] ? " " : "";
+      const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
       let text;
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
-          phrases.T_thresholdRepeatedLettersBeginBlock[L],
+          readi18nPhrases("T_thresholdRepeatedLettersBeginBlock", L),
           trialsThisBlock
         );
         switch (responseType) {
           case 0:
             text +=
-              extraSpace + `${phrases.T_pressingKeyRepeatedLetters[L]}\n\n`;
+              extraSpace +
+              `${readi18nPhrases("T_pressingKeyRepeatedLetters", L)}\n\n`;
             break;
           case 1:
             text +=
-              extraSpace + `${phrases.T_clickingLetterRepeatedLetters[L]}\n\n`;
+              extraSpace +
+              `${readi18nPhrases("T_clickingLetterRepeatedLetters", L)}\n\n`;
             break;
           default:
             text +=
               extraSpace +
-              `${phrases.T_pressingKeyOrClickingLetterRepeatedLetters[L]}\n\n`;
+              `${readi18nPhrases(
+                "T_pressingKeyOrClickingLetterRepeatedLetters",
+                L
+              )}\n\n`;
             break;
         }
       } else {
         text = replacePlaceholders(
-          phrases.T_thresholdBeginBlock[L],
+          readi18nPhrases("T_thresholdBeginBlock", L),
           trialsThisBlock
         );
         switch (responseType) {
           case 0:
-            text += extraSpace + `${phrases.T_pressingKey[L]}\n\n`;
+            text += extraSpace + `${readi18nPhrases("T_pressingKey", L)}\n\n`;
             break;
           case 1:
-            text += extraSpace + `${phrases.T_clickingLetter[L]}\n\n`;
+            text +=
+              extraSpace + `${readi18nPhrases("T_clickingLetter", L)}\n\n`;
             break;
           default:
             text +=
-              extraSpace + `${phrases.T_pressingKeyOrClickingLetter[L]}\n\n`;
+              extraSpace +
+              `${readi18nPhrases("T_pressingKeyOrClickingLetter", L)}\n\n`;
             break;
         }
       }
       return text;
     },
     timing: (L, responseType = 1, trialsThisBlock = 0) => {
-      const extraSpace = phrases.EE_languageUseSpace[L] ? " " : "";
+      const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
       let text;
       if (targetKind.current === "rsvpReading") {
         text = replacePlaceholders(
-          phrases.T_thresholdRsvpReadingBeginBlock[L],
+          readi18nPhrases("T_thresholdRsvpReadingBeginBlock", L),
           trialsThisBlock
         );
         logger("responseType", responseType);
@@ -143,17 +158,35 @@ export const instructionsText = {
           case 0:
             text +=
               extraSpace +
-              `${phrases.T_pressingKeyRsvpReading[L]} ${phrases.T_escapeToQuit[L]} ${phrases.T_continueHitReturn[L]}\n\n`;
+              `${readi18nPhrases(
+                "T_pressingKeyRsvpReading",
+                L
+              )} ${readi18nPhrases("T_escapeToQuit", L)} ${readi18nPhrases(
+                "T_continueHitReturn",
+                L
+              )}\n\n`;
             break;
           case 1:
             text +=
               extraSpace +
-              `${phrases.T_clickingWordRsvpReading[L]} ${phrases.T_escapeToQuit[L]} ${phrases.T_continueClickProceed[L]}\n\n`;
+              `${readi18nPhrases(
+                "T_clickingWordRsvpReading",
+                L
+              )} ${readi18nPhrases("T_escapeToQuit", L)} ${readi18nPhrases(
+                "T_continueClickProceed",
+                L
+              )}\n\n`;
             break;
           case 2:
             text +=
               extraSpace +
-              `${phrases.T_clickingWordRsvpReading[L]} ${phrases.T_escapeToQuit[L]} ${phrases.T_continueHitReturnOrClickProceed[L]}\n\n`;
+              `${readi18nPhrases(
+                "T_clickingWordRsvpReading",
+                L
+              )} ${readi18nPhrases("T_escapeToQuit", L)} ${readi18nPhrases(
+                "T_continueHitReturnOrClickProceed",
+                L
+              )}\n\n`;
             break;
         }
       }
@@ -161,25 +194,26 @@ export const instructionsText = {
     },
   },
   initialEnd: (L, responseType = 2) => {
-    let t = phrases.T_guessingGame[L] + " ";
-    if (_onlyClick(responseType)) t += "\n\n" + phrases.T_whyClick[L] + "\n\n";
-    t += phrases.T_escapeToQuit[L] + " ";
+    let t = readi18nPhrases("T_guessingGame", L) + " ";
+    if (_onlyClick(responseType))
+      t += "\n\n" + readi18nPhrases("T_whyClick", L) + "\n\n";
+    t += readi18nPhrases("T_escapeToQuit", L) + " ";
     return returnOrClickProceed(L, responseType, t);
   },
   edu: (L) => {
-    return phrases.T_middleLetterDemo[L];
+    return readi18nPhrases("T_middleLetterDemo", L);
   },
   eduBelow: (L, responseType = 2) => {
-    let t = phrases.T_middleLetterBrief[L];
+    let t = readi18nPhrases("T_middleLetterBrief", L);
     return returnOrClickProceed(L, responseType, t);
   },
   trial: {
     fixate: {
       vocoderPhrase: (L) => {
-        return phrases.T_soundPhraseTrial[L];
+        return readi18nPhrases("T_soundPhraseTrial", L);
       },
       sound: (L) => {
-        return phrases.T_thresholdSoundNewTrial[L];
+        return readi18nPhrases("T_thresholdSoundNewTrial", L);
       },
       spacing: (L, responseType = 2) => {
         return spaceOrCrosshair(L, responseType, "");
@@ -188,38 +222,41 @@ export const instructionsText = {
     respond: {
       rsvpReading: (L, responseType) => {
         if (responseType === 0) {
-          return phrases.T_identifyPressItRsvpReading[L];
+          return readi18nPhrases("T_identifyPressItRsvpReading", L);
         } else {
-          return phrases.T_identifyClickItRsvpReading[L];
+          return readi18nPhrases("T_identifyClickItRsvpReading", L);
         }
       },
       vocoderPhrase: (L) => {
-        return phrases.T_soundPhraseResponse[L];
+        return readi18nPhrases("T_soundPhraseResponse", L);
       },
       sound: (L) => {
-        return phrases.T_thresholdSoundResponse[L];
+        return readi18nPhrases("T_thresholdSoundResponse", L);
       },
       speechInNoise: (L) => {
-        return phrases.T_sentenceIdentifyClick[L];
+        return readi18nPhrases("T_sentenceIdentifyClick", L);
       },
       spacing: (L, responseType = 2) => {
         if (targetKind.current === "repeatedLetters") {
           switch (responseType) {
             case 0:
-              return phrases.T_identifyPressItRepeatedLetters[L];
+              return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
             case 1:
-              return phrases.T_identifyClickItRepeatedLetters[L];
+              return readi18nPhrases("T_identifyClickItRepeatedLetters", L);
             default:
-              return phrases.T_identifyPressItOrClickItRepeatedLetters[L];
+              return readi18nPhrases(
+                "T_identifyPressItOrClickItRepeatedLetters",
+                L
+              );
           }
         } else {
           switch (responseType) {
             case 0:
-              return phrases.T_identifyPressIt[L];
+              return readi18nPhrases("T_identifyPressIt", L);
             case 1:
-              return phrases.T_identifyClickIt[L];
+              return readi18nPhrases("T_identifyClickIt", L);
             default:
-              return phrases.T_identifyPressItOrClickIt[L];
+              return readi18nPhrases("T_identifyPressItOrClickIt", L);
           }
         }
       },
@@ -231,7 +268,7 @@ export const instructionsText = {
   /* -------------------------------------------------------------------------- */
   // READING
   readingEdu: (L, pages) => {
-    return phrases.T_readingTask[L].replace("111", pages);
+    return readi18nPhrases("T_readingTask", L).replace("111", pages);
   },
 };
 
@@ -239,7 +276,7 @@ export const instructionsText = {
 
 export const addBeepButton = (L, synth) => {
   const b = document.createElement("button");
-  b.innerText = phrases.T_beep[L];
+  b.innerText = readi18nPhrases("T_beep", L);
   b.onclick = (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
@@ -264,7 +301,7 @@ export const removeBeepButton = () => {
 
 export const addProceedButton = (L) => {
   const b = document.createElement("button");
-  b.innerText = phrases.T_proceed[L];
+  b.innerText = readi18nPhrases("T_proceed", L);
   b.onclick = (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();

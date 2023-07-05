@@ -151,7 +151,6 @@ import {
 /* ------------------------------- Components ------------------------------- */
 
 import { ParamReader } from "./parameters/paramReader.js";
-import { phrases } from "./components/i18n.js";
 
 import {
   logger,
@@ -394,6 +393,7 @@ import {
   waitForSignal,
   sendMessage,
 } from "./components/connectMatlab.js";
+import { readi18nPhrases } from "./components/readPhrases.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -650,11 +650,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         participant: thisExperimentInfo.participant,
         session: thisExperimentInfo.session,
       },
-      title: phrases.T_thresholdTitle[rc.language.value],
-      participantText: phrases.T_participant[rc.language.value],
-      sessionText: phrases.T_session[rc.language.value],
-      cancelText: phrases.T_cancel[rc.language.value],
-      okText: phrases.T_ok[rc.language.value],
+      title: readi18nPhrases("T_thresholdTitle", rc.language.value),
+      participantText: readi18nPhrases("T_participant", rc.language.value),
+      sessionText: readi18nPhrases("T_session", rc.language.value),
+      cancelText: readi18nPhrases("T_cancel", rc.language.value),
+      okText: readi18nPhrases("T_ok", rc.language.value),
     })
   );
 
@@ -1714,7 +1714,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       showPopup(
         thisExperimentInfo.name,
         replacePlaceholders(
-          phrases.T_proportionCorrectPopup[rc.language.value],
+          readi18nPhrases("T_proportionCorrectPopup", rc.language.value),
           `${Math.round(
             (status.trialCorrect_thisBlock / status.trialCompleted_thisBlock +
               Number.EPSILON) *
@@ -1781,7 +1781,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           instructions.setText(customInstructions);
         } else {
           instructions.setText(
-            phrases.T_readingTaskQuestionPrompt[rc.language.value]
+            readi18nPhrases("T_readingTaskQuestionPrompt", rc.language.value)
           );
         }
         instructions.setAutoDraw(true);
@@ -2269,7 +2269,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           renderObj.tinyHint.setText(
-            phrases.T_readingNextPage[rc.language.value]
+            readi18nPhrases("T_readingNextPage", rc.language.value)
           );
           renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
           renderObj.tinyHint.setAutoDraw(true);
@@ -2988,7 +2988,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // tinyHint
           renderObj.tinyHint.setText(
-            phrases.T_readingNextPage[rc.language.value]
+            readi18nPhrases("T_readingNextPage", rc.language.value)
           );
           renderObj.tinyHint.setAutoDraw(true);
 
@@ -3626,7 +3626,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           loaderText.setAttribute("id", "loaderText");
           document.body.appendChild(loader);
           document.body.appendChild(loaderText);
-          loaderText.innerHTML = phrases.T_generatingMovie[rc.language.value];
+          loaderText.innerHTML = readi18nPhrases(
+            "T_generatingMovie",
+            rc.language.value
+          );
           //generate movie
           loggerText("Generate movie here");
           if (showConditionNameConfig.showTargetSpecs)
@@ -3910,7 +3913,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       keypad.setSensitive();
       keypad.stop();
       keypad.updateKeypadMessage(
-        phrases.T_keypadContinueExperiment[rc.language.value]
+        readi18nPhrases("T_keypadContinueExperiment", rc.language.value)
       );
 
       rc.pauseDistance();
@@ -4479,7 +4482,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         keypad.start();
         keypad.setNonSensitive();
         keypad.updateKeypadMessage(
-          phrases.T_keypadReadyForResponse[rc.language.value]
+          readi18nPhrases("T_keypadReadyForResponse", rc.language.value)
         );
       }
       // *key_resp* updates
@@ -5444,7 +5447,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         showPopup(
           thisExperimentInfo.name,
-          phrases.T_takeABreakPopup[rc.language.value],
+          readi18nPhrases("T_takeABreakPopup", rc.language.value),
           "",
           true
         );

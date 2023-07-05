@@ -1,6 +1,6 @@
 import { GLOSSARY } from "../parameters/glossary";
 import { isProlificPreviewExperiment } from "./externalServices";
-import { phrases } from "./i18n";
+import { readi18nPhrases } from "./readPhrases";
 // import { rc } from "./global";
 
 export const checkSystemCompatibility = (
@@ -108,10 +108,9 @@ export const checkSystemCompatibility = (
   if (minWidthPx > 0 && minHeightPx > 0) {
     // non-zero minimum width and height
     // Internation phrase EE_compatibileScreenSize - replace 111 with minWidthPx and 222 with minHeightPx
-    const ssMsg = phrases.EE_compatibleScreenSize[Language].replace(
-      /111/g,
-      minWidthPx.toString()
-    ).replace(/222/g, minHeightPx.toString());
+    const ssMsg = readi18nPhrases("EE_compatibleScreenSize", Language)
+      .replace(/111/g, minWidthPx.toString())
+      .replace(/222/g, minHeightPx.toString());
     screenSizeMsg.push(ssMsg + ".");
     const screenSizeCompatible =
       screenWidthPx >= minWidthPx && screenHeightPx >= minHeightPx;
@@ -124,7 +123,7 @@ export const checkSystemCompatibility = (
   } else if (minWidthPx > 0) {
     // non-zero minimum width
     // Internation phrase EE_compatibileScreenWidth - replace 111 with minWidthPx
-    const ssMsg = phrases.EE_compatibleScreenWidth[Language].replace(
+    const ssMsg = readi18nPhrases("EE_compatibleScreenWidth", Language).replace(
       /111/g,
       minWidthPx.toString()
     );
@@ -139,10 +138,10 @@ export const checkSystemCompatibility = (
   } else if (minHeightPx > 0) {
     // non-zero minimum height
     // Internation phrase EE_compatibileScreenHeight - replace 111 with minHeightPx
-    const ssMsg = phrases.EE_compatibleScreenHeight[Language].replace(
-      /111/g,
-      minHeightPx.toString()
-    );
+    const ssMsg = readi18nPhrases(
+      "EE_compatibleScreenHeight",
+      Language
+    ).replace(/111/g, minHeightPx.toString());
     screenSizeMsg.push(ssMsg + ".\n\n");
     const screenSizeCompatible = screenHeightPx >= minHeightPx;
     if (deviceIsCompatibleBool && !screenSizeCompatible) {
@@ -157,30 +156,32 @@ export const checkSystemCompatibility = (
         ".\n\n";
   }
 
-  const describeScreenSize = phrases.EE_describeScreenSize[Language].replace(
-    /111/g,
-    screenWidthPx.toString()
-  ).replace(/222/g, screenHeightPx.toString());
+  const describeScreenSize = readi18nPhrases("EE_describeScreenSize", Language)
+    .replace(/111/g, screenWidthPx.toString())
+    .replace(/222/g, screenHeightPx.toString());
   msg += describeScreenSize;
   const describeDevice = msg;
   compatibilityRequirements.push(...screenSizeMsg);
 
   //create our message
-  if (deviceIsCompatibleBool) msg = [phrases.EE_compatible[Language]];
-  else msg = [phrases.EE_incompatible[Language], compatibilityRequirements];
+  if (deviceIsCompatibleBool)
+    msg = [readi18nPhrases("EE_compatible", Language)];
+  else
+    msg = [
+      readi18nPhrases("EE_incompatible", Language),
+      compatibilityRequirements,
+    ];
 
   msg.push(describeDevice);
 
   if (deviceIsCompatibleBool && isProlificPreviewExperiment())
-    msg.push(phrases.EE_incompatibleReturnToProlific[Language]);
+    msg.push(readi18nPhrases("EE_incompatibleReturnToProlific", Language));
 
   //  if the study is compatible except for screen size, prompt to refresh
   if (promptRefresh) {
     msg.push(
-      phrases.EE_compatibleExceptForScreenResolution[Language].replace(
-        /111/g,
-        screenWidthPx.toString()
-      )
+      readi18nPhrases("EE_compatibleExceptForScreenResolution", Language)
+        .replace(/111/g, screenWidthPx.toString())
         .replace(/222/g, screenHeightPx.toString())
         .replace(/333/g, minWidthPx.toString())
         .replace(/444/g, minHeightPx.toString())
@@ -288,19 +289,19 @@ export const getCompatibilityRequirements = (
     case "all": // ignore browser
       switch (OSCompatibilityType) {
         case "all": //ignore OSes
-          msg.push(phrases.EE_compatibleDeviceCores[Language]);
+          msg.push(readi18nPhrases("EE_compatibleDeviceCores", Language));
           break;
         case "not": // report incompatible OSes
           deviceIsCompatibleBool =
             deviceIsCompatibleBool &&
             !compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
-          msg.push(phrases.EE_compatibleNotOSDeviceCores[Language]);
+          msg.push(readi18nPhrases("EE_compatibleNotOSDeviceCores", Language));
           break;
         default: // report compatible OSes
           deviceIsCompatibleBool =
             deviceIsCompatibleBool &&
             compatibleOS.includes(deviceInfo["deviceSysFamily"]);
-          msg.push(phrases.EE_compatibleOSDeviceCores[Language]);
+          msg.push(readi18nPhrases("EE_compatibleOSDeviceCores", Language));
           break;
       }
       break;
@@ -310,19 +311,25 @@ export const getCompatibilityRequirements = (
         !compatibleBrowser.includes("not" + deviceInfo["deviceBrowser"]);
       switch (OSCompatibilityType) {
         case "all": //ignore OSes
-          msg.push(phrases.EE_compatibleBrowserDeviceCores[Language]);
+          msg.push(
+            readi18nPhrases("EE_compatibleBrowserDeviceCores", Language)
+          );
           break;
         case "not": //report incompatible OSes
           deviceIsCompatibleBool =
             deviceIsCompatibleBool &&
             !compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
-          msg.push(phrases.EE_compatibleNotBrowserNotOSDeviceCores[Language]);
+          msg.push(
+            readi18nPhrases("EE_compatibleNotBrowserNotOSDeviceCores", Language)
+          );
           break;
         default: //report compatible OSes
           deviceIsCompatibleBool =
             deviceIsCompatibleBool &&
             compatibleOS.includes(deviceInfo["deviceSysFamily"]);
-          msg.push(phrases.EE_compatibleNotBrowserOSDeviceCores[Language]);
+          msg.push(
+            readi18nPhrases("EE_compatibleNotBrowserOSDeviceCores", Language)
+          );
           break;
       }
       break;
@@ -338,9 +345,17 @@ export const getCompatibilityRequirements = (
               deviceIsCompatibleBool &&
               deviceInfo["deviceBrowserVersion"] >=
                 compatibleBrowserVersionMinimum;
-            msg.push(phrases.EE_compatibleBrowserVersionDeviceCores[Language]);
+            msg.push(
+              readi18nPhrases(
+                "EE_compatibleBrowserVersionDeviceCores",
+                Language
+              )
+            );
           } //ignore browser version
-          else msg.push(phrases.EE_compatibleBrowserDeviceCores[Language]);
+          else
+            msg.push(
+              readi18nPhrases("EE_compatibleBrowserDeviceCores", Language)
+            );
           break;
         case "not": //report incompatible OSes
           deviceIsCompatibleBool =
@@ -352,9 +367,14 @@ export const getCompatibilityRequirements = (
               deviceIsCompatibleBool &&
               deviceInfo["deviceBrowserVersion"] >=
                 compatibleBrowserVersionMinimum;
-            msg.push(phrases.EE_compatibleBrowserNotOSDeviceCores[Language]);
+            msg.push(
+              readi18nPhrases("EE_compatibleBrowserNotOSDeviceCores", Language)
+            );
           } //ignore browser version
-          else msg.push(phrases.EE_compatibleBrowserNotOSDeviceCores[Language]);
+          else
+            msg.push(
+              readi18nPhrases("EE_compatibleBrowserNotOSDeviceCores", Language)
+            );
           break;
         default: //report compatible browsers
           deviceIsCompatibleBool =
@@ -367,10 +387,16 @@ export const getCompatibilityRequirements = (
               deviceInfo["deviceBrowserVersion"] >=
                 compatibleBrowserVersionMinimum;
             msg.push(
-              phrases.EE_compatibleBrowserVersionOSDeviceCores[Language]
+              readi18nPhrases(
+                "EE_compatibleBrowserVersionOSDeviceCores",
+                Language
+              )
             );
           } //ignore browser version
-          else msg.push(phrases.EE_compatibleBrowserOSDeviceCores[Language]);
+          else
+            msg.push(
+              readi18nPhrases("EE_compatibleBrowserOSDeviceCores", Language)
+            );
           break;
       }
       break;
@@ -423,7 +449,7 @@ export const getCompatibilityRequirements = (
   // }
 
   //Create describeDevice, a sentence describing the participant's device.
-  let describeDevice = phrases.EE_describeDevice[Language];
+  let describeDevice = readi18nPhrases("EE_describeDevice", Language);
   // Do substitutions to describe the actual device.
   // BBB = browser
   // 111 = version
@@ -478,8 +504,9 @@ const StringOfNotItems = (items) => {
 const StringOfItems = (items, Language) => {
   //Listing items that we are compatible with, they are joined by OR.
   var itemString;
-  const Or = phrases.EE_or[Language];
-  const space = phrases.EE_languageUseSpace[Language] === "1" ? " " : "";
+  const Or = readi18nPhrases("EE_or", Language);
+  const space =
+    readi18nPhrases("EE_languageUseSpace", Language) === "1" ? " " : "";
   switch (items.length) {
     case 0:
       itemString = "";
@@ -513,7 +540,7 @@ export const displayCompatibilityMessage = async (
 
     // //create title msg
     let titleMsg = document.createElement("h3");
-    let T = phrases.EE_compatibilityTitle[rc.language.value];
+    let T = readi18nPhrases("EE_compatibilityTitle", rc.language.value);
     // replace "xxx"  or "XXX" or "Xxx" with "EasyEyes"
     T = T.replace(/xxx/g, "EasyEyes");
     T = T.replace(/XXX/g, "EasyEyes");
@@ -548,9 +575,15 @@ export const displayCompatibilityMessage = async (
       refreshButton.style.marginTop = "10px";
       refreshButton.style.marginLeft = "0";
       refreshButton.id = "refresh-btn";
-      refreshButton.innerHTML = phrases.EE_refresh[rc.language.value];
+      refreshButton.innerHTML = readi18nPhrases(
+        "EE_refresh",
+        rc.language.value
+      );
       refreshButton.addEventListener("click", () => {
-        const language = phrases.EE_languageNameEnglish[rc.language.value];
+        const language = readi18nPhrases(
+          "EE_languageNameEnglish",
+          rc.language.value
+        );
         const newMsg = checkSystemCompatibility(reader, language, rc);
         handleNewMessage(
           newMsg.msg,
@@ -568,7 +601,10 @@ export const displayCompatibilityMessage = async (
       const languageWrapper = document.createElement("div");
 
       const LanguageTitle = document.createElement("h3");
-      LanguageTitle.innerHTML = phrases.EE_languageChoose[rc.language.value];
+      LanguageTitle.innerHTML = readi18nPhrases(
+        "EE_languageChoose",
+        rc.language.value
+      );
       LanguageTitle.id = "language-title";
       LanguageTitle.style.marginTop = "40px";
       languageWrapper.appendChild(LanguageTitle);
@@ -579,7 +615,7 @@ export const displayCompatibilityMessage = async (
       languageDropdown.style.backgroundColor = "#ddd";
       languageDropdown.style.fontWeight = "bold";
 
-      const languages = phrases.EE_languageNameNative;
+      const languages = readi18nPhrases("EE_languageNameNative");
       const languageOptions = Object.keys(languages).map((language) => {
         const option = document.createElement("option");
         option.value = languages[language];
@@ -611,7 +647,7 @@ export const displayCompatibilityMessage = async (
     proceedButton.style.width = "fit-content";
     proceedButton.style.margin = "3rem 0";
     proceedButton.id = "procced-btn";
-    proceedButton.innerHTML = phrases.T_proceed[rc.language.value];
+    proceedButton.innerHTML = readi18nPhrases("T_proceed", rc.language.value);
     proceedButton.addEventListener("click", () => {
       document.getElementById("root").style.display = "";
       resolve({ proceedButtonClicked: true, proceedBool: proceedBool });
@@ -630,8 +666,8 @@ export const hideCompatibilityMessage = () => {
 const handleLanguage = (lang, rc, useEnglishNames = true) => {
   // convert to language code
   const Languages = useEnglishNames
-    ? phrases.EE_languageNameEnglish
-    : phrases.EE_languageNameNative;
+    ? readi18nPhrases("EE_languageNameEnglish")
+    : readi18nPhrases("phrases.EE_languageNameNative");
   const languageCode = Object.keys(Languages).find(
     (key) => Languages[key] === lang
   );
@@ -652,13 +688,13 @@ const handleNewMessage = (msg, msgID, lang) => {
   elem.innerHTML = displayMsg;
 
   let titleElem = document.getElementById("compatibility-title");
-  titleElem.innerHTML = phrases.EE_compatibilityTitle[lang];
+  titleElem.innerHTML = readi18nPhrases("EE_compatibilityTitle", lang);
 
   let languageTitleElem = document.getElementById("language-title");
-  languageTitleElem.innerHTML = phrases.EE_languageChoose[lang];
+  languageTitleElem.innerHTML = readi18nPhrases("EE_languageChoose", lang);
 
   let proceedButton = document.getElementById("procced-btn");
-  proceedButton.innerHTML = phrases.T_proceed[lang];
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", lang);
 };
 
 export const getCompatibilityInfoForScientistPage = (parsed) => {
@@ -720,7 +756,7 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
 };
 
 export const convertLanguageToLanguageCode = (language) => {
-  const Languages = phrases.EE_languageNameEnglish;
+  const Languages = readi18nPhrases("EE_languageNameEnglish");
   const languageCode = Object.keys(Languages).find(
     (key) => Languages[key] === language
   );
