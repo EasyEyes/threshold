@@ -33,6 +33,12 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
+  _calibrateSoundCheck: {
+    name: "_calibrateSoundCheck",
+    availability: "now",
+    type: "category",
+    default: "goal",
+  },
   _calibrateScreenSizeCookieBool: {
     name: "_calibrateScreenSizeCookieBool",
     availability: "now",

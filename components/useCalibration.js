@@ -11,7 +11,7 @@ import {
   allHzCalibrationResults,
   calibrateSoundMinHz,
   calibrateSoundMaxHz,
-  calibratePhoneMicBool,
+  calibrateMicrophonesBool,
   microphoneCalibrationResults,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
@@ -21,6 +21,9 @@ import {
   displayParametersAllHz,
 } from "./soundTest";
 import { getSoundCalibrationLevelDBSPLFromIIR } from "./soundUtils";
+import { showExperimentEnding } from "./forms";
+import { ref, set, get, child } from "firebase/database";
+import database from "./firebase/firebase.js";
 
 export const useCalibration = (reader) => {
   return ifTrue([
@@ -189,10 +192,19 @@ export const calibrateAudio = async (reader) => {
     ),
   ];
 
-  calibratePhoneMicBool.current = ifTrue(
-    reader.read(GLOSSARY._calibratePhoneMicBool.name, "__ALL_BLOCKS__")
+  calibrateMicrophonesBool.current = ifTrue(
+    reader.read(GLOSSARY._calibrateMicrophonesBool.name, "__ALL_BLOCKS__")
   );
-  console.log("calibratePhoneMicBool.current", calibratePhoneMicBool.current);
+
+  const showSoundCalibrationResultsBool = ifTrue(
+    reader.read(
+      GLOSSARY._showSoundCalibrationResultsBool.name,
+      "__ALL_BLOCKS__"
+    )
+  );
+  const showSoundTestPageBool = ifTrue(
+    reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__")
+  );
 
   calibrateSoundMinHz.current = reader.read(
     GLOSSARY.calibrateSoundMinHz.name
@@ -283,12 +295,12 @@ export const calibrateAudio = async (reader) => {
       elems.displayUpdate.style.display = "none";
       // Now that loudspeaker calibration is done, present users with two options: continue to experiment or calibrate microphone
 
-      // if calibratePhoneMicBool is true, then provide the option to calibrate the phone mic or to continue.
+      // if calibrateMicrophonesBool is true, then provide the option to calibrate the phone mic or to continue.
       // if user chooses to calibrate mic, then at the end of the calibration, user will be presented with the option to calibrate another mic or to continue.
       // for now simulate the mic calibration by 5 seconds pause then provide the option to calibrate another mic or to continue.
       // do this until the user chooses to continue.
 
-      while (calibratePhoneMicBool.current) {
+      while (calibrateMicrophonesBool.current) {
         // provide the option to calibrate another mic or to continue.
         elems.calibrateMicrophoneButton.style.display = "block";
         elems.continueButton.style.display = "block";
@@ -331,19 +343,8 @@ export const calibrateAudio = async (reader) => {
                     // remove the input field and the button
                     input.remove();
                     proceedButton.remove();
-                    // simulate the mic calibration by 5 seconds pause
-                    // await new Promise((resolve) => {
-                    //   setTimeout(() => {
-                    //     resolve();
-                    //   }, 5000);
-                    // })
-                    const {
-                      Speaker,
-                      CombinationCalibration,
-                      UnsupportedDeviceError,
-                      MissingSpeakerIdError,
-                      CalibrationTimedOutError,
-                    } = speakerCalibrator;
+                    const { Speaker, CombinationCalibration } =
+                      speakerCalibrator;
 
                     const speakerParameters = {
                       siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
@@ -406,14 +407,11 @@ export const calibrateAudio = async (reader) => {
                         calibrator,
                         500000
                       );
-
-                      console.log("resultttt: ", result);
                       microphoneCalibrationResults.push({
                         micId: micId,
                         result: result,
                       });
                     }
-                    console.log("before resolve()");
                     resolve();
                   }
                 });
@@ -426,16 +424,23 @@ export const calibrateAudio = async (reader) => {
           elems.continueButton.addEventListener("click", async (e) => {
             elems.calibrateMicrophoneButton.style.display = "none";
             elems.continueButton.style.display = "none";
-            calibratePhoneMicBool.current = false;
+            calibrateMicrophonesBool.current = false;
             resolve();
           });
         });
       }
 
+      if (!showSoundTestPageBool) {
+        _removeSoundCalibrationElems(Object.values(elems));
+        resolve(true);
+      }
+
       if (
         calibrateSoundLevel &&
         soundCalibrationResults.current &&
-        invertedImpulseResponse.current
+        invertedImpulseResponse.current &&
+        allHzCalibrationResults &&
+        showSoundCalibrationResultsBool
       ) {
         displayParameters1000Hz(
           elems,
@@ -463,13 +468,22 @@ export const calibrateAudio = async (reader) => {
             );
           });
         }
-      } else if (calibrateLoudspeaker && invertedImpulseResponse.current) {
+      } else if (
+        calibrateLoudspeaker &&
+        invertedImpulseResponse.current &&
+        allHzCalibrationResults &&
+        showSoundCalibrationResultsBool
+      ) {
         displayParametersAllHz(
           elems,
           invertedImpulseResponse.current,
           allHzCalibrationResults
         );
-      } else if (calibrateSoundLevel && soundCalibrationResults.current) {
+      } else if (
+        calibrateSoundLevel &&
+        soundCalibrationResults.current &&
+        showSoundCalibrationResultsBool
+      ) {
         displayParameters1000Hz(
           elems,
           soundLevels,
@@ -676,6 +690,15 @@ const _addSoundCss = () => {
   document.head.appendChild(styleSheet);
 };
 
+const getMicrophoneNamesFromDatabase = async () => {
+  const dbRef = ref(database);
+  const snapshot = await get(child(dbRef, "Microphone"));
+  if (snapshot.exists()) {
+    return Object.keys(snapshot.val());
+  }
+  return null;
+};
+
 const _runSoundLevelCalibration = async (elems, gains) => {
   const {
     Speaker,
@@ -836,24 +859,25 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   });
 
   //show a dropdown menu to select a mic from list of mics in our database
-
-  const micList = await Speaker.getMicrophoneNamesFromDatabase();
+  const language = rc.language.value;
+  const micList = await getMicrophoneNamesFromDatabase();
   // create a dropdown menu
   const instructions = document.createElement("p");
-  instructions.innerHTML = "Select a microphone to calibrate with:";
+  instructions.innerHTML = phrases.RC_selectMicrophone[language];
   const dropdown = document.createElement("select");
   dropdown.id = "micList";
   dropdown.name = "micList";
-  // pick the first mic as default
-  const defaultMic = micList[0];
+  // pick "No match" as the default
+  const defaultMic = document.createElement("option");
+  defaultMic.value = "No match";
+  defaultMic.text = "No match";
+  dropdown.appendChild(defaultMic);
+
   // add options to the dropdown menu
   micList.forEach((mic) => {
     const option = document.createElement("option");
     option.value = mic;
     option.text = mic;
-    if (mic === defaultMic) {
-      option.selected = true;
-    }
     dropdown.appendChild(option);
   });
 
@@ -868,7 +892,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   dropdown.style.borderRadius = "0.5rem";
 
   instructions.style.width = "100%";
-  instructions.style.fontSize = "1.2rem";
+  instructions.style.fontSize = "1.1rem";
+  instructions.style.fontWeight = "normal";
 
   // add the dropdown menu to the page
   elems.subtitle.appendChild(instructions);
@@ -887,6 +912,12 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
       elems.message.style.display = "block";
       // get the selected mic
       const selectedMic = dropdown.options[dropdown.selectedIndex].value;
+
+      // if no match is selected return false
+      if (selectedMic === "No match") {
+        showExperimentEnding();
+      }
+
       // hide the dropdown menu and proceed button
       dropdown.style.display = "none";
       instructions.style.display = "none";
