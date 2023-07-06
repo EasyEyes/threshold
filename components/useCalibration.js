@@ -1,4 +1,4 @@
-import { phrases } from "./i18n";
+import { readi18nPhrases } from "./readPhrases";
 import { debug, ifTrue, loggerText } from "./utils";
 import {
   soundGainDBSPL,
@@ -237,16 +237,16 @@ export const calibrateAudio = async (reader) => {
     const lang = rc.language.value;
     const copy = {
       title: calibrateSoundLevel
-        ? phrases.RC_soundCalibrationTitle1000Hz[lang]
-        : phrases.RC_soundCalibrationTitleAllHz[lang],
-      soundCalibration: phrases.RC_loudspeakerCalibration[lang],
-      neediPhone: phrases.RC_soundCalibrationNeedsMicrophone[lang],
-      yes: phrases.RC_soundCalibrationYes[lang],
-      no: phrases.RC_soundCalibrationNo[lang],
-      qr: phrases.RC_soundCalibrationQR[lang],
-      holdiPhoneOK: phrases.RC_soundCalibrationContinue[lang],
-      clickToStart: phrases.RC_soundCalibrationClickToStart[lang],
-      done: phrases.RC_soundCalibrationDone[lang],
+        ? readi18nPhrases("RC_soundCalibrationTitle1000Hz", lang)
+        : readi18nPhrases("RC_soundCalibrationTitleAllHz", lang),
+      soundCalibration: readi18nPhrases("RC_soundCalibration", lang),
+      neediPhone: readi18nPhrases("RC_soundCalibrationNeedsIPhone", lang),
+      yes: readi18nPhrases("RC_soundCalibrationYes", lang),
+      no: readi18nPhrases("RC_soundCalibrationNo", lang),
+      qr: readi18nPhrases("RC_soundCalibrationQR", lang),
+      holdiPhoneOK: readi18nPhrases("RC_soundCalibrationContinue", lang),
+      clickToStart: readi18nPhrases("RC_soundCalibrationClickToStart", lang),
+      done: readi18nPhrases("RC_soundCalibrationDone", lang),
       test: "Test", //include in phrases doc
       citation:
         'Measured sound power is modeled as sum of background sound power and power gain times digital sound power. Microphone compression modeled by Eq. 4 of Giannoulis, Massberg, & Reiss (2012). "Digital Dynamic Range Compressor Design — A Tutorial and Analysis." Journal of Audio Engineering Society. 60 (6): 399–408.',
@@ -815,7 +815,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
 ) => {
   // await _runSoundLevelCalibration(elems, gains);
   // (elems.subtitle.innerHTML =
-  //   phrases.RC_soundCalibrationTitleAllHz[rc.language.value]),
+  //   readi18nPhrases("RC_soundCalibrationTitleAllHz", rc.language.value)),
   //   await _runLoudspeakerCalibration(elems);
 
   elems.subtitle.innerHTML = "";
@@ -857,7 +857,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   const micList = await getMicrophoneNamesFromDatabase();
   // create a dropdown menu
   const instructions = document.createElement("p");
-  instructions.innerHTML = phrases.RC_selectMicrophone[language];
+  instructions.innerHTML = readi18nPhrases("RC_selectMicrophone", language);
   const dropdown = document.createElement("select");
   dropdown.id = "micList";
   dropdown.name = "micList";
@@ -914,10 +914,10 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
       }
 
       const isSmartPhone = await isMicrophoneSmartphone(selectedMic);
-      const messageText = `${phrases.RC_removeHeadphones[language]}${
+      const messageText = `${readi18nPhrases("RC_removeHeadphones", language)}${
         isSmartPhone
-          ? phrases.RC_getPhoneMicrophoneReady[language]
-          : phrases.RC_getUSBMicrophoneReady[language]
+          ? readi18nPhrases("RC_getPhoneMicrophoneReady", language)
+          : readi18nPhrases("RC_getUSBMicrophoneReady", language)
       }`.replace(/\n/g, "<br>");
       elems.message.innerHTML = messageText;
       // line height

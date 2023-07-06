@@ -1,15 +1,15 @@
 import Swal from "sweetalert2";
 import { localStorageKey } from "./global";
-import { phrases } from "./i18n.js";
+import { readi18nPhrases } from "./readPhrases";
 import { sleep } from "./utils";
 
 export const checkCrossSessionId = async (callback, language) => {
   return new Promise((resolve, reject) => {
     const localStorageInfo = JSON.parse(localStorage.getItem(localStorageKey));
     let storedId = undefined;
-    let detailInformation = phrases.EE_ID[language];
-    const briefInformation = phrases.EE_ID_noLocalStorage[language];
-    const languageDirection = phrases.EE_languageDirection[language];
+    let detailInformation = readi18nPhrases("EE_ID", language);
+    const briefInformation = readi18nPhrases("EE_ID_noLocalStorage", language);
+    const languageDirection = readi18nPhrases("EE_languageDirection", language);
     if (localStorageInfo && localStorageInfo.EasyEyesID)
       storedId = localStorageInfo.EasyEyesID;
     const hasStoredId = storedId !== undefined;
@@ -51,7 +51,7 @@ export const checkCrossSessionId = async (callback, language) => {
       }
     }
     Swal.fire({
-      title: phrases.EE_IDRequested[language],
+      title: readi18nPhrases("EE_IDRequested", language),
       html: hasStoredId
         ? detailInformation +
           `<div style="margin:2% 0% 2% 0%" class="row align-items-center">
@@ -62,7 +62,7 @@ export const checkCrossSessionId = async (callback, language) => {
             </div>
             <div class="col-3">
               <button id="okaybtn" class="btn btn-lg btn-dark">` +
-          phrases.EE_ok[language] +
+          readi18nPhrases("EE_ok", language) +
           `</button>
             </div>
           </div>
@@ -71,11 +71,11 @@ export const checkCrossSessionId = async (callback, language) => {
               <input type="file" style="display:none;" title="" accept=".txt" id="fileInput" class="swal2-file">
               <button class="btn btn-secondary" style="padding:0.5% 2% 0.5% 2%;align-items: center;">
                 <label style="padding:0px" for="fileInput">` +
-          phrases.EE_browseForID[language] +
+          readi18nPhrases("EE_browseForID", language) +
           `</label>
               </button>
               <span id="labelFile" style="margin-left:1%">` +
-          phrases.EE_noFileSelected[language] +
+          readi18nPhrases("EE_noFileSelected", language) +
           `</span
             </div>
           </div>`
@@ -86,7 +86,7 @@ export const checkCrossSessionId = async (callback, language) => {
             </div>
             <div class="col-3">
               <button id="okaybtn" class="btn btn-lg btn-dark">` +
-          phrases.EE_ok[language] +
+          readi18nPhrases("EE_ok", language) +
           `</button>
             </div>
           </div>
@@ -95,11 +95,11 @@ export const checkCrossSessionId = async (callback, language) => {
               <input type="file" style="display:none;" title="" accept=".txt" id="fileInput" class="swal2-file">
               <button class="btn btn-secondary" style="padding:0.5% 2% 0.5% 2%;align-items: center;">
                 <label style="padding:0px" for="fileInput">` +
-          phrases.EE_browseForID[language] +
+          readi18nPhrases("EE_browseForID", language) +
           `</label>
               </button>
               <span id="labelFile" style="margin-left:1%">` +
-          phrases.EE_noFileSelected[language] +
+          readi18nPhrases("EE_noFileSelected", language) +
           `</span
             </div>
           </div>`,
@@ -107,7 +107,7 @@ export const checkCrossSessionId = async (callback, language) => {
       //   <input type="text" id="textInput" class="swal2-input">
       // </center>
       // <input type="file" accept=".txt" id="fileInput" class="swal2-file">`,
-      //confirmButtonText: phrases.EE_ok[language],
+      //confirmButtonText: readi18nPhrases("EE_ok", language),
       showConfirmButton: false,
       customClass: {
         popup: "narrow-popup id-collection-popup",
@@ -125,12 +125,12 @@ export const checkCrossSessionId = async (callback, language) => {
       //   if (!file) {
       //     if (!text || text.length < 1) {
       //       const uploadOrValidIDError =
-      //         phrases.EE_ID_uploadOrValidID[language];
+      //         readi18nPhrases("EE_ID_uploadOrValidID", language);
       //       Swal.showValidationMessage(uploadOrValidIDError);
       //       return false;
       //     }
       //     if (!/^[A-Za-z0-9]*$/.test(text)) {
-      //       const invalidIDError = phrases.EE_ID_invalidID[language];
+      //       const invalidIDError = readi18nPhrases("EE_ID_invalidID", language);
       //       Swal.showValidationMessage(invalidIDError);
       //       return false;
       //     }
@@ -164,11 +164,14 @@ export const checkCrossSessionId = async (callback, language) => {
       let text = document.getElementById("textInput").value;
       let file = document.getElementById("fileInput").files[0];
       if (!text || text.length < 1) {
-        const uploadOrValidIDError = phrases.EE_ID_uploadOrValidID[language];
+        const uploadOrValidIDError = readi18nPhrases(
+          "EE_ID_uploadOrValidID",
+          language
+        );
         Swal.showValidationMessage(uploadOrValidIDError);
         // return false;
       } else if (!/^[A-Za-z0-9]*$/.test(text)) {
-        const invalidIDError = phrases.EE_ID_invalidID[language];
+        const invalidIDError = readi18nPhrases("EE_ID_invalidID", language);
         Swal.showValidationMessage(invalidIDError);
         // return false;
       } else {
@@ -196,14 +199,17 @@ export const checkCrossSessionId = async (callback, language) => {
           textField.value = participant;
           Swal.resetValidationMessage();
         } else {
-          const invalidFileError = phrases.EE_ID_invalidFile[language];
+          const invalidFileError = readi18nPhrases(
+            "EE_ID_invalidFile",
+            language
+          );
           Swal.showValidationMessage(invalidFileError);
         }
       };
       reader.readAsText(file);
     };
     /*let id = await Swal.fire({
-      title: phrases.EE_IDRequested[language],
+      title: readi18nPhrases("EE_IDRequested", language),
       html: hasStoredId
         ? detailInformation
         : "The researcher requested you to provide your EasyEyes ID from the previous session, please type it here, or upload the file downloaded when the last session ends.",
@@ -220,9 +226,9 @@ export const checkCrossSessionId = async (callback, language) => {
       allowOutsideClick: false,
       allowEscapeKey: false,
   
-      cancelButtonText: phrases.EE_browseForID[language], // grey
+      cancelButtonText: readi18nPhrases("EE_browseForID", language), // grey
       //denyButtonText: `I don't have EasyEyes ID`, // red
-      confirmButtonText: phrases.EE_ok[language],
+      confirmButtonText: readi18nPhrases("EE_ok", language),
   
       customClass: {
         popup: "narrow-popup id-collection-popup",

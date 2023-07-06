@@ -50,6 +50,7 @@ async function processLanguageSheet() {
 
   const exportWarning = `/*
   Do not modify this file! Run npm \`npm run phrases\` at ROOT of this project to fetch from the Google Sheets.
+  Phrases should be read using the "readi18nPhrases" function from "components/readPhrases", to prevent silent breaking errors.
   https://docs.google.com/spreadsheets/d/1UFfNikfLuo8bSromE34uWDuJrMPFiJG3VpoQKdCGkII/edit#gid=0
 */\n\n`;
   const exportHandle = `export const phrases = `;

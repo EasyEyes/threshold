@@ -1,6 +1,6 @@
 import { switchKind } from "./blockTargetKind.js";
-import { phrases } from "./i18n.js";
 import { replacePlaceholders } from "./multiLang.js";
+import { readi18nPhrases } from "./readPhrases.js";
 
 export function getTrialInfoStr(
   L,
@@ -19,7 +19,7 @@ export function getTrialInfoStr(
       switchKind(taskKind, {
         vocoderPhrase: () => {
           res = replacePlaceholders(
-            phrases.T_counterTrialBlock[L],
+            readi18nPhrases("T_counterTrialBlock", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
@@ -28,7 +28,7 @@ export function getTrialInfoStr(
         },
         sound: () => {
           res = replacePlaceholders(
-            phrases.T_counterTrialBlock[L],
+            readi18nPhrases("T_counterTrialBlock", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
@@ -37,7 +37,7 @@ export function getTrialInfoStr(
         },
         reading: () => {
           res += replacePlaceholders(
-            phrases.T_counterReadingPageBlock[L],
+            readi18nPhrases("T_counterReadingPageBlock", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
@@ -47,7 +47,7 @@ export function getTrialInfoStr(
         letter: () => {
           // On trial routines, show the trial# and block#...
           res = replacePlaceholders(
-            phrases.T_counterTrialBlock[L],
+            readi18nPhrases("T_counterTrialBlock", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
@@ -57,7 +57,7 @@ export function getTrialInfoStr(
         repeatedLetters: () => {
           // On trial routines, show the trial# and block#...
           res = replacePlaceholders(
-            phrases.T_counterTrialBlock[L],
+            readi18nPhrases("T_counterTrialBlock", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
@@ -66,7 +66,7 @@ export function getTrialInfoStr(
         },
         rsvpReading: () => {
           res = replacePlaceholders(
-            phrases.T_counterTrialBlock[L],
+            readi18nPhrases("T_counterTrialBlock", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
@@ -75,7 +75,7 @@ export function getTrialInfoStr(
         },
         movie: () => {
           res = replacePlaceholders(
-            phrases.T_counterTrialBlock[L],
+            readi18nPhrases("T_counterTrialBlock", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
@@ -86,7 +86,7 @@ export function getTrialInfoStr(
     } else {
       // ...but on block instructions, just show block#
       res = replacePlaceholders(
-        phrases.T_counterBlock[L],
+        readi18nPhrases("T_counterBlock", L),
         currentBlockIndex,
         blockCount
       );
@@ -94,7 +94,10 @@ export function getTrialInfoStr(
   }
 
   if (showViewingDistanceBool && viewingDistanceCm)
-    res += replacePlaceholders(phrases.T_counterCm[L], viewingDistanceCm);
+    res += replacePlaceholders(
+      readi18nPhrases("T_counterCm", L),
+      viewingDistanceCm
+    );
 
   return res;
 }
