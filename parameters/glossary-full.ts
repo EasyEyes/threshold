@@ -43,7 +43,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "🕑 _calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library.",
+      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library.",
     type: "boolean",
     default: "FALSE",
     categories: "",
