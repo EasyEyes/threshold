@@ -942,7 +942,7 @@ export const phrases = {
     __EMPTY: "",
     __EMPTY_1: "",
   },
-  EE_describeScreenSize: {
+  xEE_describeScreenSize: {
     "en-US": " And a 111⨉222 pixel screen.",
     de: " Und ein 111⨉222 Pixel -Bildschirm.",
     fr: " Et un écran de 111⨉222 pixels.",
