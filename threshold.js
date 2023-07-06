@@ -44,6 +44,7 @@ import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import "./components/css/showCharacterSet.css";
 import "./components/css/vocoderPhrase.css";
+import "./components/css/soundCalibration.css";
 import "./components/css/phraseIdentification.css";
 import "./components/css/forms.css";
 import "./components/css/popup.css";

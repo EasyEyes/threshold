@@ -13,6 +13,7 @@ import {
   calibrateSoundMaxHz,
   calibrateMicrophonesBool,
   microphoneCalibrationResults,
+  calibrateSoundCheck,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -196,6 +197,8 @@ export const calibrateAudio = async (reader) => {
     reader.read(GLOSSARY._calibrateMicrophonesBool.name, "__ALL_BLOCKS__")
   );
 
+  calibrateSoundCheck.current = reader.read("_calibrateSoundCheck")[0];
+
   const showSoundCalibrationResultsBool = ifTrue(
     reader.read(
       GLOSSARY._showSoundCalibrationResultsBool.name,
@@ -239,8 +242,8 @@ export const calibrateAudio = async (reader) => {
       title: calibrateSoundLevel
         ? readi18nPhrases("RC_soundCalibrationTitle1000Hz", lang)
         : readi18nPhrases("RC_soundCalibrationTitleAllHz", lang),
-      soundCalibration: readi18nPhrases("RC_soundCalibration", lang),
-      neediPhone: readi18nPhrases("RC_soundCalibrationNeedsIPhone", lang),
+      soundCalibration: readi18nPhrases("RC_loudspeakerCalibration", lang),
+      neediPhone: readi18nPhrases("RC_soundCalibrationNeedsMicrophone", lang),
       yes: readi18nPhrases("RC_soundCalibrationYes", lang),
       no: readi18nPhrases("RC_soundCalibrationNo", lang),
       qr: readi18nPhrases("RC_soundCalibrationQR", lang),
@@ -298,38 +301,138 @@ export const calibrateAudio = async (reader) => {
       elems.calibrateMicrophoneButton.style.display = "block";
       elems.continueButton.style.display = "block";
       document.querySelector("#soundNavContainer").style.display = "flex";
-
+      let isSmartPhone = true;
+      elems.title.innerHTML = "";
       await new Promise(async (resolve) => {
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
-          elems.message.innerHTML = copy.qr.replace(/\n/g, "<br>");
+          elems.title.innerHTML = readi18nPhrases(
+            "RC_microphoneCalibration",
+            lang
+          )
+            .replace(/111/g, 1)
+            .replace(/222/g, 2);
+          elems.message.innerHTML = "";
+          elems.message.style.lineHeight = "2rem";
+          const messageText1 = readi18nPhrases("RC_identifyMicrophone", lang);
+          const messageText2 = `${
+            isSmartPhone
+              ? readi18nPhrases("RC_getPhoneMicrophoneReady", lang)
+              : readi18nPhrases("RC_getUSBMicrophoneReady", lang)
+          }`.replace(/\n/g, "<br>");
+          const p = document.createElement("p");
+          p.innerHTML = messageText1;
+          elems.message.appendChild(p);
           elems.calibrateMicrophoneButton.style.display = "none";
           elems.continueButton.style.display = "none";
+
+          const container = document.createElement("div");
+          container.setAttribute("id", "micContainer");
+          container.style.display = "flex";
 
           // provide an input field for the user to enter an id(name) for the mic
           // create an input field
           const input = document.createElement("input");
           input.setAttribute("type", "text");
           input.setAttribute("id", "micId");
-          input.setAttribute("placeholder", "Enter a name for the mic");
-          input.setAttribute("style", "margin-top: 10px; margin-bottom: 10px;");
-          input.style.size = 20;
-          input.style.width = "50%";
-          elems.message.appendChild(input);
+          input.setAttribute("placeholder", "type here");
+
+          container.appendChild(input);
+          // elems.message.appendChild(input);
+          const checkboxContainer = document.createElement("div");
+          checkboxContainer.setAttribute("id", "checkboxContainer");
+          // create two checkboxes for the user to choose whether the microphone is a smartphone mic or a USB mic
+          const smartphoneCheckbox = document.createElement("input");
+          const smartphoneLabel = document.createElement("label");
+          const usbCheckbox = document.createElement("input");
+          const usbLabel = document.createElement("label");
+          const smartphoneCheckboxContainer = document.createElement("div");
+          const usbCheckboxContainer = document.createElement("div");
+
+          smartphoneCheckbox.setAttribute("type", "checkbox");
+          smartphoneCheckbox.setAttribute("id", "smartphoneCheckbox");
+          smartphoneCheckbox.setAttribute("name", "smartphoneCheckbox");
+          smartphoneCheckbox.setAttribute("value", "smartphone");
+
+          smartphoneLabel.setAttribute("for", "smartphoneCheckbox");
+          smartphoneLabel.innerHTML = "Smartphone";
+          smartphoneLabel.style.display = "inline-block";
+
+          smartphoneCheckboxContainer.appendChild(smartphoneCheckbox);
+          smartphoneCheckboxContainer.appendChild(smartphoneLabel);
+
+          usbCheckbox.setAttribute("type", "checkbox");
+          usbCheckbox.setAttribute("id", "usbCheckbox");
+          usbCheckbox.setAttribute("name", "usbCheckbox");
+          usbCheckbox.setAttribute("value", "usb");
+
+          usbLabel.setAttribute("for", "usbCheckbox");
+          usbLabel.innerHTML = "USB";
+          usbLabel.style.display = "inline-block";
+
+          usbCheckboxContainer.appendChild(usbCheckbox);
+          usbCheckboxContainer.appendChild(usbLabel);
+
+          checkboxContainer.appendChild(smartphoneCheckboxContainer);
+          checkboxContainer.appendChild(usbCheckboxContainer);
+
+          container.appendChild(checkboxContainer);
+          elems.message.appendChild(container);
+
+          // Smartphone checkbox is checked by default
+          smartphoneCheckbox.checked = true;
+          // only one checkbox can be checked at a time
+          smartphoneCheckbox.addEventListener("click", (e) => {
+            if (smartphoneCheckbox.checked) {
+              usbCheckbox.checked = false;
+            } else {
+              usbCheckbox.checked = true;
+            }
+            // find id p2
+            const p2 = document.querySelector("#p2");
+            p2.innerHTML = readi18nPhrases(
+              "RC_getPhoneMicrophoneReady",
+              lang
+            ).replace(/\n/g, "<br>");
+          });
+
+          usbCheckbox.addEventListener("click", (e) => {
+            if (usbCheckbox.checked) {
+              smartphoneCheckbox.checked = false;
+            } else {
+              smartphoneCheckbox.checked = true;
+            }
+            // find id p2
+            const p2 = document.querySelector("#p2");
+            p2.innerHTML = readi18nPhrases(
+              "RC_getUSBMicrophoneReady",
+              lang
+            ).replace(/\n/g, "<br>");
+          });
+
           // create a button to submit the input
           const proceedButton = document.createElement("button");
           proceedButton.setAttribute("id", "proceedButtonMicName");
           proceedButton.classList.add(...["btn", "btn-primary"]);
           proceedButton.innerHTML = "Proceed";
+          const p2 = document.createElement("p");
+          p2.setAttribute("id", "p2");
+          p2.innerHTML = messageText2;
+          elems.message.appendChild(p2);
           elems.message.appendChild(proceedButton);
 
           // when the button is clicked, get the value of the input field and store it in the micId variable
           await new Promise((resolve) => {
             proceedButton.addEventListener("click", async (e) => {
-              elems.displayQR.style.display = "block";
+              elems.displayQR.style.display = "flex";
+              // center child elements horizontally
+              elems.displayQR.style.justifyContent = "center";
+
               const micId = input.value;
               if (micId !== "") {
-                // remove the input field and the button
-                input.remove();
+                // remove the input field and the button, and the checkboxes
+                const isSmartPhone = smartphoneCheckbox.checked;
+
+                container.remove();
                 proceedButton.remove();
                 const { Speaker, CombinationCalibration } = speakerCalibrator;
 
@@ -385,6 +488,9 @@ export const calibrateAudio = async (reader) => {
                 } else {
                   elems.displayUpdate.style.display = "block";
                   speakerParameters.microphoneName = micId;
+                  speakerParameters.isSmartPhone = isSmartPhone;
+                  speakerParameters.calibrateSoundCheck =
+                    calibrateSoundCheck.current;
                   const result = await Speaker.startCalibration(
                     speakerParameters,
                     calibrator,
@@ -422,7 +528,8 @@ export const calibrateAudio = async (reader) => {
       soundCalibrationResults.current &&
       invertedImpulseResponse.current &&
       allHzCalibrationResults &&
-      showSoundCalibrationResultsBool
+      showSoundCalibrationResultsBool &&
+      calibrateSoundCheck.current !== "none"
     ) {
       displayParameters1000Hz(
         elems,
@@ -567,7 +674,7 @@ const _addSoundCalibrationElems = (copy) => {
   title.style.fontSize = "1.5em";
   //replace "111" with 1 and 222 with 3
   title.innerHTML = title.innerHTML.replace(/111/g, 1);
-  title.innerHTML = title.innerHTML.replace(/222/g, 3);
+  title.innerHTML = title.innerHTML.replace(/222/g, 2);
   // subtitle.innerHTML = copy.title;
   // message.innerHTML = copy.neediPhone;
   message.style.display = "none";
@@ -813,21 +920,10 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   elems,
   gains
 ) => {
-  // await _runSoundLevelCalibration(elems, gains);
-  // (elems.subtitle.innerHTML =
-  //   readi18nPhrases("RC_soundCalibrationTitleAllHz", rc.language.value)),
-  //   await _runLoudspeakerCalibration(elems);
-
   elems.subtitle.innerHTML = "";
   // hide elems.message
   elems.message.style.display = "none";
-  const {
-    Speaker,
-    CombinationCalibration,
-    UnsupportedDeviceError,
-    MissingSpeakerIdError,
-    CalibrationTimedOutError,
-  } = speakerCalibrator;
+  const { Speaker, CombinationCalibration } = speakerCalibrator;
 
   const speakerParameters = {
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
@@ -913,6 +1009,11 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
         showExperimentEnding();
       }
 
+      // remove the dropdown menu, instructions, and proceed button
+      dropdown.remove();
+      instructions.remove();
+      proceedButton.remove();
+
       const isSmartPhone = await isMicrophoneSmartphone(selectedMic);
       const messageText = `${readi18nPhrases("RC_removeHeadphones", language)}${
         isSmartPhone
@@ -923,7 +1024,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
       // line height
       elems.message.style.lineHeight = "2rem";
 
-      const calibrate = async () => {
+      const calibrate = async (isSmartPhone) => {
         const debug = false;
         if (debug) {
           invertedImpulseResponse.current = [
@@ -950,6 +1051,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
           };
         } else {
           speakerParameters.microphoneName = selectedMic;
+          speakerParameters.isSmartPhone = isSmartPhone;
+          speakerParameters.calibrateSoundCheck = calibrateSoundCheck.current;
           soundCalibrationResults.current = await Speaker.startCalibration(
             speakerParameters,
             calibrator,
@@ -959,14 +1062,16 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
           // console.log("calibrationResults", soundCalibrationResults.current);
 
           invertedImpulseResponse.current = soundCalibrationResults.current.iir;
-          allHzCalibrationResults.x_conv =
-            soundCalibrationResults.current.x_conv;
-          allHzCalibrationResults.y_conv =
-            soundCalibrationResults.current.y_conv;
-          allHzCalibrationResults.x_unconv =
-            soundCalibrationResults.current.x_unconv;
-          allHzCalibrationResults.y_unconv =
-            soundCalibrationResults.current.y_unconv;
+          if (calibrateSoundCheck.current !== "none") {
+            allHzCalibrationResults.x_conv =
+              soundCalibrationResults.current.x_conv;
+            allHzCalibrationResults.y_conv =
+              soundCalibrationResults.current.y_conv;
+            allHzCalibrationResults.x_unconv =
+              soundCalibrationResults.current.x_unconv;
+            allHzCalibrationResults.y_unconv =
+              soundCalibrationResults.current.y_unconv;
+          }
           allHzCalibrationResults.knownIr =
             soundCalibrationResults.current.componentIR;
 
@@ -980,114 +1085,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
         soundCalibrationLevelDBSPL.current = calibrationLevel;
       };
 
-      switch (isSmartPhone) {
-        case false:
-          // create an "OK" button
-          const okButton = document.createElement("button");
-          okButton.innerHTML = "OK";
-          okButton.classList.add(...["btn", "btn-primary"]);
-          elems.displayContainer.appendChild(okButton);
-          // make it to the left
-          okButton.style.marginLeft = "0";
-          dropdown.style.display = "none";
-          instructions.style.display = "none";
-          proceedButton.style.display = "none";
-          // add event listener to the OK button
-          await new Promise((resolve) => {
-            okButton.addEventListener("click", async () => {
-              // remove the OK button
-              okButton.style.display = "none";
-
-              // calibrate
-              await calibrate();
-              if (soundCalibrationResults.current === false) {
-                resolve(false);
-              }
-              resolve(true);
-            });
-
-            //  enter key event listener
-            document.addEventListener("keydown", async (e) => {
-              if (e.key === "Enter") {
-                // remove the OK button
-                okButton.style.display = "none";
-                // calibrate
-                await calibrate();
-                if (soundCalibrationResults.current === false) {
-                  resolve(false);
-                }
-                resolve(true);
-              }
-            });
-          });
-
-          break;
-        case true:
-          const debug = false;
-
-          if (debug) {
-            invertedImpulseResponse.current = [
-              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            ];
-            soundCalibrationResults.current = {
-              outDBSPL1000Values: [103.3, 102.9, 102.0, 95.3, 85.2, 75],
-              thdValues: [
-                85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1,
-                47.8, 11.4,
-              ],
-              outDBSPLValues: [
-                85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1,
-                47.8, 11.4,
-              ],
-              parameters: {
-                T: 100,
-                W: 10,
-                R: 1000,
-                backgroundDBSPL: 18.6,
-                gainDBSPL: 125,
-                RMSError: 0.1,
-              },
-            };
-          } else {
-            speakerParameters.microphoneName = selectedMic;
-            soundCalibrationResults.current = await Speaker.startCalibration(
-              speakerParameters,
-              calibrator,
-              500000
-            );
-
-            if (soundCalibrationResults.current === false) {
-              resolve(false);
-            }
-
-            // console.log("calibrationResults", soundCalibrationResults.current);
-
-            invertedImpulseResponse.current =
-              soundCalibrationResults.current.iir;
-            allHzCalibrationResults.x_conv =
-              soundCalibrationResults.current.x_conv;
-            allHzCalibrationResults.y_conv =
-              soundCalibrationResults.current.y_conv;
-            allHzCalibrationResults.x_unconv =
-              soundCalibrationResults.current.x_unconv;
-            allHzCalibrationResults.y_unconv =
-              soundCalibrationResults.current.y_unconv;
-            allHzCalibrationResults.knownIr =
-              soundCalibrationResults.current.componentIR;
-
-            soundGainDBSPL.current =
-              soundCalibrationResults.current.parameters.gainDBSPL;
-            soundGainDBSPL.current =
-              Math.round(soundGainDBSPL.current * 10) / 10;
-          }
-          const { normalizedIIR, calibrationLevel } =
-            getSoundCalibrationLevelDBSPLFromIIR(
-              invertedImpulseResponse.current
-            );
-          invertedImpulseResponse.current = normalizedIIR;
-          soundCalibrationLevelDBSPL.current = calibrationLevel;
-          break;
-      }
+      await calibrate(isSmartPhone);
 
       resolve(true);
     });
