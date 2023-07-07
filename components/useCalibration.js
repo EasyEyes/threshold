@@ -531,19 +531,21 @@ export const calibrateAudio = async (reader) => {
                     micId: micId,
                     result: result,
                   });
-                  //show sound calibration results
-                  displayParameters1000Hz(
-                    elems,
-                    soundLevels,
-                    result,
-                    "1000 Hz Calibration Results for " + micId
-                  );
-                  displayParametersAllHz(
-                    elems,
-                    result.componentIIR,
-                    result,
-                    "All Hz Calibration Results for " + micId
-                  );
+                  if (calibrateSoundCheck.current !== "none") {
+                    //show sound calibration results
+                    displayParameters1000Hz(
+                      elems,
+                      soundLevels,
+                      result,
+                      "1000 Hz Calibration Results for " + micId
+                    );
+                    displayParametersAllHz(
+                      elems,
+                      result.componentIIR,
+                      result,
+                      "All Hz Calibration Results for " + micId
+                    );
+                  }
                 }
                 resolve();
               }
