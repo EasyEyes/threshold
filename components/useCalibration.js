@@ -298,12 +298,14 @@ export const calibrateAudio = async (reader) => {
 
     while (calibrateMicrophonesBool.current) {
       // provide the option to calibrate another mic or to continue.
+      elems.displayUpdate.style.display = "none";
       elems.calibrateMicrophoneButton.style.display = "block";
       elems.continueButton.style.display = "block";
       document.querySelector("#soundNavContainer").style.display = "flex";
       let isSmartPhone = true;
       elems.title.innerHTML = "";
       await new Promise(async (resolve) => {
+        elems.message.innerHTML = copy.done;
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
           elems.title.innerHTML = readi18nPhrases(
             "RC_microphoneCalibration",
@@ -486,7 +488,9 @@ export const calibrateAudio = async (reader) => {
                     },
                   };
                 } else {
-                  elems.displayUpdate.style.display = "block";
+                  elems.displayUpdate.style.display = "flex";
+                  elems.displayUpdate.style.justifyContent = "center";
+                  elems.displayUpdate.style.flexDirection = "column";
                   speakerParameters.microphoneName = micId;
                   speakerParameters.isSmartPhone = isSmartPhone;
                   speakerParameters.calibrateSoundCheck =
@@ -517,7 +521,7 @@ export const calibrateAudio = async (reader) => {
         });
       });
     }
-
+    elems.message.innerHTML = copy.done;
     if (!showSoundTestPageBool) {
       _removeSoundCalibrationElems(Object.values(elems));
       resolve(true);
@@ -551,7 +555,7 @@ export const calibrateAudio = async (reader) => {
           );
           displayParametersAllHz(
             elems,
-            micResult.result.iir,
+            micResult.result.componentIIR,
             micResult.result,
             "All Hz Calibration Results for " + micResult.micId
           );
@@ -1050,6 +1054,12 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             },
           };
         } else {
+          elems.displayContainer.style.display = "flex";
+          elems.displayContainer.style.justifyContent = "center";
+          elems.displayContainer.style.flexDirection = "column";
+          elems.displayUpdate.style.display = "flex";
+          elems.displayUpdate.style.justifyContent = "center";
+          elems.displayUpdate.style.flexDirection = "column";
           speakerParameters.microphoneName = selectedMic;
           speakerParameters.isSmartPhone = isSmartPhone;
           speakerParameters.calibrateSoundCheck = calibrateSoundCheck.current;
@@ -1059,9 +1069,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             500000
           );
 
-          // console.log("calibrationResults", soundCalibrationResults.current);
-
-          invertedImpulseResponse.current = soundCalibrationResults.current.iir;
+          invertedImpulseResponse.current =
+            soundCalibrationResults.current.componentIIR;
           if (calibrateSoundCheck.current !== "none") {
             allHzCalibrationResults.x_conv =
               soundCalibrationResults.current.x_conv;
