@@ -289,13 +289,35 @@ export const calibrateAudio = async (reader) => {
     elems.message.innerHTML = copy.done;
     elems.yesButton.style.display = "none";
     elems.displayUpdate.style.display = "none";
+
+    //show plots of the loudspeaker calibration
+    if (
+      calibrateSoundLevel &&
+      soundCalibrationResults.current &&
+      invertedImpulseResponse.current &&
+      allHzCalibrationResults &&
+      showSoundCalibrationResultsBool &&
+      calibrateSoundCheck.current !== "none"
+    ) {
+      displayParameters1000Hz(
+        elems,
+        soundLevels,
+        soundCalibrationResults.current
+      );
+      displayParametersAllHz(
+        elems,
+        invertedImpulseResponse.current,
+        allHzCalibrationResults
+      );
+    }
+
     // Now that loudspeaker calibration is done, present users with two options: continue to experiment or calibrate microphone
 
     // if calibrateMicrophonesBool is true, then provide the option to calibrate the phone mic or to continue.
     // if user chooses to calibrate mic, then at the end of the calibration, user will be presented with the option to calibrate another mic or to continue.
     // for now simulate the mic calibration by 5 seconds pause then provide the option to calibrate another mic or to continue.
     // do this until the user chooses to continue.
-
+    let i = 0;
     while (calibrateMicrophonesBool.current) {
       // provide the option to calibrate another mic or to continue.
       elems.displayUpdate.style.display = "none";
@@ -307,6 +329,11 @@ export const calibrateAudio = async (reader) => {
       await new Promise(async (resolve) => {
         elems.message.innerHTML = copy.done;
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
+          elems.soundLevelsTable.innerHTML = "";
+          elems.soundTestPlots.innerHTML = "";
+          elems.soundParametersFromCalibration.innerHTML = "";
+          elems.downloadButton.style.visibility = "hidden";
+          elems.displayUpdate.innerHTML = "";
           elems.title.innerHTML = readi18nPhrases(
             "RC_microphoneCalibration",
             lang
@@ -504,6 +531,19 @@ export const calibrateAudio = async (reader) => {
                     micId: micId,
                     result: result,
                   });
+                  //show sound calibration results
+                  displayParameters1000Hz(
+                    elems,
+                    soundLevels,
+                    result,
+                    "1000 Hz Calibration Results for " + micId
+                  );
+                  displayParametersAllHz(
+                    elems,
+                    result.componentIIR,
+                    result,
+                    "All Hz Calibration Results for " + micId
+                  );
                 }
                 resolve();
               }
@@ -527,62 +567,62 @@ export const calibrateAudio = async (reader) => {
       resolve(true);
     }
 
-    if (
-      calibrateSoundLevel &&
-      soundCalibrationResults.current &&
-      invertedImpulseResponse.current &&
-      allHzCalibrationResults &&
-      showSoundCalibrationResultsBool &&
-      calibrateSoundCheck.current !== "none"
-    ) {
-      displayParameters1000Hz(
-        elems,
-        soundLevels,
-        soundCalibrationResults.current
-      );
-      displayParametersAllHz(
-        elems,
-        invertedImpulseResponse.current,
-        allHzCalibrationResults
-      );
-      if (microphoneCalibrationResults.length > 0) {
-        microphoneCalibrationResults.forEach((micResult) => {
-          displayParameters1000Hz(
-            elems,
-            soundLevels,
-            micResult.result,
-            "1000 Hz Calibration Results for " + micResult.micId
-          );
-          displayParametersAllHz(
-            elems,
-            micResult.result.componentIIR,
-            micResult.result,
-            "All Hz Calibration Results for " + micResult.micId
-          );
-        });
-      }
-    } else if (
-      calibrateLoudspeaker &&
-      invertedImpulseResponse.current &&
-      allHzCalibrationResults &&
-      showSoundCalibrationResultsBool
-    ) {
-      displayParametersAllHz(
-        elems,
-        invertedImpulseResponse.current,
-        allHzCalibrationResults
-      );
-    } else if (
-      calibrateSoundLevel &&
-      soundCalibrationResults.current &&
-      showSoundCalibrationResultsBool
-    ) {
-      displayParameters1000Hz(
-        elems,
-        soundLevels,
-        soundCalibrationResults.current
-      );
-    }
+    // if (
+    //   calibrateSoundLevel &&
+    //   soundCalibrationResults.current &&
+    //   invertedImpulseResponse.current &&
+    //   allHzCalibrationResults &&
+    //   showSoundCalibrationResultsBool &&
+    //   calibrateSoundCheck.current !== "none"
+    // ) {
+    //   displayParameters1000Hz(
+    //     elems,
+    //     soundLevels,
+    //     soundCalibrationResults.current
+    //   );
+    //   displayParametersAllHz(
+    //     elems,
+    //     invertedImpulseResponse.current,
+    //     allHzCalibrationResults
+    //   );
+    //   if (microphoneCalibrationResults.length > 0) {
+    //     microphoneCalibrationResults.forEach((micResult) => {
+    //       displayParameters1000Hz(
+    //         elems,
+    //         soundLevels,
+    //         micResult.result,
+    //         "1000 Hz Calibration Results for " + micResult.micId
+    //       );
+    //       displayParametersAllHz(
+    //         elems,
+    //         micResult.result.componentIIR,
+    //         micResult.result,
+    //         "All Hz Calibration Results for " + micResult.micId
+    //       );
+    //     });
+    //   }
+    // } else if (
+    //   calibrateLoudspeaker &&
+    //   invertedImpulseResponse.current &&
+    //   allHzCalibrationResults &&
+    //   showSoundCalibrationResultsBool
+    // ) {
+    //   displayParametersAllHz(
+    //     elems,
+    //     invertedImpulseResponse.current,
+    //     allHzCalibrationResults
+    //   );
+    // } else if (
+    //   calibrateSoundLevel &&
+    //   soundCalibrationResults.current &&
+    //   showSoundCalibrationResultsBool
+    // ) {
+    //   displayParameters1000Hz(
+    //     elems,
+    //     soundLevels,
+    //     soundCalibrationResults.current
+    //   );
+    // }
 
     elems.yesButton.innerHTML = "Continue to experiment.";
     document.querySelector("#soundNavContainer").style.display = "flex";
