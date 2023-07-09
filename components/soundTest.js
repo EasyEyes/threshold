@@ -893,6 +893,9 @@ export const displayParametersAllHz = (
   plotCanvas.width = 500;
   plotCanvas.height = 500;
 
+  // clear elems.soundTestPlots and remove child nodes
+  elems.soundTestPlots.innerHTML = "";
+
   elems.soundTestPlots.appendChild(plotCanvas);
 
   elems.citation.style.visibility = "visible";
