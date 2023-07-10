@@ -30,6 +30,7 @@ import {
   CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS,
   NEGATIVE_MARKING_FIXATION_STROKE_THICKENING,
   ILLDEFINED_TRACKING_INTERVALS,
+  OBSOLETE_PARAMETERS,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -46,6 +47,8 @@ import {
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 
 let zeroIndexed: boolean;
+
+const ObsoleteParametersMappedWithNew: Record<string, any> = {};
 
 export const validatedCommas = (
   parsed: Papa.ParseResult<string[]>
@@ -220,22 +223,41 @@ const areAllPresentParametersRecognized = (
 ): EasyEyesError[] => {
   const unrecognized: any[] = [];
   const recognized: string[] = [];
+  const obsolete: any[] = [];
 
   const checkIfRecognized = (parameter: string): any => {
-    if (!(parameter in GLOSSARY) && !_superMatching(parameter)) {
+    if (
+      !(parameter in GLOSSARY) &&
+      !_superMatching(parameter) &&
+      !(parameter in ObsoleteParametersMappedWithNew)
+    ) {
       unrecognized.push({
         name: parameter,
         closest: similarlySpelledCandidates(parameter, Object.keys(GLOSSARY)),
       });
-    } else {
+    } else if (!(parameter in ObsoleteParametersMappedWithNew)) {
       recognized.push(parameter);
     }
   };
 
+  // parameters if in obsolete list and the new version and do not check for recongnized.
+
+  parameters.forEach((parameter) => {
+    if (parameter in ObsoleteParametersMappedWithNew) {
+      obsolete.push({
+        name: parameter,
+        new: ObsoleteParametersMappedWithNew[parameter],
+      });
+    }
+  });
+
   parameters.forEach(checkIfRecognized);
   parameters.splice(0, parameters.length, ...recognized);
 
-  return unrecognized.map(UNRECOGNIZED_PARAMETER);
+  return [
+    ...unrecognized.map(UNRECOGNIZED_PARAMETER),
+    ...obsolete.map(OBSOLETE_PARAMETERS),
+  ];
 };
 
 const _superMatching = (parameter: string): boolean => {

@@ -283,6 +283,17 @@ export const UNRECOGNIZED_PARAMETER = (report: any): EasyEyesError => {
   };
 };
 
+export const OBSOLETE_PARAMETERS = (report: any): EasyEyesError => {
+  return {
+    name: `Parameter is obsolete`,
+    message: `Sorry, <span class="error-parameter">${report.name}</span> is obsolete. The new supported parameter is <span class="error-parameter">${report.new}</span>`,
+    hint: `All parameters are case-sensitive.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [report.name],
+  };
+};
+
 export const NOT_YET_SUPPORTED_PARAMETER = (
   parameter: string
 ): EasyEyesError => {
