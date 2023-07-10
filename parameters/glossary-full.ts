@@ -1223,7 +1223,27 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0,0,0,1",
     explanation:
-      "The color of the targets, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
+      "The color of the target font, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
+    type: "text",
+    default: "0,0,0,1",
+    categories: "",
+  },
+  {
+    name: "markColorRGB",
+    availability: "now",
+    example: "",
+    explanation:
+      "The color of the instruction font, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
+    type: "text",
+    default: "0,0,0,1",
+    categories: "",
+  },
+  {
+    name: "instructionFontColorRGBA",
+    availability: "now",
+    example: "",
+    explanation:
+      "The color of the instruction font, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
     type: "text",
     default: "0,0,0,1",
     categories: "",
@@ -2292,7 +2312,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ showConditionNameBool (default FALSE), If TRUE, then display condition name as text at lower-left corner, or, if showTargetSpecsBool is TRUE, above target specs. See showTargetSpecsBool. The point size of condition-name text should be 1.4x bigger than we use for target specs. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
+      "⭑ showConditionNameBool (default FALSE). If TRUE, then display condition name as text at lower-left corner, or, if showTargetSpecsBool is TRUE, above target specs. See showTargetSpecsBool. The point size of condition-name text should be 1.4x bigger than we use for target specs. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
     type: "boolean",
     default: "FALSE",
     categories: "",

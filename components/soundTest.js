@@ -769,10 +769,11 @@ export const displayParameters1000Hz = (
   // plot the sound levels
   // create plot canvas
   const plotCanvas = document.createElement("canvas");
-  plotCanvas.setAttribute("id", "plotCanvas");
+  // plotCanvas.setAttribute("id", "plotCanvas");
   plotCanvas.width = 500;
   plotCanvas.height = 500;
 
+  elems.soundTestPlots.innerHTML = "";
   elems.soundTestPlots.appendChild(plotCanvas);
 
   // function call to plot the sound levels
@@ -892,9 +893,6 @@ export const displayParametersAllHz = (
   plotCanvas.setAttribute("id", "plotCanvas");
   plotCanvas.width = 500;
   plotCanvas.height = 500;
-
-  // clear elems.soundTestPlots and remove child nodes
-  elems.soundTestPlots.innerHTML = "";
 
   elems.soundTestPlots.appendChild(plotCanvas);
 

@@ -317,7 +317,7 @@ export const calibrateAudio = async (reader) => {
     // if user chooses to calibrate mic, then at the end of the calibration, user will be presented with the option to calibrate another mic or to continue.
     // for now simulate the mic calibration by 5 seconds pause then provide the option to calibrate another mic or to continue.
     // do this until the user chooses to continue.
-    let i = 0;
+
     while (calibrateMicrophonesBool.current) {
       // provide the option to calibrate another mic or to continue.
       elems.displayUpdate.style.display = "none";

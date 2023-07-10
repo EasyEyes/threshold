@@ -32,8 +32,6 @@ export const phrases = {
     "zh-HK": "LTR",
     ja: "LTR",
     ko: "LTR",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_languageUseSpace: {
     "en-US": "1",
@@ -62,8 +60,6 @@ export const phrases = {
     "zh-HK": "0",
     ja: "0",
     ko: "0",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_languageUsesSpaces: {
     "en-US": "1",
@@ -92,8 +88,6 @@ export const phrases = {
     "zh-HK": "0",
     ja: "0",
     ko: "0",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_languageFont: {
     "en-US": "Noto Serif",
@@ -122,8 +116,6 @@ export const phrases = {
     "zh-HK": "Noto Serif TC",
     ja: "Noto Serif JP",
     ko: "Noto Serif KR",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_languageNameEnglish: {
     "en-US": "English",
@@ -152,8 +144,6 @@ export const phrases = {
     "zh-HK": "Traditional Chinese",
     ja: "Japanese",
     ko: "Korean",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_languageNameNative: {
     "en-US": "English",
@@ -182,8 +172,6 @@ export const phrases = {
     "zh-HK": "繁體中文",
     ja: "日本",
     ko: "한국인",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_languageChoose: {
     "en-US": "Choose a language for this study.",
@@ -212,8 +200,6 @@ export const phrases = {
     "zh-HK": "為這項研究選擇一種語言。",
     ja: "この調査の言語を選択してください。",
     ko: "이 연구에 대한 언어를 선택하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_phraseSource: {
     "en-US":
@@ -243,8 +229,6 @@ export const phrases = {
     "zh-HK": "Google Translate from Simplified Chinese",
     ja: "Google Translate from English",
     ko: "Google Translate from English",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibilityTitle: {
     "en-US": "Needs",
@@ -273,8 +257,6 @@ export const phrases = {
     "zh-HK": "需要",
     ja: "ニーズ",
     ko: "필요합니다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatible: {
     "en-US": "✅ Excellent! This study can proceed. ",
@@ -303,8 +285,6 @@ export const phrases = {
     "zh-HK": "✅好！這項研究可以進行。",
     ja: "✅素晴らしい！この研究は進むことができます。",
     ko: "✅ 우수! 이 연구는 진행될 수 있습니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleBrowserDeviceCores: {
     "en-US":
@@ -336,8 +316,6 @@ export const phrases = {
       "如其描述中所述，這項研究需要在DDD上運行至少222個CPU內核的BBB瀏覽器",
     ja: "その説明で述べたように、この研究では、少なくとも222のCPUコアでDDDで実行されるBBBブラウザが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어로 DDD에서 실행되는 BBB 브라우저가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleBrowserNotOSDeviceCores: {
     "en-US":
@@ -369,8 +347,6 @@ export const phrases = {
       "如其描述中所述，這項研究與OOO不相容，並且需要在DDD上運行至少222個CPU內核的BBB瀏覽器",
     ja: "その説明で述べたように、この研究はOOOと互換性があり、少なくとも222のCPUコアでDDDで実行されるBBBブラウザが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 OOO와 호환되지 않으며 최소 222 CPU 코어로 DDD에서 실행되는 BBB 브라우저가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleBrowserOSDeviceCores: {
     "en-US":
@@ -402,8 +378,6 @@ export const phrases = {
       "如其描述中所述，這項研究需要在OOO DDD上運行至少222個CPU內核的BBB瀏覽器",
     ja: "その説明で述べたように、この研究では、少なくとも222のCPUコアを使用してOOO DDDで実行されるBBBブラウザが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어가있는 OOO DDD에서 실행되는 BBB 브라우저가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleBrowserVersionDeviceCores: {
     "en-US":
@@ -435,8 +409,6 @@ export const phrases = {
       "如其描述中所述，這項研究需要在DDD上運行至少222個CPU核心的BBB瀏覽器（版本至少為111）",
     ja: "その説明に記載されているように、この調査では、少なくとも222 CPUコアのあるDDDで実行されているBBBブラウザ（少なくとも111バージョン）が必要です。",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어가있는 DDD에서 실행되는 BBB 브라우저 (111 개)가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleBrowserVersionNotOSDeviceCores: {
     "en-US":
@@ -468,8 +440,6 @@ export const phrases = {
       "如其描述中所述，這項研究與OOO不相容，並且需要在DDD上運行至少222 CPU內核的BBB瀏覽器（版本至少為111）",
     ja: "その説明で述べたように、この研究はOOOと互換性があり、少なくとも222 CPUコアを持つDDDで実行されているBBBブラウザ（少なくとも111バージョン）が必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 OOO와 호환되지 않으며 222 개 이상의 CPU 코어가있는 DDD에서 실행되는 BBB 브라우저 (111 개 이상)가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleBrowserVersionOSDeviceCores: {
     "en-US":
@@ -501,8 +471,6 @@ export const phrases = {
       "如其描述中所述，這項研究需要在OOO DDD上運行至少222個CPU內核的BBB瀏覽器（版本至少為111）",
     ja: "その説明で述べたように、この調査では、少なくとも222のCPUコアを使用してOOO DDDで実行されるBBBブラウザ（少なくとも111バージョン）が必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 CPU 코어가있는 OOO DDD에서 실행되는 BBB 브라우저 (111 개)가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleDeviceCores: {
     "en-US":
@@ -532,8 +500,6 @@ export const phrases = {
     "zh-HK": "如其描述中所述，這項研究需要至少222個CPU核心的DDD",
     ja: "その説明で述べたように、この研究には少なくとも222のCPUコアを持つDDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 개의 CPU 코어를 가진 DDD가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleExceptForScreenResolution: {
     "en-US":
@@ -563,8 +529,6 @@ export const phrases = {
     "zh-HK": "如果將屏幕分辨率提高到至少333⨉444像素，則該計算機將變得兼容。",
     ja: "このコンピューターは、画面の解像度を少なくとも333⨉444ピクセルに増やすと互換性があります。",
     ko: "화면 해상도를 최소 333⨉444 픽셀로 늘리면이 컴퓨터가 호환됩니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleNotBrowserDeviceCores: {
     "en-US":
@@ -596,8 +560,6 @@ export const phrases = {
       "如其描述中所述，這項研究與BBB瀏覽器不兼容，並且需要至少222個CPU核心的DDD",
     ja: "その説明に記載されているように、この研究はBBBブラウザと互換性があり、少なくとも222のCPUコアを持つDDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 BBB 브라우저와 호환되지 않으며 최소 222 CPU 코어가있는 DDD가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleNotBrowserNotOSDeviceCores: {
     "en-US":
@@ -629,8 +591,6 @@ export const phrases = {
       "如其描述中所述，這項研究與BBB瀏覽器不兼容，並且與OOO也不兼容。它需要一個至少222個CPU內核的DDD",
     ja: "その説明で述べたように、この研究はBBBブラウザーと互換性がなく、OOOとも互換性がありません。少なくとも222のCPUコアを持つDDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 BBB 브라우저와 호환되지 않으며 OOO와 호환되지 않습니다. 최소 222 CPU 코어가있는 DDD가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleNotBrowserOSDeviceCores: {
     "en-US":
@@ -662,8 +622,6 @@ export const phrases = {
       "如其描述中所述，這項研究與BBB瀏覽器不相容，並且需要至少222個CPU核心的OOO DDD",
     ja: "その説明に記載されているように、この研究はBBBブラウザと互換性があり、少なくとも222のCPUコアを持つOOO DDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 BBB 브라우저와 호환되지 않으며 최소 222 CPU 코어가있는 OOO DDD가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleNotOSDeviceCores: {
     "en-US":
@@ -695,8 +653,6 @@ export const phrases = {
       "如其描述中所述，這項研究與OOO不相容。它需要一個至少222個CPU內核的DDD",
     ja: "その説明で述べたように、この研究はOOOと互換性がありません。少なくとも222のCPUコアを持つDDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 OOO와 호환되지 않습니다. 최소 222 CPU 코어가있는 DDD가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleOSDeviceCores: {
     "en-US":
@@ -726,8 +682,6 @@ export const phrases = {
     "zh-HK": "如其描述中所述，這項研究需要一個至少222個CPU核心的OOO DDD",
     ja: "その説明で述べたように、この研究には少なくとも222のCPUコアを持つOOO DDDが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 최소 222 개의 CPU 코어를 가진 OOO DDD가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleScreenHeight: {
     "en-US": " and a screen at least 222 pixels high",
@@ -756,8 +710,6 @@ export const phrases = {
     "zh-HK": " 屏幕至少高222像素",
     ja: " 少なくとも222ピクセルの画面",
     ko: " 그리고 최소 222 픽셀의 스크린",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleScreenSize: {
     "en-US": " and a screen resolution of at least 111⨉222 pixels",
@@ -786,8 +738,6 @@ export const phrases = {
     "zh-HK": " 和至少111⨉222像素的屏幕分辨率",
     ja: " 少なくとも111⨉222ピクセルの画面解像度",
     ko: " 및 최소 111 ℃ 픽셀의 스크린 해상도",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_compatibleScreenWidth: {
     "en-US": " and a screen at least 111 pixels wide",
@@ -816,8 +766,6 @@ export const phrases = {
     "zh-HK": " 和屏幕至少111像素寬",
     ja: " 少なくとも111ピクセルの画面",
     ko: " 그리고 최소 111 픽셀의 스크린",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_ok: {
     "en-US": "Ok",
@@ -846,8 +794,6 @@ export const phrases = {
     "zh-HK": "好的",
     ja: "Ok",
     ko: "좋아요",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_or: {
     "en-US": " or",
@@ -876,8 +822,6 @@ export const phrases = {
     "zh-HK": " 或者",
     ja: " また",
     ko: " 또는",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_refresh: {
     "en-US": "Refresh",
@@ -906,8 +850,6 @@ export const phrases = {
     "zh-HK": "刷新",
     ja: "リフレッシュします",
     ko: "새로 고치다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_describeDevice: {
     "en-US":
@@ -939,8 +881,6 @@ export const phrases = {
       "看來當前的瀏覽器是BBB（版本111），在具有222個CPU內核的OOO DDD上運行。",
     ja: "現在のブラウザはBBB（バージョン111）であり、222 CPUコアを備えたOOO DDDで実行されているようです。",
     ko: "현재 브라우저는 BBB (버전 111)이며 222 CPU 코어가있는 OOO DDD에서 실행됩니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_describeScreenSize: {
     "en-US": " And a 111⨉222 pixel screen.",
@@ -969,8 +909,6 @@ export const phrases = {
     "zh-HK": " 和111⨉222像素屏幕。",
     ja: " および111⨉222ピクセル画面。",
     ko: " 및 1112222 픽셀 화면.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_IDRequested: {
     "en-US": "EasyEyes ID requested",
@@ -999,8 +937,6 @@ export const phrases = {
     "zh-HK": "請求EasyEyes ID",
     ja: "Easyeyes IDが要求されました",
     ko: "EasyEyes ID가 요청되었습니다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_noFileSelected: {
     "en-US": "No file selected",
@@ -1029,8 +965,6 @@ export const phrases = {
     "zh-HK": "未選擇文件",
     ja: "ファイルが選択されていません",
     ko: "파일이 선택되지 않았습니다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_browseForID: {
     "en-US": "Select EasyEyes ID file",
@@ -1059,8 +993,6 @@ export const phrases = {
     "zh-HK": "選擇EasyEyes ID文件",
     ja: "EasyEyes IDファイルを選択します",
     ko: "Easyeyes ID 파일을 선택하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_ID_noLocalStorage: {
     "en-US":
@@ -1092,14 +1024,12 @@ export const phrases = {
       "研究人員請求您從上一個會話中提供易於眼睛的ID，請在此處輸入，或在上次會話結束時上傳下載的文件。",
     ja: "研究者は、前のセッションからEasyEyes IDを提供することを要求します。ここに入力するか、最後のセッションが終了したらダウンロードしたファイルをアップロードしてください。",
     ko: "연구원은 이전 세션에서 EasyEeyes ID를 제공하도록 요청하고 여기에 입력하거나 마지막 세션이 종료되면 다운로드 한 파일을 업로드하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_ID: {
     "en-US":
       'A unique ID is needed to link data across sessions. This computer previously participated in a session on **ddd** with EasyEyes ID “**sss**”. Press OK if that\'s you. Otherwise, if you have an EasyEyes ID file, press the file selection button below to open it. (The filename begins with "EasyEyes", ends with ".txt", and is typically in your Downloads folder.) If you don\'t have a file, but know your EasyEyes ID, then type it. Otherwise, just make up your own ID, which can be any alphanumeric string at least 5 characters long. It can be your name, if you like. We\'ll remember it for you on this computer, but if you go to another computer, please take your EasyEyes ID file (the most recent file in your Downloads folder), or at least write down your EasyEyes ID. Use it every time to link your data from session to session.',
     de: 'Eine eindeutige ID ist erforderlich, um Daten über Sitzungen hinweg zu verknüpfen. Dieser Computer nahm zuvor an einer Sitzung auf ** ddd ** mit Easyeyes ID "** SSS **" teil. Drücken Sie OK, wenn Sie das sind. Wenn Sie eine Easyeyes -ID -Datei haben, drücken Sie die Dateiauswahltaste unten, um sie zu öffnen. (Der Dateiname beginnt mit "Easyeyes", endet mit ".txt" und befindet sich normalerweise in Ihrem Download -Ordner.) Wenn Sie keine Datei haben, aber Ihre Easyeyes -ID kennen, geben Sie sie dann ein. Ansonsten machen Sie einfach Ihre eigene ID aus, die eine alphanumerische Zeichenfolge von mindestens 5 Zeichen lang sein kann. Es kann Ihr Name sein, wenn Sie möchten. Wir werden es für Sie auf diesem Computer erinnern, aber wenn Sie zu einem anderen Computer gehen, nehmen Sie bitte Ihre Easyeyes -ID -Datei (die neueste Datei in Ihrem Download -Ordner) oder schreiben Sie zumindest Ihre Easyeyes -ID auf. Verwenden Sie es jedes Mal, um Ihre Daten von Sitzung mit der Sitzung zu verknüpfen.',
-    fr: "Un ID unique est nécessaire pour relier les données entre les sessions. Cet ordinateur avait précédemment participé à une session sur ** ddd ** avec EasyEyes ID «** SSS **». Appuyez sur OK si c'est vous. Sinon, si vous avez un fichier ID EasyEyes, appuyez sur le bouton de sélection de fichiers ci-dessous pour l'ouvrir. (Le nom de fichier commence par \"EasyEyes\", se termine par \".txt\" et est généralement dans votre dossier de téléchargement.) Si vous n'avez pas de fichier, mais connaissez votre identifiant EasyEyes, alors tapez-le. Sinon, inventez simplement votre propre identifiant, qui peut être n'importe quelle chaîne alphanumérique au moins 5 caractères. Cela peut être votre nom, si vous le souhaitez. Nous nous en souviendrons pour vous sur cet ordinateur, mais si vous allez sur un autre ordinateur, veuillez prendre votre fichier ID EasyEyes (le fichier le plus récent de votre dossier de téléchargements), ou au moins noter votre identifiant EasyEyes. Utilisez-le à chaque fois pour relier vos données de la session à la session.",
+    fr: "Un ID unique est nécessaire pour relier les données entre les sessions. Cet ordinateur avait précédemment participé à une session sur ** ddd ** avec EasyEyes ID «** SSS **». Appuyez sur OK si c'est vous. Sinon, si vous avez un fichier ID EasyEyes, appuyez sur le bouton de sélection de fichiers ci-dessous pour l'ouvrir. (Le nom de fichier commence par \"EasyEyes\", se termine par \".txt\" et est généralement dans votre dossier de téléchargement.) Si vous n'avez pas de fichier, mais connaissez votre identifiant EasyEyes, alors tapez-le. Sinon, compensez simplement votre propre identifiant, qui peut être n'importe quelle chaîne alphanumérique au moins 5 caractères. Cela peut être votre nom, si vous le souhaitez. Nous nous en souviendrons pour vous sur cet ordinateur, mais si vous allez sur un autre ordinateur, veuillez prendre votre fichier ID EasyEyes (le fichier le plus récent de votre dossier de téléchargements), ou au moins noter votre identifiant EasyEyes. Utilisez-le à chaque fois pour relier vos données de la session à la session.",
     es: 'Se necesita una identificación única para vincular los datos entre las sesiones. Esta computadora participó previamente en una sesión en ** DDD ** con EasyEyes ID "** SSS **". Presione OK si ese eres tú. De lo contrario, si tiene un archivo de ID de EasyEyes, presione el botón de selección de archivos a continuación para abrirlo. (El nombre de archivo comienza con "EasyEyes", termina con ".txt", y generalmente está en su carpeta de descargas). Si no tiene un archivo, pero conozca su ID de EasyEyes, luego escribalo. De lo contrario, simplemente cree su propia identificación, que puede ser cualquier cadena alfanumérica de al menos 5 caracteres de largo. Puede ser su nombre, si lo desea. Lo recordaremos por usted en esta computadora, pero si va a otra computadora, tome su archivo de ID de EasyEyes (el archivo más reciente en su carpeta de descargas) o al menos escriba su ID de EasyEyes. Úselo cada vez para vincular sus datos de sesión a sesión.',
     pt: 'É necessário um ID exclusivo para vincular dados nas sessões. Este computador participou anteriormente de uma sessão em ** ddd ** com o Easyeyes ID “** SSS **”. Pressione OK se for você. Caso contrário, se você tiver um arquivo de identificação easyeyes, pressione o botão Seleção de arquivo abaixo para abri -lo. (O nome do arquivo começa com "easyeyes", termina com ".txt" e normalmente está na sua pasta de downloads.) Se você não tiver um arquivo, mas conheça o seu ID easyeyes, digite -o. Caso contrário, basta criar seu próprio ID, que pode ser qualquer corda alfanumérica com pelo menos 5 caracteres. Pode ser o seu nome, se você quiser. Lembraremos disso para você neste computador, mas se você for a outro computador, pegue seu arquivo de identificação Easyeyes (o arquivo mais recente na sua pasta de downloads) ou pelo menos anote o seu ID easyeyes. Use -o sempre para vincular seus dados de sessão à sessão.',
     it: 'È necessario un ID univoco per collegare i dati tra le sessioni. Questo computer aveva precedentemente partecipato a una sessione su ** DDD ** con ID EasyEyes “** sss **”. Premi OK se sei tu. Altrimenti, se si dispone di un file ID EasyEyes, premere il pulsante di selezione del file in basso per aprirlo. (Il nome file inizia con "EasyEyes", termina con ".txt" ed è in genere nella cartella dei download.) Se non hai un file, ma conosci il tuo ID EasyEyes, quindi digitalo. Altrimenti, basta creare il tuo ID, che può essere lungo qualsiasi stringa alfanumerica di almeno 5 caratteri. Può essere il tuo nome, se vuoi. Lo ricorderemo per te su questo computer, ma se vai a un altro computer, prendi il tuo file ID EasyEyes (il file più recente nella cartella dei download) o almeno scrivi il tuo ID EasyEyes. Usalo ogni volta per collegare i tuoi dati da sessione a sessione.',
@@ -1125,8 +1055,6 @@ export const phrases = {
       "需要一個唯一的ID來鏈接跨會話的數據。這台計算機先前參加了有關** ddd **的會話，並帶有EasyEyes ID“ ** sss **”。如果是你，請按確定。否則，如果您有EasyEyes ID文件，請按下面的文件選擇按鈕打開它。 （該文件名以“ EasyEyes”開頭，以“ .txt”結尾，通常在您的下載文件夾中。）如果您沒有文件，但是知道您的EasyEyes ID，請輸入。否則，只需構成自己的ID，即至少有5個字符的字符串長。如果您願意，可以是您的名字。我們會在這台計算機上為您記住它，但是如果您轉到另一台計算機，請獲取您的EasyEyes ID文件（您的下載文件夾中的最新文件），或者至少寫下您的EasyEyes ID。每次使用它將您的數據從會話鏈接到會話。",
     ja: "セッション全体でデータをリンクするには、一意のIDが必要です。このコンピューターは、以前に** ddd **のセッションに参加していました。それがあなたである場合、OKを押してください。それ以外の場合、EasyEyes IDファイルがある場合は、下のファイル選択ボタンを押して開きます。 （ファイル名は「easyeyes」で始まり、「.txt」で終わり、通常はダウンロードフォルダーにあります。）ファイルを持っていないが、easeyeyes IDを知っている場合は、入力します。それ以外の場合は、独自のIDを構成するだけです。これは、少なくとも5文字の英数字の文字列になります。必要に応じて、それはあなたの名前かもしれません。このコンピューターでは覚えていますが、別のコンピューターにアクセスした場合は、EasyEyes IDファイル（ダウンロードフォルダーの最新のファイル）を使用するか、少なくともEasyEyes IDを書き留めてください。セッションからセッションにデータをリンクするために毎回使用してください。",
     ko: '세션에서 데이터를 연결하려면 고유 한 ID가 필요합니다. 이 컴퓨터는 이전에 EasyEyes id“** sss **”와 함께 ** ddd ** 세션에 참여했습니다. 당신이라면 확인을 누릅니다. 그렇지 않으면 EasyEeyes ID 파일이있는 경우 아래 파일 선택 버튼을 눌러 열어줍니다. (파일 이름은 "easyeyes"로 시작하여 ".txt"로 끝나고 일반적으로 다운로드 폴더에 있습니다.) 파일이 없지만 Easyeyes ID를 알고 있다면 입력하십시오. 그렇지 않으면, 자신의 ID를 구성하십시오. 이는 최소 5 자 이상의 영숫자 문자열 일 수 있습니다. 당신이 좋아한다면 그것은 당신의 이름 일 수 있습니다. 이 컴퓨터에서는 기억하겠습니다. 그러나 다른 컴퓨터로 이동하면 Easyeyes ID 파일 (다운로드 폴더의 최신 파일)을 가져 가거나 easyeyes ID를 적어도 적어 두십시오. 데이터를 세션에서 세션으로 연결하는 데마다 사용하십시오.',
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_ID_uploadOrValidID: {
     "en-US": "Please either upload a file or enter a valid EasyEyes ID.",
@@ -1155,8 +1083,6 @@ export const phrases = {
     "zh-HK": "請上傳文件或輸入有效的EasyEyes ID。",
     ja: "ファイルをアップロードするか、有効なEasyEyes IDを入力してください。",
     ko: "파일을 업로드하거나 유효한 EasyEyes ID를 입력하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_ID_invalidID: {
     "en-US":
@@ -1186,8 +1112,6 @@ export const phrases = {
     "zh-HK": "EasyEyes ID包含無效的字符。只允許字母和數字",
     ja: "EasyEyes IDには無効な文字が含まれています。文字と番号のみが許可されています",
     ko: "EasyEyes ID에는 잘못된 문자가 포함되어 있습니다. 글자와 숫자 만 허용됩니다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_ID_invalidFile: {
     "en-US":
@@ -1219,8 +1143,6 @@ export const phrases = {
       "對不起。 easyeyes ID文件的錯誤格式。嘗試另一個文件，或鍵入某些內容。",
     ja: "ごめん。 EasyEyes IDファイルの間違った形式。別のファイルを試すか、何かを入力してください。",
     ko: "죄송합니다. EasyEyes ID 파일에 대한 잘못된 형식. 다른 파일을 시도하거나 무언가를 입력하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_incompatible: {
     "en-US": "❌ INCOMPATIBLE. Sorry. Please return this study to Prolific.co.",
@@ -1249,8 +1171,6 @@ export const phrases = {
     "zh-HK": "❌不相容。對不起。請將這項研究退還給Prolific.co。",
     ja: "of互換性がありません。ごめん。この調査をProlific.coに返送してください。",
     ko: "❌ 양립 할 수 없습니다. 죄송합니다. 이 연구를 Prolific.co로 돌려주십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_incompatibleReturnToProlific: {
     "en-US":
@@ -1282,8 +1202,6 @@ export const phrases = {
       "這項研究與您的計算機或瀏覽器不兼容，因此請將其退還給Prolific.co。提交的付款將被拒絕（這會損害您的聲譽），因此請退還。",
     ja: "この調査はコンピューターまたはブラウザと互換性がないため、Prolific.coに返送してください。支払いの提出は拒否されます（あなたの評判は損傷します）ので、返品してください。",
     ko: "이 연구는 컴퓨터 나 브라우저와 호환되지 않으므로 Prolific.co로 반환하십시오. 지불 제출은 거부됩니다 (평판이 손상됨).",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   EE_studyURL: {
     "en-US": "Study link: xxx",
@@ -1312,8 +1230,6 @@ export const phrases = {
     "zh-HK": "研究鏈接：xxx",
     ja: "調査リンク：xxx",
     ko: "학습 링크 : xxx",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_angleDistanceIntro: {
     "en-US":
@@ -1345,8 +1261,6 @@ export const phrases = {
       "只需轉身，我們就會找到您的觀看距離！當被問到時，請授予您對相機的訪問權限。",
     ja: "振り向くだけで、視聴距離が見つかります！尋ねられたら、カメラへのアクセスを許可してください。",
     ko: "그냥 돌아 서면 시청 거리를 찾을 수 있습니다! 요청하면 카메라에 액세스 할 수 있습니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_angleDistanceTitle: {
     "en-US": "Measure Viewing Distance",
@@ -1375,8 +1289,6 @@ export const phrases = {
     "zh-HK": "測量觀看距離",
     ja: "表示距離を測定します",
     ko: "시청 거리를 측정하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_cancel: {
     "en-US": "Restart this calibration",
@@ -1405,8 +1317,6 @@ export const phrases = {
     "zh-HK": "重做此校準",
     ja: "キャンセル",
     ko: "이 교정을 다시 시작하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTracking: {
     "en-US": "Distance Tracking",
@@ -1435,8 +1345,6 @@ export const phrases = {
     "zh-HK": "視距追踪",
     ja: "距離追跡",
     ko: "거리 추적",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTrackingCloseL: {
     "en-US":
@@ -1468,8 +1376,6 @@ export const phrases = {
       "1.閉上左眼。 （這是屏幕的左側。）\n2.使用▶箭頭鍵滑動閃爍的點。 （或者只是將其拖動，如果它沒有響應箭頭鑰匙。）看著十字頭髮時，監視眼角的閃爍點，然後向左和向右滑動，直到它消失在盲點中。\n3.命中返回。\n注意：請密切關註十字頭髮。當您的眼睛跟隨它時，閃爍的點不會消失。",
     ja: "1.左目を閉じます。 （これは画面の左側です。）\n2.▶矢印キーを使用して、ちらつきのドットをスライドさせます。 （または、矢印キーに応答しない場合は、ドラッグしてください。）交差毛を見ながら、目の隅にあるちらつきのドットを監視し、盲点に消えるまで左右にスライドさせます。\n3.返信をヒットします。\n注：十字毛に目を向けてください。目が続く間、ちらつきのドットは消えません。",
     ko: "1. 왼쪽 눈을 닫습니다. (이것은 화면의 왼쪽입니다.)\n2. ▶ 화살표 키를 사용하여 깜박 거리는 점을 밀어냅니다. (또는 화살표 키에 응답하지 않으면 드래그하십시오.) 십자 머리카락을 보면서 눈 모서리의 깜박 거리는 점을 모니터링하고 사각 지대로 사라질 때까지 왼쪽과 오른쪽으로 밀어 넣으십시오.\n3. 반환을 누르십시오.\n참고 : 크로스 털을 주시하십시오. 눈이 뒤 따르는 동안 깜박 거리는 점은 사라지지 않습니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTrackingCloseR: {
     "en-US":
@@ -1501,8 +1407,6 @@ export const phrases = {
       "1.閉上右眼。 （這是屏幕的右側。）\n2.使用◀箭頭鍵滑動閃爍的點。看著十字頭髮時，請監視眼角的閃爍點，然後向左和向右滑動，直到它消失在盲點中。\n3.命中返回。\n注意：請密切關註十字頭髮。當您的眼睛跟隨它時，閃爍的點不會消失。",
     ja: "1.右目を閉じます。 （これは画面の右側です。）\n2.◀矢印キーを使用して、ちらつきのドットをスライドさせます。交差毛を見ながら、目の隅にあるちらつきのドットを監視し、盲点に消えるまで左右にスライドさせます。\n3.返信をヒットします。\n注：十字毛に目を向けてください。目が続く間、ちらつきのドットは消えません。",
     ko: "1. 오른쪽 눈을 감습니다. (이것은 화면의 오른쪽입니다.)\n2. ◀ 화살표 키를 사용하여 깜박 거리는 점을 밀어냅니다. 십자 머리카락을 보면서 눈의 모서리에 깜박 거리는 점을 모니터링하고 사각 지대로 사라질 때까지 왼쪽과 오른쪽으로 밀어 넣으십시오.\n3. 반환을 누르십시오.\n참고 : 크로스 털을 주시하십시오. 눈이 뒤 따르는 동안 깜박 거리는 점은 사라지지 않습니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTrackingGuide: {
     "en-US":
@@ -1534,8 +1438,6 @@ export const phrases = {
       "您的眼睛離屏幕約 xx1 厘米，但我們需要大約 xx2 厘米。 當您移動到接近的距離後實驗將會繼續進行。",
     ja: "あなたの目は画面からxx1 cmですが、実験ではおよそxx2 cmを必要とします。適切な距離になると実験が再開されます。",
     ko: "눈은 화면에서 xx1 cm이지만 실험은 대략 xx2 cm가 필요합니다. 올바른 거리에 도달하면 실험이 재개됩니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTrackingIntroEnd: {
     "en-US": "Once you're done, distance tracking will begin.",
@@ -1564,8 +1466,6 @@ export const phrases = {
     "zh-HK": "在您完成後，視距追踪將開始。",
     ja: "完了したら、距離追跡が開始されます。",
     ko: "완료되면 거리 추적이 시작됩니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTrackingIntroStart: {
     "en-US": "",
@@ -1594,8 +1494,6 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTrackingMoveCloser: {
     "en-US": "Move closer",
@@ -1624,8 +1522,6 @@ export const phrases = {
     "zh-HK": "靠近一點。",
     ja: "もっと近づいてください。",
     ko: "더 가까이 움직입니다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTrackingMoveFurther: {
     "en-US": "Move farther",
@@ -1654,8 +1550,6 @@ export const phrases = {
     "zh-HK": "離遠一點。",
     ja: "もっと離れてください。",
     ko: "더 멀리 움직입니다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTrackingRedo: {
     "en-US":
@@ -1687,8 +1581,6 @@ export const phrases = {
       "問題？如果距離似乎非常錯誤，請單擊此處重新校準，然後重新啟動此塊。",
     ja: "問題？距離がひどく間違っているように見える場合は、ここをクリックして再調整し、このブロックを再起動してください。",
     ko: "문제? 거리가 끔찍한 것처럼 보이면 여기를 클릭하여 다시 교정 하고이 블록을 다시 시작하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_distanceTrackingTitle: {
     "en-US": "Find Your Blindspot",
@@ -1717,8 +1609,6 @@ export const phrases = {
     "zh-HK": "視距追踪初始化",
     ja: "距離追跡を設定します。",
     ko: "블라인드 스팟을 찾으십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_environment: {
     "en-US": "System Information",
@@ -1747,8 +1637,6 @@ export const phrases = {
     "zh-HK": "系統信息",
     ja: "システム情報",
     ko: "시스템 정보",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_errorCameraUseDenied: {
     "en-US":
@@ -1780,8 +1668,6 @@ export const phrases = {
       "如其描述中所述，這項研究與OOO不相容，並且需要在DDD上運行至少222個CPU內核的BBB瀏覽器",
     ja: "その説明で述べたように、この研究はOOOと互換性があり、少なくとも222のCPUコアでDDDで実行されるBBBブラウザが必要です",
     ko: "설명에 언급 된 바와 같이,이 연구는 OOO와 호환되지 않으며 최소 222 CPU 코어로 DDD에서 실행되는 BBB 브라우저가 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_errorNoCamera: {
     "en-US":
@@ -1811,8 +1697,6 @@ export const phrases = {
     "zh-HK": "我們找不到您的攝像頭。",
     ja: "この調査では、ウェブカメラを使用する必要があります。ウェブカメラへのアクセスを許可することはオプションですが、それなしでは継続することはできません。誤ってノーと言って、カメラにアクセスできるようにしたい場合は、アドレスバーにカメラアイコンを見つけて、クリックしてカメラにアクセスできるようにし、ページを更新してください。",
     ko: "이 연구는 웹캠을 사용해야합니다. 웹캠에 대한 액세스 권한을 부여하는 것은 선택 사항이지만, 우리는 그 없이는 계속할 수 없습니다. 실수로 거절하지 말고 카메라에 액세스 할 수 있으시면 주소 표시 줄에서 카메라 아이콘을 찾아 클릭하고 카메라 액세스 허용 및 페이지를 새로 고치십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_gazeTracking: {
     "en-US": "Gaze Tracking",
@@ -1841,8 +1725,6 @@ export const phrases = {
     "zh-HK": "眼動追踪",
     ja: "視線追跡",
     ko: "시선 추적",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_gazeTrackingIntro: {
     "en-US":
@@ -1874,8 +1756,6 @@ export const phrases = {
       "播放“趕十字架！”現在，我們將設置凝視跟踪，以監視眼睛位置。在視頻提要中保持臉部（見下文）。無論何處，單擊十字頭髮的中心。單擊它時，請確保您的眼睛在上面。當您單擊它時，十字頭髮將移至新位置。在每個新位置單擊它，直到完成校準。遊戲而已。抓住十字架！",
     ja: "「Catch the Cross！」を再生しますこれで、目の位置を監視するために、視線追跡を設定します。ビデオフィードに顔を入れてください（以下を参照）。どこにいても、交差毛の中心をクリックします。クリックしたときに目がそれにあることを確認してください。クリックすると、クロスヘアが新しい場所に移動します。キャリブレーションが完了するまで、新しい場所ごとにクリックします。それはゲームです。十字架をキャッチ！",
     ko: '"Catch the Cross!" 이제 눈 위치를 모니터링하기 위해 시선 추적을 설정합니다. 비디오 피드에 얼굴을 유지하십시오 (아래 참조). 크로스 털의 중앙을 어디에 있든 클릭하십시오. 클릭하면 눈이 켜져 있는지 확인하십시오. 클릭하면 크로스 헤어가 새로운 위치로 이동합니다. 교정이 완료 될 때까지 각 새 위치에서 클릭하십시오. 그것은 게임이다. 십자가를 잡아라!',
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_gazeTrackingNudge: {
     "en-US":
@@ -1907,8 +1787,6 @@ export const phrases = {
       "抓住十字架！我們需要你的幫助。眼神跟踪器需要更多的培訓。如箭頭所示，當您單擊時，跟踪器認為您的目光遠非叉毛。請單擊每個新位置的雜毛。遊戲而已。抓住十字架！",
     ja: "十字架をキャッチ！君の力が必要なんだ。アイトラッカーにはさらにトレーニングが必要です。矢印で示されているように、クリックしたとき、トラッカーはあなたの視線が十字毛からはほど遠いと思った。それぞれの新しい位置でクロスヘアをクリックしてください。それはゲームです。十字架をキャッチ！",
     ko: "십자가를 잡아라! 우리는 너의 도움이 필요해. 눈 추적기에는 더 많은 훈련이 필요합니다. 화살표에서 볼 수 있듯이, 클릭했을 때 트래커는 시선이 십자 머리카락과는 거리가 멀다고 생각했습니다. 각각의 새로운 위치에서 십자 머리카락을 클릭하십시오. 그것은 게임이다. 십자가를 잡아라!",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_gazeTrackingTitle: {
     "en-US": "Set Up Gaze Tracking",
@@ -1937,8 +1815,6 @@ export const phrases = {
     "zh-HK": "眼動追踪初始化",
     ja: "視線追跡を設定します。",
     ko: "시선 추적을 설정하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_ifStuckPleaseReturn: {
     "en-US":
@@ -1970,8 +1846,6 @@ export const phrases = {
       "這很少見，但是如果您的計算機被卡在校準中，請將您的書房歸還Pollific.co。",
     ja: "まれですが、コンピューターがキャリブレーションに巻き込まれた場合は、勉強をProlific.coに返送してください。",
     ko: "드물지만 컴퓨터가 교정에 갇히면 연구를 Prolific.co로 반환하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_nearPointIntro: {
     "en-US":
@@ -2003,8 +1877,6 @@ export const phrases = {
       "我們將測量您的眼睛之間的距離。使用視頻圖像觀看您的眼睛。水平握在眼前的臉上。將您的左右拇指指甲與左右學生的中心對齊。然後將筆帶到屏幕上的統治者，以測量拇指之間的分離。用零左右拇指，並註意右拇指在哪裡。放下筆，然後單擊標尺。最後，單擊確定繼續。",
     ja: "目の間の距離を測定します。ビデオ画像を使用して目を見る。目の前で顔に水平にペンを保持します。右と左の親指の爪を右と左の生徒の中心に合わせます。次に、画面上の定規にペンを持ってきて、親指の分離を測定します。左手の親指をゼロで割り当て、右親指がどこにあるかに注意してください。ペンを置いて、その時点で定規をクリックします。最後に、[OK]をクリックして続行します。",
     ko: "우리는 당신의 눈 사이의 거리를 측정 할 것입니다. 비디오 이미지를 사용하여 눈을보십시오. 눈 앞에서 얼굴에 수평으로 펜을 잡으십시오. 오른쪽과 왼쪽 엄지 손톱을 오른쪽과 왼쪽 학생의 중심과 정렬하십시오. 그런 다음 펜을 화면 통치자에게 가져와 엄지 손가락 사이의 분리를 측정하십시오. 왼쪽 엄지 손가락을 0으로 동조하고 오른쪽 엄지 손가락이 어디에 있는지 확인하십시오. 펜을 내려 놓고 그 시점에서 통치자를 클릭하십시오. 마지막으로 확인을 클릭하여 계속하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_nearPointTitle: {
     "en-US": "Measure Pupillary Distance",
@@ -2033,8 +1905,6 @@ export const phrases = {
     "zh-HK": "測量瞳孔距離",
     ja: "瞳孔距離を測定します",
     ko: "동공 거리를 측정하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_ok: {
     "en-US": "OK",
@@ -2063,8 +1933,6 @@ export const phrases = {
     "zh-HK": "確認",
     ja: "確認",
     ko: "좋아요",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_panelButton: {
     "en-US": "Done",
@@ -2093,8 +1961,6 @@ export const phrases = {
     "zh-HK": "完畢",
     ja: "終わり",
     ko: "완료",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_panelIntro: {
     "en-US": "",
@@ -2123,8 +1989,6 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_panelIntroNext: {
     "en-US": "",
@@ -2153,8 +2017,6 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_panelTitle: {
     "en-US": "Please press a button to calibrate",
@@ -2183,8 +2045,6 @@ export const phrases = {
     "zh-HK": "請按按鈕校準",
     ja: "ボタンを押して調整してください",
     ko: "버튼을 눌러 교정하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_panelTitleNext: {
     "en-US": "Thanks for calibrating. Hit the button to continue.",
@@ -2213,8 +2073,6 @@ export const phrases = {
     "zh-HK": "感謝您的校準。點擊按鈕繼續。",
     ja: "キャリブレーションしてくれてありがとう。ボタンを押して続行します。",
     ko: "교정 해주셔서 감사합니다. 계속하려면 버튼을 누르십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_panelUsesWebcam: {
     "en-US": "uses webcam",
@@ -2243,8 +2101,6 @@ export const phrases = {
     "zh-HK": "使用網絡攝像頭",
     ja: "ウェブカメラを使用します",
     ko: "웹캠을 사용합니다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_panelUsesWebcamPhone: {
     "en-US": "uses webcam and phone",
@@ -2273,8 +2129,6 @@ export const phrases = {
     "zh-HK": "使用網絡攝像頭和電話",
     ja: "ウェブカメラと電話を使用します",
     ko: "웹캠과 전화를 사용합니다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_performance: {
     "en-US": "Graphics Performance",
@@ -2303,8 +2157,6 @@ export const phrases = {
     "zh-HK": "圖形性能",
     ja: "グラフィックパフォーマンス",
     ko: "그래픽 성능",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_performanceIntro: {
     "en-US":
@@ -2334,8 +2186,6 @@ export const phrases = {
     "zh-HK": "請不要打擾。繪製圖形以評估Web瀏覽器性能...",
     ja: "邪魔しないでください。 Webブラウザのパフォーマンスを評価するためのグラフィックを描く...",
     ko: "방해하지 마십시오. 웹 브라우저 성능을 평가하기위한 그래픽 그리기 ...",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_performanceTitle: {
     "en-US": "Graphics Performance",
@@ -2364,8 +2214,6 @@ export const phrases = {
     "zh-HK": "圖形性能",
     ja: "グラフィックパフォーマンス",
     ko: "그래픽 성능",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_privacyCamera: {
     "en-US":
@@ -2397,8 +2245,6 @@ export const phrases = {
       "保證相機隱私。沒有錄製照片或視頻。每個網絡攝像頭框架僅在該計算機內使用，僅用於估計眼睛和凝視位置，然後在10秒內刪除。只保留了眼睛和凝視位置。",
     ja: "カメラのプライバシーの保証。写真やビデオは記録されていません。各ウェブカメラフレームは、目と視線の位置を推定するためだけにこのコンピューター内でのみ使用され、10秒以内に消去されます。目と視線の位置のみが保持されます。",
     ko: "카메라 프라이버시의 보증. 사진이나 비디오가 녹음되지 않습니다. 각 웹캠 프레임은이 컴퓨터 내부에서만 사용되며 눈과 시선 위치를 추정 한 다음 10 초 이내에 지워집니다. 눈과 시선 위치 만 유지됩니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_privacyMicrophoneCalibration: {
     "en-US":
@@ -2430,8 +2276,6 @@ export const phrases = {
       "保證麥克風隱私。 EasyEyes使用您的智能手機麥克風，而不是桌面的內置麥克風，因為EasyEyes具有智能手機麥克風校準庫。麥克風僅記錄在台式計算機揚聲器中播放大聲的聲音時。智能手機和台式計算機都顯著顯示“請安靜！現在錄製”。該錄製僅用於估計揚聲器特徵，然後在30秒內刪除。僅保留麥克風和揚聲器特性。",
     ja: "マイクのプライバシーの保証。 Easyeyesには、スマートフォンマイクキャリブレーションのライブラリがあるため、デスクトップの内蔵マイクではなく、スマートフォンマイクを使用します。マイクは、デスクトップコンピューターラウドスピーカーを通じて大きな音が再生される間にのみ記録されます。スマートフォンとデスクトップの両方のコンピューターが「静かにお願いします！今録音」を顕著に表示します。録音は、スピーカーの特性を推定するためだけに使用され、30秒以内に消去されます。マイクとスピーカーの特性のみが保持されます。",
     ko: '마이크 프라이버시의 보증. EasyEeyes에는 스마트 폰 마이크 교정 라이브러리가 있기 때문에 EasyEyes는 데스크탑의 내장 마이크 대신 스마트 폰 마이크를 사용합니다. 마이크는 데스크탑 컴퓨터 라우드 스피커를 통해 큰 소리가 재생되는 동안에 만 기록합니다. 스마트 폰과 데스크탑 컴퓨터는 모두 "조용히 해주세요! 지금 녹음"을 표시합니다. 기록은 라우드 스피커 특성을 추정하는 데만 사용 된 다음 30 초 이내에 지워집니다. 마이크 및 라우드 스피커 특성 만 유지됩니다.',
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_privacyIphoneMicrophone: {
     "en-US":
@@ -2463,8 +2307,6 @@ export const phrases = {
       "❌保證麥克風隱私。 EasyEyes使用您的智能手機麥克風，而不是桌面的內置麥克風，因為EasyEyes具有智能手機麥克風校準庫。麥克風僅記錄在台式計算機揚聲器中播放大聲的聲音時。智能手機和台式計算機都顯著顯示“請安靜！現在錄製”。該錄製僅用於估計揚聲器特徵，然後在30秒內刪除。僅保留麥克風和揚聲器特性。",
     ja: "michマイクのプライバシーの保証。 Easyeyesには、スマートフォンマイクキャリブレーションのライブラリがあるため、デスクトップの内蔵マイクではなく、スマートフォンマイクを使用します。マイクは、デスクトップコンピューターラウドスピーカーを通じて大きな音が再生される間にのみ記録されます。スマートフォンとデスクトップの両方のコンピューターが「静かにお願いします！今録音」を顕著に表示します。録音は、スピーカーの特性を推定するためだけに使用され、30秒以内に消去されます。マイクとスピーカーの特性のみが保持されます。",
     ko: 'microphone 마이크 프라이버시의 보증. EasyEeyes에는 스마트 폰 마이크 교정 라이브러리가 있기 때문에 EasyEyes는 데스크탑의 내장 마이크 대신 스마트 폰 마이크를 사용합니다. 마이크는 데스크탑 컴퓨터 라우드 스피커를 통해 큰 소리가 재생되는 동안에 만 기록합니다. 스마트 폰과 데스크탑 컴퓨터는 모두 "조용히 해주세요! 지금 녹음"을 표시합니다. 기록은 라우드 스피커 특성을 추정하는 데만 사용 된 다음 30 초 이내에 지워집니다. 마이크 및 라우드 스피커 특성 만 유지됩니다.',
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_requestCamera: {
     "en-US": "To proceed, this study needs your permission to use the camera. ",
@@ -2493,8 +2335,6 @@ export const phrases = {
     "zh-HK": "為了進行，這項研究需要您使用相機的許可。",
     ja: "続行するには、この調査にはカメラを使用する許可が必要です。",
     ko: "진행하려면이 연구는 카메라 사용 권한이 필요합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_screenSize: {
     "en-US": "Screen Size",
@@ -2523,8 +2363,6 @@ export const phrases = {
     "zh-HK": "屏幕尺寸",
     ja: "画面サイズ",
     ko: "화면 크기",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_screenSizeCredit: {
     "en-US":
@@ -2554,8 +2392,6 @@ export const phrases = {
     "zh-HK": "Li等人建議的信用卡。 （2020）“虛擬Chinrest”紙。",
     ja: "Li et alが提案したクレジットカード。 （2020）「仮想チンレスト」論文。",
     ko: 'Li et al. (2020) "Virtual Chinrest"용지.',
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_screenSizeCreditCard: {
     "en-US": "a credit card",
@@ -2584,8 +2420,6 @@ export const phrases = {
     "zh-HK": "一張信用卡",
     ja: "クレジットカード",
     ko: "신용 카드",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_screenSizeHave: {
     "en-US": "I have xxx with me.",
@@ -2614,8 +2448,6 @@ export const phrases = {
     "zh-HK": "我有xxx。",
     ja: "私は私と一緒にxxxを持っています。",
     ko: "나는 나와 xxx를 가지고있다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_screenSizeIntro: {
     "en-US":
@@ -2647,8 +2479,6 @@ export const phrases = {
       "我們將測量此屏幕的大小。使用下拉菜單選擇方便的東西。您可以使用任何常見的USB連接器（包括為計算機提供電源的連接器）或信用卡（或任何相同尺寸的卡）。將對象放在屏幕上，然後移動滑塊以調整圖像以匹配對象的大小。匹配時，按返回（或單擊“確定”）繼續進行。",
     ja: "この画面のサイズを測定します。プルダウンメニューを使用して、便利なものを選択します。一般的なUSBコネクタ（コンピューターに電力を提供するものを含む）またはクレジットカード（または同じサイズのカード）を使用できます。オブジェクトを画面に配置し、スライダーを移動して、オブジェクトのサイズに合わせて画像を調整します。一致したら、return（またはクリックOK）を押して続行します。",
     ko: "이 화면의 크기를 측정합니다. 풀다운 메뉴를 사용하여 편리한 것을 선택하십시오. 공통 USB 커넥터 (컴퓨터에 전원을 공급하는 것) 또는 신용 카드 (또는 동일한 크기의 카드)를 사용할 수 있습니다. 화면에 객체를 놓고 슬라이더를 이동하여 객체의 크기에 맞게 이미지를 조정하십시오. 그들이 일치하면 반환 (또는 확인을 클릭)을 눌러 진행하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_screenSizeTitle: {
     "en-US": "Screen Size Calibration",
@@ -2677,8 +2507,6 @@ export const phrases = {
     "zh-HK": "屏幕尺寸校準",
     ja: "画面サイズのキャリブレーション",
     ko: "화면 크기 교정",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_screenSizeUSBA: {
     "en-US": "a USB Type A connector",
@@ -2707,8 +2535,6 @@ export const phrases = {
     "zh-HK": "USB A 型接口",
     ja: "USB コネクタ　タイプA",
     ko: "USB 유형 A 커넥터",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_screenSizeUSBC: {
     "en-US": "a USB Type C connector",
@@ -2737,8 +2563,6 @@ export const phrases = {
     "zh-HK": "USB C 型接口",
     ja: "USB コネクタ　タイプC",
     ko: "USB 유형 C 커넥터",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibration: {
     "en-US": "Sound Calibration",
@@ -2767,8 +2591,6 @@ export const phrases = {
     "zh-HK": "聲音校準",
     ja: "サウンドキャリブレーション",
     ko: "음향 교정",
-    __EMPTY: "#VALUE!",
-    __EMPTY_1: "#VALUE!",
   },
   RC_selectMicrophone: {
     "en-US":
@@ -2800,8 +2622,6 @@ export const phrases = {
       "準備校準揚聲器，如果您有方便的智能手機，您是否在下面的列表中看到了它的品牌和型號？如果是這樣，請選擇它。否則，選擇“無匹配”。然後單擊繼續。\n",
     ja: "スピーカーを校正する準備をしてください。スマートフォンが手元にある場合は、以下のリストにメーカーとモデルが表示されますか？もしそうなら、それを選択してください。それ以外の場合は、「一致なし」を選択します。 [続行]をクリックします。\n",
     ko: '라우드 스피커를 보정하기 위해 준비하면 스마트 폰이 편리한 경우 아래 목록에 제조사와 모델이 표시됩니까? 그렇다면 선택하십시오. 그렇지 않으면 "없음 일치"를 선택하십시오. 그런 다음 진행을 클릭하십시오.\n',
-    __EMPTY: "#VALUE!",
-    __EMPTY_1: "#VALUE!",
   },
   RC_selectMicrophoneIncludeUSB: {
     "en-US":
@@ -2833,8 +2653,6 @@ export const phrases = {
       "準備校準您的揚聲器，如果您有智能手機（或USB麥克風）方便，您是否在下面的列表中看到了它的品牌和型號？如果是這樣，請選擇它。否則，選擇“無匹配”。然後單擊繼續。\n",
     ja: "スピーカーを校正する準備をしてください。スマートフォン（またはUSBマイク）が手元にある場合、以下のリストにメーカーとモデルが表示されますか？もしそうなら、それを選択してください。それ以外の場合は、「一致なし」を選択します。 [続行]をクリックします。\n",
     ko: '스마트 폰 (또는 USB 마이크)이 편리한 경우 라우드 스피커를 보정하기 위해 준비하면 아래 목록에 제조사 및 모델이 표시됩니까? 그렇다면 선택하십시오. 그렇지 않으면 "없음 일치"를 선택하십시오. 그런 다음 진행을 클릭하십시오.\n',
-    __EMPTY: "#VALUE!",
-    __EMPTY_1: "#VALUE!",
   },
   RC_removeHeadphones: {
     "en-US":
@@ -2864,74 +2682,130 @@ export const phrases = {
     "zh-HK": "1.卸下並斷開所有耳機。這種校準無法與耳機一起使用。\n",
     ja: "1.ヘッドフォンを取り外して切断します。このキャリブレーションはヘッドフォンでは機能しません。\n",
     ko: "1. 헤드폰을 제거하고 분리하십시오. 이 교정은 헤드폰과 함께 작동하지 않습니다.\n",
-    __EMPTY: "#VALUE!",
-    __EMPTY_1: "#VALUE!",
   },
   RC_getPhoneMicrophoneReady: {
     "en-US":
-      "2. When your phone is vertical, its microphone is in the lower edge.\n3. Expose your phone's microphone by removing any protective case.\n4. Fold a hand towel in half three times and place it on the table between you and your computer.\n5. Point your phone camera at the QR code below (black and white checks), and click on the link that appears in your phone's viewfinder.\n6. If a pop up appears, asking for your permission to use the microphone, click \"Allow\".",
-    de: '2. Wenn Ihr Telefon vertikal ist, befindet sich sein Mikrofon in der unteren Kante.\n3. Stellen Sie das Mikrofon Ihres Telefons aus, indem Sie einen Schutzhülle entfernen.\n4. Falten Sie ein Handtuch in zweimal dreimal und legen Sie es auf den Tisch zwischen Ihnen und Ihrem Computer.\n5. Zeigen Sie Ihre Telefonkamera im folgenden QR -Code (Schwarzweißkontrollen) und klicken Sie auf den Link, der im Sucher Ihres Telefons angezeigt wird.\n6. Wenn ein Pop -up angezeigt wird und um Ihre Erlaubnis zur Verwendung des Mikrofons gebeten wird, klicken Sie auf "Zulassung".',
-    fr: '2. Lorsque votre téléphone est vertical, son microphone est dans le bord inférieur.\n3. Exposer le microphone de votre téléphone en supprimant tout cas de protection.\n4. Pliez une serviette à main en deux fois trois fois et placez-la sur la table entre vous et votre ordinateur.\n5. Pointez votre appareil photo de téléphone au code QR ci-dessous (vérifications en noir et blanc), puis cliquez sur le lien qui apparaît dans le viseur de votre téléphone.\n6. Si une fenêtre contextuelle apparaît, demandant votre autorisation d\'utiliser le microphone, cliquez sur "Autoriser".',
-    es: '2. Cuando su teléfono es vertical, su micrófono está en el borde inferior.\n3. Exponga el micrófono de su teléfono eliminando cualquier caso de protección.\n4. Dobla una toalla de mano por la mitad tres veces y colóquela sobre la mesa entre usted y su computadora.\n5. Apunte la cámara de su teléfono en el código QR a continuación (verificaciones en blanco y negro) y haga clic en el enlace que aparece en el visor de su teléfono.\n6. Si aparece una ventana emergente, pidiendo su permiso para usar el micrófono, haga clic en "Permitir".',
-    pt: '2. Quando o telefone é vertical, o microfone está na borda inferior.\n3. Exponha o microfone do seu telefone removendo qualquer caso de proteção.\n4. Dobre uma toalha de mão ao meio três vezes e coloque -a na mesa entre você e seu computador.\n5. Aponte a câmera do seu telefone no código QR abaixo (cheques em preto e branco) e clique no link que aparece no visor do seu telefone.\n6. Se um pop -up aparecer, solicitando sua permissão para usar o microfone, clique em "Permitir".',
-    it: '2. Quando il telefono è verticale, il suo microfono è al bordo inferiore.\n3. Esporre il microfono del telefono rimuovendo qualsiasi custodia protettiva.\n4. Piega un asciugamano a metà tre volte e posizionalo sul tavolo tra te e il tuo computer.\n5. Puntare la fotocamera del telefono sul codice QR in basso (controlli in bianco e nero) e fai clic sul collegamento che appare nel mirino del telefono.\n6. Se appare un pop -up, chiedendo il permesso di utilizzare il microfono, fare clic su "Consenti".',
-    ro: "2. Când telefonul dvs. este vertical, microfonul său este în marginea inferioară.\n3. Expuneți microfonul telefonului dvs. eliminând orice caz de protecție.\n4. Îndoiți un prosop de mână în jumătate de trei ori și așezați -l pe masa dintre dvs. și computer.\n5. Indicați camera telefonului la codul QR de mai jos (verificări alb -negru) și faceți clic pe linkul care apare în vizor de telefon al telefonului.\n6. Dacă apare un pop -up, solicitând permisiunea dvs. de a utiliza microfonul, faceți clic pe „Permite”.",
-    pl: "2. Gdy telefon jest pionowy, jego mikrofon znajduje się w dolnej krawędzi.\n3. Odsłaniaj mikrofon telefonu, usuwając dowolną sprawę ochronną.\n4. Złóż ręcznik na pół trzy razy i umieść go na stole między tobą a komputerem.\n5. Wskaż aparat telefoniczny na poniższy kod QR (czarno -białe czeki) i kliknij link, który pojawia się w wizjerze telefonu.\n6. Jeśli pojawi się wyskakujący wyskakujący, prosząc o pozwolenie na użycie mikrofonu, kliknij „Zezwalaj”.",
-    ru: "2. Когда ваш телефон вертикаль, его микрофон находится в нижнем краю.\n3. Выставьте микрофон вашего телефона, удалив любой защитный чехол.\n4. Сложите ручное полотенце за полным годам и поместите его на стол между вами и вашим компьютером.\n5. Укажите камеру телефона на QR -код ниже (черно -белые проверки) и нажмите на ссылку, которая появляется в видоискателе вашего телефона.\n6. Если появляется всплывающее окно, попросив ваше разрешение использовать микрофон, нажмите «Разрешить».",
-    hy: "2. Երբ ձեր հեռախոսը ուղղահայաց է, դրա խոսափողը ստորին եզրին է:\n3. Բացահայտեք ձեր հեռախոսի խոսափողը `հեռացնելով ցանկացած պաշտպանիչ դեպք:\n4. Ձեռքի սրբիչ ծալեք կես երեք անգամ եւ տեղադրեք այն սեղանի վրա ձեր եւ ձեր համակարգչի միջեւ:\n5. Ձեռք բերեք ձեր հեռախոսի տեսախցիկը ստորեւ նշված QR կոդով (սեւ եւ սպիտակ ստուգումներ) եւ կտտացրեք ձեր հեռախոսի տեսադաշտում հայտնված հղմանը:\n6. Եթե հայտնվում է փոփը, խնդրելով ձեր խոսափողը օգտագործելու ձեր թույլտվությունը, կտտացրեք «Թույլ տվեք»:",
-    fi: '2. Kun puhelimesi on pystysuora, sen mikrofoni on alareunassa.\n3. Paljasta puhelimen mikrofoni poistamalla kaikki suojatapaukset.\n4. Taita käsipyyhe puoliksi kolme kertaa ja aseta se pöydälle sinun ja tietokoneesi väliin.\n5. Osoita puhelinkamera alla olevaan QR -koodiin (mustavalkoiset tarkistukset) ja napsauta puhelimen etsimessä näkyvää linkkiä.\n6. Jos ponnahdusikkuna tulee näkyviin, pyydät lupaa käyttää mikrofonia, napsauta "Salli".',
-    ka: '2. როდესაც თქვენი ტელეფონი ვერტიკალურია, მისი მიკროფონი ქვედა ზღვარზეა.\n3. გამოავლინეთ თქვენი ტელეფონის მიკროფონი ნებისმიერი დამცავი საქმის ამოღებით.\n4. ჩამოყარეთ ხელის პირსახოცი ნახევარჯერ და მოათავსეთ ის მაგიდაზე თქვენსა და თქვენს კომპიუტერს შორის.\n5. მიუთითეთ თქვენი ტელეფონის კამერა QR კოდზე ქვემოთ (შავი და თეთრი ჩეკები) და დააჭირეთ ბმულს, რომელიც ჩანს თქვენი ტელეფონის სანახავად.\n6. თუ გამოჩნდება pop Up, ითხოვს თქვენი ნებართვის გამოყენებას მიკროფონის გამოყენების შესახებ, დააჭირეთ ღილაკს "დაუშვით".',
-    he: '2. כאשר הטלפון שלך אנכי, המיקרופון שלו נמצא בקצה התחתון.\n3. חשוף את המיקרופון של הטלפון שלך על ידי הסרת כל מקרה מגן.\n4. קפלו מגבת יד לחצי שלוש פעמים והניחו אותה על השולחן בינך לבין המחשב.\n.\n6. אם מופיע פופ -אפ, מבקש את רשותך להשתמש במיקרופון, לחץ על "אפשר".',
-    ar: '2. عندما يكون هاتفك رأسيًا ، يكون الميكروفون في الحافة السفلية.\n3. فضح ميكروفون هاتفك عن طريق إزالة أي حالة وقائية.\n4. قم بطي منشفة اليد في نصف ثلاث مرات ووضعها على الطاولة بينك وبين الكمبيوتر.\n5. قم بإشارة كاميرا هاتفك على رمز الاستجابة السريعة أدناه (الشيكات بالأبيض والأسود) ، وانقر على الرابط الذي يظهر في عدسة الكاميرا الخاصة بهاتفك.\n6. إذا ظهر أحد المنبثقة ، فطلب إذنك لاستخدام الميكروفون ، انقر فوق "السماح".',
-    ur: '2. جب آپ کا فون عمودی ہے تو ، اس کا مائکروفون نچلے کنارے میں ہے۔\n3. کسی بھی حفاظتی کیس کو ہٹا کر اپنے فون کے مائکروفون کو بے نقاب کریں۔\n4. آدھے تین بار ایک ہاتھ کا تولیہ جوڑیں اور اسے اپنے اور اپنے کمپیوٹر کے درمیان ٹیبل پر رکھیں۔\n5. اپنے فون کیمرہ کو نیچے کیو آر کوڈ (سیاہ اور سفید چیک) پر نشاندہی کریں ، اور اس لنک پر کلک کریں جو آپ کے فون کے ویو فائنڈر میں ظاہر ہوتا ہے۔\n6. اگر کوئی پاپ اپ ظاہر ہوتا ہے تو ، مائکروفون کو استعمال کرنے کی اجازت طلب کرتے ہیں تو ، "اجازت دیں" پر کلک کریں۔',
-    hi: '2. जब आपका फोन ऊर्ध्वाधर होता है, तो इसका माइक्रोफोन निचले किनारे में होता है।\n3. किसी भी सुरक्षात्मक मामले को हटाकर अपने फोन के माइक्रोफोन को उजागर करें।\n4. एक हाथ तौलिया को तीन बार में मोड़ो और इसे आप और आपके कंप्यूटर के बीच की मेज पर रखें।\n5. नीचे दिए गए क्यूआर कोड (ब्लैक एंड व्हाइट चेक) पर अपना फ़ोन कैमरा इंगित करें, और आपके फोन के व्यूफ़ाइंडर में दिखाई देने वाले लिंक पर क्लिक करें।\n6. यदि कोई पॉप अप दिखाई देता है, तो माइक्रोफोन का उपयोग करने के लिए अपनी अनुमति के लिए पूछें, "अनुमति" पर क्लिक करें।',
-    ta: '2. உங்கள் தொலைபேசி செங்குத்தாக இருக்கும்போது, ​​அதன் மைக்ரோஃபோன் கீழ் விளிம்பில் உள்ளது.\n3. எந்தவொரு பாதுகாப்பு வழக்கையும் அகற்றுவதன் மூலம் உங்கள் தொலைபேசியின் மைக்ரோஃபோனை அம்பலப்படுத்துங்கள்.\n4. ஒரு கை துண்டுகளை பாதி மூன்று முறை மடித்து உங்களுக்கும் உங்கள் கணினிக்கும் இடையில் மேசையில் வைக்கவும்.\n5. உங்கள் தொலைபேசி கேமராவை கீழே உள்ள QR குறியீட்டில் (கருப்பு மற்றும் வெள்ளை காசோலைகள்) சுட்டிக்காட்டவும், உங்கள் தொலைபேசியின் வ்யூஃபைண்டரில் தோன்றும் இணைப்பைக் கிளிக் செய்யவும்.\n6. ஒரு பாப் அப் தோன்றினால், மைக்ரோஃபோனைப் பயன்படுத்த உங்கள் அனுமதி கேட்கிறது, "அனுமதி" என்பதைக் கிளிக் செய்க.',
-    ml: '2. നിങ്ങളുടെ ഫോൺ ലംബമായിരിക്കുമ്പോൾ, അതിന്റെ മൈക്രോഫോൺ താഴത്തെ അരികിലാണ്.\n3. ഏതെങ്കിലും സംരക്ഷണ കേസ് നീക്കംചെയ്ത് നിങ്ങളുടെ ഫോണിന്റെ മൈക്രോഫോൺ തുറന്നുകാട്ടുക.\n4. പകുതി മൂന്ന് തവണ ഒരു കൈ തൂവാല മടക്കിക്കളയുക, നിങ്ങൾക്കും നിങ്ങളുടെ കമ്പ്യൂട്ടറിനും ഇടയിൽ മേശപ്പുറത്ത് വയ്ക്കുക.\n5. നിങ്ങളുടെ ഫോൺ ക്യാമറ ചുവടെയുള്ള QR കോഡിൽ (കറുപ്പും വെളുപ്പും പരിശോധനകൾ), നിങ്ങളുടെ ഫോണിന്റെ വ്യൂഫൈൻഡറിൽ ദൃശ്യമാകുന്ന ലിങ്കിൽ ക്ലിക്കുചെയ്യുക.\n6. ഒരു പോപ്പ് അപ്പ് പ്രത്യക്ഷപ്പെടുകയാണെങ്കിൽ, മൈക്രോഫോൺ ഉപയോഗിക്കാൻ നിങ്ങളുടെ അനുമതി ആവശ്യപ്പെടുക, "അനുവദിക്കുക" ക്ലിക്കുചെയ്യുക.',
-    te: '2. మీ ఫోన్ నిలువుగా ఉన్నప్పుడు, దాని మైక్రోఫోన్ దిగువ అంచున ఉంటుంది.\n3. ఏదైనా రక్షిత కేసును తొలగించడం ద్వారా మీ ఫోన్ యొక్క మైక్రోఫోన్‌ను బహిర్గతం చేయండి.\n4. హ్యాండ్ టవల్ ను సగం మూడు సార్లు మడవండి మరియు మీకు మరియు మీ కంప్యూటర్‌కు మధ్య ఉన్న టేబుల్‌పై ఉంచండి.\n5. మీ ఫోన్ కెమెరాను దిగువ QR కోడ్ (బ్లాక్ అండ్ వైట్ చెక్కులు) వద్ద సూచించండి మరియు మీ ఫోన్ వ్యూఫైండర్‌లో కనిపించే లింక్‌పై క్లిక్ చేయండి.\n6. పాప్ అప్ కనిపిస్తే, మైక్రోఫోన్‌ను ఉపయోగించడానికి మీ అనుమతి అడుగుతూ, "అనుమతించు" క్లిక్ చేయండి.',
-    kn: '2. ನಿಮ್ಮ ಫೋನ್ ಲಂಬವಾಗಿದ್ದಾಗ, ಅದರ ಮೈಕ್ರೊಫೋನ್ ಕೆಳಗಿನ ಅಂಚಿನಲ್ಲಿದೆ.\n3. ಯಾವುದೇ ರಕ್ಷಣಾತ್ಮಕ ಪ್ರಕರಣವನ್ನು ತೆಗೆದುಹಾಕುವ ಮೂಲಕ ನಿಮ್ಮ ಫೋನ್‌ನ ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಬಹಿರಂಗಪಡಿಸಿ.\n4. ಹ್ಯಾಂಡ್ ಟವೆಲ್ ಅನ್ನು ಅರ್ಧ ಮೂರು ಬಾರಿ ಮಡಿಸಿ ಮತ್ತು ಅದನ್ನು ನಿಮ್ಮ ಮತ್ತು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ನಡುವೆ ಮೇಜಿನ ಮೇಲೆ ಇರಿಸಿ.\n5. ನಿಮ್ಮ ಫೋನ್ ಕ್ಯಾಮೆರಾವನ್ನು ಕೆಳಗಿನ ಕ್ಯೂಆರ್ ಕೋಡ್‌ನಲ್ಲಿ (ಕಪ್ಪು ಮತ್ತು ಬಿಳಿ ಚೆಕ್‌ಗಳು) ಸೂಚಿಸಿ, ಮತ್ತು ನಿಮ್ಮ ಫೋನ್‌ನ ವ್ಯೂಫೈಂಡರ್‌ನಲ್ಲಿ ಕಂಡುಬರುವ ಲಿಂಕ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ.\n6. ಪಾಪ್ ಅಪ್ ಕಾಣಿಸಿಕೊಂಡರೆ, ಮೈಕ್ರೊಫೋನ್ ಬಳಸಲು ನಿಮ್ಮ ಅನುಮತಿಯನ್ನು ಕೇಳಿದಾಗ, "ಅನುಮತಿಸಿ" ಕ್ಲಿಕ್ ಮಾಡಿ.',
-    bn: '২. যখন আপনার ফোনটি উল্লম্ব হয়, তখন এর মাইক্রোফোনটি নীচের প্রান্তে থাকে।\n৩. কোনও প্রতিরক্ষামূলক কেস সরিয়ে আপনার ফোনের মাইক্রোফোনটি প্রকাশ করুন।\n৪. আধা তিনবার একটি হাতের তোয়ালে ভাঁজ করুন এবং এটি আপনার এবং আপনার কম্পিউটারের মধ্যে টেবিলে রাখুন।\n৫. নীচের কিউআর কোডে আপনার ফোন ক্যামেরাটি নির্দেশ করুন (কালো এবং সাদা চেক), এবং আপনার ফোনের ভিউফাইন্ডারে প্রদর্শিত লিঙ্কটিতে ক্লিক করুন।\nPop। যদি কোনও পপ আপ উপস্থিত হয়, মাইক্রোফোনটি ব্যবহার করার জন্য আপনার অনুমতি চেয়ে জিজ্ঞাসা করুন, "অনুমতি দিন" ক্লিক করুন।',
-    id: '2. Saat ponsel Anda vertikal, mikrofonnya berada di tepi bawah.\n3. Ekspos mikrofon ponsel Anda dengan menghapus kasus pelindung apa pun.\n4. Lipat handuk tangan menjadi setengah tiga kali dan letakkan di atas meja antara Anda dan komputer Anda.\n5. Arahkan kamera ponsel Anda ke kode QR di bawah ini (cek hitam dan putih), dan klik tautan yang muncul di jendela bidik ponsel Anda.\n6. Jika muncul muncul, meminta izin Anda untuk menggunakan mikrofon, klik "Izinkan".',
+      "2. When your phone is vertical, its microphone is in the lower edge.\n3. Expose your phone's microphone by removing any protective case.\n4. Fold a hand towel in half three times and place it on the table between you and your computer.\n5. Point your phone camera at the QR code below (black and white checks), and click on the link that appears in your phone's viewfinder.\n",
+    de: "2. Wenn Ihr Telefon vertikal ist, befindet sich sein Mikrofon in der unteren Kante.\n3. Stellen Sie das Mikrofon Ihres Telefons aus, indem Sie einen Schutzhülle entfernen.\n4. Falten Sie ein Handtuch in zweimal dreimal und legen Sie es auf den Tisch zwischen Ihnen und Ihrem Computer.\n5. Zeigen Sie Ihre Telefonkamera im folgenden QR -Code (Schwarzweißkontrollen) und klicken Sie auf den Link, der im Sucher Ihres Telefons angezeigt wird.\n",
+    fr: "2. Lorsque votre téléphone est vertical, son microphone est dans le bord inférieur.\n3. Exposer le microphone de votre téléphone en supprimant tout cas de protection.\n4. Pliez une serviette à main en deux fois trois fois et placez-la sur la table entre vous et votre ordinateur.\n5. Pointez votre appareil photo de téléphone au code QR ci-dessous (vérifications en noir et blanc), puis cliquez sur le lien qui apparaît dans le viseur de votre téléphone.\n",
+    es: "2. Cuando su teléfono es vertical, su micrófono está en el borde inferior.\n3. Exponga el micrófono de su teléfono eliminando cualquier caso de protección.\n4. Dobla una toalla de mano por la mitad tres veces y colóquela sobre la mesa entre usted y su computadora.\n5. Apunte la cámara de su teléfono en el código QR a continuación (verificaciones en blanco y negro) y haga clic en el enlace que aparece en el visor de su teléfono.\n",
+    pt: "2. Quando o telefone é vertical, o microfone está na borda inferior.\n3. Exponha o microfone do seu telefone removendo qualquer caso de proteção.\n4. Dobre uma toalha de mão ao meio três vezes e coloque -a na mesa entre você e seu computador.\n5. Aponte a câmera do seu telefone no código QR abaixo (cheques em preto e branco) e clique no link que aparece no visor do seu telefone.\n",
+    it: "2. Quando il telefono è verticale, il suo microfono è al bordo inferiore.\n3. Esporre il microfono del telefono rimuovendo qualsiasi custodia protettiva.\n4. Piega un asciugamano a metà tre volte e posizionalo sul tavolo tra te e il tuo computer.\n5. Puntare la fotocamera del telefono sul codice QR in basso (controlli in bianco e nero) e fai clic sul collegamento che appare nel mirino del telefono.\n",
+    ro: "2. Când telefonul dvs. este vertical, microfonul său este în marginea inferioară.\n3. Expuneți microfonul telefonului dvs. eliminând orice caz de protecție.\n4. Îndoiți un prosop de mână în jumătate de trei ori și așezați -l pe masa dintre dvs. și computer.\n5. Indicați camera telefonului la codul QR de mai jos (verificări alb -negru) și faceți clic pe linkul care apare în vizor de telefon al telefonului.\n",
+    pl: "2. Gdy telefon jest pionowy, jego mikrofon znajduje się w dolnej krawędzi.\n3. Odsłaniaj mikrofon telefonu, usuwając dowolną sprawę ochronną.\n4. Złóż ręcznik na pół trzy razy i umieść go na stole między tobą a komputerem.\n5. Wskaż aparat telefoniczny na poniższy kod QR (czarno -białe czeki) i kliknij link, który pojawia się w wizjerze telefonu.\n",
+    ru: "2. Когда ваш телефон вертикаль, его микрофон находится в нижнем краю.\n3. Выставьте микрофон вашего телефона, удалив любой защитный чехол.\n4. Сложите ручное полотенце за полным годам и поместите его на стол между вами и вашим компьютером.\n5. Укажите камеру телефона на QR -код ниже (черно -белые проверки) и нажмите на ссылку, которая появляется в видоискателе вашего телефона.\n",
+    hy: "2. Երբ ձեր հեռախոսը ուղղահայաց է, դրա խոսափողը ստորին եզրին է:\n3. Բացահայտեք ձեր հեռախոսի խոսափողը `հեռացնելով ցանկացած պաշտպանիչ դեպք:\n4. Ձեռքի սրբիչ ծալեք կես երեք անգամ եւ տեղադրեք այն սեղանի վրա ձեր եւ ձեր համակարգչի միջեւ:\n5. Ձեռք բերեք ձեր հեռախոսի տեսախցիկը ստորեւ նշված QR կոդով (սեւ եւ սպիտակ ստուգումներ) եւ կտտացրեք ձեր հեռախոսի տեսադաշտում հայտնված հղմանը:\n",
+    fi: "2. Kun puhelimesi on pystysuora, sen mikrofoni on alareunassa.\n3. Paljasta puhelimen mikrofoni poistamalla kaikki suojatapaukset.\n4. Taita käsipyyhe puoliksi kolme kertaa ja aseta se pöydälle sinun ja tietokoneesi väliin.\n5. Osoita puhelinkamera alla olevaan QR -koodiin (mustavalkoiset tarkistukset) ja napsauta puhelimen etsimessä näkyvää linkkiä.\n",
+    ka: "2. როდესაც თქვენი ტელეფონი ვერტიკალურია, მისი მიკროფონი ქვედა ზღვარზეა.\n3. გამოავლინეთ თქვენი ტელეფონის მიკროფონი ნებისმიერი დამცავი საქმის ამოღებით.\n4. ჩამოყარეთ ხელის პირსახოცი ნახევარჯერ და მოათავსეთ ის მაგიდაზე თქვენსა და თქვენს კომპიუტერს შორის.\n5. მიუთითეთ თქვენი ტელეფონის კამერა QR კოდზე ქვემოთ (შავი და თეთრი ჩეკები) და დააჭირეთ ბმულს, რომელიც ჩანს თქვენი ტელეფონის სანახავად.\n",
+    he: "2. כאשר הטלפון שלך אנכי, המיקרופון שלו נמצא בקצה התחתון.\n3. חשוף את המיקרופון של הטלפון שלך על ידי הסרת כל מקרה מגן.\n4. קפלו מגבת יד לחצי שלוש פעמים והניחו אותה על השולחן בינך לבין המחשב.\n.\n",
+    ar: "2. عندما يكون هاتفك رأسيًا ، يكون الميكروفون في الحافة السفلية.\n3. فضح ميكروفون هاتفك عن طريق إزالة أي حالة وقائية.\n4. قم بطي منشفة اليد في نصف ثلاث مرات ووضعها على الطاولة بينك وبين الكمبيوتر.\n5. قم بإشارة كاميرا هاتفك على رمز الاستجابة السريعة أدناه (الشيكات بالأبيض والأسود) ، وانقر على الرابط الذي يظهر في عدسة الكاميرا الخاصة بهاتفك.\n",
+    ur: "2. جب آپ کا فون عمودی ہے تو ، اس کا مائکروفون نچلے کنارے میں ہے۔\n3. کسی بھی حفاظتی کیس کو ہٹا کر اپنے فون کے مائکروفون کو بے نقاب کریں۔\n4. آدھے تین بار ایک ہاتھ کا تولیہ جوڑیں اور اسے اپنے اور اپنے کمپیوٹر کے درمیان ٹیبل پر رکھیں۔\n5. اپنے فون کیمرہ کو نیچے کیو آر کوڈ (سیاہ اور سفید چیک) پر نشاندہی کریں ، اور اس لنک پر کلک کریں جو آپ کے فون کے ویو فائنڈر میں ظاہر ہوتا ہے۔\n",
+    hi: "2. जब आपका फोन ऊर्ध्वाधर होता है, तो इसका माइक्रोफोन निचले किनारे में होता है।\n3. किसी भी सुरक्षात्मक मामले को हटाकर अपने फोन के माइक्रोफोन को उजागर करें।\n4. एक हाथ तौलिया को तीन बार में मोड़ो और इसे आप और आपके कंप्यूटर के बीच की मेज पर रखें।\n5. नीचे दिए गए क्यूआर कोड (ब्लैक एंड व्हाइट चेक) पर अपना फ़ोन कैमरा इंगित करें, और आपके फोन के व्यूफ़ाइंडर में दिखाई देने वाले लिंक पर क्लिक करें।\n",
+    ta: "2. உங்கள் தொலைபேசி செங்குத்தாக இருக்கும்போது, ​​அதன் மைக்ரோஃபோன் கீழ் விளிம்பில் உள்ளது.\n3. எந்தவொரு பாதுகாப்பு வழக்கையும் அகற்றுவதன் மூலம் உங்கள் தொலைபேசியின் மைக்ரோஃபோனை அம்பலப்படுத்துங்கள்.\n4. ஒரு கை துண்டுகளை பாதி மூன்று முறை மடித்து உங்களுக்கும் உங்கள் கணினிக்கும் இடையில் மேசையில் வைக்கவும்.\n5. உங்கள் தொலைபேசி கேமராவை கீழே உள்ள QR குறியீட்டில் (கருப்பு மற்றும் வெள்ளை காசோலைகள்) சுட்டிக்காட்டவும், உங்கள் தொலைபேசியின் வ்யூஃபைண்டரில் தோன்றும் இணைப்பைக் கிளிக் செய்யவும்.\n",
+    ml: "2. നിങ്ങളുടെ ഫോൺ ലംബമായിരിക്കുമ്പോൾ, അതിന്റെ മൈക്രോഫോൺ താഴത്തെ അരികിലാണ്.\n3. ഏതെങ്കിലും സംരക്ഷണ കേസ് നീക്കംചെയ്ത് നിങ്ങളുടെ ഫോണിന്റെ മൈക്രോഫോൺ തുറന്നുകാട്ടുക.\n4. പകുതി മൂന്ന് തവണ ഒരു കൈ തൂവാല മടക്കിക്കളയുക, നിങ്ങൾക്കും നിങ്ങളുടെ കമ്പ്യൂട്ടറിനും ഇടയിൽ മേശപ്പുറത്ത് വയ്ക്കുക.\n5. നിങ്ങളുടെ ഫോൺ ക്യാമറ ചുവടെയുള്ള QR കോഡിൽ (കറുപ്പും വെളുപ്പും പരിശോധനകൾ), നിങ്ങളുടെ ഫോണിന്റെ വ്യൂഫൈൻഡറിൽ ദൃശ്യമാകുന്ന ലിങ്കിൽ ക്ലിക്കുചെയ്യുക.\n",
+    te: "2. మీ ఫోన్ నిలువుగా ఉన్నప్పుడు, దాని మైక్రోఫోన్ దిగువ అంచున ఉంటుంది.\n3. ఏదైనా రక్షిత కేసును తొలగించడం ద్వారా మీ ఫోన్ యొక్క మైక్రోఫోన్‌ను బహిర్గతం చేయండి.\n4. హ్యాండ్ టవల్ ను సగం మూడు సార్లు మడవండి మరియు మీకు మరియు మీ కంప్యూటర్‌కు మధ్య ఉన్న టేబుల్‌పై ఉంచండి.\n5. మీ ఫోన్ కెమెరాను దిగువ QR కోడ్ (బ్లాక్ అండ్ వైట్ చెక్కులు) వద్ద సూచించండి మరియు మీ ఫోన్ వ్యూఫైండర్‌లో కనిపించే లింక్‌పై క్లిక్ చేయండి.\n",
+    kn: "2. ನಿಮ್ಮ ಫೋನ್ ಲಂಬವಾಗಿದ್ದಾಗ, ಅದರ ಮೈಕ್ರೊಫೋನ್ ಕೆಳಗಿನ ಅಂಚಿನಲ್ಲಿದೆ.\n3. ಯಾವುದೇ ರಕ್ಷಣಾತ್ಮಕ ಪ್ರಕರಣವನ್ನು ತೆಗೆದುಹಾಕುವ ಮೂಲಕ ನಿಮ್ಮ ಫೋನ್‌ನ ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಬಹಿರಂಗಪಡಿಸಿ.\n4. ಹ್ಯಾಂಡ್ ಟವೆಲ್ ಅನ್ನು ಅರ್ಧ ಮೂರು ಬಾರಿ ಮಡಿಸಿ ಮತ್ತು ಅದನ್ನು ನಿಮ್ಮ ಮತ್ತು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ನಡುವೆ ಮೇಜಿನ ಮೇಲೆ ಇರಿಸಿ.\n5. ನಿಮ್ಮ ಫೋನ್ ಕ್ಯಾಮೆರಾವನ್ನು ಕೆಳಗಿನ ಕ್ಯೂಆರ್ ಕೋಡ್‌ನಲ್ಲಿ (ಕಪ್ಪು ಮತ್ತು ಬಿಳಿ ಚೆಕ್‌ಗಳು) ಸೂಚಿಸಿ, ಮತ್ತು ನಿಮ್ಮ ಫೋನ್‌ನ ವ್ಯೂಫೈಂಡರ್‌ನಲ್ಲಿ ಕಂಡುಬರುವ ಲಿಂಕ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ.\n",
+    bn: "২. যখন আপনার ফোনটি উল্লম্ব হয়, তখন এর মাইক্রোফোনটি নীচের প্রান্তে থাকে।\n৩. কোনও প্রতিরক্ষামূলক কেস সরিয়ে আপনার ফোনের মাইক্রোফোনটি প্রকাশ করুন।\n৪. আধা তিনবার একটি হাতের তোয়ালে ভাঁজ করুন এবং এটি আপনার এবং আপনার কম্পিউটারের মধ্যে টেবিলে রাখুন।\n৫. নীচের কিউআর কোডে আপনার ফোন ক্যামেরাটি নির্দেশ করুন (কালো এবং সাদা চেক), এবং আপনার ফোনের ভিউফাইন্ডারে প্রদর্শিত লিঙ্কটিতে ক্লিক করুন।\n",
+    id: "2. Saat ponsel Anda vertikal, mikrofonnya berada di tepi bawah.\n3. Ekspos mikrofon ponsel Anda dengan menghapus kasus pelindung apa pun.\n4. Lipat handuk tangan menjadi setengah tiga kali dan letakkan di atas meja antara Anda dan komputer Anda.\n5. Arahkan kamera ponsel Anda ke kode QR di bawah ini (cek hitam dan putih), dan klik tautan yang muncul di jendela bidik ponsel Anda.\n",
     "zh-CN":
-      "2.当您的手机垂直时，其麦克风处于下边缘。\n3.通过删除任何保护性案例来暴露手机的麦克风。\n4.将手毛巾折成三倍，然后将其放在您和计算机之间的桌子上。\n5.将手机摄像头指向下面的QR码（黑白检查），然后单击手机取景器中出现的链接。\n6.如果出现弹出窗口，请征您使用麦克风的权限，请单击“允许”。",
+      "2.当您的手机垂直时，其麦克风处于下边缘。\n3.通过删除任何保护性案例来暴露手机的麦克风。\n4.将手毛巾折成三倍，然后将其放在您和计算机之间的桌子上。\n5.将手机摄像头指向下面的QR码（黑白检查），然后单击手机取景器中出现的链接。\n",
     "zh-HK":
-      "2.當您的手機垂直時，其麥克風處於下邊緣。\n3.通過刪除任何保護性案例來暴露手機的麥克風。\n4.將手毛巾折成三倍，然後將其放在您和計算機之間的桌子上。\n5.將手機攝像頭指向下面的QR碼（黑白檢查），然後單擊手機取景器中出現的鏈接。\n6.如果出現彈出窗口，請徵您使用麥克風的權限，請單擊“允許”。",
-    ja: "2.携帯電話が垂直になると、マイクは下端にあります。\n3.保護ケースを削除して、携帯電話のマイクを公開します。\n4.ハンドタオルを半分3回折り、あなたとあなたのコンピューターの間のテーブルに置きます。\n5.以下のQRコード（黒と白のチェック）で電話カメラをポイントし、携帯電話のViewFinderに表示されるリンクをクリックします。\n6.ポップアップが表示された場合は、マイクを使用する許可を求めて、「許可」をクリックします。",
-    ko: '2. 휴대 전화가 수직 인 경우 마이크가 아래쪽 가장자리에 있습니다.\n3. 보호 케이스를 제거하여 휴대 전화의 마이크를 노출시킵니다.\n4. 핸드 타월을 반으로 3 번 접고 컴퓨터 사이에 테이블에 놓습니다.\n5. 휴대 전화 카메라를 아래 QR 코드 (흑백 체크)로 가리키고 휴대 전화의 뷰 파인더에 나타나는 링크를 클릭하십시오.\n6. 팝업이 나타나면 마이크 사용 권한을 요청하면 "허용"을 클릭하십시오.',
-    __EMPTY: "#VALUE!",
-    __EMPTY_1: "#VALUE!",
+      "2.當您的手機垂直時，其麥克風處於下邊緣。\n3.通過刪除任何保護性案例來暴露手機的麥克風。\n4.將手毛巾折成三倍，然後將其放在您和計算機之間的桌子上。\n5.將手機攝像頭指向下面的QR碼（黑白檢查），然後單擊手機取景器中出現的鏈接。\n",
+    ja: "2.携帯電話が垂直になると、マイクは下端にあります。\n3.保護ケースを削除して、携帯電話のマイクを公開します。\n4.ハンドタオルを半分3回折り、あなたとあなたのコンピューターの間のテーブルに置きます。\n5.以下のQRコード（黒と白のチェック）で電話カメラをポイントし、携帯電話のViewFinderに表示されるリンクをクリックします。\n",
+    ko: "2. 휴대 전화가 수직 인 경우 마이크가 아래쪽 가장자리에 있습니다.\n3. 보호 케이스를 제거하여 휴대 전화의 마이크를 노출시킵니다.\n4. 핸드 타월을 반으로 3 번 접고 컴퓨터 사이에 테이블에 놓습니다.\n5. 휴대 전화 카메라를 아래 QR 코드 (흑백 체크)로 가리키고 휴대 전화의 뷰 파인더에 나타나는 링크를 클릭하십시오.\n",
   },
   RC_getUSBMicrophoneReady: {
     "en-US":
-      '2. Plug the microphone into one of your computer\'s USB-C ports. Attach the microphone to its tripod. The microphone should be vertical, pointing up to the ceiling. Place it on the table between you and your computer. Click Ok or hit RETURN.\n3. If a pop up appears, asking for permission to use the microphone, click "Allow".',
-    de: '2. Stecken Sie das Mikrofon in einen der USB-C-Anschlüsse Ihres Computers. Befestigen Sie das Mikrofon an seinem Stativ. Das Mikrofon sollte vertikal sein und auf die Decke hinweisen. Legen Sie es auf den Tisch zwischen Ihnen und Ihrem Computer. Klicken Sie auf OK oder klicken Sie auf die Rückgabe.\n3. Wenn ein Pop -up angezeigt wird und um Erlaubnis zur Verwendung des Mikrofons gebeten wird, klicken Sie auf "Ermöglichen".',
-    fr: "2. Branchez le microphone sur l'un des ports USB-C de votre ordinateur. Fixez le microphone à son trépied. Le microphone doit être vertical, pointant vers le plafond. Placez-le sur la table entre vous et votre ordinateur. Cliquez sur OK ou appuyez sur Retour.\n3. Si une fenêtre contextuelle apparaît, demandant la permission d'utiliser le microphone, cliquez sur \"Autoriser\".",
-    es: '2. Conecte el micrófono a uno de los puertos USB-C de su computadora. Conecte el micrófono a su trípode. El micrófono debe ser vertical, apuntando al techo. Colóquelo sobre la mesa entre usted y su computadora. Haga clic en Aceptar o presione la devolución.\n3. Si aparece una ventana emergente, pidiendo permiso para usar el micrófono, haga clic en "Permitir".',
-    pt: '2. Conecte o microfone em uma das portas USB-C do seu computador. Prenda o microfone ao seu tripé. O microfone deve ser vertical, apontando para o teto. Coloque -o na mesa entre você e seu computador. Clique em OK ou pressione o retorno.\n3. Se aparecer um pop -up, solicitando permissão para usar o microfone, clique em "Permitir".',
-    it: '2. Collegare il microfono in una delle porte USB-C del tuo computer. Attacca il microfono al suo treppiede. Il microfono dovrebbe essere verticale, rivolto verso il soffitto. Mettilo sul tavolo tra te e il tuo computer. Fai clic su OK o premi resi.\n3. Se appare un pop -up, chiedendo l\'autorizzazione per utilizzare il microfono, fare clic su "Consenti".',
-    ro: "2. Conectați microfonul la unul dintre porturile USB-C ale computerului dvs. Atașați microfonul la trepiedul său. Microfonul trebuie să fie vertical, îndreptându -se spre tavan. Plasați -l pe masa dintre dvs. și computer. Faceți clic pe OK sau apăsați Return.\n3. Dacă apare un pop -up, cerând permisiunea de a utiliza microfonul, faceți clic pe „Permite”.",
-    pl: "2. Podłącz mikrofon do jednego z portów USB-C komputera. Przymocuj mikrofon do jego statywu. Mikrofon powinien być pionowy, wskazując na sufit. Umieść go na stole między tobą a komputerem. Kliknij OK lub naciśnij Return.\n3. Jeśli pojawi się wyskakujący wyskakujący wysięgnik, prosząc o pozwolenie na użycie mikrofonu, kliknij „Zezwalaj”.",
-    ru: "2. Подключите микрофон к одному из портов USB-C вашего компьютера. Прикрепите микрофон к его штативу. Микрофон должен быть вертикальным, указывая на потолок. Поместите его на стол между вами и вашим компьютером. Нажмите OK или нажмите возврат.\n3. Если появляется всплывающее окно, с просьбой разрешить использовать микрофон, нажмите «Разрешить».",
-    hy: "2. Խոսափողը միացրեք ձեր համակարգչի USB-C նավահանգիստներից մեկի մեջ: Կցեք միկրոֆոնը իր եռոտանի վրա: Խոսափողը պետք է լինի ուղղահայաց, մատնանշելով առաստաղը: Տեղադրեք այն սեղանի վրա ձեր եւ ձեր համակարգչի միջեւ: Կտտացրեք OK կամ հարվածի վերադարձը:\n3. Եթե հայտնվում է փոփը, խնդրելով թույլտվություն օգտագործել խոսափողը, կտտացրեք «Թույլ տվեք»:",
-    fi: '2. Kytke mikrofoni johonkin tietokoneen USB-C-portteihin. Kiinnitä mikrofoni jalustaansa. Mikrofonin tulisi olla pystysuora, osoittaen kattoon asti. Aseta se pöydälle sinun ja tietokoneesi välillä. Napsauta OK tai paina palauta.\n3. Jos ponnahdusikkuna tulee näkyviin, pyytäen lupaa mikrofonin käyttöä, napsauta "Salli".',
-    ka: '2. შეაერთეთ მიკროფონი თქვენი კომპიუტერის USB-C ერთ პორტებში. მიამაგრეთ მიკროფონი თავის სამფეხა. მიკროფონი უნდა იყოს ვერტიკალური, მიუთითებს ჭერზე. განათავსეთ იგი მაგიდაზე თქვენსა და თქვენს კომპიუტერს შორის. დააჭირეთ ღილაკს ან დააჭირეთ დაბრუნებას.\n3. თუ გამოჩნდება pop Up, ითხოვს მიკროფონის გამოყენების ნებართვას, დააჭირეთ ღილაკს "დაუშვით".',
-    he: '2. חבר את המיקרופון לאחד מיציאות ה- USB-C של המחשב שלך. חבר את המיקרופון לחצובה שלו. המיקרופון צריך להיות אנכי, ומצביע על התקרה. הניחו אותו על השולחן בינך לבין המחשב. לחץ על אישור או לחץ על החזרה.\n3. אם מופיע פופ -אפ, מבקש אישור להשתמש במיקרופון, לחץ על "אפשר".',
-    ar: '2. قم بتوصيل الميكروفون بأحد منافذ USB-C بجهاز الكمبيوتر الخاص بك. نعلق الميكروفون إلى ترايبود. يجب أن يكون الميكروفون رأسيًا ، مما يشير إلى السقف. ضعه على الطاولة بينك وبين جهاز الكمبيوتر الخاص بك. انقر فوق موافق أو اضغط على العودة.\n3. إذا ظهر أحد المنبثقة ، فطلب إذنًا لاستخدام الميكروفون ، انقر فوق "السماح".',
-    ur: '2. مائکروفون کو اپنے کمپیوٹر کی USB-C بندرگاہوں میں سے ایک میں پلگ ان کریں۔ مائکروفون کو اس کے تپائی سے جوڑیں۔ مائکروفون عمودی ہونا چاہئے ، چھت کی طرف اشارہ کرتے ہوئے۔ اسے اپنے اور اپنے کمپیوٹر کے درمیان ٹیبل پر رکھیں۔ ٹھیک ہے پر کلک کریں یا واپسی کو ہٹائیں۔\nIf. اگر کوئی پاپ اپ ظاہر ہوتا ہے تو ، مائکروفون کو استعمال کرنے کی اجازت طلب کرتے ہیں تو ، "اجازت دیں" پر کلک کریں۔',
-    hi: '2. माइक्रोफोन को अपने कंप्यूटर के USB-C पोर्ट में से एक में प्लग करें। माइक्रोफोन को उसके तिपाई से संलग्न करें। माइक्रोफोन ऊर्ध्वाधर होना चाहिए, छत की ओर इशारा करते हुए। इसे आप और आपके कंप्यूटर के बीच की मेज पर रखें। ओके या हिट रिटर्न पर क्लिक करें।\n3. यदि कोई पॉप अप दिखाई देता है, तो माइक्रोफोन का उपयोग करने के लिए अनुमति मांगता है, "अनुमति" पर क्लिक करें।',
-    ta: '2. உங்கள் கணினியின் யூ.எஸ்.பி-சி துறைமுகங்களில் ஒன்றில் மைக்ரோஃபோனை செருகவும். மைக்ரோஃபோனை அதன் முக்காலியில் இணைக்கவும். மைக்ரோஃபோன் செங்குத்தாக இருக்க வேண்டும், உச்சவரம்பு வரை சுட்டிக்காட்டுகிறது. உங்களுக்கும் உங்கள் கணினிக்கும் இடையிலான அட்டவணையில் வைக்கவும். சரி என்பதைக் கிளிக் செய்க அல்லது திரும்பவும்.\n3. ஒரு பாப் அப் தோன்றினால், மைக்ரோஃபோனைப் பயன்படுத்த அனுமதி கேட்டால், "அனுமதி" என்பதைக் கிளிக் செய்க.',
-    ml: '2. നിങ്ങളുടെ കമ്പ്യൂട്ടറിന്റെ യുഎസ്ബി-സി പോർട്ടുകളിലൊന്നിൽ മൈക്രോഫോൺ പ്ലഗ് ചെയ്യുക. മൈക്രോഫോൺ അതിന്റെ ട്രൈപോഡിലേക്ക് അറ്റാച്ചുചെയ്യുക. മൈക്രോഫോൺ ലംബമായിരിക്കണം, സീലിംഗ് വരെ ചൂണ്ടിക്കാണിക്കണം. നിങ്ങൾക്കും നിങ്ങളുടെ കമ്പ്യൂട്ടറിനും ഇടയിലുള്ള മേശപ്പുറത്ത് വയ്ക്കുക. ശരി ക്ലിക്കുചെയ്യുക അല്ലെങ്കിൽ തിരിച്ചുവരവ്.\n3. ഒരു പോപ്പ് അപ്പ് ദൃശ്യമാകുകയാണെങ്കിൽ, മൈക്രോഫോൺ ഉപയോഗിക്കാൻ അനുമതി ചോദിച്ചാൽ, "അനുവദിക്കുക" ക്ലിക്കുചെയ്യുക.',
-    te: '2. మైక్రోఫోన్‌ను మీ కంప్యూటర్ యొక్క USB-C పోర్ట్‌లలో ఒకటిగా ప్లగ్ చేయండి. మైక్రోఫోన్‌ను దాని త్రిపాదకు అటాచ్ చేయండి. మైక్రోఫోన్ నిలువుగా ఉండాలి, పైకప్పు వరకు ఉంటుంది. మీకు మరియు మీ కంప్యూటర్ మధ్య పట్టికలో ఉంచండి. సరే క్లిక్ చేయండి లేదా రిటర్న్ నొక్కండి.\n3. పాప్ అప్ కనిపిస్తే, మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి అడుగుతూ, "అనుమతించు" క్లిక్ చేయండి.',
-    kn: '2. ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‌ನ ಯುಎಸ್‌ಬಿ-ಸಿ ಪೋರ್ಟ್‌ಗಳಲ್ಲಿ ಒಂದಕ್ಕೆ ಪ್ಲಗ್ ಮಾಡಿ. ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಅದರ ಟ್ರೈಪಾಡ್‌ಗೆ ಲಗತ್ತಿಸಿ. ಮೈಕ್ರೊಫೋನ್ ಲಂಬವಾಗಿರಬೇಕು, ಇದು ಸೀಲಿಂಗ್‌ಗೆ ಸೂಚಿಸುತ್ತದೆ. ಅದನ್ನು ನಿಮ್ಮ ಮತ್ತು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ನಡುವೆ ಮೇಜಿನ ಮೇಲೆ ಇರಿಸಿ. ಸರಿ ಕ್ಲಿಕ್ ಮಾಡಿ ಅಥವಾ ರಿಟರ್ನ್ ಒತ್ತಿರಿ.\n3. ಪಾಪ್ ಅಪ್ ಕಾಣಿಸಿಕೊಂಡರೆ, ಮೈಕ್ರೊಫೋನ್ ಬಳಸಲು ಅನುಮತಿ ಕೇಳಿದಾಗ, "ಅನುಮತಿಸಿ" ಕ್ಲಿಕ್ ಮಾಡಿ.',
-    bn: '2. আপনার কম্পিউটারের ইউএসবি-সি পোর্টগুলির মধ্যে একটিতে মাইক্রোফোনটি প্লাগ করুন। মাইক্রোফোনটি তার ট্রিপডের সাথে সংযুক্ত করুন। মাইক্রোফোনটি উল্লম্ব হওয়া উচিত, সিলিং পর্যন্ত নির্দেশ করে। এটি আপনার এবং আপনার কম্পিউটারের মধ্যে টেবিলে রাখুন। ওকে ক্লিক করুন বা রিটার্ন হিট করুন।\n৩. যদি কোনও পপ আপ উপস্থিত হয়, মাইক্রোফোনটি ব্যবহারের অনুমতি চাইতে, "অনুমতি দিন" ক্লিক করুন।',
-    id: '2. Colokkan mikrofon ke salah satu port USB-C komputer Anda. Pasang mikrofon ke tripod -nya. Mikrofon harus vertikal, menunjuk ke langit -langit. Tempatkan di atas meja antara Anda dan komputer Anda. Klik OK atau tekan kembali.\n3. Jika muncul muncul, meminta izin untuk menggunakan mikrofon, klik "Izinkan".',
+      "2. Plug the microphone into one of your computer's USB-C ports. Attach the microphone to its tripod. The microphone should be vertical, pointing up to the ceiling. Place it on the table between you and your computer. \n3. Click Proceed.",
+    de: "2. Stecken Sie das Mikrofon in einen der USB-C-Anschlüsse Ihres Computers. Befestigen Sie das Mikrofon an seinem Stativ. Das Mikrofon sollte vertikal sein und auf die Decke hinweisen. Legen Sie es auf den Tisch zwischen Ihnen und Ihrem Computer.\n3. Klicken Sie auf fortfahren.",
+    fr: "2. Branchez le microphone sur l'un des ports USB-C de votre ordinateur. Fixez le microphone à son trépied. Le microphone doit être vertical, pointant vers le plafond. Placez-le sur la table entre vous et votre ordinateur.\n3. Cliquez sur Procéder.",
+    es: "2. Conecte el micrófono a uno de los puertos USB-C de su computadora. Conecte el micrófono a su trípode. El micrófono debe ser vertical, apuntando al techo. Colóquelo sobre la mesa entre usted y su computadora.\n3. Haga clic en continuar.",
+    pt: "2. Conecte o microfone em uma das portas USB-C do seu computador. Prenda o microfone ao seu tripé. O microfone deve ser vertical, apontando para o teto. Coloque -o na mesa entre você e seu computador.\n3. Clique em prosseguir.",
+    it: "2. Collegare il microfono in una delle porte USB-C del tuo computer. Attacca il microfono al suo treppiede. Il microfono dovrebbe essere verticale, rivolto verso il soffitto. Mettilo sul tavolo tra te e il tuo computer.\n3. Fare clic su procedere.",
+    ro: "2. Conectați microfonul la unul dintre porturile USB-C ale computerului dvs. Atașați microfonul la trepiedul său. Microfonul trebuie să fie vertical, îndreptându -se spre tavan. Plasați -l pe masa dintre dvs. și computer.\n3. Faceți clic pe continuați.",
+    pl: "2. Podłącz mikrofon do jednego z portów USB-C komputera. Przymocuj mikrofon do jego statywu. Mikrofon powinien być pionowy, wskazując na sufit. Umieść go na stole między tobą a komputerem.\n3. Kliknij Postępuj.",
+    ru: "2. Подключите микрофон к одному из портов USB-C вашего компьютера. Прикрепите микрофон к его штативу. Микрофон должен быть вертикальным, указывая на потолок. Поместите его на стол между вами и вашим компьютером.\n3. Нажмите «Продолжить».",
+    hy: "2. Խոսափողը միացրեք ձեր համակարգչի USB-C նավահանգիստներից մեկի մեջ: Կցեք միկրոֆոնը իր եռոտանի վրա: Խոսափողը պետք է լինի ուղղահայաց, մատնանշելով առաստաղը: Տեղադրեք այն սեղանի վրա ձեր եւ ձեր համակարգչի միջեւ:\n3. Կտտացրեք Շարունակել:",
+    fi: "2. Kytke mikrofoni johonkin tietokoneen USB-C-portteihin. Kiinnitä mikrofoni jalustaansa. Mikrofonin tulisi olla pystysuora, osoittaen kattoon asti. Aseta se pöydälle sinun ja tietokoneesi välillä.\n3. Napsauta Jatka.",
+    ka: "2. შეაერთეთ მიკროფონი თქვენი კომპიუტერის USB-C ერთ პორტებში. მიამაგრეთ მიკროფონი თავის სამფეხა. მიკროფონი უნდა იყოს ვერტიკალური, მიუთითებს ჭერზე. განათავსეთ იგი მაგიდაზე თქვენსა და თქვენს კომპიუტერს შორის.\n3. დააჭირეთ ღილაკს.",
+    he: "2. חבר את המיקרופון לאחד מיציאות ה- USB-C של המחשב שלך. חבר את המיקרופון לחצובה שלו. המיקרופון צריך להיות אנכי, ומצביע על התקרה. הניחו אותו על השולחן בינך לבין המחשב.\n3. לחץ על המשך.",
+    ar: "2. قم بتوصيل الميكروفون بأحد منافذ USB-C بجهاز الكمبيوتر الخاص بك. نعلق الميكروفون إلى ترايبود. يجب أن يكون الميكروفون رأسيًا ، مما يشير إلى السقف. ضعه على الطاولة بينك وبين جهاز الكمبيوتر الخاص بك.\n3. انقر فوق متابعة.",
+    ur: "2. مائکروفون کو اپنے کمپیوٹر کی USB-C بندرگاہوں میں سے ایک میں پلگ ان کریں۔ مائکروفون کو اس کے تپائی سے جوڑیں۔ مائکروفون عمودی ہونا چاہئے ، چھت کی طرف اشارہ کرتے ہوئے۔ اسے اپنے اور اپنے کمپیوٹر کے درمیان ٹیبل پر رکھیں۔\n3. آگے بڑھیں پر کلک کریں۔",
+    hi: "2. माइक्रोफोन को अपने कंप्यूटर के USB-C पोर्ट में से एक में प्लग करें। माइक्रोफोन को उसके तिपाई से संलग्न करें। माइक्रोफोन ऊर्ध्वाधर होना चाहिए, छत की ओर इशारा करते हुए। इसे आप और आपके कंप्यूटर के बीच की मेज पर रखें।\n3. आगे पर क्लिक करें।",
+    ta: "2. உங்கள் கணினியின் யூ.எஸ்.பி-சி துறைமுகங்களில் ஒன்றில் மைக்ரோஃபோனை செருகவும். மைக்ரோஃபோனை அதன் முக்காலியில் இணைக்கவும். மைக்ரோஃபோன் செங்குத்தாக இருக்க வேண்டும், உச்சவரம்பு வரை சுட்டிக்காட்டுகிறது. உங்களுக்கும் உங்கள் கணினிக்கும் இடையிலான அட்டவணையில் வைக்கவும்.\n3. தொடரவும் என்பதைக் கிளிக் செய்க.",
+    ml: "2. നിങ്ങളുടെ കമ്പ്യൂട്ടറിന്റെ യുഎസ്ബി-സി പോർട്ടുകളിലൊന്നിൽ മൈക്രോഫോൺ പ്ലഗ് ചെയ്യുക. മൈക്രോഫോൺ അതിന്റെ ട്രൈപോഡിലേക്ക് അറ്റാച്ചുചെയ്യുക. മൈക്രോഫോൺ ലംബമായിരിക്കണം, സീലിംഗ് വരെ ചൂണ്ടിക്കാണിക്കണം. നിങ്ങൾക്കും നിങ്ങളുടെ കമ്പ്യൂട്ടറിനും ഇടയിലുള്ള മേശപ്പുറത്ത് വയ്ക്കുക.\n3. തുടരുക ക്ലിക്കുചെയ്യുക.",
+    te: "2. మైక్రోఫోన్‌ను మీ కంప్యూటర్ యొక్క USB-C పోర్ట్‌లలో ఒకటిగా ప్లగ్ చేయండి. మైక్రోఫోన్‌ను దాని త్రిపాదకు అటాచ్ చేయండి. మైక్రోఫోన్ నిలువుగా ఉండాలి, పైకప్పు వరకు ఉంటుంది. మీకు మరియు మీ కంప్యూటర్ మధ్య పట్టికలో ఉంచండి.\n3. కొనసాగండి క్లిక్ చేయండి.",
+    kn: "2. ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‌ನ ಯುಎಸ್‌ಬಿ-ಸಿ ಪೋರ್ಟ್‌ಗಳಲ್ಲಿ ಒಂದಕ್ಕೆ ಪ್ಲಗ್ ಮಾಡಿ. ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಅದರ ಟ್ರೈಪಾಡ್‌ಗೆ ಲಗತ್ತಿಸಿ. ಮೈಕ್ರೊಫೋನ್ ಲಂಬವಾಗಿರಬೇಕು, ಇದು ಸೀಲಿಂಗ್‌ಗೆ ಸೂಚಿಸುತ್ತದೆ. ಅದನ್ನು ನಿಮ್ಮ ಮತ್ತು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ನಡುವೆ ಮೇಜಿನ ಮೇಲೆ ಇರಿಸಿ.\n3. ಮುಂದುವರಿಯಿರಿ ಕ್ಲಿಕ್ ಮಾಡಿ.",
+    bn: "2. আপনার কম্পিউটারের ইউএসবি-সি পোর্টগুলির মধ্যে একটিতে মাইক্রোফোনটি প্লাগ করুন। মাইক্রোফোনটি তার ট্রিপডের সাথে সংযুক্ত করুন। মাইক্রোফোনটি উল্লম্ব হওয়া উচিত, সিলিং পর্যন্ত নির্দেশ করে। এটি আপনার এবং আপনার কম্পিউটারের মধ্যে টেবিলে রাখুন।\n3. এগিয়ে ক্লিক করুন।",
+    id: "2. Colokkan mikrofon ke salah satu port USB-C komputer Anda. Pasang mikrofon ke tripod -nya. Mikrofon harus vertikal, menunjuk ke langit -langit. Tempatkan di atas meja antara Anda dan komputer Anda.\n3. Klik Lanjutkan.",
     "zh-CN":
-      "2.将麦克风插入计算机的一个USB-C端口之一。将麦克风连接到其三脚架上。麦克风应垂直，指向天花板。将其放在您和您的计算机之间的桌子上。单击确定或点击返回。\n3.如果出现弹出窗口，请要求使用麦克风许可，请单击“允许”。",
+      "2.将麦克风插入计算机的一个USB-C端口之一。将麦克风连接到其三脚架上。麦克风应垂直，指向天花板。将其放在您和您的计算机之间的桌子上。\n3.点击继续。",
     "zh-HK":
-      "2.將麥克風插入計算機的一個USB-C端口之一。將麥克風連接到其三腳架上。麥克風應垂直，指向天花板。將其放在您和您的計算機之間的桌子上。單擊確定或點擊返回。\n3.如果出現彈出窗口，請要求使用麥克風許可，請單擊“允許”。",
-    ja: "2.マイクをコンピューターのUSB-Cポートの1つに接続します。マイクを三脚に取り付けます。マイクは垂直であり、天井を指している必要があります。あなたとあなたのコンピューターの間のテーブルにそれを置きます。 [OK]をクリックするか、返信を押します。\n3.ポップアップが表示された場合は、マイクを使用する許可を求めて、「許可」をクリックします。",
-    ko: '2. 마이크를 컴퓨터의 USB-C 포트 중 하나에 연결하십시오. 마이크를 삼각대에 부착하십시오. 마이크는 천장을 가리키며 수직이어야합니다. 당신과 당신의 컴퓨터 사이에 테이블에 놓으십시오. 확인을 클릭하거나 반환을 누르십시오.\n3. 팝업이 나타나면 마이크 사용 권한을 요청하고 "허용"을 클릭하십시오.',
-    __EMPTY: "",
-    __EMPTY_1: "",
+      "2.將麥克風插入計算機的一個USB-C端口之一。將麥克風連接到其三腳架上。麥克風應垂直，指向天花板。將其放在您和您的計算機之間的桌子上。\n3.點擊繼續。",
+    ja: "2.マイクをコンピューターのUSB-Cポートの1つに接続します。マイクを三脚に取り付けます。マイクは垂直であり、天井を指している必要があります。あなたとあなたのコンピューターの間のテーブルにそれを置きます。\n3. [続行]をクリックします。",
+    ko: "2. 마이크를 컴퓨터의 USB-C 포트 중 하나에 연결하십시오. 마이크를 삼각대에 부착하십시오. 마이크는 천장을 가리키며 수직이어야합니다. 당신과 당신의 컴퓨터 사이에 테이블에 놓으십시오.\n3. 진행을 클릭하십시오.",
+  },
+  RC_phoneMicrophoneInstructions: {
+    "en-US":
+      '1. If a pop up appears, asking for your permission to use the microphone, click "Allow".\n2. Your folded towel should be on the table between you and your computer. Place this phone on the towel, extending beyond the towel, with the microphone (bottom) edge facing your computer.\n3. Press "Proceed".',
+    de: '1. Wenn ein Pop -up angezeigt wird und um Ihre Erlaubnis zur Verwendung des Mikrofons gebeten wird, klicken Sie auf "Zulassung".\n2. Ihr gefaltetes Handtuch sollte auf dem Tisch zwischen Ihnen und Ihrem Computer liegen. Legen Sie dieses Telefon auf das Handtuch und erstrecken sich über das Handtuch hinaus, wobei der Mikrofon (unten) Ihren Computer zugewandt ist.\n3. Drücken Sie "Fahren".',
+    fr: '1. Si une fenêtre contextuelle apparaît, demandant votre autorisation d\'utiliser le microphone, cliquez sur "Autoriser".\n2. Votre serviette pliée doit être sur la table entre vous et votre ordinateur. Placez ce téléphone sur la serviette, s\'étendant au-delà de la serviette, avec le bord du microphone (en bas) face à votre ordinateur.\n3. Appuyez sur "Procéder".',
+    es: '1. Si aparece una ventana emergente, pidiendo su permiso para usar el micrófono, haga clic en "Permitir".\n2. Su toalla doblada debe estar sobre la mesa entre usted y su computadora. Coloque este teléfono en la toalla, extendiéndose más allá de la toalla, con el borde del micrófono (abajo) frente a su computadora.\n3. Presione "proceda".',
+    pt: '1. Se aparecer um pop -up, solicitando sua permissão para usar o microfone, clique em "Permitir".\n2. Sua toalha dobrada deve estar sobre a mesa entre você e seu computador. Coloque este telefone na toalha, estendendo -se além da toalha, com a borda do microfone (inferior) voltada para o computador.\n3. Pressione "prossiga".',
+    it: '1. Se appare un pop -up, chiedendo il permesso di utilizzare il microfono, fare clic su "Consenti".\n2. Il tuo asciugamano piegato dovrebbe essere sul tavolo tra te e il tuo computer. Posiziona questo telefono sull\'asciugamano, estendendosi oltre l\'asciugamano, con il bordo del microfono (in basso) rivolto verso il computer.\n3. Premere "Procedere".',
+    ro: "1. Dacă apare un pop -up, solicitând permisiunea dvs. de a utiliza microfonul, faceți clic pe „Permite”.\n2. Prosopul tău pliat ar trebui să fie pe masa dintre dvs. și computer. Puneți acest telefon pe prosop, extinzându -se dincolo de prosop, cu marginea microfonului (de jos) orientată spre computer.\n3. Apăsați „Continuați”.",
+    pl: "1. Jeśli pojawi się wyskakujący okienko, prosząc o pozwolenie na użycie mikrofonu, kliknij „Zezwalaj”.\n2. Złożony ręcznik powinien znajdować się na stole między tobą a komputerem. Umieść ten telefon na ręczniku, rozciągając się poza ręcznik, z mikrofonem (dolnym) krawędzi skierowanego na komputer.\n3. Naciśnij „Przejdź”.",
+    ru: "1. Если появляется всплывающее окно, попросив ваше разрешение использовать микрофон, нажмите «Разрешить».\n2. Ваше сложенное полотенце должно быть на столе между вами и вашим компьютером. Поместите этот телефон на полотенце, выходящее за полотенце, с краем микрофона (внизу), обращенным к вашему компьютеру.\n3. Нажмите «Продолжайте».",
+    hy: "1. Եթե հայտնվում է փոփը, խնդրելով ձեր խոսափողը օգտագործելու ձեր թույլտվությունը, կտտացրեք «Թույլ տվեք»:\n2. Ձեր ծալովի սրբիչը պետք է լինի սեղանի շուրջ ձեր եւ ձեր համակարգչի միջեւ: Տեղադրեք այս հեռախոսը սրբիչի վրա, տարածվելով սրբիչից այն կողմ, ձեր համակարգչով խոսափողով (ներքեւի) եզրով:\n3. Սեղմեք «Շարունը»:",
+    fi: '1. Jos ponnahdusikkuna tulee näkyviin, pyydetään lupaa käyttää mikrofonia, napsauta "Salli".\n2. Taitettu pyyhe tulee olla pöydällä sinun ja tietokoneesi välillä. Aseta tämä puhelin pyyhkeeseen ulottuen pyyhkeen ulkopuolelle, mikrofonin (pohja) reunalla tietokonetta kohti.\n3. Paina "Jatka".',
+    ka: '1. თუ გამოჩნდება pop up, ითხოვს თქვენი ნებართვას მიკროფონის გამოყენების შესახებ, დააჭირეთ ღილაკს "დაუშვებელია".\n2. თქვენი დაკეცილი პირსახოცი უნდა იყოს მაგიდაზე თქვენსა და თქვენს კომპიუტერს შორის. მოათავსეთ ეს ტელეფონი პირსახოცზე, ვრცელდება პირსახოცის მიღმა, მიკროფონის (ქვედა) ზღვარით თქვენს კომპიუტერში.\n3. დააჭირეთ "გაგრძელება".',
+    he: '1. אם מופיע פופ -אפ, מבקש את רשותך להשתמש במיקרופון, לחץ על "אפשר".\n2. המגבת המקופלת שלך צריכה להיות על השולחן בינך לבין המחשב שלך. הניחו את הטלפון הזה על המגבת, המשתרע מעבר למגבת, כאשר קצה המיקרופון (התחתון) פונה למחשב.\n3. לחץ על "המשך".',
+    ar: '1. إذا ظهر أحد المنبثقة ، فطلب إذنك لاستخدام الميكروفون ، انقر فوق "السماح".\n2. يجب أن تكون المنشفة المطوية على الطاولة بينك وبين جهاز الكمبيوتر الخاص بك. ضع هذا الهاتف على المنشفة ، ويمتد إلى ما وراء المنشفة ، مع حافة الميكروفون (أسفل) تواجه جهاز الكمبيوتر الخاص بك.\n3. اضغط على "متابعة".',
+    ur: '1. اگر کوئی پاپ اپ ظاہر ہوتا ہے تو ، مائکروفون کو استعمال کرنے کی اجازت طلب کرتے ہیں تو ، "اجازت دیں" پر کلک کریں۔\n2. آپ کا جوڑا ہوا تولیہ آپ اور آپ کے کمپیوٹر کے درمیان میز پر ہونا چاہئے۔ اس فون کو تولیہ پر رکھیں ، تولیہ سے آگے بڑھتے ہوئے ، مائکروفون (نیچے) کنارے کے ساتھ اپنے کمپیوٹر کا سامنا کریں۔\n3. "آگے بڑھیں" دبائیں۔',
+    hi: '1. यदि कोई पॉप अप दिखाई देता है, तो माइक्रोफोन का उपयोग करने के लिए आपकी अनुमति के लिए पूछें, "अनुमति" पर क्लिक करें।\n2. आपका मुड़ा हुआ तौलिया आपके और आपके कंप्यूटर के बीच की मेज पर होना चाहिए। इस फोन को तौलिया पर रखें, तौलिया से परे फैली हुई, माइक्रोफोन (नीचे) किनारे के साथ आपके कंप्यूटर का सामना करना पड़ रहा है।\n3. "आगे बढ़ें" दबाएं।',
+    ta: '1. ஒரு பாப் அப் தோன்றினால், மைக்ரோஃபோனைப் பயன்படுத்த உங்கள் அனுமதி கேட்கிறது, "அனுமதி" என்பதைக் கிளிக் செய்க.\n2. உங்கள் மடிந்த துண்டு உங்களுக்கும் உங்கள் கணினிக்கும் இடையிலான அட்டவணையில் இருக்க வேண்டும். உங்கள் கணினியை எதிர்கொள்ளும் மைக்ரோஃபோன் (கீழே) விளிம்பில், துண்டுக்கு அப்பால் நீட்டி, இந்த தொலைபேசியை துண்டில் வைக்கவும்.\n3. "தொடரவும்" என்பதை அழுத்தவும்.',
+    ml: '1. ഒരു പോപ്പ് അപ്പ് പ്രത്യക്ഷപ്പെടുകയാണെങ്കിൽ, മൈക്രോഫോൺ ഉപയോഗിക്കാൻ നിങ്ങളുടെ അനുമതി ആവശ്യപ്പെടുക, "അനുവദിക്കുക" ക്ലിക്കുചെയ്യുക.\n2. നിങ്ങളുടെ മടക്ക തൂവാല നിങ്ങൾക്കും നിങ്ങളുടെ കമ്പ്യൂട്ടറിനും ഇടയിലുള്ള മേശപ്പുറത്ത് ആയിരിക്കണം. ഈ ഫോൺ തൂവാലയിൽ വയ്ക്കുക, ടവലിനപ്പുറത്തേക്ക്, മൈക്രോഫോൺ (ചുവടെ) എഡ്ജ് നിങ്ങളുടെ കമ്പ്യൂട്ടറിനെ അഭിമുഖീകരിക്കുന്നു.\n3. "തുടരുക" അമർത്തുക.',
+    te: '1. పాప్ అప్ కనిపిస్తే, మైక్రోఫోన్‌ను ఉపయోగించడానికి మీ అనుమతి అడుగుతూ, "అనుమతించు" క్లిక్ చేయండి.\n2. మీ ముడుచుకున్న టవల్ మీకు మరియు మీ కంప్యూటర్‌కు మధ్య పట్టికలో ఉండాలి. ఈ ఫోన్‌ను టవల్ మీద ఉంచండి, టవల్ దాటి, మీ కంప్యూటర్‌కు ఎదురుగా ఉన్న మైక్రోఫోన్ (దిగువ) అంచుతో.\n3. "కొనసాగండి" నొక్కండి.',
+    kn: '1. ಪಾಪ್ ಅಪ್ ಕಾಣಿಸಿಕೊಂಡರೆ, ಮೈಕ್ರೊಫೋನ್ ಬಳಸಲು ನಿಮ್ಮ ಅನುಮತಿಯನ್ನು ಕೇಳಿದಾಗ, "ಅನುಮತಿಸಿ" ಕ್ಲಿಕ್ ಮಾಡಿ.\n2. ನಿಮ್ಮ ಮಡಿಸಿದ ಟವೆಲ್ ನಿಮ್ಮ ಮತ್ತು ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ನಡುವಿನ ಮೇಜಿನ ಮೇಲೆ ಇರಬೇಕು. ಈ ಫೋನ್ ಅನ್ನು ಟವೆಲ್ನಲ್ಲಿ ಇರಿಸಿ, ಟವೆಲ್ ಅನ್ನು ಮೀರಿ ವಿಸ್ತರಿಸಿ, ಮೈಕ್ರೊಫೋನ್ (ಕೆಳಗಿನ) ಅಂಚಿನೊಂದಿಗೆ ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಎದುರಾಗಿರುತ್ತದೆ.\n3. "ಮುಂದುವರಿಯಿರಿ" ಒತ್ತಿರಿ.',
+    bn: '1. যদি কোনও পপ আপ উপস্থিত হয়, মাইক্রোফোনটি ব্যবহার করার জন্য আপনার অনুমতি চেয়ে জিজ্ঞাসা করুন, "অনুমতি দিন" ক্লিক করুন।\n২. আপনার ভাঁজ তোয়ালে আপনার এবং আপনার কম্পিউটারের মধ্যে টেবিলে থাকা উচিত। আপনার কম্পিউটারের মুখোমুখি মাইক্রোফোন (নীচে) প্রান্তের সাথে তোয়ালে ছাড়িয়ে তোয়ালে এই ফোনটি রাখুন।\n3. "এগিয়ে যান" টিপুন।',
+    id: '1. Jika muncul muncul, meminta izin Anda untuk menggunakan mikrofon, klik "Izinkan".\n2. Handuk terlipat Anda harus di atas meja antara Anda dan komputer Anda. Tempatkan ponsel ini di atas handuk, memanjang melampaui handuk, dengan tepi mikrofon (bagian bawah) menghadap komputer Anda.\n3. Tekan "Lanjutkan".',
+    "zh-CN":
+      "1.如果出现弹出式，请要求您使用麦克风的权限，请单击“允许”。\n2.折叠的毛巾应在您和计算机之间的桌子上。将此手机放在毛巾上，延伸到毛巾之外，麦克风（底部）面向您的计算机。\n3.按“继续”。",
+    "zh-HK":
+      "1.如果出現彈出式，請要求您使用麥克風的權限，請單擊“允許”。\n2.折疊的毛巾應在您和計算機之間的桌子上。將此手機放在毛巾上，延伸到毛巾之外，麥克風（底部）面向您的計算機。\n3.按“繼續”。",
+    ja: "1.ポップアップが表示された場合は、マイクを使用する許可を求めている場合は、「許可」をクリックします。\n2.折り畳まれたタオルは、あなたとあなたのコンピューターの間のテーブルの上にある必要があります。この携帯電話をタオルの上に置き、タオルを越えて伸び、マイク（下）のエッジがコンピューターに面しています。\n3.「続行」を押します。",
+    ko: '1. 팝업이 나타나면 마이크 사용 권한을 요청하면 "허용"을 클릭하십시오.\n2. 접힌 수건은 귀하와 컴퓨터 사이의 테이블 위에 있어야합니다. 이 전화기를 타월 위에 놓고 수건 너머로 뻗어 마이크 (하단) 가장자리가 컴퓨터를 향하고 있습니다.\n3. "진행"을 누릅니다.',
+  },
+  RC_usbMicrophoneInstructions: {
+    "en-US":
+      '1. If a pop up appears, asking for your permission to use the microphone, click "Allow".\n2. Click "Proceed" or hit RETURN.',
+    de: '1. Wenn ein Pop -up angezeigt wird und um Ihre Erlaubnis zur Verwendung des Mikrofons gebeten wird, klicken Sie auf "Zulassung".\n2. Klicken Sie auf "Fahren" oder klicken Sie auf die Rückgabe.',
+    fr: '1. Si une fenêtre contextuelle apparaît, demandant votre autorisation d\'utiliser le microphone, cliquez sur "Autoriser".\n2. Cliquez sur "Procéder" ou appuyez sur Retour.',
+    es: '1. Si aparece una ventana emergente, pidiendo su permiso para usar el micrófono, haga clic en "Permitir".\n2. Haga clic en "continuar" o presione la devolución.',
+    pt: '1. Se aparecer um pop -up, solicitando sua permissão para usar o microfone, clique em "Permitir".\n2. Clique em "prosseguir" ou acertar o retorno.',
+    it: '1. Se appare un pop -up, chiedendo il permesso di utilizzare il microfono, fare clic su "Consenti".\n2. Fare clic su "Procedere" o premere restituzione.',
+    ro: "1. Dacă apare un pop -up, solicitând permisiunea dvs. de a utiliza microfonul, faceți clic pe „Permite”.\n2. Faceți clic pe „Continuați” sau apăsați Return.",
+    pl: "1. Jeśli pojawi się wyskakujący okienko, prosząc o pozwolenie na użycie mikrofonu, kliknij „Zezwalaj”.\n2. Kliknij „Przejdź” lub naciśnij Return.",
+    ru: "1. Если появляется всплывающее окно, попросив ваше разрешение использовать микрофон, нажмите «Разрешить».\n2. Нажмите «Продолжить» или нажмите возврат.",
+    hy: "1. Եթե հայտնվում է փոփը, խնդրելով ձեր խոսափողը օգտագործելու ձեր թույլտվությունը, կտտացրեք «Թույլ տվեք»:\n2. Կտտացրեք «Շարունը» կամ հարվածի վերադարձը:",
+    fi: '1. Jos ponnahdusikkuna tulee näkyviin, pyydetään lupaa käyttää mikrofonia, napsauta "Salli".\n2. Napsauta "Jatka" tai paina palautetta.',
+    ka: '1. თუ გამოჩნდება pop up, ითხოვს თქვენი ნებართვას მიკროფონის გამოყენების შესახებ, დააჭირეთ ღილაკს "დაუშვებელია".\n2. დააჭირეთ ღილაკს "გაგრძელება" ან დააჭირეთ დაბრუნებას.',
+    he: '1. אם מופיע פופ -אפ, מבקש את רשותך להשתמש במיקרופון, לחץ על "אפשר".\n2. לחץ על "המשך" או לחץ על החזרה.',
+    ar: '1. إذا ظهر أحد المنبثقة ، فطلب إذنك لاستخدام الميكروفون ، انقر فوق "السماح".\n2. انقر فوق "متابعة" أو اضغط على العودة.',
+    ur: '1. اگر کوئی پاپ اپ ظاہر ہوتا ہے تو ، مائکروفون کو استعمال کرنے کی اجازت طلب کرتے ہیں تو ، "اجازت دیں" پر کلک کریں۔\n2. "آگے بڑھیں" پر کلک کریں یا واپسی کو ماریں۔',
+    hi: '1. यदि कोई पॉप अप दिखाई देता है, तो माइक्रोफोन का उपयोग करने के लिए आपकी अनुमति के लिए पूछें, "अनुमति" पर क्लिक करें।\n2. "आगे बढ़ें" या हिट रिटर्न पर क्लिक करें।',
+    ta: '1. ஒரு பாப் அப் தோன்றினால், மைக்ரோஃபோனைப் பயன்படுத்த உங்கள் அனுமதி கேட்கிறது, "அனுமதி" என்பதைக் கிளிக் செய்க.\n2. "தொடரவும்" என்பதைக் கிளிக் செய்யவும் அல்லது திரும்பவும்.',
+    ml: '1. ഒരു പോപ്പ് അപ്പ് പ്രത്യക്ഷപ്പെടുകയാണെങ്കിൽ, മൈക്രോഫോൺ ഉപയോഗിക്കാൻ നിങ്ങളുടെ അനുമതി ആവശ്യപ്പെടുക, "അനുവദിക്കുക" ക്ലിക്കുചെയ്യുക.\n2. "തുടരുക" ക്ലിക്കുചെയ്യുക അല്ലെങ്കിൽ മടങ്ങുക.',
+    te: '1. పాప్ అప్ కనిపిస్తే, మైక్రోఫోన్‌ను ఉపయోగించడానికి మీ అనుమతి అడుగుతూ, "అనుమతించు" క్లిక్ చేయండి.\n2. "కొనసాగండి" క్లిక్ చేయండి లేదా రిటర్న్ నొక్కండి.',
+    kn: '1. ಪಾಪ್ ಅಪ್ ಕಾಣಿಸಿಕೊಂಡರೆ, ಮೈಕ್ರೊಫೋನ್ ಬಳಸಲು ನಿಮ್ಮ ಅನುಮತಿಯನ್ನು ಕೇಳಿದಾಗ, "ಅನುಮತಿಸಿ" ಕ್ಲಿಕ್ ಮಾಡಿ.\n2. "ಮುಂದುವರಿಯಿರಿ" ಕ್ಲಿಕ್ ಮಾಡಿ ಅಥವಾ ರಿಟರ್ನ್ ಒತ್ತಿರಿ.',
+    bn: '1. যদি কোনও পপ আপ উপস্থিত হয়, মাইক্রোফোনটি ব্যবহার করার জন্য আপনার অনুমতি চেয়ে জিজ্ঞাসা করুন, "অনুমতি দিন" ক্লিক করুন।\n2. "এগিয়ে যান" ক্লিক করুন বা হিট রিটার্ন।',
+    id: '1. Jika muncul muncul, meminta izin Anda untuk menggunakan mikrofon, klik "Izinkan".\n2. Klik "Lanjutkan" atau tekan kembali.',
+    "zh-CN":
+      "1.如果出现弹出式，请要求您使用麦克风的权限，请单击“允许”。\n2.单击“继续”或点击返回。",
+    "zh-HK":
+      "1.如果出現彈出式，請要求您使用麥克風的權限，請單擊“允許”。\n2.單擊“繼續”或點擊返回。",
+    ja: "1.ポップアップが表示された場合は、マイクを使用する許可を求めている場合は、「許可」をクリックします。\n2.「続行」をクリックするか、返されます。",
+    ko: '1. 팝업이 나타나면 마이크 사용 권한을 요청하면 "허용"을 클릭하십시오.\n2. "진행"을 클릭하거나 반품을 누르십시오.',
   },
   RC_identifyMicrophone: {
     "en-US":
@@ -2963,8 +2837,6 @@ export const phrases = {
       "1.在下面的框中，鍵入智能手機或USB麥克風的製造和型號，例如iPhone 12 Pro。\n",
     ja: "1.以下のボックスに、スマートフォンまたはUSBマイクのメーカーとモデルを入力します。 iPhone 12 Pro。\n",
     ko: "1. 아래 상자에 스마트 폰 또는 USB 마이크의 제조사 및 모델을 입력하십시오 (예 : iPhone 12 Pro.\n",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_loudspeakerCalibration: {
     "en-US": "Loudspeaker Calibration (page 111 of 222)",
@@ -2993,8 +2865,6 @@ export const phrases = {
     "zh-HK": "揚聲器校準（第111頁，共222頁）",
     ja: "スピーカーキャリブレーション（222ページのページ）",
     ko: "라우드 스피커 교정 (111/222 페이지)",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_microphoneCalibration: {
     "en-US": "Microphone Calibration (page 111 of 222)",
@@ -3023,8 +2893,62 @@ export const phrases = {
     "zh-HK": "麥克風校準（第111頁，共222頁）",
     ja: "マイクのキャリブレーション（222ページのページ）",
     ko: "마이크 교정 (111/222 페이지)",
-    __EMPTY: "",
-    __EMPTY_1: "",
+  },
+  RC_usingSmartphoneMicrophone: {
+    "en-US": "Using smartphone microphone",
+    de: "Mit Smartphone -Mikrofon",
+    fr: "Utilisation du microphone pour smartphone",
+    es: "Usando micrófono de teléfono inteligente",
+    pt: "Usando microfone para smartphone",
+    it: "Utilizzando il microfono per smartphone",
+    ro: "Utilizarea microfonului smartphone",
+    pl: "Korzystanie z mikrofonu smartfona",
+    ru: "Использование микрофона смартфона",
+    hy: "Օգտագործելով սմարթֆոնի խոսափող",
+    fi: "Älypuhelinmikrofonin käyttäminen",
+    ka: "სმარტფონის მიკროფონის გამოყენებით",
+    he: "באמצעות מיקרופון סמארטפון",
+    ar: "باستخدام ميكروفون الهاتف الذكي",
+    ur: "اسمارٹ فون مائکروفون کا استعمال",
+    hi: "स्मार्टफोन माइक्रोफोन का उपयोग करना",
+    ta: "ஸ்மார்ட்போன் மைக்ரோஃபோனைப் பயன்படுத்துதல்",
+    ml: "സ്മാർട്ട്ഫോൺ മൈക്രോഫോൺ ഉപയോഗിക്കുന്നു",
+    te: "స్మార్ట్‌ఫోన్ మైక్రోఫోన్ ఉపయోగించడం",
+    kn: "ಸ್ಮಾರ್ಟ್ಫೋನ್ ಮೈಕ್ರೊಫೋನ್ ಬಳಸುವುದು",
+    bn: "স্মার্টফোন মাইক্রোফোন ব্যবহার করে",
+    id: "Menggunakan mikrofon smartphone",
+    "zh-CN": "使用智能手机麦克风",
+    "zh-HK": "使用智能手機麥克風",
+    ja: "スマートフォンマイクの使用",
+    ko: "스마트 폰 마이크 사용",
+  },
+  RC_usingUSBMicrophone: {
+    "en-US": "Using USB microphone",
+    de: "Mit USB -Mikrofon",
+    fr: "Utilisation du microphone USB",
+    es: "Usando un micrófono USB",
+    pt: "Usando microfone USB",
+    it: "Usando il microfono USB",
+    ro: "Folosind microfon USB",
+    pl: "Za pomocą mikrofonu USB",
+    ru: "Использование USB -микрофона",
+    hy: "Օգտագործելով USB միկրոֆոն",
+    fi: "USB -mikrofonin käyttäminen",
+    ka: "USB მიკროფონის გამოყენებით",
+    he: "באמצעות מיקרופון USB",
+    ar: "باستخدام ميكروفون USB",
+    ur: "USB مائکروفون کا استعمال کرتے ہوئے",
+    hi: "USB माइक्रोफोन का उपयोग करना",
+    ta: "யூ.எஸ்.பி மைக்ரோஃபோனைப் பயன்படுத்துதல்",
+    ml: "യുഎസ്ബി മൈക്രോഫോൺ ഉപയോഗിക്കുന്നു",
+    te: "USB మైక్రోఫోన్ ఉపయోగించడం",
+    kn: "ಯುಎಸ್ಬಿ ಮೈಕ್ರೊಫೋನ್ ಬಳಸುವುದು",
+    bn: "ইউএসবি মাইক্রোফোন ব্যবহার করে",
+    id: "Menggunakan mikrofon USB",
+    "zh-CN": "使用USB麦克风",
+    "zh-HK": "使用USB麥克風",
+    ja: "USBマイクの使用",
+    ko: "USB 마이크 사용",
   },
   RC_soundCalibrationClickToStart: {
     "en-US": "Click Ok on your smartphone, and follow the instructions there.",
@@ -3053,8 +2977,6 @@ export const phrases = {
     "zh-HK": "單擊智能手機上的確定，然後按照那裡的說明進行操作。",
     ja: "スマートフォンの[OK]をクリックして、そこの指示に従ってください。",
     ko: "스마트 폰에서 확인을 클릭하고 그 지침을 따르십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationDone: {
     "en-US":
@@ -3086,8 +3008,6 @@ export const phrases = {
       "謝謝。揚聲器現在已經校準，您可以收起智能手機（或USB麥克風）。重要的是：在實驗完成之前，請勿觸摸音量控制。更改音量會破壞聲音校準並使所有結果無效。",
     ja: "ありがとう。スピーカーは校正され、スマートフォン（またはUSBマイク）を片付けることができます。重要：実験が完了するまで、ボリュームコントロールに触れないでください。ボリュームを変更すると、音のキャリブレーションが台無しになり、すべての結果が無効になります。",
     ko: "감사해요. 라우드 스피커가 이제 보정되어 스마트 폰 (또는 USB 마이크)을 제거 할 수 있습니다. 중요 : 실험이 완료 될 때까지 볼륨 컨트롤에 닿지 마십시오. 볼륨을 변경하면 사운드 교정이 파괴되고 모든 결과가 무효화됩니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationContinue: {
     "en-US": "Click Ok to continue. \n\n",
@@ -3116,8 +3036,6 @@ export const phrases = {
     "zh-HK": "單擊確定繼續。\n\n",
     ja: "[OK]をクリックして続行します。\n\n",
     ko: "계속하려면 확인을 클릭하십시오.\n\n",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationHoldIPhoneOk: {
     "en-US": "❌ Press Ok to continue. \n\n",
@@ -3146,8 +3064,6 @@ export const phrases = {
     "zh-HK": "❌按確定繼續。\n\n",
     ja: "[OKを押して続行します。\n\n",
     ko: "OK를 눌러 계속하십시오.\n\n",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationNeedsMicrophone: {
     "en-US":
@@ -3179,8 +3095,6 @@ export const phrases = {
       "為了產生準確的聲音，我們需要校準揚聲器。這需要連接到Internet（或USB麥克風）的智能手機。你有方便嗎？\n",
     ja: "正確なサウンドを生成するには、スピーカーを調整する必要があります。これには、インターネット（またはUSBマイク）に接続されたスマートフォンが必要です。便利ですか？\n",
     ko: "정확한 사운드를 생성하려면 라우드 스피커를 교정해야합니다. 인터넷에 연결된 스마트 폰 (또는 USB 마이크)이 필요합니다. 편리한 사람이 있습니까?\n",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationNeedsIPhone: {
     "en-US":
@@ -3212,8 +3126,6 @@ export const phrases = {
       "為了產生準確的聲音，我們需要校準揚聲器。這需要連接到Internet的智能手機。你有方便嗎？\n",
     ja: "正確なサウンドを生成するには、スピーカーを調整する必要があります。これには、インターネットに接続されたスマートフォンが必要です。便利ですか？\n",
     ko: "정확한 사운드를 생성하려면 라우드 스피커를 교정해야합니다. 인터넷에 연결된 스마트 폰이 필요합니다. 편리한 사람이 있습니까?\n",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationNo: {
     "en-US": "No, end experiment now.",
@@ -3242,8 +3154,6 @@ export const phrases = {
     "zh-HK": "不，現在結束實驗。",
     ja: "いいえ、実験を終えてください。",
     ko: "아니요, 이제 실험을 끝내십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationQR: {
     "en-US":
@@ -3275,8 +3185,6 @@ export const phrases = {
       "為了進行最佳的聲音校準，請在校準之前最大化計算機的聲音音量，然後在實驗結束之前觸摸音量。\n當QR碼出現在下面的QR碼時，將智能手機相機指向其，然後單擊智能手機屏幕上出現的鏈接。然後按照智能手機屏幕上的說明進行操作。\n—————————————————————————————————————————\n請安靜！現在錄製。不要觸摸音量控制。\n—————————————————————————————————————————\n問題？\n1.在筆記本電腦上運行EasyEyes的主網頁使用WEBRTC協議與智能手機上的QR鏈接網頁通話。該協議為連接的幾種方法提供了最好的選擇。最好的是，當您的手機和計算機都在同一WiFi網絡上時。\n                                                                                                                                 \n2.如果您的智能手機在連接中報告了錯誤，請嘗試退出和重新啟動SMPARTPHONE瀏覽器，甚至重新啟動SMPARTPHONE。\n                                                                                                                             \n3.很少見，但是，如果聲音不播放，或者在播放後，沒有出現“繼續”按鈕，則意味著校準失敗。您可以通過刷新此瀏覽器頁面來重試。通常可以解決問題。",
     ja: "最高のサウンドキャリブレーションについては、キャリブレーション前にコンピューターのサウンドボリュームを最大化してから、実験の終了までボリュームに触れないでください。\nQRコードが以下に表示されたら、スマートフォンカメラをポイントし、スマートフォン画面に表示されるリンクをクリックします。次に、スマートフォン画面の指示に従ってください。\n—————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————\nしずかにしてください！今録音。ボリュームコントロールに触れないでください。\n—————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————\n問題？\n1.ラップトップでEasyEyesを実行しているメインのWebページでは、WeBRTCプロトコルを使用して、スマートフォンのQRリンクされたWebページと通信します。このプロトコルは、接続するためのいくつかの方法の最善を模索しています。一番いいのは、携帯電話とコンピューターが同じWiFiネットワーク上にあるときです。\n                                                                                                                                 \n2.スマートフォンが接続のエラーを報告した場合は、SMPARTPHONEブラウザを終了して再起動したり、SMPARTPHONEを再起動したりしてみてください。\n                                                                                                                             \n3.まれですが、サウンドが再生されない場合、または再生後、続行ボタンが表示されない場合、キャリブレーションが失敗したことを意味します。このブラウザページを更新して、再試行できます。それは通常、トリックを行います。",
     ko: "최고의 사운드 교정을 위해서는 교정 전에 컴퓨터의 사운드 볼륨을 최대화 한 다음 실험이 끝날 때까지 볼륨을 만지지 마십시오.\nQR 코드가 아래에 나타나면 스마트 폰 카메라를 가리키고 스마트 폰 화면에 나타나는 링크를 클릭하십시오. 그런 다음 스마트 폰 화면의 지침을 따르십시오.\n——————————————————————————————————————————\n조용해! 이제 녹음. 볼륨 컨트롤에 닿지 마십시오.\n——————————————————————————————————————————\n문제?\n1. 랩톱에서 EasyEeyes를 실행하는 기본 웹 페이지는 WebRTC 프로토콜을 사용하여 스마트 폰의 QR 연결 웹 페이지와 대화합니다. 이 프로토콜은 여러 가지 방법을 최대한 활용합니다. 가장 좋은 점은 휴대 전화와 컴퓨터가 동일한 WiFi 네트워크에있을 때입니다.\n                                                                                                                                 \n2. 스마트 폰이 연결에 오류가보고되면 SMPartphone 브라우저를 종료하고 다시 시작하거나 SMPartPhone을 다시 시작하십시오.\n                                                                                                                             \n3. 드물지만 사운드가 재생되지 않거나 재생 후 진행 버튼이 나타나지 않으면 교정이 실패 함을 의미합니다. 이 브라우저 페이지를 새로 고쳐서 다시 시도 할 수 있습니다. 그것은 일반적으로 속임수를합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationRedo: {
     "en-US":
@@ -3308,8 +3216,6 @@ export const phrases = {
       "las，RMS擬合誤差為111 dB超過222 dB的公差，因此必須再次校準揚聲器。",
     ja: "残念ながら、111 dBのRMSフィッティングエラーは222 dB許容範囲を超えているため、スピーカーを再度調整する必要があります。",
     ko: "아아, 111 dB의 RMS 피팅 오류는 222dB 공차를 초과하므로 라우드 스피커를 다시 보정해야합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationTitle: {
     "en-US": "Measure Sound Level at 1000 Hz",
@@ -3338,8 +3244,6 @@ export const phrases = {
     "zh-HK": "測量1000 Hz的聲音水平",
     ja: "1000 Hzで音レベルを測定します",
     ko: "1000Hz에서 사운드 레벨을 측정하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationTitle1000Hz: {
     "en-US": "Measure Sound Level at 1000 Hz",
@@ -3368,8 +3272,6 @@ export const phrases = {
     "zh-HK": "測量1000 Hz的聲音水平",
     ja: "1000 Hzで音レベルを測定します",
     ko: "1000Hz에서 사운드 레벨을 측정하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationTitleAllHz: {
     "en-US": "Measure Sound Level at All Frequencies",
@@ -3398,8 +3300,6 @@ export const phrases = {
     "zh-HK": "在所有頻率上測量聲音水平",
     ja: "すべての周波数でサウンドレベルを測定します",
     ko: "모든 주파수에서 사운드 레벨을 측정하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_soundCalibrationYes: {
     "en-US": "Yes, continue.",
@@ -3428,8 +3328,65 @@ export const phrases = {
     "zh-HK": "是的，繼續。",
     ja: "はい、続行します。",
     ko: "예, 계속하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
+  },
+  RC_soundRecording: {
+    "en-US": "Quiet. Recording in progress. Do not disturb.",
+    de: "Ruhig. Aufnahme in Arbeit. Bitte nicht stören.",
+    fr: "Calme. Enregistrement en cours. Ne pas déranger.",
+    es: "Tranquilo. Grabación en progreso. No molestar.",
+    pt: "Quieto. Gravação em andamento. Não perturbe.",
+    it: "Tranquillo. Registrazione in corso. Non disturbare.",
+    ro: "Liniște. Înregistrarea în curs. Nu deranjați.",
+    pl: "Cichy. Nagrywanie w toku. Nie przeszkadzać.",
+    ru: "Тихий. Запись в процессе. Просьба не беспокоить.",
+    hy: "Հանգիստ. Գրանցում ընթացքի մեջ: Չխանգարել.",
+    fi: "Hiljainen. Nauhoitus käynnissä. Älä häiritse.",
+    ka: "მშვიდი. მიმდინარეობს ჩაწერა. Არ შემაწუხოთ.",
+    he: "שֶׁקֶט. הקלטה בתהליך. אל תפריע.",
+    ar: "هادئ. التسجيل في التقدم. لا تخل.",
+    ur: "خاموش ترقی میں ریکارڈنگ۔ پریشان نہ کرو.",
+    hi: "शांत। प्रगति में रिकॉर्डिंग। परेशान न करें।",
+    ta: "அமைதியாக. பதிவுசெய்தல் செயலில் உள்ளது. தொந்தரவு செய்யாதீர்.",
+    ml: "ശാന്തമാണ്. റെക്കോർഡിംഗ് പുരോഗതിയിലാണ്. ബുദ്ധിമുട്ടിക്കരുത്.",
+    te: "నిశ్శబ్ద. రికార్డింగ్ పురోగతిలో ఉంది. డిస్టర్బ్ చేయకు.",
+    kn: "ಶಾಂತ. ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಗತಿಯಲ್ಲಿದೆ. ತೊಂದರೆ ಕೊಡಬೇಡಿ.",
+    bn: "শান্ত অগ্রগতি রেকর্ডিং। বিরক্ত করবেন না.",
+    id: "Diam. Rekaman sedang berlangsung. Jangan ganggu.",
+    "zh-CN": "安静的。正在进行录制。请勿打扰。",
+    "zh-HK": "安靜的。正在進行錄製。請勿打擾。",
+    ja: "静かな。進行中の録音。邪魔しないでください。",
+    ko: "조용한. 진행중인 녹음. 방해하지 마.",
+  },
+  RC_backToExperimentWindow: {
+    "en-US":
+      'Progress is displayed in the main experiment window. Please go there now, by clicking the "EasyEyes Experiment" tab above.',
+    de: 'Der Fortschritt wird im Hauptfenster des Hauptversuchs angezeigt. Bitte gehen Sie jetzt dorthin, indem Sie oben auf die Registerkarte "Easyeyes Experiment" klicken.',
+    fr: "Les progrès sont affichés dans la fenêtre principale de l'expérience. Veuillez y aller maintenant, en cliquant sur l'onglet \"EasyEyes Experiment\" ci-dessus.",
+    es: 'El progreso se muestra en la ventana del experimento principal. Vaya allí ahora, haciendo clic en la pestaña "Experimento EasyEyes" arriba.',
+    pt: 'O progresso é exibido na janela principal do experimento. Por favor, vá para lá agora, clicando na guia "Easyeyes Experiment" acima.',
+    it: 'I progressi vengono visualizzati nella finestra dell\'esperimento principale. Vai lì ora, facendo clic sulla scheda "EasyEyes Experiment" sopra.',
+    ro: "Progresul este afișat în fereastra experimentului principal. Vă rugăm să mergeți acolo acum, făcând clic pe fila „EasyEyes Experiment” de mai sus.",
+    pl: "Postęp jest wyświetlany w głównym oknie eksperymentu. Proszę, idź tam teraz, klikając kartę „Easyeyes Experiment” powyżej.",
+    ru: "Прогресс отображается в основном окне эксперимента. Пожалуйста, перейдите туда, нажав на вкладку «Easyeyes Experime».",
+    hy: "Առաջընթացը ցուցադրվում է հիմնական փորձի պատուհանում: Խնդրում ենք հիմա գնալ այնտեղ, կտտացնելով վերեւում գտնվող «EaseEyes Experiment» ներդիրին:",
+    fi: 'Edistyminen näkyy pääkoe -ikkunassa. Mene sinne nyt napsauttamalla yllä olevaa "Easyeyes -kokeilu" -välilehteä.',
+    ka: 'პროგრესი ნაჩვენებია მთავარი ექსპერიმენტის ფანჯარაში. გთხოვთ, წახვიდეთ ახლა, დააჭირეთ ზემოთ მოცემულ "Easyeyes Experiment" ჩანართს.',
+    he: 'ההתקדמות מוצגת בחלון הניסוי הראשי. אנא סע לשם עכשיו, על ידי לחיצה על הכרטיסייה "ניסוי EasyEyes" למעלה.',
+    ar: 'يتم عرض التقدم في نافذة التجربة الرئيسية. يرجى الذهاب إلى هناك الآن ، من خلال النقر فوق علامة التبويب "Easyeyes Experience" أعلاه.',
+    ur: 'مرکزی تجربہ ونڈو میں پیشرفت ظاہر ہوتی ہے۔ براہ کرم اوپر "ایزیئس تجربہ" ٹیب پر کلک کرکے ابھی وہاں جائیں۔',
+    hi: 'प्रगति मुख्य प्रयोग विंडो में प्रदर्शित होती है। कृपया अब वहां जाएं, ऊपर "Easyeyes प्रयोग" टैब पर क्लिक करके।',
+    ta: 'முக்கிய சோதனை சாளரத்தில் முன்னேற்றம் காட்டப்படும். மேலே உள்ள "எளிதான பரிசோதனை" தாவலைக் கிளிக் செய்வதன் மூலம் இப்போது அங்கு செல்லுங்கள்.',
+    ml: 'പ്രധാന പരീക്ഷണ വിൻഡോയിൽ പുരോഗതി പ്രദർശിപ്പിക്കുന്നു. മുകളിലുള്ള "ഈസിയേസ് പരീക്ഷണം" ടാബിൽ ക്ലിക്കുചെയ്തുകൊണ്ട് ദയവായി ഇപ്പോൾ അവിടെ പോകുക.',
+    te: 'ప్రధాన ప్రయోగ విండోలో పురోగతి ప్రదర్శించబడుతుంది. పైన ఉన్న "ఈజీయెస్ ప్రయోగం" టాబ్‌ను క్లిక్ చేయడం ద్వారా దయచేసి ఇప్పుడు అక్కడికి వెళ్లండి.',
+    kn: 'ಪ್ರಗತಿಯನ್ನು ಮುಖ್ಯ ಪ್ರಯೋಗ ವಿಂಡೋದಲ್ಲಿ ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ. ಮೇಲಿನ "ಈಸಿ ಐಸ್ ಪ್ರಯೋಗ" ಟ್ಯಾಬ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡುವ ಮೂಲಕ ದಯವಿಟ್ಟು ಈಗ ಅಲ್ಲಿಗೆ ಹೋಗಿ.',
+    bn: 'অগ্রগতি প্রধান পরীক্ষার উইন্ডোতে প্রদর্শিত হয়। উপরের "ইজিয়েয়েস এক্সপেরিমেন্ট" ট্যাবে ক্লিক করে দয়া করে এখনই সেখানে যান।',
+    id: 'Kemajuan ditampilkan di jendela percobaan utama. Silakan pergi ke sana sekarang, dengan mengklik tab "EyyEyes Experiment" di atas.',
+    "zh-CN":
+      "进度显示在主实验窗口中。请单击上面的“ EasyEyes实验”选项卡，现在就去那里。",
+    "zh-HK":
+      "進度顯示在主實驗窗口中。請單擊上面的“ EasyEyes實驗”選項卡，現在就去那裡。",
+    ja: "メイン実験ウィンドウに進行状況が表示されます。上記の「Easyeyes Experiment」タブをクリックして、今すぐ行ってください。",
+    ko: '주요 실험 창에 진행이 표시됩니다. 위의 "Easyeyes Experiment"탭을 클릭하여 지금 가십시오.',
   },
   RC_starting: {
     "en-US": "Starting ...",
@@ -3458,8 +3415,6 @@ export const phrases = {
     "zh-HK": "開始...",
     ja: "開始...",
     ko: "시작 ...",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_viewingBlindSpotCredit: {
     "en-US":
@@ -3489,8 +3444,6 @@ export const phrases = {
     "zh-HK": "我們增強了Li等人的盲點映射。 （2020）通過添加閃爍和手動控制。",
     ja: "Li et alのブラインドスポットマッピングを強化しました。 （2020）フリッカーと手動制御を追加することにより。",
     ko: "우리는 Li et al. (2020) 깜박임 및 수동 제어를 추가함으로써.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_viewingBlindSpotRejected: {
     "en-US":
@@ -3522,8 +3475,6 @@ export const phrases = {
       "抱歉，最新的左和右測量值不一致。我們可以再試一次嗎？閉上眼睛。專注於十字頭髮，並從眼角監視閃爍的點。向左和向右滑動點，直到它消失在盲點中，然後擊中返回。在測試雙眼時，保持觀看距離。",
     ja: "申し訳ありませんが、最新の左右の測定値は一貫していませんでした。もう一度やり直してもいいですか？片目を閉じてください。交差毛に焦点を合わせ、目の隅から点滅するドットを監視します。ブラインドスポットに消えてしまうまで、ドットを左右にスライドさせ、リターンを押します。両目をテストするときに、視聴距離を維持します。",
     ko: "죄송합니다. 가장 최근의 왼쪽 및 오른쪽 측정은 일관성이 없었습니다. 다시 시도해도 될까요? 한쪽 눈을 닫으십시오. 십자 머리카락에 초점을 맞추고 눈 구석에서 번쩍이는 점을 모니터링하십시오. 점을 왼쪽과 오른쪽으로 맹목 스팟으로 사라질 때까지 왼쪽과 오른쪽으로 밀어 넣은 다음 리턴을 누르십시오. 양쪽 눈을 테스트 할 때 시청 거리를 유지하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_viewingDistance: {
     "en-US": "Viewing Distance",
@@ -3552,8 +3503,6 @@ export const phrases = {
     "zh-HK": "觀看距離",
     ja: "距離の表示",
     ko: "보기 거리",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_viewingDistanceIntro: {
     "en-US":
@@ -3585,8 +3534,6 @@ export const phrases = {
       "為了產生準確的聲音，實驗需要校準揚聲器。這需要連接到Internet的智能手機。你有方便嗎？\n",
     ja: "正確なサウンドを生成するには、実験ではスピーカーを調整する必要があります。これには、インターネットに接続されたスマートフォンが必要です。便利ですか？\n",
     ko: "정확한 사운드를 생성하려면 실험은 라우드 스피커를 교정해야합니다. 인터넷에 연결된 스마트 폰이 필요합니다. 편리한 사람이 있습니까?\n",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_viewingDistanceIntroTitle: {
     "en-US": "Explanation",
@@ -3615,8 +3562,6 @@ export const phrases = {
     "zh-HK": "解釋",
     ja: "説明",
     ko: "설명",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_viewingDistanceIntroLiMethod: {
     "en-US":
@@ -3648,8 +3593,6 @@ export const phrases = {
       "解釋。對於此步驟，如有必要，靠近，因此您的寬度不超過屏幕寬度的兩倍。每隻眼睛都有一個盲點。我們會找到您的，以發現您的眼睛離屏幕有多遠。您會被要求閉上或遮住一隻眼睛以隔離另一隻眼睛。當您專注於十字頭髮時，請觀察眼角閃爍的點，並在盲點消失時擊中返回。根據查看距離和屏幕尺寸，閃爍的點通常會在盲點到達屏幕中間之前到達盲點。您將用每隻眼睛交替進行此操作，直到最後兩個測量一致。測試雙眼時，請保持觀看距離。筆記。如果點永遠不會消失，則意味著您的眼睛正在跟隨點，而不是呆在十字頭髮上。該測試需要您在監視眼角的閃爍點時密切關注叉頭髮。一開始很難，但是練習變得更加容易。",
     ja: "説明。このステップでは、必要に応じて近づくと、画面幅の2倍よりも遠くないことになります。すべての目には盲点があります。画面からあなたの目がどれだけ離れているかを発見するためにあなたのものを見つけます。片方の目を閉じたり覆ったりするように求められます。交差毛に焦点を合わせている間、目の隅からちらつきのドットを見て、それがあなたの盲点に消えたときに戻ってきてください。距離と画面のサイズの表示に応じて、通常、画面の中央に到達する前に、ちらつきのドットが盲点に到達します。最後の2つの測定が一貫するまで、それぞれの目でこれを交互に行うことになります。両目をテストするときに、視聴距離を維持してください。ノート。ドットが消えない場合、それはあなたの目が十字毛にとどまるのではなく、ドットに続いていることを意味します。このテストでは、目の隅にあるちらつきのドットを監視しながら、十字毛に目を向ける必要があります。最初は難しいですが、練習すると簡単になります。",
     ko: "설명. 이 단계에서는 필요한 경우 더 가까워 지므로 화면 너비의 두 배 이상이 아닙니다. 모든 눈에는 사각 지대가 있습니다. 우리는 당신의 눈이 화면에서 얼마나 멀리 떨어져 있는지 알게 될 것입니다. 다른 눈을 닫거나 덮으려면 다른 눈을 분리해야합니다. 십자 머리카락에 집중하는 동안 눈 모퉁이에서 깜박 거리는 점을보고, 사각 지대로 사라질 때 귀환하십시오. 볼거리와 화면 크기에 따라 깜박 거리는 점은 일반적으로 화면 중앙에 도달하기 전에 블라인드 스팟에 도달합니다. 마지막 두 측정이 일관되게 될 때까지 번갈아 가며 각 눈 으로이 작업을 수행합니다. 두 눈을 테스트 할 때 시청 거리를 유지하십시오. 메모. 점이 사라지지 않으면, 십자 머리카락에 머무르는 대신 눈이 점을 따르고 있음을 의미합니다. 이 테스트는 눈 구석에 깜박 거리는 점을 모니터링하면서 십자 머리카락을 주시해야합니다. 처음에는 어렵지만 연습으로 더 쉬워집니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_viewingDistanceRedo: {
     "en-US": "Redo last response",
@@ -3678,8 +3621,6 @@ export const phrases = {
     "zh-HK": "重做上一個",
     ja: "最後の回答をやり直す",
     ko: "마지막 응답을 다시하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   RC_viewingDistanceTitle: {
     "en-US": "Measure Viewing Distance",
@@ -3708,8 +3649,6 @@ export const phrases = {
     "zh-HK": "測量觀看距離",
     ja: "表示距離を測定します",
     ko: "시청 거리를 측정하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_beep: {
     "en-US": "Beep",
@@ -3738,8 +3677,6 @@ export const phrases = {
     "zh-HK": "嗶",
     ja: "ピー",
     ko: "삑 하는 소리",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_cancel: {
     "en-US": "Cancel",
@@ -3768,8 +3705,6 @@ export const phrases = {
     "zh-HK": "取消",
     ja: "キャンセル",
     ko: "취소",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_clickingLetter: {
     "en-US": "by clicking it in the displayed list of letters.",
@@ -3798,8 +3733,6 @@ export const phrases = {
     "zh-HK": "通過點擊給出文字中的相應字母。",
     ja: "表示されている文字のリストをクリックすることで",
     ko: "표시된 문자 목록에서 클릭하여.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_clickingLetterRepeatedLetters: {
     "en-US": "by clicking them in the list of letters.",
@@ -3828,8 +3761,6 @@ export const phrases = {
     "zh-HK": "通過在字母列表中單擊它們。",
     ja: "文字のリストでそれらをクリックします。",
     ko: "문자 목록에서 클릭하여.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_clickingWordRsvpReading: {
     "en-US": "by clicking them in a list of words.",
@@ -3858,8 +3789,6 @@ export const phrases = {
     "zh-HK": "通過在單詞列表中單擊它們。",
     ja: "単語のリストでそれらをクリックします。",
     ko: "단어 목록에서 클릭하여.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_continueClickProceed: {
     "en-US": "To continue, click PROCEED.",
@@ -3888,8 +3817,6 @@ export const phrases = {
     "zh-HK": "點擊PROCEED以繼續。",
     ja: "続行するには、[続行]をクリックします。",
     ko: "계속하려면 진행을 클릭하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_continueHitReturn: {
     "en-US": "To continue, hit RETURN.",
@@ -3918,8 +3845,6 @@ export const phrases = {
     "zh-HK": "按回車鍵以繼續。",
     ja: "続行するには、Returnキーを押してください。",
     ko: "계속하려면 반환을 누르십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_continueHitReturnOrClickProceed: {
     "en-US": "To continue, hit RETURN or click PROCEED.",
@@ -3948,8 +3873,6 @@ export const phrases = {
     "zh-HK": "按回車鍵或者點擊PROCEED以繼續。",
     ja: "続行するには、Returnを押すか、[続行]をクリックします。",
     ko: "계속하려면 반품을 누르거나 진행을 클릭하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_continueNeitherClickNorType: {
     "en-US":
@@ -3979,8 +3902,6 @@ export const phrases = {
     "zh-HK": "無法進行，因為ResponseTypedBool和ResponseClickedBool都是錯誤的。",
     ja: "ResponseTypedBoolとResponseClickedBoolが両方とも虚偽であるため、続行できません。",
     ko: "ResponseTypedBool과 ResponseClickedBool은 모두 거짓이므로 진행할 수 없습니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_counterBlock: {
     "en-US": "Block xx1 of xx2.",
@@ -4009,8 +3930,6 @@ export const phrases = {
     "zh-HK": "xx2的xx1塊。",
     ja: "xx2のブロックxx1。",
     ko: "xx2의 블록 xx1.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_counterCm: {
     "en-US": " At xxx cm.",
@@ -4039,8 +3958,6 @@ export const phrases = {
     "zh-HK": " xxx 厘米遠。",
     ja: "xxx cmの距離で。",
     ko: " xxx cm에서.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_counterReadingPageBlock: {
     "en-US": "Page xx1 of xx2. Block xx3 of xx4.",
@@ -4069,8 +3986,6 @@ export const phrases = {
     "zh-HK": "xx2的第xx1頁。 xx4的xx3塊。",
     ja: "xx2のページxx1。 xx4のブロックxx3。",
     ko: "xx2의 xx1 페이지. xx4의 블록 xx3.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_counterTrialBlock: {
     "en-US": "Trial xx1 of xx2. Block xx3 of xx4.",
@@ -4099,8 +4014,6 @@ export const phrases = {
     "zh-HK": "試驗xx1，共xx2次試驗。區組xx3，共xx4個區組。",
     ja: "xx2のテストxx1。 xx4のブロックxx3。",
     ko: "xx2의 시험 xx1. xx4의 블록 xx3.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_escapeToQuit: {
     "en-US": "(Quit anytime by pressing ESCAPE.)",
@@ -4129,8 +4042,6 @@ export const phrases = {
     "zh-HK": "（在任何時候按Esc鍵以退出。）",
     ja: "（エスケープを押すことでいつでも辞めます。）",
     ko: "(탈출을 눌러 언제든지 종료하십시오.)",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_generatingMovie: {
     "en-US": "Making movie.",
@@ -4159,8 +4070,6 @@ export const phrases = {
     "zh-HK": "製作電影。",
     ja: "映画を作る。",
     ko: "영화 제작.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_guessingGame: {
     "en-US":
@@ -4192,8 +4101,6 @@ export const phrases = {
       "字母的大小和間隔是多種多樣的，從大而簡單到小而困難或不可能。您的正確率不會比三分之二高太多，所以請不要擔心。請把這個實驗看作一個猜謎遊戲，盡您所能即可。當您提供了正確答案時，您將聽到“嗶”的提示音。",
     ja: "文字の識別が容易な時も、不可能な時もあります。半分以上も識別することはできないでしょう。ですから、リラックスしてください。推測ゲームのような感覚で、できる限り多く正解してください。（ESCAPEキーでいつでも中止できます。）",
     ko: "문자 크기와 간격은 크고 쉽게 다르고 작고 단단하거나 불가능합니다. 3 분의 2 이상을 얻을 수 없으므로 긴장을 풀어주십시오. 그것을 추측 게임으로 생각하고 가능한 한 많은 것을 얻으십시오. 당신이 옳을 때마다 경고음이 들립니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyClickIt: {
     "en-US": "Please identify the middle letter by clicking it below.",
@@ -4222,8 +4129,6 @@ export const phrases = {
     "zh-HK": "請點擊下方的字母來報告您認出的中間字母。",
     ja: "下をクリックして、認識した真ん中の文字を報告してください。",
     ko: "아래를 클릭하여 중간 편지를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyClickItRepeatedLetters: {
     "en-US": "Please identify the two middle letters by clicking them below.",
@@ -4252,8 +4157,6 @@ export const phrases = {
     "zh-HK": "請單擊下面的兩個中間字母。",
     ja: "以下をクリックして、2つの中央の文字を特定してください。",
     ko: "아래를 클릭하여 두 개의 중간 문자를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyClickItSentence: {
     "en-US":
@@ -4283,8 +4186,6 @@ export const phrases = {
     "zh-HK": "顯示所有可能的句子。單擊您聽到的或最好的猜測。",
     ja: "考えられるすべての文が表示されます。聞いたものまたは最善の推測をクリックしてください。",
     ko: "가능한 모든 문장이 표시됩니다. 듣거나 가장 좋은 추측을 클릭하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyMiddleLetterClickIt: {
     "en-US": "Please identify the middle letter by clicking it below.",
@@ -4313,8 +4214,6 @@ export const phrases = {
     "zh-HK": "請通過在下面單擊它來確定中間字母。",
     ja: "下をクリックして、中央の文字を特定してください。",
     ko: "아래를 클릭하여 중간 편지를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyMiddleLetterPressIt: {
     "en-US": "Please identify the middle letter by pressing its keyboard key.",
@@ -4343,8 +4242,6 @@ export const phrases = {
     "zh-HK": "請按鍵盤鍵來確定中間字母。",
     ja: "キーボードキーを押して、中央の文字を特定してください。",
     ko: "키보드 키를 눌러 중간 문자를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyMiddleLetterPressItOrClickIt: {
     "en-US":
@@ -4374,8 +4271,6 @@ export const phrases = {
     "zh-HK": "請通過在下面單擊它或在鍵盤中按下中間字母。",
     ja: "下の文字を下にクリックするか、キーボードに押して、中央の文字を識別してください。",
     ko: "아래를 클릭하거나 키보드에 누르면 중간 편지를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyLetterClickIt: {
     "en-US": "Please identify the letter by clicking it below.",
@@ -4404,8 +4299,6 @@ export const phrases = {
     "zh-HK": "請通過在下面單擊它來確定該信。",
     ja: "以下をクリックして、文字を特定してください。",
     ko: "아래를 클릭하여 문자를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyLetterPressIt: {
     "en-US": "Please identify the letter by pressing its keyboard key.",
@@ -4434,8 +4327,6 @@ export const phrases = {
     "zh-HK": "請按鍵盤鍵來確定該信。",
     ja: "キーボードキーを押して手紙を特定してください。",
     ko: "키보드 키를 눌러 편지를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyLetterPressItOrClickIt: {
     "en-US":
@@ -4465,8 +4356,6 @@ export const phrases = {
     "zh-HK": "請通過在下面單擊它或在鍵盤中按下字母。",
     ja: "下をクリックするか、キーボードに押して文字を識別してください。",
     ko: "아래를 클릭하거나 키보드에 누르면 문자를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyClickItRsvpReading: {
     "en-US":
@@ -4496,8 +4385,6 @@ export const phrases = {
     "zh-HK": "請通過單擊下面的每一列單擊一個單詞來識別顯示的單詞。",
     ja: "以下の各列から1つの単語をクリックすることで示された単語を識別してください。",
     ko: "아래 각 열에서 한 단어를 클릭하여 표시된 단어를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyPressIt: {
     "en-US": "Please identify the middle letter by pressing its keyboard key.",
@@ -4526,8 +4413,6 @@ export const phrases = {
     "zh-HK": "請按下鍵盤上的對應按鍵來報告您認出的中間字母。",
     ja: "キーボードで対応するキーを押して、認識した真ん中の文字を報告してください。",
     ko: "키보드 키를 눌러 중간 문자를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyPressItRsvpReading: {
     "en-US":
@@ -4557,8 +4442,6 @@ export const phrases = {
     "zh-HK": "確定大聲說出來時顯示的單詞。",
     ja: "大声で話すときに示された単語を特定します。",
     ko: "큰 소리로 말할 때 표시된 단어를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyPressItOrClickIt: {
     "en-US":
@@ -4588,8 +4471,6 @@ export const phrases = {
     "zh-HK": "請按下鍵盤上的對應按鍵或者點擊下方的字母來報告您認出的中間字母。",
     ja: "キーボードで対応するキーを押すか、下をクリックして、認識した真ん中の文字を報告してください。",
     ko: "아래를 클릭하거나 키보드에 누르면 중간 편지를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyPressItOrClickItRepeatedLetters: {
     "en-US":
@@ -4619,8 +4500,6 @@ export const phrases = {
     "zh-HK": "通過單擊或在鍵盤上按下兩個中間字母。",
     ja: "キーボードでそれらをクリックまたは押して、2つの中間文字を識別します。",
     ko: "키보드에서 클릭하거나 눌러 두 개의 중간 문자를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_identifyPressItRepeatedLetters: {
     "en-US":
@@ -4650,8 +4529,6 @@ export const phrases = {
     "zh-HK": "識別兩個中間字母，將它們按在鍵盤上。",
     ja: "2つの中間文字を識別し、キーボードに押し付けます。",
     ko: "두 개의 중간 문자를 식별하여 키보드에 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_keypadContinueExperiment: {
     "en-US": "Continue the experiment as instructed.",
@@ -4680,8 +4557,6 @@ export const phrases = {
     "zh-HK": "按照指示繼續實驗。",
     ja: "指示に従って実験を続けます。",
     ko: "지시에 따라 실험을 계속하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_keypadReadyForResponse: {
     "en-US": "Respond now.",
@@ -4710,8 +4585,6 @@ export const phrases = {
     "zh-HK": "立刻回复。",
     ja: "今すぐ応答します。",
     ko: "지금 응답하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_keypadConnectedAndKeepReady: {
     "en-US":
@@ -4741,8 +4614,6 @@ export const phrases = {
     "zh-HK": "鍵盤連接。請保持此頁面打開，直到實驗提示您使用它。",
     ja: "キーパッド接続。実験が使用するように促すまで、このページを開いたままにしてください。",
     ko: "키패드 연결. 실험에서 사용하라는 메시지가 표시 될 때 까지이 페이지를 열어 두십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_keypadScanQRCode: {
     "en-US":
@@ -4772,8 +4643,6 @@ export const phrases = {
     "zh-HK": "將您的智能手機相機指向此QR碼，並用手指單擊出現的鏈接。",
     ja: "このQRコードでスマートフォンカメラをポイントし、指を使用して表示されるリンクをクリックします。",
     ko: "이 QR 코드에서 스마트 폰 카메라를 가리키고 손가락을 사용하여 나타나는 링크를 클릭하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_keypadScanQRCodeSubtitle: {
     "en-US":
@@ -4805,8 +4674,6 @@ export const phrases = {
       "這將使您可以使用手機作為鍵盤做出響應，從而使您可以坐在計算機鍵盤上。",
     ja: "これにより、携帯電話をキーボードとして使用して応答し、コンピューターキーボードから離れて座ることができます。",
     ko: "이렇게하면 전화기를 키보드로 사용하여 응답 할 수 있으므로 컴퓨터 키보드에서 멀리 앉을 수 있습니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_letterPopularDemandFeatures: {
     "en-US": "  ",
@@ -4835,8 +4702,6 @@ export const phrases = {
     "zh-HK": "  ",
     ja: "  ",
     ko: "  ",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_loadingSounds: {
     "en-US": "Loading sounds ...",
@@ -4867,8 +4732,6 @@ export const phrases = {
       "我們會定期暫停讓您休息，以防您過於疲勞。休息時間會出現在區組之間和區組之中。",
     ja: "こんにちは。ピーボタンをクリックしてこのコンピュータの音が機能していることを確認してください。ちなみに、テストでは正解する度にこの音が鳴ります。",
     ko: "소리로드 ...",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_middleLetterBrief: {
     "en-US":
@@ -4900,8 +4763,6 @@ export const phrases = {
       "這是一個 R。因為字母一直顯示在屏幕上，所以您只需移動一下視線就能輕鬆認出它。在接下來的試驗中，字母都將一閃而過，所以您不會有時間來調整您的視線。",
     ja: "これはRです。この画面は動いていないため、目を文字の位置に動かして確認するのは容易でしょう。本番のテストでは、文字は一瞬しか映されないので、目を動かす時間はないでしょう。",
     ko: "이 디스플레이는 정적이므로 눈을 편지로 이동하여 식별하기가 쉽습니다. 그러나 실제 시험에서는 편지가 번쩍이므로 눈을 움직일 시간이 없습니다. 시험을 시작할 때 십자 머리카락을 보는 것이 중요합니다. 편지는 즉시 플래시됩니다. 플래시 후 눈이 어디로 가는지는 중요하지 않습니다. 테스트의 첫 번째 블록은 우리가 본격적으로 시작하기 전에 몇 가지 실무 시험입니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_middleLetterDemo: {
     "en-US":
@@ -4933,8 +4794,6 @@ export const phrases = {
       "每次試驗中，在您注視十字準線的某個時刻，三個隨機字母將短暫地出現在您的視野邊緣。讓我們來試一試。請注視十字準線，保持視線不動並試著認出中間的字母。",
     ja: "各テストでは、あなたが十字線を見ている間に3つのランダムな文字があなたの目の端に短く表示されます。この場で試してみましょう。\n目を動かさずに十字線を見なが、真ん中の文字を識別してみてください。",
     ko: "각 시험에서 십자형 머리카락을 보면서 3 개의 임의의 문자가 눈의 모퉁이에서 번쩍입니다. 단지 플래시. 작업을 배우려면 먼저 정적 디스플레이를 사용하여 시도해 봅시다. 눈을 움직이지 않고 아래의 십자 머리카락을 보면서 중간 문자를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_letterBrief: {
     "en-US":
@@ -4966,8 +4825,6 @@ export const phrases = {
       "這是一個R。這個顯示器是靜態的，因此將您的眼睛移到字母上並識別它很容易。但是，在一個真正的審判中，這封信閃爍了，所以沒有時間動眼睛。當您啟動試驗時，看一下十字頭髮很重要。這封信將立即閃爍。在閃光之後，您的眼睛走到哪裡都沒關係。在認真開始之前，第一個測試只是進行幾次實踐試驗。",
     ja: "RはRです。このディスプレイは静的なので、目を文字に移動して識別するのは簡単です。しかし、実際の裁判では、手紙が点滅するので、目を動かす時間はありません。試練を開始するときに、十字毛を見ることが重要です。手紙はすぐに点滅します。フラッシュの後に目がどこに行くかは関係ありません。テストの最初のブロックは、本格的に始める前のほんの数回の実践試験です。",
     ko: "이 디스플레이는 정적이므로 눈을 편지로 이동하여 식별하기가 쉽습니다. 그러나 실제 시험에서는 편지가 번쩍이므로 눈을 움직일 시간이 없습니다. 시험을 시작할 때 십자 머리카락을 보는 것이 중요합니다. 편지는 즉시 플래시됩니다. 플래시 후 눈이 어디로 가는지는 중요하지 않습니다. 테스트의 첫 번째 블록은 우리가 본격적으로 시작하기 전에 몇 가지 실무 시험입니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_letterDemo: {
     "en-US":
@@ -4999,8 +4856,6 @@ export const phrases = {
       "在每個試驗中，隨機字母將在您的眼角閃爍。只是一個閃光。要學習任務，讓我們先嘗試使用靜態顯示器。在看下面的十字頭髮時，沒有動眼睛，請嘗試識別這封信。",
     ja: "各トライアルでは、ランダムな文字が目の隅に点滅します。ちょっとしたフラッシュ。タスクを学ぶには、静的ディスプレイで最初に試してみましょう。下の毛を見ながら、目を動かすことなく、手紙を特定してみてください。",
     ko: "각 시험에서, 임의의 편지는 당신의 눈의 모퉁이에서 번쩍입니다. 단지 플래시. 작업을 배우려면 먼저 정적 디스플레이를 사용하여 시도해 봅시다. 눈을 움직이지 않고 아래의 십자 머리카락을 보면서 편지를 식별하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_ok: {
     "en-US": "OK",
@@ -5029,8 +4884,6 @@ export const phrases = {
     "zh-HK": "確認",
     ja: "確認",
     ko: "좋아요",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_participant: {
     "en-US": "Participant",
@@ -5059,8 +4912,6 @@ export const phrases = {
     "zh-HK": "被試",
     ja: "参加者",
     ko: "참가자",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_pressingKey: {
     "en-US": "by pressing it in the keyboard.",
@@ -5089,8 +4940,6 @@ export const phrases = {
     "zh-HK": "通過按下鍵盤上的對應按鍵",
     ja: "キーボードで対応するキーを押すことで",
     ko: "키보드에 눌러서.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_pressingKeyOrClickingLetter: {
     "en-US":
@@ -5120,8 +4969,6 @@ export const phrases = {
     "zh-HK": "通過按下鍵盤上的對應按鍵或者點擊給出文字中的相應字母。",
     ja: "キーボードで対応するキーを押すか、表示されている文字のリストをクリックすることで",
     ko: "표시된 문자 목록에서 클릭하거나 키보드에 누르면됩니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_pressingKeyOrClickingLetterRepeatedLetters: {
     "en-US":
@@ -5151,8 +4998,6 @@ export const phrases = {
     "zh-HK": "通過在顯示的字母列表中單擊它們，或在鍵盤上按下它們。",
     ja: "表示されている文字のリストでクリックするか、キーボードで押します。",
     ko: "표시된 문자 목록에서 클릭하거나 키보드에 누르면됩니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_pressingKeyRepeatedLetters: {
     "en-US": "by pressing them on the keyboard.",
@@ -5181,8 +5026,6 @@ export const phrases = {
     "zh-HK": "通過在鍵盤上按下它們。",
     ja: "キーボードでそれらを押すことにより。",
     ko: "키보드에 눌러서.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_pressingKeyRsvpReading: {
     "en-US": "by saying the words aloud.",
@@ -5211,8 +5054,6 @@ export const phrases = {
     "zh-HK": "大聲說出這些字。",
     ja: "言葉を声に出して言うことによって。",
     ko: "말을 큰 소리로 말함으로써.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_PROCEED: {
     "en-US": "PROCEED",
@@ -5241,8 +5082,6 @@ export const phrases = {
     "zh-HK": "繼續",
     ja: "続行",
     ko: "진행하다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_proceed: {
     "en-US": "Proceed",
@@ -5271,8 +5110,6 @@ export const phrases = {
     "zh-HK": "繼續",
     ja: "続行",
     ko: "진행하다",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_proportionCorrectPopup: {
     "en-US": "Nice work! You got xxx% right.",
@@ -5301,8 +5138,6 @@ export const phrases = {
     "zh-HK": "做得好！您的xxx％正確。",
     ja: "よくやった！ xxx％が正しくなりました。",
     ko: "잘 하셨어요! 당신은 xxx%가 맞습니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readingNextPage: {
     "en-US": "Press SPACE for next page.",
@@ -5331,8 +5166,6 @@ export const phrases = {
     "zh-HK": "按下下一頁的空間。",
     ja: "次のページのスペースを押します。",
     ko: "다음 페이지를 위해 공간을 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_rsvpReadingTask: {
     "en-US":
@@ -5364,8 +5197,6 @@ export const phrases = {
       "您即將開始一個xxx試驗。您會讀一個故事，一次讀幾句話。每個審判都會迅速向您展示一個值得一句話的句子，然後要求您記住您閱讀的單詞。",
     ja: "xxxトライアルのブロックを開始しようとしています。あなたは一度にいくつかの言葉を読むでしょう。各トライアルは、次々と文章のある言葉についてすぐに表示され、あなたが読んだ言葉を覚えておくように頼みます。",
     ko: "xxx 시험 블록을 시작하려고합니다. 한 번에 몇 마디 씩 이야기를 읽을 수 있습니다. 각 시험은 다른 단어의 문장 가치에 대해 신속하게 보여줄 것입니다. 그런 다음 읽은 단어를 기억하도록 요청합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readingTask: {
     "en-US":
@@ -5397,8 +5228,6 @@ export const phrases = {
       "講故事的時間！您會從一本書中閱讀111頁。一旦開始，請盡可能快地靜靜地閱讀所有頁面，同時保持完全理解，直到到達末尾。然後，我們會問您有關這個故事的幾個問題。在每個頁面上，按下下一頁的空格欄。準備就緒時，請按空格。",
     ja: "ストーリータイム！本から111ページを読みます。開始したら、最後に到達するまで、完全な理解を維持しながら、できるだけ早くすべてのページを静かに読んでください。次に、ストーリーについていくつか質問します。各ページで、次のページのスペースバーを押します。準備ができたら、スペースを押します。",
     ko: "이야기 시간! 책에서 111 페이지를 읽을 것입니다. 일단 시작되면 끝까지 도달 할 때까지 모든 이해를 유지하면서 최대한 빨리 모든 페이지를 조용히 읽으십시오. 그런 다음 이야기에 대해 몇 가지 질문을 할 것입니다. 각 페이지에서 다음 페이지의 공간 표시 줄을 누릅니다. 준비가되면 공간을 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readingTaskQuestionPrompt: {
     "en-US":
@@ -5428,8 +5257,6 @@ export const phrases = {
     "zh-HK": "您剛剛閱讀的段落中出現了以下哪個單詞？",
     ja: "次の単語のどれがあなたが読んだパッセージに登場しましたか？",
     ko: "방금 읽은 구절에 다음 중 어떤 단어가 나타 났습니까?",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readingTheEnd: {
     "en-US": "THE END",
@@ -5458,8 +5285,6 @@ export const phrases = {
     "zh-HK": "結束",
     ja: "終わり",
     ko: "끝",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyClickCrosshair: {
     "en-US":
@@ -5489,8 +5314,6 @@ export const phrases = {
     "zh-HK": "準備好了嗎？保持注視十字準線，並點擊十字準線。",
     ja: "準備はできましたか？十字線を直視しながら、十字線をクリックしてください。",
     ko: "준비가 된? 크로스 털의 중앙을 클릭하여 문자를 나타냅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyTrackCrosshair: {
     "en-US":
@@ -5520,8 +5343,6 @@ export const phrases = {
     "zh-HK": "準備好？使用光標跟踪十字頭髮的中心，直到字母出現為止。",
     ja: "準備？カーソルを使用して、文字が表示されるまで交差髪の中心を追跡します。",
     ko: "준비가 된? 커서를 사용하여 문자가 나타날 때까지 십자 머리의 중심을 추적하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyClickCrosshairRepeatedLetters: {
     "en-US":
@@ -5551,8 +5372,6 @@ export const phrases = {
     "zh-HK": "準備識別字母了嗎？單擊十字頭髮的中心。",
     ja: "手紙を識別する準備はできましたか？交差毛の中心をクリックします。",
     ko: "글자를 식별 할 준비가 되셨습니까? 십자 머리카락의 중앙을 클릭하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyTrackCrosshairRepeatedLetters: {
     "en-US":
@@ -5582,8 +5401,6 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyClickCrosshairRsvpReading: {
     "en-US": "Ready to read some words? Click the center of the cross hairs.",
@@ -5612,8 +5429,6 @@ export const phrases = {
     "zh-HK": "準備閱讀一些單詞了嗎？單擊十字頭髮的中心。",
     ja: "いくつかの言葉を読む準備はできましたか？交差毛の中心をクリックします。",
     ko: "단어를 읽을 준비가 되셨습니까? 십자 머리카락의 중앙을 클릭하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyTrackCrosshairRsvpReading: {
     "en-US":
@@ -5643,8 +5458,6 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyPressSpace: {
     "en-US":
@@ -5674,8 +5487,6 @@ export const phrases = {
     "zh-HK": "準備好了嗎？保持注視十字準線，並按下空格鍵。",
     ja: "準備はできましたか？十字線を直視しながら、スペースキーを押してください。",
     ko: "편지를 식별 할 준비가 되셨습니까? 크로스 털의 중앙을 직접 보면서 우주 막대를 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyPressSpaceRepeatedLetters: {
     "en-US":
@@ -5705,8 +5516,6 @@ export const phrases = {
     "zh-HK": "準備識別字母了嗎？直接看著十字頭髮的中心時，請按太空棒。",
     ja: "手紙を識別する準備はできましたか？交差毛の中心を直接見ながら、スペースバーを押してください。",
     ko: "글자를 식별 할 준비가 되셨습니까? 크로스 털의 중앙을 직접 보면서 우주 막대를 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyPressSpaceRsvpReading: {
     "en-US":
@@ -5736,8 +5545,6 @@ export const phrases = {
     "zh-HK": "準備閱讀一些單詞了嗎？直接看著十字頭髮的中心時，請按太空棒。",
     ja: "いくつかの言葉を読む準備はできましたか？交差毛の中心を直接見ながら、スペースバーを押してください。",
     ko: "단어를 읽을 준비가 되셨습니까? 크로스 털의 중앙을 직접 보면서 우주 막대를 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyPressSpaceOrClickCrosshair: {
     "en-US":
@@ -5767,8 +5574,6 @@ export const phrases = {
     "zh-HK": "準備好了嗎？保持注視十字準線，並按下空格鍵或者點擊十字準線。",
     ja: "準備はできましたか？十字線を直視しながら、スペースキーを押すか、十字線をクリックしてください。",
     ko: "편지를 식별 할 준비가 되셨습니까? 십자 머리카락의 중앙을 직접 보면서 클릭하거나 우주 막대를 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyPressSpaceOrClickCrosshairRepeatedLetters: {
     "en-US":
@@ -5798,8 +5603,6 @@ export const phrases = {
     "zh-HK": "準備識別字母了嗎？直接看著十字頭髮的中心時，請單擊或按太空欄。",
     ja: "手紙を識別する準備はできましたか？交差毛の中心を直接見ながら、クリックするか、スペースバーを押してください。",
     ko: "글자를 식별 할 준비가 되셨습니까? 십자 머리카락의 중앙을 직접 보면서 클릭하거나 우주 막대를 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_readyPressSpaceOrClickCrosshairRsvpReading: {
     "en-US":
@@ -5829,8 +5632,6 @@ export const phrases = {
     "zh-HK": "準備閱讀一些單詞了嗎？直接看著十字頭髮的中心時，請按太空棒。",
     ja: "いくつかの言葉を読む準備はできましたか？交差毛の中心を直接見ながら、スペースバーを押してください。",
     ko: "단어를 읽을 준비가 되셨습니까? 크로스 털의 중앙을 직접 보면서 우주 막대를 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_sentenceGuessingGame: {
     "en-US":
@@ -5862,8 +5663,6 @@ export const phrases = {
       "該句子的可理解性將從輕鬆到硬或不可能不等。您不能獲得超過三分之二的正確，所以放鬆。將其視為一個猜測遊戲，只需獲得盡可能多的遊戲。每當您正確時，您都會聽到蜂鳴聲。",
     ja: "文の明瞭度は、簡単なダウンからハードまたは不可能までさまざまです。 3分の2を超えることはできないので、リラックスしてください。それを推測ゲームと考えて、できるだけ多くのことを手に入れてください。あなたが正しいときはいつでもビープ音が聞こえます。",
     ko: "문장의 명료성은 쉬운 곳에서 단단하거나 불가능한 곳에 달라집니다. 3 분의 2 이상을 얻을 수 없으므로 긴장을 풀어주십시오. 그것을 추측 게임으로 생각하고 가능한 한 많은 것을 얻으십시오. 당신이 옳을 때마다 경고음이 들립니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_sentenceIdentifyClick: {
     "en-US":
@@ -5895,8 +5694,6 @@ export const phrases = {
       "下面的列表顯示了句子中每個單詞的所有可能性。通過單擊您聽到的單詞來報告句子或最好的猜測。",
     ja: "以下のリストは、文の各単語のすべての可能性を示しています。聞いた言葉をクリックして、文または最善の推測を報告してください。",
     ko: "아래 목록은 문장의 각 단어에 대한 모든 가능성을 보여줍니다. 들었던 단어를 클릭하여 문장이나 최선의 추측을보고하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_sentenceProcedure: {
     "en-US":
@@ -5928,8 +5725,6 @@ export const phrases = {
       "在每個審判中，通常會在噪音中聽到一個句子。然後，您將看到句子中每個單詞的所有可能性列表。通過單擊您聽到的單詞來報告句子或最好的猜測。",
     ja: "各トライアルでは、通常はノイズで文が聞こえます。次に、文の各単語のすべての可能性のリストが表示されます。聞いた言葉をクリックして、文または最善の推測を報告してください。",
     ko: "각 시험에서는 일반적으로 소음으로 문장이 들립니다. 그런 다음 문장의 각 단어에 대한 모든 가능성 목록이 표시됩니다. 들었던 단어를 클릭하여 문장이나 최선의 추측을보고하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_session: {
     "en-US": "",
@@ -5958,8 +5753,6 @@ export const phrases = {
     "zh-HK": "",
     ja: "",
     ko: "",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_soundPhraseBlock: {
     "en-US":
@@ -5991,8 +5784,6 @@ export const phrases = {
       "在每個審判中，您都會聽到一句話，然後您會被要求記住兩個單詞。聲音被扭曲，可能很難識別，因此您無法使它們正確。不用擔心。只需將其視為遊戲，並儘力而為。祝你好運。點擊返回或單擊繼續繼續進行。\n\n繼續按鈕將立即消失，一旦加載聲音，實驗將開始，這取決於Internet連接的速度，需要40秒或更長時間。我們正在努力在以後的版本中縮短這一延遲。\n\n加載聲音...",
     ja: "各トライアルで、文が聞こえると、2つの単語を覚えておくように求められます。音は歪んでおり、認識が難しいかもしれないので、それらをすべて正しくすることはできません。心配しないで。それをゲームとして扱って、最善を尽くしてください。幸運を。戻るかクリックして続行して続行します。\n\n進行ボタンはすぐに消え、インターネット接続の速度に応じて、サウンドがロードされると実験が開始されます。将来のリリースでこの遅延を短縮するために取り組んでいます。\n\n音の読み込み...",
     ko: "각 시험에서 문장을 듣고 두 단어를 기억하도록 요청받을 것입니다. 소리가 왜곡되어 인식하기 어려울 수 있으므로 올바르게 얻을 수는 없습니다. 괜찮아요. 게임으로 취급하고 최선을 다하십시오. 행운을 빌어요. 반품을 누르거나 계속 진행하려면 진행하십시오.\n\n진행 버튼은 즉시 사라지고 사운드가로드되면 실험이 시작되며 인터넷 연결 속도에 따라 40 초 이상이 걸립니다. 우리는 향후 릴리스 에서이 지연을 단축하기 위해 노력하고 있습니다.\n\n소리로드 ...",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_soundPhraseResponse: {
     "en-US":
@@ -6022,8 +5813,6 @@ export const phrases = {
     "zh-HK": "您剛剛聽到這句話。請從兩個菜單中選擇單詞以填寫缺失的單詞。",
     ja: "この文章を聞いたばかりです。 2つのメニューから単語を選択して、不足している単語を入力してください。",
     ko: "방금이 문장을 들었습니다. 누락 된 단어를 채우려면 두 메뉴에서 단어를 선택하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_soundPhraseTrial: {
     "en-US": "Hit the SPACE bar to hear the next sentence",
@@ -6052,8 +5841,6 @@ export const phrases = {
     "zh-HK": "登上太空酒吧聽下一句話",
     ja: "次の文を聞くためにスペースバーを押してください",
     ko: "다음 문장을 들으려면 우주 막대를 치십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_takeABreakPopup: {
     "en-US": "Good work! Please take a moment to relax and blink.",
@@ -6082,8 +5869,6 @@ export const phrases = {
     "zh-HK": "幹得好！請短暫的休息一下，眨眨眼放輕鬆。",
     ja: "よくできました！少し時間をかけてリラックスして点滅してください。",
     ko: "잘 했어! 잠시 휴식을 취하고 깜박이십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdBeginBlock: {
     "en-US":
@@ -6115,8 +5900,6 @@ export const phrases = {
       "您即將開始進行一個含有xxx次試驗的區組。每次試驗將會有三個字母出現，比如：Z R N。請只報告中間的字母。",
     ja: "あなたはxxxテストのブロックを始めようとしています。各テストではこのように3文字が表示されます：Z R N。真ん中の文字だけを報告してください。",
     ko: "xxx 시험 블록을 시작하려고합니다. 예를 들어 Z R N. 중간 편지 만보 고하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdMiddleLetterBeginBlock: {
     "en-US":
@@ -6148,8 +5931,6 @@ export const phrases = {
       "您即將開始一個xxx試驗。每個試驗中將出現三個字母的三胞胎，例如：z r n。請僅報告中間字母，",
     ja: "xxxトライアルのブロックを開始しようとしています。たとえば、各試行に3文字のトリプレットが表示されます。",
     ko: "xxx 시험 블록을 시작하려고합니다. 예를 들어 Z R N. 중간 편지 만보 고하십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdLetterBeginBlock: {
     "en-US":
@@ -6179,8 +5960,6 @@ export const phrases = {
     "zh-HK": "您即將開始一個xxx試驗。每個審判都會出現一個信件。請報告，",
     ja: "xxxトライアルのブロックを開始しようとしています。各トライアルに文字が表示されます。報告してください、",
     ko: "xxx 시험 블록을 시작하려고합니다. 각 시험에는 편지가 나타납니다. 보고 해주세요.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdRsvpReadingBeginBlock: {
     "en-US":
@@ -6212,8 +5991,6 @@ export const phrases = {
       "您即將開始一個xxx試驗。每個審判都會迅速向您展示單詞，一個接一個地，要求您報告您閱讀的內容",
     ja: "xxxトライアルのブロックを開始しようとしています。各トライアルは次々に単語をすぐに表示し、あなたが読んだものを報告するように頼みます",
     ko: "xxx 시험 블록을 시작하려고합니다. 각 시험은 당신에게 다른 말을하면 신속하게 말하고, 당신이 읽은 내용을보고하도록 요청합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdRepeatedLettersBeginBlock: {
     "en-US":
@@ -6245,8 +6022,6 @@ export const phrases = {
       "您即將開始一個xxx試驗。每個審判中都會出現一個字母字段。報告您看到的兩個中間字符",
     ja: "xxxトライアルのブロックを開始しようとしています。各トライアルに文字のフィールドが表示されます。あなたが見る2つの中間文字を報告してください",
     ko: "xxx 시험 블록을 시작하려고합니다. 각 시험에서 편지 분야가 나타납니다. 당신이 보는 두 개의 중간 문자를보고하십시오",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdSoundBeginBlock: {
     "en-US":
@@ -6278,8 +6053,6 @@ export const phrases = {
       "聲音檢測。您將開始進行許多試驗。您正在嘗試檢測特定的目標聲音：一個音符，重複8次，總是相同的音符。該目標僅在一半的試驗中存在。在每個試驗中，您的工作是傾聽並確定是否在場，是還是否。隨著您從試驗的進行，根據您的響應，目標聲音量將適應，因此幾乎無法檢測到。在最初的練習塊中，目標將是一個人。在以後的塊中，由於其他聲音，目標將很難檢測到。始終忽略其他聲音，並嘗試報告，是或否，是否存在目標聲音。使用“是”的“ y”鍵，而“ n”鍵否。\n\n點擊返回或單擊，請盡快進行。繼續按鈕將立即消失，一旦加載聲音，實驗將開始，這取決於Internet連接的速度，需要40秒或更長時間。我們正在努力在以後的版本中縮短這一延遲。\n\n加載聲音...",
     ja: "音の検出。多くの試験のブロックを開始しようとしています。特定のターゲットサウンドを検出しようとしています。1つのメモ、8回繰り返され、常に同じメモです。そのターゲットは、ランダムに試行の半分にのみ存在します。各トライアルでは、あなたの仕事は、それが存在するかどうかを聞いて決定することです。応答に基づいて、試用から試用へと進むにつれて、ターゲットの音量が適応して、ほとんど検出できません。最初の練習ブロックでは、ターゲットは単独で行われます。後のブロックでは、他の音のためにターゲットを検出するのが難しくなります。常に他の音を無視し、ターゲットサウンドが存在するかどうかを報告してみてください。はいのために「Y」キーを使用し、「n」キーを使用します。\n\n返品を押すか、準備ができたらすぐにクリックしてください。進行ボタンはすぐに消え、インターネット接続の速度に応じて、サウンドがロードされると実験が開始されます。将来のリリースでこの遅延を短縮するために取り組んでいます。\n\n音の読み込み...",
     ko: '소리 감지. 많은 시련의 블록을 시작하려고합니다. 특정 대상 사운드를 감지하려고합니다. 하나의 음표, 8 번 반복, 항상 같은 음표입니다. 그 목표는 시험의 절반에만 존재합니다. 각 재판에서 귀하의 임무는 예, 그렇지 않은지를 듣고 결정하는 것입니다. 응답에 따라 시험에서 시험으로 진행하면 대상 사운드 볼륨이 거의 감지 할 수 있도록 적응합니다. 초기 연습 블록에서는 대상이 혼자가됩니다. 이후 블록에서는 다른 소리 때문에 대상이 감지하기가 더 어려워집니다. 항상 다른 소리를 무시하고 대상 사운드가 있는지 여부를보고하십시오. 예에 "y"키를 사용하고 "n"키를 사용하십시오.\n\n준비 되 자마자 반품을 누르거나 클릭하십시오. 진행 버튼은 즉시 사라지고 사운드가로드되면 실험이 시작되며 인터넷 연결 속도에 따라 40 초 이상이 걸립니다. 우리는 향후 릴리스 에서이 지연을 단축하기 위해 노력하고 있습니다.\n\n소리로드 ...',
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdSoundCheck: {
     "en-US":
@@ -6311,8 +6084,6 @@ export const phrases = {
       "您好。請點擊“嗶”以確認此電腦的聲音播放功能沒有問題。順帶一提，當您每正確完成一次試驗時，您將聽到相同的“嗶”聲。",
     ja: "こんにちは。ピーボタンをクリックしてこのコンピュータの音が機能していることを確認してください。ちなみに、テストでは正解する度にこの音が鳴ります。",
     ko: "안녕하세요. 경고음 버튼을 클릭 하여이 컴퓨터의 사운드가 작동하는지 확인하십시오. 당신은 당신의 대답이 옳을 때마다 그런 경고음을들을 것입니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdSoundNewTrial: {
     "en-US": "Hit the SPACE bar to hear the next trial.",
@@ -6341,8 +6112,6 @@ export const phrases = {
     "zh-HK": "登上太空酒吧，聽到下一個審判。",
     ja: "次のトライアルを聞くためにスペースバーを押してください。",
     ko: "다음 시험을 들으려면 우주 막대를 치십시오.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdSoundResponse: {
     "en-US": "Was the target sound present? Press y or n.",
@@ -6371,8 +6140,6 @@ export const phrases = {
     "zh-HK": "目標聲音存在嗎？按y或n。",
     ja: "ターゲットサウンドは存在していましたか？ yまたはnを押します。",
     ko: "대상 사운드가 존재 했습니까? y 또는 n을 누릅니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_thresholdTitle: {
     "en-US": "Welcome to EasyEyes Threshold.",
@@ -6401,8 +6168,6 @@ export const phrases = {
     "zh-HK": "歡迎使用 EasyEyes Threshold。",
     ja: "EasyEyes Thresholdへようこそ。",
     ko: "Easyeyes 임계 값에 오신 것을 환영합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
   T_whyClick: {
     "en-US":
@@ -6434,7 +6199,5 @@ export const phrases = {
       "在此區組中請使用鼠標而非鍵盤，因為點擊鼠標可以讓您在合適的時機看合適的位置。",
     ja: "このブロックでは、キーボードの代わりにクリックを使用します。クリックが適切なタイミングで適切な場所に目を向けるためです。",
     ko: "이 블록에서는 키보드 대신 클릭을 사용합니다.",
-    __EMPTY: "",
-    __EMPTY_1: "",
   },
 };
