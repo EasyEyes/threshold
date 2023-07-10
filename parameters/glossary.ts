@@ -1389,18 +1389,6 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
   },
-  markColorRGB: {
-    name: "markColorRGB",
-    availability: "now",
-    type: "text",
-    default: "0,0,0,1",
-  },
-  instructionFontColorRGBA: {
-    name: "instructionFontColorRGBA",
-    availability: "now",
-    type: "text",
-    default: "0,0,0,1",
-  },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
     availability: "now",
@@ -1474,6 +1462,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "Verdana",
+  },
+  instructionFontColorRGBA: {
+    name: "instructionFontColorRGBA",
+    availability: "now",
+    type: "text",
+    default: "0,0,0,1",
   },
   instructionFontLeftToRightBool: {
     name: "instructionFontLeftToRightBool",
@@ -1580,6 +1574,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "FALSE",
+  },
+  markingColorRGB: {
+    name: "markingColorRGB",
+    availability: "now",
+    type: "text",
+    default: "0,0,0,1",
   },
   markingFixationHotSpotRadiusDeg: {
     name: "markingFixationHotSpotRadiusDeg",

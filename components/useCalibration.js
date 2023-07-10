@@ -289,6 +289,7 @@ export const calibrateAudio = async (reader) => {
     elems.message.innerHTML = copy.done;
     elems.yesButton.style.display = "none";
     elems.displayUpdate.style.display = "none";
+    elems.subtitle.innerHTML = "";
 
     //show plots of the loudspeaker calibration
     if (
@@ -326,9 +327,11 @@ export const calibrateAudio = async (reader) => {
       document.querySelector("#soundNavContainer").style.display = "flex";
       let isSmartPhone = true;
       elems.title.innerHTML = "";
+      elems.subtitle.innerHTML = "";
       await new Promise(async (resolve) => {
         elems.message.innerHTML = copy.done;
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
+          elems.citation.style.visibility = "hidden";
           elems.soundLevelsTable.innerHTML = "";
           elems.soundTestPlots.innerHTML = "";
           elems.soundParametersFromCalibration.innerHTML = "";
@@ -339,7 +342,7 @@ export const calibrateAudio = async (reader) => {
             lang
           )
             .replace(/111/g, 1)
-            .replace(/222/g, 2);
+            .replace(/222/g, 3);
           elems.message.innerHTML = "";
           elems.message.style.lineHeight = "2rem";
           const messageText1 = readi18nPhrases("RC_identifyMicrophone", lang);
@@ -454,7 +457,7 @@ export const calibrateAudio = async (reader) => {
             proceedButton.addEventListener("click", async (e) => {
               elems.displayQR.style.display = "flex";
               // center child elements horizontally
-              elems.displayQR.style.justifyContent = "center";
+              elems.displayQR.style.justifyContent = "left";
 
               const micId = input.value;
               if (micId !== "") {
@@ -515,9 +518,15 @@ export const calibrateAudio = async (reader) => {
                     },
                   };
                 } else {
+                  elems.displayContainer.style.display = "flex";
+                  elems.displayContainer.style.marginLeft = "0px";
+                  elems.displayContainer.style.flexDirection = "column";
                   elems.displayUpdate.style.display = "flex";
-                  elems.displayUpdate.style.justifyContent = "center";
+                  elems.displayUpdate.style.marginLeft = "0px";
                   elems.displayUpdate.style.flexDirection = "column";
+                  elems.displayQR.style.display = "flex";
+                  elems.displayQR.style.marginLeft = "0px";
+                  elems.displayQR.style.flexDirection = "column";
                   speakerParameters.microphoneName = micId;
                   speakerParameters.isSmartPhone = isSmartPhone;
                   speakerParameters.calibrateSoundCheck =
@@ -720,7 +729,7 @@ const _addSoundCalibrationElems = (copy) => {
   title.style.fontSize = "1.5em";
   //replace "111" with 1 and 222 with 3
   title.innerHTML = title.innerHTML.replace(/111/g, 1);
-  title.innerHTML = title.innerHTML.replace(/222/g, 2);
+  title.innerHTML = title.innerHTML.replace(/222/g, 3);
   // subtitle.innerHTML = copy.title;
   // message.innerHTML = copy.neediPhone;
   message.style.display = "none";
@@ -1070,6 +1079,11 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
       // line height
       elems.message.style.lineHeight = "2rem";
 
+      elems.subtitle.innerHTML = isSmartPhone
+        ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+        : readi18nPhrases("RC_usingUSBMicrophone", language);
+      elems.subtitle.style.fontSize = "1.1rem";
+
       const calibrate = async (isSmartPhone) => {
         const debug = false;
         if (debug) {
@@ -1097,11 +1111,14 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
           };
         } else {
           elems.displayContainer.style.display = "flex";
-          elems.displayContainer.style.justifyContent = "center";
+          elems.displayContainer.style.marginLeft = "0px";
           elems.displayContainer.style.flexDirection = "column";
           elems.displayUpdate.style.display = "flex";
-          elems.displayUpdate.style.justifyContent = "center";
+          elems.displayUpdate.style.marginLeft = "0px";
           elems.displayUpdate.style.flexDirection = "column";
+          elems.displayQR.style.display = "flex";
+          elems.displayQR.style.marginLeft = "0px";
+          elems.displayQR.style.flexDirection = "column";
           speakerParameters.microphoneName = selectedMic;
           speakerParameters.isSmartPhone = isSmartPhone;
           speakerParameters.calibrateSoundCheck = calibrateSoundCheck.current;

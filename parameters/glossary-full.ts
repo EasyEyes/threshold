@@ -1223,27 +1223,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0,0,0,1",
     explanation:
-      "The color of the target font, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
-    type: "text",
-    default: "0,0,0,1",
-    categories: "",
-  },
-  {
-    name: "markColorRGB",
-    availability: "now",
-    example: "",
-    explanation:
-      "The color of the instruction font, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
-    type: "text",
-    default: "0,0,0,1",
-    categories: "",
-  },
-  {
-    name: "instructionFontColorRGBA",
-    availability: "now",
-    example: "",
-    explanation:
-      "The color of the instruction font, in RGBA, on a scale of 0 to 1 for each dimension. Please refer to screenColorRGB for the background color.",
+      "fontColorRGBA is the color of the target font, in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color.",
     type: "text",
     default: "0,0,0,1",
     categories: "",
@@ -1366,6 +1346,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       'instructionFont (default empty) sets the font used to display instructions to the participant. The parameter"font" applies to the target and stimulus text, and instructionFont applies to the instructional text. Four cases are selected by instructionFontSource=\ndefaultForLanguage: We recommend leaving instructionFont blank and setting instructionFontSource to defaultForLanguage, which will result in using whatever font is recommended by the EasyEyes International Phrases sheet for the chosen instructionLanguage. This allows runtime selection of instructionLanguage by the participant. For each language, the EasyEyes International Phrases table recommends a font from the Noto serif family, which are all served by Google Fonts.\nfile:  instructionFont is the file name (including extension .woff2, .woff, .otf, or .ttf) of a font in your Fonts folder in your Pavlovia account. Be sure that your font can render the characters of the instructionLanguage you pick. \ngoogle: instructionFont is a filename (including extension) of a font on the Google Fonts server.\nserver: instructionFont is a URL pointing to the desired font on a font server, e.g. Adobe. ("server" support is coming.)\nbrowser: instructionFont should be a string for the browser expressing your font preference.\n     Noto Fonts. The EasyEyes International Phrases table recommends the appropriate "Noto" font, available from Google and Adobe at no charge. Wiki says, "Noto is a font family comprising over 100 individual fonts, which are together designed to cover all the scripts encoded in the Unicode standard." Various fonts in the Noto serif family cover all the worlds languages that are recognized by unicode. https://en.wikipedia.org/wiki/Noto_fonts  \nWe plan to use the free Google Fonts server, which serves all the Noto fonts.\n     Runtime language selection. To allow language selection by the participant at runtime, we will ask the Google Fonts server to serve an appropriate font (from the Noto Serif family) as specified by the EasyEyes International Phrases sheet. \n     Fonts load early. We\'ll get the browser to load all needed fonts at the beginning of the experiment, so the rest of the experiment can run without internet or font-loading delay. Of course, we hope the computer eventually reconnects to send the experiment\'s data to Pavlovia, where the scientist can retrieve it.',
     type: "text",
     default: "Verdana",
+    categories: "",
+  },
+  {
+    name: "instructionFontColorRGBA",
+    availability: "now",
+    example: "",
+    explanation:
+      "instructionFontColorRGBA is the color of the instruction font, in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color.",
+    type: "text",
+    default: "0,0,0,1",
     categories: "",
   },
   {
@@ -1536,6 +1526,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '⭑ markingClippedToStimulusRectBool TRUE requests that fixation and target marking be restricted to the stimulus rect, protecting the screen margins. Otherwise they are allowed to extend to the screen edges, a "full bleed".',
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "markingColorRGB",
+    availability: "now",
+    example: "",
+    explanation:
+      "markingColorRGB is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color.",
+    type: "text",
+    default: "0,0,0,1",
     categories: "",
   },
   {
