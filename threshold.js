@@ -165,6 +165,7 @@ import {
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
   addApparatusInfoToData,
+  getViewingDistancedCm,
 } from "./components/utils.js";
 import {
   buildWindowErrorHandling,
@@ -4318,10 +4319,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
       /* -------------------------------------------------------------------------- */
       // ! distance
-      if (ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block)))
+      if (
+        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
+      ) {
+        psychoJS.experiment.addData(
+          "viewingDistancePredictedCm",
+          getViewingDistancedCm(
+            viewingDistanceCm.current,
+            displayOptions,
+            rc.windowHeightPx.value
+          )
+        );
         viewingDistanceCm.current = rc.viewingDistanceCm
           ? rc.viewingDistanceCm.value
           : viewingDistanceCm.current;
+      }
 
       addApparatusInfoToData(displayOptions, rc, psychoJS, stimulusParameters);
 

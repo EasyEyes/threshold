@@ -489,6 +489,14 @@ export const addApparatusInfoToData = (
 ) => {
   const pxPerCm = Math.round(displayOptions.pixPerCm * 100) / 100;
   psychoJS.experiment.addData("viewingDistanceCm", viewingDistanceCm.current);
+  psychoJS.experiment.addData(
+    "viewingDistanceActualCm",
+    getViewingDistancedCm(
+      viewingDistanceCm.current,
+      displayOptions,
+      rc.windowHeightPx.value
+    )
+  );
   psychoJS.experiment.addData("pxPerCm", pxPerCm);
   psychoJS.experiment.addData("screenWidthPx", rc.windowWidthPx.value);
   psychoJS.experiment.addData("screenHeightPx", rc.windowHeightPx.value);
@@ -993,4 +1001,12 @@ export const cursorNearFixation = (cX, cY) => {
   const cursorIsNearFixation =
     cursorDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx;
   return cursorIsNearFixation;
+};
+
+export const getViewingDistancedCm = (vCm, displayOptions, screenHeightPx) => {
+  const pxPerCm = Math.round(displayOptions.pixPerCm * 100) / 100;
+  // using the formula: dCm = sqrt(hCm^2 - vCm^2)
+  // where vCm is the vertical distance, the camera is 0.5 cm above the screen
+  // so vCm = screen height / 2 + 0.5 m
+  return Math.sqrt(vCm ** 2 - (screenHeightPx / (2 * pxPerCm) + 0.5) ** 2);
 };
