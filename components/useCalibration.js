@@ -183,6 +183,7 @@ export const saveCheckData = (rc, psychoJS) => {
   }
 };
 
+// TODO: Clean up sound calibration code after the paper deadline
 export const calibrateAudio = async (reader) => {
   const [calibrateSoundLevel, calibrateLoudspeaker] = [
     ifTrue(
@@ -1012,6 +1013,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   const dropdown = document.createElement("select");
   dropdown.id = "micList";
   dropdown.name = "micList";
+
   // pick "No match" as the default
   const defaultMic = document.createElement("option");
   defaultMic.value = "No match";
@@ -1027,14 +1029,18 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   });
 
   // css
-  dropdown.style.width = "25%";
+  dropdown.style.width = "fit-content";
   dropdown.style.height = "100%";
   dropdown.style.fontSize = "1rem";
   dropdown.style.fontWeight = "bold";
   dropdown.style.color = "black";
-  dropdown.style.backgroundColor = "white";
+  dropdown.style.backgroundColor = "#e2e0e0";
   dropdown.style.border = "none";
   dropdown.style.borderRadius = "0.5rem";
+
+  //make the dropdown menu look like a button
+  dropdown.style.padding = "0.5rem";
+  dropdown.style.cursor = "pointer";
 
   instructions.style.width = "100%";
   instructions.style.fontSize = "1.1rem";
