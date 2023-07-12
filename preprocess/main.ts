@@ -236,8 +236,6 @@ export const prepareExperimentFileForThreshold = async (
     targetSoundFolder: folderList.targetSoundFolder,
   };
   const missingFolderErrors: any = [];
-  console.log("maskerAndTargetFolders", maskerAndTargetFolders);
-  console.log("folderList", folderList);
   if (
     easyeyesResources.folders.length > 0 &&
     (folderList.maskerSoundFolder.length > 0 ||

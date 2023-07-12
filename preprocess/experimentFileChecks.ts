@@ -597,7 +597,7 @@ export const isSoundFolderMissing = (
     requestedFolderList[key].forEach((requestedFolder: any) => {
       if (!existingFolderList.includes(requestedFolder + ".zip")) {
         // console.log(requestedFolder+".zip")
-        missingFolderList.push(requestedFolder);
+        missingFolderList.push(requestedFolder + ".zip");
       }
     });
     if (missingFolderList.length)

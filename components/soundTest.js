@@ -6,6 +6,7 @@ import {
   soundCalibrationResults,
   soundGainTWR,
   ICalibDBSPL,
+  calibrateSoundCheck,
 } from "./global";
 import { plotForAllHz, plotSoundLevels1000Hz } from "./soundTestPlots";
 import {

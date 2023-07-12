@@ -301,15 +301,27 @@ export const calibrateAudio = async (reader) => {
       showSoundCalibrationResultsBool &&
       calibrateSoundCheck.current !== "none"
     ) {
+      const title1000Hz =
+        "Sound Level at 1000 Hz" +
+        (calibrateSoundCheck.current === "system"
+          ? " (Loudspeaker + Mic)"
+          : "(Loudspeaker)");
+      const titleallHz =
+        "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers." +
+        (calibrateSoundCheck.current === "system"
+          ? " (Loudspeaker + Mic)"
+          : "(Loudspeaker)");
       displayParameters1000Hz(
         elems,
         soundLevels,
-        soundCalibrationResults.current
+        soundCalibrationResults.current,
+        title1000Hz
       );
       displayParametersAllHz(
         elems,
         invertedImpulseResponse.current,
-        allHzCalibrationResults
+        allHzCalibrationResults,
+        titleallHz
       );
     }
 
@@ -543,17 +555,28 @@ export const calibrateAudio = async (reader) => {
                   });
                   if (calibrateSoundCheck.current !== "none") {
                     //show sound calibration results
+                    const title1000Hz =
+                      "Sound Level at 1000 Hz for" +
+                      micId +
+                      (calibrateSoundCheck.current === "system"
+                        ? " (Loudspeaker + Microphone)"
+                        : " (Microphone)");
+                    const titleallHz =
+                      "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers." +
+                      (calibrateSoundCheck.current === "system"
+                        ? " (Loudspeaker + Microphone)"
+                        : " (Microphone)");
                     displayParameters1000Hz(
                       elems,
                       soundLevels,
                       result,
-                      "1000 Hz Calibration Results for " + micId
+                      title1000Hz
                     );
                     displayParametersAllHz(
                       elems,
                       result.componentIIR,
                       result,
-                      "All Hz Calibration Results for " + micId
+                      titleallHz
                     );
                   }
                 }
