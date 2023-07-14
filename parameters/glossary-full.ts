@@ -1952,7 +1952,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute an HDR movie. A one-frame movie will display a static image for the specified targetDurationSec. movieComputeJS is used if and only if the targetKind is movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box. The program must define and fill the “movieNit” array. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. When EasyEyes reads your compute js file, it processes the list of argument in the function definition. You can include any of the INPUT PARAMETERS defined this GLOSSARY in your list of arguments. At runtime, EasyEyes will retrieve their values and provide whichever input parameters your code specifies.\n\nTIMING: Each movie trial reports timing data in the CSV results file. Each movie trial, computes a movie by first running the scientist\'s movieComputeJS and then passing it through the ffMPEG encoder. Here are some results using tiltedFlickeringGrating.js on Chrome on a MacBook Pro (13-inch, M1, 2020), asking ffMPEG to use the avc1 : libx264 codec. Total prep time (watching the wait icon) grows linearly with the product of pixels per frame and number of frames. \ntimeSec = 1 + MPix*frames/4\nwhere timeSec is the prep time in seconds, MPix means a mega pixel, i.e. one million pixels, and frames is the number of frames in the movie. 25% of this is the runtime of the tiltedFlickeringGrating.js, and 75% is ffMPEG. The formula for just ffMPEG is\nffMpegSec = 0.7 + MPix*frames/6\nThe 6 MPix/s rate seems fine. The fixed 0.7 s overhead is surprising. We don\'t yet know what it\'s doing during that time.\n\nTIMING DATA IN CSV FILE, for each trial\ncomputeMovieArraySec, e.g. 1.1. The time (in sec) spent in the scientist’s movie.js to prepare compute the movie for this trial.\ncomputeFfmpegSec, e.g. 2.1, The time (in sec) spent in ffMPEG to encode the movie for this trial\ncomputeTotalSec, e.g. 3.2, Total time (in sec) preparing the movie for this trial.\ncomputePixels, e.g., 1000000, The number of pixels in each frame.\ncomputeFrames, e.g. 10, The number of frames in the movie.\ncomputeCodec is the name is of the codec, different for Chrome and Safari.\n\n(NOT UP TO DATE) ADVICE ON HOW TO WRITE YOUR JavaScript MOVIE ROUTINE\nxyDeg is a 2*width*height float array, which provides the exact x,y visual coordinate of each screen pixel in movieRectPx. \nxDeg and yDeg are float vectors, which provide approximate visual coordinates of the screen pixels in movieRectPx. \nTo compute a (possibly one-frame) movie as a visual stimulus, we usually need the visual coordinate of each pixel. EasyEyes provides the width*height*2 array xyDeg[i,j,k], where each 2-number element (indexed by k) is the x,y position in deg of pixel i,j. Use of the xyDeg array does not allow speed up by computational separation of x and y, so you may prefer to use the separable approximation provided by the width-long vector xDeg and height-long vector yDeg, which provide approximate visual coordinates of the pixels in movieRectPx. (Note: xyDeg takes time and space for EasyEyes to compute, and not all movieComputeJS programs need it, so EasyEyes skips making xyDeg if the string  "xyDeg" is not found in the movieComputeJS file.)\n\nEXAMPLE: movieComputeJS might contain the filename "VerticalGrating.js", and that file might contain:\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length).fill(0)\n        .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n        gx.push(\n                Math.exp(-((x-targetEccentrictyXDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nfor (const y of yDeg) {\n        gy.push(\n                Math.exp(-((y-targetEccentrictyYDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n        fx[i]=gx[i]*Math.sin(\n                2*Math.PI*((xDeg[i]-targetEccentrictyXDeg)*targetCyclePerDeg + targetPhase/360)\n        )\n}\nfor (j = 0; j < yDeg.length; j++) {\n        for (i = 0; i < xDeg.length; i++) {\n                imageNit[i][j] = (255/2) * (1 + targetContrast * gy[j] * fx[i]);\n        }\n}',
+      '⭑ movieComputeJS holds the filename (including extension “.js”) of a JavaScript program to compute an HDR movie. A one-frame movie will display a static image for the specified targetDurationSec. movieComputeJS is used if and only if the targetKind is movie. When the experiment table is compiled, the program file must already have been uploaded through the EasyEyes submission box. The program must define and fill the “movieNit” array. The program can use several predefined variables, including: movieRectPx, tSec, xyDeg, xDeg, and yDeg, as well as the EasyEyes input parameters targetContrast, targetEccentricityXDeg, targetEccentricityYDeg, targetCyclePerDeg, targetHz, targetPhaseDeg, targetOrientationDeg (clockwise from vertical), targetSpaceConstantDeg (the 1/e radius), targetTimeConstantSec, movieRectDeg, and movieLuminanceNit. When EasyEyes reads your compute js file, it processes the list of argument in the function definition. You can include any of the INPUT PARAMETERS defined in this GLOSSARY in your list of arguments. At runtime, EasyEyes will retrieve their values and provide whichever input parameters your code specifies.\n\nTIMING: Each movie trial reports timing data in the CSV results file. Each movie trial, computes a movie by first running the scientist\'s movieComputeJS and then passing it through the ffMPEG encoder. Here are some results using tiltedFlickeringGrating.js on Chrome on a MacBook Pro (13-inch, M1, 2020), asking ffMPEG to use the avc1 : libx264 codec. Total prep time (watching the wait icon) grows linearly with the product of pixels per frame and number of frames. \ntimeSec = 1 + MPix*frames/4\nwhere timeSec is the prep time in seconds, MPix means a mega pixel, i.e. one million pixels, and frames is the number of frames in the movie. 25% of this is the runtime of the tiltedFlickeringGrating.js, and 75% is ffMPEG. The formula for just ffMPEG is\nffMpegSec = 0.7 + MPix*frames/6\nThe 6 MPix/s rate seems fine. The fixed 0.7 s overhead is surprising. We don\'t yet know what it\'s doing during that time.\n\nTIMING DATA IN CSV FILE, for each trial\ncomputeMovieArraySec, e.g. 1.1. The time (in sec) spent in the scientist’s movie.js to prepare compute the movie for this trial.\ncomputeFfmpegSec, e.g. 2.1, The time (in sec) spent in ffMPEG to encode the movie for this trial\ncomputeTotalSec, e.g. 3.2, Total time (in sec) preparing the movie for this trial.\ncomputePixels, e.g., 1000000, The number of pixels in each frame.\ncomputeFrames, e.g. 10, The number of frames in the movie.\ncomputeCodec is the name is of the codec, different for Chrome and Safari.\n\n(NOT UP TO DATE) ADVICE ON HOW TO WRITE YOUR JavaScript MOVIE ROUTINE\nxyDeg is a 2*width*height float array, which provides the exact x,y visual coordinate of each screen pixel in movieRectPx. \nxDeg and yDeg are float vectors, which provide approximate visual coordinates of the screen pixels in movieRectPx. \nTo compute a (possibly one-frame) movie as a visual stimulus, we usually need the visual coordinate of each pixel. EasyEyes provides the width*height*2 array xyDeg[i,j,k], where each 2-number element (indexed by k) is the x,y position in deg of pixel i,j. Use of the xyDeg array does not allow speed up by computational separation of x and y, so you may prefer to use the separable approximation provided by the width-long vector xDeg and height-long vector yDeg, which provide approximate visual coordinates of the pixels in movieRectPx. (Note: xyDeg takes time and space for EasyEyes to compute, and not all movieComputeJS programs need it, so EasyEyes skips making xyDeg if the string  "xyDeg" is not found in the movieComputeJS file.)\n\nEXAMPLE: movieComputeJS might contain the filename "VerticalGrating.js", and that file might contain:\n// Compute vertical Gabor.\nvar imageNit = new Array(xDeg.length).fill(0)\n        .map(() => new Array(yDeg.length).fill(0));\nvar gx = [];\nvar gy = [];\nfor (const x of xDeg) {\n        gx.push(\n                Math.exp(-((x-targetEccentrictyXDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nfor (const y of yDeg) {\n        gy.push(\n                Math.exp(-((y-targetEccentrictyYDeg)/targetSpaceConstantDeg)**2)\n        );\n}\nvar fx = [];\nfor (i = 0; i < xDeg.length; i++) {\n        fx[i]=gx[i]*Math.sin(\n                2*Math.PI*((xDeg[i]-targetEccentrictyXDeg)*targetCyclePerDeg + targetPhase/360)\n        )\n}\nfor (j = 0; j < yDeg.length; j++) {\n        for (i = 0; i < xDeg.length; i++) {\n                imageNit[i][j] = (255/2) * (1 + targetContrast * gy[j] * fx[i]);\n        }\n}',
     type: "text",
     default: "",
     categories: "",
@@ -2073,6 +2073,46 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "notes Use this to add comments about the condition that you want preserved in the data file. Ignored by EasyEyes and saved with results.",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "measureLuminanceBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "measureLuminanceBool (default FALSE) turns on sampling by the photometer during stimulus presentation. (Initially implemented solely for targetKind='movie'.) This uses the Cambridge Research Systems Colorimeter, which must be plugged into a USB port of the computer. Use measureLuminanceHz and measureLuminanceDelaySec to set the sampling rate and start time from stimulus onset. EasyEyes saves a data file called luminances-EXPERIMENT-BLOCK-NAME.csv into the Downloads folder, where EXPERIMENT is the experiment name, BLOCK is the block number, and NAME is the conditionName. The first column is the time stamp, since the stimulus onset, of the luminance measurement. The second column is copied from movieValues. The third column is measured luminance in candelas per meter squared (also called nits). ",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "measureLuminanceHz",
+    availability: "now",
+    example: "",
+    explanation:
+      "measureLuminanceHz (default 1) sets the rate that the photometer is sampled. Note that the CRS Colorimeter is designed for slow precise measurements. If the stimulus is a movie, you'll typically set this frequency to match the frame rate of the movie, which might be 1/6 Hz.",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
+    name: "measureLuminanceDelaySec",
+    availability: "now",
+    example: "",
+    explanation:
+      "measureLuminanceDelaySec (default 5) sets the delay (which can be negative) from stimulus onset to taking of first luminance sample. Note that the CRS Colorimeter is designed for slow precise measurements. To achieve better than 12 bit precision, if you want the reading of a new luminance to be unaffected by the prior luminance, we recommend allowing 5 s for the device to settle at the new luminance before taking a reading. Thus, if targetKind='movie', you might run your movie with 6 s per frame (i.e. 1/6 Hz) and set measureLuminanceDelaySec=5.",
+    type: "numerical",
+    default: "5",
+    categories: "",
+  },
+  {
+    name: "movieValues",
+    availability: "now",
+    example: "",
+    explanation:
+      "movieValues (default empty) is a comma-separated list of numbers, one per frame of a movie. The length of the list determines the number of frames. This vector can be used by the scientist's computeMovie.js program to control, e.g. the contrast, of each frame of a movie, with one frame per value in this list. If movieMeasureLuminanceBool=TRUE then the movieValues list is reproduced as one of the columns in the luminancesXXX.csv data file that is dropped into the Downloads folder.",
     type: "text",
     default: "",
     categories: "",
@@ -2461,6 +2501,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
+      "⭑ screenColorRGB is the background color for the condition, in RGB, on a scale of 0 to 1 for each dimension. This is used to set the background of the rest of the screen to match the background of a movie.",
+    type: "text",
+    default: "0.92,0.92,0.92",
+    categories: "",
+  },
+  {
+    name: "screenColorRGBA",
+    availability: "now",
+    example: "",
+    explanation:
       "⭑ screenColorRGBA is the background color for the condition, in RGB, on a scale of 0 to 1 for each dimension. This is used to set the background of the rest of the screen to match the background of a movie.",
     type: "text",
     default: "0.92,0.92,0.92",
@@ -2710,7 +2760,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "⭑ Use the software model specifed by simulationModel to generale observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables type as a response method, regardles of the setting of responseTypedBool.",
+      "⭑ Use the software model specifed by simulationModel to generate observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables typed responses, regardless of the setting of responseTypedBool.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2748,7 +2798,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "blind",
     explanation:
-      "⭑ For debugging and checking it is often helpful to simulate the observer. simulationModel can be: \n• right: Always right.\n• wrong: Always wrong.\n• blind: This model merely presses a random response key. \n• ideal: This model does the same task as the human, picking the best response (i.e. maxmizing expected proportion correct) given the stimulus. Its threshold is a useful point of reference in analyzing human data. Without noise, the ideal will always be right. Since noise hasn't yet been implemented in EasyEyes, for now, this model just gives the right answer.\n• weibull: This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately measure its (unknown to Quest) threshold, when the rest of the QUEST parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.\nThe source code for our simulation model is here:\nhttps://github.com/EasyEyes/threshold/blob/a9ea5a6c64d3c5ff0aacfc01c86b6a5aecf64369/components/simulatedObserver.js",
+      "⭑ For debugging and checking it is often helpful to simulate the observer. simulationModel can be: \n• right: Always right.\n• wrong: Always wrong.\n• blind: This model merely presses a random response key. \n• ideal: This model does the same task as the human, picking the best response (i.e. maxmizing expected proportion correct) given the stimulus. Its threshold is a useful point of reference in analyzing human data. Without noise, the ideal will always be right. Since noise hasn't yet been implemented in EasyEyes, for now, this model just gives the right answer.\n• weibull: This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately estimate its (unknown to Quest) threshold, when the rest of the QUEST parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.\nThe source code for our simulation model is here:\nhttps://github.com/EasyEyes/threshold/blob/a9ea5a6c64d3c5ff0aacfc01c86b6a5aecf64369/components/simulatedObserver.js",
     type: "categorical",
     default: "ideal",
     categories: "right, wrong, blind, weibull, ideal",
@@ -3177,7 +3227,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0",
     explanation:
-      "🕑 targetWhenSec (default 0) indicates when the middle time of the target occurs relative to the middle of the movie.",
+      "🕑 targetWhenSec (default 0) indicates how much later the middle time of the target occurs relative to the middle of the movie.",
     type: "numerical",
     default: "0",
     categories: "",

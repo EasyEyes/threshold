@@ -234,7 +234,8 @@ export const _repeatedLetters_trialRoutineEachFrame = (
       showCharacterSetResponse,
       null,
       "",
-      targetKind.current
+      targetKind.current,
+      status.block_condition
     );
 
     instructions.tSTart = t;

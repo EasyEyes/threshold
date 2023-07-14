@@ -1,8 +1,12 @@
 import { Polygon, ShapeStim } from "../psychojs/src/visual";
 import { Color, to_px } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
-import { displayOptions, fixationConfig, letterConfig } from "./global";
-import { logger, XYPixOfXYDeg, cursorNearFixation } from "./utils";
+import { displayOptions, fixationConfig } from "./global";
+import {
+  XYPixOfXYDeg,
+  cursorNearFixation,
+  colorRGBASnippetToRGBA,
+} from "./utils";
 
 export const getFixationPos = (blockN, paramReader) => {
   const locationStrategy = paramReader.read(
@@ -88,6 +92,9 @@ export class Fixation {
       "markingFixationStrokeThickening",
       BC
     );
+    fixationConfig.color = colorRGBASnippetToRGBA(
+      reader.read("markingColorRGBA", BC)
+    );
     if (
       ["pixPerCm", "nearPointXYDeg", "nearPointXYPix"].every(
         (s) => displayOptions[s]
@@ -124,6 +131,7 @@ export class Fixation {
       );
       this.setVertices(theseVertices);
       this.setLineWidth(fixationConfig.strokeWidth);
+      this.setColor(fixationConfig.color);
     }
   }
   /**
@@ -215,6 +223,15 @@ export class Fixation {
   setLineWidth(width) {
     this.stims.forEach((stim) => stim.setLineWidth(width));
   }
+  setColor(color) {
+    color = new Color(color);
+    this.stims.forEach((stim) => {
+      // Set color of fixation, but not blanking circle
+      if (!(stim instanceof Polygon)) {
+        stim.setLineColor(color);
+      }
+    });
+  }
   get status() {
     return this.stims[0].status;
   }
@@ -228,10 +245,10 @@ export class Fixation {
     this.stims.forEach((stim) => (stim.status = s));
   }
   set tStart(t) {
-    this.stims.map((stim) => (stim.tStart = t));
+    this.stims.forEach((stim) => (stim.tStart = t));
   }
   set frameNStart(f) {
-    this.stims.map((stim) => (stim.frameNStart = f));
+    this.stims.forEach((stim) => (stim.frameNStart = f));
   }
 }
 

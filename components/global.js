@@ -100,8 +100,8 @@ export const font = {
 export const fontCharacterSet = { current: undefined, where: undefined };
 
 export const screenBackground = {
-  defaultColorRGBA: "0.92,0.92,0.92",
-  colorRGB: undefined,
+  defaultColorRGBA: "0.92,0.92,0.92,1",
+  colorRGBA: undefined,
 };
 
 export const fixationConfig = {
@@ -111,6 +111,7 @@ export const fixationConfig = {
   show: true,
   strokeLength: 45, // aka fixationStrokeLengthPx
   strokeWidth: 2, // aka fixationStrokeThicknessPx
+  color: undefined,
   markingBlankedNearTargetBool: undefined,
   markingBlankingPos: undefined,
   markingBlankingRadiusReEccentricity: undefined,

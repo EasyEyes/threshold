@@ -2455,6 +2455,30 @@ export const GLOSSARY: Glossary = {
     default: "0",
   },
   notes: { name: "notes", availability: "now", type: "text", default: "" },
+  measureLuminanceBool: {
+    name: "measureLuminanceBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  measureLuminanceHz: {
+    name: "measureLuminanceHz",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+  },
+  measureLuminanceDelaySec: {
+    name: "measureLuminanceDelaySec",
+    availability: "now",
+    type: "numerical",
+    default: "5",
+  },
+  movieValues: {
+    name: "movieValues",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   "questionAndAnswer@@": {
     name: "questionAndAnswer@@",
     availability: "now",

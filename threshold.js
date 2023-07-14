@@ -396,6 +396,7 @@ import {
   sendMessage,
 } from "./components/connectMatlab.js";
 import { readi18nPhrases } from "./components/readPhrases.js";
+import { updateColor } from "./components/color.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -627,11 +628,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   const readingSound = getReadingSound();
 
   // initial background color
-  screenBackground.colorRGB = paramReader.read(
-    "screenColorRGB",
-    "__ALL_BLOCKS__"
-  )[0];
-  loggerText(screenBackground.colorRGB);
+  screenBackground.colorRGBA = colorRGBASnippetToRGBA(
+    paramReader.read("screenColorRGBA", "__ALL_BLOCKS__")[0]
+  );
 
   // open window:
   psychoJS.openWindow({
@@ -1196,7 +1195,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
   }
 
-  function _instructionSetup(text) {
+  function _instructionSetup(text, blockOrCondition) {
     t = 0;
     instructionsClock.reset(); // clock
     frameN = -1;
@@ -1204,6 +1203,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructions.setWrapWidth(window.innerWidth * 0.8);
     instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
     instructions.setText(text);
+    updateColor(instructions, "instruction", blockOrCondition);
     instructions.setAutoDraw(true);
     dynamicSetSize([instructions], instructionsConfig.height);
   }
@@ -1222,6 +1222,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructions.setWrapWidth(wrapWidth);
     instructions.setPos(pos);
     instructions.setText(text);
+    updateColor(instructions, "instruction", status.block_condition);
     instructions.setAutoDraw(true);
   }
 
@@ -1786,6 +1787,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             readi18nPhrases("T_readingTaskQuestionPrompt", rc.language.value)
           );
         }
+        updateColor(instructions, "instruction", status.block_condition);
         instructions.setAutoDraw(true);
       }
 
@@ -1809,10 +1811,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       trialCounter.setText(trialCounterStr);
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      updateColor(trialCounter, "instruction", status.block);
       trialCounter.setAutoDraw(showCounterBool);
 
       // tinyHint
       renderObj.tinyHint.setText("");
+      updateColor(renderObj.tinyHint, "instruction", status.block);
       renderObj.tinyHint.setAutoDraw(false);
     };
 
@@ -1858,7 +1862,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (correct) correctSynth.play();
           },
           "readingAnswer",
-          targetKind.current
+          targetKind.current,
+          status.block
         );
 
         readingCurrentQuestionIndex.current++;
@@ -1904,7 +1909,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (!lastQuestion) psychoJS.experiment.nextEntry();
           },
           "readingAnswer",
-          targetKind.current
+          targetKind.current,
+          status.block
         );
 
         readingCurrentQuestionIndex.current++;
@@ -2188,9 +2194,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
 
       // set default background color for instructions
-      psychoJS.window.color = new util.Color(
-        colorRGBSnippetToRGB(screenBackground.defaultColorRGBA)
+      screenBackground.colorRGBA = colorRGBASnippetToRGBA(
+        paramReader.read("screenColorRGBA", status.block)[0]
       );
+      psychoJS.window.color = new util.Color(screenBackground.colorRGBA);
       psychoJS.window._needUpdate = true; // ! dangerous
 
       switchKind(targetKind.current, {
@@ -2198,7 +2205,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //setup instruction
           const instr = instructionsText.vocoderPhraseBegin(L);
           _instructionSetup(
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr,
+            status.block
           );
         },
         sound: () => {
@@ -2208,7 +2216,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ? instructionsText.speechInNoiseBegin(L)
               : instructionsText.soundBegin(L);
           _instructionSetup(
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr,
+            status.block
           );
         },
         letter: () => {
@@ -2223,7 +2232,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 responseType.current,
                 totalTrialsThisBlock.current
               ) +
-              instructionsText.initialEnd(L, responseType.current)
+              instructionsText.initialEnd(L, responseType.current),
+            status.block
           );
         },
         repeatedLetters: () => {
@@ -2239,7 +2249,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               totalTrialsThisBlock.current
             ) +
             instructionsText.initialEnd(L, responseType.current);
-          _instructionSetup(repeatedLettersBlockInstructs);
+          _instructionSetup(repeatedLettersBlockInstructs, status.block);
         },
         rsvpReading: () => {
           const rsvpReadingBlockInstructs =
@@ -2255,7 +2265,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "fontTrackingForLetters",
             status.block
           )[0];
-          _instructionSetup(rsvpReadingBlockInstructs);
+          _instructionSetup(rsvpReadingBlockInstructs, status.block);
           rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
             status.block
@@ -2267,12 +2277,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               instructionsText.readingEdu(
                 L,
                 paramReader.read("readingPages", status.block)[0]
-              )
+              ),
+            status.block
           );
 
           renderObj.tinyHint.setText(
             readi18nPhrases("T_readingNextPage", rc.language.value)
           );
+          updateColor(renderObj.tinyHint, "instruction", status.block);
           renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
           renderObj.tinyHint.setAutoDraw(true);
 
@@ -2299,14 +2311,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           )[0];
 
           readingParagraph.setFont(font.name);
-          readingParagraph.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
+          updateColor(readingParagraph, "marking", status.block);
           readingParagraph.setLetterSpacingByProportion(font.letterSpacing);
 
-          // ? background do we need it here?
-          screenBackground.colorRGB = paramReader.read(
-            "screenColorRGB",
-            status.block
-          )[0];
           // psychoJS.window.color = new util.Color(colorRGBSnippetToRGB(
           //   screenBackground.colorRGB
           // ))
@@ -2373,7 +2380,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         movie: () => {
           loggerText("inside movie");
           _instructionSetup(
-            snapshot.block === 0 ? instructionsText.initial(L) : ""
+            snapshot.block === 0 ? instructionsText.initial(L) : "",
+            status.block
           );
         },
       });
@@ -2402,6 +2410,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current
       );
       trialCounter.setText(trialCounterStr);
+      updateColor(trialCounter, "instruction", status.block);
       trialCounter.setAutoDraw(true);
 
       customInstructionText.current = getCustomInstructionText(
@@ -2410,7 +2419,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block
       );
       if (customInstructionText.current.length)
-        _instructionSetup(customInstructionText.current);
+        _instructionSetup(customInstructionText.current, status.block);
 
       return Scheduler.Event.NEXT;
     };
@@ -2468,11 +2477,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         letter: () => {
           // IDENTIFY
-          _instructionSetup(instructionsText.edu(rc.language.value));
+          _instructionSetup(
+            instructionsText.edu(rc.language.value),
+            status.block
+          );
 
           instructions2.setText(
             instructionsText.eduBelow(rc.language.value, responseType.current)
           );
+          updateColor(instructions2, "instruction", status.block);
           instructions2.setWrapWidth(window.innerWidth * 0.8);
           instructions2.setPos([
             -window.innerWidth * 0.4,
@@ -2492,24 +2505,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.setPos([D, 0]);
           target.setText("R");
           target.setHeight(h);
-          target.setColor(colorRGBASnippetToRGBA(font.defaultColorRGBA));
+          updateColor(target, "marking", status.block);
 
           // TODO maybe show four flankers in instructions, if radialAndTangential or horizontalAndVertical
           flanker1.setFont(instructionFont.current);
           flanker1.setPos([D - g, 0]);
           flanker1.setText("H");
           flanker1.setHeight(h);
-          flanker1.setColor(colorRGBASnippetToRGBA(font.defaultColorRGBA));
+          updateColor(flanker1, "marking", status.block);
 
           flanker2.setFont(instructionFont.current);
           flanker2.setPos([D + g, 0]);
           flanker2.setText("C");
           flanker2.setHeight(h);
-          flanker2.setColor(colorRGBASnippetToRGBA(font.defaultColorRGBA));
+          updateColor(flanker2, "marking", status.block);
 
           fixation.setVertices(getFixationVertices(h));
           fixation.setLineWidth(5);
           fixation.setPos([0, 0]);
+          fixation.setColor(
+            colorRGBASnippetToRGBA(
+              paramReader.read("markingColorRGBA", status.block)[0]
+            )
+          );
 
           fixation.setAutoDraw(true);
           target.setAutoDraw(true);
@@ -2520,11 +2538,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           loggerText("TODO rsvpLetter eduInstructionRoutineBegin"),
         movie: () => {
           // IDENTIFY
-          _instructionSetup(instructionsText.edu(rc.language.value));
+          _instructionSetup(
+            instructionsText.edu(rc.language.value),
+            status.block
+          );
 
           instructions2.setText(
             instructionsText.eduBelow(rc.language.value, responseType.current)
           );
+          updateColor(instructions2, "instruction", status.block);
           instructions2.setWrapWidth(window.innerWidth * 0.8);
           instructions2.setPos([
             -window.innerWidth * 0.4,
@@ -2541,6 +2563,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.setVertices(getFixationVertices(h));
           fixation.setLineWidth(5);
           fixation.setPos([0, 0]);
+          fixation.setColor(
+            colorRGBASnippetToRGBA(
+              paramReader.read("markingColorRGBA", status.block)[0]
+            )
+          );
           fixation.setAutoDraw(true);
         },
       });
@@ -2602,7 +2629,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // function blockInstructionRoutineBegin(snapshot) {
   //   return async function () {
   //     TrialHandler.fromSnapshot(snapshot);
-  //     _instructionSetup(instructionsText.block(snapshot.block + 1));
+  //     _instructionSetup(instructionsText.block(snapshot.block + 1), snapshot.block+1);
 
   //     clickedContinue.current = false;
   //     document.addEventListener("click", _clickContinue);
@@ -2800,7 +2827,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       font.colorRGBA = reader.read("fontColorRGBA", BC);
       font.letterSpacing = reader.read("fontTrackingForLetters", BC);
 
-      screenBackground.colorRGB = reader.read("screenColorRGB", BC);
+      screenBackground.colorRGBA = colorRGBASnippetToRGBA(
+        reader.read("screenColorRGBA", BC)
+      );
 
       showCounterBool = reader.read("showCounterBool", BC);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
@@ -2852,9 +2881,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       // set background color
-      psychoJS.window.color = new util.Color(
-        colorRGBSnippetToRGB(screenBackground.colorRGB)
-      );
+      psychoJS.window.color = new util.Color(screenBackground.colorRGBA);
       psychoJS.window._needUpdate = true; // ! dangerous
       /* -------------------------------------------------------------------------- */
 
@@ -2866,7 +2893,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             instructionsText.trial.fixate["vocoderPhrase"](rc.language.value),
             w,
             // [-window.innerWidth / 2 + w * 1.1, 0]
-            [-window.innerWidth * 0.4, window.innerHeight * 0.4]
+            [-window.innerWidth * 0.4, window.innerHeight * 0.4],
+            status.block_condition
           );
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
@@ -2991,6 +3019,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // tinyHint
           renderObj.tinyHint.setText(
             readi18nPhrases("T_readingNextPage", rc.language.value)
+          );
+          updateColor(
+            renderObj.tinyHint,
+            "instruction",
+            status.block_condition
           );
           renderObj.tinyHint.setAutoDraw(true);
 
@@ -3174,6 +3207,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               target.setPadding(font.padding);
 
               target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+              updateColor(target, "marking", status.block_condition);
 
               allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
               break;
@@ -3194,13 +3228,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     );
                   }
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+                  updateColor(target, "marking", status.block_condition);
 
                   var flankersHeightPx = target.getHeight();
                   // flanker1 === outer flanker
                   // flanker2 === inner flanker
                   flankersUsed.forEach((f, i) => {
                     f.setFont(font.name);
-                    f.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
+                    updateColor(f, "marking", status.block_condition);
                     f.setText(flankerCharacters[i]);
                     f.setHeight(flankersHeightPx);
                     f.setPadding(font.padding);
@@ -3254,6 +3289,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     stimulusParameters.widthPx,
                   ]);
                   target.setPadding(font.padding);
+                  updateColor(target, "marking", status.block_condition);
 
                   flanker1.setAutoDraw(false);
                   flanker2.setAutoDraw(false);
@@ -3310,6 +3346,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           showCharacterSet.setPos([0, 0]);
           showCharacterSet.setText("");
+          updateColor(showCharacterSet, "marking", status.block_condition);
           // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
           if (showConditionNameConfig.showTargetSpecs)
@@ -3724,6 +3761,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (showConditionNameConfig.showTargetSpecs) {
         targetSpecs.setText(showConditionNameConfig.targetSpecs);
         targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
+        updateColor(targetSpecs, "instruction", BC);
         targetSpecs.setAutoDraw(true);
       }
       showConditionName(conditionName, targetSpecs);
@@ -3744,6 +3782,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialCounter.setFont(instructionFont.current);
       trialCounter.setHeight(trialCounterConfig.height);
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      updateColor(trialCounter, "instruction", BC);
       trialCounter.setAutoDraw(showCounterBool);
 
       for (const thisComponent of trialComponents)
@@ -4088,6 +4127,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               maskerSoundFolder.current
             );
             targetSpecs.setText(showConditionNameConfig.targetSpecs);
+            updateColor(targetSpecs, "instruction", status.block_condition);
             targetSpecs.setAutoDraw(true);
           }
           if (invertedImpulseResponse.current)
@@ -4132,6 +4172,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 targetSoundFolder.current
               );
               targetSpecs.setText(showConditionNameConfig.targetSpecs);
+              updateColor(targetSpecs, "instruction", status.block_condition);
               targetSpecs.setAutoDraw(true);
             }
           } else {
@@ -4165,6 +4206,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 maskerSoundFolder.current
               );
               targetSpecs.setText(showConditionNameConfig.targetSpecs);
+              updateColor(targetSpecs, "instruction", status.block_condition);
               targetSpecs.setAutoDraw(true);
             }
           }
@@ -4251,13 +4293,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         instructionsText.trial.respond["spacing"](
           rc.language.value,
           responseType.current
-        )
-      );
-      instructions.setText(
-        instructionsText.trial.respond["spacing"](
-          rc.language.value,
-          responseType.current
-        )
+        ),
+        status.block_condition
       );
 
       //use google sheets phrases for instructions
@@ -4267,16 +4304,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             rc.language.value,
             responseType.current
           );
-          _instructionSetup(instr);
-          instructions.setText(instr);
+          _instructionSetup(instr, status.block_condition);
         },
         vocoderPhrase: () => {
           // change instruction
           const instr = instructionsText.trial.respond["vocoderPhrase"](
             rc.language.value
           );
-          _instructionSetup(instr);
-          instructions.setText(instr);
+          _instructionSetup(instr, status.block_condition);
         },
         sound: () => {
           const instr =
@@ -4285,8 +4320,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   rc.language.value
                 )
               : instructionsText.trial.respond["sound"](rc.language.value);
-          _instructionSetup(instr);
-          instructions.setText(instr);
+          _instructionSetup(instr, status.block_condition);
         },
       });
       instructions.setAutoDraw(false);
@@ -4310,6 +4344,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setText(
             readingThisBlockPages[readingPageIndex.current]
           );
+          updateColor(readingParagraph, "marking", status.block_condition);
 
           // AUTO DRAW
           readingParagraph.setAutoDraw(true);
@@ -4880,6 +4915,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               0.02
             )}]`;
             targetSpecs.setText(showConditionNameConfig.targetSpecs);
+            updateColor(targetSpecs, "instruction", status.block_condition);
             showConditionName(conditionName, targetSpecs);
           }
         }
@@ -4976,7 +5012,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               showCharacterSetResponse,
               null,
               "",
-              "sound"
+              "sound",
+              status.block_condition
             );
             speechInNoiseTargetList.current = undefined;
           }
@@ -5002,7 +5039,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               showCharacterSetResponse,
               null,
               "",
-              targetKind.current
+              targetKind.current,
+              status.block_condition
             );
 
             instructions.tSTart = t;
@@ -5031,12 +5069,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               showCharacterSetResponse,
               null,
               "",
-              targetKind.current
+              targetKind.current,
+              status.block_condition
             );
 
             // instructions.setText(
             //   "Please identify the orientation by selecting a letter.\n V means vertical, H means horizontal, R means tilted right, and L means tilted left."
             // );
+            updateColor(instructions, "instruction", status.block_condition);
             instructions.tSTart = t;
             instructions.frameNStart = frameN;
             instructions.setAutoDraw(true);
@@ -5083,6 +5123,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         if (customInstructions.length) {
           instructions.setText(customInstructions);
+          updateColor(instructions, "instruction", status.block_condition);
           instructions.tSTart = t;
           instructions.frameNStart = frameN;
           instructions.setAutoDraw(true);

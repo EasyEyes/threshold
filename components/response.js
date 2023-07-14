@@ -23,7 +23,12 @@ import { getFontFamilyName } from "./fonts";
 import { phraseIdentificationResponse, font } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import { scaleFontSizeToFit, getMinFontSize } from "./showCharacterSet";
-import { logger, showCursor, toFixedNumber } from "./utils";
+import {
+  colorRGBASnippetToRGBA,
+  logger,
+  showCursor,
+  toFixedNumber,
+} from "./utils";
 
 export const _responseTypes = {
   // [click, type, keypad, speak]
@@ -142,6 +147,9 @@ export const setupPhraseIdentification = (
       categoryItem.innerHTML = categoryChild;
       const fontFamily = getFontFamilyName(font.name);
       categoryItem.style.fontFamily = fontFamily;
+      categoryItem.style.color = colorRGBASnippetToRGBA(
+        reader.read("markingColorRGBA", BC)
+      );
       if (fontSize) categoryItem.style.fontSize = String(fontSize) + "px";
       categoryItem.onclick = () => {
         // Only register one response per category
@@ -164,6 +172,9 @@ export const setupPhraseIdentification = (
             `phrase-identification-category-title-${categoryId}`
           );
           correspondingFeedbackText.innerHTML = categoryChild;
+          correspondingFeedbackText.style.color = colorRGBASnippetToRGBA(
+            reader.read("markingColorRGBA", BC)
+          );
           correspondingFeedbackText.classList.add(
             answerIsCorrect
               ? "phrase-identification-item-correct"

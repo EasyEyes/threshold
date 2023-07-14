@@ -63,6 +63,7 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
       characterSet: fontCharacterSet.current.join(""),
     });
   });
+  stims.forEach((s) => updateColor(s, "marking", status.block_condition));
   return stims;
 };
 

@@ -36,6 +36,7 @@ import {
   noteStimulusOnsetForPhraseIdentification,
   showPhraseIdentification,
 } from "./response";
+import { updateColor } from "./color";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -122,21 +123,24 @@ export class RSVPReadingTargetSet {
         topRowPosition,
         this._heightPx,
         this._spacingPx,
-        `topFlanker-${this.orderNumber}`
+        `topFlanker-${this.orderNumber}`,
+        this.BC
       );
       const targetRowLetters = _generateLetterStimsForWord(
         strings[1],
         this.position,
         this._heightPx,
         this._spacingPx,
-        `middleRow-${this.orderNumber}`
+        `middleRow-${this.orderNumber}`,
+        this.BC
       );
       const bottomRowFlankerLetters = _generateLetterStimsForWord(
         strings[2],
         bottomRowPosition,
         this._heightPx,
         this._spacingPx,
-        `bottomFlanker-${this.orderNumber}`
+        `bottomFlanker-${this.orderNumber}`,
+        this.BC
       );
       return [
         ...topRowFlankerLetters,
@@ -149,7 +153,8 @@ export class RSVPReadingTargetSet {
         this.position,
         this._heightPx,
         this._spacingPx,
-        `middleRow-${this.orderNumber}`
+        `middleRow-${this.orderNumber}`,
+        this.BC
       );
     }
   }
@@ -181,6 +186,7 @@ export class RSVPReadingTargetSet {
     if (font.letterSpacing) {
       readingStim.setLetterSpacingByProportion(font.letterSpacing);
     }
+    updateColor(readingStim, "marking", this.BC);
     return [readingStim];
   }
 }
@@ -319,7 +325,8 @@ const _generateLetterStimsForWord = (
   position,
   heightPx,
   spacingPx,
-  name
+  name,
+  BC
 ) => {
   const letterOffsets = getEvenlySpacedValues(word.length, spacingPx);
   const letterPositions = letterOffsets.map((xOffset) => [
@@ -330,7 +337,7 @@ const _generateLetterStimsForWord = (
     ? `${name}-letterWordStim-${word}`
     : `letterWordStim-${word}`;
   const letters = letterPositions.map((p, i) => {
-    return new TextStim({
+    const s = new TextStim({
       name: nameBase + `-${word[i]}`,
       win: psychoJS.window,
       text: word[i],
@@ -344,6 +351,8 @@ const _generateLetterStimsForWord = (
       opacity: 1.0,
       depth: 999999,
     });
+    updateColor(s, "marking", BC);
+    return s;
   });
   return letters;
 };

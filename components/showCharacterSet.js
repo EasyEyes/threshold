@@ -1,3 +1,4 @@
+import { paramReader } from "../threshold";
 import { switchKind } from "./blockTargetKind";
 import {
   showCharacterSetResponse,
@@ -36,14 +37,21 @@ export function setupClickableCharacterSet(
   responseRegister,
   extraFunction = null,
   extraCharClassName = "",
-  targetKind = ""
+  targetKind = "",
+  blockOrCondition
 ) {
   const characterSetHolder = document.createElement("div");
   characterSetHolder.id = "characterSet-holder";
   characterSetHolder.className = "characterSet-holder";
 
   characterSetHolder.style.fontFamily = `"${font}"`;
-  characterSetHolder.style.color = colorRGBASnippetToRGBA(globalFont.colorRGBA);
+
+  // Set color based on specified instruction color
+  let color = paramReader.read("instructionFontColorRGBA", blockOrCondition);
+  if (Array.isArray(color)) color = color[0];
+  color = colorRGBASnippetToRGBA(color);
+  characterSetHolder.style.color = color;
+
   characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
   if (letterSpacing)
     characterSetHolder.style.letterSpacing = String(letterSpacing) + "em";
@@ -64,7 +72,8 @@ export function setupClickableCharacterSet(
     responseRegister,
     extraFunction,
     extraCharClassName,
-    targetKind
+    targetKind,
+    blockOrCondition
   );
 
   document.body.appendChild(characterSetHolder);
@@ -94,7 +103,8 @@ export function updateClickableCharacterSet(
   responseRegister,
   extraFunction = null,
   extraCharClassName = "",
-  targetKind = ""
+  targetKind = "",
+  blockOrCondition
 ) {
   const characterSetHolder = document.querySelector(".characterSet-holder");
   while (characterSetHolder.firstChild) {
@@ -107,7 +117,8 @@ export function updateClickableCharacterSet(
     responseRegister,
     extraFunction,
     extraCharClassName,
-    targetKind
+    targetKind,
+    blockOrCondition
   );
   return characterSetHolder;
 }
@@ -120,7 +131,8 @@ const pushCharacterSet = (
   responseRegister,
   extraFunction = null,
   extraCharClassName = "",
-  targetKind = ""
+  targetKind = "",
+  blockOrCondition
 ) => {
   for (const a of ans) {
     const characterSet = document.createElement("span");
@@ -140,7 +152,11 @@ const pushCharacterSet = (
       addFakeConnection && targetKind !== "reading" ? `&zwj;${a}&zwj;` : a;
     characterSet.style.direction = globalFont.ltr ? "ltr" : "rtl";
 
-    characterSet.style.color = colorRGBASnippetToRGBA(globalFont.colorRGBA);
+    // Set color based on specified instruction color
+    let color = paramReader.read("instructionFontColorRGBA", blockOrCondition);
+    if (Array.isArray(color)) color = color[0];
+    color = colorRGBASnippetToRGBA(color);
+    characterSet.style.color = color;
 
     // TODO customize for letter config
     characterSet.style.fontSize = "2rem";
