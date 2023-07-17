@@ -33,12 +33,6 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  _calibrateSoundCheck: {
-    name: "_calibrateSoundCheck",
-    availability: "now",
-    type: "category",
-    default: "goal",
-  },
   _calibrateScreenSizeCookieBool: {
     name: "_calibrateScreenSizeCookieBool",
     availability: "now",
@@ -50,6 +44,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "76",
+  },
+  _calibrateSoundCheck: {
+    name: "_calibrateSoundCheck",
+    availability: "now",
+    type: "category",
+    default: "goal",
   },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",
@@ -2382,6 +2382,24 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
+  measureLuminanceBool: {
+    name: "measureLuminanceBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+  },
+  measureLuminanceDelaySec: {
+    name: "measureLuminanceDelaySec",
+    availability: "now",
+    type: "numerical",
+    default: "5",
+  },
+  measureLuminanceHz: {
+    name: "measureLuminanceHz",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+  },
   movieComputeJS: {
     name: "movieComputeJS",
     availability: "now",
@@ -2430,6 +2448,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
   },
+  movieValues: {
+    name: "movieValues",
+    availability: "now",
+    type: "text",
+    default: "",
+  },
   needEasyEyesKeypadBeyondCm: {
     name: "needEasyEyesKeypadBeyondCm",
     availability: "now",
@@ -2455,30 +2479,6 @@ export const GLOSSARY: Glossary = {
     default: "0",
   },
   notes: { name: "notes", availability: "now", type: "text", default: "" },
-  measureLuminanceBool: {
-    name: "measureLuminanceBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-  },
-  measureLuminanceHz: {
-    name: "measureLuminanceHz",
-    availability: "now",
-    type: "numerical",
-    default: "1",
-  },
-  measureLuminanceDelaySec: {
-    name: "measureLuminanceDelaySec",
-    availability: "now",
-    type: "numerical",
-    default: "5",
-  },
-  movieValues: {
-    name: "movieValues",
-    availability: "now",
-    type: "text",
-    default: "",
-  },
   "questionAndAnswer@@": {
     name: "questionAndAnswer@@",
     availability: "now",

@@ -791,11 +791,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (allHzCalibrationResults.x_conv) {
       psychoJS.experiment.addData(
         "Recording with filter (Hz)",
-        allHzCalibrationResults.x_conv
+        allHzCalibrationResults.y_conv
       );
       psychoJS.experiment.addData(
         "Recording with filter (dB)",
-        allHzCalibrationResults.y_conv
+        allHzCalibrationResults.x_conv
       );
       psychoJS.experiment.addData(
         "Recording (Hz)",
