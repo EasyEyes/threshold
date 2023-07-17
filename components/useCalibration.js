@@ -251,10 +251,11 @@ export const calibrateAudio = async (reader) => {
       holdiPhoneOK: readi18nPhrases("RC_soundCalibrationContinue", lang),
       clickToStart: readi18nPhrases("RC_soundCalibrationClickToStart", lang),
       done: readi18nPhrases("RC_soundCalibrationDone", lang),
-      test: "Test", //include in phrases doc
+      test: readi18nPhrases("RC_testSounds", lang), //include in phrases doc
       citation:
         'Measured sound power is modeled as sum of background sound power and power gain times digital sound power. Microphone compression modeled by Eq. 4 of Giannoulis, Massberg, & Reiss (2012). "Digital Dynamic Range Compressor Design — A Tutorial and Analysis." Journal of Audio Engineering Society. 60 (6): 399–408.',
       calibrateMicrophone: "Calibrate a Microphone",
+      proceedToExperiment: readi18nPhrases("RC_proceedToExperiment", lang),
     };
 
     const elems = _addSoundCalibrationElems(copy);
@@ -333,17 +334,28 @@ export const calibrateAudio = async (reader) => {
     // do this until the user chooses to continue.
 
     while (calibrateMicrophonesBool.current) {
+      if (showSoundTestPageBool) {
+        elems.testButton.style.display = "block";
+        elems.testButton.style.visibility = "visible";
+        elems.testButton.addEventListener("click", async (e) => {
+          addSoundTestElements(reader);
+          $("#soundTestModal").modal("show");
+        });
+      }
+
       // provide the option to calibrate another mic or to continue.
       elems.displayUpdate.style.display = "none";
       elems.calibrateMicrophoneButton.style.display = "block";
       elems.continueButton.style.display = "block";
-      document.querySelector("#soundNavContainer").style.display = "flex";
-      let isSmartPhone = true;
+      elems.navContainer.style.display = "flex";
       elems.title.innerHTML = "";
       elems.subtitle.innerHTML = "";
-      await new Promise(async (resolve) => {
-        elems.message.innerHTML = copy.done;
+      elems.message.innerHTML = copy.done;
+
+      let isSmartPhone = true;
+      const calibration = await new Promise(async (resolve) => {
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
+          elems.testButton.style.display = "none";
           elems.citation.style.visibility = "hidden";
           elems.soundLevelsTable.innerHTML = "";
           elems.soundTestPlots.innerHTML = "";
@@ -592,86 +604,33 @@ export const calibrateAudio = async (reader) => {
           elems.calibrateMicrophoneButton.style.display = "none";
           elems.continueButton.style.display = "none";
           calibrateMicrophonesBool.current = false;
-          resolve();
+          resolve("proceed");
         });
       });
+
+      if ((await calibration) === "proceed") {
+        _removeSoundCalibrationElems(Object.values(elems));
+        resolve(true);
+      }
     }
+
     elems.message.innerHTML = copy.done;
     if (!showSoundTestPageBool) {
       _removeSoundCalibrationElems(Object.values(elems));
       resolve(true);
     }
 
-    // if (
-    //   calibrateSoundLevel &&
-    //   soundCalibrationResults.current &&
-    //   invertedImpulseResponse.current &&
-    //   allHzCalibrationResults &&
-    //   showSoundCalibrationResultsBool &&
-    //   calibrateSoundCheck.current !== "none"
-    // ) {
-    //   displayParameters1000Hz(
-    //     elems,
-    //     soundLevels,
-    //     soundCalibrationResults.current
-    //   );
-    //   displayParametersAllHz(
-    //     elems,
-    //     invertedImpulseResponse.current,
-    //     allHzCalibrationResults
-    //   );
-    //   if (microphoneCalibrationResults.length > 0) {
-    //     microphoneCalibrationResults.forEach((micResult) => {
-    //       displayParameters1000Hz(
-    //         elems,
-    //         soundLevels,
-    //         micResult.result,
-    //         "1000 Hz Calibration Results for " + micResult.micId
-    //       );
-    //       displayParametersAllHz(
-    //         elems,
-    //         micResult.result.componentIIR,
-    //         micResult.result,
-    //         "All Hz Calibration Results for " + micResult.micId
-    //       );
-    //     });
-    //   }
-    // } else if (
-    //   calibrateLoudspeaker &&
-    //   invertedImpulseResponse.current &&
-    //   allHzCalibrationResults &&
-    //   showSoundCalibrationResultsBool
-    // ) {
-    //   displayParametersAllHz(
-    //     elems,
-    //     invertedImpulseResponse.current,
-    //     allHzCalibrationResults
-    //   );
-    // } else if (
-    //   calibrateSoundLevel &&
-    //   soundCalibrationResults.current &&
-    //   showSoundCalibrationResultsBool
-    // ) {
-    //   displayParameters1000Hz(
-    //     elems,
-    //     soundLevels,
-    //     soundCalibrationResults.current
-    //   );
-    // }
+    elems.navContainer.style.display = "flex";
+    elems.yesButton.style.display = "block";
+    elems.testButton.style.display = "block";
+    elems.testButton.style.visibility = "visible";
 
-    elems.yesButton.innerHTML = "Continue to experiment.";
-    document.querySelector("#soundNavContainer").style.display = "flex";
-    document.querySelector("#soundYes").style.display = "block";
+    elems.testButton.addEventListener("click", async (e) => {
+      addSoundTestElements(reader);
+      $("#soundTestModal").modal("show");
+    });
 
-    if (debugBool.current) {
-      elems.testButton.style.display = "block";
-      elems.testButton.style.visibility = "visible";
-      elems.testButton.addEventListener("click", async (e) => {
-        addSoundTestElements(reader);
-        $("#soundTestModal").modal("show");
-      });
-    }
-
+    elems.yesButton.innerHTML = readi18nPhrases("RC_proceedToExperiment", lang);
     elems.yesButton.addEventListener("click", async (e) => {
       _removeSoundCalibrationElems(Object.values(elems));
       resolve(true);
@@ -769,7 +728,7 @@ const _addSoundCalibrationElems = (copy) => {
   citation.style.visibility = "hidden";
   calibrateMicrophoneButton.innerHTML = copy.calibrateMicrophone;
   calibrateMicrophoneButton.style.display = "none";
-  continueButton.innerHTML = "Continue";
+  continueButton.innerHTML = copy.proceedToExperiment;
   continueButton.style.display = "none";
 
   background.classList.add(...["sound-calibration-background", "rc-panel"]);
@@ -778,7 +737,7 @@ const _addSoundCalibrationElems = (copy) => {
   container.classList.add(...["container"]);
   yesButton.classList.add(...["btn", "btn-primary"]);
   noButton.classList.add(...["btn", "btn-secondary"]);
-  testButton.classList.add(...["btn", "btn-success"]);
+  testButton.classList.add(...["btn", "btn-secondary"]);
   calibrateMicrophoneButton.classList.add(...["btn", "btn-primary"]);
   continueButton.classList.add(...["btn", "btn-success"]);
   //make download button invisible
@@ -789,11 +748,12 @@ const _addSoundCalibrationElems = (copy) => {
   container.appendChild(subtitle);
   container.appendChild(message);
   container.appendChild(navContainer);
-  navContainer.appendChild(yesButton);
-  navContainer.appendChild(noButton);
   navContainer.appendChild(testButton);
   navContainer.appendChild(calibrateMicrophoneButton);
+  navContainer.appendChild(yesButton);
+  navContainer.appendChild(noButton);
   navContainer.appendChild(continueButton);
+
   container.appendChild(displayContainer);
   displayContainer.appendChild(displayQR);
   displayContainer.appendChild(displayUpdate);
