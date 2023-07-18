@@ -158,6 +158,37 @@ export const prepareExperimentFileForThreshold = async (
   );
   fillCurrentExperiment("_online5CochlearImplant", "_online5CochlearImplant");
 
+  fillCurrentExperiment("_online5LanguageFluent", "_prolific4LanguageFluent");
+  fillCurrentExperiment("_online5LanguageFirst", "_prolific4LanguageFirst");
+  fillCurrentExperiment("_online5LanguagePrimary", "_prolific4LanguagePrimary");
+  fillCurrentExperiment("_online3DeviceKind", "_prolific2DeviceKind");
+  fillCurrentExperiment(
+    "_online3RequiredServices",
+    "_prolific2RequiredServices"
+  );
+  fillCurrentExperiment("_online4Location", "_prolific3Location");
+  fillCurrentExperiment("_online4CustomAllowList", "_prolific3CustomAllowList");
+  fillCurrentExperiment("_online4CustomBlockList", "_prolific3CustomBlockList");
+  fillCurrentExperiment(
+    "_online3PhoneOperatingSystem",
+    "_prolific4PhoneOperatingSystem"
+  );
+  fillCurrentExperiment("_online5Vision", "_prolific4Vision");
+  fillCurrentExperiment("_online5Dyslexia", "_prolific4Dyslexia");
+  fillCurrentExperiment(
+    "_online5HearingDifficulties",
+    "_prolific4HearingDifficulties"
+  );
+  fillCurrentExperiment(
+    "_online5MusicalInstrumentExperience",
+    "_prolific4MusicalInstrumentExperience"
+  );
+  fillCurrentExperiment(
+    "_online5LanguageRelatedDisorders",
+    "_prolific4LanguageRelatedDisorders"
+  );
+  fillCurrentExperiment("_online5CochlearImplant", "_prolific4CochlearImplant");
+
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
   if (
@@ -187,6 +218,15 @@ export const prepareExperimentFileForThreshold = async (
     // ! prolificWorkspaceProjectId
     user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
       (i: string[]) => i[0] === "_online2ProlificProjectID"
+    )?.[1];
+    user.currentExperiment.prolificWorkspaceModeBool = true;
+  } else if (
+    parsed.data.find((i: string[]) => i[0] === "_prolific1ProjectID")
+  ) {
+    // if there's a project id, the account is in workspace mode
+    // ! prolificWorkspaceProjectId
+    user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
+      (i: string[]) => i[0] === "_prolific1ProjectID"
     )?.[1];
     user.currentExperiment.prolificWorkspaceModeBool = true;
   } else {

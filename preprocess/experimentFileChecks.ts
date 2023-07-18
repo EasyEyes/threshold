@@ -48,8 +48,6 @@ import { normalizeExperimentDfShape } from "./transformExperimentTable";
 
 let zeroIndexed: boolean;
 
-const ObsoleteParametersMappedWithNew: Record<string, any> = {};
-
 export const validatedCommas = (
   parsed: Papa.ParseResult<string[]>
 ): EasyEyesError | undefined => {
@@ -226,16 +224,16 @@ const areAllPresentParametersRecognized = (
   const obsolete: any[] = [];
 
   const checkIfRecognized = (parameter: string): any => {
-    if (
-      !(parameter in GLOSSARY) &&
-      !_superMatching(parameter) &&
-      !(parameter in ObsoleteParametersMappedWithNew)
-    ) {
+    if (!(parameter in GLOSSARY) && !_superMatching(parameter)) {
       unrecognized.push({
         name: parameter,
         closest: similarlySpelledCandidates(parameter, Object.keys(GLOSSARY)),
       });
-    } else if (!(parameter in ObsoleteParametersMappedWithNew)) {
+    } else if (
+      parameter in GLOSSARY &&
+      _superMatching(parameter) &&
+      GLOSSARY[parameter]["type"] !== "obsolete"
+    ) {
       recognized.push(parameter);
     }
   };
@@ -243,10 +241,9 @@ const areAllPresentParametersRecognized = (
   // parameters if in obsolete list and the new version and do not check for recongnized.
 
   parameters.forEach((parameter) => {
-    if (parameter in ObsoleteParametersMappedWithNew) {
+    if (GLOSSARY?.[parameter]?.["type"] === "obsolete") {
       obsolete.push({
         name: parameter,
-        new: ObsoleteParametersMappedWithNew[parameter],
       });
     }
   });
@@ -360,6 +357,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
       | "text"
       | "boolean"
       | "categorical"
+      | "obsolete"
       | "multicategorical",
     categories?: string[]
   ): void => {
@@ -436,6 +434,8 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
           break;
         case "text":
           // TODO define what a failing, ie non-"text", value would be
+          break;
+        case "obsolete":
           break;
         case "categorical":
           const validCategory = (s: string): boolean =>

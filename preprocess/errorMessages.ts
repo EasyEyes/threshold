@@ -67,6 +67,7 @@ export const INCORRECT_PARAMETER_TYPE = (
     | "numerical"
     | "text"
     | "boolean"
+    | "obsolete"
     | "categorical"
     | "multicategorical",
   categories?: string[]
@@ -286,7 +287,7 @@ export const UNRECOGNIZED_PARAMETER = (report: any): EasyEyesError => {
 export const OBSOLETE_PARAMETERS = (report: any): EasyEyesError => {
   return {
     name: `Parameter is obsolete`,
-    message: `Sorry, <span class="error-parameter">${report.name}</span> is obsolete. The new supported parameter is <span class="error-parameter">${report.new}</span>`,
+    message: `Sorry, <span class="error-parameter">${report.name}</span> is obsolete.`,
     hint: `All parameters are case-sensitive.`,
     context: "preprocessor",
     kind: "error",

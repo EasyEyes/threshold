@@ -507,7 +507,10 @@ export const getPastProlificIdFromExperimentTables = async (
   let prolificProjectId = "";
   for (const field of fields) {
     const fieldDetail = field.split(",");
-    if (fieldDetail[0] === "_online2ProlificProjectID") {
+    if (
+      fieldDetail[0] === "_online2ProlificProjectID" ||
+      fieldDetail[0] === "_prolific1ProjectID"
+    ) {
       prolificProjectId = fieldDetail[1];
     }
   }
