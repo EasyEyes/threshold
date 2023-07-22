@@ -14,6 +14,7 @@ import {
   calibrateMicrophonesBool,
   microphoneCalibrationResults,
   calibrateSoundCheck,
+  timeoutSec,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -209,6 +210,8 @@ export const calibrateAudio = async (reader) => {
   const showSoundTestPageBool = ifTrue(
     reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__")
   );
+
+  timeoutSec.current = reader.read(GLOSSARY._timeoutSec.name)[0];
 
   calibrateSoundMinHz.current = reader.read(
     GLOSSARY.calibrateSoundMinHz.name
@@ -559,7 +562,7 @@ export const calibrateAudio = async (reader) => {
                   const result = await Speaker.startCalibration(
                     speakerParameters,
                     calibrator,
-                    500000
+                    timeoutSec.current
                   );
                   microphoneCalibrationResults.push({
                     micId: micId,
@@ -1114,7 +1117,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
           soundCalibrationResults.current = await Speaker.startCalibration(
             speakerParameters,
             calibrator,
-            500000
+            timeoutSec.current
           );
 
           invertedImpulseResponse.current =
