@@ -84,9 +84,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       '🕑 _calibrateSoundCheck (default "goal") optionally checks the sound frequency response (i.e. sound spectrum produced by a white noise stimulus) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the system, microphone, or loudspeaker. _calibrateSoundCheck must be set to one of three values: “none”, “system”, or “goal”. \n• “none” skips the check. \n• “system” checks using the IIR corresponding the the combination of loudspeaker and microphone.\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.',
-    type: "category",
+    type: "categorical",
     default: "goal",
-    categories: "",
+    categories: "none, system, goal",
   },
   {
     name: "_calibrateTimingNumberAndSecs",
@@ -1004,6 +1004,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '_showSoundTestPageBool (default FALSE) requests the Sound Test page, after each sound calibration, to allow the "participant" (typically the scientist) to check the accuracy of sound calibration by using a control panel to produce several sounds at arbitrary sound levels, typically while measuring with a sound level meter. Each sound calibration (of the loudspeaker and each microphone) includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).',
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_timeoutSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "_timeoutSec (default 180) is the suggested interval to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this helps us explore in our search for a general solution.",
+    type: "numerical",
+    default: "180",
     categories: "",
   },
   {

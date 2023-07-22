@@ -48,8 +48,9 @@ export const GLOSSARY: Glossary = {
   _calibrateSoundCheck: {
     name: "_calibrateSoundCheck",
     availability: "now",
-    type: "category",
+    type: "categorical",
     default: "goal",
+    categories: ["none", "system", "goal"],
   },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",
@@ -1814,6 +1815,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "boolean",
     default: "FALSE",
+  },
+  _timeoutSec: {
+    name: "_timeoutSec",
+    availability: "now",
+    type: "numerical",
+    default: "180",
   },
   _trackGazeExternallyBool: {
     name: "_trackGazeExternallyBool",
