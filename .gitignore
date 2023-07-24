@@ -24,6 +24,7 @@ examples/*/**
 !examples/tables/readingExperiment.csv
 !examples/tables/testTiming.csv
 !examples/tables/questionExperiment.csv
+!examples/tables/demoFlickeringGaborMovie.csv
 
 !examples/folders/folders
 

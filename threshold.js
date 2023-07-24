@@ -3689,7 +3689,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             //observer should not be allowed to respond before actualStimulusLevel has retured.
             //i.e. before the movie has generated
             actualStimulusLevel = actualStimulusLevelTemp;
-            generate_video(imageNit, movieHz, psychoJS).then((data) => {
+            let moviePQEncodedBool = paramReader.read("moviePQEncodedBool", BC);
+            generate_video(
+              imageNit,
+              movieHz,
+              psychoJS,
+              moviePQEncodedBool
+            ).then((data) => {
               videoblob = data;
               let computeTotalSecEndTime = performance.now();
               psychoJS.experiment.addData(
@@ -3886,6 +3892,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetSpecs.setAutoDraw(true);
           }
           if (video_generated == true) {
+            if (
+              paramReader.read(
+                "responseMustTrackCrosshairBool",
+                status.block_condition
+              )
+            )
+              checkIfCursorIsTrackingFixation(t, paramReader);
             if (fixationConfig.markingFixationMotionRadiusDeg > 0)
               gyrateFixation(fixation, t, displayOptions);
             fixation.setAutoDraw(true);
