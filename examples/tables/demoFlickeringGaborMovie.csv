@@ -1,0 +1,50 @@
+_about,Measure contrast threshold for flickering gabor.,
+_authors,Denis Pelli,
+%_consentForm,2022-01 IRB-FY2016-404 Remote Testing.pdf,
+%_debriefForm,2022-01 IRB-FY2016-404 Debrief.pdf,
+_needBrowser,"Chrome,Edge,Safari",
+_needDeviceType,desktop,
+_needProcessorCoresMinimum,6,
+_online1RecruitmentService,Prolific,
+_online2ProlificProjectID,62cd33e1566da7aa25d1790f,
+_participantIDGetBool,TRUE,
+_participantIDPutBool,TRUE,
+block,,1
+calibrateScreenSizeBool,,TRUE
+calibrateTrackDistanceBool,,TRUE
+conditionName,,"2 Hz, 3 c/deg"
+conditionTrials,,5
+fontCharacterSet,,HVLR
+instructionForBlock,,"Each trial will present flickering stripes. Your job is to report the stripe orientation: horizontal, vertical, tilted left or tilted right. When you're right, you'll hear a beep. Click Proceed to continue."
+instructionForResponse,,"What was the orientation of the stripes? Click or type H for horizontal, V for vertical, L for tilted left or R for tilted right."
+instructionForStimulus,,"When you're ready, track center of the moving crosshair with your mouse pointer."
+movieComputeJS,,tiltedFlickeringGabor.js
+movieHz,,10
+moviePQEncodedBool,,TRUE
+movieRectDeg,,"-5,-5,5,5"
+movieRectPxContainsRectDegBool,,FALSE
+movieSec,,1
+movieTargetDelaySec,,0
+responseClickedBool,,TRUE
+responseMustClickCrosshairBool,,TRUE
+responseTypedBool,,TRUE
+screenColorRGBA,,"0.735,0.735,0.735,1"
+showConditionNameBool,,TRUE
+showCounterBool,,TRUE
+showTargetSpecsBool,,FALSE
+showViewingDistanceBool,,TRUE
+targetCyclePerDeg,,3
+targetDurationSec,,1
+targetEccentricityXDeg,,0
+targetEccentricityYDeg,,0
+targetHz,,2
+targetKind,,movie
+targetPhaseSpatialDeg,,0
+targetPhaseTemporalDeg,,0
+targetSizeIsHeightBool,,FALSE
+targetSpaceConstantDeg,,2
+targetTask,,identify
+targetTimeConstantSec,,1
+thresholdGuess,,0.1
+thresholdParameter,,targetContrast
+viewingDistanceDesiredCm,,50
