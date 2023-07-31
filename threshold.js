@@ -397,6 +397,11 @@ import {
 } from "./components/connectMatlab.js";
 import { readi18nPhrases } from "./components/readPhrases.js";
 import { updateColor } from "./components/color.js";
+import {
+  getDelayBeforeMoviePlays,
+  getLuminanceFilename,
+  initColorCAL,
+} from "./components/photometry.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -2065,6 +2070,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             },
             movie: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
+              if (
+                paramReader
+                  .read("measureLuminanceBool", status.block)
+                  .some((x) => x)
+              )
+                initColorCAL();
             },
           });
         },
@@ -4868,8 +4879,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // document.getElementById("root").style.display = "none";
             video.setAttribute("src", videoblob);
             document.body.appendChild(video);
-            video.play();
-            video_flag = 0;
+            const delayBeforeMovieForLuminanceMeasuringMs =
+              getDelayBeforeMoviePlays(status.block_condition);
+            setTimeout(() => {
+              video.play();
+              video_flag = 0;
+            }, delayBeforeMovieForLuminanceMeasuringMs);
           }
 
           // if movie is done register responses
@@ -4880,6 +4895,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             videoblob = [];
             // loggerText("played");
             document.body.removeChild(video);
+            if (
+              paramReader.read("measureLuminanceBool", status.block_condition)
+            ) {
+              const luminanceFilename = getLuminanceFilename(
+                thisExperimentInfo.experiment,
+                status.block,
+                paramReader.read("conditionName", status.block_condition),
+                status.trial
+              );
+              psychoJS.experiment.saveCSV(
+                measureLuminanceRecords,
+                luminanceFilename
+              );
+            }
           };
           break;
       }

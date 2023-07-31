@@ -34,6 +34,14 @@ const config = {
   },
   resolve: {
     extensions: [".ts", ".js"],
+    fallback: {
+      fs: false,
+      child_process: false,
+      os: require.resolve("os-browserify/browser"),
+      path: require.resolve("path-browserify"),
+      stream: require.resolve("stream-browserify"),
+      util: require.resolve("util/"),
+    },
   },
   devtool: "source-map",
   output: {

@@ -74,11 +74,16 @@
     "firebase": "^9.23.0",
     "image-js": "^0.35.3",
     "jszip": "^3.10.1",
-    "mathjs": "^11.9.0",
+    "mathjs": "^11.9.1",
     "merge-audio-buffers": "^1.0.0",
+    "os-browserify": "^0.3.0",
     "papaparse": "^5.3.2",
+    "path-browserify": "^1.0.1",
+    "serialport": "^11.0.1",
     "stats.js": "^0.17.0",
+    "stream-browserify": "^3.0.0",
     "sweetalert2": "^11.7.2",
+    "util": "^0.12.5",
     "virtual-keypad": "^5.2.0",
     "webfontloader": "^1.6.28"
   }

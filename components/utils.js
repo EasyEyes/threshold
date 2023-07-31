@@ -1010,3 +1010,49 @@ export const getViewingDistancedCm = (vCm, displayOptions, screenHeightPx) => {
   // so vCm = screen height / 2 + 0.5 m
   return Math.sqrt(vCm ** 2 - (screenHeightPx / (2 * pxPerCm) + 0.5) ** 2);
 };
+
+/**
+ * @source https://stackoverflow.com/questions/27082377/get-number-of-decimal-places-with-javascript
+ */
+const countDecimals = (value) => {
+  let text = value.toString();
+  // verify if number 0.000005 is represented as "5e-6"
+  if (text.indexOf("e-") > -1) {
+    let [base, trail] = text.split("e-");
+    let deg = parseInt(trail, 10);
+    return deg;
+  }
+  // count decimals for number in representation like "0.123456"
+  if (Math.floor(value) !== value) {
+    return value.toString().split(".")[1].length || 0;
+  }
+  return 0;
+};
+
+/**
+ * Get the greatest common divisor of two floats
+ * @param {number} a float
+ * @param {number} b float
+ * @returns
+ */
+export const getGCD = (a, b) => {
+  const decimalsA = countDecimals(a);
+  const decimalsB = countDecimals(b);
+  if (decimalsA === 0 && decimalsB === 0) return gcd(a, b);
+  const maxDecimals = Math.max(decimalsA, decimalsB);
+  const intA = Math.floor(a * 10 ** maxDecimals);
+  const intB = Math.floor(b * 10 ** maxDecimals);
+  return gcd(intA, intB) / maxDecimals;
+};
+
+/**
+ * Get the greatest common divisor of two integers
+ * @param {number} a int
+ * @param {number} b int
+ * @returns
+ */
+const gcd = (a, b) => {
+  if (a < b) return gcd(b, a);
+  if (a % b === 0) return b;
+  return gcd(a % b, b);
+};
