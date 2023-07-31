@@ -15,6 +15,10 @@ import {
   microphoneCalibrationResults,
   calibrateSoundCheck,
   timeoutSec,
+  calibrateSoundBurstRepeats,
+  calibrateSoundBurstSec,
+  calibrateSoundBurstsWarmup,
+  calibrateSoundHz,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -218,6 +222,17 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundMaxHz.current = reader.read(
     GLOSSARY.calibrateSoundMaxHz.name
   )[0];
+
+  calibrateSoundBurstRepeats.current = reader.read(
+    GLOSSARY._calibrateSoundBurstRepeats.name
+  )[0];
+  calibrateSoundBurstSec.current = reader.read(
+    GLOSSARY._calibrateSoundBurstSec.name
+  )[0];
+  calibrateSoundBurstsWarmup.current = reader.read(
+    GLOSSARY._calibrateSoundBurstsWarmup.name
+  )[0];
+  calibrateSoundHz.current = reader.read(GLOSSARY._calibrateSoundHz.name)[0];
 
   ICalibDBSPL.current = reader.read(
     GLOSSARY._calibrateSoundAssumingThisICalibDBSPL.name
@@ -502,6 +517,13 @@ export const calibrateAudio = async (reader) => {
                   ICalib: ICalibDBSPL.current,
                   gainValues: gains,
                   knownIR: allHzCalibrationResults.knownIr,
+                  instructionDisplayId: "",
+                  calibrateSoundBurstRepeats:
+                    calibrateSoundBurstRepeats.current,
+                  calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+                  calibrateSoundBurstsWarmup:
+                    calibrateSoundBurstsWarmup.current,
+                  calibrateSoundHz: calibrateSoundHz.current,
                 };
 
                 const calibratorParams = {
@@ -973,6 +995,11 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
     ICalib: ICalibDBSPL.current,
     gainValues: gains,
     knownIR: null,
+    instructionDisplayId: "",
+    calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
+    calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+    calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
+    calibrateSoundHz: calibrateSoundHz.current,
   };
 
   const calibratorParams = {

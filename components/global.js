@@ -409,6 +409,11 @@ export const allHzCalibrationResults = {
   knownIr: undefined,
 };
 
+export const calibrateSoundBurstRepeats = { current: 4 };
+export const calibrateSoundBurstSec = { current: 1 };
+export const calibrateSoundBurstsWarmup = { current: 1 };
+export const calibrateSoundHz = { current: 48000 };
+
 export const timeoutSec = { current: 180 };
 export const calibrateSoundCheck = { current: "goal" };
 export const microphoneCalibrationResults = [];

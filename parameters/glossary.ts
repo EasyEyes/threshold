@@ -45,12 +45,36 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "76",
   },
+  _calibrateSoundBurstRepeats: {
+    name: "_calibrateSoundBurstRepeats",
+    availability: "now",
+    type: "numerical",
+    default: "4",
+  },
+  _calibrateSoundBurstSec: {
+    name: "_calibrateSoundBurstSec",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+  },
+  _calibrateSoundBurstsWarmup: {
+    name: "_calibrateSoundBurstsWarmup",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+  },
   _calibrateSoundCheck: {
     name: "_calibrateSoundCheck",
     availability: "now",
     type: "categorical",
     default: "goal",
     categories: ["none", "system", "goal"],
+  },
+  _calibrateSoundHz: {
+    name: "_calibrateSoundHz",
+    availability: "now",
+    type: "numerical",
+    default: "48000",
   },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",
