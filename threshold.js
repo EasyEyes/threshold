@@ -133,6 +133,7 @@ import {
   _key_resp_allKeys,
   allHzCalibrationResults,
   ICalibDBSPL,
+  microphoneCalibrationResults,
 } from "./components/global.js";
 
 import {
@@ -805,6 +806,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "Recording (dB)",
         allHzCalibrationResults.x_unconv
       ); // x and y are swapped
+    }
+    if (microphoneCalibrationResults.length > 0) {
+      psychoJS.experiment.addData(
+        "Microphone calibration results",
+        JSON.stringify(microphoneCalibrationResults)
+      );
     }
     if (rc.stressFps) {
       psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);

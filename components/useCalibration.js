@@ -586,8 +586,23 @@ export const calibrateAudio = async (reader) => {
                     timeoutSec.current
                   );
                   microphoneCalibrationResults.push({
-                    micId: micId,
-                    result: result,
+                    name: micId,
+                    Recording_with_Filter_Hz:
+                      calibrateSoundCheck.current !== "none"
+                        ? result.y_conv
+                        : [],
+                    Recording_with_Filter_dB:
+                      calibrateSoundCheck.current !== "none"
+                        ? result.x_conv
+                        : [],
+                    Recording_Hz:
+                      calibrateSoundCheck.current !== "none"
+                        ? result.y_unconv
+                        : [],
+                    Recording_dB:
+                      calibrateSoundCheck.current !== "none"
+                        ? result.x_unconv
+                        : [],
                   });
                   if (calibrateSoundCheck.current !== "none") {
                     //show sound calibration results
