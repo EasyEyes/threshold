@@ -247,17 +247,6 @@ export const CODE_FILES_MISSING = (
   };
 };
 
-export const NOT_SUPPORTED_TYPE = (type: any): EasyEyesError => {
-  return {
-    name: `Type is unsupported`,
-    message: `Apologies from the EasyEyes team! The type <span class="error-parameter">${type}</span> isn't supported.`,
-    hint: `Unsupported type`,
-    context: "preprocessor",
-    kind: "error",
-    parameters: [type],
-  };
-};
-
 export const PARAMETERS_NOT_ALPHABETICAL = (
   firstOffendingParameter: string
 ): EasyEyesError => {
@@ -572,5 +561,24 @@ export const ILLDEFINED_TRACKING_INTERVALS = (
     context: "preprocessor",
     kind: "error",
     parameters: ["responstMustTrackMinSec", "responseMustTrackMaxSec"],
+  };
+};
+export const IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE = (
+  names: string[],
+  types: string[]
+): EasyEyesError => {
+  const plural = names.length > 1;
+  const nameTypeMessage = verballyEnumerate(
+    names.map((n, i) => `${n} (\'${types[i]}\')`)
+  );
+  return {
+    name: `Type in glossary is unsupported`,
+    message: `${nameTypeMessage} ${plural ? "have" : "has"} invalid type${
+      plural ? "s" : ""
+    }. Please contact the EasyEyes team.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: names,
   };
 };

@@ -121,13 +121,13 @@ export const GLOSSARY: Glossary = {
   _dateCreated: {
     name: "_dateCreated",
     availability: "now",
-    type: "date",
+    type: "text",
     default: " ",
   },
   _dateModified: {
     name: "_dateModified",
     availability: "now",
-    type: "date",
+    type: "text",
     default: " ",
   },
   _debriefForm: {
@@ -1864,7 +1864,6 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
   },
-  "%": { name: "%", availability: "now", type: "", default: "" },
   block: { name: "block", availability: "now", type: "integer", default: "1" },
   blockShuffleGroups1: {
     name: "blockShuffleGroups1",
@@ -2013,8 +2012,9 @@ export const GLOSSARY: Glossary = {
   closestPointEccentricitySetting: {
     name: "closestPointEccentricitySetting",
     availability: "now",
-    type: "",
+    type: "categorical",
     default: "",
+    categories: ["target", "fixation", "value"],
   },
   conditionEnabledBool: {
     name: "conditionEnabledBool",
@@ -2049,8 +2049,8 @@ export const GLOSSARY: Glossary = {
   errorEndsExperimentBool: {
     name: "errorEndsExperimentBool",
     availability: "now",
-    type: "",
-    default: "",
+    type: "boolean",
+    default: "FALSE",
   },
   fixationCheckBool: {
     name: "fixationCheckBool",
