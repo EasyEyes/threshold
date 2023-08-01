@@ -31,6 +31,7 @@ import {
   NEGATIVE_MARKING_FIXATION_STROKE_THICKENING,
   ILLDEFINED_TRACKING_INTERVALS,
   OBSOLETE_PARAMETERS,
+  NOT_SUPPORTED_TYPE,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -41,7 +42,6 @@ import {
   valuesContiguous,
   getNoncontiguousValues,
   isBlockShuffleGroupingParam,
-  toColumnName,
   conditionIndexToColumnName,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
@@ -464,7 +464,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
           );
           break;
         default:
-          throw `Unrecognized type '${correctType}' used in the glossary. Please contact the EasyEyes team.`;
+          errors.push(NOT_SUPPORTED_TYPE(correctType));
       }
     }
   });

@@ -247,6 +247,17 @@ export const CODE_FILES_MISSING = (
   };
 };
 
+export const NOT_SUPPORTED_TYPE = (type: any): EasyEyesError => {
+  return {
+    name: `Type is unsupported`,
+    message: `Apologies from the EasyEyes team! The type <span class="error-parameter">${type}</span> isn't supported.`,
+    hint: `Unsupported type`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [type],
+  };
+};
+
 export const PARAMETERS_NOT_ALPHABETICAL = (
   firstOffendingParameter: string
 ): EasyEyesError => {
