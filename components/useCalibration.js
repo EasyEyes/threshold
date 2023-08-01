@@ -19,6 +19,9 @@ import {
   calibrateSoundBurstSec,
   calibrateSoundBurstsWarmup,
   calibrateSoundHz,
+  calibrateSoundBurstRecordings,
+  calibrateSound1000HzSec,
+  timeToCalibrate,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -233,6 +236,9 @@ export const calibrateAudio = async (reader) => {
     GLOSSARY._calibrateSoundBurstsWarmup.name
   )[0];
   calibrateSoundHz.current = reader.read(GLOSSARY._calibrateSoundHz.name)[0];
+  calibrateSoundBurstRecordings.current = reader.read(
+    GLOSSARY._calibrateSoundBurstRecordings.name
+  )[0];
 
   ICalibDBSPL.current = reader.read(
     GLOSSARY._calibrateSoundAssumingThisICalibDBSPL.name
@@ -251,6 +257,14 @@ export const calibrateAudio = async (reader) => {
   const gains = soundLevels.map((soundLevel) => {
     return Math.pow(10, soundLevel / 20);
   });
+
+  let dSec =
+    1.1 *
+      (1 + calibrateSoundBurstRecordings.current) *
+      calibrateSoundBurstRepeats.current *
+      calibrateSoundBurstSec.current +
+    gains.length * calibrateSound1000HzSec.current;
+  timeToCalibrate.current = Math.round(dSec / 60);
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
 
@@ -525,6 +539,7 @@ export const calibrateAudio = async (reader) => {
                   calibrateSoundBurstsWarmup:
                     calibrateSoundBurstsWarmup.current,
                   calibrateSoundHz: calibrateSoundHz.current,
+                  timeToCalibrate: timeToCalibrate.current,
                 };
 
                 const calibratorParams = {
@@ -687,7 +702,7 @@ const _addSoundCalibrationElems = (copy) => {
   const message = document.createElement("div");
   const displayContainer = document.createElement("div");
   const displayQR = document.createElement("div");
-  const displayUpdate = document.createElement("div");
+  const displayUpdate = document.createElement("span");
   const citation = document.createElement("div");
   const navContainer = document.createElement("div");
   const yesButton = document.createElement("button");
@@ -770,6 +785,9 @@ const _addSoundCalibrationElems = (copy) => {
   calibrateMicrophoneButton.style.display = "none";
   continueButton.innerHTML = copy.proceedToExperiment;
   continueButton.style.display = "none";
+  // width for displayUpdate
+  displayUpdate.style.width = "25vw";
+  displayQR.style.marginTop = "15px";
 
   background.classList.add(...["sound-calibration-background", "rc-panel"]);
   // avoid background being clipped from the top
@@ -795,8 +813,8 @@ const _addSoundCalibrationElems = (copy) => {
   navContainer.appendChild(continueButton);
 
   container.appendChild(displayContainer);
-  displayContainer.appendChild(displayQR);
   displayContainer.appendChild(displayUpdate);
+  displayContainer.appendChild(displayQR);
   buttonAndParametersContainer.appendChild(soundParametersFromCalibration);
   buttonAndParametersContainer.appendChild(downloadButton);
   container.appendChild(soundLevelsTable);
@@ -979,11 +997,6 @@ const _runLoudspeakerCalibration = async (elems) => {
       500000
     );
     invertedImpulseResponse.current = calibrationResults.iir;
-    // only use the first 100 values
-    // invertedImpulseResponse.current = invertedImpulseResponse.current.slice(
-    //   0,
-    //   100
-    // );
     allHzCalibrationResults.x_conv = calibrationResults.x_conv;
     allHzCalibrationResults.y_conv = calibrationResults.y_conv;
     allHzCalibrationResults.x_unconv = calibrationResults.x_unconv;
@@ -1003,7 +1016,6 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   // hide elems.message
   elems.message.style.display = "none";
   const { Speaker, CombinationCalibration } = speakerCalibrator;
-
   const speakerParameters = {
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
@@ -1017,6 +1029,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
     calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
     calibrateSoundHz: calibrateSoundHz.current,
+    timeToCalibrate: timeToCalibrate.current,
   };
 
   const calibratorParams = {

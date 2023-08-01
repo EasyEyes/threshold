@@ -79,13 +79,33 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundBurstRecordings",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundBurstRecordings (default 3) is the desired number of recordings, where each recording consists of _calibrateSoundBurstRepeats. Each recording includes its own warm up _calibrateSoundBurstsWarmup.",
+    type: "numerical",
+    default: "3",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundBurstRepeats",
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst.",
+      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count includes the warm up bursts.",
     type: "numerical",
     default: "4",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundBurstSamplingHz",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundBurstSamplingHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
+    type: "numerical",
+    default: "48000",
     categories: "",
   },
   {
@@ -103,7 +123,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstsWarmup (default 1) is the number of sound bursts, from the beginning, that analysis should skip. This is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before we record for analysis.",
+      "_calibrateSoundBurstsWarmup (default 1) is the number of sound bursts, from the beginning of each recording, that analysis should skip. This is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
     type: "numerical",
     default: "1",
     categories: "",
@@ -123,7 +143,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
+      "❌ _calibrateSoundHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
     type: "numerical",
     default: "48000",
     categories: "",
@@ -1204,6 +1224,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ Set calibrateSound1000HzBool TRUE (default FALSE) to request loudspeaker (and possibly _calibrateMicrophonesBool) sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's pre-calibrated microphone (either in a smartphone or a USB-connected microphone). If the participant offers a smartphone, EasyEyes checks its library for that model in its library of microphone calibrations. Many sound levels are tested to calibrate the effect of clipping and dynamic gain control. Early exit if no calibrated microphone is available. Calibration is done only once, at the beginning, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses the 1000 Hz calibration if and only if it sets calibrateSound1000HzBool TRUE. The parameters calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the all-Hz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. Once, the loudspeaker is calibrated, if _calibrateMicrophonesBool is TRUE, then EasyEyes offers to calibrate microphones, one at a time.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "calibrateSound1000HzSec",
+    availability: "now",
+    example: "-3",
+    explanation:
+      "🕑 calibrateSound1000HzSec (default 2) specifies the duration of the 1 kHz sound at each sound level.",
+    type: "numerical",
+    default: "2",
     categories: "",
   },
   {
