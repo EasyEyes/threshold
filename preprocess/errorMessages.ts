@@ -563,3 +563,22 @@ export const ILLDEFINED_TRACKING_INTERVALS = (
     parameters: ["responstMustTrackMinSec", "responseMustTrackMaxSec"],
   };
 };
+export const IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE = (
+  names: string[],
+  types: string[]
+): EasyEyesError => {
+  const plural = names.length > 1;
+  const nameTypeMessage = verballyEnumerate(
+    names.map((n, i) => `${n} (\'${types[i]}\')`)
+  );
+  return {
+    name: `Type in glossary is unsupported`,
+    message: `${nameTypeMessage} ${plural ? "have" : "has"} invalid type${
+      plural ? "s" : ""
+    }. Please contact the EasyEyes team.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: names,
+  };
+};

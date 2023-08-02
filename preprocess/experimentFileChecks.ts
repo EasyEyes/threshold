@@ -31,6 +31,7 @@ import {
   NEGATIVE_MARKING_FIXATION_STROKE_THICKENING,
   ILLDEFINED_TRACKING_INTERVALS,
   OBSOLETE_PARAMETERS,
+  IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -41,7 +42,6 @@ import {
   valuesContiguous,
   getNoncontiguousValues,
   isBlockShuffleGroupingParam,
-  toColumnName,
   conditionIndexToColumnName,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
@@ -103,6 +103,9 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   const parametersToCheck: string[] = [];
   const parameters = experimentDf.listColumns();
   let errors: EasyEyesError[] = [];
+
+  // Check the parameters of the glossary itself
+  errors.push(...areGlossaryParametersProper());
 
   // Check parameters are alphabetical
   const parametersArentAlphabetical = areParametersAlphabetical(parameters);
@@ -464,7 +467,8 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
           );
           break;
         default:
-          throw `Unrecognized type '${correctType}' used in the glossary. Please contact the EasyEyes team.`;
+        // default:
+        //   console.error(`Unrecognized type '${correctType}' used in the glossary. Please contact the EasyEyes team.`);
       }
     }
   });
@@ -906,4 +910,27 @@ const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {
     errors.push(ILLDEFINED_TRACKING_INTERVALS(trackingIntervalImpossible));
 
   return errors;
+};
+
+const areGlossaryParametersProper = (): EasyEyesError[] => {
+  // TODO any other checks on the glossary itself?
+  return [..._areGlossaryParametersValidTypes()];
+};
+const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
+  const validTypes = [
+    "integer",
+    "numerical",
+    "boolean",
+    "text",
+    "obsolete",
+    "categorical",
+    "multicategorical",
+  ];
+  const offendingParams = Object.values(GLOSSARY).filter(
+    (p) => !validTypes.includes(p["type"] as string)
+  );
+  if (!offendingParams.length) return [];
+  const names = offendingParams.map((p) => p["name"]) as string[];
+  const types = offendingParams.map((p) => p["type"]) as string[];
+  return [IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE(names, types)];
 };
