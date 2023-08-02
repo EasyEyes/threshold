@@ -188,6 +188,8 @@ export const prepareExperimentFileForThreshold = async (
     "_prolific4LanguageRelatedDisorders"
   );
   fillCurrentExperiment("_online5CochlearImplant", "_prolific4CochlearImplant");
+  fillCurrentExperiment("_online5VRExperiences", "_online5VRExperiences");
+  fillCurrentExperiment("_online5VRExperiences", "_prolific4VRExperiences");
 
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
