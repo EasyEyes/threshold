@@ -93,7 +93,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count includes the warm up bursts. IMPORTANT: The Novak et al. (2012) algorithm to deal with asychronous loudspeaker and microphone requires that we use at least two repeats of the MLS period. Thus _calibrateSoundBurstRepeats ≥ 2+",
+      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count includes the warm up bursts. IMPORTANT: The Novak et al. (2012) algorithm to deal with asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period. Thus make sure that\n_calibrateSoundBurstRepeats ≥ 2+_calibrateSoundBurstsWarmup\nWe plan to have the EasyEyes compiler enforce this.",
     type: "numerical",
     default: "4",
     categories: "",
@@ -1221,7 +1221,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "-3",
     explanation:
-      "🕑 calibrateSound1000HzSec (default 2) specifies the duration of the 1 kHz sound at each sound level.",
+      "🕑 calibrateSound1000HzSec (default 5) specifies the duration of the 1 kHz sound at each sound level.",
     type: "numerical",
     default: "2",
     categories: "",
