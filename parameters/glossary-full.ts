@@ -93,7 +93,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count includes the warm up bursts.",
+      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count includes the warm up bursts. IMPORTANT: The Novak et al. (2012) algorithm to deal with asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period. Thus make sure that\n_calibrateSoundBurstRepeats ≥ 2+_calibrateSoundBurstsWarmup\nWe plan to have the EasyEyes compiler enforce this.",
     type: "numerical",
     default: "4",
     categories: "",
@@ -204,7 +204,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "8/1/2021",
     explanation:
       "Optional date of creation. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
-    type: "date",
+    type: "text",
     default: " ",
     categories: "",
   },
@@ -214,7 +214,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "8/15/2021",
     explanation:
       "Optional date of latest modification. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
-    type: "date",
+    type: "text",
     default: " ",
     categories: "",
   },
@@ -1087,16 +1087,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "%",
-    availability: "now",
-    example: "",
-    explanation:
-      "⭑ An initial percent sign % at the beginning of the parameter name tells EasyEyes to ignore the whole row. To ignore a column see conditionEnabledBool. ",
-    type: "",
-    default: "",
-    categories: "",
-  },
-  {
     name: "block",
     availability: "now",
     example: "1",
@@ -1231,9 +1221,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "-3",
     explanation:
-      "🕑 calibrateSound1000HzSec (default 2) specifies the duration of the 1 kHz sound at each sound level.",
+      "🕑 calibrateSound1000HzSec (default 5) specifies the duration of the 1 kHz sound at each sound level.",
     type: "numerical",
-    default: "2",
+    default: "5",
     categories: "",
   },
   {
@@ -1352,9 +1342,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "🕑 VIEWING GEOMETRY\nviewingDistanceCm = distance from eye to closest point.\nclosestPointXYInUnitSquare=[0.8 0.5]; % Rough location of closest point in screenRect re lower left corner.\nclosestPointXYPix % screen coordinate of point on screen closest to viewer's eyes. Y goes down.\nclosestPointXYDeg % eccentricity of closest point re fixation. Y goes up.\nclosestPointEccentricitySetting\n1. Set closestPointXYPix according to closestPointXYInUnitSquare.\n2. If closestPointEccentricitySetting==\n'target', then set closestPointXYDeg=eccentricityXYDeg\n'fixation', then set closestPointXYDeg=[0 0].\n'value', then assume closestPointXYDeg is already set.\n3. Ask viewer to adjust display so desired closest point is at desired\nviewing distance and orthogonal to line of sight from eye.\n4. If using off-screen fixation, put fixation at same distance from eye\nas the closest point, and compute its position relative to closest point.",
-    type: "",
+    type: "categorical",
     default: "",
-    categories: "",
+    categories: "target, fixation, value",
   },
   {
     name: "conditionEnabledBool",
@@ -1412,8 +1402,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "🕑 errorEndsExperimentBool (default FALSE) determines what happens after the participant hits the only button in the pop up error message. If TRUE then then button tells EasyEyes to terminate the experiment. If FALSE then the button tells EasyEyes to continue at the next block. The participant is not offered any choice. The scientist can set this independently for each condition throughout the experiment.\n\nCOMPLETE CODE AT END OF EXPERIMENT WITH ERROR. We’re going to change our handling of the completion code. Currently when there’s a fatal error, EasyEyes does NOT return a completion code. That makes the participant’s contribution seem suspect in the Prolific dash board, even though the error is practically always due to a fault in EasyEyes marring a best-faith effort by the participant. That denial of “completion” seems unfair to the participant. NEW POLICY: If we have an error in the middle, but eventually finish normally (including the case of an error in the last block), EasyEyes will consider the experiment “complete”, and return the completion code. That’s more fair to participants, graphically confirming that they did the work. Thus “completion” will refer to the orderly return from EasyEyes back to the caller (e.g. Prolific), even though some blocks (conceivably all blocks) may have been skipped due to errors. Prolific will declare the experiment as complete, and give it a green check. Properly handled errors will be invisible to Prolific. NOT YET IMPLEMENTED: When we issue the completion code we also set a new flag in the CSV file, indicating that it ended normally. Simon needs this for the Summary Report.",
-    type: "",
-    default: "",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
