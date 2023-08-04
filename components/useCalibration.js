@@ -619,6 +619,10 @@ export const calibrateAudio = async (reader) => {
                       calibrateSoundCheck.current !== "none"
                         ? result.x_unconv
                         : [],
+                    in_dB_1000Hz: result.inDBValues ? result.inDBValues : [],
+                    out_dBSPL_1000Hz: result.outDBSPL1000Values
+                      ? result.outDBSPL1000Values
+                      : [],
                   });
                   if (calibrateSoundCheck.current !== "none") {
                     //show sound calibration results
