@@ -194,6 +194,10 @@ export const prepareExperimentFileForThreshold = async (
   fillCurrentExperiment("_online5VRHeadset", "_prolific4VRHeadset");
   fillCurrentExperiment("_online5VRHeadsetUsage", "_online5VRHeadsetUsage");
   fillCurrentExperiment("_online5VRHeadsetUsage", "_prolific4VRHeadsetUsage");
+  fillCurrentExperiment(
+    "_online5VisionCorrection",
+    "_prolific4VisionCorrection"
+  );
 
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
