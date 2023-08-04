@@ -596,7 +596,7 @@ export const GLOSSARY: Glossary = {
     name: "_prolific2DeviceKind",
     availability: "now",
     type: "multicategorical",
-    default: "Desktop",
+    default: "desktop",
     categories: ["mobile", "tablet", "desktop"],
   },
   _prolific2RequiredServices: {

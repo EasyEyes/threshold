@@ -771,7 +771,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "⭑ _prolific2DeviceKind is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nmobile\ntablet\ndesktop\nThe parameter value will be a comma-separated list of none to all of: mobile, tablet, desktop.",
     type: "multicategorical",
-    default: "Desktop",
+    default: "desktop",
     categories: "mobile, tablet, desktop",
   },
   {
