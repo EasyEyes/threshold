@@ -5,7 +5,6 @@ import {
   soundCalibrationLevelDBSPL,
   soundCalibrationResults,
   soundGainTWR,
-  ICalibDBSPL,
   calibrateSoundCheck,
 } from "./global";
 import { plotForAllHz, plotSoundLevels1000Hz } from "./soundTestPlots";
@@ -755,7 +754,6 @@ export const displayParameters1000Hz = (
   gainDBSPL: ${parameters.gainDBSPL.toFixed(1)}\n
   backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}\n
   RMSError: ${parameters.RMSError.toFixed(1) + " dB"}\n
-  iCalib: ${ICalibDBSPL.current.toFixed(1)} 
   `;
 
   elems.downloadButton.style.visibility = "visible";

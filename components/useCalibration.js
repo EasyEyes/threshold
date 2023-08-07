@@ -7,7 +7,6 @@ import {
   soundCalibrationLevelDBSPL,
   soundCalibrationResults,
   debugBool,
-  ICalibDBSPL,
   allHzCalibrationResults,
   calibrateSoundMinHz,
   calibrateSoundMaxHz,
@@ -239,10 +238,6 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundBurstRecordings.current = reader.read(
     GLOSSARY._calibrateSoundBurstRecordings.name
   )[0];
-
-  ICalibDBSPL.current = reader.read(
-    GLOSSARY._calibrateSoundAssumingThisICalibDBSPL.name
-  )[0];
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
     .split(",");
@@ -401,6 +396,9 @@ export const calibrateAudio = async (reader) => {
             .replace(/222/g, 3);
           elems.message.innerHTML = "";
           elems.message.style.lineHeight = "2rem";
+          elems.message.style.fontWeight = "normal";
+          elems.message.style.fontSize = "0.7rem";
+          elems.message.style.overflowX = "scroll";
           const messageText1 = readi18nPhrases("RC_identifyMicrophone", lang);
           const messageText2 = `${
             isSmartPhone
@@ -528,7 +526,6 @@ export const calibrateAudio = async (reader) => {
                   siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
                   targetElementId: "displayQR",
                   debug: debugBool.current,
-                  ICalib: ICalibDBSPL.current,
                   gainValues: gains,
                   knownIR: allHzCalibrationResults.knownIr,
                   instructionDisplayId: "soundMessage",
@@ -601,6 +598,7 @@ export const calibrateAudio = async (reader) => {
                     calibrator,
                     timeoutSec.current
                   );
+                  console.log("Microphone Results:", result);
                   microphoneCalibrationResults.push({
                     name: micId,
                     Recording_with_Filter_Hz:
@@ -623,6 +621,8 @@ export const calibrateAudio = async (reader) => {
                     out_dBSPL_1000Hz: result.outDBSPL1000Values
                       ? result.outDBSPL1000Values
                       : [],
+                    ir: result.componentIR ? result.componentIR : [],
+                    iir: result.componentIIR ? result.componentIIR : [],
                   });
                   if (calibrateSoundCheck.current !== "none") {
                     //show sound calibration results
@@ -915,7 +915,6 @@ const _runSoundLevelCalibration = async (elems, gains) => {
     targetElementId: "displayQR",
     gainValues: gains,
     debug: debugBool.current,
-    ICalib: ICalibDBSPL.current,
   };
 
   // console.log(VolumeCalibration);
@@ -1024,7 +1023,6 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
     debug: debugBool.current,
-    ICalib: ICalibDBSPL.current,
     gainValues: gains,
     knownIR: null,
     instructionDisplayId: "soundMessage",
@@ -1179,7 +1177,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             calibrator,
             timeoutSec.current
           );
-
+          console.log("Louspeaker Results: ", soundCalibrationResults.current);
           invertedImpulseResponse.current =
             soundCalibrationResults.current.componentIIR;
           if (calibrateSoundCheck.current !== "none") {

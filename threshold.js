@@ -132,7 +132,6 @@ import {
   blockOrder,
   _key_resp_allKeys,
   allHzCalibrationResults,
-  ICalibDBSPL,
   microphoneCalibrationResults,
 } from "./components/global.js";
 
@@ -787,7 +786,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "THD",
         soundCalibrationResults.current.thdValues
       );
-      psychoJS.experiment.addData("iCalib", ICalibDBSPL.current);
     }
     if (allHzCalibrationResults.x_conv) {
       psychoJS.experiment.addData(
@@ -806,6 +804,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "Recording (dB)",
         allHzCalibrationResults.x_unconv
       ); // x and y are swapped
+      psychoJS.experiment.addData(
+        "Loudspeaker IR",
+        allHzCalibrationResults.knownIr
+      );
+      psychoJS.experiment.addData(
+        "Loudspeaker IIR",
+        invertedImpulseResponse.current
+      );
     }
     if (microphoneCalibrationResults.length > 0) {
       psychoJS.experiment.addData(
