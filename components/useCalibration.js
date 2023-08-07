@@ -600,6 +600,8 @@ export const calibrateAudio = async (reader) => {
                   );
                   // white space wrap
                   elems.message.style.whiteSpace = "normal";
+                  elems.message.style.fontSize = "0.8rem";
+                  elems.message.style.fontWeight = "normal";
                   console.log("Microphone Results:", result);
                   microphoneCalibrationResults.push({
                     name: micId,
@@ -1180,6 +1182,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             timeoutSec.current
           );
           elems.message.style.whiteSpace = "normal";
+          elems.message.style.fontSize = "0.8rem";
+          elems.message.style.fontWeight = "normal";
           console.log("Louspeaker Results: ", soundCalibrationResults.current);
           invertedImpulseResponse.current =
             soundCalibrationResults.current.componentIIR;
