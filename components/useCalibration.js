@@ -598,6 +598,8 @@ export const calibrateAudio = async (reader) => {
                     calibrator,
                     timeoutSec.current
                   );
+                  // white space wrap
+                  elems.message.style.whiteSpace = "normal";
                   console.log("Microphone Results:", result);
                   microphoneCalibrationResults.push({
                     name: micId,
@@ -1177,6 +1179,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             calibrator,
             timeoutSec.current
           );
+          elems.message.style.whiteSpace = "normal";
           console.log("Louspeaker Results: ", soundCalibrationResults.current);
           invertedImpulseResponse.current =
             soundCalibrationResults.current.componentIIR;
