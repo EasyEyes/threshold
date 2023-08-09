@@ -2285,9 +2285,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "3",
     explanation:
-      'If readingSetSizeBy is "nominal", then set point size to the product readingNominalSizeDeg*pixPerDeg.',
+      'readingNominalSizeDeg (default 1) sets the nominal size of the text in deg, provided  readingSetSizeBy is "nominalDeg". It sets the font\'s point size to the product readingNominalSizeDeg*pxPerDeg.',
     type: "numerical",
     default: "1",
+    categories: "",
+  },
+  {
+    name: "readingNominalSizePt",
+    availability: "now",
+    example: "3",
+    explanation:
+      '🕑 readingNominalSizePt (default 12) sets the nominal point size of the text, provided readingSetSizeBy is "nominalPt". One "point" is 1/72 inch.',
+    type: "numerical",
+    default: "12",
     categories: "",
   },
   {
@@ -2325,10 +2335,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "spacing",
     explanation:
-      "⭑ How do you specify the size of the text to be read?\n• nominal will set the point size of the text to readingNominalSizeDeg*pixPerDeg,  \n• xHeight will adjust text size to achieve the specified x-height (the height of lowercase x),  i.e. readingXHeightDeg. \n• spacing will adjust the text size to achieve the specified average letter-to-letter readingSpacingDeg.",
+      '⭑ readingSetSizeBy (default "spacing") determines how you specify the size of the text to be read:\n• nominalPt sets the point size of the text to readingNominalSizePt.\n• nominalDeg sets the point size of the text to readingNominalSizeDeg\\*pxPerDeg,\n• xHeightPt adjusts the text size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg. \n• xHeightDeg adjusts the text size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt, where 1 pt=1/72 inch.\n• spacing adjusts the text size to achieve the specified average letter-to-letter readingSpacingDeg.',
     type: "categorical",
     default: "spacing",
-    categories: "nominal, xHeight, spacing",
+    categories: "nominalPt, nominalDeg, xHeightPt, xHeightDeg, spacing",
   },
   {
     name: "readingSingleLineSpacingDeg",
@@ -2345,7 +2355,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "⭑ readingSpacingDeg has default 0.5 deg. If readingSetSizeBy is spacing, the point size of the text to be read is adjusted to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. For the proportionality of spacing to point size, I suggest we measure the width of the fontCharacterSet string, and divide by the number of numbers in the string.",
+      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacing. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
     type: "numerical",
     default: "0.5",
     categories: "",
@@ -2365,9 +2375,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      'If readingSetSizeBy is "xHeight", then set point size to to achieve this specified x-height (the height of lowercase x). ',
+      'If readingSetSizeBy is "xHeightDeg", then set point size to to achieve this specified x-height (the height of lowercase x). ',
     type: "numerical",
     default: "1",
+    categories: "",
+  },
+  {
+    name: "readingXHeightPt",
+    availability: "now",
+    example: "0.5",
+    explanation:
+      'If readingSetSizeBy is "xHeightPt", then set point size to achieve this specified x-height (the height of lowercase x) in typographic "points" (1/72 inch). ',
+    type: "numerical",
+    default: "6",
     categories: "",
   },
   {

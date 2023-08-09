@@ -2052,6 +2052,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
   },
+  readingNominalSizePt: {
+    name: "readingNominalSizePt",
+    availability: "now",
+    type: "numerical",
+    default: "12",
+  },
   readingNumberOfPossibleAnswers: {
     name: "readingNumberOfPossibleAnswers",
     availability: "now",
@@ -2075,7 +2081,13 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "spacing",
-    categories: ["nominal", "xHeight", "spacing"],
+    categories: [
+      "nominalPt",
+      "nominalDeg",
+      "xHeightPt",
+      "xHeightDeg",
+      "spacing",
+    ],
   },
   readingSingleLineSpacingDeg: {
     name: "readingSingleLineSpacingDeg",
@@ -2100,6 +2112,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "1",
+  },
+  readingXHeightPt: {
+    name: "readingXHeightPt",
+    availability: "now",
+    type: "numerical",
+    default: "6",
   },
   responseAllowedEarlyBool: {
     name: "responseAllowedEarlyBool",
