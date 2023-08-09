@@ -873,14 +873,14 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_prolific3Sample",
+    name: "_prolific3StudyDistribution",
     availability: "now",
     example: "",
     explanation:
-      '🕑 _prolific3Sample [Prolific "Study distribution"] is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution\nHow do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nThe parameter value will be one of: UK, USA, Balanced, Standard\nThe scientist thus chooses a sample of participants: (representative of) USA, (representative of) UK, (50/50 sex) Balanced, or (whoever is available) Standard. Note that Prolific charges more for representative (i.e. US or UK) samples.',
+      '🕑 _prolific3StudyDistribution [Prolific "Study distribution"] (default Standard sample) is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution\nHow do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nApparently "Representative sample" is automatically assigned to either UK or USA.\nThe scientist chooses a sample of participants that is one of: Representative of USA or UK, Balanced 50/50 between sexes, or Standard (whoever is available). Prolific charges more for representative samples.',
     type: "categorical",
-    default: "Standard",
-    categories: "UK, USA, Balanced, Standard",
+    default: "Standard sample",
+    categories: "Representative sample, Balanced sample, Standard sample",
   },
   {
     name: "_prolific4CochlearImplant",

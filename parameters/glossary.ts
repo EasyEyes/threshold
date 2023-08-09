@@ -910,12 +910,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  _prolific3Sample: {
-    name: "_prolific3Sample",
+  _prolific3StudyDistribution: {
+    name: "_prolific3StudyDistribution",
     availability: "now",
     type: "categorical",
-    default: "Standard",
-    categories: ["UK", "USA", "Balanced", "Standard"],
+    default: "Standard sample",
+    categories: ["Representative sample", "Balanced sample", "Standard sample"],
   },
   _prolific4CochlearImplant: {
     name: "_prolific4CochlearImplant",
