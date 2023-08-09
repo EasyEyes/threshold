@@ -6,7 +6,6 @@ _needBrowser,"Chrome,Edge,Safari",
 _needDeviceType,desktop,
 _needProcessorCoresMinimum,6,
 _online1RecruitmentService,Prolific,
-_online2ProlificProjectID,62cd33e1566da7aa25d1790f,
 _participantIDGetBool,TRUE,
 _participantIDPutBool,TRUE,
 block,,1

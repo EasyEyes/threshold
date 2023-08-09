@@ -316,9 +316,7 @@ export const preprocessCorpusToSentenceList = (
 /* -------------------------------------------------------------------------- */
 
 export const getSizeForXHeight = (readingParagraph, targetDeg) => {
-  const targetPix = degreesToPixels(targetDeg, {
-    pixPerCm: displayOptions.pixPerCm,
-  });
+  const targetPix = degreesToPixels(targetDeg, "y");
 
   readingParagraph.setText("x");
 
@@ -332,10 +330,10 @@ export const getSizeForXHeight = (readingParagraph, targetDeg) => {
     height += 0.5;
   }
   psychoJS.experiment.addData(
-    "readingParagraphSetHeightUsingxHeightError",
+    "readingParagraphSetHeightUsingxHeightDegError",
     `height: ${height}, window height: ${window.innerHeight}, testHeight: ${testHeight}, targetPix: ${targetPix}`
   );
-  throw `Failed to set reading paragraph height using [xHeight]. height: ${height}, window height: ${window.innerHeight}, testHeight: ${testHeight}, targetPix: ${targetPix}`;
+  throw `Failed to set reading paragraph height using [xHeightDeg]. height: ${height}, window height: ${window.innerHeight}, testHeight: ${testHeight}, targetPix: ${targetPix}`;
 };
 
 export const getSizeForSpacing = (
@@ -394,30 +392,51 @@ export const findReadingSize = (
   paramReader,
   readingParagraph
 ) => {
+  let px;
   switch (readingSetSizeBy) {
-    case "nominal":
-      return (
-        paramReader.read("readingNominalSizeDeg", status.block)[0] *
-        degreesToPixels(1, {
-          pixPerCm: displayOptions.pixPerCm,
-        })
-      );
-    case "xHeight":
-      return getSizeForXHeight(
+    case "nominalDeg":
+      px = getReadingNominalSizeDeg(paramReader);
+      break;
+    case "xHeightDeg":
+      px = getSizeForXHeight(
         readingParagraph,
         paramReader.read("readingXHeightDeg", status.block)[0]
       );
+      break;
     case "spacing":
-      return getSizeForSpacing(
+      px = getSizeForSpacing(
         readingParagraph,
         paramReader.read("readingSpacingDeg", status.block)[0],
         fontCharacterSet.current.join("")
       );
+      break;
+    case "nominalPt":
+      px = getReadingNominalSizePt(paramReader);
+      break;
     default:
       return;
   }
+  return Math.max(1, px);
 };
 /* --------------------------------- HELPERS -------------------------------- */
+
+const getReadingNominalSizeDeg = (paramReader, customValueDeg = undefined) => {
+  if (typeof customValueDeg === "undefined") {
+    return degreesToPixels(
+      paramReader.read("readingNominalSizeDeg", status.block)[0],
+      "y"
+    );
+  }
+  return degreesToPixels(customValueDeg, "y");
+};
+
+const getReadingNominalSizePt = (paramReader) => {
+  const sizeDeg =
+    (paramReader.read("readingNominalSizePt", status.block)[0] *
+      ((displayOptions.pixPerCm * 2.54) / 72)) /
+    displayOptions.pixPerCm;
+  return getReadingNominalSizeDeg(paramReader, sizeDeg);
+};
 
 const removeLastSpace = (str) => {
   return str.replace(/ $/, "");

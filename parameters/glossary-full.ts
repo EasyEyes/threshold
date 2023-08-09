@@ -140,7 +140,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateSoundHz",
     availability: "now",
     example: "",
-    explanation: "❌Use _calibrateSoundBurstSamplingHz instead.",
+    explanation: "❌ Use _calibrateSoundBurstSamplingHz instead.",
     type: "numerical",
     default: "48000",
     categories: "",
@@ -796,7 +796,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific3AllowAfterHours [Prolific "xxx"] (default 0) requires that at least the specified (floating) number of hours pass since completion of the _prolific3AllowCompletedExperiment before the participant’s ID is added to the allowList.',
+      '🕑 _prolific3AllowAfterHours [Prolific "xxx"] (default 0) requires that at least the specified (floating) number of hours pass since completion of the _prolific3AllowCompletedExperiment before the participant’s ID is added to the allowList.',
     type: "numerical",
     default: "0",
     categories: "",
@@ -806,7 +806,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific3AllowCompletedExperiment [Prolific "xxx"] (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _prolific3AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _prolific3AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _prolific3CustomAllowList is not empty, then it adds its IDs to the allowList.',
+      '🕑 _prolific3AllowCompletedExperiment [Prolific "xxx"] (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _prolific3AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _prolific3AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _prolific3CustomAllowList is not empty, then it adds its IDs to the allowList.',
     type: "text",
     default: "",
     categories: "",
@@ -816,7 +816,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific3ApprovalRate [Prolific "Approval rate"] (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)',
+      '🕑 _prolific3ApprovalRate [Prolific "Approval rate"] (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)',
     type: "text",
     default: " 0,100",
     categories: "",
@@ -857,7 +857,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific3ParticipantInPreviousStudyExclude [Prolific "Exclude participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.',
+      '🕑 _prolific3ParticipantInPreviousStudyExclude [Prolific "Exclude participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.',
     type: "text",
     default: "",
     categories: "",
@@ -867,7 +867,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific3ParticipantInPreviousStudyInclude [Prolific "Include participants from previous studies"] (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren\'t approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.',
+      '🕑 _prolific3ParticipantInPreviousStudyInclude [Prolific "Include participants from previous studies"] (no default) is a comma-separated list of Experiment names in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren\'t approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.',
     type: "text",
     default: "",
     categories: "",
@@ -877,7 +877,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _prolific3StudyDistribution [Prolific "Study distribution"] (default Standard sample) is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution\nHow do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nApparently "Representative sample" is automatically assigned to either UK or USA.\nThe scientist chooses a sample of participants that is one of: Representative of USA or UK, Balanced 50/50 between sexes, or Standard (whoever is available). Prolific charges more for representative samples.',
+      '🕑 _prolific3StudyDistribution [Prolific "Study distribution"] (default Standard sample) is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution. How do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nApparently "Representative sample" is automatically assigned to either UK or USA.\nThe scientist chooses a sample of participants that is one of: Representative of USA or UK, Balanced 50/50 between sexes, or Standard (whoever is available). Prolific charges more for representative samples.',
     type: "categorical",
     default: "Standard sample",
     categories: "Representative sample, Balanced sample, Standard sample",
@@ -917,7 +917,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ _prolific4LanguageFirst [Prolific "First language"] (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.',
+      '_prolific4LanguageFirst [Prolific "First language"] (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.',
     type: "multicategorical",
     default: "",
     categories:
@@ -928,7 +928,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ _prolific4LanguageFluent [Prolific "Fluent languages"] (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.',
+      '_prolific4LanguageFluent [Prolific "Fluent languages"] (no default) is a comma-separated list of acceptable languages. Prolific uses OR to combine values within a parameter, and AND to combine across parameters. Prolific is international but based in UK; Enlish is the native language of a large fraction of their participants.',
     type: "multicategorical",
     default: "",
     categories:
@@ -1012,17 +1012,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific4VRHeadsetOwnership [Prolific "VR headset (ownership)"] (no default), controls Prolific "VR Headset Ownership" and is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (ownership)\nParticipants were asked the following question: Do you own a VR (Virtual Reality) headset?\nYes\nNo\nDon\'t know / other\nNot applicable / rather not say',
+      '🕑 _prolific4VRHeadsetOwnership [Prolific "VR headset (ownership)"] (no default), controls Prolific "VR Headset Ownership" and is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (ownership)\nParticipants were asked the following question: Do you own a VR (Virtual Reality) headset?\nYes\nNo\nDon\'t know / other\nNot applicable / rather not say',
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Don''t know / other, Not applicable / rather not say",
   },
   {
-    name: "_prolific4VRHeadsetFrequency",
+    name: "_prolific4VRHeadsetOwnership",
     availability: "now",
     example: "",
     explanation:
-      '_prolific4VRHeadsetFrequency [Prolific "VR headset (frequency)"] (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (frequency)\nParticipants were asked the following question: In a given month, how frequently do you use a VR headset?\n0 times\n1-5 times\n6-10 times\n11-15 times\nmore than 15 times\nNot applicable / rather not say',
+      '🕑 _prolific4VRHeadsetFrequency [Prolific "VR headset (frequency)"] (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (frequency)\nParticipants were asked the following question: In a given month, how frequently do you use a VR headset?\n0 times\n1-5 times\n6-10 times\n11-15 times\nmore than 15 times\nNot applicable / rather not say',
     type: "multicategorical",
     default: "",
     categories:
@@ -1604,7 +1604,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "file",
     explanation:
-      "⭑ fontSource must be file, google, server (not yet supported), or browser. Browsers blithely substitute for unavailable or slow-to-load fonts. That's great for keeping the web going, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has fontSource file, the compiler checks for presence of the font in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app. Any popular font format will work, but for quick upload, we recommend minimizing file size by using the highly compressed WOFF2 webfont file format, indicated by the filename extension woff2. \n\nfile: font contains the filename (with extension) of a file in the Fonts folder in the EasyEyesResources repository in your Pavlovia account. Font availability is checked by the EasyEyes compiler, to avoid runtime surprises. LIMITATIONS: The font filename should not have any spaces. EasyEyes currently is only aware of up to 20 fonts. Further fonts are ignored. We hope to remove these limits in a future release. If you hit the 20-font limit, you can use the VIew code button in Pavlovia to open the EasyEyesResources repository and delete fonts that you don't need right now.\n\ngoogle: font contains the font name as recognized by the Google Fonts server.\n\nserver: font contains the URL of the font on a font server. (\"server\" support is coming.)\n\nbrowser: font is a font-preference string that is passed to the participant's browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don't know any quick way to discover what font the browser chose, so the scientist will never know.) ",
+      "⭑ fontSource must be file, google, server (🕑 not yet supported), or browser. Browsers blithely substitute for unavailable or slow-to-load fonts. That's great for keeping the web going, but bad for perception experiments, so we encourage you to provide access to a specific font, either as a file or on a font server. For each condition that has fontSource file, the compiler checks for presence of the font in your Fonts folder (in your Pavlovia account). That folder is persistent, and you can add more fonts to it at any time, through the EasyEyes.app. Any popular font format will work, but for quick upload, we recommend minimizing file size by using the highly compressed WOFF2 webfont file format, indicated by the filename extension woff2. \n\nfile: font contains the filename (with extension) of a file in the Fonts folder in the EasyEyesResources repository in your Pavlovia account. Font availability is checked by the EasyEyes compiler, to avoid runtime surprises. LIMITATIONS: The font filename should not have any spaces. EasyEyes currently is only aware of up to 20 fonts. Further fonts are ignored. We hope to remove these limits in a future release. If you hit the 20-font limit, you can use the VIew code button in Pavlovia to open the EasyEyesResources repository and delete fonts that you don't need right now.\n\ngoogle: font contains the font name as recognized by the Google Fonts server.\n\n🕑 server: font contains the URL of the font on a font server. (\"server\" support is coming.)\n\nbrowser: font is a font-preference string that is passed to the participant's browser. This never produces an error; we accept whatever font the browser chooses. Your font string can include several font names, separated by commas, to help the browser find something close to your intent. This is the usual way to select a font on the web, and never generates an error. (We don't know any quick way to discover what font the browser chose, so the scientist will never know.) ",
     type: "categorical",
     default: "google",
     categories: "file, google, browser",
@@ -1694,7 +1694,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "browser",
     explanation:
-      'instructionFontSource must be file, google, server, or browser. "server" support is coming. See fontSource for explanation.',
+      'instructionFontSource must be file, google, server, or browser. 🕑 "server" support is coming. See fontSource for explanation.',
     type: "categorical",
     default: "browser",
     categories: "file, google, browser",

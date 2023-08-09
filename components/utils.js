@@ -174,19 +174,32 @@ export const loggerText = (text) => {
  * Convert a (magnitude) value of visual degrees to pixels
  * @todo add tests
  * @param {Number} degrees Scalar, in degrees
- * @param {Object} displayOptions Parameters about the stimulus presentation
- * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
  * @returns {Number}
  */
-export const degreesToPixels = (degrees, displayOptions) => {
-  if (Math.abs(degrees) > 90)
-    throw new Error(
-      "To large of an angle (ie > 90 deg) specified for this method of transferring between angles and pixels."
-    );
-  const radians = Math.abs(degrees) * (Math.PI / 180);
-  const pixels =
-    displayOptions.pixPerCm * viewingDistanceCm.current * Math.tan(radians);
-  return pixels;
+export const degreesToPixels = (degrees, method = "x") => {
+  switch (method) {
+    case "x":
+      return (
+        XYDegOfXYPix([degrees, 0], displayOptions)[0] -
+        XYDegOfXYPix([0, 0], displayOptions)[0]
+      );
+    case "y":
+      return (
+        XYDegOfXYPix([0, degrees], displayOptions)[1] -
+        XYDegOfXYPix([0, 0], displayOptions)[1]
+      );
+    case "old":
+    default:
+      // If need be, use this gross, not fixation-relative method. Please don't use this if possible.
+      if (Math.abs(degrees) > 90)
+        throw new Error(
+          "To large of an angle (ie > 90 deg) specified for this method of transferring between angles and pixels."
+        );
+      const radians = Math.abs(degrees) * (Math.PI / 180);
+      const pixels =
+        displayOptions.pixPerCm * viewingDistanceCm.current * Math.tan(radians);
+      return pixels;
+  }
 };
 /**
  * Convert a (magnitude) of visual degrees to pixels

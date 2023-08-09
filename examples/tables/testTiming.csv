@@ -7,7 +7,6 @@ conditionTrials,,5,5,5,5
 font,,Roboto Mono,BhuTuka Expanded One,Roboto Mono,BhuTuka Expanded One
 fontCharacterSet,,defghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz
 fontSource,,google,google,google,google
-responseEscapeOptionsBool,,TRUE,TRUE,TRUE,TRUE
 showConditionNameBool,,TRUE,TRUE,TRUE,TRUE
 showCounterBool,,TRUE,TRUE,TRUE,TRUE
 showFPSBool,,TRUE,TRUE,TRUE,TRUE

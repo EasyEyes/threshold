@@ -1283,18 +1283,6 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "",
     categories: [
-      "Yes",
-      "No",
-      "Don''t know / other",
-      "Not applicable / rather not say",
-    ],
-  },
-  _prolific4VRHeadsetFrequency: {
-    name: "_prolific4VRHeadsetFrequency",
-    availability: "now",
-    type: "multicategorical",
-    default: "",
-    categories: [
       "0 times",
       "1-5 times",
       "6-10 times",
