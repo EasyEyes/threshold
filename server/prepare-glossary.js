@@ -35,6 +35,7 @@ async function processLanguageSheet() {
       availability: parameter["NOW"] || "now",
       type: parameter["TYPE"],
       default: parameter["DEFAULT"],
+      explanation: parameter["EXPLANATION"],
     };
     // Categories is only relevant for the "categorical" and "multicategorica" types
     if (

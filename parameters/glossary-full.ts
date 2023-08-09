@@ -260,7 +260,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⭑ _language (default English) is the English name of the initial language of the experiment, e.g. English, German, or Arabic. We currently support 28 languages, and it would be very easy to add more. The translations, mostly by Google Translate, are far from perfect, but we occasionally paste in better translations for key phrases. If _languageSelectionByParticipantBool==TRUE then the initial compatibiliy page allows the participant to choose any of 28 languages for the rest of the experiment. Otherwise the language remains as set by _language.",
+      "⭑ _language (default English) is the English name of the initial language of the experiment, e.g. English, German, or Arabic. We currently support 28 languages, and it would be very easy to add more. The translations, mostly by Google Translate, are imperfect, so we occasionally paste in better translations for key phrases. If _languageSelectionByParticipantBool==TRUE then the initial compatibiliy page allows the participant to choose any of 28 languages for the rest of the experiment. Otherwise the language remains as set by _language.",
     type: "categorical",
     default: "English",
     categories:
