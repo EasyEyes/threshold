@@ -1282,14 +1282,26 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "multicategorical",
     default: "",
-    categories: ["Yes", "No", "Don't know", "Not applicable"],
+    categories: [
+      "Yes",
+      "No",
+      "Don''t know / other",
+      "Not applicable / rather not say",
+    ],
   },
   _prolific4VRHeadsetFrequency: {
     name: "_prolific4VRHeadsetFrequency",
     availability: "now",
     type: "multicategorical",
     default: "",
-    categories: ["0", "1-5", "6-10", "11-15", "more than 15", "Not applicable"],
+    categories: [
+      "0 times",
+      "1-5 times",
+      "6-10 times",
+      "11-15 times",
+      "more than 15 times",
+      "Not applicable / rather not say",
+    ],
   },
   _saveEachBlockBool: {
     name: "_saveEachBlockBool",

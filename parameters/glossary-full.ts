@@ -52,8 +52,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibratePhoneMicBool",
     availability: "now",
     example: "TRUE",
-    explanation:
-      "❌ _calibratePhoneMicBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library.",
+    explanation: "❌ Use _calibrateMicrophonesBool instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -72,8 +71,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateSoundAssumingThisICalibDBSPL",
     availability: "now",
     example: "",
-    explanation:
-      "❌ _calibrateSoundAssumingICalibDBSPL (default 76) is a calibration factor for iPhone recordings. The physical sound level (in dB SPL) is iCalib+20*log10(rms), where rms is the root mean square of the digital sound recording. The value we got from the internet was 104.9. The value we use is based on our calibration of an iPhone 12 Pro by the UMIK-1 digital microphone and the REW software, which reads the (90 deg, i.e. vertically oriented) factory calibration of the UMIK-1 microphone. The scientist can override the current default by setting this parameter in the experiment table. The compiler allows you to provide a different value for each condition, but in fact it's used only once, during calibration, and I suppose we use the value provided for the first condition. The value of iCalib is included in the Sound Calibration report, both on screen, and in the CSV file that you can optionally download.",
+    explanation: "❌ Obsolete.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -142,8 +140,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateSoundHz",
     availability: "now",
     example: "",
-    explanation:
-      "❌ _calibrateSoundHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
+    explanation: "❌Use _calibrateSoundBurstSamplingHz instead.",
     type: "numerical",
     default: "48000",
     categories: "",
@@ -1018,7 +1015,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '_prolific4VRHeadsetOwnership [Prolific "VR headset (ownership)"] (no default), controls Prolific "VR Headset Ownership" and is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (ownership)\nParticipants were asked the following question: Do you own a VR (Virtual Reality) headset?\nYes\nNo\nDon\'t know / other\nNot applicable / rather not say',
     type: "multicategorical",
     default: "",
-    categories: "Yes, No, Don't know, Not applicable",
+    categories: "Yes, No, Don''t know / other, Not applicable / rather not say",
   },
   {
     name: "_prolific4VRHeadsetFrequency",
@@ -1028,7 +1025,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '_prolific4VRHeadsetFrequency [Prolific "VR headset (frequency)"] (no default) is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (frequency)\nParticipants were asked the following question: In a given month, how frequently do you use a VR headset?\n0 times\n1-5 times\n6-10 times\n11-15 times\nmore than 15 times\nNot applicable / rather not say',
     type: "multicategorical",
     default: "",
-    categories: "0, 1-5, 6-10, 11-15, more than 15, Not applicable",
+    categories:
+      "0 times, 1-5 times, 6-10 times, 11-15 times, more than 15 times, Not applicable / rather not say",
   },
   {
     name: "_saveEachBlockBool",
