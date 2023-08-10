@@ -1466,7 +1466,7 @@ export const GLOSSARY: Glossary = {
     categories: [
       "Yes",
       "No",
-      "Don''t know / other",
+      "Don't know / other",
       "Not applicable / rather not say",
     ],
   },
@@ -2506,7 +2506,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      'readingNominalSizeDeg (default 1) sets the nominal size of the text in deg, provided  readingSetSizeBy is "nominalDeg". It sets the font\'s point size to the product readingNominalSizeDeg*pxPerDeg.',
+      'readingNominalSizeDeg (default 1) sets the nominal size of the text in deg, provided readingSetSizeBy=="nominalDeg". It sets the font\'s point size to the product readingNominalSizeDeg*pxPerDeg.',
   },
   readingNominalSizePt: {
     name: "readingNominalSizePt",
@@ -2514,7 +2514,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "12",
     explanation:
-      '🕑 readingNominalSizePt (default 12) sets the nominal point size of the text, provided readingSetSizeBy is "nominalPt". One "point" is 1/72 inch.',
+      'readingNominalSizePt (default 12) sets the nominal point size of the text, provided readingSetSizeBy=="nominalPt". One "point" is 1/72 inch.',
   },
   readingNumberOfPossibleAnswers: {
     name: "readingNumberOfPossibleAnswers",
@@ -2544,15 +2544,15 @@ export const GLOSSARY: Glossary = {
     name: "readingSetSizeBy",
     availability: "now",
     type: "categorical",
-    default: "spacing",
+    default: "spacingDeg",
     explanation:
-      '⭑ readingSetSizeBy (default "spacing") determines how you specify the size of the text to be read:\n• nominalPt sets the point size of the text to readingNominalSizePt.\n• nominalDeg sets the point size that subtends readingNominalSizeDeg. The point size is \n(72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt adjusts the text size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg. \n• xHeightDeg adjusts the text size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt, where 1 pt=1/72 inch.\n• spacing adjusts the text size to achieve the specified average letter-to-letter readingSpacingDeg.',
+      '⭑ readingSetSizeBy (default "spacingDeg") determines how you specify the size of the text to be read. "Point" is abbreviated "pt", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so we call the typeset size (e.g. 12 pt), the "nominal" type size.\n• nominalPt sets the font\'s point size to readingNominalSizePt.\n• nominalDeg sets the font\'s point size to subtend readingNominalSizeDeg. The formula is \n(72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg. \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt.\n• spacingDeg sets the font\'s point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.',
     categories: [
       "nominalPt",
       "nominalDeg",
       "xHeightPt",
       "xHeightDeg",
-      "spacing",
+      "spacingDeg",
     ],
   },
   readingSingleLineSpacingDeg: {
@@ -2585,7 +2585,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      'If readingSetSizeBy is "xHeightDeg", then set point size to to achieve this specified x-height (the height of lowercase x). ',
+      'If readingSetSizeBy is "xHeightDeg", then set the font\'s point size to to achieve this specified x-height (the height of lowercase x). ',
   },
   readingXHeightPt: {
     name: "readingXHeightPt",
@@ -2593,7 +2593,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "6",
     explanation:
-      'If readingSetSizeBy is "xHeightPt", then set point size to achieve this specified x-height (the height of lowercase x) in typographic "points" (1/72 inch). ',
+      'If readingSetSizeBy is "xHeightPt", then set the font\'s point size to achieve this specified x-height (the height of lowercase x) in typographic "points" (1/72 inch). ',
   },
   responseAllowedEarlyBool: {
     name: "responseAllowedEarlyBool",
