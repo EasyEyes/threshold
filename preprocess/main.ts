@@ -188,12 +188,12 @@ export const prepareExperimentFileForThreshold = async (
     "_prolific4LanguageRelatedDisorders"
   );
   fillCurrentExperiment("_online5CochlearImplant", "_prolific4CochlearImplant");
-  fillCurrentExperiment("_online5VRExperiences", "_online5VRExperiences");
   fillCurrentExperiment("_online5VRExperiences", "_prolific4VRExperiences");
-  fillCurrentExperiment("_online5VRHeadset", "_online5VRHeadset");
-  fillCurrentExperiment("_online5VRHeadset", "_prolific4VRHeadset");
-  fillCurrentExperiment("_online5VRHeadsetUsage", "_online5VRHeadsetUsage");
-  fillCurrentExperiment("_online5VRHeadsetUsage", "_prolific4VRHeadsetUsage");
+  fillCurrentExperiment("_online5VRHeadset", "_prolific4VRHeadsetOwnership");
+  fillCurrentExperiment(
+    "_online5VRHeadsetUsage",
+    "_prolific4VRHeadsetFrequency"
+  );
   fillCurrentExperiment(
     "_online5VisionCorrection",
     "_prolific4VisionCorrection"

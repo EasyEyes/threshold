@@ -820,7 +820,7 @@ export const phrases = {
     id: " atau",
     "zh-CN": " 或者",
     "zh-HK": " 或者",
-    ja: " また",
+    ja: " または",
     ko: " 또는",
   },
   EE_refresh: {
