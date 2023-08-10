@@ -910,12 +910,12 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
   },
-  _prolific3Sample: {
-    name: "_prolific3Sample",
+  _prolific3StudyDistribution: {
+    name: "_prolific3StudyDistribution",
     availability: "now",
     type: "categorical",
-    default: "Standard",
-    categories: ["UK", "USA", "Balanced", "Standard"],
+    default: "Standard sample",
+    categories: ["Representative sample", "Balanced sample", "Standard sample"],
   },
   _prolific4CochlearImplant: {
     name: "_prolific4CochlearImplant",
@@ -1282,14 +1282,14 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "multicategorical",
     default: "",
-    categories: ["Yes", "No", "Don't know", "Not applicable"],
-  },
-  _prolific4VRHeadsetFrequency: {
-    name: "_prolific4VRHeadsetFrequency",
-    availability: "now",
-    type: "multicategorical",
-    default: "",
-    categories: ["0", "1-5", "6-10", "11-15", "more than 15", "Not applicable"],
+    categories: [
+      "0 times",
+      "1-5 times",
+      "6-10 times",
+      "11-15 times",
+      "more than 15 times",
+      "Not applicable / rather not say",
+    ],
   },
   _saveEachBlockBool: {
     name: "_saveEachBlockBool",
@@ -2052,6 +2052,12 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
   },
+  readingNominalSizePt: {
+    name: "readingNominalSizePt",
+    availability: "now",
+    type: "numerical",
+    default: "12",
+  },
   readingNumberOfPossibleAnswers: {
     name: "readingNumberOfPossibleAnswers",
     availability: "now",
@@ -2075,7 +2081,13 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "spacing",
-    categories: ["nominal", "xHeight", "spacing"],
+    categories: [
+      "nominalPt",
+      "nominalDeg",
+      "xHeightPt",
+      "xHeightDeg",
+      "spacing",
+    ],
   },
   readingSingleLineSpacingDeg: {
     name: "readingSingleLineSpacingDeg",
@@ -2100,6 +2112,12 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "1",
+  },
+  readingXHeightPt: {
+    name: "readingXHeightPt",
+    availability: "now",
+    type: "numerical",
+    default: "6",
   },
   responseAllowedEarlyBool: {
     name: "responseAllowedEarlyBool",

@@ -1182,7 +1182,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             timeoutSec.current
           );
           elems.message.style.whiteSpace = "normal";
-          elems.message.style.fontSize = "0.8rem";
+          elems.message.style.fontSize = "1.1rem";
           elems.message.style.fontWeight = "normal";
           console.log("Louspeaker Results: ", soundCalibrationResults.current);
           invertedImpulseResponse.current =
