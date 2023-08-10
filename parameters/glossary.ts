@@ -2546,7 +2546,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "spacing",
     explanation:
-      '⭑ readingSetSizeBy (default "spacing") determines how you specify the size of the text to be read:\n• nominalPt sets the point size of the text to readingNominalSizePt.\n• nominalDeg sets the point size of the text to readingNominalSizeDeg\\*pxPerDeg,\n• xHeightPt adjusts the text size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg. \n• xHeightDeg adjusts the text size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt, where 1 pt=1/72 inch.\n• spacing adjusts the text size to achieve the specified average letter-to-letter readingSpacingDeg.',
+      '⭑ readingSetSizeBy (default "spacing") determines how you specify the size of the text to be read:\n• nominalPt sets the point size of the text to readingNominalSizePt.\n• nominalDeg sets the point size that subtends readingNominalSizeDeg. The point size is \n(72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt adjusts the text size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg. \n• xHeightDeg adjusts the text size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt, where 1 pt=1/72 inch.\n• spacing adjusts the text size to achieve the specified average letter-to-letter readingSpacingDeg.',
     categories: [
       "nominalPt",
       "nominalDeg",
@@ -2561,7 +2561,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "🕑 Explicit value of single line spacing. This is ignored unless readingDefineSingleLineSpacingAs is explicit.",
+      "🕑 readingSingleLineSpacingDeg (default 1) set the single line spacing in deg, but only if readingDefineSingleLineSpacingAs==explicit. Otherwise it's ignored.",
   },
   readingSpacingDeg: {
     name: "readingSpacingDeg",

@@ -12,6 +12,7 @@ import {
   readingWordListArchive,
   status,
   timing,
+  viewingDistanceCm,
 } from "./global";
 import { degreesToPixels, getRandomInt, logger, XYPixOfXYDeg } from "./utils";
 
@@ -421,13 +422,21 @@ export const findReadingSize = (
 /* --------------------------------- HELPERS -------------------------------- */
 
 const getReadingNominalSizeDeg = (paramReader, customValueDeg = undefined) => {
-  if (typeof customValueDeg === "undefined") {
-    return degreesToPixels(
-      paramReader.read("readingNominalSizeDeg", status.block)[0],
-      "y"
-    );
-  }
-  return degreesToPixels(customValueDeg, "y");
+  /**
+   * readingSetSizeBy (default “spacing”) determines how you specify the size of the text to be read:
+• nominalDeg sets the point size that subtends readingNominalSizeDeg. The point size is
+(72/2.54)*2*atan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.
+   */
+  const nominalSizeDeg =
+    typeof customValueDeg === "undefined"
+      ? paramReader.read("readingNominalSizeDeg", status.block)[0]
+      : customValueDeg;
+  const ptSize =
+    (72 / 2.54) *
+    2 *
+    Math.tan((0.5 * nominalSizeDeg * Math.PI) / 180) *
+    viewingDistanceCm.current;
+  return ptSize;
 };
 
 const getReadingNominalSizePt = (paramReader) => {
