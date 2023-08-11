@@ -287,7 +287,7 @@ export const UNRECOGNIZED_PARAMETER = (report: any): EasyEyesError => {
 export const OBSOLETE_PARAMETERS = (report: any): EasyEyesError => {
   return {
     name: `Parameter is obsolete`,
-    message: `Sorry, <span class="error-parameter">${report.name}</span> is obsolete.`,
+    message: ``,
     hint: `${GLOSSARY[report.name]?.["explanation"]}`,
     context: "preprocessor",
     kind: "error",
