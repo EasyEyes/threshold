@@ -463,7 +463,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "15",
     explanation:
-      '⭑ _online2PayPerHour [In Prolific, EasyEyes computes and fills in "How much do you want to pay them?"](default zero) specifies the hourly rate (a number) that determines (with _online2Minutes) the payment offered to each participant. The currency is specified by _online2PayCurrency. If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. Prolific lists the study titles and pay per hour for selection by prospective participants. Some participants mentioned selecting my study because it seemed interesting. Others said that in their rush to sign up for $15/hour studies, they often skip the description. ',
+      '⭑ _online2PayPerHour (default zero) specifies the hourly rate (a number) that determines (with _online2Minutes) the payment offered to each participant. [In Prolific, EasyEyes computes and fills in "How much do you want to pay them?"] The currency is specified by _online2PayCurrency. If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. The pay is specified with two decimals (e.g. 11.01), rounding up to the next cent, so the hourly rate offered will never be less than specified by the experiment. Prolific lists the study titles and pay per hour for selection by prospective participants. Some participants mentioned selecting my study because it seemed interesting. Others said that in their rush to sign up for $15/hour studies, they often skip the description. ',
     type: "numerical",
     default: "0",
     categories: "",
