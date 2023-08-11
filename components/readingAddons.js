@@ -404,7 +404,7 @@ export const findReadingSize = (
         paramReader.read("readingXHeightDeg", status.block)[0]
       );
       break;
-    case "spacing":
+    case "spacingDeg":
       px = getSizeForSpacing(
         readingParagraph,
         paramReader.read("readingSpacingDeg", status.block)[0],
