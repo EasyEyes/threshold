@@ -5325,7 +5325,7 @@ export const phrases = {
     ko: "이렇게하면 시청 거리에서 전화기를 키패드로 사용하여 응답 할 수 있습니다.",
   },
   T_letterPopularDemandFeatures: {
-    "en-US": "❌",
+    "en-US": "❌ T_letterPopularDemandFeatures is obsolete. Don't use it.",
     de: "  ",
     fr: "  ",
     es: "  ",
