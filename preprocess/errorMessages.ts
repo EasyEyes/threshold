@@ -288,7 +288,7 @@ export const OBSOLETE_PARAMETERS = (report: any): EasyEyesError => {
   return {
     name: `Parameter is obsolete`,
     message: `Sorry, <span class="error-parameter">${report.name}</span> is obsolete.`,
-    hint: `All parameters are case-sensitive.`,
+    hint: `${GLOSSARY[report.name]?.["explanation"]}`,
     context: "preprocessor",
     kind: "error",
     parameters: [report.name],
