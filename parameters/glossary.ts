@@ -396,6 +396,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ _needProcessorCoresMinimum tries to exclude slow computers without testing speed. The number of cores is a positive integer, also called \"hardwareConcurrency,\" whose value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the rate (in MHz) at which the computer generates random numbers. https://en.wikipedia.org/wiki/Multi-core_processor\nUsing Prolific, our experiments are occasionally assigned to slow computers that produce inaccurate stimulus timing. EasyEyes measures lateness and duration and reports them as targetMeasuredLatenessSec and targetMeasuredDurationSec in the CSV file. We find that setting _needProcessorCoresMinimum=6 nearly eliminated bad timing, but it also eliminates quite a few computers with good timing. You may prefer to set _needProcessorCoresMinimum lower, e.g. 4, to include most computers, and weed out the slow computers later, during data analysis, based on mean and SD of  targetMeasuredLatenessSec and targetMeasuredDurationSec. \nNOTE: To make your computer harder to track, the Chrome extension DuckDuckGo spoofs the number of cores to 2. Any experiment requiring 3 or more cores will reject any participant whose computer spoofs having 2 cores. \n\nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
   },
+  _needRecordingControls: {
+    name: "_needRecordingControls",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    explanation:
+      "🕑 _needRecordingControls (no default) is for sound recording. It's multicategorical and allows the scientist to demand control of echoCancellation, autoGainControl, and noiseSuppression. Not all browsers offer such control. We need these features off for sound calibration because they seriously distort the recording. In principle we'd be happy with a rudimentary browser that didn't do these things, and thus wouldn't offer control over them, but in practice the industry norm is to do these things by default, so the only way to be sure a feature is off is for the browser to report control, and then to use that control to disable the feature. Our calibration code always tries to turn the features off, but some browsers will ignore the request. This need statement admits only browsers that support the requests.",
+    categories: ["echoCancellation", "autoGainControl", "noiseSuppression"],
+  },
   _needScreenSizeMinimumPx: {
     name: "_needScreenSizeMinimumPx",
     availability: "now",
@@ -598,7 +607,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "❌ Use _prolific3Sample instead.",
+    explanation: "❌ Use _prolific3StudyDistribution instead.",
   },
   _online5CochlearImplant: {
     name: "_online5CochlearImplant",
@@ -626,7 +635,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "❌ Use _prolific4LanguageFluent instead.",
+    explanation: "❌ Use _prolific4LanguageFirst instead.",
   },
   _online5LanguageFluent: {
     name: "_online5LanguageFluent",
@@ -682,14 +691,14 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "❌ Use _prolific4VRHeadset instead.",
+    explanation: "❌ Use _prolific4VRHeadsetOwnership instead.",
   },
   _online5VRHeadsetUsage: {
     name: "_online5VRHeadsetUsage",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "❌ Use _prolific4VRHeadsetUsage instead.",
+    explanation: "❌ Use _prolific4VRHeadsetFrequency instead.",
   },
   _participantIDGetBool: {
     name: "_participantIDGetBool",
