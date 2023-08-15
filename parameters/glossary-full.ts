@@ -43,9 +43,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library.",
+      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_calibrateMicrophonesPreventLocalBool",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      "🕑 _calibrateMicrophonesPreventLocalBool (default TRUE) disablles calibration of any microphone that is connected in any way other than via QR code. This prevents a local connection (internal mic, USB mic, or Apple handoff), which, at least on a MacBook, goes though the OS sound panel. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS has removed the calibration tones, played through the loudspeaker, from the recording, which defeats the point of calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesPreventLocalBool=FALSE and you'll be allowed to record locally.",
+    type: "boolean",
+    default: "TRUE",
     categories: "",
   },
   {
@@ -81,9 +91,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstRecordings (default 3) is the desired number of recordings, where each recording consists of _calibrateSoundBurstRepeats. Each recording includes its own warm up _calibrateSoundBurstsWarmup.",
+      "_calibrateSoundBurstRecordings (default 1) is the desired number of recordings, where each recording consists of _calibrateSoundBurstRepeats. Each recording includes its own warm up _calibrateSoundBurstsWarmup. WE NOW THINK THIS SHOULD ALWAYS BE 1, BECAUSE AVERAGING THE TIME-BASED IR IS NOT RECOMMENDED.",
     type: "numerical",
-    default: "3",
+    default: "1",
     categories: "",
   },
   {
@@ -91,7 +101,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count includes the warm up bursts. IMPORTANT: The Novak et al. (2012) algorithm to deal with asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period. Thus make sure that\n_calibrateSoundBurstRepeats ≥ 2+_calibrateSoundBurstsWarmup\nWe plan to have the EasyEyes compiler enforce this.",
+      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count EXCLUDES the warm up bursts. IMPORTANT: The Novak et al. (2012) algorithm to deal with asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period, so make sure that\n_calibrateSoundBurstRepeats ≥ 2\nWe plan to have the EasyEyes compiler enforce this.",
     type: "numerical",
     default: "4",
     categories: "",
@@ -121,7 +131,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstsWarmup (default 1) is the number of sound bursts, from the beginning of each recording, that analysis should skip. This is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
+      "_calibrateSoundBurstsWarmup (default 1) is the number of extra sound bursts, not recorded, before the recorded series of bursts. The warmup is NOT part of the _calibrateSoundBurstRepeats. There will be _calibrateSoundBurstRepeats+_calibrateSoundBurstRepeats sound bursts, and only the final _calibrateSoundBurstRepeats are recorded and analyzed. Having a warmup burst is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
     type: "numerical",
     default: "1",
     categories: "",
