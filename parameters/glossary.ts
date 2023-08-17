@@ -131,7 +131,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.2",
     explanation:
-      "🕑 _calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response.",
+      "_calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response.",
   },
   _calibrateSoundIRSec: {
     name: "_calibrateSoundIRSec",
@@ -141,13 +141,13 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _calibrateSoundIRSec (default 0.2) specifies the desired length of the impulse response. ",
   },
-  _calibrateSoundSamplingHz: {
-    name: "_calibrateSoundSamplingHz",
+  _calibrateSoundSamplingDesiredHz: {
+    name: "_calibrateSoundSamplingDesiredHz",
     availability: "now",
     type: "numerical",
     default: "48000",
     explanation:
-      "🕑 _calibrateSoundSamplingHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
+      "🕑 _calibrateSoundSamplingDesiredHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
   },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",
