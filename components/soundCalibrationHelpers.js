@@ -99,13 +99,13 @@ export const getInstructionText = (thisDevice, language) => {
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
   if (userOS === "Android") {
-    findModelNumber = readi18nPhrases("RC_FindModelAndroid", language);
+    findModelNumber = readi18nPhrases("RC_findModelAndroid", language);
   } else if (userOS === "iOS") {
-    findModelNumber = readi18nPhrases("RC_FindModelIOs", language);
+    findModelNumber = readi18nPhrases("RC_findModelIOs", language);
   } else if (userOS === "Windows") {
-    findModelNumber = readi18nPhrases("RC_FindModelWindows", language);
+    findModelNumber = readi18nPhrases("RC_findModelWindows", language);
   } else if (userOS === "macOS") {
-    findModelNumber = readi18nPhrases("RC_FindModelMacOs", language);
+    findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
   }
 
   return `${needModelNumberFinal} <br> <br> ${findModelNumber}`;
@@ -125,13 +125,13 @@ export const getDeviceString = (thisDevice, language) => {
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
   if (userOS === "Android") {
-    findModelNumber = readi18nPhrases("RC_FindModelAndroid", language);
+    findModelNumber = readi18nPhrases("RC_findModelAndroid", language);
   } else if (userOS === "iOS") {
-    findModelNumber = readi18nPhrases("RC_FindModelIOs", language);
+    findModelNumber = readi18nPhrases("RC_findModelIOs", language);
   } else if (userOS === "Windows") {
-    findModelNumber = readi18nPhrases("RC_FindModelWindows", language);
+    findModelNumber = readi18nPhrases("RC_findModelWindows", language);
   } else if (userOS === "macOS") {
-    findModelNumber = readi18nPhrases("RC_FindModelMacOs", language);
+    findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
   }
 
   return `This device: (#Text to be added to the phrases doc) <br> <b>Platform Name:</b> ${thisDevice.PlatformName} <br>
