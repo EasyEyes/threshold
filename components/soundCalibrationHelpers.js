@@ -87,7 +87,7 @@ export const matchLoudSpeakerByOEMandModelNumber = async (OEM, modelNumber) => {
 
 export const getInstructionText = (thisDevice, language) => {
   const needModelNumber = readi18nPhrases(
-    "RC_NeedModelNumberAndName",
+    "RC_needModelNumberAndName",
     language
   );
   const needModelNumberFinal =
@@ -113,7 +113,7 @@ export const getInstructionText = (thisDevice, language) => {
 
 export const getDeviceString = (thisDevice, language) => {
   const needModelNumber = readi18nPhrases(
-    "RC_NeedModelNumberAndName",
+    "RC_needModelNumberAndName",
     language
   );
   const needModelNumberFinal =
