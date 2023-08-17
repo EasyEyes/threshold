@@ -264,11 +264,12 @@ export const calibrateAudio = async (reader) => {
   });
 
   let dSec =
-    1.1 *
-      (1 + calibrateSoundBurstRecordings.current) *
-      calibrateSoundBurstRepeats.current *
+    6 *
+      calibrateSoundBurstRecordings.current *
+      (calibrateSoundBurstRepeats.current +
+        calibrateSoundBurstsWarmup.current) *
       calibrateSoundBurstSec.current +
-    gains.length * calibrateSound1000HzSec.current;
+    2 * gains.length * calibrateSound1000HzSec.current;
   timeToCalibrate.current = Math.round(dSec / 60);
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
