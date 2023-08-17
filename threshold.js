@@ -133,6 +133,7 @@ import {
   _key_resp_allKeys,
   allHzCalibrationResults,
   microphoneCalibrationResults,
+  thisDevice,
 } from "./components/global.js";
 
 import {
@@ -811,6 +812,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.experiment.addData(
         "Loudspeaker IIR",
         invertedImpulseResponse.current
+      );
+      psychoJS.experiment.addData(
+        "Loudspeaker model",
+        JSON.stringify(thisDevice.current)
       );
     }
     if (microphoneCalibrationResults.length > 0) {

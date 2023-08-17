@@ -110,10 +110,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateSoundBurstSamplingHz",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateSoundBurstSamplingHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
-    type: "numerical",
-    default: "48000",
+    explanation: "❌ Use _calibrateSoundSamplingHz instead.",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
@@ -150,7 +149,27 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateSoundHz",
     availability: "now",
     example: "",
-    explanation: "❌ Use _calibrateSoundBurstSamplingHz instead.",
+    explanation: "❌ Use _calibrateSoundSamplingHz instead.",
+    type: "obsolete",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundImpulseResponseSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _calibrateSoundImpulseResponseSec (default 0.2) specifies the desired length of the impulse response. Correcting low frequencies or a big room requires a long impulse response.",
+    type: "numerical",
+    default: "0.2",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundSamplingHz",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _calibrateSoundSamplingHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
     type: "numerical",
     default: "48000",
     categories: "",
@@ -1028,16 +1047,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "Virtual reality, Augmented reality, Mixed reality, Other, Not applicable",
   },
   {
-    name: "_prolific4VRHeadsetOwnership",
-    availability: "now",
-    example: "",
-    explanation:
-      '_prolific4VRHeadsetOwnership [Prolific "VR headset (ownership)"] (no default), controls Prolific "VR Headset Ownership" and is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (ownership)\nParticipants were asked the following question: Do you own a VR (Virtual Reality) headset?\nYes\nNo\nDon\'t know / other\nNot applicable / rather not say',
-    type: "multicategorical",
-    default: "",
-    categories: "Yes, No, Don't know / other, Not applicable / rather not say",
-  },
-  {
     name: "_prolific4VRHeadsetFrequency",
     availability: "now",
     example: "",
@@ -1047,6 +1056,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     default: "",
     categories:
       "0 times, 1-5 times, 6-10 times, 11-15 times, more than 15 times, Not applicable / rather not say",
+  },
+  {
+    name: "_prolific4VRHeadsetOwnership",
+    availability: "now",
+    example: "",
+    explanation:
+      '_prolific4VRHeadsetOwnership [Prolific "VR headset (ownership)"] (no default), controls Prolific "VR Headset Ownership" and is a comma-separated list of acceptable answers (see Categories) to this Prolific prescreening query: \nVR headset (ownership)\nParticipants were asked the following question: Do you own a VR (Virtual Reality) headset?\nYes\nNo\nDon\'t know / other\nNot applicable / rather not say',
+    type: "multicategorical",
+    default: "",
+    categories: "Yes, No, Don't know / other, Not applicable / rather not say",
   },
   {
     name: "_saveEachBlockBool",
@@ -1239,16 +1258,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibrateSound1000HzSec",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 calibrateSound1000HzSec (default 5) specifies the duration of the 1 kHz sound at each sound level.",
-    type: "numerical",
-    default: "5",
-    categories: "",
-  },
-  {
     name: "calibrateSound1000HzDB",
     availability: "now",
     example: "-3",
@@ -1256,6 +1265,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
     type: "text",
     default: "-60, -50, -40, -30, -20, -15, -10, -3.1",
+    categories: "",
+  },
+  {
+    name: "calibrateSound1000HzSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 calibrateSound1000HzSec (default 5) specifies the duration of the 1 kHz sound at each sound level.",
+    type: "numerical",
+    default: "5",
     categories: "",
   },
   {
@@ -2305,7 +2324,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'readingNominalSizeDeg (default 1) sets the nominal size of the text in deg, provided readingSetSizeBy=="nominalDeg". It sets the font\'s point size to the product readingNominalSizeDeg*pxPerDeg.',
     type: "numerical",
-    default: "1",
+    default: "",
     categories: "",
   },
   {
@@ -2315,7 +2334,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'readingNominalSizePt (default 12) sets the nominal point size of the text, provided readingSetSizeBy=="nominalPt". One "point" is 1/72 inch.',
     type: "numerical",
-    default: "12",
+    default: "",
     categories: "",
   },
   {
@@ -2353,7 +2372,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "nominalPt",
     explanation:
-      '⭑ readingSetSizeBy (default "spacingDeg") determines how you specify the size of the text to be read. "Point" is abbreviated "pt", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so we call the typeset size (e.g. 12 pt), the "nominal" type size.\n• nominalPt sets the font\'s point size to readingNominalSizePt.\n• nominalDeg sets the font\'s point size to subtend readingNominalSizeDeg. The formula is \n(72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg. \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt.\n• spacingDeg sets the font\'s point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.',
+      '⭑ readingSetSizeBy (default "spacingDeg") determines how you specify the size of the text to be read. "Point" is abbreviated "pt", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so we call the typeset size (e.g. 12 pt), the "nominal" type size.\n• nominalPt sets the font\'s point size to readingNominalSizePt.\n• nominalDeg sets the font\'s point size to subtend readingNominalSizeDeg. The formula is \n(72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg.\n• spacingDeg sets the font\'s point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.',
     type: "categorical",
     default: "spacingDeg",
     categories: "nominalPt, nominalDeg, xHeightPt, xHeightDeg, spacingDeg",
@@ -2375,7 +2394,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacing. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
     type: "numerical",
-    default: "0.5",
+    default: "",
     categories: "",
   },
   {
@@ -2395,7 +2414,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'If readingSetSizeBy is "xHeightDeg", then set the font\'s point size to to achieve this specified x-height (the height of lowercase x). ',
     type: "numerical",
-    default: "1",
+    default: "",
     categories: "",
   },
   {
@@ -2405,7 +2424,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'If readingSetSizeBy is "xHeightPt", then set the font\'s point size to achieve this specified x-height (the height of lowercase x) in typographic "points" (1/72 inch). ',
     type: "numerical",
-    default: "6",
+    default: "",
     categories: "",
   },
   {
@@ -3087,6 +3106,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "targetGapDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetGapDeg (default 10/60=0.167) gap between Vernier lines.",
+    type: "numerical",
+    default: "0.167",
+    categories: "",
+  },
+  {
     name: "targetHz",
     availability: "now",
     example: "",
@@ -3104,16 +3133,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "🕑 targetImageFolder (empty default) names a folder of images (each file must have extension APNG, AVIF, GIF, JPEG, JPG, JP2, PNG, SVG, or WebP) that may be used when targetKind==image. (JPG is just an abbreviation of the JPEG extension; JP2 indicates JPEG 2000.) On each trial, the target image is sampled randomly, without replacement, from the images in the image folder. (\"Without replacement\" considers all the trials of this condition of this block. Other conditions and blocks are independent.) The folder is submitted as a zip archive to the EasyEyes drop box, and saved in the EasyEyesResources repository of the scientist's Pavlovia account. To be clear: The scientist creates a suitably named folder full of images, and zips that; the zip archive inherits the name of the folder. Each file in the folder must have one of the allowed image-file extensions. Different files can have different extensions. No subfolders are allowed. An experiment uses the folder by setting targetImageFolder to the name of the zip archive, without the extension.\n\nEach image with embedded icc color profile will be color managed. 10-bit rendering and HDR are automatic, but require use of 16-bit png or jpeg2000. Parameters allow the scientist to specify eccentricity, size, and duration. When the images have diverse size the scientist can instead specify image pixels per degree. \nCOLOR MANAGEMENT. The browser's color-managed rendering will take into account the ICC color profiles of the image and display. For accurate image rendering, each image should have an embedded ICC color profile. (The informal convention of assuming an sRGB profile when none is embedded seems too unreliable, across browsers, for research-grade stimuli.) \n\nHDR. A large proportion of computer displays produced in recent years support 10 bits per color channel, and most browsers now use the 10 bits when displaying HDR (High dynamic range) images using the HTML <img> tag. Several Netflix engineers studied how to achieve 10-bit display on current browsers using available image formats. \nhttps://netflixtechblog.com/enhancing-the-netflix-ui-experience-with-hdr-1e7506ad3e8\nThey recommend using 16-bit PNG or JPEG 2000. 16-bit PNG is supported by the several browsers we tested. As of September 2022, Safari was the only browser supporting JPEG 2000.\nhttps://caniuse.com/jpeg2000\nSurprisingly, another web page claims that JPEG2000 is also supported by Chrome and Firefox.\nhttps://fileinfo.com/extension/jp2\n\n[FUTURE: Instead of the zip archive, we could also allow our submit box to accept a folder, which it copies, including all the directly enclosed files.]",
     type: "text",
     default: "",
-    categories: "",
-  },
-  {
-    name: "targetGapDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "targetGapDeg (default 10/60=0.167) gap between Vernier lines.",
-    type: "numerical",
-    default: "0.167",
     categories: "",
   },
   {
@@ -3138,26 +3157,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "targetOffsetDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "targetOffsetDeg (default 0.1) the offset between Vernier lines that are colinear at zero offset. The two line split the offset, displaced in opposite directions. Displacement direction is random for each trial.",
-    type: "numerical",
-    default: "0.1",
-    categories: "",
-  },
-  {
-    name: "targetThicknessDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "targetThicknessDeg (default 5/60=0.083) is the stroke thickness of Vernier target.",
-    type: "numerical",
-    default: "0.083",
-    categories: "",
-  },
-  {
     name: "targetMinimumPix",
     availability: "now",
     example: "8",
@@ -3165,6 +3164,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "targetMinimumPix (default 8) specifies enough pixels for decent rendering of this target. This refers to size (in pixels) as specified by targetSizeIsHeightBool.",
     type: "numerical",
     default: "8",
+    categories: "",
+  },
+  {
+    name: "targetOffsetDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetOffsetDeg (default 0.1) the offset between Vernier lines that are colinear at zero offset. The two line split the offset, displaced in opposite directions. Displacement direction is random for each trial.",
+    type: "numerical",
+    default: "0.1",
     categories: "",
   },
   {
@@ -3353,6 +3362,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "UNDEFINED",
     categories: "identify, detect, questionAndAnswer",
+  },
+  {
+    name: "targetThicknessDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetThicknessDeg (default 5/60=0.083) is the stroke thickness of Vernier target.",
+    type: "numerical",
+    default: "0.083",
+    categories: "",
   },
   {
     name: "targetTimeConstantSec",

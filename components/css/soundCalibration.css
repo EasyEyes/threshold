@@ -38,3 +38,97 @@
   position: relative;
   top: 2px;
 }
+
+#modelNumberInput {
+  width: 30vw;
+  height: 100%;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#modelNameInput {
+  width: 30vw;
+  height: 100%;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#loudspeakerInstructions1 {
+  /*   instructions.style.width = "100%";
+  instructions.style.fontSize = "1.1rem";
+  instructions.style.fontWeight = "normal"; */
+  width: 100%;
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+#micDropdown {
+  width: fit-content;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  background-color: #afaaaa;
+  padding: 10px;
+}
+
+#micNameInput {
+  width: 30vw;
+  height: 100%;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#micManufacturerInput {
+  width: 30vw;
+  height: 100%;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#micSerialNumberInput {
+  width: 30vw;
+  height: 100%;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#modelNumberInput2 {
+  width: 30vw;
+  height: 100%;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#modelNameInput2 {
+  width: 30vw;
+  height: 100%;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#loudspeakerInstructions2 {
+  font-size: 1rem;
+  font-weight: normal;
+  margin-top: 10px;
+}

@@ -426,6 +426,7 @@ export const ICalibDBSPL = { current: undefined };
 export const calibrateMicrophonesBool = { current: false };
 export const rsvpReadingWordsForThisBlock = { current: undefined };
 export const timeToCalibrate = { current: 1 };
+export const thisDevice = { current: undefined };
 
 export const rsvpReadingTargetSets = {
   numberOfSets: undefined,
