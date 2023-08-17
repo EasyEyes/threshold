@@ -155,11 +155,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateSoundImpulseResponseSec",
+    name: "_calibrateSoundIIRSec",
     availability: "now",
     example: "",
     explanation:
-      "🕑 _calibrateSoundImpulseResponseSec (default 0.2) specifies the desired length of the impulse response. Correcting low frequencies or a big room requires a long impulse response.",
+      "🕑 _calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response.",
+    type: "numerical",
+    default: "0.2",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundIRSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _calibrateSoundIRSec (default 0.2) specifies the desired length of the impulse response. ",
     type: "numerical",
     default: "0.2",
     categories: "",
