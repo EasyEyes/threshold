@@ -155,23 +155,42 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateSoundImpulseResponseSec",
+    name: "_calibrateSoundIIRSec",
     availability: "now",
     example: "",
     explanation:
-      "🕑 _calibrateSoundImpulseResponseSec (default 0.2) specifies the desired length of the impulse response. Correcting low frequencies or a big room requires a long impulse response.",
+      "_calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response.",
     type: "numerical",
     default: "0.2",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundIRSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _calibrateSoundIRSec (default 0.2) specifies the desired length of the impulse response. ",
+    type: "numerical",
+    default: "0.2",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundSamplingDesiredHz",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _calibrateSoundSamplingDesiredHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
+    type: "numerical",
+    default: "48000",
     categories: "",
   },
   {
     name: "_calibrateSoundSamplingHz",
     availability: "now",
     example: "",
-    explanation:
-      "🕑 _calibrateSoundSamplingHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
-    type: "numerical",
-    default: "48000",
+    explanation: "❌ Use _calibrateSoundSamplingDesiredHz instead.",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {

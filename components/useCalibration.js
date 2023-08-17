@@ -22,6 +22,7 @@ import {
   calibrateSound1000HzSec,
   timeToCalibrate,
   thisDevice,
+  calibrateSoundIIRSec,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -247,6 +248,9 @@ export const calibrateAudio = async (reader) => {
   )[0];
   calibrateSoundBurstRecordings.current = reader.read(
     GLOSSARY._calibrateSoundBurstRecordings.name
+  )[0];
+  calibrateSoundIIRSec.current = reader.read(
+    GLOSSARY._calibrateSoundIIRSec.name
   )[0];
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
@@ -592,6 +596,7 @@ export const calibrateAudio = async (reader) => {
                 micSerialNumber: micSerialNumber,
                 micModelNumber: micModelNumber,
                 micModelName: micModelName,
+                calibrateSoundIIRSec: calibrateSoundIIRSec.current,
               };
 
               const calibratorParams = {
@@ -1270,6 +1275,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             micModelName: micModelName,
             isSmartPhone: isSmartPhone,
             calibrateSoundCheck: calibrateSoundCheck.current,
+            calibrateSoundIIRSec: calibrateSoundIIRSec.current,
           };
           const calibratorParams = {
             numCaptures: calibrateSoundBurstRecordings.current,

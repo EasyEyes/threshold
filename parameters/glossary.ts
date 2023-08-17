@@ -125,21 +125,36 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation: "❌ Use _calibrateSoundSamplingHz instead.",
   },
-  _calibrateSoundImpulseResponseSec: {
-    name: "_calibrateSoundImpulseResponseSec",
+  _calibrateSoundIIRSec: {
+    name: "_calibrateSoundIIRSec",
     availability: "now",
     type: "numerical",
     default: "0.2",
     explanation:
-      "🕑 _calibrateSoundImpulseResponseSec (default 0.2) specifies the desired length of the impulse response. Correcting low frequencies or a big room requires a long impulse response.",
+      "_calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response.",
   },
-  _calibrateSoundSamplingHz: {
-    name: "_calibrateSoundSamplingHz",
+  _calibrateSoundIRSec: {
+    name: "_calibrateSoundIRSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.2",
+    explanation:
+      "🕑 _calibrateSoundIRSec (default 0.2) specifies the desired length of the impulse response. ",
+  },
+  _calibrateSoundSamplingDesiredHz: {
+    name: "_calibrateSoundSamplingDesiredHz",
     availability: "now",
     type: "numerical",
     default: "48000",
     explanation:
-      "🕑 _calibrateSoundSamplingHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
+      "🕑 _calibrateSoundSamplingDesiredHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
+  },
+  _calibrateSoundSamplingHz: {
+    name: "_calibrateSoundSamplingHz",
+    availability: "now",
+    type: "obsolete",
+    default: "",
+    explanation: "❌ Use _calibrateSoundSamplingDesiredHz instead.",
   },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",

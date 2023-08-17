@@ -1,5 +1,11 @@
 import { Chart } from "chart.js/auto";
 import { SoundLevelModel } from "./soundTest";
+import {
+  calibrateSoundBurstRepeats,
+  calibrateSoundBurstSec,
+  calibrateSoundBurstsWarmup,
+  calibrateSoundHz,
+} from "./global";
 
 export const plotSoundLevels1000Hz = (
   plotCanvas,
@@ -204,6 +210,17 @@ export const plotForAllHz = (
     ],
   };
 
+  // compute standard deviation of the filtered data points from 400 to 8000 Hz (frequency is x-axis)
+  const filteredDataPoints = convMergedDataPoints.filter(
+    (point) => point.x >= 400 && point.x <= 8000
+  );
+  const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
+  const sd = standardDeviation(filteredDataPointsY);
+
+  const subtitleText = [
+    `Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz.`,
+    `From 400 to 8000 Hz, the IIR-filtered MLS recording has SD = ${sd} dB.`,
+  ];
   const config = {
     type: "line",
     data: data,
@@ -214,6 +231,15 @@ export const plotForAllHz = (
         title: {
           display: true,
           text: title,
+        },
+        subtitle: {
+          display: true,
+          text: subtitleText,
+          position: "bottom",
+          font: {
+            size: 13,
+          },
+          align: "center",
         },
         legend: {
           labels: {
@@ -264,4 +290,30 @@ export const plotForAllHz = (
   };
 
   const plot = new Chart(plotCanvas, config);
+};
+
+const standardDeviation = (values) => {
+  const avg = average(values);
+
+  const squareDiffs = values.map((value) => {
+    const diff = value - avg;
+    const sqrDiff = diff * diff;
+    return sqrDiff;
+  });
+
+  const avgSquareDiff = average(squareDiffs);
+
+  const stdDev = Math.sqrt(avgSquareDiff);
+  // only 1 digit after the decimal place
+  const std = Math.round(stdDev * 10) / 10;
+  return std;
+};
+
+const average = (data) => {
+  const sum = data.reduce((sum, value) => {
+    return sum + value;
+  }, 0);
+
+  const avg = sum / data.length;
+  return avg;
 };

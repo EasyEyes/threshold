@@ -415,6 +415,7 @@ export const calibrateSoundBurstsWarmup = { current: 1 };
 export const calibrateSoundHz = { current: 48000 };
 export const calibrateSoundBurstRecordings = { current: 3 };
 export const calibrateSound1000HzSec = { current: 2 };
+export const calibrateSoundIIRSec = { current: 0.2 };
 export const timeoutSec = { current: 180 };
 export const calibrateSoundCheck = { current: "goal" };
 export const microphoneCalibrationResults = [];
