@@ -234,9 +234,8 @@ const readJS = async (filename) => {
   const response = await axios.get(`code/${filename}`);
   if (!response)
     console.error(`Error loading text from this source (./code/${filename})!`);
-
   // var code = preprocessRawCorpus(response.data);
-  return code;
+  return response.data;
 };
 
 export async function evaluateJSCode(
