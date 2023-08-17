@@ -89,9 +89,9 @@ export const GLOSSARY: Glossary = {
   _calibrateSoundBurstSamplingHz: {
     name: "_calibrateSoundBurstSamplingHz",
     availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateSoundSamplingHz instead.",
+    type: "numerical",
+    default: "48000",
+    explanation: "❌ Use _calibrateSoundSamplingDesiredHz instead.",
   },
   _calibrateSoundBurstSec: {
     name: "_calibrateSoundBurstSec",

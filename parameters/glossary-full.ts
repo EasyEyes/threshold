@@ -110,9 +110,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateSoundBurstSamplingHz",
     availability: "now",
     example: "",
-    explanation: "❌ Use _calibrateSoundSamplingHz instead.",
-    type: "obsolete",
-    default: "",
+    explanation: "❌ Use _calibrateSoundSamplingDesiredHz instead.",
+    type: "numerical",
+    default: "48000",
     categories: "",
   },
   {
