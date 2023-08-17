@@ -316,8 +316,22 @@ export const preprocessCorpusToSentenceList = (
 
 /* -------------------------------------------------------------------------- */
 
-export const getSizeForXHeight = (readingParagraph, targetDeg) => {
-  const targetPix = degreesToPixels(targetDeg, "y");
+export const getSizeForXHeight = (
+  readingParagraph,
+  targetHeight,
+  unit = "deg"
+) => {
+  logger("!. targetHeight", targetHeight);
+  logger("!. unit", unit);
+  let targetPix;
+  if (unit === "deg") {
+    targetPix = degreesToPixels(targetHeight, "x");
+  } else {
+    // TODO should this unit be "Px" not "Pt?", ie readingXHeightPx not readingXHeightPt
+    //      since we are measuring the height of the "x" character (in px) given some pt
+    targetPix = targetHeight;
+  }
+  logger("!. targetPix", targetPix);
 
   readingParagraph.setText("x");
 
@@ -326,6 +340,8 @@ export const getSizeForXHeight = (readingParagraph, targetDeg) => {
   while (height < window.innerHeight * 0.5) {
     readingParagraph.setHeight(height);
     testHeight = readingParagraph.getBoundingBox(true).height;
+    logger("!. testHeight", testHeight);
+    logger("!. height", height);
     if (testHeight > targetPix) return height;
 
     height += 0.5;
@@ -393,31 +409,45 @@ export const findReadingSize = (
   paramReader,
   readingParagraph
 ) => {
-  let px;
+  let pt;
+  logger("!. readingSetSizeBy", readingSetSizeBy);
   switch (readingSetSizeBy) {
     case "nominalDeg":
-      px = getReadingNominalSizeDeg(paramReader);
+      pt = getReadingNominalSizeDeg(paramReader);
+      break;
+    case "nominalPt":
+      pt = paramReader.read("readingNominalSizePt", status.block)[0];
       break;
     case "xHeightDeg":
-      px = getSizeForXHeight(
+      pt = getSizeForXHeight(
         readingParagraph,
-        paramReader.read("readingXHeightDeg", status.block)[0]
+        paramReader.read("readingXHeightDeg", status.block)[0],
+        "deg"
+      );
+      break;
+    case "xHeightPt":
+      logger(
+        "!. findReadingSize readingXHeightPx",
+        paramReader.read("readingXHeightPt", status.block)[0]
+      );
+      pt = getSizeForXHeight(
+        readingParagraph,
+        paramReader.read("readingXHeightPt", status.block)[0],
+        "pt"
       );
       break;
     case "spacingDeg":
-      px = getSizeForSpacing(
+      pt = getSizeForSpacing(
         readingParagraph,
         paramReader.read("readingSpacingDeg", status.block)[0],
         fontCharacterSet.current.join("")
       );
       break;
-    case "nominalPt":
-      px = getReadingNominalSizePt(paramReader);
-      break;
     default:
       return;
   }
-  return Math.max(1, px);
+  logger("!. pt", pt);
+  return Math.max(1, pt);
 };
 /* --------------------------------- HELPERS -------------------------------- */
 
@@ -425,7 +455,7 @@ const getReadingNominalSizeDeg = (paramReader, customValueDeg = undefined) => {
   /**
    * readingSetSizeBy (default “spacing”) determines how you specify the size of the text to be read:
 • nominalDeg sets the point size that subtends readingNominalSizeDeg. The point size is
-(72/2.54)*2*atan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.
+(72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.
    */
   const nominalSizeDeg =
     typeof customValueDeg === "undefined"
@@ -439,13 +469,13 @@ const getReadingNominalSizeDeg = (paramReader, customValueDeg = undefined) => {
   return ptSize;
 };
 
-const getReadingNominalSizePt = (paramReader) => {
-  const sizeDeg =
-    (paramReader.read("readingNominalSizePt", status.block)[0] *
-      ((displayOptions.pixPerCm * 2.54) / 72)) /
-    displayOptions.pixPerCm;
-  return getReadingNominalSizeDeg(paramReader, sizeDeg);
-};
+// const getReadingNominalSizePt = (paramReader) => {
+//   const sizeDeg =
+//     (paramReader.read("readingNominalSizePt", status.block)[0] *
+//       ((displayOptions.pixPerCm * 2.54) / 72)) /
+//     displayOptions.pixPerCm;
+//   return getReadingNominalSizeDeg(paramReader, sizeDeg);
+// };
 
 const removeLastSpace = (str) => {
   return str.replace(/ $/, "");

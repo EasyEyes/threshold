@@ -180,13 +180,13 @@ export const degreesToPixels = (degrees, method = "x") => {
   switch (method) {
     case "x":
       return (
-        XYDegOfXYPix([degrees, 0], displayOptions)[0] -
-        XYDegOfXYPix([0, 0], displayOptions)[0]
+        XYPixOfXYDeg([degrees, 0], displayOptions)[0] -
+        XYPixOfXYDeg([0, 0], displayOptions)[0]
       );
     case "y":
       return (
-        XYDegOfXYPix([0, degrees], displayOptions)[1] -
-        XYDegOfXYPix([0, 0], displayOptions)[1]
+        XYPixOfXYDeg([0, degrees], displayOptions)[1] -
+        XYPixOfXYDeg([0, 0], displayOptions)[1]
       );
     case "old":
     default:
