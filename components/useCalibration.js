@@ -242,7 +242,9 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundBurstsWarmup.current = reader.read(
     GLOSSARY._calibrateSoundBurstsWarmup.name
   )[0];
-  calibrateSoundHz.current = reader.read(GLOSSARY._calibrateSoundHz.name)[0];
+  calibrateSoundHz.current = reader.read(
+    GLOSSARY._calibrateSoundSamplingHz.name
+  )[0];
   calibrateSoundBurstRecordings.current = reader.read(
     GLOSSARY._calibrateSoundBurstRecordings.name
   )[0];
