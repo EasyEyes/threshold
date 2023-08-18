@@ -560,8 +560,8 @@ export const calibrateAudio = async (reader) => {
 
                 // add  to the page
                 elems.subtitle.appendChild(instructions2);
-                elems.subtitle.appendChild(modelNumberInput2);
                 elems.subtitle.appendChild(modelNameInput2);
+                elems.subtitle.appendChild(modelNumberInput2);
 
                 const proceedButton4 = document.createElement("button");
                 proceedButton4.innerHTML = "Proceed";
@@ -1101,8 +1101,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
 
   // add  to the page
   elems.subtitle.appendChild(findModel);
-  elems.subtitle.appendChild(modelNumberInput);
   elems.subtitle.appendChild(modelNameInput);
+  elems.subtitle.appendChild(modelNumberInput);
   elems.subtitle.appendChild(instructions);
   // elems.subtitle.appendChild(p);
   // elems.subtitle.appendChild(dropdown);
@@ -1278,8 +1278,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
 
               // add  to the page
               elems.subtitle.appendChild(instructions2);
-              elems.subtitle.appendChild(modelNumberInput2);
               elems.subtitle.appendChild(modelNameInput2);
+              elems.subtitle.appendChild(modelNumberInput2);
 
               const proceedButton4 = document.createElement("button");
               proceedButton4.innerHTML = "Proceed";
