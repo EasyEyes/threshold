@@ -501,17 +501,33 @@ export const calibrateAudio = async (reader) => {
                   proceedButton3.addEventListener("click", async () => {
                     // get the model number and name
                     micName = micNameInput.value;
-                    micManufacturer = micManufacturerInput.value;
-                    micSerialNumber = micSerialNumberInput.value;
-                    // remove the dropdown menu, instructions, proceed button, and input boxes
-                    removeElements([
-                      p,
-                      proceedButton3,
-                      micNameInput,
-                      micManufacturerInput,
-                      micSerialNumberInput,
-                    ]);
-                    resolve();
+                    micManufacturer = micManufacturerInput.value
+                      .toLowerCase()
+                      .split(" ")
+                      .join("");
+                    micSerialNumber = micSerialNumberInput.value
+                      .toLowerCase()
+                      .split(" ")
+                      .join("");
+
+                    // require the user to input the model number and name
+                    if (
+                      micName === "" ||
+                      micManufacturer === "" ||
+                      micSerialNumber === ""
+                    ) {
+                      alert("Please input the model number and name");
+                    } else {
+                      // remove the dropdown menu, instructions, proceed button, and input boxes
+                      removeElements([
+                        p,
+                        proceedButton3,
+                        micNameInput,
+                        micManufacturerInput,
+                        micSerialNumberInput,
+                      ]);
+                      resolve();
+                    }
                   });
                 });
               } else {
@@ -548,16 +564,27 @@ export const calibrateAudio = async (reader) => {
                 await new Promise((resolve) => {
                   proceedButton4.addEventListener("click", async () => {
                     // get the model number and name
-                    micModelNumber = modelNumberInput2.value;
-                    micModelName = modelNameInput2.value;
-                    // remove the dropdown menu, instructions, proceed button, and input boxes
-                    removeElements([
-                      instructions2,
-                      proceedButton4,
-                      modelNumberInput2,
-                      modelNameInput2,
-                    ]);
-                    resolve();
+                    micModelNumber = modelNumberInput2.value
+                      .toLowerCase()
+                      .split(" ")
+                      .join("");
+                    micModelName = modelNameInput2.value
+                      .toLowerCase()
+                      .split(" ")
+                      .join("");
+
+                    if (micModelNumber === "" || micModelName === "") {
+                      alert("Please input the model number and name");
+                    } else {
+                      // remove the dropdown menu, instructions, proceed button, and input boxes
+                      removeElements([
+                        instructions2,
+                        proceedButton4,
+                        modelNumberInput2,
+                        modelNameInput2,
+                      ]);
+                      resolve();
+                    }
                   });
                 });
               }
@@ -1083,310 +1110,351 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   return await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
       // get the model number and name
-      const modelNumber = modelNumberInput.value;
-      const modelName = modelNameInput.value;
-      elems.title.innerHTML = elems.title.innerHTML.replace(1, 2);
-      elems.message.style.display = "block";
+      const modelNumber = modelNumberInput.value
+        .toLowerCase()
+        .split(" ")
+        .join("");
+      const modelName = modelNameInput.value.toLowerCase().split(" ").join("");
 
-      // remove the dropdown menu, instructions, proceed button, and input boxes
-      removeElements([
-        instructions,
-        proceedButton,
-        modelNumberInput,
-        modelNameInput,
-        findModel,
-      ]);
+      // require the model number and name
+      if (modelNumber === "" || modelName === "") {
+        alert("Please enter a model number and name");
+      } else {
+        elems.title.innerHTML = elems.title.innerHTML.replace(1, 2);
+        elems.message.style.display = "block";
 
-      //  create a dropdown menu to select from "USB Microphone", "SmartPhone", "None"(default)
-      const dropdown = document.createElement("select");
-      dropdown.id = "micDropdown";
-      dropdown.name = "micDropdown";
-      const options = ["USB Microphone", "SmartPhone"];
-      options.forEach((option) => {
-        const optionElem = document.createElement("option");
-        optionElem.value = option;
-        optionElem.innerHTML = option;
-        dropdown.appendChild(optionElem);
-      });
+        // remove the dropdown menu, instructions, proceed button, and input boxes
+        removeElements([
+          instructions,
+          proceedButton,
+          modelNumberInput,
+          modelNameInput,
+          findModel,
+        ]);
 
-      const p = document.createElement("p");
-      p.innerHTML =
-        "Select the type of microphone you are using for this calibration: (#Text to be added to the phrases doc)";
-      p.style.fontSize = "1rem";
-
-      // add  to the page
-      elems.subtitle.appendChild(p);
-      elems.subtitle.appendChild(dropdown);
-
-      // add a proceed button
-      const proceedButton2 = document.createElement("button");
-      proceedButton2.innerHTML = "Proceed";
-      proceedButton2.classList.add(...["btn", "btn-primary"]);
-      elems.subtitle.appendChild(proceedButton2);
-
-      // add event listener to the proceed button
-      await new Promise((resolve) => {
-        proceedButton2.addEventListener("click", async () => {
-          const isSmartPhone = dropdown.value === "SmartPhone";
-          // remove the dropdown menu, proeed button
-          removeElements([dropdown, proceedButton2, p]);
-
-          elems.subtitle.innerHTML = isSmartPhone
-            ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
-            : readi18nPhrases("RC_usingUSBMicrophone", language);
-          elems.subtitle.style.fontSize = "1.1rem";
-
-          var micName = "";
-          var micManufacturer = "";
-          var micSerialNumber = "";
-          var micModelName = "";
-          var micModelNumber = "";
-          if (!isSmartPhone) {
-            const p = document.createElement("p");
-            p.innerHTML =
-              "Input information about your microphone: (#Text to be added to the phrases doc)";
-            p.style.fontSize = "1rem";
-            p.style.fontWeight = "normal";
-            // create input fields for the microphone name, manufacturer, and serial number
-            const micNameInput = document.createElement("input");
-            micNameInput.type = "text";
-            micNameInput.id = "micNameInput";
-            micNameInput.name = "micNameInput";
-            micNameInput.placeholder = "Microphone Name";
-
-            const micManufacturerInput = document.createElement("input");
-            micManufacturerInput.type = "text";
-            micManufacturerInput.id = "micManufacturerInput";
-            micManufacturerInput.name = "micManufacturerInput";
-            micManufacturerInput.placeholder = "Microphone Manufacturer";
-
-            const micSerialNumberInput = document.createElement("input");
-            micSerialNumberInput.type = "text";
-            micSerialNumberInput.id = "micSerialNumberInput";
-            micSerialNumberInput.name = "micSerialNumberInput";
-            micSerialNumberInput.placeholder = "Serial Number";
-
-            // add  to the page
-            elems.subtitle.appendChild(p);
-            elems.subtitle.appendChild(micNameInput);
-            elems.subtitle.appendChild(micManufacturerInput);
-            elems.subtitle.appendChild(micSerialNumberInput);
-
-            const proceedButton3 = document.createElement("button");
-            proceedButton3.innerHTML = "Proceed";
-            proceedButton3.classList.add(...["btn", "btn-primary"]);
-            elems.subtitle.appendChild(proceedButton3);
-
-            // add event listener to the proceed button
-            await new Promise((resolve) => {
-              proceedButton3.addEventListener("click", async () => {
-                // get the model number and name
-                micName = micNameInput.value;
-                micManufacturer = micManufacturerInput.value;
-                micSerialNumber = micSerialNumberInput.value;
-                // remove the dropdown menu, instructions, proceed button, and input boxes
-                removeElements([
-                  p,
-                  proceedButton3,
-                  micNameInput,
-                  micManufacturerInput,
-                  micSerialNumberInput,
-                ]);
-                resolve();
-              });
-            });
-          } else {
-            // create input box for model number and name
-            const modelNumberInput2 = document.createElement("input");
-            modelNumberInput2.type = "text";
-            modelNumberInput2.id = "modelNumberInput2";
-            modelNumberInput2.name = "modelNumberInput2";
-            modelNumberInput2.placeholder = "Model Number";
-
-            const modelNameInput2 = document.createElement("input");
-            modelNameInput2.type = "text";
-            modelNameInput2.id = "modelNameInput2";
-            modelNameInput2.name = "modelNameInput2";
-            modelNameInput2.placeholder = "Model Name";
-
-            const instructions2 = document.createElement("p");
-            instructions2.id = "loudspeakerInstructions2";
-            instructions2.innerHTML =
-              "We need the model number and name of your microphone to identify it (#Text to be added to the phrases doc)";
-            instructions2.style.fontSize = "1rem";
-
-            // add  to the page
-            elems.subtitle.appendChild(instructions2);
-            elems.subtitle.appendChild(modelNumberInput2);
-            elems.subtitle.appendChild(modelNameInput2);
-
-            const proceedButton4 = document.createElement("button");
-            proceedButton4.innerHTML = "Proceed";
-            proceedButton4.classList.add(...["btn", "btn-primary"]);
-            elems.subtitle.appendChild(proceedButton4);
-
-            // add event listener to the proceed button
-            await new Promise((resolve) => {
-              proceedButton4.addEventListener("click", async () => {
-                // get the model number and name
-                micModelNumber = modelNumberInput2.value;
-                micModelName = modelNameInput2.value;
-                // remove the dropdown menu, instructions, proceed button, and input boxes
-                removeElements([
-                  instructions2,
-                  proceedButton4,
-                  modelNumberInput2,
-                  modelNameInput2,
-                ]);
-                resolve();
-              });
-            });
-          }
-
-          const messageText = `${readi18nPhrases(
-            "RC_removeHeadphones",
-            language
-          )}${
-            isSmartPhone
-              ? readi18nPhrases("RC_getPhoneMicrophoneReady", language)
-              : readi18nPhrases("RC_getUSBMicrophoneReady", language)
-          }`.replace(/\n/g, "<br>");
-          elems.message.innerHTML = messageText;
-          // line height
-          elems.message.style.lineHeight = "2rem";
-          const { Speaker, CombinationCalibration } = speakerCalibrator;
-          const speakerParameters = {
-            siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
-            targetElementId: "displayQR",
-            debug: debugBool.current,
-            gainValues: gains,
-            knownIR: null,
-            instructionDisplayId: "soundMessage",
-            titleDisplayId: "soundTitle",
-            calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
-            calibrateSoundBurstSec: calibrateSoundBurstSec.current,
-            calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
-            calibrateSoundHz: calibrateSoundHz.current,
-            timeToCalibrate: timeToCalibrate.current,
-            microphoneName: micName,
-            micManufacturer: micManufacturer,
-            micSerialNumber: micSerialNumber,
-            micModelNumber: micModelNumber,
-            micModelName: micModelName,
-            isSmartPhone: isSmartPhone,
-            calibrateSoundCheck: calibrateSoundCheck.current,
-            calibrateSoundIIRSec: calibrateSoundIIRSec.current,
-          };
-          const calibratorParams = {
-            numCaptures: calibrateSoundBurstRecordings.current,
-            numMLSPerCapture: 4,
-            download: debugBool.current,
-            lowHz: calibrateSoundMinHz.current,
-            highHz: calibrateSoundMaxHz.current,
-          };
-
-          const calibrator = new CombinationCalibration(calibratorParams);
-
-          calibrator.on("update", ({ message, ...rest }) => {
-            elems.displayUpdate.innerHTML = message;
-          });
-
-          const calibrate = async (isSmartPhone) => {
-            const debug = false;
-            if (debug) {
-              invertedImpulseResponse.current = getDebugIIR();
-              soundCalibrationResults.current =
-                getDebugSoundCalibrationResults();
-              return;
-            } else {
-              elems.displayContainer.style.display = "flex";
-              elems.displayContainer.style.marginLeft = "0px";
-              elems.displayContainer.style.flexDirection = "column";
-              elems.displayUpdate.style.display = "flex";
-              elems.displayUpdate.style.marginLeft = "0px";
-              elems.displayUpdate.style.flexDirection = "column";
-              elems.displayQR.style.display = "flex";
-              elems.displayQR.style.marginLeft = "0px";
-              elems.displayQR.style.flexDirection = "column";
-              soundCalibrationResults.current = await Speaker.startCalibration(
-                speakerParameters,
-                calibrator,
-                timeoutSec.current
-              );
-              elems.message.style.whiteSpace = "normal";
-              elems.message.style.fontSize = "1.1rem";
-              elems.message.style.fontWeight = "normal";
-              console.log(
-                "Louspeaker Results: ",
-                soundCalibrationResults.current
-              );
-              if (soundCalibrationResults.current === false) {
-                return;
-              }
-              invertedImpulseResponse.current =
-                soundCalibrationResults.current.componentIIR;
-              if (calibrateSoundCheck.current !== "none") {
-                allHzCalibrationResults.x_conv =
-                  soundCalibrationResults.current.x_conv;
-                allHzCalibrationResults.y_conv =
-                  soundCalibrationResults.current.y_conv;
-                allHzCalibrationResults.x_unconv =
-                  soundCalibrationResults.current.x_unconv;
-                allHzCalibrationResults.y_unconv =
-                  soundCalibrationResults.current.y_unconv;
-              }
-              allHzCalibrationResults.knownIr =
-                soundCalibrationResults.current.componentIR;
-
-              soundGainDBSPL.current =
-                soundCalibrationResults.current.parameters.gainDBSPL;
-              soundGainDBSPL.current =
-                Math.round(soundGainDBSPL.current * 10) / 10;
-            }
-            const { normalizedIIR, calibrationLevel } =
-              getSoundCalibrationLevelDBSPLFromIIR(
-                invertedImpulseResponse.current
-              );
-            invertedImpulseResponse.current = normalizedIIR;
-            soundCalibrationLevelDBSPL.current = calibrationLevel;
-            return true;
-          };
-
-          const result = await calibrate(isSmartPhone);
-          if (result) {
-            try {
-              const loudSpeakerInfo = {
-                ModelName: modelName,
-                ModelNumber: modelNumber,
-                isSmartPhone: thisDevice.current.IsMobile,
-                HardwareName: thisDevice.current.HardwareName,
-                HardwareModel: thisDevice.current.HardwareModel,
-                HardwareModelVariants: thisDevice.current.HardwareModelVariants,
-                HardwareFamily: thisDevice.current.HardwareFamily,
-                OEM: thisDevice.current.OEM,
-                DeviceType: thisDevice.current.DeviceType,
-                DeviceId: thisDevice.current.DeviceId,
-                PlatformName: thisDevice.current.PlatformName,
-                PlatformVersion: thisDevice.current.PlatformVersion,
-                gainDBSPL: soundGainDBSPL.current,
-              };
-              await saveLoudSpeakerInfo(
-                loudSpeakerInfo,
-                modelNumber,
-                thisDevice.current.OEM,
-                invertedImpulseResponse.current,
-                soundCalibrationResults.current.componentIR
-              );
-            } catch (err) {
-              console.log(err);
-            }
-
-            resolve(true);
-          }
+        //  create a dropdown menu to select from "USB Microphone", "SmartPhone", "None"(default)
+        const dropdown = document.createElement("select");
+        dropdown.id = "micDropdown";
+        dropdown.name = "micDropdown";
+        const options = ["USB Microphone", "SmartPhone"];
+        options.forEach((option) => {
+          const optionElem = document.createElement("option");
+          optionElem.value = option;
+          optionElem.innerHTML = option;
+          dropdown.appendChild(optionElem);
         });
-      });
 
-      resolve(true);
+        const p = document.createElement("p");
+        p.innerHTML =
+          "Select the type of microphone you are using for this calibration: (#Text to be added to the phrases doc)";
+        p.style.fontSize = "1rem";
+
+        // add  to the page
+        elems.subtitle.appendChild(p);
+        elems.subtitle.appendChild(dropdown);
+
+        // add a proceed button
+        const proceedButton2 = document.createElement("button");
+        proceedButton2.innerHTML = "Proceed";
+        proceedButton2.classList.add(...["btn", "btn-primary"]);
+        elems.subtitle.appendChild(proceedButton2);
+
+        // add event listener to the proceed button
+        await new Promise((resolve) => {
+          proceedButton2.addEventListener("click", async () => {
+            const isSmartPhone = dropdown.value === "SmartPhone";
+            // remove the dropdown menu, proeed button
+            removeElements([dropdown, proceedButton2, p]);
+
+            elems.subtitle.innerHTML = isSmartPhone
+              ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+              : readi18nPhrases("RC_usingUSBMicrophone", language);
+            elems.subtitle.style.fontSize = "1.1rem";
+
+            var micName = "";
+            var micManufacturer = "";
+            var micSerialNumber = "";
+            var micModelName = "";
+            var micModelNumber = "";
+            if (!isSmartPhone) {
+              const p = document.createElement("p");
+              p.innerHTML =
+                "Input information about your microphone: (#Text to be added to the phrases doc)";
+              p.style.fontSize = "1rem";
+              p.style.fontWeight = "normal";
+              // create input fields for the microphone name, manufacturer, and serial number
+              const micNameInput = document.createElement("input");
+              micNameInput.type = "text";
+              micNameInput.id = "micNameInput";
+              micNameInput.name = "micNameInput";
+              micNameInput.placeholder = "Microphone Name";
+
+              const micManufacturerInput = document.createElement("input");
+              micManufacturerInput.type = "text";
+              micManufacturerInput.id = "micManufacturerInput";
+              micManufacturerInput.name = "micManufacturerInput";
+              micManufacturerInput.placeholder = "Microphone Manufacturer";
+
+              const micSerialNumberInput = document.createElement("input");
+              micSerialNumberInput.type = "text";
+              micSerialNumberInput.id = "micSerialNumberInput";
+              micSerialNumberInput.name = "micSerialNumberInput";
+              micSerialNumberInput.placeholder = "Serial Number";
+
+              // add  to the page
+              elems.subtitle.appendChild(p);
+              elems.subtitle.appendChild(micNameInput);
+              elems.subtitle.appendChild(micManufacturerInput);
+              elems.subtitle.appendChild(micSerialNumberInput);
+
+              const proceedButton3 = document.createElement("button");
+              proceedButton3.innerHTML = "Proceed";
+              proceedButton3.classList.add(...["btn", "btn-primary"]);
+              elems.subtitle.appendChild(proceedButton3);
+
+              // add event listener to the proceed button
+              await new Promise((resolve) => {
+                proceedButton3.addEventListener("click", async () => {
+                  // get the model number and name
+                  micName = micNameInput.value;
+                  micManufacturer = micManufacturerInput.value
+                    .toLowerCase()
+                    .split(" ")
+                    .join("");
+                  micSerialNumber = micSerialNumberInput.value
+                    .toLowerCase()
+                    .split(" ")
+                    .join("");
+
+                  // require mic name, manufacturer, and serial number
+                  if (
+                    micName === "" ||
+                    micManufacturer === "" ||
+                    micSerialNumber === ""
+                  ) {
+                    alert(
+                      "Please enter a microphone name, manufacturer, and serial number"
+                    );
+                  } else {
+                    // remove the dropdown menu, instructions, proceed button, and input boxes
+                    removeElements([
+                      p,
+                      proceedButton3,
+                      micNameInput,
+                      micManufacturerInput,
+                      micSerialNumberInput,
+                    ]);
+                    resolve();
+                  }
+                });
+              });
+            } else {
+              // create input box for model number and name
+              const modelNumberInput2 = document.createElement("input");
+              modelNumberInput2.type = "text";
+              modelNumberInput2.id = "modelNumberInput2";
+              modelNumberInput2.name = "modelNumberInput2";
+              modelNumberInput2.placeholder = "Model Number";
+
+              const modelNameInput2 = document.createElement("input");
+              modelNameInput2.type = "text";
+              modelNameInput2.id = "modelNameInput2";
+              modelNameInput2.name = "modelNameInput2";
+              modelNameInput2.placeholder = "Model Name";
+
+              const instructions2 = document.createElement("p");
+              instructions2.id = "loudspeakerInstructions2";
+              instructions2.innerHTML =
+                "We need the model number and name of your microphone to identify it (#Text to be added to the phrases doc)";
+              instructions2.style.fontSize = "1rem";
+
+              // add  to the page
+              elems.subtitle.appendChild(instructions2);
+              elems.subtitle.appendChild(modelNumberInput2);
+              elems.subtitle.appendChild(modelNameInput2);
+
+              const proceedButton4 = document.createElement("button");
+              proceedButton4.innerHTML = "Proceed";
+              proceedButton4.classList.add(...["btn", "btn-primary"]);
+              elems.subtitle.appendChild(proceedButton4);
+
+              // add event listener to the proceed button
+              await new Promise((resolve) => {
+                proceedButton4.addEventListener("click", async () => {
+                  // get the model number and name
+                  micModelNumber = modelNumberInput2.value
+                    .toLowerCase()
+                    .split(" ")
+                    .join("");
+                  micModelName = modelNameInput2.value
+                    .toLowerCase()
+                    .split(" ")
+                    .join("");
+
+                  // require model number and name
+                  if (micModelNumber === "" || micModelName === "") {
+                    alert("Please enter a model number and name");
+                  } else {
+                    // remove the dropdown menu, instructions, proceed button, and input boxes
+                    removeElements([
+                      instructions2,
+                      proceedButton4,
+                      modelNumberInput2,
+                      modelNameInput2,
+                    ]);
+                    resolve();
+                  }
+                });
+              });
+            }
+
+            const messageText = `${readi18nPhrases(
+              "RC_removeHeadphones",
+              language
+            )}${
+              isSmartPhone
+                ? readi18nPhrases("RC_getPhoneMicrophoneReady", language)
+                : readi18nPhrases("RC_getUSBMicrophoneReady", language)
+            }`.replace(/\n/g, "<br>");
+            elems.message.innerHTML = messageText;
+            // line height
+            elems.message.style.lineHeight = "2rem";
+            const { Speaker, CombinationCalibration } = speakerCalibrator;
+            const speakerParameters = {
+              siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
+              targetElementId: "displayQR",
+              debug: debugBool.current,
+              gainValues: gains,
+              knownIR: null,
+              instructionDisplayId: "soundMessage",
+              titleDisplayId: "soundTitle",
+              calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
+              calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+              calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
+              calibrateSoundHz: calibrateSoundHz.current,
+              timeToCalibrate: timeToCalibrate.current,
+              microphoneName: micName,
+              micManufacturer: micManufacturer,
+              micSerialNumber: micSerialNumber,
+              micModelNumber: micModelNumber,
+              micModelName: micModelName,
+              isSmartPhone: isSmartPhone,
+              calibrateSoundCheck: calibrateSoundCheck.current,
+              calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+            };
+            const calibratorParams = {
+              numCaptures: calibrateSoundBurstRecordings.current,
+              numMLSPerCapture: 4,
+              download: debugBool.current,
+              lowHz: calibrateSoundMinHz.current,
+              highHz: calibrateSoundMaxHz.current,
+            };
+
+            const calibrator = new CombinationCalibration(calibratorParams);
+
+            calibrator.on("update", ({ message, ...rest }) => {
+              elems.displayUpdate.innerHTML = message;
+            });
+
+            const calibrate = async (isSmartPhone) => {
+              const debug = false;
+              if (debug) {
+                invertedImpulseResponse.current = getDebugIIR();
+                soundCalibrationResults.current =
+                  getDebugSoundCalibrationResults();
+                return;
+              } else {
+                elems.displayContainer.style.display = "flex";
+                elems.displayContainer.style.marginLeft = "0px";
+                elems.displayContainer.style.flexDirection = "column";
+                elems.displayUpdate.style.display = "flex";
+                elems.displayUpdate.style.marginLeft = "0px";
+                elems.displayUpdate.style.flexDirection = "column";
+                elems.displayQR.style.display = "flex";
+                elems.displayQR.style.marginLeft = "0px";
+                elems.displayQR.style.flexDirection = "column";
+                soundCalibrationResults.current =
+                  await Speaker.startCalibration(
+                    speakerParameters,
+                    calibrator,
+                    timeoutSec.current
+                  );
+                elems.message.style.whiteSpace = "normal";
+                elems.message.style.fontSize = "1.1rem";
+                elems.message.style.fontWeight = "normal";
+                console.log(
+                  "Louspeaker Results: ",
+                  soundCalibrationResults.current
+                );
+                if (soundCalibrationResults.current === false) {
+                  return;
+                }
+                invertedImpulseResponse.current =
+                  soundCalibrationResults.current.componentIIR;
+                if (calibrateSoundCheck.current !== "none") {
+                  allHzCalibrationResults.x_conv =
+                    soundCalibrationResults.current.x_conv;
+                  allHzCalibrationResults.y_conv =
+                    soundCalibrationResults.current.y_conv;
+                  allHzCalibrationResults.x_unconv =
+                    soundCalibrationResults.current.x_unconv;
+                  allHzCalibrationResults.y_unconv =
+                    soundCalibrationResults.current.y_unconv;
+                }
+                allHzCalibrationResults.knownIr =
+                  soundCalibrationResults.current.componentIR;
+
+                soundGainDBSPL.current =
+                  soundCalibrationResults.current.parameters.gainDBSPL;
+                soundGainDBSPL.current =
+                  Math.round(soundGainDBSPL.current * 10) / 10;
+              }
+              const { normalizedIIR, calibrationLevel } =
+                getSoundCalibrationLevelDBSPLFromIIR(
+                  invertedImpulseResponse.current
+                );
+              invertedImpulseResponse.current = normalizedIIR;
+              soundCalibrationLevelDBSPL.current = calibrationLevel;
+              return true;
+            };
+
+            const result = await calibrate(isSmartPhone);
+            if (result) {
+              try {
+                const loudSpeakerInfo = {
+                  ModelName: modelName,
+                  ModelNumber: modelNumber,
+                  isSmartPhone: thisDevice.current.IsMobile,
+                  HardwareName: thisDevice.current.HardwareName,
+                  HardwareModel: thisDevice.current.HardwareModel,
+                  HardwareModelVariants:
+                    thisDevice.current.HardwareModelVariants,
+                  HardwareFamily: thisDevice.current.HardwareFamily,
+                  OEM: thisDevice.current.OEM,
+                  DeviceType: thisDevice.current.DeviceType,
+                  DeviceId: thisDevice.current.DeviceId,
+                  PlatformName: thisDevice.current.PlatformName,
+                  PlatformVersion: thisDevice.current.PlatformVersion,
+                  gainDBSPL: soundGainDBSPL.current,
+                };
+                await saveLoudSpeakerInfo(
+                  loudSpeakerInfo,
+                  modelNumber,
+                  thisDevice.current.OEM,
+                  invertedImpulseResponse.current,
+                  soundCalibrationResults.current.componentIR
+                );
+              } catch (err) {
+                console.log(err);
+              }
+
+              resolve(true);
+            }
+          });
+        });
+
+        resolve(true);
+      }
     });
   });
 };
