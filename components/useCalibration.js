@@ -429,7 +429,7 @@ export const calibrateAudio = async (reader) => {
           const dropdown = document.createElement("select");
           dropdown.id = "micDropdown";
           dropdown.name = "micDropdown";
-          const options = ["USB Microphone", "SmartPhone"];
+          const options = ["USB Microphone", "SmartPhone", "None"];
           options.forEach((option) => {
             const optionElem = document.createElement("option");
             optionElem.value = option;
@@ -468,7 +468,10 @@ export const calibrateAudio = async (reader) => {
               var micSerialNumber = "";
               var micModelName = "";
               var micModelNumber = "";
-              if (choice === "USB Microphone") {
+
+              if (choice === "None") {
+                showExperimentEnding();
+              } else if (choice === "USB Microphone") {
                 const p = document.createElement("p");
                 p.innerHTML =
                   "Input information about your microphone: (#Text to be added to the phrases doc)";
@@ -1144,7 +1147,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
         const dropdown = document.createElement("select");
         dropdown.id = "micDropdown";
         dropdown.name = "micDropdown";
-        const options = ["USB Microphone", "SmartPhone"];
+        const options = ["USB Microphone", "SmartPhone", "None"];
         options.forEach((option) => {
           const optionElem = document.createElement("option");
           optionElem.value = option;
@@ -1170,6 +1173,9 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
         // add event listener to the proceed button
         await new Promise((resolve) => {
           proceedButton2.addEventListener("click", async () => {
+            if (dropdown.value === "None") {
+              showExperimentEnding();
+            }
             const isSmartPhone = dropdown.value === "SmartPhone";
             // remove the dropdown menu, proeed button
             removeElements([dropdown, proceedButton2, p]);
