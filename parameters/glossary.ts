@@ -123,7 +123,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "❌ Use _calibrateSoundSamplingHz instead.",
+    explanation: "❌ Use _calibrateSoundSamplingDesiredHz instead.",
   },
   _calibrateSoundIIRSec: {
     name: "_calibrateSoundIIRSec",
@@ -2953,7 +2953,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "disabled",
     explanation:
-      "⭑ showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). Set showGrid to 'px' for a pixel grid, [pt NOT YET IMPLEMENTED.] 'pt' for a typographer \"points\" grid (72 points per inch), 'cm' for a centimeter grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially after a moving crosshair, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you collect human data and when you check timing.",
+      "⭑ showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). [pt AND inch NOT YET IMPLEMENTED.] Set showGrid to 'px' for a pixel grid, 'pt' for a typographer \"points\" grid (72 points per inch), 'cm' for a centimeter grid, 'inch' for an inch grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially after a moving crosshair, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you collect human data and when you check timing.",
     categories: ["px", "pt", "cm", "inch", "deg", "mm", "none", "disabled"],
   },
   showPercentCorrectBool: {
