@@ -69,11 +69,17 @@ export const isMicrophoneSmartphone = async (microphoneName) => {
 export const saveLoudSpeakerInfo = async (
   loudSpeakerInfo,
   modelNumber,
-  OEM
+  OEM,
+  iir,
+  ir
 ) => {
   console.log("Saving LoudSpeaker Info");
   const dbRef = ref(database);
   await set(child(dbRef, `LoudSpeaker/${OEM}/${modelNumber}`), loudSpeakerInfo);
+  // save iir
+  await set(child(dbRef, `LoudSpeaker/${OEM}/${modelNumber}/iir`), iir);
+  // save ir
+  await set(child(dbRef, `LoudSpeaker/${OEM}/${modelNumber}/ir`), ir);
 };
 
 export const matchLoudSpeakerByOEMandModelNumber = async (OEM, modelNumber) => {

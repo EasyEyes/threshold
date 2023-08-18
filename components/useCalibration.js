@@ -1354,28 +1354,33 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
 
           const result = await calibrate(isSmartPhone);
           if (result) {
-            const loudSpeakerInfo = {
-              ModelName: modelName,
-              ModelNumber: modelNumber,
-              isSmartPhone: thisDevice.current.IsMobile,
-              HardwareName: thisDevice.current.HardwareName,
-              HardwareModel: thisDevice.current.HardwareModel,
-              HardwareModelVariants: thisDevice.current.HardwareModelVariants,
-              HardwareFamily: thisDevice.current.HardwareFamily,
-              OEM: thisDevice.current.OEM,
-              DeviceType: thisDevice.current.DeviceType,
-              DeviceId: thisDevice.current.DeviceId,
-              PlatformName: thisDevice.current.PlatformName,
-              PlatformVersion: thisDevice.current.PlatformVersion,
-              iir: invertedImpulseResponse.current,
-              ir: soundCalibrationResults.current.componentIR,
-              gainDBSPL: soundGainDBSPL.current,
-            };
-            await saveLoudSpeakerInfo(
-              loudSpeakerInfo,
-              modelNumber,
-              thisDevice.current.OEM
-            );
+            try {
+              const loudSpeakerInfo = {
+                ModelName: modelName,
+                ModelNumber: modelNumber,
+                isSmartPhone: thisDevice.current.IsMobile,
+                HardwareName: thisDevice.current.HardwareName,
+                HardwareModel: thisDevice.current.HardwareModel,
+                HardwareModelVariants: thisDevice.current.HardwareModelVariants,
+                HardwareFamily: thisDevice.current.HardwareFamily,
+                OEM: thisDevice.current.OEM,
+                DeviceType: thisDevice.current.DeviceType,
+                DeviceId: thisDevice.current.DeviceId,
+                PlatformName: thisDevice.current.PlatformName,
+                PlatformVersion: thisDevice.current.PlatformVersion,
+                gainDBSPL: soundGainDBSPL.current,
+              };
+              await saveLoudSpeakerInfo(
+                loudSpeakerInfo,
+                modelNumber,
+                thisDevice.current.OEM,
+                invertedImpulseResponse.current,
+                soundCalibrationResults.current.componentIR
+              );
+            } catch (err) {
+              console.log(err);
+            }
+
             resolve(true);
           }
         });
