@@ -278,6 +278,14 @@ export const calibrateAudio = async (reader) => {
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
 
+  // QUIT FULLSCREEN
+  if (rc.isFullscreen.value) {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+    else if (document.msExitFullscreen) document.msExitFullscreen();
+  }
+
   return new Promise(async (resolve) => {
     const lang = rc.language.value;
     const copy = {
@@ -368,7 +376,7 @@ export const calibrateAudio = async (reader) => {
       );
     }
 
-    // Now that loudspeaker calibration is done, present users with two options: continue to experiment or calibrate microphone
+    // Now that loudspeaker calibration is done, present users with three options: continue to experiment, calibrate microphone or test sounds
 
     // if calibrateMicrophonesBool is true, then provide the option to calibrate the phone mic or to continue.
     // if user chooses to calibrate mic, then at the end of the calibration, user will be presented with the option to calibrate another mic or to continue.

@@ -499,10 +499,11 @@ const paramReaderInitialized = async (reader) => {
     return;
   } else {
     // Get fullscreen
-    if (!rc.isFullscreen.value && !debug) {
-      rc.getFullscreen();
-      await sleep(1000);
-    }
+    // commented this out to avoid going fullscreen before sound calibration. Added to startExperiment()
+    // if (!rc.isFullscreen.value && !debug) {
+    //   rc.getFullscreen();
+    //   await sleep(1000);
+    // }
   }
 
   // prepareForReading(reader);
@@ -541,6 +542,11 @@ const paramReaderInitialized = async (reader) => {
         document.querySelector("#rc-panel-holder").remove();
 
       rc.pauseNudger();
+      // Get fullscreen
+      if (!rc.isFullscreen.value && !debug) {
+        rc.getFullscreen();
+        await sleep(1000);
+      }
 
       // ! Start actual experiment
       experiment(reader.blockCount);
