@@ -178,7 +178,8 @@ export class RSVPReadingTargetSet {
     readingConfig.height = findReadingSize(
       this.paramReader.read("readingSetSizeBy", this.BC),
       this.paramReader,
-      readingStim
+      readingStim,
+      "condition"
     );
     fontSize.current = readingConfig.height;
     readingStim.setHeight(readingConfig.height);
