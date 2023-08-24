@@ -2352,7 +2352,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingConfig.height = findReadingSize(
             paramReader.read("readingSetSizeBy", status.block)[0],
             paramReader,
-            readingParagraph
+            readingParagraph,
+            "block"
           );
           readingParagraph.setHeight(readingConfig.height);
           fontSize.current = readingConfig.height;

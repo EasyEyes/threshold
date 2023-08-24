@@ -126,6 +126,8 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFilename) => {
     readingSingleLineSpacingDeg: reader.read("readingSingleLineSpacingDeg", BC),
     readingSpacingDeg: reader.read("readingSpacingDeg", BC),
     readingXHeightDeg: reader.read("readingXHeightDeg", BC),
+    readingXHeightPt: reader.read("readingXHeightPt", BC),
+    readingNominalSizePt: reader.read("readingNominalSizePt", BC),
     viewingDistanceCm: viewingDistanceCm.current,
   };
   showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
@@ -178,6 +180,8 @@ export const updateTargetSpecsForRsvpReading = (
     readingSingleLineSpacingDeg: reader.read("readingSingleLineSpacingDeg", BC),
     readingSpacingDeg: reader.read("readingSpacingDeg", BC),
     readingXHeightDeg: reader.read("readingXHeightDeg", BC),
+    readingXHeightPt: reader.read("readingXHeightPt", BC),
+    readingNominalSizePt: reader.read("readingNominalSizePt", BC),
     viewingDistanceCm: viewingDistanceCm.current,
   };
   const rsvpSpecs = {

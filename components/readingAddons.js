@@ -3,6 +3,7 @@ import axios from "axios";
 import {
   displayOptions,
   fontCharacterSet,
+  letterConfig,
   readingCorpusArchive,
   readingFrequencyToWordArchive,
   readingPageStats,
@@ -316,69 +317,65 @@ export const preprocessCorpusToSentenceList = (
 
 /* -------------------------------------------------------------------------- */
 
+const getInitialFontSizePt = () =>
+  Math.round(((200 / displayOptions.pixPerCm) * 72) / 2.54);
+
 export const getSizeForXHeight = (
   readingParagraph,
   targetHeight,
   unit = "deg"
 ) => {
-  logger("!. targetHeight", targetHeight);
-  logger("!. unit", unit);
-  let targetPix;
-  if (unit === "deg") {
-    targetPix = degreesToPixels(targetHeight, "x");
-  } else {
-    // TODO should this unit be "Px" not "Pt?", ie readingXHeightPx not readingXHeightPt
-    //      since we are measuring the height of the "x" character (in px) given some pt
-    targetPix = targetHeight;
-  }
-  logger("!. targetPix", targetPix);
-
+  const initialFontSizePt = getInitialFontSizePt();
   readingParagraph.setText("x");
+  readingParagraph.setHeight(initialFontSizePt);
+  readingParagraph._updateIfNeeded();
+  readingParagraph.refresh();
+  const xHeightPx = readingParagraph.getBoundingBox(true).height;
 
-  let height = 0.5;
-  let testHeight;
-  while (height < window.innerHeight * 0.5) {
-    readingParagraph.setHeight(height);
-    testHeight = readingParagraph.getBoundingBox(true).height;
-    logger("!. testHeight", testHeight);
-    logger("!. height", height);
-    if (testHeight > targetPix) return height;
-
-    height += 0.5;
+  if (unit === "deg") {
+    /**
+     * PSEUDO CODE TO SET x-height to readingXHeightDeg
+Convert deg to px.
+xHeightDesiredPx=PxOfDegVertical(readingXHeightDeg);
+Set font size to initialFontSizePt, and measure the height of letter “x”: xHeightPx.
+fontSizePt=(xHeightDesiredPx/xHeightPx)*initialFontSizePt
+     */
+    // DEG
+    const readingXHeightDeg = targetHeight;
+    logger("!. readingXHeightDeg", targetHeight);
+    // Convert deg to px
+    const xHeightDesiredPx = pxOfDegVertical(readingXHeightDeg);
+    // Set font size to initialFontSizePt, and measure the height of letter “x”: xHeightPx.
+    const fontSizePt = (xHeightDesiredPx / xHeightPx) * initialFontSizePt;
+    return fontSizePt;
+  } else {
+    // PT
+    const readingXHeightPt = targetHeight;
+    const xHeightCm = xHeightPx / displayOptions.pixPerCm;
+    const xHeightInch = xHeightCm / 2.54;
+    const xHeightPt = xHeightInch * 72;
+    const fontSizePt = (readingXHeightPt / xHeightPt) * initialFontSizePt;
+    return fontSizePt;
   }
-  psychoJS.experiment.addData(
-    "readingParagraphSetHeightUsingxHeightDegError",
-    `height: ${height}, window height: ${window.innerHeight}, testHeight: ${testHeight}, targetPix: ${targetPix}`
-  );
-  throw `Failed to set reading paragraph height using [xHeightDeg]. height: ${height}, window height: ${window.innerHeight}, testHeight: ${testHeight}, targetPix: ${targetPix}`;
 };
 
 export const getSizeForSpacing = (
   readingParagraph,
-  targetDeg,
+  readingSpacingDeg,
   testingString
 ) => {
-  // TODO calculate spacing at fixation location, not just [0,0]?
-  const targetPix = XYPixOfXYDeg([targetDeg, 0], displayOptions)[0];
-
-  readingParagraph.setWrapWidth(999999);
+  // Convert deg to px.
+  const spacingDesiredPx = pxOfDegHorizontal(readingSpacingDeg);
+  // Set the font size to initialFontSizePt, and measure the width of the string fontCharacterSet,
+  const initialFontSizePt = getInitialFontSizePt();
   readingParagraph.setText(testingString);
-
-  let height = 0.5;
-  let testWidth;
-  while (height < window.innerHeight * 0.5) {
-    readingParagraph.setHeight(height);
-    testWidth =
-      readingParagraph.getBoundingBox(true).width / testingString.length;
-    if (testWidth > targetPix) return height;
-
-    height += 0.5;
-  }
-  psychoJS.experiment.addData(
-    "readingParagraphSetHeightUsingSpacingError",
-    `height: ${height}, windowHeight: ${window.innerHeight}, testWidth: ${testWidth}, testingString.length: ${testingString.length}, targetPix: ${targetPix}`
-  );
-  throw `Failed to set reading paragraph height using [spacing]. height: ${height}, windowHeight: ${window.innerHeight}, testWidth: ${testWidth}, testingString.length: ${testingString.length}, targetPix: ${targetPix}`;
+  readingParagraph.setHeight(initialFontSizePt);
+  readingParagraph._updateIfNeeded();
+  readingParagraph.refresh();
+  const stringWidthPx = readingParagraph.getBoundingBox(true).width;
+  const spacingPx = stringWidthPx / testingString.length;
+  const fontSizePt = (spacingDesiredPx / spacingPx) * initialFontSizePt;
+  return fontSizePt;
 };
 
 export const addReadingStatsToOutput = (pageN, psychoJS) => {
@@ -407,75 +404,64 @@ export const addReadingStatsToOutput = (pageN, psychoJS) => {
 export const findReadingSize = (
   readingSetSizeBy,
   paramReader,
-  readingParagraph
+  readingParagraph,
+  blockOrConditionEnum
 ) => {
   let pt;
-  logger("!. readingSetSizeBy", readingSetSizeBy);
   switch (readingSetSizeBy) {
     case "nominalDeg":
-      pt = getReadingNominalSizeDeg(paramReader);
+      const readingNominalSizeDeg =
+        blockOrConditionEnum === "block"
+          ? paramReader.read("readingNominalSizeDeg", status.block)[0]
+          : paramReader.read("readingNominalSizeDeg", status.block_condition);
+      pt = getReadingNominalSizeDeg(readingNominalSizeDeg);
       break;
     case "nominalPt":
-      pt = paramReader.read("readingNominalSizePt", status.block)[0];
+      if (blockOrConditionEnum === "block") {
+        pt = paramReader.read("readingNominalSizePt", status.block)[0];
+      } else {
+        pt = paramReader.read("readingNominalSizePt", status.block_condition);
+      }
       break;
     case "xHeightDeg":
-      pt = getSizeForXHeight(
-        readingParagraph,
-        paramReader.read("readingXHeightDeg", status.block)[0],
-        "deg"
-      );
+      const readingXHeightDeg =
+        blockOrConditionEnum === "block"
+          ? paramReader.read("readingXHeightDeg", status.block)[0]
+          : paramReader.read("readingXHeightDeg", status.block_condition);
+      pt = getSizeForXHeight(readingParagraph, readingXHeightDeg, "deg");
       break;
     case "xHeightPt":
-      logger(
-        "!. findReadingSize readingXHeightPx",
-        paramReader.read("readingXHeightPt", status.block)[0]
-      );
-      pt = getSizeForXHeight(
-        readingParagraph,
-        paramReader.read("readingXHeightPt", status.block)[0],
-        "pt"
-      );
+      const readingXHeightPt =
+        blockOrConditionEnum === "block"
+          ? paramReader.read("readingXHeightPt", status.block)[0]
+          : paramReader.read("readingXHeightPt", status.block_condition);
+      pt = getSizeForXHeight(readingParagraph, readingXHeightPt, "pt");
       break;
     case "spacingDeg":
+      const readingSpacingDeg =
+        blockOrConditionEnum === "block"
+          ? paramReader.read("readingSpacingDeg", status.block)[0]
+          : paramReader.read("readingSpacingDeg", status.block_condition);
       pt = getSizeForSpacing(
         readingParagraph,
-        paramReader.read("readingSpacingDeg", status.block)[0],
+        readingSpacingDeg,
         fontCharacterSet.current.join("")
       );
       break;
     default:
       return;
   }
-  logger("!. pt", pt);
   return Math.max(1, pt);
 };
 /* --------------------------------- HELPERS -------------------------------- */
 
-const getReadingNominalSizeDeg = (paramReader, customValueDeg = undefined) => {
-  /**
-   * readingSetSizeBy (default “spacing”) determines how you specify the size of the text to be read:
-• nominalDeg sets the point size that subtends readingNominalSizeDeg. The point size is
-(72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.
-   */
-  const nominalSizeDeg =
-    typeof customValueDeg === "undefined"
-      ? paramReader.read("readingNominalSizeDeg", status.block)[0]
-      : customValueDeg;
-  const ptSize =
-    (72 / 2.54) *
-    2 *
-    Math.tan((0.5 * nominalSizeDeg * Math.PI) / 180) *
-    viewingDistanceCm.current;
-  return ptSize;
+const getReadingNominalSizeDeg = (readingNominalSizeDeg) => {
+  // Convert deg to px.
+  const sizePx = pxOfDegVertical(readingNominalSizeDeg);
+  // Convert px to pt.
+  const fontSizePt = ((sizePx / displayOptions.pixPerCm) * 72) / 2.54;
+  return fontSizePt;
 };
-
-// const getReadingNominalSizePt = (paramReader) => {
-//   const sizeDeg =
-//     (paramReader.read("readingNominalSizePt", status.block)[0] *
-//       ((displayOptions.pixPerCm * 2.54) / 72)) /
-//     displayOptions.pixPerCm;
-//   return getReadingNominalSizeDeg(paramReader, sizeDeg);
-// };
 
 const removeLastSpace = (str) => {
   return str.replace(/ $/, "");
@@ -494,4 +480,44 @@ export const reportWordCounts = (reader, experiment) => {
   const strictWordCount = readingWordListArchive[corpus].length;
   experiment.addData("readingCorpusWordsLax", laxWordCount);
   experiment.addData("readingCorpusWordsStrict", strictWordCount);
+};
+
+/**
+ * 
+UTILITY FUNCTIONS PxOfDegVertical, PxOfDegHorizontal
+heightPx=PxOfDegVertical(heightDeg)
+// Convert deg to px.
+xDeg=targetEccentricityXDeg;
+yDeg=targetEccentricityYDeg;
+bottomXYPix=XYPxOfXYDeg(xDeg,yDeg-heightDeg/2);
+topXYPix=XYPxOfXYDeg(xDeg,yDeg+heightDeg/2);
+heightPx=bottomXYPix[1]-topXYPix[1];
+return heightPx
+widthPx=PxOfDegHorizontal(widthDeg)
+// Convert deg to px.
+xDeg=targetEccentricityXDeg;
+yDeg=targetEccentricityYDeg;
+leftXYPix=XYPxOfXYDeg(xDeg-widthDeg/2,yDeg);
+rightXYPix=XYPxOfXYDeg(xDeg+widthDeg/2,yDeg);
+widthPx=rightXYPix[0]-leftXYPix[0];
+return widthPx (edited) 
+ */
+
+const pxOfDegVertical = (heightDeg) => {
+  // Convert deg to px
+  // TODO make sure letterConfig is being set on reading, at start of reading block
+  const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
+  const bottomXYPx = XYPixOfXYDeg([xDeg, yDeg - heightDeg / 2], displayOptions);
+  const topXYPx = XYPixOfXYDeg([xDeg, yDeg + heightDeg / 2], displayOptions);
+  const heightPx = Math.abs(bottomXYPx[1] - topXYPx[1]);
+  return heightPx;
+};
+
+const pxOfDegHorizontal = (widthDeg) => {
+  // COnvert deg to px
+  const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
+  const leftXYPx = XYPixOfXYDeg([xDeg - widthDeg / 2, yDeg], displayOptions);
+  const rightXYPx = XYPixOfXYDeg([xDeg + widthDeg / 2, yDeg], displayOptions);
+  const widthPx = Math.abs(rightXYPx[0] - leftXYPx[0]);
+  return widthPx;
 };
