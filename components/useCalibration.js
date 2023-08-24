@@ -23,6 +23,7 @@ import {
   timeToCalibrate,
   thisDevice,
   calibrateSoundIIRSec,
+  loudspeakerInfo,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -252,6 +253,15 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundIIRSec.current = reader.read(
     GLOSSARY._calibrateSoundIIRSec.name
   )[0];
+
+  calibrateSound1000HzSec.current = reader.read(
+    GLOSSARY.calibrateSound1000HzSec.name
+  )[0];
+  console.log(
+    "calibrateSound1000HzSec.current",
+    calibrateSound1000HzSec.current
+  );
+
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
     .split(",");
@@ -635,6 +645,7 @@ export const calibrateAudio = async (reader) => {
                 micModelNumber: micModelNumber,
                 micModelName: micModelName,
                 calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+                calibrateSound1000HzSec: calibrateSound1000HzSec.current,
               };
 
               const calibratorParams = {
@@ -682,6 +693,12 @@ export const calibrateAudio = async (reader) => {
                   ID: result.micInfo.ID,
                   OEM: result.micInfo.OEM,
                   isSmartPhone: isSmartPhone,
+                  HardwareName: result.micModel?.HardwareName,
+                  HardwareFamily: result.micModel?.HardwareFamily,
+                  HardwareModel: result.micModel?.HardwareModel,
+                  HardwareModelVariants: result.micModel?.HardwareModelVariants,
+                  PlatformVersion: result.micModel?.PlatformVersion,
+                  DeviceType: result.micModel?.DeviceType,
                   Recording_with_Filter_Hz:
                     calibrateSoundCheck.current !== "none" ? result.y_conv : [],
                   Recording_with_Filter_dB:
@@ -1355,6 +1372,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               isSmartPhone: isSmartPhone,
               calibrateSoundCheck: calibrateSoundCheck.current,
               calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+              calibrateSound1000HzSec: calibrateSound1000HzSec.current,
             };
             const calibratorParams = {
               numCaptures: calibrateSoundBurstRecordings.current,
@@ -1435,7 +1453,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             const result = await calibrate(isSmartPhone);
             if (result) {
               try {
-                const loudSpeakerInfo = {
+                loudspeakerInfo.current = {
                   ModelName: modelName,
                   ModelNumber: modelNumber,
                   isSmartPhone: thisDevice.current.IsMobile,
@@ -1452,7 +1470,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   gainDBSPL: soundGainDBSPL.current,
                 };
                 await saveLoudSpeakerInfo(
-                  loudSpeakerInfo,
+                  loudspeakerInfo.current,
                   modelNumber,
                   thisDevice.current.OEM,
                   invertedImpulseResponse.current,

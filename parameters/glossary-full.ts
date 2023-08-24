@@ -840,6 +840,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "audio, camera, microphone, download",
   },
   {
+    name: "_prolific2ScreenerSet",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _prolific2ScreenerSet (default none) allows you, the scientist, to provide the name of a screener set that you created in Prolific. This gives you immediate access to all Prolific parameters, as soon as they appear on Prolific. Using a screener set causes Prolific to ignore all other screener requests, including all the EasyEyes _prolific3XXX and _prolific4XXX parameters. The twenty EasyEyes _prolific3XXX and _prolific4XXX parameters are useful, but represent only a small fraction of the screeners offered by Prolific.",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "_prolific2SubmissionApproval",
     availability: "now",
     example: "",
@@ -854,7 +864,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _prolific3AllowAfterHours [Prolific "xxx"] (default 0) requires that at least the specified (floating) number of hours pass since completion of the _prolific3AllowCompletedExperiment before the participant’s ID is added to the allowList.',
+      '🕑 _prolific3AllowAfterHours [Prolific "???"] (default 0) requires that at least the specified (floating) number of hours pass since completion of the _prolific3AllowCompletedExperiment before the participant’s ID is added to the allowList.',
     type: "numerical",
     default: "0",
     categories: "",
@@ -2800,7 +2810,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "showFPSBool",
     availability: "now",
     example: "",
-    explanation: "Obsolete, but EasyEyes crashes if we remove it.",
+    explanation: "❌ Obsolete, but EasyEyes crashes if we remove it.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2970,7 +2980,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       '❌ soundGainTWR (default 100,10,100) is a comma-separated list of 3 numbers that is used with soundGainDBSPL to specifies the parameters of our model of dynamic range compression of sound in the iPhone microphone: T (in dB SPL), W (in dB), and R (dimensionless). Typically each number will have one digit after the decimal, e.g. "-100.1,-15.1,30.0".\nT is the "threshold" sound level (dB SPL) at the knee in the curve of outDbSPL vs inDb. The curve is straight at low and high sound levels (inDB+soundGainDbSpl<T-W/2 or inDb+soundGainDbSpl>T+W/2). Those lines would intersect at T, but the curve rounds the knee, as controlled by W.\nW is the "width" of the knee. The rounded knee extends from T-W/2 to T+W/2.\nR is the reciprocal of the slope of outDbSPL vs inDb at sound levels above T+W/2.\nIf calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. \nOur compression model (using T, W, and R) is Eq. 4 in Giannoulis et al. (2012).\nGiannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss (2012). Digital Dynamic Range Compressor Design –– A Tutorial and Analysis. Journal of Audio Engineering Society. Vol. 60, Issue 6, pp. 399–408.\nhttp://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf',
     type: "obsolete",
-    default: "100,10,100",
+    default: "",
     categories: "",
   },
   {

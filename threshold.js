@@ -134,6 +134,7 @@ import {
   allHzCalibrationResults,
   microphoneCalibrationResults,
   thisDevice,
+  loudspeakerInfo,
 } from "./components/global.js";
 
 import {
@@ -821,7 +822,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       psychoJS.experiment.addData(
         "Loudspeaker model",
-        JSON.stringify(thisDevice.current)
+        JSON.stringify(loudspeakerInfo.current)
       );
     }
     if (microphoneCalibrationResults.length > 0) {

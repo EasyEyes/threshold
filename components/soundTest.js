@@ -899,3 +899,19 @@ export const displayParametersAllHz = (
 
   plotForAllHz(plotCanvas, iir, calibrationResults, title);
 };
+
+// The table has 3 colums.
+// Row 1 Column 1 is empty
+// Column 1 has: target, Device Kind, OS, Make(OEM), hardware Family, Model name, Model specifier, Calibration Date
+// Column 2 is for Loudspeaker
+// Column 3 is for Microphone
+export const displayCompleteTransducerTable = (
+  LoudspeakerInfo,
+  microphoneInfo,
+  elems
+) => {
+  const table = document.createElement("table");
+  table.setAttribute("id", "completeTransducerTable");
+  table.style.width = "100%";
+  table.style.border = "1px solid black";
+};
