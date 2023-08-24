@@ -9,6 +9,9 @@ import {
   rc,
   showCharacterSetResponse,
   thisExperimentInfo,
+  soundCalibrationResults,
+  microphoneCalibrationResults,
+  invertedImpulseResponse,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
@@ -162,6 +165,26 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
     psychoJS.quit(quitOptions);
+    if (soundCalibrationResults.current) {
+      psychoJS.experiment.downloadJSON({
+        "Loudspeaker Component IR":
+          soundCalibrationResults.current?.componentIR,
+        "Loudspeaker Component IIR": invertedImpulseResponse.current,
+        "Loudspeaker system IR": soundCalibrationResults.current?.systemIR,
+        "Loudspeaker system IIR": soundCalibrationResults.current?.systemIIR,
+      });
+    }
+    if (microphoneCalibrationResults.length > 0) {
+      const objectData = [];
+      for (const result of microphoneCalibrationResults) {
+        const data = {
+          "Microphone IR": result["ir"],
+          "Microphone IIR": result["iir"],
+        };
+        objectData.push(data);
+      }
+      psychoJS.experiment.downloadJSON(objectData);
+    }
     // logPsychoJSQuit(
     //   "_afterQuitFunction",
     //   window.location.toString(),

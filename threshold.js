@@ -774,19 +774,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // add sound calibration results
     if (soundCalibrationResults.current) {
       psychoJS.experiment.addData(
-        "1000 Hz in (dB)",
+        "Cal1000HzInDb",
         soundCalibrationResults.current.inDBValues
       );
+      // psychoJS.experiment.addData(
+      //   "All Hz out (dB SPL)",
+      //   soundCalibrationResults.current.outDBSPLValues
+      // );
       psychoJS.experiment.addData(
-        "All Hz out (dB SPL)",
-        soundCalibrationResults.current.outDBSPLValues
-      );
-      psychoJS.experiment.addData(
-        "1000 Hz out (dB SPL)",
+        "Cal1000HzOutDb",
         soundCalibrationResults.current.outDBSPL1000Values
       );
       psychoJS.experiment.addData(
-        "Sound gain parameters",
+        "SoundGainParameters",
         JSON.stringify(soundCalibrationResults.current.parameters)
       );
       psychoJS.experiment.addData(
@@ -796,19 +796,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
     if (allHzCalibrationResults.x_conv) {
       psychoJS.experiment.addData(
-        "Recording with filter (Hz)",
+        "MlsSpectrumHz",
         allHzCalibrationResults.y_conv
       );
       psychoJS.experiment.addData(
-        "Recording with filter (dB)",
+        "MlsSpectrumFilteredDb",
         allHzCalibrationResults.x_conv
       );
       psychoJS.experiment.addData(
-        "Recording (Hz)",
+        "MlsSpectrumUnfilteredHz",
         allHzCalibrationResults.y_unconv
       ); // x and y are swapped
       psychoJS.experiment.addData(
-        "Recording (dB)",
+        "MlsSpectrumUnfilteredDb",
         allHzCalibrationResults.x_unconv
       ); // x and y are swapped
       psychoJS.experiment.addData(
