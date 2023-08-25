@@ -2680,7 +2680,7 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "",
     explanation:
-      "🕑 THIS DESIGN DID NOT ANTICIPATE THAT, WHEN IN FULL-SCREEN MODE, THE BROWSER RESERVES THE ESCAPE KEY FOR EXITING FROM FULL-SCREEN MODE. WE'LL HAVE TO PICK ANOTHER KEY FOR SKIPPING AHEAD. Once debugged, responseEscapeOptionsBool will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest option is to continue from where ESCAPE was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
+      "❌ THIS DESIGN DID NOT ANTICIPATE THAT, WHEN IN FULL-SCREEN MODE, THE BROWSER RESERVES THE ESCAPE KEY FOR EXITING FROM FULL-SCREEN MODE. WE'LL HAVE TO PICK ANOTHER KEY FOR SKIPPING AHEAD. Once debugged, responseEscapeOptionsBool will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest option is to continue from where ESCAPE was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
   },
   responseMustClickCrosshairBool: {
     name: "responseMustClickCrosshairBool",
@@ -2688,7 +2688,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "⭑ Setting responseMustClickCrosshairBool TRUE overrules all other response boolean parameters to enable clicking, and ONLY clicking, of the crosshair, to request the next trial. We suppose that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool.",
+      "❌ Setting responseMustClickCrosshairBool TRUE overrules all other response boolean parameters to enable clicking, and ONLY clicking, of the crosshair, to request the next trial. We suppose that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool.",
   },
   responseMustTrackContinuouslyBool: {
     name: "responseMustTrackContinuouslyBool",
@@ -2696,7 +2696,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "responseMustTrackContinuouslyBool (default TRUE) when TRUE requires that the cursor be within the hotspot for the entire (random) waiting interval, not just the beginning and end. If the cursor is ever outside the hotspot during the waiting interval then the software begins, again, waiting for the cursor to enter the hotspot, to begin a new waiting intevale (whose duration is a fresh random sample).",
+      "⭑ responseMustTrackContinuouslyBool (default TRUE) when TRUE requires that the cursor be within the hotspot for the entire (random) waiting interval, not just the beginning and end. Whenever the cursor is outside the hotspot during the waiting interval then the software begins, again, waiting for the cursor to enter the hotspot, to begin a new waiting inteval (whose duration is a fresh random sample).",
   },
   responseMustTrackCrosshairBool: {
     name: "responseMustTrackCrosshairBool",
@@ -2704,7 +2704,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "⭑ For the participant to get target presentation, responseMustTrackCrosshairBool=TRUE overrules all other response boolean parameters, and target presentation can be requested only by cursor tracking of the crosshair center. We suppose good fixation of the crosshair while it is tracked. responseMustTrackCrosshairBool has no effect on other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool. \n     If responseMustTrackCrosshairBool=TRUE, when EasyEyes begins a trial, it enters a loop. First it loads a countdown timer with the required tracking duration, which is randomly sampled from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The countdown begins when the cursor is first within markingFixationHotSpotRadiusDeg of the crosshair center. When the countdown reaches zero, EasyEyes again checks whether the cursor is within markingFixationHotSpotRadiusDeg of the crosshair center. If yes, then EasyEyes exits the loop, and the target is immediately presented. If not, then EasyEyes returns to the beginning of the loop, selecting a new random tracking duration.",
+      "❌ For the participant to get target presentation, responseMustTrackCrosshairBool=TRUE overrules all other response boolean parameters, and target presentation can be requested only by cursor tracking of the crosshair center. We suppose good fixation of the crosshair while it is tracked. responseMustTrackCrosshairBool has no effect on other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool. \n     If responseMustTrackCrosshairBool=TRUE, when EasyEyes begins a trial, it enters a loop. First it loads a countdown timer with the required tracking duration, which is randomly sampled from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The countdown begins when the cursor is first within markingFixationHotSpotRadiusDeg of the crosshair center. When the countdown reaches zero, EasyEyes again checks whether the cursor is within markingFixationHotSpotRadiusDeg of the crosshair center. If yes, then EasyEyes exits the loop, and the target is immediately presented. If not, then EasyEyes returns to the beginning of the loop, selecting a new random tracking duration.",
   },
   responseMustTrackMaxSec: {
     name: "responseMustTrackMaxSec",
@@ -2814,7 +2814,7 @@ export const GLOSSARY: Glossary = {
     name: "screenColorRGBA",
     availability: "now",
     type: "text",
-    default: "0.92,0.92,0.92",
+    default: "0.92,0.92,0.92,1",
     explanation:
       "⭑ screenColorRGBA is the background color for the condition, in RGB, on a scale of 0 to 1 for each dimension. This is used to set the background of the rest of the screen to match the background of a movie.",
   },
@@ -3157,6 +3157,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       'When computing the characterSet bounding box as the union of the bounding box of each letter, align the bounding boxes horizontally by "center" or "origin". The bounding boxes are always vertically aligned by baseline.',
     categories: ["center", "origin"],
+  },
+  targetColorRGBA: {
+    name: "targetColorRGBA",
+    availability: "now",
+    type: "text",
+    default: "0,0,0,1",
+    explanation:
+      'targetColorRGBA (default "0,0,0,1") sets target color. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white.',
   },
   targetContrast: {
     name: "targetContrast",
