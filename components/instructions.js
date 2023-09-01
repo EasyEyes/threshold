@@ -125,7 +125,7 @@ export const instructionsText = {
         }
       } else {
         text = replacePlaceholders(
-          readi18nPhrases("T_thresholdBeginBlock", L),
+          readi18nPhrases("T_thresholdMiddleLetterBeginBlock", L),
           trialsThisBlock
         );
         switch (responseType) {
@@ -252,11 +252,14 @@ export const instructionsText = {
         } else {
           switch (responseType) {
             case 0:
-              return readi18nPhrases("T_identifyPressIt", L);
+              return readi18nPhrases("T_identifyMiddleLetterPressIt", L);
             case 1:
-              return readi18nPhrases("T_identifyClickIt", L);
+              return readi18nPhrases("T_identifyMiddleLetterClickIt", L);
             default:
-              return readi18nPhrases("T_identifyPressItOrClickIt", L);
+              return readi18nPhrases(
+                "T_identifyMiddleLetterPressItOrClickIt",
+                L
+              );
           }
         }
       },

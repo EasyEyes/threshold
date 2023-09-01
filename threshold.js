@@ -3130,7 +3130,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           const atLeastTwoFlankersNeeded =
-            thresholdParameter === "spacing" &&
+            thresholdParameter === "spacingDeg" &&
             letterConfig.spacingRelationToSize !== "typographic";
           const fourFlankersNeeded = [
             "horizontalAndVertical",
@@ -3216,7 +3216,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           let targetText;
 
           switch (thresholdParameter) {
-            case "size":
+            case "targetSizeDeg":
               targetText = targetCharacter;
               target.setText(targetText);
               // TODO I don't think this distinction in how to scale target, based on targetSizeIsHeightBool, is (should be?) necessary.
@@ -3237,7 +3237,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
               break;
-            case "spacing":
+            case "spacingDeg":
               switch (letterConfig.spacingRelationToSize) {
                 case "none":
                 case "ratio":
@@ -3361,7 +3361,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               heightPx:
                 ["none", "ratio"].includes(
                   letterConfig.spacingRelationToSize
-                ) && thresholdParameter === "spacing"
+                ) && thresholdParameter === "spacingDeg"
                   ? flankersHeightPx
                   : stimulusParameters.heightPx,
               spacingRelationToSize: letterConfig.spacingRelationToSize,
@@ -4018,7 +4018,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (fixationConfig.markingFixationMotionRadiusDeg) {
             const stimsToOffset =
               letterConfig.spacingRelationToSize !== "typographic" &&
-              letterConfig.thresholdParameter === "spacing"
+              letterConfig.thresholdParameter === "spacingDeg"
                 ? [target, flanker1, flanker2]
                 : [target];
             const boundingBoxStims = [

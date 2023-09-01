@@ -41,7 +41,7 @@ export const generateCharacterSetBoundingRects = (
       font = cleanFontName(font);
     const typographicCrowding =
       paramReader.read("spacingRelationToSize", BC) === "typographic" &&
-      paramReader.read("thresholdParameter", BC) === "spacing";
+      paramReader.read("thresholdParameter", BC) === "spacingDeg";
     const padding = paramReader.read("fontPadding", BC);
     const letterRepeats = typographicCrowding ? 3 : 1;
 
@@ -218,8 +218,8 @@ export const restrictLevel = (
     throw `spacingRelationToSize must equal 'none', 'ratio', or 'typographic', not '${spacingRelationToSize}'`;
   if (!["screen", "retina", "cortex"].includes(spacingSymmetry))
     throw `spacingSymmetry must equal 'screen', 'retina', or 'cortex', not '${spacingSymmetry}'`;
-  if (!["spacing", "size"].includes(thresholdParameter))
-    throw `thresholdParameter must equal 'spacing' or 'size', not '${thresholdParameter}'`;
+  if (!["spacingDeg", "targetSizeDeg"].includes(thresholdParameter))
+    throw `thresholdParameter must equal 'spacingDeg' or 'targetSizeDeg', not '${thresholdParameter}'`;
 
   let level, stimulusParameters, spacingDeg, sizeDeg;
   const screenLowerLeft = [
@@ -232,7 +232,7 @@ export const restrictLevel = (
   ];
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
-    case "size":
+    case "targetSizeDeg":
       [sizeDeg, stimulusParameters] = restrictSizeDeg(
         proposedLevel,
         letterConfig.targetEccentricityXYDeg,
@@ -246,7 +246,7 @@ export const restrictLevel = (
       );
       level = Math.log10(sizeDeg);
       break;
-    case "spacing":
+    case "spacingDeg":
       [spacingDeg, stimulusParameters] = restrictSpacingDeg(
         proposedLevel,
         letterConfig.targetEccentricityXYDeg,
@@ -795,17 +795,17 @@ export const getLargestBoundsRatio = (
     console.error("stimulus TALLER than screen");
 
   switch (thresholdParameter) {
-    case "spacing":
+    case "spacingDeg":
       if (spacingRelationToSize === "none") {
         // Deduct fixed letter size.
         stim = stim.inset(widthPx / 2, heightPx / 2);
         screen = screen.inset(widthPx / 2, heightPx / 2);
       }
       break;
-    case "size":
+    case "targetSizeDeg":
       break;
     default:
-      throw "This routine expects thresholdParameter to be size or spacing.";
+      throw "This routine expects thresholdParameter to be targetSizeDeg or spacingDeg.";
   }
   if (
     screen.left >= 0 ||

@@ -153,7 +153,7 @@ export const addBoundingBoxesToComponents = (
     trialComponents.push(stimulusPolies.target);
     if (
       (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
-      thresholdParameter === "spacing"
+      thresholdParameter === "spacingDeg"
     ) {
       trialComponents.push(stimulusPolies.flanker1);
       trialComponents.push(stimulusPolies.flanker2);
@@ -163,7 +163,7 @@ export const addBoundingBoxesToComponents = (
     trialComponents.push(characterSetPolies.target);
     if (
       (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
-      thresholdParameter === "spacing"
+      thresholdParameter === "spacingDeg"
     ) {
       trialComponents.push(characterSetPolies.flanker1);
       trialComponents.push(characterSetPolies.flanker2);
@@ -236,7 +236,7 @@ const updateTripletBoundingBoxPolies = (
 ) => {
   const separateFlankers =
     (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
-    thresholdParameter === "spacing";
+    thresholdParameter === "spacingDeg";
   if (showBoundingBox) {
     const stimsToUpdate = separateFlankers
       ? [
@@ -366,7 +366,7 @@ const sizeAndPositionTripletBoundingBoxes = (
     boundingBoxPolies.target.setSize([targetBB.width, targetBB.height]);
     if (
       ["none", "ratio"].includes(spacingRelationToSize) &&
-      thresholdParameter === "spacing"
+      thresholdParameter === "spacingDeg"
     ) {
       boundingStims.push(
         boundingBoxPolies.flanker1,
@@ -384,7 +384,7 @@ const sizeAndPositionTripletBoundingBoxes = (
   if (showCharacterSetBoundingBox) {
     const separateFlankers =
       ["none", "ratio"].includes(spacingRelationToSize) &&
-      thresholdParameter === "spacing";
+      thresholdParameter === "spacingDeg";
     const tripletCharacterSetBoundingBoxPositions = separateFlankers
       ? getCharacterSetBoundingBoxPositions(
           [triplet.target, triplet.flanker1, triplet.flanker2],
@@ -412,7 +412,7 @@ const sizeAndPositionTripletBoundingBoxes = (
     characterSetBoundingBoxPolies.target.setSize(characterSetBounds);
     if (
       (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
-      thresholdParameter === "spacing"
+      thresholdParameter === "spacingDeg"
     ) {
       characterSetBoundingStims.push(
         characterSetBoundingBoxPolies.flanker1,

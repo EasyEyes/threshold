@@ -420,7 +420,7 @@ export const addBlockStaircaseSummariesToData = (
 
         //=============report innerSpacingFromQuestMean.==========
         var innerSpacingFromQuestMean;
-        if (loop._conditions[i]["thresholdParameter"] === "spacing") {
+        if (loop._conditions[i]["thresholdParameter"] === "spacingDeg") {
           //Convert outer to inner spacing
           //eDeg = radial eccentricity in deg
           //innerSpacingDeg = inner spacing in deg
