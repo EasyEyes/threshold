@@ -3018,7 +3018,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ Use the software model specifed by simulationModel to generate observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables typed responses, regardless of the setting of responseTypedBool.",
+      "WARNING: Simulated observer responses will result in rapid, flashing stimuli on screen. Use caution if sensitive to flashing lights. ⭑ Use the software model specifed by simulationModel to generate observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables typed responses, regardless of the setting of responseTypedBool.",
   },
   simulateWithDisplayBool: {
     name: "simulateWithDisplayBool",

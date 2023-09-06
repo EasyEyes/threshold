@@ -267,10 +267,6 @@ export const phraseIdentificationResponse = Object.seal({
   clickTime: [],
 });
 
-/* ------------------------------- SIMULATION ------------------------------- */
-
-export const simulatedObserver = {};
-
 /* --------------------------------- Reading -------------------------------- */
 export const readingCorpusArchive = {};
 export const readingWordListArchive = {};

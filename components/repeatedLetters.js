@@ -20,6 +20,7 @@ import {
 import { getLargestBoundsRatio } from "./bounding";
 import { TextStim } from "../psychojs/src/visual";
 import { Color } from "../psychojs/src/util";
+import { updateColor } from "./color";
 
 export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
   // TODO add a preprocessor check that the border character isn't found in the target character set
@@ -285,7 +286,13 @@ export const registerResponseForRepeatedLetters = (
   status.trialCompleted_thisBlock++;
   // Correct press
   if (correct) {
-    correctSynth.play();
+    try {
+      correctSynth.play();
+    } catch (e) {
+      console.error(
+        "Failed to play correctSynth in registerResponseForRepeatedLetters"
+      );
+    }
     status.trialCorrect_thisBlock++;
   }
 };

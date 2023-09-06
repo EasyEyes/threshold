@@ -147,6 +147,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
       "fixationLocationYScreen",
       "targetKind",
       ...blockShuffleGroupParams,
+      "simulateParticipantBool",
     ])
   );
 

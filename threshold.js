@@ -80,7 +80,6 @@ import {
   displayOptions,
   letterConfig,
   fixationConfig,
-  simulatedObserver,
   instructionsConfig,
   instructionFont,
   readingPageIndex,
@@ -255,11 +254,7 @@ import {
 } from "./components/bounding.js";
 
 import { Grid } from "./components/grid.js";
-import {
-  checkIfSimulated,
-  SimulatedObserver,
-  simulateObserverResponse,
-} from "./components/simulatedObserver.js";
+import { SimulatedObserversHandler } from "./components/simulatedObserver.ts";
 
 // import {
 //   getCanvasContext,
@@ -416,7 +411,7 @@ let video_flag = 1;
 window.jsQUEST = jsQUEST;
 
 const fontsRequired = {};
-var simulated;
+export var simulatedObservers;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
@@ -515,8 +510,9 @@ const paramReaderInitialized = async (reader) => {
   // ! Load recruitment service config
   loadRecruitmentServiceConfig();
 
-  // ! Simulate observer
-  simulated = checkIfSimulated(reader);
+  // Keep track of a simulated observer for each condition
+  simulatedObservers = new SimulatedObserversHandler(reader, psychoJS);
+  logger("!. simulatedObservers", simulatedObservers);
 
   // ! Load reading corpus and preprocess
   await loadReadingCorpus(reader);
@@ -1161,9 +1157,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineEachFrame() {
     return async function () {
-      /* --- SIMULATED --- */
-      if (simulated) return Scheduler.Event.NEXT;
-      /* --- /SIMULATED --- */
       //------Loop for each frame of Routine 'file'-------
       // get current time
       t = fileClock.getTime();
@@ -1252,9 +1245,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function _instructionRoutineEachFrame() {
-    /* --- SIMULATED --- */
-    if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
-    /* --- /SIMULATED --- */
+    if (simulatedObservers.proceed(status.block)) {
+      continueRoutine = false;
+      removeProceedButton();
+    }
 
     trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
     renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
@@ -2133,9 +2127,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function filterRoutineEachFrame() {
     return async function () {
-      /* --- SIMULATED --- */
-      if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
-      /* --- /SIMULATED --- */
+      if (simulatedObservers.proceed(status.block)) return Scheduler.Event.NEXT;
 
       //------Loop for each frame of Routine 'filter'-------
       // get current time
@@ -2883,7 +2875,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         s.setCharacterSet(fontCharacterSet.current.join(""))
       );
 
-      if (keypad.keypadRequired(BC)) {
+      if (keypad.keypadRequired(BC) && !simulatedObservers.proceed(BC)) {
         const keypadAlphabet = [...fontCharacterSet.current, "space"];
         await keypad.update(keypadAlphabet, font.name, BC);
         keypad.start();
@@ -3424,28 +3416,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             trialComponents
           );
           // /* --- /BOUNDING BOX --- */
-          // /* --- SIMULATED --- */
-          if (simulated && simulated[status.block]) {
-            if (!simulatedObserver[BC]) {
-              simulatedObserver[BC] = new SimulatedObserver(
-                simulated[status.block][BC],
-                level,
-                fontCharacterSet.current,
-                targetCharacter,
-                paramReader.read("thresholdProportionCorrect", BC),
-                paramReader.read("simulationBeta", BC),
-                paramReader.read("simulationDelta", BC),
-                paramReader.read("simulationThreshold", BC)
-              );
-            } else {
-              simulatedObserver[BC].updateTrial(
-                level,
-                fontCharacterSet.current,
-                targetCharacter
-              );
-            }
-          }
-          // /* --- /SIMULATED --- */
+
+          // TODO add call to update() from every targetKind
+          simulatedObservers.update(BC, {
+            stimulusIntensity: level,
+            possibleResponses: fontCharacterSet.current,
+            correctResponses: [targetCharacter],
+          });
 
           psychoJS.experiment.addData(
             "trialInstructionBeginDurationSec",
@@ -3505,6 +3482,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             generateRepeatedLettersStims(stimulusParameters);
           repeatedLettersConfig.level = level;
           repeatedLettersConfig.stimulusParameters = stimulusParameters;
+
+          // Simulated observer
+          simulatedObservers.update(BC, {
+            stimulusIntensity: level,
+            possibleResponses: fontCharacterSet.current,
+            correctResponses: correctAns.current,
+          });
 
           // Update fixation
           fixation.update(
@@ -3591,6 +3575,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingTargetSets.upcoming = targetSets;
           correctAns.current = targetSets.map((t) => t.word.toLowerCase());
           rsvpReadingTargetSets.past = [];
+
+          // TODO confirm that this same toLowerCase scheme is used when setting up phrase identification screen, ie that the html elems have id's which use the lowercase transformed word
+          simulatedObservers.update(status.block_condition, {
+            stimulusIntensity: level,
+            correctResponses: correctAns.current,
+            possibleResponses: targetSets
+              .map((t) => [t.word, ...t.foilWords])
+              .flat()
+              .map((w) => w.toLowerCase()),
+          });
 
           psychoJS.experiment.addData(
             "rsvpReadingTargetNumberOfSets",
@@ -3855,9 +3849,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCursor();
         return Scheduler.Event.NEXT;
       }
-      /* --- SIMULATED --- */
-      if (simulated && simulated[status.block]) return Scheduler.Event.NEXT;
-      /* --- /SIMULATED --- */
 
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
@@ -3989,7 +3980,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         (canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) ||
-        keypad.endRoutine(status.block_condition)
+        keypad.endRoutine(status.block_condition) ||
+        simulatedObservers.proceed()
       ) {
         continueRoutine = false;
         movePastFixation();
@@ -4474,12 +4466,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           : 0;
       /* -------------------------------------------------------------------------- */
       if (frameN === 0) {
-        // If this isn't duplicatedConditionCardinal === 1, then this trial isn't for showing stimuli.
-        // Instead, it's response type trial, ie one of a multi-part trial just used for response. AKA cardinal trial
-        // Allow response right away if this is just a response trial
-        // const responseTypeTrial =
-        //   status.condition.hasOwnProperty("_duplicatedConditionCardinal") &&
-        //   status.condition._duplicatedConditionCardinal !== 1;
         rsvpEndRoutineAtT = undefined;
         customResponseInstructionsDisplayed = false;
         switch (targetKind.current) {
@@ -4504,6 +4490,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("responseAllowedEarlyBool", status.block_condition)
         )
           timeWhenRespondable = 0;
+
+        if (simulatedObservers.proceed()) {
+          logger("!. in trialRoutineEachFrame, going to respond");
+          await simulatedObservers.respond();
+          logger("!. in trialRoutineEachFrame, responded");
+          timeWhenRespondable = 0;
+        }
 
         frameRemains =
           delayBeforeStimOnsetSec +
@@ -4580,7 +4573,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (
         t >= timeWhenRespondable &&
-        keypad.keypadRequired(status.block_condition)
+        keypad.keypadRequired(status.block_condition) &&
+        !simulatedObservers.proceed(status.block_condition)
       ) {
         keypad.start();
         keypad.setNonSensitive();
@@ -4589,15 +4583,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
       }
       // *key_resp* updates
-      // TODO although showGrid/simulated should only be activated for experimenters, it's better to have
-      // response type more independent
       if (
         targetKind.current === "sound" ||
         targetKind.current === "reading" ||
-        canType(responseType.current) ||
-        (simulated &&
-          simulated[status.block] &&
-          simulated[status.block][status.block_condition])
+        canType(responseType.current)
+        // || (simulated &&
+        //   simulated[status.block] &&
+        //   simulated[status.block][status.block_condition])
       ) {
         if (
           targetKind.current === "sound" ||
@@ -4624,23 +4616,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
         // Input from keyboard
         if (key_resp.status === PsychoJS.Status.STARTED) {
-          ////
-          /* --- SIMULATED --- */
-          if (
-            simulated &&
-            simulated[status.block] &&
-            simulated[status.block][status.block_condition]
-          ) {
-            return simulateObserverResponse(
-              simulatedObserver[status.block_condition],
-              key_resp,
-              psychoJS
-            );
-          }
-          /* --- /SIMULATED --- */
+          // ////
+          // /* --- SIMULATED --- */
+          // if (
+          //   simulated &&
+          //   simulated[status.block] &&
+          //   simulated[status.block][status.block_condition]
+          // ) {
+          //   return simulateObserverResponse(
+          //     simulatedObserver[status.block_condition],
+          //     key_resp,
+          //     psychoJS
+          //   );
+          // }
+          // /* --- /SIMULATED --- */
 
           const keyList =
             targetKind.current === "rsvpReading" ? ["up", "down"] : validAns;
+          logger("keyList", keyList);
           let theseKeys = key_resp.getKeys({
             keyList: keyList,
             waitRelease: false,
@@ -5032,6 +5025,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         vocoderPhrase: () => {
           showCursor();
           instructions.setAutoDraw(true);
+          // TODO show if simulated
           if (vocoderPhraseShowClickable.current) {
             // keep track of start time/frame for later
             showCharacterSet.tStart = t; // (not accounting for frame time here)
@@ -5049,9 +5043,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //speech in noise setup clickable characters
           // *showCharacterSet* updates
           if (
-            targetTask.current == "identify" &&
-            speechInNoiseTargetList.current &&
-            speechInNoiseShowClickable.current
+            (targetTask.current == "identify" &&
+              speechInNoiseTargetList.current &&
+              speechInNoiseShowClickable.current) ||
+            (simulatedObservers.proceed() && speechInNoiseShowClickable.current)
           ) {
             validAns = [""];
             speechInNoiseShowClickable.current = false;
@@ -5076,10 +5071,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: () => {
           // *showCharacterSet* updates
           if (
-            t >=
+            (t >=
               delayBeforeStimOnsetSec +
                 letterConfig.targetSafetyMarginSec +
-                letterConfig.targetDurationSec &&
+                letterConfig.targetDurationSec ||
+              simulatedObservers.proceed()) &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
           ) {
             // keep track of start time/frame for later
@@ -5106,10 +5102,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         movie: () => {
           // *showCharacterSet* updates
           if (
-            t >=
+            (t >=
               delayBeforeStimOnsetSec +
                 letterConfig.targetSafetyMarginSec +
-                letterConfig.targetDurationSec &&
+                letterConfig.targetDurationSec ||
+              simulatedObservers.proceed()) &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
           ) {
             // keep track of start time/frame for later
@@ -5429,7 +5426,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _letter_trialRoutineEnd(
               target,
               currentLoop,
-              simulated,
+              simulatedObservers.proceed(),
               key_resp.corr,
               level,
               letterRespondedEarly
@@ -5454,7 +5451,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _letter_trialRoutineEnd(
               repeatedLettersConfig.stims[0],
               currentLoop,
-              simulated,
+              simulatedObservers.proceed(),
               repeatedLettersResponse.correct,
               level,
               letterRespondedEarly
@@ -5540,6 +5537,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "takeABreakTrialCredit",
         status.block_condition
       );
+      if (simulatedObservers.proceed(status.block_condition))
+        currentBlockCreditForTrialBreak = 0;
       //update the progress bar
       updateProgressBar((status.trial / totalTrialsThisBlock.current) * 100);
       // Toggle takeABreak credit progressBar

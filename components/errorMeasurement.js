@@ -126,7 +126,8 @@ export const addResponseIfTolerableError = (
   tolerances,
   trackGaze,
   psychoJS,
-  respondedEarly
+  respondedEarly,
+  simulated
 ) => {
   addMeasuredErrorToOutput(psychoJS, tolerances);
   const durationAcceptable =
@@ -146,9 +147,11 @@ export const addResponseIfTolerableError = (
     ? [durationAcceptable, latencyAcceptable, gazeAcceptable]
     : [durationAcceptable, latencyAcceptable];
 
-  const validTrialToGiveToQUEST = relevantChecks.every((x) => x);
+  const validTrialToGiveToQUEST = relevantChecks.every((x) => x) || simulated;
   logQuest("Was trial given to QUEST?", validTrialToGiveToQUEST);
   logQuest("Was answer correct?", answerCorrect ? true : false);
+  if (simulated)
+    psychoJS.experiment.addData("trialGivenToQuestBecauseSimulated", true);
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
   loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
 

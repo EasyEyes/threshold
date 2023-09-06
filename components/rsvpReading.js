@@ -37,6 +37,7 @@ import {
   showPhraseIdentification,
 } from "./response";
 import { updateColor } from "./color";
+import { simulatedObservers } from "../threshold";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -380,7 +381,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       rsvpReadingTargetSets.numberOfSets
     ) {
       // Ensure a small delay after the last response, so the participant sees feedback for every response
-      rsvpEndRoutineAtT ??= t + 0.5;
+      rsvpEndRoutineAtT ??= simulatedObservers.proceed() ? t : t + 0.5;
       if (t >= rsvpEndRoutineAtT) {
         if (rsvpReadingResponse.responseType === "typed")
           removeScientistKeypressFeedback();

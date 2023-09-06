@@ -97,6 +97,7 @@ export const setupPhraseIdentification = (
   BC,
   fontSize = undefined
 ) => {
+  logger("!. categories", categories);
   const responseScreen = document.createElement("div");
   responseScreen.id = "phrase-identification-response-screen";
   responseScreen.classList.add("responseScreen");
@@ -135,6 +136,7 @@ export const setupPhraseIdentification = (
     const categoryColumn = document.createElement("div");
     categoryColumn.classList.add("phrase-identification-category-column");
     categoryColumn.id = `phrase-identification-category-column-${categoryId}`;
+    logger("!. category column id", categoryColumn.id);
     categoryColumn.style.display = "flex";
     categoryColumn.style.flexDirection = "column";
     categoryColumn.style.letterSpacing = String(font.letterSpacing) + "em";
@@ -142,7 +144,7 @@ export const setupPhraseIdentification = (
     // categoryChild aka distractor word
     category.elements.forEach((categoryChild) => {
       const categoryItem = document.createElement("div");
-      categoryItem.id = `phrase-identification-category-item-${categoryChild}`;
+      categoryItem.id = `phrase-identification-category-item-${categoryChild.toLowerCase()}`;
       categoryItem.className = `phrase-identification-category-item`;
       categoryItem.innerHTML = categoryChild;
       const fontFamily = getFontFamilyName(font.name);

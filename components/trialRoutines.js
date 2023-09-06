@@ -4,7 +4,6 @@
 // import { hideCursor, XYPixOfXYDeg } from "./utils.js";
 // import { cleanFontName } from "./fonts.js";
 // import { getCharacterSetBoundingBox, restrictLevel } from "./bounding.js";
-// import { SimulatedObserver } from "./simulatedObserver.js";
 import {
   font,
   fontCharacterSet,
@@ -57,19 +56,13 @@ export const _identify_trialInstructionRoutineEnd = (
 export const _letter_trialRoutineEnd = (
   target,
   currentLoop,
-  simulated,
+  simulatedBool,
   responseCorrect,
   level,
   respondedEarly
 ) => {
   // letterTiming.targetFinishSec and letterTiming.targetStartSec are undefined for simulated observer
-  if (
-    !(
-      simulated &&
-      simulated[status.block] &&
-      simulated[status.block][status.block_condition]
-    )
-  ) {
+  if (!simulatedBool) {
     calculateError(
       letterTiming,
       tolerances,
@@ -97,7 +90,7 @@ export const _letter_trialRoutineEnd = (
   letterTiming.targetFinishSec = undefined;
 
   addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
-  logger("tolerances", tolerances);
+  logger("!. tolerances", tolerances);
   if (currentLoop instanceof MultiStairHandler) {
     // currentLoop.addResponse(key_resp.corr, level);
     logQuest("Level given quest", toFixedNumber(level, 3));
@@ -109,7 +102,8 @@ export const _letter_trialRoutineEnd = (
         tolerances,
         usingGaze.current,
         psychoJS,
-        respondedEarly
+        respondedEarly,
+        simulatedBool
       ) &&
       usingGaze.current
     ) {
