@@ -95,7 +95,7 @@ export const instructionsText = {
       : readi18nPhrases("T_letterPopularDemandFeatures", L) + "\n\n";
   },
   initialByThresholdParameter: {
-    spacing: (L, responseType = 2, trialsThisBlock = 0) => {
+    spacingDeg: (L, responseType = 2, trialsThisBlock = 0) => {
       const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
       let text;
       if (targetKind.current === "repeatedLetters") {
@@ -125,7 +125,57 @@ export const instructionsText = {
         }
       } else {
         text = replacePlaceholders(
-          readi18nPhrases("T_thresholdBeginBlock", L),
+          readi18nPhrases("T_thresholdMiddleLetterBeginBlock", L),
+          trialsThisBlock
+        );
+        switch (responseType) {
+          case 0:
+            text += extraSpace + `${readi18nPhrases("T_pressingKey", L)}\n\n`;
+            break;
+          case 1:
+            text +=
+              extraSpace + `${readi18nPhrases("T_clickingLetter", L)}\n\n`;
+            break;
+          default:
+            text +=
+              extraSpace +
+              `${readi18nPhrases("T_pressingKeyOrClickingLetter", L)}\n\n`;
+            break;
+        }
+      }
+      return text;
+    },
+    targetSizeDeg: (L, responseType = 2, trialsThisBlock = 0) => {
+      const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
+      let text;
+      if (targetKind.current === "repeatedLetters") {
+        text = replacePlaceholders(
+          readi18nPhrases("T_thresholdRepeatedLettersBeginBlock", L),
+          trialsThisBlock
+        );
+        switch (responseType) {
+          case 0:
+            text +=
+              extraSpace +
+              `${readi18nPhrases("T_pressingKeyRepeatedLetters", L)}\n\n`;
+            break;
+          case 1:
+            text +=
+              extraSpace +
+              `${readi18nPhrases("T_clickingLetterRepeatedLetters", L)}\n\n`;
+            break;
+          default:
+            text +=
+              extraSpace +
+              `${readi18nPhrases(
+                "T_pressingKeyOrClickingLetterRepeatedLetters",
+                L
+              )}\n\n`;
+            break;
+        }
+      } else {
+        text = replacePlaceholders(
+          readi18nPhrases("T_thresholdLetterBeginBlock", L),
           trialsThisBlock
         );
         switch (responseType) {
@@ -200,12 +250,23 @@ export const instructionsText = {
     t += readi18nPhrases("T_escapeToQuit", L) + " ";
     return returnOrClickProceed(L, responseType, t);
   },
-  edu: (L) => {
-    return readi18nPhrases("T_middleLetterDemo", L);
+  edu: {
+    spacingDeg: (L) => {
+      return readi18nPhrases("T_middleLetterDemo", L);
+    },
+    targetSizeDeg: (L) => {
+      return readi18nPhrases("T_letterDemo", L);
+    },
   },
-  eduBelow: (L, responseType = 2) => {
-    let t = readi18nPhrases("T_middleLetterBrief", L);
-    return returnOrClickProceed(L, responseType, t);
+  eduBelow: {
+    spacingDeg: (L, responseType = 2) => {
+      let t = readi18nPhrases("T_middleLetterBrief", L);
+      return returnOrClickProceed(L, responseType, t);
+    },
+    targetSizeDeg: (L, responseType = 2) => {
+      let t = readi18nPhrases("T_letterBrief", L);
+      return returnOrClickProceed(L, responseType, t);
+    },
   },
   trial: {
     fixate: {
@@ -215,7 +276,7 @@ export const instructionsText = {
       sound: (L) => {
         return readi18nPhrases("T_thresholdSoundNewTrial", L);
       },
-      spacing: (L, responseType = 2) => {
+      spacingDeg: (L, responseType = 2) => {
         return spaceOrCrosshair(L, responseType, "");
       },
     },
@@ -236,7 +297,7 @@ export const instructionsText = {
       speechInNoise: (L) => {
         return readi18nPhrases("T_sentenceIdentifyClick", L);
       },
-      spacing: (L, responseType = 2) => {
+      spacingDeg: (L, responseType = 2) => {
         if (targetKind.current === "repeatedLetters") {
           switch (responseType) {
             case 0:
@@ -252,11 +313,38 @@ export const instructionsText = {
         } else {
           switch (responseType) {
             case 0:
-              return readi18nPhrases("T_identifyPressIt", L);
+              return readi18nPhrases("T_identifyMiddleLetterPressIt", L);
             case 1:
-              return readi18nPhrases("T_identifyClickIt", L);
+              return readi18nPhrases("T_identifyMiddleLetterClickIt", L);
             default:
-              return readi18nPhrases("T_identifyPressItOrClickIt", L);
+              return readi18nPhrases(
+                "T_identifyMiddleLetterPressItOrClickIt",
+                L
+              );
+          }
+        }
+      },
+      targetSizeDeg: (L, responseType = 2) => {
+        if (targetKind.current === "repeatedLetters") {
+          switch (responseType) {
+            case 0:
+              return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
+            case 1:
+              return readi18nPhrases("T_identifyClickItRepeatedLetters", L);
+            default:
+              return readi18nPhrases(
+                "T_identifyPressItOrClickItRepeatedLetters",
+                L
+              );
+          }
+        } else {
+          switch (responseType) {
+            case 0:
+              return readi18nPhrases("T_identifyLetterPressIt", L);
+            case 1:
+              return readi18nPhrases("T_identifyLetterClickIt", L);
+            default:
+              return readi18nPhrases("T_identifyLetterPressItOrClickIt", L);
           }
         }
       },

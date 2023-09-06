@@ -415,6 +415,7 @@ export const findReadingSize = (
           ? paramReader.read("readingNominalSizeDeg", status.block)[0]
           : paramReader.read("readingNominalSizeDeg", status.block_condition);
       pt = getReadingNominalSizeDeg(readingNominalSizeDeg);
+      pt = tempScaleNominalSize(pt);
       break;
     case "nominalPt":
       if (blockOrConditionEnum === "block") {
@@ -422,6 +423,7 @@ export const findReadingSize = (
       } else {
         pt = paramReader.read("readingNominalSizePt", status.block_condition);
       }
+      pt = tempScaleNominalSize(pt);
       break;
     case "xHeightDeg":
       const readingXHeightDeg =
@@ -454,6 +456,10 @@ export const findReadingSize = (
   return Math.max(1, pt);
 };
 /* --------------------------------- HELPERS -------------------------------- */
+
+const tempScaleNominalSize = (nominal) => {
+  return nominal * 1.42;
+};
 
 const getReadingNominalSizeDeg = (readingNominalSizeDeg) => {
   // Convert deg to px.

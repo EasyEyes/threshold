@@ -775,19 +775,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // add sound calibration results
     if (soundCalibrationResults.current) {
       psychoJS.experiment.addData(
-        "1000 Hz in (dB)",
+        "Cal1000HzInDb",
         soundCalibrationResults.current.inDBValues
       );
+      // psychoJS.experiment.addData(
+      //   "All Hz out (dB SPL)",
+      //   soundCalibrationResults.current.outDBSPLValues
+      // );
       psychoJS.experiment.addData(
-        "All Hz out (dB SPL)",
-        soundCalibrationResults.current.outDBSPLValues
-      );
-      psychoJS.experiment.addData(
-        "1000 Hz out (dB SPL)",
+        "Cal1000HzOutDb",
         soundCalibrationResults.current.outDBSPL1000Values
       );
       psychoJS.experiment.addData(
-        "Sound gain parameters",
+        "SoundGainParameters",
         JSON.stringify(soundCalibrationResults.current.parameters)
       );
       psychoJS.experiment.addData(
@@ -797,19 +797,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
     if (allHzCalibrationResults.x_conv) {
       psychoJS.experiment.addData(
-        "Recording with filter (Hz)",
+        "MlsSpectrumHz",
         allHzCalibrationResults.y_conv
       );
       psychoJS.experiment.addData(
-        "Recording with filter (dB)",
+        "MlsSpectrumFilteredDb",
         allHzCalibrationResults.x_conv
       );
       psychoJS.experiment.addData(
-        "Recording (Hz)",
+        "MlsSpectrumUnfilteredHz",
         allHzCalibrationResults.y_unconv
       ); // x and y are swapped
       psychoJS.experiment.addData(
-        "Recording (dB)",
+        "MlsSpectrumUnfilteredDb",
         allHzCalibrationResults.x_unconv
       ); // x and y are swapped
       psychoJS.experiment.addData(
@@ -2225,6 +2225,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.window.color = new util.Color(screenBackground.colorRGBA);
       psychoJS.window._needUpdate = true; // ! dangerous
 
+      thresholdParameter = paramReader.read(
+        "thresholdParameter",
+        status.block
+      )[0];
+
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //setup instruction
@@ -2246,13 +2251,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         letter: () => {
+          console.log(thresholdParameter);
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
               instructionsText.popularFeatures(
                 L,
                 paramReader.read("takeABreakTrialCredit", status.block)[0]
               ) +
-              instructionsText.initialByThresholdParameter["spacing"](
+              instructionsText.initialByThresholdParameter[thresholdParameter](
                 L,
                 responseType.current,
                 totalTrialsThisBlock.current
@@ -2268,7 +2274,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               L,
               paramReader.read("takeABreakTrialCredit", status.block)[0]
             ) +
-            instructionsText.initialByThresholdParameter["spacing"](
+            instructionsText.initialByThresholdParameter[thresholdParameter](
               L,
               responseType.current,
               totalTrialsThisBlock.current
@@ -2500,16 +2506,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       clickedContinue.current = false;
       if (canClick(responseType.current)) addProceedButton(rc.language.value);
 
+      thresholdParameter = paramReader.read(
+        "thresholdParameter",
+        status.block
+      )[0];
       switchKind(targetKind.current, {
         letter: () => {
           // IDENTIFY
           _instructionSetup(
-            instructionsText.edu(rc.language.value),
+            instructionsText.edu[thresholdParameter](rc.language.value),
             status.block
           );
 
           instructions2.setText(
-            instructionsText.eduBelow(rc.language.value, responseType.current)
+            instructionsText.eduBelow[thresholdParameter](
+              rc.language.value,
+              responseType.current
+            )
           );
           updateColor(instructions2, "instruction", status.block);
           instructions2.setWrapWidth(window.innerWidth * 0.8);
@@ -2565,12 +2578,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         movie: () => {
           // IDENTIFY
           _instructionSetup(
-            instructionsText.edu(rc.language.value),
+            instructionsText.edu["spacingDeg"](rc.language.value),
             status.block
           );
 
           instructions2.setText(
-            instructionsText.eduBelow(rc.language.value, responseType.current)
+            instructionsText.eduBelow["spacingDeg"](
+              rc.language.value,
+              responseType.current
+            )
           );
           updateColor(instructions2, "instruction", status.block);
           instructions2.setWrapWidth(window.innerWidth * 0.8);
@@ -3077,7 +3093,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
           _instructionBeforeStimulusSetup(
-            instructionsText.trial.fixate["spacing"](
+            instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
               paramReader.read("responseMustTrackCrosshairBool", BC)
                 ? 3
@@ -3130,7 +3146,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           const atLeastTwoFlankersNeeded =
-            thresholdParameter === "spacing" &&
+            thresholdParameter === "spacingDeg" &&
             letterConfig.spacingRelationToSize !== "typographic";
           const fourFlankersNeeded = [
             "horizontalAndVertical",
@@ -3216,7 +3232,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           let targetText;
 
           switch (thresholdParameter) {
-            case "size":
+            case "targetSizeDeg":
               targetText = targetCharacter;
               target.setText(targetText);
               // TODO I don't think this distinction in how to scale target, based on targetSizeIsHeightBool, is (should be?) necessary.
@@ -3237,7 +3253,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
               break;
-            case "spacing":
+            case "spacingDeg":
               switch (letterConfig.spacingRelationToSize) {
                 case "none":
                 case "ratio":
@@ -3361,7 +3377,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               heightPx:
                 ["none", "ratio"].includes(
                   letterConfig.spacingRelationToSize
-                ) && thresholdParameter === "spacing"
+                ) && thresholdParameter === "spacingDeg"
                   ? flankersHeightPx
                   : stimulusParameters.heightPx,
               spacingRelationToSize: letterConfig.spacingRelationToSize,
@@ -3462,7 +3478,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Set up instructions
           // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
           _instructionBeforeStimulusSetup(
-            instructionsText.trial.fixate["spacing"](
+            instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
               paramReader.read("responseMustTrackCrosshairBool", BC)
                 ? 3
@@ -3612,7 +3628,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Set up instructions
           // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
           _instructionBeforeStimulusSetup(
-            instructionsText.trial.fixate["spacing"](
+            instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
               paramReader.read("responseMustTrackCrosshairBool", BC)
                 ? 3
@@ -4018,7 +4034,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (fixationConfig.markingFixationMotionRadiusDeg) {
             const stimsToOffset =
               letterConfig.spacingRelationToSize !== "typographic" &&
-              letterConfig.thresholdParameter === "spacing"
+              letterConfig.thresholdParameter === "spacingDeg"
                 ? [target, flanker1, flanker2]
                 : [target];
             const boundingBoxStims = [
@@ -4329,7 +4345,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       showCharacterSetResponse.alreadyClickedCharacters = [];
 
       _instructionSetup(
-        instructionsText.trial.respond["spacing"](
+        instructionsText.trial.respond["spacingDeg"](
           rc.language.value,
           responseType.current
         ),
