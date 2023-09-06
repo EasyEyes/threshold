@@ -24,12 +24,15 @@ import {
   thisDevice,
   calibrateSoundIIRSec,
   loudspeakerInfo,
+  microphoneInfo,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
   addSoundTestElements,
+  displayCompleteTransducerTable,
   displayParameters1000Hz,
   displayParametersAllHz,
+  displaySummarizedTransducerTable,
 } from "./soundTest";
 import { getSoundCalibrationLevelDBSPLFromIIR } from "./soundUtils";
 import { showExperimentEnding } from "./forms";
@@ -352,7 +355,6 @@ export const calibrateAudio = async (reader) => {
     elems.displayUpdate.style.display = "none";
     elems.subtitle.innerHTML = "";
 
-    console.log("sound calibration done");
     //show plots of the loudspeaker calibration
     if (
       calibrateSoundLevel &&
@@ -362,6 +364,41 @@ export const calibrateAudio = async (reader) => {
       showSoundCalibrationResultsBool &&
       calibrateSoundCheck.current !== "none"
     ) {
+      // example data for testing
+      // loudspeakerInfo.current = {
+      //   IsMobile: false,
+      //   HardwareName: "MacBookPro",
+      //   HardwareFamily: "MacBookPro",
+      //   HardwareModel: "MacBookPro",
+      //   OEM: "Apple",
+      //   HardwareModelVariants: "MacBookPro",
+      //   DeviceId: "MacBookPro",
+      //   PlatformName: "MacBookPro",
+      //   PlatformVersion: "MacBookPro",
+      //   DeviceType: "Desktop",
+      //   ID: "MNEISD",
+      //   CalibrationDate: new Date().toUTCString()
+      // }
+      // microphoneInfo.current = {
+      //   IsMobile: false,
+      //   HardwareName: "MacBookPro",
+      //   HardwareFamily: "MacBookPro",
+      //   HardwareModel: "MacBookPro",
+      //   OEM: "Apple",
+      //   HardwareModelVariants: "MacBookPro",
+      //   DeviceId: "MacBookPro",
+      //   PlatformName: "MacBookPro",
+      //   PlatformVersion: "MacBookPro",
+      //   DeviceType: "Desktop",
+      //   ID: "LLSHUs",
+      //   CalibrationDate: new Date().toUTCString()
+      // }
+      displayCompleteTransducerTable(
+        loudspeakerInfo.current,
+        microphoneInfo.current,
+        elems,
+        true
+      );
       const title1000Hz =
         "Sound Level at 1000 Hz" +
         (calibrateSoundCheck.current === "system"
@@ -378,11 +415,23 @@ export const calibrateAudio = async (reader) => {
         soundCalibrationResults.current,
         title1000Hz
       );
+      displaySummarizedTransducerTable(
+        loudspeakerInfo.current,
+        microphoneInfo.current,
+        elems,
+        true
+      );
       displayParametersAllHz(
         elems,
         invertedImpulseResponse.current,
         allHzCalibrationResults,
         titleallHz
+      );
+      displaySummarizedTransducerTable(
+        loudspeakerInfo.current,
+        microphoneInfo.current,
+        elems,
+        true
       );
     }
 
@@ -683,6 +732,9 @@ export const calibrateAudio = async (reader) => {
                   calibrator,
                   timeoutSec.current
                 );
+                microphoneInfo.current = result.micInfo;
+                microphoneInfo.current.CalibrationDate =
+                  new Date().toUTCString();
                 // white space wrap
                 elems.message.style.whiteSpace = "normal";
                 elems.message.style.fontSize = "0.8rem";
@@ -690,15 +742,16 @@ export const calibrateAudio = async (reader) => {
                 console.log("Microphone Results:", result);
                 microphoneCalibrationResults.push({
                   name: isSmartPhone ? micModelName : micName,
-                  ID: result.micInfo.ID,
-                  OEM: result.micInfo.OEM,
+                  ID: microphoneInfo.current.ID,
+                  OEM: microphoneInfo.current.OEM,
                   isSmartPhone: isSmartPhone,
-                  HardwareName: result.micModel?.HardwareName,
-                  HardwareFamily: result.micModel?.HardwareFamily,
-                  HardwareModel: result.micModel?.HardwareModel,
-                  HardwareModelVariants: result.micModel?.HardwareModelVariants,
-                  PlatformVersion: result.micModel?.PlatformVersion,
-                  DeviceType: result.micModel?.DeviceType,
+                  HardwareName: microphoneInfo.current.HardwareName,
+                  HardwareFamily: microphoneInfo.current.HardwareFamily,
+                  HardwareModel: microphoneInfo.current.HardwareModel,
+                  HardwareModelVariants:
+                    microphoneInfo.currentHardwareModelVariants,
+                  PlatformVersion: microphoneInfo.current.PlatformVersion,
+                  DeviceType: microphoneInfo.current.DeviceType,
                   Recording_with_Filter_Hz:
                     calibrateSoundCheck.current !== "none" ? result.y_conv : [],
                   Recording_with_Filter_dB:
@@ -719,6 +772,12 @@ export const calibrateAudio = async (reader) => {
                   iir: result.componentIIR ? result.componentIIR : [],
                 });
                 if (calibrateSoundCheck.current !== "none") {
+                  displayCompleteTransducerTable(
+                    loudspeakerInfo.current,
+                    microphoneInfo.current,
+                    elems,
+                    false
+                  );
                   //show sound calibration results
                   const title1000Hz =
                     "Sound Level at 1000 Hz for" +
@@ -806,6 +865,7 @@ const _addSoundCalibrationElems = (copy) => {
   const noButton = document.createElement("button");
   const testButton = document.createElement("button");
   const soundLevelsTable = document.createElement("table");
+  const completeTransducerTable = document.createElement("div");
   const soundTestContainer = document.createElement("div");
   const soundParametersFromCalibration = document.createElement("div");
   const soundTestPlots = document.createElement("div");
@@ -827,6 +887,7 @@ const _addSoundCalibrationElems = (copy) => {
     message,
     testButton,
     soundLevelsTable,
+    completeTransducerTable,
     soundParametersFromCalibration,
     soundTestPlots,
     soundTestContainer,
@@ -914,6 +975,7 @@ const _addSoundCalibrationElems = (copy) => {
   displayContainer.appendChild(displayQR);
   buttonAndParametersContainer.appendChild(soundParametersFromCalibration);
   buttonAndParametersContainer.appendChild(downloadButton);
+  container.appendChild(completeTransducerTable);
   container.appendChild(soundLevelsTable);
   soundTestContainer.appendChild(buttonAndParametersContainer);
   soundTestContainer.appendChild(soundTestPlots);
@@ -1394,7 +1456,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                 invertedImpulseResponse.current = getDebugIIR();
                 soundCalibrationResults.current =
                   getDebugSoundCalibrationResults();
-                return;
+                return true;
               } else {
                 elems.displayContainer.style.display = "flex";
                 elems.displayContainer.style.marginLeft = "0px";
@@ -1423,6 +1485,10 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                 }
                 invertedImpulseResponse.current =
                   soundCalibrationResults.current.componentIIR;
+                microphoneInfo.current =
+                  soundCalibrationResults.current.micInfo;
+                microphoneInfo.current.CalibrationDate =
+                  new Date().toUTCString();
                 if (calibrateSoundCheck.current !== "none") {
                   allHzCalibrationResults.x_conv =
                     soundCalibrationResults.current.x_conv;
@@ -1455,7 +1521,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               try {
                 loudspeakerInfo.current = {
                   ModelName: modelName,
-                  ModelNumber: modelNumber,
+                  ID: modelNumber,
                   isSmartPhone: thisDevice.current.IsMobile,
                   HardwareName: thisDevice.current.HardwareName,
                   HardwareModel: thisDevice.current.HardwareModel,
@@ -1468,6 +1534,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   PlatformName: thisDevice.current.PlatformName,
                   PlatformVersion: thisDevice.current.PlatformVersion,
                   gainDBSPL: soundGainDBSPL.current,
+                  CalibrationDate: new Date().toUTCString(),
                 };
                 await saveLoudSpeakerInfo(
                   loudspeakerInfo.current,

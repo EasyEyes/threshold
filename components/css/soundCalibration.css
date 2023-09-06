@@ -132,3 +132,7 @@
   font-weight: normal;
   margin-top: 10px;
 }
+
+#completeTransducerTable {
+  border-collapse: collapse;
+}

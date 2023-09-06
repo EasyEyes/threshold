@@ -429,6 +429,7 @@ export const rsvpReadingWordsForThisBlock = { current: undefined };
 export const timeToCalibrate = { current: 1 };
 export const thisDevice = { current: undefined };
 export const loudspeakerInfo = { current: undefined };
+export const microphoneInfo = { current: undefined };
 
 export const rsvpReadingTargetSets = {
   numberOfSets: undefined,
