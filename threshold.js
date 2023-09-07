@@ -3981,7 +3981,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         (canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) ||
         keypad.endRoutine(status.block_condition) ||
-        simulatedObservers.proceed()
+        simulatedObservers.proceed(status.block_condition)
       ) {
         continueRoutine = false;
         movePastFixation();
@@ -5046,7 +5046,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             (targetTask.current == "identify" &&
               speechInNoiseTargetList.current &&
               speechInNoiseShowClickable.current) ||
-            (simulatedObservers.proceed() && speechInNoiseShowClickable.current)
+            (simulatedObservers.proceed(status.block_condition) &&
+              speechInNoiseShowClickable.current)
           ) {
             validAns = [""];
             speechInNoiseShowClickable.current = false;
@@ -5106,7 +5107,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               delayBeforeStimOnsetSec +
                 letterConfig.targetSafetyMarginSec +
                 letterConfig.targetDurationSec ||
-              simulatedObservers.proceed()) &&
+              simulatedObservers.proceed(status.block_condition)) &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
           ) {
             // keep track of start time/frame for later
@@ -5451,7 +5452,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _letter_trialRoutineEnd(
               repeatedLettersConfig.stims[0],
               currentLoop,
-              simulatedObservers.proceed(),
+              simulatedObservers.proceed(status.block_condition),
               repeatedLettersResponse.correct,
               level,
               letterRespondedEarly
