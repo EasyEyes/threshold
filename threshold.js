@@ -2246,10 +2246,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           console.log(thresholdParameter);
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
-              instructionsText.popularFeatures(
-                L,
-                paramReader.read("takeABreakTrialCredit", status.block)[0]
-              ) +
               instructionsText.initialByThresholdParameter[thresholdParameter](
                 L,
                 responseType.current,
@@ -2262,10 +2258,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         repeatedLetters: () => {
           const repeatedLettersBlockInstructs =
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
-            instructionsText.popularFeatures(
-              L,
-              paramReader.read("takeABreakTrialCredit", status.block)[0]
-            ) +
             instructionsText.initialByThresholdParameter[thresholdParameter](
               L,
               responseType.current,

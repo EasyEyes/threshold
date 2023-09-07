@@ -2910,7 +2910,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "WARNING: Simulated observer responses will result in rapid, flashing stimuli on screen. Use caution if sensitive to flashing lights. ⭑ Use the software model specifed by simulationModel to generate observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables typed responses, regardless of the setting of responseTypedBool.",
+      "WARNING: Simulated observer responses will result in rapid, flashing stimuli on screen. Use caution since flashing stimuli (esp. at 8 Hz) can induce epileptic seizures in those who are susceptible. ⭑ Use the software model specifed by simulationModel to generate observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables typed responses, regardless of the setting of responseTypedBool. Now working for letter, repeatedLetter, and rsvp targetKind, and tested the clicking input modality.",
     type: "boolean",
     default: "FALSE",
     categories: "",

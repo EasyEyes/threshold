@@ -89,11 +89,6 @@ export const instructionsText = {
       "\n\n"
     );
   },
-  popularFeatures: (L, takeABreakTrialCreditsThisBlock = 0) => {
-    return takeABreakTrialCreditsThisBlock === 0
-      ? ""
-      : readi18nPhrases("T_letterPopularDemandFeatures", L) + "\n\n";
-  },
   initialByThresholdParameter: {
     spacingDeg: (L, responseType = 2, trialsThisBlock = 0) => {
       const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
