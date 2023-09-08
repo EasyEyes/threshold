@@ -28,5 +28,5 @@ thresholdBeta,,2.3,2.3,2.3,2.3,2.3,2.3
 thresholdDelta,,0.01,0.01,0.01,0.01,0.01,0.01
 thresholdGuess,,2,2,2,2,2,2
 thresholdGuessLogSd,,3,3,3,3,3,3
-thresholdParameter,,spacing,spacing,spacing,spacing,spacing,spacing
+thresholdParameter,,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg
 viewingDistanceDesiredCm,,50,50,50,50,50,50
