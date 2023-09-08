@@ -640,3 +640,21 @@ export const displayRightOrWrong = (correct) => {
     document.body.removeChild(rightOrWrong);
   }, 1000);
 };
+
+export const getCurrentTimeString = () => {
+  const date = new Date();
+
+  // Get the date string in the user's locale
+  const dateOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZoneName: "longOffset",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  };
+  const dateString = date.toLocaleDateString(undefined, dateOptions);
+
+  return dateString.replace("at ", "");
+};

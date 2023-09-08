@@ -25,6 +25,7 @@ import {
   calibrateSoundIIRSec,
   loudspeakerInfo,
   microphoneInfo,
+  calibrationTime,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -34,7 +35,10 @@ import {
   displayParametersAllHz,
   displaySummarizedTransducerTable,
 } from "./soundTest";
-import { getSoundCalibrationLevelDBSPLFromIIR } from "./soundUtils";
+import {
+  getCurrentTimeString,
+  getSoundCalibrationLevelDBSPLFromIIR,
+} from "./soundUtils";
 import { showExperimentEnding } from "./forms";
 import {
   getDebugIIR,
@@ -45,6 +49,7 @@ import {
   removeElements,
   saveLoudSpeakerInfo,
 } from "./soundCalibrationHelpers";
+import { testResults } from "./testData";
 
 export const useCalibration = (reader) => {
   return ifTrue([
@@ -280,6 +285,7 @@ export const calibrateAudio = async (reader) => {
     return Math.pow(10, soundLevel / 20);
   });
 
+  calibrationTime.current = getCurrentTimeString();
   let dSec =
     6 *
       calibrateSoundBurstRecordings.current *
@@ -377,7 +383,8 @@ export const calibrateAudio = async (reader) => {
       //   PlatformVersion: "MacBookPro",
       //   DeviceType: "Desktop",
       //   ID: "MNEISD",
-      //   CalibrationDate: new Date().toUTCString()
+      //   CalibrationDate: calibrationTime.current,
+      //   ModelName: "MacBook"
       // }
       // microphoneInfo.current = {
       //   IsMobile: false,
@@ -391,35 +398,35 @@ export const calibrateAudio = async (reader) => {
       //   PlatformVersion: "MacBookPro",
       //   DeviceType: "Desktop",
       //   ID: "LLSHUs",
-      //   CalibrationDate: new Date().toUTCString()
+      //   CalibrationDate: calibrationTime.current,
       // }
       displayCompleteTransducerTable(
         loudspeakerInfo.current,
         microphoneInfo.current,
         elems,
-        true
+        true,
+        calibrateSoundCheck.current
       );
-      const title1000Hz =
-        "Sound Level at 1000 Hz" +
-        (calibrateSoundCheck.current === "system"
-          ? " (Loudspeaker + Mic)"
-          : "(Loudspeaker)");
-      const titleallHz =
-        "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers." +
-        (calibrateSoundCheck.current === "system"
-          ? " (Loudspeaker + Mic)"
-          : "(Loudspeaker)");
+      const title1000Hz = "Sound Level at 1000 Hz";
+      const titleallHz = [
+        "Power spectral density of sound recording of white noise (MLS)",
+        "source played through the loudspeakers.",
+      ];
       displayParameters1000Hz(
         elems,
         soundLevels,
         soundCalibrationResults.current,
-        title1000Hz
+        title1000Hz,
+        calibrateSoundCheck.current,
+        true
       );
       displaySummarizedTransducerTable(
         loudspeakerInfo.current,
         microphoneInfo.current,
         elems,
-        true
+        true,
+        calibrateSoundCheck.current,
+        "right"
       );
       displayParametersAllHz(
         elems,
@@ -431,7 +438,8 @@ export const calibrateAudio = async (reader) => {
         loudspeakerInfo.current,
         microphoneInfo.current,
         elems,
-        true
+        true,
+        calibrateSoundCheck.current
       );
     }
 
@@ -569,6 +577,11 @@ export const calibrateAudio = async (reader) => {
                 // add event listener to the proceed button
                 await new Promise((resolve) => {
                   proceedButton3.addEventListener("click", async () => {
+                    microphoneInfo.current = {
+                      micFullName: micNameInput.value,
+                      micrFullManufacturerName: micManufacturerInput.value,
+                      micFullSerialNumber: micSerialNumberInput.value,
+                    };
                     // get the model number and name
                     micName = micNameInput.value;
                     micManufacturer = micManufacturerInput.value
@@ -633,6 +646,10 @@ export const calibrateAudio = async (reader) => {
                 // add event listener to the proceed button
                 await new Promise((resolve) => {
                   proceedButton4.addEventListener("click", async () => {
+                    microphoneInfo.current = {
+                      micFullName: modelNameInput2.value,
+                      micFullSerialNumber: modelNumberInput2.value,
+                    };
                     // get the model number and name
                     micModelNumber = modelNumberInput2.value
                       .toLowerCase()
@@ -732,17 +749,19 @@ export const calibrateAudio = async (reader) => {
                   calibrator,
                   timeoutSec.current
                 );
-                microphoneInfo.current = result.micInfo;
+                microphoneInfo.current = {
+                  ...microphoneInfo.current,
+                  ...result.micInfo,
+                };
                 microphoneInfo.current.CalibrationDate =
-                  new Date().toUTCString();
-                // white space wrap
+                  calibrationTime.current;
                 elems.message.style.whiteSpace = "normal";
                 elems.message.style.fontSize = "0.8rem";
                 elems.message.style.fontWeight = "normal";
                 console.log("Microphone Results:", result);
                 microphoneCalibrationResults.push({
                   name: isSmartPhone ? micModelName : micName,
-                  ID: microphoneInfo.current.ID,
+                  ID: microphoneInfo.current.micFullSerialNumber,
                   OEM: microphoneInfo.current.OEM,
                   isSmartPhone: isSmartPhone,
                   HardwareName: microphoneInfo.current.HardwareName,
@@ -770,37 +789,52 @@ export const calibrateAudio = async (reader) => {
                     : [],
                   ir: result.componentIR ? result.componentIR : [],
                   iir: result.componentIIR ? result.componentIIR : [],
+                  CalibrationDate: microphoneInfo.current.CalibrationDate,
                 });
                 if (calibrateSoundCheck.current !== "none") {
                   displayCompleteTransducerTable(
                     loudspeakerInfo.current,
                     microphoneInfo.current,
                     elems,
-                    false
+                    false,
+                    calibrateSoundCheck.current
                   );
                   //show sound calibration results
-                  const title1000Hz =
-                    "Sound Level at 1000 Hz for" +
-                    micName +
-                    (calibrateSoundCheck.current === "system"
-                      ? " (Loudspeaker + Microphone)"
-                      : " (Microphone)");
-                  const titleallHz =
-                    "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers." +
-                    (calibrateSoundCheck.current === "system"
-                      ? " (Loudspeaker + Microphone)"
-                      : " (Microphone)");
+                  const title1000Hz = "Sound Level at 1000 Hz for" + micName;
+                  const titleallHz = [
+                    "Power spectral density of sound recording of white noise (MLS)",
+                    "source played through the loudspeakers.",
+                  ];
                   displayParameters1000Hz(
                     elems,
                     soundLevels,
                     result,
-                    title1000Hz
+                    title1000Hz,
+                    calibrateSoundCheck.current,
+                    false
+                  );
+                  displaySummarizedTransducerTable(
+                    loudspeakerInfo.current,
+                    microphoneInfo.current,
+                    elems,
+                    false,
+                    calibrateSoundCheck.current,
+                    "right"
                   );
                   displayParametersAllHz(
                     elems,
                     result.componentIIR,
                     result,
-                    titleallHz
+                    titleallHz,
+                    calibrateSoundCheck.current,
+                    false
+                  );
+                  displaySummarizedTransducerTable(
+                    loudspeakerInfo.current,
+                    microphoneInfo.current,
+                    elems,
+                    false,
+                    calibrateSoundCheck.current
                   );
                 }
               }
@@ -1200,6 +1234,10 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   return await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
       // get the model number and name
+      loudspeakerInfo.current = {
+        fullLoudspeakerModelName: modelNameInput.value,
+        fullLoudspeakerModelNumber: modelNumberInput.value,
+      };
       const modelNumber = modelNumberInput.value
         .toLowerCase()
         .split(" ")
@@ -1309,6 +1347,11 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               await new Promise((resolve) => {
                 proceedButton3.addEventListener("click", async () => {
                   // get the model number and name
+                  microphoneInfo.current = {
+                    micFullName: micNameInput.value,
+                    micrFullManufacturerName: micManufacturerInput.value,
+                    micFullSerialNumber: micSerialNumberInput.value,
+                  };
                   micName = micNameInput.value;
                   micManufacturer = micManufacturerInput.value
                     .toLowerCase()
@@ -1374,6 +1417,10 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               // add event listener to the proceed button
               await new Promise((resolve) => {
                 proceedButton4.addEventListener("click", async () => {
+                  microphoneInfo.current = {
+                    micFullName: modelNameInput2.value,
+                    micFullSerialNumber: modelNumberInput2.value,
+                  };
                   // get the model number and name
                   micModelNumber = modelNumberInput2.value
                     .toLowerCase()
@@ -1485,10 +1532,12 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                 }
                 invertedImpulseResponse.current =
                   soundCalibrationResults.current.componentIIR;
-                microphoneInfo.current =
-                  soundCalibrationResults.current.micInfo;
+                microphoneInfo.current = {
+                  ...microphoneInfo.current,
+                  ...soundCalibrationResults.current.micInfo,
+                };
                 microphoneInfo.current.CalibrationDate =
-                  new Date().toUTCString();
+                  calibrationTime.current;
                 if (calibrateSoundCheck.current !== "none") {
                   allHzCalibrationResults.x_conv =
                     soundCalibrationResults.current.x_conv;
@@ -1520,6 +1569,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             if (result) {
               try {
                 loudspeakerInfo.current = {
+                  ...loudspeakerInfo.current,
                   ModelName: modelName,
                   ID: modelNumber,
                   isSmartPhone: thisDevice.current.IsMobile,
@@ -1534,7 +1584,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   PlatformName: thisDevice.current.PlatformName,
                   PlatformVersion: thisDevice.current.PlatformVersion,
                   gainDBSPL: soundGainDBSPL.current,
-                  CalibrationDate: new Date().toUTCString(),
+                  CalibrationDate: calibrationTime.current,
                 };
                 await saveLoudSpeakerInfo(
                   loudspeakerInfo.current,

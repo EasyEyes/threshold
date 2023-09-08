@@ -6,8 +6,16 @@ import {
   soundCalibrationResults,
   soundGainTWR,
   calibrateSoundCheck,
+  calibrateSoundBurstRepeats,
+  calibrateSoundBurstsWarmup,
+  calibrateSoundBurstSec,
+  calibrateSoundHz,
 } from "./global";
-import { plotForAllHz, plotSoundLevels1000Hz } from "./soundTestPlots";
+import {
+  plotForAllHz,
+  plotSoundLevels1000Hz,
+  standardDeviation,
+} from "./soundTestPlots";
 import {
   adjustSoundDbSPL,
   connectAudioNodes,
@@ -660,7 +668,9 @@ export const displayParameters1000Hz = (
   elems,
   soundLevels,
   soundCalibrationResults,
-  PlotTitle = "Sound Level at 1000 Hz"
+  PlotTitle = "Sound Level at 1000 Hz",
+  calibrationGoal = "system",
+  isLoudspeakerCalibration = true
 ) => {
   elems.citation.style.visibility = "visible";
   elems.background.style.top = "70%";
@@ -750,7 +760,7 @@ export const displayParameters1000Hz = (
   Dynamic Range Compression Model:\n
   T: ${parameters.T.toFixed(1) + " dB SPL"}\n
   W: ${parameters.W.toFixed(1) + " dB"}\n
-  1/R: ${1 / Number(parameters.R.toFixed(1))}\n
+  Q = 1/R: ${(1 / Number(parameters.R.toFixed(1))).toFixed(3)}\n
   gainDBSPL: ${parameters.gainDBSPL.toFixed(1)}\n
   backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}\n
   RMSError: ${parameters.RMSError.toFixed(1) + " dB"}\n
@@ -782,7 +792,9 @@ export const displayParameters1000Hz = (
     parameters,
     soundLevels,
     outDBSPL1000Values,
-    PlotTitle
+    PlotTitle,
+    calibrationGoal,
+    isLoudspeakerCalibration
   );
 
   // fit plotCanvas to parent
@@ -886,18 +898,46 @@ export const displayParametersAllHz = (
   elems,
   iir,
   calibrationResults,
-  title = "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers."
+  title = "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers.",
+  calibrationGoal = "system",
+  isLoudspeakerCalibration = true
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
   plotCanvas.width = 500;
   plotCanvas.height = 500;
+  plotCanvas.style.marginTop = "20px";
 
   elems.soundTestPlots.appendChild(plotCanvas);
 
+  const p = document.createElement("p");
+  // compute standard deviation of the filtered data points from 400 to 8000 Hz (frequency is x-axis)
+  const convMergedDataPoints = calibrationResults.x_conv.map((x, i) => {
+    return { x: calibrationResults.y_conv[i], y: 10 * Math.log10(x) };
+  });
+  const filteredDataPoints = convMergedDataPoints.filter(
+    (point) => point.x >= 400 && point.x <= 8000
+  );
+  const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
+  const sd = standardDeviation(filteredDataPointsY);
+
+  const subtitleText = [
+    `Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz.`,
+    `From 400 to 8000 Hz, the IIR-filtered MLS recording has SD = ${sd} dB.`,
+  ];
+  p.innerHTML = subtitleText.join("<br>");
+  elems.soundTestPlots.appendChild(p);
+
   elems.citation.style.visibility = "visible";
 
-  plotForAllHz(plotCanvas, iir, calibrationResults, title);
+  plotForAllHz(
+    plotCanvas,
+    iir,
+    calibrationResults,
+    title,
+    calibrationGoal,
+    isLoudspeakerCalibration
+  );
 };
 
 // The table has 3 colums.
@@ -909,7 +949,8 @@ export const displayCompleteTransducerTable = (
   LoudspeakerInfo,
   microphoneInfo,
   elems,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
+  calibrationGoal
 ) => {
   const table = document.createElement("table");
   table.setAttribute("id", "completeTransducerTable");
@@ -928,18 +969,13 @@ export const displayCompleteTransducerTable = (
   tr.appendChild(th3);
   thead.appendChild(tr);
 
-  // add borders
-  th1.style.border = "0.5px solid grey";
-  th2.style.border = "0.5px solid grey";
-  th3.style.border = "0.5px solid grey";
-
   const columns = [
     "target",
     "DeviceType",
     "PlatformName",
     "OEM",
     "HardwareFamily",
-    "HarwareModel",
+    "ModelName",
     "ID",
     "CalibrationDate",
   ];
@@ -962,31 +998,52 @@ export const displayCompleteTransducerTable = (
     td1.style.fontWeight = "bold";
     // if (column === "target" && isLoudSpeakerCalibration) td1.innerHTML = a check mark (U+2713) and td2.innerHTML = ""
     // if (column === "target" && !isLoudSpeakerCalibration) td2.innerHTML = a check mark (U+2713) and td1.innerHTML = ""
-    if (column === "target" && isLoudspeakerCalibration) {
-      td2.innerHTML = "✓";
+    if (column === "target") {
+      if (calibrationGoal === "system") {
+        td2.innerHTML = "✓";
+        td3.innerHTML = "✓";
+      } else if (calibrationGoal == "goal" && isLoudspeakerCalibration) {
+        td3.innerHTML = "✓";
+        td2.innerHTML = " ";
+      } else if (calibrationGoal == "goal" && !isLoudspeakerCalibration) {
+        td2.innerHTML = "✓";
+        td3.innerHTML = " ";
+      }
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
+    } else if (column === "CalibrationDate") {
+      td2.innerHTML = LoudspeakerInfo[column];
       td3.innerHTML = " ";
-    } else if (column === "target" && !isLoudspeakerCalibration) {
-      td3.innerHTML = "✓";
-      td2.innerHTML = " ";
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+    } else if (column === "ModelName") {
+      td2.innerHTML = LoudspeakerInfo["fullLoudspeakerModelName"];
+      td3.innerHTML = microphoneInfo["micFullName"];
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
+    } else if (column === "ID") {
+      td2.innerHTML = LoudspeakerInfo["fullLoudspeakerModelNumber"];
+      td3.innerHTML = microphoneInfo["micFullSerialNumber"];
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
     } else {
       td2.innerHTML = LoudspeakerInfo[column];
       td3.innerHTML = microphoneInfo[column];
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
     }
-    tr.appendChild(td1);
-    tr.appendChild(td2);
-    tr.appendChild(td3);
-    // add borders
-    td1.style.border = "0.5px solid grey";
-    td2.style.border = "0.5px solid grey";
-    td3.style.border = "0.5px solid grey";
 
     tbody.appendChild(tr);
   });
 
   // add space between the columns
-  th1.style.paddingRight = "20px";
-  th2.style.paddingRight = "20px";
-  th3.style.paddingRight = "20px";
+  // th1.style.paddingRight = "20px";
+  // th2.style.paddingRight = "20px";
+  // th3.style.paddingRight = "20px";
 
   table.appendChild(thead);
   table.appendChild(tbody);
@@ -999,7 +1056,9 @@ export const displaySummarizedTransducerTable = (
   LoudspeakerInfo,
   microphoneInfo,
   elems,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
+  calibrationGoal,
+  position = "left"
 ) => {
   // the table has two columns and 4 rows
   const table = document.createElement("table");
@@ -1015,10 +1074,13 @@ export const displaySummarizedTransducerTable = (
   th1.innerHTML = "Loudspeaker";
   th2.innerHTML = "Microphone";
 
-  if (isLoudspeakerCalibration) {
+  if (calibrationGoal === "system") {
+    th1.style.fontWeight = "bold";
+    th2.style.fontWeight = "bold";
+  } else if (calibrationGoal == "goal" && isLoudspeakerCalibration) {
     th1.style.fontWeight = "bold";
     th2.style.fontWeight = "normal";
-  } else {
+  } else if (calibrationGoal == "goal") {
     th2.style.fontWeight = "bold";
     th1.style.fontWeight = "normal";
   }
@@ -1042,7 +1104,7 @@ export const displaySummarizedTransducerTable = (
   const td3 = document.createElement("td");
   const td4 = document.createElement("td");
   td3.innerHTML = LoudspeakerInfo["ID"];
-  td4.innerHTML = microphoneInfo["micID"];
+  td4.innerHTML = microphoneInfo["ID"];
   tr3.appendChild(td3);
   tr3.appendChild(td4);
   tbody.appendChild(tr3);
@@ -1058,21 +1120,26 @@ export const displaySummarizedTransducerTable = (
   tbody.appendChild(tr4);
 
   // add borders
-  th1.style.border = "0.5px solid grey";
-  th2.style.border = "0.5px solid grey";
-  td1.style.border = "0.5px solid grey";
-  td2.style.border = "0.5px solid grey";
-  td3.style.border = "0.5px solid grey";
-  td4.style.border = "0.5px solid grey";
-  td5.style.border = "0.5px solid grey";
-  td6.style.border = "0.5px solid grey";
+  // th1.style.border = "0.5px solid grey";
+  // th2.style.border = "0.5px solid grey";
+  // td1.style.border = "0.5px solid grey";
+  // td2.style.border = "0.5px solid grey";
+  // td3.style.border = "0.5px solid grey";
+  // td4.style.border = "0.5px solid grey";
+  // td5.style.border = "0.5px solid grey";
+  // td6.style.border = "0.5px solid grey";
 
   table.appendChild(thead);
   table.appendChild(tbody);
 
   // center the table horizontally
-  table.style.marginLeft = "auto";
-  table.style.marginRight = "auto";
+  // table.style.marginLeft = "auto";
+  // table.style.marginRight = "auto";
+
+  if (position === "right") {
+    // make the table to the left
+    table.style.marginLeft = "15%";
+  }
 
   // add space between the columns
   th1.style.paddingRight = "20px";

@@ -12,8 +12,16 @@ export const plotSoundLevels1000Hz = (
   parameters,
   soundLevels,
   outDBSPL1000Values,
-  title
+  title,
+  calibrationGoal,
+  isLoudspeakerCalibration
 ) => {
+  const subtitleText =
+    calibrationGoal === "system"
+      ? "Loudspeaker + Microphone"
+      : isLoudspeakerCalibration
+      ? "Loudspeaker"
+      : "Microphone";
   const mergedDataPoints = soundLevels.map((x, i) => {
     return { x: x, y: outDBSPL1000Values[i] };
   });
@@ -100,6 +108,15 @@ export const plotSoundLevels1000Hz = (
     ],
   };
 
+  var inDBUnits = "";
+  var outDBUnits = "";
+  if (calibrationGoal === "system") {
+    inDBUnits = "dB";
+    outDBUnits = "dB";
+  } else {
+    inDBUnits = isLoudspeakerCalibration ? "dB" : "dB SPL";
+    outDBUnits = isLoudspeakerCalibration ? "dB SPL" : "dB";
+  }
   const config = {
     type: "scatter",
     data: data,
@@ -110,6 +127,17 @@ export const plotSoundLevels1000Hz = (
         title: {
           display: true,
           text: title,
+          font: {
+            size: 20,
+          },
+        },
+        subtitle: {
+          display: true,
+          text: subtitleText,
+          font: {
+            size: 15,
+          },
+          align: "center",
         },
         legend: {
           labels: {
@@ -144,7 +172,7 @@ export const plotSoundLevels1000Hz = (
           position: "bottom",
           title: {
             display: true,
-            text: "in (dB)",
+            text: `in (${inDBUnits})`,
           },
           ticks: {
             stepSize: 10,
@@ -155,7 +183,7 @@ export const plotSoundLevels1000Hz = (
           position: "left",
           title: {
             display: true,
-            text: "out (dB SPL)",
+            text: `out (${outDBUnits})`,
           },
           ticks: {
             stepSize: 10 * ratio,
@@ -171,8 +199,16 @@ export const plotForAllHz = (
   plotCanvas,
   iir = [],
   calibrationResults,
-  title
+  title,
+  calibrationGoal,
+  isLoudspeakerCalibration
 ) => {
+  const subtitleText =
+    calibrationGoal === "system"
+      ? "Loudspeaker + Microphone"
+      : isLoudspeakerCalibration
+      ? "Loudspeaker"
+      : "Microphone";
   const unconvMergedDataPoints = calibrationResults.x_unconv.map((x, i) => {
     return { x: calibrationResults.y_unconv[i], y: 10 * Math.log10(x) };
   });
@@ -210,17 +246,6 @@ export const plotForAllHz = (
     ],
   };
 
-  // compute standard deviation of the filtered data points from 400 to 8000 Hz (frequency is x-axis)
-  const filteredDataPoints = convMergedDataPoints.filter(
-    (point) => point.x >= 400 && point.x <= 8000
-  );
-  const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
-  const sd = standardDeviation(filteredDataPointsY);
-
-  const subtitleText = [
-    `Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz.`,
-    `From 400 to 8000 Hz, the IIR-filtered MLS recording has SD = ${sd} dB.`,
-  ];
   const config = {
     type: "line",
     data: data,
@@ -231,13 +256,15 @@ export const plotForAllHz = (
         title: {
           display: true,
           text: title,
+          font: {
+            size: 18,
+          },
         },
         subtitle: {
           display: true,
           text: subtitleText,
-          position: "bottom",
           font: {
-            size: 13,
+            size: 15,
           },
           align: "center",
         },
@@ -292,7 +319,7 @@ export const plotForAllHz = (
   const plot = new Chart(plotCanvas, config);
 };
 
-const standardDeviation = (values) => {
+export const standardDeviation = (values) => {
   const avg = average(values);
 
   const squareDiffs = values.map((value) => {
