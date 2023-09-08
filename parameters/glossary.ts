@@ -3001,8 +3001,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "",
-    explanation:
-      "showText (default empty string) displays the provided text at the bottom-left of the screen, aligned left, with line breaking to show multiple lines. This is static, unchanged before, during, and after the stimulus. Default is empty string, no text. Same point size as used by showConditionNameBool. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool. [FUTURE: Do we need showTextBeforeStimulus or showTextAfterStimulus?]",
+    explanation: "Click the crosshair.",
   },
   showViewingDistanceBool: {
     name: "showViewingDistanceBool",
@@ -3048,7 +3047,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "ideal",
     explanation:
-      "⭑ For debugging and checking it is often helpful to simulate the observer. simulationModel can be: \n• right: Always right.\n• wrong: Always wrong.\n• blind: This model merely presses a random response key. \n• ideal: This model does the same task as the human, picking the best response (i.e. maxmizing expected proportion correct) given the stimulus. Its threshold is a useful point of reference in analyzing human data. Without noise, the ideal will always be right. Since noise hasn't yet been implemented in EasyEyes, for now, this model just gives the right answer.\n• weibull: This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately estimate its (unknown to Quest) threshold, when the rest of the QUEST parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.\nThe source code for our simulation model is here:\nhttps://github.com/EasyEyes/threshold/blob/a9ea5a6c64d3c5ff0aacfc01c86b6a5aecf64369/components/simulatedObserver.js",
+      "⭑ For debugging and checking it is often helpful to simulate the observer. simulationModel can be: \n• right: Always right.\n• wrong: Always wrong.\n• blind: This model presses a random response key. \n• ideal: This model does the same task as the human, picking the best response (i.e. maximizing expected proportion correct) given the stimulus. The ideal knows the target probabilities, and the noise statistics. Its threshold is a useful point of reference in analyzing human data. Without noise, the ideal will always be right. Since noise hasn't yet been implemented in EasyEyes, for now, this model just gives the right answer.\n• weibull: This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately estimate its (unknown to Quest) threshold, when the rest of the QUEST parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.\nThe source code for our simulation model is here:\nhttps://github.com/EasyEyes/threshold/blob/a9ea5a6c64d3c5ff0aacfc01c86b6a5aecf64369/components/simulatedObserver.js",
     categories: ["right", "wrong", "blind", "weibull", "ideal"],
   },
   simulationThreshold: {
@@ -3263,7 +3262,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "targetLengthDeg (default 1) is the stroke length of Vernier target.",
+      "targetLengthDeg (default 1) is the length of each line in the Vernier target.",
   },
   targetMinimumPix: {
     name: "targetMinimumPix",
@@ -3279,7 +3278,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.1",
     explanation:
-      "targetOffsetDeg (default 0.1) the horizontal offset between Vernier lines that are colinear at zero offset. The two line split the offset, displaced in opposite directions. Displacement direction is random for each trial.",
+      "targetOffsetDeg (default 0.1) the horizontal offset between two vertical Vernier lines that are colinear at zero offset. The two lines split the offset. They are displaced in opposite directions, each by half targetOffsetDeg. Displacement direction is random for each trial.",
   },
   targetOrientationDeg: {
     name: "targetOrientationDeg",
@@ -3539,7 +3538,7 @@ export const GLOSSARY: Glossary = {
     name: "thresholdParameter",
     availability: "now",
     type: "categorical",
-    default: "spacing",
+    default: "spacingDeg",
     explanation:
       '⭑ thresholdParameter (default is the empty string) designates an input parameter (e.g. targetSizeDeg or spacingDeg) that will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacingDeg" (formerly "spacing") varies center-to-center spacing of target and neighboring flankers. \n• "targetSizeDeg" (formerly "size") varies target size. \n• "targetDurationSec" varies target duration.\n• "targetContrast" awaits HDR10 support.\n•  "targetEccentricityXDeg"  may be added in the future.\n• "targetSoundDBSPL" (formerly "soundLevel")  varies target sound level.\n• "targetSoundNoiseDBSPL" varies noise sound level. Not yet implemented.\nNOTE: EasyEyes formerly supported the short crossed-out nicknames (size, spacing, and soundLevel), but we removed them so that only an actual input parameter name (listed in the first column of this Glossary) is allowed as a value of thresholdParameter. ',
     categories: [
