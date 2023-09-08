@@ -54,13 +54,7 @@ import * as util from "../psychojs/src/util/index.js";
 
 const { EventManager } = core;
 const { Scheduler } = util;
-import {
-  createSignalingMap,
-  arraysEqual,
-  log,
-  logger,
-  sleep,
-} from "./utils.js";
+import { createSignalingMap, arraysEqual, log, sleep } from "./utils.js";
 import { ParamReader } from "../parameters/paramReader.js";
 import { canClick, canType, getResponseType } from "./response.js";
 import { responseType, rsvpReadingTargetSets, targetKind } from "./global.js";
@@ -109,7 +103,6 @@ export class SimulatedObserversHandler {
   }
   // setup: checkIfSimulated, compile observers
   setup() {
-    logger("reader.conditions", this.reader.conditions);
     for (const condition of this.reader.conditions as any) {
       if (!condition.block_condition)
         throw new SimulatedObserverError(
@@ -135,8 +128,6 @@ export class SimulatedObserversHandler {
         this.simulatedBlocks.add(block);
       }
     }
-    logger("!. this.observers, finished setup", this.observers);
-    logger("!. this.simulatedBlocks, finished setup", this.simulatedBlocks);
   }
   // Update for the current trial
   update(newBC: BlockCondition, newTrialProperties: TrialProperties) {
@@ -159,7 +150,6 @@ export class SimulatedObserversHandler {
   }
   // Predicate. Should we move to the next routine, ie is the current block/condition simulated?
   proceed(blockOrCondition?: number | BlockCondition) {
-    logger("!. proceed, blockOrCondition", blockOrCondition);
     if (typeof blockOrCondition === "undefined") {
       if (typeof this.BC === "undefined")
         throw new SimulatedObserverError(
@@ -169,7 +159,6 @@ export class SimulatedObserversHandler {
       return this.simulatedBlocks.has(block);
     }
     const block = Number(String(blockOrCondition).split("_")[0]);
-    logger("!. proceed, block", block);
     return this.simulatedBlocks.has(block);
   }
   async respond() {
@@ -184,7 +173,6 @@ export class SimulatedObserversHandler {
         `thisObserver is undefined, SimulatedObserversHandler.respond. Check SimulatedObserversHandler.setup logic. BC: ${this.BC}, observers: ${this.observers}.`
       );
     const responses = thisObserver.getSimulatedResponses();
-    logger("!. responses", responses);
 
     const responseType = getResponseType(
       this.reader.read("responseClickedBool", BC),
@@ -210,17 +198,14 @@ export class SimulatedObserversHandler {
     }
   }
   _respondByClick = (response: string) => {
-    logger("!. responding by click", response);
     const interval = setInterval(() => {
       // Match naming used in showCharacterSet.js:pushCharacterSet
       const clickableCharacterSetId = `clickableCharacter-${response.toLowerCase()}`;
       let clickableCharacterSet = document.getElementById(
         clickableCharacterSetId
       );
-      logger("!. clickableCharSet in _respondByClick", clickableCharacterSet);
       if (clickableCharacterSet) {
         clearInterval(interval);
-        logger("!. ready to click clickableCharSet", clickableCharacterSet);
         clickableCharacterSet.click();
       }
 
@@ -230,16 +215,8 @@ export class SimulatedObserversHandler {
       const phraseIdentificationResponse = document.getElementById(
         phraseIdentificationResponseId
       );
-      logger(
-        "!. phraseIdentificationResponse in _respondByClick",
-        phraseIdentificationResponse
-      );
       if (phraseIdentificationResponse) {
         clearInterval(interval);
-        logger(
-          "!. ready to click phraseIdentification",
-          phraseIdentificationResponse
-        );
         phraseIdentificationResponse.click();
         return;
       }
@@ -248,7 +225,6 @@ export class SimulatedObserversHandler {
     // TODO generalize to other clicking modalities???
   };
   _respondByKeypress = (response: string) => {
-    logger("!. responding by keypress", response);
     // Simulate a keypress
     const simulatedResponseEvent = {
       key: response.toLocaleLowerCase(),
@@ -439,7 +415,6 @@ export class SimulatedObserver {
           `targetKind not yet supported, SimulatedObserver.getSimulatedResponse. targetKind: ${thisTargetKind}`
         );
     }
-    logger("!. nResponsesRequired", nResponsesRequired);
     if (this.trial.correctResponses.length !== nResponsesRequired)
       throw new SimulatedObserverError(
         `Number of responses required is not equal to the number of correct responses, SimulatedObserver.getSimulatedResponses. nResponsesRequired: ${nResponsesRequired}, correctResponses: ${this.trial.correctResponses}`
