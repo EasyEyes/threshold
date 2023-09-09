@@ -2554,8 +2554,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           fixation.setAutoDraw(true);
           target.setAutoDraw(true);
-          flanker1.setAutoDraw(true);
-          flanker2.setAutoDraw(true);
+          if (thresholdParameter === "spacingDeg") {
+            flanker1.setAutoDraw(true);
+            flanker2.setAutoDraw(true);
+          }
         },
         rsvpReading: () =>
           loggerText("TODO rsvpLetter eduInstructionRoutineBegin"),
