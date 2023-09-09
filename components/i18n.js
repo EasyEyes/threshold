@@ -5260,7 +5260,7 @@ export const phrases = {
     ja: "以下の各列から1つの単語をクリックすることで示された単語を識別してください。",
     ko: "아래 각 열에서 한 단어를 클릭하여 표시된 단어를 식별하십시오.",
   },
-  T_identifyPressIt: {
+  "❌T_identifyPressIt": {
     "en-US": "CHANGE T_identifyPressIt → T_identifyMiddleLetterPressIt",
     de: "Bitte identifizieren Sie den mittleren Buchstaben, indem Sie ihn in der Tastatur drücken.",
     fr: "Modifier T_Identifypressit → T_IdentifymiddleletterPressit",
@@ -5317,7 +5317,7 @@ export const phrases = {
     ja: "大声で話すときに示された単語を特定します。",
     ko: "큰 소리로 말할 때 표시된 단어를 식별하십시오.",
   },
-  T_identifyPressItOrClickIt: {
+  "❌T_identifyPressItOrClickIt": {
     "en-US":
       "CHANGE T_identifyPressItOrClickIt → T_identifyMiddleLetterPressItOrClickIt",
     de: "Bitte identifizieren Sie den mittleren Buchstaben, indem Sie ihn in der Tastatur drücken oder unten darauf klicken.",
@@ -6629,7 +6629,7 @@ export const phrases = {
     ja: "各トライアルでは、通常はノイズで文が聞こえます。次に、文の各単語のすべての可能性のリストが表示されます。聞いた言葉をクリックして、文または最善の推測を報告してください。",
     ko: "각 시험에서는 일반적으로 소음으로 문장이 들립니다. 그런 다음 문장의 각 단어에 대한 모든 가능성 목록이 표시됩니다. 들었던 단어를 클릭하여 문장이나 최선의 추측을보고하십시오.",
   },
-  T_session: {
+  "❌T_session": {
     "en-US": "❌",
     de: "",
     fr: "",
@@ -6773,7 +6773,7 @@ export const phrases = {
     ja: "よくできました！少し時間をかけてリラックスして点滅してください。",
     ko: "잘 했어! 잠시 휴식을 취하고 깜박이십시오.",
   },
-  T_thresholdBeginBlock: {
+  "❌T_thresholdBeginBlock": {
     "en-US": "CHANGE T_thresholdBeginBlock→ T_thresholdMiddleLetterBeginBlock",
     de: "Sie sind dabei, einen Block von xxx-Testversionen zu beginnen. Jeder Versuch enthält drei Buchstaben, wie z. B.: Z R N. Bitte melden Sie nur den mittleren Buchstaben,",
     fr: "Vous êtes sur le point de commencer un bloc d'essais xxx. Chaque essai présentera trois lettres, comme ceci : Z R N. Veuillez ne signaler que la lettre du milieu,",
