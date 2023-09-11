@@ -3534,11 +3534,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "thresholdParameter",
     availability: "now",
-    example: "spacing",
+    example: "",
     explanation:
       '⭑ thresholdParameter (default is the empty string) designates an input parameter (e.g. targetSizeDeg or spacingDeg) that will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacingDeg" (formerly "spacing") varies center-to-center spacing of target and neighboring flankers. \n• "targetSizeDeg" (formerly "size") varies target size. \n• "targetDurationSec" varies target duration.\n• "targetContrast" awaits HDR10 support.\n•  "targetEccentricityXDeg"  may be added in the future.\n• "targetSoundDBSPL" (formerly "soundLevel")  varies target sound level.\n• "targetSoundNoiseDBSPL" varies noise sound level. Not yet implemented.\nNOTE: EasyEyes formerly supported the short crossed-out nicknames (size, spacing, and soundLevel), but we removed them so that only an actual input parameter name (listed in the first column of this Glossary) is allowed as a value of thresholdParameter. ',
     type: "categorical",
-    default: "spacingDeg",
+    default: "",
     categories:
       "spacingDeg, targetSizeDeg, targetOffsetDeg, targetDurationSec, targetContrast, targetSoundDBSPL, targetSoundNoiseDBSPL, targetOffsetDeg",
   },

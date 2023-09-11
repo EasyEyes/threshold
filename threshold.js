@@ -512,7 +512,6 @@ const paramReaderInitialized = async (reader) => {
 
   // Keep track of a simulated observer for each condition
   simulatedObservers = new SimulatedObserversHandler(reader, psychoJS);
-  logger("!. simulatedObservers", simulatedObservers);
 
   // ! Load reading corpus and preprocess
   await loadReadingCorpus(reader);
@@ -4486,9 +4485,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           timeWhenRespondable = 0;
 
         if (simulatedObservers.proceed()) {
-          logger("!. in trialRoutineEachFrame, going to respond");
           await simulatedObservers.respond();
-          logger("!. in trialRoutineEachFrame, responded");
           timeWhenRespondable = 0;
         }
 
@@ -5642,6 +5639,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const currentTrial = currentLoopSnapshot.getCurrentTrial();
         // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
         const BC = currentTrial["trials.label"] ?? currentTrial["label"];
+        status.block_condition = BC;
         addConditionToData(
           paramReader,
           BC,
