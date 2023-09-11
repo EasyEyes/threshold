@@ -3544,10 +3544,12 @@ export const GLOSSARY: Glossary = {
     categories: [
       "spacingDeg",
       "targetSizeDeg",
+      "targetOffsetDeg",
       "targetDurationSec",
       "targetContrast",
       "targetSoundDBSPL",
       "targetSoundNoiseDBSPL",
+      "targetOffsetDeg",
     ],
   },
   thresholdProcedure: {

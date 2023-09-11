@@ -3540,7 +3540,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "spacingDeg",
     categories:
-      "spacingDeg, targetSizeDeg, targetDurationSec, targetContrast, targetSoundDBSPL, targetSoundNoiseDBSPL",
+      "spacingDeg, targetSizeDeg, targetOffsetDeg, targetDurationSec, targetContrast, targetSoundDBSPL, targetSoundNoiseDBSPL, targetOffsetDeg",
   },
   {
     name: "thresholdProcedure",
