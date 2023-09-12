@@ -2477,6 +2477,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current
       );
       trialCounter.setText(trialCounterStr);
+
       updateColor(trialCounter, "instruction", status.block);
       trialCounter.setAutoDraw(true);
 
@@ -3931,7 +3932,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           console.log("proposedOffsetDeg", Math.pow(proposedLevel, 10));
           console.log("targetOffsetDeg", vernierConfig.targetOffsetDeg);
           vernier.update(directionBool);
-          console.log("offset", vernierConfig.offset);
+
           /* -------------------------------------------------------------------------- */
 
           // DISPLAY OPTIONS
@@ -3957,6 +3958,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               thisExperimentInfo.experimentFilename
             );
 
+          trialCounter.setAutoDraw(showCounterBool);
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(...fixation.stims);

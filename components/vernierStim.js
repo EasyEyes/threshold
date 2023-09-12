@@ -9,8 +9,6 @@ export const vernierConfig = {
   color: undefined,
   length: 45,
   width: 2,
-  pos: [0, 0],
-  offset: 20,
   show: true,
   targetColorRGBA: undefined,
   targetDurationSec: 999,
@@ -39,39 +37,42 @@ export const readTrialLevelVenierParams = (reader, BC) => {
 };
 
 export const getUpperLineVertices = (directionBool) => {
-  vernierConfig.offset =
-    XYPixOfXYDeg([vernierConfig.targetOffsetDeg, 0], displayOptions)[0] -
-    vernierConfig.targetEccentricityXDeg;
-  const horizontalOffset = directionBool
-    ? vernierConfig.offset
-    : -vernierConfig.offset;
-  const gap =
-    XYPixOfXYDeg([vernierConfig.targetGapDeg, 0], displayOptions)[0] -
-    vernierConfig.targetEccentricityXDeg;
-  const upperLineX = vernierConfig.targetEccentricityXDeg + horizontalOffset;
-  const upperLineY = vernierConfig.targetEccentricityYDeg + gap / 2;
-  return [
-    [upperLineX, upperLineY],
-    [upperLineX, upperLineY + vernierConfig.length],
+  const horizontalOffsetDeg = directionBool
+    ? vernierConfig.targetOffsetDeg
+    : -vernierConfig.targetOffsetDeg;
+
+  const upperLineXDeg =
+    vernierConfig.targetEccentricityXDeg + horizontalOffsetDeg;
+  const upperLineYDeg =
+    vernierConfig.targetEccentricityYDeg + vernierConfig.targetGapDeg / 2;
+  const upperXYPix = [
+    XYPixOfXYDeg([upperLineXDeg, upperLineYDeg], displayOptions),
+    XYPixOfXYDeg(
+      [upperLineXDeg, upperLineYDeg + vernierConfig.targetLengthDeg],
+      displayOptions
+    ),
   ];
+  return upperXYPix;
 };
 
 export const getLowerLineVertices = (directionBool) => {
-  vernierConfig.offset =
-    XYPixOfXYDeg([vernierConfig.targetOffsetDeg, 0], displayOptions)[0] -
-    vernierConfig.targetEccentricityXDeg;
-  const horizontalOffset = directionBool
-    ? vernierConfig.offset
-    : -vernierConfig.offset;
-  const gap =
-    XYPixOfXYDeg([vernierConfig.targetGapDeg, 0], displayOptions)[0] -
-    vernierConfig.targetEccentricityXDeg;
-  const lowerLineX = vernierConfig.targetEccentricityXDeg - horizontalOffset;
-  const lowerLineY = vernierConfig.targetEccentricityYDeg - gap / 2;
-  return [
-    [lowerLineX, lowerLineY],
-    [lowerLineX, lowerLineY - vernierConfig.length],
+  const horizontalOffsetDeg = directionBool
+    ? vernierConfig.targetOffsetDeg
+    : -vernierConfig.targetOffsetDeg;
+
+  const lowerLineXDeg =
+    vernierConfig.targetEccentricityXDeg - horizontalOffsetDeg;
+  const lowerLineYDeg =
+    vernierConfig.targetEccentricityYDeg - vernierConfig.targetGapDeg / 2;
+  const lowerXYPix = [
+    XYPixOfXYDeg([lowerLineXDeg, lowerLineYDeg], displayOptions),
+    XYPixOfXYDeg(
+      [lowerLineXDeg, lowerLineYDeg - vernierConfig.targetLengthDeg],
+      displayOptions
+    ),
   ];
+  console.log("lowerXYPix", lowerXYPix);
+  return lowerXYPix;
 };
 
 export const restrictOffsetDeg = (proposedOffsetDeg, directionBool) => {

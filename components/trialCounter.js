@@ -82,6 +82,15 @@ export function getTrialInfoStr(
             blockCount
           );
         },
+        vernier: () => {
+          res = replacePlaceholders(
+            readi18nPhrases("T_counterTrialBlock", L),
+            currentTrialIndex,
+            currentTrialLength,
+            currentBlockIndex,
+            blockCount
+          );
+        },
       });
     } else {
       // ...but on block instructions, just show block#
