@@ -352,6 +352,7 @@ import {
   vernierConfig,
   readTrialLevelVenierParams,
   VernierStim,
+  restrictOffsetDeg,
 } from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import {
@@ -3869,10 +3870,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
-          // TODO
-          // ! where are the other font information?
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
           // update component parameters for each repeat
           displayOptions.windowWidthCm = rc.screenWidthCm
@@ -3923,8 +3922,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               `color: red; font-size: 1.5rem; font-family: "${font.name}"`
             );
           correctAns.current = [targetCharacter.toLowerCase()];
-          var directionBool = targetCharacter === fontCharacterSet.current[0];
+          var directionBool = targetCharacter === fontCharacterSet.current[1];
+          vernierConfig.targetOffsetDeg = restrictOffsetDeg(
+            Math.pow(proposedLevel, 10),
+            directionBool
+          );
+          console.log("proposedLevel", proposedLevel);
+          console.log("proposedOffsetDeg", Math.pow(proposedLevel, 10));
+          console.log("targetOffsetDeg", vernierConfig.targetOffsetDeg);
           vernier.update(directionBool);
+          console.log("offset", vernierConfig.offset);
           /* -------------------------------------------------------------------------- */
 
           // DISPLAY OPTIONS
