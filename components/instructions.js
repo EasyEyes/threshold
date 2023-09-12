@@ -343,6 +343,18 @@ export const instructionsText = {
           }
         }
       },
+      targetOffsetDeg: (L, responseType = 2) => {
+        if (targetKind.current === "vernier") {
+          switch (responseType) {
+            case 0:
+              return readi18nPhrases("T_identifyVernierPressIt", L);
+            case 1:
+              return readi18nPhrases("T_identifyVernierClickIt", L);
+            default:
+              return readi18nPhrases("T_identifyVernierPressItOrClickIt", L);
+          }
+        }
+      },
     },
   },
   trialBreak: (L, responseType = 2) => {

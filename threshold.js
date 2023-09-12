@@ -348,6 +348,11 @@ import {
   gyrateFixation,
   offsetStimsToFixationPos,
 } from "./components/fixation.js";
+import {
+  vernierConfig,
+  readTrialLevelVenierParams,
+  VernierStim,
+} from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import {
   isProlificExperiment,
@@ -880,6 +885,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var key_resp;
   var keypad;
   var fixation; ////
+  var vernier;
   var flanker1, flanker2, flanker3, flanker4;
   var target;
   var showCharacterSet;
@@ -921,6 +927,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     /* -------------------------------------------------------------------------- */
     fixation = new Fixation();
     // fixationConfig.stim = fixation;
+    vernier = new VernierStim(vernierConfig);
 
     const psychojsTextStimConfig = {
       win: psychoJS.window,
@@ -1333,6 +1340,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
+      vernier: () => {
+        if (
+          canType(responseType.current) &&
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+        ) {
+          loggerText(
+            "Inside switchKind [vernier] if statement of _instructionRoutineEachFrame"
+          );
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
     });
 
     return Scheduler.Event.FLIP_REPEAT;
@@ -1434,6 +1453,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
             switchKind(_thisBlock.targetKind, {
               letter: () => {
+                blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
+                blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
+                blocksLoopScheduler.add(eduInstructionRoutineEnd(snapshot));
+              },
+              vernier: () => {
                 blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
                 blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
                 blocksLoopScheduler.add(eduInstructionRoutineEnd(snapshot));
@@ -1629,6 +1653,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 seed: Math.round(performance.now()),
               });
               logger("trials", trials);
+              fixationConfig.show = true;
+            },
+            vernier: () => {
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader,
+                "vernier"
+              );
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                nTrials: totalTrialsThisBlock.current,
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+              });
               fixationConfig.show = true;
             },
           });
@@ -2084,6 +2126,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             movie: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
+            vernier: () => {
+              totalTrialsThisBlock.current = getTotalTrialsThisBlock();
+            },
           });
         },
         detect: () => {
@@ -2242,7 +2287,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         letter: () => {
-          console.log(thresholdParameter);
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
               instructionsText.initialByThresholdParameter[thresholdParameter](
@@ -2396,6 +2440,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           loggerText("inside movie");
           _instructionSetup(
             snapshot.block === 0 ? instructionsText.initial(L) : "",
+            status.block
+          );
+        },
+        vernier: () => {
+          _instructionSetup(
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+              "Vernier instruction initial",
             status.block
           );
         },
@@ -2597,6 +2648,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           fixation.setAutoDraw(true);
         },
+        vernier: () => {
+          _instructionSetup("vernier instuction edu", status.block);
+          var h = 50;
+          var D = 200;
+          fixation.setVertices(getFixationVertices(h));
+          fixation.setLineWidth(5);
+          fixation.setPos([0, 0]);
+          fixation.setColor(
+            colorRGBASnippetToRGBA(
+              paramReader.read("markingColorRGBA", status.block)[0]
+            )
+          );
+          fixation.setAutoDraw(true);
+          // vernier.setAutoDraw(true);
+        },
       });
 
       psychoJS.eventManager.clearKeys();
@@ -2641,6 +2707,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         rsvpReading: () => {
           loggerText("TODO rsvpReading eduInstructionRoutineEnd");
+        },
+        vernier: () => {
+          // vernier.setAutoDraw(false);
         },
       });
 
@@ -2788,6 +2857,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterSetResponseType();
         },
         movie: () => {
+          for (let c of snapshot.handler.getConditions()) {
+            if (c.block_condition === trials._currentStaircase._name) {
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
+            }
+          }
+          letterSetResponseType();
+        },
+        vernier: () => {
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
               status.condition = c;
@@ -3762,6 +3840,151 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
         },
+        vernier: () => {
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* ----------------- vernier Trial Instruction Routine BEGIN ----------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+
+          // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
+          _instructionBeforeStimulusSetup(
+            instructionsText.trial.fixate["spacingDeg"](
+              rc.language.value,
+              paramReader.read("responseMustTrackCrosshairBool", BC)
+                ? 3
+                : responseType.current
+            )
+          );
+
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
+          // fixation.setAutoDraw(true);
+
+          clickedContinue.current = false;
+
+          addHandlerForClickingFixation(paramReader);
+          TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
+
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+
+          // TODO
+          // ! where are the other font information?
+
+          // update component parameters for each repeat
+          displayOptions.windowWidthCm = rc.screenWidthCm
+            ? rc.screenWidthCm.value
+            : 30;
+          displayOptions.windowWidthPx = rc.displayWidthPx.value;
+          displayOptions.pixPerCm =
+            displayOptions.windowWidthPx / displayOptions.windowWidthCm;
+          if (!rc.screenWidthCm)
+            console.warn(
+              "[Screen Width] Using arbitrary screen width. Enable RC."
+            );
+
+          readTrialLevelVenierParams(reader, BC);
+          readAllowedTolerances(tolerances, reader, BC);
+          const targetEccentricityXYPx = XYPixOfXYDeg(
+            letterConfig.targetEccentricityXYDeg,
+            displayOptions
+          );
+          fixation.update(paramReader, BC, 100, targetEccentricityXYPx);
+          fixationConfig.pos = fixationConfig.nominalPos;
+          fixation.setPos(fixationConfig.pos);
+
+          validAns = String(reader.read("fontCharacterSet", BC))
+            .toLowerCase()
+            .split("");
+
+          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
+
+          thresholdParameter = reader.read("thresholdParameter", BC);
+
+          showBoundingBox = reader.read("showBoundingBoxBool", BC) || false;
+          showCharacterSetBoundingBox = reader.read(
+            "showCharacterSetBoundingBoxBool",
+            BC
+          );
+
+          /* ------------------------------ Pick random letter ----------------------------- */
+          if (fontCharacterSet.current.length !== 2)
+            throw `[EasyEyes experiment configuration error] You must have 2 characters in your character set for this block_condition, however, the researcher only put ${fontCharacterSet.current.length}.`;
+          var [targetCharacter] = sampleWithoutReplacement(
+            fontCharacterSet.current,
+            1
+          );
+          if (debug)
+            console.log(
+              `%c${targetCharacter}`,
+              `color: red; font-size: 1.5rem; font-family: "${font.name}"`
+            );
+          correctAns.current = [targetCharacter.toLowerCase()];
+          var directionBool = targetCharacter === fontCharacterSet.current[0];
+          vernier.update(directionBool);
+          /* -------------------------------------------------------------------------- */
+
+          // DISPLAY OPTIONS
+          displayOptions.window = psychoJS.window;
+          psychoJS.experiment.addData(
+            "targetLocationPx",
+            targetEccentricityXYPx
+          );
+
+          psychoJS.experiment.addData(
+            "spacingRelationToSize",
+            letterConfig.spacingRelationToSize
+          );
+
+          showCharacterSet.setPos([0, 0]);
+          showCharacterSet.setText("");
+          updateColor(showCharacterSet, "marking", status.block_condition);
+          // showCharacterSet.setText(getCharacterSetShowText(validAns))
+
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecsForLetter(
+              stimulusParameters,
+              thisExperimentInfo.experimentFilename
+            );
+
+          trialComponents = [];
+          trialComponents.push(key_resp);
+          trialComponents.push(...fixation.stims);
+          trialComponents.push(showCharacterSet);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
+
+          simulatedObservers.update(BC, {
+            stimulusIntensity: proposedLevel,
+            possibleResponses: fontCharacterSet.current,
+            correctResponses: [targetCharacter],
+          });
+
+          if (paramReader.read("_trackGazeExternallyBool")[0])
+            recordStimulusPositionsForEyetracking(
+              target,
+              "trialInstructionRoutineBegin"
+            );
+
+          psychoJS.experiment.addData(
+            "trialInstructionBeginDurationSec",
+            trialInstructionClock.getTime()
+          );
+
+          // tinyHint
+          renderObj.tinyHint.setAutoDraw(false);
+
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* ------------------ vernier Trial Instruction Routine END ------------------ */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+          /* -------------------------------------------------------------------------- */
+        },
       });
 
       const customInstructions = getCustomInstructionText(
@@ -3930,6 +4153,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             fixation.setAutoDraw(true);
           }
         },
+        vernier: letterEachFrame,
       });
 
       if (showConditionNameConfig.show) {
@@ -4055,6 +4279,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         },
         movie: () => {
+          _identify_trialInstructionRoutineEnd(instructions, fixation);
+        },
+        vernier: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
         },
       });
@@ -4311,6 +4538,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
         },
+        vernier: () => {
+          responseType.current = resetResponseType(
+            responseType.original,
+            responseType.current,
+            paramReader.read(
+              "responseMustClickCrosshairBool",
+              status.block_condition
+            )
+          );
+          if (paramReader.read("_trackGazeExternallyBool")[0])
+            recordStimulusPositionsForEyetracking(target, "trialRoutineBegin");
+        },
       });
       letterRespondedEarly = false;
 
@@ -4361,6 +4600,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 )
               : instructionsText.trial.respond["sound"](rc.language.value);
           _instructionSetup(instr, status.block_condition);
+        },
+        letter: () => {
+          _instructionSetup(
+            instructionsText.trial.respond[thresholdParameter](
+              rc.language.value,
+              responseType.current
+            ),
+            status.block_condition
+          );
+        },
+        vernier: () => {
+          _instructionSetup(
+            instructionsText.trial.respond[thresholdParameter](
+              rc.language.value,
+              responseType.current
+            ),
+            status.block_condition
+          );
         },
       });
       instructions.setAutoDraw(false);
@@ -4454,7 +4711,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       const delayBeforeStimOnsetSec =
         targetKind.current === "letter" ||
-        targetKind.current === "repeatedLetters"
+        targetKind.current === "repeatedLetters" ||
+        targetKind.current === "vernier"
           ? letterConfig.delayBeforeStimOnsetSec
           : 0;
       /* -------------------------------------------------------------------------- */
@@ -4493,7 +4751,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           delayBeforeStimOnsetSec +
           letterConfig.targetDurationSec -
           psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
-
         // !
         // TODO this is misleading, ie in `letter` targetKind the stimulus onset isn't until the target is drawn
         //     if `delayBeforeStimOnsetSec !== 0` then this `clickToStimulusOnsetSec` would be `delayBeforeStimOnsetSec` early to the stimulus
@@ -4558,6 +4815,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             //video.style.position = "absolute";
             //set continueRoutine = false once movie is over
           },
+          vernier: () => {},
         });
       }
       /* -------------------------------------------------------------------------- */
@@ -4769,6 +5027,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
+            vernier: () => {
+              correctSynth.play();
+              status.trialCorrect_thisBlock++;
+              status.trialCompleted_thisBlock++;
+            },
           });
           // CORRECT
           key_resp.corr = 1;
@@ -4908,6 +5171,63 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             document.body.removeChild(video);
           };
           break;
+      }
+
+      if (targetKind.current === "vernier") {
+        // *target* updates
+
+        if (
+          vernier.status === PsychoJS.Status.STARTED &&
+          !letterTiming.targetStartSec
+        ) {
+          letterTiming.targetStartSec = t;
+          readingTiming.onsets.push(clock.global.getTime());
+          vernier.frameNDrawnConfirmed = frameN;
+          letterTiming.targetDrawnConfirmedTimestamp = performance.now();
+          letterTiming.crosshairClickedTimestamp =
+            clickedContinue.timestamps[clickedContinue.timestamps.length - 1];
+        }
+        if (
+          t >= delayBeforeStimOnsetSec &&
+          vernier.status === PsychoJS.Status.NOT_STARTED
+        ) {
+          // keep track of start time/frame for later
+          vernier.tStart = t; // (not accounting for frame time here)
+          vernier.frameNStart = frameN; // exact frame index
+          vernier.setAutoDraw(true);
+        }
+        if (
+          vernier.status === PsychoJS.Status.FINISHED &&
+          !letterTiming.targetFinishSec
+        ) {
+          letterTiming.targetFinishSec = t;
+          vernier.frameNFinishConfirmed = frameN;
+
+          if (showConditionNameConfig.showTargetSpecs) {
+            const thisDuration =
+              letterTiming.targetFinishSec - letterTiming.targetStartSec;
+            showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
+              Math.round(thisDuration * 100.0) / 100
+            } [${isTimingOK(
+              Math.abs(thisDuration - letterConfig.targetDurationSec),
+              0.02
+            )}]`;
+            targetSpecs.setText(showConditionNameConfig.targetSpecs);
+            updateColor(targetSpecs, "instruction", status.block_condition);
+            showConditionName(conditionName, targetSpecs);
+          }
+        }
+        if (vernier.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+          vernier.setAutoDraw(false);
+          vernier.status = PsychoJS.Status.NOT_STARTED;
+          vernier.frameNEnd = frameN;
+          // Play purr sound
+          // purrSynth.play();
+
+          setTimeout(() => {
+            showCursor();
+          }, 500);
+        }
       }
 
       if (targetKind.current === "letter") {
@@ -5121,6 +5441,37 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             //   "Please identify the orientation by selecting a letter.\n V means vertical, H means horizontal, R means tilted right, and L means tilted left."
             // );
             updateColor(instructions, "instruction", status.block_condition);
+            instructions.tSTart = t;
+            instructions.frameNStart = frameN;
+            instructions.setAutoDraw(true);
+          }
+        },
+        vernier: () => {
+          // *showCharacterSet* updates
+          if (
+            (t >=
+              delayBeforeStimOnsetSec +
+                letterConfig.targetSafetyMarginSec +
+                letterConfig.targetDurationSec ||
+              simulatedObservers.proceed(status.block_condition)) &&
+            showCharacterSet.status === PsychoJS.Status.NOT_STARTED
+          ) {
+            // keep track of start time/frame for later
+            showCharacterSet.tStart = t; // (not accounting for frame time here)
+            showCharacterSet.frameNStart = frameN; // exact frame index
+            showCharacterSet.setAutoDraw(true);
+
+            setupClickableCharacterSet(
+              fontCharacterSet.current,
+              font.name,
+              0, // letter spacing not applicable
+              fontCharacterSet.where,
+              showCharacterSetResponse,
+              null,
+              "",
+              targetKind.current,
+              status.block_condition
+            );
             instructions.tSTart = t;
             instructions.frameNStart = frameN;
             instructions.setAutoDraw(true);
@@ -5489,6 +5840,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 actualStimulusLevel
               );
               // }
+            }
+          },
+          vernier: () => {
+            addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+            if (
+              currentLoop instanceof MultiStairHandler &&
+              currentLoop.nRemaining !== 0
+            ) {
+              const giveToQuest = true;
+              psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
+              currentLoop.addResponse(key_resp.corr, actualStimulusLevel);
             }
           },
         });
