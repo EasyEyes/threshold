@@ -1,10 +1,11 @@
 import { KeyPress } from "../psychojs/src/core/index.js";
 import { rc, _key_resp_allKeys, thisExperimentInfo } from "./global";
+import { psychoJS } from "./globalPsychoJS.js";
 import { readi18nPhrases } from "./readPhrases.js";
 import { logger } from "./utils";
 import { Receiver } from "virtual-keypad";
 
-// const ALPHABET_CONSTANTS = ["ESC", "SPACE"];
+const ALPHABET_CONSTANTS = ["RETURN", "SPACE"];
 
 // TODO clarify between: responseTypedEasyEyesKeypadBool, simulateKeypadBool, wirelessKeyboardNeededBool
 
@@ -26,7 +27,8 @@ export class KeypadHandler {
 
     this.onDataCallback = (message) => {
       if (this.acceptingResponses) {
-        const response = message.response.toLowerCase();
+        let response = message.response.toLowerCase();
+
         const responseKeypress = new KeyPress(undefined, undefined, response);
         _key_resp_allKeys.current.push(responseKeypress);
       }
@@ -52,7 +54,7 @@ export class KeypadHandler {
     return [...this.conditionsRequiringKeypad.values()].some((x) => x);
   }
   async update(alphabet, font, BC) {
-    this.alphabet = alphabet ?? this.alphabet;
+    this.alphabet = this._getFullAlphabet(alphabet ?? this.alphabet);
     this.font = font ?? this.font;
     this.BC = BC ?? this.BC;
     if (!this.receiver) {
@@ -178,16 +180,38 @@ export class KeypadHandler {
     return shouldEndRoutine;
   }
   clearKeys(BC) {
-    if (BC) _key_resp_allKeys.current = [];
+    if (typeof BC !== undefined) {
+      if (this.keypadRequired(BC)) _key_resp_allKeys.current = [];
+      return;
+    }
+    _key_resp_allKeys.current = [];
   }
-  removeSpaceKey() {
-    this.alphabet = this.alphabet.filter((x) => x !== "space");
-    this.update();
-  }
+  // removeSpaceKey() {
+  //   this.alphabet = this.alphabet.filter((x) => x !== "space");
+  //   this.update();
+  // }
   setSensitive() {
     this.sensitive = true;
   }
   setNonSensitive() {
     this.sensitive = false;
+  }
+  _getFullAlphabet(keys) {
+    const full = [];
+    keys.forEach((k) => {
+      switch (k.toLowerCase()) {
+        case "return":
+          full.push("RETURN");
+          break;
+        case "space":
+          full.push("SPACE");
+          break;
+        default:
+          full.push(k);
+      }
+    });
+    if (!full.includes("RETURN")) full.push("RETURN");
+    if (!full.includes("SPACE")) full.push("SPACE");
+    return full;
   }
 }

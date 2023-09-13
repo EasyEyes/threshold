@@ -20,7 +20,7 @@
  */
 
 import { getFontFamilyName } from "./fonts";
-import { phraseIdentificationResponse, font } from "./global";
+import { phraseIdentificationResponse, font, responseType } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import { scaleFontSizeToFit, getMinFontSize } from "./showCharacterSet";
 import {
@@ -35,6 +35,10 @@ export const _responseTypes = {
   0: [false, true, false, false],
   1: [true, false, false, false],
   2: [true, true, false, false],
+  3: [false, false, true, false], // Keypad only
+  4: [false, true, true, false], // Keypad or type
+  5: [true, false, true, false], // Keypad or click
+  6: [true, true, true, false], // Keypad or click or type
 };
 
 export const getResponseType = (
@@ -45,6 +49,15 @@ export const getResponseType = (
   mustClickCrosshairForResponse,
   spokenToExperimenter
 ) => {
+  logger("!. get responseType click", click);
+  logger("!. get responseType type", type);
+  logger("!. get responseType keypad", keypad);
+  logger("!. get responseType speak", speak);
+  logger(
+    "!. get responseType mustClickCrosshairForResponse",
+    mustClickCrosshairForResponse
+  );
+  logger("!. get responseType spokenToExperimenter", spokenToExperimenter);
   // responseMustClickCrosshairBool
   if (mustClickCrosshairForResponse) return 1;
 
@@ -56,6 +69,10 @@ export const getResponseType = (
   if (!c && t && !k && !s) return 0;
   else if (c && !t && !k && !s) return 1;
   else if (c && t && !k && !s) return 2;
+  else if (!c && !t && k && !s) return 3; // Keypad only
+  else if (!c && t && k && !s) return 4; // Keypad or type
+  else if (c && !t && k && !s) return 5; // Keypad or click
+  else if (c && t && k && !s) return 6; // Keypad or click or type
   else return 1;
   // TODO finish other situations
 };
@@ -79,6 +96,9 @@ export const canClick = (responseType) => {
   return _responseTypes[responseType][0];
 };
 
+export const keypadActive = (responseType) => {
+  return _responseTypes[responseType][2];
+};
 /* -------------------------------------------------------------------------- */
 
 export const _onlyClick = (responseType) => {

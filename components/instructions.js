@@ -19,6 +19,16 @@ export const returnOrClickProceed = (L, responseType, prev = "") => {
       return prev + readi18nPhrases("T_continueHitReturn", L);
     case 1:
       return prev + readi18nPhrases("T_continueClickProceed", L);
+    case 3:
+      return prev + readi18nPhrases("T_continueKeypad", L);
+    case 4:
+      return prev + readi18nPhrases("T_continueHitReturnOrKeypad", L);
+    case 5:
+      return prev + readi18nPhrases("T_continueClickProceedOrKeypad", L);
+    case 6:
+      return (
+        prev + readi18nPhrases("T_continueClickProceedOrHitReturnOrKeypad", L)
+      );
     default:
       return prev + readi18nPhrases("T_continueHitReturnOrClickProceed", L);
   }
@@ -180,6 +190,28 @@ export const instructionsText = {
           case 1:
             text +=
               extraSpace + `${readi18nPhrases("T_clickingLetter", L)}\n\n`;
+            break;
+          case 3:
+            text += extraSpace + `${readi18nPhrases("T_keypadLetter", L)}\n\n`;
+            break;
+          case 4:
+            text +=
+              extraSpace +
+              `${readi18nPhrases("T_keypadLetterOrPressingKey", L)}\n\n`;
+            break;
+          case 5:
+            text +=
+              extraSpace +
+              `${readi18nPhrases("T_keypadLetterOrClickingLetter", L)}\n\n`;
+            break;
+          case 6:
+            // TODO add
+            text +=
+              extraSpace +
+              `${readi18nPhrases(
+                "T_keypadLetterOrClickingLetterOrPressingKey",
+                L
+              )}\n\n`;
             break;
           default:
             text +=

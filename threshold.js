@@ -187,6 +187,7 @@ import {
   canType,
   clearPhraseIdentificationRegisters,
   getResponseType,
+  keypadActive,
   resetResponseType,
   setupPhraseIdentification,
 } from "./components/response.js";
@@ -210,6 +211,7 @@ import {
   updateInstructionFont,
   checkIfCursorIsTrackingFixation,
   addHandlerForClickingFixation,
+  returnOrClickProceed,
 } from "./components/instructions.js";
 
 import {
@@ -1280,6 +1282,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     continueRoutine = true;
 
+    if (
+      keypadActive(responseType.current) &&
+      _key_resp_allKeys.current.map((r) => r.name).includes("return")
+    ) {
+      continueRoutine = false;
+      removeProceedButton();
+    }
+
     switchKind(targetKind.current, {
       letter: () => {
         if (
@@ -1331,7 +1341,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       },
       movie: () => {
         if (
-          canType(responseType.current) &&
+          (canType(responseType.current) ||
+            keypadActive(responseType.current)) &&
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
         ) {
           loggerText(
@@ -2254,6 +2265,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         undefined,
         paramReader.read("responseSpokenBool", status.block)[0]
       );
+      logger("!. responseType", responseType.current);
+      logger("!. canClick", canClick(responseType.current));
+      logger("!. canType", canType(responseType.current));
 
       // set default background color for instructions
       screenBackground.colorRGBA = colorRGBASnippetToRGBA(
@@ -2288,16 +2302,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         letter: () => {
-          _instructionSetup(
+          const letterBlockInstructionText =
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
-              instructionsText.initialByThresholdParameter[thresholdParameter](
-                L,
-                responseType.current,
-                totalTrialsThisBlock.current
-              ) +
-              instructionsText.initialEnd(L, responseType.current),
-            status.block
+            instructionsText.initialByThresholdParameter[thresholdParameter](
+              L,
+              responseType.current,
+              totalTrialsThisBlock.current
+            ) +
+            instructionsText.initialEnd(L, responseType.current);
+          logger("!. instruction text", letterBlockInstructionText);
+          logger(
+            "!. thresholdParameter used for instructions",
+            thresholdParameter
           );
+          _instructionSetup(letterBlockInstructionText, status.block);
         },
         repeatedLetters: () => {
           const repeatedLettersBlockInstructs =
@@ -2457,9 +2475,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (canClick(responseType.current) && targetKind.current !== "reading")
         addProceedButton(rc.language.value);
 
+      if (
+        keypadActive(responseType.current) &&
+        targetKind.current !== "reading"
+      ) {
+        await keypad.update(["RETURN"], font.name, undefined);
+        keypad.updateKeypadMessage(returnOrClickProceed(L));
+        keypad.start();
+      }
+
       addBeepButton(L, correctSynth);
 
       psychoJS.eventManager.clearKeys();
+      keypad.clearKeys(status.block_condition);
 
       // reset takeABreak state
       currentBlockCreditForTrialBreak = 0;
@@ -2506,6 +2534,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function initInstructionRoutineEnd() {
     return async function () {
       instructions.setAutoDraw(false);
+      if (keypadActive(responseType.current)) keypad.stop();
 
       removeBeepButton();
 
@@ -2668,6 +2697,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
 
       psychoJS.eventManager.clearKeys();
+      keypad.clearKeys();
       return Scheduler.Event.NEXT;
     };
   }
@@ -4057,6 +4087,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
 
       psychoJS.eventManager.clearKeys();
+      keypad.clearKeys(status.block_condition);
 
       if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
@@ -4222,8 +4253,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       loggerText("trialInstructionRoutineEnd");
 
       keypad.clearKeys(status.block_condition);
-      // TODO if this call hurts timing, remove it and just ignore "space" lentries at trial response time
-      keypad.removeSpaceKey();
+      // TODO disable keypad control keys
       keypad.setSensitive();
       keypad.stop();
       keypad.updateKeypadMessage(
