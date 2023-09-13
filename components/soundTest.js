@@ -1014,9 +1014,9 @@ export const displayCompleteTransducerTable = (
       tr.appendChild(td3);
     } else if (column === "CalibrationDate") {
       td2.innerHTML = LoudspeakerInfo[column];
-      td3.innerHTML = " ";
       tr.appendChild(td1);
       tr.appendChild(td2);
+      td2.setAttribute("colspan", "2");
     } else if (column === "ModelName") {
       td2.innerHTML = LoudspeakerInfo["fullLoudspeakerModelName"];
       td3.innerHTML = microphoneInfo["micFullName"];
@@ -1093,8 +1093,8 @@ export const displaySummarizedTransducerTable = (
   const tr2 = document.createElement("tr");
   const td1 = document.createElement("td");
   const td2 = document.createElement("td");
-  td1.innerHTML = LoudspeakerInfo["ModelName"];
-  td2.innerHTML = microphoneInfo["micModelName"];
+  td1.innerHTML = LoudspeakerInfo["fullLoudspeakerModelName"];
+  td2.innerHTML = microphoneInfo["micFullName"];
   tr2.appendChild(td1);
   tr2.appendChild(td2);
   tbody.appendChild(tr2);
@@ -1103,8 +1103,8 @@ export const displaySummarizedTransducerTable = (
   const tr3 = document.createElement("tr");
   const td3 = document.createElement("td");
   const td4 = document.createElement("td");
-  td3.innerHTML = LoudspeakerInfo["ID"];
-  td4.innerHTML = microphoneInfo["ID"];
+  td3.innerHTML = LoudspeakerInfo["fullLoudspeakerModelNumber"];
+  td4.innerHTML = microphoneInfo["micFullSerialNumber"];
   tr3.appendChild(td3);
   tr3.appendChild(td4);
   tbody.appendChild(tr3);
@@ -1112,22 +1112,10 @@ export const displaySummarizedTransducerTable = (
   // row 4 column 1 is the calibration date, column 2 is empty
   const tr4 = document.createElement("tr");
   const td5 = document.createElement("td");
-  const td6 = document.createElement("td");
   td5.innerHTML = LoudspeakerInfo["CalibrationDate"];
-  td6.innerHTML = " ";
+  td5.setAttribute("colspan", "2");
   tr4.appendChild(td5);
-  tr4.appendChild(td6);
   tbody.appendChild(tr4);
-
-  // add borders
-  // th1.style.border = "0.5px solid grey";
-  // th2.style.border = "0.5px solid grey";
-  // td1.style.border = "0.5px solid grey";
-  // td2.style.border = "0.5px solid grey";
-  // td3.style.border = "0.5px solid grey";
-  // td4.style.border = "0.5px solid grey";
-  // td5.style.border = "0.5px solid grey";
-  // td6.style.border = "0.5px solid grey";
 
   table.appendChild(thead);
   table.appendChild(tbody);
@@ -1136,10 +1124,10 @@ export const displaySummarizedTransducerTable = (
   // table.style.marginLeft = "auto";
   // table.style.marginRight = "auto";
 
-  if (position === "right") {
-    // make the table to the left
-    table.style.marginLeft = "15%";
-  }
+  // if (position === "right") {
+  //   // make the table to the left
+  //   table.style.marginLeft = "15%";
+  // }
 
   // add space between the columns
   th1.style.paddingRight = "20px";

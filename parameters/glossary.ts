@@ -1963,7 +1963,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      "fontColorRGBA is the color of the target font, in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color.",
+      "fontColorRGBA is the color of the target font, in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
   },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
@@ -2069,7 +2069,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      "instructionFontColorRGBA is the color of the instruction font, in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color.",
+      "instructionFontColorRGBA is the color of the instruction font, in RGBA, on a scale of 0 to 1 for each dimension. If the instructions include buttons, then each button's outline is drawn in the same color as the text, both specified by instructionFontColorRGBA. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
   },
   instructionFontLeftToRightBool: {
     name: "instructionFontLeftToRightBool",
@@ -2217,7 +2217,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      "markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color.",
+      "markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
   },
   markingFixationHotSpotRadiusDeg: {
     name: "markingFixationHotSpotRadiusDeg",
@@ -2816,7 +2816,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0.92,0.92,0.92,1",
     explanation:
-      "⭑ screenColorRGBA is the background color for the condition, in RGB, on a scale of 0 to 1 for each dimension. This is used to set the background of the rest of the screen to match the background of a movie.",
+      "⭑ screenColorRGBA is the background color for the condition, in RGB, on a scale of 0 to 1 for each dimension. This is used to set the background of the rest of the screen to match the background of a movie. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
   },
   screenshotBool: {
     name: "screenshotBool",
@@ -3163,7 +3163,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      'targetColorRGBA (default "0,0,0,1") sets target color. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white.',
+      'targetColorRGBA (default "0,0,0,1") sets target color. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
   },
   targetContrast: {
     name: "targetContrast",
