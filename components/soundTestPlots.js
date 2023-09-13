@@ -1,10 +1,12 @@
 import { Chart } from "chart.js/auto";
-import { SoundLevelModel } from "./soundTest";
+import { SoundLevelModel, displaySummarizedTransducerTable } from "./soundTest";
 import {
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
   calibrateSoundBurstsWarmup,
   calibrateSoundHz,
+  loudspeakerInfo,
+  microphoneInfo,
 } from "./global";
 
 export const plotSoundLevels1000Hz = (
@@ -14,7 +16,8 @@ export const plotSoundLevels1000Hz = (
   outDBSPL1000Values,
   title,
   calibrationGoal,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
+  position = "left"
 ) => {
   const subtitleText =
     calibrationGoal === "system"
@@ -193,6 +196,27 @@ export const plotSoundLevels1000Hz = (
     },
   };
   const plot = new Chart(plotCanvas, config);
+  const table = displaySummarizedTransducerTable(
+    loudspeakerInfo.current,
+    microphoneInfo.current,
+    "",
+    isLoudspeakerCalibration,
+    calibrationGoal,
+    ""
+  );
+
+  // add the table to the lower right of the canvas. Adjust the position of the table based on the canvas size
+  const tableDiv = document.createElement("div");
+  tableDiv.appendChild(table);
+  tableDiv.style.position = "absolute";
+  const rect = plotCanvas.getBoundingClientRect();
+  // position the table on the lower right of the canvas (make responsive for different screen sizes)
+  tableDiv.style.top = rect.bottom - 200 + "px";
+  tableDiv.style.right = 100 + "px";
+
+  // make the table on top of the canvas
+  tableDiv.style.zIndex = 1;
+  plotCanvas.parentNode.appendChild(tableDiv);
 };
 
 export const plotForAllHz = (
@@ -244,6 +268,16 @@ export const plotForAllHz = (
         showLine: true,
       },
     ],
+  };
+
+  const plugin = {
+    id: "customHTMLonCanvas",
+    // afterDraw: (chart) => {
+    //   const table = displaySummarizedTransducerTable(
+    //     loudspeakerInfo.current, microphoneInfo.current,"",isLoudspeakerCalibration,calibrationGoal,"");
+    //   const canvas = chart.canvas;
+    //   drawTableOnCanvas(table, canvas);
+    // }
   };
 
   const config = {
@@ -314,10 +348,66 @@ export const plotForAllHz = (
         },
       },
     },
+    plugins: [plugin],
   };
 
   const plot = new Chart(plotCanvas, config);
+  const table = displaySummarizedTransducerTable(
+    loudspeakerInfo.current,
+    microphoneInfo.current,
+    "",
+    isLoudspeakerCalibration,
+    calibrationGoal,
+    ""
+  );
+
+  // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
+  const tableDiv = document.createElement("div");
+  tableDiv.appendChild(table);
+  tableDiv.style.position = "absolute";
+  const rect = plotCanvas.getBoundingClientRect();
+  tableDiv.style.top = rect.bottom - 220 + "px";
+  tableDiv.style.left = 120 + "px";
+
+  // make the table on top of the canvas
+  tableDiv.style.zIndex = 1;
+
+  plotCanvas.parentNode.appendChild(tableDiv);
 };
+// const  drawTableOnCanvas = (table, canvas)=>{
+//   // Get the canvas context
+//   var ctx = canvas.getContext('2d');
+
+//   // Clear any previous content on the canvas
+//   // ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+//   var startX = 0.1 * canvas.width; // 10% of the canvas width
+//   var startY = 0.3 * canvas.height; // 90% of the canvas height
+
+//   // You will need to parse the table and draw each cell and its content manually.
+//   // This example assumes a simple table with text content only.
+//   var rows = table.rows;
+
+//   for (var i = 0; i < rows.length; i++) {
+//     var cells = rows[i].cells;
+//     for (var j = 0; j < cells.length; j++) {
+//       var cell = cells[j];
+//       var cellWidth = parseFloat(window.getComputedStyle(cell).width||160);
+//       var cellHeight = parseFloat(window.getComputedStyle(cell).height||160);
+//       // Calculate the position for this cell
+//       var x = startX;
+//       var y = startY + cellHeight; // Adjust for cell height
+//       // var x = j * cellWidth +20;
+//       // var y = i * cellHeight;
+//       console.log("width",cellWidth,"height",cellHeight,"x",x,"y",y)
+//       ctx.fillText(cell.textContent, x, y + cellHeight);
+//       startX += cellWidth;
+//       // You can use other canvas drawing methods for different cell types (e.g., images).
+//     }
+//     startX = 0.1 * canvas.width;
+//     startY += cellHeight;
+//   }
+// }
 
 export const standardDeviation = (values) => {
   const avg = average(values);

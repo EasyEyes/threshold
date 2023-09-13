@@ -989,6 +989,26 @@ export const displayCompleteTransducerTable = (
     "Model specifier",
     "Calibration Date",
   ];
+
+  // from loudspeakr info and microphone info replace "Unknown", "undefined", "N/A" with ""
+  Object.keys(LoudspeakerInfo).forEach((key) => {
+    if (
+      LoudspeakerInfo[key] === "Unknown" ||
+      LoudspeakerInfo[key] === "undefined" ||
+      LoudspeakerInfo[key] === "N/A"
+    )
+      LoudspeakerInfo[key] = "";
+  });
+
+  Object.keys(microphoneInfo).forEach((key) => {
+    if (
+      microphoneInfo[key] === "Unknown" ||
+      microphoneInfo[key] === "undefined" ||
+      microphoneInfo[key] === "N/A"
+    )
+      microphoneInfo[key] = "";
+  });
+
   columns.forEach((column, idx) => {
     const tr = document.createElement("tr");
     const td1 = document.createElement("td");
@@ -1029,9 +1049,17 @@ export const displayCompleteTransducerTable = (
       tr.appendChild(td1);
       tr.appendChild(td2);
       tr.appendChild(td3);
+    } else if (column === "OEM") {
+      td2.innerHTML = LoudspeakerInfo["OEM"];
+      td3.innerHTML = microphoneInfo["micrFullManufacturerName"]
+        ? microphoneInfo["micrFullManufacturerName"]
+        : microphoneInfo["OEM"];
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
     } else {
-      td2.innerHTML = LoudspeakerInfo[column];
-      td3.innerHTML = microphoneInfo[column];
+      td2.innerHTML = LoudspeakerInfo[column] ? LoudspeakerInfo[column] : "";
+      td3.innerHTML = microphoneInfo[column] ? microphoneInfo[column] : "";
       tr.appendChild(td1);
       tr.appendChild(td2);
       tr.appendChild(td3);
@@ -1055,18 +1083,19 @@ export const displayCompleteTransducerTable = (
 export const displaySummarizedTransducerTable = (
   LoudspeakerInfo,
   microphoneInfo,
-  elems,
+  elems = "",
   isLoudspeakerCalibration,
   calibrationGoal,
   position = "left"
 ) => {
   // the table has two columns and 4 rows
   const table = document.createElement("table");
-  table.setAttribute("id", "summarizedTransducerTable");
+  // table.setAttribute("id", "summarizedTransducerTable");
 
   const thead = document.createElement("thead");
   const tbody = document.createElement("tbody");
-
+  // font size
+  table.style.fontSize = "12px";
   // row 1 includes "Loudspeaker" and "Microphone"
   const tr1 = document.createElement("tr");
   const th1 = document.createElement("th");
@@ -1129,9 +1158,6 @@ export const displaySummarizedTransducerTable = (
   //   table.style.marginLeft = "15%";
   // }
 
-  // add space between the columns
-  th1.style.paddingRight = "20px";
-  th2.style.paddingRight = "20px";
-
-  elems.soundTestPlots.appendChild(table);
+  return table;
+  // elems.soundTestPlots.appendChild(table);
 };
