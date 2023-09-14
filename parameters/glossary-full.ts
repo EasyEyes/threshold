@@ -2607,7 +2607,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "responseTypedEasyEyesKeypadWidthOverHeight",
+    name: "responseTypedKeypadWidthOverHeight",
     availability: "now",
     example: "",
     explanation:
