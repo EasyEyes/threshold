@@ -930,7 +930,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     /* -------------------------------------------------------------------------- */
     fixation = new Fixation();
     // fixationConfig.stim = fixation;
-    vernier = new VernierStim(vernierConfig);
+    vernier = new VernierStim();
 
     const psychojsTextStimConfig = {
       win: psychoJS.window,

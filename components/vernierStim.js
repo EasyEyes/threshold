@@ -71,7 +71,6 @@ export const getLowerLineVertices = (directionBool) => {
       displayOptions
     ),
   ];
-  console.log("lowerXYPix", lowerXYPix);
   return lowerXYPix;
 };
 
@@ -86,27 +85,24 @@ export const restrictOffsetDeg = (proposedOffsetDeg, directionBool) => {
   ];
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
 
-  let targetOffsetDeg = proposedOffsetDeg;
+  vernierConfig.targetOffsetDeg = proposedOffsetDeg;
 
   // Calculate the vertices for the upper and lower lines based on the proposed offset
-  const upperLineVertices = getUpperLineVertices(vernierConfig, directionBool);
-  const lowerLineVertices = getLowerLineVertices(vernierConfig, directionBool);
+  let upperLineVertices = getUpperLineVertices(vernierConfig, directionBool);
+  let lowerLineVertices = getLowerLineVertices(vernierConfig, directionBool);
 
   // Calculate the width of the stimulus based on vertices
-  const stimulusWidthDeg = Math.abs(
+  let stimulusWidthDeg = Math.abs(
     upperLineVertices[0][0] - lowerLineVertices[0][0]
   );
 
   // Check if the stimulus fits within the screen boundaries
   if (stimulusWidthDeg <= screenRectPx.width) {
-    // Stimulus fits, return the calculated targetOffsetDeg
-    return targetOffsetDeg;
+    return vernierConfig.targetOffsetDeg;
   }
 
-  // If the stimulus doesn't fit, you can adjust targetOffsetDeg as needed.
-  // For example, you can reduce it by a fraction until it fits.
   while (stimulusWidthDeg > screenRectPx.width) {
-    targetOffsetDeg *= 0.9; // Adjust the factor as needed
+    vernierConfig.targetOffsetDeg *= 0.9; // Adjust the factor as needed
     // Recalculate stimulus width
     upperLineVertices = getUpperLineVertices(vernierConfig, directionBool);
     lowerLineVertices = getLowerLineVertices(vernierConfig, directionBool);
@@ -115,11 +111,11 @@ export const restrictOffsetDeg = (proposedOffsetDeg, directionBool) => {
     );
   }
 
-  return targetOffsetDeg;
+  return vernierConfig.targetOffsetDeg;
 };
 
 export class VernierStim {
-  constructor(vernierConfig) {
+  constructor() {
     this.stims = [
       new ShapeStim({
         name: "upper line",

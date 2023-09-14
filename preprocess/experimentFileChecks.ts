@@ -32,6 +32,8 @@ import {
   ILLDEFINED_TRACKING_INTERVALS,
   OBSOLETE_PARAMETERS,
   IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE,
+  VERNIER_MUST_USE_TARGETOFFSETDEG,
+  TARGETOFFSETDEG_MUST_USE_VERNIER,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -163,7 +165,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   );
 
   errors.push(...checkSpecificParameterValues(experimentDf));
-
+  errors.push(...checkVernierUsingCorrectThreshold(experimentDf));
   // Remove empty errors (FUTURE ought to be unnecessary, find root cause)
   errors = errors
     .filter((error) => error)
@@ -934,4 +936,25 @@ const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
   const names = offendingParams.map((p) => p["name"]) as string[];
   const types = offendingParams.map((p) => p["type"]) as string[];
   return [IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE(names, types)];
+};
+
+const checkVernierUsingCorrectThreshold = (df: any): EasyEyesError[] => {
+  const thresholdParameter = getColumnValues(df, "thresholdParameter");
+  const targetKind = getColumnValues(df, "targetKind");
+
+  for (let i = 0; i < thresholdParameter.length; i++) {
+    if (
+      thresholdParameter[i] === "targetOffsetDeg" &&
+      targetKind[i] !== "vernier"
+    ) {
+      return [TARGETOFFSETDEG_MUST_USE_VERNIER(targetKind[i], i + 3)];
+    }
+    if (
+      thresholdParameter[i] !== "targetOffsetDeg" &&
+      targetKind[i] === "vernier"
+    ) {
+      return [VERNIER_MUST_USE_TARGETOFFSETDEG(thresholdParameter[i], i + 3)];
+    }
+  }
+  return [];
 };

@@ -582,3 +582,33 @@ export const IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE = (
     parameters: names,
   };
 };
+
+export const VERNIER_MUST_USE_TARGETOFFSETDEG = (
+  thresholdParameter: string,
+  i: number
+): EasyEyesError => {
+  return {
+    name: `thersholdParameter type is unsupported`,
+    message: `By setting targetKind = vernier, you must set thresholdParameter = targetOffsetDeg.`,
+    hint: `The erroneous values is ${thresholdParameter} at column ${toColumnName(
+      i
+    )}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["tresholdParameter"],
+  };
+};
+
+export const TARGETOFFSETDEG_MUST_USE_VERNIER = (
+  targetKind: string,
+  i: number
+): EasyEyesError => {
+  return {
+    name: `targetKind type is unsupported`,
+    message: `By setting thresholdParameter = targetOffsetDeg, you must set targetKind = vernier.`,
+    hint: `The erroneous values is ${targetKind} at column ${toColumnName(i)}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["targetKind"],
+  };
+};
