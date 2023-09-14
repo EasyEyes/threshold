@@ -2694,9 +2694,9 @@ export const GLOSSARY: Glossary = {
     name: "responseMustTrackContinuouslyBool",
     availability: "now",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
     explanation:
-      "⭑ responseMustTrackContinuouslyBool (default TRUE) when TRUE requires that the cursor be within the hotspot for the entire (random) waiting interval, not just the beginning and end. Whenever the cursor is outside the hotspot during the waiting interval then the software begins, again, waiting for the cursor to enter the hotspot, to begin a new waiting inteval (whose duration is a fresh random sample).",
+      "⭑ responseMustTrackContinuouslyBool (default FALSE) when TRUE requires that the cursor be within the hotspot for the entire (random) waiting interval, not just the beginning and end. Whenever the cursor is outside the hotspot during the waiting interval then the software begins, again, waiting for the cursor to enter the hotspot, to begin a new waiting inteval (whose duration is a fresh random sample). responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool.",
   },
   responseMustTrackCrosshairBool: {
     name: "responseMustTrackCrosshairBool",
@@ -2768,7 +2768,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      'responseTypedEasyEyesKeypadBool (default FALSE) = TRUE allows participant to provide any "typed" response by pressing a key in the EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings. \nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis\'s requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone\'s keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say "Connection lost." and offer a "Reconnect" button.\n\n',
+      'responseTypedEasyEyesKeypadBool (default FALSE) = TRUE allows participant to provide any "typed" response by pressing a key in the EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings. \nThe Space and Return keys get the bottom row, and each of them takes half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except space and return) has the aspect ratio specified by responseTypedEasyEyesKeypadWidthOverHeight.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis\'s requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone\'s keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say "Connection lost." and offer a "Reconnect" button.\n\n',
+  },
+  responseTypedEasyEyesKeypadWidthOverHeight: {
+    name: "responseTypedEasyEyesKeypadWidthOverHeight",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "responseTypedEasyEyesKeypadWidthOverHeight (default 1) is the aspect ratio of each key in the keypad, except the Space and Return keys, which together occupy one row, and each occupy half that row.",
   },
   rsvpReadingFlankerCharacterSet: {
     name: "rsvpReadingFlankerCharacterSet",
@@ -3538,7 +3546,7 @@ export const GLOSSARY: Glossary = {
     name: "thresholdParameter",
     availability: "now",
     type: "categorical",
-    default: "",
+    default: "spacingDeg",
     explanation:
       '⭑ thresholdParameter (default is the empty string) designates an input parameter (e.g. targetSizeDeg or spacingDeg) that will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacingDeg" (formerly "spacing") varies center-to-center spacing of target and neighboring flankers. \n• "targetSizeDeg" (formerly "size") varies target size. \n• "targetDurationSec" varies target duration.\n• "targetContrast" awaits HDR10 support.\n•  "targetEccentricityXDeg"  may be added in the future.\n• "targetSoundDBSPL" (formerly "soundLevel")  varies target sound level.\n• "targetSoundNoiseDBSPL" varies noise sound level. Not yet implemented.\nNOTE: EasyEyes formerly supported the short crossed-out nicknames (size, spacing, and soundLevel), but we removed them so that only an actual input parameter name (listed in the first column of this Glossary) is allowed as a value of thresholdParameter. ',
     categories: [
