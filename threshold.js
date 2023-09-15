@@ -4006,6 +4006,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             Math.pow(proposedLevel, 10),
             directionBool
           );
+          level = Math.log(vernierConfig.targetOffsetDeg);
           console.log("proposedLevel", proposedLevel);
           console.log("proposedOffsetDeg", Math.pow(proposedLevel, 10));
           console.log("targetOffsetDeg", vernierConfig.targetOffsetDeg);
@@ -5937,7 +5938,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ) {
               const giveToQuest = true;
               psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
-              currentLoop.addResponse(key_resp.corr, actualStimulusLevel);
+              currentLoop.addResponse(key_resp.corr, level);
             }
           },
         });
