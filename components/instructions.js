@@ -75,6 +75,10 @@ export const spaceOrCrosshair = (L, responseType, prev = "") => {
         return prev + readi18nPhrases("T_readyClickCrosshair", L);
       case 3:
         return prev + readi18nPhrases("T_readyTrackCrosshair", L);
+      case 4:
+        return prev + readi18nPhrases("T_readyPressSpace", L);
+      case 5:
+        return prev + readi18nPhrases("T_readyClickCrosshair", L);
       default:
         return prev + readi18nPhrases("T_readyPressSpaceOrClickCrosshair", L);
     }
@@ -98,6 +102,27 @@ export const instructionsText = {
       readi18nPhrases("T_sentenceGuessingGame", L) +
       "\n\n"
     );
+  },
+  vernierBegin: (L, responseType = 2, trialsThisBlock = 0) => {
+    const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
+    let text = replacePlaceholders(
+      readi18nPhrases("T_thresholdVenierBeginBlock", L),
+      trialsThisBlock
+    );
+    switch (responseType) {
+      case 0:
+        text += extraSpace + `${readi18nPhrases("T_pressingKey", L)}\n\n`;
+        break;
+      case 1:
+        text += extraSpace + `${readi18nPhrases("T_clickingLetter", L)}\n\n`;
+        break;
+      default:
+        text +=
+          extraSpace +
+          `${readi18nPhrases("T_pressingKeyOrClickingLetter", L)}\n\n`;
+        break;
+    }
+    return text;
   },
   initialByThresholdParameter: {
     spacingDeg: (L, responseType = 2, trialsThisBlock = 0) => {
@@ -284,6 +309,9 @@ export const instructionsText = {
     targetSizeDeg: (L) => {
       return readi18nPhrases("T_letterDemo", L);
     },
+    targetOffsetDeg: (L) => {
+      return readi18nPhrases("T_VernierDemo", L);
+    },
   },
   eduBelow: {
     spacingDeg: (L, responseType = 2) => {
@@ -292,6 +320,10 @@ export const instructionsText = {
     },
     targetSizeDeg: (L, responseType = 2) => {
       let t = readi18nPhrases("T_letterBrief", L);
+      return returnOrClickProceed(L, responseType, t);
+    },
+    targetOffsetDeg: (L, responseType = 2) => {
+      let t = readi18nPhrases("T_VernierBrief", L);
       return returnOrClickProceed(L, responseType, t);
     },
   },

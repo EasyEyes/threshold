@@ -2464,11 +2464,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         vernier: () => {
-          _instructionSetup(
+          const vernierBlockInstructionText =
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
-              "Vernier instruction initial",
-            status.block
+            instructionsText.vernierBegin(
+              L,
+              responseType.current,
+              totalTrialsThisBlock.current
+            );
+          logger("!. instruction text", vernierBlockInstructionText);
+          logger(
+            "!. thresholdParameter used for instructions",
+            thresholdParameter
           );
+          _instructionSetup(vernierBlockInstructionText, status.block);
         },
       });
 
@@ -2681,9 +2689,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.setAutoDraw(true);
         },
         vernier: () => {
-          _instructionSetup("vernier instuction edu", status.block);
+          _instructionSetup(
+            instructionsText.edu[thresholdParameter](rc.language.value),
+            status.block
+          );
+          instructions2.setText(
+            instructionsText.eduBelow[thresholdParameter](
+              rc.language.value,
+              responseType.current
+            )
+          );
+          updateColor(instructions2, "instruction", status.block);
+          instructions2.setWrapWidth(window.innerWidth * 0.8);
+          instructions2.setPos([
+            -window.innerWidth * 0.4,
+            -window.innerHeight * 0.4,
+          ]);
+          instructions2.setAutoDraw(true);
+          dynamicSetSize(
+            [instructions, instructions2],
+            instructionsConfig.height
+          );
           var h = 50;
-          var D = 200;
           fixation.setVertices(getFixationVertices(h));
           fixation.setLineWidth(5);
           fixation.setPos([0, 0]);
@@ -2693,7 +2720,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
           );
           fixation.setAutoDraw(true);
-          // vernier.setAutoDraw(true);
+          vernier.stims[0].setVertices([
+            [190, 10],
+            [190, 50],
+          ]);
+          vernier.stims[1].setVertices([
+            [210, -10],
+            [210, -50],
+          ]);
+          vernier.setColor(
+            colorRGBASnippetToRGBA(
+              paramReader.read("markingColorRGBA", status.block)[0]
+            )
+          );
+          vernier.setLineWidth(2);
+          vernier.setAutoDraw(true);
         },
       });
 
@@ -2745,7 +2786,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           loggerText("TODO rsvpReading eduInstructionRoutineEnd");
         },
         vernier: () => {
-          // vernier.setAutoDraw(false);
+          instructions2.setAutoDraw(false);
+          vernier.setAutoDraw(false);
+          vernier.status = PsychoJS.Status.NOT_STARTED;
         },
       });
 
@@ -3194,7 +3237,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
-              paramReader.read("responseMustTrackCrosshairBool", BC)
+              paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
                 : responseType.current
             )
@@ -3564,7 +3607,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
-              paramReader.read("responseMustTrackCrosshairBool", BC)
+              paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
                 : responseType.current
             )
@@ -3731,7 +3774,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
-              paramReader.read("responseMustTrackCrosshairBool", BC)
+              paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
                 : responseType.current
             )
@@ -3885,11 +3928,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
 
-          // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
-              paramReader.read("responseMustTrackCrosshairBool", BC)
+              paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
                 : responseType.current
             )
@@ -4140,7 +4182,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         if (
           paramReader.read(
-            "responseMustTrackCrosshairBool",
+            "responseMustTrackContinuouslyBool",
             status.block_condition
           )
         )
@@ -4187,7 +4229,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (video_generated == true) {
             if (
               paramReader.read(
-                "responseMustTrackCrosshairBool",
+                "responseMustTrackContinuouslyBool",
                 status.block_condition
               )
             )

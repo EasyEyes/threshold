@@ -59,7 +59,7 @@ export const getResponseType = (
   );
   logger("!. get responseType spokenToExperimenter", spokenToExperimenter);
   // responseMustClickCrosshairBool
-  if (mustClickCrosshairForResponse) return 1;
+  // if (mustClickCrosshairForResponse) return 1;
 
   // Default routine
   const c = click,

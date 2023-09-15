@@ -126,8 +126,8 @@ export class VernierStim {
         opacity: undefined,
         depth: -6.0,
         vertices: [
-          [20, 20],
-          [20, 60],
+          [190, 10],
+          [190, 50],
         ],
         units: "pix",
       }),
@@ -140,8 +140,8 @@ export class VernierStim {
         opacity: undefined,
         depth: -6.0,
         vertices: [
-          [-20, -20],
-          [-20, -60],
+          [210, -10],
+          [210, -50],
         ],
         units: "pix",
       }),
@@ -174,6 +174,8 @@ export class VernierStim {
     // Update vertices for the upper line
 
     this.stims[0].setVertices(getUpperLineVertices(directionBool));
+    console.log("upper", getUpperLineVertices(directionBool));
+    console.log("lower", getLowerLineVertices(directionBool));
 
     // Update vertices for the lower line
     this.stims[1].setVertices(getLowerLineVertices(directionBool));
