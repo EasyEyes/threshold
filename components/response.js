@@ -32,9 +32,9 @@ import {
 
 export const _responseTypes = {
   // [click, type, keypad, speak]
-  0: [false, true, false, false],
-  1: [true, false, false, false],
-  2: [true, true, false, false],
+  0: [false, true, false, false], // type only
+  1: [true, false, false, false], // click only
+  2: [true, true, false, false], // click or type
   3: [false, false, true, false], // Keypad only
   4: [false, true, true, false], // Keypad or type
   5: [true, false, true, false], // Keypad or click

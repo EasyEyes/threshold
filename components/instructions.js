@@ -220,23 +220,11 @@ export const instructionsText = {
             text += extraSpace + `${readi18nPhrases("T_keypadLetter", L)}\n\n`;
             break;
           case 4:
-            text +=
-              extraSpace +
-              `${readi18nPhrases("T_keypadLetterOrPressingKey", L)}\n\n`;
+            text += extraSpace + `${readi18nPhrases("T_pressingKey", L)}\n\n`;
             break;
           case 5:
             text +=
-              extraSpace +
-              `${readi18nPhrases("T_keypadLetterOrClickingLetter", L)}\n\n`;
-            break;
-          case 6:
-            // TODO add
-            text +=
-              extraSpace +
-              `${readi18nPhrases(
-                "T_keypadLetterOrClickingLetterOrPressingKey",
-                L
-              )}\n\n`;
+              extraSpace + `${readi18nPhrases("T_clickingLetter", L)}\n\n`;
             break;
           default:
             text +=
@@ -297,6 +285,13 @@ export const instructionsText = {
   },
   initialEnd: (L, responseType = 2) => {
     let t = readi18nPhrases("T_guessingGame", L) + " ";
+    if (_onlyClick(responseType))
+      t += "\n\n" + readi18nPhrases("T_whyClick", L) + "\n\n";
+    t += readi18nPhrases("T_escapeToQuit", L) + " ";
+    return returnOrClickProceed(L, responseType, t);
+  },
+  vernierInitialEnd: (L, responseType = 2) => {
+    let t = readi18nPhrases("T_guessingGameVernier", L) + " ";
     if (_onlyClick(responseType))
       t += "\n\n" + readi18nPhrases("T_whyClick", L) + "\n\n";
     t += readi18nPhrases("T_escapeToQuit", L) + " ";
@@ -525,7 +520,10 @@ const _takeFixationClick = (e) => {
 
 export const addHandlerForClickingFixation = (reader) => {
   // If fixation is to be clicked (ie not tracked) then add a handler
-  if (!reader.read("responseMustTrackCrosshairBool", status.block_condition)) {
+  if (
+    !reader.read("responseMustTrackContinuouslyBool", status.block_condition) &&
+    reader.read("responseClickedBool", status.block_condition)
+  ) {
     document.addEventListener("click", _takeFixationClick);
     document.addEventListener("touchend", _takeFixationClick);
   }

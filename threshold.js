@@ -1783,7 +1783,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current == "sound" ||
         targetKind.current === "repeatedLetters" ||
         targetKind.current === "rsvpReading" ||
-        targetKind.current === "movie") &&
+        targetKind.current === "movie" ||
+        targetKind.current === "vernier") &&
       paramReader.read("showPercentCorrectBool", status.block_condition)
     ) {
       // Proportion correct
@@ -1798,7 +1799,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           )}`
         ),
         instructionsText.trialBreak(rc.language.value, responseType.current),
-        false
+        !canClick(responseType.current)
       );
       await addPopupLogic(thisExperimentInfo.name, responseType.current, null);
     }
@@ -2470,7 +2471,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               L,
               responseType.current,
               totalTrialsThisBlock.current
-            );
+            ) +
+            instructionsText.vernierInitialEnd(L, responseType.current);
           logger("!. instruction text", vernierBlockInstructionText);
           logger(
             "!. thresholdParameter used for instructions",

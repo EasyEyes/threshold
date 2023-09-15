@@ -54,7 +54,7 @@ export const showPopup = (
   document.getElementById(`${keyName}-title`).innerHTML = title;
   document.getElementById(`${keyName}-sub-text`).innerHTML = subText;
 
-  if (hideSubTextAndProceed) hidePopupProceed(keyName);
+  if (hideSubTextAndProceed) hidePopupProceed(keyName, subText);
   else showPopupProceed(keyName, subText, true);
 };
 
@@ -74,8 +74,9 @@ export const showPopupProceed = (keyName, subText, canClick) => {
       "none";
 };
 
-export const hidePopupProceed = (keyName) => {
-  document.getElementById(`${keyName}-sub-text`).style.display = "none";
+export const hidePopupProceed = (keyName, subText) => {
+  const hintEle = document.getElementById(`${keyName}-sub-text`);
+  hintEle.innerHTML = subText;
   document.getElementById(`${keyName}-continue-button`).style.display = "none";
 };
 
