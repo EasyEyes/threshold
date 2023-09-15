@@ -1288,6 +1288,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     ) {
       continueRoutine = false;
       removeProceedButton();
+      keypad.clearKeys();
     }
 
     switchKind(targetKind.current, {
@@ -2534,7 +2535,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function initInstructionRoutineEnd() {
     return async function () {
       instructions.setAutoDraw(false);
-      if (keypadActive(responseType.current)) keypad.stop();
+      // if (keypadActive(responseType.current)) keypad.stop(); // Necessary??
 
       removeBeepButton();
 
@@ -2698,6 +2699,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       psychoJS.eventManager.clearKeys();
       keypad.clearKeys();
+
+      // if (keypadActive(responseType.current)) keypad.start();
       return Scheduler.Event.NEXT;
     };
   }
@@ -2716,6 +2719,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function eduInstructionRoutineEnd() {
     return async function () {
       instructions.setAutoDraw(false);
+      // if (keypadActive(responseType.current)) keypad.stop(); Necessary??
 
       switchKind(targetKind.current, {
         reading: () => {

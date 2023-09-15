@@ -2776,7 +2776,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "responseTypedEasyEyesKeypadWidthOverHeight (default 1) is the aspect ratio of each key in the keypad, except the Space and Return keys, which together occupy one row, and each occupy half that row.",
+      "responseTypedKeypadWidthOverHeight (default 1) is the aspect ratio of each key in the keypad, except the Space and Return keys, which together occupy one row, and each occupy half that row.",
   },
   rsvpReadingFlankerCharacterSet: {
     name: "rsvpReadingFlankerCharacterSet",

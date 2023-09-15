@@ -2611,7 +2611,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "responseTypedEasyEyesKeypadWidthOverHeight (default 1) is the aspect ratio of each key in the keypad, except the Space and Return keys, which together occupy one row, and each occupy half that row.",
+      "responseTypedKeypadWidthOverHeight (default 1) is the aspect ratio of each key in the keypad, except the Space and Return keys, which together occupy one row, and each occupy half that row.",
     type: "numerical",
     default: "1",
     categories: "",

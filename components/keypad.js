@@ -64,9 +64,11 @@ export class KeypadHandler {
     }
   }
   start() {
+    // TODO visually enable keys
     this.acceptingResponses = true;
   }
   stop() {
+    // TODO visually disable keys
     this.acceptingResponses = false;
   }
   forgetKeypad() {
@@ -180,7 +182,7 @@ export class KeypadHandler {
     return shouldEndRoutine;
   }
   clearKeys(BC) {
-    if (typeof BC !== undefined) {
+    if (typeof BC !== "undefined") {
       if (this.keypadRequired(BC)) _key_resp_allKeys.current = [];
       return;
     }
