@@ -82,8 +82,7 @@ export const resetResponseType = (
   responseType,
   mustClickCrosshairForResponse
 ) => {
-  if (mustClickCrosshairForResponse) return originalResponseType;
-  else return responseType;
+  return responseType;
 };
 
 /* -------------------------------------------------------------------------- */

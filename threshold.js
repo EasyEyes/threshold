@@ -4003,13 +4003,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           correctAns.current = [targetCharacter.toLowerCase()];
           var directionBool = targetCharacter === fontCharacterSet.current[1];
           vernierConfig.targetOffsetDeg = restrictOffsetDeg(
-            Math.pow(proposedLevel, 10),
+            Math.pow(10, proposedLevel),
             directionBool
           );
-          level = Math.log(vernierConfig.targetOffsetDeg);
+          level = Math.log10(vernierConfig.targetOffsetDeg);
           console.log("proposedLevel", proposedLevel);
-          console.log("proposedOffsetDeg", Math.pow(proposedLevel, 10));
+          console.log("proposedOffsetDeg", Math.pow(10, proposedLevel));
           console.log("targetOffsetDeg", vernierConfig.targetOffsetDeg);
+          console.log("level", level);
           vernier.update(directionBool);
 
           /* -------------------------------------------------------------------------- */
@@ -5938,6 +5939,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ) {
               const giveToQuest = true;
               psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
+              console.log("level", level);
               currentLoop.addResponse(key_resp.corr, level);
             }
           },
