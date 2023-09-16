@@ -355,6 +355,7 @@ import {
   readTrialLevelVenierParams,
   VernierStim,
   restrictOffsetDeg,
+  offsetVernierToFixationPos,
 } from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import {
@@ -1800,6 +1801,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         instructionsText.trialBreak(rc.language.value, responseType.current),
         !canClick(responseType.current)
       );
+      console.log(keypadActive(responseType.current));
       await addPopupLogic(thisExperimentInfo.name, responseType.current, null);
     }
     // Reset trial counter
@@ -4377,6 +4379,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         vernier: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
+          offsetVernierToFixationPos(vernier);
         },
       });
 
@@ -5949,7 +5952,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ) {
               const giveToQuest = true;
               psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
-              console.log("level", level);
               currentLoop.addResponse(key_resp.corr, level);
             }
           },

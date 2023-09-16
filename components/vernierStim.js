@@ -1,7 +1,7 @@
 import { Polygon, ShapeStim } from "../psychojs/src/visual";
 import { Color, to_px } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
-import { displayOptions } from "./global";
+import { fixationConfig, displayOptions } from "./global";
 
 import { Rectangle, XYPixOfXYDeg, colorRGBASnippetToRGBA } from "./utils";
 
@@ -114,6 +114,27 @@ export const restrictOffsetDeg = (proposedOffsetDeg, directionBool) => {
   return vernierConfig.targetOffsetDeg;
 };
 
+export const offsetVernierToFixationPos = (vernier) => {
+  const fixationDisplacement = [
+    fixationConfig.pos[0] - fixationConfig.nominalPos[0],
+    fixationConfig.pos[1] - fixationConfig.nominalPos[1],
+  ];
+
+  const vertices = [[], []];
+  console.log("offsetVernierToFixationPos");
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 2; j++) {
+      vertices[i].push([
+        vernier.stims[i].vertices[j][0] + fixationDisplacement[0],
+        vernier.stims[i].vertices[j][1] + fixationDisplacement[1],
+      ]);
+    }
+  }
+  vernier.setVertices(vertices);
+  console.log("upper offseted", vernier.stims[0].vertices);
+  console.log("lower offseted", vernier.stims[1].vertices);
+};
+
 export class VernierStim {
   constructor() {
     this.stims = [
@@ -161,13 +182,15 @@ export class VernierStim {
       XYPixOfXYDeg([0, vernierConfig.targetGapDeg], displayOptions)[1] -
       vernierConfig.targetEccentricityYDeg;
     console.log("gap", gap);
-    vernierConfig.length =
-      XYPixOfXYDeg([0, vernierConfig.targetLengthDeg], displayOptions)[1] -
-      vernierConfig.targetEccentricityYDeg;
+    vernierConfig.length = XYPixOfXYDeg(
+      [0, vernierConfig.targetLengthDeg],
+      displayOptions
+    )[1];
     console.log("length", vernierConfig.length);
-    vernierConfig.width =
-      XYPixOfXYDeg([vernierConfig.targetThicknessDeg, 0], displayOptions)[0] -
-      0;
+    vernierConfig.width = XYPixOfXYDeg(
+      [vernierConfig.targetThicknessDeg, 0],
+      displayOptions
+    )[0];
     console.log("width", vernierConfig.width);
     vernierConfig.color = colorRGBASnippetToRGBA(vernierConfig.targetColorRGBA);
     console.log("color", vernierConfig.color);
@@ -202,7 +225,10 @@ export class VernierStim {
     this.setLineWidth(vernierConfig.width);
     this.setColor(vernierConfig.color);
   }
-
+  setVertices(vertices) {
+    this.stims[0].setVertices(vertices[0]);
+    this.stims[1].setVertices(vertices[1]);
+  }
   setColor(color) {
     color = new Color(color);
     this.stims.forEach((stim) => {
