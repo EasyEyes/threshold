@@ -1433,7 +1433,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.serverManager,
           `conditions/block_${_thisBlock.block + 1}.csv`
         );
-
         blocksLoopScheduler.add(importConditions(snapshot, "block"));
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
         blocksLoopScheduler.add(filterRoutineEachFrame());
@@ -2034,6 +2033,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       showCursor();
 
       status.block = snapshot.block + 1;
+      console.log(
+        `%c====== New Block - ${status.block} ======`,
+        "background: orange; color: white; padding: 1rem"
+      );
       status.nthBlock += 1;
       totalBlocks.current = snapshot.nTotal;
 
@@ -6078,21 +6081,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function importConditions(currentLoopSnapshot, snapshotType) {
     return async function () {
-      // if (debug) {
-      if (snapshotType === "block") {
-        console.log(
-          "%c====== New Block ======",
-          "background: orange; color: white; padding: 1rem"
-        );
-      } else if (snapshotType === "trial") {
-        console.log(
-          "%c====== New Trial ======",
-          "background: purple; color: white; padding: 1rem"
-        );
-
+      if (snapshotType === "trial") {
         // ! update trial counter
         // dangerous
         status.trial = currentLoopSnapshot.thisN;
+
+        console.log(
+          `%c====== New Trial - ${status.trial} ======`,
+          "background: purple; color: white; padding: 1rem"
+        );
 
         const parametersToExcludeFromData = [];
         const currentTrial = currentLoopSnapshot.getCurrentTrial();
@@ -6105,7 +6102,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.experiment,
           parametersToExcludeFromData
         );
-      } else {
+      } else if (snapshotType !== "trial" && snapshotType !== "block") {
         console.log(
           "%c====== Unknown Snapshot ======",
           "background: red; color: white; padding: 1rem"
