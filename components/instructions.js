@@ -358,6 +358,8 @@ export const instructionsText = {
               return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
             case 1:
               return readi18nPhrases("T_identifyClickItRepeatedLetters", L);
+            case 4:
+              return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
             default:
               return readi18nPhrases(
                 "T_identifyPressItOrClickItRepeatedLetters",
@@ -370,6 +372,8 @@ export const instructionsText = {
               return readi18nPhrases("T_identifyMiddleLetterPressIt", L);
             case 1:
               return readi18nPhrases("T_identifyMiddleLetterClickIt", L);
+            case 4:
+              return readi18nPhrases("T_identifyMiddleLetterPressIt", L);
             default:
               return readi18nPhrases(
                 "T_identifyMiddleLetterPressItOrClickIt",
@@ -385,6 +389,8 @@ export const instructionsText = {
               return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
             case 1:
               return readi18nPhrases("T_identifyClickItRepeatedLetters", L);
+            case 4:
+              return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
             default:
               return readi18nPhrases(
                 "T_identifyPressItOrClickItRepeatedLetters",
@@ -397,6 +403,8 @@ export const instructionsText = {
               return readi18nPhrases("T_identifyLetterPressIt", L);
             case 1:
               return readi18nPhrases("T_identifyLetterClickIt", L);
+            case 4:
+              return readi18nPhrases("T_identifyLetterPressIt", L);
             default:
               return readi18nPhrases("T_identifyLetterPressItOrClickIt", L);
           }
@@ -409,6 +417,8 @@ export const instructionsText = {
               return readi18nPhrases("T_identifyVernierPressIt", L);
             case 1:
               return readi18nPhrases("T_identifyVernierClickIt", L);
+            case 4:
+              return readi18nPhrases("T_identifyVernierPressIt", L);
             default:
               return readi18nPhrases("T_identifyVernierPressItOrClickIt", L);
           }

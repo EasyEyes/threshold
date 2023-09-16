@@ -1937,7 +1937,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           "readingAnswer",
           targetKind.current,
-          status.block
+          status.block,
+          responseType.current
         );
 
         readingCurrentQuestionIndex.current++;
@@ -1984,7 +1985,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           "readingAnswer",
           targetKind.current,
-          status.block
+          status.block,
+          responseType.current
         );
 
         readingCurrentQuestionIndex.current++;
@@ -4636,6 +4638,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             )
           );
+          console.log("responseType.current", responseType.current);
           if (paramReader.read("_trackGazeExternallyBool")[0])
             recordStimulusPositionsForEyetracking(target, "trialRoutineBegin");
         },
@@ -5464,7 +5467,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               null,
               "",
               "sound",
-              status.block_condition
+              status.block_condition,
+              responseType.current
             );
             speechInNoiseTargetList.current = undefined;
           }
@@ -5492,7 +5496,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               null,
               "",
               targetKind.current,
-              status.block_condition
+              status.block_condition,
+              responseType.current
             );
 
             instructions.tSTart = t;
@@ -5523,7 +5528,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               null,
               "",
               targetKind.current,
-              status.block_condition
+              status.block_condition,
+              responseType.current
             );
 
             // instructions.setText(
@@ -5559,7 +5565,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               null,
               "",
               targetKind.current,
-              status.block_condition
+              status.block_condition,
+              responseType.current
             );
             instructions.tSTart = t;
             instructions.frameNStart = frameN;

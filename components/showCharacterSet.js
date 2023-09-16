@@ -13,6 +13,7 @@ import {
   XYPixOfXYDeg,
   logger,
 } from "./utils";
+import { canClick } from "./response";
 
 function getCharacterSetShowPos(ele, showWhere) {
   switch (showWhere) {
@@ -38,7 +39,8 @@ export function setupClickableCharacterSet(
   extraFunction = null,
   extraCharClassName = "",
   targetKind = "",
-  blockOrCondition
+  blockOrCondition,
+  responseType
 ) {
   const characterSetHolder = document.createElement("div");
   characterSetHolder.id = "characterSet-holder";
@@ -73,7 +75,8 @@ export function setupClickableCharacterSet(
     extraFunction,
     extraCharClassName,
     targetKind,
-    blockOrCondition
+    blockOrCondition,
+    responseType
   );
 
   document.body.appendChild(characterSetHolder);
@@ -104,7 +107,8 @@ export function updateClickableCharacterSet(
   extraFunction = null,
   extraCharClassName = "",
   targetKind = "",
-  blockOrCondition
+  blockOrCondition,
+  responseType
 ) {
   const characterSetHolder = document.querySelector(".characterSet-holder");
   while (characterSetHolder.firstChild) {
@@ -118,7 +122,8 @@ export function updateClickableCharacterSet(
     extraFunction,
     extraCharClassName,
     targetKind,
-    blockOrCondition
+    blockOrCondition,
+    responseType
   );
   return characterSetHolder;
 }
@@ -132,7 +137,8 @@ const pushCharacterSet = (
   extraFunction = null,
   extraCharClassName = "",
   targetKind = "",
-  blockOrCondition
+  blockOrCondition,
+  responseType
 ) => {
   for (const a of ans) {
     const characterSet = document.createElement("span");
@@ -173,13 +179,15 @@ const pushCharacterSet = (
       },
     });
 
-    characterSet.onclick = () => {
-      responseRegister.clickTime.push(performance.now());
-      responseRegister.current.push(a.toLowerCase());
-      safeExecuteFunc(extraFunction, a); // TEMP? For reading response
-      characterSet.style.border = "2px solid black";
-      characterSet.style.backgroundColor = "lightgray";
-    };
+    if (canClick(responseType)) {
+      characterSet.onclick = () => {
+        responseRegister.clickTime.push(performance.now());
+        responseRegister.current.push(a.toLowerCase());
+        safeExecuteFunc(extraFunction, a); // TEMP? For reading response
+        characterSet.style.border = "2px solid black";
+        characterSet.style.backgroundColor = "lightgray";
+      };
+    }
     characterSetHolder.appendChild(characterSet);
   }
 };
