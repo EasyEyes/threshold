@@ -167,16 +167,35 @@ export class VernierStim {
     console.log("length", vernierConfig.length);
     vernierConfig.width =
       XYPixOfXYDeg([vernierConfig.targetThicknessDeg, 0], displayOptions)[0] -
-      vernierConfig.targetEccentricityXDeg;
+      0;
     console.log("width", vernierConfig.width);
     vernierConfig.color = colorRGBASnippetToRGBA(vernierConfig.targetColorRGBA);
     console.log("color", vernierConfig.color);
     // Update vertices for the upper line
 
     this.stims[0].setVertices(getUpperLineVertices(directionBool));
-    console.log("upper", getUpperLineVertices(directionBool));
-    console.log("lower", getLowerLineVertices(directionBool));
-
+    let upper = getUpperLineVertices(directionBool);
+    let lower = getLowerLineVertices(directionBool);
+    console.log(
+      "upper line top",
+      Math.round(upper[0][0]),
+      Math.round(upper[0][1])
+    );
+    console.log(
+      "upper line bottom",
+      Math.round(upper[1][0]),
+      Math.round(upper[1][1])
+    );
+    console.log(
+      "lower line top",
+      Math.round(lower[0][0]),
+      Math.round(lower[0][1])
+    );
+    console.log(
+      "lower line bottom",
+      Math.round(lower[1][0]),
+      Math.round(lower[1][1])
+    );
     // Update vertices for the lower line
     this.stims[1].setVertices(getLowerLineVertices(directionBool));
 
