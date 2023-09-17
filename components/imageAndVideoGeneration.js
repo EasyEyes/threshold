@@ -27,10 +27,10 @@ export async function generate_image(
   let height = bitmapArray[0].length;
   psychoJS.experiment.addData("computePixels", width * height);
   psychoJS.experiment.addData("computeFrames", bitmapArray[0][0].length);
-  logger("bitmapArray[0][0].length", bitmapArray[0][0].length);
-  logger("bitmapArray[0].length", bitmapArray[0].length);
-  logger("bitmapArray.length", bitmapArray.length);
-  logger("bitmapArray", bitmapArray);
+  // logger("bitmapArray[0][0].length", bitmapArray[0][0].length);
+  // logger("bitmapArray[0].length", bitmapArray[0].length);
+  // logger("bitmapArray.length", bitmapArray.length);
+  // logger("bitmapArray", bitmapArray);
   for (let t = 0; t < bitmapArray[0][0].length; t++) {
     let i = 0;
     // logger("bitmapArray.length",bitmapArray.length)
@@ -46,7 +46,7 @@ export async function generate_image(
           temp_data[z++] = bitmapArray[x][y][t];
         }
       }
-      logger("temp_data", temp_data);
+      // logger("temp_data", temp_data);
       let new_data = [];
       for (let m = 0; m < temp_data.length; m = m + 3) {
         new_data.push([
@@ -55,9 +55,9 @@ export async function generate_image(
           temp_data[m + 2] / 65535,
         ]);
       }
-      logger("new_data", new_data);
+      // logger("new_data", new_data);
       let after_pq_data = im_ctrans(new_data, "rgb2020", "pq_rgb", null, 100);
-      logger("after_pq_data", after_pq_data);
+      // logger("after_pq_data", after_pq_data);
       for (let y = 0; y < after_pq_data.length; y++) {
         data[i++] = after_pq_data[y][0] * 65535;
         data[i++] = after_pq_data[y][1] * 65535;
@@ -74,7 +74,7 @@ export async function generate_image(
         }
       }
     }
-    logger("data", data);
+    // logger("data", data);
     let image = new Image(width, height, data, {
       alpha: 1,
       kind: "RGBA",
@@ -297,7 +297,7 @@ export async function evaluateJSCode(
     //logger("parameters deconstructed", Object.keys(parameters));
     // var args =
     //   "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, isRectInRect,movieRectDeg,movieRectPxContainsRectDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentricityXDeg,targetEccentricityYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
-    logger("jsCode", jsCode);
+    // logger("jsCode", jsCode);
     var myFunc = new Function(...Object.keys(parameters), jsCode);
     var returnedValues = myFunc(...Object.values(parameters));
     var imageNit = returnedValues[0];

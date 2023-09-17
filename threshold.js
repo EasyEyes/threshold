@@ -134,6 +134,7 @@ import {
   microphoneCalibrationResults,
   thisDevice,
   loudspeakerInfo,
+  measureLuminance,
 } from "./components/global.js";
 
 import {
@@ -403,6 +404,12 @@ import {
 } from "./components/connectMatlab.js";
 import { readi18nPhrases } from "./components/readPhrases.js";
 import { updateColor } from "./components/color.js";
+import {
+  getDelayBeforeMoviePlays,
+  getLuminanceFilename,
+  addMeasureLuminanceIntervals,
+  initColorCAL,
+} from "./components/photometry.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -2147,6 +2154,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             },
             movie: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
+              if (
+                paramReader
+                  .read("measureLuminanceBool", status.block)
+                  .some((x) => x)
+              ) {
+                if ("serial" in navigator) {
+                  initColorCAL();
+                } else {
+                  console.error("Web Serial API not supported in this browser");
+                }
+              }
             },
             vernier: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
@@ -4841,7 +4859,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         )
           timeWhenRespondable = 0;
 
-        if (simulatedObservers.proceed()) {
+        if (simulatedObservers.proceed(status.block_condition)) {
           await simulatedObservers.respond();
           timeWhenRespondable = 0;
         }
@@ -5249,15 +5267,35 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           break;
         case "movie":
           // Play the movie here
-          // logger("len videoblob", videoblob.length);
           if (videoblob.length > 0 && video_flag == 1) {
-            // loggerText("Running");
-            // document.querySelector("canvas").style.display = "none";
-            // document.getElementById("root").style.display = "none";
             video.setAttribute("src", videoblob);
             document.body.appendChild(video);
-            video.play();
-            video_flag = 0;
+            const delayBeforeMovieForLuminanceMeasuringMs =
+              getDelayBeforeMoviePlays(status.block_condition);
+            if (delayBeforeMovieForLuminanceMeasuringMs != 0) {
+              setTimeout(() => {
+                logger(
+                  "addMeasureLuminanceIntervals called 2",
+                  performance.now()
+                );
+                video.play();
+                video_flag = 0;
+              }, delayBeforeMovieForLuminanceMeasuringMs);
+            } else {
+              video.play();
+              video_flag = 0;
+            }
+            console.log(
+              "delayBeforeMovieForLuminanceMeasuringMs",
+              delayBeforeMovieForLuminanceMeasuringMs
+            );
+            measureLuminance.movieStart =
+              performance.now() + delayBeforeMovieForLuminanceMeasuringMs;
+            console.log(
+              "addMeasureLuminanceIntervals called 1",
+              measureLuminance.movieStart
+            );
+            addMeasureLuminanceIntervals(status.block_condition);
           }
 
           // if movie is done register responses
@@ -5268,6 +5306,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             videoblob = [];
             // loggerText("played");
             document.body.removeChild(video);
+            if (
+              paramReader.read("measureLuminanceBool", status.block_condition)
+            ) {
+              const luminanceFilename = getLuminanceFilename(
+                thisExperimentInfo.expName,
+                status.block_condition,
+                paramReader.read("conditionName", status.block_condition),
+                status.trial
+              );
+              logger("measureLuminance.records", measureLuminance.records);
+              psychoJS.experiment.saveCSV(
+                measureLuminance.records,
+                luminanceFilename
+              );
+            }
           };
           break;
       }
@@ -5518,7 +5571,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             (t >=
               delayBeforeStimOnsetSec +
                 letterConfig.targetSafetyMarginSec +
-                letterConfig.targetDurationSec ||
+                paramReader.read("movieSec", status.block_condition) ||
               simulatedObservers.proceed(status.block_condition)) &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
           ) {

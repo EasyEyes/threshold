@@ -124,7 +124,7 @@ export const im_ctrans = (
     */
   // let col_vec = im2colvec(im)
   let col_vec = im;
-  console.log("col_vec", col_vec);
+  // console.log("col_vec", col_vec);
   if (fromCS != null) {
     var [nl_func, in2xyz] = __to_xyz_cforms[fromCS];
     if (nl_func != null) {
@@ -141,7 +141,7 @@ export const im_ctrans = (
   }
   let transposeM = transpose(M);
   let col_vec_out = multiply(col_vec, multiply(transposeM, exposure));
-  console.log("col_vec_out", col_vec_out);
+  // console.log("col_vec_out", col_vec_out);
   if (to_nl_func != null) {
     // Non-linearity, if needed
     col_vec_out = to_nl_func(col_vec_out);

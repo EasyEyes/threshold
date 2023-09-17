@@ -462,3 +462,11 @@ export const fontSize = { current: "Uninitiated" };
 // };
 
 export const eyeTrackingStimulusRecords = [];
+
+export const measureLuminance = {
+  records: [],
+  movieStart: undefined,
+  movieStartMeasured: undefined,
+  movieValues: undefined,
+  colorimeter: undefined,
+};

@@ -17,12 +17,15 @@ fontCharacterSet,,HVLR
 instructionForBlock,,"Each trial will present flickering stripes. Your job is to report the stripe orientation: horizontal, vertical, tilted left or tilted right. When you're right, you'll hear a beep. Click Proceed to continue."
 instructionForResponse,,"What was the orientation of the stripes? Click or type H for horizontal, V for vertical, L for tilted left or R for tilted right."
 instructionForStimulus,,"When you're ready, track center of the moving crosshair with your mouse pointer."
+measureLuminanceBool,,TRUE
+measureLuminanceDelaySec,,0
+measureLuminanceHz,,1
 movieComputeJS,,tiltedFlickeringGabor.js
-movieHz,,10
-moviePQEncodedBool,,TRUE
+movieHz,,2.5
+moviePQEncodedBool,,FALSE
 movieRectDeg,,"-5,-5,5,5"
 movieRectPxContainsRectDegBool,,FALSE
-movieSec,,1
+movieSec,,4
 movieTargetDelaySec,,0
 responseClickedBool,,TRUE
 responseMustClickCrosshairBool,,TRUE
