@@ -1802,6 +1802,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         !canClick(responseType.current)
       );
       console.log(keypadActive(responseType.current));
+      // if (keypadActive(responseType.current)) keypad.start();
       await addPopupLogic(thisExperimentInfo.name, responseType.current, null);
     }
     // Reset trial counter
@@ -2878,7 +2879,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ),
           paramReader.read("responseSpokenBool", status.block_condition),
           paramReader.read(
-            "responseMustClickCrosshairBool",
+            "responseMustTrackContinuouslyBool",
             status.block_condition
           ),
           paramReader.read("responseSpokenBool", status.block_condition)
@@ -4596,7 +4597,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.original,
             responseType.current,
             paramReader.read(
-              "responseMustClickCrosshairBool",
+              "responseMustTrackContinuouslyBool",
               status.block_condition
             )
           );
@@ -4609,7 +4610,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.original,
             responseType.current,
             paramReader.read(
-              "responseMustClickCrosshairBool",
+              "responseMustTrackContinuouslyBool",
               status.block_condition
             )
           );
@@ -4619,7 +4620,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.original,
             responseType.current,
             paramReader.read(
-              "responseMustClickCrosshairBool",
+              "responseMustTrackContinuouslyBool",
               status.block_condition
             )
           );
@@ -4630,7 +4631,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.original,
             responseType.current,
             paramReader.read(
-              "responseMustClickCrosshairBool",
+              "responseMustTrackContinuouslyBool",
               status.block_condition
             )
           );
@@ -4640,7 +4641,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.original,
             responseType.current,
             paramReader.read(
-              "responseMustClickCrosshairBool",
+              "responseMustTrackContinuouslyBool",
               status.block_condition
             )
           );
@@ -4980,7 +4981,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           const keyList =
             targetKind.current === "rsvpReading" ? ["up", "down"] : validAns;
-          logger("keyList", keyList);
+          // logger("keyList", keyList);
           let theseKeys = key_resp.getKeys({
             keyList: keyList,
             waitRelease: false,

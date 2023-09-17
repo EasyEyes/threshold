@@ -46,7 +46,7 @@ export const getResponseType = (
   type,
   keypad,
   speak,
-  mustClickCrosshairForResponse,
+  responseMustTrackContinuouslyBool,
   spokenToExperimenter
 ) => {
   logger("!. get responseType click", click);
@@ -54,12 +54,12 @@ export const getResponseType = (
   logger("!. get responseType keypad", keypad);
   logger("!. get responseType speak", speak);
   logger(
-    "!. get responseType mustClickCrosshairForResponse",
-    mustClickCrosshairForResponse
+    "!. get responseType responseMustTrackContinuouslyBool",
+    responseMustTrackContinuouslyBool
   );
   logger("!. get responseType spokenToExperimenter", spokenToExperimenter);
-  // responseMustClickCrosshairBool
-  // if (mustClickCrosshairForResponse) return 1;
+  // responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool
+  if (responseMustTrackContinuouslyBool) return 1;
 
   // Default routine
   const c = click,
@@ -80,9 +80,10 @@ export const getResponseType = (
 export const resetResponseType = (
   originalResponseType,
   responseType,
-  mustClickCrosshairForResponse
+  mustTrackContinuouslyBool
 ) => {
-  return responseType;
+  if (mustTrackContinuouslyBool) return originalResponseType;
+  else return responseType;
 };
 
 /* -------------------------------------------------------------------------- */
