@@ -2044,7 +2044,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       status.block = snapshot.block + 1;
       console.log(
-        `%c====== New Block - ${status.block} ======`,
+        `%c====== Block ${status.block} ======`,
         "background: orange; color: white; padding: 1rem"
       );
       status.nthBlock += 1;
@@ -6143,7 +6143,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.trial = currentLoopSnapshot.thisN;
 
         console.log(
-          `%c====== New Trial - ${status.trial} ======`,
+          `%c====== Trial ${status.trial} ======`,
           "background: purple; color: white; padding: 1rem"
         );
 
