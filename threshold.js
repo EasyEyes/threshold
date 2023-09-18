@@ -574,6 +574,7 @@ const paramReaderInitialized = async (reader) => {
       "#rc-panel-holder",
       {
         debug: debug || debugBool.current,
+        i18n: false,
       },
       async () => {
         if (!experimentStarted.current) {
