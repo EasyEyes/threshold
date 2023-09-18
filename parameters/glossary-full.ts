@@ -1942,7 +1942,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec) will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
+      "🕑 markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec) will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
     type: "numerical",
     default: "0.3",
     categories: "",
@@ -1952,7 +1952,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "markingFixationMotionPeriodSec (default 10 s) is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
+      "TO BE REMOVED: markingFixationMotionPeriodSec (default 10 s) is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
     type: "numerical",
     default: "10",
     categories: "",
@@ -1962,7 +1962,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "markingFixationMotionRadiusDeg (default 0.5 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
+      "markingFixationMotionRadiusDeg (default 0.5 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustClickCrosshairBool=TRUE.",
     type: "numerical",
     default: "0.5",
     categories: "",
@@ -2871,9 +2871,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "🕑 showParameters (no default) accepts a comma-separated list of parameter names. In the style of showTargetSpecsBool but allows scientist to specify which parameters to display. All the parameters are displayed at the left edge of the screen, bottom-aligned, one per row, each with its value.",
-    type: "",
+    type: "categorical",
     default: "",
-    categories: "",
+    categories:
+      "block, blockShuffleGroups1, blockShuffleGroups2, blockShuffleGroups3, blockShuffleGroups4, calibrateDistanceCheckBool, calibrateGazeCheckBool, calibrateScreenSizeBool, calibrateScreenSizeCheckBool, calibrateSound1000HzBool, calibrateSound1000HzDB, calibrateSound1000HzSec, calibrateSoundAllHzBool, calibrateSoundAllHzDB, calibrateSoundMaxHz, calibrateSoundMinHz, calibrateSoundSaveToCSVBool, calibrateSoundToleranceDB, calibrateTrackDistanceBool, conditionEnabledBool, conditionName, conditionTrials, errorBool, fixationLocationXScreen, fixationLocationYScreen, font, fontCharacterSet, fontColorRGBA, fontLeftToRightBool, fontMaxPx, fontPadding, fontSource, fontTrackingForLetters, instructionFont, instructionFontLeftToRightBool, instructionFontSource, instructionForBlock, instructionForResponse, instructionForStimulus, instructionForStimulusLocation, logQuestBool, markingBlankedNearTargetBool, markingBlankingRadiusReEccentricity, markingBlankingRadiusReTargetHeight, markingClippedToStimulusRectBool, markingColorRGBA, markingFixationHotSpotRadiusDeg, markingFixationMotionPeriodSec, markingFixationMotionRadiusDeg, markingFixationStrokeLengthDeg, markingFixationStrokeThickening, markingFixationStrokeThicknessDeg, markingOffsetBeforeTargetOnsetSecs, markingOnsetAfterTargetOffsetSecs, markingTargetStrokeLengthDeg, markingTargetStrokeThicknessDeg, markTheFixationBool, markThePossibleTargetsBool, maskerBaseFrequencyMultiplier, maskerSoundDBSPL, maskerSoundFolder, maskerSoundPhrase, measureLuminanceBool, measureLuminanceDelaySec, measureLuminanceHz, movieComputeJS, movieHz, movieLuminanceNit, moviePQEncodedBool, movieRectDeg, movieRectPxContainsRectDegBool, movieSec, movieTargetDelaySec, movieValues, needEasyEyesKeypadBeyondCm, needScreenHeightUpToDeg, needScreenWidthUpToDeg, needTargetSizeDownToDeg, notes, questionAndAnswer@@, readingCorpus, readingFirstFewWords, readingLinesPerPage, readingMaxCharactersPerLine, readingNominalSizeDeg, readingNominalSizePt, readingNumberOfPossibleAnswers, readingNumberOfQuestions, readingPages, readingSetSizeBy, readingSpacingDeg, readingTargetMaxWordFrequency, readingXHeightDeg, readingXHeightPt, responseCharacterHasMedialShapeBool, responseClickedBool, responseMustTrackContinuouslyBool, responseMustTrackMaxSec, responseMustTrackMinSec, responseNegativeFeedbackBool, responsePositiveFeedbackBool, responsePurrWhenReadyBool, responseTypedBool, responseTypedEasyEyesKeypadBool, responseTypedKeypadWidthOverHeight, rsvpReadingFlankerCharacterSet, rsvpReadingNumberOfResponseOptions, rsvpReadingNumberOfWords, rsvpReadingRequireUniqueWordsBool, screenColorRGBA, showBoundingBoxBool, showCharacterSetBoundingBoxBool, showCharacterSetForAllResponsesBool, showCharacterSetWhere, showConditionNameBool, showCounterBool, showCounterWhere, showGazeBool, showGazeNudgerBool, showGrid, showPercentCorrectBool, showProgressBarBool, showTakeABreakCreditBool, showTargetSpecsBool, showViewingDistanceBool, simulateParticipantBool, simulateWithDisplayBool, simulationBeta, simulationDelta, simulationModel, simulationThreshold, soundGainDBSPL, spacingDeg, spacingDirection, spacingIsOuterBool, spacingOverSizeRatio, spacingRelationToSize, spacingSymmetry, takeABreakMinimumDurationSec, takeABreakTrialCredit, targetBoundingBoxHorizontalAlignment, targetColorRGBA, targetContrast, targetCyclePerDeg, targetDelaySec, targetDurationSec, targetEccentricityXDeg, targetEccentricityYDeg, targetGapDeg, targetHz, targetKind, targetLengthDeg, targetMinimumPix, targetOffsetDeg, targetOrientationDeg, targetPhaseSpatialDeg, targetPhaseTemporalDeg, targetRepeatsBorderCharacter, targetRepeatsMaxLines, targetSafetyMarginSec, targetSizeDeg, targetSizeIsHeightBool, targetSoundChannels, targetSoundDBSPL, targetSoundFolder, targetSoundNoiseBool, targetSoundNoiseClockHz, targetSoundNoiseDBSPL, targetSoundNoiseOffsetReTargetSec, targetSoundNoiseOnsetReTargetSec, targetSoundPhrase, targetSpaceConstantDeg, targetTask, targetThicknessDeg, targetTimeConstantSec, thresholdAllowedDurationRatio, thresholdAllowedGazeRErrorDeg, thresholdAllowedGazeXErrorDeg, thresholdAllowedGazeYErrorDeg, thresholdAllowedLatenessSec, thresholdBeta, thresholdDelta, thresholdGamma, thresholdGuess, thresholdGuessLogSd, thresholdParameter, thresholdProcedure, thresholdProportionCorrect, viewingDistanceAllowedRatio, viewingDistanceDesiredCm, viewingDistanceNudgingBool",
   },
   {
     name: "showPercentCorrectBool",
