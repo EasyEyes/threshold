@@ -164,7 +164,7 @@ export class KeypadHandler {
       const expName = thisExperimentInfo.name;
       const container = document.getElementById(`${expName}-container`);
       const title = document.getElementById(`${expName}-title`);
-      const subtitle = document.getElementById(`${expName}-sub-text`);
+      // const subtitle = document.getElementById(`${expName}-sub-text`);
       const popup = document.getElementById(`${expName}-popup`);
 
       popup.style.width = "60%";
@@ -172,17 +172,17 @@ export class KeypadHandler {
 
       qrImage.style.display = "block";
       container.style.display = "block";
-      subtitle.style.display = "block";
+      // subtitle.style.display = "block";
       qrImage.style.margin = "auto";
 
       title.innerHTML = readi18nPhrases(
         "T_keypadScanQRCode",
         rc.language.value
       );
-      subtitle.innerHTML = readi18nPhrases(
-        "T_keypadScanQRCodeSubtitle",
-        rc.language.value
-      );
+      // subtitle.innerHTML = readi18nPhrases(
+      //   "T_keypadScanQRCodeSubtitle",
+      //   rc.language.value
+      // );
       title.appendChild(qrImage);
       if (this.reattemptPopupInterval)
         clearInterval(this.reattemptPopupInterval);
