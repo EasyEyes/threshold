@@ -82,7 +82,12 @@ export const hidePopupProceed = (keyName, subText) => {
 
 /* -------------------------------------------------------------------------- */
 
-export const addPopupLogic = async (keyName, responseType, func = null) => {
+export const addPopupLogic = async (
+  keyName,
+  responseType,
+  func = null,
+  keypad = undefined
+) => {
   return new Promise((resolve) => {
     const proceed = () => {
       document.getElementById(`${keyName}-continue-button`).onclick = () => {
@@ -94,6 +99,19 @@ export const addPopupLogic = async (keyName, responseType, func = null) => {
       safeExecuteFunc(func);
       resolve();
     };
+    const handleVirtualKeyPress = () => {
+      const onDataCallback = (message) => {
+        if (message) {
+          if ((message.response = "RETURN")) {
+            proceed();
+            keypad.receiver.onData = keypad.onDataCallback;
+          }
+        }
+      };
+      if (keypad) {
+        keypad.receiver.onData = onDataCallback;
+      }
+    };
 
     const handleKeyResponse = (e) => {
       e.preventDefault();
@@ -104,6 +122,7 @@ export const addPopupLogic = async (keyName, responseType, func = null) => {
       }
     };
 
+    handleVirtualKeyPress();
     if (canClick(responseType)) {
       showCursor();
       document.getElementById(`${keyName}-continue-button`).onclick = proceed;

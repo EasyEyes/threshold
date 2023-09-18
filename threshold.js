@@ -1810,7 +1810,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       console.log(keypadActive(responseType.current));
       // if (keypadActive(responseType.current)) keypad.start();
-      await addPopupLogic(thisExperimentInfo.name, responseType.current, null);
+      await addPopupLogic(
+        thisExperimentInfo.name,
+        responseType.current,
+        null,
+        keypad
+      );
     }
     // Reset trial counter
     status.trialCorrect_thisBlock = 0;
@@ -5872,7 +5877,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         // was no response the correct answer?!
-        if (key_resp.keys === []) {
+        if (key_resp.keys == []) {
           console.error("[key_resp.keys] No response error.");
         }
 
