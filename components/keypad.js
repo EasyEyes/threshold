@@ -13,15 +13,17 @@ export class KeypadHandler {
   constructor(reader) {
     this.reader = reader;
     this.conditionsRequiringKeypad = this.readKeypadParams();
+    this.disabledMessage =
+      readi18nPhrases("T_keypadInactive", rc.language.value) ?? "";
 
     this.alphabet = [];
-    this.font = "";
+    this.font = "sans-serif";
     this.message = "";
     this.BC = undefined;
 
     this.receiver = undefined;
     this.acceptingResponses = false;
-    // Is the experiment doing something which cannot be interrupted by a
+    // Is the experiment doing something which cannot be interrupted by a response
     this.sensitive = false;
     this.connection = undefined;
 
@@ -54,6 +56,7 @@ export class KeypadHandler {
     return [...this.conditionsRequiringKeypad.values()].some((x) => x);
   }
   async update(alphabet, font, BC) {
+    this.updateKeypadMessage("");
     this.alphabet = this._getFullAlphabet(alphabet ?? this.alphabet);
     this.font = font ?? this.font;
     this.BC = BC ?? this.BC;
@@ -63,20 +66,29 @@ export class KeypadHandler {
       this.receiver.update(this.alphabet, this.font);
     }
   }
+  /**
+   * Set the keypad as active.
+   * Keys show and wait message is removed.
+   * Should run cheaply and without error if called when keypad not in use.
+   */
   start() {
     // TODO visually enable keys
     this.acceptingResponses = true;
+    this.receiver?.update(this.alphabet, this.font);
+    this.updateKeypadMessage("");
   }
   stop() {
     // TODO visually disable keys
     this.acceptingResponses = false;
+    this.receiver?.update([]);
+    this.updateKeypadMessage(this.disabledMessage);
   }
   forgetKeypad() {
     this.receiver = undefined;
     this.connection = undefined;
   }
   updateKeypadMessage(message) {
-    if (this.message !== message && this.connection) {
+    if (this.connection) {
       logger(
         `updating message, from ${this.message} to ${message}`,
         this.message !== message
@@ -87,9 +99,10 @@ export class KeypadHandler {
   }
   async initKeypad() {
     const handshakeCallback = () => {
-      this.updateKeypadMessage(
-        readi18nPhrases("T_keypadConnectedAndKeepReady", rc.language.value)
-      );
+      this.updateKeypadMessage("");
+      // this.updateKeypadMessage(
+      //   readi18nPhrases("T_keypadConnectedAndKeepReady", rc.language.value)
+      // );
       this.hideQRPopup();
     };
     const keypadReceiver = new Receiver(
@@ -152,10 +165,16 @@ export class KeypadHandler {
       const container = document.getElementById(`${expName}-container`);
       const title = document.getElementById(`${expName}-title`);
       const subtitle = document.getElementById(`${expName}-sub-text`);
+      const popup = document.getElementById(`${expName}-popup`);
 
+      popup.style.width = "60%";
+      popup.style.height = "max-content";
+
+      qrImage.style.display = "block";
       container.style.display = "block";
-      container.style.zIndex = Infinity;
       subtitle.style.display = "block";
+      qrImage.style.margin = "auto";
+
       title.innerHTML = readi18nPhrases(
         "T_keypadScanQRCode",
         rc.language.value
@@ -172,6 +191,9 @@ export class KeypadHandler {
   hideQRPopup() {
     const expName = thisExperimentInfo.name;
     const container = document.getElementById(`${expName}-container`);
+    const popup = document.getElementById(`${expName}-popup`);
+    popup.style.width = "40%";
+    popup.style.height = "30%";
 
     container.style.display = "none";
   }
