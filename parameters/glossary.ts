@@ -2177,7 +2177,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "logQuestBool (default FALSE) enables logging of Quest activity in the browser Console",
+      "logQuestBool (default FALSE) enables logging of Quest activity in the browser Console.",
   },
   markingBlankedNearTargetBool: {
     name: "markingBlankedNearTargetBool",
@@ -2217,7 +2217,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      "markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
+      "🕑 markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
   },
   markingFixationHotSpotRadiusDeg: {
     name: "markingFixationHotSpotRadiusDeg",
@@ -2226,6 +2226,14 @@ export const GLOSSARY: Glossary = {
     default: "0.1",
     explanation:
       "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
+  },
+  markingFixationMotionSpeedDegPerSec: {
+    name: "markingFixationMotionSpeedDegPerSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.3",
+    explanation:
+      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec) will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
   },
   markingFixationMotionPeriodSec: {
     name: "markingFixationMotionPeriodSec",
@@ -2656,7 +2664,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "When responseAllowedEarlyBool is TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. Note that enabling early response while clicked responses are allowed forces EasyEyes to show the characterSet early, since clicking requires something to click on. And if responseRequiresCharacterSetBool is TRUE then setting responseAllowedEarlyBool TRUE will force early display of the characterSet regardless of which response modalities are enabled.",
+      "🕑 When responseAllowedEarlyBool is TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. Note that enabling early response while clicked responses are allowed forces EasyEyes to show the characterSet early, since clicking requires something to click on. And if responseRequiresCharacterSetBool is TRUE then setting responseAllowedEarlyBool TRUE will force early display of the characterSet regardless of which response modalities are enabled.",
   },
   responseCharacterHasMedialShapeBool: {
     name: "responseCharacterHasMedialShapeBool",
@@ -2672,7 +2680,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "⭑ Allow participant to respond at every occasion by clicking (e.g. clicking the target letter in the fontCharacterSet). When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too.",
+      "⭑ Allow participant to respond at every occasion by clicking (e.g. clicking the target letter in the fontCharacterSet). When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too. Note that, just for initiating the trial, responseMustTrackContinuouslyBool overrides other responseXXX settings so that the only way to initiate the trial is by tracking with the cursor; it has no effect on other screens, including the stimulus response at the end of the trial. ",
   },
   responseEscapeOptionsBool: {
     name: "responseEscapeOptionsBool",
@@ -2688,7 +2696,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "❌ Setting responseMustClickCrosshairBool TRUE overrules all other response boolean parameters to enable clicking, and ONLY clicking, of the crosshair, to request the next trial. We suppose that clicking the crosshair results in good fixation just before stimulus presentation. This parameter is ignored for other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool.",
+      "❌ responseMustClickCrosshairBool is obsolete. Use responseMustTrackContinuouslyBool instead.",
   },
   responseMustTrackContinuouslyBool: {
     name: "responseMustTrackContinuouslyBool",
@@ -2696,15 +2704,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ responseMustTrackContinuouslyBool (default FALSE) when TRUE requires that the cursor be within the hotspot for the entire (random) waiting interval, not just the beginning and end. Whenever the cursor is outside the hotspot during the waiting interval then the software begins, again, waiting for the cursor to enter the hotspot, to begin a new waiting inteval (whose duration is a fresh random sample). responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool.",
+      "⭑ responseMustTrackContinuouslyBool (default FALSE), when TRUE, imposes a special way of initiating a trial that results in good fixation. It selects a waiting interval by taking a fresh random sample from the uniform distribution over the range responseMustTrackMinSec to responseMustTrackMaxSec.  It requires that the cursor tip be within the hotspot (within markingFixationHotSpotRadiusDeg of the crosshair center) for the entire waiting interval.  Whenever the cursor is outside the hotspot the software resets the waiting process, first waiting for the cursor to enter the hotspot, which begins a new waiting interval (whose duration is a fresh random sample). For initiating a trial, responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. We submitted an article to Journal of Vision about the excellent fixation achieved with responseMustTrackContinuouslyBool. (Kurzawski et al. submitted 2023).",
   },
   responseMustTrackCrosshairBool: {
     name: "responseMustTrackCrosshairBool",
     availability: "now",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
     explanation:
-      "❌ For the participant to get target presentation, responseMustTrackCrosshairBool=TRUE overrules all other response boolean parameters, and target presentation can be requested only by cursor tracking of the crosshair center. We suppose good fixation of the crosshair while it is tracked. responseMustTrackCrosshairBool has no effect on other responses, e.g. identifying the target and proceeding through instructions. It is an error to enable both responseMustClickCrosshairBool and responseMustTrackCrosshairBool. \n     If responseMustTrackCrosshairBool=TRUE, when EasyEyes begins a trial, it enters a loop. First it loads a countdown timer with the required tracking duration, which is randomly sampled from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The countdown begins when the cursor is first within markingFixationHotSpotRadiusDeg of the crosshair center. When the countdown reaches zero, EasyEyes again checks whether the cursor is within markingFixationHotSpotRadiusDeg of the crosshair center. If yes, then EasyEyes exits the loop, and the target is immediately presented. If not, then EasyEyes returns to the beginning of the loop, selecting a new random tracking duration.",
+      "❌ responseMustTrackCrosshairBool is obsolete. Use responseMustTrackContinuouslyBool instead.",
   },
   responseMustTrackMaxSec: {
     name: "responseMustTrackMaxSec",
@@ -2760,7 +2768,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      'responseTypedBool allows participant to respond at every occasion by pressing a key in keyboard. The various response modes are not exclusive. Enable as many as you like. Note: disable typed reponses if you want to force participants to click on fixation as a way tp ensure good fixation when the stimulus is presented. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. But responseMustClickCrosshairBool overrides all other settings while the crosshair is available for clicking.\n',
+      'responseTypedBool allows the participant to respond at every occasion by pressing a key in the keyboard/keypad. The various response modes are not exclusive. Enable as many as you like. Note that, just for initiating the trial, responseMustTrackContinuouslyBool overrides other responseXXX settings so that the only way to initiate the trial is by tracking with the cursor. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. \n',
   },
   responseTypedEasyEyesKeypadBool: {
     name: "responseTypedEasyEyesKeypadBool",
@@ -2768,7 +2776,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      'responseTypedEasyEyesKeypadBool (default FALSE) = TRUE allows participant to provide any "typed" response by pressing a key in the EasyEyes keypad. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings. \nThe Space and Return keys get the bottom row, and each of them takes half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except space and return) has the aspect ratio specified by responseTypedEasyEyesKeypadWidthOverHeight.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis\'s requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone\'s keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say "Connection lost." and offer a "Reconnect" button.\n\n',
+      'responseTypedEasyEyesKeypadBool (default FALSE) = TRUE allows participant to provide any "typed" response by pressing a key in the EasyEyes keypad. responseMustTrackCrosshairBool enables/disables the keypad independently for each block. If any block uses the keypad, the keypad is connected (by pointing camera at QR code) at the beginning of the experiment. The various response modes (responseClickBool responseTypeBool and  are not exclusive. Enable as many as you like, but, for initiating a trial, responseMustTrackCrosshairBool overrides all other settings. \nThe SPACE and RETURN keys get the bottom row, each taking half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except SPACE and RETURN) has the aspect ratio specified by responseTypedEasyEyesKeypadWidthOverHeight. The smartphone connection is established at the beginning of the experiment, before nudging begins. \nPROGRAMMER: All tasks accept text (if responseTypedBool=TRUE) regardless of source (keyboard or keypad). The availability of the keypad is controlled by this switch, but centrally, not by conditionals in the code for each task.\nGus April 14, 2023: Planned improvements:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when disabled (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis\'s requests:\n1. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say "Connection lost." and offer a "Reconnect" button.\n2. EasyEyes compiler should require that all conditions of a block must have the same TRUE/FALSE value of responseTypedEasyEyesKeypadBool.',
   },
   responseTypedKeypadWidthOverHeight: {
     name: "responseTypedKeypadWidthOverHeight",
@@ -2776,7 +2784,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "responseTypedKeypadWidthOverHeight (default 1) is the aspect ratio of each key in the keypad, except the Space and Return keys, which together occupy one row, and each occupy half that row.",
+      "responseTypedKeypadWidthOverHeight (default 1) is the aspect ratio of each key in the keypad, except the Space and Return keys, which together occupy the bottom row, each occupying half the row.",
   },
   rsvpReadingFlankerCharacterSet: {
     name: "rsvpReadingFlankerCharacterSet",
@@ -2930,7 +2938,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "showExperimentNameBool (default FALSE) is useful when making screenshots to show the experimentName (i.e. the name of the Pavlovia repository, e.g. crowding3). It should go in the lower left corner. We have several text messages that stack up there. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
+      "🕑 showExperimentNameBool (default FALSE) is useful when making screenshots to show the experimentName (i.e. the name of the Pavlovia repository, e.g. crowding3). It should go in the lower left corner. We have several text messages that stack up there. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
   },
   showFixationMarkBool: {
     name: "showFixationMarkBool",
@@ -2972,6 +2980,14 @@ export const GLOSSARY: Glossary = {
       "⭑ showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). [pt AND inch NOT YET IMPLEMENTED.] Set showGrid to 'px' for a pixel grid, 'pt' for a typographer \"points\" grid (72 points per inch), 'cm' for a centimeter grid, 'inch' for an inch grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially after a moving crosshair, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you collect human data and when you check timing.",
     categories: ["px", "pt", "cm", "inch", "deg", "mm", "none", "disabled"],
   },
+  showParameters: {
+    name: "showParameters",
+    availability: "now",
+    type: "",
+    default: "",
+    explanation:
+      "🕑 showParameters (no default) accepts a comma-separated list of parameter names. In the style of showTargetSpecsBool but allows scientist to specify which parameters to display. All the parameters are displayed at the left edge of the screen, bottom-aligned, one per row, each with its value.",
+  },
   showPercentCorrectBool: {
     name: "showPercentCorrectBool",
     availability: "now",
@@ -2994,7 +3010,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "If showTakeABreakCreditBool (default FALSE) then display the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, from the bottom up, with glowing green. Empty for zero and full for 1. The box is currently centered at bottom of screen, but we plan to make it contiguous to the trial counter display.",
+      "MANY PARTICIPANTS REPORT LIKING THIS. Intended for long blocks, over 50 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don't do it within a long block, and they may complain that they feel stressed and that their eyes hurt (they sting because they didn't blink during the block, which dries out the cornea), so we added this feature to force a break every so often. If showTakeABreakCreditBool (default FALSE) then display the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, from the bottom up, with glowing green. Empty for zero and full for 1. The box is currently centered at bottom of screen, but we plan to make it contiguous to the trial counter display.",
   },
   showTargetSpecsBool: {
     name: "showTargetSpecsBool",
@@ -3002,14 +3018,15 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ For debugging. If TRUE, showTargetSpecsBool (default FALSE) displays various target parameters, including size and spacing, in lower left corner, similar to the trial/block counter. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
+      "CURRENTLY BROKEN, CRASHES.⭑ For debugging. If TRUE, showTargetSpecsBool (default FALSE) displays various target parameters, including size and spacing, in lower left corner, similar to the trial/block counter. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
   },
   showText: {
     name: "showText",
     availability: "now",
     type: "text",
     default: "",
-    explanation: "Click the crosshair.",
+    explanation:
+      "🕑 Display the text as a left-aligned string. It'd be great to allow basic formatting.",
   },
   showViewingDistanceBool: {
     name: "showViewingDistanceBool",
@@ -3080,7 +3097,7 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "",
     explanation:
-      '❌ soundGainTWR (default 100,10,100) is a comma-separated list of 3 numbers that is used with soundGainDBSPL to specifies the parameters of our model of dynamic range compression of sound in the iPhone microphone: T (in dB SPL), W (in dB), and R (dimensionless). Typically each number will have one digit after the decimal, e.g. "-100.1,-15.1,30.0".\nT is the "threshold" sound level (dB SPL) at the knee in the curve of outDbSPL vs inDb. The curve is straight at low and high sound levels (inDB+soundGainDbSpl<T-W/2 or inDb+soundGainDbSpl>T+W/2). Those lines would intersect at T, but the curve rounds the knee, as controlled by W.\nW is the "width" of the knee. The rounded knee extends from T-W/2 to T+W/2.\nR is the reciprocal of the slope of outDbSPL vs inDb at sound levels above T+W/2.\nIf calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. \nOur compression model (using T, W, and R) is Eq. 4 in Giannoulis et al. (2012).\nGiannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss (2012). Digital Dynamic Range Compressor Design –– A Tutorial and Analysis. Journal of Audio Engineering Society. Vol. 60, Issue 6, pp. 399–408.\nhttp://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf',
+      '❌ soundGainTWR (default 100,10,100) is a comma-separated list of 3 numbers that is used with soundGainDBSPL to specify the parameters of our model of dynamic range compression of sound in the iPhone microphone: T (in dB SPL), W (in dB), and R (dimensionless). Typically each number will have one digit after the decimal, e.g. "-100.1,-15.1,30.0".\nT is the "threshold" sound level (dB SPL) at the knee in the curve of outDbSPL vs inDb. The curve is straight at low and high sound levels (inDB+soundGainDbSpl<T-W/2 or inDb+soundGainDbSpl>T+W/2). Those lines would intersect at T, but the curve rounds the knee, as controlled by W.\nW is the "width" of the knee. The rounded knee extends from T-W/2 to T+W/2.\nR is the reciprocal of the slope of outDbSPL vs inDb at sound levels above T+W/2.\nIf calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. \nOur compression model (using T, W, and R) is Eq. 4 in Giannoulis et al. (2012).\nGiannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss (2012). Digital Dynamic Range Compressor Design –– A Tutorial and Analysis. Journal of Audio Engineering Society. Vol. 60, Issue 6, pp. 399–408.\nhttp://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf',
   },
   spacingDeg: {
     name: "spacingDeg",
@@ -3154,7 +3171,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.05",
     explanation:
-      'MANY PARTICIPANTS REPORT LIKING THIS. Intended for long blocks, over 50 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don\'t do that within a long block, and they may complain that they feel stressed and that their eyes sting (because they didn\'t blink during the block), so we added this feature to force a break every so often. takeABreakTrialCredit sets the value that accrues from performing each trial of this condition. Set it to zero for no breaks. The block\'s running total, regardless of condition, is kept in the internal parameter takeABreakCredit, which is zero at the beginning of each block. When takeABreakCredit exceeds 1, EasyEyes immediately subtracts 1 and takes a break. \nTHE BREAK\nEasyEyes displays a pop-up window with a dark surround, "Good work! Please take a brief break to relax and blink." Responses (except ESCAPE) and viewing-distance nudging are suspended for the time specified by takeABreakMinimumDurationSec. Then EasyEyes reenables responses, adds a Proceed button, and adds text, "To continue hit Proceed or RETURN." The participant can take as long as they need. When they hit Proceed (or RETURN), EasyEyes closes the pop up window, reenables the nudger (if it was formerly active), and resumes testing. ',
+      'takeABreakTrialCredit sets the value that accrues from performing each trial of this condition. See showTakeABreakBool for explanation. Set it to zero for no breaks. The block\'s running total, regardless of condition, is kept in the internal parameter takeABreakCredit, which is zero at the beginning of each block. When takeABreakCredit exceeds 1, EasyEyes immediately subtracts 1 and takes a break. \nTHE BREAK\nEasyEyes displays a pop-up window with a dark surround, "Good work! Please take a brief break to relax and blink." Responses (except ESCAPE) and viewing-distance nudging are suspended for the time specified by takeABreakMinimumDurationSec. Then EasyEyes reenables responses, adds a Proceed button, and adds text, "To continue hit Proceed or RETURN." The participant can take as long as they need. When they hit Proceed (or RETURN), EasyEyes closes the pop up window, reenables the nudger (if it was formerly active), and resumes testing. ',
   },
   targetBoundingBoxHorizontalAlignment: {
     name: "targetBoundingBoxHorizontalAlignment",

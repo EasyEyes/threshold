@@ -667,7 +667,7 @@ const handleLanguage = (lang, rc, useEnglishNames = true) => {
   // convert to language code
   const Languages = useEnglishNames
     ? readi18nPhrases("EE_languageNameEnglish")
-    : readi18nPhrases("phrases.EE_languageNameNative");
+    : readi18nPhrases("EE_languageNameNative");
   const languageCode = Object.keys(Languages).find(
     (key) => Languages[key] === lang
   );
@@ -676,6 +676,7 @@ const handleLanguage = (lang, rc, useEnglishNames = true) => {
   if (languageCode) {
     rc.newLanguage(languageCode);
   }
+  console.log("languageCode", languageCode);
 };
 
 const handleNewMessage = (msg, msgID, lang) => {
