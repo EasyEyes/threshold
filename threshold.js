@@ -6091,9 +6091,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ),
               canClick(responseType.current)
             );
-            addPopupLogic(thisExperimentInfo.name, responseType.current, () => {
-              resolve(Scheduler.Event.NEXT);
-            });
+            addPopupLogic(
+              thisExperimentInfo.name,
+              responseType.current,
+              () => {
+                resolve(Scheduler.Event.NEXT);
+              },
+              keypad
+            );
           }, takeABreakMinimumDurationSec * 1000);
         });
       }
