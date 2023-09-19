@@ -2315,6 +2315,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block
       )[0];
 
+      if (
+        paramReader
+          .read("responseTypedEasyEyesKeypadBool", status.block)
+          .some((x) => x)
+      ) {
+        keypad.start();
+      } else {
+        keypad.stop();
+      }
+
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //setup instruction

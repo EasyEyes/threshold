@@ -1,5 +1,5 @@
 import { KeyPress } from "../psychojs/src/core/index.js";
-import { rc, _key_resp_allKeys, thisExperimentInfo } from "./global";
+import { status, rc, _key_resp_allKeys, thisExperimentInfo } from "./global";
 import { psychoJS } from "./globalPsychoJS.js";
 import { readi18nPhrases } from "./readPhrases.js";
 import { logger } from "./utils";
@@ -13,8 +13,13 @@ export class KeypadHandler {
   constructor(reader) {
     this.reader = reader;
     this.conditionsRequiringKeypad = this.readKeypadParams();
-    this.disabledMessage =
-      readi18nPhrases("T_keypadInactive", rc.language.value) ?? "";
+    const keypadDistanceThreshold = String(
+      Math.round(Number(this.reader.read("needEasyEyesKeypadBeyondCm")[0]))
+    );
+    this.disabledMessage = readi18nPhrases(
+      "T_keypadInactive",
+      rc.language.value
+    ).replace("111", keypadDistanceThreshold);
 
     this.alphabet = [];
     this.font = "sans-serif";
@@ -75,7 +80,17 @@ export class KeypadHandler {
     // TODO visually enable keys
     this.acceptingResponses = true;
     this.receiver?.update(this.alphabet, this.font);
-    this.updateKeypadMessage("");
+    // TODO this breaks if keypad use is not unique within block
+    if (
+      this.keypadRequired(this.BC) ||
+      this.reader
+        .read("responseTypedEasyEyesKeypadBool", status.block)
+        .some((x) => x)
+    ) {
+      this.updateKeypadMessage("");
+    } else {
+      this.updateKeypadMessage(this.disabledMessage);
+    }
   }
   stop() {
     // TODO visually disable keys
@@ -88,6 +103,7 @@ export class KeypadHandler {
     this.connection = undefined;
   }
   updateKeypadMessage(message) {
+    console.log("!. to update message", message);
     if (this.connection) {
       logger(
         `updating message, from ${this.message} to ${message}`,
@@ -99,10 +115,17 @@ export class KeypadHandler {
   }
   async initKeypad() {
     const handshakeCallback = () => {
-      this.updateKeypadMessage("");
-      // this.updateKeypadMessage(
-      //   readi18nPhrases("T_keypadConnectedAndKeepReady", rc.language.value)
-      // );
+      setTimeout(() => {
+        if (
+          this.reader
+            .read("responseTypedEasyEyesKeypadBool", status.block)
+            .some((x) => x)
+        ) {
+          this.start();
+        } else {
+          this.stop();
+        }
+      }, 1000);
       this.hideQRPopup();
     };
     const keypadReceiver = new Receiver(
