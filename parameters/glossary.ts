@@ -2233,7 +2233,7 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "",
     explanation:
-      "❌ markingFixationMotionPeriodSec is obsolete. Use markingFixationMotionSpeedDegPerSec instead.",
+      "❌ Obsolete. Use markingFixationMotionSpeedDegPerSec instead.",
   },
   markingFixationMotionSpeedDegPerSec: {
     name: "markingFixationMotionSpeedDegPerSec",
@@ -2241,7 +2241,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.3",
     explanation:
-      "🕑 markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec) will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
+      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
   },
   markingFixationMotionRadiusDeg: {
     name: "markingFixationMotionRadiusDeg",
