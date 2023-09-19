@@ -2315,6 +2315,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block
       )[0];
 
+      if (
+        paramReader
+          .read("responseTypedEasyEyesKeypadBool", status.block)
+          .some((x) => x)
+      ) {
+        keypad.start();
+      } else {
+        keypad.stop();
+      }
+
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //setup instruction
@@ -2522,8 +2532,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         keypadActive(responseType.current) &&
         targetKind.current !== "reading"
       ) {
-        await keypad.update(["RETURN"], font.name, undefined);
-        keypad.updateKeypadMessage(returnOrClickProceed(L));
+        await keypad.update(["RETURN"], "sans-serif", undefined);
+        // await keypad.update(["RETURN"], font.name, undefined);
+        // keypad.updateKeypadMessage(returnOrClickProceed(L));
         keypad.start();
       }
 
@@ -3059,10 +3070,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         s.setCharacterSet(fontCharacterSet.current.join(""))
       );
 
-      if (keypad.keypadRequired(BC) && !simulatedObservers.proceed(BC)) {
-        const keypadAlphabet = [...fontCharacterSet.current, "space"];
-        await keypad.update(keypadAlphabet, font.name, BC);
-        keypad.start();
+      if (!simulatedObservers.proceed(BC)) {
+        if (keypad.keypadRequired(BC)) {
+          await keypad.update([...fontCharacterSet.current], "sans-serif", BC);
+          // await keypad.update([...fontCharacterSet.current], font.name, BC);
+          keypad.start();
+        } else {
+          keypad.stop();
+        }
       }
 
       showConditionNameConfig.show = paramReader.read(
@@ -4337,10 +4352,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       keypad.clearKeys(status.block_condition);
       // TODO disable keypad control keys
       keypad.setSensitive();
-      keypad.stop();
-      keypad.updateKeypadMessage(
-        readi18nPhrases("T_keypadContinueExperiment", rc.language.value)
-      );
+      // keypad.stop();
+      // keypad.updateKeypadMessage(
+      //   readi18nPhrases("T_keypadContinueExperiment", rc.language.value)
+      // );
 
       rc.pauseDistance();
       if (toShowCursor()) {
@@ -4945,14 +4960,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (
         t >= timeWhenRespondable &&
-        keypad.keypadRequired(status.block_condition) &&
         !simulatedObservers.proceed(status.block_condition)
       ) {
         keypad.start();
         keypad.setNonSensitive();
-        keypad.updateKeypadMessage(
-          readi18nPhrases("T_keypadReadyForResponse", rc.language.value)
-        );
+        // keypad.updateKeypadMessage(
+        //   readi18nPhrases("T_keypadReadyForResponse", rc.language.value)
+        // );
       }
       // *key_resp* updates
       if (
