@@ -49,7 +49,6 @@ import {
   removeElements,
   saveLoudSpeakerInfo,
 } from "./soundCalibrationHelpers";
-import { testResults } from "./testData";
 export const useCalibration = (reader) => {
   return ifTrue([
     ...reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"),
@@ -1457,12 +1456,12 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                 elems.displayQR.style.display = "flex";
                 elems.displayQR.style.marginLeft = "0px";
                 elems.displayQR.style.flexDirection = "column";
-                soundCalibrationResults.current = testResults;
-                // await Speaker.startCalibration(
-                //   speakerParameters,
-                //   calibrator,
-                //   timeoutSec.current
-                // );
+                soundCalibrationResults.current =
+                  await Speaker.startCalibration(
+                    speakerParameters,
+                    calibrator,
+                    timeoutSec.current
+                  );
                 elems.message.style.whiteSpace = "normal";
                 elems.message.style.fontSize = "1.1rem";
                 elems.message.style.fontWeight = "normal";
@@ -1533,13 +1532,13 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                     ) / 10,
                   CalibrationDate: calibrationTime.current,
                 };
-                // await saveLoudSpeakerInfo(
-                //   loudspeakerInfo.current,
-                //   modelNumber,
-                //   thisDevice.current.OEM,
-                //   invertedImpulseResponse.current,
-                //   soundCalibrationResults.current.componentIR
-                // );
+                await saveLoudSpeakerInfo(
+                  loudspeakerInfo.current,
+                  modelNumber,
+                  thisDevice.current.OEM,
+                  invertedImpulseResponse.current,
+                  soundCalibrationResults.current.componentIR
+                );
               } catch (err) {
                 console.log(err);
               }
