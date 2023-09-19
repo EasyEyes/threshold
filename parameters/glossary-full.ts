@@ -1938,7 +1938,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "markingFixationMotionSpeedDegPerSec",
+    name: "markingFixationMotionPeriodSec",
     availability: "now",
     example: "",
     explanation:
@@ -1948,7 +1948,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "markingFixationMotionPeriodSec",
+    name: "markingFixationMotionRadiusDeg",
     availability: "now",
     example: "",
     explanation:
@@ -1958,7 +1958,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "markingFixationMotionRadiusDeg",
+    name: "markingFixationMotionSpeedDegPerSec",
     availability: "now",
     example: "0.5",
     explanation:

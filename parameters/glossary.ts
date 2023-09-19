@@ -2227,24 +2227,24 @@ export const GLOSSARY: Glossary = {
     explanation:
       "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
   },
-  markingFixationMotionSpeedDegPerSec: {
-    name: "markingFixationMotionSpeedDegPerSec",
+  markingFixationMotionPeriodSec: {
+    name: "markingFixationMotionPeriodSec",
     availability: "now",
     type: "numerical",
     default: "0.3",
     explanation:
       "🕑 markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec) will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
   },
-  markingFixationMotionPeriodSec: {
-    name: "markingFixationMotionPeriodSec",
+  markingFixationMotionRadiusDeg: {
+    name: "markingFixationMotionRadiusDeg",
     availability: "now",
     type: "numerical",
     default: "10",
     explanation:
       "TO BE REMOVED: markingFixationMotionPeriodSec (default 10 s) is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
   },
-  markingFixationMotionRadiusDeg: {
-    name: "markingFixationMotionRadiusDeg",
+  markingFixationMotionSpeedDegPerSec: {
+    name: "markingFixationMotionSpeedDegPerSec",
     availability: "now",
     type: "numerical",
     default: "0.5",
