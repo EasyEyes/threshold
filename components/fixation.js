@@ -71,14 +71,17 @@ export class Fixation {
       "markingFixationStrokeThicknessDeg",
       BC
     );
-    fixationConfig.markingFixationMotionPeriodSec = reader.read(
-      "markingFixationMotionPeriodSec",
-      BC
-    );
     fixationConfig.markingFixationMotionRadiusDeg = reader.read(
       "markingFixationMotionRadiusDeg",
       BC
     );
+    const markingFixationMotionSpeedDegPerSec = reader.read(
+      "markingFixationMotionSpeedDegPerSec",
+      BC
+    );
+    fixationConfig.markingFixationMotionPeriodSec =
+      (2 * Math.PI * fixationConfig.markingFixationMotionRadiusDeg) /
+      markingFixationMotionSpeedDegPerSec;
     fixationConfig.markingFixationHotSpotRadiusDeg = reader.read(
       "markingFixationHotSpotRadiusDeg",
       BC

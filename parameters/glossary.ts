@@ -2227,24 +2227,24 @@ export const GLOSSARY: Glossary = {
     explanation:
       "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
   },
-  markingFixationMotionSpeedDegPerSec: {
-    name: "markingFixationMotionSpeedDegPerSec",
+  markingFixationMotionPeriodSec: {
+    name: "markingFixationMotionPeriodSec",
     availability: "now",
     type: "numerical",
     default: "0.3",
     explanation:
       "🕑 markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec) will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
   },
-  markingFixationMotionPeriodSec: {
-    name: "markingFixationMotionPeriodSec",
+  markingFixationMotionRadiusDeg: {
+    name: "markingFixationMotionRadiusDeg",
     availability: "now",
     type: "numerical",
     default: "10",
     explanation:
       "TO BE REMOVED: markingFixationMotionPeriodSec (default 10 s) is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
   },
-  markingFixationMotionRadiusDeg: {
-    name: "markingFixationMotionRadiusDeg",
+  markingFixationMotionSpeedDegPerSec: {
+    name: "markingFixationMotionSpeedDegPerSec",
     availability: "now",
     type: "numerical",
     default: "0.5",
@@ -2454,10 +2454,10 @@ export const GLOSSARY: Glossary = {
   needEasyEyesKeypadBeyondCm: {
     name: "needEasyEyesKeypadBeyondCm",
     availability: "now",
-    type: "obsolete",
-    default: "",
+    type: "numerical",
+    default: "50",
     explanation:
-      "🕑 needEasyEyesKeypadBeyondCm (default 60). If the required viewingDistanceCm exceeds this threshold then EasyEyes will recruit the participant's smartphone (at the beginning of the experiment) and activate a keypad/trackpad on that smartphone during each block that requires it. The phone will be recruited at the beginning of the experiment (on the compatibility page), and will remain connected until the end of the experiment.The keypad will be activate only for blocks with a viewingDistanceCm that exceeds the threshold. While the keypad is active, the participant is free to click or type on either or both the standard and EasyEyes keypad/trackpad. Setting this to zero will always provide the remote keypad. Setting it to a large value, greater than all viewing distances used, will never provide it.\n\nCurrently we recruit the phone at the beginning of the first block that needs it. Let's change that to recruit the phone at the beginning of the experiment, on the compatibility page. If we can't recruit it, there's no point in running the experiment. \n\nI don't know if we disconnect at the end of the block, or the end of the last block that needs it, or just leave it connected until the end of the experiment. I think I prefer disconnecting after the last block that needs it. Some experiments will use the smartphone both as keypad AND for sound calibration. Sound calibration is done before the first block, so it will always come first. Requiring separate recruitment for each use is tolerable, but it would be nicer if participant could just recruit the smartphone once for the whole experiment. \n\nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis's requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone's keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say \"Connection lost.\" and offer a \"Reconnect\" button.\n\n",
+      "🕑 needEasyEyesKeypadBeyondCm (default 60). If any block has \nviewingDistanceDesiredCm > needEasyEyesKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone (at the beginning of the experiment) and provide a keypad on the smartphone during each block that requires it. The phone is recruited at the beginning of the experiment (on the compatibility page), and remains connected until the end of the experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needEasyEyesKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the smartphone keypad. Set needEasyEyesKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nCurrently we recruit the phone at the beginning of the first block that needs it. Let's change that to recruit the phone at the beginning of the experiment, on the compatibility page. If we can't recruit it, there's no point in running the experiment. \n\nI don't know if we disconnect at the end of the block, or the end of the last block that needs it, or just leave it connected until the end of the experiment. I think I prefer disconnecting after the last block that needs it. Some experiments will use the smartphone both as keypad AND for sound calibration. Sound calibration is done before the first block, so it will always come first. Requiring separate recruitment for each use is tolerable, but it would be nicer if participant could just recruit the smartphone once for the whole experiment. \n\nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis's requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone's keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say \"Connection lost.\" and offer a \"Reconnect\" button.\n\n",
   },
   needScreenHeightUpToDeg: {
     name: "needScreenHeightUpToDeg",
@@ -2986,7 +2986,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "",
     explanation:
-      "🕑 showParameters (no default) accepts a comma-separated list of parameter names. In the style of showTargetSpecsBool but allows scientist to specify which parameters to display. All the parameters are displayed at the left edge of the screen, bottom-aligned, one per row, each with its value.",
+      "🕑 showParameters (no default) accepts a comma-separated list of parameter names. Its display is in the style of showTargetSpecsBool, but it allows the scientist to specify which parameters to display. All the parameters are displayed at the left edge of the screen, bottom-aligned, one per row, each with its value. At the moment, we only allow input parameters, but we will extend this list to include internal parameters.",
     categories: [
       "block",
       "blockShuffleGroups1",
