@@ -5676,6 +5676,37 @@ export const phrases = {
     ja: "このブロックを無効にします。代わりにコンピューターのキーボードを使用してください。目的の表示距離が111 cmを超えると、キーパッドが有効になります。",
     ko: "이 블록의 경우 비활성화되었습니다. 대신 컴퓨터의 키보드를 사용하십시오. 원하는 시청 거리가 111cm를 초과 할 때 키패드가 활성화됩니다.",
   },
+  T_keypadInactive: {
+    "en-US":
+      "Disabled for this block. Use your computer's keyboard instead. The keypad is enabled when the desired viewing distance exceeds 111 cm.",
+    de: "Für diesen Block deaktiviert. Verwenden Sie stattdessen die Tastatur Ihres Computers. Die Tastatur ist aktiviert, wenn die gewünschte Betrachtungsentfernung 111 cm überschreitet.",
+    fr: "Désactivé pour ce bloc. Utilisez plutôt le clavier de votre ordinateur. Le clavier est activé lorsque la distance de visualisation souhaitée dépasse 111 cm.",
+    es: "Deshabilitado para este bloque. Use el teclado de su computadora en su lugar. El teclado está habilitado cuando la distancia de visualización deseada excede los 111 cm.",
+    pt: "Desativado para este bloco. Use o teclado do seu computador. O teclado é ativado quando a distância de visualização desejada excede 111 cm.",
+    it: "Disabilitato per questo blocco. Usa invece la tastiera del tuo computer. La tastiera è abilitata quando la distanza di visualizzazione desiderata supera 111 cm.",
+    ro: "Dezactivat pentru acest bloc. Utilizați în schimb tastatura computerului. Tastatura este activată atunci când distanța dorită de vizualizare depășește 111 cm.",
+    pl: "Wyłączone dla tego bloku. Zamiast tego użyj klawiatury komputera. Klucz jest włączony, gdy żądana odległość oglądania przekracza 111 cm.",
+    ru: "Отключено для этого блока. Вместо этого используйте клавиатуру вашего компьютера. Клавиатура включена, когда желаемое расстояние просмотра превышает 111 см.",
+    hy: "Անջատված է այս բլոկի համար: Փոխարենը օգտագործեք ձեր համակարգչի ստեղնաշարը: Ստեղնաշարը միացված է, երբ ցանկալի դիտման հեռավորությունը գերազանցում է 111 սմը:",
+    fi: "Tämän lohkon vammaiset. Käytä sen sijaan tietokoneesi näppäimistöä. Näppäimistö on käytössä, kun haluttu katseluetäisyys ylittää 111 cm.",
+    ka: "გამორთულია ამ ბლოკისთვის. ამის ნაცვლად გამოიყენეთ თქვენი კომპიუტერის კლავიატურა. კლავიატურა ჩართულია, როდესაც სასურველი სანახავი მანძილი აღემატება 111 სმ.",
+    he: 'מושבת לחסימה זו. השתמש במקום זאת במקלדת המחשב שלך. לוח המקשים מופעל כאשר מרחק הצפייה הרצוי עולה על 111 ס"מ.',
+    ar: "معاق لهذه الكتلة. استخدم لوحة مفاتيح جهاز الكمبيوتر الخاص بك بدلاً من ذلك. يتم تمكين لوحة المفاتيح عندما تتجاوز مسافة المشاهدة المطلوبة 111 سم.",
+    ur: "اس بلاک کے لئے غیر فعال. اس کے بجائے اپنے کمپیوٹر کا کی بورڈ استعمال کریں۔ جب مطلوبہ دیکھنے کا فاصلہ 111 سینٹی میٹر سے زیادہ ہو تو کیپیڈ فعال ہے۔",
+    hi: "इस ब्लॉक के लिए अक्षम। इसके बजाय अपने कंप्यूटर के कीबोर्ड का उपयोग करें। कीपैड को सक्षम किया जाता है जब वांछित देखने की दूरी 111 सेमी से अधिक हो जाती है।",
+    ta: "இந்த தொகுதிக்கு முடக்கப்பட்டது. அதற்கு பதிலாக உங்கள் கணினியின் விசைப்பலகை பயன்படுத்தவும். விரும்பிய பார்வை தூரம் 111 செ.மீ தாண்டும்போது விசைப்பலகை இயக்கப்படுகிறது.",
+    ml: "ഈ ബ്ലോക്കിനായി അപ്രാപ്തമാക്കി. പകരം നിങ്ങളുടെ കമ്പ്യൂട്ടറിന്റെ കീബോർഡ് ഉപയോഗിക്കുക. 111 സെന്റിമീറ്റർ കവിയുമ്പോൾ കീപാഡ് പ്രാപ്തമാക്കി.",
+    te: "ఈ బ్లాక్ కోసం నిలిపివేయబడింది. బదులుగా మీ కంప్యూటర్ కీబోర్డ్‌ను ఉపయోగించండి. కావలసిన వీక్షణ దూరం 111 సెం.మీ మించి ఉన్నప్పుడు కీప్యాడ్ ప్రారంభించబడుతుంది.",
+    kn: "ಈ ಬ್ಲಾಕ್ಗಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ. ಬದಲಿಗೆ ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್‌ನ ಕೀಬೋರ್ಡ್ ಬಳಸಿ. ಅಪೇಕ್ಷಿತ ವೀಕ್ಷಣೆಯ ಅಂತರವು 111 ಸೆಂ.ಮೀ ಮೀರಿದಾಗ ಕೀಪ್ಯಾಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗುತ್ತದೆ.",
+    bn: "এই ব্লকের জন্য অক্ষম। পরিবর্তে আপনার কম্পিউটারের কীবোর্ড ব্যবহার করুন। পছন্দসই দেখার দূরত্ব 111 সেমি ছাড়িয়ে গেলে কীপ্যাড সক্ষম করা হয়।",
+    id: "Dinonaktifkan untuk blok ini. Gunakan keyboard komputer Anda sebagai gantinya. Keypad diaktifkan ketika jarak tampilan yang diinginkan melebihi 111 cm.",
+    "zh-CN":
+      "为此块禁用。改用计算机的键盘。当所需的观看距离超过111厘米时，启用了键盘。",
+    "zh-HK":
+      "為此塊禁用。改用計算機的鍵盤。當所需的觀看距離超過111厘米時，啟用了鍵盤。",
+    ja: "このブロックを無効にします。代わりにコンピューターのキーボードを使用してください。目的の表示距離が111 cmを超えると、キーパッドが有効になります。",
+    ko: "이 블록의 경우 비활성화되었습니다. 대신 컴퓨터의 키보드를 사용하십시오. 원하는 시청 거리가 111cm를 초과 할 때 키패드가 활성화됩니다.",
+  },
   T_keypadFrozen: {
     "en-US":
       "If this screen freezes, please reconnect by pointing your smartphone camera at the QR code on your computer screen. When a link appears, touch it with your finger.",
