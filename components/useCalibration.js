@@ -49,6 +49,7 @@ import {
   removeElements,
   saveLoudSpeakerInfo,
 } from "./soundCalibrationHelpers";
+import { testResults } from "./testData";
 export const useCalibration = (reader) => {
   return ifTrue([
     ...reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"),
@@ -368,36 +369,6 @@ export const calibrateAudio = async (reader) => {
       showSoundCalibrationResultsBool &&
       calibrateSoundCheck.current !== "none"
     ) {
-      // example data for testing
-      // loudspeakerInfo.current = {
-      //   IsMobile: false,
-      //   HardwareName: "MacBookPro",
-      //   HardwareFamily: "MacBookPro",
-      //   HardwareModel: "MacBookPro",
-      //   OEM: "Apple",
-      //   HardwareModelVariants: "MacBookPro",
-      //   DeviceId: "MacBookPro",
-      //   PlatformName: "MacBookPro",
-      //   PlatformVersion: "MacBookPro",
-      //   DeviceType: "Desktop",
-      //   ID: "MNEISD",
-      //   CalibrationDate: calibrationTime.current,
-      //   ModelName: "MacBook"
-      // }
-      // microphoneInfo.current = {
-      //   IsMobile: false,
-      //   HardwareName: "MacBookPro",
-      //   HardwareFamily: "MacBookPro",
-      //   HardwareModel: "MacBookPro",
-      //   OEM: "Apple",
-      //   HardwareModelVariants: "MacBookPro",
-      //   DeviceId: "MacBookPro",
-      //   PlatformName: "MacBookPro",
-      //   PlatformVersion: "MacBookPro",
-      //   DeviceType: "Desktop",
-      //   ID: "LLSHUs",
-      //   CalibrationDate: calibrationTime.current,
-      // }
       displayCompleteTransducerTable(
         loudspeakerInfo.current,
         microphoneInfo.current,
@@ -418,26 +389,11 @@ export const calibrateAudio = async (reader) => {
         calibrateSoundCheck.current,
         true
       );
-      displaySummarizedTransducerTable(
-        loudspeakerInfo.current,
-        microphoneInfo.current,
-        elems,
-        true,
-        calibrateSoundCheck.current,
-        "right"
-      );
       displayParametersAllHz(
         elems,
         invertedImpulseResponse.current,
         allHzCalibrationResults,
         titleallHz
-      );
-      displaySummarizedTransducerTable(
-        loudspeakerInfo.current,
-        microphoneInfo.current,
-        elems,
-        true,
-        calibrateSoundCheck.current
       );
     }
 
@@ -751,6 +707,11 @@ export const calibrateAudio = async (reader) => {
                   ...microphoneInfo.current,
                   ...result.micInfo,
                 };
+                microphoneInfo.current.gainDBSPL =
+                  Math.round(
+                    microphoneInfo.current.gainDBSPL -
+                      loudspeakerInfo.current.gainDBSPL * 10
+                  ) / 10;
                 microphoneInfo.current.CalibrationDate =
                   calibrationTime.current;
                 elems.message.style.whiteSpace = "normal";
@@ -811,14 +772,6 @@ export const calibrateAudio = async (reader) => {
                     calibrateSoundCheck.current,
                     false
                   );
-                  displaySummarizedTransducerTable(
-                    loudspeakerInfo.current,
-                    microphoneInfo.current,
-                    elems,
-                    false,
-                    calibrateSoundCheck.current,
-                    "right"
-                  );
                   displayParametersAllHz(
                     elems,
                     result.componentIIR,
@@ -826,13 +779,6 @@ export const calibrateAudio = async (reader) => {
                     titleallHz,
                     calibrateSoundCheck.current,
                     false
-                  );
-                  displaySummarizedTransducerTable(
-                    loudspeakerInfo.current,
-                    microphoneInfo.current,
-                    elems,
-                    false,
-                    calibrateSoundCheck.current
                   );
                 }
               }
@@ -1184,7 +1130,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   elems,
   gains
 ) => {
-  elems.subtitle.innerHTML = "";
+  // elems.subtitle.innerHTML = "";
   elems.message.style.display = "none";
   const language = rc.language.value;
   thisDevice.current = await identifyDevice();
@@ -1225,7 +1171,6 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = "Proceed";
   proceedButton.classList.add(...["btn", "btn-primary"]);
-
   elems.subtitle.appendChild(proceedButton);
 
   // add event listener to the proceed button
@@ -1512,12 +1457,12 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                 elems.displayQR.style.display = "flex";
                 elems.displayQR.style.marginLeft = "0px";
                 elems.displayQR.style.flexDirection = "column";
-                soundCalibrationResults.current =
-                  await Speaker.startCalibration(
-                    speakerParameters,
-                    calibrator,
-                    timeoutSec.current
-                  );
+                soundCalibrationResults.current = testResults;
+                // await Speaker.startCalibration(
+                //   speakerParameters,
+                //   calibrator,
+                //   timeoutSec.current
+                // );
                 elems.message.style.whiteSpace = "normal";
                 elems.message.style.fontSize = "1.1rem";
                 elems.message.style.fontWeight = "normal";
@@ -1581,16 +1526,20 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   DeviceId: thisDevice.current.DeviceId,
                   PlatformName: thisDevice.current.PlatformName,
                   PlatformVersion: thisDevice.current.PlatformVersion,
-                  gainDBSPL: soundGainDBSPL.current,
+                  gainDBSPL:
+                    Math.round(
+                      soundGainDBSPL.current -
+                        microphoneInfo.current.gainDBSPL * 10
+                    ) / 10,
                   CalibrationDate: calibrationTime.current,
                 };
-                await saveLoudSpeakerInfo(
-                  loudspeakerInfo.current,
-                  modelNumber,
-                  thisDevice.current.OEM,
-                  invertedImpulseResponse.current,
-                  soundCalibrationResults.current.componentIR
-                );
+                // await saveLoudSpeakerInfo(
+                //   loudspeakerInfo.current,
+                //   modelNumber,
+                //   thisDevice.current.OEM,
+                //   invertedImpulseResponse.current,
+                //   soundCalibrationResults.current.componentIR
+                // );
               } catch (err) {
                 console.log(err);
               }

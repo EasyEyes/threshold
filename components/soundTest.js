@@ -1088,13 +1088,9 @@ export const displaySummarizedTransducerTable = (
   calibrationGoal,
   position = "left"
 ) => {
-  // the table has two columns and 4 rows
   const table = document.createElement("table");
-  // table.setAttribute("id", "summarizedTransducerTable");
-
   const thead = document.createElement("thead");
   const tbody = document.createElement("tbody");
-  // font size
   table.style.fontSize = "12px";
   // row 1 includes "Loudspeaker" and "Microphone"
   const tr1 = document.createElement("tr");
@@ -1118,7 +1114,6 @@ export const displaySummarizedTransducerTable = (
   thead.appendChild(tr1);
 
   // row 2 is the Model Names
-
   const tr2 = document.createElement("tr");
   const td1 = document.createElement("td");
   const td2 = document.createElement("td");
@@ -1126,7 +1121,6 @@ export const displaySummarizedTransducerTable = (
   td2.innerHTML = microphoneInfo["micFullName"];
   tr2.appendChild(td1);
   tr2.appendChild(td2);
-  tbody.appendChild(tr2);
 
   // row 3 is the Model Specifiers
   const tr3 = document.createElement("tr");
@@ -1136,28 +1130,69 @@ export const displaySummarizedTransducerTable = (
   td4.innerHTML = microphoneInfo["micFullSerialNumber"];
   tr3.appendChild(td3);
   tr3.appendChild(td4);
-  tbody.appendChild(tr3);
 
   // row 4 column 1 is the calibration date, column 2 is empty
   const tr4 = document.createElement("tr");
   const td5 = document.createElement("td");
   td5.innerHTML = LoudspeakerInfo["CalibrationDate"];
-  td5.setAttribute("colspan", "2");
+  td5.setAttribute("colspan", "3");
   tr4.appendChild(td5);
+
+  // row 5 is OEM
+  const tr5 = document.createElement("tr");
+  const td6 = document.createElement("td");
+  const td7 = document.createElement("td");
+  td6.innerHTML = LoudspeakerInfo["OEM"];
+  td7.innerHTML = microphoneInfo["micrFullManufacturerName"];
+  tr5.appendChild(td6);
+  tr5.appendChild(td7);
+
+  // row 6 is the gain
+  const tr6 = document.createElement("tr");
+  const td8 = document.createElement("td");
+  const td9 = document.createElement("td");
+  const td10 = document.createElement("td");
+  LoudspeakerInfo["gainDBSPL"] =
+    Math.round(LoudspeakerInfo["gainDBSPL"] * 10) / 10;
+  microphoneInfo["gainDBSPL"] =
+    Math.round(microphoneInfo["gainDBSPL"] * 10) / 10;
+  td8.innerHTML =
+    LoudspeakerInfo["gainDBSPL"] > 0
+      ? "+" + LoudspeakerInfo["gainDBSPL"]
+      : LoudspeakerInfo["gainDBSPL"];
+  td9.innerHTML =
+    microphoneInfo["gainDBSPL"] > 0
+      ? "+" + microphoneInfo["gainDBSPL"]
+      : microphoneInfo["gainDBSPL"];
+  td10.innerHTML = "dB SPL gain at 1kHz";
+  tr6.appendChild(td8);
+  tr6.appendChild(td9);
+  tr6.appendChild(td10);
+
+  tbody.appendChild(tr6);
+  tbody.appendChild(tr5);
+  tbody.appendChild(tr2);
+  tbody.appendChild(tr3);
   tbody.appendChild(tr4);
+
+  const maxWidth = Math.max(th1.offsetWidth, td1.offsetWidth, td3.offsetWidth);
+
+  td1.style.width = `${maxWidth + 13}ch`;
+  td2.style.width = `${maxWidth + 13}ch`;
+  td3.style.width = `${maxWidth + 13}ch`;
+  td4.style.width = `${maxWidth + 13}ch`;
+  td5.style.width = `${maxWidth + 13}ch`;
+  td6.style.width = `${maxWidth + 13}ch`;
+
+  tr1.style.lineHeight = "1.2";
+  tr2.style.lineHeight = "1.2";
+  tr3.style.lineHeight = "1.2";
+  tr4.style.lineHeight = "1.2";
+  tr5.style.lineHeight = "1.2";
+  tr6.style.lineHeight = "1.2";
 
   table.appendChild(thead);
   table.appendChild(tbody);
 
-  // center the table horizontally
-  // table.style.marginLeft = "auto";
-  // table.style.marginRight = "auto";
-
-  // if (position === "right") {
-  //   // make the table to the left
-  //   table.style.marginLeft = "15%";
-  // }
-
   return table;
-  // elems.soundTestPlots.appendChild(table);
 };

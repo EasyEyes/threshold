@@ -365,49 +365,14 @@ export const plotForAllHz = (
   const tableDiv = document.createElement("div");
   tableDiv.appendChild(table);
   tableDiv.style.position = "absolute";
+  plotCanvas.parentNode.appendChild(tableDiv);
   const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.top = rect.bottom - 220 + "px";
+  tableDiv.style.top = rect.bottom - 230 + "px";
   tableDiv.style.left = 120 + "px";
 
   // make the table on top of the canvas
   tableDiv.style.zIndex = 1;
-
-  plotCanvas.parentNode.appendChild(tableDiv);
 };
-// const  drawTableOnCanvas = (table, canvas)=>{
-//   // Get the canvas context
-//   var ctx = canvas.getContext('2d');
-
-//   // Clear any previous content on the canvas
-//   // ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-//   var startX = 0.1 * canvas.width; // 10% of the canvas width
-//   var startY = 0.3 * canvas.height; // 90% of the canvas height
-
-//   // You will need to parse the table and draw each cell and its content manually.
-//   // This example assumes a simple table with text content only.
-//   var rows = table.rows;
-
-//   for (var i = 0; i < rows.length; i++) {
-//     var cells = rows[i].cells;
-//     for (var j = 0; j < cells.length; j++) {
-//       var cell = cells[j];
-//       var cellWidth = parseFloat(window.getComputedStyle(cell).width||160);
-//       var cellHeight = parseFloat(window.getComputedStyle(cell).height||160);
-//       // Calculate the position for this cell
-//       var x = startX;
-//       var y = startY + cellHeight; // Adjust for cell height
-//       // var x = j * cellWidth +20;
-//       // var y = i * cellHeight;
-//       console.log("width",cellWidth,"height",cellHeight,"x",x,"y",y)
-//       ctx.fillText(cell.textContent, x, y + cellHeight);
-//       startX += cellWidth;
-//       // You can use other canvas drawing methods for different cell types (e.g., images).
-//     }
-//     startX = 0.1 * canvas.width;
-//     startY += cellHeight;
-//   }
-// }
 
 export const standardDeviation = (values) => {
   const avg = average(values);

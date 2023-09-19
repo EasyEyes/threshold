@@ -2217,7 +2217,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      "🕑 markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
+      "markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
   },
   markingFixationHotSpotRadiusDeg: {
     name: "markingFixationHotSpotRadiusDeg",
@@ -2230,21 +2230,21 @@ export const GLOSSARY: Glossary = {
   markingFixationMotionPeriodSec: {
     name: "markingFixationMotionPeriodSec",
     availability: "now",
-    type: "numerical",
-    default: "0.3",
+    type: "obsolete",
+    default: "",
     explanation:
-      "🕑 markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec) will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
-  },
-  markingFixationMotionRadiusDeg: {
-    name: "markingFixationMotionRadiusDeg",
-    availability: "now",
-    type: "numerical",
-    default: "10",
-    explanation:
-      "TO BE REMOVED: markingFixationMotionPeriodSec (default 10 s) is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
+      "❌ Obsolete. Use markingFixationMotionSpeedDegPerSec instead.",
   },
   markingFixationMotionSpeedDegPerSec: {
     name: "markingFixationMotionSpeedDegPerSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.3",
+    explanation:
+      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
+  },
+  markingFixationMotionRadiusDeg: {
+    name: "markingFixationMotionRadiusDeg",
     availability: "now",
     type: "numerical",
     default: "0.5",
@@ -2704,7 +2704,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ responseMustTrackContinuouslyBool (default FALSE), when TRUE, imposes a special way of initiating a trial that results in good fixation. It selects a waiting interval by taking a fresh random sample from the uniform distribution over the range responseMustTrackMinSec to responseMustTrackMaxSec.  It requires that the cursor tip be within the hotspot (within markingFixationHotSpotRadiusDeg of the crosshair center) for the entire waiting interval.  Whenever the cursor is outside the hotspot the software resets the waiting process, first waiting for the cursor to enter the hotspot, which begins a new waiting interval (whose duration is a fresh random sample). For initiating a trial, responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. We submitted an article to Journal of Vision about the excellent fixation achieved with responseMustTrackContinuouslyBool. (Kurzawski et al. submitted 2023).",
+      "⭑ responseMustTrackContinuouslyBool (default FALSE), when TRUE, imposes a special way of initiating a trial that results in good fixation. It selects a waiting interval by taking a fresh random sample from the uniform distribution over the range responseMustTrackMinSec to responseMustTrackMaxSec. The motion is controlled by markingFixationMotionRadiusDeg and markingFixationMotionSpeedDegPerSec.  responseMustTrackContinuouslyBool requires that the cursor tip be within the hotspot (within markingFixationHotSpotRadiusDeg of the crosshair center) for the entire waiting interval.  Whenever the cursor is outside the hotspot the software resets the waiting process, first waiting for the cursor to enter the hotspot, which begins a new waiting interval (whose duration is a fresh random sample). For initiating a trial, responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. We submitted an article to Journal of Vision about the excellent fixation achieved with responseMustTrackContinuouslyBool. (Kurzawski et al. submitted 2023).",
   },
   responseMustTrackCrosshairBool: {
     name: "responseMustTrackCrosshairBool",
@@ -2946,7 +2946,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "🕑 Whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
+      "🕑 showFixationMarkBool (default TRUE) determines whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
   },
   showFPSBool: {
     name: "showFPSBool",
@@ -3035,8 +3035,8 @@ export const GLOSSARY: Glossary = {
       "markingClippedToStimulusRectBool",
       "markingColorRGBA",
       "markingFixationHotSpotRadiusDeg",
-      "markingFixationMotionPeriodSec",
       "markingFixationMotionRadiusDeg",
+      "markingFixationMotionSpeedDegPerSec",
       "markingFixationStrokeLengthDeg",
       "markingFixationStrokeThickening",
       "markingFixationStrokeThicknessDeg",
