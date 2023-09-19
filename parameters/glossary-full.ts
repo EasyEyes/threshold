@@ -1922,7 +1922,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
+      "markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
     type: "text",
     default: "0,0,0,1",
     categories: "",
@@ -1942,6 +1942,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
+      "❌ markingFixationMotionPeriodSec is obsolete. Use markingFixationMotionSpeedDegPerSec instead.",
+    type: "obsolete",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "markingFixationMotionSpeedDegPerSec",
+    availability: "now",
+    example: "",
+    explanation:
       "🕑 markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec) will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
     type: "numerical",
     default: "0.3",
@@ -1949,16 +1959,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
   },
   {
     name: "markingFixationMotionRadiusDeg",
-    availability: "now",
-    example: "",
-    explanation:
-      "TO BE REMOVED: markingFixationMotionPeriodSec (default 10 s) is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
-    type: "numerical",
-    default: "10",
-    categories: "",
-  },
-  {
-    name: "markingFixationMotionSpeedDegPerSec",
     availability: "now",
     example: "0.5",
     explanation:
@@ -2821,7 +2821,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "🕑 Whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
+      "🕑 showFixationMarkBool (default TRUE) determines whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
     type: "boolean",
     default: "TRUE",
     categories: "",

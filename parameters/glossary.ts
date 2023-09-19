@@ -2217,7 +2217,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      "🕑 markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
+      "markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
   },
   markingFixationHotSpotRadiusDeg: {
     name: "markingFixationHotSpotRadiusDeg",
@@ -2230,6 +2230,14 @@ export const GLOSSARY: Glossary = {
   markingFixationMotionPeriodSec: {
     name: "markingFixationMotionPeriodSec",
     availability: "now",
+    type: "obsolete",
+    default: "",
+    explanation:
+      "❌ markingFixationMotionPeriodSec is obsolete. Use markingFixationMotionSpeedDegPerSec instead.",
+  },
+  markingFixationMotionSpeedDegPerSec: {
+    name: "markingFixationMotionSpeedDegPerSec",
+    availability: "now",
     type: "numerical",
     default: "0.3",
     explanation:
@@ -2237,14 +2245,6 @@ export const GLOSSARY: Glossary = {
   },
   markingFixationMotionRadiusDeg: {
     name: "markingFixationMotionRadiusDeg",
-    availability: "now",
-    type: "numerical",
-    default: "10",
-    explanation:
-      "TO BE REMOVED: markingFixationMotionPeriodSec (default 10 s) is the time, in secs, that it takes the crosshair to do one revolution around the origin. Used with responseMustClickCrosshairBool=TRUE for a peripheral target.",
-  },
-  markingFixationMotionSpeedDegPerSec: {
-    name: "markingFixationMotionSpeedDegPerSec",
     availability: "now",
     type: "numerical",
     default: "0.5",
@@ -2946,7 +2946,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "🕑 Whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
+      "🕑 showFixationMarkBool (default TRUE) determines whether or not to show the fixation mark. Regardless of this parameter, we don't show fixation when targetRepeatsBool is TRUE. In that can we cover a large area of the screen with repeated targets. ",
   },
   showFPSBool: {
     name: "showFPSBool",
