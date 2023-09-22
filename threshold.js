@@ -3072,8 +3072,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (!simulatedObservers.proceed(BC)) {
         if (keypad.keypadRequired(BC)) {
-          await keypad.update([...fontCharacterSet.current], "sans-serif", BC);
-          // await keypad.update([...fontCharacterSet.current], font.name, BC);
+          const alphabet = reader.read("fontLeftToRightBool")
+            ? [...fontCharacterSet.current]
+            : [...fontCharacterSet.current].reverse();
+          await keypad.update(alphabet, "sans-serif", BC);
           keypad.start();
         } else {
           keypad.stop();
@@ -4960,7 +4962,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (
         t >= timeWhenRespondable &&
-        !simulatedObservers.proceed(status.block_condition)
+        !simulatedObservers.proceed(status.block_condition) &&
+        keypad.keypadRequired(status.block_condition) &&
+        !keypad.acceptingResponses
       ) {
         keypad.start();
         keypad.setNonSensitive();

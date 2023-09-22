@@ -1,6 +1,5 @@
 import { KeyPress } from "../psychojs/src/core/index.js";
 import { status, rc, _key_resp_allKeys, thisExperimentInfo } from "./global";
-import { psychoJS } from "./globalPsychoJS.js";
 import { readi18nPhrases } from "./readPhrases.js";
 import { logger } from "./utils";
 import { Receiver } from "virtual-keypad";
@@ -99,7 +98,7 @@ export class KeypadHandler {
     this.updateKeypadMessage(this.disabledMessage);
   }
   forgetKeypad() {
-    this.receiver = undefined;
+    // this.receiver = undefined;
     this.connection = undefined;
   }
   updateKeypadMessage(message) {
@@ -128,7 +127,7 @@ export class KeypadHandler {
       }, 1000);
       this.hideQRPopup();
     };
-    const keypadReceiver = new Receiver(
+    this.receiver ??= new Receiver(
       { alphabet: this.alphabet ?? "", font: this.font ?? "Sans" },
       this.onDataCallback,
       handshakeCallback,
@@ -136,7 +135,6 @@ export class KeypadHandler {
       this.onCloseCallback,
       this.onErrorCallback
     );
-    this.receiver = keypadReceiver;
 
     const qrImage = await this.createQRCode();
     this.showQRPopup(qrImage);

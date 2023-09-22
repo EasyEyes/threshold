@@ -38,7 +38,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool.",
+      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool. To contribute to the EasyEyes calibration library, the scientist must provide _authorEmails.",
   },
   _calibrateMicrophonesPreventLocalBool: {
     name: "_calibrateMicrophonesPreventLocalBool",
@@ -46,14 +46,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "🕑 _calibrateMicrophonesPreventLocalBool (default TRUE) disablles calibration of any microphone that is connected in any way other than via QR code. This prevents a local connection (internal mic, USB mic, or Apple handoff), which, at least on a MacBook, goes though the OS sound panel. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS has removed the calibration tones, played through the loudspeaker, from the recording, which defeats the point of calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesPreventLocalBool=FALSE and you'll be allowed to record locally.",
-  },
-  _calibratePhoneMicBool: {
-    name: "_calibratePhoneMicBool",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateMicrophonesBool instead.",
+      "🕑 _calibrateMicrophonesPreventLocalBool (default TRUE) disables calibration of any microphone that is connected in any way other than via QR code. This prevents a local connection (internal mic, USB mic, or Apple handoff), which, at least on a MacBook, goes though the OS sound panel. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS has removed the calibration tones, played through the loudspeaker, from the recording, which defeats the point of calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesPreventLocalBool=FALSE and you'll be allowed to record locally.",
   },
   _calibrateScreenSizeCookieBool: {
     name: "_calibrateScreenSizeCookieBool",
@@ -1701,13 +1694,29 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
   },
+  calibrateSound1000HzPostSec: {
+    name: "calibrateSound1000HzPostSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.5",
+    explanation:
+      "calibrateSound1000HzPostSec (default 0.5) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for delay between when the sound ends and when the analyzed interval ends.",
+  },
+  calibrateSound1000HzPreSec: {
+    name: "calibrateSound1000HzPreSec",
+    availability: "now",
+    type: "numerical",
+    default: "3.5",
+    explanation:
+      "calibrateSound1000HzPreSec (default 3.5) specifies the duration of the 1 kHz sound played as warmup, before the part that is analyzed at each sound level.",
+  },
   calibrateSound1000HzSec: {
     name: "calibrateSound1000HzSec",
     availability: "now",
     type: "numerical",
-    default: "5",
+    default: "1",
     explanation:
-      "🕑 calibrateSound1000HzSec (default 5) specifies the duration of the 1 kHz sound at each sound level.",
+      "calibrateSound1000HzSec (default 1) specifies the duration, after warmup, of the 1 kHz sound that is analyzed at each sound level. ",
   },
   calibrateSoundAllHzBool: {
     name: "calibrateSoundAllHzBool",
@@ -2235,14 +2244,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "❌ Obsolete. Use markingFixationMotionSpeedDegPerSec instead.",
   },
-  markingFixationMotionSpeedDegPerSec: {
-    name: "markingFixationMotionSpeedDegPerSec",
-    availability: "now",
-    type: "numerical",
-    default: "0.3",
-    explanation:
-      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
-  },
   markingFixationMotionRadiusDeg: {
     name: "markingFixationMotionRadiusDeg",
     availability: "now",
@@ -2250,6 +2251,14 @@ export const GLOSSARY: Glossary = {
     default: "0.5",
     explanation:
       "markingFixationMotionRadiusDeg (default 0.5 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustClickCrosshairBool=TRUE.",
+  },
+  markingFixationMotionSpeedDegPerSec: {
+    name: "markingFixationMotionSpeedDegPerSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.3",
+    explanation:
+      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
   },
   markingFixationStrokeLengthDeg: {
     name: "markingFixationStrokeLengthDeg",
