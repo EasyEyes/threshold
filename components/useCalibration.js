@@ -708,8 +708,9 @@ export const calibrateAudio = async (reader) => {
                 };
                 microphoneInfo.current.gainDBSPL =
                   Math.round(
-                    microphoneInfo.current.gainDBSPL -
-                      loudspeakerInfo.current.gainDBSPL * 10
+                    (microphoneInfo.current.gainDBSPL -
+                      loudspeakerInfo.current.gainDBSPL) *
+                      10
                   ) / 10;
                 microphoneInfo.current.CalibrationDate =
                   calibrationTime.current;
@@ -1527,8 +1528,9 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   PlatformVersion: thisDevice.current.PlatformVersion,
                   gainDBSPL:
                     Math.round(
-                      soundGainDBSPL.current -
-                        microphoneInfo.current.gainDBSPL * 10
+                      (soundGainDBSPL.current -
+                        microphoneInfo.current.gainDBSPL) *
+                        10
                     ) / 10,
                   CalibrationDate: calibrationTime.current,
                 };

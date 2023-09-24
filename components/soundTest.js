@@ -1135,7 +1135,7 @@ export const displaySummarizedTransducerTable = (
   const tr4 = document.createElement("tr");
   const td5 = document.createElement("td");
   td5.innerHTML = LoudspeakerInfo["CalibrationDate"];
-  td5.setAttribute("colspan", "3");
+  td5.setAttribute("colspan", "2");
   tr4.appendChild(td5);
 
   // row 5 is OEM
@@ -1151,7 +1151,7 @@ export const displaySummarizedTransducerTable = (
   const tr6 = document.createElement("tr");
   const td8 = document.createElement("td");
   const td9 = document.createElement("td");
-  const td10 = document.createElement("td");
+
   LoudspeakerInfo["gainDBSPL"] =
     Math.round(LoudspeakerInfo["gainDBSPL"] * 10) / 10;
   microphoneInfo["gainDBSPL"] =
@@ -1162,12 +1162,10 @@ export const displaySummarizedTransducerTable = (
       : LoudspeakerInfo["gainDBSPL"];
   td9.innerHTML =
     microphoneInfo["gainDBSPL"] > 0
-      ? "+" + microphoneInfo["gainDBSPL"]
-      : microphoneInfo["gainDBSPL"];
-  td10.innerHTML = "dB SPL gain at 1kHz";
+      ? "+" + microphoneInfo["gainDBSPL"] + " dB SPL gain at 1 kHz"
+      : microphoneInfo["gainDBSPL"] + " dB SPL gain at 1 kHz";
   tr6.appendChild(td8);
   tr6.appendChild(td9);
-  tr6.appendChild(td10);
 
   tbody.appendChild(tr6);
   tbody.appendChild(tr5);
@@ -1175,14 +1173,17 @@ export const displaySummarizedTransducerTable = (
   tbody.appendChild(tr3);
   tbody.appendChild(tr4);
 
-  const maxWidth = Math.max(th1.offsetWidth, td1.offsetWidth, td3.offsetWidth);
-
-  td1.style.width = `${maxWidth + 13}ch`;
-  td2.style.width = `${maxWidth + 13}ch`;
-  td3.style.width = `${maxWidth + 13}ch`;
-  td4.style.width = `${maxWidth + 13}ch`;
-  td5.style.width = `${maxWidth + 13}ch`;
-  td6.style.width = `${maxWidth + 13}ch`;
+  // const maxWidth = Math.max(th1.offsetWidth, td1.offsetWidth, td3.offsetWidth, td6.offsetWidth, td8.offsetWidth);
+  // console.log(th1.offsetWidth, td1.offsetWidth, td3.offsetWidth, td6.offsetWidth, td8.offsetWidth);
+  // td1.style.width = `${maxWidth + 13}ch`;
+  // td2.style.width = `${maxWidth + 13}ch`;
+  // td3.style.width = `${maxWidth + 13}ch`;
+  // td4.style.width = `${maxWidth + 13}ch`;
+  // td5.style.width = `${maxWidth + 13}ch`;
+  // td6.style.width = `${maxWidth + 13}ch`;
+  // td7.style.width = `${maxWidth + 13}ch`;
+  // td8.style.width = `${maxWidth + 13}ch`;
+  // td9.style.width = `${maxWidth + 13}ch`;
 
   tr1.style.lineHeight = "1.2";
   tr2.style.lineHeight = "1.2";
