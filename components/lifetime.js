@@ -10,6 +10,7 @@ import {
   showCharacterSetResponse,
   thisExperimentInfo,
   soundCalibrationResults,
+  loudspeakerInfo,
   microphoneCalibrationResults,
   invertedImpulseResponse,
 } from "./global";
@@ -170,9 +171,18 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     //   window.location.toString(),
     //   rc.id.value
     // );
-
+    let objectData = [];
+    let allSoundResults;
     if (soundCalibrationResults.current) {
-      psychoJS.experiment.downloadJSON({
+      allSoundResults = {
+        SoundGainParameters: soundCalibrationResults.current?.parameters,
+        Cal1000HzInDb: soundCalibrationResults.current?.inDBValues,
+        Cal1000HzOutDb: soundCalibrationResults.current?.outDBSPLValues,
+        THD: soundCalibrationResults.current?.thdValues,
+        MlsSpectrumHz: soundCalibrationResults.current?.y_conv,
+        MlsSpectrumFilteredDb: soundCalibrationResults.current?.x_conv,
+        MlsSpectrumUnfilteredHz: soundCalibrationResults.current?.y_unconv,
+        MlsSpectrumUnfilteredDb: soundCalibrationResults.current?.x_unconv,
         "Loudspeaker Component IR":
           soundCalibrationResults.current?.componentIR,
         "Loudspeaker Component IIR": invertedImpulseResponse.current,
@@ -190,11 +200,13 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.x_system_iir_no_bandpass,
         Hz_system_iir_no_bandpass:
           soundCalibrationResults.current?.y_system_iir_no_bandpass,
-      });
+        "Loudspeaker model": loudspeakerInfo.current,
+        micInfo: soundCalibrationResults.current?.micInfo,
+        "Microphone Results": [],
+      };
     }
 
     if (microphoneCalibrationResults.length > 0) {
-      const objectData = [];
       for (const result of microphoneCalibrationResults) {
         const data = {
           "Microphone IR": result["ir"],
@@ -202,8 +214,9 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         };
         objectData.push(data);
       }
-      psychoJS.experiment.downloadJSON(objectData);
     }
+    allSoundResults["Microphone Results"] = objectData;
+    psychoJS.experiment.downloadJSON(allSoundResults);
   }
 
   return Scheduler.Event.QUIT;
