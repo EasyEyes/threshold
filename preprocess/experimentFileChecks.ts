@@ -150,6 +150,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
       "targetKind",
       ...blockShuffleGroupParams,
       "simulateParticipantBool",
+      "needEasyEyesKeypadBeyondCm",
     ])
   );
 
