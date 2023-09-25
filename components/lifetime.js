@@ -178,6 +178,18 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         "Loudspeaker Component IIR": invertedImpulseResponse.current,
         "Loudspeaker system IR": soundCalibrationResults.current?.systemIR,
         "Loudspeaker system IIR": soundCalibrationResults.current?.systemIIR,
+        dB_component_iir: soundCalibrationResults.current?.x_component_iir,
+        Hz_component_iir: soundCalibrationResults.current?.y_component_iir,
+        dB_component_iir_no_bandpass:
+          soundCalibrationResults.current?.x_component_iir_no_bandpass,
+        Hz_component_iir_no_bandpass:
+          soundCalibrationResults.current?.y_component_iir_no_bandpass,
+        dB_system_iir: soundCalibrationResults.current?.x_system_iir,
+        Hz_system_iir: soundCalibrationResults.current?.y_system_iir,
+        dB_system_iir_no_bandpass:
+          soundCalibrationResults.current?.x_system_iir_no_bandpass,
+        Hz_system_iir_no_bandpass:
+          soundCalibrationResults.current?.y_system_iir_no_bandpass,
       });
     }
 

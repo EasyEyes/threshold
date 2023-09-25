@@ -13,7 +13,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Effect of font on crowding.",
     explanation:
-      "Optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+      "_about (no default) is an optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -23,7 +23,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "dp3@nyu.edu",
     explanation:
-      "Optional, semicolon-separated email addresses of the authors.  The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+      "_authorEmails (no default) is optional, semicolon-separated email addresses of the authors.  The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -33,7 +33,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Denis Pelli",
     explanation:
-      "Optional, names of all the authors, separated by semicolons. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+      "_author (no default) is optional, the names of all the authors, separated by semicolons. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: "",
     categories: "",
@@ -209,7 +209,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "adultConsent2021.pdf",
     explanation:
-      "⭑ Optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+      "⭑ _consentForm (no default) is an optional brief description of the whole experiment that asks the participant to give informed consent (yes or no) before participating. Normally this form should be approved by your institution's Institutional Review Board (IRB) for human research. Many IRB's suggest also obtaining agreement with a final debrief form as well (see _debriefForm).",
     type: "text",
     default: "",
     categories: "",
@@ -219,7 +219,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "http://xyz?cc=123",
     explanation:
-      "🕑 _daisyChainURLAfterEasyEyes is a URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
+      "🕑 _daisyChainURLAfterEasyEyes (no default) is a URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
     type: "text",
     default: "",
     categories: "",
@@ -229,7 +229,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "http://xyz?cc=123",
     explanation:
-      "🕑 _daisyChainURLBeforeEasyEyes is a URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), signaling the participant's eligibility for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Thanks to Becca Hirst at Open Science Tools for suggesting daisy chaining.",
+      "🕑 _daisyChainURLBeforeEasyEyes (no default) is a URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), signaling the participant's eligibility for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Thanks to Becca Hirst at Open Science Tools for suggesting daisy chaining.",
     type: "text",
     default: "",
     categories: "",
@@ -239,7 +239,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "8/1/2021",
     explanation:
-      "Optional date of creation. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+      "_dateCreated (no default) is the optional date of creation. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: " ",
     categories: "",
@@ -249,7 +249,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "8/15/2021",
     explanation:
-      "Optional date of latest modification. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+      "_dateModified (no default) is the optional date of latest modification. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "text",
     default: " ",
     categories: "",
@@ -289,7 +289,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "🕑 At the end of the experiment, invite the participant to make parting comments. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+      "🕑 _invitePartingCommentsBool. At the end of the experiment, invite the participant to make parting comments. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -775,7 +775,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ Multi-session experiments require a way to link a participant's several sessions. When _participantIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID, or type in any ASCII alphanumeric string without whitespace to use as their EasyEyesID. If EasyEyes cannot get an EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
+      "⭑ _participantIDGetBool (no default). Multi-session experiments require a way to link a participant's several sessions. When _participantIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID, or type in any ASCII alphanumeric string without whitespace to use as their EasyEyesID. If EasyEyes cannot get an EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -785,7 +785,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ EasyEyes always saves an EasyEyesID cookie in browser local storage (which can be lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Downloads Folder of the  participant's computer. Also see _participantIDGetBool above.",
+      "⭑ _participantIDPutBool (no default). EasyEyes always saves an EasyEyesID cookie in browser local storage (which can be lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Downloads Folder of the  participant's computer. Also see _participantIDGetBool above.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1422,7 +1422,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 VIEWING GEOMETRY\nviewingDistanceCm = distance from eye to closest point.\nclosestPointXYInUnitSquare=[0.8 0.5]; % Rough location of closest point in screenRect re lower left corner.\nclosestPointXYPix % screen coordinate of point on screen closest to viewer's eyes. Y goes down.\nclosestPointXYDeg % eccentricity of closest point re fixation. Y goes up.\nclosestPointEccentricitySetting\n1. Set closestPointXYPix according to closestPointXYInUnitSquare.\n2. If closestPointEccentricitySetting==\n'target', then set closestPointXYDeg=eccentricityXYDeg\n'fixation', then set closestPointXYDeg=[0 0].\n'value', then assume closestPointXYDeg is already set.\n3. Ask viewer to adjust display so desired closest point is at desired\nviewing distance and orthogonal to line of sight from eye.\n4. If using off-screen fixation, put fixation at same distance from eye\nas the closest point, and compute its position relative to closest point.",
+      "🕑 closestPointEccentricitySetting (no default). VIEWING GEOMETRY\nviewingDistanceCm = distance from eye to closest point.\nclosestPointXYInUnitSquare=[0.8 0.5]; % Rough location of closest point in screenRect re lower left corner.\nclosestPointXYPix % screen coordinate of point on screen closest to viewer's eyes. Y goes down.\nclosestPointXYDeg % eccentricity of closest point re fixation. Y goes up.\nclosestPointEccentricitySetting\n1. Set closestPointXYPix according to closestPointXYInUnitSquare.\n2. If closestPointEccentricitySetting==\n'target', then set closestPointXYDeg=eccentricityXYDeg\n'fixation', then set closestPointXYDeg=[0 0].\n'value', then assume closestPointXYDeg is already set.\n3. Ask viewer to adjust display so desired closest point is at desired\nviewing distance and orthogonal to line of sight from eye.\n4. If using off-screen fixation, put fixation at same distance from eye\nas the closest point, and compute its position relative to closest point.",
     type: "categorical",
     default: "",
     categories: "target, fixation, value",
@@ -1452,7 +1452,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Crowding",
     explanation:
-      "⭑ We highly recommend using conditionName to label each condition to guide your subsequent data analysis. Need not be unique. It's fine to give several (possibly identical) conditions the same conditionName, to guide analysis. Not used by EasyEyes, but reported in any error message. Set showConditionNameBool=TRUE to display it on screen during each trial. The R software that we are developing to analyze CSV results files will parse any conditionNames that include a period into a first and second part, before and after the period. This will identify factors that the scientist wants to use in analysis. ",
+      "⭑ conditionName (no default) labels each condition in your data as a potential guide to subsequent data analysis. Need not be unique. It's fine to give several (possibly identical) conditions the same conditionName, to guide analysis. Not used by EasyEyes, but reported in any error message. Set showConditionNameBool=TRUE to display it on screen during each trial. The R software that we are developing to analyze CSV results files will parse any conditionNames that include a period into a first and second part, before and after the period. This will identify factors that the scientist wants to use in analysis. ",
     type: "text",
     default: "",
     categories: "",
@@ -1462,7 +1462,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "40",
     explanation:
-      "⭑ conditionTrials is the number of trials of this condition to run in this block. Each condition can have a different number of trials. They are all randomly interleaved. IMPORTANT: We have parameters, e.g. thresholdAllowedDuration and thresholdAllowedLateness, that can reject trials for various reasons, e.g. bad duration or delay. When a trial is rejected, it is not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the rejected trial's result so you could reanalyze your data including the rejected trials. FUTURE: In principle, it would be nice to add a new trial to make up for each rejected trial, but the PsychoJS MultiStair code has no provision for adding a trial to an ongoing loop. We hope to add that capability in the future. NOTE: conditionTrials is ignored when targetKind==reading.",
+      "⭑ conditionTrials (no default) is the number of trials of this condition to run in this block. Each condition can have a different number of trials. They are all randomly interleaved. IMPORTANT: We have parameters, e.g. thresholdAllowedDuration and thresholdAllowedLateness, that can reject trials for various reasons, e.g. bad duration or delay. When a trial is rejected, it is not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the rejected trial's result so you could reanalyze your data including the rejected trials. FUTURE: In principle, it would be nice to add a new trial to make up for each rejected trial, but the PsychoJS MultiStair code has no provision for adding a trial to an ongoing loop. We hope to add that capability in the future. NOTE: conditionTrials is ignored when targetKind==reading.",
     type: "integer",
     default: "35",
     categories: "",
@@ -1492,7 +1492,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "🕑 Display a foveal triplet that is easy to read if the participant's eye is on fixation, and hard to read if the eye is elsewhere.",
+      "🕑 fixationCheckBool (default FALSE). Display a foveal triplet that is easy to read if the participant's eye is on fixation, and hard to read if the eye is elsewhere.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1533,7 +1533,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "🕑 To test the far periphery, with help from the participant, it may be worth the trouble of setting up an off-screen fixation mark. Set fixationRequestedOffscreenBool TRUE and EasyEyes will ask the participant to put tape on a bottle or box and draw a crosshair on it. To figure out where the crosshair is, EasyEyes will display arrows on the display and ask the participant to drag the arrow heads to point to the crosshair.",
+      "🕑 fixationRequestedOffscreenBool (default FALSE). To test the far periphery, with help from the participant, it may be worth the trouble of setting up an off-screen fixation mark. Set fixationRequestedOffscreenBool TRUE and EasyEyes will ask the participant to put tape on a bottle or box and draw a crosshair on it. To figure out where the crosshair is, EasyEyes will display arrows on the display and ask the participant to drag the arrow heads to point to the crosshair.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1633,7 +1633,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 Font features provide information about how to use the glyphs in a font to render a script or language. fontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. "calt" enables the font’s "contextual alternates", especially connections between adjacent letters in a script font. "smcp" enables small caps. "zero" requests a slash through the zero character to distinguish it from O. Most font features are Boolean and accept an argument of 0 for off, and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, including Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\nhttps://helpx.adobe.com/in/fonts/using/open-type-syntax.html\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-ligatures\nhttps://en.wikipedia.org/wiki/Ligature_(writing)\nhttps://stackoverflow.com/questions/7069247/inserting-html-tag-in-the-middle-of-arabic-word-breaks-word-connection-cursive/55218489#55218489\n',
+      '🕑 fontFeatureSettings (no default). Font features provide information about how to use the glyphs in a font to render a script or language. fontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. "calt" enables the font’s "contextual alternates", especially connections between adjacent letters in a script font. "smcp" enables small caps. "zero" requests a slash through the zero character to distinguish it from O. Most font features are Boolean and accept an argument of 0 for off, and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, including Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\nhttps://helpx.adobe.com/in/fonts/using/open-type-syntax.html\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-ligatures\nhttps://en.wikipedia.org/wiki/Ligature_(writing)\nhttps://stackoverflow.com/questions/7069247/inserting-html-tag-in-the-middle-of-arabic-word-breaks-word-connection-cursive/55218489#55218489\n',
     type: "text",
     default: "",
     categories: "",
@@ -2293,7 +2293,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "the-phantom-tollbooth.txt",
     explanation:
-      "REQUIRED. The filename of a text file that has already been uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\nIMPORTANT: Currently, leaving the readingCorpus field blank causes a fatal error in EasyEyes when that condition runs. We plan to add a compiler check to detect the problem at compile time, before your study runs.\n",
+      "⭑ readingCorpus (no default is the filename of a text file that has already been uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\nIMPORTANT: Currently, leaving the readingCorpus field blank causes a fatal error in EasyEyes when that condition runs. We plan to add a compiler check to detect the problem at compile time, before your study runs.\n",
     type: "text",
     default: "",
     categories: "",
@@ -2302,9 +2302,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "readingCorpusEndlessBool",
     availability: "now",
     example: "",
-    explanation: "🕑 readingCorpusEndlessBool",
+    explanation: "🕑 readingCorpusEndlessBool (default FALSE).",
     type: "boolean",
-    default: "",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -2412,7 +2412,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      "⭑ Number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
+      "⭑ readingPages (no default) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
     type: "numerical",
     default: "4",
     categories: "",
@@ -2502,7 +2502,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ Allow participant to respond at every occasion by clicking (e.g. clicking the target letter in the fontCharacterSet). When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too. Note that, just for initiating the trial, responseMustTrackContinuouslyBool overrides other responseXXX settings so that the only way to initiate the trial is by tracking with the cursor; it has no effect on other screens, including the stimulus response at the end of the trial. ",
+      "⭑ responseClickedBool (default TRUE). Allow participant to respond at every occasion by clicking (e.g. clicking the target letter in the fontCharacterSet). When ready for stimulus, allow clicking fixation instead of hitting SPACE. The various response modes are not exclusive. Enable as many as you like. And simulateParticipantBool can provide responses too. Note that, just for initiating the trial, responseMustTrackContinuouslyBool overrides other responseXXX settings so that the only way to initiate the trial is by tracking with the cursor; it has no effect on other screens, including the stimulus response at the end of the trial. ",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -3600,7 +3600,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.7",
     explanation:
-      'Used by QUEST, which calls it "pThreshold". This is the threshold criterion. In Methods you might say that "We defined threshold as the intensity at which the participant attained 70% correct." This corresponds to setting thresholdProportionCorrect to 0.7.\nPsychoJS code:\nhttps://github.com/kurokida/jsQUEST/blob/main/src/jsQUEST.js\nhttps://github.com/psychopy/psychojs/blob/2021.3.0/src/data/QuestHandler.js',
+      'thresholdProportionCorrect (default 0.7) is used by QUEST, which calls it "pThreshold". This is the threshold criterion. In Methods you might say that "We defined threshold as the intensity at which the participant attained 70% correct." This corresponds to setting thresholdProportionCorrect to 0.7.\nPsychoJS code:\nhttps://github.com/kurokida/jsQUEST/blob/main/src/jsQUEST.js\nhttps://github.com/psychopy/psychojs/blob/2021.3.0/src/data/QuestHandler.js',
     type: "numerical",
     default: "0.7",
     categories: "",
@@ -3610,7 +3610,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      '🕑 If true, and this condition\'s threshold is "bad" (see below), then the block will be run again (only once even if again bad). The criterion for "bad" is that QuestSD>0.25. Several conditions in a block may make this request and be bad, but we still repeat the block only once. When we add a block, we should adjust the trial/block counter to reflect the change. (The 0.25 criterion is right for 35 trials, beta=2.3, and many possible targets. Later i\'ll write a more general formula and provide a way for the scientist to specify an arbitrary criterion value of QuestSD.)',
+      '🕑 thresholdRepeatBadBlockBool (default FALSE). If true, and this condition\'s threshold is "bad" (see below), then the block will be run again (only once even if again bad). The criterion for "bad" is that QuestSD>0.25. Several conditions in a block may make this request and be bad, but we still repeat the block only once. When we add a block, we should adjust the trial/block counter to reflect the change. (The 0.25 criterion is right for 35 trials, beta=2.3, and many possible targets. Later i\'ll write a more general formula and provide a way for the scientist to specify an arbitrary criterion value of QuestSD.)',
     type: "boolean",
     default: "FALSE",
     categories: "",
