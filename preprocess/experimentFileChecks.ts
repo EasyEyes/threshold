@@ -940,21 +940,27 @@ const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
 };
 
 const checkVernierUsingCorrectThreshold = (df: any): EasyEyesError[] => {
-  const thresholdParameter = getColumnValues(df, "thresholdParameter");
-  const targetKind = getColumnValues(df, "targetKind");
+  const presentParameters: string[] = df.listColumns();
 
-  for (let i = 0; i < thresholdParameter.length; i++) {
-    if (
-      thresholdParameter[i] === "targetOffsetDeg" &&
-      targetKind[i] !== "vernier"
-    ) {
-      return [TARGETOFFSETDEG_MUST_USE_VERNIER(targetKind[i], i + 3)];
-    }
-    if (
-      thresholdParameter[i] !== "targetOffsetDeg" &&
-      targetKind[i] === "vernier"
-    ) {
-      return [VERNIER_MUST_USE_TARGETOFFSETDEG(thresholdParameter[i], i + 3)];
+  if (
+    presentParameters.includes("thresholdParameter") &&
+    presentParameters.includes("targetKind")
+  ) {
+    const thresholdParameter = getColumnValues(df, "thresholdParameter");
+    const targetKind = getColumnValues(df, "targetKind");
+    for (let i = 0; i < thresholdParameter.length; i++) {
+      if (
+        thresholdParameter[i] === "targetOffsetDeg" &&
+        targetKind[i] !== "vernier"
+      ) {
+        return [TARGETOFFSETDEG_MUST_USE_VERNIER(targetKind[i], i + 3)];
+      }
+      if (
+        thresholdParameter[i] !== "targetOffsetDeg" &&
+        targetKind[i] === "vernier"
+      ) {
+        return [VERNIER_MUST_USE_TARGETOFFSETDEG(thresholdParameter[i], i + 3)];
+      }
     }
   }
   return [];

@@ -203,6 +203,13 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         "Loudspeaker model": loudspeakerInfo.current,
         micInfo: soundCalibrationResults.current?.micInfo,
         "Microphone Results": [],
+        unconv_rec: soundCalibrationResults.current?.unconv_rec,
+        conv_rec: soundCalibrationResults.current?.conv_rec,
+        mls: soundCalibrationResults.current?.mls,
+        componentConvolution:
+          soundCalibrationResults.current?.componentConvolution,
+        systemConvolution: soundCalibrationResults.current?.systemConvolution,
+        autocorrelations: soundCalibrationResults.current?.autocorrelations,
       };
     }
 
