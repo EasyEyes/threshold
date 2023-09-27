@@ -177,7 +177,8 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       allSoundResults = {
         SoundGainParameters: soundCalibrationResults.current?.parameters,
         Cal1000HzInDb: soundCalibrationResults.current?.inDBValues,
-        Cal1000HzOutDb: soundCalibrationResults.current?.outDBSPLValues,
+        Cal1000HzOutDb: soundCalibrationResults.current?.outDBSPL1000Values,
+        outDBSPLValues: soundCalibrationResults.current?.outDBSPLValues,
         THD: soundCalibrationResults.current?.thdValues,
         MlsSpectrumHz: soundCalibrationResults.current?.y_conv,
         MlsSpectrumFilteredDb: soundCalibrationResults.current?.x_conv,
