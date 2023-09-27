@@ -813,7 +813,7 @@ export const getLargestBoundsRatio = (
     screen.top <= 0 ||
     screen.bottom >= 0
   ) {
-    throw "Target offscreen.";
+    throw `Target offscreen. Screen: ${screen}`;
   }
   const ratios = {
     left: stim.left / screen.left,

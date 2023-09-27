@@ -412,6 +412,8 @@ export const addNewInternalParam = (
 ): any => {
   const columnName = paramName[0] !== "!" ? "!" + paramName : paramName;
   if (df.listColumns().includes(columnName)) return df;
+  if (Array.isArray(paramValue))
+    return df.withColumn(columnName, (_: any, i: number) => paramValue[i]);
   return df.withColumn(columnName, (_: any, i: number) => paramValue);
 };
 
@@ -483,6 +485,20 @@ export const getColumnValues = (df: any, columnName: string): string[] => {
     .select(columnName)
     .toArray()
     .map((x: any[]): any => x[0]);
+};
+
+// Return a column as a flat array, with unspecified columns filled in with the default
+// TODO should this just be the behavior of getColumnValues?
+export const getColumnValuesOrDefaults = (
+  df: any,
+  columnName: string
+): string[] => {
+  const presentParameters: string[] = df.listColumns();
+  const rows = df.dim()[0];
+  const defaultValue = GLOSSARY[columnName].default as unknown as string;
+  if (presentParameters.includes(columnName))
+    return getColumnValues(df, columnName).map((x) => x ?? defaultValue);
+  return new Array(rows).fill(defaultValue);
 };
 
 /**

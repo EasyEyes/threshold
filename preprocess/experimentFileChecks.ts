@@ -41,6 +41,7 @@ import {
   levDist,
   arraysEqual,
   getColumnValues,
+  getColumnValuesOrDefaults,
   valuesContiguous,
   getNoncontiguousValues,
   isBlockShuffleGroupingParam,
@@ -504,7 +505,6 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
   const responseMedia = [
     "responseClickedBool",
     "responseTypedBool",
-    "responseTypedEasyEyesKeypadBool",
     "responseSpokenBool",
     "simulateParticipantBool",
   ];
@@ -522,20 +522,34 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
   );
   // The values for each included modality, for each condition of the experiment
   const conditions = df.select(...includedMedia).toArray();
+  const viewingDistances = getColumnValuesOrDefaults(
+    df,
+    "viewingDistanceDesiredCm"
+  );
+  const keypadDistances = getColumnValuesOrDefaults(
+    df,
+    "needEasyEyesKeypadBeyondCm"
+  );
   // Finding those problematic conditions which...
   const conditionsWithoutResponse: number[] = [];
-  conditions.forEach((row: string[], conditionNumber: number) => {
+  conditions.forEach((row: string[], i: number) => {
     // ... don't have a modality explictly allowed by the experimenter
+    const [viewingDistanceDesiredCm, needEasyEyesKeypadBeyondCm] = [
+      viewingDistances[i],
+      keypadDistances[i],
+    ];
     if (
       !(
         row.some((bool: string) => bool.toLowerCase() === "true") ||
         // ... or a modality which is true by default
         excludedMedia.some(
           (__: string, i: number) => defaults[i].toLowerCase() === "true"
-        )
+        ) ||
+        // ... or keypad is to be activated
+        viewingDistanceDesiredCm > needEasyEyesKeypadBeyondCm
       )
     )
-      conditionsWithoutResponse.push(conditionNumber);
+      conditionsWithoutResponse.push(i);
   });
   // Return an error if there are any offending conditions
   if (conditionsWithoutResponse.length)
@@ -876,19 +890,16 @@ const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {
   const presentParameters: string[] = experimentDf.listColumns();
   const BCs = getColumnValues(experimentDf, "block_condition");
 
-  // TODO should this be the behavior of getColumnValues? ie how should getColumnValues behave if that column isn't specified in the experiment table?
-  const getColumnValuesOrDefaults = (param: string) =>
-    presentParameters.includes(param)
-      ? getColumnValues(experimentDf, param)
-      : new Array(BCs.length).fill(GLOSSARY[param].default);
-
   const responseMustTrackMaxSec = getColumnValuesOrDefaults(
+    experimentDf,
     "responseMustTrackMaxSec"
   );
   const responseMustTrackMinSec = getColumnValuesOrDefaults(
+    experimentDf,
     "responseMustTrackMinSec"
   );
   const markingFixationStrokeThickening = getColumnValuesOrDefaults(
+    experimentDf,
     "markingFixationStrokeThickening"
   );
 
@@ -964,4 +975,19 @@ const checkVernierUsingCorrectThreshold = (df: any): EasyEyesError[] => {
     }
   }
   return [];
+};
+
+export const getResponseTypedEasyEyesKeypadBools = (df: any): boolean[] => {
+  const viewingDistanceDesiredCm = getColumnValuesOrDefaults(
+    df,
+    "viewingDistanceDesiredCm"
+  );
+  const needEasyEyesKeypadBeyondCm = getColumnValuesOrDefaults(
+    df,
+    "needEasyEyesKeypadBeyondCm"
+  );
+  const needKeypad = viewingDistanceDesiredCm.map(
+    (v, i) => Number(v) > Number(needEasyEyesKeypadBeyondCm[i])
+  );
+  return needKeypad;
 };

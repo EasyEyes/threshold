@@ -177,7 +177,7 @@ export class SimulatedObserversHandler {
     const responseType = getResponseType(
       this.reader.read("responseClickedBool", BC),
       this.reader.read("responseTypedBool", BC),
-      this.reader.read("responseTypedEasyEyesKeypadBool", BC),
+      this.reader.read("!responseTypedEasyEyesKeypadBool", BC),
       this.reader.read("responseSpokenBool", BC),
       undefined,
       this.reader.read("responseSpokenBool", BC)

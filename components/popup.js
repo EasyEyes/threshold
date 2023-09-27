@@ -108,7 +108,7 @@ export const addPopupLogic = async (
           }
         }
       };
-      if (keypad) {
+      if (keypad && keypad.receiver) {
         keypad.receiver.onData = onDataCallback;
       }
     };

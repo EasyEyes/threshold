@@ -1,17 +1,17 @@
 import { KeyPress } from "../psychojs/src/core/index.js";
 import { status, rc, _key_resp_allKeys, thisExperimentInfo } from "./global";
 import { readi18nPhrases } from "./readPhrases.js";
-import { logger } from "./utils";
+import { arraysEqual, logger } from "./utils";
 import { Receiver } from "virtual-keypad";
-
-const ALPHABET_CONSTANTS = ["RETURN", "SPACE"];
-
-// TODO clarify between: responseTypedEasyEyesKeypadBool, simulateKeypadBool, wirelessKeyboardNeededBool
 
 export class KeypadHandler {
   constructor(reader) {
     this.reader = reader;
-    this.conditionsRequiringKeypad = this.readKeypadParams();
+    [
+      this.conditionsRequiringKeypad,
+      this.blocksRequiringKeypad,
+      this.keypadDistanceThresholds,
+    ] = this._readKeypadParams();
     const keypadDistanceThreshold = String(
       Math.round(Number(this.reader.read("needEasyEyesKeypadBeyondCm")[0]))
     );
@@ -20,7 +20,7 @@ export class KeypadHandler {
       rc.language.value
     ).replace("111", keypadDistanceThreshold);
 
-    this.alphabet = [];
+    this.alphabet = this._getFullAlphabet([]);
     this.font = "sans-serif";
     this.message = "";
     this.BC = undefined;
@@ -39,35 +39,90 @@ export class KeypadHandler {
         _key_resp_allKeys.current.push(responseKeypress);
       }
     };
-    if (this.keypadRequiredInExperiment()) this.initKeypad();
+    if (this.inUse()) this.initKeypad();
   }
-  readKeypadParams() {
+  _readKeypadParams() {
     const conditionsNeedingKeypad = new Map();
+    const blocksNeedingKeypad = new Map();
+    const keypadDistanceThresholds = new Map();
     for (let condition of this.reader.conditions) {
       const BC = condition.block_condition;
+      const block = Number(BC.split("_")[0]);
       const keypadRequested = this.reader.read(
-        "responseTypedEasyEyesKeypadBool",
+        "!responseTypedEasyEyesKeypadBool",
+        BC
+      );
+      const keypadDistanceThreshold = this.reader.read(
+        "needEasyEyesKeypadBeyondCm",
         BC
       );
       conditionsNeedingKeypad.set(BC, keypadRequested);
+      keypadDistanceThresholds.set(BC, keypadDistanceThreshold);
+      if (keypadRequested) {
+        blocksNeedingKeypad.set(block, true);
+      } else if (!blocksNeedingKeypad.has(block)) {
+        blocksNeedingKeypad.set(block, false);
+      }
     }
-    return conditionsNeedingKeypad;
+    return [
+      conditionsNeedingKeypad,
+      blocksNeedingKeypad,
+      keypadDistanceThresholds,
+    ];
   }
-  keypadRequired(BC) {
+  inUse(blockOrCondition) {
+    const forExperiment = typeof blockOrCondition === "undefined";
+    const isCondition = isNaN(Number(blockOrCondition));
+    if (forExperiment) return this._keypadRequiredInExperiment();
+    if (isCondition) return this._keypadRequiredInCondition(blockOrCondition);
+    return this._keypadRequiredInBlock(blockOrCondition);
+  }
+  _keypadRequiredInCondition(BC) {
     return this.conditionsRequiringKeypad.get(BC);
   }
-  keypadRequiredInExperiment() {
-    return [...this.conditionsRequiringKeypad.values()].some((x) => x);
+  _keypadRequiredInBlock(block) {
+    const keypadRequiredInBlock = this.blocksRequiringKeypad.get(block);
+    return keypadRequiredInBlock;
   }
-  async update(alphabet, font, BC) {
-    this.updateKeypadMessage("");
+  _keypadRequiredInExperiment() {
+    const someConditionUsesKeypad = [
+      ...this.conditionsRequiringKeypad.values(),
+    ].some((x) => x);
+    return someConditionUsesKeypad;
+  }
+  async update(alphabet, font, BC, force = false) {
+    this.updateKeypadMessage("", force);
+
+    alphabet = this._getFullAlphabet(alphabet);
+    const alphabetChanged = !arraysEqual(
+      [...alphabet].sort(),
+      [...this.alphabet].sort()
+    );
+    if (alphabetChanged)
+      logger("!. alphabetChanged, [alphabet, this.alphabet]", [
+        alphabet,
+        this.alphabet,
+      ]);
+    const fontChanged = font !== this.font;
+    if (fontChanged)
+      logger("!. fontChanged, [font, this.font]", [font, this.font]);
+    const BCChanged = BC !== this.BC;
+
     this.alphabet = this._getFullAlphabet(alphabet ?? this.alphabet);
     this.font = font ?? this.font;
     this.BC = BC ?? this.BC;
     if (!this.receiver) {
       await this.initKeypad();
     } else {
-      this.receiver.update(this.alphabet, this.font);
+      if (alphabetChanged || fontChanged || force) {
+        this.receiver.update(this.alphabet, this.font);
+      }
+      // Update the stored disabled message, so it references the correct viewing distance threshold for this condition
+      if (BCChanged)
+        this.disabledMessage = readi18nPhrases(
+          "T_keypadInactive",
+          rc.language.value
+        ).replace("111", this.keypadDistanceThresholds.get(BC));
     }
   }
   /**
@@ -79,56 +134,40 @@ export class KeypadHandler {
     // TODO visually enable keys
     this.acceptingResponses = true;
     this.receiver?.update(this.alphabet, this.font);
-    // TODO this breaks if keypad use is not unique within block
-    if (
-      this.keypadRequired(this.BC) ||
-      this.reader
-        .read("responseTypedEasyEyesKeypadBool", status.block)
-        .some((x) => x)
-    ) {
-      this.updateKeypadMessage("");
-    } else {
-      this.updateKeypadMessage(this.disabledMessage);
-    }
   }
   stop() {
     // TODO visually disable keys
     this.acceptingResponses = false;
-    this.receiver?.update([]);
+    this.receiver?.update([], this.font);
     this.updateKeypadMessage(this.disabledMessage);
   }
   forgetKeypad() {
     // this.receiver = undefined;
     this.connection = undefined;
   }
-  updateKeypadMessage(message) {
-    console.log("!. to update message", message);
+  updateKeypadMessage(message, force = false) {
     if (this.connection) {
       logger(
-        `updating message, from ${this.message} to ${message}`,
+        `!. updating message, from ${this.message} to ${message}`,
         this.message !== message
       );
-      this.receiver?.updateDisplayMessage(message);
-      this.message = message;
+      if (this.message !== message || force) {
+        this.receiver?.updateDisplayMessage(message);
+        this.message = message;
+      }
     }
   }
   async initKeypad() {
     const handshakeCallback = () => {
-      setTimeout(() => {
-        if (
-          this.reader
-            .read("responseTypedEasyEyesKeypadBool", status.block)
-            .some((x) => x)
-        ) {
-          this.start();
-        } else {
-          this.stop();
-        }
-      }, 1000);
+      if (this.inUse(status.block)) {
+        this.start();
+      } else {
+        this.stop();
+      }
       this.hideQRPopup();
     };
     this.receiver ??= new Receiver(
-      { alphabet: this.alphabet ?? "", font: this.font ?? "Sans" },
+      { alphabet: this.alphabet ?? [], font: this.font ?? "sans-serif" },
       this.onDataCallback,
       handshakeCallback,
       this.onConnectionCallback,
@@ -220,13 +259,15 @@ export class KeypadHandler {
   }
   endRoutine(BC) {
     const shouldEndRoutine =
-      this.keypadRequired(BC) &&
-      _key_resp_allKeys.current.map((kp) => kp.name).includes("space");
+      this.inUse(BC) &&
+      _key_resp_allKeys.current
+        .map((kp) => kp.name.toLowerCase())
+        .includes("space");
     return shouldEndRoutine;
   }
   clearKeys(BC) {
     if (typeof BC !== "undefined") {
-      if (this.keypadRequired(BC)) _key_resp_allKeys.current = [];
+      if (this.inUse(BC)) _key_resp_allKeys.current = [];
       return;
     }
     _key_resp_allKeys.current = [];

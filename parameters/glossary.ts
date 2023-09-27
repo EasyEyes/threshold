@@ -63,6 +63,14 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation: "❌ Obsolete.",
   },
+  _calibrateSoundBackgroundSecs: {
+    name: "_calibrateSoundBackgroundSecs",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "_calibrateSoundBackgroundSecs (default 0) records the background sound for the specified duration. This is used to estimate the background spectrum, which we subtract from spectra of other recordings. This recording is made if and only if _calibrateSoundBackgroundSecs>0 and calibrateSoundAllHzBool==TRUE.",
+  },
   _calibrateSoundBurstRecordings: {
     name: "_calibrateSoundBurstRecordings",
     availability: "now",

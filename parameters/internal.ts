@@ -38,4 +38,14 @@ export const INTERNAL_GLOSSARY: Glossary = {
     default: "",
     categories: "",
   },
+  "!responseTypedEasyEyesKeypadBool": {
+    name: "!responseTypedEasyEyesKeypadBool",
+    availability: "now",
+    example: "true",
+    explanation:
+      "responseTypedEasyEyesKeypadBool=viewingDistanceDesiredCm>needEasyEyesKeypadBeyondCm",
+    type: "boolean",
+    default: "false",
+    categories: "",
+  },
 };

@@ -2063,6 +2063,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.save();
       }
 
+      if (keypad.inUse(status.block)) {
+        logger("!. keypad in use, starting at filterRoutineBegin");
+        keypad.start();
+      } else {
+        logger("!. keypad not in use, stopping at filterRoutineBegin");
+        keypad.stop();
+      }
+
       updateInstructionFont(paramReader, status.block, [
         instructions,
         instructions2,
@@ -2294,7 +2302,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       responseType.current = getResponseType(
         paramReader.read("responseClickedBool", status.block)[0],
         paramReader.read("responseTypedBool", status.block)[0],
-        paramReader.read("responseTypedEasyEyesKeypadBool", status.block)[0],
+        paramReader.read("!responseTypedEasyEyesKeypadBool", status.block)[0],
         paramReader.read("responseSpokenBool", status.block)[0],
         undefined,
         paramReader.read("responseSpokenBool", status.block)[0]
@@ -2314,16 +2322,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "thresholdParameter",
         status.block
       )[0];
-
-      if (
-        paramReader
-          .read("responseTypedEasyEyesKeypadBool", status.block)
-          .some((x) => x)
-      ) {
-        keypad.start();
-      } else {
-        keypad.stop();
-      }
 
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
@@ -2528,14 +2526,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (canClick(responseType.current) && targetKind.current !== "reading")
         addProceedButton(rc.language.value);
 
-      if (
-        keypadActive(responseType.current) &&
-        targetKind.current !== "reading"
-      ) {
-        await keypad.update(["RETURN"], "sans-serif", undefined);
-        // await keypad.update(["RETURN"], font.name, undefined);
-        // keypad.updateKeypadMessage(returnOrClickProceed(L));
-        keypad.start();
+      if (keypad.inUse(status.block) && targetKind.current !== "reading") {
+        await keypad.update(["SPACE", "RETURN"], "sans-serif", undefined);
       }
 
       addBeepButton(L, correctSynth);
@@ -2909,7 +2901,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("responseClickedBool", status.block_condition),
           paramReader.read("responseTypedBool", status.block_condition),
           paramReader.read(
-            "responseTypedEasyEyesKeypadBool",
+            "!responseTypedEasyEyesKeypadBool",
             status.block_condition
           ),
           paramReader.read("responseSpokenBool", status.block_condition),
@@ -3070,15 +3062,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         s.setCharacterSet(fontCharacterSet.current.join(""))
       );
 
-      if (!simulatedObservers.proceed(BC)) {
-        if (keypad.keypadRequired(BC)) {
-          const alphabet = reader.read("fontLeftToRightBool")
-            ? [...fontCharacterSet.current]
-            : [...fontCharacterSet.current].reverse();
-          await keypad.update(alphabet, "sans-serif", BC);
+      if (!simulatedObservers.proceed(BC) && keypad.inUse(BC)) {
+        const alphabet = reader.read("fontLeftToRightBool")
+          ? [...fontCharacterSet.current]
+          : [...fontCharacterSet.current].reverse();
+        await keypad.update(alphabet, "sans-serif", BC);
+        if (keypad.inUse(BC) && !keypad.acceptingResponses) {
+          logger("!. starting keypad in trialInstructionRoutineBegin");
           keypad.start();
-        } else {
-          keypad.stop();
         }
       }
 
@@ -4963,14 +4954,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         t >= timeWhenRespondable &&
         !simulatedObservers.proceed(status.block_condition) &&
-        keypad.keypadRequired(status.block_condition) &&
+        keypad.inUse(status.block_condition) &&
         !keypad.acceptingResponses
       ) {
-        keypad.start();
         keypad.setNonSensitive();
-        // keypad.updateKeypadMessage(
-        //   readi18nPhrases("T_keypadReadyForResponse", rc.language.value)
-        // );
       }
       // *key_resp* updates
       if (
@@ -5722,8 +5709,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       speechInNoiseShowClickable.current = true;
       vocoderPhraseShowClickable.current = true;
       grid.current.hide();
-
-      keypad.stop();
 
       if (fixationConfig.nominalPos)
         fixationConfig.pos = fixationConfig.nominalPos;

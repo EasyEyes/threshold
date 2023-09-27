@@ -10,6 +10,7 @@ import {
   isTextMissing,
   isSoundFolderMissing,
   isCodeMissing,
+  getResponseTypedEasyEyesKeypadBools,
 } from "./experimentFileChecks";
 
 import {
@@ -354,6 +355,12 @@ export const prepareExperimentFileForThreshold = async (
   if (filename) {
     df = addNewInternalParam(df, "!experimentFilename", filename);
   }
+
+  df = addNewInternalParam(
+    df,
+    "!responseTypedEasyEyesKeypadBool",
+    getResponseTypedEasyEyesKeypadBools(df)
+  );
 
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
