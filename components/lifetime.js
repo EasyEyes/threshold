@@ -211,6 +211,13 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.componentConvolution,
         systemConvolution: soundCalibrationResults.current?.systemConvolution,
         autocorrelations: soundCalibrationResults.current?.autocorrelations,
+        // backgroundNoise: soundCalibrationResults.current?.background_noise,
+        backgroundRecording:
+          soundCalibrationResults.current?.background_noise?.recording,
+        db_BackgroundNoise:
+          soundCalibrationResults.current?.background_noise?.x_background,
+        Hz_BackgroundNoise:
+          soundCalibrationResults.current?.background_noise?.y_background,
       };
     }
 

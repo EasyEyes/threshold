@@ -403,8 +403,11 @@ export const allHzCalibrationResults = {
   x_conv: undefined,
   y_conv: undefined,
   knownIr: undefined,
+  x_background: undefined,
+  y_background: undefined,
 };
 
+export const calibrateSoundBackgroundSecs = { current: 0 };
 export const calibrateSoundBurstRepeats = { current: 4 };
 export const calibrateSoundBurstSec = { current: 1 };
 export const calibrateSoundBurstsWarmup = { current: 1 };

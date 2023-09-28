@@ -26,6 +26,7 @@ import {
   loudspeakerInfo,
   microphoneInfo,
   calibrationTime,
+  calibrateSoundBackgroundSecs,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -263,10 +264,9 @@ export const calibrateAudio = async (reader) => {
   calibrateSound1000HzSec.current = reader.read(
     GLOSSARY.calibrateSound1000HzSec.name
   )[0];
-  console.log(
-    "calibrateSound1000HzSec.current",
-    calibrateSound1000HzSec.current
-  );
+  calibrateSoundBackgroundSecs.current = reader.read(
+    GLOSSARY._calibrateSoundBackgroundSecs.name
+  )[0];
 
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
@@ -665,6 +665,8 @@ export const calibrateAudio = async (reader) => {
                 micModelName: micModelName,
                 calibrateSoundIIRSec: calibrateSoundIIRSec.current,
                 calibrateSound1000HzSec: calibrateSound1000HzSec.current,
+                calibrateSoundBackgroundSecs:
+                  calibrateSoundBackgroundSecs.current,
               };
 
               const calibratorParams = {
@@ -1425,6 +1427,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               calibrateSoundCheck: calibrateSoundCheck.current,
               calibrateSoundIIRSec: calibrateSoundIIRSec.current,
               calibrateSound1000HzSec: calibrateSound1000HzSec.current,
+              calibrateSoundBackgroundSecs:
+                calibrateSoundBackgroundSecs.current,
             };
             const calibratorParams = {
               numCaptures: calibrateSoundBurstRecordings.current,
@@ -1490,6 +1494,12 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                     soundCalibrationResults.current.x_unconv;
                   allHzCalibrationResults.y_unconv =
                     soundCalibrationResults.current.y_unconv;
+                  if (calibrateSoundBackgroundSecs.current > 0) {
+                    allHzCalibrationResults.x_background =
+                      soundCalibrationResults.current.background_noise.x_background;
+                    allHzCalibrationResults.y_background =
+                      soundCalibrationResults.current.background_noise.y_background;
+                  }
                 }
                 allHzCalibrationResults.knownIr =
                   soundCalibrationResults.current.componentIR;

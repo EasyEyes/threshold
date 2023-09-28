@@ -241,33 +241,55 @@ export const plotForAllHz = (
     return { x: calibrationResults.y_conv[i], y: 10 * Math.log10(x) };
   });
 
+  const backgroundMergedDataPoints = calibrationResults.x_background.map(
+    (x, i) => {
+      return { x: calibrationResults.y_background[i], y: 10 * Math.log10(x) };
+    }
+  );
+
   // sort the data points by x
   unconvMergedDataPoints.sort((a, b) => a.x - b.x);
   convMergedDataPoints.sort((a, b) => a.x - b.x);
+  backgroundMergedDataPoints.sort((a, b) => a.x - b.x);
+
+  const datasets = [
+    {
+      label: "Unfiltered",
+      data: unconvMergedDataPoints,
+      backgroundColor: "rgba(255, 99, 132, 0.2)",
+      borderColor: "rgba(255, 99, 132, 1)",
+      borderWidth: 1,
+      pointRadius: 0,
+      // pointHoverRadius: 5,
+      showLine: true,
+    },
+    {
+      label: "Filtered",
+      data: convMergedDataPoints,
+      backgroundColor: "rgba(54, 162, 235, 0.2)",
+      borderColor: "rgba(54, 162, 235, 1)",
+      borderWidth: 1,
+      pointRadius: 0,
+      // pointHoverRadius: 5,
+      showLine: true,
+    },
+  ];
+
+  if (backgroundMergedDataPoints.length > 0) {
+    datasets.push({
+      label: "Background",
+      data: backgroundMergedDataPoints,
+      backgroundColor: "rgba(0, 0, 0, 0.2)",
+      borderColor: "rgba(0, 0, 0, 1)",
+      borderWidth: 1,
+      pointRadius: 0,
+      // pointHoverRadius: 5,
+      showLine: true,
+    });
+  }
 
   const data = {
-    datasets: [
-      {
-        label: "Unfiltered",
-        data: unconvMergedDataPoints,
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
-        borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
-        pointRadius: 0,
-        // pointHoverRadius: 5,
-        showLine: true,
-      },
-      {
-        label: "Filtered",
-        data: convMergedDataPoints,
-        backgroundColor: "rgba(54, 162, 235, 0.2)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
-        pointRadius: 0,
-        // pointHoverRadius: 5,
-        showLine: true,
-      },
-    ],
+    datasets: datasets,
   };
 
   const plugin = {
