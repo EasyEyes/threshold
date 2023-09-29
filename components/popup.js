@@ -102,7 +102,7 @@ export const addPopupLogic = async (
     const handleVirtualKeyPress = () => {
       const onDataCallback = (message) => {
         if (message) {
-          if ((message.response = "RETURN")) {
+          if (message.response.toLowerCase() === "return") {
             proceed();
             keypad.receiver.onData = keypad.onDataCallback;
           }
