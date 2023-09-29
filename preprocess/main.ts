@@ -387,10 +387,10 @@ export const prepareExperimentFileForThreshold = async (
     console.log("_online2Minutes", durations._online2Minutes);
     const durationInMin = Math.round(durations.currentDuration / 60);
     durations.durationForStatusline =
-      "EasyEyes: " +
+      "EasyEyes=" +
       durationInMin +
       ", " +
-      "_online2Minutes: " +
+      "_online2Minutes=" +
       durations._online2Minutes;
     // console.log(durations.durationForStatusline);
     compatibilityRequirements.parsedInfo =

@@ -403,10 +403,10 @@ export const getDurationForProject = async (
       } else if (result != "") {
         const durationInMin = Math.round(result.currentDuration / 60);
         let durationline =
-          "EasyEyes: " +
+          "EasyEyes=" +
           durationInMin +
           ", " +
-          "_online2Minutes: " +
+          "_online2Minutes=" +
           result._online2Minutes;
         return durationline;
       }
