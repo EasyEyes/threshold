@@ -10,6 +10,8 @@ import {
   calibrateSoundBurstsWarmup,
   calibrateSoundBurstSec,
   calibrateSoundHz,
+  calibrateSoundMaxHz,
+  calibrateSoundMinHz,
 } from "./global";
 import {
   plotForAllHz,
@@ -915,15 +917,17 @@ export const displayParametersAllHz = (
   const convMergedDataPoints = calibrationResults.x_conv.map((x, i) => {
     return { x: calibrationResults.y_conv[i], y: 10 * Math.log10(x) };
   });
+
   const filteredDataPoints = convMergedDataPoints.filter(
-    (point) => point.x >= 400 && point.x <= 8000
+    (point) =>
+      point.x >= calibrateSoundMinHz.current && point.x <= calibrateSoundMaxHz
   );
   const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
   const sd = standardDeviation(filteredDataPointsY);
 
   const subtitleText = [
     `Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz.`,
-    `From 400 to 8000 Hz, the IIR-filtered MLS recording has SD = ${sd} dB.`,
+    `From ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz, the IIR-filtered MLS recording has SD = ${sd} dB.`,
   ];
   p.innerHTML = subtitleText.join("<br>");
   elems.soundTestPlots.appendChild(p);

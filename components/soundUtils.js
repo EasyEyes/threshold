@@ -652,7 +652,6 @@ export const getCurrentTimeString = () => {
     timeZoneName: "longOffset",
     hour: "numeric",
     minute: "numeric",
-    second: "numeric",
   };
   const dateString = date.toLocaleDateString(undefined, dateOptions);
 
