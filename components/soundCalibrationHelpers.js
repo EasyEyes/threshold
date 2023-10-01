@@ -153,3 +153,12 @@ export const getDeviceString = (thisDevice, language) => {
 };
 
 export const removeElements = (elms) => elms.forEach((el) => el.remove());
+
+export const doesMicrophoneExist = async (speakerID, OEM) => {
+  const dbRef = ref(database);
+  const snapshot = await get(child(dbRef, `Microphone2/${OEM}/${speakerID}`));
+  if (snapshot.exists()) {
+    return true;
+  }
+  return false;
+};

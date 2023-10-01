@@ -42,6 +42,7 @@ import {
 } from "./soundUtils";
 import { showExperimentEnding } from "./forms";
 import {
+  doesMicrophoneExist,
   getDebugIIR,
   getDebugSoundCalibrationResults,
   getDeviceString,
@@ -545,7 +546,6 @@ export const calibrateAudio = async (reader) => {
                       .toLowerCase()
                       .split(" ")
                       .join("");
-
                     // require the user to input the model number and name
                     if (
                       micName === "" ||
@@ -554,15 +554,26 @@ export const calibrateAudio = async (reader) => {
                     ) {
                       alert("Please input the model number and name");
                     } else {
-                      // remove the dropdown menu, instructions, proceed button, and input boxes
-                      removeElements([
-                        p,
-                        proceedButton3,
-                        micNameInput,
-                        micManufacturerInput,
-                        micSerialNumberInput,
-                      ]);
-                      resolve();
+                      if (
+                        !(await doesMicrophoneExist(
+                          micSerialNumber,
+                          micManufacturer
+                        ))
+                      ) {
+                        alert(
+                          "The microphone you entered does not exist in our database. Please try again."
+                        );
+                      }
+                      {
+                        removeElements([
+                          p,
+                          proceedButton3,
+                          micNameInput,
+                          micManufacturerInput,
+                          micSerialNumberInput,
+                        ]);
+                        resolve();
+                      }
                     }
                   });
                 });
@@ -1317,15 +1328,26 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                       "Please enter a microphone name, manufacturer, and serial number"
                     );
                   } else {
-                    // remove the dropdown menu, instructions, proceed button, and input boxes
-                    removeElements([
-                      p,
-                      proceedButton3,
-                      micNameInput,
-                      micManufacturerInput,
-                      micSerialNumberInput,
-                    ]);
-                    resolve();
+                    if (
+                      !(await doesMicrophoneExist(
+                        micSerialNumber,
+                        micManufacturer
+                      ))
+                    ) {
+                      alert(
+                        "The microphone you entered does not exist in the database. Please try again."
+                      );
+                    } else {
+                      // remove the dropdown menu, instructions, proceed button, and input boxes
+                      removeElements([
+                        p,
+                        proceedButton3,
+                        micNameInput,
+                        micManufacturerInput,
+                        micSerialNumberInput,
+                      ]);
+                      resolve();
+                    }
                   }
                 });
               });
@@ -1393,10 +1415,17 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               });
             }
 
-            const messageText = `${readi18nPhrases(
-              "RC_removeHeadphones",
-              language
-            )}${
+            const microphoneInCalibrationLibrary = isSmartPhone
+              ? ""
+              : readi18nPhrases(
+                  "RC_microphoneIsInCalibrationLibrary",
+                  language
+                ).replace(
+                  "xxx",
+                  `${microphoneInfo.current.micrFullManufacturerName} ${microphoneInfo.current.micFullName}`
+                );
+            const messageText = `${microphoneInCalibrationLibrary}
+            ${readi18nPhrases("RC_removeHeadphones", language)}${
               isSmartPhone
                 ? readi18nPhrases("RC_getPhoneMicrophoneReady", language)
                 : readi18nPhrases("RC_getUSBMicrophoneReady", language)
