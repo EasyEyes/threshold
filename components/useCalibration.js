@@ -42,12 +42,16 @@ import {
 } from "./soundUtils";
 import { showExperimentEnding } from "./forms";
 import {
+  addMicrophoneToDatabase,
   doesMicrophoneExist,
+  findGainatFrequency,
+  getCalibrationFile,
   getDebugIIR,
   getDebugSoundCalibrationResults,
   getDeviceString,
   getInstructionText,
   identifyDevice,
+  parseCalibrationFile,
   removeElements,
   saveLoudSpeakerInfo,
 } from "./soundCalibrationHelpers";
@@ -554,26 +558,14 @@ export const calibrateAudio = async (reader) => {
                     ) {
                       alert("Please input the model number and name");
                     } else {
-                      if (
-                        !(await doesMicrophoneExist(
-                          micSerialNumber,
-                          micManufacturer
-                        ))
-                      ) {
-                        alert(
-                          "The microphone you entered does not exist in our database. Please try again."
-                        );
-                      }
-                      {
-                        removeElements([
-                          p,
-                          proceedButton3,
-                          micNameInput,
-                          micManufacturerInput,
-                          micSerialNumberInput,
-                        ]);
-                        resolve();
-                      }
+                      removeElements([
+                        p,
+                        proceedButton3,
+                        micNameInput,
+                        micManufacturerInput,
+                        micSerialNumberInput,
+                      ]);
+                      resolve();
                     }
                   });
                 });
@@ -1307,6 +1299,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               // add event listener to the proceed button
               await new Promise((resolve) => {
                 proceedButton3.addEventListener("click", async () => {
+                  proceedButton3.innerHTML = "Loading...";
                   // get the model number and name
                   microphoneInfo.current = {
                     micFullName: micNameInput.value,
@@ -1332,6 +1325,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                     alert(
                       "Please enter a microphone name, manufacturer, and serial number"
                     );
+                    proceedButton3.innerHTML = "Proceed";
                   } else {
                     if (
                       !(await doesMicrophoneExist(
@@ -1339,9 +1333,77 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                         micManufacturer
                       ))
                     ) {
-                      alert(
-                        "The microphone you entered does not exist in the database. Please try again."
-                      );
+                      // if the microphone is from miniDSP, fetch the microphone info
+                      if (
+                        micManufacturer === "minidsp" &&
+                        (micName === "UMIK-1" || micName === "UMIK-2")
+                      ) {
+                        const serial =
+                          microphoneInfo.current.micFullSerialNumber.replace(
+                            "-",
+                            ""
+                          );
+                        const url =
+                          micName === "UMIK-1"
+                            ? `https://www.minidsp.com/scripts/umikcal/umik90.php/${serial}_90deg.txt`
+                            : `https://www.minidsp.com/scripts/umik2cal/umik90.php/${serial}_90deg.txt`;
+                        const file = await getCalibrationFile(url);
+                        if (file) {
+                          const data = parseCalibrationFile(file);
+                          const offset = findGainatFrequency(
+                            data.Freq,
+                            data.Gain,
+                            1000
+                          );
+                          const Gain = data.SensFactor + offset;
+                          const micData = {
+                            Gain: Gain,
+                            Gain1000: Gain,
+                            isSmartPhone: false,
+                            linear: {
+                              Freq: data.Freq,
+                              Gain: data.Gain,
+                            },
+                            serial: microphoneInfo.current.micFullSerialNumber,
+                            info: {
+                              DeviceType: "N/A",
+                              HardwareModel:
+                                microphoneInfo.current.micrFullManufacturerName,
+                              HardwareName:
+                                microphoneInfo.current.micrFullManufacturerName,
+                              ID: microphoneInfo.current.micFullSerialNumber,
+                              OEM: "minidsp",
+                              PlatformName: "N/A",
+                              PlatformVersion: "N/A",
+                              hardwareFamily:
+                                microphoneInfo.current.micrFullManufacturerName,
+                              micModelName:
+                                microphoneInfo.current.micrFullManufacturerName,
+                            },
+                          };
+                          await addMicrophoneToDatabase(
+                            micSerialNumber,
+                            "minidsp",
+                            micData
+                          );
+                          // remove the dropdown menu, instructions, proceed button, and input boxes
+                          removeElements([
+                            p,
+                            proceedButton3,
+                            micNameInput,
+                            micManufacturerInput,
+                            micSerialNumberInput,
+                          ]);
+                          resolve();
+                        } else {
+                          alert(
+                            "Please make sure you have entered the correct serial number."
+                          );
+                        }
+                      } else
+                        alert(
+                          "The microphone you entered does not exist in the database. Please try again."
+                        );
                     } else {
                       // remove the dropdown menu, instructions, proceed button, and input boxes
                       removeElements([
@@ -1354,6 +1416,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                       resolve();
                     }
                   }
+                  proceedButton3.innerHTML = "Proceed";
                 });
               });
             } else {

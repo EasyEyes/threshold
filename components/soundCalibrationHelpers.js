@@ -162,3 +162,81 @@ export const doesMicrophoneExist = async (speakerID, OEM) => {
   }
   return false;
 };
+
+export const addMicrophoneToDatabase = async (microphoneID, OEM, Data) => {
+  const dbRef = ref(database);
+  await set(child(dbRef, `Microphone2/${OEM}/${microphoneID}`), Data);
+};
+
+export const getCalibrationFile = async (url) => {
+  try {
+    const file = await fetch(url).then((response) => {
+      return response.text();
+    });
+    if (file.includes("Sens Factor =")) {
+      return file;
+    }
+    return false;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const parseCalibrationFile = (file) => {
+  // Split the file content into lines
+  const lines = file.split("\n");
+
+  // Parse Sens Factor from the first line
+  const sensFactorMatch = lines[0].match(/Sens Factor =([\d.-]+)dB/);
+  const sensFactor = sensFactorMatch ? parseFloat(sensFactorMatch[1]) : null;
+
+  const frequencies = [];
+  const gains = [];
+  // Iterate over each line starting from the third line
+  for (let i = 2; i < lines.length; i++) {
+    // Split the line into values (assuming tab-separated values)
+    const values = lines[i].split("\t");
+
+    // Convert the first value to a float and add it to the frequencies array
+    const frequency = parseFloat(values[0]);
+    const gain = parseFloat(values[1]);
+
+    if (frequency && gain) {
+      frequencies.push(frequency);
+      gains.push(gain);
+    }
+  }
+
+  // Create an object with 'Freq', 'Gain', and 'SensFactor' properties
+  const data = { Freq: frequencies, Gain: gains, SensFactor: sensFactor };
+  // Convert the object to a JSON string with indentation
+  // const jsonString = JSON.stringify(data, null, 2);
+  return data;
+};
+
+// Function to perform linear interpolation between two points
+const interpolate = (x, x0, y0, x1, y1) => {
+  return y0 + ((x - x0) * (y1 - y0)) / (x1 - x0);
+};
+
+export const findGainatFrequency = (frequencies, gains, targetFrequency) => {
+  // Find the index of the first frequency in the array greater than the target frequency
+  let index = 0;
+  while (index < frequencies.length && frequencies[index] < targetFrequency) {
+    index++;
+  }
+
+  // Handle cases when the target frequency is outside the range of the given data
+  if (index === 0) {
+    return gains[0];
+  } else if (index === frequencies.length) {
+    return gains[gains.length - 1];
+  } else {
+    // Interpolate the gain based on the surrounding frequencies
+    const x0 = frequencies[index - 1];
+    const y0 = gains[index - 1];
+    const x1 = frequencies[index];
+    const y1 = gains[index];
+    return interpolate(targetFrequency, x0, y0, x1, y1);
+  }
+};
