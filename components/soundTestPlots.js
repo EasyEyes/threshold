@@ -241,11 +241,11 @@ export const plotForAllHz = (
     return { x: calibrationResults.y_conv[i], y: 10 * Math.log10(x) };
   });
 
-  const backgroundMergedDataPoints = calibrationResults.x_background.map(
-    (x, i) => {
-      return { x: calibrationResults.y_background[i], y: 10 * Math.log10(x) };
-    }
-  );
+  const backgroundMergedDataPoints = calibrationResults.x_background
+    ? calibrationResults.x_background.map((x, i) => {
+        return { x: calibrationResults.y_background[i], y: 10 * Math.log10(x) };
+      })
+    : [];
 
   // sort the data points by x
   unconvMergedDataPoints.sort((a, b) => a.x - b.x);

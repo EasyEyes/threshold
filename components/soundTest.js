@@ -920,7 +920,8 @@ export const displayParametersAllHz = (
 
   const filteredDataPoints = convMergedDataPoints.filter(
     (point) =>
-      point.x >= calibrateSoundMinHz.current && point.x <= calibrateSoundMaxHz
+      point.x >= calibrateSoundMinHz.current &&
+      point.x <= calibrateSoundMaxHz.current
   );
   const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
   const sd = standardDeviation(filteredDataPointsY);

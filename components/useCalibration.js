@@ -1496,9 +1496,9 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                     soundCalibrationResults.current.y_unconv;
                   if (calibrateSoundBackgroundSecs.current > 0) {
                     allHzCalibrationResults.x_background =
-                      soundCalibrationResults.current.background_noise.x_background;
+                      soundCalibrationResults.current.background_noise?.x_background;
                     allHzCalibrationResults.y_background =
-                      soundCalibrationResults.current.background_noise.y_background;
+                      soundCalibrationResults.current.background_noise?.y_background;
                   }
                 }
                 allHzCalibrationResults.knownIr =

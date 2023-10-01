@@ -1708,7 +1708,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.5",
     explanation:
-      "calibrateSound1000HzPostSec (default 0.5) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for delay between when the sound ends and when the analyzed interval ends.",
+      "calibrateSound1000HzPostSec (default 0.5) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for some discrepancy between the clocks used to drive sound playing and recording. Making the sound longer than the recording allows us to be sure of getting a full recording despite modest discrepany in loudspeaker and microphone clocks.",
   },
   calibrateSound1000HzPreSec: {
     name: "calibrateSound1000HzPreSec",
