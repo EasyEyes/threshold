@@ -660,7 +660,7 @@ export const calibrateAudio = async (reader) => {
                 debug: debugBool.current,
                 gainValues: gains,
                 knownIR: allHzCalibrationResults.knownIr,
-                instructionDisplayId: "soundMessage",
+                instructionDisplayId: "recordingInProgress",
                 titleDisplayId: "soundTitle",
                 calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
                 calibrateSoundBurstSec: calibrateSoundBurstSec.current,
@@ -727,6 +727,7 @@ export const calibrateAudio = async (reader) => {
                   ) / 10;
                 microphoneInfo.current.CalibrationDate =
                   calibrationTime.current;
+                elems.recordingInProgress.innerHTML = "";
                 elems.message.style.whiteSpace = "normal";
                 elems.message.style.fontSize = "0.8rem";
                 elems.message.style.fontWeight = "normal";
@@ -864,7 +865,9 @@ const _addSoundCalibrationElems = (copy) => {
   const buttonAndParametersContainer = document.createElement("div");
   const calibrateMicrophoneButton = document.createElement("button");
   const continueButton = document.createElement("button");
+  const recordingInProgress = document.createElement("div");
   const elems = {
+    recordingInProgress,
     background,
     title,
     subtitle,
@@ -889,6 +892,7 @@ const _addSoundCalibrationElems = (copy) => {
     continueButton,
   };
 
+  recordingInProgress.setAttribute("id", "recordingInProgress");
   title.setAttribute("id", "soundTitle");
   subtitle.setAttribute("id", "soundSubtitle");
   message.setAttribute("id", "soundMessage");
@@ -951,6 +955,7 @@ const _addSoundCalibrationElems = (copy) => {
   downloadButton.style.visibility = "hidden";
 
   background.appendChild(container);
+  container.appendChild(recordingInProgress);
   container.appendChild(title);
   container.appendChild(subtitle);
   container.appendChild(message);
@@ -1440,7 +1445,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               debug: debugBool.current,
               gainValues: gains,
               knownIR: null,
-              instructionDisplayId: "soundMessage",
+              instructionDisplayId: "recordingInProgress",
               titleDisplayId: "soundTitle",
               calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
               calibrateSoundBurstSec: calibrateSoundBurstSec.current,
@@ -1496,6 +1501,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                     calibrator,
                     timeoutSec.current
                   );
+                elems.recordingInProgress.innerHTML = "";
                 elems.message.style.whiteSpace = "normal";
                 elems.message.style.fontSize = "1.1rem";
                 elems.message.style.fontWeight = "normal";
