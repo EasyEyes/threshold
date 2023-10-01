@@ -229,9 +229,9 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         };
         objectData.push(data);
       }
+      allSoundResults["Microphone Results"] = objectData;
     }
-    allSoundResults["Microphone Results"] = objectData;
-    psychoJS.experiment.downloadJSON(allSoundResults);
+    if (allSoundResults) psychoJS.experiment.downloadJSON(allSoundResults);
   }
 
   return Scheduler.Event.QUIT;
