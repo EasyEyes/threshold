@@ -20,6 +20,8 @@ import {
   calibrateSoundHz,
   calibrateSoundBurstRecordings,
   calibrateSound1000HzSec,
+  calibrateSound1000HzPreSec,
+  calibrateSound1000HzPostSec,
   timeToCalibrate,
   thisDevice,
   calibrateSoundIIRSec,
@@ -269,6 +271,18 @@ export const calibrateAudio = async (reader) => {
   calibrateSound1000HzSec.current = reader.read(
     GLOSSARY.calibrateSound1000HzSec.name
   )[0];
+  calibrateSound1000HzPreSec.current = reader.read(
+    GLOSSARY.calibrateSound1000HzPreSec.name
+  )[0];
+  calibrateSound1000HzPostSec.current = reader.read(
+    GLOSSARY.calibrateSound1000HzPostSec.name
+  )[0];
+  console.log("calibrateSound1000HzPreSec", calibrateSound1000HzPreSec.current);
+  console.log(
+    "calibrateSound1000HzPostSec",
+    calibrateSound1000HzPostSec.current
+  );
+
   calibrateSoundBackgroundSecs.current = reader.read(
     GLOSSARY._calibrateSoundBackgroundSecs.name
   )[0];
@@ -295,7 +309,11 @@ export const calibrateAudio = async (reader) => {
       (calibrateSoundBurstRepeats.current +
         calibrateSoundBurstsWarmup.current) *
       calibrateSoundBurstSec.current +
-    2 * gains.length * calibrateSound1000HzSec.current;
+    2 *
+      gains.length *
+      (calibrateSound1000HzPreSec.current +
+        calibrateSound1000HzSec.current +
+        calibrateSound1000HzPostSec.current);
   timeToCalibrate.current = Math.round(dSec / 60);
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
@@ -667,7 +685,10 @@ export const calibrateAudio = async (reader) => {
                 micModelNumber: micModelNumber,
                 micModelName: micModelName,
                 calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+                calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
                 calibrateSound1000HzSec: calibrateSound1000HzSec.current,
+                calibrateSound1000HzPostSec:
+                  calibrateSound1000HzPostSec.current,
                 calibrateSoundBackgroundSecs:
                   calibrateSoundBackgroundSecs.current,
               };
@@ -1523,7 +1544,9 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               isSmartPhone: isSmartPhone,
               calibrateSoundCheck: calibrateSoundCheck.current,
               calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+              calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
               calibrateSound1000HzSec: calibrateSound1000HzSec.current,
+              calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
               calibrateSoundBackgroundSecs:
                 calibrateSoundBackgroundSecs.current,
             };
@@ -1558,6 +1581,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                 elems.displayQR.style.display = "flex";
                 elems.displayQR.style.marginLeft = "0px";
                 elems.displayQR.style.flexDirection = "column";
+                console.log(speakerParameters);
                 soundCalibrationResults.current =
                   await Speaker.startCalibration(
                     speakerParameters,
