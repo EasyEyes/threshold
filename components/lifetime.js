@@ -13,6 +13,7 @@ import {
   loudspeakerInfo,
   microphoneCalibrationResults,
   invertedImpulseResponse,
+  calibrateSoundSaveJSONBool,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
@@ -173,7 +174,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     // );
     let objectData = [];
     let allSoundResults;
-    if (soundCalibrationResults.current) {
+    if (soundCalibrationResults.current && calibrateSoundSaveJSONBool.current) {
       allSoundResults = {
         SoundGainParameters: soundCalibrationResults.current?.parameters,
         Cal1000HzInDb: soundCalibrationResults.current?.inDBValues,
@@ -236,7 +237,10 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       };
     }
 
-    if (microphoneCalibrationResults.length > 0) {
+    if (
+      microphoneCalibrationResults.length > 0 &&
+      calibrateSoundSaveJSONBool.current
+    ) {
       // for (const result of microphoneCalibrationResults) {
       //   const data = {
       //     "Microphone IR": result["ir"],
@@ -246,7 +250,8 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       // }
       allSoundResults["Microphone Results"] = microphoneCalibrationResults;
     }
-    if (allSoundResults) psychoJS.experiment.downloadJSON(allSoundResults);
+    if (allSoundResults && calibrateSoundSaveJSONBool.current)
+      psychoJS.experiment.downloadJSON(allSoundResults);
   }
 
   return Scheduler.Event.QUIT;

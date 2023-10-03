@@ -29,6 +29,7 @@ import {
   microphoneInfo,
   calibrationTime,
   calibrateSoundBackgroundSecs,
+  calibrateSoundSaveJSONBool,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -286,6 +287,10 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundBackgroundSecs.current = reader.read(
     GLOSSARY._calibrateSoundBackgroundSecs.name
   )[0];
+
+  calibrateSoundSaveJSONBool.current = ifTrue(
+    reader.read(GLOSSARY._calibrateSoundSaveJSONBool.name, "__ALL_BLOCKS__")
+  );
 
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
