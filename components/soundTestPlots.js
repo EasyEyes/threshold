@@ -221,11 +221,11 @@ export const plotSoundLevels1000Hz = (
 
 export const plotForAllHz = (
   plotCanvas,
-  iir = [],
   calibrationResults,
   title,
   calibrationGoal,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
+  backgroundNoise = {}
 ) => {
   const subtitleText =
     calibrationGoal === "system"
@@ -233,17 +233,17 @@ export const plotForAllHz = (
       : isLoudspeakerCalibration
       ? "Loudspeaker"
       : "Microphone";
-  const unconvMergedDataPoints = calibrationResults.x_unconv.map((x, i) => {
-    return { x: calibrationResults.y_unconv[i], y: 10 * Math.log10(x) };
+  const unconvMergedDataPoints = calibrationResults.unconv.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(calibrationResults.unconv.y[i]) };
   });
 
-  const convMergedDataPoints = calibrationResults.x_conv.map((x, i) => {
-    return { x: calibrationResults.y_conv[i], y: 10 * Math.log10(x) };
+  const convMergedDataPoints = calibrationResults.conv.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(calibrationResults.conv.y[i]) };
   });
 
-  const backgroundMergedDataPoints = calibrationResults.x_background
-    ? calibrationResults.x_background.map((x, i) => {
-        return { x: calibrationResults.y_background[i], y: 10 * Math.log10(x) };
+  const backgroundMergedDataPoints = backgroundNoise.x_background
+    ? backgroundNoise.x_background.map((x, i) => {
+        return { x: x, y: 10 * Math.log10(backgroundNoise.y_background[i]) };
       })
     : [];
 

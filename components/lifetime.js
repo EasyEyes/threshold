@@ -180,36 +180,51 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         Cal1000HzOutDb: soundCalibrationResults.current?.outDBSPL1000Values,
         outDBSPLValues: soundCalibrationResults.current?.outDBSPLValues,
         THD: soundCalibrationResults.current?.thdValues,
-        MlsSpectrumHz: soundCalibrationResults.current?.y_conv,
-        MlsSpectrumFilteredDb: soundCalibrationResults.current?.x_conv,
-        MlsSpectrumUnfilteredHz: soundCalibrationResults.current?.y_unconv,
-        MlsSpectrumUnfilteredDb: soundCalibrationResults.current?.x_unconv,
+        MlsSpectrumHz_system:
+          soundCalibrationResults.current?.system?.psd?.conv?.x,
+        MlsSpectrumFilteredDb_system:
+          soundCalibrationResults.current?.system?.psd?.conv?.y,
+        MlsSpectrumUnfilteredHz_system:
+          soundCalibrationResults.current?.system?.psd?.unconv?.x,
+        MlsSpectrumUnfilteredDb_system:
+          soundCalibrationResults.current?.system?.psd?.unconv?.y,
+        MlsSpectrumHz_component:
+          soundCalibrationResults.current?.component?.psd?.conv?.x,
+        MlsSpectrumFilteredDb_component:
+          soundCalibrationResults.current?.component?.psd?.conv?.y,
+        MlsSpectrumUnfilteredHz_component:
+          soundCalibrationResults.current?.component?.psd?.unconv?.x,
+        MlsSpectrumUnfilteredDb_component:
+          soundCalibrationResults.current?.component?.psd?.unconv?.y,
         "Loudspeaker Component IR":
-          soundCalibrationResults.current?.componentIR,
-        "Loudspeaker Component IIR": invertedImpulseResponse.current,
-        "Loudspeaker system IR": soundCalibrationResults.current?.systemIR,
-        "Loudspeaker system IIR": soundCalibrationResults.current?.systemIIR,
-        dB_component_iir: soundCalibrationResults.current?.x_component_iir,
-        Hz_component_iir: soundCalibrationResults.current?.y_component_iir,
+          soundCalibrationResults.current?.component?.ir,
+        "Loudspeaker Component IIR":
+          soundCalibrationResults.current?.component?.iir,
+        "Loudspeaker system IR": soundCalibrationResults.current?.system?.ir,
+        "Loudspeaker system IIR": soundCalibrationResults.current?.system?.iir,
+        dB_component_iir:
+          soundCalibrationResults.current?.component?.iir_psd?.y,
+        Hz_component_iir:
+          soundCalibrationResults.current?.component?.iir_psd?.x,
         dB_component_iir_no_bandpass:
-          soundCalibrationResults.current?.x_component_iir_no_bandpass,
+          soundCalibrationResults.current?.component?.iir_psd?.y_no_bandpass,
         Hz_component_iir_no_bandpass:
-          soundCalibrationResults.current?.y_component_iir_no_bandpass,
-        dB_system_iir: soundCalibrationResults.current?.x_system_iir,
-        Hz_system_iir: soundCalibrationResults.current?.y_system_iir,
+          soundCalibrationResults.current?.component?.iir_psd?.x_no_bandpass,
+        dB_system_iir: soundCalibrationResults.current?.system?.iir_psd?.y,
+        Hz_system_iir: soundCalibrationResults.current?.system?.iir_psd?.x,
         dB_system_iir_no_bandpass:
-          soundCalibrationResults.current?.x_system_iir_no_bandpass,
+          soundCalibrationResults.current?.system?.iir_psd?.y_no_bandpass,
         Hz_system_iir_no_bandpass:
-          soundCalibrationResults.current?.y_system_iir_no_bandpass,
+          soundCalibrationResults.current?.system?.iir_psd?.x_no_bandpass,
         "Loudspeaker model": loudspeakerInfo.current,
         micInfo: soundCalibrationResults.current?.micInfo,
         "Microphone Results": [],
-        unconv_rec: soundCalibrationResults.current?.unconv_rec,
-        conv_rec: soundCalibrationResults.current?.conv_rec,
+        unconv_rec: soundCalibrationResults.current?.unfiltered_recording,
+        conv_rec: soundCalibrationResults.current?.filtered_recording,
         mls: soundCalibrationResults.current?.mls,
         componentConvolution:
-          soundCalibrationResults.current?.componentConvolution,
-        systemConvolution: soundCalibrationResults.current?.systemConvolution,
+          soundCalibrationResults.current?.component?.convolution,
+        systemConvolution: soundCalibrationResults.current?.system?.convolution,
         autocorrelations: soundCalibrationResults.current?.autocorrelations,
         // backgroundNoise: soundCalibrationResults.current?.background_noise,
         backgroundRecording:
@@ -222,14 +237,14 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     }
 
     if (microphoneCalibrationResults.length > 0) {
-      for (const result of microphoneCalibrationResults) {
-        const data = {
-          "Microphone IR": result["ir"],
-          "Microphone IIR": result["iir"],
-        };
-        objectData.push(data);
-      }
-      allSoundResults["Microphone Results"] = objectData;
+      // for (const result of microphoneCalibrationResults) {
+      //   const data = {
+      //     "Microphone IR": result["ir"],
+      //     "Microphone IIR": result["iir"],
+      //   };
+      //   objectData.push(data);
+      // }
+      allSoundResults["Microphone Results"] = microphoneCalibrationResults;
     }
     if (allSoundResults) psychoJS.experiment.downloadJSON(allSoundResults);
   }

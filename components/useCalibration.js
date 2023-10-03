@@ -396,7 +396,9 @@ export const calibrateAudio = async (reader) => {
         microphoneInfo.current,
         elems,
         true,
-        calibrateSoundCheck.current
+        calibrateSoundCheck.current === "both"
+          ? "system"
+          : calibrateSoundCheck.current
       );
       const title1000Hz = "Sound Level at 1000 Hz";
       const titleallHz = [
@@ -408,15 +410,43 @@ export const calibrateAudio = async (reader) => {
         soundLevels,
         soundCalibrationResults.current,
         title1000Hz,
-        calibrateSoundCheck.current,
+        calibrateSoundCheck.current === "both"
+          ? "system"
+          : calibrateSoundCheck.current,
         true
       );
-      displayParametersAllHz(
-        elems,
-        invertedImpulseResponse.current,
-        allHzCalibrationResults,
-        titleallHz
-      );
+      if (
+        calibrateSoundCheck.current === "system" ||
+        calibrateSoundCheck.current === "goal"
+      ) {
+        displayParametersAllHz(
+          elems,
+          calibrateSoundCheck.current === "system"
+            ? allHzCalibrationResults.system
+            : allHzCalibrationResults.component,
+          titleallHz,
+          calibrateSoundCheck.current,
+          true,
+          allHzCalibrationResults.background
+        );
+      } else {
+        displayParametersAllHz(
+          elems,
+          allHzCalibrationResults.system,
+          titleallHz,
+          "system",
+          true,
+          allHzCalibrationResults.background
+        );
+        displayParametersAllHz(
+          elems,
+          allHzCalibrationResults.component,
+          titleallHz,
+          "goal",
+          true,
+          allHzCalibrationResults.background
+        );
+      }
     }
 
     // Now that loudspeaker calibration is done, present users with three options: continue to experiment, calibrate microphone or test sounds
@@ -671,6 +701,7 @@ export const calibrateAudio = async (reader) => {
                 gainValues: gains,
                 knownIR: allHzCalibrationResults.knownIr,
                 instructionDisplayId: "recordingInProgress",
+                soundMessageId: "soundMessage",
                 titleDisplayId: "soundTitle",
                 calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
                 calibrateSoundBurstSec: calibrateSoundBurstSec.current,
@@ -696,7 +727,7 @@ export const calibrateAudio = async (reader) => {
               const calibratorParams = {
                 numCaptures: calibrateSoundBurstRecordings.current,
                 numMLSPerCapture: 4,
-                download: debugBool.current,
+                download: false,
                 lowHz: calibrateSoundMinHz.current,
                 highHz: calibrateSoundMaxHz.current,
               };
@@ -757,25 +788,50 @@ export const calibrateAudio = async (reader) => {
                     microphoneInfo.currentHardwareModelVariants,
                   PlatformVersion: microphoneInfo.current.PlatformVersion,
                   DeviceType: microphoneInfo.current.DeviceType,
-                  Recording_with_Filter_Hz:
-                    calibrateSoundCheck.current !== "none" ? result.y_conv : [],
-                  Recording_with_Filter_dB:
-                    calibrateSoundCheck.current !== "none" ? result.x_conv : [],
-                  Recording_Hz:
-                    calibrateSoundCheck.current !== "none"
-                      ? result.y_unconv
-                      : [],
-                  Recording_dB:
-                    calibrateSoundCheck.current !== "none"
-                      ? result.x_unconv
-                      : [],
                   in_dB_1000Hz: result.inDBValues ? result.inDBValues : [],
                   out_dBSPL_1000Hz: result.outDBSPL1000Values
                     ? result.outDBSPL1000Values
                     : [],
-                  ir: result.componentIR ? result.componentIR : [],
-                  iir: result.componentIIR ? result.componentIIR : [],
                   CalibrationDate: microphoneInfo.current.CalibrationDate,
+                  MlsSpectrumHz_system: result?.system?.psd?.conv?.x,
+                  MlsSpectrumFilteredDb_system:
+                    result.current?.system?.psd?.conv?.y,
+                  MlsSpectrumUnfilteredHz_system:
+                    result?.system?.psd?.unconv?.x,
+                  MlsSpectrumUnfilteredDb_system:
+                    result?.system?.psd?.unconv?.y,
+                  MlsSpectrumHz_component: result?.component?.psd?.conv?.x,
+                  MlsSpectrumFilteredDb_component:
+                    result?.component?.psd?.conv?.y,
+                  MlsSpectrumUnfilteredHz_component:
+                    result?.component?.psd?.unconv?.x,
+                  MlsSpectrumUnfilteredDb_component:
+                    result?.component?.psd?.unconv?.y,
+                  "Microphone Component IR": result?.component?.ir,
+                  "Microphone Component IIR": result?.component?.iir,
+                  "Microphone system IR": result?.system?.ir,
+                  "Microphone system IIR": result?.system?.iir,
+                  dB_component_iir: result?.component?.iir_psd?.y,
+                  Hz_component_iir: result?.component?.iir_psd?.x,
+                  dB_component_iir_no_bandpass:
+                    result?.component?.iir_psd?.y_no_bandpass,
+                  Hz_component_iir_no_bandpass:
+                    result?.component?.iir_psd?.x_no_bandpass,
+                  dB_system_iir: result?.system?.iir_psd?.y,
+                  Hz_system_iir: result?.system?.iir_psd?.x,
+                  dB_system_iir_no_bandpass:
+                    result?.system?.iir_psd?.y_no_bandpass,
+                  Hz_system_iir_no_bandpass:
+                    result?.system?.iir_psd?.x_no_bandpass,
+                  unconv_rec: result?.unfiltered_recording,
+                  conv_rec: result?.filtered_recording,
+                  mls: result?.mls,
+                  componentConvolution: result?.component?.convolution,
+                  systemConvolution: result?.system?.convolution,
+                  autocorrelations: result?.autocorrelations,
+                  backgroundRecording: result?.background_noise?.recording,
+                  db_BackgroundNoise: result?.background_noise?.x_background,
+                  Hz_BackgroundNoise: result?.background_noise?.y_background,
                 });
                 if (calibrateSoundCheck.current !== "none") {
                   displayCompleteTransducerTable(
@@ -783,7 +839,9 @@ export const calibrateAudio = async (reader) => {
                     microphoneInfo.current,
                     elems,
                     false,
-                    calibrateSoundCheck.current
+                    calibrateSoundCheck.current === "both"
+                      ? "system"
+                      : calibrateSoundCheck.current
                   );
                   //show sound calibration results
                   const title1000Hz = "Sound Level at 1000 Hz for" + micName;
@@ -796,17 +854,47 @@ export const calibrateAudio = async (reader) => {
                     soundLevels,
                     result,
                     title1000Hz,
-                    calibrateSoundCheck.current,
+                    calibrateSoundCheck.current === "both"
+                      ? "system"
+                      : calibrateSoundCheck.current,
                     false
                   );
-                  displayParametersAllHz(
-                    elems,
-                    result.componentIIR,
-                    result,
-                    titleallHz,
-                    calibrateSoundCheck.current,
-                    false
-                  );
+                  if (
+                    calibrateSoundCheck.current === "system" ||
+                    calibrateSoundCheck.current === "goal"
+                  ) {
+                    displayParametersAllHz(
+                      elems,
+                      calibrateSoundCheck.current === "system"
+                        ? result.system.psd
+                        : result.component.psd,
+                      titleallHz,
+                      calibrateSoundCheck.current,
+                      false,
+                      result.background_noise
+                    );
+                  } else {
+                    displayParametersAllHz(
+                      elems,
+                      calibrateSoundCheck.current === "system"
+                        ? result.system.psd
+                        : result.component.psd,
+                      titleallHz,
+                      "system",
+                      false,
+                      result.background_noise
+                    );
+                    displayParametersAllHz(
+                      elems,
+                      calibrateSoundCheck.current === "system"
+                        ? result.system.psd
+                        : result.component.psd,
+                      titleallHz,
+                      "goal",
+                      false,
+                      result.background_noise
+                    );
+                  }
                 }
               }
               resolve();
@@ -1530,6 +1618,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               gainValues: gains,
               knownIR: null,
               instructionDisplayId: "recordingInProgress",
+              soundMessageId: "soundMessage",
               titleDisplayId: "soundTitle",
               calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
               calibrateSoundBurstSec: calibrateSoundBurstSec.current,
@@ -1553,7 +1642,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             const calibratorParams = {
               numCaptures: calibrateSoundBurstRecordings.current,
               numMLSPerCapture: 4,
-              download: debugBool.current,
+              download: false,
               lowHz: calibrateSoundMinHz.current,
               highHz: calibrateSoundMaxHz.current,
             };
@@ -1600,7 +1689,9 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   return;
                 }
                 invertedImpulseResponse.current =
-                  soundCalibrationResults.current.componentIIR;
+                  calibrateSoundCheck.current === "system"
+                    ? soundCalibrationResults.current.system.iir
+                    : soundCalibrationResults.current.component.iir;
                 microphoneInfo.current = {
                   ...microphoneInfo.current,
                   ...soundCalibrationResults.current.micInfo,
@@ -1608,23 +1699,31 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                 microphoneInfo.current.CalibrationDate =
                   calibrationTime.current;
                 if (calibrateSoundCheck.current !== "none") {
-                  allHzCalibrationResults.x_conv =
-                    soundCalibrationResults.current.x_conv;
-                  allHzCalibrationResults.y_conv =
-                    soundCalibrationResults.current.y_conv;
-                  allHzCalibrationResults.x_unconv =
-                    soundCalibrationResults.current.x_unconv;
-                  allHzCalibrationResults.y_unconv =
-                    soundCalibrationResults.current.y_unconv;
+                  if (calibrateSoundCheck.current === "system") {
+                    allHzCalibrationResults.system =
+                      soundCalibrationResults.current.system.psd;
+                  } else if (calibrateSoundCheck.current === "goal") {
+                    allHzCalibrationResults.component =
+                      soundCalibrationResults.current.component.psd;
+                  } else if (calibrateSoundCheck.current === "both") {
+                    allHzCalibrationResults.system =
+                      soundCalibrationResults.current.system.psd;
+                    allHzCalibrationResults.component =
+                      soundCalibrationResults.current.component.psd;
+                  }
                   if (calibrateSoundBackgroundSecs.current > 0) {
-                    allHzCalibrationResults.x_background =
-                      soundCalibrationResults.current.background_noise?.x_background;
-                    allHzCalibrationResults.y_background =
-                      soundCalibrationResults.current.background_noise?.y_background;
+                    allHzCalibrationResults.background = {
+                      x_background:
+                        soundCalibrationResults.current.background_noise
+                          ?.x_background,
+                      y_background:
+                        soundCalibrationResults.current.background_noise
+                          ?.y_background,
+                    };
                   }
                 }
                 allHzCalibrationResults.knownIr =
-                  soundCalibrationResults.current.componentIR;
+                  soundCalibrationResults.current.component.ir;
 
                 soundGainDBSPL.current =
                   soundCalibrationResults.current.parameters.gainDBSPL;
@@ -1671,7 +1770,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   modelNumber,
                   thisDevice.current.OEM,
                   invertedImpulseResponse.current,
-                  soundCalibrationResults.current.componentIR
+                  soundCalibrationResults.current.component.ir
                 );
               } catch (err) {
                 console.log(err);

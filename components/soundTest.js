@@ -898,11 +898,11 @@ const downloadCalibrationData = (downloadButton, parameters) => {
 
 export const displayParametersAllHz = (
   elems,
-  iir,
   calibrationResults,
   title = "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers.",
   calibrationGoal = "system",
-  isLoudspeakerCalibration = true
+  isLoudspeakerCalibration = true,
+  backgroundNoise
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -913,11 +913,9 @@ export const displayParametersAllHz = (
   elems.soundTestPlots.appendChild(plotCanvas);
 
   const p = document.createElement("p");
-  // compute standard deviation of the filtered data points from 400 to 8000 Hz (frequency is x-axis)
-  const convMergedDataPoints = calibrationResults.x_conv.map((x, i) => {
-    return { x: calibrationResults.y_conv[i], y: 10 * Math.log10(x) };
+  const convMergedDataPoints = calibrationResults.conv.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(calibrationResults.conv.y[i]) };
   });
-
   const filteredDataPoints = convMergedDataPoints.filter(
     (point) =>
       point.x >= calibrateSoundMinHz.current &&
@@ -925,7 +923,6 @@ export const displayParametersAllHz = (
   );
   const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
   const sd = standardDeviation(filteredDataPointsY);
-
   const subtitleText = [
     `Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz.`,
     `From ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz, the IIR-filtered MLS recording has SD = ${sd} dB.`,
@@ -937,11 +934,11 @@ export const displayParametersAllHz = (
 
   plotForAllHz(
     plotCanvas,
-    iir,
     calibrationResults,
     title,
     calibrationGoal,
-    isLoudspeakerCalibration
+    isLoudspeakerCalibration,
+    backgroundNoise
   );
 };
 

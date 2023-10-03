@@ -405,6 +405,9 @@ export const allHzCalibrationResults = {
   knownIr: undefined,
   x_background: undefined,
   y_background: undefined,
+  system: {},
+  component: {},
+  background: {},
 };
 
 export const calibrateSoundBackgroundSecs = { current: 0 };
