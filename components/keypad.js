@@ -16,7 +16,7 @@ export class KeypadHandler {
       Math.round(Number(this.reader.read("needEasyEyesKeypadBeyondCm")[0]))
     );
     this.disabledMessage = readi18nPhrases(
-      "T_keypadInactive",
+      "T_keypadDisabled",
       rc.language.value
     ).replace("111", keypadDistanceThreshold);
 
@@ -120,7 +120,7 @@ export class KeypadHandler {
       // Update the stored disabled message, so it references the correct viewing distance threshold for this condition
       if (BCChanged)
         this.disabledMessage = readi18nPhrases(
-          "T_keypadInactive",
+          "T_keypadDisabled",
           rc.language.value
         ).replace("111", this.keypadDistanceThresholds.get(BC));
     }
