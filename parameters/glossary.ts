@@ -114,10 +114,10 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundCheck",
     availability: "now",
     type: "categorical",
-    default: "goal",
+    default: "both",
     explanation:
       '_calibrateSoundCheck (default "goal") optionally checks the sound frequency response (i.e. sound spectrum produced by a white noise stimulus) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the system, microphone, or loudspeaker. _calibrateSoundCheck must be set to one of three values: “none”, “system”, or “goal”. \n• “none” skips the check. \n• “system” checks using the IIR corresponding the the combination of loudspeaker and microphone.\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.\n• "both" checks both "system" and "goal".',
-    categories: ["none", "system", "goal"],
+    categories: ["none", "system", "goal", "both"],
   },
   _calibrateSoundHz: {
     name: "_calibrateSoundHz",
