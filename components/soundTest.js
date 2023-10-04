@@ -902,7 +902,7 @@ export const displayParametersAllHz = (
   title = "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers.",
   calibrationGoal = "system",
   isLoudspeakerCalibration = true,
-  backgroundNoise
+  backgroundNoise = []
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
