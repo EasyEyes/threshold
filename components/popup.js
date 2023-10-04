@@ -3,6 +3,7 @@
 import { readi18nPhrases } from "./readPhrases";
 import { canClick, canType } from "./response";
 import { safeExecuteFunc, showCursor } from "./utils";
+import { status } from "./global";
 
 export const preparePopup = (L, keyName) => {
   // keyName can be 'trial-break' or 'proportion-correct'
@@ -96,6 +97,7 @@ export const addPopupLogic = async (
       hidePopupProceed(keyName);
       hidePopup(keyName);
 
+      keypad.receiver.onData = keypad.onDataCallback;
       safeExecuteFunc(func);
       resolve();
     };
@@ -104,11 +106,10 @@ export const addPopupLogic = async (
         if (message) {
           if (message.response.toLowerCase() === "return") {
             proceed();
-            keypad.receiver.onData = keypad.onDataCallback;
           }
         }
       };
-      if (keypad && keypad.receiver) {
+      if (keypad.inUse(status.block)) {
         keypad.receiver.onData = onDataCallback;
       }
     };

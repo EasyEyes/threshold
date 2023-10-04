@@ -1292,7 +1292,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     continueRoutine = true;
 
     if (
-      keypadActive(responseType.current) &&
+      keypad.inUse(status.block) &&
       _key_resp_allKeys.current.map((r) => r.name).includes("return")
     ) {
       continueRoutine = false;

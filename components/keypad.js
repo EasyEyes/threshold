@@ -114,6 +114,7 @@ export class KeypadHandler {
     if (!this.receiver) {
       await this.initKeypad();
     } else {
+      this.clearKeys(this.BC);
       if (alphabetChanged || fontChanged || force) {
         this.receiver.update(this.alphabet, this.font);
       }
