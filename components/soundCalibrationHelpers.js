@@ -96,12 +96,14 @@ export const getInstructionText = (thisDevice, language) => {
     "RC_needModelNumberAndName",
     language
   );
-  const needModelNumberFinal =
-    thisDevice.OEM === "Unknown" || thisDevice.DeviceType === "Unknown"
-      ? needModelNumber.replace("xxx ", "device").replace("yyy", "")
-      : needModelNumber
-          .replace("xxx", thisDevice.OEM)
-          .replace("yyy", thisDevice.DeviceType);
+  const preferredModelNumber = "model number";
+  const needModelNumberFinal = needModelNumber
+    .replace("mmm", preferredModelNumber)
+    .replace("xxx", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
+    .replace(
+      "yyy",
+      thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType
+    );
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
   if (userOS === "Android") {
@@ -118,16 +120,6 @@ export const getInstructionText = (thisDevice, language) => {
 };
 
 export const getDeviceString = (thisDevice, language) => {
-  const needModelNumber = readi18nPhrases(
-    "RC_needModelNumberAndName",
-    language
-  );
-  const needModelNumberFinal =
-    thisDevice.OEM === "Unknown" || thisDevice.DeviceType === "Unknown"
-      ? needModelNumber.replace("xxx ", "device").replace("yyy", "")
-      : needModelNumber
-          .replace("xxx", thisDevice.OEM)
-          .replace("yyy", thisDevice.DeviceType);
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
   if (userOS === "Android") {
@@ -140,16 +132,14 @@ export const getDeviceString = (thisDevice, language) => {
     findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
   }
 
-  return `This device: (#Text to be added to the phrases doc) <br> <b>Platform Name:</b> ${thisDevice.PlatformName} <br>
-   <b>Platform Version:</b> ${thisDevice.PlatformVersion} <br>
-   <b>Device Id:</b> ${thisDevice.DeviceId} <br>
-   <b>Hardware Model Variants:</b> ${thisDevice.HardwareModelVariants} <br>
-   <b>OEM:</b> ${thisDevice.OEM} <br>
+  return `<b>OEM:</b> ${thisDevice.OEM} <br>
    <b>Device Type:</b> ${thisDevice.DeviceType} <br>
+   <b>Platform Name:</b> ${thisDevice.PlatformName} <br>
+   <b>Platform Version:</b> ${thisDevice.PlatformVersion} <br>
    <b>Hardware Model:</b> ${thisDevice.HardwareModel} <br>
    <b>Hardware Family:</b> ${thisDevice.HardwareFamily} <br>
    <b>Hardware Name:</b> ${thisDevice.HardwareName} <br>
-   <b>Is a Mobile Device:</b> ${thisDevice.IsMobile} <br><br>`;
+   <b>Hardware Model Variants:</b> ${thisDevice.HardwareModelVariants} <br><br>`;
 };
 
 export const removeElements = (elms) => elms.forEach((el) => el.remove());

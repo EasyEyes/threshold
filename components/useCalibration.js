@@ -507,7 +507,9 @@ export const calibrateAudio = async (reader) => {
           const dropdown = document.createElement("select");
           dropdown.id = "micDropdown";
           dropdown.name = "micDropdown";
-          const options = ["USB Microphone", "SmartPhone", "None"];
+          const options = calibrateMicrophonesBool.current
+            ? ["USB Microphone", "Smartphone", "None"]
+            : ["Smartphone", "USB Microphone", "None"];
           options.forEach((option) => {
             const optionElem = document.createElement("option");
             optionElem.value = option;
@@ -516,8 +518,8 @@ export const calibrateAudio = async (reader) => {
           });
 
           const p2 = document.createElement("p");
-          p2.innerHTML =
-            "Select the type of microphone you are using for this calibration: (#Text to be added to the phrases doc)";
+          p2.innerHTML = readi18nPhrases("RC_selectMicrophoneType", lang);
+          // "Select the type of microphone you are using for this calibration: (#Text to be added to the phrases doc)";
           p2.style.fontSize = "1rem";
 
           // add  to the page
@@ -537,7 +539,7 @@ export const calibrateAudio = async (reader) => {
               elems.displayQR.style.display = "flex";
               elems.displayQR.style.justifyContent = "left";
               const choice = dropdown.value;
-              const isSmartPhone = choice === "SmartPhone";
+              const isSmartPhone = choice === "Smartphone";
               p2.remove();
               dropdown.remove();
               proceedButton.remove();
@@ -706,6 +708,7 @@ export const calibrateAudio = async (reader) => {
                 gainValues: gains,
                 knownIR: allHzCalibrationResults.knownIr,
                 instructionDisplayId: "recordingInProgress",
+                timeToCalibrateId: "timeToCalibrate",
                 soundMessageId: "soundMessage",
                 titleDisplayId: "soundTitle",
                 calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
@@ -972,7 +975,9 @@ const _addSoundCalibrationElems = (copy) => {
   const calibrateMicrophoneButton = document.createElement("button");
   const continueButton = document.createElement("button");
   const recordingInProgress = document.createElement("div");
+  const timeToCalibrate = document.createElement("div");
   const elems = {
+    timeToCalibrate,
     recordingInProgress,
     background,
     title,
@@ -998,6 +1003,7 @@ const _addSoundCalibrationElems = (copy) => {
     continueButton,
   };
 
+  timeToCalibrate.setAttribute("id", "timeToCalibrate");
   recordingInProgress.setAttribute("id", "recordingInProgress");
   title.setAttribute("id", "soundTitle");
   subtitle.setAttribute("id", "soundSubtitle");
@@ -1045,7 +1051,7 @@ const _addSoundCalibrationElems = (copy) => {
   continueButton.innerHTML = copy.proceedToExperiment;
   continueButton.style.display = "none";
   // width for displayUpdate
-  displayUpdate.style.width = "25vw";
+  displayUpdate.style.width = "95%";
   displayQR.style.marginTop = "15px";
 
   background.classList.add(...["sound-calibration-background", "rc-panel"]);
@@ -1064,6 +1070,7 @@ const _addSoundCalibrationElems = (copy) => {
   container.appendChild(recordingInProgress);
   container.appendChild(title);
   container.appendChild(subtitle);
+  container.appendChild(timeToCalibrate);
   container.appendChild(message);
   container.appendChild(navContainer);
   navContainer.appendChild(testButton);
@@ -1331,7 +1338,9 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
         const dropdown = document.createElement("select");
         dropdown.id = "micDropdown";
         dropdown.name = "micDropdown";
-        const options = ["USB Microphone", "SmartPhone", "None"];
+        const options = calibrateMicrophonesBool.current
+          ? ["USB Microphone", "Smartphone", "None"]
+          : ["Smartphone", "USB Microphone", "None"];
         options.forEach((option) => {
           const optionElem = document.createElement("option");
           optionElem.value = option;
@@ -1340,8 +1349,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
         });
 
         const p = document.createElement("p");
-        p.innerHTML =
-          "Select the type of microphone you are using for this calibration: (#Text to be added to the phrases doc)";
+        p.innerHTML = readi18nPhrases("RC_selectMicrophoneType", language);
+        // "Select the type of microphone you are using for this calibration: (#Text to be added to the phrases doc)";
         p.style.fontSize = "1rem";
 
         // add  to the page
@@ -1360,7 +1369,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             if (dropdown.value === "None") {
               showExperimentEnding();
             }
-            const isSmartPhone = dropdown.value === "SmartPhone";
+            const isSmartPhone = dropdown.value === "Smartphone";
             // remove the dropdown menu, proeed button
             removeElements([dropdown, proceedButton2, p]);
 
@@ -1625,6 +1634,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               instructionDisplayId: "recordingInProgress",
               soundMessageId: "soundMessage",
               titleDisplayId: "soundTitle",
+              timeToCalibrateId: "timeToCalibrate",
               calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
               calibrateSoundBurstSec: calibrateSoundBurstSec.current,
               calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
