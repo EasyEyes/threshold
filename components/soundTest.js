@@ -899,7 +899,7 @@ const downloadCalibrationData = (downloadButton, parameters) => {
 export const displayParametersAllHz = (
   elems,
   calibrationResults,
-  title = "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers.",
+  title = "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers",
   calibrationGoal = "system",
   isLoudspeakerCalibration = true,
   backgroundNoise = []
@@ -923,13 +923,12 @@ export const displayParametersAllHz = (
   );
   const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
   const sd = standardDeviation(filteredDataPointsY);
-  const subtitleText = [
-    `Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz.`,
-    `From ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz, the IIR-filtered MLS recording has SD = ${sd} dB.`,
-  ];
-  p.innerHTML = subtitleText.join("<br>");
-  elems.soundTestPlots.appendChild(p);
+  const subtitleText = `Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz. From ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz, the IIR-filtered MLS recording has SD = ${sd} dB.`;
 
+  p.innerHTML = subtitleText;
+  p.style.fontSize = "12px";
+  p.style.width = "500px";
+  elems.soundTestPlots.appendChild(p);
   elems.citation.style.visibility = "visible";
 
   plotForAllHz(

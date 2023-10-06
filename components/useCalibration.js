@@ -408,7 +408,7 @@ export const calibrateAudio = async (reader) => {
       const title1000Hz = "Sound Level at 1000 Hz";
       const titleallHz = [
         "Power spectral density of sound recording of white noise (MLS)",
-        "source played through the loudspeakers.",
+        "source played through the loudspeakers",
       ];
       displayParameters1000Hz(
         elems,
@@ -855,7 +855,7 @@ export const calibrateAudio = async (reader) => {
                   const title1000Hz = "Sound Level at 1000 Hz for" + micName;
                   const titleallHz = [
                     "Power spectral density of sound recording of white noise (MLS)",
-                    "source played through the loudspeakers.",
+                    "source played through the loudspeakers",
                   ];
                   displayParameters1000Hz(
                     elems,
@@ -974,7 +974,7 @@ const _addSoundCalibrationElems = (copy) => {
   const buttonAndParametersContainer = document.createElement("div");
   const calibrateMicrophoneButton = document.createElement("button");
   const continueButton = document.createElement("button");
-  const recordingInProgress = document.createElement("div");
+  const recordingInProgress = document.createElement("h1");
   const timeToCalibrate = document.createElement("div");
   const elems = {
     timeToCalibrate,
@@ -1027,6 +1027,7 @@ const _addSoundCalibrationElems = (copy) => {
   soundTestContainer.setAttribute("id", "soundTestContainer");
   citation.setAttribute("id", "citation");
 
+  // container.style.lineHeight = "1rem";
   title.innerHTML = copy.soundCalibration;
   // font size for title
   title.style.fontSize = "1.5em";
@@ -1051,8 +1052,9 @@ const _addSoundCalibrationElems = (copy) => {
   continueButton.innerHTML = copy.proceedToExperiment;
   continueButton.style.display = "none";
   // width for displayUpdate
-  displayUpdate.style.width = "95%";
-  displayQR.style.marginTop = "15px";
+  displayUpdate.style.width = "100%";
+  displayQR.style.marginTop = "12px";
+  timeToCalibrate.style.marginLeft = "0px";
 
   background.classList.add(...["sound-calibration-background", "rc-panel"]);
   // avoid background being clipped from the top
@@ -1070,7 +1072,7 @@ const _addSoundCalibrationElems = (copy) => {
   container.appendChild(recordingInProgress);
   container.appendChild(title);
   container.appendChild(subtitle);
-  container.appendChild(timeToCalibrate);
+  // container.appendChild(timeToCalibrate);
   container.appendChild(message);
   container.appendChild(navContainer);
   navContainer.appendChild(testButton);
@@ -1080,6 +1082,7 @@ const _addSoundCalibrationElems = (copy) => {
   navContainer.appendChild(continueButton);
 
   container.appendChild(displayContainer);
+  displayContainer.appendChild(timeToCalibrate);
   displayContainer.appendChild(displayUpdate);
   displayContainer.appendChild(displayQR);
   buttonAndParametersContainer.appendChild(soundParametersFromCalibration);
@@ -1693,6 +1696,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                     timeoutSec.current
                   );
                 elems.recordingInProgress.innerHTML = "";
+                elems.timeToCalibrate.innerHTML = "";
+                elems.message.style.display = "block";
                 elems.message.style.whiteSpace = "normal";
                 elems.message.style.fontSize = "1.1rem";
                 elems.message.style.fontWeight = "normal";

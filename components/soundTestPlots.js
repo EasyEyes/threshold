@@ -132,6 +132,8 @@ export const plotSoundLevels1000Hz = (
           text: title,
           font: {
             size: 20,
+            weight: "normal",
+            family: "system-ui",
           },
         },
         subtitle: {
@@ -139,6 +141,7 @@ export const plotSoundLevels1000Hz = (
           text: subtitleText,
           font: {
             size: 15,
+            family: "system-ui",
           },
           align: "center",
         },
@@ -314,6 +317,8 @@ export const plotForAllHz = (
           text: title,
           font: {
             size: 18,
+            weight: "normal",
+            family: "system-ui",
           },
         },
         subtitle: {
@@ -321,6 +326,7 @@ export const plotForAllHz = (
           text: subtitleText,
           font: {
             size: 15,
+            family: "system-ui",
           },
           align: "center",
         },
@@ -356,6 +362,9 @@ export const plotForAllHz = (
           title: {
             display: true,
             text: "Frequency (Hz)",
+            font: {
+              size: "12px",
+            },
           },
           min: 20,
           max: 16000,
@@ -366,6 +375,9 @@ export const plotForAllHz = (
           title: {
             display: true,
             text: "Recording (dB)",
+            font: {
+              size: "12px",
+            },
           },
         },
       },
