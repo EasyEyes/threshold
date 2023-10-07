@@ -12,6 +12,8 @@ import {
   calibrateSoundHz,
   calibrateSoundMaxHz,
   calibrateSoundMinHz,
+  calibrateSoundIIRSec,
+  calibrateSoundBurstDb,
 } from "./global";
 import {
   plotForAllHz,
@@ -923,9 +925,9 @@ export const displayParametersAllHz = (
   );
   const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
   const sd = standardDeviation(filteredDataPointsY);
-  const subtitleText = `Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz. From ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz, the IIR-filtered MLS recording has SD = ${sd} dB.`;
-
-  p.innerHTML = subtitleText;
+  const subtitleText = `From ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz, the IIR-filtered MLS recording has SD = ${sd} dB. Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz.`;
+  const reportParameters = `_calibrateSoundIIRSec=${calibrateSoundIIRSec.current}, calibrateSoundBurstDb=${calibrateSoundBurstDb.current}, _calibrateSoundBurstRepeats=${calibrateSoundBurstRepeats.current}, _calibrateSoundBurstSec=${calibrateSoundBurstSec.current}`;
+  p.innerHTML = subtitleText + "<br>" + reportParameters;
   p.style.fontSize = "12px";
   p.style.width = "500px";
   elems.soundTestPlots.appendChild(p);
