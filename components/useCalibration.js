@@ -25,6 +25,7 @@ import {
   timeToCalibrate,
   thisDevice,
   calibrateSoundIIRSec,
+  calibrateSoundBurstDb,
   loudspeakerInfo,
   microphoneInfo,
   calibrationTime,
@@ -269,6 +270,12 @@ export const calibrateAudio = async (reader) => {
     GLOSSARY._calibrateSoundIIRSec.name
   )[0];
 
+  calibrateSoundBurstDb.current = reader.read(
+    GLOSSARY._calibrateSoundBurstDb.name
+  )[0];
+
+  console.log("calibrateSoundBurstDb", calibrateSoundBurstDb.current);
+
   calibrateSound1000HzSec.current = reader.read(
     GLOSSARY.calibrateSound1000HzSec.name
   )[0];
@@ -278,11 +285,6 @@ export const calibrateAudio = async (reader) => {
   calibrateSound1000HzPostSec.current = reader.read(
     GLOSSARY.calibrateSound1000HzPostSec.name
   )[0];
-  console.log("calibrateSound1000HzPreSec", calibrateSound1000HzPreSec.current);
-  console.log(
-    "calibrateSound1000HzPostSec",
-    calibrateSound1000HzPostSec.current
-  );
 
   calibrateSoundBackgroundSecs.current = reader.read(
     GLOSSARY._calibrateSoundBackgroundSecs.name
@@ -723,6 +725,10 @@ export const calibrateAudio = async (reader) => {
                 micSerialNumber: micSerialNumber,
                 micModelNumber: micModelNumber,
                 micModelName: micModelName,
+                calibrateSoundBurstDb: Math.pow(
+                  10,
+                  calibrateSoundBurstDb.current / 20
+                ),
                 calibrateSoundIIRSec: calibrateSoundIIRSec.current,
                 calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
                 calibrateSound1000HzSec: calibrateSound1000HzSec.current,
@@ -1649,6 +1655,10 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               micModelNumber: micModelNumber,
               micModelName: micModelName,
               isSmartPhone: isSmartPhone,
+              calibrateSoundBurstDb: Math.pow(
+                10,
+                calibrateSoundBurstDb.current / 20
+              ),
               calibrateSoundCheck: calibrateSoundCheck.current,
               calibrateSoundIIRSec: calibrateSoundIIRSec.current,
               calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
