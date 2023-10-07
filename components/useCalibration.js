@@ -791,9 +791,11 @@ export const calibrateAudio = async (reader) => {
                 elems.message.style.fontWeight = "normal";
                 console.log("Microphone Results:", result);
                 microphoneCalibrationResults.push({
-                  name: isSmartPhone ? micModelName : micName,
+                  name: microphoneInfo.current.micFullName,
                   ID: microphoneInfo.current.micFullSerialNumber,
-                  OEM: microphoneInfo.current.OEM,
+                  OEM: isSmartPhone
+                    ? microphoneInfo.current.OEM
+                    : microphoneInfo.current.micrFullManufacturerName,
                   isSmartPhone: isSmartPhone,
                   HardwareName: microphoneInfo.current.HardwareName,
                   HardwareFamily: microphoneInfo.current.HardwareFamily,
