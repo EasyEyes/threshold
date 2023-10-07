@@ -1778,7 +1778,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   ...loudspeakerInfo.current,
                   ModelName: modelName,
                   ID: modelNumber,
-                  isSmartPhone: thisDevice.current.IsMobile,
+                  isSmartPhone: isSmartPhone,
                   HardwareName: thisDevice.current.HardwareName,
                   HardwareModel: thisDevice.current.HardwareModel,
                   HardwareModelVariants:
@@ -1796,6 +1796,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                         10
                     ) / 10,
                   CalibrationDate: calibrationTime.current,
+                  micInfo: microphoneInfo.current,
                 };
                 await saveLoudSpeakerInfo(
                   loudspeakerInfo.current,
