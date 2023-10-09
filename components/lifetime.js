@@ -14,6 +14,12 @@ import {
   microphoneCalibrationResults,
   invertedImpulseResponse,
   calibrateSoundSaveJSONBool,
+  calibrateSoundBurstDb,
+  calibrateSoundBurstSec,
+  calibrateSoundBurstRepeats,
+  calibrateSoundIIRSec,
+  calibrateSoundMinHz,
+  calibrateSoundMaxHz,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
@@ -234,6 +240,12 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.background_noise?.x_background,
         Hz_BackgroundNoise:
           soundCalibrationResults.current?.background_noise?.y_background,
+        calibrateSoundBurstDb: calibrateSoundBurstDb.current,
+        calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+        calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
+        calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+        calibrateSoundMinHz: calibrateSoundMinHz.current,
+        calibrateSoundMaxHz: calibrateSoundMaxHz.current,
       };
     }
 
