@@ -1,12 +1,15 @@
 import { Chart } from "chart.js/auto";
 import { SoundLevelModel, displaySummarizedTransducerTable } from "./soundTest";
 import {
+  calibrateSoundBurstDb,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
   calibrateSoundBurstsWarmup,
   calibrateSoundHz,
+  calibrateSoundIIRSec,
   loudspeakerInfo,
   microphoneInfo,
+  showSoundParametersBool,
 } from "./global";
 
 export const plotSoundLevels1000Hz = (
@@ -214,7 +217,7 @@ export const plotSoundLevels1000Hz = (
   tableDiv.style.position = "absolute";
   const rect = plotCanvas.getBoundingClientRect();
   // position the table on the lower right of the canvas (make responsive for different screen sizes)
-  tableDiv.style.top = rect.bottom - 200 + "px";
+  tableDiv.style.top = rect.bottom - 240 + "px";
   tableDiv.style.right = 100 + "px";
 
   // make the table on top of the canvas
@@ -397,11 +400,22 @@ export const plotForAllHz = (
 
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
+  if (showSoundParametersBool.current) {
+    const p = document.createElement("p");
+    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${calibrateSoundBurstSec.current} sec, ${calibrateSoundBurstRepeats.current} reps <br> IIR: ${calibrateSoundIIRSec.current} sec`;
+    p.innerHTML = reportParameters;
+    p.style.fontSize = "12px";
+    p.style.fontWeight = "bold";
+    p.style.marginBottom = "0px";
+    tableDiv.appendChild(p);
+  }
   tableDiv.appendChild(table);
   tableDiv.style.position = "absolute";
   plotCanvas.parentNode.appendChild(tableDiv);
   const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.top = rect.bottom - 230 + "px";
+  tableDiv.style.top = showSoundParametersBool.current
+    ? rect.bottom - 290 + "px"
+    : rect.bottom - 240 + "px";
   tableDiv.style.left = 120 + "px";
 
   // make the table on top of the canvas

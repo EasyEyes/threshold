@@ -410,6 +410,7 @@ export const allHzCalibrationResults = {
   background: {},
 };
 
+export const showSoundParametersBool = { current: true };
 export const calibrateSoundSaveJSONBool = { current: false };
 export const calibrateSoundBackgroundSecs = { current: 0 };
 export const calibrateSoundBurstRepeats = { current: 4 };

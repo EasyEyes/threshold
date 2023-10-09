@@ -242,7 +242,9 @@ export const calibrateAudio = async (reader) => {
   const showSoundTestPageBool = ifTrue(
     reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__")
   );
-
+  const showSoundParametersBool = ifTrue(
+    reader.read(GLOSSARY._showSoundParametersBool.name, "__ALL_BLOCKS__")
+  );
   timeoutSec.current = reader.read(GLOSSARY._timeoutSec.name)[0] * 1000;
   calibrateSoundMinHz.current = reader.read(
     GLOSSARY.calibrateSoundMinHz.name
@@ -250,7 +252,6 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundMaxHz.current = reader.read(
     GLOSSARY.calibrateSoundMaxHz.name
   )[0];
-
   calibrateSoundBurstRepeats.current = reader.read(
     GLOSSARY._calibrateSoundBurstRepeats.name
   )[0];
@@ -269,13 +270,9 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundIIRSec.current = reader.read(
     GLOSSARY._calibrateSoundIIRSec.name
   )[0];
-
   calibrateSoundBurstDb.current = reader.read(
     GLOSSARY._calibrateSoundBurstDb.name
   )[0];
-
-  console.log("calibrateSoundBurstDb", calibrateSoundBurstDb.current);
-
   calibrateSound1000HzSec.current = reader.read(
     GLOSSARY.calibrateSound1000HzSec.name
   )[0];
@@ -285,15 +282,12 @@ export const calibrateAudio = async (reader) => {
   calibrateSound1000HzPostSec.current = reader.read(
     GLOSSARY.calibrateSound1000HzPostSec.name
   )[0];
-
   calibrateSoundBackgroundSecs.current = reader.read(
     GLOSSARY._calibrateSoundBackgroundSecs.name
   )[0];
-
   calibrateSoundSaveJSONBool.current = ifTrue(
     reader.read(GLOSSARY._calibrateSoundSaveJSONBool.name, "__ALL_BLOCKS__")
   );
-
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
     .split(",");
@@ -301,10 +295,6 @@ export const calibrateAudio = async (reader) => {
   for (let i = 0; i < soundLevels.length; i++) {
     soundLevels[i] = parseFloat(soundLevels[i]);
   }
-  // const soundLevels = [-60, -50, -40, -30, -20, -15,-10, -3.1]
-  // const soundLevels = [-3.1, -13.1];
-  // const soundLevels = [-3.1, -10,-20,-30,-40, -50]
-  // change sound Levels to gain values
   const gains = soundLevels.map((soundLevel) => {
     return Math.pow(10, soundLevel / 20);
   });
@@ -1063,6 +1053,12 @@ const _addSoundCalibrationElems = (copy) => {
   displayUpdate.style.width = "100%";
   displayQR.style.marginTop = "12px";
   timeToCalibrate.style.marginLeft = "0px";
+  subtitle.style.paddingBottom = "0px";
+  subtitle.style.marginBottom = "0px";
+  timeToCalibrate.style.paddingTop = "8px";
+  timeToCalibrate.style.paddingBottom = "0px";
+  displayUpdate.style.paddingTop = "8px";
+  displayContainer.style.paddingTop = "0px";
 
   background.classList.add(...["sound-calibration-background", "rc-panel"]);
   // avoid background being clipped from the top
