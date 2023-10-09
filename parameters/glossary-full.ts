@@ -94,7 +94,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundBurstDb (default -10) is the digital sound level (in dB) at which to play the MLS during calibration. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital sound power will be _calibrateSoundBurstDb (in dB). The unfiltered MLS amplitude will be ±10^(_calibrateSoundBurstDb/20). At the default of -10 dB, the amplitude is ±0.32. _calibrateSoundBurstDb specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
     type: "numerical",
-    default: "1",
+    default: "-10",
     categories: "",
   },
   {
@@ -395,6 +395,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "multicategorical",
     default: "",
     categories: "hdrMovie, tenBit",
+  },
+  {
+    name: "_needIncognitoBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needIncognitoBool (default FALSE) requires that the browser window be in \"incognito\" mode. Alas Safari always returns FALSE, so this will reject Safari. (When we reject for not having incognito, many participants will try again, by starting again in a new incognito window. They need to know that EasyEyes can't detect incognito in Safari.) In general, EasyEyes includes only participants whose equipment is known to meet the scientist's stated needs (by _needXXX statements in the experiment spreadsheet). \nhttps://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/extension/inIncognitoContext",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
   },
   {
     name: "_needOperatingSystem",
@@ -1133,6 +1143,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "_showSoundCalibrationResultsBool (default TRUE) requests displaying the plots and tables of the calibration results immediately after each sound calibration (the loudspeaker and each microphone). These plots and tables are impressive, and might interest the participant. If that seems distracting, this switch allows the scientist to disable that display. Each sound calibration includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "_showSoundParametersBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_showSoundParametersBool (default TRUE) adds to every sound plot a formatted display of several input parameters:\n_calibrateSoundBurstDb\n_calibrateSoundBurstSec\n_calibrateSoundBurstRepeats\n_calibrateSoundlIRSec",
     type: "boolean",
     default: "TRUE",
     categories: "",

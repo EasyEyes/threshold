@@ -75,7 +75,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstDb",
     availability: "now",
     type: "numerical",
-    default: "1",
+    default: "-10",
     explanation:
       "_calibrateSoundBurstDb (default -10) is the digital sound level (in dB) at which to play the MLS during calibration. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital sound power will be _calibrateSoundBurstDb (in dB). The unfiltered MLS amplitude will be ±10^(_calibrateSoundBurstDb/20). At the default of -10 dB, the amplitude is ±0.32. _calibrateSoundBurstDb specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
   },
@@ -395,6 +395,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _needDisplay demands support for key display features:\nHDRMovie: Browser must support HDR movies.\ntenBit: Display must support 10-bit imaging. https://trello.com/c/VxGHyxDa\ncodec: I'm not sure whether we should explicitly list the codecs we support or just write \"codec\" and have EasyEyes check that the browser supports at least one of the video codecs supported by EasyEyes. EasyEyes's list of compatible codecs may grow. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
     categories: ["hdrMovie", "tenBit"],
+  },
+  _needIncognitoBool: {
+    name: "_needIncognitoBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 _needIncognitoBool (default FALSE) requires that the browser window be in \"incognito\" mode. Alas Safari always returns FALSE, so this will reject Safari. (When we reject for not having incognito, many participants will try again, by starting again in a new incognito window. They need to know that EasyEyes can't detect incognito in Safari.) In general, EasyEyes includes only participants whose equipment is known to meet the scientist's stated needs (by _needXXX statements in the experiment spreadsheet). \nhttps://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/extension/inIncognitoContext",
   },
   _needOperatingSystem: {
     name: "_needOperatingSystem",
@@ -1573,6 +1581,14 @@ export const GLOSSARY: Glossary = {
     default: "TRUE",
     explanation:
       "_showSoundCalibrationResultsBool (default TRUE) requests displaying the plots and tables of the calibration results immediately after each sound calibration (the loudspeaker and each microphone). These plots and tables are impressive, and might interest the participant. If that seems distracting, this switch allows the scientist to disable that display. Each sound calibration includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).",
+  },
+  _showSoundParametersBool: {
+    name: "_showSoundParametersBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_showSoundParametersBool (default TRUE) adds to every sound plot a formatted display of several input parameters:\n_calibrateSoundBurstDb\n_calibrateSoundBurstSec\n_calibrateSoundBurstRepeats\n_calibrateSoundlIRSec",
   },
   _showSoundTestPageBool: {
     name: "_showSoundTestPageBool",
