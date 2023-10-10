@@ -209,7 +209,7 @@ export const restrictRepeatedLettersSpacing = (
         stimulusFieldBoundingRectPx,
         screenRectPx,
         targetXYPx,
-        "spacing",
+        letterConfig.thresholdParameter ?? "spacingDeg",
         letterConfig.spacingRelationToSize,
         widthPx,
         heightPx

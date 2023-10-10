@@ -97,7 +97,7 @@ export const addPopupLogic = async (
       hidePopupProceed(keyName);
       hidePopup(keyName);
 
-      keypad.receiver.onData = keypad.onDataCallback;
+      if (keypad.receiver) keypad.receiver.onData = keypad.onDataCallback;
       safeExecuteFunc(func);
       resolve();
     };

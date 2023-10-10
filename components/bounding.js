@@ -805,7 +805,8 @@ export const getLargestBoundsRatio = (
     case "targetSizeDeg":
       break;
     default:
-      throw "This routine expects thresholdParameter to be targetSizeDeg or spacingDeg.";
+      // TODO make a compiler check
+      throw `This routine expects thresholdParameter to be targetSizeDeg or spacingDeg. Received thresholdParameter of value ${thresholdParameter}`;
   }
   if (
     screen.left >= 0 ||

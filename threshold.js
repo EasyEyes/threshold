@@ -4370,11 +4370,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
           if (fixationConfig.markingFixationMotionRadiusDeg) {
-            const stimsToOffset =
+            let stimsToOffset;
+            if (
               letterConfig.spacingRelationToSize !== "typographic" &&
               letterConfig.thresholdParameter === "spacingDeg"
-                ? [target, flanker1, flanker2]
-                : [target];
+            ) {
+              stimsToOffset = [target, flanker1, flanker2];
+              const fourFlankersNeeded = [
+                "horizontalAndVertical",
+                "radialAndTangential",
+              ].includes(letterConfig.spacingDirection);
+              if (fourFlankersNeeded) stimsToOffset.push(flanker3, flanker4);
+            } else {
+              stimsToOffset = [target];
+            }
             const boundingBoxStims = [
               ...Object.getOwnPropertyNames(boundingBoxPolies).map(
                 (prop) => boundingBoxPolies[prop]

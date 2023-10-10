@@ -21,6 +21,7 @@ import {
   letterTiming,
   showConditionNameConfig,
   showCharacterSetResponse,
+  responseType,
 } from "./global.js";
 import {
   measureGazeError,
@@ -229,7 +230,8 @@ export const _repeatedLetters_trialRoutineEachFrame = (
       null,
       "",
       targetKind.current,
-      status.block_condition
+      status.block_condition,
+      responseType.current
     );
 
     instructions.tSTart = t;
