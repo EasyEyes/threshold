@@ -240,6 +240,16 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.background_noise?.x_background,
         Hz_BackgroundNoise:
           soundCalibrationResults.current?.background_noise?.y_background,
+        db_system_convolution:
+          soundCalibrationResults.current?.system?.filtered_mls_psd?.y,
+        Hz_system_convolution:
+          soundCalibrationResults.current?.system?.filtered_mls_psd?.x,
+        db_component_convolution:
+          soundCalibrationResults.current?.component?.filtered_mls_psd?.y,
+        Hz_component_convolution:
+          soundCalibrationResults.current?.component?.filtered_mls_psd?.x,
+        db_mls: soundCalibrationResults.current?.mls_psd?.y,
+        Hz_mls: soundCalibrationResults.current?.mls_psd?.x,
         calibrateSoundBurstDb: calibrateSoundBurstDb.current,
         calibrateSoundBurstSec: calibrateSoundBurstSec.current,
         calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
