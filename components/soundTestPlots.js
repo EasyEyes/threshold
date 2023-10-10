@@ -231,7 +231,8 @@ export const plotForAllHz = (
   title,
   calibrationGoal,
   isLoudspeakerCalibration,
-  backgroundNoise = {}
+  backgroundNoise = {},
+  mls_psd = {}
 ) => {
   const subtitleText =
     calibrationGoal === "system"
@@ -239,12 +240,12 @@ export const plotForAllHz = (
       : isLoudspeakerCalibration
       ? "Loudspeaker"
       : "Microphone";
-  const unconvMergedDataPoints = calibrationResults.unconv.x.map((x, i) => {
-    return { x: x, y: 10 * Math.log10(calibrationResults.unconv.y[i]) };
+  const unconvMergedDataPoints = calibrationResults.psd.unconv.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(calibrationResults.psd.unconv.y[i]) };
   });
 
-  const convMergedDataPoints = calibrationResults.conv.x.map((x, i) => {
-    return { x: x, y: 10 * Math.log10(calibrationResults.conv.y[i]) };
+  const convMergedDataPoints = calibrationResults.psd.conv.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(calibrationResults.psd.conv.y[i]) };
   });
 
   const backgroundMergedDataPoints = backgroundNoise.x_background
@@ -253,10 +254,24 @@ export const plotForAllHz = (
       })
     : [];
 
+  const digitalMLSPoints = mls_psd.x
+    ? mls_psd.x.map((x, i) => {
+        return { x: x, y: 10 * Math.log10(mls_psd.y[i]) };
+      })
+    : [];
+  console.log("psd", calibrationResults);
+  const filteredDigitalMLSPoints = calibrationResults.filtered_mls_psd.x
+    ? calibrationResults.filtered_mls_psd.x.map((x, i) => {
+        return {
+          x: x,
+          y: 10 * Math.log10(calibrationResults.filtered_mls_psd.y[i]),
+        };
+      })
+    : [];
   // sort the data points by x
-  unconvMergedDataPoints.sort((a, b) => a.x - b.x);
-  convMergedDataPoints.sort((a, b) => a.x - b.x);
-  backgroundMergedDataPoints.sort((a, b) => a.x - b.x);
+  // unconvMergedDataPoints.sort((a, b) => a.x - b.x);
+  // convMergedDataPoints.sort((a, b) => a.x - b.x);
+  // backgroundMergedDataPoints.sort((a, b) => a.x - b.x);
 
   const datasets = [
     {
@@ -291,6 +306,32 @@ export const plotForAllHz = (
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
+    });
+  }
+  if (filteredDigitalMLSPoints.length > 0) {
+    datasets.push({
+      label: "Filtered MLS",
+      data: filteredDigitalMLSPoints,
+      backgroundColor: "rgba(54, 162, 235, 0.2)",
+      borderColor: "rgba(54, 162, 235, 1)",
+      borderWidth: 1,
+      pointRadius: 0,
+      // pointHoverRadius: 5,
+      showLine: true,
+      borderDash: [5, 5],
+    });
+  }
+  if (digitalMLSPoints.length > 0) {
+    datasets.push({
+      label: "MLS",
+      data: digitalMLSPoints,
+      backgroundColor: "rgba(255, 99, 132, 0.2)",
+      borderColor: "rgba(255, 99, 132, 1)",
+      borderWidth: 1,
+      pointRadius: 0,
+      // pointHoverRadius: 5,
+      showLine: true,
+      borderDash: [5, 5],
     });
   }
 
@@ -400,21 +441,21 @@ export const plotForAllHz = (
 
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
+  tableDiv.appendChild(table);
   if (showSoundParametersBool.current) {
     const p = document.createElement("p");
     const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${calibrateSoundBurstSec.current} sec, ${calibrateSoundBurstRepeats.current} reps <br> IIR: ${calibrateSoundIIRSec.current} sec`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "12px";
-    p.style.fontWeight = "bold";
     p.style.marginBottom = "0px";
     tableDiv.appendChild(p);
   }
-  tableDiv.appendChild(table);
+
   tableDiv.style.position = "absolute";
   plotCanvas.parentNode.appendChild(tableDiv);
   const rect = plotCanvas.getBoundingClientRect();
   tableDiv.style.top = showSoundParametersBool.current
-    ? rect.bottom - 290 + "px"
+    ? rect.bottom - 285 + "px"
     : rect.bottom - 240 + "px";
   tableDiv.style.left = 120 + "px";
 

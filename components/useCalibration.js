@@ -424,7 +424,8 @@ export const calibrateAudio = async (reader) => {
           titleallHz,
           calibrateSoundCheck.current,
           true,
-          allHzCalibrationResults.background
+          allHzCalibrationResults.background,
+          allHzCalibrationResults.mls_psd
         );
       } else {
         displayParametersAllHz(
@@ -433,7 +434,8 @@ export const calibrateAudio = async (reader) => {
           titleallHz,
           "system",
           true,
-          allHzCalibrationResults.background
+          allHzCalibrationResults.background,
+          allHzCalibrationResults.mls_psd
         );
         displayParametersAllHz(
           elems,
@@ -441,7 +443,8 @@ export const calibrateAudio = async (reader) => {
           titleallHz,
           "goal",
           true,
-          allHzCalibrationResults.background
+          allHzCalibrationResults.background,
+          allHzCalibrationResults.mls_psd
         );
       }
     }
@@ -872,33 +875,36 @@ export const calibrateAudio = async (reader) => {
                     displayParametersAllHz(
                       elems,
                       calibrateSoundCheck.current === "system"
-                        ? result.system.psd
-                        : result.component.psd,
+                        ? result.system
+                        : result.component,
                       titleallHz,
                       calibrateSoundCheck.current,
                       false,
-                      result.background_noise
+                      result.background_noise,
+                      result.mls_psd
                     );
                   } else {
                     displayParametersAllHz(
                       elems,
                       calibrateSoundCheck.current === "system"
-                        ? result.system.psd
-                        : result.component.psd,
+                        ? result.system
+                        : result.component,
                       titleallHz,
                       "system",
                       false,
-                      result.background_noise
+                      result.background_noise,
+                      result.mls_psd
                     );
                     displayParametersAllHz(
                       elems,
                       calibrateSoundCheck.current === "system"
-                        ? result.system.psd
-                        : result.component.psd,
+                        ? result.system
+                        : result.component,
                       titleallHz,
                       "goal",
                       false,
-                      result.background_noise
+                      result.background_noise,
+                      result.mls_psd
                     );
                   }
                 }
@@ -1729,16 +1735,18 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                 if (calibrateSoundCheck.current !== "none") {
                   if (calibrateSoundCheck.current === "system") {
                     allHzCalibrationResults.system =
-                      soundCalibrationResults.current.system.psd;
+                      soundCalibrationResults.current.system;
                   } else if (calibrateSoundCheck.current === "goal") {
                     allHzCalibrationResults.component =
-                      soundCalibrationResults.current.component.psd;
+                      soundCalibrationResults.current.component;
                   } else if (calibrateSoundCheck.current === "both") {
                     allHzCalibrationResults.system =
-                      soundCalibrationResults.current.system.psd;
+                      soundCalibrationResults.current.system;
                     allHzCalibrationResults.component =
-                      soundCalibrationResults.current.component.psd;
+                      soundCalibrationResults.current.component;
                   }
+                  allHzCalibrationResults.mls_psd =
+                    soundCalibrationResults.current.mls_psd;
                   if (calibrateSoundBackgroundSecs.current > 0) {
                     allHzCalibrationResults.background = {
                       x_background:

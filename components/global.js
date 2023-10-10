@@ -408,6 +408,7 @@ export const allHzCalibrationResults = {
   system: {},
   component: {},
   background: {},
+  mls_psd: {},
 };
 
 export const showSoundParametersBool = { current: true };

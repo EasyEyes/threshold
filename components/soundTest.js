@@ -904,7 +904,8 @@ export const displayParametersAllHz = (
   title = "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers",
   calibrationGoal = "system",
   isLoudspeakerCalibration = true,
-  backgroundNoise = []
+  backgroundNoise = [],
+  mls_psd = {}
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -915,8 +916,8 @@ export const displayParametersAllHz = (
   elems.soundTestPlots.appendChild(plotCanvas);
 
   const p = document.createElement("p");
-  const convMergedDataPoints = calibrationResults.conv.x.map((x, i) => {
-    return { x: x, y: 10 * Math.log10(calibrationResults.conv.y[i]) };
+  const convMergedDataPoints = calibrationResults.psd.conv.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(calibrationResults.psd.conv.y[i]) };
   });
   const filteredDataPoints = convMergedDataPoints.filter(
     (point) =>
@@ -939,7 +940,8 @@ export const displayParametersAllHz = (
     title,
     calibrationGoal,
     isLoudspeakerCalibration,
-    backgroundNoise
+    backgroundNoise,
+    mls_psd
   );
 };
 
