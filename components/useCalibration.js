@@ -398,10 +398,7 @@ export const calibrateAudio = async (reader) => {
           : calibrateSoundCheck.current
       );
       const title1000Hz = "Sound Level at 1000 Hz";
-      const titleallHz = [
-        "Power spectral density of sound recording of white noise (MLS)",
-        "source played through the loudspeakers",
-      ];
+      const titleallHz = ["Spectra of MLS recordings"];
       displayParameters1000Hz(
         elems,
         soundLevels,
@@ -854,10 +851,7 @@ export const calibrateAudio = async (reader) => {
                   );
                   //show sound calibration results
                   const title1000Hz = "Sound Level at 1000 Hz for" + micName;
-                  const titleallHz = [
-                    "Power spectral density of sound recording of white noise (MLS)",
-                    "source played through the loudspeakers",
-                  ];
+                  const titleallHz = ["Spectra of MLS recordings"];
                   displayParameters1000Hz(
                     elems,
                     soundLevels,

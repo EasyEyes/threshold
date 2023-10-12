@@ -7,6 +7,8 @@ import {
   calibrateSoundBurstsWarmup,
   calibrateSoundHz,
   calibrateSoundIIRSec,
+  calibrateSoundMaxHz,
+  calibrateSoundMinHz,
   loudspeakerInfo,
   microphoneInfo,
   showSoundParametersBool,
@@ -212,17 +214,17 @@ export const plotSoundLevels1000Hz = (
   );
 
   // add the table to the lower right of the canvas. Adjust the position of the table based on the canvas size
+  const chartArea = plot.chartArea;
   const tableDiv = document.createElement("div");
-  tableDiv.appendChild(table);
   tableDiv.style.position = "absolute";
-  const rect = plotCanvas.getBoundingClientRect();
-  // position the table on the lower right of the canvas (make responsive for different screen sizes)
-  tableDiv.style.top = rect.bottom - 240 + "px";
-  tableDiv.style.right = 100 + "px";
+  tableDiv.appendChild(table);
+  plotCanvas.parentNode.appendChild(tableDiv);
+  const tableRec = tableDiv.getBoundingClientRect();
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 40) + "px";
+  tableDiv.style.marginLeft = chartArea.right - tableRec.width + "px";
 
   // make the table on top of the canvas
   tableDiv.style.zIndex = 1;
-  plotCanvas.parentNode.appendChild(tableDiv);
 };
 
 export const plotForAllHz = (
@@ -259,7 +261,7 @@ export const plotForAllHz = (
         return { x: x, y: 10 * Math.log10(mls_psd.y[i]) };
       })
     : [];
-  console.log("psd", calibrationResults);
+
   const filteredDigitalMLSPoints = calibrationResults.filtered_mls_psd.x
     ? calibrationResults.filtered_mls_psd.x.map((x, i) => {
         return {
@@ -275,7 +277,7 @@ export const plotForAllHz = (
 
   const datasets = [
     {
-      label: "Unfiltered",
+      label: "Recording of MLS",
       data: unconvMergedDataPoints,
       backgroundColor: "rgba(255, 99, 132, 0.2)",
       borderColor: "rgba(255, 99, 132, 1)",
@@ -285,7 +287,7 @@ export const plotForAllHz = (
       showLine: true,
     },
     {
-      label: "Filtered",
+      label: "Recording of filtered MLS",
       data: convMergedDataPoints,
       backgroundColor: "rgba(54, 162, 235, 0.2)",
       borderColor: "rgba(54, 162, 235, 1)",
@@ -298,7 +300,7 @@ export const plotForAllHz = (
 
   if (backgroundMergedDataPoints.length > 0) {
     datasets.push({
-      label: "Background",
+      label: "Recording of background",
       data: backgroundMergedDataPoints,
       backgroundColor: "rgba(0, 0, 0, 0.2)",
       borderColor: "rgba(0, 0, 0, 1)",
@@ -338,6 +340,20 @@ export const plotForAllHz = (
   const data = {
     datasets: datasets,
   };
+
+  // find the max of the y values
+  const maxY = Math.max(
+    ...unconvMergedDataPoints.map((point) => point.y),
+    ...convMergedDataPoints.map((point) => point.y),
+    ...backgroundMergedDataPoints.map((point) => point.y),
+    ...digitalMLSPoints.map((point) => point.y),
+    ...filteredDigitalMLSPoints.map((point) => point.y)
+  );
+
+  // min = -130 max = maxY + 10, stepSize = 10. Set the plotCanvas Height based on the max and min. Every 10 dB is 40 pixels
+  const plotCanvasHeight = (maxY + 10 + 130) * 5.5;
+  plotCanvas.height = plotCanvasHeight;
+  plotCanvas.width = 600;
 
   const plugin = {
     id: "customHTMLonCanvas",
@@ -418,10 +434,15 @@ export const plotForAllHz = (
           position: "left",
           title: {
             display: true,
-            text: "Recording (dB)",
+            text: "Power spectral density (dB)",
             font: {
               size: "12px",
             },
+          },
+          min: -130,
+          max: maxY + 10,
+          ticks: {
+            stepSize: 10,
           },
         },
       },
@@ -430,6 +451,7 @@ export const plotForAllHz = (
   };
 
   const plot = new Chart(plotCanvas, config);
+  const chartArea = plot.chartArea;
   const table = displaySummarizedTransducerTable(
     loudspeakerInfo.current,
     microphoneInfo.current,
@@ -441,23 +463,37 @@ export const plotForAllHz = (
 
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
-  tableDiv.appendChild(table);
   if (showSoundParametersBool.current) {
+    const filteredDataPoints = convMergedDataPoints.filter(
+      (point) =>
+        point.x >= calibrateSoundMinHz.current &&
+        point.x <= calibrateSoundMaxHz.current
+    );
+    const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
+    const sd = standardDeviation(filteredDataPointsY);
     const p = document.createElement("p");
-    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${calibrateSoundBurstSec.current} sec, ${calibrateSoundBurstRepeats.current} reps <br> IIR: ${calibrateSoundIIRSec.current} sec`;
+    const reportParameters = `SD: ${sd} dB over ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "12px";
     p.style.marginBottom = "0px";
     tableDiv.appendChild(p);
   }
+  tableDiv.appendChild(table);
+  if (showSoundParametersBool.current) {
+    const p = document.createElement("p");
+    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${calibrateSoundBurstSec.current} sec, ${calibrateSoundBurstRepeats.current} reps, ${calibrateSoundHz.current} Hz, IIR: ${calibrateSoundIIRSec.current} sec, ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz`;
+    p.innerHTML = reportParameters;
+    p.style.fontSize = "12px";
+    p.style.marginBottom = "0px";
+    tableDiv.appendChild(p);
+  }
+  plotCanvas.parentNode.appendChild(tableDiv);
 
   tableDiv.style.position = "absolute";
-  plotCanvas.parentNode.appendChild(tableDiv);
+  const tableRec = tableDiv.getBoundingClientRect();
   const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.top = showSoundParametersBool.current
-    ? rect.bottom - 285 + "px"
-    : rect.bottom - 240 + "px";
-  tableDiv.style.left = 120 + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 40) + "px";
+  tableDiv.style.marginLeft = chartArea.left + 3 + "px";
 
   // make the table on top of the canvas
   tableDiv.style.zIndex = 1;
@@ -477,7 +513,7 @@ export const standardDeviation = (values) => {
   const stdDev = Math.sqrt(avgSquareDiff);
   // only 1 digit after the decimal place
   const std = Math.round(stdDev * 10) / 10;
-  return std;
+  return std.toFixed(1);
 };
 
 const average = (data) => {

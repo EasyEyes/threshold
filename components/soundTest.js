@@ -909,29 +909,10 @@ export const displayParametersAllHz = (
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
-  plotCanvas.width = 500;
-  plotCanvas.height = 500;
+  // plotCanvas.width = 500;
+  // plotCanvas.height = 500;
   plotCanvas.style.marginTop = "20px";
-
   elems.soundTestPlots.appendChild(plotCanvas);
-
-  const p = document.createElement("p");
-  const convMergedDataPoints = calibrationResults.psd.conv.x.map((x, i) => {
-    return { x: x, y: 10 * Math.log10(calibrationResults.psd.conv.y[i]) };
-  });
-  const filteredDataPoints = convMergedDataPoints.filter(
-    (point) =>
-      point.x >= calibrateSoundMinHz.current &&
-      point.x <= calibrateSoundMaxHz.current
-  );
-  const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
-  const sd = standardDeviation(filteredDataPointsY);
-  const subtitleText = `From ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz, the IIR-filtered MLS recording has SD = ${sd} dB. Frequency response calibrated with ${calibrateSoundBurstRepeats.current} repeats (after ${calibrateSoundBurstsWarmup.current} warmup) of a ${calibrateSoundBurstSec.current} sec burst, sampled at ${calibrateSoundHz.current} Hz.`;
-  const reportParameters = `_calibrateSoundIIRSec=${calibrateSoundIIRSec.current}, calibrateSoundBurstDb=${calibrateSoundBurstDb.current}, _calibrateSoundBurstRepeats=${calibrateSoundBurstRepeats.current}, _calibrateSoundBurstSec=${calibrateSoundBurstSec.current}`;
-  p.innerHTML = subtitleText;
-  p.style.fontSize = "12px";
-  p.style.width = "500px";
-  elems.soundTestPlots.appendChild(p);
   elems.citation.style.visibility = "visible";
 
   plotForAllHz(
