@@ -13,6 +13,7 @@ import {
   microphoneInfo,
   showSoundParametersBool,
 } from "./global";
+import { readFrqGain } from "./soundCalibrationHelpers";
 
 export const plotSoundLevels1000Hz = (
   plotCanvas,
@@ -234,7 +235,8 @@ export const plotForAllHz = (
   calibrationGoal,
   isLoudspeakerCalibration,
   backgroundNoise = {},
-  mls_psd = {}
+  mls_psd = {},
+  microphoneGain = { Freq: [], Gain: [] }
 ) => {
   const subtitleText =
     calibrationGoal === "system"
@@ -270,6 +272,13 @@ export const plotForAllHz = (
         };
       })
     : [];
+  const microphoneGainPoints =
+    microphoneGain.Freq.length > 0
+      ? microphoneGain.Freq.map((x, i) => {
+          return { x: x, y: microphoneGain.Gain[i] };
+        })
+      : [];
+
   // sort the data points by x
   // unconvMergedDataPoints.sort((a, b) => a.x - b.x);
   // convMergedDataPoints.sort((a, b) => a.x - b.x);
@@ -336,6 +345,20 @@ export const plotForAllHz = (
       borderDash: [5, 5],
     });
   }
+  // black dashed line for microphone gain
+  if (microphoneGainPoints.length > 0) {
+    datasets.push({
+      label: "Microphone gain",
+      data: microphoneGainPoints,
+      backgroundColor: "rgba(0, 0, 0, 0.2)",
+      borderColor: "rgba(0, 0, 0, 1)",
+      borderWidth: 1,
+      pointRadius: 0,
+      // pointHoverRadius: 5,
+      showLine: true,
+      borderDash: [5, 5],
+    });
+  }
 
   const data = {
     datasets: datasets,
@@ -347,7 +370,8 @@ export const plotForAllHz = (
     ...convMergedDataPoints.map((point) => point.y),
     ...backgroundMergedDataPoints.map((point) => point.y),
     ...digitalMLSPoints.map((point) => point.y),
-    ...filteredDigitalMLSPoints.map((point) => point.y)
+    ...filteredDigitalMLSPoints.map((point) => point.y),
+    ...microphoneGainPoints.map((point) => point.y)
   );
 
   // min = -130 max = maxY + 10, stepSize = 10. Set the plotCanvas Height based on the max and min. Every 10 dB is 40 pixels

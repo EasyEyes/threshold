@@ -905,7 +905,8 @@ export const displayParametersAllHz = (
   calibrationGoal = "system",
   isLoudspeakerCalibration = true,
   backgroundNoise = [],
-  mls_psd = {}
+  mls_psd = {},
+  microphoneGain = { Freq: [], Gain: [] }
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -922,7 +923,8 @@ export const displayParametersAllHz = (
     calibrationGoal,
     isLoudspeakerCalibration,
     backgroundNoise,
-    mls_psd
+    mls_psd,
+    microphoneGain
   );
 };
 
@@ -1158,18 +1160,6 @@ export const displaySummarizedTransducerTable = (
   tbody.appendChild(tr2);
   tbody.appendChild(tr3);
   tbody.appendChild(tr4);
-
-  // const maxWidth = Math.max(th1.offsetWidth, td1.offsetWidth, td3.offsetWidth, td6.offsetWidth, td8.offsetWidth);
-  // console.log(th1.offsetWidth, td1.offsetWidth, td3.offsetWidth, td6.offsetWidth, td8.offsetWidth);
-  // td1.style.width = `${maxWidth + 13}ch`;
-  // td2.style.width = `${maxWidth + 13}ch`;
-  // td3.style.width = `${maxWidth + 13}ch`;
-  // td4.style.width = `${maxWidth + 13}ch`;
-  // td5.style.width = `${maxWidth + 13}ch`;
-  // td6.style.width = `${maxWidth + 13}ch`;
-  // td7.style.width = `${maxWidth + 13}ch`;
-  // td8.style.width = `${maxWidth + 13}ch`;
-  // td9.style.width = `${maxWidth + 13}ch`;
 
   tr1.style.lineHeight = "1.2";
   tr2.style.lineHeight = "1.2";

@@ -409,6 +409,8 @@ export const allHzCalibrationResults = {
   component: {},
   background: {},
   mls_psd: {},
+  microphoneGain: { Freq: [], Gain: [] },
+  loudspeakerGain: { Freq: [], Gain: [] },
 };
 
 export const showSoundParametersBool = { current: true };

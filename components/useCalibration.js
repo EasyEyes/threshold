@@ -56,6 +56,7 @@ import {
   getInstructionText,
   identifyDevice,
   parseCalibrationFile,
+  readFrqGain,
   removeElements,
   saveLoudSpeakerInfo,
 } from "./soundCalibrationHelpers";
@@ -422,7 +423,8 @@ export const calibrateAudio = async (reader) => {
           calibrateSoundCheck.current,
           true,
           allHzCalibrationResults.background,
-          allHzCalibrationResults.mls_psd
+          allHzCalibrationResults.mls_psd,
+          allHzCalibrationResults.microphoneGain
         );
       } else {
         displayParametersAllHz(
@@ -441,7 +443,8 @@ export const calibrateAudio = async (reader) => {
           "goal",
           true,
           allHzCalibrationResults.background,
-          allHzCalibrationResults.mls_psd
+          allHzCalibrationResults.mls_psd,
+          allHzCalibrationResults.microphoneGain
         );
       }
     }
@@ -1741,6 +1744,12 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   }
                   allHzCalibrationResults.mls_psd =
                     soundCalibrationResults.current.mls_psd;
+                  const OEM = microphoneInfo.current.OEM;
+                  const ID = microphoneInfo.current.ID;
+                  const FreqGain = await readFrqGain(ID, OEM);
+                  allHzCalibrationResults.microphoneGain = FreqGain
+                    ? FreqGain
+                    : {};
                   if (calibrateSoundBackgroundSecs.current > 0) {
                     allHzCalibrationResults.background = {
                       x_background:
