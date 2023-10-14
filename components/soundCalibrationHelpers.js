@@ -191,7 +191,9 @@ export const parseCalibrationFile = (file) => {
 
     // Convert the first value to a float and add it to the frequencies array
     const frequency = parseFloat(values[0]);
-    const gain = parseFloat(values[1]);
+    const gain = sensFactor
+      ? parseFloat(values[1]) + sensFactor
+      : parseFloat(values[1]);
 
     if (frequency && gain) {
       frequencies.push(frequency);
