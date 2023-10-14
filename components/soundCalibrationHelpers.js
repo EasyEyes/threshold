@@ -160,7 +160,9 @@ export const addMicrophoneToDatabase = async (microphoneID, OEM, Data) => {
 
 export const getCalibrationFile = async (url) => {
   try {
-    const file = await fetch(url).then((response) => {
+    const file = await fetch(
+      "https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/" + url
+    ).then((response) => {
       return response.text();
     });
     if (file.includes("Sens Factor =")) {
