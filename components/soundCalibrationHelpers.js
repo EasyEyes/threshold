@@ -158,6 +158,17 @@ export const addMicrophoneToDatabase = async (microphoneID, OEM, Data) => {
   await set(child(dbRef, `Microphone2/${OEM}/${microphoneID}`), Data);
 };
 
+export const readFrqGain = async (speakerID, OEM) => {
+  const dbRef = ref(database);
+  const snapshot = await get(
+    child(dbRef, `Microphone2/${OEM}/${speakerID}/linear`)
+  );
+  if (snapshot.exists()) {
+    return snapshot.val();
+  }
+  return null;
+};
+
 export const getCalibrationFile = async (url) => {
   try {
     const file = await fetch(

@@ -1480,12 +1480,12 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                         const file = await getCalibrationFile(url);
                         if (file) {
                           const data = parseCalibrationFile(file);
-                          const offset = findGainatFrequency(
+                          const Gain = findGainatFrequency(
                             data.Freq,
                             data.Gain,
                             1000
                           );
-                          const Gain = data.SensFactor + offset;
+                          // const Gain = data.SensFactor + offset;
                           const micData = {
                             Gain: Gain,
                             Gain1000: Gain,
