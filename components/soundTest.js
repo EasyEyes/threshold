@@ -760,21 +760,21 @@ export const displayParameters1000Hz = (
   }
 
   // display the parameters used for the calibration
-  elems.soundParametersFromCalibration.innerHTML = `
-  Dynamic Range Compression Model:\n
-  T: ${parameters.T.toFixed(1) + " dB SPL"}\n
-  W: ${parameters.W.toFixed(1) + " dB"}\n
-  Q = 1/R: ${(1 / Number(parameters.R.toFixed(1))).toFixed(3)}\n
-  gainDBSPL: ${parameters.gainDBSPL.toFixed(1)}\n
-  backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}\n
-  RMSError: ${parameters.RMSError.toFixed(1) + " dB"}\n
-  `;
+  // elems.soundParametersFromCalibration.innerHTML = `
+  // Dynamic Range Compression Model:\n
+  // T: ${parameters.T.toFixed(1) + " dB SPL"}\n
+  // W: ${parameters.W.toFixed(1) + " dB"}\n
+  // Q = 1/R: ${(1 / Number(parameters.R.toFixed(1))).toFixed(3)}\n
+  // gainDBSPL: ${parameters.gainDBSPL.toFixed(1)}\n
+  // backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}\n
+  // RMSError: ${parameters.RMSError.toFixed(1) + " dB"}\n
+  // `;
 
-  elems.downloadButton.style.visibility = "visible";
-  elems.downloadButton.classList.add(...["btn", "btn-success"]);
+  // elems.downloadButton.style.visibility = "visible";
+  // elems.downloadButton.classList.add(...["btn", "btn-success"]);
 
   // button to download the soundLevelsTable and the parameters as a csv file
-  downloadCalibrationData(elems.downloadButton, parameters);
+  // downloadCalibrationData(elems.downloadButton, parameters);
 
   // plot
   // elems.soundTestContainer.style.display = "flex";
@@ -1066,6 +1066,49 @@ export const displayCompleteTransducerTable = (
 
   elems.completeTransducerTable.style.marginBottom = "20px";
   elems.completeTransducerTable.appendChild(table);
+};
+
+export const display1000HzParametersTable = (parameters) => {
+  const parametersToDisplay = {
+    T: parameters.T.toFixed(1) + " dB SPL",
+    W: parameters.W.toFixed(1) + " dB",
+    Q: (1 / Number(parameters.R.toFixed(1))).toFixed(3),
+    gainDBSPL: parameters.gainDBSPL.toFixed(1),
+    backgroundDBSPL: parameters.backgroundDBSPL.toFixed(1),
+    RMSError: parameters.RMSError.toFixed(1) + " dB",
+  };
+  const table = document.createElement("table");
+  table.style.fontSize = "12px";
+  table.setAttribute("id", "parametersTable");
+  const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
+  //  title of the table: Dynamic Range Compression Model
+  // then 2 columns: parameter and value (no need to display the titles of the columns)
+
+  // add the title of the table
+  const trTitle = document.createElement("tr");
+  const thTitle = document.createElement("th");
+  thTitle.innerHTML = "Dynamic Range Compression Model";
+  thTitle.setAttribute("colspan", "2");
+  trTitle.appendChild(thTitle);
+  thead.appendChild(trTitle);
+
+  // add the parameters and values
+  Object.keys(parametersToDisplay).forEach((key) => {
+    const tr = document.createElement("tr");
+    tr.style.lineHeight = "1.2";
+    const td1 = document.createElement("td");
+    const td2 = document.createElement("td");
+    td1.innerHTML = key;
+    td2.innerHTML = parametersToDisplay[key];
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  return table;
 };
 
 export const displaySummarizedTransducerTable = (
