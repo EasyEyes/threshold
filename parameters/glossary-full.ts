@@ -53,8 +53,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation: "",
-    type: "numerical",
-    default: "50",
+    type: "text",
+    default: "50, 70",
     categories: "",
   },
   {

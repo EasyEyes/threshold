@@ -43,8 +43,8 @@ export const GLOSSARY: Glossary = {
   _calibrateTrackingDistanceCheckCm: {
     name: "_calibrateTrackingDistanceCheckCm",
     availability: "now",
-    type: "numerical",
-    default: "50",
+    type: "text",
+    default: "50, 70",
     explanation: "",
   },
   _calibrateTrackingDistanceCheckBool: {
