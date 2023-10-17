@@ -40,6 +40,20 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool. To contribute to the EasyEyes calibration library, the scientist must provide _authorEmails.",
   },
+  _calibrateTrackingDistanceCheckCm: {
+    name: "_calibrateTrackingDistanceCheckCm",
+    availability: "now",
+    type: "numerical",
+    default: "50",
+    explanation: "",
+  },
+  _calibrateTrackingDistanceCheckBool: {
+    name: "_calibrateTrackingDistanceCheckBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation: "",
+  },
   _calibrateMicrophonesPreventLocalBool: {
     name: "_calibrateMicrophonesPreventLocalBool",
     availability: "now",
