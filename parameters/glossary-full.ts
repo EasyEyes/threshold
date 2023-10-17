@@ -49,26 +49,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateTrackingDistanceCheckCm",
-    availability: "now",
-    example: "",
-    explanation:
-      "_calibrateTrackingDistanceCheckCm A list of distances to check.",
-    type: "text",
-    default: "50, 70",
-    categories: "",
-  },
-  {
-    name: "_calibrateTrackingDistanceCheckBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_calibrateTrackingDistanceCheckBool Whether to ask participant to help check accuracy of distance tracking.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "_calibrateMicrophonesPreventLocalBool",
     availability: "now",
     example: "TRUE",
@@ -242,6 +222,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '🕑 _calibrateTimingNumberAndSecs accepts a text string containing an even number of comma-separated arguments, n1,s1,n2,s2, etc. Each pair of arguments n,s, requests that EasyEyes generate n intervals of duration s, where s is in seconds, and measure how long each interval actually was, in seconds. Save the results in the CSV file. Use one column per series. Name each column by the duration in sec, e.g. "timing0.15". The column length will be n. This should run during the compatibility phase, before the experiment, since its sole purpose is to work out the parameters of a compatibility test.',
     type: "text",
     default: "",
+    categories: "",
+  },
+  {
+    name: "_calibrateTrackingDistanceCheckBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackingDistanceCheckBool Whether to ask participant to help check accuracy of distance tracking. This replaces the now obsolete calibrateTrackingDistanceCheckBool.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_calibrateTrackingDistanceCheckCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackingDistanceCheckCm A list of distances to check. This replaces the now obsolete calibrateTrackingDistanceCheckCm.",
+    type: "text",
+    default: "50, 70",
     categories: "",
   },
   {

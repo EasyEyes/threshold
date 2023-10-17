@@ -40,22 +40,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool. To contribute to the EasyEyes calibration library, the scientist must provide _authorEmails.",
   },
-  _calibrateTrackingDistanceCheckCm: {
-    name: "_calibrateTrackingDistanceCheckCm",
-    availability: "now",
-    type: "text",
-    default: "50, 70",
-    explanation:
-      "_calibrateTrackingDistanceCheckCm A list of distances to check.",
-  },
-  _calibrateTrackingDistanceCheckBool: {
-    name: "_calibrateTrackingDistanceCheckBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "_calibrateTrackingDistanceCheckBool Whether to ask participant to help check accuracy of distance tracking.",
-  },
   _calibrateMicrophonesPreventLocalBool: {
     name: "_calibrateMicrophonesPreventLocalBool",
     availability: "now",
@@ -196,6 +180,22 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       '🕑 _calibrateTimingNumberAndSecs accepts a text string containing an even number of comma-separated arguments, n1,s1,n2,s2, etc. Each pair of arguments n,s, requests that EasyEyes generate n intervals of duration s, where s is in seconds, and measure how long each interval actually was, in seconds. Save the results in the CSV file. Use one column per series. Name each column by the duration in sec, e.g. "timing0.15". The column length will be n. This should run during the compatibility phase, before the experiment, since its sole purpose is to work out the parameters of a compatibility test.',
+  },
+  _calibrateTrackingDistanceCheckBool: {
+    name: "_calibrateTrackingDistanceCheckBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_calibrateTrackingDistanceCheckBool Whether to ask participant to help check accuracy of distance tracking. This replaces the now obsolete calibrateTrackingDistanceCheckBool.",
+  },
+  _calibrateTrackingDistanceCheckCm: {
+    name: "_calibrateTrackingDistanceCheckCm",
+    availability: "now",
+    type: "text",
+    default: "50, 70",
+    explanation:
+      "_calibrateTrackingDistanceCheckCm A list of distances to check. This replaces the now obsolete calibrateTrackingDistanceCheckCm.",
   },
   _compileAsNewExperimentBool: {
     name: "_compileAsNewExperimentBool",
