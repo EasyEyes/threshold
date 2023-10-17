@@ -906,7 +906,8 @@ export const displayParametersAllHz = (
   isLoudspeakerCalibration = true,
   backgroundNoise = [],
   mls_psd = {},
-  microphoneGain = { Freq: [], Gain: [] }
+  microphoneGain = { Freq: [], Gain: [] },
+  filteredMLSRange = { Min: 0, Max: 0 }
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -924,7 +925,8 @@ export const displayParametersAllHz = (
     isLoudspeakerCalibration,
     backgroundNoise,
     mls_psd,
-    microphoneGain
+    microphoneGain,
+    filteredMLSRange
   );
 };
 

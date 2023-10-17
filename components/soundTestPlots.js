@@ -250,7 +250,8 @@ export const plotForAllHz = (
   isLoudspeakerCalibration,
   backgroundNoise = {},
   mls_psd = {},
-  microphoneGain = { Freq: [], Gain: [] }
+  microphoneGain = { Freq: [], Gain: [] },
+  filteredMLSRange
 ) => {
   const subtitleText =
     calibrationGoal === "system"
@@ -292,6 +293,16 @@ export const plotForAllHz = (
           return { x: x, y: microphoneGain.Gain[i] };
         })
       : [];
+  // expected correction is the sum of the recording of MLS and the filtered MLS
+  const expectedCorrectionPoints = [];
+  if (filteredDigitalMLSPoints.length > 0) {
+    for (let i = 0; i < filteredDigitalMLSPoints.length; i++) {
+      expectedCorrectionPoints.push({
+        x: filteredDigitalMLSPoints[i].x,
+        y: filteredDigitalMLSPoints[i].y + unconvMergedDataPoints[i].y,
+      });
+    }
+  }
 
   // sort the data points by x
   // unconvMergedDataPoints.sort((a, b) => a.x - b.x);
@@ -374,6 +385,20 @@ export const plotForAllHz = (
     });
   }
 
+  // solid purple line for expected correction
+  if (expectedCorrectionPoints.length > 0) {
+    datasets.push({
+      label: "Expected correction",
+      data: expectedCorrectionPoints,
+      backgroundColor: "rgba(128, 0, 128, 0.2)",
+      borderColor: "rgba(128, 0, 128, 1)",
+      borderWidth: 1,
+      pointRadius: 0,
+      // pointHoverRadius: 5,
+      showLine: true,
+    });
+  }
+
   const data = {
     datasets: datasets,
   };
@@ -385,11 +410,15 @@ export const plotForAllHz = (
     ...backgroundMergedDataPoints.map((point) => point.y),
     ...digitalMLSPoints.map((point) => point.y),
     ...filteredDigitalMLSPoints.map((point) => point.y),
-    ...microphoneGainPoints.map((point) => point.y)
+    ...microphoneGainPoints.map((point) => point.y),
+    ...expectedCorrectionPoints.map((point) => point.y)
   );
 
   // min = -130 max = maxY + 10, stepSize = 10. Set the plotCanvas Height based on the max and min. Every 10 dB is 40 pixels
-  const plotCanvasHeight = (maxY + 10 + 130) * 5.5;
+  const plotCanvasHeight =
+    calibrationGoal === "system"
+      ? (maxY + 10 + 180) * 5.5
+      : (maxY + 10 + 230) * 5.5;
   plotCanvas.height = plotCanvasHeight;
   plotCanvas.width = 600;
 
@@ -477,7 +506,7 @@ export const plotForAllHz = (
               size: "12px",
             },
           },
-          min: -130,
+          min: calibrationGoal === "system" ? -180 : -230,
           max: maxY + 10,
           ticks: {
             stepSize: 10,
@@ -518,8 +547,18 @@ export const plotForAllHz = (
   }
   tableDiv.appendChild(table);
   if (showSoundParametersBool.current) {
+    const Min = Math.round(filteredMLSRange.Min * 10) / 10;
+    const Max = Math.round(filteredMLSRange.Max * 10) / 10;
     const p = document.createElement("p");
-    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${calibrateSoundBurstSec.current} sec, ${calibrateSoundBurstRepeats.current} reps, ${calibrateSoundHz.current} Hz, IIR: ${calibrateSoundIIRSec.current} sec, ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz`;
+    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
+      calibrateSoundBurstSec.current
+    } sec, ${calibrateSoundBurstRepeats.current} reps, ${
+      calibrateSoundHz.current
+    } Hz, IIR: ${calibrateSoundIIRSec.current} sec, ${
+      calibrateSoundMinHz.current
+    } to ${calibrateSoundMaxHz.current} Hz, filtered MLS Range: ${Min.toFixed(
+      1
+    )} to ${Max.toFixed(1)}`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "12px";
     p.style.marginBottom = "0px";

@@ -411,6 +411,10 @@ export const allHzCalibrationResults = {
   mls_psd: {},
   microphoneGain: { Freq: [], Gain: [] },
   loudspeakerGain: { Freq: [], Gain: [] },
+  filteredMLSRange: {
+    system: { Min: null, Max: null },
+    component: { Min: null, Max: null },
+  },
 };
 
 export const showSoundParametersBool = { current: true };

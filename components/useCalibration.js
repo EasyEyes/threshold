@@ -424,7 +424,10 @@ export const calibrateAudio = async (reader) => {
           true,
           allHzCalibrationResults.background,
           allHzCalibrationResults.mls_psd,
-          allHzCalibrationResults.microphoneGain
+          allHzCalibrationResults.microphoneGain,
+          calibrateSoundCheck.current === "system"
+            ? allHzCalibrationResults.filteredMLSRange.system
+            : allHzCalibrationResults.filteredMLSRange.component
         );
       } else {
         displayParametersAllHz(
@@ -434,7 +437,9 @@ export const calibrateAudio = async (reader) => {
           "system",
           true,
           allHzCalibrationResults.background,
-          allHzCalibrationResults.mls_psd
+          allHzCalibrationResults.mls_psd,
+          { Freq: [], Gain: [] },
+          allHzCalibrationResults.filteredMLSRange.system
         );
         displayParametersAllHz(
           elems,
@@ -444,7 +449,8 @@ export const calibrateAudio = async (reader) => {
           true,
           allHzCalibrationResults.background,
           allHzCalibrationResults.mls_psd,
-          allHzCalibrationResults.microphoneGain
+          allHzCalibrationResults.microphoneGain,
+          allHzCalibrationResults.filteredMLSRange.component
         );
       }
     }
@@ -878,7 +884,11 @@ export const calibrateAudio = async (reader) => {
                       calibrateSoundCheck.current,
                       false,
                       result.background_noise,
-                      result.mls_psd
+                      result.mls_psd,
+                      { Freq: [], Gain: [] },
+                      calibrateSoundCheck.current === "system"
+                        ? result.filteredMLSRange.system
+                        : result.filteredMLSRange.component
                     );
                   } else {
                     displayParametersAllHz(
@@ -890,7 +900,9 @@ export const calibrateAudio = async (reader) => {
                       "system",
                       false,
                       result.background_noise,
-                      result.mls_psd
+                      result.mls_psd,
+                      { Freq: [], Gain: [] },
+                      result.filteredMLSRange.system
                     );
                     displayParametersAllHz(
                       elems,
@@ -901,7 +913,9 @@ export const calibrateAudio = async (reader) => {
                       "goal",
                       false,
                       result.background_noise,
-                      result.mls_psd
+                      result.mls_psd,
+                      result.microphoneGain,
+                      result.filteredMLSRange.component
                     );
                   }
                 }
@@ -1750,6 +1764,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                   allHzCalibrationResults.microphoneGain = FreqGain
                     ? FreqGain
                     : {};
+                  allHzCalibrationResults.filteredMLSRange =
+                    soundCalibrationResults.current.filteredMLSRange;
                   if (calibrateSoundBackgroundSecs.current > 0) {
                     allHzCalibrationResults.background = {
                       x_background:
