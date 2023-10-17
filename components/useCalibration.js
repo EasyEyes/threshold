@@ -733,7 +733,7 @@ export const calibrateAudio = async (reader) => {
 
               const calibratorParams = {
                 numCaptures: calibrateSoundBurstRecordings.current,
-                numMLSPerCapture: 4,
+                numMLSPerCapture: 2,
                 download: false,
                 lowHz: calibrateSoundMinHz.current,
                 highHz: calibrateSoundMaxHz.current,
@@ -1231,7 +1231,7 @@ const _runLoudspeakerCalibration = async (elems) => {
 
   const calibratorParams = {
     numCaptures: 3,
-    numMLSPerCapture: 4,
+    numMLSPerCapture: 2,
     download: debugBool.current,
     lowHz: calibrateSoundMinHz.current,
     highHz: calibrateSoundMaxHz.current,
@@ -1670,7 +1670,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             };
             const calibratorParams = {
               numCaptures: calibrateSoundBurstRecordings.current,
-              numMLSPerCapture: 4,
+              numMLSPerCapture: 2,
               download: false,
               lowHz: calibrateSoundMinHz.current,
               highHz: calibrateSoundMaxHz.current,
