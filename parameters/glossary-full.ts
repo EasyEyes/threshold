@@ -52,7 +52,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackingDistanceCheckCm",
     availability: "now",
     example: "",
-    explanation: "",
+    explanation:
+      "_calibrateTrackingDistanceCheckCm A list of distances to check.",
     type: "text",
     default: "50, 70",
     categories: "",
@@ -61,7 +62,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackingDistanceCheckBool",
     availability: "now",
     example: "",
-    explanation: "",
+    explanation:
+      "_calibrateTrackingDistanceCheckBool Whether to ask participant to help check accuracy of distance tracking.",
     type: "boolean",
     default: "FALSE",
     categories: "",

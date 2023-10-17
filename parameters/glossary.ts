@@ -45,14 +45,16 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "text",
     default: "50, 70",
-    explanation: "",
+    explanation:
+      "_calibrateTrackingDistanceCheckCm A list of distances to check.",
   },
   _calibrateTrackingDistanceCheckBool: {
     name: "_calibrateTrackingDistanceCheckBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
-    explanation: "",
+    explanation:
+      "_calibrateTrackingDistanceCheckBool Whether to ask participant to help check accuracy of distance tracking.",
   },
   _calibrateMicrophonesPreventLocalBool: {
     name: "_calibrateMicrophonesPreventLocalBool",
