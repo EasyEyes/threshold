@@ -186,11 +186,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundSamplingDesiredBits",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundSamplingDesiredBits (default 24) specifies the desired number of bits per sample in recording during sound calibration. Using the web API, some devices (e.g. miniDSP UMIK-2) allow selection of 24 or 32 bits. EasyEyes will pick the available bits per sample nearest to this desired value.",
+    type: "integer",
+    default: "24",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundSamplingDesiredHz",
     availability: "now",
     example: "",
     explanation:
-      "🕑 _calibrateSoundSamplingDesiredHz (48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
+      "_calibrateSoundSamplingDesiredHz (default 48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
     type: "numerical",
     default: "48000",
     categories: "",
@@ -360,7 +370,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "If _languageSelectionByParticipantBool is TRUE (default FALSE), then the initial compatibility page offers the participant a pull-down menu to select any language for the rest of the experiment. The experiment always begins with the language specified by _language, and the language changes only if  _languageSelectionByParticipantBool=TRUE and the participant selects another language. The participant selects among the native names of the languages, e.g. English, Deutsch, عربي. EasyEyes currently offers 28 languages, and it would be very easy to add more. If there's demand, we could add another parameter to specify a list of languages to offer to the participant.",
+      "_languageSelectionByParticipantBool (default FALSE), when TRUE, tell the initial compatibility page to offer the participant a pull-down menu to select any language for the rest of the experiment. The experiment always begins with the language specified by _language, and the participant's option to change language appears only if  _languageSelectionByParticipantBool=TRUE. The participant selects among the native names of the languages, e.g. English, Deutsch, عربي. EasyEyes currently offers 77 languages, and it would be easy to add more. If there's demand, we could add another parameter to allow you to specify a list of languages to offer to the participant.",
     type: "boolean",
     default: "FALSE",
     categories: "",
