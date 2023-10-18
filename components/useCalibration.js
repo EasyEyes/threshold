@@ -1052,7 +1052,7 @@ const _addSoundCalibrationElems = (copy) => {
   title.style.fontSize = "1.5em";
   //replace "111" with 1 and 222 with 3
   title.innerHTML = title.innerHTML.replace(/111/g, 1);
-  title.innerHTML = title.innerHTML.replace(/222/g, 3);
+  title.innerHTML = title.innerHTML.replace(/222/g, 5);
   // subtitle.innerHTML = copy.title;
   // message.innerHTML = copy.neediPhone;
   message.style.display = "none";
@@ -1397,6 +1397,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
             if (dropdown.value === "None") {
               showExperimentEnding();
             }
+            elems.title.innerHTML = elems.title.innerHTML.replace(2, 3);
             const isSmartPhone = dropdown.value === "Smartphone";
             // remove the dropdown menu, proeed button
             removeElements([dropdown, proceedButton2, p]);
@@ -1633,7 +1634,7 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
                 });
               });
             }
-
+            elems.title.innerHTML = elems.title.innerHTML.replace(3, 4);
             const microphoneInCalibrationLibrary = isSmartPhone
               ? ""
               : readi18nPhrases(
