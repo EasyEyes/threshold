@@ -190,7 +190,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundSamplingDesiredBits (default 24) specifies the desired number of bits per sample in recording during sound calibration. Using the web API, some devices (e.g. miniDSP UMIK-2) allow selection of 24 or 32 bits. EasyEyes will pick the available bits per sample nearest to this desired value.",
+      "_calibrateSoundSamplingDesiredBits (default 24) specifies the desired number of bits per sample in recording during sound calibration. Using the web API, some devices allow selection of number of bits, e.g. the miniDSP UMIK-2 offers 24 or 32 bits. EasyEyes will pick the available bits per sample nearest to this desired value.",
     type: "integer",
     default: "24",
     categories: "",
@@ -200,7 +200,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundSamplingDesiredHz (default 48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the available sampling rate nearest to this desired value.",
+      "_calibrateSoundSamplingDesiredHz (default 48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play with a sampling rate of up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the sampling rate nearest to this desired value that is available for both playing and recording.",
     type: "numerical",
     default: "48000",
     categories: "",

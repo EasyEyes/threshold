@@ -17,7 +17,7 @@ import {
   microphoneInfo,
   showSoundParametersBool,
 } from "./global";
-import { readFrqGain } from "./soundCalibrationHelpers";
+import { findGainatFrequency, readFrqGain } from "./soundCalibrationHelpers";
 
 export const plotSoundLevels1000Hz = (
   plotCanvas,
@@ -293,6 +293,48 @@ export const plotForAllHz = (
           return { x: x, y: microphoneGain.Gain[i] };
         })
       : [];
+
+  // if calibration goal == system and isLoudspeakerCalibration ==true, then subtract microphone gain from conv, unconv, and background
+
+  if (calibrationGoal === "goal" && isLoudspeakerCalibration) {
+    // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
+    // const conv_subtractedGain = interpolateGain(microphoneGainPoints,convMergedDataPoints)
+    // console.log(conv_subtractedGain);
+    const microphoneGainFreq = microphoneGainPoints.map((point) => point.x);
+    const microphoneGainGain = microphoneGainPoints.map((point) => point.y);
+    convMergedDataPoints.forEach((point, i) => {
+      convMergedDataPoints[i].y =
+        convMergedDataPoints[i].y -
+        findGainatFrequency(
+          microphoneGainFreq,
+          microphoneGainGain,
+          convMergedDataPoints[i].x
+        );
+    });
+
+    unconvMergedDataPoints.forEach((point, i) => {
+      unconvMergedDataPoints[i].y =
+        unconvMergedDataPoints[i].y -
+        findGainatFrequency(
+          microphoneGainFreq,
+          microphoneGainGain,
+          unconvMergedDataPoints[i].x
+        );
+    });
+
+    backgroundMergedDataPoints.forEach((point, i) => {
+      backgroundMergedDataPoints[i].y =
+        backgroundMergedDataPoints[i].y -
+        findGainatFrequency(
+          microphoneGainFreq,
+          microphoneGainGain,
+          backgroundMergedDataPoints[i].x
+        );
+    });
+
+    // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
+  }
+
   // expected correction is the sum of the recording of MLS and the filtered MLS
   const expectedCorrectionPoints = [];
   if (filteredDigitalMLSPoints.length > 0) {
@@ -554,11 +596,11 @@ export const plotForAllHz = (
       calibrateSoundBurstSec.current
     } sec, ${calibrateSoundBurstRepeats.current} reps, ${
       calibrateSoundHz.current
-    } Hz, IIR: ${calibrateSoundIIRSec.current} sec, ${
+    } Hz,<br>IIR: ${calibrateSoundIIRSec.current} sec, ${
       calibrateSoundMinHz.current
-    } to ${calibrateSoundMaxHz.current} Hz, filtered MLS Range: ${Min.toFixed(
-      1
-    )} to ${Max.toFixed(1)}`;
+    } to ${
+      calibrateSoundMaxHz.current
+    } Hz,<br>filtered MLS Range: ${Min.toFixed(1)} to ${Max.toFixed(1)}`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "12px";
     p.style.marginBottom = "0px";
@@ -600,4 +642,47 @@ const average = (data) => {
 
   const avg = sum / data.length;
   return avg;
+};
+
+const interpolateGain = (microphoneData, mlsData) => {
+  // Assuming microphoneData and mlsData are arrays of objects with x and y properties
+  const result = [];
+
+  for (let i = 0; i < mlsData.length; i++) {
+    const mlsFreq = mlsData[i].x;
+
+    // Find the two closest points in the microphoneData for linear interpolation
+    let lowerIndex = 0;
+    let upperIndex = 0;
+
+    for (let j = 0; j < microphoneData.length; j++) {
+      if (microphoneData[j].x <= mlsFreq) {
+        lowerIndex = j;
+      }
+
+      if (microphoneData[j].x >= mlsFreq) {
+        upperIndex = j;
+        break;
+      }
+    }
+
+    // Perform linear interpolation
+    const x0 = microphoneData[lowerIndex].x;
+    const x1 = microphoneData[upperIndex].x;
+    const y0 = microphoneData[lowerIndex].y;
+    const y1 = microphoneData[upperIndex].y;
+
+    const interpolatedGain = y0 + (y1 - y0) * ((mlsFreq - x0) / (x1 - x0));
+
+    // Subtract the interpolated gain from the MLS gain
+    const subtractedGain = mlsData[i].y - interpolatedGain;
+
+    // Store the result
+    result.push({
+      x: mlsFreq,
+      y: subtractedGain,
+    });
+  }
+
+  return result;
 };
