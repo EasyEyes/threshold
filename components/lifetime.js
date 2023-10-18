@@ -10,6 +10,7 @@ import {
   showCharacterSetResponse,
   thisExperimentInfo,
   soundCalibrationResults,
+  allHzCalibrationResults,
   loudspeakerInfo,
   microphoneCalibrationResults,
   invertedImpulseResponse,
@@ -248,6 +249,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.component?.filtered_mls_psd?.y,
         Hz_component_convolution:
           soundCalibrationResults.current?.component?.filtered_mls_psd?.x,
+        microphoneGain: allHzCalibrationResults.microphoneGain,
         db_mls: soundCalibrationResults.current?.mls_psd?.y,
         Hz_mls: soundCalibrationResults.current?.mls_psd?.x,
         calibrateSoundBurstDb: calibrateSoundBurstDb.current,
