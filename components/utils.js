@@ -1069,3 +1069,40 @@ const gcd = (a, b) => {
   if (a % b === 0) return b;
   return gcd(a % b, b);
 };
+
+/**
+ * Determine whether a blockOrCondition string represents a block, eg "1" rather than "1_1"
+ * @param {str} blockOrConditionLabel
+ * @returns bool
+ */
+export const isBlockLabel = (blockOrConditionLabel) => {
+  return !isNaN(blockOrConditionLabel);
+};
+
+/**
+ * Determine whether a blockOrCondition string represents a condition, eg "1_1" rather than "1"
+ * @param {str} blockOrConditionLabel
+ * @returns bool
+ */
+export const isConditionLabel = (blockOrConditionLabel) => {
+  return !isBlockLabel(blockOrConditionLabel);
+};
+
+/**
+ * Get a single value for a parameter, when you may have a block label or a condition label
+ * ie reader.read(param, condition) or reader.read(param, block)[0]
+ * @param {string} paramName
+ * @param {string} blockOrConditionLabel
+ * @returns any
+ */
+export const getParamValueForBlockOrCondition = (
+  paramName,
+  blockOrConditionLabel
+) => {
+  // Block, just return first parameter value
+  if (isBlockLabel(blockOrConditionLabel)) {
+    return paramReader.read(paramName, blockOrConditionLabel)[0];
+  }
+  // Condition
+  return paramReader.read(paramName, blockOrConditionLabel);
+};

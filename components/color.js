@@ -1,6 +1,6 @@
 import { util } from "../psychojs/src";
 import { paramReader } from "../threshold";
-import { colorRGBASnippetToRGBA } from "./utils";
+import { colorRGBASnippetToRGBA, isBlockLabel } from "./utils";
 
 export const updateColor = (stim, instructionOrMarking, blockOrCondition) => {
   if (instructionOrMarking === "instruction") {
@@ -13,7 +13,7 @@ export const updateColor = (stim, instructionOrMarking, blockOrCondition) => {
 const updateInstructionColor = (instructions, blockOrCondition) => {
   let colorString;
   // block
-  if (!isNaN(blockOrCondition)) {
+  if (isBlockLabel(blockOrCondition)) {
     colorString = colorRGBASnippetToRGBA(
       paramReader.read("instructionFontColorRGBA", blockOrCondition)[0]
     );
@@ -29,7 +29,7 @@ const updateInstructionColor = (instructions, blockOrCondition) => {
 const updateMarkingColor = (markingStim, blockOrCondition) => {
   let colorString;
   // block
-  if (!isNaN(blockOrCondition)) {
+  if (isBlockLabel(blockOrCondition)) {
     colorString = colorRGBASnippetToRGBA(
       paramReader.read("markingColorRGBA", blockOrCondition)[0]
     );

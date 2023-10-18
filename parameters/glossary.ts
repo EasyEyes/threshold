@@ -2152,6 +2152,13 @@ export const GLOSSARY: Glossary = {
     explanation:
       "instructionFontLeftToRightBool should be set to TRUE for most languages, including English, which are written from left to right, and should be set to FALSE for Arabic, Hebrew, and other right-to-left languages. The default value is TRUE. For identifying letters, the letters will be placed accordingly on the response screen. For reading, it's important to set this correctly, or text may fall off the screen: left-to-right text will be left-aligned, and right-to-left text will be right aligned.                                                                                                                                                                                      ",
   },
+  instructionFontSizePt: {
+    name: "instructionFontSizePt",
+    availability: "now",
+    type: "numerical",
+    default: "25",
+    explanation: "",
+  },
   instructionFontSource: {
     name: "instructionFontSource",
     availability: "now",

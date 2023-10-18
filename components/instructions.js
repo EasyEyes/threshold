@@ -587,6 +587,9 @@ export const movePastFixation = () => {
 
 export const dynamicSetSize = (instructionList, initHeight) => {
   let reducedHeight = 1;
+  instructionList.forEach((e) => {
+    e.setHeight(initHeight);
+  });
   while (
     getSumHeight(instructionList) >
     window.innerHeight * (1 - 0.2 * instructionList.length)

@@ -1849,6 +1849,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "instructionFontSizePt",
+    availability: "now",
+    example: "25",
+    explanation: "",
+    type: "numerical",
+    default: "25",
+    categories: "",
+  },
+  {
     name: "instructionFontSource",
     availability: "now",
     example: "browser",

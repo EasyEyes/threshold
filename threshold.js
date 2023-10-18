@@ -16,6 +16,7 @@ import {
   norm,
   saveDataOnWindowClose,
   sleep,
+  getParamValueForBlockOrCondition,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -135,6 +136,7 @@ import {
   thisDevice,
   loudspeakerInfo,
   measureLuminance,
+  uniComponentConfig,
 } from "./components/global.js";
 
 import {
@@ -1236,14 +1238,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructionsClock.reset(); // clock
     frameN = -1;
     continueRoutine = true;
+    // Hide while changing size/text, to avoid jarring flickering
+    instructions.setOpacity(0);
+    instructionsConfig.height = getParamValueForBlockOrCondition(
+      "instructionFontSizePt",
+      blockOrCondition
+    );
     instructions.setWrapWidth(window.innerWidth * 0.8);
     instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
     instructions.setText(text);
     updateColor(instructions, "instruction", blockOrCondition);
     instructions.setAutoDraw(true);
     dynamicSetSize([instructions], instructionsConfig.height);
+    // Show text again once sized
+    instructions.setOpacity(uniComponentConfig.opacity);
   }
 
+  // TODO use _instructionSetup, DRY
   function _instructionBeforeStimulusSetup(
     text,
     wrapWidth = window.innerWidth / 4,
@@ -1253,13 +1264,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructionsClock.reset(); // clock
     frameN = -1;
     continueRoutine = true;
+    // Hide while changing size/text, to avoid jarring flickering
+    instructions.setOpacity(0);
     // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
-    //const wrapWidth = window.innerWidth / 4;
+    instructionsConfig.height = getParamValueForBlockOrCondition(
+      "instructionFontSizePt",
+      status.block_condition
+    );
     instructions.setWrapWidth(wrapWidth);
     instructions.setPos(pos);
     instructions.setText(text);
     updateColor(instructions, "instruction", status.block_condition);
     instructions.setAutoDraw(true);
+    // Show text again once sized
+    instructions.setOpacity(uniComponentConfig.opacity);
   }
 
   async function _instructionRoutineEachFrame() {
@@ -2642,6 +2660,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             -window.innerHeight * 0.4,
           ]);
           instructions2.setAutoDraw(true);
+          instructionsConfig.height = getParamValueForBlockOrCondition(
+            "instructionFontSizePt",
+            status.block
+          );
           dynamicSetSize(
             [instructions, instructions2],
             instructionsConfig.height
@@ -2708,6 +2730,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             -window.innerHeight * 0.4,
           ]);
           instructions2.setAutoDraw(true);
+          instructionsConfig.height = getParamValueForBlockOrCondition(
+            "instructionFontSizePt",
+            status.block
+          );
           dynamicSetSize(
             [instructions, instructions2],
             instructionsConfig.height
@@ -2743,6 +2769,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             -window.innerHeight * 0.4,
           ]);
           instructions2.setAutoDraw(true);
+          instructionsConfig.height = getParamValueForBlockOrCondition(
+            "instructionFontSizePt",
+            status.block
+          );
           dynamicSetSize(
             [instructions, instructions2],
             instructionsConfig.height
