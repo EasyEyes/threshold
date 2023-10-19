@@ -4445,6 +4445,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       keypad.setSensitive();
 
       clearInterval(preStimulus.interval);
+      preStimulus.interval = undefined;
 
       rc.pauseDistance();
       if (toShowCursor()) {
