@@ -116,7 +116,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "_calibrateSoundBurstsWarmup (default 1) is the number of extra sound bursts, not recorded, before the recorded series of bursts. The warmup is NOT part of the _calibrateSoundBurstRepeats. There will be _calibrateSoundBurstRepeats+_calibrateSoundBurstRepeats sound bursts, and only the final _calibrateSoundBurstRepeats are recorded and analyzed. Having a warmup burst is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
+      "_calibrateSoundBurstsWarmup (default 1) is the number of extra sound bursts, not recorded, before the recorded series of bursts. The warmup is NOT part of the _calibrateSoundBurstRepeats. There will be _calibrateSoundBurstsWarmup+_calibrateSoundBurstRepeats sound bursts, and only the final _calibrateSoundBurstRepeats are recorded and analyzed. Having a warmup burst is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
   },
   _calibrateSoundCheck: {
     name: "_calibrateSoundCheck",
@@ -140,7 +140,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.2",
     explanation:
-      "_calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response.",
+      "_calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
   },
   _calibrateSoundIRSec: {
     name: "_calibrateSoundIRSec",
@@ -156,7 +156,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "24",
     explanation:
-      "_calibrateSoundSamplingDesiredBits (default 24) specifies the desired number of bits per sample in recording during sound calibration. Using the web API, some devices allow selection of number of bits, e.g. the miniDSP UMIK-2 offers 24 or 32 bits. EasyEyes will pick the available bits per sample nearest to this desired value.",
+      "_calibrateSoundSamplingDesiredBits (default 24) specifies the desired number of bits per sample in recording during sound calibration. Using the web API, some devices allow selection of number of bits, e.g. the miniDSP UMIK-2 offers 24 or 32 bits. The UMIK=1 is fixed at 24 bits. EasyEyes will pick the available bits per sample nearest to this desired value.",
   },
   _calibrateSoundSamplingDesiredHz: {
     name: "_calibrateSoundSamplingDesiredHz",

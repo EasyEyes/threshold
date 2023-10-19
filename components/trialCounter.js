@@ -110,3 +110,35 @@ export function getTrialInfoStr(
 
   return res;
 }
+
+export const liveUpdateTrialCounter = (
+  L,
+  showCounterBool,
+  showViewingDistanceBool,
+  currentTrialIndex,
+  currentTrialLength,
+  currentBlockIndex,
+  blockCount,
+  viewingDistanceCm,
+  taskKind,
+  t,
+  trialCounterStim
+) => {
+  const periodMs = 500;
+  const tMs = Math.floor(t) * 1000;
+  if (tMs % periodMs === 0) {
+    trialCounterStim.setText(
+      getTrialInfoStr(
+        L,
+        showCounterBool,
+        showViewingDistanceBool,
+        currentTrialIndex,
+        currentTrialLength,
+        currentBlockIndex,
+        blockCount,
+        viewingDistanceCm,
+        taskKind
+      )
+    );
+  }
+};

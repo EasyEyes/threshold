@@ -488,3 +488,8 @@ export const measureLuminance = {
   movieValues: undefined,
   colorimeter: undefined,
 };
+
+export const preStimulus = {
+  interval: undefined,
+  running: false,
+};

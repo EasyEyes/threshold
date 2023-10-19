@@ -137,6 +137,7 @@ import {
   loudspeakerInfo,
   measureLuminance,
   uniComponentConfig,
+  preStimulus,
 } from "./components/global.js";
 
 import {
@@ -250,7 +251,10 @@ import {
   updateTargetSpecsForSoundDetect,
   updateTargetSpecsForSoundIdentify,
 } from "./components/showTrialInformation.js";
-import { getTrialInfoStr } from "./components/trialCounter.js";
+import {
+  getTrialInfoStr,
+  liveUpdateTrialCounter,
+} from "./components/trialCounter.js";
 ////
 
 import {
@@ -1238,8 +1242,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructionsClock.reset(); // clock
     frameN = -1;
     continueRoutine = true;
-    // Hide while changing size/text, to avoid jarring flickering
-    instructions.setOpacity(0);
     instructionsConfig.height = getParamValueForBlockOrCondition(
       "instructionFontSizePt",
       blockOrCondition
@@ -1250,8 +1252,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     updateColor(instructions, "instruction", blockOrCondition);
     instructions.setAutoDraw(true);
     dynamicSetSize([instructions], instructionsConfig.height);
-    // Show text again once sized
-    instructions.setOpacity(uniComponentConfig.opacity);
   }
 
   // TODO use _instructionSetup, DRY
@@ -1264,8 +1264,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructionsClock.reset(); // clock
     frameN = -1;
     continueRoutine = true;
-    // Hide while changing size/text, to avoid jarring flickering
-    instructions.setOpacity(0);
     // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
     instructionsConfig.height = getParamValueForBlockOrCondition(
       "instructionFontSizePt",
@@ -1276,8 +1274,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructions.setText(text);
     updateColor(instructions, "instruction", status.block_condition);
     instructions.setAutoDraw(true);
-    // Show text again once sized
-    instructions.setOpacity(uniComponentConfig.opacity);
   }
 
   async function _instructionRoutineEachFrame() {
@@ -1285,12 +1281,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       continueRoutine = false;
       removeProceedButton();
     }
-
     trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
     renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
     t = instructionsClock.getTime();
     frameN = frameN + 1;
+
+    liveUpdateTrialCounter(
+      rc.language.value,
+      paramReader.read("showCounterBool", status.block)[0],
+      paramReader.read("showViewingDistanceBool", status.block)[0],
+      undefined,
+      undefined,
+      status.nthBlock,
+      totalBlocks.current,
+      viewingDistanceCm.current,
+      targetKind.current,
+      t,
+      trialCounter
+    );
 
     if (
       psychoJS.experiment.experimentEnded ||
@@ -2082,10 +2091,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       if (keypad.inUse(status.block)) {
-        logger("!. keypad in use, starting at filterRoutineBegin");
         keypad.start();
       } else {
-        logger("!. keypad not in use, stopping at filterRoutineBegin");
         keypad.stop();
       }
 
@@ -2325,9 +2332,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         undefined,
         paramReader.read("responseSpokenBool", status.block)[0]
       );
-      logger("!. responseType", responseType.current);
-      logger("!. canClick", canClick(responseType.current));
-      logger("!. canType", canType(responseType.current));
 
       // set default background color for instructions
       screenBackground.colorRGBA = colorRGBASnippetToRGBA(
@@ -2370,11 +2374,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               totalTrialsThisBlock.current
             ) +
             instructionsText.initialEnd(L, responseType.current);
-          logger("!. instruction text", letterBlockInstructionText);
-          logger(
-            "!. thresholdParameter used for instructions",
-            thresholdParameter
-          );
           _instructionSetup(letterBlockInstructionText, status.block);
         },
         repeatedLetters: () => {
@@ -2531,11 +2530,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               totalTrialsThisBlock.current
             ) +
             instructionsText.vernierInitialEnd(L, responseType.current);
-          logger("!. instruction text", vernierBlockInstructionText);
-          logger(
-            "!. thresholdParameter used for instructions",
-            thresholdParameter
-          );
           _instructionSetup(vernierBlockInstructionText, status.block);
         },
       });
@@ -2598,6 +2592,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function initInstructionRoutineEnd() {
     return async function () {
       instructions.setAutoDraw(false);
+      keypad.clearKeys();
       // if (keypadActive(responseType.current)) keypad.stop(); // Necessary??
 
       removeBeepButton();
@@ -3051,6 +3046,66 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (rc.setDistanceDesired)
           rc.setDistanceDesired(viewingDistanceDesiredCm.current);
 
+        // TODO does RC provide callbacks, ie to do this every time the nudger activates?
+        /**
+         * NOTES
+         * How to handle the variable viewing distance of the participant during trialInstructionRoutine?
+         * We generate all our (ie viewing distance dependent) stimuli during trialInstructionRoutineBegin,
+         * but we continue to track/nudge viewing distance during trialInstructionRoutineEachFrame.
+         *
+         * Early on we chose to do all our heavy/slow processing (ie generating stimuli) at that earlier
+         * point (trialInstructionRoutineBegin) in order to minimize delay between fixation click and the
+         * start of fixation.
+         *
+         * This means, however, that stimuli is being generated at the very start of the trial instructions,
+         * instead of when fixation is clicked. Stimuli therefore does not reflect distance at actual
+         * start of the trial.
+         */
+
+        // criterion for change in viewing distance to trigger rerun -- use the same criteria as the nudger
+        if (!preStimulus.interval) {
+          const rerunIntervalMs = 50;
+          preStimulus.running = true;
+          preStimulus.interval = setInterval(async () => {
+            // Update viewing distance
+            const nominalViewingDistance = viewingDistanceDesiredCm.current;
+            viewingDistanceCm.current = rc.viewingDistanceCm
+              ? rc.viewingDistanceCm.value
+              : viewingDistanceCm.current;
+            let allowedRatio = Math.max(
+              paramReader.read(
+                "viewingDistanceAllowedRatio",
+                status.block_condition
+              ),
+              0.000000001
+            );
+            let bounds;
+            if (allowedRatio > 1) {
+              bounds = [
+                nominalViewingDistance / allowedRatio,
+                nominalViewingDistance * allowedRatio,
+              ];
+            } else {
+              bounds = [
+                nominalViewingDistance * allowedRatio,
+                nominalViewingDistance / allowedRatio,
+              ];
+            }
+            const significantChangeBool =
+              viewingDistanceCm.current < bounds[0] ||
+              viewingDistanceCm.current > bounds[1];
+            // If not already in progress, rerun trialInstructionRoutineBegin
+            if (!preStimulus.running && significantChangeBool) {
+              preStimulus.running = true;
+              const startTime = performance.now();
+              await trialInstructionRoutineBegin(snapshot)();
+              const stopTime = performance.now();
+              const duration = stopTime - startTime;
+              logger("!. Done rerunning.", duration);
+              preStimulus.running = false;
+            }
+          }, rerunIntervalMs);
+        }
         // Distance nudging
         if (
           paramReader.read("viewingDistanceNudgingBool", status.block_condition)
@@ -3098,7 +3153,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           : [...fontCharacterSet.current].reverse();
         await keypad.update(alphabet, "sans-serif", BC);
         if (keypad.inUse(BC) && !keypad.acceptingResponses) {
-          logger("!. starting keypad in trialInstructionRoutineBegin");
           keypad.start();
         }
       }
@@ -3778,9 +3832,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           const thisTrialWords =
-            rsvpReadingWordsForThisBlock.current[
-              status.block_condition
-            ].shift();
+            rsvpReadingWordsForThisBlock.current[status.block_condition][0];
           const actualNumberOfWords = thisTrialWords.targetWords.length;
           if (actualNumberOfWords !== numberOfWords)
             warning(
@@ -4215,6 +4267,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* --------------------------------- \PUBLIC -------------------------------- */
 
+      preStimulus.running = false;
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -4228,6 +4282,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
+
+      liveUpdateTrialCounter(
+        rc.language.value,
+        paramReader.read("showCounterBool", status.block_condition),
+        paramReader.read("showViewingDistanceBool", status.block_condition),
+        status.trial,
+        totalTrialsThisBlock.current,
+        status.nthBlock,
+        totalBlocks.current,
+        viewingDistanceCm.current,
+        targetKind.current,
+        instructionsClock.getTime(),
+        trialCounter
+      );
 
       const letterEachFrame = () => {
         // IDENTIFY
@@ -4375,10 +4443,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       keypad.clearKeys(status.block_condition);
       // TODO disable keypad control keys
       keypad.setSensitive();
-      // keypad.stop();
-      // keypad.updateKeypadMessage(
-      //   readi18nPhrases("T_keypadContinueExperiment", rc.language.value)
-      // );
+
+      clearInterval(preStimulus.interval);
 
       rc.pauseDistance();
       if (toShowCursor()) {
@@ -4445,6 +4511,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ];
             offsetStimsToFixationPos(stimsToOffset);
           }
+          rsvpReadingWordsForThisBlock.current[status.block_condition].pop();
         },
         movie: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
