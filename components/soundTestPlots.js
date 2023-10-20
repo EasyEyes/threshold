@@ -548,7 +548,7 @@ export const plotForAllHz = (
               size: "12px",
             },
           },
-          min: calibrationGoal === "system" ? -180 : -230,
+          min: -160,
           max: maxY + 10,
           ticks: {
             stepSize: 10,
@@ -567,7 +567,8 @@ export const plotForAllHz = (
     "",
     isLoudspeakerCalibration,
     calibrationGoal,
-    ""
+    "",
+    [calibrateSoundHz.current, calibrateSoundHz.current]
   );
 
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
@@ -580,8 +581,20 @@ export const plotForAllHz = (
     );
     const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
     const sd = standardDeviation(filteredDataPointsY);
+
+    const filteredExpectedCorrectionPoints = expectedCorrectionPoints.filter(
+      (point) =>
+        point.x >= calibrateSoundMinHz.current &&
+        point.x <= calibrateSoundMaxHz.current
+    );
+    const filteredExpectedCorrectionPointsY =
+      filteredExpectedCorrectionPoints.map((point) => point.y);
+    const sdExpectedCorrection = standardDeviation(
+      filteredExpectedCorrectionPointsY
+    );
+
     const p = document.createElement("p");
-    const reportParameters = `SD: ${sd} dB over ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz`;
+    const reportParameters = `SD: actual ${sd} dB and expected ${sdExpectedCorrection} dB over ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "12px";
     p.style.marginBottom = "0px";

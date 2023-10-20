@@ -14,6 +14,7 @@ import {
   calibrateSoundMinHz,
   calibrateSoundIIRSec,
   calibrateSoundBurstDb,
+  calibrateSoundSamplingDesiredBits,
 } from "./global";
 import {
   plotForAllHz,
@@ -1119,7 +1120,8 @@ export const displaySummarizedTransducerTable = (
   elems = "",
   isLoudspeakerCalibration,
   calibrationGoal,
-  position = "left"
+  position = "left",
+  samplingHz = []
 ) => {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
@@ -1201,6 +1203,20 @@ export const displaySummarizedTransducerTable = (
   tr6.appendChild(td9);
 
   tbody.appendChild(tr6);
+  if (samplingHz.length > 0) {
+    const tr7 = document.createElement("tr");
+    const td10 = document.createElement("td");
+    const td11 = document.createElement("td");
+    td10.innerHTML = samplingHz[0] + " Hz";
+    td11.innerHTML =
+      samplingHz[1] +
+      " Hz" +
+      `, ${calibrateSoundSamplingDesiredBits.current} bits`;
+    tr7.appendChild(td10);
+    tr7.appendChild(td11);
+    tbody.appendChild(tr7);
+  }
+
   tbody.appendChild(tr5);
   tbody.appendChild(tr2);
   tbody.appendChild(tr3);
