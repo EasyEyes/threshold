@@ -31,6 +31,8 @@ import {
   calibrationTime,
   calibrateSoundBackgroundSecs,
   calibrateSoundSaveJSONBool,
+  showSoundParametersBool,
+  calibrateSoundSamplingDesiredBits,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -243,7 +245,7 @@ export const calibrateAudio = async (reader) => {
   const showSoundTestPageBool = ifTrue(
     reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__")
   );
-  const showSoundParametersBool = ifTrue(
+  showSoundParametersBool.current = ifTrue(
     reader.read(GLOSSARY._showSoundParametersBool.name, "__ALL_BLOCKS__")
   );
   timeoutSec.current = reader.read(GLOSSARY._timeoutSec.name)[0] * 1000;
@@ -289,6 +291,9 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundSaveJSONBool.current = ifTrue(
     reader.read(GLOSSARY._calibrateSoundSaveJSONBool.name, "__ALL_BLOCKS__")
   );
+  calibrateSoundSamplingDesiredBits.current = reader.read(
+    GLOSSARY._calibrateSoundSamplingDesiredBits.name
+  )[0];
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
     .split(",");
@@ -715,6 +720,8 @@ export const calibrateAudio = async (reader) => {
                 titleDisplayId: "soundTitle",
                 calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
                 calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+                calibrateSoundSamplingDesiredBits:
+                  calibrateSoundSamplingDesiredBits.current,
                 calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
                 calibrateSoundHz: calibrateSoundHz.current,
                 timeToCalibrate: timeToCalibrate.current,
@@ -1666,6 +1673,8 @@ const _runSoundLevelCalibrationAndLoudspeakerCalibration = async (
               timeToCalibrateId: "timeToCalibrate",
               calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
               calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+              calibrateSoundSamplingDesiredBits:
+                calibrateSoundSamplingDesiredBits.current,
               calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
               calibrateSoundHz: calibrateSoundHz.current,
               timeToCalibrate: timeToCalibrate.current,
