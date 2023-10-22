@@ -56,13 +56,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _calibrateScreenSizeCookieBool (default TRUE) when TRUE enables EasyEyes reading and saving of a cookie (on the participant computer) containing the screen resolution (px) and size (cm),  e.g. 3024 px x 1964 px, 24.5 cm x 16 cm. The cookie is read only if it's present and calibrateScreenSizeCookieBool==TRUE. If read, the cookie is considered valid only if it reports a screen resolution (width x height px) that matches the current resolution. If valid then EasyEyes takes the screen size (width x height cm) from the cookie instead of doing the calibration normally provoked by calibrateScreenSizeBool==TRUE. Lacking a valid cookie, then calibrateScreenSizeBool==TRUE will provoke size calibration. If size is actually calibrated, and calibrateScreenSizeCookieBool==TRUE, then a cookie is saved, holding the screen resolution and size. The reason to check for validity is that the computer might have several screens, and the browser window could be opened on any of them. The chances are low that a given computer will have two screens with different sizes and the same resolution. Set calibrateScreenSizeCookieBool=FALSE to rule out the small chance of mistaking a new display for a same-resolution but differently sized one that was calibrated on a previous occasion.",
   },
-  _calibrateSoundAssumingThisICalibDBSPL: {
-    name: "_calibrateSoundAssumingThisICalibDBSPL",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Obsolete.",
-  },
   _calibrateSoundBackgroundSecs: {
     name: "_calibrateSoundBackgroundSecs",
     availability: "now",
@@ -85,7 +78,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "_calibrateSoundBurstRecordings (default 1) is the desired number of recordings, where each recording consists of _calibrateSoundBurstRepeats. Each recording includes its own warm up _calibrateSoundBurstsWarmup. WE NOW THINK THIS SHOULD ALWAYS BE 1, BECAUSE AVERAGING THE TIME-BASED IR IS NOT RECOMMENDED.",
+      "❌ _calibrateSoundBurstRecordings (default 1) is the desired number of recordings, where each recording consists of _calibrateSoundBurstRepeats. Each recording includes its own warm up _calibrateSoundBurstsWarmup. WE NOW THINK THIS SHOULD ALWAYS BE 1, BECAUSE AVERAGING THE TIME-BASED IR IS NOT RECOMMENDED.",
   },
   _calibrateSoundBurstRepeats: {
     name: "_calibrateSoundBurstRepeats",
@@ -94,13 +87,6 @@ export const GLOSSARY: Glossary = {
     default: "4",
     explanation:
       "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count EXCLUDES the warm up bursts. IMPORTANT: The Novak et al. (2012) algorithm to deal with asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period, so make sure that\n_calibrateSoundBurstRepeats ≥ 2\nWe plan to have the EasyEyes compiler enforce this.",
-  },
-  _calibrateSoundBurstSamplingHz: {
-    name: "_calibrateSoundBurstSamplingHz",
-    availability: "now",
-    type: "numerical",
-    default: "48000",
-    explanation: "❌ Use _calibrateSoundSamplingDesiredHz instead.",
   },
   _calibrateSoundBurstSec: {
     name: "_calibrateSoundBurstSec",
@@ -126,13 +112,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateSoundCheck (default "goal") optionally checks the sound frequency response (i.e. sound spectrum produced by a white noise stimulus) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the system, microphone, or loudspeaker. _calibrateSoundCheck must be set to one of three values: “none”, “system”, or “goal”. \n• “none” skips the check. \n• “system” checks using the IIR corresponding the the combination of loudspeaker and microphone.\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.\n• "both" checks both "system" and "goal".',
     categories: ["none", "system", "goal", "both"],
-  },
-  _calibrateSoundHz: {
-    name: "_calibrateSoundHz",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateSoundSamplingDesiredHz instead.",
   },
   _calibrateSoundIIRSec: {
     name: "_calibrateSoundIIRSec",
@@ -165,13 +144,6 @@ export const GLOSSARY: Glossary = {
     default: "48000",
     explanation:
       "_calibrateSoundSamplingDesiredHz (default 48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play with a sampling rate of up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the sampling rate nearest to this desired value that is available for both playing and recording.",
-  },
-  _calibrateSoundSamplingHz: {
-    name: "_calibrateSoundSamplingHz",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateSoundSamplingDesiredHz instead.",
   },
   _calibrateSoundSaveJSONBool: {
     name: "_calibrateSoundSaveJSONBool",
@@ -590,13 +562,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '⭑ _online2PayPerHour (default zero) specifies the hourly rate (a number) that determines (with _online2Minutes) the payment offered to each participant. [In Prolific, EasyEyes computes and fills in "How much do you want to pay them?"] The currency is specified by _online2PayCurrency. If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. The pay is specified with two decimals (e.g. 11.01), rounding up to the next cent, so the hourly rate offered will never be less than specified by the experiment. Prolific lists the study titles and pay per hour for selection by prospective participants. Some participants mentioned selecting my study because it seemed interesting. Others said that in their rush to sign up for $15/hour studies, they often skip the description. ',
   },
-  _online2ProlificProjectID: {
-    name: "_online2ProlificProjectID",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific1ProjectID instead.",
-  },
   _online2SaveIncompleteResponsesBool: {
     name: "_online2SaveIncompleteResponsesBool",
     availability: "now",
@@ -604,188 +569,6 @@ export const GLOSSARY: Glossary = {
     default: "TRUE",
     explanation:
       "🕑 _online2SaveIncompleteResponsesBool (default TRUE) sets the corresponding option in Pavlovia. Note that if you don’t have a Pavlovia site license, and you’re not in PILOTING mode, then you pay 20 pence for each response (i.e. data file) that you save, so you save money by not saving (and paying for) incomplete studies. We don't know yet whether Pavlovia provides an API for this.",
-  },
-  _online2SubmissionApproval: {
-    name: "_online2SubmissionApproval",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific2SubmissionApproval instead.",
-  },
-  _online3DeviceKind: {
-    name: "_online3DeviceKind",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific2DeviceKind instead.",
-  },
-  _online3PhoneOperatingSystem: {
-    name: "_online3PhoneOperatingSystem",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4PhoneOperatingSystem instead.",
-  },
-  _online3RequiredServices: {
-    name: "_online3RequiredServices",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific2RequiredServices instead.",
-  },
-  _online4AllowAfterHours: {
-    name: "_online4AllowAfterHours",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific3AllowAfterHours instead.",
-  },
-  _online4AllowCompletedExperiment: {
-    name: "_online4AllowCompletedExperiment",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific3AllowCompletedExperiment instead.",
-  },
-  _online4ApprovalRate: {
-    name: "_online4ApprovalRate",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific3ApprovalRate instead.",
-  },
-  _online4CustomAllowList: {
-    name: "_online4CustomAllowList",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific3CustomAllowList instead.",
-  },
-  _online4CustomBlockList: {
-    name: "_online4CustomBlockList",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific3CustomBlockList instead.",
-  },
-  _online4Location: {
-    name: "_online4Location",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific3Location instead.",
-  },
-  _online4ParticipantInPreviousStudyExclude: {
-    name: "_online4ParticipantInPreviousStudyExclude",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific3ParticipantInPreviousStudyExclude instead.",
-  },
-  _online4ParticipantInPreviousStudyInclude: {
-    name: "_online4ParticipantInPreviousStudyInclude",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific3ParticipantInPreviousStudyInclude instead.",
-  },
-  _online4Sample: {
-    name: "_online4Sample",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific3StudyDistribution instead.",
-  },
-  _online5CochlearImplant: {
-    name: "_online5CochlearImplant",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4CochlearImplant instread.",
-  },
-  _online5Dyslexia: {
-    name: "_online5Dyslexia",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4Dyslexia instead.",
-  },
-  _online5HearingDifficulties: {
-    name: "_online5HearingDifficulties",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4HearingDifficulties instead.",
-  },
-  _online5LanguageFirst: {
-    name: "_online5LanguageFirst",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4LanguageFirst instead.",
-  },
-  _online5LanguageFluent: {
-    name: "_online5LanguageFluent",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4LanguageFluent instead.",
-  },
-  _online5LanguagePrimary: {
-    name: "_online5LanguagePrimary",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4LanguagePrimary instead.",
-  },
-  _online5LanguageRelatedDisorders: {
-    name: "_online5LanguageRelatedDisorders",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4LanguageRelatedDisorders instead.",
-  },
-  _online5MusicalInstrumentExperience: {
-    name: "_online5MusicalInstrumentExperience",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4MusicalInstrumentExperience instead.",
-  },
-  _online5Vision: {
-    name: "_online5Vision",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4Vision instead.",
-  },
-  _online5VisionCorrection: {
-    name: "_online5VisionCorrection",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4VisionCorrection instead.",
-  },
-  _online5VRExperiences: {
-    name: "_online5VRExperiences",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4VRExperiences instead.",
-  },
-  _online5VRHeadset: {
-    name: "_online5VRHeadset",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4VRHeadsetOwnership instead.",
-  },
-  _online5VRHeadsetUsage: {
-    name: "_online5VRHeadsetUsage",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific4VRHeadsetFrequency instead.",
   },
   _participantIDGetBool: {
     name: "_participantIDGetBool",
@@ -1692,7 +1475,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      '❌ MOST PEOPLE SHOULD USE _calibrateTrackViewingDistanceBool INSTEAD. Set calibrateBlindSpotBool TRUE (default FALSE) to make an initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position. Use _calibrateTrackViewingDistanceBool or calibrateBlindSpotBool, not both. _calibrateTrackViewingDistanceBool maps the blind spot AND tracks viewing distance for the whole experiment. That\'s what most scientists want.',
+      '⚠ MOST PEOPLE SHOULD USE _calibrateTrackViewingDistanceBool INSTEAD. Set calibrateBlindSpotBool TRUE (default FALSE) to make an initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position. Use _calibrateTrackViewingDistanceBool or calibrateBlindSpotBool, not both. _calibrateTrackViewingDistanceBool maps the blind spot AND tracks viewing distance for the whole experiment. That\'s what most scientists want.',
   },
   calibrateDistanceCheckBool: {
     name: "calibrateDistanceCheckBool",
@@ -1708,7 +1491,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "❌ WORKS BUT FAILS TO PREDICT TIMING PROBLEMS. Set calibrateFrameRateUnderStressBool TRUE (default FALSE) to ask the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file.",
+      "⚠ WORKS BUT FAILS TO PREDICT TIMING PROBLEMS. Set calibrateFrameRateUnderStressBool TRUE (default FALSE) to ask the Remote Calibrator (which runs at beginning of the experiment) to run a several-second-long test of graphics speed. The test is run if any condition requests it, and is only run once, regardless of the number of requests. This value is reported by the output parameter frameRateUnderStress in the CSV data file⚠",
   },
   calibrateGazeCheckBool: {
     name: "calibrateGazeCheckBool",
@@ -1860,7 +1643,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "❌ WORKS BUT NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG, AND IT REQUIRES FREQUENT RECALIBRATION, WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
+      "⚠ WORKS BUT NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG, AND IT REQUIRES FREQUENT RECALIBRATION, WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
   },
   closestPointEccentricitySetting: {
     name: "closestPointEccentricitySetting",
@@ -1877,7 +1660,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "⭑ When conditionEnabledBool is FALSE (default is TRUE), the condition (column in experiment table) is ignored, except for block numbering. Thus even if all the conditions of a block are disabled, the block is still counted by the block counter. This makes it easy to skip conditions during development and debugging without removing their details from the experiment table. This ignores a column. EasyEyes ignores any row that begins with %.",
+      "⭑ When conditionEnabledBool is FALSE (default is TRUE), the condition (column in experiment table) is ignored, except for block numbering. The block is counted even if all its conditions are disabled. This makes it easy to omit conditions during development and debugging without removing their details from the experiment table. \n     This ignores a column. To ignore a row, insert % as its first character.\n     EXAMPLE. As noted above, disabling a column, unlike deleting it, doesn't affect block numbering. If you have three blocks and disable block 2, you'll be left with blocks 1 and 3, and the compiler won't complain. If you deleted block 2 then you'd have to renumber block \"3\" to be \"2\", or get a compiler error about non-consecutive block numbers.\n     NOTE. Values in ignored columns (conditionEnabledBool==FALSE) should not affect the compiled program. If you find such an effect, please report it as a bug. Send a short experiment that exhibits the problem to denis.pelli@nyu.edu.",
   },
   conditionGroup: {
     name: "conditionGroup",
@@ -1885,7 +1668,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "0",
     explanation:
-      '🕑 conditionGroup imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross and target X) to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among the targets in any set simply by creating a condition for each target, and giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a conditionGroup, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
+      '🕑 conditionGroup (empty default) imposes consistent screen markings across a set of conditions. Screen markings before and during stimulus presentation indicate the positions of the fixation and possible targets. There are many parameters, below, whose names begin with "marking" that allow you to customize markings.  Within a block, all conditions with the same nonzero conditionGroup number are presented with the same markings (fixation cross "+" and target "x") to avoid giving any clue as to which of the possible targets will appear on this trial. Thus, one can implement uncertainty among the targets in any set simply by putting them all in one block, with one condition for each target, giving all the conditions the same nonzero conditionGroup number. There can be any number of conditions in a condition group, and there can be any number of condition groups in a block. Every condition belongs to a condition group. A condition with a zero or unique conditionGroup number belongs to a condition group with just that condition.',
   },
   conditionName: {
     name: "conditionName",
@@ -2306,14 +2089,6 @@ export const GLOSSARY: Glossary = {
     default: "0.1",
     explanation:
       "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
-  },
-  markingFixationMotionPeriodSec: {
-    name: "markingFixationMotionPeriodSec",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation:
-      "❌ Obsolete. Use markingFixationMotionSpeedDegPerSec instead.",
   },
   markingFixationMotionRadiusDeg: {
     name: "markingFixationMotionRadiusDeg",
@@ -2776,7 +2551,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "❌ responseMustClickCrosshairBool is obsolete. Use responseMustTrackContinuouslyBool instead.",
+      "⚠ responseMustClickCrosshairBool (default FALSE) requires the participant to click the crosshair in order to initiate the trial. For initiating a trial, responseMustClickCrosshairBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial.  This is not a good way to get fixation of the crosshair at the moment of target presentation. If you want good fixation use responseMustTrackContinuouslyBool instead. We're not sure what this might be good for, so we're leaving it for the time being. If it turns out to be an attractive nuisance we may remove it.",
   },
   responseMustTrackContinuouslyBool: {
     name: "responseMustTrackContinuouslyBool",
@@ -2784,15 +2559,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ responseMustTrackContinuouslyBool (default FALSE), when TRUE, imposes a special way of initiating a trial that results in good fixation. It selects a waiting interval by taking a fresh random sample from the uniform distribution over the range responseMustTrackMinSec to responseMustTrackMaxSec. The motion is controlled by markingFixationMotionRadiusDeg and markingFixationMotionSpeedDegPerSec.  responseMustTrackContinuouslyBool requires that the cursor tip be within the hotspot (within markingFixationHotSpotRadiusDeg of the crosshair center) for the entire waiting interval.  Whenever the cursor is outside the hotspot the software resets the waiting process, first waiting for the cursor to enter the hotspot, which begins a new waiting interval (whose duration is a fresh random sample). For initiating a trial, responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. We submitted an article to Journal of Vision about the excellent fixation achieved with responseMustTrackContinuouslyBool. (Kurzawski et al. submitted 2023).",
-  },
-  responseMustTrackCrosshairBool: {
-    name: "responseMustTrackCrosshairBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "❌ responseMustTrackCrosshairBool is obsolete. Use responseMustTrackContinuouslyBool instead.",
+      "⭑ responseMustTrackContinuouslyBool (default FALSE), when TRUE, imposes a special way of initiating a trial that results in good fixation. It selects a waiting interval by taking a fresh random sample from the uniform distribution over the range responseMustTrackMinSec to responseMustTrackMaxSec. The motion is controlled by markingFixationMotionRadiusDeg and markingFixationMotionSpeedDegPerSec.  responseMustTrackContinuouslyBool requires that the cursor tip be within the hotspot (within markingFixationHotSpotRadiusDeg of the crosshair center) for the entire waiting interval.  Whenever the cursor is outside the hotspot, the software resets the waiting process, first waiting for the cursor to enter the hotspot, which begins a new waiting interval (whose duration is a fresh random sample). For initiating a trial, responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. We submitted an article to Journal of Vision about the excellent fixation achieved with responseMustTrackContinuouslyBool. (Kurzawski et al. submitted 2023).",
   },
   responseMustTrackMaxSec: {
     name: "responseMustTrackMaxSec",
@@ -3363,14 +3130,6 @@ export const GLOSSARY: Glossary = {
     default: "125",
     explanation:
       'soundGainDBSPL (default 125) is the assumed louspeaker gain (dB SPL) at 1000 Hz from digital sound (inDb) to physical sound (outDbSpl),\noutDbSpl=inDb+soundGainDbSpl.\nThe "level" of a sound vector is 10*log(P) dB, where the power is P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant\'s computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL as the default. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz).',
-  },
-  soundGainTWR: {
-    name: "soundGainTWR",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation:
-      '❌ soundGainTWR (default 100,10,100) is a comma-separated list of 3 numbers that is used with soundGainDBSPL to specify the parameters of our model of dynamic range compression of sound in the iPhone microphone: T (in dB SPL), W (in dB), and R (dimensionless). Typically each number will have one digit after the decimal, e.g. "-100.1,-15.1,30.0".\nT is the "threshold" sound level (dB SPL) at the knee in the curve of outDbSPL vs inDb. The curve is straight at low and high sound levels (inDB+soundGainDbSpl<T-W/2 or inDb+soundGainDbSpl>T+W/2). Those lines would intersect at T, but the curve rounds the knee, as controlled by W.\nW is the "width" of the knee. The rounded knee extends from T-W/2 to T+W/2.\nR is the reciprocal of the slope of outDbSPL vs inDb at sound levels above T+W/2.\nIf calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL and soundGainTWR as the defaults. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL and soundGainTWR to fit what was measured at 1000 Hz. \nOur compression model (using T, W, and R) is Eq. 4 in Giannoulis et al. (2012).\nGiannoulis, Dimitrios, Michael Massberg, and Joshua D. Reiss (2012). Digital Dynamic Range Compressor Design –– A Tutorial and Analysis. Journal of Audio Engineering Society. Vol. 60, Issue 6, pp. 399–408.\nhttp://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf',
   },
   spacingDeg: {
     name: "spacingDeg",
