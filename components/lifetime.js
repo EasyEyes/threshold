@@ -233,7 +233,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         componentConvolution:
           soundCalibrationResults.current?.component?.convolution,
         systemConvolution: soundCalibrationResults.current?.system?.convolution,
-        autocorrelations: soundCalibrationResults.current?.autocorrelations,
+        autocorrelations: {},
         // backgroundNoise: soundCalibrationResults.current?.background_noise,
         backgroundRecording:
           soundCalibrationResults.current?.background_noise?.recording,
@@ -262,6 +262,9 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         calibrateSoundIIRSec: calibrateSoundIIRSec.current,
         calibrateSoundMinHz: calibrateSoundMinHz.current,
         calibrateSoundMaxHz: calibrateSoundMaxHz.current,
+        calibrateSound1000HzSec: calibrateSound1000HzSec.current,
+        calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
+        calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
       };
     }
 
@@ -277,6 +280,20 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       //   objectData.push(data);
       // }
       allSoundResults["Microphone Results"] = microphoneCalibrationResults;
+    }
+
+    if (
+      soundCalibrationResults.current?.autocorrelations?.length > 0 &&
+      calibrateSoundSaveJSONBool.current
+    ) {
+      for (
+        let i = 0;
+        i < soundCalibrationResults.current.autocorrelations.length;
+        i++
+      ) {
+        allSoundResults["autocorrelations"][`autocorrelation_${i}`] =
+          soundCalibrationResults.current.autocorrelations[i];
+      }
     }
     if (allSoundResults && calibrateSoundSaveJSONBool.current)
       psychoJS.experiment.downloadJSON(allSoundResults);
