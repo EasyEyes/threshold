@@ -578,12 +578,13 @@ export const calibrateAudio = async (reader) => {
 
           resolve();
         });
-      });
-      elems.continueButton.addEventListener("click", async (e) => {
-        elems.calibrateMicrophoneButton.style.display = "none";
-        elems.continueButton.style.display = "none";
-        calibrateMicrophonesBool.current = false;
-        resolve("proceed");
+
+        elems.continueButton.addEventListener("click", async (e) => {
+          elems.calibrateMicrophoneButton.style.display = "none";
+          elems.continueButton.style.display = "none";
+          calibrateMicrophonesBool.current = false;
+          resolve("proceed");
+        });
       });
 
       if ((await calibration) === "proceed") {
