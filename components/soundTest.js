@@ -15,6 +15,9 @@ import {
   calibrateSoundIIRSec,
   calibrateSoundBurstDb,
   calibrateSoundSamplingDesiredBits,
+  actualBitsPerSample,
+  actualSamplingRate,
+  microphoneActualSamplingRate,
 } from "./global";
 import {
   plotForAllHz,
@@ -1197,8 +1200,8 @@ export const displaySummarizedTransducerTable = (
       : LoudspeakerInfo["gainDBSPL"];
   td9.innerHTML =
     microphoneInfo["gainDBSPL"] > 0
-      ? "+" + microphoneInfo["gainDBSPL"] + " dB SPL gain at 1 kHz"
-      : microphoneInfo["gainDBSPL"] + " dB SPL gain at 1 kHz";
+      ? "+" + microphoneInfo["gainDBSPL"] + " dB gain at 1 kHz"
+      : microphoneInfo["gainDBSPL"] + " dB gain at 1 kHz";
   tr6.appendChild(td8);
   tr6.appendChild(td9);
 
@@ -1207,11 +1210,11 @@ export const displaySummarizedTransducerTable = (
     const tr7 = document.createElement("tr");
     const td10 = document.createElement("td");
     const td11 = document.createElement("td");
-    td10.innerHTML = samplingHz[0] + " Hz";
+    td10.innerHTML = actualSamplingRate.current + " Hz";
     td11.innerHTML =
-      samplingHz[1] +
+      microphoneActualSamplingRate.current +
       " Hz" +
-      `, ${calibrateSoundSamplingDesiredBits.current} bits`;
+      `, ${actualBitsPerSample.current} bits`;
     tr7.appendChild(td10);
     tr7.appendChild(td11);
     tbody.appendChild(tr7);

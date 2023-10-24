@@ -392,6 +392,9 @@ export const vocoderPhrases = {
   targetPhrase: undefined,
   maskerPhrase: undefined,
 };
+export const actualSamplingRate = { current: "" };
+export const actualBitsPerSample = { current: "" };
+export const microphoneActualSamplingRate = { current: "" };
 export const vocoderPhraseCategories = { chosen: undefined, all: undefined };
 export const vocoderPhraseShowClickable = { current: true };
 export const vocoderPhraseCorrectResponse = { current: undefined };

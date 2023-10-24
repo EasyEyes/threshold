@@ -391,7 +391,7 @@ export const plotForAllHz = (
   // solid purple line for expected correction
   if (expectedCorrectionPoints.length > 0) {
     datasets.push({
-      label: "Expected correction",
+      label: "Predicted correction",
       data: expectedCorrectionPoints,
       backgroundColor: "rgba(128, 0, 128, 0.2)",
       borderColor: "rgba(128, 0, 128, 1)",
@@ -555,7 +555,7 @@ export const plotForAllHz = (
     );
 
     const p = document.createElement("p");
-    const reportParameters = `SD: actual ${sd} dB and expected ${sdExpectedCorrection} dB over ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz`;
+    const reportParameters = `SD: predicted ${sdExpectedCorrection} dB and actual ${sd} dB over ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "12px";
     p.style.marginBottom = "0px";
@@ -568,13 +568,13 @@ export const plotForAllHz = (
     const p = document.createElement("p");
     const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
       calibrateSoundBurstSec.current
-    } sec, ${calibrateSoundBurstRepeats.current} reps, ${
+    }s, ${calibrateSoundBurstRepeats.current}X, ${
       calibrateSoundHz.current
-    } Hz,<br>IIR: ${calibrateSoundIIRSec.current} sec, ${
+    } Hz <br>IIR: ${calibrateSoundIIRSec.current}s, ${
       calibrateSoundMinHz.current
-    } to ${
-      calibrateSoundMaxHz.current
-    } Hz,<br>filtered MLS Range: ${Min.toFixed(1)} to ${Max.toFixed(1)}`;
+    } to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
+      1
+    )} to ${Max.toFixed(1)}`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "12px";
     p.style.marginBottom = "0px";

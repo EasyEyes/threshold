@@ -1,4 +1,6 @@
 import {
+  actualBitsPerSample,
+  actualSamplingRate,
   allHzCalibrationResults,
   calibrateMicrophonesBool,
   calibrateSound1000HzPostSec,
@@ -20,6 +22,7 @@ import {
   debugBool,
   invertedImpulseResponse,
   loudspeakerInfo,
+  microphoneActualSamplingRate,
   microphoneCalibrationResult,
   microphoneCalibrationResults,
   microphoneInfo,
@@ -631,6 +634,12 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     ...microphoneInfo.current,
     ...soundCalibrationResults.current.micInfo,
   };
+  actualSamplingRate.current =
+    soundCalibrationResults.current.audioInfo?.sourceSampleRate;
+  microphoneActualSamplingRate.current =
+    soundCalibrationResults.current.audioInfo?.sinkSampleRate;
+  actualBitsPerSample.current =
+    soundCalibrationResults.current.audioInfo?.bitsPerSample;
   microphoneInfo.current.CalibrationDate = calibrationTime.current;
   if (calibrateSoundCheck.current !== "none") {
     if (calibrateSoundCheck.current === "system") {
