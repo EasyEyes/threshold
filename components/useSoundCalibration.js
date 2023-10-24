@@ -44,7 +44,6 @@ import {
   saveLoudSpeakerInfo,
 } from "./soundCalibrationHelpers";
 import { showExperimentEnding } from "./forms";
-import { testData } from "./LatestTestData";
 
 const globalGains = { values: [] };
 
@@ -613,7 +612,6 @@ const startCalibration = async (
     calibrator,
     timeoutSec.current
   );
-  // const results = testData
   if (results === false) {
     return false;
   }
