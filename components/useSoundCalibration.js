@@ -62,8 +62,8 @@ export const runCombinationCalibration = async (
     ? readi18nPhrases("RC_loudspeakerCalibration", language)
     : readi18nPhrases("RC_microphoneCalibration", language);
   adjustPageNumber(elems.title, [
-    { replace: /111/g, with: 1 },
-    { replace: /222/g, with: 6 },
+    { replace: /111/g, with: 0 },
+    { replace: /222/g, with: 5 },
   ]);
   elems.message.style.display = "none";
   const options = ["Smartphone", "USB Microphone", "None"];
@@ -80,7 +80,10 @@ export const runCombinationCalibration = async (
         showExperimentEnding();
       }
       const isSmartPhone = dropdown.value === "Smartphone";
-      adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+      adjustPageNumber(elems.title, [
+        { replace: 0, with: 1 },
+        { replace: 5, with: isSmartPhone ? 3 : 5 },
+      ]);
       removeElements([dropdown, proceedButton, p]);
       elems.subtitle.innerHTML = isLoudspeakerCalibration
         ? isSmartPhone
@@ -152,8 +155,8 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
   isLoudspeakerCalibration
     ? null
     : adjustPageNumber(elems.title, [
-        { replace: /111/g, with: 2 },
-        { replace: /222/g, with: 6 },
+        { replace: /111/g, with: 1 },
+        { replace: /222/g, with: 5 },
       ]);
   const p = document.createElement("p");
   p.innerHTML = readi18nPhrases("RC_connectUSBMicrophone", language);
@@ -171,7 +174,7 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
       removeElements([p, proceedButton]);
-      adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
+      adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
       await getUSBMicrophoneDetailsFromUser(
         elems,
         language,
@@ -248,7 +251,7 @@ const getUSBMicrophoneDetailsFromUser = async (
             micSerialNumberInput,
             proceedButton,
           ]);
-          adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
+          adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
           await getLoudspeakerDeviceDetailsFromUser(
             elems,
             language,
@@ -331,7 +334,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           deviceStringElem,
           proceedButton,
         ]);
-        adjustPageNumber(elems.title, [{ replace: 4, with: 5 }]);
+        adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
         await startCalibration(
           elems,
           isLoudspeakerCalibration,
@@ -408,7 +411,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
           deviceStringElem,
           proceedButton,
         ]);
-        adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
+        adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
         await startCalibration(
           elems,
           isLoudspeakerCalibration,
