@@ -2158,6 +2158,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "readingMaxWidthDegPerLine",
+    availability: "now",
+    example: "",
+    explanation:
+      'If specified, when targetKind=="reading" the width of the reading paragraph (ie determining how many words are included in a given line) will be constrained by the lower bound of this width (deg) and readingMaxCharacterPerLine. If left blank, reading paragraph width is constrained by readingMaxCharacterPerLine and 80% of the width of the screen.',
+    type: "numerical",
+    default: "",
+    categories: "",
+  },
+  {
     name: "readingMultipleOfSingleLineSpacing",
     availability: "now",
     example: "1.2",
@@ -2475,6 +2485,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "If rsvpReadingRequireUniqueWordsBool is TRUE, only select words for the target sequence and foil words which have not yet been used as a target or foil. If FALSE, draw words directly from the corpus, even if those words have already been used in this condition.",
     type: "boolean",
     default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "saveCursorTrackingBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 saveCursorTrackingBool (default FALSE), during each trial of this condition, records the time and x,y pixel position of the crosshair and cursor plus boolean presence/absence of the target (6 numbers per sample) at a frequency set by saveCursorTrackingHz. The time stamp is floating point absolute time in sec. The record should begin when EasyEyes starts moving the crosshair and tracking the cursor, and should end at target offset.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "saveCursorTrackingHz",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 saveCursorTrackingHz (default 60) specifies the rate at which the cursor and crosshair position are sampled. Has no effect when saveCursorTrackingBool==FALSE.",
+    type: "numerical",
+    default: "60",
     categories: "",
   },
   {

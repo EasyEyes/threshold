@@ -2410,6 +2410,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ readingMaxCharactersPerLine (default 57) is the maximum line length in characters. (Note that line breaking is based on pixels, not characters; readingMaxCharactersPerLine is used to compute readingMaxPixPerLine.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.",
   },
+  readingMaxWidthDegPerLine: {
+    name: "readingMaxWidthDegPerLine",
+    availability: "now",
+    type: "numerical",
+    default: "",
+    explanation:
+      'If specified, when targetKind=="reading" the width of the reading paragraph (ie determining how many words are included in a given line) will be constrained by the lower bound of this width (deg) and readingMaxCharacterPerLine. If left blank, reading paragraph width is constrained by readingMaxCharacterPerLine and 80% of the width of the screen.',
+  },
   readingMultipleOfSingleLineSpacing: {
     name: "readingMultipleOfSingleLineSpacing",
     availability: "now",
@@ -2672,6 +2680,22 @@ export const GLOSSARY: Glossary = {
     default: "TRUE",
     explanation:
       "If rsvpReadingRequireUniqueWordsBool is TRUE, only select words for the target sequence and foil words which have not yet been used as a target or foil. If FALSE, draw words directly from the corpus, even if those words have already been used in this condition.",
+  },
+  saveCursorTrackingBool: {
+    name: "saveCursorTrackingBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 saveCursorTrackingBool (default FALSE), during each trial of this condition, records the time and x,y pixel position of the crosshair and cursor plus boolean presence/absence of the target (6 numbers per sample) at a frequency set by saveCursorTrackingHz. The time stamp is floating point absolute time in sec. The record should begin when EasyEyes starts moving the crosshair and tracking the cursor, and should end at target offset.",
+  },
+  saveCursorTrackingHz: {
+    name: "saveCursorTrackingHz",
+    availability: "now",
+    type: "numerical",
+    default: "60",
+    explanation:
+      "🕑 saveCursorTrackingHz (default 60) specifies the rate at which the cursor and crosshair position are sampled. Has no effect when saveCursorTrackingBool==FALSE.",
   },
   screenColorRGBA: {
     name: "screenColorRGBA",

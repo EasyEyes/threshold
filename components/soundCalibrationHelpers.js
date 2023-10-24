@@ -1,6 +1,7 @@
 import { readi18nPhrases } from "./readPhrases";
 import { ref, set, get, child } from "firebase/database";
 import database from "./firebase/firebase.js";
+import { microphoneInfo } from "./global";
 export const identifyDevice = async () => {
   try {
     const deviceInfo = {};
@@ -91,7 +92,23 @@ export const matchLoudSpeakerByOEMandModelNumber = async (OEM, modelNumber) => {
   return null;
 };
 
-export const getInstructionText = (thisDevice, language) => {
+export const getInstructionText = (
+  thisDevice,
+  language,
+  isSmartPhone,
+  isLoudspeakerCalibration
+) => {
+  const microphoneInCalibrationLibrary = isLoudspeakerCalibration
+    ? isSmartPhone
+      ? ""
+      : readi18nPhrases(
+          "RC_microphoneIsInCalibrationLibrary",
+          language
+        ).replace(
+          "xxx",
+          `${microphoneInfo.current.micrFullManufacturerName} ${microphoneInfo.current.micFullName}`
+        ) + "<br> <br>"
+    : "";
   const needModelNumber = readi18nPhrases(
     "RC_needModelNumberAndName",
     language
@@ -99,7 +116,7 @@ export const getInstructionText = (thisDevice, language) => {
   const preferredModelNumber = "model number";
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
-    .replace("xxx", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
+    .replace("xxx", thisDevice.OEM === "Unknown" ? "unknown" : thisDevice.OEM)
     .replace(
       "yyy",
       thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType
@@ -116,7 +133,7 @@ export const getInstructionText = (thisDevice, language) => {
     findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
   }
 
-  return `${needModelNumberFinal} <br> <br> ${findModelNumber}`;
+  return `${microphoneInCalibrationLibrary}${needModelNumberFinal} <br> <br> ${findModelNumber}`;
 };
 
 export const getDeviceString = (thisDevice, language) => {

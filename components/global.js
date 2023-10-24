@@ -434,6 +434,7 @@ export const calibrateSoundBurstDb = { current: -10 };
 export const timeoutSec = { current: 180 };
 export const calibrateSoundCheck = { current: "goal" };
 export const microphoneCalibrationResults = [];
+export const microphoneCalibrationResult = { current: undefined };
 export const calibrateSoundMaxHz = { current: undefined };
 export const calibrateSoundMinHz = { current: undefined };
 export const soundGainTWR = { T: undefined, W: undefined, R: undefined };
