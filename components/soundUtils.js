@@ -1,6 +1,9 @@
 import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 import JSZip from "jszip";
 import {
+  calibrateSound1000HzPostSec,
+  calibrateSound1000HzPreSec,
+  calibrateSound1000HzSec,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
   calibrateSoundBurstsWarmup,
@@ -667,8 +670,9 @@ export const getCurrentTimeString = () => {
 export const calculateTimeToCalibrate = (gains) => {
   const measure1GainSec =
     1.5 *
-    (calibrateSoundBurstRepeats.current + calibrateSoundBurstsWarmup.current) *
-    calibrateSoundBurstSec.current;
+    (calibrateSound1000HzPostSec.current +
+      calibrateSound1000HzPreSec.current +
+      calibrateSound1000HzSec.current);
   const measureGainsSec = (0.5 + gains.length) * measure1GainSec;
   let checks = 0;
   switch (calibrateSoundCheck.current) {
@@ -685,12 +689,13 @@ export const calculateTimeToCalibrate = (gains) => {
       checks = 2;
       break;
   }
-
-  const measure1IRSec =
+  // measure1ResponseSec=2*(_calibrateSoundBurstRepeats+_calibrateSoundBurstsWarmup)*_calibrateSoundBurstSec;
+  const measure1ResponseSec =
+    2 *
     (calibrateSoundBurstRepeats.current + calibrateSoundBurstsWarmup.current) *
     calibrateSoundBurstSec.current;
-  const measureAllIRSec = (1 + checks) * measure1IRSec;
-  let calibrateSec = measureGainsSec + measureAllIRSec;
+  const measureResponsesSec = (1 + checks) * measure1ResponseSec;
+  let calibrateSec = measureGainsSec + measureResponsesSec;
 
   return Math.round(calibrateSec / 60);
 };

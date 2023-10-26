@@ -67,12 +67,17 @@ export const runCombinationCalibration = async (
     { replace: /222/g, with: 5 },
   ]);
   elems.message.style.display = "none";
-  const options = ["Smartphone", "USB Microphone", "None"];
+  const options = [
+    readi18nPhrases("RC_smartphone", language),
+    readi18nPhrases("RC_usbMicrophone", language),
+    readi18nPhrases("RC_none", language),
+  ];
   const dropdownTitle = readi18nPhrases("RC_selectMicrophoneType", language);
   const { dropdown, proceedButton, p } = addDropdownMenu(
     elems,
     options,
-    dropdownTitle
+    dropdownTitle,
+    language
   );
 
   await new Promise((resolve) => {
@@ -114,9 +119,10 @@ const adjustPageNumber = (title, numbers = []) => {
   });
 };
 
-const addDropdownMenu = (elems, options, title) => {
+const addDropdownMenu = (elems, options, title, language) => {
   //  create a dropdown menu to select from "USB Microphone", "SmartPhone", "None"(default)
   const dropdown = document.createElement("select");
+  dropdown.style.fontWeight = "bold";
   dropdown.id = "micDropdown";
   dropdown.name = "micDropdown";
   options.forEach((option) => {
@@ -137,7 +143,7 @@ const addDropdownMenu = (elems, options, title) => {
 
   // add a proceed button
   const proceedButton2 = document.createElement("button");
-  proceedButton2.innerHTML = "Proceed";
+  proceedButton2.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton2.classList.add(...["btn", "btn-success"]);
   proceedButton2.style.marginTop = "1rem";
   elems.subtitle.appendChild(proceedButton2);
@@ -160,13 +166,16 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
         { replace: /222/g, with: 5 },
       ]);
   const p = document.createElement("p");
-  p.innerHTML = readi18nPhrases("RC_connectUSBMicrophone", language);
+  p.innerHTML = readi18nPhrases("RC_connectUSBMicrophone", language)
+    .replace("111", calibrateSoundHz.current)
+    .replace("222", calibrateSoundSamplingDesiredBits.current)
+    .replace(/\n/g, "<br>");
   p.style.fontWeight = "normal";
   p.style.fontSize = "1rem";
   // p.style.marginTop = "1rem";
 
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = "Proceed";
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   elems.subtitle.appendChild(p);
@@ -191,8 +200,27 @@ const getUSBMicrophoneDetailsFromUser = async (
   language,
   isLoudspeakerCalibration
 ) => {
+  let micName = "UMIK";
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (stream) {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const mics = devices.filter((device) => device.kind === "audioinput");
+      mics.forEach((mic) => {
+        if (mic.label.includes("Umik") || mic.label.includes("UMIK")) {
+          micName = mic.label.replace("Microphone", "");
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+
   const p = document.createElement("p");
-  p.innerHTML = readi18nPhrases("RC_identifyUSBMicrophone", language);
+  p.innerHTML = readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
+    "UUU",
+    micName
+  );
   p.style.fontSize = "1rem";
   p.style.fontWeight = "normal";
   // p.style.marginTop = "1rem";
@@ -218,7 +246,7 @@ const getUSBMicrophoneDetailsFromUser = async (
 
   // add a proceed button
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = "Proceed";
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   // add  to the page
@@ -267,7 +295,7 @@ const getUSBMicrophoneDetailsFromUser = async (
             .replace("SSS", microphoneInfo.current.micFullSerialNumber);
         }
       }
-      proceedButton.innerHTML = "Proceed";
+      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
     });
   });
 };
@@ -292,6 +320,15 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     isLoudspeakerCalibration,
     preferredModelNumber
   );
+
+  // update subtitle
+  elems.subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
+    .replace(
+      "xxx",
+      thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM
+    )
+    .replace("yyy", thisDevice.current.DeviceType);
+
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
@@ -303,7 +340,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   modelNameInput.type = "text";
   modelNameInput.id = "modelNameInput";
   modelNameInput.name = "modelNameInput";
-  modelNameInput.placeholder = "Model Name";
+  modelNameInput.placeholder = readi18nPhrases("RC_modelName", language);
 
   const deviceStringElem = document.createElement("p");
   deviceStringElem.id = "loudspeakerInstructions1";
@@ -314,7 +351,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   findModel.innerHTML = instructionText;
 
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = "Proceed";
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   // add  to the page
@@ -363,24 +400,37 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
   thisDevice.current = await identifyDevice();
   // display the device info
   const deviceString = getDeviceString(thisDevice.current, language);
+  const { preferredModelNumber } = getDeviceDetails(
+    thisDevice.current.PlatformName,
+    language
+  );
   const instructionText = getInstructionText(
     thisDevice.current,
     language,
     isSmartPhone,
-    isLoudspeakerCalibration
+    isLoudspeakerCalibration,
+    preferredModelNumber
   );
+  // update subtitle
+  elems.subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
+    .replace(
+      "xxx",
+      thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM
+    )
+    .replace("yyy", thisDevice.current.DeviceType);
+
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
   modelNumberInput.name = "modelNumberInput";
-  modelNumberInput.placeholder = "Model Number";
+  modelNumberInput.placeholder = preferredModelNumber;
 
   const modelNameInput = document.createElement("input");
   modelNameInput.type = "text";
   modelNameInput.id = "modelNameInput";
   modelNameInput.name = "modelNameInput";
-  modelNameInput.placeholder = "Model Name";
+  modelNameInput.placeholder = readi18nPhrases("RC_modelName", language);
 
   const deviceStringElem = document.createElement("p");
   deviceStringElem.id = "loudspeakerInstructions1";
@@ -391,7 +441,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
   findModel.innerHTML = instructionText;
 
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = "Proceed";
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   // add  to the page
@@ -511,7 +561,7 @@ const showSmartphoneCalibrationInstructions = async (
   elems.message.style.lineHeight = "2rem";
 
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = "Proceed";
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
   proceedButton.style.marginTop = "1rem";
   elems.message.appendChild(proceedButton);
@@ -554,6 +604,11 @@ const startCalibration = async (
   isSmartPhone,
   knownIR = null
 ) => {
+  elems.subtitle.innerHTML = isLoudspeakerCalibration
+    ? isSmartPhone
+      ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+      : readi18nPhrases("RC_usingUSBMicrophone", language)
+    : elems.subtitle.innerHTML;
   const micName = microphoneInfo.current?.micFullName
     ? microphoneInfo.current.micFullName.toLowerCase().split(" ").join("")
     : "";
@@ -571,6 +626,7 @@ const startCalibration = async (
     : "";
   const { Speaker, CombinationCalibration } = speakerCalibrator;
   const speakerParameters = {
+    language: language,
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
     debug: debugBool.current,
@@ -643,6 +699,15 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     ...microphoneInfo.current,
     ...soundCalibrationResults.current.micInfo,
   };
+  microphoneInfo.current.micFullName = isSmartPhone
+    ? microphoneInfo.current.micModelName
+    : microphoneInfo.current.micFullName;
+  microphoneInfo.current.micFullSerialNumber = isSmartPhone
+    ? microphoneInfo.current.ID
+    : microphoneInfo.current.micFullSerialNumber;
+  microphoneInfo.current.micrFullManufacturerName = isSmartPhone
+    ? microphoneInfo.current.OEM
+    : microphoneInfo.current.micrFullManufacturerName;
   actualSamplingRate.current =
     soundCalibrationResults.current.audioInfo?.sourceSampleRate;
   microphoneActualSamplingRate.current =
@@ -662,7 +727,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
         soundCalibrationResults.current.component;
     }
     allHzCalibrationResults.mls_psd = soundCalibrationResults.current.mls_psd;
-    const OEM = microphoneInfo.current.OEM;
+    const OEM = microphoneInfo.current.OEM.toLowerCase().split(" ").join("");
     const ID = microphoneInfo.current.ID;
     const FreqGain = await readFrqGain(ID, OEM);
     allHzCalibrationResults.microphoneGain = FreqGain ? FreqGain : {};
@@ -681,7 +746,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     soundCalibrationResults.current.component.ir;
   soundGainDBSPL.current = soundCalibrationResults.current.parameters.gainDBSPL;
   soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
-
+  allHzCalibrationResults.timestamps =
+    soundCalibrationResults.current.timeStamps;
   const modelNumber = loudspeakerInfo.current.fullLoudspeakerModelNumber
     .toLowerCase()
     .split(" ")

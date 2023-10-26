@@ -18,6 +18,7 @@ import {
   actualBitsPerSample,
   actualSamplingRate,
   microphoneActualSamplingRate,
+  allHzCalibrationResults,
 } from "./global";
 import {
   plotForAllHz,
@@ -1071,6 +1072,12 @@ export const displayCompleteTransducerTable = (
   table.appendChild(tbody);
 
   elems.completeTransducerTable.style.marginBottom = "20px";
+  const p = document.createElement("p");
+  p.innerHTML = "Timestamps:";
+  const p2 = document.createElement("p");
+  p2.innerHTML = allHzCalibrationResults.timestamps.replace(/\n/g, "<br />");
+  elems.completeTransducerTable.appendChild(p);
+  elems.completeTransducerTable.appendChild(p2);
   elems.completeTransducerTable.appendChild(table);
 };
 

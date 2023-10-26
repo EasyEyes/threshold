@@ -418,6 +418,7 @@ export const allHzCalibrationResults = {
     system: { Min: null, Max: null },
     component: { Min: null, Max: null },
   },
+  timestamps: "",
 };
 
 export const calibrateSoundSamplingDesiredBits = { current: 16 };

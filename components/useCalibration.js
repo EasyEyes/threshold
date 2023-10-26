@@ -471,10 +471,7 @@ export const calibrateAudio = async (reader) => {
       const calibration = await new Promise(async (resolve) => {
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
           // find element by id and remove it: completeTransducerTable
-          const completeTransducerTable = document.getElementById(
-            "completeTransducerTable"
-          );
-          if (completeTransducerTable) completeTransducerTable.remove();
+          elems.completeTransducerTable.remove();
           elems.testButton.style.display = "none";
           elems.citation.style.visibility = "hidden";
           elems.soundLevelsTable.innerHTML = "";

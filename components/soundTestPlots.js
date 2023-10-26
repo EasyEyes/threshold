@@ -5,6 +5,9 @@ import {
   displaySummarizedTransducerTable,
 } from "./soundTest";
 import {
+  calibrateSound1000HzPostSec,
+  calibrateSound1000HzPreSec,
+  calibrateSound1000HzSec,
   calibrateSoundBurstDb,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
@@ -223,6 +226,23 @@ export const plotSoundLevels1000Hz = (
   const tableDiv = document.createElement("div");
   tableDiv.style.position = "absolute";
   tableDiv.appendChild(table);
+  if (showSoundParametersBool.current) {
+    const p = document.createElement("p");
+    const reportParameters = `1000 Hz duration: pre ${calibrateSound1000HzPreSec.current} s, use ${calibrateSound1000HzSec.current} s, post ${calibrateSound1000HzPostSec.current}  `;
+    p.innerHTML = reportParameters;
+    p.style.fontSize = "12px";
+    p.style.marginBottom = "0px";
+    tableDiv.appendChild(p);
+
+    const parametersTable = display1000HzParametersTable(parameters);
+    const parametersTableDiv = document.createElement("div");
+    parametersTableDiv.style.position = "absolute";
+    parametersTableDiv.appendChild(parametersTable);
+    plotCanvas.parentNode.appendChild(parametersTableDiv);
+    parametersTableDiv.style.marginLeft = chartArea.left + 3 + "px";
+    parametersTableDiv.style.marginTop =
+      -(chartArea.height + chartArea.top - 40) + "px";
+  }
   plotCanvas.parentNode.appendChild(tableDiv);
   const tableRec = tableDiv.getBoundingClientRect();
   tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 40) + "px";
@@ -230,16 +250,6 @@ export const plotSoundLevels1000Hz = (
 
   // make the table on top of the canvas
   tableDiv.style.zIndex = 1;
-
-  const parametersTable = display1000HzParametersTable(parameters);
-  const parametersTableDiv = document.createElement("div");
-  parametersTableDiv.style.position = "absolute";
-  parametersTableDiv.appendChild(parametersTable);
-  plotCanvas.parentNode.appendChild(parametersTableDiv);
-  const parametersTableRec = parametersTableDiv.getBoundingClientRect();
-  parametersTableDiv.style.marginLeft = chartArea.left + 3 + "px";
-  parametersTableDiv.style.marginTop =
-    -(chartArea.height + chartArea.top - 40) + "px";
 };
 
 export const plotForAllHz = (
