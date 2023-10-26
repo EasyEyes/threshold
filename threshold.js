@@ -455,13 +455,15 @@ const paramReaderInitialized = async (reader) => {
     reader.read("_language")[0],
     rc
   );
+  const compatibilityCheckPeer = new ExperimentPeer({});
   const { proceedButtonClicked, proceedBool } =
     await displayCompatibilityMessage(
       compMsg["msg"],
       reader,
       rc,
       compMsg["promptRefresh"],
-      compMsg["proceed"]
+      compMsg["proceed"],
+      compatibilityCheckPeer
     );
 
   hideCompatibilityMessage();
