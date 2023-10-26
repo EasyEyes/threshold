@@ -96,7 +96,8 @@ export const getInstructionText = (
   thisDevice,
   language,
   isSmartPhone,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
+  preferredModelNumberText = "model number"
 ) => {
   const microphoneInCalibrationLibrary = isLoudspeakerCalibration
     ? isSmartPhone
@@ -113,7 +114,7 @@ export const getInstructionText = (
     "RC_needModelNumberAndName",
     language
   );
-  const preferredModelNumber = "model number";
+  const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
     .replace("xxx", thisDevice.OEM === "Unknown" ? "unknown" : thisDevice.OEM)
@@ -261,4 +262,81 @@ export const findGainatFrequency = (frequencies, gains, targetFrequency) => {
     const y1 = gains[index];
     return interpolate(targetFrequency, x0, y0, x1, y1);
   }
+};
+
+export const getDeviceDetails = (platformName, lang) => {
+  let OS = "";
+  let preferredModelNumber = "";
+  let findModel = "";
+  switch (platformName) {
+    case "iOS":
+      OS = "IOS";
+      break;
+    case "mac":
+      OS = "macOS";
+      break;
+    case "win":
+      OS = "Windows";
+      break;
+    case "Android":
+      OS = "Android";
+      break;
+    case "cros":
+      OS = "ChromeOS";
+      break;
+    case "Linux":
+      OS = "Linux";
+      break;
+    case "openbsd":
+      OS = "Open/FreeBSD";
+      break;
+    case "Fuchsia":
+      OS = "Fuchsia";
+      break;
+    default:
+      OS = "GenericOS";
+      break;
+  }
+  if (OS.includes("Android")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberAndroid", lang);
+    findModel = readi18nPhrases("RC_findModelAndroid", lang);
+  } else if (OS.includes("Bada")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberBada", lang);
+    findModel = readi18nPhrases("RC_findModelBada", lang);
+  } else if (OS.includes("Blackberry")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberBlackberry", lang);
+    findModel = readi18nPhrases("RC_findModelBlackberry", lang);
+  } else if (OS.includes("Firefox")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberFirefox", lang);
+    findModel = readi18nPhrases("RC_findModelFirefox", lang);
+  } else if (OS.includes("IOS")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberIOs", lang);
+    findModel = readi18nPhrases("RC_findModelIOs", lang);
+  } else if (OS.includes("iPad")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberIPad", lang);
+    findModel = readi18nPhrases("RC_findModelIPad", lang);
+  } else if (OS.includes("Linux")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberLinux", lang);
+    findModel = readi18nPhrases("RC_findModelLinux", lang);
+  } else if (OS.includes("macOS")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberMacOs", lang);
+    findModel = readi18nPhrases("RC_findModelMacOs", lang);
+  } else if (OS.includes("Maemo")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberMaemo", lang);
+    findModel = readi18nPhrases("RC_findModelMaemo", lang);
+  } else if (OS.includes("Palm")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberPalm", lang);
+    findModel = readi18nPhrases("RC_findModelPalm", lang);
+  } else if (OS.includes("WebOS")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberWebOS", lang);
+    findModel = readi18nPhrases("RC_findModelWebOS", lang);
+  } else if (OS.includes("Windows")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberWindows", lang);
+    findModel = readi18nPhrases("RC_findModelWindows", lang);
+  } else {
+    preferredModelNumber = readi18nPhrases("RC_modelNumber", lang);
+    findModel = readi18nPhrases("RC_findModeGeneric", lang);
+  }
+
+  return { preferredModelNumber, findModel };
 };

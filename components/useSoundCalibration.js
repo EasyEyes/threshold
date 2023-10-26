@@ -38,6 +38,7 @@ import {
   doesMicrophoneExist,
   findGainatFrequency,
   getCalibrationFile,
+  getDeviceDetails,
   getDeviceString,
   getInstructionText,
   identifyDevice,
@@ -278,20 +279,25 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   isLoudspeakerCalibration
 ) => {
   thisDevice.current = await identifyDevice();
+  const { preferredModelNumber } = getDeviceDetails(
+    thisDevice.current.PlatformName,
+    language
+  );
   // display the device info
   const deviceString = getDeviceString(thisDevice.current, language);
   const instructionText = getInstructionText(
     thisDevice.current,
     language,
     isSmartPhone,
-    isLoudspeakerCalibration
+    isLoudspeakerCalibration,
+    preferredModelNumber
   );
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
   modelNumberInput.name = "modelNumberInput";
-  modelNumberInput.placeholder = "Model Number";
+  modelNumberInput.placeholder = preferredModelNumber;
 
   const modelNameInput = document.createElement("input");
   modelNameInput.type = "text";
@@ -793,16 +799,17 @@ const adjustDisplayBeforeCalibration = (
   elems.displayQR.style.flexDirection = "column";
 
   const messageText = isSmartPhone
-    ? `${readi18nPhrases("RC_hopeMicrophoneIsInLibrary", language)}
-                        ${readi18nPhrases(
-                          "RC_pointCameraAtQR",
-                          language
-                        )}`.replace(/\n/g, "<br>")
-    : `${readi18nPhrases("RC_removeHeadphones", language)}
-                         ${readi18nPhrases(
-                           "RC_getUSBMicrophoneReady",
-                           language
-                         )}`.replace(/\n/g, "<br>");
+    ? `${readi18nPhrases(
+        "RC_hopeMicrophoneIsInLibrary",
+        language
+      )}${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
+        /\n/g,
+        "<br>"
+      )
+    : `${readi18nPhrases("RC_removeHeadphones", language)}${readi18nPhrases(
+        "RC_getUSBMicrophoneReady",
+        language
+      )}`.replace(/\n/g, "<br>");
 
   elems.message.style.display = "block";
   elems.message.innerHTML = messageText;

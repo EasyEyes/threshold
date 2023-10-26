@@ -1,5 +1,11 @@
 import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 import JSZip from "jszip";
+import {
+  calibrateSoundBurstRepeats,
+  calibrateSoundBurstSec,
+  calibrateSoundBurstsWarmup,
+  calibrateSoundCheck,
+} from "./global";
 
 export var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -656,4 +662,35 @@ export const getCurrentTimeString = () => {
   const dateString = date.toLocaleDateString(undefined, dateOptions);
 
   return dateString.replace("at ", "");
+};
+
+export const calculateTimeToCalibrate = (gains) => {
+  const measure1GainSec =
+    1.5 *
+    (calibrateSoundBurstRepeats.current + calibrateSoundBurstsWarmup.current) *
+    calibrateSoundBurstSec.current;
+  const measureGainsSec = (0.5 + gains.length) * measure1GainSec;
+  let checks = 0;
+  switch (calibrateSoundCheck.current) {
+    case "none":
+      checks = 0;
+      break;
+    case "system":
+      checks = 1;
+      break;
+    case "goal":
+      checks = 1;
+      break;
+    case "both":
+      checks = 2;
+      break;
+  }
+
+  const measure1IRSec =
+    (calibrateSoundBurstRepeats.current + calibrateSoundBurstsWarmup.current) *
+    calibrateSoundBurstSec.current;
+  const measureAllIRSec = (1 + checks) * measure1IRSec;
+  let calibrateSec = measureGainsSec + measureAllIRSec;
+
+  return Math.round(calibrateSec / 60);
 };

@@ -44,6 +44,7 @@ import {
   displaySummarizedTransducerTable,
 } from "./soundTest";
 import {
+  calculateTimeToCalibrate,
   getCurrentTimeString,
   getSoundCalibrationLevelDBSPLFromIIR,
 } from "./soundUtils";
@@ -308,18 +309,7 @@ export const calibrateAudio = async (reader) => {
   });
 
   calibrationTime.current = getCurrentTimeString();
-  let dSec =
-    6 *
-      calibrateSoundBurstRecordings.current *
-      (calibrateSoundBurstRepeats.current +
-        calibrateSoundBurstsWarmup.current) *
-      calibrateSoundBurstSec.current +
-    2 *
-      gains.length *
-      (calibrateSound1000HzPreSec.current +
-        calibrateSound1000HzSec.current +
-        calibrateSound1000HzPostSec.current);
-  timeToCalibrate.current = Math.round(dSec / 60);
+  timeToCalibrate.current = calculateTimeToCalibrate(gains);
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
 
