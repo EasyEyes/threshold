@@ -319,7 +319,7 @@ export const getDeviceDetails = (platformName, lang) => {
     preferredModelNumber = readi18nPhrases("RC_modelNumberLinux", lang);
     findModel = readi18nPhrases("RC_findModelLinux", lang);
   } else if (OS.includes("macOS")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberMacOs", lang);
+    preferredModelNumber = readi18nPhrases("RC_modelNumberMacOS", lang);
     findModel = readi18nPhrases("RC_findModelMacOs", lang);
   } else if (OS.includes("Maemo")) {
     preferredModelNumber = readi18nPhrases("RC_modelNumberMaemo", lang);
