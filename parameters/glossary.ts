@@ -2102,9 +2102,9 @@ export const GLOSSARY: Glossary = {
     name: "markingFixationMotionRadiusDeg",
     availability: "now",
     type: "numerical",
-    default: "0.5",
+    default: "2",
     explanation:
-      "markingFixationMotionRadiusDeg (default 0.5 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustContinuouslyTrackCrosshairBool=TRUE.",
+      "markingFixationMotionRadiusDeg (default 2 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustContinuouslyTrackCrosshairBool=TRUE.",
   },
   markingFixationMotionSpeedDegPerSec: {
     name: "markingFixationMotionSpeedDegPerSec",
