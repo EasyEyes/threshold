@@ -447,6 +447,14 @@ export const GLOSSARY: Glossary = {
       "notDeepin",
     ],
   },
+  _needSmartphoneCheckBool: {
+    name: "_needSmartphoneCheckBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_needSmartphoneCheckBool (default FALSE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
+  },
   _needProcessorCoresMinimum: {
     name: "_needProcessorCoresMinimum",
     availability: "now",

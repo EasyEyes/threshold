@@ -640,15 +640,14 @@ export const displayCompatibilityMessage = async (
       messageWrapper.appendChild(languageWrapper);
     }
 
-    // TODO create compatibility check QR code
-    const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
-    compatiblityCheckQR.style.maxHeight = "300px";
-    compatiblityCheckQR.style.maxWidth = "300px";
-    const compatibilityCheckQRExplanation = document.createElement("p");
-    compatibilityCheckQRExplanation.innerText =
-      "Please scan this QR code using your phone, to determine if your device meets the technical requirements of this experiment.";
-    messageWrapper.append(compatiblityCheckQR);
-    messageWrapper.append(compatibilityCheckQRExplanation);
+    // const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
+    // compatiblityCheckQR.style.maxHeight = "300px";
+    // compatiblityCheckQR.style.maxWidth = "300px";
+    // const compatibilityCheckQRExplanation = document.createElement("p");
+    // compatibilityCheckQRExplanation.innerText =
+    //   "Please scan this QR code using your phone, to determine if your device meets the technical requirements of this experiment.";
+    // messageWrapper.append(compatiblityCheckQR);
+    // messageWrapper.append(compatibilityCheckQRExplanation);
 
     //create proceed button
     const buttonWrapper = document.createElement("div");

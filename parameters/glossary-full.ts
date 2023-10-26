@@ -412,6 +412,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "all, macOS, Windows, ChromeOS, ChromiumOS, AndroidOS, iOS, SamsungOS, KaiOS, NokiaOS, Series40OS, Linux, Ubuntu, FreeBSD, Debian, Fedora, Solaris, CentOS, Deepin, notmacOS, notWindows, notChromeOS, notChromiumOS, notAndroidOS, notiOS, notSamsungOS, notKaiOS, notNokiaOS, notSeries40OS, notLinux, notUbuntu, notFreeBSD, notDebian, notFedora, notSolaris, notCentOS, notDeepin",
   },
   {
+    name: "_needSmartphoneCheckBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_needSmartphoneCheckBool (default FALSE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_needProcessorCoresMinimum",
     availability: "now",
     example: "6",
