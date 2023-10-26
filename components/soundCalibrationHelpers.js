@@ -272,7 +272,7 @@ export const getDeviceDetails = (platformName, lang) => {
     case "iOS":
       OS = "IOS";
       break;
-    case "mac":
+    case "macOS":
       OS = "macOS";
       break;
     case "win":
