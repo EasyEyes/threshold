@@ -249,10 +249,6 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.component?.filtered_mls_psd?.y,
         Hz_component_convolution:
           soundCalibrationResults.current?.component?.filtered_mls_psd?.x,
-        db_test_convolution:
-          soundCalibrationResults.current?.component?.psd?.test?.y,
-        Hz_test_convolution:
-          soundCalibrationResults.current?.component?.psd?.test?.x,
         microphoneGain: allHzCalibrationResults.microphoneGain,
         db_mls: soundCalibrationResults.current?.mls_psd?.y,
         Hz_mls: soundCalibrationResults.current?.mls_psd?.x,
