@@ -1,6 +1,7 @@
 import { GLOSSARY } from "../parameters/glossary";
 import { isProlificPreviewExperiment } from "./externalServices";
 import { readi18nPhrases } from "./readPhrases";
+import { doesMicrophoneExist } from "./soundCalibrationHelpers";
 // import { rc } from "./global";
 
 export const checkSystemCompatibility = (
@@ -527,7 +528,9 @@ export const displayCompatibilityMessage = async (
   rc,
   promptRefresh,
   proceedBool,
-  compatibilityCheckPeer
+  compatibilityCheckPeer,
+  needAnySmartphone,
+  needCalibratedSmartphoneMicrophone
 ) => {
   return new Promise(async (resolve) => {
     //message wrapper
@@ -640,14 +643,67 @@ export const displayCompatibilityMessage = async (
       messageWrapper.appendChild(languageWrapper);
     }
 
-    // const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
-    // compatiblityCheckQR.style.maxHeight = "300px";
-    // compatiblityCheckQR.style.maxWidth = "300px";
-    // const compatibilityCheckQRExplanation = document.createElement("p");
-    // compatibilityCheckQRExplanation.innerText =
-    //   "Please scan this QR code using your phone, to determine if your device meets the technical requirements of this experiment.";
-    // messageWrapper.append(compatiblityCheckQR);
-    // messageWrapper.append(compatibilityCheckQRExplanation);
+    document.body.appendChild(messageWrapper);
+
+    if (compatibilityCheckPeer) {
+      const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
+      compatiblityCheckQR.style.maxHeight = "150px";
+      compatiblityCheckQR.style.maxWidth = "150px";
+      compatiblityCheckQR.style.alignSelf = "left";
+      compatiblityCheckQR.style.padding = "0px";
+      const compatibilityCheckQRExplanation = document.createElement("p");
+      compatibilityCheckQRExplanation.style.marginBottom = "0px";
+      let messageForQr;
+      if (needAnySmartphone && needCalibratedSmartphoneMicrophone) {
+        messageForQr =
+          readi18nPhrases("RC_inDescription", rc.language.value) +
+          " " +
+          readi18nPhrases("RC_needPhoneMicrophoneAndKeypad", rc.language.value);
+      } else if (needCalibratedSmartphoneMicrophone) {
+        messageForQr =
+          readi18nPhrases("RC_inDescription", rc.language.value) +
+          " " +
+          readi18nPhrases("RC_needPhoneMicrophone", rc.language.value);
+      } else if (needAnySmartphone) {
+        messageForQr =
+          readi18nPhrases("RC_inDescription", rc.language.value) +
+          " " +
+          readi18nPhrases("RC_needPhoneKeypad", rc.language.value);
+      }
+
+      compatibilityCheckQRExplanation.innerText =
+        "\n" +
+        messageForQr +
+        " " +
+        readi18nPhrases("RC_needsPointCameraAtQR", rc.language.value);
+      messageWrapper.append(compatibilityCheckQRExplanation);
+      messageWrapper.append(compatiblityCheckQR);
+      const displayUpdate = document.createElement("p");
+      messageWrapper.appendChild(displayUpdate);
+      try {
+        while (true) {
+          console.log("waiting for compatibilityCheckPeer");
+          const result = await compatibilityCheckPeer.getResults();
+          compatibilityCheckPeer.onPeerClose();
+          if (result) {
+            const deviceDetails = result.deviceDetails;
+            const OEM = deviceDetails.OEM.toLowerCase().split(" ").join("");
+            displayUpdate.innerText = "";
+            const proceed = await isSmartphoneInDatabase(
+              OEM,
+              messageWrapper,
+              rc.language.value,
+              displayUpdate
+            );
+            if (proceed) {
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.log("error", e);
+      }
+    }
 
     //create proceed button
     const buttonWrapper = document.createElement("div");
@@ -664,9 +720,75 @@ export const displayCompatibilityMessage = async (
     });
     buttonWrapper.appendChild(proceedButton);
     messageWrapper.appendChild(buttonWrapper);
-
-    document.body.appendChild(messageWrapper);
   });
+};
+
+const isSmartphoneInDatabase = async (
+  OEM,
+  messageWrapper,
+  lang,
+  displayUpdate
+) => {
+  // ask for the model number and name of the device
+  // create input box for model number and name
+  const modelNumberInput = document.createElement("input");
+  modelNumberInput.type = "text";
+  modelNumberInput.id = "modelNumberInput";
+  modelNumberInput.name = "modelNumberInput";
+  modelNumberInput.placeholder = "Model Number";
+
+  const modelNameInput = document.createElement("input");
+  modelNameInput.type = "text";
+  modelNameInput.id = "modelNameInput";
+  modelNameInput.name = "modelNameInput";
+  modelNameInput.placeholder = "Model Name";
+
+  const p = document.createElement("p");
+  p.innerText = `Please enter the model number and name of the ${OEM} device you just scanned the QR code with to check if it's in our database.`;
+
+  const checkButton = document.createElement("button");
+  checkButton.classList.add(...["btn", "btn-primary"]);
+  checkButton.innerText = "Check";
+  checkButton.style.width = "fit-content";
+
+  const modelNumberWrapper = document.createElement("div");
+  modelNumberWrapper.style.marginTop = "20px";
+  modelNumberWrapper.appendChild(p);
+  modelNumberWrapper.appendChild(modelNameInput);
+  modelNumberWrapper.appendChild(modelNumberInput);
+  modelNumberWrapper.appendChild(checkButton);
+  messageWrapper.appendChild(modelNumberWrapper);
+
+  const procceed = await new Promise((resolve) => {
+    checkButton.addEventListener("click", async () => {
+      const modelNumber = modelNumberInput.value;
+      const modelName = modelNameInput.value;
+      if (modelName === "" || modelNumber === "") {
+        alert("Please enter the model number and name of the device");
+      } else {
+        const exists = await doesMicrophoneExist(modelNumber, OEM);
+        modelNumberInput.remove();
+        modelNameInput.remove();
+        checkButton.remove();
+        p.remove();
+        if (exists) {
+          displayUpdate.innerText = readi18nPhrases(
+            "RC_microphoneIsInCalibrationLibrary",
+            lang
+          ).replace("xxx", modelName);
+          resolve(true);
+        } else {
+          displayUpdate.innerText = readi18nPhrases(
+            "RC_microphoneNotInCalibrationLibrary",
+            lang
+          ).replace("xxx", modelName);
+          resolve(false);
+        }
+      }
+    });
+  });
+
+  return procceed;
 };
 
 export const hideCompatibilityMessage = () => {

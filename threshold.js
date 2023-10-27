@@ -455,7 +455,31 @@ const paramReaderInitialized = async (reader) => {
     reader.read("_language")[0],
     rc
   );
-  const compatibilityCheckPeer = new ExperimentPeer({});
+  let needAnySmartphone = false;
+  let needCalibratedSmartphoneMicrophone = false;
+  // TODO: add logic for needAnySmartphone
+
+  const calibrateMicrophonesBool = reader.read("_calibrateMicrophonesBool")[0];
+  const calibrateSound1000Hz = reader.read("calibrateSound1000HzBool")[0];
+  const calibrateSoundAllHz = reader.read("calibrateSoundAllHzBool")[0];
+  if (
+    calibrateMicrophonesBool === false &&
+    (calibrateSound1000Hz === true || calibrateSoundAllHz === true)
+  ) {
+    needCalibratedSmartphoneMicrophone = true;
+  }
+  console.log(
+    "needCalibratedSmartphoneMicrophone",
+    needCalibratedSmartphoneMicrophone
+  );
+
+  let compatibilityCheckPeer = null;
+  if (needCalibratedSmartphoneMicrophone || needAnySmartphone) {
+    const params = {
+      text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
+    };
+    compatibilityCheckPeer = new ExperimentPeer(params);
+  }
   const { proceedButtonClicked, proceedBool } =
     await displayCompatibilityMessage(
       compMsg["msg"],
@@ -463,7 +487,9 @@ const paramReaderInitialized = async (reader) => {
       rc,
       compMsg["promptRefresh"],
       compMsg["proceed"],
-      compatibilityCheckPeer
+      compatibilityCheckPeer,
+      needAnySmartphone,
+      needCalibratedSmartphoneMicrophone
     );
 
   hideCompatibilityMessage();
