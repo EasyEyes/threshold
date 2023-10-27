@@ -1,8 +1,19 @@
 import { GLOSSARY } from "../parameters/glossary";
 import { isProlificPreviewExperiment } from "./externalServices";
 import { readi18nPhrases } from "./readPhrases";
-import { doesMicrophoneExist } from "./soundCalibrationHelpers";
+// import { doesMicrophoneExist } from "./soundCalibrationHelpers";
+import { ref, get, child } from "firebase/database";
+import database from "./firebase/firebase.js";
 // import { rc } from "./global";
+
+const doesMicrophoneExist = async (speakerID, oem) => {
+  const dbRef = ref(database);
+  const snapshot = await get(child(dbRef, `Microphone2/${oem}/${speakerID}`));
+  if (snapshot.exists()) {
+    return true;
+  }
+  return false;
+};
 
 export const checkSystemCompatibility = (
   reader,
