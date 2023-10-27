@@ -139,6 +139,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "none, system, goal, both",
   },
   {
+    name: "_calibrateSoundCopyToDownloadsBool",
+    availability: "now",
+    example: "",
+    explanation:
+      " _calibrateSoundCopyToDownloadsBool (default FALSE) save a copy of each newly created file in the Downloads folder.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundIIRSec",
     availability: "now",
     example: "",
