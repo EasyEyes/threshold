@@ -463,7 +463,7 @@ const paramReaderInitialized = async (reader) => {
   const calibrateSound1000Hz = reader.read("calibrateSound1000HzBool")[0];
   const calibrateSoundAllHz = reader.read("calibrateSoundAllHzBool")[0];
   if (
-    calibrateMicrophonesBool === false &&
+    calibrateMicrophonesBool === true &&
     (calibrateSound1000Hz === true || calibrateSoundAllHz === true)
   ) {
     needCalibratedSmartphoneMicrophone = true;

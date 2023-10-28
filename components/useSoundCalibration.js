@@ -59,58 +59,71 @@ export const runCombinationCalibration = async (
   language
 ) => {
   globalGains.values = gains;
+  elems.message.style.display = "none";
   elems.title.innerHTML = isLoudspeakerCalibration
     ? readi18nPhrases("RC_loudspeakerCalibration", language)
     : readi18nPhrases("RC_microphoneCalibration", language);
-  adjustPageNumber(elems.title, [
-    { replace: /111/g, with: 0 },
-    { replace: /222/g, with: 5 },
-  ]);
-  elems.message.style.display = "none";
-  const options = [
-    readi18nPhrases("RC_smartphone", language),
-    readi18nPhrases("RC_usbMicrophone", language),
-    readi18nPhrases("RC_none", language),
-  ];
-  const dropdownTitle = readi18nPhrases("RC_selectMicrophoneType", language);
-  const { dropdown, proceedButton, p } = addDropdownMenu(
-    elems,
-    options,
-    dropdownTitle,
-    language
-  );
 
-  await new Promise((resolve) => {
-    proceedButton.addEventListener("click", async () => {
-      if (dropdown.value === "None") {
-        showExperimentEnding();
-      }
-      const isSmartPhone = dropdown.value === "Smartphone";
-      adjustPageNumber(elems.title, [
-        { replace: 0, with: 1 },
-        { replace: 5, with: isSmartPhone ? 3 : 5 },
-      ]);
-      removeElements([dropdown, proceedButton, p]);
-      elems.subtitle.innerHTML = isLoudspeakerCalibration
-        ? isSmartPhone
-          ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
-          : readi18nPhrases("RC_usingUSBMicrophone", language)
-        : elems.subtitle.innerHTML;
-      elems.subtitle.style.fontSize = "1.1rem";
+  if (isLoudspeakerCalibration) {
+    const isSmartPhone = calibrateMicrophonesBool.current;
+    adjustPageNumber(elems.title, [
+      { replace: /111/g, with: isLoudspeakerCalibration ? 1 : 0 },
+      { replace: /222/g, with: isSmartPhone ? 3 : 5 },
+    ]);
+    if (isSmartPhone) {
+      await runSmartphoneCalibration(elems, isLoudspeakerCalibration, language);
+    } else {
+      await runUSBCalibration(elems, isLoudspeakerCalibration, language);
+    }
+  } else {
+    const options = [
+      readi18nPhrases("RC_smartphone", language),
+      readi18nPhrases("RC_usbMicrophone", language),
+      readi18nPhrases("RC_none", language),
+    ];
+    const dropdownTitle = readi18nPhrases("RC_selectMicrophoneType", language);
+    const { dropdown, proceedButton, p } = addDropdownMenu(
+      elems,
+      options,
+      dropdownTitle,
+      language
+    );
+    adjustPageNumber(elems.title, [
+      { replace: /111/g, with: 0 },
+      { replace: /222/g, with: 5 },
+    ]);
+    await new Promise((resolve) => {
+      proceedButton.addEventListener("click", async () => {
+        if (dropdown.value === "None") {
+          showExperimentEnding();
+        }
+        const isSmartPhone = dropdown.value === "Smartphone";
+        adjustPageNumber(elems.title, [
+          { replace: 0, with: 1 },
+          { replace: 5, with: isSmartPhone ? 3 : 5 },
+        ]);
+        removeElements([dropdown, proceedButton, p]);
+        elems.subtitle.innerHTML = isLoudspeakerCalibration
+          ? isSmartPhone
+            ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+            : readi18nPhrases("RC_usingUSBMicrophone", language)
+          : elems.subtitle.innerHTML;
+        elems.subtitle.style.fontSize = "1.1rem";
 
-      if (isSmartPhone) {
-        await runSmartphoneCalibration(
-          elems,
-          isLoudspeakerCalibration,
-          language
-        );
-      } else {
-        await runUSBCalibration(elems, isLoudspeakerCalibration, language);
-      }
+        if (isSmartPhone) {
+          await runSmartphoneCalibration(
+            elems,
+            isLoudspeakerCalibration,
+            language
+          );
+        } else {
+          await runUSBCalibration(elems, isLoudspeakerCalibration, language);
+        }
 
-      resolve();
+        resolve();
+      });
     });
-  });
+  }
 };
 
 const adjustPageNumber = (title, numbers = []) => {
@@ -206,6 +219,7 @@ const getUSBMicrophoneDetailsFromUser = async (
     if (stream) {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const mics = devices.filter((device) => device.kind === "audioinput");
+      console.log(mics);
       mics.forEach((mic) => {
         if (mic.label.includes("Umik") || mic.label.includes("UMIK")) {
           micName = mic.label.replace("Microphone", "");
@@ -328,6 +342,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
       thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM
     )
     .replace("yyy", thisDevice.current.DeviceType);
+  elems.subtitle.style.fontSize = "1rem";
 
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");
@@ -418,6 +433,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
       thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM
     )
     .replace("yyy", thisDevice.current.DeviceType);
+  elems.subtitle.style.fontSize = "1rem";
 
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");
@@ -614,10 +630,8 @@ const startCalibration = async (
     : "";
   const micSerialNumber = microphoneInfo.current?.micFullSerialNumber
     ? microphoneInfo.current.micFullSerialNumber
-        .toLowerCase()
-        .split(" ")
-        .join("")
     : "";
+  console.log(micSerialNumber);
   const micManufacturer = microphoneInfo.current?.micrFullManufacturerName
     ? microphoneInfo.current.micrFullManufacturerName
         .toLowerCase()

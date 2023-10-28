@@ -4,6 +4,7 @@ import { readi18nPhrases } from "./readPhrases";
 // import { doesMicrophoneExist } from "./soundCalibrationHelpers";
 import { ref, get, child } from "firebase/database";
 import database from "./firebase/firebase.js";
+import { microphoneInfo } from "./global";
 // import { rc } from "./global";
 
 const doesMicrophoneExist = async (speakerID, oem) => {
@@ -698,7 +699,7 @@ export const displayCompatibilityMessage = async (
           compatibilityCheckPeer.onPeerClose();
           if (result) {
             const deviceDetails = result.deviceDetails;
-            const OEM = deviceDetails.OEM.toLowerCase().split(" ").join("");
+            const OEM = deviceDetails.OEM;
             displayUpdate.innerText = "";
             const proceed = await isSmartphoneInDatabase(
               OEM,
@@ -777,7 +778,10 @@ const isSmartphoneInDatabase = async (
       if (modelName === "" || modelNumber === "") {
         alert("Please enter the model number and name of the device");
       } else {
-        const exists = await doesMicrophoneExist(modelNumber, OEM);
+        const exists = await doesMicrophoneExist(
+          modelNumber,
+          OEM.toLowerCase().split(" ").join("")
+        );
         modelNumberInput.remove();
         modelNameInput.remove();
         checkButton.remove();
@@ -787,6 +791,9 @@ const isSmartphoneInDatabase = async (
             "RC_microphoneIsInCalibrationLibrary",
             lang
           ).replace("xxx", modelName);
+          microphoneInfo.current.micFullName = modelName;
+          microphoneInfo.current.micFullSerialNumber = modelNumber;
+          microphoneInfo.current.micrFullManufacturerName = OEM;
           resolve(true);
         } else {
           displayUpdate.innerText = readi18nPhrases(
