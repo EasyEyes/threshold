@@ -814,8 +814,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     .split(" ")
     .join("");
   const ID = microphoneInfo.current.micFullSerialNumber;
-  const FreqGain = await readFrqGain(ID, OEM);
-  microphoneCalibrationResult.current.microphoneGain = FreqGain ? FreqGain : {};
+  microphoneCalibrationResult.current.microphoneGain =
+    allHzCalibrationResults.knownIr;
   microphoneCalibrationResults.push({
     name: microphoneInfo.current.micFullName,
     ID: microphoneInfo.current.micFullSerialNumber,
