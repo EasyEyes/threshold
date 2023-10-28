@@ -4,9 +4,14 @@ import { readi18nPhrases } from "./readPhrases";
 // import { doesMicrophoneExist } from "./soundCalibrationHelpers";
 import { ref, get, child } from "firebase/database";
 import database from "./firebase/firebase.js";
-import { microphoneInfo } from "./global";
+// import { microphoneInfo } from "./global";
 // import { rc } from "./global";
 
+const microphoneInfo = {
+  micFullName: "",
+  micFullSerialNumber: "",
+  micrFullManufacturerName: "",
+};
 const doesMicrophoneExist = async (speakerID, oem) => {
   const dbRef = ref(database);
   const snapshot = await get(child(dbRef, `Microphone2/${oem}/${speakerID}`));
@@ -728,7 +733,11 @@ export const displayCompatibilityMessage = async (
     proceedButton.innerHTML = readi18nPhrases("T_proceed", rc.language.value);
     proceedButton.addEventListener("click", () => {
       document.getElementById("root").style.display = "";
-      resolve({ proceedButtonClicked: true, proceedBool: proceedBool });
+      resolve({
+        proceedButtonClicked: true,
+        proceedBool: proceedBool,
+        mic: microphoneInfo,
+      });
     });
     buttonWrapper.appendChild(proceedButton);
     messageWrapper.appendChild(buttonWrapper);
@@ -791,9 +800,9 @@ const isSmartphoneInDatabase = async (
             "RC_microphoneIsInCalibrationLibrary",
             lang
           ).replace("xxx", modelName);
-          microphoneInfo.current.micFullName = modelName;
-          microphoneInfo.current.micFullSerialNumber = modelNumber;
-          microphoneInfo.current.micrFullManufacturerName = OEM;
+          microphoneInfo.micFullName = modelName;
+          microphoneInfo.micFullSerialNumber = modelNumber;
+          microphoneInfo.micrFullManufacturerName = OEM;
           resolve(true);
         } else {
           displayUpdate.innerText = readi18nPhrases(

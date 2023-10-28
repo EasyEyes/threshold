@@ -138,6 +138,7 @@ import {
   measureLuminance,
   uniComponentConfig,
   preStimulus,
+  microphoneInfo,
 } from "./components/global.js";
 
 import {
@@ -480,7 +481,7 @@ const paramReaderInitialized = async (reader) => {
     };
     compatibilityCheckPeer = new ExperimentPeer(params);
   }
-  const { proceedButtonClicked, proceedBool } =
+  const { proceedButtonClicked, proceedBool, mic } =
     await displayCompatibilityMessage(
       compMsg["msg"],
       reader,
@@ -491,6 +492,11 @@ const paramReaderInitialized = async (reader) => {
       needAnySmartphone,
       needCalibratedSmartphoneMicrophone
     );
+
+  microphoneInfo.current.micFullName = mic.micFullName;
+  microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
+  microphoneInfo.current.micrFullManufacturerName =
+    mic.micrFullManufacturerName;
 
   hideCompatibilityMessage();
   if (proceedButtonClicked && !proceedBool) {

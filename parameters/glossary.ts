@@ -38,7 +38,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateMicrophonesBool (default FALSE) enables microphone calibration, typically in smartphones. A manufacturer-calibrated USB microphone will be used to calibrate the loudspeakers, then the calibrated loudspeakers will be used to calibrate, one by one, any number of microphones. Each microphone calibration is added to the EasyEyes microphone calibration library, stamped with the author’s email, so _authorEmails must be specified in the experiment spreadsheet. Set _calibrateSoundMicrophonesBool FALSE for participants in your hearing research; they will use a smartphone to calibrate their loudspeakers. Set it TRUE for scientists who will calibrate microphones; they will use a USB microphone (miniDSP UMIK-1 or UMIK-2) to calibrate their loudspeakers.",
+      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool. To contribute to the EasyEyes calibration library, the scientist must provide _authorEmails.",
   },
   _calibrateMicrophonesPreventLocalBool: {
     name: "_calibrateMicrophonesPreventLocalBool",
