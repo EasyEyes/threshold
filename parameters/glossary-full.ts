@@ -74,7 +74,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       '🕑 _calibrateSoundFavoriteAuthors (default is empty) optionally provides a comma-separated list of email addresses of trusted authors of microphone calibrations in the EasyEyes calibration library. Each calibration is stamped with the author\'s email. The list is ordered so that preference diminishes farther down the list. An empty list indicates that you\'ll accept any calibration file in the EasyEyes library that matches your microphone model. If you list one or more emails, then the first is your top preference, and so on. At the end you can list "any", or not. "any" indicates that if your favored authors have not calibrated this device, then you\'ll accept any available calibration.',
-    type: "",
+    type: "text",
     default: "",
     categories: "",
   },
