@@ -531,7 +531,7 @@ export const calibrateAudio = async (reader) => {
                 false,
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
-                { Freq: [], Gain: [] },
+                microphoneCalibrationResult.current.microphoneGain,
                 calibrateSoundCheck.current === "system"
                   ? microphoneCalibrationResult.current.filteredMLSRange.system
                   : microphoneCalibrationResult.current.filteredMLSRange
@@ -546,7 +546,7 @@ export const calibrateAudio = async (reader) => {
                 false,
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
-                { Freq: [], Gain: [] },
+                microphoneCalibrationResult.current.microphoneGain,
                 microphoneCalibrationResult.current.filteredMLSRange.system
               );
               displayParametersAllHz(

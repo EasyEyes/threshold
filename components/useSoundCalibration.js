@@ -809,12 +809,17 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
         10
     ) / 10;
   microphoneInfo.current.CalibrationDate = calibrationTime.current;
+  const OEM = microphoneInfo.current.micrFullManufacturerName
+    .toLowerCase()
+    .split(" ")
+    .join("");
+  const ID = microphoneInfo.current.micFullSerialNumber;
+  const FreqGain = await readFrqGain(ID, OEM);
+  microphoneCalibrationResult.current.microphoneGain = FreqGain ? FreqGain : {};
   microphoneCalibrationResults.push({
     name: microphoneInfo.current.micFullName,
     ID: microphoneInfo.current.micFullSerialNumber,
-    OEM: isSmartPhone
-      ? microphoneInfo.current.OEM
-      : microphoneInfo.current.micrFullManufacturerName,
+    OEM: microphoneInfo.current.micrFullManufacturerName,
     isSmartPhone: isSmartPhone,
     HardwareName: microphoneInfo.current.HardwareName,
     HardwareFamily: microphoneInfo.current.HardwareFamily,
