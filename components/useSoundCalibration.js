@@ -498,10 +498,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
 };
 
 const checkMicrophoneInDatabase = async () => {
-  const micName = microphoneInfo.current.micFullName
-    .toLowerCase()
-    .split(" ")
-    .join("");
+  const micName = microphoneInfo.current.micFullName;
   const micSerialNumber = microphoneInfo.current.micFullSerialNumber
     .toLowerCase()
     .split(" ")
