@@ -305,6 +305,44 @@ export const plotForAllHz = (
       : [];
 
   // if calibration goal == system and isLoudspeakerCalibration ==true, then subtract microphone gain from conv, unconv, and background
+  if (calibrationGoal === "goal") {
+    // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
+    // const conv_subtractedGain = interpolateGain(microphoneGainPoints,convMergedDataPoints)
+    // console.log(conv_subtractedGain);
+    const microphoneGainFreq = microphoneGainPoints.map((point) => point.x);
+    const microphoneGainGain = microphoneGainPoints.map((point) => point.y);
+    convMergedDataPoints.forEach((point, i) => {
+      convMergedDataPoints[i].y =
+        convMergedDataPoints[i].y -
+        findGainatFrequency(
+          microphoneGainFreq,
+          microphoneGainGain,
+          convMergedDataPoints[i].x
+        );
+    });
+
+    unconvMergedDataPoints.forEach((point, i) => {
+      unconvMergedDataPoints[i].y =
+        unconvMergedDataPoints[i].y -
+        findGainatFrequency(
+          microphoneGainFreq,
+          microphoneGainGain,
+          unconvMergedDataPoints[i].x
+        );
+    });
+
+    backgroundMergedDataPoints.forEach((point, i) => {
+      backgroundMergedDataPoints[i].y =
+        backgroundMergedDataPoints[i].y -
+        findGainatFrequency(
+          microphoneGainFreq,
+          microphoneGainGain,
+          backgroundMergedDataPoints[i].x
+        );
+    });
+
+    // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
+  }
 
   // expected correction is the sum of the recording of MLS and the filtered MLS
   const expectedCorrectionPoints = [];

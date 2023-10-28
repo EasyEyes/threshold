@@ -409,9 +409,7 @@ export const calibrateAudio = async (reader) => {
       ) {
         displayParametersAllHz(
           elems,
-          calibrateSoundCheck.current === "system"
-            ? allHzCalibrationResults.system
-            : allHzCalibrationResults.component,
+          allHzCalibrationResults.system,
           titleallHz,
           calibrateSoundCheck.current,
           true,
@@ -436,7 +434,7 @@ export const calibrateAudio = async (reader) => {
         );
         displayParametersAllHz(
           elems,
-          allHzCalibrationResults.component,
+          allHzCalibrationResults.system,
           titleallHz,
           "goal",
           true,
@@ -523,9 +521,7 @@ export const calibrateAudio = async (reader) => {
             ) {
               displayParametersAllHz(
                 elems,
-                calibrateSoundCheck.current === "system"
-                  ? microphoneCalibrationResult.current.system
-                  : microphoneCalibrationResult.current.component,
+                microphoneCalibrationResult.current.system,
                 titleallHz,
                 calibrateSoundCheck.current,
                 false,
@@ -551,7 +547,7 @@ export const calibrateAudio = async (reader) => {
               );
               displayParametersAllHz(
                 elems,
-                microphoneCalibrationResult.current.component,
+                microphoneCalibrationResult.current.system,
                 titleallHz,
                 "goal",
                 false,
