@@ -65,7 +65,7 @@ export const runCombinationCalibration = async (
     : readi18nPhrases("RC_microphoneCalibration", language);
 
   if (isLoudspeakerCalibration) {
-    const isSmartPhone = calibrateMicrophonesBool.current;
+    const isSmartPhone = !calibrateMicrophonesBool.current;
     adjustPageNumber(elems.title, [
       { replace: /111/g, with: isLoudspeakerCalibration ? 1 : 0 },
       { replace: /222/g, with: isSmartPhone ? 3 : 5 },
