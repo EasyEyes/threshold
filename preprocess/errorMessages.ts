@@ -330,6 +330,17 @@ export const INVALID_STARTING_BLOCK = (
   };
 };
 
+export const INVALID_AUTHOR_EMAIL = (parameter: string[]): EasyEyesError => {
+  return {
+    name: `The author email is invalid`,
+    message: `Each microphone calibration is stamped with _authorEmails.`,
+    hint: `Include parameter _authorEmails with a valid email (or several separated by semicolon).`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: parameter,
+  };
+};
+
 export const NONSEQUENTIAL_BLOCK_VALUE = (
   nonsequentials: { value: number; previous: number; index: number }[],
   blockValues: string[]

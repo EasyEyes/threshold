@@ -208,6 +208,8 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.component?.ir,
         "Loudspeaker Component IIR":
           soundCalibrationResults.current?.component?.iir,
+        "Loudspeaker Component IR Time Domain":
+          soundCalibrationResults.current?.component?.ir_in_time_domain,
         "Loudspeaker system IR": soundCalibrationResults.current?.system?.ir,
         "Loudspeaker system IIR": soundCalibrationResults.current?.system?.iir,
         dB_component_iir:
@@ -226,7 +228,6 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.system?.iir_psd?.x_no_bandpass,
         "Loudspeaker model": loudspeakerInfo.current,
         micInfo: soundCalibrationResults.current?.micInfo,
-        "Microphone Results": [],
         unconv_rec: soundCalibrationResults.current?.unfiltered_recording,
         conv_rec: soundCalibrationResults.current?.filtered_recording,
         mls: soundCalibrationResults.current?.mls,
@@ -268,14 +269,13 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       microphoneCalibrationResults.length > 0 &&
       calibrateSoundSaveJSONBool.current
     ) {
-      // for (const result of microphoneCalibrationResults) {
-      //   const data = {
-      //     "Microphone IR": result["ir"],
-      //     "Microphone IIR": result["iir"],
-      //   };
-      //   objectData.push(data);
-      // }
-      allSoundResults["Microphone Results"] = microphoneCalibrationResults;
+      for (let i = 0; i < microphoneCalibrationResults.length; i++) {
+        console.log(i);
+        psychoJS.experiment.downloadJSON(
+          microphoneCalibrationResults[i],
+          i + 1
+        );
+      }
     }
 
     if (
@@ -292,7 +292,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       }
     }
     if (allSoundResults && calibrateSoundSaveJSONBool.current)
-      psychoJS.experiment.downloadJSON(allSoundResults);
+      psychoJS.experiment.downloadJSON(allSoundResults, "");
   }
 
   return Scheduler.Event.QUIT;
