@@ -35,7 +35,9 @@ import {
 import { readi18nPhrases } from "./readPhrases";
 import {
   addMicrophoneToDatabase,
+  addMicrophoneToFirestore,
   doesMicrophoneExist,
+  doesMicrophoneExistInFirestore,
   findGainatFrequency,
   getCalibrationFile,
   getDeviceDetails,
@@ -44,6 +46,7 @@ import {
   identifyDevice,
   parseCalibrationFile,
   readFrqGain,
+  readFrqGainFromFirestore,
   removeElements,
   saveLoudSpeakerInfo,
 } from "./soundCalibrationHelpers";
@@ -507,9 +510,13 @@ const checkMicrophoneInDatabase = async () => {
     .toLowerCase()
     .split(" ")
     .join("");
-  const micExists = await doesMicrophoneExist(micSerialNumber, micManufacturer);
+  // const micExists = await doesMicrophoneExist(micSerialNumber, micManufacturer);
+  const micExistsInFirestore = await doesMicrophoneExistInFirestore(
+    micSerialNumber,
+    micManufacturer
+  );
 
-  if (micExists) {
+  if (micExistsInFirestore) {
     return true;
   }
 
@@ -549,7 +556,13 @@ const checkMicrophoneInDatabase = async () => {
         },
       };
 
-      await addMicrophoneToDatabase(micSerialNumber, micManufacturer, micData);
+      // await addMicrophoneToDatabase(micSerialNumber, micManufacturer, micData);
+      await addMicrophoneToFirestore(
+        micSerialNumber,
+        micManufacturer,
+        micData,
+        true
+      );
       return true;
     }
   }
@@ -740,7 +753,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     allHzCalibrationResults.mls_psd = soundCalibrationResults.current.mls_psd;
     const OEM = microphoneInfo.current.OEM.toLowerCase().split(" ").join("");
     const ID = microphoneInfo.current.ID;
-    const FreqGain = await readFrqGain(ID, OEM);
+    // const FreqGain = await readFrqGain(ID, OEM);
+    const FreqGain = await readFrqGainFromFirestore(ID, OEM);
     allHzCalibrationResults.microphoneGain = FreqGain ? FreqGain : {};
     allHzCalibrationResults.filteredMLSRange =
       soundCalibrationResults.current.filteredMLSRange;

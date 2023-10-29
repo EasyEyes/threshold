@@ -467,9 +467,17 @@ export const GLOSSARY: Glossary = {
     name: "_needSmartphoneCheckBool",
     availability: "now",
     type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_needSmartphoneCheckBool (default TRUE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
+  },
+  _needSmartphoneSurveyBool: {
+    name: "_needSmartphoneSurveyBool",
+    availability: "now",
+    type: "boolean",
     default: "FALSE",
     explanation:
-      "_needSmartphoneCheckBool (default FALSE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
+      "_needSmartphoneSurveyBool (default TRUE) if TRUE then the Needs page uses a QR code to identify a smartphone. EasyEyes saves the data, and proceeds. In a typical use, there is no calibration and no other data collection.",
   },
   _needProcessorCoresMinimum: {
     name: "_needProcessorCoresMinimum",
@@ -1404,6 +1412,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       'When _saveEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always include the last active block. Usually _saveEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (to minimize delay and make the experiment more robust). But scientists will enable it when they want to know which block failed. \nSAVING. The extra saves enabled by _saveEachBlockBool are in addition to the always-performed saves at the beginning and "end" of the session. ("End" includes a shift of attention aways from the EasyEyes page, which is not the end if the participant returns.) All saves are alike in saving all currently known rows and parameters to the CSV file, and all saves are cumulative, only adding new data. The CSV file on Pavlovia is readable throughout, and grows in length with successive saves. EasyEyes first saves after the compatibility check, before the remote calibration (regardless of whether the remote calibrator runs), which is before the first block, and again at the "end," which includes four cases: 1. completion, 2. orderly termination through an error message or the escape mechanism including waiting out the "saving" window at the end, 3. closing the EasyEyes window before completion or termination, and 4. shift of browser focus away from the EasyEyes page before completion or termination. Saving does not end the experiment.  After shifting attention away, the participant can shift attention back to EasyEyes and continue the experiment, which will save again in any of the four ways. This can happen again and again. ',
+  },
+  _showResourceLoadingBool: {
+    name: "_showResourceLoadingBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      '_showResourceLoadingBool (default TRUE). As each EasyEyes study begins, before the "Initializing ..." message, the study shows a blank page while it loads all resources needed by the experiment. This can take many minutes if the internet connection is slow (e.g. 3 MB/s), which can seem broken. _showResourceLoadingBool mitigates the possibly long wait by showing the participant that EasyEyes is busy loading resources, e.g. "8:20:27 AM. Loading consentForm …". Turn this off if seeing your resource names might have an undesired effect on your participants, e.g. reveal your hypothesis.',
   },
   _showSoundCalibrationResultsBool: {
     name: "_showSoundCalibrationResultsBool",

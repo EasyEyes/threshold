@@ -3,7 +3,7 @@ import { isProlificPreviewExperiment } from "./externalServices";
 import { readi18nPhrases } from "./readPhrases";
 // import { doesMicrophoneExist } from "./soundCalibrationHelpers";
 import { ref, get, child } from "firebase/database";
-import database from "./firebase/firebase.js";
+import database, { db } from "./firebase/firebase.js";
 // import { microphoneInfo } from "./global";
 // import { rc } from "./global";
 
@@ -11,6 +11,17 @@ const microphoneInfo = {
   micFullName: "",
   micFullSerialNumber: "",
   micrFullManufacturerName: "",
+};
+
+export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
+  const docRef = doc(db, "Microphone", OEM, speakerID, "default");
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    console.log("Existsss");
+    return true;
+  }
+  console.log("Does not exist");
+  return false;
 };
 const doesMicrophoneExist = async (speakerID, oem) => {
   const dbRef = ref(database);
@@ -787,7 +798,7 @@ const isSmartphoneInDatabase = async (
       if (modelName === "" || modelNumber === "") {
         alert("Please enter the model number and name of the device");
       } else {
-        const exists = await doesMicrophoneExist(
+        const exists = await doesMicrophoneExistInFirestore(
           modelNumber,
           OEM.toLowerCase().split(" ").join("")
         );

@@ -20,7 +20,7 @@ import {
   microphoneInfo,
   showSoundParametersBool,
 } from "./global";
-import { findGainatFrequency, readFrqGain } from "./soundCalibrationHelpers";
+import { findGainatFrequency } from "./soundCalibrationHelpers";
 
 export const plotSoundLevels1000Hz = (
   plotCanvas,

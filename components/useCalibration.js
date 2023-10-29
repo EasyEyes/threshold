@@ -48,22 +48,7 @@ import {
   getCurrentTimeString,
   getSoundCalibrationLevelDBSPLFromIIR,
 } from "./soundUtils";
-import { showExperimentEnding } from "./forms";
-import {
-  addMicrophoneToDatabase,
-  doesMicrophoneExist,
-  findGainatFrequency,
-  getCalibrationFile,
-  getDebugIIR,
-  getDebugSoundCalibrationResults,
-  getDeviceString,
-  getInstructionText,
-  identifyDevice,
-  parseCalibrationFile,
-  readFrqGain,
-  removeElements,
-  saveLoudSpeakerInfo,
-} from "./soundCalibrationHelpers";
+
 import { runCombinationCalibration } from "./useSoundCalibration";
 export const useCalibration = (reader) => {
   return ifTrue([
