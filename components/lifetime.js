@@ -208,6 +208,8 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.component?.ir,
         "Loudspeaker Component IIR":
           soundCalibrationResults.current?.component?.iir,
+        "Loudspeaker Component IR Time Domain":
+          soundCalibrationResults.current?.component?.ir_in_time_domain,
         "Loudspeaker system IR": soundCalibrationResults.current?.system?.ir,
         "Loudspeaker system IIR": soundCalibrationResults.current?.system?.iir,
         dB_component_iir:
