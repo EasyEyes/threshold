@@ -34,6 +34,7 @@ import {
   IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE,
   VERNIER_MUST_USE_TARGETOFFSETDEG,
   TARGETOFFSETDEG_MUST_USE_VERNIER,
+  INVALID_AUTHOR_EMAIL,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -119,6 +120,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   errors.push(...areParametersDuplicated(parametersToCheck));
   errors.push(...areAllPresentParametersRecognized(parametersToCheck));
   errors.push(...areAllPresentParametersCurrentlySupported(parametersToCheck));
+  errors.push(...areAuthorizedEmailsValid(experimentDf));
 
   // Enforce using Column B for the underscore parameters, and Column C and on for conditions
   errors.unshift(...doConditionsBeginInTheSecondColumn(experimentDf));
@@ -990,4 +992,44 @@ export const getResponseTypedEasyEyesKeypadBools = (df: any): boolean[] => {
     (v, i) => Number(v) > Number(needEasyEyesKeypadBeyondCm[i])
   );
   return needKeypad;
+};
+
+/**
+ * Returns an error message if the _authorEmails has an invalid email if _calibrateMicrophonesBool is true.
+ * @param {String[]} parameters Array of parameters , which the experimenter has provided
+ * @returns {Object[]} List of error messages for unrecognized parameters
+ */
+const areAuthorizedEmailsValid = (experiment: any): EasyEyesError[] => {
+  const columnNames = experiment.listColumns();
+  const columns = experiment.toArray();
+  let offendingParameters: any = [];
+  let hasEmail = false;
+  for (let i = 0; i < columnNames.length; i++) {
+    if (
+      columnNames[i] === "_calibrateMicrophonesBool" &&
+      columns[0][i] === "TRUE"
+    ) {
+      for (let j = 0; j < columnNames.length; j++) {
+        if (columnNames[j] === "_authorEmails") {
+          const emailText = columns[0][j];
+          const emails = emailText.split(";");
+          for (const i in emails) {
+            if (!emails[i].includes("@")) {
+              offendingParameters.push(emails[i]);
+            }
+          }
+          hasEmail = true;
+          break;
+        }
+      }
+      if (hasEmail) {
+        break;
+      } else {
+        offendingParameters.push("No _authorEmails field");
+      }
+    }
+  }
+  if (offendingParameters.length)
+    return [INVALID_AUTHOR_EMAIL(offendingParameters)];
+  return [];
 };

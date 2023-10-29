@@ -330,6 +330,17 @@ export const INVALID_STARTING_BLOCK = (
   };
 };
 
+export const INVALID_AUTHOR_EMAIL = (parameter: string[]): EasyEyesError => {
+  return {
+    name: `The author email is invalid`,
+    message: `The email entered in the _authorEmails fiels is invalid.`,
+    hint: `Please enter a valid email in the _authorEmails field.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: parameter,
+  };
+};
+
 export const NONSEQUENTIAL_BLOCK_VALUE = (
   nonsequentials: { value: number; previous: number; index: number }[],
   blockValues: string[]
