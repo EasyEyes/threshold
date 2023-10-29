@@ -1025,7 +1025,9 @@ const areAuthorizedEmailsValid = (experiment: any): EasyEyesError[] => {
       if (hasEmail) {
         break;
       } else {
-        offendingParameters.push("No _authorEmails field");
+        offendingParameters.push(
+          "_authorEmails required when _calibrateMicrophonesBool is TRUE."
+        );
       }
     }
   }
