@@ -21,6 +21,9 @@ import {
   calibrateSoundIIRSec,
   calibrateSoundMinHz,
   calibrateSoundMaxHz,
+  calibrateSound1000HzSec,
+  calibrateSound1000HzPreSec,
+  calibrateSound1000HzPostSec,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
