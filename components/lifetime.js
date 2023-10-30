@@ -292,7 +292,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       }
     }
     if (allSoundResults && calibrateSoundSaveJSONBool.current)
-      psychoJS.experiment.downloadJSON(allSoundResults, "");
+      psychoJS.experiment.downloadJSON(allSoundResults, 0);
   }
 
   return Scheduler.Event.QUIT;
