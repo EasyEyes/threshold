@@ -159,6 +159,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundIRSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundIRSec (default 0.1) specifies the desired length of the impulse response. Correcting low frequencies or a big room requires a long impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
+    type: "numerical",
+    default: "0.1",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundIIRSec",
     availability: "now",
     example: "",
@@ -206,6 +216,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_calibrateSoundSaveJSONBool (default FALSE) requests saving of sound-calibration results in a large JSON file, at the end of the experiment (in quitPsychoJS). Currently the JSON is saved to the participant's Download folder. Ideally it would instead be saved to the experiment's repository on Pavlovia.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundSmoothOctaves",
+    availability: "now",
+    example: "",
+    explanation:
+      " 🕑 _calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing.",
+    type: "numerical",
+    default: "0.3333333",
     categories: "",
   },
   {

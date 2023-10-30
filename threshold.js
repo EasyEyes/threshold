@@ -139,6 +139,7 @@ import {
   uniComponentConfig,
   preStimulus,
   microphoneInfo,
+  needPhoneSurvey,
 } from "./components/global.js";
 
 import {
@@ -463,9 +464,12 @@ const paramReaderInitialized = async (reader) => {
   const calibrateMicrophonesBool = reader.read("_calibrateMicrophonesBool")[0];
   const calibrateSound1000Hz = reader.read("calibrateSound1000HzBool")[0];
   const calibrateSoundAllHz = reader.read("calibrateSoundAllHzBool")[0];
+  needPhoneSurvey.current = reader.read("_needSmartphoneSurveyBool")[0];
   if (
     calibrateMicrophonesBool === false &&
-    (calibrateSound1000Hz === true || calibrateSoundAllHz === true)
+    (calibrateSound1000Hz === true ||
+      calibrateSoundAllHz === true ||
+      needPhoneSurvey.current === true)
   ) {
     needCalibratedSmartphoneMicrophone = true;
   }
@@ -497,6 +501,7 @@ const paramReaderInitialized = async (reader) => {
   microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
   microphoneInfo.current.micrFullManufacturerName =
     mic.micrFullManufacturerName;
+  microphoneInfo.current.phoneSurvey = mic.phoneSurvey;
 
   hideCompatibilityMessage();
   if (proceedButtonClicked && !proceedBool) {
@@ -824,6 +829,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "frameRateReportedByPsychoJS",
       thisExperimentInfo["monitorFrameRate"]
     );
+
+    // if _needSmartphoneSurveyBool add survey data
+    if (needPhoneSurvey.current) {
+      // add microphoneInfo.current.phoneSurvey
+      psychoJS.experiment.addData(
+        "Microphone survey",
+        JSON.stringify(microphoneInfo.current.phoneSurvey)
+      );
+    }
     // add sound calibration results
     if (soundCalibrationResults.current) {
       psychoJS.experiment.addData(

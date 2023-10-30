@@ -451,6 +451,7 @@ export const thisDevice = { current: undefined };
 export const loudspeakerInfo = { current: undefined };
 export const microphoneInfo = { current: {} };
 export const calibrationTime = { current: undefined };
+export const needPhoneSurvey = { current: false };
 export const rsvpReadingTargetSets = {
   numberOfSets: undefined,
   current: undefined,

@@ -129,14 +129,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       " _calibrateSoundCopyToDownloadsBool (default FALSE) save a copy of each newly created file in the Downloads folder.",
   },
-  _calibrateSoundIIRSec: {
-    name: "_calibrateSoundIIRSec",
-    availability: "now",
-    type: "numerical",
-    default: "0.2",
-    explanation:
-      "_calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
-  },
   _calibrateSoundIRSec: {
     name: "_calibrateSoundIRSec",
     availability: "now",
@@ -144,6 +136,14 @@ export const GLOSSARY: Glossary = {
     default: "0.2",
     explanation:
       "🕑 _calibrateSoundIRSec (default 0.2) specifies the desired length of the impulse response. ",
+  },
+  _calibrateSoundIIRSec: {
+    name: "_calibrateSoundIIRSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.2",
+    explanation:
+      "_calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
   },
   _calibrateSoundSamplingDesiredBits: {
     name: "_calibrateSoundSamplingDesiredBits",
@@ -168,6 +168,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "_calibrateSoundSaveJSONBool (default FALSE) requests saving of sound-calibration results in a large JSON file, at the end of the experiment (in quitPsychoJS). Currently the JSON is saved to the participant's Download folder. Ideally it would instead be saved to the experiment's repository on Pavlovia.",
+  },
+  _calibrateSoundSmoothOctaves: {
+    name: "_calibrateSoundSmoothOctaves",
+    availability: "now",
+    type: "numerical",
+    default: "0.3333333",
+    explanation:
+      " 🕑 _calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing.",
   },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",

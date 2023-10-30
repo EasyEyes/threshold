@@ -96,7 +96,8 @@ export const getInstructionText = (
   language,
   isSmartPhone,
   isLoudspeakerCalibration,
-  preferredModelNumberText = "model number"
+  preferredModelNumberText = "model number",
+  needPhoneSurvey = false
 ) => {
   const microphoneInCalibrationLibrary = isLoudspeakerCalibration
     ? isSmartPhone
@@ -109,10 +110,11 @@ export const getInstructionText = (
           `${microphoneInfo.current.micrFullManufacturerName} ${microphoneInfo.current.micFullName}`
         ) + "<br> <br>"
     : "";
-  const needModelNumber = readi18nPhrases(
-    "RC_needModelNumberAndName",
-    language
-  );
+  const needModelNumber = isSmartPhone
+    ? needPhoneSurvey
+      ? readi18nPhrases("RC_needPhoneModel", language)
+      : readi18nPhrases("RC_needPhoneModel", language)
+    : readi18nPhrases("RC_needModelNumberAndName", language);
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
@@ -131,9 +133,15 @@ export const getInstructionText = (
     findModelNumber = readi18nPhrases("RC_findModelWindows", language);
   } else if (userOS === "macOS") {
     findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
+  } else if (userOS === "Linux") {
+    findModelNumber = readi18nPhrases("RC_findModelLinux", language);
+  } else {
+    findModelNumber = readi18nPhrases("RC_findModeGeneric", language);
   }
 
-  return `${microphoneInCalibrationLibrary}${needModelNumberFinal} <br> <br> ${findModelNumber}`;
+  return isSmartPhone
+    ? `${microphoneInCalibrationLibrary}${needModelNumberFinal} ${findModelNumber}`
+    : `${microphoneInCalibrationLibrary}${needModelNumberFinal} <br> <br> ${findModelNumber}`;
 };
 
 export const getDeviceString = (thisDevice, language) => {

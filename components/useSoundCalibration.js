@@ -615,14 +615,78 @@ const runSmartphoneCalibration = async (
   language
 ) => {
   // await startCalibration(elems, isLoudspeakerCalibration, language, true, isLoudspeakerCalibration? null: allHzCalibrationResults.knownIr);
-  await getLoudspeakerDeviceDetailsFromUserForSmartphone(
-    elems,
-    language,
-    true,
-    isLoudspeakerCalibration
-  );
+  if (isLoudspeakerCalibration) {
+    await getLoudspeakerDeviceDetailsFromUserForSmartphone(
+      elems,
+      language,
+      true,
+      isLoudspeakerCalibration
+    );
+  } else {
+    await getSmartPhoneMicrophoneDetailsFromUser(
+      elems,
+      language,
+      isLoudspeakerCalibration
+    );
+  }
 };
 
+const getSmartPhoneMicrophoneDetailsFromUser = async (
+  elems,
+  language,
+  isLoudspeakerCalibration
+) => {
+  // create input box for model number and name
+  const modelNumberInput = document.createElement("input");
+  modelNumberInput.type = "text";
+  modelNumberInput.id = "modelNumberInput";
+  modelNumberInput.name = "modelNumberInput";
+  modelNumberInput.placeholder = "Model Number";
+
+  const modelNameInput = document.createElement("input");
+  modelNameInput.type = "text";
+  modelNameInput.id = "modelNameInput";
+  modelNameInput.name = "modelNameInput";
+  modelNameInput.placeholder = "Model Name";
+
+  const p = document.createElement("p");
+  p.innerText = `Please enter the model number and name of the smartphone you are using for this calibration.`;
+
+  // add a proceed button
+  const proceedButton = document.createElement("button");
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.classList.add(...["btn", "btn-success"]);
+
+  // add  to the page
+  elems.subtitle.appendChild(p);
+  elems.subtitle.appendChild(modelNameInput);
+  elems.subtitle.appendChild(modelNumberInput);
+  elems.subtitle.appendChild(proceedButton);
+
+  await new Promise((resolve) => {
+    proceedButton.addEventListener("click", async () => {
+      if (modelNameInput.value === "" || modelNumberInput.value === "") {
+        alert("Please fill out all the fields");
+      } else {
+        microphoneInfo.current = {
+          micFullName: modelNameInput.value,
+          micFullSerialNumber: modelNumberInput.value,
+        };
+
+        removeElements([p, proceedButton, modelNameInput, modelNumberInput]);
+        adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+        await startCalibration(
+          elems,
+          isLoudspeakerCalibration,
+          language,
+          true,
+          isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
+        );
+        resolve();
+      }
+    });
+  });
+};
 const startCalibration = async (
   elems,
   isLoudspeakerCalibration,
@@ -823,13 +887,11 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
         10
     ) / 10;
   microphoneInfo.current.CalibrationDate = calibrationTime.current;
-  const OEM = microphoneInfo.current.micrFullManufacturerName
-    .toLowerCase()
-    .split(" ")
-    .join("");
-  const ID = microphoneInfo.current.micFullSerialNumber;
   microphoneCalibrationResult.current.microphoneGain =
     allHzCalibrationResults.knownIr;
+  microphoneInfo.current.micrFullManufacturerName = isSmartPhone
+    ? microphoneCalibrationResult.current.micInfo.OEM
+    : microphoneInfo.current.micrFullManufacturerName;
   microphoneCalibrationResults.push({
     name: microphoneInfo.current.micFullName,
     ID: microphoneInfo.current.micFullSerialNumber,

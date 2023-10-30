@@ -1,9 +1,9 @@
 import { GLOSSARY } from "../parameters/glossary";
 import { isProlificPreviewExperiment } from "./externalServices";
 import { readi18nPhrases } from "./readPhrases";
-// import { doesMicrophoneExist } from "./soundCalibrationHelpers";
 import { ref, get, child } from "firebase/database";
 import database, { db } from "./firebase/firebase.js";
+import { doc, getDoc } from "firebase/firestore";
 // import { microphoneInfo } from "./global";
 // import { rc } from "./global";
 
@@ -11,6 +11,47 @@ const microphoneInfo = {
   micFullName: "",
   micFullSerialNumber: "",
   micrFullManufacturerName: "",
+  phoneSurvey: {},
+};
+
+const getInstructionText = (
+  thisDevice,
+  language,
+  isSmartPhone,
+  isLoudspeakerCalibration,
+  preferredModelNumberText = "model number",
+  needPhoneSurvey = false
+) => {
+  const needModelNumber = isSmartPhone
+    ? needPhoneSurvey
+      ? readi18nPhrases("RC_needPhoneModel", language)
+      : readi18nPhrases("RC_needPhoneModel", language)
+    : readi18nPhrases("RC_needModelNumberAndName", language);
+  const preferredModelNumber = preferredModelNumberText;
+  const needModelNumberFinal = needModelNumber
+    .replace("mmm", preferredModelNumber)
+    .replace("xxx", thisDevice.OEM === "Unknown" ? "unknown" : thisDevice.OEM)
+    .replace(
+      "yyy",
+      thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType
+    );
+  const userOS = thisDevice.PlatformName;
+  var findModelNumber = "";
+  if (userOS === "Android") {
+    findModelNumber = readi18nPhrases("RC_findModelAndroid", language);
+  } else if (userOS === "iOS") {
+    findModelNumber = readi18nPhrases("RC_findModelIOs", language);
+  } else if (userOS === "Windows") {
+    findModelNumber = readi18nPhrases("RC_findModelWindows", language);
+  } else if (userOS === "macOS") {
+    findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
+  } else if (userOS === "Linux") {
+    findModelNumber = readi18nPhrases("RC_findModelLinux", language);
+  } else {
+    findModelNumber = readi18nPhrases("RC_findModeGeneric", language);
+  }
+
+  return `${needModelNumberFinal} ${findModelNumber}`;
 };
 
 export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
@@ -646,6 +687,7 @@ export const displayCompatibilityMessage = async (
       languageDropdown.style.width = "12rem";
       languageDropdown.style.backgroundColor = "#ddd";
       languageDropdown.style.fontWeight = "bold";
+      languageDropdown.style.marginLeft = "auto";
 
       const languages = readi18nPhrases("EE_languageNameNative");
       const languageOptions = Object.keys(languages).map((language) => {
@@ -667,6 +709,11 @@ export const displayCompatibilityMessage = async (
         );
       });
 
+      // top right corner
+      languageWrapper.style.position = "absolute";
+      languageWrapper.style.top = "0";
+      languageWrapper.style.right = "20vw";
+
       languageWrapper.appendChild(languageDropdown);
       messageWrapper.appendChild(languageWrapper);
     }
@@ -682,21 +729,44 @@ export const displayCompatibilityMessage = async (
       const compatibilityCheckQRExplanation = document.createElement("p");
       compatibilityCheckQRExplanation.style.marginBottom = "0px";
       let messageForQr;
+      const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
+      console.log("needPhoneSurvey", needPhoneSurvey);
       if (needAnySmartphone && needCalibratedSmartphoneMicrophone) {
         messageForQr =
-          readi18nPhrases("RC_inDescription", rc.language.value) +
-          " " +
-          readi18nPhrases("RC_needPhoneMicrophoneAndKeypad", rc.language.value);
+          readi18nPhrases("RC_inDescription", rc.language.value) + " ";
+        needPhoneSurvey
+          ? (messageForQr += readi18nPhrases(
+              "RC_needPhoneSurvey",
+              rc.language.value
+            ))
+          : (messageForQr += readi18nPhrases(
+              "RC_needPhoneMicrophoneAndKeypad",
+              rc.language.value
+            ));
       } else if (needCalibratedSmartphoneMicrophone) {
         messageForQr =
-          readi18nPhrases("RC_inDescription", rc.language.value) +
-          " " +
-          readi18nPhrases("RC_needPhoneMicrophone", rc.language.value);
+          readi18nPhrases("RC_inDescription", rc.language.value) + " ";
+        needPhoneSurvey
+          ? (messageForQr += readi18nPhrases(
+              "RC_needPhoneSurvey",
+              rc.language.value
+            ))
+          : (messageForQr += readi18nPhrases(
+              "RC_needPhoneMicrophone",
+              rc.language.value
+            ));
       } else if (needAnySmartphone) {
         messageForQr =
-          readi18nPhrases("RC_inDescription", rc.language.value) +
-          " " +
-          readi18nPhrases("RC_needPhoneKeypad", rc.language.value);
+          readi18nPhrases("RC_inDescription", rc.language.value) + " ";
+        needPhoneSurvey
+          ? (messageForQr += readi18nPhrases(
+              "RC_needPhoneSurvey",
+              rc.language.value
+            ))
+          : (messageForQr += readi18nPhrases(
+              "RC_needPhoneKeypad",
+              rc.language.value
+            ));
       }
 
       compatibilityCheckQRExplanation.innerText =
@@ -721,13 +791,19 @@ export const displayCompatibilityMessage = async (
               OEM,
               messageWrapper,
               rc.language.value,
-              displayUpdate
+              displayUpdate,
+              deviceDetails,
+              needPhoneSurvey
             );
             if (proceed) {
               break;
             }
           }
         }
+        // remove the QR code and explanation
+        compatiblityCheckQR.remove();
+        compatibilityCheckQRExplanation.remove();
+        displayUpdate.remove();
       } catch (e) {
         console.log("error", e);
       }
@@ -759,10 +835,13 @@ const isSmartphoneInDatabase = async (
   OEM,
   messageWrapper,
   lang,
-  displayUpdate
+  displayUpdate,
+  deviceDetails,
+  needPhoneSurvey = false
 ) => {
   // ask for the model number and name of the device
   // create input box for model number and name
+  console.log("deviceDetails", deviceDetails);
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
@@ -775,12 +854,21 @@ const isSmartphoneInDatabase = async (
   modelNameInput.name = "modelNameInput";
   modelNameInput.placeholder = "Model Name";
 
+  const instructionText = getInstructionText(
+    deviceDetails,
+    lang,
+    true,
+    false,
+    "model number",
+    false,
+    needPhoneSurvey
+  );
   const p = document.createElement("p");
-  p.innerText = `Please enter the model number and name of the ${OEM} device you just scanned the QR code with to check if it's in our database.`;
+  p.innerHTML = instructionText;
 
   const checkButton = document.createElement("button");
   checkButton.classList.add(...["btn", "btn-primary"]);
-  checkButton.innerText = "Check";
+  checkButton.innerText = needPhoneSurvey ? "Add" : "Check";
   checkButton.style.width = "fit-content";
 
   const modelNumberWrapper = document.createElement("div");
@@ -798,29 +886,44 @@ const isSmartphoneInDatabase = async (
       if (modelName === "" || modelNumber === "") {
         alert("Please enter the model number and name of the device");
       } else {
-        const exists = await doesMicrophoneExistInFirestore(
-          modelNumber,
-          OEM.toLowerCase().split(" ").join("")
-        );
-        modelNumberInput.remove();
-        modelNameInput.remove();
-        checkButton.remove();
-        p.remove();
-        if (exists) {
-          displayUpdate.innerText = readi18nPhrases(
-            "RC_microphoneIsInCalibrationLibrary",
-            lang
-          ).replace("xxx", modelName);
-          microphoneInfo.micFullName = modelName;
-          microphoneInfo.micFullSerialNumber = modelNumber;
-          microphoneInfo.micrFullManufacturerName = OEM;
+        if (needPhoneSurvey) {
+          // add microphone details to microphoneInfo.phoneSurvey array
+          microphoneInfo.phoneSurvey = {
+            smartphoneManufacturer: OEM,
+            smartphoneModelName: modelName,
+            smartphoneModelNumber: modelNumber,
+            smartphoneInfoFrom51Degrees: deviceDetails,
+          };
+          p.innerHTML = readi18nPhrases("RC_smartphoneSurveyEnd", lang);
+          modelNumberInput.remove();
+          modelNameInput.remove();
+          checkButton.remove();
           resolve(true);
         } else {
-          displayUpdate.innerText = readi18nPhrases(
-            "RC_microphoneNotInCalibrationLibrary",
-            lang
-          ).replace("xxx", modelName);
-          resolve(false);
+          const exists = await doesMicrophoneExistInFirestore(
+            modelNumber,
+            OEM.toLowerCase().split(" ").join("")
+          );
+          modelNumberInput.remove();
+          modelNameInput.remove();
+          checkButton.remove();
+          p.remove();
+          if (exists) {
+            displayUpdate.innerText = readi18nPhrases(
+              "RC_microphoneIsInCalibrationLibrary",
+              lang
+            ).replace("xxx", modelName);
+            microphoneInfo.micFullName = modelName;
+            microphoneInfo.micFullSerialNumber = modelNumber;
+            microphoneInfo.micrFullManufacturerName = OEM;
+            resolve(true);
+          } else {
+            displayUpdate.innerText = readi18nPhrases(
+              "RC_microphoneNotInCalibrationLibrary",
+              lang
+            ).replace("xxx", modelName);
+            resolve(false);
+          }
         }
       }
     });
