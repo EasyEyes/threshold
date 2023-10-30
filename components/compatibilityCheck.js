@@ -14,6 +14,83 @@ const microphoneInfo = {
   phoneSurvey: {},
 };
 
+const getDeviceDetails = (platformName, lang) => {
+  let OS = "";
+  let preferredModelNumber = "";
+  let findModel = "";
+  switch (platformName) {
+    case "iOS":
+      OS = "IOS";
+      break;
+    case "macOS":
+      OS = "macOS";
+      break;
+    case "win":
+      OS = "Windows";
+      break;
+    case "Android":
+      OS = "Android";
+      break;
+    case "cros":
+      OS = "ChromeOS";
+      break;
+    case "Linux":
+      OS = "Linux";
+      break;
+    case "openbsd":
+      OS = "Open/FreeBSD";
+      break;
+    case "Fuchsia":
+      OS = "Fuchsia";
+      break;
+    default:
+      OS = "GenericOS";
+      break;
+  }
+  if (OS.includes("Android")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberAndroid", lang);
+    findModel = readi18nPhrases("RC_findModelAndroid", lang);
+  } else if (OS.includes("Bada")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberBada", lang);
+    findModel = readi18nPhrases("RC_findModelBada", lang);
+  } else if (OS.includes("Blackberry")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberBlackberry", lang);
+    findModel = readi18nPhrases("RC_findModelBlackberry", lang);
+  } else if (OS.includes("Firefox")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberFirefox", lang);
+    findModel = readi18nPhrases("RC_findModelFirefox", lang);
+  } else if (OS.includes("IOS")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberIOs", lang);
+    findModel = readi18nPhrases("RC_findModelIOs", lang);
+  } else if (OS.includes("iPad")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberIPad", lang);
+    findModel = readi18nPhrases("RC_findModelIPad", lang);
+  } else if (OS.includes("Linux")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberLinux", lang);
+    findModel = readi18nPhrases("RC_findModelLinux", lang);
+  } else if (OS.includes("macOS")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberMacOS", lang);
+    findModel = readi18nPhrases("RC_findModelMacOs", lang);
+  } else if (OS.includes("Maemo")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberMaemo", lang);
+    findModel = readi18nPhrases("RC_findModelMaemo", lang);
+  } else if (OS.includes("Palm")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberPalm", lang);
+    findModel = readi18nPhrases("RC_findModelPalm", lang);
+  } else if (OS.includes("WebOS")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberWebOS", lang);
+    findModel = readi18nPhrases("RC_findModelWebOS", lang);
+  } else if (OS.includes("Windows")) {
+    preferredModelNumber = readi18nPhrases("RC_modelNumberWindows", lang);
+    findModel = readi18nPhrases("RC_findModelWindows", lang);
+  } else {
+    preferredModelNumber = readi18nPhrases("RC_modelNumber", lang);
+    findModel = readi18nPhrases("RC_findModeGeneric", lang);
+  }
+
+  return { preferredModelNumber, findModel };
+};
+
 const getInstructionText = (
   thisDevice,
   language,
@@ -24,9 +101,12 @@ const getInstructionText = (
 ) => {
   const needModelNumber = isSmartPhone
     ? needPhoneSurvey
-      ? readi18nPhrases("RC_needPhoneModel", language)
+      ? readi18nPhrases("RC_surveyPhoneModel", language)
+          .replace("ooo", thisDevice.PlatformName)
+          .replace("mmm", preferredModelNumberText.toLocaleLowerCase())
       : readi18nPhrases("RC_needPhoneModel", language)
     : readi18nPhrases("RC_needModelNumberAndName", language);
+  console.log("needModelNumber", needModelNumber);
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
@@ -793,7 +873,9 @@ export const displayCompatibilityMessage = async (
               rc.language.value,
               displayUpdate,
               deviceDetails,
-              needPhoneSurvey
+              needPhoneSurvey,
+              compatiblityCheckQR,
+              compatibilityCheckQRExplanation
             );
             if (proceed) {
               break;
@@ -837,11 +919,18 @@ const isSmartphoneInDatabase = async (
   lang,
   displayUpdate,
   deviceDetails,
-  needPhoneSurvey = false
+  needPhoneSurvey = false,
+  qrCodeDisplay = null,
+  qrCodeExplanation = null
 ) => {
   // ask for the model number and name of the device
   // create input box for model number and name
-  console.log("deviceDetails", deviceDetails);
+  // hide  the QR code and explanation (but don't remove them)
+  if (needPhoneSurvey) {
+    qrCodeDisplay.style.display = "none";
+    qrCodeExplanation.style.display = "none";
+  }
+
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
@@ -854,21 +943,25 @@ const isSmartphoneInDatabase = async (
   modelNameInput.name = "modelNameInput";
   modelNameInput.placeholder = "Model Name";
 
+  const { preferredModelNumber } = getDeviceDetails(
+    deviceDetails.platformName,
+    lang
+  );
+
   const instructionText = getInstructionText(
     deviceDetails,
     lang,
     true,
     false,
-    "model number",
-    false,
+    preferredModelNumber,
     needPhoneSurvey
   );
   const p = document.createElement("p");
   p.innerHTML = instructionText;
 
   const checkButton = document.createElement("button");
-  checkButton.classList.add(...["btn", "btn-primary"]);
-  checkButton.innerText = needPhoneSurvey ? "Add" : "Check";
+  checkButton.classList.add(...["btn", "btn-success"]);
+  checkButton.innerText = needPhoneSurvey ? "Proceed" : "Check";
   checkButton.style.width = "fit-content";
 
   const modelNumberWrapper = document.createElement("div");

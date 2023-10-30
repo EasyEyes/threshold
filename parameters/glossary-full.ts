@@ -69,16 +69,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateSoundFavoriteAuthors",
-    availability: "now",
-    example: "",
-    explanation:
-      '🕑 _calibrateSoundFavoriteAuthors (default is empty) optionally provides a comma-separated list of email addresses of trusted authors of microphone calibrations in the EasyEyes calibration library. Each calibration is stamped with the author\'s email. The list is ordered so that preference diminishes farther down the list. An empty list indicates that you\'ll accept any calibration file in the EasyEyes library that matches your microphone model. If you list one or more emails, then the first is your top preference, and so on. At the end you can list "any", or not. "any" indicates that if your favored authors have not calibrated this device, then you\'ll accept any available calibration.',
-    type: "text",
-    default: "",
-    categories: "",
-  },
-  {
     name: "_calibrateSoundBackgroundSecs",
     availability: "now",
     example: "",
@@ -159,13 +149,13 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateSoundIRSec",
+    name: "_calibrateSoundFavoriteAuthors",
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundIRSec (default 0.1) specifies the desired length of the impulse response. Correcting low frequencies or a big room requires a long impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
-    type: "numerical",
-    default: "0.1",
+      '🕑 _calibrateSoundFavoriteAuthors (default is empty) optionally provides a comma-separated list of email addresses of trusted authors of microphone calibrations in the EasyEyes calibration library. Each calibration is stamped with the author\'s email. The list is ordered so that preference diminishes farther down the list. An empty list indicates that you\'ll accept any calibration file in the EasyEyes library that matches your microphone model. If you list one or more emails, then the first is your top preference, and so on. At the end you can list "any", or not. "any" indicates that if your favored authors have not calibrated this device, then you\'ll accept any available calibration.',
+    type: "text",
+    default: "",
     categories: "",
   },
   {
@@ -173,9 +163,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
+      "_calibrateSoundIIRSec (default 0.1) specifies the desired length of the inverse impulse response (IIR). Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
     type: "numerical",
-    default: "0.2",
+    default: "0.1",
     categories: "",
   },
   {
@@ -183,9 +173,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _calibrateSoundIRSec (default 0.2) specifies the desired length of the impulse response. ",
+      "_calibrateSoundIRSec (default 0.1) specifies the desired length of the impulse response (IR). Correcting low frequencies or a big room requires a long impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
     type: "numerical",
-    default: "0.2",
+    default: "0.1",
     categories: "",
   },
   {
@@ -223,7 +213,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      " 🕑 _calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing.",
+      "_calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing.",
     type: "numerical",
     default: "0.3333333",
     categories: "",
@@ -452,26 +442,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "all, macOS, Windows, ChromeOS, ChromiumOS, AndroidOS, iOS, SamsungOS, KaiOS, NokiaOS, Series40OS, Linux, Ubuntu, FreeBSD, Debian, Fedora, Solaris, CentOS, Deepin, notmacOS, notWindows, notChromeOS, notChromiumOS, notAndroidOS, notiOS, notSamsungOS, notKaiOS, notNokiaOS, notSeries40OS, notLinux, notUbuntu, notFreeBSD, notDebian, notFedora, notSolaris, notCentOS, notDeepin",
   },
   {
-    name: "_needSmartphoneCheckBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_needSmartphoneCheckBool (default TRUE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
-    name: "_needSmartphoneSurveyBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_needSmartphoneSurveyBool (default TRUE) if TRUE then the Needs page uses a QR code to identify a smartphone. EasyEyes saves the data, and proceeds. In a typical use, there is no calibration and no other data collection.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "_needProcessorCoresMinimum",
     availability: "now",
     example: "6",
@@ -499,6 +469,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "🕑 _needScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. In each block, needScreenHeightUpToDeg and needScreenWidthUpToDeg are each combined with needTargetSizeDownToDeg to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. ",
     type: "integer",
     default: "",
+    categories: "",
+  },
+  {
+    name: "_needSmartphoneCheckBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_needSmartphoneCheckBool (default TRUE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "_needSmartphoneSurveyBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_needSmartphoneSurveyBool (default TRUE) if TRUE then the Needs page uses a QR code to identify a smartphone. EasyEyes saves the data, and proceeds. In a typical use, there is no calibration and no other data collection.",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
