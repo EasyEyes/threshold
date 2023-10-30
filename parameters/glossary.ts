@@ -56,14 +56,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _calibrateScreenSizeCookieBool (default TRUE) when TRUE enables EasyEyes reading and saving of a cookie (on the participant computer) containing the screen resolution (px) and size (cm),  e.g. 3024 px x 1964 px, 24.5 cm x 16 cm. The cookie is read only if it's present and calibrateScreenSizeCookieBool==TRUE. If read, the cookie is considered valid only if it reports a screen resolution (width x height px) that matches the current resolution. If valid then EasyEyes takes the screen size (width x height cm) from the cookie instead of doing the calibration normally provoked by calibrateScreenSizeBool==TRUE. Lacking a valid cookie, then calibrateScreenSizeBool==TRUE will provoke size calibration. If size is actually calibrated, and calibrateScreenSizeCookieBool==TRUE, then a cookie is saved, holding the screen resolution and size. The reason to check for validity is that the computer might have several screens, and the browser window could be opened on any of them. The chances are low that a given computer will have two screens with different sizes and the same resolution. Set calibrateScreenSizeCookieBool=FALSE to rule out the small chance of mistaking a new display for a same-resolution but differently sized one that was calibrated on a previous occasion.",
   },
-  _calibrateSoundFavoriteAuthors: {
-    name: "_calibrateSoundFavoriteAuthors",
-    availability: "now",
-    type: "text",
-    default: "",
-    explanation:
-      '🕑 _calibrateSoundFavoriteAuthors (default is empty) optionally provides a comma-separated list of email addresses of trusted authors of microphone calibrations in the EasyEyes calibration library. Each calibration is stamped with the author\'s email. The list is ordered so that preference diminishes farther down the list. An empty list indicates that you\'ll accept any calibration file in the EasyEyes library that matches your microphone model. If you list one or more emails, then the first is your top preference, and so on. At the end you can list "any", or not. "any" indicates that if your favored authors have not calibrated this device, then you\'ll accept any available calibration.',
-  },
   _calibrateSoundBackgroundSecs: {
     name: "_calibrateSoundBackgroundSecs",
     availability: "now",
@@ -129,21 +121,29 @@ export const GLOSSARY: Glossary = {
     explanation:
       " _calibrateSoundCopyToDownloadsBool (default FALSE) save a copy of each newly created file in the Downloads folder.",
   },
-  _calibrateSoundIRSec: {
-    name: "_calibrateSoundIRSec",
+  _calibrateSoundFavoriteAuthors: {
+    name: "_calibrateSoundFavoriteAuthors",
     availability: "now",
-    type: "numerical",
-    default: "0.2",
+    type: "text",
+    default: "",
     explanation:
-      "🕑 _calibrateSoundIRSec (default 0.2) specifies the desired length of the impulse response. ",
+      '🕑 _calibrateSoundFavoriteAuthors (default is empty) optionally provides a comma-separated list of email addresses of trusted authors of microphone calibrations in the EasyEyes calibration library. Each calibration is stamped with the author\'s email. The list is ordered so that preference diminishes farther down the list. An empty list indicates that you\'ll accept any calibration file in the EasyEyes library that matches your microphone model. If you list one or more emails, then the first is your top preference, and so on. At the end you can list "any", or not. "any" indicates that if your favored authors have not calibrated this device, then you\'ll accept any available calibration.',
   },
   _calibrateSoundIIRSec: {
     name: "_calibrateSoundIIRSec",
     availability: "now",
     type: "numerical",
-    default: "0.2",
+    default: "0.1",
     explanation:
-      "_calibrateSoundIIRSec (default 0.2) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
+      "_calibrateSoundIIRSec (default 0.1) specifies the desired length of the inverse impulse response. Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
+  },
+  _calibrateSoundIRSec: {
+    name: "_calibrateSoundIRSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.1",
+    explanation:
+      "_calibrateSoundIRSec (default 0.1) specifies the desired length of the impulse response. Correcting low frequencies or a big room requires a long impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
   },
   _calibrateSoundSamplingDesiredBits: {
     name: "_calibrateSoundSamplingDesiredBits",
@@ -175,7 +175,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.3333333",
     explanation:
-      " 🕑 _calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing.",
+      "_calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing.",
   },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",
@@ -471,22 +471,6 @@ export const GLOSSARY: Glossary = {
       "notDeepin",
     ],
   },
-  _needSmartphoneCheckBool: {
-    name: "_needSmartphoneCheckBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "_needSmartphoneCheckBool (default TRUE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
-  },
-  _needSmartphoneSurveyBool: {
-    name: "_needSmartphoneSurveyBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "_needSmartphoneSurveyBool (default TRUE) if TRUE then the Needs page uses a QR code to identify a smartphone. EasyEyes saves the data, and proceeds. In a typical use, there is no calibration and no other data collection.",
-  },
   _needProcessorCoresMinimum: {
     name: "_needProcessorCoresMinimum",
     availability: "now",
@@ -511,6 +495,22 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       "🕑 _needScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. In each block, needScreenHeightUpToDeg and needScreenWidthUpToDeg are each combined with needTargetSizeDownToDeg to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. ",
+  },
+  _needSmartphoneCheckBool: {
+    name: "_needSmartphoneCheckBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_needSmartphoneCheckBool (default TRUE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
+  },
+  _needSmartphoneSurveyBool: {
+    name: "_needSmartphoneSurveyBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_needSmartphoneSurveyBool (default TRUE) if TRUE then the Needs page uses a QR code to identify a smartphone. EasyEyes saves the data, and proceeds. In a typical use, there is no calibration and no other data collection.",
   },
   _needSmartphoneTooBool: {
     name: "_needSmartphoneTooBool",
