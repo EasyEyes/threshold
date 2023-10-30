@@ -775,6 +775,7 @@ const startCalibration = async (
   if (results === false) {
     return false;
   }
+  console.log(results);
   adjustDisplayAfterCalibration(elems, isLoudspeakerCalibration);
   isLoudspeakerCalibration
     ? await parseLoudspeakerCalibrationResults(results, isSmartPhone)
@@ -897,9 +898,11 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     ? microphoneCalibrationResult.current.micInfo.OEM
     : microphoneInfo.current.micrFullManufacturerName;
   microphoneCalibrationResults.push({
-    name: microphoneInfo.current.micFullName,
-    ID: microphoneInfo.current.micFullSerialNumber,
-    OEM: microphoneInfo.current.micrFullManufacturerName,
+    SoundGainParameters: result.paramters,
+    Cal1000HzInDb: result.inDBValues ? result.inDBValues : [],
+    Cal1000HzOutDb: result.outDBSPL1000Values ? result.outDBSPL1000Values : [],
+    outDBSPLValues: result.outDBSPLValues,
+    THD: result.thdValues,
     isSmartPhone: isSmartPhone,
     HardwareName: microphoneInfo.current.HardwareName,
     HardwareFamily: microphoneInfo.current.HardwareFamily,
@@ -907,13 +910,9 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     HardwareModelVariants: microphoneInfo.currentHardwareModelVariants,
     PlatformVersion: microphoneInfo.current.PlatformVersion,
     DeviceType: microphoneInfo.current.DeviceType,
-    in_dB_1000Hz: result.inDBValues ? result.inDBValues : [],
-    out_dBSPL_1000Hz: result.outDBSPL1000Values
-      ? result.outDBSPL1000Values
-      : [],
     CalibrationDate: microphoneInfo.current.CalibrationDate,
     MlsSpectrumHz_system: result?.system?.psd?.conv?.x,
-    MlsSpectrumFilteredDb_system: result.current?.system?.psd?.conv?.y,
+    MlsSpectrumFilteredDb_system: result?.system?.psd?.conv?.y,
     MlsSpectrumUnfilteredHz_system: result?.system?.psd?.unconv?.x,
     MlsSpectrumUnfilteredDb_system: result?.system?.psd?.unconv?.y,
     MlsSpectrumHz_component: result?.component?.psd?.conv?.x,
@@ -922,6 +921,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     MlsSpectrumUnfilteredDb_component: result?.component?.psd?.unconv?.y,
     "Microphone Component IR": result?.component?.ir,
     "Microphone Component IIR": result?.component?.iir,
+    "Loudspeaker Component IR Time Domain":
+      result?.component?.ir_in_time_domain,
     "Microphone system IR": result?.system?.ir,
     "Microphone system IIR": result?.system?.iir,
     dB_component_iir: result?.component?.iir_psd?.y,
@@ -932,6 +933,13 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     Hz_system_iir: result?.system?.iir_psd?.x,
     dB_system_iir_no_bandpass: result?.system?.iir_psd?.y_no_bandpass,
     Hz_system_iir_no_bandpass: result?.system?.iir_psd?.x_no_bandpass,
+    "Loudspeaker model": loudspeakerInfo.current,
+    micInfo: {
+      micModelName: microphoneInfo.current.micFullName,
+      OEM: microphoneInfo.current.micrFullManufacturerName,
+      ID: microphoneInfo.current.micFullSerialNumber,
+      gainDBSPL: microphoneInfo.current.gainDBSPL,
+    },
     unconv_rec: result?.unfiltered_recording,
     conv_rec: result?.filtered_recording,
     mls: result?.mls,
@@ -941,6 +949,22 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     backgroundRecording: result?.background_noise?.recording,
     db_BackgroundNoise: result?.background_noise?.x_background,
     Hz_BackgroundNoise: result?.background_noise?.y_background,
+    db_system_convolution: result.current?.system?.filtered_mls_psd?.y,
+    Hz_system_convolution: result.current?.system?.filtered_mls_psd?.x,
+    db_component_convolution: result.component?.filtered_mls_psd?.y,
+    Hz_component_convolution: result.component?.filtered_mls_psd?.x,
+    loudspeakerGain: allHzCalibrationResults.knownIr,
+    db_mls: result.mls_psd?.y,
+    Hz_mls: result.mls_psd?.x,
+    calibrateSoundBurstDb: calibrateSoundBurstDb.current,
+    calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+    calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
+    calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+    calibrateSoundMinHz: calibrateSoundMinHz.current,
+    calibrateSoundMaxHz: calibrateSoundMaxHz.current,
+    calibrateSound1000HzSec: calibrateSound1000HzSec.current,
+    calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
+    calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
   });
 };
 
