@@ -169,6 +169,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundSaveJSONBool (default FALSE) requests saving of sound-calibration results in a large JSON file, at the end of the experiment (in quitPsychoJS). Currently the JSON is saved to the participant's Download folder. Ideally it would instead be saved to the experiment's repository on Pavlovia.",
   },
+  _calibrateSoundSmoothOctaves: {
+    name: "_calibrateSoundSmoothOctaves",
+    availability: "now",
+    type: "numerical",
+    default: "0.3333333",
+    explanation:
+      " 🕑 _calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing.",
+  },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",
     availability: "now",

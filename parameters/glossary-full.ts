@@ -209,6 +209,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundSmoothOctaves",
+    availability: "now",
+    example: "",
+    explanation:
+      " 🕑 _calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing.",
+    type: "numerical",
+    default: "0.3333333",
+    categories: "",
+  },
+  {
     name: "_calibrateTimingNumberAndSecs",
     availability: "now",
     example: "",
