@@ -32,6 +32,7 @@ import {
   calibrationTime,
   calibrateSoundBackgroundSecs,
   calibrateSoundSaveJSONBool,
+  calibrateSoundSmoothOctaves,
   showSoundParametersBool,
   calibrateSoundSamplingDesiredBits,
   microphoneCalibrationResult,
@@ -284,6 +285,9 @@ export const calibrateAudio = async (reader) => {
   )[0];
   calibrateSoundSaveJSONBool.current = ifTrue(
     reader.read(GLOSSARY._calibrateSoundSaveJSONBool.name, "__ALL_BLOCKS__")
+  );
+  calibrateSoundSmoothOctaves.current = ifTrue(
+    reader.read(GLOSSARY._calibrateSoundSmoothOctaves.name, "__ALL_BLOCKS__")
   );
   calibrateSoundSamplingDesiredBits.current = reader.read(
     GLOSSARY._calibrateSoundSamplingDesiredBits.name

@@ -7,6 +7,7 @@ import {
   calibrateSound1000HzPreSec,
   calibrateSound1000HzSec,
   calibrateSoundBackgroundSecs,
+  calibrateSoundSmoothOctaves,
   calibrateSoundBurstDb,
   calibrateSoundBurstRecordings,
   calibrateSoundBurstRepeats,
@@ -746,6 +747,7 @@ const startCalibration = async (
     calibrateSound1000HzSec: calibrateSound1000HzSec.current,
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
+    calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
   };
   const calibratorParams = {
     numCaptures: calibrateSoundBurstRecordings.current,

@@ -424,6 +424,7 @@ export const allHzCalibrationResults = {
 export const calibrateSoundSamplingDesiredBits = { current: 16 };
 export const showSoundParametersBool = { current: true };
 export const calibrateSoundSaveJSONBool = { current: false };
+export const calibrateSoundSmoothOctaves = { current: 0.3333333 };
 export const calibrateSoundBackgroundSecs = { current: 0 };
 export const calibrateSoundBurstRepeats = { current: 4 };
 export const calibrateSoundBurstSec = { current: 1 };
