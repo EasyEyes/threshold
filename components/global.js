@@ -420,6 +420,7 @@ export const allHzCalibrationResults = {
   },
   timestamps: "",
 };
+export const loudspeakerIR = { current: undefined };
 
 export const calibrateSoundSamplingDesiredBits = { current: 16 };
 export const showSoundParametersBool = { current: true };

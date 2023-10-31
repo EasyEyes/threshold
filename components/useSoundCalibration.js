@@ -23,6 +23,7 @@ import {
   calibrationTime,
   debugBool,
   invertedImpulseResponse,
+  loudspeakerIR,
   loudspeakerInfo,
   microphoneActualSamplingRate,
   microphoneCalibrationResult,
@@ -836,8 +837,12 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
       };
     }
   }
-  allHzCalibrationResults.knownIr =
-    soundCalibrationResults.current.component.ir;
+  loudspeakerIR.current = JSON.parse(
+    JSON.stringify(soundCalibrationResults.current.component.ir)
+  );
+  allHzCalibrationResults.knownIr = JSON.parse(
+    JSON.stringify(soundCalibrationResults.current.component.ir)
+  );
   soundGainDBSPL.current = soundCalibrationResults.current.parameters.gainDBSPL;
   soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
   allHzCalibrationResults.timestamps =
@@ -893,8 +898,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
         10
     ) / 10;
   microphoneInfo.current.CalibrationDate = getCurrentTimeString();
-  microphoneCalibrationResult.current.microphoneGain =
-    allHzCalibrationResults.knownIr;
+  microphoneCalibrationResult.current.microphoneGain = loudspeakerIR.current;
   microphoneInfo.current.micrFullManufacturerName = isSmartPhone
     ? microphoneCalibrationResult.current.micInfo.OEM
     : microphoneInfo.current.micrFullManufacturerName;
@@ -954,7 +958,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     Hz_system_convolution: result.system?.filtered_mls_psd?.x,
     db_component_convolution: result.component?.filtered_mls_psd?.y,
     Hz_component_convolution: result.component?.filtered_mls_psd?.x,
-    loudspeakerGain: allHzCalibrationResults.knownIr,
+    loudspeakerGain: loudspeakerIR.current,
     db_mls: result.mls_psd?.y,
     Hz_mls: result.mls_psd?.x,
     calibrateSoundBurstDb: calibrateSoundBurstDb.current,

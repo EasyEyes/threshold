@@ -12,6 +12,7 @@ import {
   soundCalibrationResults,
   allHzCalibrationResults,
   loudspeakerInfo,
+  loudspeakerIR,
   microphoneCalibrationResults,
   invertedImpulseResponse,
   calibrateSoundSaveJSONBool,
@@ -207,8 +208,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.component?.psd?.unconv?.x,
         MlsSpectrumUnfilteredDb_component:
           soundCalibrationResults.current?.component?.psd?.unconv?.y,
-        "Loudspeaker Component IR":
-          soundCalibrationResults.current?.component?.ir,
+        "Loudspeaker Component IR": loudspeakerIR.current,
         "Loudspeaker Component IIR":
           soundCalibrationResults.current?.component?.iir,
         "Loudspeaker Component IR Time Domain":
