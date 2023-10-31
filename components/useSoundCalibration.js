@@ -51,6 +51,7 @@ import {
   readFrqGainFromFirestore,
   removeElements,
   saveLoudSpeakerInfo,
+  saveLoudSpeakerInfoToFirestore,
 } from "./soundCalibrationHelpers";
 import { showExperimentEnding } from "./forms";
 
@@ -872,13 +873,13 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     micInfo: microphoneInfo.current,
   };
   try {
-    // await saveLoudSpeakerInfo(
-    //     loudspeakerInfo.current,
-    //     modelNumber,
-    //     thisDevice.current.OEM,
-    //     invertedImpulseResponse.current,
-    //     soundCalibrationResults.current.component.ir
-    // );
+    await saveLoudSpeakerInfoToFirestore(
+      loudspeakerInfo.current,
+      modelNumber,
+      thisDevice.current.OEM,
+      soundCalibrationResults.current.component.ir,
+      soundCalibrationResults.current.component.iir
+    );
   } catch (err) {
     console.log(err);
   }

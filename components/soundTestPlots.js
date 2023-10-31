@@ -640,6 +640,114 @@ export const plotForAllHz = (
   tableDiv.style.zIndex = 1;
 };
 
+export const plotImpulseResponse = (
+  plotCanvas,
+  ir,
+  title,
+  isLoudspeakerCalibration
+) => {
+  const subtitleText = isLoudspeakerCalibration ? "Loudspeaker" : "Microphone";
+  const IrFreq = ir.Freq;
+  const IrGain = ir.Gain;
+  const IrPoints = IrFreq.map((x, i) => {
+    return { x: x, y: IrGain[i] };
+  });
+  const data = {
+    datasets: [
+      {
+        label: "Impulse response",
+        data: IrPoints,
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 1,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        showLine: true,
+      },
+    ],
+  };
+  const config = {
+    type: "line",
+    data: data,
+    options: {
+      responsive: false,
+      // aspectRatio : 1,
+      plugins: {
+        title: {
+          display: true,
+          text: title,
+          font: {
+            size: 18,
+            weight: "normal",
+            family: "system-ui",
+          },
+        },
+        subtitle: {
+          display: true,
+          text: subtitleText,
+          font: {
+            size: 15,
+            family: "system-ui",
+          },
+          align: "center",
+        },
+        legend: {
+          labels: {
+            usePointStyle: true,
+            generateLabels: function (chart) {
+              const data = chart.data;
+              if (data.datasets.length) {
+                return data.datasets.map(function (dataset, i) {
+                  return {
+                    text: dataset.label,
+                    fillStyle: dataset.backgroundColor,
+                    strokeStyle: dataset.borderColor,
+                    lineWidth: dataset.borderWidth,
+                    hidden: !chart.isDatasetVisible(i),
+                    index: i,
+                    lineDash: dataset.borderDash,
+                    pointStyle: "line",
+                    lineWidth: 1,
+                  };
+                });
+              }
+              return [];
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: "logarithmic",
+          position: "bottom",
+          title: {
+            display: true,
+            text: "Frequency (Hz)",
+            font: {
+              size: "12px",
+            },
+          },
+          min: 20,
+          max: 16000,
+        },
+        y: {
+          type: "linear",
+          position: "left",
+          title: {
+            display: true,
+            text: "Gain (dB)",
+            font: {
+              size: "12px",
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const plot = new Chart(plotCanvas, config);
+};
+
 export const standardDeviation = (values) => {
   const avg = average(values);
 

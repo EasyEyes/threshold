@@ -22,6 +22,7 @@ import {
 } from "./global";
 import {
   plotForAllHz,
+  plotImpulseResponse,
   plotSoundLevels1000Hz,
   standardDeviation,
 } from "./soundTestPlots";
@@ -933,6 +934,23 @@ export const displayParametersAllHz = (
     microphoneGain,
     filteredMLSRange
   );
+};
+
+export const displayWhatIsSavedInDatabase = (
+  elems,
+  ir,
+  isLoudspeakerCalibration = true,
+  title = "Impulse response saved in the database"
+) => {
+  const plotCanvas = document.createElement("canvas");
+  plotCanvas.setAttribute("id", "plotCanvas");
+  plotCanvas.width = 500;
+  plotCanvas.height = 500;
+  plotCanvas.style.marginTop = "20px";
+  elems.soundTestPlots.appendChild(plotCanvas);
+  elems.citation.style.visibility = "visible";
+
+  plotImpulseResponse(plotCanvas, ir, title, isLoudspeakerCalibration);
 };
 
 // The table has 3 colums.

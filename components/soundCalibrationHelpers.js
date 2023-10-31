@@ -78,17 +78,17 @@ export const saveLoudSpeakerInfoToFirestore = async (
   loudSpeakerInfo,
   modelNumber,
   OEM,
-  iir,
-  ir
+  ir,
+  iir
 ) => {
-  console.log("Saving LoudSpeaker Info");
-  const collectionRef = collection(db, "LoudSpeaker", OEM, modelNumber);
+  const collectionRef = collection(db, "Loudspeaker", OEM, modelNumber);
   // add doc to collection. save loudSpeakerInfo first then iir and ir
-  await addDoc(collectionRef, loudSpeakerInfo);
+  // save loudSpeakerInfo first and then in the same document (with a random Id) save iir and ir
+  const docRef = await addDoc(collectionRef, loudSpeakerInfo);
   // save iir
-  await setDoc(doc(collectionRef, "iir"), iir);
+  await setDoc(docRef, { iir: iir }, { merge: true });
   // save ir
-  await setDoc(doc(collectionRef, "ir"), ir);
+  await setDoc(docRef, { ir: ir }, { merge: true });
 };
 
 export const getInstructionText = (
