@@ -54,6 +54,7 @@ import {
   saveLoudSpeakerInfoToFirestore,
 } from "./soundCalibrationHelpers";
 import { showExperimentEnding } from "./forms";
+import { getCurrentTimeString } from "./soundUtils";
 
 const globalGains = { values: [] };
 
@@ -387,17 +388,16 @@ const getLoudspeakerDeviceDetailsFromUser = async (
       if (modelNameInput.value === "" || modelNumberInput.value === "") {
         alert("Please fill out all the fields");
       } else {
-        loudspeakerInfo.current = {
-          fullLoudspeakerModelName: modelNameInput.value,
-          fullLoudspeakerModelNumber: modelNumberInput.value,
-        };
-        removeElements([
-          findModel,
-          modelNameInput,
-          modelNumberInput,
-          deviceStringElem,
-          proceedButton,
-        ]);
+        loudspeakerInfo.current.fullLoudspeakerModelName = modelNameInput.value;
+        (loudspeakerInfo.current.fullLoudspeakerModelNumber =
+          modelNumberInput.value),
+          removeElements([
+            findModel,
+            modelNameInput,
+            modelNumberInput,
+            deviceStringElem,
+            proceedButton,
+          ]);
         adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
         await startCalibration(
           elems,
@@ -478,10 +478,10 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
       if (modelNameInput.value === "" || modelNumberInput.value === "") {
         alert("Please fill out all the fields");
       } else {
-        loudspeakerInfo.current = {
-          fullLoudspeakerModelName: modelNameInput.value,
-          fullLoudspeakerModelNumber: modelNumberInput.value,
-        };
+        loudspeakerInfo.current.fullLoudspeakerModelName = modelNameInput.value;
+        loudspeakerInfo.current.fullLoudspeakerModelNumber =
+          modelNumberInput.value;
+
         removeElements([
           findModel,
           modelNameInput,
@@ -807,7 +807,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     soundCalibrationResults.current.audioInfo?.sinkSampleRate;
   actualBitsPerSample.current =
     soundCalibrationResults.current.audioInfo?.bitsPerSample;
-  microphoneInfo.current.CalibrationDate = calibrationTime.current;
+  microphoneInfo.current.CalibrationDate = getCurrentTimeString();
   if (calibrateSoundCheck.current !== "none") {
     if (calibrateSoundCheck.current === "system") {
       allHzCalibrationResults.system = soundCalibrationResults.current.system;
@@ -868,7 +868,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
       Math.round(
         (soundGainDBSPL.current - microphoneInfo.current.gainDBSPL) * 10
       ) / 10,
-    CalibrationDate: calibrationTime.current,
+    CalibrationDate: getCurrentTimeString(),
     micInfo: microphoneInfo.current,
   };
   try {
@@ -888,10 +888,11 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   microphoneCalibrationResult.current = result;
   microphoneInfo.current.gainDBSPL =
     Math.round(
-      (microphoneInfo.current.gainDBSPL - loudspeakerInfo.current.gainDBSPL) *
+      (microphoneCalibrationResult.current.parameters.gainDBSPL -
+        loudspeakerInfo.current.gainDBSPL) *
         10
     ) / 10;
-  microphoneInfo.current.CalibrationDate = calibrationTime.current;
+  microphoneInfo.current.CalibrationDate = getCurrentTimeString();
   microphoneCalibrationResult.current.microphoneGain =
     allHzCalibrationResults.knownIr;
   microphoneInfo.current.micrFullManufacturerName = isSmartPhone

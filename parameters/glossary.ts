@@ -723,7 +723,7 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "All countries available",
     explanation:
-      '⭑ _prolific3Location [Prolific "Location"] is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\n...\nThe answer can include many countries, which are combined by an OR rule.\nNOTE: _prolific3Location accepts "Venezuela" which is automatically converted to Prolific\'s "Venezuela, Bolivarian Republic of". ',
+      '🕑 _prolific3Location [Prolific "Location"] is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\n...\nThe answer can include many countries, which are combined by an OR rule.\nNOTE: _prolific3Location accepts "Venezuela" which is automatically converted to Prolific\'s "Venezuela, Bolivarian Republic of". ',
     categories: [
       "All countries available",
       "USA",

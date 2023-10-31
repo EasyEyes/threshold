@@ -303,8 +303,6 @@ export const calibrateAudio = async (reader) => {
   const gains = soundLevels.map((soundLevel) => {
     return Math.pow(10, soundLevel / 20);
   });
-
-  calibrationTime.current = getCurrentTimeString();
   timeToCalibrate.current = calculateTimeToCalibrate(gains);
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
