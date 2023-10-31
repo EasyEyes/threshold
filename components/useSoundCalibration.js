@@ -775,7 +775,6 @@ const startCalibration = async (
   if (results === false) {
     return false;
   }
-  console.log(results);
   adjustDisplayAfterCalibration(elems, isLoudspeakerCalibration);
   isLoudspeakerCalibration
     ? await parseLoudspeakerCalibrationResults(results, isSmartPhone)
@@ -898,7 +897,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     ? microphoneCalibrationResult.current.micInfo.OEM
     : microphoneInfo.current.micrFullManufacturerName;
   microphoneCalibrationResults.push({
-    SoundGainParameters: result.paramters,
+    SoundGainParameters: result.parameters,
     Cal1000HzInDb: result.inDBValues ? result.inDBValues : [],
     Cal1000HzOutDb: result.outDBSPL1000Values ? result.outDBSPL1000Values : [],
     outDBSPLValues: result.outDBSPLValues,
