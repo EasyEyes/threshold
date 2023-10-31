@@ -880,6 +880,13 @@ export const displayCompatibilityMessage = async (
               elem
             );
             if (proceed) {
+              if (needPhoneSurvey) {
+                resolve({
+                  proceedButtonClicked: true,
+                  proceedBool: true,
+                  mic: microphoneInfo,
+                });
+              }
               break;
             }
           }
