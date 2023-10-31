@@ -749,10 +749,9 @@ export const displayCompatibilityMessage = async (
       messageWrapper.appendChild(refreshButton);
     }
 
+    const languageWrapper = document.createElement("div");
     if (reader.read("_languageSelectionByParticipantBool")[0]) {
       // create language selection dropdown
-      const languageWrapper = document.createElement("div");
-
       const LanguageTitle = document.createElement("h3");
       LanguageTitle.innerHTML = readi18nPhrases(
         "EE_languageChoose",
@@ -875,7 +874,10 @@ export const displayCompatibilityMessage = async (
               deviceDetails,
               needPhoneSurvey,
               compatiblityCheckQR,
-              compatibilityCheckQRExplanation
+              compatibilityCheckQRExplanation,
+              languageWrapper,
+              titleContainer,
+              elem
             );
             if (proceed) {
               break;
@@ -921,14 +923,26 @@ const isSmartphoneInDatabase = async (
   deviceDetails,
   needPhoneSurvey = false,
   qrCodeDisplay = null,
-  qrCodeExplanation = null
+  qrCodeExplanation = null,
+  languageWrapper = null,
+  titleContainer = null,
+  elem = null
 ) => {
   // ask for the model number and name of the device
   // create input box for model number and name
   // hide  the QR code and explanation (but don't remove them)
   if (needPhoneSurvey) {
-    qrCodeDisplay.style.display = "none";
-    qrCodeExplanation.style.display = "none";
+    qrCodeDisplay.remove();
+    qrCodeExplanation.remove();
+    if (languageWrapper) {
+      languageWrapper.remove();
+    }
+    titleContainer.remove();
+    elem.remove();
+    // center messageWrapper
+    messageWrapper.style.margin = "auto";
+    messageWrapper.style.marginLeft = "20vw";
+    messageWrapper.style.marginRight = "20vw";
   }
 
   const modelNumberInput = document.createElement("input");
@@ -965,7 +979,7 @@ const isSmartphoneInDatabase = async (
   checkButton.style.width = "fit-content";
 
   const modelNumberWrapper = document.createElement("div");
-  modelNumberWrapper.style.marginTop = "20px";
+  // modelNumberWrapper.style.marginTop = "20px";
   modelNumberWrapper.appendChild(p);
   modelNumberWrapper.appendChild(modelNameInput);
   modelNumberWrapper.appendChild(modelNumberInput);
@@ -988,6 +1002,8 @@ const isSmartphoneInDatabase = async (
             smartphoneInfoFrom51Degrees: deviceDetails,
           };
           p.innerHTML = readi18nPhrases("RC_smartphoneSurveyEnd", lang);
+          // center p
+          messageWrapper.style.textAlign = "center";
           modelNumberInput.remove();
           modelNameInput.remove();
           checkButton.remove();
