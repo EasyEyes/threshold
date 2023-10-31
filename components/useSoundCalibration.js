@@ -776,7 +776,6 @@ const startCalibration = async (
   if (results === false) {
     return false;
   }
-  console.log(results);
   adjustDisplayAfterCalibration(elems, isLoudspeakerCalibration);
   isLoudspeakerCalibration
     ? await parseLoudspeakerCalibrationResults(results, isSmartPhone)
@@ -899,7 +898,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     ? microphoneCalibrationResult.current.micInfo.OEM
     : microphoneInfo.current.micrFullManufacturerName;
   microphoneCalibrationResults.push({
-    SoundGainParameters: result.paramters,
+    SoundGainParameters: result.parameters,
     Cal1000HzInDb: result.inDBValues ? result.inDBValues : [],
     Cal1000HzOutDb: result.outDBSPL1000Values ? result.outDBSPL1000Values : [],
     outDBSPLValues: result.outDBSPLValues,
@@ -950,8 +949,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     backgroundRecording: result?.background_noise?.recording,
     db_BackgroundNoise: result?.background_noise?.x_background,
     Hz_BackgroundNoise: result?.background_noise?.y_background,
-    db_system_convolution: result.current?.system?.filtered_mls_psd?.y,
-    Hz_system_convolution: result.current?.system?.filtered_mls_psd?.x,
+    db_system_convolution: result.system?.filtered_mls_psd?.y,
+    Hz_system_convolution: result.system?.filtered_mls_psd?.x,
     db_component_convolution: result.component?.filtered_mls_psd?.y,
     Hz_component_convolution: result.component?.filtered_mls_psd?.x,
     loudspeakerGain: allHzCalibrationResults.knownIr,
