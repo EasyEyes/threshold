@@ -422,9 +422,9 @@ export const plotForAllHz = (
     });
   }
   // black dashed line for microphone gain
-  if (microphoneGainPoints.length > 0) {
+  if (microphoneGainPoints.length > 0 && calibrationGoal === "goal") {
     datasets.push({
-      label: "Microphone gain",
+      label: isLoudspeakerCalibration ? "Loudspeaker gain" : "Microphone gain",
       data: microphoneGainPoints,
       backgroundColor: "rgba(0, 0, 0, 0.2)",
       borderColor: "rgba(0, 0, 0, 1)",

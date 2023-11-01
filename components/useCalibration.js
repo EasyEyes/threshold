@@ -565,7 +565,7 @@ export const calibrateAudio = async (reader) => {
             displayWhatIsSavedInDatabase(
               elems,
               microphoneCalibrationResult.current.component.ir,
-              true
+              false
             );
           }
 

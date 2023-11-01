@@ -606,7 +606,7 @@ const showSmartphoneCalibrationInstructions = async (
         isLoudspeakerCalibration,
         language,
         true,
-        isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
+        isLoudspeakerCalibration ? null : loudspeakerIR.current
       );
       resolve();
     });
@@ -684,7 +684,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
           isLoudspeakerCalibration,
           language,
           true,
-          isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
+          isLoudspeakerCalibration ? null : loudspeakerIR.current
         );
         resolve();
       }
