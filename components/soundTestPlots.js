@@ -424,7 +424,7 @@ export const plotForAllHz = (
   // black dashed line for microphone gain
   if (microphoneGainPoints.length > 0 && calibrationGoal === "goal") {
     datasets.push({
-      label: isLoudspeakerCalibration ? "Loudspeaker gain" : "Microphone gain",
+      label: isLoudspeakerCalibration ? "Microphone gain" : "Loudspeaker gain",
       data: microphoneGainPoints,
       backgroundColor: "rgba(0, 0, 0, 0.2)",
       borderColor: "rgba(0, 0, 0, 1)",
