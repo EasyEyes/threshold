@@ -477,11 +477,21 @@ export const plotForAllHz = (
     );
   }
 
+  const lowerEnd =
+    calibrationGoal === "system"
+      ? -160
+      : isLoudspeakerCalibration
+      ? -160
+      : -210;
+
   // min = -130 max = maxY + 10, stepSize = 10. Set the plotCanvas Height based on the max and min. Every 10 dB is 40 pixels
   const plotCanvasHeight =
     calibrationGoal === "system"
       ? (maxY + 10 + 180) * 5.5
+      : isLoudspeakerCalibration
+      ? (maxY + 10 + 180) * 5.5
       : (maxY + 10 + 230) * 5.5;
+
   plotCanvas.height = plotCanvasHeight;
   plotCanvas.width = 600;
 
@@ -569,7 +579,7 @@ export const plotForAllHz = (
               size: "12px",
             },
           },
-          min: -210,
+          min: lowerEnd,
           max: maxY + 10,
           ticks: {
             stepSize: 10,
@@ -665,8 +675,8 @@ export const plotImpulseResponse = (
     return { x: x, y: IrGain[i] };
   });
   let maxY = Math.max(...IrPoints.map((point) => point.y));
-
-  const plotCanvasHeight = (maxY + 100) * 5.5;
+  let minY = Math.min(...IrPoints.map((point) => point.y));
+  const plotCanvasHeight = (Math.ceil((maxY - minY) / 10) * 10 + 100) * 6;
 
   plotCanvas.height = plotCanvasHeight;
 
@@ -758,8 +768,11 @@ export const plotImpulseResponse = (
               size: "12px",
             },
           },
-          min: maxY - 50,
-          max: maxY + 50,
+          min: Math.floor(minY / 10) * 10 - 50,
+          max: Math.ceil(maxY / 10) * 10 + 50,
+          ticks: {
+            stepSize: 10,
+          },
         },
       },
     },
