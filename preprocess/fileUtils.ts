@@ -70,7 +70,11 @@ export const getBase64Data = (file: File): Promise<string> => {
 
 // now only used for favicon.ico and SOUNDS
 export const assetUsesBase64 = (filePath: string) => {
-  return filePath.includes(".ico") || filePath.includes(".mp3");
+  return (
+    filePath.includes(".ico") ||
+    filePath.includes(".mp3") ||
+    filePath.includes(".png")
+  );
 };
 
 export const getAssetFileContentBase64 = async (filePath: string) => {
