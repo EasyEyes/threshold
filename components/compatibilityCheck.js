@@ -938,6 +938,7 @@ const isSmartphoneInDatabase = async (
   // ask for the model number and name of the device
   // create input box for model number and name
   // hide  the QR code and explanation (but don't remove them)
+  const img = document.createElement("img");
   if (needPhoneSurvey) {
     qrCodeDisplay.remove();
     qrCodeExplanation.remove();
@@ -950,6 +951,15 @@ const isSmartphoneInDatabase = async (
     messageWrapper.style.margin = "auto";
     messageWrapper.style.marginLeft = "20vw";
     messageWrapper.style.marginRight = "20vw";
+    if (deviceDetails.PlatformName === "iOS") {
+      // insert image of iOS settings
+      const img = document.createElement("img");
+      img.src = "./components/images/ios_settings.png";
+      img.style.width = "30%";
+      img.style.margin = "auto";
+      img.style.marginBottom = "30px";
+      messageWrapper.appendChild(img);
+    }
   }
 
   const modelNumberInput = document.createElement("input");
@@ -1014,6 +1024,7 @@ const isSmartphoneInDatabase = async (
           modelNumberInput.remove();
           modelNameInput.remove();
           checkButton.remove();
+          img.remove();
           resolve(true);
         } else {
           const exists = await doesMicrophoneExistInFirestore(

@@ -125,6 +125,10 @@ const constructForEXperiment = async (d: string) => {
         "../components/images/favicon.ico",
         `${dir}/components/images/favicon.ico`
       );
+      copyFileSync(
+        "../components/images/ios_settings.png",
+        `${dir}/components/images/ios_settings.png`
+      );
 
       copyFolder("fonts", dir);
       copyFolder("forms", dir);
