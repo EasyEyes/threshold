@@ -455,15 +455,27 @@ export const plotForAllHz = (
   };
 
   // find the max of the y values
-  const maxY = Math.max(
-    ...unconvMergedDataPoints.map((point) => point.y),
-    ...convMergedDataPoints.map((point) => point.y),
-    ...backgroundMergedDataPoints.map((point) => point.y),
-    ...digitalMLSPoints.map((point) => point.y),
-    ...filteredDigitalMLSPoints.map((point) => point.y),
-    ...microphoneGainPoints.map((point) => point.y),
-    ...expectedCorrectionPoints.map((point) => point.y)
-  );
+  let maxY;
+  if (calibrationGoal !== "system") {
+    maxY = Math.max(
+      ...unconvMergedDataPoints.map((point) => point.y),
+      ...convMergedDataPoints.map((point) => point.y),
+      ...backgroundMergedDataPoints.map((point) => point.y),
+      ...digitalMLSPoints.map((point) => point.y),
+      ...filteredDigitalMLSPoints.map((point) => point.y),
+      ...microphoneGainPoints.map((point) => point.y),
+      ...expectedCorrectionPoints.map((point) => point.y)
+    );
+  } else {
+    maxY = Math.max(
+      ...unconvMergedDataPoints.map((point) => point.y),
+      ...convMergedDataPoints.map((point) => point.y),
+      ...backgroundMergedDataPoints.map((point) => point.y),
+      ...digitalMLSPoints.map((point) => point.y),
+      ...filteredDigitalMLSPoints.map((point) => point.y),
+      ...expectedCorrectionPoints.map((point) => point.y)
+    );
+  }
 
   // min = -130 max = maxY + 10, stepSize = 10. Set the plotCanvas Height based on the max and min. Every 10 dB is 40 pixels
   const plotCanvasHeight =
@@ -557,7 +569,7 @@ export const plotForAllHz = (
               size: "12px",
             },
           },
-          min: -160,
+          min: -210,
           max: maxY + 10,
           ticks: {
             stepSize: 10,
@@ -652,6 +664,12 @@ export const plotImpulseResponse = (
   const IrPoints = IrFreq.map((x, i) => {
     return { x: x, y: IrGain[i] };
   });
+  let maxY = Math.max(...IrPoints.map((point) => point.y));
+
+  const plotCanvasHeight = (maxY + 100) * 5.5;
+
+  plotCanvas.height = plotCanvasHeight;
+
   const data = {
     datasets: [
       {
@@ -740,6 +758,8 @@ export const plotImpulseResponse = (
               size: "12px",
             },
           },
+          min: maxY - 50,
+          max: maxY + 50,
         },
       },
     },
