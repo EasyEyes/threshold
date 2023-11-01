@@ -25,6 +25,7 @@ import {
   calibrateSound1000HzSec,
   calibrateSound1000HzPreSec,
   calibrateSound1000HzPostSec,
+  calibrateSoundHz,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
@@ -265,6 +266,8 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         calibrateSound1000HzSec: calibrateSound1000HzSec.current,
         calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
         calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
+        calibrateSoundHz: calibrateSoundHz.current,
+        filteredMLSRange: allHzCalibrationResults.filteredMLSRange,
       };
     }
 

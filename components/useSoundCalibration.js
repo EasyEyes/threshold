@@ -970,6 +970,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     calibrateSound1000HzSec: calibrateSound1000HzSec.current,
     calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
+    calibrateSoundHz: calibrateSoundHz.current,
+    filteredMLSRange: result.filteredMLSRange,
   });
 };
 
