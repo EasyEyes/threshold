@@ -8,6 +8,7 @@ export const _loadFiles: string[] = [
   "README.md",
   "coi-serviceworker.js",
   "components/images/favicon.ico",
+  "components/images/ios_settings.png",
   "index.html",
   "js/reading-page-flip.mp3",
   "js/threshold.min.js",
