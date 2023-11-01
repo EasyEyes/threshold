@@ -638,7 +638,7 @@ export const plotForAllHz = (
     const p = document.createElement("p");
     const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
       calibrateSoundBurstSec.current
-    }s, ${calibrateSoundBurstRepeats.current}X, ${
+    }s, ${calibrateSoundBurstRepeats.current}✕, ${
       calibrateSoundHz.current
     } Hz <br>IIR: ${calibrateSoundIIRSec.current}s, ${
       calibrateSoundMinHz.current
@@ -703,7 +703,9 @@ export const plotImpulseResponse = (
       plugins: {
         title: {
           display: true,
-          text: title,
+          text: isLoudspeakerCalibration
+            ? "Loudspeaker gain calibration"
+            : "Microphone gain calibration",
           font: {
             size: 18,
             weight: "normal",
