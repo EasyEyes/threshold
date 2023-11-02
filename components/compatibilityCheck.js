@@ -999,13 +999,13 @@ const isSmartphoneInDatabase = async (
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
   modelNumberInput.name = "modelNumberInput";
-  modelNumberInput.placeholder = "Model Number";
+  modelNumberInput.placeholder = readi18nPhrases("RC_modelNumber", lang);
 
   const modelNameInput = document.createElement("input");
   modelNameInput.type = "text";
   modelNameInput.id = "modelNameInput";
   modelNameInput.name = "modelNameInput";
-  modelNameInput.placeholder = "Model Name";
+  modelNameInput.placeholder = readi18nPhrases("RC_modelName", lang);
 
   const { preferredModelNumber } = getDeviceDetails(
     deviceDetails.platformName,
@@ -1025,7 +1025,7 @@ const isSmartphoneInDatabase = async (
 
   const checkButton = document.createElement("button");
   checkButton.classList.add(...["btn", "btn-success"]);
-  checkButton.innerText = needPhoneSurvey ? "Proceed" : "Check";
+  checkButton.innerText = readi18nPhrases("T_PROCEED", lang);
   checkButton.style.width = "fit-content";
 
   const modelNumberWrapper = document.createElement("div");
@@ -1096,7 +1096,7 @@ const isSmartphoneInDatabase = async (
           }
         }
       }
-      checkButton.innerHTML = needPhoneSurvey ? "Proceed" : "Check";
+      checkButton.innerHTML = readi18nPhrases("T_PROCEED", lang);
     });
   });
 
