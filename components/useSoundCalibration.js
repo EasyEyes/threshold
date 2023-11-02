@@ -34,6 +34,7 @@ import {
   thisDevice,
   timeToCalibrate,
   timeoutSec,
+  authorEmail,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -89,7 +90,10 @@ export const runCombinationCalibration = async (
       readi18nPhrases("RC_usbMicrophone", language),
       readi18nPhrases("RC_none", language),
     ];
-    const dropdownTitle = readi18nPhrases("RC_selectMicrophoneType", language);
+    const dropdownTitle = readi18nPhrases(
+      "RC_selectMicrophoneTypeToBeCalibrated",
+      language
+    );
     const { dropdown, proceedButton, p } = addDropdownMenu(
       elems,
       options,
@@ -303,13 +307,24 @@ const getUSBMicrophoneDetailsFromUser = async (
             proceedButton,
           ]);
           adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
-          await getLoudspeakerDeviceDetailsFromUser(
-            elems,
-            language,
-            false,
-            isLoudspeakerCalibration
-          );
-          resolve();
+          if (isLoudspeakerCalibration) {
+            await getLoudspeakerDeviceDetailsFromUser(
+              elems,
+              language,
+              false,
+              isLoudspeakerCalibration
+            );
+            resolve();
+          } else {
+            await startCalibration(
+              elems,
+              isLoudspeakerCalibration,
+              language,
+              false,
+              isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
+            );
+            resolve();
+          }
         } else {
           p.innerHTML = readi18nPhrases("RC_sorryUSBMicrophone", language)
             .replace("MMM", microphoneInfo.current.micrFullManufacturerName)
@@ -750,6 +765,8 @@ const startCalibration = async (
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+    calibrateMicrophonesBool: calibrateMicrophonesBool.current,
+    authorEmails: authorEmail.current,
   };
   const calibratorParams = {
     numCaptures: calibrateSoundBurstRecordings.current,
@@ -769,11 +786,27 @@ const startCalibration = async (
     language,
     isLoudspeakerCalibration
   );
+  timeToCalibrate.timeAtTheStartOfCalibration = new Date();
   const results = await Speaker.startCalibration(
     speakerParameters,
     calibrator,
     timeoutSec.current
   );
+  timeToCalibrate.timeAtTheEndOfCalibration = new Date();
+  // timeToCalibrate.calibrationDuration in minutes
+  timeToCalibrate.calibrationDuration = Math.round(
+    (timeToCalibrate.timeAtTheEndOfCalibration -
+      timeToCalibrate.timeAtTheStartOfCalibration) /
+      1000 /
+      60
+  );
+  const timeElement = document.getElementById("timeToCalibrate");
+  timeElement.innerHTML = readi18nPhrases(
+    "RC_calibrationEstimatedAndActualMinutes",
+    language
+  )
+    .replace("111", timeToCalibrate.current)
+    .replace("222", timeToCalibrate.calibrationDuration);
   if (results === false) {
     return false;
   }
@@ -875,7 +908,11 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
       ) / 10,
     CalibrationDate: getCurrentTimeString(),
     micInfo: microphoneInfo.current,
+    calibrateMicrophonesBool: calibrateMicrophonesBool.current,
   };
+  if (calibrateMicrophonesBool.current) {
+    loudspeakerInfo.current.authorEmails = authorEmail.current;
+  }
   try {
     await saveLoudSpeakerInfoToFirestore(
       loudspeakerInfo.current,
@@ -1012,7 +1049,7 @@ const adjustDisplayBeforeCalibration = (
 const adjustDisplayAfterCalibration = (elems, isLoudspeakerCalibration) => {
   if (isLoudspeakerCalibration) {
     elems.recordingInProgress.innerHTML = "";
-    elems.timeToCalibrate.innerHTML = "";
+    // elems.timeToCalibrate.innerHTML = "";
     elems.message.style.display = "block";
     elems.message.style.whiteSpace = "normal";
     elems.message.style.fontSize = "1.1rem";

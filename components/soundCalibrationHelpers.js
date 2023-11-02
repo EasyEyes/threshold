@@ -141,7 +141,7 @@ export const getInstructionText = (
 
   return isSmartPhone
     ? `${microphoneInCalibrationLibrary}${needModelNumberFinal} ${findModelNumber}`
-    : `${microphoneInCalibrationLibrary}${needModelNumberFinal} <br> <br> ${findModelNumber}`;
+    : `${microphoneInCalibrationLibrary}${needModelNumberFinal} ${findModelNumber}`;
 };
 
 export const getDeviceString = (thisDevice, language) => {

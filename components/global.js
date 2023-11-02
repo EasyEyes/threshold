@@ -449,12 +449,18 @@ export const debugBool = { current: false };
 export const ICalibDBSPL = { current: undefined };
 export const calibrateMicrophonesBool = { current: false };
 export const rsvpReadingWordsForThisBlock = { current: undefined };
-export const timeToCalibrate = { current: 1 };
+export const timeToCalibrate = {
+  current: 1,
+  timeAtTheStartOfCalibration: 0,
+  timeAtTheEndOfCalibration: 0,
+  calibrationDuration: 0,
+};
 export const thisDevice = { current: undefined };
 export const loudspeakerInfo = { current: {} };
 export const microphoneInfo = { current: {} };
 export const calibrationTime = { current: undefined };
 export const needPhoneSurvey = { current: false };
+export const authorEmail = { current: undefined };
 export const rsvpReadingTargetSets = {
   numberOfSets: undefined,
   current: undefined,

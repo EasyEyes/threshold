@@ -36,6 +36,7 @@ import {
   showSoundParametersBool,
   calibrateSoundSamplingDesiredBits,
   microphoneCalibrationResult,
+  authorEmail,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -304,6 +305,7 @@ export const calibrateAudio = async (reader) => {
     return Math.pow(10, soundLevel / 20);
   });
   timeToCalibrate.current = calculateTimeToCalibrate(gains);
+  authorEmail.current = reader.read(GLOSSARY._authorEmails.name)[0];
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
 
@@ -468,7 +470,10 @@ export const calibrateAudio = async (reader) => {
       elems.navContainer.style.display = "flex";
       elems.title.innerHTML = "";
       elems.subtitle.innerHTML = "";
-      elems.message.innerHTML = copy.done;
+      elems.message.innerHTML = readi18nPhrases(
+        "RC_soundCalibrationMicrophoneDone",
+        rc.language.value
+      );
 
       const calibration = await new Promise(async (resolve) => {
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
@@ -488,6 +493,7 @@ export const calibrateAudio = async (reader) => {
           elems.message.style.overflowX = "scroll";
           elems.calibrateMicrophoneButton.style.display = "none";
           elems.continueButton.style.display = "none";
+          elems.timeToCalibrate.innerHTML = "";
 
           await runCombinationCalibration(
             elems,
