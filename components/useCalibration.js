@@ -444,7 +444,9 @@ export const calibrateAudio = async (reader) => {
       displayWhatIsSavedInDatabase(
         elems,
         allHzCalibrationResults.knownIr,
-        true
+        true,
+        "",
+        allHzCalibrationResults.filteredMLSRange.component
       );
     }
 
@@ -565,7 +567,9 @@ export const calibrateAudio = async (reader) => {
             displayWhatIsSavedInDatabase(
               elems,
               microphoneCalibrationResult.current.component.ir,
-              false
+              false,
+              "",
+              microphoneCalibrationResult.current.filteredMLSRange.component
             );
           }
 

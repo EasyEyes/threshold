@@ -92,7 +92,7 @@ export const plotSoundLevels1000Hz = (
         data: mergedDataPoints,
         backgroundColor: "rgba(255, 99, 132, 0.2)",
         borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
+        borderWidth: 2,
         pointRadius: 3,
         pointHoverRadius: 5,
         showLine: false,
@@ -102,7 +102,7 @@ export const plotSoundLevels1000Hz = (
         data: model,
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
+        borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 2,
         showLine: true,
@@ -114,7 +114,7 @@ export const plotSoundLevels1000Hz = (
         data: modelWithOutBackground,
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
+        borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 2,
         showLine: true,
@@ -144,7 +144,7 @@ export const plotSoundLevels1000Hz = (
           display: true,
           text: title,
           font: {
-            size: 20,
+            size: 22,
             weight: "normal",
             family: "system-ui",
           },
@@ -153,13 +153,16 @@ export const plotSoundLevels1000Hz = (
           display: true,
           text: subtitleText,
           font: {
-            size: 15,
+            size: 19,
             family: "system-ui",
           },
           align: "center",
         },
         legend: {
           labels: {
+            font: {
+              size: 17,
+            },
             usePointStyle: true,
             generateLabels: function (chart) {
               const data = chart.data;
@@ -174,7 +177,6 @@ export const plotSoundLevels1000Hz = (
                     index: i,
                     lineDash: dataset.borderDash,
                     pointStyle: "line",
-                    lineWidth: 1,
                   };
                 });
               }
@@ -192,9 +194,15 @@ export const plotSoundLevels1000Hz = (
           title: {
             display: true,
             text: `in (${inDBUnits})`,
+            font: {
+              size: "19px",
+            },
           },
           ticks: {
             stepSize: 10,
+            font: {
+              size: 17,
+            },
           },
         },
         y: {
@@ -203,9 +211,15 @@ export const plotSoundLevels1000Hz = (
           title: {
             display: true,
             text: `out (${outDBUnits})`,
+            font: {
+              size: "19px",
+            },
           },
           ticks: {
             stepSize: 10 * ratio,
+            font: {
+              size: 17,
+            },
           },
         },
       },
@@ -245,7 +259,7 @@ export const plotSoundLevels1000Hz = (
   }
   plotCanvas.parentNode.appendChild(tableDiv);
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 40) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 44) + "px";
   tableDiv.style.marginLeft = chartArea.right - tableRec.width + "px";
 
   // make the table on top of the canvas
@@ -366,7 +380,7 @@ export const plotForAllHz = (
       data: unconvMergedDataPoints,
       backgroundColor: "rgba(255, 99, 132, 0.2)",
       borderColor: "rgba(255, 99, 132, 1)",
-      borderWidth: 1,
+      borderWidth: 2,
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
@@ -376,7 +390,7 @@ export const plotForAllHz = (
       data: convMergedDataPoints,
       backgroundColor: "rgba(54, 162, 235, 0.2)",
       borderColor: "rgba(54, 162, 235, 1)",
-      borderWidth: 1,
+      borderWidth: 2,
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
@@ -389,7 +403,7 @@ export const plotForAllHz = (
       data: backgroundMergedDataPoints,
       backgroundColor: "rgba(0, 0, 0, 0.2)",
       borderColor: "rgba(0, 0, 0, 1)",
-      borderWidth: 1,
+      borderWidth: 2,
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
@@ -401,7 +415,7 @@ export const plotForAllHz = (
       data: filteredDigitalMLSPoints,
       backgroundColor: "rgba(54, 162, 235, 0.2)",
       borderColor: "rgba(54, 162, 235, 1)",
-      borderWidth: 1,
+      borderWidth: 2,
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
@@ -414,7 +428,7 @@ export const plotForAllHz = (
       data: digitalMLSPoints,
       backgroundColor: "rgba(255, 99, 132, 0.2)",
       borderColor: "rgba(255, 99, 132, 1)",
-      borderWidth: 1,
+      borderWidth: 2,
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
@@ -428,7 +442,7 @@ export const plotForAllHz = (
       data: microphoneGainPoints,
       backgroundColor: "rgba(0, 0, 0, 0.2)",
       borderColor: "rgba(0, 0, 0, 1)",
-      borderWidth: 1,
+      borderWidth: 2,
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
@@ -443,7 +457,7 @@ export const plotForAllHz = (
       data: expectedCorrectionPoints,
       backgroundColor: "rgba(128, 0, 128, 0.2)",
       borderColor: "rgba(128, 0, 128, 1)",
-      borderWidth: 1,
+      borderWidth: 2,
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
@@ -516,7 +530,7 @@ export const plotForAllHz = (
           display: true,
           text: title,
           font: {
-            size: 18,
+            size: 22,
             weight: "normal",
             family: "system-ui",
           },
@@ -525,13 +539,16 @@ export const plotForAllHz = (
           display: true,
           text: subtitleText,
           font: {
-            size: 15,
+            size: 19,
             family: "system-ui",
           },
           align: "center",
         },
         legend: {
           labels: {
+            font: {
+              size: 17,
+            },
             usePointStyle: true,
             generateLabels: function (chart) {
               const data = chart.data;
@@ -546,7 +563,6 @@ export const plotForAllHz = (
                     index: i,
                     lineDash: dataset.borderDash,
                     pointStyle: "line",
-                    lineWidth: 1,
                   };
                 });
               }
@@ -563,11 +579,20 @@ export const plotForAllHz = (
             display: true,
             text: "Frequency (Hz)",
             font: {
-              size: "12px",
+              size: "19px",
             },
           },
           min: 20,
           max: 16000,
+          ticks: {
+            callback: function (value, index, values) {
+              const tickValues = [20, 100, 200, 1000, 2000, 10000, 16000];
+              return tickValues.includes(value) ? value : "";
+            },
+            font: {
+              size: 17,
+            },
+          },
         },
         y: {
           type: "linear",
@@ -576,13 +601,16 @@ export const plotForAllHz = (
             display: true,
             text: "Power spectral density (dB)",
             font: {
-              size: "12px",
+              size: "19px",
             },
           },
           min: lowerEnd,
-          max: maxY + 10,
+          max: Math.ceil(maxY / 10) * 10 + 10,
           ticks: {
             stepSize: 10,
+            font: {
+              size: 17,
+            },
           },
         },
       },
@@ -638,9 +666,9 @@ export const plotForAllHz = (
     const p = document.createElement("p");
     const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
       calibrateSoundBurstSec.current
-    }s, ${calibrateSoundBurstRepeats.current}✕, ${
+    } s, ${calibrateSoundBurstRepeats.current}✕, ${
       calibrateSoundHz.current
-    } Hz <br>IIR: ${calibrateSoundIIRSec.current}s, ${
+    } Hz <br>IIR: ${calibrateSoundIIRSec.current} s, ${
       calibrateSoundMinHz.current
     } to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
       1
@@ -655,7 +683,7 @@ export const plotForAllHz = (
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
   const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 40) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 65) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
 
   // make the table on top of the canvas
@@ -666,6 +694,7 @@ export const plotImpulseResponse = (
   plotCanvas,
   ir,
   title,
+  filteredMLSRange,
   isLoudspeakerCalibration
 ) => {
   const subtitleText = isLoudspeakerCalibration ? "Loudspeaker" : "Microphone";
@@ -687,7 +716,7 @@ export const plotImpulseResponse = (
         data: IrPoints,
         backgroundColor: "rgba(255, 99, 132, 0.2)",
         borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
+        borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 5,
         showLine: true,
@@ -707,7 +736,7 @@ export const plotImpulseResponse = (
             ? "Loudspeaker gain calibration"
             : "Microphone gain calibration",
           font: {
-            size: 18,
+            size: 22,
             weight: "normal",
             family: "system-ui",
           },
@@ -716,13 +745,16 @@ export const plotImpulseResponse = (
           display: true,
           text: subtitleText,
           font: {
-            size: 15,
+            size: 19,
             family: "system-ui",
           },
           align: "center",
         },
         legend: {
           labels: {
+            font: {
+              size: 17,
+            },
             usePointStyle: true,
             generateLabels: function (chart) {
               const data = chart.data;
@@ -737,7 +769,6 @@ export const plotImpulseResponse = (
                     index: i,
                     lineDash: dataset.borderDash,
                     pointStyle: "line",
-                    lineWidth: 1,
                   };
                 });
               }
@@ -754,11 +785,20 @@ export const plotImpulseResponse = (
             display: true,
             text: "Frequency (Hz)",
             font: {
-              size: "12px",
+              size: "19px",
             },
           },
           min: 20,
           max: 16000,
+          ticks: {
+            callback: function (value, index, values) {
+              const tickValues = [20, 100, 200, 1000, 2000, 10000, 16000];
+              return tickValues.includes(value) ? value : "";
+            },
+            font: {
+              size: 17,
+            },
+          },
         },
         y: {
           type: "linear",
@@ -767,13 +807,16 @@ export const plotImpulseResponse = (
             display: true,
             text: "Gain (dB)",
             font: {
-              size: "12px",
+              size: "19px",
             },
           },
           min: Math.floor(minY / 10) * 10 - 50,
           max: Math.ceil(maxY / 10) * 10 + 50,
           ticks: {
             stepSize: 10,
+            font: {
+              size: 17,
+            },
           },
         },
       },
@@ -781,6 +824,47 @@ export const plotImpulseResponse = (
   };
 
   const plot = new Chart(plotCanvas, config);
+  const chartArea = plot.chartArea;
+  const table = displaySummarizedTransducerTable(
+    loudspeakerInfo.current,
+    microphoneInfo.current,
+    "",
+    isLoudspeakerCalibration,
+    "goal",
+    "",
+    [calibrateSoundHz.current, calibrateSoundHz.current]
+  );
+  // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
+  const tableDiv = document.createElement("div");
+  tableDiv.appendChild(table);
+  if (showSoundParametersBool.current) {
+    const Min = Math.round(filteredMLSRange.Min * 10) / 10;
+    const Max = Math.round(filteredMLSRange.Max * 10) / 10;
+    const p = document.createElement("p");
+    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
+      calibrateSoundBurstSec.current
+    } s, ${calibrateSoundBurstRepeats.current}✕, ${
+      calibrateSoundHz.current
+    } Hz <br>IIR: ${calibrateSoundIIRSec.current}s, ${
+      calibrateSoundMinHz.current
+    } to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
+      1
+    )} to ${Max.toFixed(1)}`;
+    p.innerHTML = reportParameters;
+    p.style.fontSize = "12px";
+    p.style.marginBottom = "0px";
+    tableDiv.appendChild(p);
+  }
+  plotCanvas.parentNode.appendChild(tableDiv);
+
+  tableDiv.style.position = "absolute";
+  const tableRec = tableDiv.getBoundingClientRect();
+  const rect = plotCanvas.getBoundingClientRect();
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 16) + "px";
+  tableDiv.style.marginLeft = chartArea.left + 3 + "px";
+
+  // make the table on top of the canvas
+  tableDiv.style.zIndex = 1;
 };
 
 export const standardDeviation = (values) => {

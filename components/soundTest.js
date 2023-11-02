@@ -940,7 +940,8 @@ export const displayWhatIsSavedInDatabase = (
   elems,
   ir,
   isLoudspeakerCalibration = true,
-  title = "Impulse response saved in the database"
+  title = "Impulse response saved in the database",
+  filteredMLSRange
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -950,7 +951,13 @@ export const displayWhatIsSavedInDatabase = (
   elems.soundTestPlots.appendChild(plotCanvas);
   elems.citation.style.visibility = "visible";
 
-  plotImpulseResponse(plotCanvas, ir, title, isLoudspeakerCalibration);
+  plotImpulseResponse(
+    plotCanvas,
+    ir,
+    title,
+    filteredMLSRange,
+    isLoudspeakerCalibration
+  );
 };
 
 // The table has 3 colums.
