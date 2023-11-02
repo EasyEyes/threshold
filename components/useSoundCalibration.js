@@ -163,6 +163,7 @@ const addDropdownMenu = (elems, options, title, language) => {
   p.style.fontSize = "1rem";
 
   // add  to the page
+  elems.subtitle.innerHTML = "";
   elems.subtitle.appendChild(p);
   elems.subtitle.appendChild(dropdown);
 
