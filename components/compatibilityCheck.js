@@ -750,6 +750,7 @@ export const displayCompatibilityMessage = async (
     }
 
     const languageWrapper = document.createElement("div");
+    const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
     if (reader.read("_languageSelectionByParticipantBool")[0]) {
       // create language selection dropdown
       const LanguageTitle = document.createElement("h3");
@@ -784,7 +785,11 @@ export const displayCompatibilityMessage = async (
         handleNewMessage(
           newMsg.msg,
           "compatibility-message",
-          rc.language.value
+          rc.language.value,
+          needPhoneSurvey,
+          compatibilityCheckPeer,
+          needAnySmartphone,
+          needCalibratedSmartphoneMicrophone
         );
       });
 
@@ -798,61 +803,29 @@ export const displayCompatibilityMessage = async (
     }
 
     document.body.appendChild(messageWrapper);
-
     if (compatibilityCheckPeer) {
       const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
+      // add id to the QR code
+      compatiblityCheckQR.id = "compatibility-qr";
       compatiblityCheckQR.style.maxHeight = "150px";
       compatiblityCheckQR.style.maxWidth = "150px";
       compatiblityCheckQR.style.alignSelf = "left";
       compatiblityCheckQR.style.padding = "0px";
+      // move QR code 15px to the left from its current position
+      compatiblityCheckQR.style.marginLeft = "-13px";
       const compatibilityCheckQRExplanation = document.createElement("p");
-      compatibilityCheckQRExplanation.style.marginBottom = "0px";
-      let messageForQr;
-      const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
-      console.log("needPhoneSurvey", needPhoneSurvey);
-      if (needAnySmartphone && needCalibratedSmartphoneMicrophone) {
-        messageForQr =
-          readi18nPhrases("RC_inDescription", rc.language.value) + " ";
-        needPhoneSurvey
-          ? (messageForQr += readi18nPhrases(
-              "RC_needPhoneSurvey",
-              rc.language.value
-            ))
-          : (messageForQr += readi18nPhrases(
-              "RC_needPhoneMicrophoneAndKeypad",
-              rc.language.value
-            ));
-      } else if (needCalibratedSmartphoneMicrophone) {
-        messageForQr =
-          readi18nPhrases("RC_inDescription", rc.language.value) + " ";
-        needPhoneSurvey
-          ? (messageForQr += readi18nPhrases(
-              "RC_needPhoneSurvey",
-              rc.language.value
-            ))
-          : (messageForQr += readi18nPhrases(
-              "RC_needPhoneMicrophone",
-              rc.language.value
-            ));
-      } else if (needAnySmartphone) {
-        messageForQr =
-          readi18nPhrases("RC_inDescription", rc.language.value) + " ";
-        needPhoneSurvey
-          ? (messageForQr += readi18nPhrases(
-              "RC_needPhoneSurvey",
-              rc.language.value
-            ))
-          : (messageForQr += readi18nPhrases(
-              "RC_needPhoneKeypad",
-              rc.language.value
-            ));
-      }
+      // add id to the QR code explanation
+      compatibilityCheckQRExplanation.id = "compatibility-qr-explanation";
+      compatibilityCheckQRExplanation.style.marginBottom = "10px";
+      compatibilityCheckQRExplanation.style.marginTop = "10px";
+      let messageForQr = getMessageForQR(
+        needAnySmartphone,
+        needCalibratedSmartphoneMicrophone,
+        needPhoneSurvey,
+        rc.language.value
+      );
+      compatibilityCheckQRExplanation.innerText = messageForQr;
 
-      compatibilityCheckQRExplanation.innerText =
-        "\n" +
-        messageForQr +
-        " " +
-        readi18nPhrases("RC_needsPointCameraAtQR", rc.language.value);
       messageWrapper.append(compatibilityCheckQRExplanation);
       messageWrapper.append(compatiblityCheckQR);
       const displayUpdate = document.createElement("p");
@@ -920,6 +893,66 @@ export const displayCompatibilityMessage = async (
     buttonWrapper.appendChild(proceedButton);
     messageWrapper.appendChild(buttonWrapper);
   });
+};
+
+const getMessageForQR = (
+  needAnySmartphone,
+  needCalibratedSmartphoneMicrophone,
+  needPhoneSurvey,
+  language
+) => {
+  let messageForQr = "";
+  if (needAnySmartphone && needCalibratedSmartphoneMicrophone) {
+    messageForQr = readi18nPhrases("RC_inDescription", language) + " ";
+    needPhoneSurvey
+      ? (messageForQr += readi18nPhrases("RC_needPhoneSurvey", language))
+      : (messageForQr += readi18nPhrases(
+          "RC_needPhoneMicrophoneAndKeypad",
+          language
+        ));
+  } else if (needCalibratedSmartphoneMicrophone) {
+    messageForQr = readi18nPhrases("RC_inDescription", language) + " ";
+    needPhoneSurvey
+      ? (messageForQr += readi18nPhrases("RC_needPhoneSurvey", language))
+      : (messageForQr += readi18nPhrases("RC_needPhoneMicrophone", language));
+  } else if (needAnySmartphone) {
+    messageForQr = readi18nPhrases("RC_inDescription", language) + " ";
+    needPhoneSurvey
+      ? (messageForQr += readi18nPhrases("RC_needPhoneSurvey", language))
+      : (messageForQr += readi18nPhrases("RC_needPhoneKeypad", language));
+  }
+  return (
+    messageForQr + " " + readi18nPhrases("RC_needsPointCameraAtQR", language)
+  );
+};
+const checkModelNumberandNameForIOS = (modelNumber, modelName) => {
+  // check if the model number has 5 characters
+  //  check if first character of model number is the letter "A"
+  // check if the last 4 characters of the model number are numbers
+
+  const modelNumberLength = modelNumber.length;
+  if (modelNumberLength !== 5) {
+    return false;
+  }
+  if (modelNumber[0] !== "A") {
+    return false;
+  }
+  const lastFourCharacters = modelNumber.slice(1);
+  const lastFourCharactersAreNumbers = /^\d+$/.test(lastFourCharacters);
+  if (!lastFourCharactersAreNumbers) {
+    return false;
+  }
+
+  // check if the model name starts with "iPhone"
+
+  const modelNameLength = modelName.length;
+  if (modelNameLength < 6) {
+    return false;
+  }
+  if (modelName.slice(0, 6) !== "iPhone") {
+    return false;
+  }
+  return true;
 };
 
 const isSmartphoneInDatabase = async (
@@ -1005,27 +1038,37 @@ const isSmartphoneInDatabase = async (
 
   const procceed = await new Promise((resolve) => {
     checkButton.addEventListener("click", async () => {
+      checkButton.innerHTML = "Loading...";
       const modelNumber = modelNumberInput.value;
       const modelName = modelNameInput.value;
       if (modelName === "" || modelNumber === "") {
         alert("Please enter the model number and name of the device");
       } else {
         if (needPhoneSurvey) {
-          // add microphone details to microphoneInfo.phoneSurvey array
-          microphoneInfo.phoneSurvey = {
-            smartphoneManufacturer: OEM,
-            smartphoneModelName: modelName,
-            smartphoneModelNumber: modelNumber,
-            smartphoneInfoFrom51Degrees: deviceDetails,
-          };
-          p.innerHTML = readi18nPhrases("RC_smartphoneSurveyEnd", lang);
-          // center p
-          messageWrapper.style.textAlign = "center";
-          modelNumberInput.remove();
-          modelNameInput.remove();
-          checkButton.remove();
-          img.remove();
-          resolve(true);
+          // check if model number and name are in the correct format
+          const valid = checkModelNumberandNameForIOS(modelNumber, modelName);
+          if (!valid) {
+            p.innerHTML =
+              instructionText +
+              "<br>" +
+              readi18nPhrases("RC_wrongIPhoneModel", lang);
+          } else {
+            // add microphone details to microphoneInfo.phoneSurvey array
+            microphoneInfo.phoneSurvey = {
+              smartphoneManufacturer: OEM,
+              smartphoneModelName: modelName,
+              smartphoneModelNumber: modelNumber,
+              smartphoneInfoFrom51Degrees: deviceDetails,
+            };
+            p.innerHTML = readi18nPhrases("RC_smartphoneSurveyEnd", lang);
+            // center p
+            messageWrapper.style.textAlign = "center";
+            modelNumberInput.remove();
+            modelNameInput.remove();
+            checkButton.remove();
+            img.remove();
+            resolve(true);
+          }
         } else {
           const exists = await doesMicrophoneExistInFirestore(
             modelNumber,
@@ -1053,6 +1096,7 @@ const isSmartphoneInDatabase = async (
           }
         }
       }
+      checkButton.innerHTML = needPhoneSurvey ? "Proceed" : "Check";
     });
   });
 
@@ -1079,23 +1123,47 @@ const handleLanguage = (lang, rc, useEnglishNames = true) => {
   console.log("languageCode", languageCode);
 };
 
-const handleNewMessage = (msg, msgID, lang) => {
+const handleNewMessage = (
+  msg,
+  msgID,
+  lang,
+  needPhoneSurvey = false,
+  compatibilityCheckPeer = null,
+  needAnySmartphone = false,
+  needCalibratedSmartphoneMicrophone = false
+) => {
   var displayMsg = "";
   msg.forEach((item) => {
     displayMsg += item;
     displayMsg += " ";
   });
   let elem = document.getElementById(msgID);
-  elem.innerHTML = displayMsg;
+  if (elem) elem.innerHTML = displayMsg;
 
   let titleElem = document.getElementById("compatibility-title");
-  titleElem.innerHTML = readi18nPhrases("EE_compatibilityTitle", lang);
+  if (titleElem)
+    titleElem.innerHTML = readi18nPhrases("EE_compatibilityTitle", lang);
 
   let languageTitleElem = document.getElementById("language-title");
-  languageTitleElem.innerHTML = readi18nPhrases("EE_languageChoose", lang);
+  if (languageTitleElem)
+    languageTitleElem.innerHTML = readi18nPhrases("EE_languageChoose", lang);
 
   let proceedButton = document.getElementById("procced-btn");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", lang);
+  if (proceedButton)
+    proceedButton.innerHTML = readi18nPhrases("T_proceed", lang);
+
+  if (needPhoneSurvey || compatibilityCheckPeer) {
+    let qrCodeExplanation = document.getElementById(
+      "compatibility-qr-explanation"
+    );
+    let messageForQr = getMessageForQR(
+      needAnySmartphone,
+      needCalibratedSmartphoneMicrophone,
+      needPhoneSurvey,
+      lang
+    );
+    qrCodeExplanation.innerText = messageForQr;
+  }
 };
 
 export const getCompatibilityInfoForScientistPage = (parsed) => {
