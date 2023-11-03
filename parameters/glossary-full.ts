@@ -219,6 +219,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundSmoothPowerBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundSmoothPowerBool (default TRUE) specifies that _calibrateSoundSmoothOctaves first converts to power, then computes average power, and then coverts back to original units (e.g. dB).",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_calibrateTimingNumberAndSecs",
     availability: "now",
     example: "",
