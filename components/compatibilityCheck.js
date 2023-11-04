@@ -103,17 +103,25 @@ const getInstructionText = (
     ? needPhoneSurvey
       ? readi18nPhrases("RC_surveyPhoneModel", language)
           .replace("ooo", thisDevice.PlatformName)
+          .replace("OOO", thisDevice.PlatformName)
           .replace("mmm", preferredModelNumberText.toLocaleLowerCase())
+          .replace("MMM", preferredModelNumberText)
       : readi18nPhrases("RC_needPhoneModel", language)
     : readi18nPhrases("RC_needModelNumberAndName", language);
   console.log("needModelNumber", needModelNumber);
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
+    .replace("MMM", preferredModelNumber)
     .replace("xxx", thisDevice.OEM === "Unknown" ? "unknown" : thisDevice.OEM)
+    .replace("XXX", thisDevice.OEM === "Unknown" ? "Unknown" : thisDevice.OEM)
     .replace(
       "yyy",
       thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType
+    )
+    .replace(
+      "YYY",
+      thisDevice.DeviceType === "Unknown" ? "Device" : thisDevice.DeviceType
     );
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
@@ -994,23 +1002,22 @@ const isSmartphoneInDatabase = async (
       messageWrapper.appendChild(img);
     }
   }
+  const { preferredModelNumber } = getDeviceDetails(
+    deviceDetails.platformName,
+    lang
+  );
 
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
   modelNumberInput.name = "modelNumberInput";
-  modelNumberInput.placeholder = readi18nPhrases("RC_modelNumber", lang);
+  modelNumberInput.placeholder = preferredModelNumber;
 
   const modelNameInput = document.createElement("input");
   modelNameInput.type = "text";
   modelNameInput.id = "modelNameInput";
   modelNameInput.name = "modelNameInput";
   modelNameInput.placeholder = readi18nPhrases("RC_modelName", lang);
-
-  const { preferredModelNumber } = getDeviceDetails(
-    deviceDetails.platformName,
-    lang
-  );
 
   const instructionText = getInstructionText(
     deviceDetails,
@@ -1025,7 +1032,7 @@ const isSmartphoneInDatabase = async (
 
   const checkButton = document.createElement("button");
   checkButton.classList.add(...["btn", "btn-success"]);
-  checkButton.innerText = readi18nPhrases("T_PROCEED", lang);
+  checkButton.innerText = readi18nPhrases("T_proceed", lang);
   checkButton.style.width = "fit-content";
 
   const modelNumberWrapper = document.createElement("div");
@@ -1096,7 +1103,7 @@ const isSmartphoneInDatabase = async (
           }
         }
       }
-      checkButton.innerHTML = readi18nPhrases("T_PROCEED", lang);
+      checkButton.innerHTML = readi18nPhrases("T_proceed", lang);
     });
   });
 

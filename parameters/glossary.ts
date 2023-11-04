@@ -175,15 +175,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.3333333",
     explanation:
-      "_calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing.",
-  },
-  _calibrateSoundSmoothPowerBool: {
-    name: "_calibrateSoundSmoothPowerBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "_calibrateSoundSmoothPowerBool (default TRUE) specifies that _calibrateSoundSmoothOctaves first converts to power, then computes average power, and then coverts back to original units (e.g. dB).",
+      "_calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing. We smooth by replacing each power gain by the average power gain within the specified bandwidth, centered, in log frequency, about the frequency whose gain we are smoothing.",
   },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",
