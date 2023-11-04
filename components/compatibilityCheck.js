@@ -1003,10 +1003,11 @@ const isSmartphoneInDatabase = async (
     }
   }
   const { preferredModelNumber } = getDeviceDetails(
-    deviceDetails.platformName,
+    deviceDetails.PlatformName,
     lang
   );
-
+  console.log("platformName", deviceDetails.PlatformName);
+  console.log("preferredModelNumber", preferredModelNumber);
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
