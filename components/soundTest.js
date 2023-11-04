@@ -1116,7 +1116,7 @@ export const display1000HzParametersTable = (parameters) => {
     RMSError: parameters.RMSError.toFixed(1) + " dB",
   };
   const table = document.createElement("table");
-  table.style.fontSize = "12px";
+  table.style.fontSize = "15px";
   table.setAttribute("id", "parametersTable");
   const thead = document.createElement("thead");
   const tbody = document.createElement("tbody");
@@ -1161,7 +1161,7 @@ export const displaySummarizedTransducerTable = (
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   const tbody = document.createElement("tbody");
-  table.style.fontSize = "12px";
+  table.style.fontSize = "15px";
   // row 1 includes "Loudspeaker" and "Microphone"
   const tr1 = document.createElement("tr");
   const th1 = document.createElement("th");
