@@ -74,15 +74,65 @@ export const runCombinationCalibration = async (
     : readi18nPhrases("RC_microphoneCalibration", language);
 
   if (isLoudspeakerCalibration) {
-    const isSmartPhone = !calibrateMicrophonesBool.current;
+    const isParticipant = !calibrateMicrophonesBool.current;
     adjustPageNumber(elems.title, [
       { replace: /111/g, with: isLoudspeakerCalibration ? 1 : 0 },
-      { replace: /222/g, with: isSmartPhone ? 3 : 5 },
+      { replace: /222/g, with: isParticipant ? 3 : 5 },
     ]);
-    if (isSmartPhone) {
+    if (isParticipant) {
       await runSmartphoneCalibration(elems, isLoudspeakerCalibration, language);
     } else {
-      await runUSBCalibration(elems, isLoudspeakerCalibration, language);
+      // await runUSBCalibration(elems, isLoudspeakerCalibration, language);
+      const options = [
+        readi18nPhrases("RC_smartphone", language),
+        readi18nPhrases("RC_usbMicrophone", language),
+        readi18nPhrases("RC_none", language),
+      ];
+      const dropdownTitle = readi18nPhrases(
+        "RC_selectMicrophoneTypeToBeCalibrated",
+        language
+      );
+      const { dropdown, proceedButton, p } = addDropdownMenu(
+        elems,
+        options,
+        dropdownTitle,
+        language
+      );
+      adjustPageNumber(elems.title, [
+        { replace: /111/g, with: 0 },
+        { replace: /222/g, with: 5 },
+      ]);
+      await new Promise((resolve) => {
+        proceedButton.addEventListener("click", async () => {
+          if (dropdown.value === "None") {
+            showExperimentEnding();
+          }
+          const isSmartPhone = dropdown.value === "Smartphone";
+          adjustPageNumber(elems.title, [
+            { replace: 0, with: 1 },
+            { replace: 5, with: isSmartPhone ? 3 : 5 },
+          ]);
+          removeElements([dropdown, proceedButton, p]);
+          elems.subtitle.innerHTML = isLoudspeakerCalibration
+            ? isSmartPhone
+              ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+              : readi18nPhrases("RC_usingUSBMicrophone", language)
+            : elems.subtitle.innerHTML;
+          elems.subtitle.style.fontSize = "1.1rem";
+
+          if (isSmartPhone) {
+            await runSmartphoneCalibration(
+              elems,
+              isLoudspeakerCalibration,
+              language
+            );
+          } else {
+            await runUSBCalibration(elems, isLoudspeakerCalibration, language);
+          }
+
+          resolve();
+        });
+      });
     }
   } else {
     const options = [
@@ -636,12 +686,17 @@ const runSmartphoneCalibration = async (
 ) => {
   // await startCalibration(elems, isLoudspeakerCalibration, language, true, isLoudspeakerCalibration? null: allHzCalibrationResults.knownIr);
   if (isLoudspeakerCalibration) {
-    await getLoudspeakerDeviceDetailsFromUserForSmartphone(
+    await getSmartPhoneMicrophoneDetailsFromUser(
       elems,
       language,
-      true,
       isLoudspeakerCalibration
     );
+    // await getLoudspeakerDeviceDetailsFromUserForSmartphone(
+    //   elems,
+    //   language,
+    //   true,
+    //   isLoudspeakerCalibration
+    // );
   } else {
     await getSmartPhoneMicrophoneDetailsFromUser(
       elems,
@@ -671,7 +726,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   const p = document.createElement("p");
   p.innerText = `Please enter the model number and name of the smartphone you are using for this calibration.`;
-
+  p.style.fontWeight = "normal";
   // add a proceed button
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -685,24 +740,61 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
+      proceedButton.innerHTML = "Loading...";
       if (modelNameInput.value === "" || modelNumberInput.value === "") {
         alert("Please fill out all the fields");
       } else {
-        microphoneInfo.current = {
-          micFullName: modelNameInput.value,
-          micFullSerialNumber: modelNumberInput.value,
-        };
-
-        removeElements([p, proceedButton, modelNameInput, modelNumberInput]);
-        adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
-        await startCalibration(
-          elems,
-          isLoudspeakerCalibration,
-          language,
-          true,
-          isLoudspeakerCalibration ? null : loudspeakerIR.current
-        );
-        resolve();
+        if (isLoudspeakerCalibration) {
+          const micSerialNumber = modelNumberInput.value;
+          const micManufacturer = modelNameInput.value
+            .toLowerCase()
+            .split(" ")
+            .join("");
+          if (
+            (micManufacturer === "umik-1" || micManufacturer === "umik-2") &&
+            (await doesMicrophoneExistInFirestore(micSerialNumber, "minidsp"))
+          ) {
+            removeElements([
+              p,
+              proceedButton,
+              modelNameInput,
+              modelNumberInput,
+            ]);
+            adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+            microphoneInfo.current = {
+              micFullName: modelNameInput.value,
+              micFullSerialNumber: modelNumberInput.value,
+            };
+            await getLoudspeakerDeviceDetailsFromUserForSmartphone(
+              elems,
+              language,
+              true,
+              isLoudspeakerCalibration
+            );
+            resolve();
+          } else {
+            p.innerHTML = readi18nPhrases(
+              "RC_microphoneNotInCalibrationLibrary",
+              language
+            ).replace("xxx", modelNameInput.value);
+            proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+          }
+        } else {
+          removeElements([p, proceedButton, modelNameInput, modelNumberInput]);
+          adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+          microphoneInfo.current = {
+            micFullName: modelNameInput.value,
+            micFullSerialNumber: modelNumberInput.value,
+          };
+          await startCalibration(
+            elems,
+            isLoudspeakerCalibration,
+            language,
+            true,
+            isLoudspeakerCalibration ? null : loudspeakerIR.current
+          );
+          resolve();
+        }
       }
     });
   });

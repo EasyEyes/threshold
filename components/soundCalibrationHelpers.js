@@ -110,11 +110,10 @@ export const getInstructionText = (
           `${microphoneInfo.current.micrFullManufacturerName} ${microphoneInfo.current.micFullName}`
         ) + "<br> <br>"
     : "";
-  const needModelNumber = isSmartPhone
-    ? needPhoneSurvey
-      ? readi18nPhrases("RC_needPhoneModel", language)
-      : readi18nPhrases("RC_needPhoneModel", language)
-    : readi18nPhrases("RC_needModelNumberAndName", language);
+  const needModelNumber = readi18nPhrases(
+    "RC_needModelNumberAndName",
+    language
+  );
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
