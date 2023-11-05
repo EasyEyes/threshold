@@ -764,6 +764,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
             microphoneInfo.current = {
               micFullName: modelNameInput.value,
               micFullSerialNumber: modelNumberInput.value,
+              micrFullManufacturerName: "miniDSP",
             };
             await getLoudspeakerDeviceDetailsFromUserForSmartphone(
               elems,
@@ -922,12 +923,21 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   microphoneInfo.current.micFullName = isSmartPhone
     ? microphoneInfo.current.micModelName
     : microphoneInfo.current.micFullName;
+  if (microphoneInfo.current.micFullName === "umik-1") {
+    microphoneInfo.current.micFullName = "UMIK-1";
+  }
+  if (microphoneInfo.current.micFullName === "umik-2") {
+    microphoneInfo.current.micFullName = "UMIK-2";
+  }
   microphoneInfo.current.micFullSerialNumber = isSmartPhone
     ? microphoneInfo.current.ID
     : microphoneInfo.current.micFullSerialNumber;
   microphoneInfo.current.micrFullManufacturerName = isSmartPhone
     ? microphoneInfo.current.OEM
     : microphoneInfo.current.micrFullManufacturerName;
+  if (microphoneInfo.current.micrFullManufacturerName === "minidsp") {
+    microphoneInfo.current.micrFullManufacturerName = "miniDSP";
+  }
   actualSamplingRate.current =
     soundCalibrationResults.current.audioInfo?.sourceSampleRate;
   microphoneActualSamplingRate.current =
@@ -951,7 +961,9 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     const ID = microphoneInfo.current.ID;
     // const FreqGain = await readFrqGain(ID, OEM);
     const FreqGain = await readFrqGainFromFirestore(ID, OEM);
-    allHzCalibrationResults.microphoneGain = FreqGain ? FreqGain : {};
+    allHzCalibrationResults.microphoneGain = FreqGain
+      ? FreqGain
+      : { Freq: [], Gain: [] };
     allHzCalibrationResults.filteredMLSRange =
       soundCalibrationResults.current.filteredMLSRange;
     if (calibrateSoundBackgroundSecs.current > 0) {
