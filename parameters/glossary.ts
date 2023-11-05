@@ -145,6 +145,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundIRSec (default 0.1) specifies the desired length of the impulse response (IR). Correcting low frequencies or a big room requires a long impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
   },
+  _calibrateSoundPowerBinDesiredSec: {
+    name: "_calibrateSoundPowerBinDesiredSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.2",
+    explanation:
+      "🕑 _calibrateSoundPowerBinDesiredSec (default 0.2) sets the bin size for estimation of power to plot power vs. time during each MLS recording, filtered or unfiltered.",
+  },
   _calibrateSoundSamplingDesiredBits: {
     name: "_calibrateSoundSamplingDesiredBits",
     availability: "now",
