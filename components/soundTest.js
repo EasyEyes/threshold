@@ -19,6 +19,7 @@ import {
   actualSamplingRate,
   microphoneActualSamplingRate,
   allHzCalibrationResults,
+  webAudioDeviceNames,
 } from "./global";
 import {
   plotForAllHz,
@@ -1237,6 +1238,18 @@ export const displaySummarizedTransducerTable = (
   tr6.appendChild(td8);
   tr6.appendChild(td9);
 
+  if (webAudioDeviceNames.loudspeaker && webAudioDeviceNames.microphone) {
+    const tr8 = document.createElement("tr");
+    const td12 = document.createElement("td");
+    const td13 = document.createElement("td");
+    td12.innerHTML = webAudioDeviceNames.loudspeaker;
+    td13.innerHTML = webAudioDeviceNames.microphone;
+    tr8.appendChild(td12);
+    tr8.appendChild(td13);
+    tr8.style.lineHeight = "0.8";
+    tbody.appendChild(tr8);
+  }
+
   tbody.appendChild(tr6);
   if (samplingHz.length > 0) {
     const tr7 = document.createElement("tr");
@@ -1249,6 +1262,7 @@ export const displaySummarizedTransducerTable = (
       `, ${actualBitsPerSample.current} bits`;
     tr7.appendChild(td10);
     tr7.appendChild(td11);
+    tr7.style.lineHeight = "0.8";
     tbody.appendChild(tr7);
   }
 
@@ -1263,6 +1277,9 @@ export const displaySummarizedTransducerTable = (
   tr4.style.lineHeight = "0.8";
   tr5.style.lineHeight = "0.8";
   tr6.style.lineHeight = "0.8";
+
+  // max width of the table: 300px. wrap the texts
+  table.style.maxWidth = "400px";
 
   table.appendChild(thead);
   table.appendChild(tbody);

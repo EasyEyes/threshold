@@ -35,6 +35,7 @@ import {
   timeToCalibrate,
   timeoutSec,
   authorEmail,
+  webAudioDeviceNames,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -293,13 +294,30 @@ const getUSBMicrophoneDetailsFromUser = async (
       mics.forEach((mic) => {
         if (mic.label.includes("Umik") || mic.label.includes("UMIK")) {
           micName = mic.label.replace("Microphone", "");
+          webAudioDeviceNames.microphone = micName;
+        }
+      });
+      if (webAudioDeviceNames.microphone === null) {
+        mics.forEach((mic) => {
+          if (mic.label.includes("Default")) {
+            webAudioDeviceNames.microphone = micName;
+          }
+        });
+      }
+      const loudspeaker = devices.filter(
+        (device) => device.kind === "audiooutput"
+      );
+      console.log(loudspeaker);
+      loudspeaker.forEach((speaker) => {
+        if (speaker.label.includes("Default")) {
+          webAudioDeviceNames.loudspeaker = speaker.label;
         }
       });
     }
   } catch (err) {
     console.log(err);
   }
-
+  console.log(webAudioDeviceNames);
   const p = document.createElement("p");
   p.innerHTML = readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
     "UUU",
@@ -848,6 +866,7 @@ const startCalibration = async (
     soundMessageId: "soundMessage",
     titleDisplayId: "soundTitle",
     timeToCalibrateId: "timeToCalibrate",
+    soundSubtitleId: "soundSubtitle",
     calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
     calibrateSoundSamplingDesiredBits:

@@ -740,6 +740,7 @@ export const plotForAllHz = (
 
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
+  tableDiv.style.lineHeight = "0.8";
   if (showSoundParametersBool.current) {
     const filteredDataPoints = convMergedDataPoints.filter(
       (point) =>
@@ -791,9 +792,8 @@ export const plotForAllHz = (
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
   const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 20) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 18) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
-
   // make the table on top of the canvas
   tableDiv.style.zIndex = 1;
 };
@@ -943,6 +943,7 @@ export const plotImpulseResponse = (
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
   tableDiv.appendChild(table);
+  tableDiv.style.lineHeight = "0.8";
   if (showSoundParametersBool.current) {
     const Min = Math.round(filteredMLSRange.Min * 10) / 10;
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
@@ -970,7 +971,7 @@ export const plotImpulseResponse = (
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
   const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height + 40) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height + 41) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
 
   // make the table on top of the canvas

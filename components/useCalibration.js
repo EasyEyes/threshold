@@ -368,7 +368,6 @@ export const calibrateAudio = async (reader) => {
     elems.yesButton.style.display = "none";
     elems.displayUpdate.style.display = "none";
     elems.subtitle.innerHTML = "";
-
     //show plots of the loudspeaker calibration
     if (
       calibrateSoundLevel &&
@@ -451,7 +450,7 @@ export const calibrateAudio = async (reader) => {
         allHzCalibrationResults.filteredMLSRange.component
       );
     }
-
+    let showLoudSpeakerDoneMessage = true;
     // MICROPHONE CALIBRATION
     while (calibrateMicrophonesBool.current) {
       if (showSoundTestPageBool) {
@@ -470,10 +469,16 @@ export const calibrateAudio = async (reader) => {
       elems.navContainer.style.display = "flex";
       elems.title.innerHTML = "";
       elems.subtitle.innerHTML = "";
-      elems.message.innerHTML = readi18nPhrases(
-        "RC_soundCalibrationMicrophoneDone",
-        rc.language.value
-      );
+      elems.message.innerHTML = showLoudSpeakerDoneMessage
+        ? readi18nPhrases(
+            "RC_soundCalibrationLoudspeakerDone",
+            rc.language.value
+          )
+        : readi18nPhrases(
+            "RC_soundCalibrationMicrophoneDone",
+            rc.language.value
+          );
+      showLoudSpeakerDoneMessage = false;
 
       const calibration = await new Promise(async (resolve) => {
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
