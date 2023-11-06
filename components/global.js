@@ -206,6 +206,7 @@ export const status = {
   ////
   trialCorrect_thisBlock: 0, // Correct trials in this block
   trialCompleted_thisBlock: 0, // Total completed trials in this block
+  nthTrialByCondition: new Map(), // Which trial we're on, for each condition
 };
 
 // SKIP
