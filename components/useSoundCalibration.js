@@ -80,7 +80,12 @@ export const runCombinationCalibration = async (
       { replace: /222/g, with: isParticipant ? 3 : 5 },
     ]);
     if (isParticipant) {
-      await runSmartphoneCalibration(elems, isLoudspeakerCalibration, language);
+      await runSmartphoneCalibration(
+        elems,
+        isLoudspeakerCalibration,
+        language,
+        true
+      );
     } else {
       // await runUSBCalibration(elems, isLoudspeakerCalibration, language);
       const options = [
@@ -124,7 +129,8 @@ export const runCombinationCalibration = async (
             await runSmartphoneCalibration(
               elems,
               isLoudspeakerCalibration,
-              language
+              language,
+              false
             );
           } else {
             await runUSBCalibration(elems, isLoudspeakerCalibration, language);
@@ -176,7 +182,8 @@ export const runCombinationCalibration = async (
           await runSmartphoneCalibration(
             elems,
             isLoudspeakerCalibration,
-            language
+            language,
+            false
           );
         } else {
           await runUSBCalibration(elems, isLoudspeakerCalibration, language);
@@ -682,21 +689,25 @@ const showSmartphoneCalibrationInstructions = async (
 const runSmartphoneCalibration = async (
   elems,
   isLoudspeakerCalibration,
-  language
+  language,
+  isParticipant = false
 ) => {
   // await startCalibration(elems, isLoudspeakerCalibration, language, true, isLoudspeakerCalibration? null: allHzCalibrationResults.knownIr);
   if (isLoudspeakerCalibration) {
-    await getSmartPhoneMicrophoneDetailsFromUser(
-      elems,
-      language,
-      isLoudspeakerCalibration
-    );
-    // await getLoudspeakerDeviceDetailsFromUserForSmartphone(
-    //   elems,
-    //   language,
-    //   true,
-    //   isLoudspeakerCalibration
-    // );
+    if (isParticipant) {
+      await getLoudspeakerDeviceDetailsFromUserForSmartphone(
+        elems,
+        language,
+        true,
+        isLoudspeakerCalibration
+      );
+    } else {
+      await getSmartPhoneMicrophoneDetailsFromUser(
+        elems,
+        language,
+        isLoudspeakerCalibration
+      );
+    }
   } else {
     await getSmartPhoneMicrophoneDetailsFromUser(
       elems,

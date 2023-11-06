@@ -504,28 +504,112 @@ export const plotForAllHz = (
   }
 
   let minY;
+  let minYAt1000Hz;
   if (calibrationGoal !== "system") {
-    minY = Math.min(
-      ...unconvMergedDataPoints.map((point) => point.y),
-      ...convMergedDataPoints.map((point) => point.y),
-      ...backgroundMergedDataPoints.map((point) => point.y),
-      ...digitalMLSPoints.map((point) => point.y),
-      ...filteredDigitalMLSPoints.map((point) => point.y),
-      ...microphoneGainPoints.map((point) => point.y),
-      ...expectedCorrectionPoints.map((point) => point.y)
+    // minY = Math.min(
+    //   ...unconvMergedDataPoints.map((point) => point.y),
+    //   ...convMergedDataPoints.map((point) => point.y),
+    //   ...backgroundMergedDataPoints.map((point) => point.y),
+    //   ...digitalMLSPoints.map((point) => point.y),
+    //   ...filteredDigitalMLSPoints.map((point) => point.y),
+    //   ...microphoneGainPoints.map((point) => point.y),
+    //   ...expectedCorrectionPoints.map((point) => point.y)
+    // );
+    const gainAt1000Hz_unconv = findGainatFrequency(
+      unconvMergedDataPoints.map((point) => point.x),
+      unconvMergedDataPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_conv = findGainatFrequency(
+      convMergedDataPoints.map((point) => point.x),
+      convMergedDataPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_background = findGainatFrequency(
+      backgroundMergedDataPoints.map((point) => point.x),
+      backgroundMergedDataPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_digitalMLS = findGainatFrequency(
+      digitalMLSPoints.map((point) => point.x),
+      digitalMLSPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_filteredDigitalMLS = findGainatFrequency(
+      filteredDigitalMLSPoints.map((point) => point.x),
+      filteredDigitalMLSPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_microphoneGain = findGainatFrequency(
+      microphoneGainPoints.map((point) => point.x),
+      microphoneGainPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_expectedCorrection = findGainatFrequency(
+      expectedCorrectionPoints.map((point) => point.x),
+      expectedCorrectionPoints.map((point) => point.y),
+      1000
+    );
+    minYAt1000Hz = Math.min(
+      gainAt1000Hz_unconv,
+      gainAt1000Hz_conv,
+      gainAt1000Hz_background,
+      gainAt1000Hz_digitalMLS,
+      gainAt1000Hz_filteredDigitalMLS,
+      gainAt1000Hz_microphoneGain,
+      gainAt1000Hz_expectedCorrection
     );
   } else {
-    minY = Math.min(
-      ...unconvMergedDataPoints.map((point) => point.y),
-      ...convMergedDataPoints.map((point) => point.y),
-      ...backgroundMergedDataPoints.map((point) => point.y),
-      ...digitalMLSPoints.map((point) => point.y),
-      ...filteredDigitalMLSPoints.map((point) => point.y),
-      ...expectedCorrectionPoints.map((point) => point.y)
+    // minY = Math.min(
+    //   ...unconvMergedDataPoints.map((point) => point.y),
+    //   ...convMergedDataPoints.map((point) => point.y),
+    //   ...backgroundMergedDataPoints.map((point) => point.y),
+    //   ...digitalMLSPoints.map((point) => point.y),
+    //   ...filteredDigitalMLSPoints.map((point) => point.y),
+    //   ...expectedCorrectionPoints.map((point) => point.y)
+    // );
+    const gainAt1000Hz_unconv = findGainatFrequency(
+      unconvMergedDataPoints.map((point) => point.x),
+      unconvMergedDataPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_conv = findGainatFrequency(
+      convMergedDataPoints.map((point) => point.x),
+      convMergedDataPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_background = findGainatFrequency(
+      backgroundMergedDataPoints.map((point) => point.x),
+      backgroundMergedDataPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_digitalMLS = findGainatFrequency(
+      digitalMLSPoints.map((point) => point.x),
+      digitalMLSPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_filteredDigitalMLS = findGainatFrequency(
+      filteredDigitalMLSPoints.map((point) => point.x),
+      filteredDigitalMLSPoints.map((point) => point.y),
+      1000
+    );
+    const gainAt1000Hz_expectedCorrection = findGainatFrequency(
+      expectedCorrectionPoints.map((point) => point.x),
+      expectedCorrectionPoints.map((point) => point.y),
+      1000
+    );
+    minYAt1000Hz = Math.min(
+      gainAt1000Hz_unconv,
+      gainAt1000Hz_conv,
+      gainAt1000Hz_background,
+      gainAt1000Hz_digitalMLS,
+      gainAt1000Hz_filteredDigitalMLS,
+      gainAt1000Hz_expectedCorrection
     );
   }
-
-  const lowerEnd = Math.floor(minY / 10) * 10 - 50;
+  // round down minYAt1000Hz to the nearest 10
+  const lowerEnd = Math.floor(minYAt1000Hz / 10) * 10 - 50;
+  // const lowerEnd = Math.floor(minY / 10) * 10 - 50;
 
   // min = -130 max = maxY + 10, stepSize = 10. Set the plotCanvas Height based on the max and min. Every 10 dB is 40 pixels
   const plotCanvasHeight = (maxY - lowerEnd) * 6;
@@ -552,22 +636,22 @@ export const plotForAllHz = (
       plugins: {
         title: {
           display: true,
-          text: title,
+          text: subtitleText + " " + title,
           font: {
             size: 22,
             weight: "normal",
             family: "system-ui",
           },
         },
-        subtitle: {
-          display: true,
-          text: subtitleText,
-          font: {
-            size: 19,
-            family: "system-ui",
-          },
-          align: "center",
-        },
+        // subtitle: {
+        //   display: true,
+        //   text: subtitleText,
+        //   font: {
+        //     size: 19,
+        //     family: "system-ui",
+        //   },
+        //   align: "center",
+        // },
         legend: {
           labels: {
             font: {
@@ -707,7 +791,7 @@ export const plotForAllHz = (
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
   const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 41) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 20) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
 
   // make the table on top of the canvas
@@ -729,7 +813,7 @@ export const plotImpulseResponse = (
   let maxY = Math.max(...IrPoints.map((point) => point.y));
   let minY = Math.min(...IrPoints.map((point) => point.y));
   const plotCanvasHeight =
-    (Math.ceil(maxY / 10) * 10 - Math.floor(minY / 10) * 10 + 80) * 6;
+    (Math.ceil(maxY / 10) * 10 - Math.floor(minY / 10) * 10 + 50) * 6;
 
   plotCanvas.height = plotCanvasHeight;
   plotCanvas.width = 600;
@@ -833,7 +917,7 @@ export const plotImpulseResponse = (
             },
           },
           min: Math.floor(minY / 10) * 10 - 40,
-          max: Math.ceil(maxY / 10) * 10 + 40,
+          max: Math.ceil(maxY / 10) * 10 + 10,
           ticks: {
             stepSize: 10,
             font: {

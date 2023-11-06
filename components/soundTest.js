@@ -1257,12 +1257,12 @@ export const displaySummarizedTransducerTable = (
   tbody.appendChild(tr3);
   tbody.appendChild(tr4);
 
-  tr1.style.lineHeight = "1.2";
-  tr2.style.lineHeight = "1.2";
-  tr3.style.lineHeight = "1.2";
-  tr4.style.lineHeight = "1.2";
-  tr5.style.lineHeight = "1.2";
-  tr6.style.lineHeight = "1.2";
+  tr1.style.lineHeight = "0.8";
+  tr2.style.lineHeight = "0.8";
+  tr3.style.lineHeight = "0.8";
+  tr4.style.lineHeight = "0.8";
+  tr5.style.lineHeight = "0.8";
+  tr6.style.lineHeight = "0.8";
 
   table.appendChild(thead);
   table.appendChild(tbody);

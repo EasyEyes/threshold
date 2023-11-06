@@ -388,7 +388,7 @@ export const calibrateAudio = async (reader) => {
           : calibrateSoundCheck.current
       );
       const title1000Hz = "Sound Level at 1000 Hz";
-      const titleallHz = ["Spectra of MLS recordings"];
+      const titleallHz = ["Correction"];
       displayParameters1000Hz(
         elems,
         soundLevels,
@@ -514,7 +514,7 @@ export const calibrateAudio = async (reader) => {
             );
             //show sound calibration results
             const title1000Hz = "Sound Level at 1000 Hz";
-            const titleallHz = ["Spectra of MLS recordings"];
+            const titleallHz = ["Correction"];
             displayParameters1000Hz(
               elems,
               soundLevels,

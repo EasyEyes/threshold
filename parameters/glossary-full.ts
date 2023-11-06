@@ -179,6 +179,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundPowerDbSDToleratedDb",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _calibrateSoundPowerDbSDToleratedDb (default 1) sets maximum for SD of power (in dB) during the used part of the recording, when recording filtered or unfiltered MLS. If the recording is rejected, then the recording begins again.",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundPowerBinDesiredSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _calibrateSoundPowerBinDesiredSec (default 0.2) sets the bin size for estimation of power to plot power vs. time during each MLS recording, filtered or unfiltered.",
+    type: "numerical",
+    default: "0.2",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundSamplingDesiredBits",
     availability: "now",
     example: "",
