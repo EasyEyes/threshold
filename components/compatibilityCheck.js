@@ -1087,10 +1087,11 @@ const isSmartphoneInDatabase = async (
           checkButton.remove();
           p.remove();
           if (exists) {
-            displayUpdate.innerText = readi18nPhrases(
+            elem.innerText = readi18nPhrases(
               "RC_microphoneIsInCalibrationLibrary",
               lang
-            ).replace("xxx", modelName);
+            ).replace("xxx", OEM + " " + modelName);
+            if (languageWrapper) languageWrapper.remove();
             microphoneInfo.micFullName = modelName;
             microphoneInfo.micFullSerialNumber = modelNumber;
             microphoneInfo.micrFullManufacturerName = OEM;
