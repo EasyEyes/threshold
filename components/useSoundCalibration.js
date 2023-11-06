@@ -1051,7 +1051,6 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     Math.round(freq)
   );
   let IrGain = soundCalibrationResults.current.component.ir.Gain;
-  console.log(IrFreq);
   const correctGain = loudspeakerInfo.current["gainDBSPL"];
   const IrGainAt1000Hz = IrGain[IrFreq.findIndex((freq) => freq === 1000)];
   const difference = Math.round(10 * (IrGainAt1000Hz - correctGain)) / 10;
@@ -1090,6 +1089,16 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   microphoneInfo.current.micrFullManufacturerName = isSmartPhone
     ? microphoneCalibrationResult.current.micInfo.OEM
     : microphoneInfo.current.micrFullManufacturerName;
+  const IrFreq = result?.component.ir.Freq.map((freq) => Math.round(freq));
+  let IrGain = result?.component?.ir.Gain;
+  const correctGain = microphoneInfo.current.gainDBSPL;
+  const IrGainAt1000Hz = IrGain[IrFreq.findIndex((freq) => freq === 1000)];
+  const difference = Math.round(10 * (IrGainAt1000Hz - correctGain)) / 10;
+  IrGain = IrGain.map((gain) => gain - difference);
+  microphoneCalibrationResult.current.component.ir = {
+    Freq: IrFreq,
+    Gain: IrGain,
+  };
   microphoneCalibrationResults.push({
     SoundGainParameters: result.parameters,
     Cal1000HzInDb: result.inDBValues ? result.inDBValues : [],
@@ -1112,7 +1121,10 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     MlsSpectrumFilteredDb_component: result?.component?.psd?.conv?.y,
     MlsSpectrumUnfilteredHz_component: result?.component?.psd?.unconv?.x,
     MlsSpectrumUnfilteredDb_component: result?.component?.psd?.unconv?.y,
-    "Microphone Component IR": result?.component?.ir,
+    "Microphone Component IR": {
+      Freq: IrFreq,
+      Gain: IrGain,
+    },
     "Microphone Component IIR": result?.component?.iir,
     "Loudspeaker Component IR Time Domain":
       result?.component?.ir_in_time_domain,
