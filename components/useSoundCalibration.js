@@ -8,6 +8,8 @@ import {
   calibrateSound1000HzSec,
   calibrateSoundBackgroundSecs,
   calibrateSoundSmoothOctaves,
+  calibrateSoundPowerBinDesiredSec,
+  calibrateSoundPowerDbSDToleratedDb,
   calibrateSoundBurstDb,
   calibrateSoundBurstRecordings,
   calibrateSoundBurstRepeats,
@@ -889,6 +891,9 @@ const startCalibration = async (
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+    calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
+    calibrateSoundPowerDbSDToleratedDb:
+      calibrateSoundPowerDbSDToleratedDb.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
   };
