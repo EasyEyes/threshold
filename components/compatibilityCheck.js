@@ -933,11 +933,17 @@ const getMessageForQR = (
     messageForQr + " " + readi18nPhrases("RC_needsPointCameraAtQR", language)
   );
 };
-const checkModelNumberandNameForIOS = (modelNumber, modelName) => {
+const checkModelNumberandNameForIOS = (
+  modelNumber,
+  modelName,
+  platformName
+) => {
   // check if the model number has 5 characters
   //  check if first character of model number is the letter "A"
   // check if the last 4 characters of the model number are numbers
-
+  if (platformName !== "iOS") {
+    return true;
+  }
   const modelNumberLength = modelNumber.length;
   if (modelNumberLength !== 5) {
     return false;
@@ -1052,15 +1058,19 @@ const isSmartphoneInDatabase = async (
       if (modelName === "" || modelNumber === "") {
         alert("Please enter the model number and name of the device");
       } else {
-        if (needPhoneSurvey) {
-          // check if model number and name are in the correct format
-          const valid = checkModelNumberandNameForIOS(modelNumber, modelName);
-          if (!valid) {
-            p.innerHTML =
-              instructionText +
-              "<br>" +
-              readi18nPhrases("RC_wrongIPhoneModel", lang);
-          } else {
+        // check if model number and name are in the correct format
+        const valid = checkModelNumberandNameForIOS(
+          modelNumber,
+          modelName,
+          deviceDetails.PlatformName
+        );
+        if (!valid) {
+          p.innerHTML =
+            instructionText +
+            "<br>" +
+            readi18nPhrases("RC_wrongIPhoneModel", lang);
+        } else {
+          if (needPhoneSurvey) {
             // add microphone details to microphoneInfo.phoneSurvey array
             microphoneInfo.phoneSurvey = {
               smartphoneManufacturer: OEM,
@@ -1076,32 +1086,32 @@ const isSmartphoneInDatabase = async (
             checkButton.remove();
             img.remove();
             resolve(true);
-          }
-        } else {
-          const exists = await doesMicrophoneExistInFirestore(
-            modelNumber,
-            OEM.toLowerCase().split(" ").join("")
-          );
-          modelNumberInput.remove();
-          modelNameInput.remove();
-          checkButton.remove();
-          p.remove();
-          if (exists) {
-            elem.innerText = readi18nPhrases(
-              "RC_microphoneIsInCalibrationLibrary",
-              lang
-            ).replace("xxx", OEM + " " + modelName);
-            if (languageWrapper) languageWrapper.remove();
-            microphoneInfo.micFullName = modelName;
-            microphoneInfo.micFullSerialNumber = modelNumber;
-            microphoneInfo.micrFullManufacturerName = OEM;
-            resolve(true);
           } else {
-            displayUpdate.innerText = readi18nPhrases(
-              "RC_microphoneNotInCalibrationLibrary",
-              lang
-            ).replace("xxx", modelName);
-            resolve(false);
+            const exists = await doesMicrophoneExistInFirestore(
+              modelNumber,
+              OEM.toLowerCase().split(" ").join("")
+            );
+            modelNumberInput.remove();
+            modelNameInput.remove();
+            checkButton.remove();
+            p.remove();
+            if (exists) {
+              elem.innerText = readi18nPhrases(
+                "RC_microphoneIsInCalibrationLibrary",
+                lang
+              ).replace("xxx", OEM + " " + modelName);
+              if (languageWrapper) languageWrapper.remove();
+              microphoneInfo.micFullName = modelName;
+              microphoneInfo.micFullSerialNumber = modelNumber;
+              microphoneInfo.micrFullManufacturerName = OEM;
+              resolve(true);
+            } else {
+              displayUpdate.innerText = readi18nPhrases(
+                "RC_microphoneNotInCalibrationLibrary",
+                lang
+              ).replace("xxx", modelName);
+              resolve(false);
+            }
           }
         }
       }
