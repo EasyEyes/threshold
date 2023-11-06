@@ -1010,12 +1010,6 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
       };
     }
   }
-  loudspeakerIR.current = JSON.parse(
-    JSON.stringify(soundCalibrationResults.current.component.ir)
-  );
-  allHzCalibrationResults.knownIr = JSON.parse(
-    JSON.stringify(soundCalibrationResults.current.component.ir)
-  );
   soundGainDBSPL.current = soundCalibrationResults.current.parameters.gainDBSPL;
   soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
   allHzCalibrationResults.timestamps =
@@ -1053,6 +1047,23 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   if (calibrateMicrophonesBool.current) {
     loudspeakerInfo.current.authorEmails = authorEmail.current;
   }
+  const IrFreq = soundCalibrationResults.current.component.ir.Freq.map((freq) =>
+    Math.round(freq)
+  );
+  let IrGain = soundCalibrationResults.current.component.ir.Gain;
+  console.log(IrFreq);
+  const correctGain = loudspeakerInfo.current["gainDBSPL"];
+  const IrGainAt1000Hz = IrGain[IrFreq.findIndex((freq) => freq === 1000)];
+  const difference = Math.round(10 * (IrGainAt1000Hz - correctGain)) / 10;
+  IrGain = IrGain.map((gain) => gain - difference);
+  soundCalibrationResults.current.component.ir = { Freq: IrFreq, Gain: IrGain };
+  console.log(soundCalibrationResults.current.component.ir);
+  loudspeakerIR.current = JSON.parse(
+    JSON.stringify(soundCalibrationResults.current.component.ir)
+  );
+  allHzCalibrationResults.knownIr = JSON.parse(
+    JSON.stringify(soundCalibrationResults.current.component.ir)
+  );
   try {
     await saveLoudSpeakerInfoToFirestore(
       loudspeakerInfo.current,

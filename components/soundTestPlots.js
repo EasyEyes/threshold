@@ -978,6 +978,160 @@ export const plotImpulseResponse = (
   tableDiv.style.zIndex = 1;
 };
 
+export const plotRecordings = (
+  plotCanvas,
+  ir,
+  title,
+  filteredMLSRange,
+  isLoudspeakerCalibration
+) => {
+  const IrFreq = ir.Freq;
+  const IrGain = ir.Gain;
+  const IrPoints = IrFreq.filter((x, i) => x <= 16000).map((x, i) => {
+    return { x: x, y: IrGain[i] };
+  });
+  let maxY = Math.max(...IrPoints.map((point) => point.y));
+  let minY = Math.min(...IrPoints.map((point) => point.y));
+  const plotCanvasHeight =
+    (Math.ceil(maxY / 10) * 10 - Math.floor(minY / 10) * 10 + 50) * 6;
+
+  plotCanvas.height = plotCanvasHeight;
+  plotCanvas.width = 600;
+
+  const data = {
+    datasets: [
+      {
+        label: "Impulse response",
+        data: IrPoints,
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        showLine: true,
+      },
+    ],
+  };
+  const config = {
+    type: "line",
+    data: data,
+    options: {
+      responsive: false,
+      // aspectRatio : 1,
+      plugins: {
+        title: {
+          display: true,
+          text: isLoudspeakerCalibration
+            ? "Loudspeaker Profile"
+            : "Microphone Profile",
+          font: {
+            size: 22,
+            weight: "normal",
+            family: "system-ui",
+          },
+        },
+        subtitle: {
+          display: false,
+        },
+        legend: {
+          display: false,
+        },
+      },
+      scales: {
+        x: {
+          type: "logarithmic",
+          position: "bottom",
+          title: {
+            display: true,
+            text: "Frequency (Hz)",
+            font: {
+              size: "19px",
+            },
+          },
+          min: 20,
+          max: 16000,
+          ticks: {
+            callback: function (value, index, values) {
+              const tickValues = [20, 100, 200, 1000, 2000, 10000, 16000];
+              return tickValues.includes(value) ? value : "";
+            },
+            font: {
+              size: 15,
+            },
+          },
+        },
+        y: {
+          type: "linear",
+          position: "left",
+          title: {
+            display: true,
+            text: "Gain (dB)",
+            font: {
+              size: "19px",
+            },
+          },
+          min: Math.floor(minY / 10) * 10 - 40,
+          max: Math.ceil(maxY / 10) * 10 + 10,
+          ticks: {
+            stepSize: 10,
+            font: {
+              size: 15,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const plot = new Chart(plotCanvas, config);
+  const chartArea = plot.chartArea;
+  const table = displaySummarizedTransducerTable(
+    loudspeakerInfo.current,
+    microphoneInfo.current,
+    "",
+    isLoudspeakerCalibration,
+    "goal",
+    "",
+    [calibrateSoundHz.current, calibrateSoundHz.current]
+  );
+  // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
+  const tableDiv = document.createElement("div");
+  tableDiv.appendChild(table);
+  tableDiv.style.lineHeight = "0.8";
+  if (showSoundParametersBool.current) {
+    const Min = Math.round(filteredMLSRange.Min * 10) / 10;
+    const Max = Math.round(filteredMLSRange.Max * 10) / 10;
+    const p = document.createElement("p");
+    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
+      calibrateSoundBurstSec.current
+    } s, ${calibrateSoundBurstRepeats.current}✕, ${
+      calibrateSoundHz.current
+    } Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
+      calibrateSoundIIRSec.current
+    } s, 
+    octaves: ${calibrateSoundSmoothOctaves.current}, ${
+      calibrateSoundMinHz.current
+    }
+     to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
+      1
+    )} to ${Max.toFixed(1)}`;
+    p.innerHTML = reportParameters;
+    p.style.fontSize = "15px";
+    p.style.marginBottom = "0px";
+    tableDiv.appendChild(p);
+  }
+  plotCanvas.parentNode.appendChild(tableDiv);
+
+  tableDiv.style.position = "absolute";
+  const tableRec = tableDiv.getBoundingClientRect();
+  const rect = plotCanvas.getBoundingClientRect();
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height + 41) + "px";
+  tableDiv.style.marginLeft = chartArea.left + 3 + "px";
+
+  // make the table on top of the canvas
+  tableDiv.style.zIndex = 1;
+};
+
 export const standardDeviation = (values) => {
   const avg = average(values);
 

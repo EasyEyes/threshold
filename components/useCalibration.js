@@ -48,6 +48,7 @@ import {
   displayParametersAllHz,
   displaySummarizedTransducerTable,
   displayWhatIsSavedInDatabase,
+  displayRecordings,
 } from "./soundTest";
 import {
   calculateTimeToCalibrate,
@@ -463,6 +464,13 @@ export const calibrateAudio = async (reader) => {
         "",
         allHzCalibrationResults.filteredMLSRange.component
       );
+      // displayRecordings(
+      //   elems,
+      //   allHzCalibrationResults.knownIr,
+      //   true,
+      //   "",
+      //   allHzCalibrationResults.filteredMLSRange.component
+      // );
     }
     let showLoudSpeakerDoneMessage = true;
     // MICROPHONE CALIBRATION
@@ -596,6 +604,13 @@ export const calibrateAudio = async (reader) => {
               "",
               microphoneCalibrationResult.current.filteredMLSRange.component
             );
+            // displayRecordings(
+            //   elems,
+            //   microphoneCalibrationResult.current.component.ir,
+            //   false,
+            //   "",
+            //   microphoneCalibrationResult.current.filteredMLSRange.component
+            // );
           }
 
           resolve();
