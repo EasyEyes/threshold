@@ -872,12 +872,12 @@ const startCalibration = async (
   )
     .replace("xxx", webAudioDeviceNames.microphone)
     .replace("XXX", webAudioDeviceNames.microphone);
-  IDsToSaveInSoundProfileLibrary = {
-    ProlificParticipantID: isProlificExperiment()
-      ? new URLSearchParams(window.location.search).get("participant")
-      : "",
-    PavloviaSessionID: thisExperimentInfo.PavloviaSessionID,
-  };
+  IDsToSaveInSoundProfileLibrary.ProlificParticipantID = isProlificExperiment()
+    ? new URLSearchParams(window.location.search).get("participant")
+    : "";
+  IDsToSaveInSoundProfileLibrary.PavloviaSessionID =
+    thisExperimentInfo.PavloviaSessionID;
+
   const speakerParameters = {
     language: language,
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
