@@ -2681,6 +2681,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "When responsePurrWhenReadyBool (default FALSE) is TRUE, play a purring sound to alert the observer while we await their response. Pure 200 Hz tone indefinitely at amplitude 1. Stop purring when they respond.",
   },
+  responseSkipTrialButtonBool: {
+    name: "responseSkipTrialButtonBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      '🕑 responseSkipTrialButtonBool (default FALSE) displays a button visible only before trial is initiated that, when pressed, skips the trial. We are exploring the difficulty of many variants on the cursor tracking of the moving crosshair and anticipate that some conditions will be impossible, so we want to offer the participant a way to move on. The button will say "Skip Trial" (international phrase T_skipTrial) and will be big in the upper right corner of the screen.',
+  },
   responseSpokenBool: {
     name: "responseSpokenBool",
     availability: "now",

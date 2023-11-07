@@ -2488,6 +2488,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "responseSkipTrialButtonBool",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑 responseSkipTrialButtonBool (default FALSE) displays a button visible only before trial is initiated that, when pressed, skips the trial. We are exploring the difficulty of many variants on the cursor tracking of the moving crosshair and anticipate that some conditions will be impossible, so we want to offer the participant a way to move on. The button will say "Skip Trial" (international phrase T_skipTrial) and will be big in the upper right corner of the screen.',
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "responseSpokenBool",
     availability: "now",
     example: "FALSE",
