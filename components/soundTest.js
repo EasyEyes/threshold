@@ -26,6 +26,7 @@ import {
   plotImpulseResponse,
   plotSoundLevels1000Hz,
   plotRecordings,
+  plotWarmups,
   standardDeviation,
 } from "./soundTestPlots";
 import {
@@ -962,13 +963,7 @@ export const displayWhatIsSavedInDatabase = (
   );
 };
 
-export const displayRecordings = (
-  elems,
-  recChecks,
-  isLoudspeakerCalibration = true,
-  title = "Recording power variation",
-  filteredMLSRange
-) => {
+export const displayRecordings = (elems, recChecks, isWarmp) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
   plotCanvas.width = 500;
@@ -976,8 +971,11 @@ export const displayRecordings = (
   plotCanvas.style.marginTop = "20px";
   elems.soundTestPlots.appendChild(plotCanvas);
   elems.citation.style.visibility = "visible";
-
-  plotRecordings(plotCanvas, recChecks, title, isLoudspeakerCalibration);
+  if (isWarmp) {
+    plotWarmups(plotCanvas, recChecks);
+  } else {
+    plotRecordings(plotCanvas, recChecks);
+  }
 };
 
 // The table has 3 colums.

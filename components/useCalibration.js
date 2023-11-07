@@ -271,7 +271,6 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundIRSec.current = reader.read(
     GLOSSARY._calibrateSoundIRSec.name
   )[0];
-  console.log(calibrateSoundIRSec.current);
 
   calibrateSoundBurstDb.current = reader.read(
     GLOSSARY._calibrateSoundBurstDb.name
@@ -291,21 +290,15 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundSaveJSONBool.current = ifTrue(
     reader.read(GLOSSARY._calibrateSoundSaveJSONBool.name, "__ALL_BLOCKS__")
   );
-  calibrateSoundSmoothOctaves.current = ifTrue(
-    reader.read(GLOSSARY._calibrateSoundSmoothOctaves.name, "__ALL_BLOCKS__")
-  );
-  calibrateSoundPowerBinDesiredSec.current = ifTrue(
-    reader.read(
-      GLOSSARY._calibrateSoundPowerBinDesiredSec.name,
-      "__ALL_BLOCKS__"
-    )
-  );
-  calibrateSoundPowerDbSDToleratedDb.current = ifTrue(
-    reader.read(
-      GLOSSARY._calibrateSoundPowerDbSDToleratedDb.name,
-      "__ALL_BLOCKS__"
-    )
-  );
+  calibrateSoundSmoothOctaves.current = reader.read(
+    GLOSSARY._calibrateSoundSmoothOctaves.name
+  )[0];
+  calibrateSoundPowerBinDesiredSec.current = reader.read(
+    GLOSSARY._calibrateSoundPowerBinDesiredSec.name
+  )[0];
+  calibrateSoundPowerDbSDToleratedDb.current = reader.read(
+    GLOSSARY._calibrateSoundPowerDbSDToleratedDb.name
+  )[0];
   calibrateSoundSamplingDesiredBits.current = reader.read(
     GLOSSARY._calibrateSoundSamplingDesiredBits.name
   )[0];
@@ -464,13 +457,16 @@ export const calibrateAudio = async (reader) => {
         "",
         allHzCalibrationResults.filteredMLSRange.component
       );
-      // displayRecordings(
-      //   elems,
-      //   allHzCalibrationResults.knownIr,
-      //   true,
-      //   "",
-      //   allHzCalibrationResults.filteredMLSRange.component
-      // );
+      displayRecordings(
+        elems,
+        soundCalibrationResults.current.recordingChecks,
+        true
+      );
+      displayRecordings(
+        elems,
+        soundCalibrationResults.current.recordingChecks,
+        false
+      );
     }
     let showLoudSpeakerDoneMessage = true;
     // MICROPHONE CALIBRATION
@@ -604,13 +600,16 @@ export const calibrateAudio = async (reader) => {
               "",
               microphoneCalibrationResult.current.filteredMLSRange.component
             );
-            // displayRecordings(
-            //   elems,
-            //   microphoneCalibrationResult.current.component.ir,
-            //   false,
-            //   "",
-            //   microphoneCalibrationResult.current.filteredMLSRange.component
-            // );
+            displayRecordings(
+              elems,
+              microphoneCalibrationResult.current.recordingChecks,
+              true
+            );
+            displayRecordings(
+              elems,
+              microphoneCalibrationResult.current.recordingChecks,
+              false
+            );
           }
 
           resolve();

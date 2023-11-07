@@ -978,52 +978,50 @@ export const plotImpulseResponse = (
   tableDiv.style.zIndex = 1;
 };
 
-export const plotRecordings = (
-  plotCanvas,
-  ir,
-  title,
-  filteredMLSRange,
-  isLoudspeakerCalibration
-) => {
-  const IrFreq = ir.Freq;
-  const IrGain = ir.Gain;
-  const IrPoints = IrFreq.filter((x, i) => x <= 16000).map((x, i) => {
-    return { x: x, y: IrGain[i] };
-  });
-  let maxY = Math.max(...IrPoints.map((point) => point.y));
-  let minY = Math.min(...IrPoints.map((point) => point.y));
-  const plotCanvasHeight =
-    (Math.ceil(maxY / 10) * 10 - Math.floor(minY / 10) * 10 + 50) * 6;
+export const plotWarmups = (plotCanvas, recordingChecks, title) => {
+  // Extract warm-up data for unfiltered, component, and system
+  const unfilteredWarmupData = recordingChecks.unfiltered[0].warmupDb;
+  const componentWarmupData = recordingChecks.component[0].warmupDb;
+  const systemWarmupData = recordingChecks.system[0].warmupDb;
+  const warmupTData = recordingChecks.unfiltered[0].warmupT; // Assuming warmupT is the same for all categories
 
-  plotCanvas.height = plotCanvasHeight;
+  // Prepare labels and datasets for Chart.js
+  const warmupLabels = warmupTData;
+  const unfilteredWarmupDbData = Object.values(unfilteredWarmupData);
+  const componentWarmupDbData = Object.values(componentWarmupData);
+  const systemWarmupDbData = Object.values(systemWarmupData);
+
+  plotCanvas.height = 600;
   plotCanvas.width = 600;
 
-  const data = {
-    datasets: [
-      {
-        label: "Impulse response",
-        data: IrPoints,
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
-        borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 5,
-        showLine: true,
-      },
-    ],
-  };
-  const config = {
+  // Chart.js configuration for warm-up plot
+  const warmupChart = new Chart(plotCanvas, {
     type: "line",
-    data: data,
+    data: {
+      labels: warmupLabels,
+      datasets: [
+        {
+          label: "Unfiltered mls recording",
+          data: unfilteredWarmupDbData,
+          borderColor: "red",
+        },
+        {
+          label: "Filtered mls component",
+          data: componentWarmupDbData,
+          borderColor: "blue",
+        },
+        {
+          label: "Filtered mls system",
+          data: systemWarmupDbData,
+          borderColor: "green",
+        },
+      ],
+    },
     options: {
-      responsive: false,
-      // aspectRatio : 1,
       plugins: {
         title: {
           display: true,
-          text: isLoudspeakerCalibration
-            ? "Loudspeaker Profile"
-            : "Microphone Profile",
+          text: "Power variation (warm-ups)",
           font: {
             size: 22,
             weight: "normal",
@@ -1034,27 +1032,27 @@ export const plotRecordings = (
           display: false,
         },
         legend: {
-          display: false,
-        },
-      },
-      scales: {
-        x: {
-          type: "logarithmic",
-          position: "bottom",
-          title: {
-            display: true,
-            text: "Frequency (Hz)",
+          labels: {
             font: {
               size: "19px",
             },
           },
-          min: 20,
-          max: 16000,
-          ticks: {
-            callback: function (value, index, values) {
-              const tickValues = [20, 100, 200, 1000, 2000, 10000, 16000];
-              return tickValues.includes(value) ? value : "";
+        },
+      },
+      scales: {
+        x: {
+          type: "linear",
+          position: "bottom",
+          min: 0,
+          max: 3.5,
+          title: {
+            display: true,
+            text: "Time (s)",
+            font: {
+              size: "19px",
             },
+          },
+          ticks: {
             font: {
               size: 15,
             },
@@ -1065,15 +1063,13 @@ export const plotRecordings = (
           position: "left",
           title: {
             display: true,
-            text: "Gain (dB)",
+            text: "Power (dB)",
             font: {
               size: "19px",
             },
           },
-          min: Math.floor(minY / 10) * 10 - 40,
-          max: Math.ceil(maxY / 10) * 10 + 10,
           ticks: {
-            stepSize: 10,
+            stepSize: 1,
             font: {
               size: 15,
             },
@@ -1081,55 +1077,109 @@ export const plotRecordings = (
         },
       },
     },
-  };
+  });
+};
 
-  const plot = new Chart(plotCanvas, config);
-  const chartArea = plot.chartArea;
-  const table = displaySummarizedTransducerTable(
-    loudspeakerInfo.current,
-    microphoneInfo.current,
-    "",
-    isLoudspeakerCalibration,
-    "goal",
-    "",
-    [calibrateSoundHz.current, calibrateSoundHz.current]
-  );
-  // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
-  const tableDiv = document.createElement("div");
-  tableDiv.appendChild(table);
-  tableDiv.style.lineHeight = "0.8";
-  if (showSoundParametersBool.current) {
-    const Min = Math.round(filteredMLSRange.Min * 10) / 10;
-    const Max = Math.round(filteredMLSRange.Max * 10) / 10;
-    const p = document.createElement("p");
-    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
-      calibrateSoundBurstSec.current
-    } s, ${calibrateSoundBurstRepeats.current}✕, ${
-      calibrateSoundHz.current
-    } Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
-      calibrateSoundIIRSec.current
-    } s, 
-    octaves: ${calibrateSoundSmoothOctaves.current}, ${
-      calibrateSoundMinHz.current
-    }
-     to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
-      1
-    )} to ${Max.toFixed(1)}`;
-    p.innerHTML = reportParameters;
-    p.style.fontSize = "15px";
-    p.style.marginBottom = "0px";
-    tableDiv.appendChild(p);
-  }
-  plotCanvas.parentNode.appendChild(tableDiv);
+export const plotRecordings = (plotCanvas, recordingChecks) => {
+  // Extract warm-up data for unfiltered, component, and system
+  const unfilteredData = recordingChecks.unfiltered[0].recDb;
+  const componentData = recordingChecks.component[0].recDb;
+  const systemData = recordingChecks.system[0].recDb;
+  const TData = recordingChecks.unfiltered[0].recT; // Assuming warmupT is the same for all categories
 
-  tableDiv.style.position = "absolute";
-  const tableRec = tableDiv.getBoundingClientRect();
-  const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height + 41) + "px";
-  tableDiv.style.marginLeft = chartArea.left + 3 + "px";
+  // Prepare labels and datasets for Chart.js
+  const Labels = TData;
+  const unfilteredDbData = Object.values(unfilteredData);
+  const componentDbData = Object.values(componentData);
+  const systemDbData = Object.values(systemData);
 
-  // make the table on top of the canvas
-  tableDiv.style.zIndex = 1;
+  plotCanvas.height = 600;
+  plotCanvas.width = 600;
+
+  // Chart.js configuration for warm-up plot
+  const warmupChart = new Chart(plotCanvas, {
+    type: "line",
+    data: {
+      labels: Labels,
+      datasets: [
+        {
+          label: "Unfiltered mlsrecording",
+          data: unfilteredDbData,
+          borderColor: "red",
+        },
+        {
+          label: "Filtered mls component",
+          data: componentDbData,
+          borderColor: "blue",
+        },
+        {
+          label: "Filtered mls system",
+          data: systemDbData,
+          borderColor: "green",
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: "Power variation (recordings)",
+          font: {
+            size: 22,
+            weight: "normal",
+            family: "system-ui",
+          },
+        },
+        subtitle: {
+          display: false,
+        },
+        legend: {
+          labels: {
+            font: {
+              size: "19px",
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: "linear",
+          position: "bottom",
+          min: 0,
+          max: 3.5,
+          title: {
+            display: true,
+            text: "Time (s)",
+            font: {
+              size: "19px",
+            },
+          },
+          ticks: {
+            font: {
+              size: 15,
+            },
+          },
+        },
+        y: {
+          type: "linear",
+          position: "left",
+          title: {
+            display: true,
+            text: "Power (dB)",
+            font: {
+              size: "19px",
+            },
+          },
+          ticks: {
+            stepSize: 1,
+            font: {
+              size: 15,
+            },
+          },
+        },
+      },
+    },
+  });
 };
 
 export const standardDeviation = (values) => {
