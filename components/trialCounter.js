@@ -1,4 +1,5 @@
 import { switchKind } from "./blockTargetKind.js";
+import { status } from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { readi18nPhrases } from "./readPhrases.js";
 
@@ -140,5 +141,17 @@ export const liveUpdateTrialCounter = (
         taskKind
       )
     );
+  }
+};
+
+/**
+ * Set the value for the current trial of a given condition
+ * @param {string} BC
+ */
+export const trackNthTrialInCondition = (BC) => {
+  if (status.nthTrialByCondition.has(BC)) {
+    status.nthTrialByCondition.set(BC, status.nthTrialByCondition.get(BC) + 1);
+  } else {
+    status.nthTrialByCondition.set(BC, 1);
   }
 };

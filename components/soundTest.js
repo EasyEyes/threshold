@@ -25,6 +25,8 @@ import {
   plotForAllHz,
   plotImpulseResponse,
   plotSoundLevels1000Hz,
+  plotRecordings,
+  plotWarmups,
   standardDeviation,
 } from "./soundTestPlots";
 import {
@@ -959,6 +961,17 @@ export const displayWhatIsSavedInDatabase = (
     filteredMLSRange,
     isLoudspeakerCalibration
   );
+};
+
+export const displayRecordings = (elems, recChecks) => {
+  const plotCanvas = document.createElement("canvas");
+  plotCanvas.setAttribute("id", "plotCanvas");
+  plotCanvas.width = 500;
+  plotCanvas.height = 500;
+  plotCanvas.style.marginTop = "20px";
+  elems.soundTestPlots.appendChild(plotCanvas);
+  elems.citation.style.visibility = "visible";
+  plotRecordings(plotCanvas, recChecks);
 };
 
 // The table has 3 colums.

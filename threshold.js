@@ -256,6 +256,7 @@ import {
 import {
   getTrialInfoStr,
   liveUpdateTrialCounter,
+  trackNthTrialInCondition,
 } from "./components/trialCounter.js";
 ////
 
@@ -2948,6 +2949,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      preStimulus.running = true;
       // Check fullscreen and if not, get fullscreen
       if (!rc.isFullscreen.value && !debug) {
         rc.getFullscreen();
@@ -4556,7 +4558,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ];
             offsetStimsToFixationPos(stimsToOffset);
           }
-          rsvpReadingWordsForThisBlock.current[status.block_condition].pop();
+          rsvpReadingWordsForThisBlock.current[status.block_condition].shift();
         },
         movie: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
@@ -6317,6 +6319,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
         const BC = currentTrial["trials.label"] ?? currentTrial["label"];
         status.block_condition = BC;
+        trackNthTrialInCondition(BC);
         addConditionToData(
           paramReader,
           BC,
