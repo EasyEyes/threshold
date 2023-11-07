@@ -39,6 +39,7 @@ import {
   calibrateSoundSamplingDesiredBits,
   microphoneCalibrationResult,
   authorEmail,
+  loudspeakerIR,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -579,7 +580,7 @@ export const calibrateAudio = async (reader) => {
                 false,
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
-                microphoneCalibrationResult.current.microphoneGain,
+                loudspeakerIR,
                 microphoneCalibrationResult.current.filteredMLSRange.component
               );
             }

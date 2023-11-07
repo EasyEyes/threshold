@@ -397,6 +397,9 @@ const getUSBMicrophoneDetailsFromUser = async (
             );
             resolve();
           } else {
+            allHzCalibrationResults.knownIr = JSON.parse(
+              JSON.stringify(loudspeakerIR)
+            );
             await startCalibration(
               elems,
               isLoudspeakerCalibration,
@@ -496,6 +499,9 @@ const getLoudspeakerDeviceDetailsFromUser = async (
             proceedButton,
           ]);
         adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
+        allHzCalibrationResults.knownIr = JSON.parse(
+          JSON.stringify(loudspeakerIR)
+        );
         await startCalibration(
           elems,
           isLoudspeakerCalibration,
@@ -587,6 +593,9 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
           proceedButton,
         ]);
         adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+        allHzCalibrationResults.knownIr = JSON.parse(
+          JSON.stringify(loudspeakerIR)
+        );
         await startCalibration(
           elems,
           isLoudspeakerCalibration,
@@ -697,12 +706,15 @@ const showSmartphoneCalibrationInstructions = async (
       elems.message.innerHTML = "";
       removeElements([proceedButton]);
       adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
+      allHzCalibrationResults.knownIr = JSON.parse(
+        JSON.stringify(loudspeakerIR)
+      );
       await startCalibration(
         elems,
         isLoudspeakerCalibration,
         language,
         true,
-        isLoudspeakerCalibration ? null : loudspeakerIR.current
+        isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
       );
       resolve();
     });
@@ -821,12 +833,15 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
             micFullName: modelNameInput.value,
             micFullSerialNumber: modelNumberInput.value,
           };
+          allHzCalibrationResults.knownIr = JSON.parse(
+            JSON.stringify(loudspeakerIR)
+          );
           await startCalibration(
             elems,
             isLoudspeakerCalibration,
             language,
             true,
-            isLoudspeakerCalibration ? null : loudspeakerIR.current
+            isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
           );
           resolve();
         }
@@ -1086,9 +1101,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   IrGain = IrGain.map((gain) => gain - difference);
   soundCalibrationResults.current.component.ir = { Freq: IrFreq, Gain: IrGain };
   console.log(soundCalibrationResults.current.component.ir);
-  loudspeakerIR.current = JSON.parse(
-    JSON.stringify(soundCalibrationResults.current.component.ir)
-  );
+  loudspeakerIR.Freq = IrFreq;
+  loudspeakerIR.Gain = IrGain;
   allHzCalibrationResults.knownIr = JSON.parse(
     JSON.stringify(soundCalibrationResults.current.component.ir)
   );
@@ -1107,6 +1121,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
 
 const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   microphoneCalibrationResult.current = result;
+  console.log(microphoneCalibrationResult.current);
   microphoneInfo.current.gainDBSPL =
     Math.round(
       (microphoneCalibrationResult.current.parameters.gainDBSPL -
@@ -1114,7 +1129,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
         10
     ) / 10;
   microphoneInfo.current.CalibrationDate = getCurrentTimeString();
-  microphoneCalibrationResult.current.microphoneGain = loudspeakerIR.current;
+  // microphoneCalibrationResult.current.microphoneGain = loudspeakerIR.current;
   microphoneInfo.current.micrFullManufacturerName = isSmartPhone
     ? microphoneCalibrationResult.current.micInfo.OEM
     : microphoneInfo.current.micrFullManufacturerName;
@@ -1187,7 +1202,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     Hz_system_convolution: result.system?.filtered_mls_psd?.x,
     db_component_convolution: result.component?.filtered_mls_psd?.y,
     Hz_component_convolution: result.component?.filtered_mls_psd?.x,
-    loudspeakerGain: loudspeakerIR.current,
+    loudspeakerGain: loudspeakerIR,
     db_mls: result.mls_psd?.y,
     Hz_mls: result.mls_psd?.x,
     calibrateSoundBurstDb: calibrateSoundBurstDb.current,

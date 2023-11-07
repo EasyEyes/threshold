@@ -209,7 +209,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
           soundCalibrationResults.current?.component?.psd?.unconv?.x,
         MlsSpectrumUnfilteredDb_component:
           soundCalibrationResults.current?.component?.psd?.unconv?.y,
-        "Loudspeaker Component IR": loudspeakerIR.current,
+        "Loudspeaker Component IR": loudspeakerIR,
         "Loudspeaker Component IIR":
           soundCalibrationResults.current?.component?.iir,
         "Loudspeaker Component IR Time Domain":

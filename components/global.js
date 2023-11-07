@@ -421,7 +421,7 @@ export const allHzCalibrationResults = {
   },
   timestamps: "",
 };
-export const loudspeakerIR = { current: undefined };
+export const loudspeakerIR = { Freq: [], Gain: [] };
 export const webAudioDeviceNames = {
   loudspeaker: null,
   microphone: null,
