@@ -978,120 +978,45 @@ export const plotImpulseResponse = (
   tableDiv.style.zIndex = 1;
 };
 
-export const plotWarmups = (plotCanvas, recordingChecks, title) => {
-  // Extract warm-up data for unfiltered, component, and system
-  const unfilteredWarmupData = recordingChecks.unfiltered[0].warmupDb;
-  const componentWarmupData = recordingChecks.component[0].warmupDb;
-  const systemWarmupData = recordingChecks.system[0].warmupDb;
-  const warmupTData = recordingChecks.unfiltered[0].warmupT; // Assuming warmupT is the same for all categories
-
-  // Prepare labels and datasets for Chart.js
-  const warmupLabels = warmupTData;
-  const unfilteredWarmupDbData = Object.values(unfilteredWarmupData);
-  const componentWarmupDbData = Object.values(componentWarmupData);
-  const systemWarmupDbData = Object.values(systemWarmupData);
-
-  plotCanvas.height = 600;
-  plotCanvas.width = 600;
-
-  // Chart.js configuration for warm-up plot
-  const warmupChart = new Chart(plotCanvas, {
-    type: "line",
-    data: {
-      labels: warmupLabels,
-      datasets: [
-        {
-          label: "Unfiltered mls recording",
-          data: unfilteredWarmupDbData,
-          borderColor: "red",
-        },
-        {
-          label: "Filtered mls component",
-          data: componentWarmupDbData,
-          borderColor: "blue",
-        },
-        {
-          label: "Filtered mls system",
-          data: systemWarmupDbData,
-          borderColor: "green",
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        title: {
-          display: true,
-          text: "Power variation (warm-ups)",
-          font: {
-            size: 22,
-            weight: "normal",
-            family: "system-ui",
-          },
-        },
-        subtitle: {
-          display: false,
-        },
-        legend: {
-          labels: {
-            font: {
-              size: "19px",
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          type: "linear",
-          position: "bottom",
-          min: 0,
-          max: 3.5,
-          title: {
-            display: true,
-            text: "Time (s)",
-            font: {
-              size: "19px",
-            },
-          },
-          ticks: {
-            font: {
-              size: 15,
-            },
-          },
-        },
-        y: {
-          type: "linear",
-          position: "left",
-          title: {
-            display: true,
-            text: "Power (dB)",
-            font: {
-              size: "19px",
-            },
-          },
-          ticks: {
-            stepSize: 1,
-            font: {
-              size: 15,
-            },
-          },
-        },
-      },
-    },
-  });
-};
-
 export const plotRecordings = (plotCanvas, recordingChecks) => {
-  // Extract warm-up data for unfiltered, component, and system
-  const unfilteredData = recordingChecks.unfiltered[0].recDb;
-  const componentData = recordingChecks.component[0].recDb;
-  const systemData = recordingChecks.system[0].recDb;
-  const TData = recordingChecks.unfiltered[0].recT; // Assuming warmupT is the same for all categories
+  const TData = recordingChecks.unfiltered[0].recT;
+  const unfilteredData = TData.map((x, i) => {
+    return { x: x, y: recordingChecks.unfiltered[0].recDb[i] };
+  });
+  const componentData = TData.map((x, i) => {
+    return {
+      x: x,
+      y: recordingChecks.component[recordingChecks.component.length - 1].recDb[
+        i
+      ],
+    };
+  });
+  const systemData = TData.map((x, i) => {
+    return {
+      x: x,
+      y: recordingChecks.system[recordingChecks.system.length - 1].recDb[i],
+    };
+  });
+  // Assuming warmupT is the same for all categories
 
-  // Prepare labels and datasets for Chart.js
-  const Labels = TData;
-  const unfilteredDbData = Object.values(unfilteredData);
-  const componentDbData = Object.values(componentData);
-  const systemDbData = Object.values(systemData);
+  const warmupTData = recordingChecks.unfiltered[0].warmupT;
+  const unfilteredWarmupData = warmupTData.map((x, i) => {
+    return { x: x, y: recordingChecks.unfiltered[0].warmupDb[i] };
+  });
+  const componentWarmupData = warmupTData.map((x, i) => {
+    return {
+      x: x,
+      y: recordingChecks.component[recordingChecks.component.length - 1]
+        .warmupDb[i],
+    };
+  });
+  const systemWarmupData = warmupTData.map((x, i) => {
+    return {
+      x: x,
+      y: recordingChecks.system[recordingChecks.system.length - 1].warmupDb[i],
+    };
+  });
+  // Assuming warmupT is the same for all categories
 
   plotCanvas.height = 600;
   plotCanvas.width = 600;
@@ -1100,22 +1025,73 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
   const warmupChart = new Chart(plotCanvas, {
     type: "line",
     data: {
-      labels: Labels,
+      // Combine warm-up and recording labels
       datasets: [
         {
-          label: "Unfiltered mlsrecording",
-          data: unfilteredDbData,
+          label: "MLS Recording Warm up",
+          data: unfilteredWarmupData,
           borderColor: "red",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderDash: [5, 5], // Dashed line for unfiltered warm-up data
+          borderWidth: 2,
         },
         {
-          label: "Filtered mls component",
-          data: componentDbData,
+          label: "Component Recording Warm up",
+          data: componentWarmupData,
           borderColor: "blue",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderDash: [5, 5],
+          borderWidth: 2,
         },
         {
-          label: "Filtered mls system",
-          data: systemDbData,
+          label: "System Recording Warm up",
+          data: systemWarmupData,
           borderColor: "green",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderDash: [5, 5],
+          borderWidth: 2,
+        },
+        {
+          label:
+            "MLS Recording Data, SD = " +
+            recordingChecks.unfiltered[recordingChecks.unfiltered.length - 1]
+              .sd,
+          data: unfilteredData,
+          borderColor: "red",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderWidth: 2,
+        },
+        {
+          label:
+            "Component Recording Data, SD = " +
+            recordingChecks.component[recordingChecks.component.length - 1].sd,
+          data: componentData,
+          borderColor: "blue",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderWidth: 2,
+          fill: false,
+        },
+        {
+          label:
+            "System Recording Data, SD = " +
+            recordingChecks.system[recordingChecks.system.length - 1].sd,
+          data: systemData,
+          borderColor: "green",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderWidth: 2,
+          fill: false,
         },
       ],
     },
@@ -1136,7 +1112,27 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
         legend: {
           labels: {
             font: {
-              size: "19px",
+              size: 15,
+            },
+            usePointStyle: true,
+            pointStyle: "line",
+            generateLabels: function (chart) {
+              const data = chart.data;
+              if (data.datasets.length) {
+                return data.datasets.map(function (dataset, i) {
+                  return {
+                    text: dataset.label,
+                    fillStyle: dataset.backgroundColor,
+                    strokeStyle: dataset.borderColor,
+                    lineWidth: dataset.borderWidth,
+                    hidden: !chart.isDatasetVisible(i),
+                    index: i,
+                    lineDash: dataset.borderDash,
+                    pointStyle: "line",
+                  };
+                });
+              }
+              return [];
             },
           },
         },

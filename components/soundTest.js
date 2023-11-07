@@ -963,7 +963,7 @@ export const displayWhatIsSavedInDatabase = (
   );
 };
 
-export const displayRecordings = (elems, recChecks, isWarmp) => {
+export const displayRecordings = (elems, recChecks) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
   plotCanvas.width = 500;
@@ -971,11 +971,7 @@ export const displayRecordings = (elems, recChecks, isWarmp) => {
   plotCanvas.style.marginTop = "20px";
   elems.soundTestPlots.appendChild(plotCanvas);
   elems.citation.style.visibility = "visible";
-  if (isWarmp) {
-    plotWarmups(plotCanvas, recChecks);
-  } else {
-    plotRecordings(plotCanvas, recChecks);
-  }
+  plotRecordings(plotCanvas, recChecks);
 };
 
 // The table has 3 colums.
