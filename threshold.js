@@ -473,10 +473,6 @@ const paramReaderInitialized = async (reader) => {
   ) {
     needCalibratedSmartphoneMicrophone = true;
   }
-  console.log(
-    "needCalibratedSmartphoneMicrophone",
-    needCalibratedSmartphoneMicrophone
-  );
 
   let compatibilityCheckPeer = null;
   if (needCalibratedSmartphoneMicrophone || needAnySmartphone) {

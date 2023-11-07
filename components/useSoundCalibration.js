@@ -38,6 +38,8 @@ import {
   timeoutSec,
   authorEmail,
   webAudioDeviceNames,
+  thisExperimentInfo,
+  IDsToSaveInSoundProfileLibrary,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -60,6 +62,7 @@ import {
 } from "./soundCalibrationHelpers";
 import { showExperimentEnding } from "./forms";
 import { getCurrentTimeString } from "./soundUtils";
+import { isProlificExperiment } from "./externalServices";
 
 const globalGains = { values: [] };
 
@@ -857,6 +860,24 @@ const startCalibration = async (
         .join("")
     : "";
   const { Speaker, CombinationCalibration } = speakerCalibrator;
+  webAudioDeviceNames.loudspeakerText = readi18nPhrases(
+    "RC_nameLoudspeaker",
+    language
+  )
+    .replace("xxx", webAudioDeviceNames.loudspeaker)
+    .replace("XXX", webAudioDeviceNames.loudspeaker);
+  webAudioDeviceNames.microphoneText = readi18nPhrases(
+    "RC_nameMicrophone",
+    language
+  )
+    .replace("xxx", webAudioDeviceNames.microphone)
+    .replace("XXX", webAudioDeviceNames.microphone);
+  IDsToSaveInSoundProfileLibrary = {
+    ProlificParticipantID: isProlificExperiment()
+      ? new URLSearchParams(window.location.search).get("participant")
+      : "",
+    PavloviaSessionID: thisExperimentInfo.PavloviaSessionID,
+  };
   const speakerParameters = {
     language: language,
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
@@ -869,6 +890,8 @@ const startCalibration = async (
     titleDisplayId: "soundTitle",
     timeToCalibrateId: "timeToCalibrate",
     soundSubtitleId: "soundSubtitle",
+    webAudioDeviceNames: webAudioDeviceNames,
+    IDsToSaveInSoundProfileLibrary: IDsToSaveInSoundProfileLibrary,
     calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
     calibrateSoundSamplingDesiredBits:
@@ -1030,6 +1053,12 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     .join("");
   loudspeakerInfo.current = {
     ...loudspeakerInfo.current,
+    webAudioDeviceNames: {
+      loudspeaker: webAudioDeviceNames.loudspeaker,
+      microphone: webAudioDeviceNames.microphone,
+    },
+    PavloviaSessionID: thisExperimentInfo.PavloviaSessionID,
+    userIDs: IDsToSaveInSoundProfileLibrary,
     ModelName: modelName,
     ID: modelNumber,
     isSmartPhone: isSmartPhone,
