@@ -1023,7 +1023,7 @@ export const plotRecordings = (
   });
   // Assuming warmupT is the same for all categories
 
-  plotCanvas.height = 600;
+  plotCanvas.height = 500;
   plotCanvas.width = 600;
 
   let maxY = Math.max(
@@ -1035,14 +1035,15 @@ export const plotRecordings = (
     ...systemWarmupData.map((point) => point.y)
   );
 
-  let minY = Math.min(
-    ...unfilteredData.map((point) => point.y),
-    ...componentData.map((point) => point.y),
-    ...systemData.map((point) => point.y),
-    ...unfilteredWarmupData.map((point) => point.y),
-    ...componentWarmupData.map((point) => point.y),
-    ...systemWarmupData.map((point) => point.y)
-  );
+  let minY =
+    Math.min(
+      ...unfilteredData.map((point) => point.y),
+      ...componentData.map((point) => point.y),
+      ...systemData.map((point) => point.y),
+      ...unfilteredWarmupData.map((point) => point.y),
+      ...componentWarmupData.map((point) => point.y),
+      ...systemWarmupData.map((point) => point.y)
+    ) - 27;
 
   let transducer = isLoudspeakerCalibration ? "Loudspeaker" : "Microphone";
   // Chart.js configuration for warm-up plot
@@ -1097,7 +1098,7 @@ export const plotRecordings = (
         {
           label:
             transducer +
-            " Data, SD =" +
+            " Data, SD = " +
             recordingChecks.component[recordingChecks.component.length - 1].sd +
             " dB",
           data: componentData,
@@ -1194,7 +1195,7 @@ export const plotRecordings = (
               size: "19px",
             },
           },
-          min: Math.floor(minY / 10) * 10 - 40,
+          min: Math.floor(minY / 10) * 10,
           max: Math.ceil(maxY / 10) * 10,
           ticks: {
             stepSize: 10,

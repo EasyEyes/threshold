@@ -27,6 +27,10 @@ import {
   calibrateSound1000HzPreSec,
   calibrateSound1000HzPostSec,
   calibrateSoundHz,
+  webAudioDeviceNames,
+  actualSamplingRate,
+  microphoneActualSamplingRate,
+  actualBitsPerSample,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
@@ -271,6 +275,16 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         calibrateSoundHz: calibrateSoundHz.current,
         calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
         filteredMLSRange: allHzCalibrationResults.filteredMLSRange,
+        sampleRate: {
+          loudspeaker: actualSamplingRate.current,
+          microphone: microphoneActualSamplingRate.current,
+        },
+        sampleSize: actualBitsPerSample.current,
+        filteredMLSRange: allHzCalibrationResults.filteredMLSRange,
+        webAudioDeviceNames: {
+          loudspeaker: webAudioDeviceNames.loudspeaker,
+          microphone: webAudioDeviceNames.microphone,
+        },
       };
     }
 
