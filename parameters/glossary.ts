@@ -149,9 +149,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundPowerDbSDToleratedDb",
     availability: "now",
     type: "numerical",
-    default: "1",
+    default: "100",
     explanation:
-      "🕑 _calibrateSoundPowerDbSDToleratedDb (default 1) sets maximum for SD of power (in dB) during the used part of the recording, when recording filtered or unfiltered MLS. If the recording is rejected, then the recording begins again.",
+      "_calibrateSoundPowerDbSDToleratedDb (default 1) sets maximum for SD of power (in dB) during the used part of the recording, when recording filtered or unfiltered MLS. If the recording is rejected, then the recording begins again.",
   },
   _calibrateSoundPowerBinDesiredSec: {
     name: "_calibrateSoundPowerBinDesiredSec",
@@ -159,7 +159,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.2",
     explanation:
-      "🕑 _calibrateSoundPowerBinDesiredSec (default 0.2) sets the bin size for estimation of power to plot power vs. time during each MLS recording, filtered or unfiltered.",
+      "_calibrateSoundPowerBinDesiredSec (default 0.2) sets the bin size for estimation of power to plot power vs. time during each MLS recording, filtered or unfiltered. You want the bin size to be short enough to reveal changes over time, but long enough to average out the random variations of the MLS itself, so you get a smooth curve.",
   },
   _calibrateSoundSamplingDesiredBits: {
     name: "_calibrateSoundSamplingDesiredBits",
