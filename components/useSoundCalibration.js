@@ -73,6 +73,8 @@ export const runCombinationCalibration = async (
   isLoudspeakerCalibration,
   language
 ) => {
+  webAudioDeviceNames.loudspeaker = "";
+  webAudioDeviceNames.microphone = "";
   globalGains.values = gains;
   elems.message.style.display = "none";
   elems.title.innerHTML = isLoudspeakerCalibration
@@ -302,12 +304,15 @@ const getUSBMicrophoneDetailsFromUser = async (
           webAudioDeviceNames.microphone = micName;
         }
       });
-      if (webAudioDeviceNames.microphone === null) {
+      if (webAudioDeviceNames.microphone === "") {
         mics.forEach((mic) => {
           if (mic.label.includes("Default")) {
-            webAudioDeviceNames.microphone = micName;
+            webAudioDeviceNames.microphone = mic.label;
           }
         });
+      }
+      if (webAudioDeviceNames.microphone === "") {
+        webAudioDeviceNames.microphone = micName;
       }
       const loudspeaker = devices.filter(
         (device) => device.kind === "audiooutput"
@@ -515,6 +520,23 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
   isSmartPhone,
   isLoudspeakerCalibration
 ) => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (stream) {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const loudspeaker = devices.filter(
+        (device) => device.kind === "audiooutput"
+      );
+      console.log(loudspeaker);
+      loudspeaker.forEach((speaker) => {
+        if (speaker.label.includes("Default")) {
+          webAudioDeviceNames.loudspeaker = speaker.label;
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
   thisDevice.current = await identifyDevice();
   // display the device info
   const deviceString = getDeviceString(thisDevice.current, language);
@@ -745,6 +767,23 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   language,
   isLoudspeakerCalibration
 ) => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (stream) {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const loudspeaker = devices.filter(
+        (device) => device.kind === "audiooutput"
+      );
+      console.log(loudspeaker);
+      loudspeaker.forEach((speaker) => {
+        if (speaker.label.includes("Default")) {
+          webAudioDeviceNames.loudspeaker = speaker.label;
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
@@ -920,6 +959,7 @@ const startCalibration = async (
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
   };
+
   const calibratorParams = {
     numCaptures: calibrateSoundBurstRecordings.current,
     numMLSPerCapture: 2,

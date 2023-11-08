@@ -1251,7 +1251,10 @@ export const displaySummarizedTransducerTable = (
   tr6.appendChild(td8);
   tr6.appendChild(td9);
 
-  if (webAudioDeviceNames.loudspeaker && webAudioDeviceNames.microphone) {
+  if (
+    webAudioDeviceNames.loudspeaker !== "" ||
+    webAudioDeviceNames.microphone !== ""
+  ) {
     const tr8 = document.createElement("tr");
     const td12 = document.createElement("td");
     const td13 = document.createElement("td");

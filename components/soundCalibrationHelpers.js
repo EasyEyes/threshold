@@ -9,6 +9,7 @@ import {
   addDoc,
   updateDoc,
   setDoc,
+  arrayUnion,
 } from "firebase/firestore";
 
 export const identifyDevice = async () => {
@@ -81,6 +82,16 @@ export const saveLoudSpeakerInfoToFirestore = async (
   ir,
   iir
 ) => {
+  const OEMdocRef = doc(db, "Loudspeaker", OEM);
+  const OEMdocSnap = await getDoc(OEMdocRef);
+  // if OEM does not exist, create it with dummy field
+  if (!OEMdocSnap.exists()) {
+    await setDoc(OEMdocRef, { dummy: "dummy" });
+  }
+  // save the collectionIDs in the OEM document as a field. If the field already exists, add the new collectionID to the array
+  await updateDoc(OEMdocRef, {
+    collectionIDs: arrayUnion(modelNumber),
+  });
   const collectionRef = collection(db, "Loudspeaker", OEM, modelNumber);
   // add doc to collection. save loudSpeakerInfo first then iir and ir
   // save loudSpeakerInfo first and then in the same document (with a random Id) save iir and ir
