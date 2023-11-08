@@ -297,7 +297,6 @@ const getUSBMicrophoneDetailsFromUser = async (
     if (stream) {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const mics = devices.filter((device) => device.kind === "audioinput");
-      console.log(mics);
       mics.forEach((mic) => {
         if (mic.label.includes("Umik") || mic.label.includes("UMIK")) {
           micName = mic.label.replace("Microphone", "");
@@ -317,7 +316,6 @@ const getUSBMicrophoneDetailsFromUser = async (
       const loudspeaker = devices.filter(
         (device) => device.kind === "audiooutput"
       );
-      console.log(loudspeaker);
       loudspeaker.forEach((speaker) => {
         if (speaker.label.includes("Default")) {
           webAudioDeviceNames.loudspeaker = speaker.label;
@@ -327,7 +325,6 @@ const getUSBMicrophoneDetailsFromUser = async (
   } catch (err) {
     console.log(err);
   }
-  console.log(webAudioDeviceNames);
   const p = document.createElement("p");
   p.innerHTML = readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
     "UUU",
@@ -533,7 +530,6 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
       const loudspeaker = devices.filter(
         (device) => device.kind === "audiooutput"
       );
-      console.log(loudspeaker);
       loudspeaker.forEach((speaker) => {
         if (speaker.label.includes("Default")) {
           webAudioDeviceNames.loudspeaker = speaker.label;
@@ -786,7 +782,6 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
       const loudspeaker = devices.filter(
         (device) => device.kind === "audiooutput"
       );
-      console.log(loudspeaker);
       loudspeaker.forEach((speaker) => {
         if (speaker.label.includes("Default")) {
           webAudioDeviceNames.loudspeaker = speaker.label;
@@ -907,7 +902,6 @@ const startCalibration = async (
   const micSerialNumber = microphoneInfo.current?.micFullSerialNumber
     ? microphoneInfo.current.micFullSerialNumber
     : "";
-  console.log(micSerialNumber);
   const micManufacturer = microphoneInfo.current?.micrFullManufacturerName
     ? microphoneInfo.current.micrFullManufacturerName
         .toLowerCase()
@@ -1141,7 +1135,6 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   const difference = Math.round(10 * (IrGainAt1000Hz - correctGain)) / 10;
   IrGain = IrGain.map((gain) => gain - difference);
   soundCalibrationResults.current.component.ir = { Freq: IrFreq, Gain: IrGain };
-  console.log(soundCalibrationResults.current.component.ir);
   loudspeakerIR.Freq = IrFreq;
   loudspeakerIR.Gain = IrGain;
   allHzCalibrationResults.knownIr = JSON.parse(
