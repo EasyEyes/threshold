@@ -963,7 +963,12 @@ export const displayWhatIsSavedInDatabase = (
   );
 };
 
-export const displayRecordings = (elems, recChecks) => {
+export const displayRecordings = (
+  elems,
+  recChecks,
+  isLoudspeakerCalibration,
+  filteredMLSRange
+) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
   plotCanvas.width = 500;
@@ -971,7 +976,12 @@ export const displayRecordings = (elems, recChecks) => {
   plotCanvas.style.marginTop = "20px";
   elems.soundTestPlots.appendChild(plotCanvas);
   elems.citation.style.visibility = "visible";
-  plotRecordings(plotCanvas, recChecks);
+  plotRecordings(
+    plotCanvas,
+    recChecks,
+    isLoudspeakerCalibration,
+    filteredMLSRange
+  );
 };
 
 // The table has 3 colums.

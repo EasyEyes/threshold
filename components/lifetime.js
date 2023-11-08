@@ -22,6 +22,7 @@ import {
   calibrateSoundIIRSec,
   calibrateSoundMinHz,
   calibrateSoundMaxHz,
+  calibrateSoundSmoothOctaves,
   calibrateSound1000HzSec,
   calibrateSound1000HzPreSec,
   calibrateSound1000HzPostSec,
@@ -257,6 +258,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         microphoneGain: allHzCalibrationResults.microphoneGain,
         db_mls: soundCalibrationResults.current?.mls_psd?.y,
         Hz_mls: soundCalibrationResults.current?.mls_psd?.x,
+        recordingChecks: soundCalibrationResults.current?.recordingChecks,
         calibrateSoundBurstDb: calibrateSoundBurstDb.current,
         calibrateSoundBurstSec: calibrateSoundBurstSec.current,
         calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
@@ -267,6 +269,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
         calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
         calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
         calibrateSoundHz: calibrateSoundHz.current,
+        calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
         filteredMLSRange: allHzCalibrationResults.filteredMLSRange,
       };
     }

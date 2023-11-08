@@ -458,7 +458,12 @@ export const calibrateAudio = async (reader) => {
         "",
         allHzCalibrationResults.filteredMLSRange.component
       );
-      displayRecordings(elems, soundCalibrationResults.current.recordingChecks);
+      displayRecordings(
+        elems,
+        soundCalibrationResults.current.recordingChecks,
+        true,
+        allHzCalibrationResults.filteredMLSRange.component
+      );
     }
     let showLoudSpeakerDoneMessage = true;
     // MICROPHONE CALIBRATION
@@ -594,7 +599,9 @@ export const calibrateAudio = async (reader) => {
             );
             displayRecordings(
               elems,
-              microphoneCalibrationResult.current.recordingChecks
+              microphoneCalibrationResult.current.recordingChecks,
+              false,
+              microphoneCalibrationResult.current.filteredMLSRange.component
             );
           }
 

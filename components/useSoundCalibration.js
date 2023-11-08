@@ -1205,6 +1205,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     loudspeakerGain: loudspeakerIR,
     db_mls: result.mls_psd?.y,
     Hz_mls: result.mls_psd?.x,
+    recordingChecks: result.recordingChecks,
     calibrateSoundBurstDb: calibrateSoundBurstDb.current,
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
     calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
@@ -1215,6 +1216,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundHz: calibrateSoundHz.current,
+    calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
     filteredMLSRange: result.filteredMLSRange,
   });
 };
