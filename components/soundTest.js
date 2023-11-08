@@ -1258,6 +1258,7 @@ export const displaySummarizedTransducerTable = (
     microphoneInfo["gainDBSPL"] > 0
       ? "+" + microphoneInfo["gainDBSPL"] + " dB gain at 1 kHz"
       : microphoneInfo["gainDBSPL"] + " dB gain at 1 kHz";
+  td9.style.width = "200px";
   tr6.appendChild(td8);
   tr6.appendChild(td9);
 
@@ -1270,9 +1271,11 @@ export const displaySummarizedTransducerTable = (
     const td13 = document.createElement("td");
     td12.innerHTML = webAudioDeviceNames.loudspeaker;
     td13.innerHTML = webAudioDeviceNames.microphone;
+    td12.style.width = "200px";
+    td13.style.width = "200px";
     tr8.appendChild(td12);
     tr8.appendChild(td13);
-    tr8.style.lineHeight = "0.8";
+    tr8.style.lineHeight = "1";
     tbody.appendChild(tr8);
   }
 
@@ -1288,7 +1291,7 @@ export const displaySummarizedTransducerTable = (
       `, ${actualBitsPerSample.current} bits`;
     tr7.appendChild(td10);
     tr7.appendChild(td11);
-    tr7.style.lineHeight = "0.8";
+    tr7.style.lineHeight = "1";
     tbody.appendChild(tr7);
   }
 
@@ -1297,16 +1300,16 @@ export const displaySummarizedTransducerTable = (
   tbody.appendChild(tr3);
   tbody.appendChild(tr4);
 
-  tr1.style.lineHeight = "0.8";
-  tr2.style.lineHeight = "0.8";
-  tr3.style.lineHeight = "0.8";
-  tr4.style.lineHeight = "0.8";
-  tr5.style.lineHeight = "0.8";
-  tr6.style.lineHeight = "0.8";
+  tr1.style.lineHeight = "1";
+  tr2.style.lineHeight = "1";
+  tr3.style.lineHeight = "1";
+  tr4.style.lineHeight = "1";
+  tr5.style.lineHeight = "1";
+  tr6.style.lineHeight = "1";
 
   // max width of the table: 300px. wrap the texts
   table.style.maxWidth = "400px";
-
+  table.style.tableLayout = "fixed";
   table.appendChild(thead);
   table.appendChild(tbody);
 

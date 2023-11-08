@@ -740,7 +740,7 @@ export const plotForAllHz = (
 
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
-  tableDiv.style.lineHeight = "0.8";
+  tableDiv.style.lineHeight = "1";
   if (showSoundParametersBool.current) {
     const filteredDataPoints = convMergedDataPoints.filter(
       (point) =>
@@ -943,7 +943,7 @@ export const plotImpulseResponse = (
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
   tableDiv.appendChild(table);
-  tableDiv.style.lineHeight = "0.8";
+  tableDiv.style.lineHeight = "1";
   if (showSoundParametersBool.current) {
     const Min = Math.round(filteredMLSRange.Min * 10) / 10;
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
@@ -1035,15 +1035,14 @@ export const plotRecordings = (
     ...systemWarmupData.map((point) => point.y)
   );
 
-  let minY =
-    Math.min(
-      ...unfilteredData.map((point) => point.y),
-      ...componentData.map((point) => point.y),
-      ...systemData.map((point) => point.y),
-      ...unfilteredWarmupData.map((point) => point.y),
-      ...componentWarmupData.map((point) => point.y),
-      ...systemWarmupData.map((point) => point.y)
-    ) - 27;
+  let minY = Math.min(
+    ...unfilteredData.map((point) => point.y),
+    ...componentData.map((point) => point.y),
+    ...systemData.map((point) => point.y),
+    ...unfilteredWarmupData.map((point) => point.y),
+    ...componentWarmupData.map((point) => point.y),
+    ...systemWarmupData.map((point) => point.y)
+  );
 
   let transducer = isLoudspeakerCalibration ? "Loudspeaker" : "Microphone";
   // Chart.js configuration for warm-up plot
@@ -1195,7 +1194,7 @@ export const plotRecordings = (
               size: "19px",
             },
           },
-          min: Math.floor(minY / 10) * 10,
+          min: Math.floor(minY / 10) * 10 - 30,
           max: Math.ceil(maxY / 10) * 10,
           ticks: {
             stepSize: 10,
@@ -1221,7 +1220,7 @@ export const plotRecordings = (
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
   tableDiv.appendChild(table);
-  tableDiv.style.lineHeight = "0.8";
+  tableDiv.style.lineHeight = "1";
   if (showSoundParametersBool.current) {
     const Min = Math.round(filteredMLSRange.Min * 10) / 10;
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
