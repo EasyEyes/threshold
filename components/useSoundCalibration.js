@@ -826,6 +826,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
       proceedButton.innerHTML = "Loading...";
+
       if (modelNameInput.value === "" || modelNumberInput.value === "") {
         alert("Please fill out all the fields");
       } else {
