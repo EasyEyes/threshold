@@ -978,7 +978,12 @@ export const plotImpulseResponse = (
   tableDiv.style.zIndex = 1;
 };
 
-export const plotRecordings = (plotCanvas, recordingChecks) => {
+export const plotRecordings = (
+  plotCanvas,
+  recordingChecks,
+  isLoudspeakerCalibration,
+  filteredMLSRange
+) => {
   const TData = recordingChecks.unfiltered[0].recT;
   const unfilteredData = TData.map((x, i) => {
     return { x: x, y: recordingChecks.unfiltered[0].recDb[i] };
@@ -1021,6 +1026,25 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
   plotCanvas.height = 600;
   plotCanvas.width = 600;
 
+  let maxY = Math.max(
+    ...unfilteredData.map((point) => point.y),
+    ...componentData.map((point) => point.y),
+    ...systemData.map((point) => point.y),
+    ...unfilteredWarmupData.map((point) => point.y),
+    ...componentWarmupData.map((point) => point.y),
+    ...systemWarmupData.map((point) => point.y)
+  );
+
+  let minY = Math.min(
+    ...unfilteredData.map((point) => point.y),
+    ...componentData.map((point) => point.y),
+    ...systemData.map((point) => point.y),
+    ...unfilteredWarmupData.map((point) => point.y),
+    ...componentWarmupData.map((point) => point.y),
+    ...systemWarmupData.map((point) => point.y)
+  );
+
+  let transducer = isLoudspeakerCalibration ? "Loudspeaker" : "Microphone";
   // Chart.js configuration for warm-up plot
   const warmupChart = new Chart(plotCanvas, {
     type: "line",
@@ -1028,7 +1052,7 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
       // Combine warm-up and recording labels
       datasets: [
         {
-          label: "MLS Recording Warm up",
+          label: "MLS Warm up",
           data: unfilteredWarmupData,
           borderColor: "red",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1038,7 +1062,7 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
           borderWidth: 2,
         },
         {
-          label: "Component Recording Warm up",
+          label: transducer + " Warmup",
           data: componentWarmupData,
           borderColor: "blue",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1048,7 +1072,7 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
           borderWidth: 2,
         },
         {
-          label: "System Recording Warm up",
+          label: "Loudspeaker+Microphone Warm up",
           data: systemWarmupData,
           borderColor: "green",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1059,9 +1083,10 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
         },
         {
           label:
-            "MLS Recording Data, SD = " +
+            "MLS Data, SD = " +
             recordingChecks.unfiltered[recordingChecks.unfiltered.length - 1]
-              .sd,
+              .sd +
+            " dB",
           data: unfilteredData,
           borderColor: "red",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1071,8 +1096,10 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
         },
         {
           label:
-            "Component Recording Data, SD = " +
-            recordingChecks.component[recordingChecks.component.length - 1].sd,
+            transducer +
+            " Data, SD =" +
+            recordingChecks.component[recordingChecks.component.length - 1].sd +
+            " dB",
           data: componentData,
           borderColor: "blue",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1083,8 +1110,9 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
         },
         {
           label:
-            "System Recording Data, SD = " +
-            recordingChecks.system[recordingChecks.system.length - 1].sd,
+            "Loudspeaker+Microphone Data, SD = " +
+            recordingChecks.system[recordingChecks.system.length - 1].sd +
+            " dB",
           data: systemData,
           borderColor: "green",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1099,7 +1127,7 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
       plugins: {
         title: {
           display: true,
-          text: "Power variation (recordings)",
+          text: "Power Variation in Recordings",
           font: {
             size: 22,
             weight: "normal",
@@ -1166,8 +1194,10 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
               size: "19px",
             },
           },
+          min: Math.floor(minY / 10) * 10 - 40,
+          max: Math.ceil(maxY / 10) * 10,
           ticks: {
-            stepSize: 1,
+            stepSize: 10,
             font: {
               size: 15,
             },
@@ -1176,6 +1206,52 @@ export const plotRecordings = (plotCanvas, recordingChecks) => {
       },
     },
   });
+
+  const chartArea = warmupChart.chartArea;
+  const table = displaySummarizedTransducerTable(
+    loudspeakerInfo.current,
+    microphoneInfo.current,
+    "",
+    isLoudspeakerCalibration,
+    "goal",
+    "",
+    [calibrateSoundHz.current, calibrateSoundHz.current]
+  );
+  // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
+  const tableDiv = document.createElement("div");
+  tableDiv.appendChild(table);
+  tableDiv.style.lineHeight = "0.8";
+  if (showSoundParametersBool.current) {
+    const Min = Math.round(filteredMLSRange.Min * 10) / 10;
+    const Max = Math.round(filteredMLSRange.Max * 10) / 10;
+    const p = document.createElement("p");
+    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
+      calibrateSoundBurstSec.current
+    } s, ${calibrateSoundBurstRepeats.current}✕, ${
+      calibrateSoundHz.current
+    } Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
+      calibrateSoundIIRSec.current
+    } s, 
+    octaves: ${calibrateSoundSmoothOctaves.current}, ${
+      calibrateSoundMinHz.current
+    }
+     to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
+      1
+    )} to ${Max.toFixed(1)}`;
+    p.innerHTML = reportParameters;
+    p.style.fontSize = "15px";
+    p.style.marginBottom = "0px";
+    tableDiv.appendChild(p);
+  }
+  plotCanvas.parentNode.appendChild(tableDiv);
+
+  tableDiv.style.position = "absolute";
+  const tableRec = tableDiv.getBoundingClientRect();
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 65) + "px";
+  tableDiv.style.marginLeft = chartArea.left + 3 + "px";
+
+  // make the table on top of the canvas
+  tableDiv.style.zIndex = 1;
 };
 
 export const standardDeviation = (values) => {

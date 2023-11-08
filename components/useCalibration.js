@@ -39,6 +39,7 @@ import {
   calibrateSoundSamplingDesiredBits,
   microphoneCalibrationResult,
   authorEmail,
+  loudspeakerIR,
 } from "./global";
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
@@ -457,7 +458,12 @@ export const calibrateAudio = async (reader) => {
         "",
         allHzCalibrationResults.filteredMLSRange.component
       );
-      displayRecordings(elems, soundCalibrationResults.current.recordingChecks);
+      displayRecordings(
+        elems,
+        soundCalibrationResults.current.recordingChecks,
+        true,
+        allHzCalibrationResults.filteredMLSRange.component
+      );
     }
     let showLoudSpeakerDoneMessage = true;
     // MICROPHONE CALIBRATION
@@ -579,7 +585,7 @@ export const calibrateAudio = async (reader) => {
                 false,
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
-                microphoneCalibrationResult.current.microphoneGain,
+                loudspeakerIR,
                 microphoneCalibrationResult.current.filteredMLSRange.component
               );
             }
@@ -593,7 +599,9 @@ export const calibrateAudio = async (reader) => {
             );
             displayRecordings(
               elems,
-              microphoneCalibrationResult.current.recordingChecks
+              microphoneCalibrationResult.current.recordingChecks,
+              false,
+              microphoneCalibrationResult.current.filteredMLSRange.component
             );
           }
 
