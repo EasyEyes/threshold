@@ -40,7 +40,10 @@ import {
   microphoneCalibrationResult,
   authorEmail,
   loudspeakerIR,
+  thisExperimentInfo,
 } from "./global";
+import { psychoJS } from "./globalPsychoJS";
+
 import { GLOSSARY } from "../parameters/glossary.ts";
 import {
   addSoundTestElements,
@@ -348,7 +351,11 @@ export const calibrateAudio = async (reader) => {
     };
 
     const elems = _addSoundCalibrationElems(copy);
-
+    psychoJS.start({
+      expName: thisExperimentInfo.name,
+      expInfo: thisExperimentInfo,
+      resources: [],
+    });
     document.querySelector("#soundNavContainer").style.display = "none";
     try {
       if (calibrateSoundLevel && calibrateLoudspeaker) {

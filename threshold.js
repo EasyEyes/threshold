@@ -482,29 +482,6 @@ const paramReaderInitialized = async (reader) => {
     };
     compatibilityCheckPeer = new ExperimentPeer(params);
   }
-  const { proceedButtonClicked, proceedBool, mic } =
-    await displayCompatibilityMessage(
-      compMsg["msg"],
-      reader,
-      rc,
-      compMsg["promptRefresh"],
-      compMsg["proceed"],
-      compatibilityCheckPeer,
-      needAnySmartphone,
-      needCalibratedSmartphoneMicrophone
-    );
-
-  microphoneInfo.current.micFullName = mic.micFullName;
-  microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
-  microphoneInfo.current.micrFullManufacturerName =
-    mic.micrFullManufacturerName;
-  microphoneInfo.current.phoneSurvey = mic.phoneSurvey;
-
-  hideCompatibilityMessage();
-  if (proceedButtonClicked && !proceedBool) {
-    showExperimentEnding();
-    return;
-  }
 
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
@@ -526,6 +503,31 @@ const paramReaderInitialized = async (reader) => {
         thisExperimentInfo.PavloviaSessionID = participant;
       }
     };
+
+    const { proceedButtonClicked, proceedBool, mic } =
+      await displayCompatibilityMessage(
+        compMsg["msg"],
+        reader,
+        rc,
+        compMsg["promptRefresh"],
+        compMsg["proceed"],
+        compatibilityCheckPeer,
+        needAnySmartphone,
+        needCalibratedSmartphoneMicrophone
+      );
+
+    microphoneInfo.current.micFullName = mic.micFullName;
+    microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
+    microphoneInfo.current.micrFullManufacturerName =
+      mic.micrFullManufacturerName;
+    microphoneInfo.current.phoneSurvey = mic.phoneSurvey;
+
+    hideCompatibilityMessage();
+    if (proceedButtonClicked && !proceedBool) {
+      showExperimentEnding();
+      return;
+    }
+
     const result = await checkCrossSessionId(
       gotParticipantId,
       rc.language.value

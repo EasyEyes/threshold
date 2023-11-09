@@ -9,28 +9,8 @@ import {
   rc,
   showCharacterSetResponse,
   thisExperimentInfo,
-  soundCalibrationResults,
-  allHzCalibrationResults,
-  loudspeakerInfo,
-  loudspeakerIR,
   microphoneCalibrationResults,
-  invertedImpulseResponse,
   calibrateSoundSaveJSONBool,
-  calibrateSoundBurstDb,
-  calibrateSoundBurstSec,
-  calibrateSoundBurstRepeats,
-  calibrateSoundIIRSec,
-  calibrateSoundMinHz,
-  calibrateSoundMaxHz,
-  calibrateSoundSmoothOctaves,
-  calibrateSound1000HzSec,
-  calibrateSound1000HzPreSec,
-  calibrateSound1000HzPostSec,
-  calibrateSoundHz,
-  webAudioDeviceNames,
-  actualSamplingRate,
-  microphoneActualSamplingRate,
-  actualBitsPerSample,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
@@ -189,133 +169,19 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     //   window.location.toString(),
     //   rc.id.value
     // );
-    let objectData = [];
-    let allSoundResults;
-    if (soundCalibrationResults.current && calibrateSoundSaveJSONBool.current) {
-      allSoundResults = {
-        SoundGainParameters: soundCalibrationResults.current?.parameters,
-        Cal1000HzInDb: soundCalibrationResults.current?.inDBValues,
-        Cal1000HzOutDb: soundCalibrationResults.current?.outDBSPL1000Values,
-        outDBSPLValues: soundCalibrationResults.current?.outDBSPLValues,
-        THD: soundCalibrationResults.current?.thdValues,
-        MlsSpectrumHz_system:
-          soundCalibrationResults.current?.system?.psd?.conv?.x,
-        MlsSpectrumFilteredDb_system:
-          soundCalibrationResults.current?.system?.psd?.conv?.y,
-        MlsSpectrumUnfilteredHz_system:
-          soundCalibrationResults.current?.system?.psd?.unconv?.x,
-        MlsSpectrumUnfilteredDb_system:
-          soundCalibrationResults.current?.system?.psd?.unconv?.y,
-        MlsSpectrumHz_component:
-          soundCalibrationResults.current?.component?.psd?.conv?.x,
-        MlsSpectrumFilteredDb_component:
-          soundCalibrationResults.current?.component?.psd?.conv?.y,
-        MlsSpectrumUnfilteredHz_component:
-          soundCalibrationResults.current?.component?.psd?.unconv?.x,
-        MlsSpectrumUnfilteredDb_component:
-          soundCalibrationResults.current?.component?.psd?.unconv?.y,
-        "Loudspeaker Component IR": loudspeakerIR,
-        "Loudspeaker Component IIR":
-          soundCalibrationResults.current?.component?.iir,
-        "Loudspeaker Component IR Time Domain":
-          soundCalibrationResults.current?.component?.ir_in_time_domain,
-        "Loudspeaker system IR": soundCalibrationResults.current?.system?.ir,
-        "Loudspeaker system IIR": soundCalibrationResults.current?.system?.iir,
-        dB_component_iir:
-          soundCalibrationResults.current?.component?.iir_psd?.y,
-        Hz_component_iir:
-          soundCalibrationResults.current?.component?.iir_psd?.x,
-        dB_component_iir_no_bandpass:
-          soundCalibrationResults.current?.component?.iir_psd?.y_no_bandpass,
-        Hz_component_iir_no_bandpass:
-          soundCalibrationResults.current?.component?.iir_psd?.x_no_bandpass,
-        dB_system_iir: soundCalibrationResults.current?.system?.iir_psd?.y,
-        Hz_system_iir: soundCalibrationResults.current?.system?.iir_psd?.x,
-        dB_system_iir_no_bandpass:
-          soundCalibrationResults.current?.system?.iir_psd?.y_no_bandpass,
-        Hz_system_iir_no_bandpass:
-          soundCalibrationResults.current?.system?.iir_psd?.x_no_bandpass,
-        "Loudspeaker model": loudspeakerInfo.current,
-        micInfo: soundCalibrationResults.current?.micInfo,
-        unconv_rec: soundCalibrationResults.current?.unfiltered_recording,
-        conv_rec: soundCalibrationResults.current?.filtered_recording,
-        mls: soundCalibrationResults.current?.mls,
-        componentConvolution:
-          soundCalibrationResults.current?.component?.convolution,
-        systemConvolution: soundCalibrationResults.current?.system?.convolution,
-        autocorrelations: {},
-        // backgroundNoise: soundCalibrationResults.current?.background_noise,
-        backgroundRecording:
-          soundCalibrationResults.current?.background_noise?.recording,
-        db_BackgroundNoise:
-          soundCalibrationResults.current?.background_noise?.x_background,
-        Hz_BackgroundNoise:
-          soundCalibrationResults.current?.background_noise?.y_background,
-        db_system_convolution:
-          soundCalibrationResults.current?.system?.filtered_mls_psd?.y,
-        Hz_system_convolution:
-          soundCalibrationResults.current?.system?.filtered_mls_psd?.x,
-        db_component_convolution:
-          soundCalibrationResults.current?.component?.filtered_mls_psd?.y,
-        Hz_component_convolution:
-          soundCalibrationResults.current?.component?.filtered_mls_psd?.x,
-        microphoneGain: allHzCalibrationResults.microphoneGain,
-        db_mls: soundCalibrationResults.current?.mls_psd?.y,
-        Hz_mls: soundCalibrationResults.current?.mls_psd?.x,
-        recordingChecks: soundCalibrationResults.current?.recordingChecks,
-        calibrateSoundBurstDb: calibrateSoundBurstDb.current,
-        calibrateSoundBurstSec: calibrateSoundBurstSec.current,
-        calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
-        calibrateSoundIIRSec: calibrateSoundIIRSec.current,
-        calibrateSoundMinHz: calibrateSoundMinHz.current,
-        calibrateSoundMaxHz: calibrateSoundMaxHz.current,
-        calibrateSound1000HzSec: calibrateSound1000HzSec.current,
-        calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
-        calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
-        calibrateSoundHz: calibrateSoundHz.current,
-        calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
-        filteredMLSRange: allHzCalibrationResults.filteredMLSRange,
-        sampleRate: {
-          loudspeaker: actualSamplingRate.current,
-          microphone: microphoneActualSamplingRate.current,
-        },
-        sampleSize: actualBitsPerSample.current,
-        filteredMLSRange: allHzCalibrationResults.filteredMLSRange,
-        webAudioDeviceNames: {
-          loudspeaker: webAudioDeviceNames.loudspeaker,
-          microphone: webAudioDeviceNames.microphone,
-        },
-      };
-    }
 
-    if (
-      microphoneCalibrationResults.length > 0 &&
-      calibrateSoundSaveJSONBool.current
-    ) {
-      for (let i = 0; i < microphoneCalibrationResults.length; i++) {
-        console.log(i);
-        psychoJS.experiment.downloadJSON(
-          microphoneCalibrationResults[i],
-          i + 1
-        );
-      }
-    }
-
-    if (
-      soundCalibrationResults.current?.autocorrelations?.length > 0 &&
-      calibrateSoundSaveJSONBool.current
-    ) {
-      for (
-        let i = 0;
-        i < soundCalibrationResults.current.autocorrelations.length;
-        i++
-      ) {
-        allSoundResults["autocorrelations"][`autocorrelation_${i}`] =
-          soundCalibrationResults.current.autocorrelations[i];
-      }
-    }
-    if (allSoundResults && calibrateSoundSaveJSONBool.current)
-      psychoJS.experiment.downloadJSON(allSoundResults, 0);
+    // if (
+    //   microphoneCalibrationResults.length > 0 &&
+    //   calibrateSoundSaveJSONBool.current
+    // ) {
+    //   for (let i = 0; i < microphoneCalibrationResults.length; i++) {
+    //     console.log(i);
+    //     psychoJS.experiment.downloadJSON(
+    //       microphoneCalibrationResults[i],
+    //       i + 1
+    //     );
+    //   }
+    // }
   }
 
   return Scheduler.Event.QUIT;

@@ -792,7 +792,7 @@ export const plotForAllHz = (
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
   const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 18) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 15) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
   // make the table on top of the canvas
   tableDiv.style.zIndex = 1;
@@ -971,7 +971,7 @@ export const plotImpulseResponse = (
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
   const rect = plotCanvas.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height + 41) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height + 44) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
 
   // make the table on top of the canvas
