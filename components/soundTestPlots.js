@@ -262,7 +262,7 @@ export const plotSoundLevels1000Hz = (
   plotCanvas.parentNode.appendChild(tableDiv);
   const tableRec = tableDiv.getBoundingClientRect();
   tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 44) + "px";
-  tableDiv.style.marginLeft = chartArea.right - tableRec.width - 3 + "px";
+  tableDiv.style.marginLeft = chartArea.left + 3 + "px";
 
   // make the table on top of the canvas
   tableDiv.style.zIndex = 1;
@@ -286,20 +286,20 @@ export const plotForAllHz = (
       ? "Loudspeaker"
       : "Microphone";
   const unconvMergedDataPoints = calibrationResults.psd.unconv.x
-    .filter((x) => x <= 16000)
+    .filter((x) => x <= 20000)
     .map((x, i) => {
       return { x: x, y: 10 * Math.log10(calibrationResults.psd.unconv.y[i]) };
     });
 
   const convMergedDataPoints = calibrationResults.psd.conv.x
-    .filter((x) => x <= 16000)
+    .filter((x) => x <= 20000)
     .map((x, i) => {
       return { x: x, y: 10 * Math.log10(calibrationResults.psd.conv.y[i]) };
     });
 
   const backgroundMergedDataPoints = backgroundNoise.x_background
     ? backgroundNoise.x_background
-        .filter((x) => x <= 16000)
+        .filter((x) => x <= 20000)
         .map((x, i) => {
           return { x: x, y: 10 * Math.log10(backgroundNoise.y_background[i]) };
         })
@@ -307,7 +307,7 @@ export const plotForAllHz = (
 
   const digitalMLSPoints = mls_psd.x
     ? mls_psd.x
-        .filter((x) => x <= 16000)
+        .filter((x) => x <= 20000)
         .map((x, i) => {
           return { x: x, y: 10 * Math.log10(mls_psd.y[i]) };
         })
@@ -315,7 +315,7 @@ export const plotForAllHz = (
 
   const filteredDigitalMLSPoints = calibrationResults.filtered_mls_psd.x
     ? calibrationResults.filtered_mls_psd.x
-        .filter((x) => x <= 16000)
+        .filter((x) => x <= 20000)
         .map((x, i) => {
           return {
             x: x,
@@ -325,7 +325,7 @@ export const plotForAllHz = (
     : [];
   const microphoneGainPoints =
     microphoneGain.Freq.length > 0
-      ? microphoneGain.Freq.filter((x) => x <= 16000).map((x, i) => {
+      ? microphoneGain.Freq.filter((x) => x <= 20000).map((x, i) => {
           return { x: x, y: microphoneGain.Gain[i] };
         })
       : [];
@@ -691,10 +691,12 @@ export const plotForAllHz = (
             },
           },
           min: 20,
-          max: 16000,
+          max: 20000,
           ticks: {
             callback: function (value, index, values) {
-              const tickValues = [20, 100, 200, 1000, 2000, 10000, 16000];
+              const tickValues = [
+                20, 100, 200, 1000, 2000, 10000, 16000, 20000,
+              ];
               return tickValues.includes(value) ? value : "";
             },
             font: {
@@ -807,7 +809,7 @@ export const plotImpulseResponse = (
 ) => {
   const IrFreq = ir.Freq;
   const IrGain = ir.Gain;
-  const IrPoints = IrFreq.filter((x, i) => x <= 16000).map((x, i) => {
+  const IrPoints = IrFreq.filter((x, i) => x <= 20000).map((x, i) => {
     return { x: x, y: IrGain[i] };
   });
   let maxY = Math.max(...IrPoints.map((point) => point.y));
@@ -895,10 +897,12 @@ export const plotImpulseResponse = (
             },
           },
           min: 20,
-          max: 16000,
+          max: 20000,
           ticks: {
             callback: function (value, index, values) {
-              const tickValues = [20, 100, 200, 1000, 2000, 10000, 16000];
+              const tickValues = [
+                20, 100, 200, 1000, 2000, 10000, 16000, 20000,
+              ];
               return tickValues.includes(value) ? value : "";
             },
             font: {

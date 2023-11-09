@@ -104,10 +104,10 @@ export const runCombinationCalibration = async (
         readi18nPhrases("RC_usbMicrophone", language),
         readi18nPhrases("RC_none", language),
       ];
-      const dropdownTitle = readi18nPhrases(
-        "RC_selectMicrophoneTypeToBeCalibrated",
-        language
-      );
+      const dropdownTitle =
+        readi18nPhrases("RC_selectMicrophoneType", language) +
+        " " +
+        readi18nPhrases("RC_OkToConnect", language);
       const { dropdown, proceedButton, p } = addDropdownMenu(
         elems,
         options,
@@ -157,10 +157,14 @@ export const runCombinationCalibration = async (
       readi18nPhrases("RC_usbMicrophone", language),
       readi18nPhrases("RC_none", language),
     ];
-    const dropdownTitle = readi18nPhrases(
-      "RC_selectMicrophoneTypeToBeCalibrated",
-      language
-    );
+    const dropdownTitle =
+      readi18nPhrases("RC_helloCalibrator", language)
+        .replace("xxx", authorEmail.current)
+        .replace("xxx", authorEmail.current)
+        .replace("XXX", authorEmail.current)
+        .replace("XXX", authorEmail.current) +
+      " " +
+      readi18nPhrases("RC_selectMicrophoneTypeToBeCalibrated", language);
     const { dropdown, proceedButton, p } = addDropdownMenu(
       elems,
       options,
@@ -1290,13 +1294,18 @@ const adjustDisplayBeforeCalibration = (
   elems.displayQR.style.flexDirection = "column";
 
   const messageText = isSmartPhone
-    ? `${readi18nPhrases(
-        "RC_hopeMicrophoneIsInLibrary",
-        language
-      )}${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
-        /\n/g,
-        "<br>"
-      )
+    ? isLoudspeakerCalibration
+      ? `${readi18nPhrases(
+          "RC_hopeMicrophoneIsInLibrary",
+          language
+        )}${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
+          /\n/g,
+          "<br>"
+        )
+      : `${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
+          /\n/g,
+          "<br>"
+        )
     : `${readi18nPhrases("RC_removeHeadphones", language)}${readi18nPhrases(
         "RC_getUSBMicrophoneReady",
         language
