@@ -518,6 +518,10 @@ export const measureLuminance = {
   colorimeter: undefined,
 };
 
+/**
+ * `State used when rerunning stimulus generation (ie trialInstructionRoutineBegin)
+ *  ie when the participant has significantly changed their viewing distance.
+ */
 export const preStimulus = {
   interval: undefined,
   running: false,

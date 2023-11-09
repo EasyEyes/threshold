@@ -330,7 +330,11 @@ import {
 /* ---------------------------------- */
 
 import { switchKind, switchTask } from "./components/blockTargetKind.js";
-import { handleEscapeKey } from "./components/skipTrialOrBlock.js";
+import {
+  addSkipTrialButton,
+  handleEscapeKey,
+  removeSkipTrialButton,
+} from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
 import { getPavloviaProjectName, quitPsychoJS } from "./components/lifetime.js";
 import {
@@ -1905,8 +1909,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         instructionsText.trialBreak(rc.language.value, responseType.current),
         !canClick(responseType.current)
       );
-      console.log(keypadActive(responseType.current));
-      // if (keypadActive(responseType.current)) keypad.start();
       await addPopupLogic(
         thisExperimentInfo.name,
         responseType.current,
@@ -4335,10 +4337,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
       else hideTrialBreakProgressBar();
 
+      addSkipTrialButton();
       /* --------------------------------- \PUBLIC -------------------------------- */
-
       preStimulus.running = false;
-
       return Scheduler.Event.NEXT;
     };
   }
@@ -4522,6 +4523,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCursor();
         return Scheduler.Event.NEXT;
       }
+
+      removeSkipTrialButton();
 
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
@@ -5001,7 +5004,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (toShowCursor()) {
         showCursor();
         removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
-        vocoderPhraseRemoveClickableCategory(showCategoryResponse);
+        vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
         return Scheduler.Event.NEXT;
       }
 

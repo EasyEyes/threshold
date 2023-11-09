@@ -8,6 +8,9 @@ import {
   isPavloviaExperiment,
   isProlificPreviewExperiment,
 } from "./externalServices";
+import { paramReader } from "../threshold";
+import { readi18nPhrases } from "./readPhrases";
+import { rc } from "./global";
 
 export async function handleEscapeKey() {
   // check if esc handling enabled for this condition, if not, quit
@@ -74,14 +77,10 @@ export async function handleEscapeKey() {
     document
       .getElementById("skip-trial-btn")
       .addEventListener("click", (event) => {
-        loggerText("--- SKIP TRIAL ---");
         event.preventDefault();
-        skipTrialOrBlock.skipTrial = true;
-        skipTrialOrBlock.trialId = status.trial;
-        skipTrialOrBlock.blockId = status.block;
+        skipTrial();
         action.skipTrial = true;
         dialog.hide();
-        loggerText("--- SKIP TRIAL ENDS ---");
         resolve();
       });
     document
@@ -114,3 +113,46 @@ export async function handleEscapeKey() {
   document.removeEventListener("keydown", logKey);
   return action;
 }
+
+/**
+ * Isolate trial skipping behavior, so that it can be used in the modal enviroment
+ * as well as on the trialInstruction routine for the responseSkipTrialButtonBool
+ * button.
+ */
+const skipTrial = () => {
+  loggerText("--- SKIP TRIAL ---");
+  skipTrialOrBlock.skipTrial = true;
+  skipTrialOrBlock.trialId = status.trial;
+  skipTrialOrBlock.blockId = status.block;
+  loggerText("--- SKIP TRIAL ENDS ---");
+};
+
+/**
+ * Create button, for fixation screen, as controlled by responseSkipButtonBool.
+ */
+export const addSkipTrialButton = () => {
+  const responseSkipTrialButtonBool = paramReader.read(
+    "responseSkipTrialButtonBool",
+    status.block_condition
+  );
+  if (
+    responseSkipTrialButtonBool &&
+    !document.getElementById("skipTrialButton")
+  ) {
+    const button = document.createElement("button");
+    button.id = "skipTrialButton";
+    button.className =
+      "btn btn-outline-secondary threshold-button threshold-beep-button";
+    const label = readi18nPhrases("T_skipTrial", rc.language.value);
+    button.innerText = label;
+    button.addEventListener("click", skipTrial);
+    document.body.appendChild(button);
+    console.log("!. skip trial button", button);
+  }
+};
+/**
+ * Remove responseSkipButtonBool button.
+ */
+export const removeSkipTrialButton = () => {
+  document.getElementById("skipTrialButton")?.remove();
+};
