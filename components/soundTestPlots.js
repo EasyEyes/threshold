@@ -608,7 +608,7 @@ export const plotForAllHz = (
     );
   }
   // round down minYAt1000Hz to the nearest 10
-  const lowerEnd = Math.floor(minYAt1000Hz / 10) * 10 - 50;
+  const lowerEnd = Math.floor(minYAt1000Hz / 10) * 10 - 60;
   // const lowerEnd = Math.floor(minY / 10) * 10 - 50;
 
   // min = -130 max = maxY + 10, stepSize = 10. Set the plotCanvas Height based on the max and min. Every 10 dB is 40 pixels
@@ -815,7 +815,7 @@ export const plotImpulseResponse = (
   let maxY = Math.max(...IrPoints.map((point) => point.y));
   let minY = Math.min(...IrPoints.map((point) => point.y));
   const plotCanvasHeight =
-    (Math.ceil(maxY / 10) * 10 - Math.floor(minY / 10) * 10 + 50) * 6;
+    (Math.ceil(maxY / 10) * 10 - Math.floor(minY / 10) * 10 + 60) * 6;
 
   plotCanvas.height = plotCanvasHeight;
   plotCanvas.width = 600;
@@ -920,7 +920,7 @@ export const plotImpulseResponse = (
               size: "19px",
             },
           },
-          min: Math.floor(minY / 10) * 10 - 40,
+          min: Math.floor(minY / 10) * 10 - 50,
           max: Math.ceil(maxY / 10) * 10 + 10,
           ticks: {
             stepSize: 10,
