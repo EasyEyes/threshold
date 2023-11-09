@@ -539,9 +539,31 @@ const paramReaderInitialized = async (reader) => {
   } else {
     thisExperimentInfo.participant = rc.id.value;
     thisExperimentInfo.setSession(1);
-
     thisExperimentInfo.EasyEyesID = rc.id.value;
     thisExperimentInfo.PavloviaSessionID = rc.id.value;
+    const { proceedButtonClicked, proceedBool, mic } =
+      await displayCompatibilityMessage(
+        compMsg["msg"],
+        reader,
+        rc,
+        compMsg["promptRefresh"],
+        compMsg["proceed"],
+        compatibilityCheckPeer,
+        needAnySmartphone,
+        needCalibratedSmartphoneMicrophone
+      );
+
+    microphoneInfo.current.micFullName = mic.micFullName;
+    microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
+    microphoneInfo.current.micrFullManufacturerName =
+      mic.micrFullManufacturerName;
+    microphoneInfo.current.phoneSurvey = mic.phoneSurvey;
+
+    hideCompatibilityMessage();
+    if (proceedButtonClicked && !proceedBool) {
+      showExperimentEnding();
+      return;
+    }
   }
 
   // show screens before actual experiment begins
