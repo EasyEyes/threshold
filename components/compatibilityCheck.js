@@ -834,10 +834,12 @@ export const displayCompatibilityMessage = async (
       );
       compatibilityCheckQRExplanation.innerText = messageForQr;
 
+      const displayUpdate = document.createElement("p");
+      displayUpdate.style.display = "none";
+      messageWrapper.appendChild(displayUpdate);
       messageWrapper.append(compatibilityCheckQRExplanation);
       messageWrapper.append(compatiblityCheckQR);
-      const displayUpdate = document.createElement("p");
-      messageWrapper.appendChild(displayUpdate);
+
       try {
         while (true) {
           console.log("waiting for compatibilityCheckPeer");
@@ -1007,6 +1009,14 @@ const isSmartphoneInDatabase = async (
       img.style.marginBottom = "30px";
       messageWrapper.appendChild(img);
     }
+  } else {
+    if (languageWrapper) {
+      languageWrapper.remove();
+    }
+    elem.style.display = "none";
+    qrCodeDisplay.style.display = "none";
+    qrCodeExplanation.style.display = "none";
+    titleContainer.style.margin = "0px";
   }
   const { preferredModelNumber } = getDeviceDetails(
     deviceDetails.PlatformName,
@@ -1096,6 +1106,7 @@ const isSmartphoneInDatabase = async (
             checkButton.remove();
             p.remove();
             if (exists) {
+              elem.style.display = "";
               elem.innerText = readi18nPhrases(
                 "RC_microphoneIsInCalibrationLibrary",
                 lang
@@ -1106,6 +1117,9 @@ const isSmartphoneInDatabase = async (
               microphoneInfo.micrFullManufacturerName = OEM;
               resolve(true);
             } else {
+              // restore the QR code and explanation
+              qrCodeDisplay.style.display = "";
+              displayUpdate.style.display = "";
               displayUpdate.innerText = readi18nPhrases(
                 "RC_microphoneNotInCalibrationLibrary",
                 lang
