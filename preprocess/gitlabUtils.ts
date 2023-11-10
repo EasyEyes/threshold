@@ -116,7 +116,6 @@ export const getAllProjects = async (user: User) => {
   );
   const firstResponseData = await firstResponse.json();
   projectList.push(...firstResponseData);
-  console.log(firstResponseData, "Paginated experiment list from gitlab.");
 
   // check if header is present
   const pageCountHeader = await firstResponse.headers.get("x-total-pages");
@@ -898,6 +897,8 @@ export const pushCommits = async (
     commit_message: commitMessage,
     actions: commits,
   };
+
+  console.log(commitBody);
 
   const response = await fetch(
     `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/commits?access_token=${user.accessToken}`,
