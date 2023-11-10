@@ -53,6 +53,7 @@ import {
   displaySummarizedTransducerTable,
   displayWhatIsSavedInDatabase,
   displayRecordings,
+  displayVolumeRecordings,
 } from "./soundTest";
 import {
   calculateTimeToCalibrate,
@@ -414,6 +415,12 @@ export const calibrateAudio = async (reader) => {
           : calibrateSoundCheck.current,
         true
       );
+      displayVolumeRecordings(
+        elems,
+        soundCalibrationResults.current.recordingChecks,
+        true,
+        allHzCalibrationResults.filteredMLSRange.component
+      );
       if (
         calibrateSoundCheck.current === "system" ||
         calibrateSoundCheck.current === "goal"
@@ -551,6 +558,12 @@ export const calibrateAudio = async (reader) => {
                 ? "system"
                 : calibrateSoundCheck.current,
               false
+            );
+            displayVolumeRecordings(
+              elems,
+              microphoneCalibrationResult.current.recordingChecks,
+              false,
+              microphoneCalibrationResult.current.filteredMLSRange.component
             );
             if (
               calibrateSoundCheck.current === "system" ||

@@ -1258,6 +1258,241 @@ export const plotRecordings = (
   tableDiv.style.zIndex = 1;
 };
 
+export const plotVolumeRecordings = (
+  plotCanvas,
+  recordingChecks,
+  isLoudspeakerCalibration,
+  filteredMLSRange
+) => {
+  const volumeData = recordingChecks["volume"];
+  const volumeLabels = Object.keys(volumeData);
+  const color = [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "purple",
+    "orange",
+    "pink",
+    "brown",
+    "black",
+  ];
+  const volumeDatasets = volumeLabels.map((inDB, i) => {
+    let volumeRecordings = volumeData[inDB];
+
+    let volumeRecordingData = volumeRecordings.recT.map((x, j) => {
+      return { x: x, y: volumeRecordings.recDb[j] };
+    });
+
+    return {
+      label: `${inDB} dB data`,
+      data: volumeRecordingData,
+      borderColor: color[i % color.length],
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      pointRadius: 0,
+      showLine: true,
+      borderWidth: 2,
+    };
+  });
+
+  const volumeWarmupDatasets = volumeLabels.map((inDB, i) => {
+    let volumeWarmup = volumeData[inDB];
+
+    let volumeWarmupData = volumeWarmup.preT.map((x, j) => {
+      return { x: x, y: volumeWarmup.preDb[j] };
+    });
+
+    return {
+      label: `${inDB} dB pre data`,
+      data: volumeWarmupData,
+      borderColor: color[i % color.length],
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      pointRadius: 0,
+      showLine: true,
+      borderDash: [5, 5],
+      borderWidth: 2,
+    };
+  });
+
+  const volumePostDatasets = volumeLabels.map((inDB, i) => {
+    let volumePostRecordings = volumeData[inDB];
+
+    let volumePostData = volumePostRecordings.postT.map((x, j) => {
+      return { x: x, y: volumePostRecordings.postDb[j] };
+    });
+
+    return {
+      label: `${inDB} dB post data`,
+      data: volumePostData,
+      borderColor: color[i % color.length],
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      pointRadius: 0,
+      showLine: true,
+      borderDash: [1, 1],
+      borderWidth: 2,
+    };
+  });
+
+  const allDatasets = [
+    ...volumeDatasets,
+    ...volumeWarmupDatasets,
+    ...volumePostDatasets,
+  ];
+
+  // Calculate maxY and minY for the new datasets
+  let maxY = Math.max(
+    ...volumeDatasets.map((dataset) =>
+      Math.max(...dataset.data.map((point) => point.y))
+    ),
+    ...volumeWarmupDatasets.map((dataset) =>
+      Math.max(...dataset.data.map((point) => point.y))
+    ),
+    ...volumePostDatasets.map((dataset) =>
+      Math.max(...dataset.data.map((point) => point.y))
+    )
+  );
+
+  let minY = Math.min(
+    ...volumeDatasets.map((dataset) =>
+      Math.max(...dataset.data.map((point) => point.y))
+    ),
+    ...volumeWarmupDatasets.map((dataset) =>
+      Math.max(...dataset.data.map((point) => point.y))
+    ),
+    ...volumePostDatasets.map((dataset) =>
+      Math.max(...dataset.data.map((point) => point.y))
+    )
+  );
+
+  plotCanvas.height = 600;
+  plotCanvas.width = 600;
+
+  // Chart.js configuration for warm-up plot
+  const volumeChart = new Chart(plotCanvas, {
+    type: "line",
+    data: {
+      // Combine warm-up and recording labels
+      datasets: allDatasets,
+    },
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: "Power Variation in 1000hz",
+          font: {
+            size: 22,
+            weight: "normal",
+            family: "system-ui",
+          },
+        },
+        subtitle: {
+          display: false,
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 15,
+            },
+            usePointStyle: true,
+            pointStyle: "line",
+            generateLabels: function (chart) {
+              const data = chart.data;
+
+              if (data.datasets.length) {
+                // Number of columns you want
+
+                return data.datasets.map(function (dataset, i) {
+                  return {
+                    text: dataset.label,
+                    fillStyle: dataset.backgroundColor,
+                    strokeStyle: dataset.borderColor,
+                    lineWidth: dataset.borderWidth,
+                    hidden: !chart.isDatasetVisible(i),
+                    index: i,
+                    lineDash: dataset.borderDash,
+                    pointStyle: "line",
+                  };
+                });
+              }
+
+              return [];
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: "linear",
+          position: "bottom",
+          min: 0,
+          max: 3.5,
+          title: {
+            display: true,
+            text: "Time (s)",
+            font: {
+              size: "19px",
+            },
+          },
+          ticks: {
+            font: {
+              size: 15,
+            },
+          },
+        },
+        y: {
+          type: "linear",
+          position: "left",
+          title: {
+            display: true,
+            text: "Power (dB)",
+            font: {
+              size: "19px",
+            },
+          },
+          min: Math.floor(minY / 10) * 10 - 30,
+          max: Math.ceil(maxY / 10) * 10,
+          ticks: {
+            stepSize: 10,
+            font: {
+              size: 15,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const chartArea = volumeChart.chartArea;
+  const table = displaySummarizedTransducerTable(
+    loudspeakerInfo.current,
+    microphoneInfo.current,
+    "",
+    isLoudspeakerCalibration,
+    "system",
+    "",
+    [calibrateSoundHz.current, calibrateSoundHz.current]
+  );
+  // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
+  const tableDiv = document.createElement("div");
+  tableDiv.appendChild(table);
+  tableDiv.style.lineHeight = "1";
+  if (showSoundParametersBool.current) {
+    const p = document.createElement("p");
+    const reportParameters = `1000 Hz duration: pre ${calibrateSound1000HzPreSec.current} s, use ${calibrateSound1000HzSec.current} s, post ${calibrateSound1000HzPostSec.current}  `;
+    p.innerHTML = reportParameters;
+    p.style.fontSize = "15px";
+    p.style.marginBottom = "0px";
+    tableDiv.appendChild(p);
+  }
+  tableDiv.style.zIndex = 1;
+  plotCanvas.parentNode.appendChild(tableDiv);
+
+  tableDiv.style.position = "absolute";
+  const tableRec = tableDiv.getBoundingClientRect();
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 115) + "px";
+  tableDiv.style.marginLeft = chartArea.left + 3 + "px";
+};
+
 export const standardDeviation = (values) => {
   const avg = average(values);
 

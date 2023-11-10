@@ -26,7 +26,7 @@ import {
   plotImpulseResponse,
   plotSoundLevels1000Hz,
   plotRecordings,
-  plotWarmups,
+  plotVolumeRecordings,
   standardDeviation,
 } from "./soundTestPlots";
 import {
@@ -977,6 +977,27 @@ export const displayRecordings = (
   elems.soundTestPlots.appendChild(plotCanvas);
   elems.citation.style.visibility = "visible";
   plotRecordings(
+    plotCanvas,
+    recChecks,
+    isLoudspeakerCalibration,
+    filteredMLSRange
+  );
+};
+
+export const displayVolumeRecordings = (
+  elems,
+  recChecks,
+  isLoudspeakerCalibration,
+  filteredMLSRange
+) => {
+  const plotCanvas = document.createElement("canvas");
+  plotCanvas.setAttribute("id", "plotCanvas");
+  plotCanvas.width = 500;
+  plotCanvas.height = 500;
+  plotCanvas.style.marginTop = "20px";
+  elems.soundTestPlots.appendChild(plotCanvas);
+  elems.citation.style.visibility = "visible";
+  plotVolumeRecordings(
     plotCanvas,
     recChecks,
     isLoudspeakerCalibration,
