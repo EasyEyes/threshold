@@ -949,6 +949,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "Yes, No, Don't know / other, Not applicable / rather not say",
   },
   {
+    name: "_saveCursorPositionBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_saveCursorPositionBool (default FALSE) records cursor and crosshair position at every display frame throughout the experiment. At the end of the experiment, EasyEyes saves a CSV file to the \"data\" folder in the experiment's Pavlovia repository. (Based on the similar, but now deprecated _trackGazeExternallyBool.)\nSTIMULUS CSV TABLE. Each row of the EasyEyes CSV “stimulus” table records posix time (in secs, floating point), x,y position (px) of the: crosshair, cursor, and (if present) target. We also include viewing distance (cm), x,y of closest point (px) to observer's eyes, experiment name, Pavlovia session ID, block number, condition number, conditionName, and trial number.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_saveEachBlockBool",
     availability: "now",
     example: "",
@@ -2492,7 +2502,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 responseSkipTrialButtonBool (default FALSE) displays a button visible only before trial is initiated that, when pressed, skips the trial. We are exploring the difficulty of many variants on the cursor tracking of the moving crosshair and anticipate that some conditions will be impossible, so we want to offer the participant a way to move on. The button will say "Skip Trial" (international phrase T_skipTrial) and will be big in the upper right corner of the screen.',
+      'responseSkipTrialButtonBool (default FALSE) displays a button visible only before trial is initiated that, when pressed, skips the trial. We are exploring the difficulty of many variants on the cursor tracking of the moving crosshair and anticipate that some conditions will be impossible, so we want to offer the participant a way to move on. The button will say "Skip Trial" (international phrase T_skipTrial) and will be big in the upper right corner of the screen. You might also consider using responseTimeoutSec.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2505,6 +2515,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "🕑 responseSpokenBool allows participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "responseTimeoutSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "responseTimeoutSec (default 86400, i.e. a day) automatically skips the trial if the participant doesn't initiate it within the timeout interval. We need this to handle the situation where EasyEyes requires cursor tracking of the crosshair and we inadvertently stumbled onto a set of parameters that is impossible to satisfy. We want the participant to proceed to the rest of the trials and finish the test. You might also consider using responseSkipTrialButtonBool.",
+    type: "numerical",
+    default: "86400",
     categories: "",
   },
   {
