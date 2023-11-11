@@ -1155,7 +1155,7 @@ export const display1000HzParametersTable = (parameters) => {
   const parametersToDisplay = {
     T: parameters.T.toFixed(1) + " dB SPL",
     W: parameters.W.toFixed(1) + " dB",
-    Q: (1 / Number(parameters.R.toFixed(1))).toFixed(3),
+    "Q = 1/R": (1 / Number(parameters.R.toFixed(1))).toFixed(3),
     gainDBSPL: parameters.gainDBSPL.toFixed(1),
     backgroundDBSPL: parameters.backgroundDBSPL.toFixed(1),
     RMSError: parameters.RMSError.toFixed(1) + " dB",

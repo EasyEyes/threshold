@@ -1027,9 +1027,6 @@ export const plotRecordings = (
   });
   // Assuming warmupT is the same for all categories
 
-  plotCanvas.height = 500;
-  plotCanvas.width = 600;
-
   let maxY = Math.max(
     ...unfilteredData.map((point) => point.y),
     ...componentData.map((point) => point.y),
@@ -1037,6 +1034,15 @@ export const plotRecordings = (
     ...unfilteredWarmupData.map((point) => point.y),
     ...componentWarmupData.map((point) => point.y),
     ...systemWarmupData.map((point) => point.y)
+  );
+
+  let maxX = Math.max(
+    ...unfilteredData.map((point) => point.x),
+    ...componentData.map((point) => point.x),
+    ...systemData.map((point) => point.x),
+    ...unfilteredWarmupData.map((point) => point.x),
+    ...componentWarmupData.map((point) => point.x),
+    ...systemWarmupData.map((point) => point.x)
   );
 
   let minY = Math.min(
@@ -1048,6 +1054,12 @@ export const plotRecordings = (
     ...systemWarmupData.map((point) => point.y)
   );
 
+  minY = Math.floor(minY / 10) * 10 - 30;
+  maxY = Math.ceil(maxY / 10) * 10;
+
+  plotCanvas.height = 600;
+  plotCanvas.width = 600;
+
   let transducer = isLoudspeakerCalibration ? "Loudspeaker" : "Microphone";
   // Chart.js configuration for warm-up plot
   const warmupChart = new Chart(plotCanvas, {
@@ -1056,7 +1068,7 @@ export const plotRecordings = (
       // Combine warm-up and recording labels
       datasets: [
         {
-          label: "MLS Warm up",
+          label: "MLS pre",
           data: unfilteredWarmupData,
           borderColor: "red",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1066,7 +1078,7 @@ export const plotRecordings = (
           borderWidth: 2,
         },
         {
-          label: transducer + " Warmup",
+          label: transducer + " pre",
           data: componentWarmupData,
           borderColor: "blue",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1076,7 +1088,7 @@ export const plotRecordings = (
           borderWidth: 2,
         },
         {
-          label: "Loudspeaker+Microphone Warm up",
+          label: "Loudspeaker+Microphone pre",
           data: systemWarmupData,
           borderColor: "green",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1086,11 +1098,7 @@ export const plotRecordings = (
           borderWidth: 2,
         },
         {
-          label:
-            "MLS Data, SD = " +
-            recordingChecks.unfiltered[recordingChecks.unfiltered.length - 1]
-              .sd +
-            " dB",
+          label: "MLS SD=" + recordingChecks.unfiltered[0].sd + " dB",
           data: unfilteredData,
           borderColor: "red",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1100,8 +1108,9 @@ export const plotRecordings = (
         },
         {
           label:
+            "MLS corrected for " +
             transducer +
-            " Data, SD = " +
+            " SD=" +
             recordingChecks.component[recordingChecks.component.length - 1].sd +
             " dB",
           data: componentData,
@@ -1114,7 +1123,7 @@ export const plotRecordings = (
         },
         {
           label:
-            "Loudspeaker+Microphone Data, SD = " +
+            "MLS corrected for Loudspeaker+Microphone SD=" +
             recordingChecks.system[recordingChecks.system.length - 1].sd +
             " dB",
           data: systemData,
@@ -1131,7 +1140,7 @@ export const plotRecordings = (
       plugins: {
         title: {
           display: true,
-          text: "Power Variation in Recordings",
+          text: "Power Variation in Wideband Recordings",
           font: {
             size: 22,
             weight: "normal",
@@ -1174,7 +1183,7 @@ export const plotRecordings = (
           type: "linear",
           position: "bottom",
           min: 0,
-          max: 3.5,
+          max: Math.ceil(maxX / 0.5) * 0.5,
           title: {
             display: true,
             text: "Time (s)",
@@ -1183,6 +1192,7 @@ export const plotRecordings = (
             },
           },
           ticks: {
+            stepSize: 0.5,
             font: {
               size: 15,
             },
@@ -1198,8 +1208,8 @@ export const plotRecordings = (
               size: "19px",
             },
           },
-          min: Math.floor(minY / 10) * 10 - 30,
-          max: Math.ceil(maxY / 10) * 10,
+          min: minY,
+          max: maxY,
           ticks: {
             stepSize: 10,
             font: {
@@ -1285,7 +1295,7 @@ export const plotVolumeRecordings = (
     });
 
     return {
-      label: `${inDB} dB data`,
+      label: `${inDB} dB SD=` + volumeRecordings.sd + " Db",
       data: volumeRecordingData,
       borderColor: color[i % color.length],
       backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1303,7 +1313,7 @@ export const plotVolumeRecordings = (
     });
 
     return {
-      label: `${inDB} dB pre data`,
+      label: `${inDB} dB pre`,
       data: volumeWarmupData,
       borderColor: color[i % color.length],
       backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1322,13 +1332,13 @@ export const plotVolumeRecordings = (
     });
 
     return {
-      label: `${inDB} dB post data`,
+      label: `${inDB} dB post`,
       data: volumePostData,
       borderColor: color[i % color.length],
       backgroundColor: "rgba(0, 0, 0, 0)",
       pointRadius: 0,
       showLine: true,
-      borderDash: [1, 1],
+      borderDash: [5, 5],
       borderWidth: 2,
     };
   });
@@ -1352,15 +1362,27 @@ export const plotVolumeRecordings = (
     )
   );
 
-  let minY = Math.min(
+  let maxX = Math.max(
     ...volumeDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.y))
+      Math.max(...dataset.data.map((point) => point.x))
     ),
     ...volumeWarmupDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.y))
+      Math.max(...dataset.data.map((point) => point.x))
     ),
     ...volumePostDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.y))
+      Math.max(...dataset.data.map((point) => point.x))
+    )
+  );
+
+  let minY = Math.min(
+    ...volumeDatasets.map((dataset) =>
+      Math.min(...dataset.data.map((point) => point.y))
+    ),
+    ...volumeWarmupDatasets.map((dataset) =>
+      Math.min(...dataset.data.map((point) => point.y))
+    ),
+    ...volumePostDatasets.map((dataset) =>
+      Math.min(...dataset.data.map((point) => point.y))
     )
   );
 
@@ -1378,7 +1400,7 @@ export const plotVolumeRecordings = (
       plugins: {
         title: {
           display: true,
-          text: "Power Variation in 1000hz",
+          text: "Power Variation in 1000 Hz Recordings",
           font: {
             size: 22,
             weight: "normal",
@@ -1425,7 +1447,7 @@ export const plotVolumeRecordings = (
           type: "linear",
           position: "bottom",
           min: 0,
-          max: 3.5,
+          max: Math.ceil(maxX / 0.5) * 0.5,
           title: {
             display: true,
             text: "Time (s)",
@@ -1434,6 +1456,7 @@ export const plotVolumeRecordings = (
             },
           },
           ticks: {
+            stepSize: 0.5,
             font: {
               size: 15,
             },
