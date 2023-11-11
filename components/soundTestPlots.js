@@ -1313,7 +1313,7 @@ export const plotVolumeRecordings = (
     });
 
     return {
-      label: `${inDB} dB pre`,
+      label: `${inDB} dB`,
       data: volumeWarmupData,
       borderColor: color[i % color.length],
       backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1332,7 +1332,7 @@ export const plotVolumeRecordings = (
     });
 
     return {
-      label: `${inDB} dB post`,
+      label: `${inDB} dB`,
       data: volumePostData,
       borderColor: color[i % color.length],
       backgroundColor: "rgba(0, 0, 0, 0)",
