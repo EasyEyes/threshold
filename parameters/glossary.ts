@@ -40,6 +40,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool. To contribute to the EasyEyes calibration library, the scientist must provide _authorEmails.",
   },
+  _calibrateMicrophoneKeywords: {
+    name: "_calibrateMicrophoneKeywords",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      '🕑 _calibrateMicrophoneKeywords (default "Mik-1, Mik-2, Bluetooth, Headset") is used to interpret the list of input devices returned by Web Audio on mobile phones. On a desktop, web audio identifies which input device is in use. On a mobile device, web audio just gives a list of possible input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is either using its main built-in microphone, or using a connected external microphone. When connected to a smartphone by the QR code technique, EasyEyes scans the enumerated list of input devices returned by web audio. Any enumerated device whose name includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name. If no name matches a keyword, then EasyEyes assumes that the default microphone (enumerated as "mic" 1) is active, and returns its name, which on some phones is "Default". If some of your participants use some external device that EasyEyes misses, you may be able help EasyEyes to catch it by adding a keyword here.',
+  },
   _calibrateMicrophonesOnlyViaPhoneBool: {
     name: "_calibrateMicrophonesOnlyViaPhoneBool",
     availability: "now",

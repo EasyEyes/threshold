@@ -925,9 +925,7 @@ const startCalibration = async (
   webAudioDeviceNames.microphoneText = readi18nPhrases(
     "RC_nameMicrophone",
     language
-  )
-    .replace("xxx", webAudioDeviceNames.microphone)
-    .replace("XXX", webAudioDeviceNames.microphone);
+  );
   IDsToSaveInSoundProfileLibrary.ProlificParticipantID = isProlificExperiment()
     ? new URLSearchParams(window.location.search).get("participant")
     : "";

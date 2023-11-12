@@ -49,6 +49,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateMicrophoneKeywords",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      '🕑 _calibrateMicrophoneKeywords (default "Mik-1, Mik-2, Bluetooth, Headset") is used to interpret the list of input devices returned by Web Audio on mobile phones. On a desktop, web audio identifies which input device is in use. On a mobile device, web audio just gives a list of possible input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is either using its main built-in microphone, or using a connected external microphone. When connected to a smartphone by the QR code technique, EasyEyes scans the enumerated list of input devices returned by web audio. Any enumerated device whose name includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name. If no name matches a keyword, then EasyEyes assumes that the default microphone (enumerated as "mic" 1) is active, and returns its name, which on some phones is "Default". If some of your participants use some external device that EasyEyes misses, you may be able help EasyEyes to catch it by adding a keyword here.',
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_calibrateMicrophonesOnlyViaPhoneBool",
     availability: "now",
     example: "TRUE",
