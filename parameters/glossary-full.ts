@@ -49,11 +49,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateMicrophonesPreventLocalBool",
+    name: "_calibrateMicrophonesOnlyViaPhoneBool",
     availability: "now",
     example: "TRUE",
     explanation:
-      "🕑 _calibrateMicrophonesPreventLocalBool (default TRUE) disables calibration of any microphone that is connected in any way other than via QR code. This prevents a local connection (internal mic, USB mic, or Apple handoff), which, at least on a MacBook, goes though the OS sound panel. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS has removed the calibration tones, played through the loudspeaker, from the recording, which defeats the point of calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesPreventLocalBool=FALSE and you'll be allowed to record locally.",
+      "🕑 _calibrateMicrophonesOnlyViaPhoneBool (default TRUE) allows microphone calibration only via a smartphone connected by QR code. This prevents a local connection (internal mic., USB mic., bluetooth mic. or Apple handoff), which, at least on a MacBook Pro, goes though the OS sound panel which often screws up efforts to calibrate sound. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS removes the calibration sounds, played through the loudspeaker, from the recording, which ruins the calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesOnlyViaPhoneBool=FALSE and you'll be allowed to record locally.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -103,7 +103,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count EXCLUDES the warm up bursts. IMPORTANT: The Novak et al. (2012) algorithm to deal with asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period, so make sure that\n_calibrateSoundBurstRepeats ≥ 2\nWe plan to have the EasyEyes compiler enforce this.",
+      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count EXCLUDES the warm up bursts. IMPORTANT: The Novak et al. (2012) algorithm to deal with asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period, so make sure that\n_calibrateSoundBurstRepeats ≥ 2\nWe plan to have the EasyEyes compiler enforce this.\nNOTE: There is a bit of uncertainty in synchronizing the loudspeaker and recording onsets so we record for 10% longer than requested (which is _calibrateSoundBurstRepeats*_calibrateSoundBurstRepeats).",
     type: "numerical",
     default: "4",
     categories: "",
@@ -123,7 +123,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstsWarmup (default 1) is the number of extra sound bursts, not recorded, before the recorded series of bursts. The warmup is NOT part of the _calibrateSoundBurstRepeats. There will be _calibrateSoundBurstsWarmup+_calibrateSoundBurstRepeats sound bursts, and only the final _calibrateSoundBurstRepeats are recorded and analyzed. Having a warmup burst is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
+      "❌ _calibrateSoundBurstsWarmup (default 1) is the number of extra sound bursts, not recorded, before the recorded series of bursts. The warmup is NOT part of the _calibrateSoundBurstRepeats. There will be _calibrateSoundBurstsWarmup+_calibrateSoundBurstRepeats sound bursts, and only the final _calibrateSoundBurstRepeats are recorded and analyzed. Having a warmup burst is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
     type: "numerical",
     default: "1",
     categories: "",
@@ -153,7 +153,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _calibrateSoundFavoriteAuthors (default is empty) optionally provides a comma-separated list of email addresses of trusted authors of microphone calibrations in the EasyEyes calibration library. Each calibration is stamped with the author\'s email. The list is ordered so that preference diminishes farther down the list. An empty list indicates that you\'ll accept any calibration file in the EasyEyes library that matches your microphone model. If you list one or more emails, then the first is your top preference, and so on. At the end you can list "any", or not. "any" indicates that if your favored authors have not calibrated this device, then you\'ll accept any available calibration.',
+      '🕑 _calibrateSoundFavoriteAuthors (default is empty) optionally provides a comma-separated list of email addresses of trusted authors of microphone calibrations in the EasyEyes calibration library. Each calibration is stamped with the authors\' email(s). The list is ordered so that preference diminishes farther down the list. An empty list indicates that you\'ll accept any calibration file in the EasyEyes library that matches your microphone model. If you list one or more emails, then the first is your top preference, and so on. At the end you can list "any", or not. "any" indicates that if your favorite authors have not calibrated this device, then you\'ll accept any available calibration.',
     type: "text",
     default: "",
     categories: "",
@@ -195,7 +195,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundPowerBinDesiredSec (default 0.2) sets the bin size for estimation of power to plot power vs. time during each MLS recording, filtered or unfiltered. You want the bin size to be short enough to reveal changes over time, but long enough to average out the random variations of the MLS itself, so you get a smooth curve.",
     type: "numerical",
-    default: "0.2",
+    default: "0.1",
     categories: "",
   },
   {
@@ -1183,7 +1183,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "calibrateSound1000HzPostSec (default 0.5) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for some discrepancy between the clocks used to drive sound playing and recording. Making the sound longer than the recording allows us to be sure of getting a full recording despite modest discrepany in loudspeaker and microphone clocks.",
+      'calibrateSound1000HzPostSec (default 0.5) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for some discrepancy between the clocks used to drive sound playing and recording. Making the sound longer than the recording allows us to be sure of getting a full recording despite modest discrepany in loudspeaker and microphone clocks.\nNOTE: Because of the uncertainty in synchronizing the loudspeaker and recording onsets we record for 20% longer than the whole requested duration: _calibrateSound1000HzPreSec+_calibrateSound1000HzSec+_calibrateSound1000HzPostSec. In the EasyEyes plots of power over time, the excess duration beyond _calibrateSound1000HzPreSec+_calibrateSound1000HzSec is assigned to the "post" interval, so the plotted "post" interval will be longer than requested by calibrateSound1000HzSec by 20% of the whole requested duration.',
     type: "numerical",
     default: "0.5",
     categories: "",
@@ -2522,7 +2522,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "responseTimeoutSec (default 86400, i.e. a day) automatically skips the trial if the participant doesn't initiate it within the timeout interval. We need this to handle the situation where EasyEyes requires cursor tracking of the crosshair and we inadvertently stumbled onto a set of parameters that is impossible to satisfy. We want the participant to proceed to the rest of the trials and finish the test. You might also consider using responseSkipTrialButtonBool.",
+      "responseTimeoutSec (default 86400, i.e. a day) automatically skips the trial if the participant doesn't initiate it within the timeout interval. We need timeout to handle the situation where EasyEyes requires cursor tracking of the crosshair to initiate the trial, but the participant can't keep up, possibly because the hot spot is too small, or the motion is too fast or curvy. Instead of remaining stuck there, we want the participant to proceed to the rest of the trials and finish the test. You might also consider using responseSkipTrialButtonBool.",
     type: "numerical",
     default: "86400",
     categories: "",
