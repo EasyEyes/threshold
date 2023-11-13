@@ -39,6 +39,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateMicrophoneKeywords",
+    availability: "now",
+    example: "TRUE",
+    explanation:
+      '🕑 _calibrateMicrophoneKeywords (see defaults below) is a list of keywords used to interpret the list of input devices returned by Web Audio on a mobile phone. On a desktop, Web Audio identifies which input device is in use. On a mobile device, Web Audio just gives a list of available input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is using either its main built-in microphone or a connected external microphone. When connected to a smartphone by the QR-code technique, EasyEyes scans the enumerated list of sound input device "labels" returned by web audio. Any enumerated device whose label includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name of the Microphone. Keyword matching ignores case. If no label matches a keyword, then EasyEyes assumes that the microphone enumerated as "mics:0" is default and active, and returns its name, which on some phones is "Default". If any of your participants uses an external microphone that EasyEyes fails to detect, you may be able help EasyEyes to catch it by adding a keyword to the default list and using that extended list. Conversely, if our list inadvertently contains a keyword that is causing a false alarm because it appears in a participant\'s phone\'s label for an internal sound-input source, you can create and use a new list without the problematic keyword.\nDEFAULT (matching ignores case): "Mik-1, Mik-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Voyager, Yealink"',
+    type: "categorical",
+    default:
+      "Mik-1, Mik-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly Voyager, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Yealink",
+    categories: "",
+  },
+  {
     name: "_calibrateMicrophonesBool",
     availability: "now",
     example: "TRUE",
@@ -46,16 +57,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool. To contribute to the EasyEyes calibration library, the scientist must provide _authorEmails.",
     type: "boolean",
     default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "_calibrateMicrophoneKeywords",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      '🕑 _calibrateMicrophoneKeywords (default "Mik-1, Mik-2, Bluetooth, Headset") is used to interpret the list of input devices returned by Web Audio on mobile phones. On a desktop, web audio identifies which input device is in use. On a mobile device, web audio just gives a list of possible input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is either using its main built-in microphone, or using a connected external microphone. When connected to a smartphone by the QR code technique, EasyEyes scans the enumerated list of input devices returned by web audio. Any enumerated device whose name includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name. If no name matches a keyword, then EasyEyes assumes that the default microphone (enumerated as "mic" 1) is active, and returns its name, which on some phones is "Default". If some of your participants use some external device that EasyEyes misses, you may be able help EasyEyes to catch it by adding a keyword here.',
-    type: "boolean",
-    default: "TRUE",
     categories: "",
   },
   {
