@@ -423,6 +423,12 @@ import {
   addMeasureLuminanceIntervals,
   initColorCAL,
 } from "./components/photometry.js";
+import {
+  defineTargetForCursorTracking,
+  trackCursor,
+  updateTrackCursorHz,
+} from "./components/cursorTracking.ts";
+import { setPreStimulusRerunInterval } from "./components/rerunPrestimulus.js";
 
 /* -------------------------------------------------------------------------- */
 
@@ -3118,66 +3124,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (rc.setDistanceDesired)
           rc.setDistanceDesired(viewingDistanceDesiredCm.current);
 
-        // TODO does RC provide callbacks, ie to do this every time the nudger activates?
-        /**
-         * NOTES
-         * How to handle the variable viewing distance of the participant during trialInstructionRoutine?
-         * We generate all our (ie viewing distance dependent) stimuli during trialInstructionRoutineBegin,
-         * but we continue to track/nudge viewing distance during trialInstructionRoutineEachFrame.
-         *
-         * Early on we chose to do all our heavy/slow processing (ie generating stimuli) at that earlier
-         * point (trialInstructionRoutineBegin) in order to minimize delay between fixation click and the
-         * start of fixation.
-         *
-         * This means, however, that stimuli is being generated at the very start of the trial instructions,
-         * instead of when fixation is clicked. Stimuli therefore does not reflect distance at actual
-         * start of the trial.
-         */
+        setPreStimulusRerunInterval(
+          paramReader,
+          trialInstructionRoutineBegin,
+          snapshot
+        );
 
-        // criterion for change in viewing distance to trigger rerun -- use the same criteria as the nudger
-        if (!preStimulus.interval) {
-          const rerunIntervalMs = 50;
-          preStimulus.running = true;
-          preStimulus.interval = setInterval(async () => {
-            // Update viewing distance
-            const nominalViewingDistance = viewingDistanceDesiredCm.current;
-            viewingDistanceCm.current = rc.viewingDistanceCm
-              ? rc.viewingDistanceCm.value
-              : viewingDistanceCm.current;
-            let allowedRatio = Math.max(
-              paramReader.read(
-                "viewingDistanceAllowedRatio",
-                status.block_condition
-              ),
-              0.000000001
-            );
-            let bounds;
-            if (allowedRatio > 1) {
-              bounds = [
-                nominalViewingDistance / allowedRatio,
-                nominalViewingDistance * allowedRatio,
-              ];
-            } else {
-              bounds = [
-                nominalViewingDistance * allowedRatio,
-                nominalViewingDistance / allowedRatio,
-              ];
-            }
-            const significantChangeBool =
-              viewingDistanceCm.current < bounds[0] ||
-              viewingDistanceCm.current > bounds[1];
-            // If not already in progress, rerun trialInstructionRoutineBegin
-            if (!preStimulus.running && significantChangeBool) {
-              preStimulus.running = true;
-              const startTime = performance.now();
-              await trialInstructionRoutineBegin(snapshot)();
-              const stopTime = performance.now();
-              const duration = stopTime - startTime;
-              logger("!. Done rerunning.", duration);
-              preStimulus.running = false;
-            }
-          }, rerunIntervalMs);
-        }
         // Distance nudging
         if (
           paramReader.read("viewingDistanceNudgingBool", status.block_condition)
@@ -3416,6 +3368,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               thisExperimentInfo.experimentFilename
             );
 
+          defineTargetForCursorTracking(readingParagraph);
+
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(readingParagraph);
@@ -3534,6 +3488,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.setPos(targetEccentricityXYPx);
           target.setFont(font.name);
           target.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
+
+          defineTargetForCursorTracking(target);
 
           psychoJS.experiment.addData(
             "spacingRelationToSize",
@@ -3789,7 +3745,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
         },
         repeatedLetters: () => {
-          /// Do on both trials for this condition
           // Read relevant trial-level parameters (and save to letterConfig? repeatedLettersConfig?)
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
           readAllowedTolerances(tolerances, reader, BC);
@@ -3830,6 +3785,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             generateRepeatedLettersStims(stimulusParameters);
           repeatedLettersConfig.level = level;
           repeatedLettersConfig.stimulusParameters = stimulusParameters;
+
+          defineTargetForCursorTracking(repeatedLettersConfig.stims);
 
           // Simulated observer
           simulatedObservers.update(BC, {
@@ -4206,6 +4163,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           console.log("targetOffsetDeg", vernierConfig.targetOffsetDeg);
           console.log("level", level);
           vernier.update(directionBool);
+
+          defineTargetForCursorTracking(vernier);
 
           /* -------------------------------------------------------------------------- */
 
@@ -6353,6 +6312,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.experiment,
           parametersToExcludeFromData
         );
+        // Update sampling rate for cursor tracking, as it can vary by condition
+        updateTrackCursorHz(paramReader);
       } else if (snapshotType !== "trial" && snapshotType !== "block") {
         console.log(
           "%c====== Unknown Snapshot ======",
@@ -6360,6 +6321,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
       }
       // }
+
+      // Begin tracking the cursor, if _saveCursorPositionBool
+      trackCursor(paramReader);
 
       logger(`this ${snapshotType}`, currentLoopSnapshot.getCurrentTrial());
       psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());

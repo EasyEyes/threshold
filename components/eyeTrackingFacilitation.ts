@@ -144,7 +144,7 @@ export const getAppleCoordinatePosition = (x: number, y: number): number[] => {
  * Get the width,height of the screen, defaulting to psychoJS' values and falling back on window inner dimensions
  * @returns [widthPx, heightPx]
  */
-const getScreenDimensions = (): number[] => {
+export const getScreenDimensions = (): number[] => {
   if (displayOptions && displayOptions.window) {
     const win = displayOptions.window as unknown as any;
     return win._size as unknown as number[];

@@ -510,6 +510,11 @@ export const fontSize = { current: "Uninitiated" };
 
 export const eyeTrackingStimulusRecords = [];
 
+export const cursorTracking = {
+  records: [],
+  target: undefined, // TODO are there other places where we care about the current target stim?
+};
+
 export const measureLuminance = {
   records: [],
   movieStart: undefined,

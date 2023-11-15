@@ -11,6 +11,7 @@ import {
   thisExperimentInfo,
   microphoneCalibrationResults,
   calibrateSoundSaveJSONBool,
+  cursorTracking,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
@@ -144,6 +145,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     };
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
+    quitOptions.cursorTrackingData = cursorTracking.records;
     psychoJS.quit(quitOptions);
     // logPsychoJSQuit(
     //   "_afterQuitFunction",
@@ -163,6 +165,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     };
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
+    quitOptions.cursorTrackingData = cursorTracking.records;
     psychoJS.quit(quitOptions);
     // logPsychoJSQuit(
     //   "_afterQuitFunction",
