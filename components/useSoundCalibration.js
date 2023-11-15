@@ -672,6 +672,8 @@ const checkMicrophoneInDatabase = async () => {
         Gain: Gain,
         Gain1000: Gain,
         isSmartPhone: false,
+        CreateDate: new Date(),
+        DateText: getCurrentTimeString(),
         linear: {
           Freq: data.Freq,
           Gain: data.Gain,
@@ -1125,6 +1127,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
         (soundGainDBSPL.current - microphoneInfo.current.gainDBSPL) * 10
       ) / 10,
     CalibrationDate: getCurrentTimeString(),
+    CreateDate: new Date(),
     micInfo: microphoneInfo.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
   };
