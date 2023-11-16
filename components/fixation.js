@@ -80,8 +80,10 @@ export class Fixation {
       BC
     );
     fixationConfig.markingFixationMotionPeriodSec =
-      (2 * Math.PI * fixationConfig.markingFixationMotionRadiusDeg) /
-      markingFixationMotionSpeedDegPerSec;
+      markingFixationMotionSpeedDegPerSec === 0
+        ? 0
+        : (2 * Math.PI * fixationConfig.markingFixationMotionRadiusDeg) /
+          markingFixationMotionSpeedDegPerSec;
     fixationConfig.markingFixationHotSpotRadiusDeg = reader.read(
       "markingFixationHotSpotRadiusDeg",
       BC
@@ -305,14 +307,16 @@ export const gyrateFixation = (fixation, t, displayOptions) => {
       )[0]
   );
   const period = fixationConfig.markingFixationMotionPeriodSec;
-  const newFixationXY = [
-    fixationConfig.nominalPos[0] +
-      Math.cos((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
-    fixationConfig.nominalPos[1] +
-      Math.sin((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
-  ];
-  fixationConfig.pos = newFixationXY;
-  fixation.setPos(newFixationXY);
+  if (period !== 0) {
+    const newFixationXY = [
+      fixationConfig.nominalPos[0] +
+        Math.cos((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
+      fixationConfig.nominalPos[1] +
+        Math.sin((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
+    ];
+    fixationConfig.pos = newFixationXY;
+    fixation.setPos(newFixationXY);
+  }
 };
 
 /**
