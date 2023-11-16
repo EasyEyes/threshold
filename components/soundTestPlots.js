@@ -1313,7 +1313,7 @@ export const plotVolumeRecordings = (
     });
 
     return {
-      label: `${inDB} dB`,
+      label: "pre",
       data: volumeWarmupData,
       borderColor: color[i % color.length],
       backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1332,7 +1332,7 @@ export const plotVolumeRecordings = (
     });
 
     return {
-      label: `${inDB} dB`,
+      label: "post",
       data: volumePostData,
       borderColor: color[i % color.length],
       backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1421,20 +1421,22 @@ export const plotVolumeRecordings = (
               const data = chart.data;
 
               if (data.datasets.length) {
-                // Number of columns you want
-
-                return data.datasets.map(function (dataset, i) {
-                  return {
-                    text: dataset.label,
-                    fillStyle: dataset.backgroundColor,
-                    strokeStyle: dataset.borderColor,
-                    lineWidth: dataset.borderWidth,
-                    hidden: !chart.isDatasetVisible(i),
-                    index: i,
-                    lineDash: dataset.borderDash,
-                    pointStyle: "line",
-                  };
-                });
+                return data.datasets.reduce((labels, dataset, i) => {
+                  // Exclude labels containing "pre" or "post"
+                  if (dataset.label !== "pre" && dataset.label !== "post") {
+                    labels.push({
+                      text: dataset.label,
+                      fillStyle: dataset.backgroundColor,
+                      strokeStyle: dataset.borderColor,
+                      lineWidth: dataset.borderWidth,
+                      hidden: !chart.isDatasetVisible(i),
+                      index: i,
+                      lineDash: dataset.borderDash,
+                      pointStyle: "line",
+                    });
+                  }
+                  return labels;
+                }, []);
               }
 
               return [];
@@ -1512,7 +1514,7 @@ export const plotVolumeRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 115) + "px";
+  tableDiv.style.marginTop = -(chartArea.bottom - tableRec.height - 147) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
 };
 
