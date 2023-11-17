@@ -3,7 +3,14 @@ import { isProlificPreviewExperiment } from "./externalServices";
 import { readi18nPhrases } from "./readPhrases";
 import { ref, get, child } from "firebase/database";
 import database, { db } from "./firebase/firebase.js";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  collection,
+} from "firebase/firestore";
 // import { microphoneInfo } from "./global";
 // import { rc } from "./global";
 
@@ -143,21 +150,20 @@ const getInstructionText = (
 };
 
 export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
-  const docRef = doc(db, "Microphone", OEM, speakerID, "default");
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
+  const collectionRef = collection(db, "Microphones");
+  // get the document in the collection with the speakerID, OEM and isDefault = true
+  const q = query(
+    collectionRef,
+    where("ID", "==", speakerID),
+    where("lowercaseOEM", "==", OEM),
+    where("isDefault", "==", true)
+  );
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.size > 0) {
     console.log("Existsss");
     return true;
   }
   console.log("Does not exist");
-  return false;
-};
-const doesMicrophoneExist = async (speakerID, oem) => {
-  const dbRef = ref(database);
-  const snapshot = await get(child(dbRef, `Microphone2/${oem}/${speakerID}`));
-  if (snapshot.exists()) {
-    return true;
-  }
   return false;
 };
 

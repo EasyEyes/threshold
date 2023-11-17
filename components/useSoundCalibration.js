@@ -679,26 +679,22 @@ const checkMicrophoneInDatabase = async () => {
           Gain: data.Gain,
         },
         serial: microphoneInfo.current.micFullSerialNumber,
-        info: {
-          DeviceType: "N/A",
-          HardwareModel: microphoneInfo.current.micrFullManufacturerName,
-          HardwareName: microphoneInfo.current.micrFullManufacturerName,
-          ID: microphoneInfo.current.micFullSerialNumber,
-          OEM: "minidsp",
-          PlatformName: "N/A",
-          PlatformVersion: "N/A",
-          hardwareFamily: microphoneInfo.current.micrFullManufacturerName,
-          micModelName: microphoneInfo.current.micrFullManufacturerName,
-        },
+        DeviceType: "N/A",
+        HardwareModel: microphoneInfo.current.micrFullManufacturerName,
+        HardwareName: microphoneInfo.current.micrFullManufacturerName,
+        ID: microphoneInfo.current.micFullSerialNumber,
+        OEM: microphoneInfo.current.micrFullManufacturerName,
+        PlatformName: "N/A",
+        PlatformVersion: "N/A",
+        hardwareFamily: microphoneInfo.current.micrFullManufacturerName,
+        micModelName: microphoneInfo.current.micFullName,
+        isDefault: true,
+        micManufacturerName: microphoneInfo.current.micrFullManufacturerName,
+        lowercaseOEM: micManufacturer,
       };
 
       // await addMicrophoneToDatabase(micSerialNumber, micManufacturer, micData);
-      await addMicrophoneToFirestore(
-        micSerialNumber,
-        micManufacturer,
-        micData,
-        true
-      );
+      await addMicrophoneToFirestore(micData);
       return true;
     }
   }
