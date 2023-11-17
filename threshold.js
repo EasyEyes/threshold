@@ -3518,6 +3518,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulusParameters.targetAndFlankersXYPx[0]
           );
           fixation.setPos(fixationConfig.pos);
+          psychoJS.experiment.addData(
+            "markingFixationHotSpotRadiusPx",
+            fixationConfig.markingFixationHotSpotRadiusPx
+          );
 
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
           psychoJS.experiment.addData(
@@ -3806,6 +3810,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.setPos(fixationConfig.pos);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
+          psychoJS.experiment.addData(
+            "markingFixationHotSpotRadiusPx",
+            fixationConfig.markingFixationHotSpotRadiusPx
+          );
 
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForRepeatedLetters(
@@ -3944,6 +3952,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.setPos(fixationConfig.pos);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
+          psychoJS.experiment.addData(
+            "markingFixationHotSpotRadiusPx",
+            fixationConfig.markingFixationHotSpotRadiusPx
+          );
 
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForRsvpReading(
@@ -4058,6 +4070,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               );
               fixationConfig.pos = fixationConfig.nominalPos;
               fixation.setPos(fixationConfig.pos);
+              psychoJS.experiment.addData(
+                "markingFixationHotSpotRadiusPx",
+                fixationConfig.markingFixationHotSpotRadiusPx
+              );
               addHandlerForClickingFixation(paramReader);
             });
           });
@@ -4124,6 +4140,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.update(paramReader, BC, 100, targetEccentricityXYPx);
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
+          psychoJS.experiment.addData(
+            "markingFixationHotSpotRadiusPx",
+            fixationConfig.markingFixationHotSpotRadiusPx
+          );
 
           validAns = String(reader.read("fontCharacterSet", BC))
             .toLowerCase()
