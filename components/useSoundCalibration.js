@@ -304,21 +304,21 @@ const getUSBMicrophoneDetailsFromUser = async (
     if (stream) {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const mics = devices.filter((device) => device.kind === "audioinput");
+      // mics.forEach((mic) => {
+      //   if (mic.label.includes("Umik") || mic.label.includes("UMIK")) {
+      //     // micName = mic.label.replace("Microphone", "");
+      //     webAudioDeviceNames.microphone = mic.label;
+      //   }
+      // });
+
       mics.forEach((mic) => {
-        if (mic.label.includes("Umik") || mic.label.includes("UMIK")) {
-          micName = mic.label.replace("Microphone", "");
-          webAudioDeviceNames.microphone = micName;
+        if (mic.label.includes("Default")) {
+          webAudioDeviceNames.microphone = mic.label;
         }
       });
+
       if (webAudioDeviceNames.microphone === "") {
-        mics.forEach((mic) => {
-          if (mic.label.includes("Default")) {
-            webAudioDeviceNames.microphone = mic.label;
-          }
-        });
-      }
-      if (webAudioDeviceNames.microphone === "") {
-        webAudioDeviceNames.microphone = micName;
+        webAudioDeviceNames.microphone = mics[0].label;
       }
       const loudspeaker = devices.filter(
         (device) => device.kind === "audiooutput"
@@ -332,6 +332,7 @@ const getUSBMicrophoneDetailsFromUser = async (
   } catch (err) {
     console.log(err);
   }
+  console.log(webAudioDeviceNames);
   const p = document.createElement("p");
   p.innerHTML = readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
     "UUU",
