@@ -692,6 +692,7 @@ const checkMicrophoneInDatabase = async () => {
         isDefault: true,
         micManufacturerName: microphoneInfo.current.micrFullManufacturerName,
         lowercaseOEM: micManufacturer,
+        ID_from_51Degrees: "N/A",
       };
 
       // await addMicrophoneToDatabase(micSerialNumber, micManufacturer, micData);
@@ -903,16 +904,13 @@ const startCalibration = async (
       : readi18nPhrases("RC_usingUSBMicrophone", language)
     : elems.subtitle.innerHTML;
   const micName = microphoneInfo.current?.micFullName
-    ? microphoneInfo.current.micFullName.toLowerCase().split(" ").join("")
+    ? microphoneInfo.current.micFullName
     : "";
   const micSerialNumber = microphoneInfo.current?.micFullSerialNumber
     ? microphoneInfo.current.micFullSerialNumber
     : "";
   const micManufacturer = microphoneInfo.current?.micrFullManufacturerName
     ? microphoneInfo.current.micrFullManufacturerName
-        .toLowerCase()
-        .split(" ")
-        .join("")
     : "";
   const { Speaker, CombinationCalibration } = speakerCalibrator;
   webAudioDeviceNames.loudspeakerText = readi18nPhrases(
