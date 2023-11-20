@@ -674,7 +674,7 @@ const checkMicrophoneInDatabase = async () => {
         Gain: Gain,
         Gain1000: Gain,
         isSmartPhone: false,
-        CreateDate: new Date(),
+        createDate: new Date(),
         DateText: getCurrentTimeString(),
         linear: {
           Freq: data.Freq,
@@ -1127,6 +1127,11 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     CreateDate: new Date(),
     micInfo: microphoneInfo.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
+    mlsSD: qualityMetrics.current?.mlsSD,
+    systemCorrectionSD: Number(qualityMetrics.current?.correctionSD.system),
+    componentCorrectionSD: Number(
+      qualityMetrics.current?.correctionSD.component
+    ),
   };
   if (calibrateMicrophonesBool.current) {
     loudspeakerInfo.current.authorEmails = authorEmail.current;
