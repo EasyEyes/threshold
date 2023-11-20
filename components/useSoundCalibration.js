@@ -1089,14 +1089,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
   allHzCalibrationResults.timestamps =
     soundCalibrationResults.current.timeStamps;
-  const modelNumber = loudspeakerInfo.current.fullLoudspeakerModelNumber
-    .toLowerCase()
-    .split(" ")
-    .join("");
-  const modelName = loudspeakerInfo.current.fullLoudspeakerModelName
-    .toLowerCase()
-    .split(" ")
-    .join("");
+  const modelNumber = loudspeakerInfo.current.fullLoudspeakerModelNumber;
+  const modelName = loudspeakerInfo.current.fullLoudspeakerModelName;
   loudspeakerInfo.current = {
     ...loudspeakerInfo.current,
     webAudioDeviceNames: {
