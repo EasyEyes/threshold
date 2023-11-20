@@ -401,6 +401,12 @@ export const vocoderPhraseShowClickable = { current: true };
 export const vocoderPhraseCorrectResponse = { current: undefined };
 export const soundCalibrationLevelDBSPL = { current: undefined };
 export const soundCalibrationResults = { current: undefined };
+export const qualityMetrics = {
+  current: {
+    mlsSD: undefined,
+    correctionSD: undefined,
+  },
+};
 export const allHzCalibrationResults = {
   x_unconv: undefined,
   y_unconv: undefined,
