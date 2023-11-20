@@ -20,6 +20,7 @@ import {
   calibrateSoundSmoothOctaves,
   loudspeakerInfo,
   microphoneInfo,
+  qualityMetrics,
   showSoundParametersBool,
 } from "./global";
 import { findGainatFrequency } from "./soundCalibrationHelpers";
@@ -783,7 +784,12 @@ export const plotForAllHz = (
       calibrateSoundIIRSec.current
     } s, ${calibrateSoundMinHz.current} to ${
       calibrateSoundMaxHz.current
-    } Hz<br>Filtered MLS Range: ${Min.toFixed(1)} to ${Max.toFixed(1)}`;
+    } Hz<br>Filtered MLS Range: ${Min.toFixed(1)} to ${Max.toFixed(1)}<br>
+    SD (dB): Rec. MLS ${qualityMetrics.current.mlsSD},
+     Speak+mic corr. ${qualityMetrics.current?.correctionSD.system},
+      ${isLoudspeakerCalibration ? "Mic" : "Speak"} corr. ${
+      qualityMetrics.current?.correctionSD.component
+    }`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
@@ -964,7 +970,13 @@ export const plotImpulseResponse = (
     }
      to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
       1
-    )} to ${Max.toFixed(1)}`;
+    )} to ${Max.toFixed(1)}<br>
+    SD (dB): Rec. MLS ${qualityMetrics.current.mlsSD},
+     Speak+mic corr. ${qualityMetrics.current?.correctionSD.system},
+     ${isLoudspeakerCalibration ? "Mic" : "Speak"} corr. ${
+      qualityMetrics.current?.correctionSD.component
+    }`;
+
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
@@ -1251,7 +1263,13 @@ export const plotRecordings = (
     }
      to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
       1
-    )} to ${Max.toFixed(1)}`;
+    )} to ${Max.toFixed(1)}<br>
+    SD (dB): Rec. MLS ${qualityMetrics.current.mlsSD},
+     Speak+mic corr. ${qualityMetrics.current?.correctionSD.system},
+     ${isLoudspeakerCalibration ? "Mic" : "Speak"} corr. ${
+      qualityMetrics.current?.correctionSD.component
+    }`;
+
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";

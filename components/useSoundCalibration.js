@@ -33,6 +33,7 @@ import {
   microphoneCalibrationResult,
   microphoneCalibrationResults,
   microphoneInfo,
+  qualityMetrics,
   soundCalibrationResults,
   soundGainDBSPL,
   thisDevice,
@@ -1022,6 +1023,7 @@ const startCalibration = async (
 
 const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   soundCalibrationResults.current = results;
+  qualityMetrics.current = results.qualityMetrics;
   invertedImpulseResponse.current =
     calibrateSoundCheck.current === "system"
       ? soundCalibrationResults.current.system.iir
