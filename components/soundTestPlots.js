@@ -971,7 +971,7 @@ export const plotImpulseResponse = (
      to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
       1
     )} to ${Max.toFixed(1)}<br>
-    SD (dB): Rec. MLS ${qualityMetrics.current.mlsSD},
+    SD (dB): Rec. MLS ${qualityMetrics.current?.mlsSD},
      Speak+mic corr. ${qualityMetrics.current?.correctionSD.system},
      ${isLoudspeakerCalibration ? "Mic" : "Speak"} corr. ${
       qualityMetrics.current?.correctionSD.component
