@@ -930,13 +930,23 @@ const startCalibration = async (
   IDsToSaveInSoundProfileLibrary.PavloviaSessionID =
     thisExperimentInfo.PavloviaSessionID;
 
+  const restrtCalibration = document.createElement("button");
+  restrtCalibration.innerHTML = readi18nPhrases("RC_ReRecord", language);
+  restrtCalibration.classList.add(...["btn", "btn-primary"]);
+  restrtCalibration.style.marginLeft = "0px";
+  restrtCalibration.style.marginTop = "10px";
+  restrtCalibration.style.display = "none";
+  elems.displayContainer.appendChild(restrtCalibration);
+
   const speakerParameters = {
+    restartButton: restrtCalibration,
     language: language,
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
     debug: debugBool.current,
     gainValues: globalGains.values,
     knownIR: knownIR,
+    displayUpdate: elems.displayUpdate,
     instructionDisplayId: "recordingInProgress",
     soundMessageId: "soundMessage",
     titleDisplayId: "soundTitle",
@@ -997,6 +1007,8 @@ const startCalibration = async (
     calibrator,
     timeoutSec.current
   );
+  restrtCalibration.style.display = "none";
+  // Speaker.closeConnection()
   timeToCalibrate.timeAtTheEndOfCalibration = new Date();
   // timeToCalibrate.calibrationDuration in minutes
   timeToCalibrate.calibrationDuration = Math.round(
@@ -1014,6 +1026,18 @@ const startCalibration = async (
     .replace("222", timeToCalibrate.calibrationDuration);
   if (results === false) {
     return false;
+  }
+  if (results === "restart") {
+    elems.displayUpdate.innerHTML = "";
+    elems.displayUpdate.style.display = "none";
+    await startCalibration(
+      elems,
+      isLoudspeakerCalibration,
+      language,
+      isSmartPhone,
+      knownIR
+    );
+    return;
   }
   adjustDisplayAfterCalibration(elems, isLoudspeakerCalibration);
   isLoudspeakerCalibration
