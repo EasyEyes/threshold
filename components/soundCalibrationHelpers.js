@@ -95,6 +95,55 @@ export const saveLoudSpeakerInfoToFirestore = async (
   await setDoc(docRef, { ir: ir }, { merge: true });
 };
 
+export const writeIsSmartPhoneToFirestore = async (
+  micID,
+  isSmartPhone,
+  OEM
+) => {
+  const collectionRef = collection(db, "Microphones");
+  const q = query(
+    collectionRef,
+    where("ID", "==", micID),
+    where("lowercaseOEM", "==", OEM),
+    where("isDefault", "==", true)
+  );
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.size > 0) {
+    const docRef = await addDoc(collectionRef, {
+      isSmartPhone: isSmartPhone,
+      isDefault: false,
+    });
+    return docRef.id;
+  } else {
+    const docRef = await addDoc(collectionRef, {
+      isSmartPhone: isSmartPhone,
+      isDefault: true,
+    });
+    return docRef.id;
+  }
+};
+
+export const writeMicrophoneInfoToFirestore = async (micInfo, documentID) => {
+  const docRef = doc(db, "Microphones", documentID);
+  await setDoc(docRef, micInfo, { merge: true });
+};
+
+export const writeFrqGainToFirestore = async (frq, gain, documentID) => {
+  const data = { Freq: frq, Gain: gain };
+
+  const docRef = doc(db, "Microphones", documentID);
+  await updateDoc(docRef, {
+    linear: data,
+  });
+};
+
+export const writeGainat1000HzToFirestore = async (gain, documentID) => {
+  const docRef = doc(db, "Microphones", documentID);
+  await updateDoc(docRef, {
+    Gain1000: gain,
+  });
+};
+
 export const getInstructionText = (
   thisDevice,
   language,

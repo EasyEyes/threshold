@@ -62,6 +62,10 @@ import {
   removeElements,
   saveLoudSpeakerInfo,
   saveLoudSpeakerInfoToFirestore,
+  writeIsSmartPhoneToFirestore,
+  writeMicrophoneInfoToFirestore,
+  writeFrqGainToFirestore,
+  writeGainat1000HzToFirestore,
 } from "./soundCalibrationHelpers";
 import { showExperimentEnding } from "./forms";
 import { getCurrentTimeString } from "./soundUtils";
@@ -1168,7 +1172,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   allHzCalibrationResults.knownIr = JSON.parse(
     JSON.stringify(soundCalibrationResults.current.component.ir)
   );
-  downloadLoudspeakerCalibration();
+  let filename = downloadLoudspeakerCalibration();
+  loudspeakerInfo.current["jsonFileName"] = filename;
   try {
     await saveLoudSpeakerInfoToFirestore(
       loudspeakerInfo.current,
@@ -1291,12 +1296,33 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
       loudspeaker: webAudioDeviceNames.loudspeaker,
       microphone: webAudioDeviceNames.microphone,
     },
+    mlsSD: result?.qualityMetrics.mlsSD,
+    systemCorrectionSD: Number(result?.qualityMetrics.correctionSD.system),
+    componentCorrectionSD: Number(
+      result?.qualityMetrics.correctionSD.component
+    ),
   };
   microphoneCalibrationResults.push(allResults);
   if (calibrateSoundSaveJSONBool.current) {
-    psychoJS.experiment.downloadJSON(allResults, calibrationRound.current);
+    console.log(calibrationRound.current);
+    let filename = psychoJS.experiment.downloadJSON(
+      allResults,
+      calibrationRound.current
+    );
+    result.micInfo["jsonFileName"] = filename;
     calibrationRound.current = calibrationRound.current + 1;
+  } else {
+    result.micInfo["jsonFileName"] = "";
   }
+
+  const id = await writeIsSmartPhoneToFirestore(
+    result.micInfo.ID,
+    isSmartPhone,
+    result.micInfo.OEM
+  );
+  await writeMicrophoneInfoToFirestore(result.micInfo, id);
+  await writeFrqGainToFirestore(IrFreq, IrGain, id);
+  await writeGainat1000HzToFirestore(correctGain, id);
 };
 
 const adjustDisplayBeforeCalibration = (
@@ -1449,6 +1475,11 @@ const downloadLoudspeakerCalibration = () => {
         loudspeaker: webAudioDeviceNames.loudspeaker,
         microphone: webAudioDeviceNames.microphone,
       },
+      mlsSD: qualityMetrics.current.mlsSD,
+      systemCorrectionSD: Number(qualityMetrics.current?.correctionSD.system),
+      componentCorrectionSD: Number(
+        qualityMetrics.current?.correctionSD.component
+      ),
     };
   }
   if (
@@ -1465,6 +1496,9 @@ const downloadLoudspeakerCalibration = () => {
     }
   }
   if (allSoundResults && calibrateSoundSaveJSONBool.current)
-    psychoJS.experiment.downloadJSON(allSoundResults, calibrationRound.current);
-  calibrationRound.current = calibrationRound.current + 1;
+    return psychoJS.experiment.downloadJSON(
+      allSoundResults,
+      calibrationRound.current++
+    );
+  return "";
 };
