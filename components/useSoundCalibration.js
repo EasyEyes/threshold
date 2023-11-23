@@ -1184,6 +1184,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
 
 const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   microphoneCalibrationResult.current = result;
+  qualityMetrics.current = result?.qualityMetrics;
   console.log(microphoneCalibrationResult.current);
   microphoneInfo.current.gainDBSPL =
     Math.round(
