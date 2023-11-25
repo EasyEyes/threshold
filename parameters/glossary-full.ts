@@ -54,7 +54,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (possibly manufacturer=calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool. To contribute to the EasyEyes calibration library, the scientist must provide _authorEmails.",
+      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (typically manufacturer-calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool. To contribute to the EasyEyes calibration library, the scientist must provide _authorEmails.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -114,7 +114,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst. This count EXCLUDES the warm up bursts. IMPORTANT: The Novak et al. (2012) algorithm to deal with asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period, so make sure that\n_calibrateSoundBurstRepeats ≥ 2\nWe plan to have the EasyEyes compiler enforce this.\nNOTE: There is a bit of uncertainty in synchronizing the loudspeaker and recording onsets so we record for 10% longer than requested (which is _calibrateSoundBurstRepeats*_calibrateSoundBurstRepeats).",
+      "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst for analysis. EasyEyes adds an extra warm-up rep, at the beginning, that is also recorded, but not used in estimation of the impulse response, and an extra 10% of the requested duration, at the end, to allow for any small difference in start time between the loudspeaker and microphone. IMPORTANT: The Novak et al. (2012) algorithm to deal with an asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period, so make sure that\n_calibrateSoundBurstRepeats ≥ 2\nWe plan to have the EasyEyes compiler enforce this.",
     type: "numerical",
     default: "4",
     categories: "",
@@ -144,7 +144,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_calibrateSoundCheck (default "goal") optionally checks the sound frequency response (i.e. sound spectrum produced by a white noise stimulus) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the system, microphone, or loudspeaker. _calibrateSoundCheck must be set to one of three values: “none”, “system”, or “goal”. \n• “none” skips the check. \n• “system” checks using the IIR corresponding the the combination of loudspeaker and microphone.\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.\n• "both" checks both "system" and "goal".',
+      '_calibrateSoundCheck (default "goal") optionally the flatness of the spectrum produced by playing the MLS (which has a white spectrum) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the system, microphone, or loudspeaker. _calibrateSoundCheck must be set to one of three values: “none”, “system”, or “goal”. \n• “none” skips the check. \n• “system” checks using the IIR corresponding the the combination of loudspeaker and microphone.\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.\n• "both" checks both "system" and "goal".',
     type: "categorical",
     default: "both",
     categories: "none, system, goal, both",
@@ -442,6 +442,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_needComputerSurveyBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_needComputerSurveyBool (default TRUE) if TRUE then the Needs page asks the participant to identify the computer's model name and number, and proceeds. In a typical use, there is no calibration and no other data collection.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_needDeviceType",
     availability: "now",
     example: "desktop",
@@ -520,16 +530,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_needSmartphoneCheckBool (default TRUE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
     type: "boolean",
     default: "TRUE",
-    categories: "",
-  },
-  {
-    name: "_needComputerSurveyBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_needComputerSurveyBool (default TRUE) if TRUE then the Needs page asks the participant to identify the computer's model name and number, and proceeds. In a typical use, there is no calibration and no other data collection.",
-    type: "boolean",
-    default: "FALSE",
     categories: "",
   },
   {
