@@ -22,6 +22,7 @@ import {
   microphoneInfo,
   qualityMetrics,
   showSoundParametersBool,
+  filteredMLSAttenuation,
 } from "./global";
 import { findGainatFrequency } from "./soundCalibrationHelpers";
 
@@ -773,8 +774,23 @@ export const plotForAllHz = (
   }
   tableDiv.appendChild(table);
   if (showSoundParametersBool.current) {
+    const maxAbs =
+      calibrationGoal === "system"
+        ? filteredMLSAttenuation.maxAbsSystem
+        : filteredMLSAttenuation.maxAbsComponent;
+    const gain =
+      calibrationGoal === "system"
+        ? filteredMLSAttenuation.system
+        : filteredMLSAttenuation.component;
+    const amplitude = Math.round(gain * maxAbs * 10) / 10;
+    const attenuationDb =
+      calibrationGoal === "system"
+        ? filteredMLSAttenuation.attenuationDbSystem
+        : filteredMLSAttenuation.attenuationDbComponent;
+    const attenuationDbRounded = Math.round(attenuationDb * 10) / 10;
     const Min = Math.round(filteredMLSRange.Min * 10) / 10;
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
+
     const p = document.createElement("p");
     const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
       calibrateSoundBurstSec.current
@@ -784,7 +800,7 @@ export const plotForAllHz = (
       calibrateSoundIIRSec.current
     } s, ${calibrateSoundMinHz.current} to ${
       calibrateSoundMaxHz.current
-    } Hz<br>Filtered MLS Range: ${Min.toFixed(1)} to ${Max.toFixed(1)}<br>
+    } Hz<br>${attenuationDbRounded} dB attenuation of filtered MLS for amplitude ${amplitude}<br>
     SD (dB): Rec. MLS ${qualityMetrics.current.mls},
      Speak+mic corr. ${qualityMetrics.current?.system},
       ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${

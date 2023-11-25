@@ -41,6 +41,7 @@ import {
   authorEmail,
   loudspeakerIR,
   thisExperimentInfo,
+  calibrateSoundLimit,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -306,6 +307,9 @@ export const calibrateAudio = async (reader) => {
   )[0];
   calibrateSoundSamplingDesiredBits.current = reader.read(
     GLOSSARY._calibrateSoundSamplingDesiredBits.name
+  )[0];
+  calibrateSoundLimit.current = reader.read(
+    GLOSSARY._calibrateSoundLimit.name
   )[0];
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]

@@ -474,6 +474,15 @@ export const timeToCalibrate = {
   timeAtTheEndOfCalibration: 0,
   calibrationDuration: 0,
 };
+export const calibrateSoundLimit = { current: 1 };
+export const filteredMLSAttenuation = {
+  component: 1,
+  system: 1,
+  maxAbsSystem: 1,
+  maxAbsComponent: 1,
+  attenuationDbSystem: 0,
+  attenuationDbComponent: 0,
+};
 export const thisDevice = { current: undefined };
 export const loudspeakerInfo = { current: {} };
 export const microphoneInfo = { current: {} };

@@ -43,6 +43,8 @@ import {
   webAudioDeviceNames,
   thisExperimentInfo,
   IDsToSaveInSoundProfileLibrary,
+  calibrateSoundLimit,
+  filteredMLSAttenuation,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -943,6 +945,7 @@ const startCalibration = async (
   elems.displayContainer.appendChild(restrtCalibration);
 
   const speakerParameters = {
+    calibrateSoundLimit: calibrateSoundLimit.current,
     restartButton: restrtCalibration,
     language: language,
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
@@ -1115,6 +1118,20 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
       };
     }
   }
+
+  filteredMLSAttenuation.component =
+    soundCalibrationResults.current.filteredMLSAttenuation.component;
+  filteredMLSAttenuation.system =
+    soundCalibrationResults.current.filteredMLSAttenuation.system;
+  filteredMLSAttenuation.maxAbsComponent =
+    soundCalibrationResults.current.filteredMLSAttenuation.maxAbsComponent;
+  filteredMLSAttenuation.maxAbsSystem =
+    soundCalibrationResults.current.filteredMLSAttenuation.maxAbsSystem;
+  filteredMLSAttenuation.attenuationDbSystem =
+    -20 * Math.log10(filteredMLSAttenuation.system);
+  filteredMLSAttenuation.attenuationDbComponent =
+    -20 * Math.log10(filteredMLSAttenuation.component);
+
   soundGainDBSPL.current = soundCalibrationResults.current.parameters.gainDBSPL;
   soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
   allHzCalibrationResults.timestamps =
@@ -1196,13 +1213,13 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   loudspeakerInfo.current["calibrateSoundMaxHz"] = calibrateSoundMaxHz.current;
 
   try {
-    await saveLoudSpeakerInfoToFirestore(
-      loudspeakerInfo.current,
-      modelNumber,
-      thisDevice.current.OEM,
-      soundCalibrationResults.current.component.ir,
-      soundCalibrationResults.current.component.iir
-    );
+    // await saveLoudSpeakerInfoToFirestore(
+    //   loudspeakerInfo.current,
+    //   modelNumber,
+    //   thisDevice.current.OEM,
+    //   soundCalibrationResults.current.component.ir,
+    //   soundCalibrationResults.current.component.iir
+    // );
   } catch (err) {
     console.log(err);
   }
@@ -1233,6 +1250,19 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     Freq: IrFreq,
     Gain: IrGain,
   };
+  filteredMLSAttenuation.component =
+    microphoneCalibrationResult.current.filteredMLSAttenuation.component;
+  filteredMLSAttenuation.system =
+    microphoneCalibrationResult.current.filteredMLSAttenuation.system;
+  filteredMLSAttenuation.maxAbsSystem =
+    microphoneCalibrationResult.current.filteredMLSAttenuation.maxAbsSystem;
+  filteredMLSAttenuation.maxAbsComponent =
+    microphoneCalibrationResult.current.filteredMLSAttenuation.maxAbsComponent;
+  filteredMLSAttenuation.attenuationDbSystem =
+    -20 * Math.log10(filteredMLSAttenuation.system);
+  filteredMLSAttenuation.attenuationDbComponent =
+    -20 * Math.log10(filteredMLSAttenuation.component);
+
   let allResults = {
     SoundGainParameters: result.parameters,
     Cal1000HzInDb: result.inDBValues ? result.inDBValues : [],
@@ -1320,6 +1350,10 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     mlsSD: Number(result?.qualityMetrics.system),
     systemCorrectionSD: Number(result?.qualityMetrics.system),
     componentCorrectionSD: Number(result?.qualityMetrics.component),
+    calibrateSoundAttenuationSpeakerAndMicDb:
+      filteredMLSAttenuation.attenuationDbSystem,
+    calibrateSoundAttenuationMicrophoneDb:
+      filteredMLSAttenuation.attenuationDbComponent,
   };
   microphoneCalibrationResults.push(allResults);
   if (calibrateSoundSaveJSONBool.current) {
@@ -1515,6 +1549,10 @@ const downloadLoudspeakerCalibration = () => {
       mlsSD: qualityMetrics.current.mlsSD,
       systemCorrectionSD: Number(qualityMetrics.current?.system),
       componentCorrectionSD: Number(qualityMetrics.current?.component),
+      calibrateSoundAttenuationSpeakerAndMicDb:
+        filteredMLSAttenuation.attenuationDbSystem,
+      calibrateSoundAttenuationLoudspeakerDb:
+        filteredMLSAttenuation.attenuationDbComponent,
     };
   }
   if (
