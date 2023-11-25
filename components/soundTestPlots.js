@@ -785,10 +785,10 @@ export const plotForAllHz = (
     } s, ${calibrateSoundMinHz.current} to ${
       calibrateSoundMaxHz.current
     } Hz<br>Filtered MLS Range: ${Min.toFixed(1)} to ${Max.toFixed(1)}<br>
-    SD (dB): Rec. MLS ${qualityMetrics.current.mlsSD},
-     Speak+mic corr. ${qualityMetrics.current?.correctionSD.system},
-      ${isLoudspeakerCalibration ? "Mic" : "Speak"} corr. ${
-      qualityMetrics.current?.correctionSD.component
+    SD (dB): Rec. MLS ${qualityMetrics.current.mls},
+     Speak+mic corr. ${qualityMetrics.current?.system},
+      ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${
+      qualityMetrics.current?.component
     }`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
@@ -971,10 +971,10 @@ export const plotImpulseResponse = (
      to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
       1
     )} to ${Max.toFixed(1)}<br>
-    SD (dB): Rec. MLS ${qualityMetrics.current?.mlsSD},
-     Speak+mic corr. ${qualityMetrics.current?.correctionSD.system},
-     ${isLoudspeakerCalibration ? "Mic" : "Speak"} corr. ${
-      qualityMetrics.current?.correctionSD.component
+    SD (dB): Rec. MLS ${qualityMetrics.current?.mls},
+     Speak+mic corr. ${qualityMetrics.current?.system},
+     ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${
+      qualityMetrics.current?.component
     }`;
 
     p.innerHTML = reportParameters;
@@ -1264,10 +1264,10 @@ export const plotRecordings = (
      to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
       1
     )} to ${Max.toFixed(1)}<br>
-    SD (dB): Rec. MLS ${qualityMetrics.current.mlsSD},
-     Speak+mic corr. ${qualityMetrics.current?.correctionSD.system},
-     ${isLoudspeakerCalibration ? "Mic" : "Speak"} corr. ${
-      qualityMetrics.current?.correctionSD.component
+    SD (dB): Rec. MLS ${qualityMetrics.current.mls},
+     Speak+mic corr. ${qualityMetrics.current?.system},
+     ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${
+      qualityMetrics.current?.component
     }`;
 
     p.innerHTML = reportParameters;

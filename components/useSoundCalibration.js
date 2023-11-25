@@ -1149,11 +1149,9 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     CreateDate: new Date(),
     micInfo: microphoneInfo.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
-    mlsSD: qualityMetrics.current?.mlsSD,
-    systemCorrectionSD: Number(qualityMetrics.current?.correctionSD.system),
-    componentCorrectionSD: Number(
-      qualityMetrics.current?.correctionSD.component
-    ),
+    mlsSD: Number(qualityMetrics.current?.mls),
+    systemCorrectionSD: Number(qualityMetrics.current?.system),
+    componentCorrectionSD: Number(qualityMetrics.current?.component),
   };
   if (calibrateMicrophonesBool.current) {
     loudspeakerInfo.current.authorEmails = authorEmail.current;
@@ -1174,6 +1172,29 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   );
   let filename = downloadLoudspeakerCalibration();
   loudspeakerInfo.current["jsonFileName"] = filename;
+  loudspeakerInfo.current["filteredMLSComponentMin"] =
+    Math.round(allHzCalibrationResults.filteredMLSRange.component.Min * 10) /
+    10;
+  loudspeakerInfo.current["filteredMLSComponentMax"] =
+    Math.round(allHzCalibrationResults.filteredMLSRange.component.Max * 10) /
+    10;
+  loudspeakerInfo.current["filteredMLSSystemMin"] =
+    Math.round(allHzCalibrationResults.filteredMLSRange.system.Min * 10) / 10;
+  loudspeakerInfo.current["filteredMLSSystemMax"] =
+    Math.round(allHzCalibrationResults.filteredMLSRange.system.Max * 10) / 10;
+  loudspeakerInfo.current["calibrateSoundBurstDb"] =
+    calibrateSoundBurstDb.current;
+  loudspeakerInfo.current["calibrateSoundBurstSec"] =
+    calibrateSoundBurstSec.current;
+  loudspeakerInfo.current["calibrateSoundBurstRepeats"] =
+    calibrateSoundBurstRepeats.current;
+  loudspeakerInfo.current["calibrateSoundHz"] = calibrateSoundHz.current;
+  loudspeakerInfo.current["calibrateSoundIRSec"] = calibrateSoundIRSec.current;
+  loudspeakerInfo.current["calibrateSoundIIRSec"] =
+    calibrateSoundIIRSec.current;
+  loudspeakerInfo.current["calibrateSoundMinHz"] = calibrateSoundMinHz.current;
+  loudspeakerInfo.current["calibrateSoundMaxHz"] = calibrateSoundMaxHz.current;
+
   try {
     await saveLoudSpeakerInfoToFirestore(
       loudspeakerInfo.current,
@@ -1296,11 +1317,9 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
       loudspeaker: webAudioDeviceNames.loudspeaker,
       microphone: webAudioDeviceNames.microphone,
     },
-    mlsSD: result?.qualityMetrics.mlsSD,
-    systemCorrectionSD: Number(result?.qualityMetrics.correctionSD.system),
-    componentCorrectionSD: Number(
-      result?.qualityMetrics.correctionSD.component
-    ),
+    mlsSD: Number(result?.qualityMetrics.system),
+    systemCorrectionSD: Number(result?.qualityMetrics.system),
+    componentCorrectionSD: Number(result?.qualityMetrics.component),
   };
   microphoneCalibrationResults.push(allResults);
   if (calibrateSoundSaveJSONBool.current) {
@@ -1320,6 +1339,24 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     isSmartPhone,
     result.micInfo.OEM
   );
+  result.micInfo["filteredMLSSystemMin"] =
+    Math.round(result.filteredMLSRange.system.Min * 10) / 10;
+  result.micInfo["filteredMLSSystemMax"] =
+    Math.round(result.filteredMLSRange.system.Max * 10) / 10;
+  result.micInfo["filteredMLSComponentMin"] =
+    Math.round(result.filteredMLSRange.component.Min * 10) / 10;
+  result.micInfo["filteredMLSComponentMax"] =
+    Math.round(result.filteredMLSRange.component.Max * 10) / 10;
+  result.micInfo["calibrateSoundBurstDb"] = calibrateSoundBurstDb.current;
+  result.micInfo["calibrateSoundBurstSec"] = calibrateSoundBurstSec.current;
+  result.micInfo["calibrateSoundBurstRepeats"] =
+    calibrateSoundBurstRepeats.current;
+  result.micInfo["calibrateSoundHz"] = calibrateSoundHz.current;
+  result.micInfo["calibrateSoundIRSec"] = calibrateSoundIRSec.current;
+  result.micInfo["calibrateSoundIIRSec"] = calibrateSoundIIRSec.current;
+  result.micInfo["calibrateSoundMinHz"] = calibrateSoundMinHz.current;
+  result.micInfo["calibrateSoundMaxHz"] = calibrateSoundMaxHz.current;
+
   await writeMicrophoneInfoToFirestore(result.micInfo, id);
   await writeFrqGainToFirestore(IrFreq, IrGain, id);
   await writeGainat1000HzToFirestore(correctGain, id);
@@ -1476,10 +1513,8 @@ const downloadLoudspeakerCalibration = () => {
         microphone: webAudioDeviceNames.microphone,
       },
       mlsSD: qualityMetrics.current.mlsSD,
-      systemCorrectionSD: Number(qualityMetrics.current?.correctionSD.system),
-      componentCorrectionSD: Number(
-        qualityMetrics.current?.correctionSD.component
-      ),
+      systemCorrectionSD: Number(qualityMetrics.current?.system),
+      componentCorrectionSD: Number(qualityMetrics.current?.component),
     };
   }
   if (
