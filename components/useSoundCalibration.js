@@ -1213,13 +1213,13 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   loudspeakerInfo.current["calibrateSoundMaxHz"] = calibrateSoundMaxHz.current;
 
   try {
-    // await saveLoudSpeakerInfoToFirestore(
-    //   loudspeakerInfo.current,
-    //   modelNumber,
-    //   thisDevice.current.OEM,
-    //   soundCalibrationResults.current.component.ir,
-    //   soundCalibrationResults.current.component.iir
-    // );
+    await saveLoudSpeakerInfoToFirestore(
+      loudspeakerInfo.current,
+      modelNumber,
+      thisDevice.current.OEM,
+      soundCalibrationResults.current.component.ir,
+      soundCalibrationResults.current.component.iir
+    );
   } catch (err) {
     console.log(err);
   }
