@@ -538,6 +538,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_needSmartphoneCheckBool (default TRUE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE.",
   },
+  _needComputerSurveyBool: {
+    name: "_needComputerSurveyBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_needComputerSurveyBool (default TRUE) if TRUE then the Needs page asks the participant to identify the computer's model name and number, and proceeds. In a typical use, there is no calibration and no other data collection.",
+  },
   _needSmartphoneSurveyBool: {
     name: "_needSmartphoneSurveyBool",
     availability: "now",

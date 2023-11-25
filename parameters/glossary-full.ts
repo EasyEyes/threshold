@@ -523,6 +523,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_needComputerSurveyBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_needComputerSurveyBool (default TRUE) if TRUE then the Needs page asks the participant to identify the computer's model name and number, and proceeds. In a typical use, there is no calibration and no other data collection.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_needSmartphoneSurveyBool",
     availability: "now",
     example: "",
