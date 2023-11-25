@@ -155,13 +155,13 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundIRSec (default 0.1) specifies the desired length of the impulse response (IR). Correcting low frequencies or a big room requires a long impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
   },
-  _calibrateSoundPowerDbSDToleratedDb: {
-    name: "_calibrateSoundPowerDbSDToleratedDb",
+  _calibrateSoundLimit: {
+    name: "_calibrateSoundLimit",
     availability: "now",
     type: "numerical",
-    default: "100",
+    default: "1.0",
     explanation:
-      "_calibrateSoundPowerDbSDToleratedDb (default 1) sets maximum for SD of power (in dB) during the used part of the recording, when recording filtered or unfiltered MLS. If the recording is rejected, then the recording begins again.",
+      "_calibrateSoundLimit (default 1.0). If filtered MLS amplitude, i.e. max(abs(filteredMLS)), would exceed _calibrateSoundLimit, then EasyEyes attenuates the filteredMLS to make its amplitude equal to _calibrateSoundLimit.\nIF maxAbsFilteredMLS > _calibrateSoundLimit THEN\ngain = _calibrateSoundLimit/maxAbsFilteredMLS;\nELSE\ngain = 1;\nEND\nThe recorded microphone output will be scaled back up by dividing out the gain. _calibrateSoundLimit applies solely to filtered MLS; it does not affect the amplitude of the 1000 Hz sine or the unfiltered MLS. The attenuation is reported in the output parameter \ncalibrateSoundAttenuationXXXDb = -20*log10(gain)\nThe XXX part of the name depends on what we’re correcting:\ncalibrateSoundAttenuationSpeakerAndMicDb\ncalibrateSoundAttenuationLoudspeakerDb\ncalibrateSoundAttenuationMicrophoneDb\nThis value will always be positive, because this parameter only attenuates, never amplifies, i.e. the gain ≤ 1.",
   },
   _calibrateSoundPowerBinDesiredSec: {
     name: "_calibrateSoundPowerBinDesiredSec",
@@ -170,6 +170,14 @@ export const GLOSSARY: Glossary = {
     default: "0.1",
     explanation:
       "_calibrateSoundPowerBinDesiredSec (default 0.2) sets the bin size for estimation of power to plot power vs. time during each MLS recording, filtered or unfiltered. You want the bin size to be short enough to reveal changes over time, but long enough to average out the random variations of the MLS itself, so you get a smooth curve.",
+  },
+  _calibrateSoundPowerDbSDToleratedDb: {
+    name: "_calibrateSoundPowerDbSDToleratedDb",
+    availability: "now",
+    type: "numerical",
+    default: "100",
+    explanation:
+      "_calibrateSoundPowerDbSDToleratedDb (default 1) sets maximum for SD of power (in dB) during the used part of the recording, when recording filtered or unfiltered MLS. If the recording is rejected, then the recording begins again.",
   },
   _calibrateSoundSamplingDesiredBits: {
     name: "_calibrateSoundSamplingDesiredBits",

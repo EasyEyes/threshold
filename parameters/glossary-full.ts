@@ -190,13 +190,13 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateSoundPowerDbSDToleratedDb",
+    name: "_calibrateSoundLimit",
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundPowerDbSDToleratedDb (default 1) sets maximum for SD of power (in dB) during the used part of the recording, when recording filtered or unfiltered MLS. If the recording is rejected, then the recording begins again.",
+      "_calibrateSoundLimit (default 1.0). If filtered MLS amplitude, i.e. max(abs(filteredMLS)), would exceed _calibrateSoundLimit, then EasyEyes attenuates the filteredMLS to make its amplitude equal to _calibrateSoundLimit.\nIF maxAbsFilteredMLS > _calibrateSoundLimit THEN\ngain = _calibrateSoundLimit/maxAbsFilteredMLS;\nELSE\ngain = 1;\nEND\nThe recorded microphone output will be scaled back up by dividing out the gain. _calibrateSoundLimit applies solely to filtered MLS; it does not affect the amplitude of the 1000 Hz sine or the unfiltered MLS. The attenuation is reported in the output parameter \ncalibrateSoundAttenuationXXXDb = -20*log10(gain)\nThe XXX part of the name depends on what we’re correcting:\ncalibrateSoundAttenuationSpeakerAndMicDb\ncalibrateSoundAttenuationLoudspeakerDb\ncalibrateSoundAttenuationMicrophoneDb\nThis value will always be positive, because this parameter only attenuates, never amplifies, i.e. the gain ≤ 1.",
     type: "numerical",
-    default: "100",
+    default: "1.0",
     categories: "",
   },
   {
@@ -207,6 +207,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_calibrateSoundPowerBinDesiredSec (default 0.2) sets the bin size for estimation of power to plot power vs. time during each MLS recording, filtered or unfiltered. You want the bin size to be short enough to reveal changes over time, but long enough to average out the random variations of the MLS itself, so you get a smooth curve.",
     type: "numerical",
     default: "0.1",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundPowerDbSDToleratedDb",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundPowerDbSDToleratedDb (default 1) sets maximum for SD of power (in dB) during the used part of the recording, when recording filtered or unfiltered MLS. If the recording is rejected, then the recording begins again.",
+    type: "numerical",
+    default: "100",
     categories: "",
   },
   {
