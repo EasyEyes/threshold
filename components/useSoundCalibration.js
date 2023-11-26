@@ -1356,10 +1356,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
       filteredMLSAttenuation.attenuationDbComponent,
     calibrateSoundAttenuationMicrophoneGain: filteredMLSAttenuation.component,
     calibrateSoundAttenuationSpeakerAndMicGain: filteredMLSAttenuation.system,
-    calibrateSoundAttenuationMicrophoneMaxAbs:
-      filteredMLSAttenuation.maxAbsComponent,
-    calibrateSoundAttenuationSpeakerAndMicMaxAbs:
-      filteredMLSAttenuation.maxAbsSystem,
+    filteredMLSMaxAbsComponent: filteredMLSAttenuation.maxAbsComponent,
+    filteredMLSMaxAbsSystem: filteredMLSAttenuation.maxAbsSystem,
   };
   microphoneCalibrationResults.push(allResults);
   if (calibrateSoundSaveJSONBool.current) {
