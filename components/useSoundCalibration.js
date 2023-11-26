@@ -680,7 +680,7 @@ const checkMicrophoneInDatabase = async () => {
         Gain: Gain,
         Gain1000: Gain,
         isSmartPhone: false,
-        createDate: new Date(),
+        createDate: getCurrentTimeString(),
         DateText: getCurrentTimeString(),
         linear: {
           Freq: data.Freq,
@@ -1008,6 +1008,7 @@ const startCalibration = async (
     language,
     isLoudspeakerCalibration
   );
+  calibrationTime.current = getCurrentTimeString();
   timeToCalibrate.timeAtTheStartOfCalibration = new Date();
   const results = await Speaker.startCalibration(
     speakerParameters,
@@ -1087,7 +1088,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     soundCalibrationResults.current.audioInfo?.sinkSampleRate;
   actualBitsPerSample.current =
     soundCalibrationResults.current.audioInfo?.bitsPerSample;
-  microphoneInfo.current.CalibrationDate = getCurrentTimeString();
+  microphoneInfo.current.CalibrationDate = calibrationTime.current;
   if (calibrateSoundCheck.current !== "none") {
     if (calibrateSoundCheck.current === "system") {
       allHzCalibrationResults.system = soundCalibrationResults.current.system;
@@ -1162,8 +1163,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
       Math.round(
         (soundGainDBSPL.current - microphoneInfo.current.gainDBSPL) * 10
       ) / 10,
-    CalibrationDate: getCurrentTimeString(),
-    CreateDate: new Date(),
+    CalibrationDate: calibrationTime.current,
+    CreateDate: calibrationTime.current,
     micInfo: microphoneInfo.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     mlsSD: Number(qualityMetrics.current?.mls),
@@ -1235,7 +1236,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
         loudspeakerInfo.current.gainDBSPL) *
         10
     ) / 10;
-  microphoneInfo.current.CalibrationDate = getCurrentTimeString();
+  microphoneInfo.current.CalibrationDate = calibrationTime.current;
   // microphoneCalibrationResult.current.microphoneGain = loudspeakerIR.current;
   microphoneInfo.current.micrFullManufacturerName = isSmartPhone
     ? microphoneCalibrationResult.current.micInfo.OEM
