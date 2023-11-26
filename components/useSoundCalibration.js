@@ -1354,6 +1354,12 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
       filteredMLSAttenuation.attenuationDbSystem,
     calibrateSoundAttenuationMicrophoneDb:
       filteredMLSAttenuation.attenuationDbComponent,
+    calibrateSoundAttenuationMicrophoneGain: filteredMLSAttenuation.component,
+    calibrateSoundAttenuationSpeakerAndMicGain: filteredMLSAttenuation.system,
+    calibrateSoundAttenuationMicrophoneMaxAbs:
+      filteredMLSAttenuation.maxAbsComponent,
+    calibrateSoundAttenuationSpeakerAndMicMaxAbs:
+      filteredMLSAttenuation.maxAbsSystem,
   };
   microphoneCalibrationResults.push(allResults);
   if (calibrateSoundSaveJSONBool.current) {
@@ -1553,6 +1559,11 @@ const downloadLoudspeakerCalibration = () => {
         filteredMLSAttenuation.attenuationDbSystem,
       calibrateSoundAttenuationLoudspeakerDb:
         filteredMLSAttenuation.attenuationDbComponent,
+      calibrateSoundAttenuationSpeakerAndMicGain: filteredMLSAttenuation.system,
+      calibrateSoundAttenuationLoudspeakerGain:
+        filteredMLSAttenuation.component,
+      filteredMLSMaxAbsSystem: filteredMLSAttenuation.maxAbsSystem,
+      filteredMLSMaxAbsComponent: filteredMLSAttenuation.maxAbsComponent,
     };
   }
   if (
