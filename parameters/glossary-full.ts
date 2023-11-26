@@ -64,7 +64,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "🕑 _calibrateMicrophonesOnlyViaPhoneBool (default TRUE) allows microphone calibration only via a smartphone connected by QR code. This prevents a local connection (internal mic., USB mic., bluetooth mic. or Apple handoff), which, at least on a MacBook Pro, goes though the OS sound panel which often screws up efforts to calibrate sound. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS removes the calibration sounds, played through the loudspeaker, from the recording, which ruins the calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesOnlyViaPhoneBool=FALSE and you'll be allowed to record locally.",
+      "❌🕑 _calibrateMicrophonesOnlyViaPhoneBool (default TRUE) allows microphone calibration only via a smartphone connected by QR code. This prevents a local connection (internal mic., USB mic., bluetooth mic. or Apple handoff), which, at least on a MacBook Pro, goes though the OS sound panel which often screws up efforts to calibrate sound. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS removes the calibration sounds, played through the loudspeaker, from the recording, which ruins the calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesOnlyViaPhoneBool=FALSE and you'll be allowed to record locally.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -244,7 +244,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundSaveJSONBool (default FALSE) requests saving of sound-calibration results in a large JSON file, at the end of the experiment (in quitPsychoJS). Currently the JSON is saved to the participant's Download folder. Ideally it would instead be saved to the experiment's repository on Pavlovia.",
+      "_calibrateSoundSaveJSONBool (default FALSE) requests saving of sound-calibration results in a large JSON file for the just-calibrated device when EasyEyes reaches the Sound Calibration Results page. Currently the JSON is saved to the participant's Download folder. Ideally it would instead be saved to the experiment's repository on Pavlovia.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -430,6 +430,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "integer",
     default: "0",
     categories: "",
+  },
+  {
+    name: "_needCalibratedSound",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needCalibratedSound (default empty) requires a microphone (smartphone) or loudspeaker (computer) whose model is included in the EasyEyes profile library. If more than one is listed, it means OR.",
+    type: "multicategorical",
+    default: "",
+    categories: "microphone, loudspeaker",
   },
   {
     name: "_needCameraBool",
