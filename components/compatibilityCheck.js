@@ -21,6 +21,12 @@ const microphoneInfo = {
   phoneSurvey: {},
 };
 
+const loudspeakerInfo = {
+  modelName: "",
+  modelNumber: "",
+  detailsFrom51Degrees: {},
+};
+
 const getDeviceDetails = (platformName, lang) => {
   let OS = "";
   let preferredModelNumber = "";
@@ -115,7 +121,6 @@ const getInstructionText = (
           .replace("MMM", preferredModelNumberText)
       : readi18nPhrases("RC_needPhoneModel", language)
     : readi18nPhrases("RC_needModelNumberAndName", language);
-  console.log("needModelNumber", needModelNumber);
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
@@ -693,7 +698,8 @@ export const displayCompatibilityMessage = async (
   proceedBool,
   compatibilityCheckPeer,
   needAnySmartphone,
-  needCalibratedSmartphoneMicrophone
+  needCalibratedSmartphoneMicrophone,
+  needComputerSurveyBool
 ) => {
   return new Promise(async (resolve) => {
     //message wrapper
@@ -870,10 +876,17 @@ export const displayCompatibilityMessage = async (
             );
             if (proceed) {
               if (needPhoneSurvey) {
+                if (needComputerSurveyBool) {
+                  await getLoudspeakerDeviceDetailsFromUser(
+                    messageWrapper,
+                    rc.language.value
+                  );
+                }
                 resolve({
                   proceedButtonClicked: true,
                   proceedBool: true,
                   mic: microphoneInfo,
+                  loudspeaker: loudspeakerInfo,
                 });
               }
               break;
@@ -886,6 +899,24 @@ export const displayCompatibilityMessage = async (
         displayUpdate.remove();
       } catch (e) {
         console.log("error", e);
+      }
+    } else {
+      if (needComputerSurveyBool) {
+        if (languageWrapper) {
+          languageWrapper.remove();
+        }
+        titleContainer.remove();
+        elem.remove();
+        await getLoudspeakerDeviceDetailsFromUser(
+          messageWrapper,
+          rc.language.value
+        );
+        resolve({
+          proceedButtonClicked: true,
+          proceedBool: true,
+          mic: microphoneInfo,
+          loudspeaker: loudspeakerInfo,
+        });
       }
     }
 
@@ -904,6 +935,7 @@ export const displayCompatibilityMessage = async (
         proceedButtonClicked: true,
         proceedBool: proceedBool,
         mic: microphoneInfo,
+        loudspeaker: loudspeakerInfo,
       });
     });
     buttonWrapper.appendChild(proceedButton);
@@ -1008,7 +1040,6 @@ const isSmartphoneInDatabase = async (
     messageWrapper.style.marginRight = "20vw";
     if (deviceDetails.PlatformName === "iOS") {
       // insert image of iOS settings
-      const img = document.createElement("img");
       img.src = "./components/images/ios_settings.png";
       img.style.width = "30%";
       img.style.margin = "auto";
@@ -1051,6 +1082,8 @@ const isSmartphoneInDatabase = async (
     needPhoneSurvey
   );
   const p = document.createElement("p");
+  // add id for p
+  p.id = "need-phone-survey-instruction";
   p.innerHTML = instructionText;
 
   const checkButton = document.createElement("button");
@@ -1096,7 +1129,7 @@ const isSmartphoneInDatabase = async (
             };
             p.innerHTML = readi18nPhrases("RC_smartphoneSurveyEnd", lang);
             // center p
-            messageWrapper.style.textAlign = "center";
+            // messageWrapper.style.textAlign = "center";
             modelNumberInput.remove();
             modelNameInput.remove();
             checkButton.remove();
@@ -1269,4 +1302,139 @@ export const convertLanguageToLanguageCode = (language) => {
     (key) => Languages[key] === language
   );
   return languageCode ? languageCode : "en-US";
+};
+
+const getLoudspeakerDeviceDetailsFromUser = async (elems, language) => {
+  const p = document.getElementById("need-phone-survey-instruction");
+  if (p) {
+    p.style.display = "none";
+  }
+  const thisDevice = await identifyDevice();
+  const { preferredModelNumber } = getDeviceDetails(
+    thisDevice.PlatformName,
+    language
+  );
+  // display the device info
+  const deviceString = getDeviceString(thisDevice, language);
+  const instructionText = getInstructionText(
+    thisDevice,
+    language,
+    false,
+    false,
+    preferredModelNumber,
+    false
+  );
+
+  // create title
+  const title = document.createElement("h2");
+  title.innerHTML = "Survey";
+  title.style.fontSize = "1.5rem";
+  elems.appendChild(title);
+  // create subtitle
+  const subtitle = document.createElement("h3");
+  subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
+    .replace("xxx", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
+    .replace("yyy", thisDevice.DeviceType);
+  subtitle.style.fontSize = "1rem";
+  subtitle.style.marginBottom = "0px";
+  elems.appendChild(subtitle);
+
+  // create input box for model number and name
+  const modelNumberInput = document.createElement("input");
+  modelNumberInput.type = "text";
+  modelNumberInput.id = "modelNumberInput";
+  modelNumberInput.name = "modelNumberInput";
+  modelNumberInput.placeholder = preferredModelNumber;
+  modelNumberInput.style.marginBottom = "0px";
+
+  const modelNameInput = document.createElement("input");
+  modelNameInput.type = "text";
+  modelNameInput.id = "modelNameInput";
+  modelNameInput.name = "modelNameInput";
+  modelNameInput.placeholder = readi18nPhrases("RC_modelName", language);
+  modelNameInput.style.marginBottom = "0px";
+
+  const deviceStringElem = document.createElement("p");
+  deviceStringElem.id = "loudspeakerInstructions1";
+  deviceStringElem.innerHTML = deviceString;
+  deviceStringElem.style.marginBottom = "10px";
+  deviceStringElem.style.marginTop = "10px";
+
+  const findModel = document.createElement("p");
+  findModel.id = "loudspeakerInstructions2";
+  findModel.innerHTML = instructionText;
+  findModel.style.marginBottom = "0px";
+
+  const proceedButton = document.createElement("button");
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.classList.add(...["btn", "btn-success"]);
+  proceedButton.style.width = "fit-content";
+
+  // add  to the page
+  elems.appendChild(findModel);
+  elems.appendChild(modelNameInput);
+  elems.appendChild(modelNumberInput);
+  elems.appendChild(deviceStringElem);
+  elems.appendChild(proceedButton);
+
+  await new Promise((resolve) => {
+    proceedButton.addEventListener("click", async () => {
+      if (modelNameInput.value === "" || modelNumberInput.value === "") {
+        alert("Please fill out all the fields");
+      } else {
+        // add loudspeaker details to loudspeakerInfo
+        loudspeakerInfo.modelName = modelNameInput.value;
+        loudspeakerInfo.modelNumber = modelNumberInput.value;
+        loudspeakerInfo.detailsFrom51Degrees = thisDevice;
+        removeElements([
+          findModel,
+          modelNameInput,
+          modelNumberInput,
+          deviceStringElem,
+          proceedButton,
+          title,
+          subtitle,
+        ]);
+        resolve();
+      }
+    });
+  });
+};
+
+const identifyDevice = async () => {
+  try {
+    const deviceInfo = {};
+    fod.complete(function (data) {
+      deviceInfo["IsMobile"] = data.device["ismobile"];
+      deviceInfo["HardwareName"] = data.device["hardwarename"];
+      deviceInfo["HardwareFamily"] = data.device["hardwarefamily"];
+      deviceInfo["HardwareModel"] = data.device["hardwaremodel"];
+      deviceInfo["OEM"] = data.device["oem"];
+      deviceInfo["HardwareModelVariants"] =
+        data.device["hardwaremodelvariants"];
+      deviceInfo["DeviceId"] = data.device["deviceid"];
+      deviceInfo["PlatformName"] = data.device["platformname"];
+      deviceInfo["PlatformVersion"] = data.device["platformversion"];
+      deviceInfo["DeviceType"] = data.device["devicetype"];
+    });
+    return deviceInfo;
+  } catch (error) {
+    console.error("Error fetching or executing script:", error.message);
+    return null;
+  }
+};
+
+const getDeviceString = (thisDevice, language) => {
+  return `<b>OEM:</b> ${thisDevice.OEM} <br>
+   <b>Device Type:</b> ${thisDevice.DeviceType} <br>
+   <b>Platform Name:</b> ${thisDevice.PlatformName} <br>
+   <b>Platform Version:</b> ${thisDevice.PlatformVersion} <br>
+   <b>Hardware Model:</b> ${thisDevice.HardwareModel} <br>
+   <b>Hardware Family:</b> ${thisDevice.HardwareFamily} <br>
+   <b>Hardware Name:</b> ${thisDevice.HardwareName} <br>
+   <b>Hardware Model Variants:</b> ${thisDevice.HardwareModelVariants}<br>`;
+};
+
+const removeElements = (elements) => {
+  elements.forEach((elem) => elem.remove());
 };

@@ -488,6 +488,7 @@ export const loudspeakerInfo = { current: {} };
 export const microphoneInfo = { current: {} };
 export const calibrationTime = { current: undefined };
 export const needPhoneSurvey = { current: false };
+export const needComputerSurveyBool = { current: false };
 export const authorEmail = { current: undefined };
 export const rsvpReadingTargetSets = {
   numberOfSets: undefined,

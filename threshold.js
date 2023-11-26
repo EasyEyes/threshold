@@ -140,6 +140,7 @@ import {
   preStimulus,
   microphoneInfo,
   needPhoneSurvey,
+  needComputerSurveyBool,
 } from "./components/global.js";
 
 import {
@@ -476,6 +477,7 @@ const paramReaderInitialized = async (reader) => {
   const calibrateSound1000Hz = reader.read("calibrateSound1000HzBool")[0];
   const calibrateSoundAllHz = reader.read("calibrateSoundAllHzBool")[0];
   needPhoneSurvey.current = reader.read("_needSmartphoneSurveyBool")[0];
+  needComputerSurveyBool.current = reader.read("_needComputerSurveyBool")[0];
   if (
     calibrateMicrophonesBool === false &&
     (calibrateSound1000Hz === true ||
@@ -514,7 +516,7 @@ const paramReaderInitialized = async (reader) => {
       }
     };
 
-    const { proceedButtonClicked, proceedBool, mic } =
+    const { proceedButtonClicked, proceedBool, mic, loudspeaker } =
       await displayCompatibilityMessage(
         compMsg["msg"],
         reader,
@@ -523,7 +525,8 @@ const paramReaderInitialized = async (reader) => {
         compMsg["proceed"],
         compatibilityCheckPeer,
         needAnySmartphone,
-        needCalibratedSmartphoneMicrophone
+        needCalibratedSmartphoneMicrophone,
+        needComputerSurveyBool.current
       );
 
     microphoneInfo.current.micFullName = mic.micFullName;
@@ -531,6 +534,7 @@ const paramReaderInitialized = async (reader) => {
     microphoneInfo.current.micrFullManufacturerName =
       mic.micrFullManufacturerName;
     microphoneInfo.current.phoneSurvey = mic.phoneSurvey;
+    loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
 
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
@@ -551,7 +555,7 @@ const paramReaderInitialized = async (reader) => {
     thisExperimentInfo.setSession(1);
     thisExperimentInfo.EasyEyesID = rc.id.value;
     thisExperimentInfo.PavloviaSessionID = rc.id.value;
-    const { proceedButtonClicked, proceedBool, mic } =
+    const { proceedButtonClicked, proceedBool, mic, loudspeaker } =
       await displayCompatibilityMessage(
         compMsg["msg"],
         reader,
@@ -560,9 +564,11 @@ const paramReaderInitialized = async (reader) => {
         compMsg["proceed"],
         compatibilityCheckPeer,
         needAnySmartphone,
-        needCalibratedSmartphoneMicrophone
+        needCalibratedSmartphoneMicrophone,
+        needComputerSurveyBool.current
       );
 
+    loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
     microphoneInfo.current.micFullName = mic.micFullName;
     microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
     microphoneInfo.current.micrFullManufacturerName =
@@ -869,6 +875,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         JSON.stringify(microphoneInfo.current.phoneSurvey)
       );
     }
+    if (needComputerSurveyBool.current) {
+      psychoJS.experiment.addData(
+        "Loudspeaker survey",
+        JSON.stringify(loudspeakerInfo.current.loudspeakerSurvey)
+      );
+    }
+
     // add sound calibration results
     if (soundCalibrationResults.current) {
       psychoJS.experiment.addData(
