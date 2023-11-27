@@ -127,6 +127,27 @@ const skipTrial = () => {
   loggerText("--- SKIP TRIAL ENDS ---");
 };
 
+var timeWhenTimeout;
+/**
+ * After the time specified by responseTimeoutSec, skip the current trial
+ * @param {number} frameN Integer, frames since the start of the trial
+ * @param {number} t Time (sec) since the start of the trial
+ */
+export const handleResponseTimeoutSec = (frameN, t) => {
+  // Set timeWhenTimeout on first frame
+  if (frameN === 0) {
+    const responseTimeoutSec = paramReader.read(
+      "responseTimeoutSec",
+      status.block_condition
+    );
+    timeWhenTimeout = t + responseTimeoutSec;
+  }
+  if (timeWhenTimeout && t > timeWhenTimeout) {
+    skipTrial();
+    timeWhenTimeout = undefined;
+  }
+};
+
 /**
  * Create button, for fixation screen, as controlled by responseSkipButtonBool.
  */

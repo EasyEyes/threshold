@@ -334,6 +334,7 @@ import { switchKind, switchTask } from "./components/blockTargetKind.js";
 import {
   addSkipTrialButton,
   handleEscapeKey,
+  handleResponseTimeoutSec,
   removeSkipTrialButton,
 } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
@@ -4343,6 +4344,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         return Scheduler.Event.NEXT;
       }
 
+      t = instructionsClock.getTime();
+      frameN = frameN + 1;
+
+      handleResponseTimeoutSec(frameN, t);
+
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
       renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
@@ -4362,9 +4368,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       const letterEachFrame = () => {
         // IDENTIFY
-        t = instructionsClock.getTime();
-        frameN = frameN + 1;
-
         if (paramReader.read("_trackGazeExternallyBool")[0])
           recordStimulusPositionsForEyetracking(
             target,
@@ -4418,9 +4421,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         repeatedLetters: letterEachFrame,
         rsvpReading: letterEachFrame,
         movie: () => {
-          t = instructionsClock.getTime();
-          frameN = frameN + 1;
-
           if (showConditionNameConfig.showTargetSpecs) {
             targetSpecsConfig.pos[0] = -window.innerWidth / 2;
             targetSpecsConfig.pos[1] = -window.innerHeight / 2;
