@@ -141,6 +141,7 @@ import {
   microphoneInfo,
   needPhoneSurvey,
   needComputerSurveyBool,
+  gotLoudspeakerMatch,
 } from "./components/global.js";
 
 import {
@@ -475,6 +476,9 @@ const paramReaderInitialized = async (reader) => {
   // TODO: add logic for needAnySmartphone
 
   const calibrateMicrophonesBool = reader.read("_calibrateMicrophonesBool")[0];
+  // const calibrateMicrophonesBool = false;
+  const needCalibratedSound = reader.read("_needCalibratedSound")[0].split(",");
+  // const needCalibratedSound = ['microphone', 'loudspeaker']
   const calibrateSound1000Hz = reader.read("calibrateSound1000HzBool")[0];
   const calibrateSoundAllHz = reader.read("calibrateSoundAllHzBool")[0];
   needPhoneSurvey.current = reader.read("_needSmartphoneSurveyBool")[0];
@@ -517,25 +521,34 @@ const paramReaderInitialized = async (reader) => {
       }
     };
 
-    const { proceedButtonClicked, proceedBool, mic, loudspeaker } =
-      await displayCompatibilityMessage(
-        compMsg["msg"],
-        reader,
-        rc,
-        compMsg["promptRefresh"],
-        compMsg["proceed"],
-        compatibilityCheckPeer,
-        needAnySmartphone,
-        needCalibratedSmartphoneMicrophone,
-        needComputerSurveyBool.current
-      );
+    const {
+      proceedButtonClicked,
+      proceedBool,
+      mic,
+      loudspeaker,
+      gotLoudspeakerMatchBool,
+    } = await displayCompatibilityMessage(
+      compMsg["msg"],
+      reader,
+      rc,
+      compMsg["promptRefresh"],
+      compMsg["proceed"],
+      compatibilityCheckPeer,
+      needAnySmartphone,
+      needCalibratedSmartphoneMicrophone,
+      needComputerSurveyBool.current,
+      needCalibratedSound
+    );
 
+    gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
     microphoneInfo.current.micFullName = mic.micFullName;
     microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
     microphoneInfo.current.micrFullManufacturerName =
       mic.micrFullManufacturerName;
     microphoneInfo.current.phoneSurvey = mic.phoneSurvey;
-    loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
+    if (needComputerSurveyBool.current)
+      loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
+    else loudspeakerInfo.current = loudspeaker;
 
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
@@ -556,20 +569,28 @@ const paramReaderInitialized = async (reader) => {
     thisExperimentInfo.setSession(1);
     thisExperimentInfo.EasyEyesID = rc.id.value;
     thisExperimentInfo.PavloviaSessionID = rc.id.value;
-    const { proceedButtonClicked, proceedBool, mic, loudspeaker } =
-      await displayCompatibilityMessage(
-        compMsg["msg"],
-        reader,
-        rc,
-        compMsg["promptRefresh"],
-        compMsg["proceed"],
-        compatibilityCheckPeer,
-        needAnySmartphone,
-        needCalibratedSmartphoneMicrophone,
-        needComputerSurveyBool.current
-      );
-
-    loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
+    const {
+      proceedButtonClicked,
+      proceedBool,
+      mic,
+      loudspeaker,
+      gotLoudspeakerMatchBool,
+    } = await displayCompatibilityMessage(
+      compMsg["msg"],
+      reader,
+      rc,
+      compMsg["promptRefresh"],
+      compMsg["proceed"],
+      compatibilityCheckPeer,
+      needAnySmartphone,
+      needCalibratedSmartphoneMicrophone,
+      needComputerSurveyBool.current,
+      needCalibratedSound
+    );
+    gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
+    if (needComputerSurveyBool.current)
+      loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
+    else loudspeakerInfo.current = loudspeaker;
     microphoneInfo.current.micFullName = mic.micFullName;
     microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
     microphoneInfo.current.micrFullManufacturerName =

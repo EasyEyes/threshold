@@ -42,6 +42,7 @@ import {
   loudspeakerIR,
   thisExperimentInfo,
   calibrateSoundLimit,
+  gotLoudspeakerMatch,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -325,6 +326,7 @@ export const calibrateAudio = async (reader) => {
   authorEmail.current = reader.read(GLOSSARY._authorEmails.name)[0];
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
+  if (gotLoudspeakerMatch.current) return true;
 
   // QUIT FULLSCREEN
   if (rc.isFullscreen.value) {
@@ -363,7 +365,11 @@ export const calibrateAudio = async (reader) => {
     });
     document.querySelector("#soundNavContainer").style.display = "none";
     try {
-      if (calibrateSoundLevel && calibrateLoudspeaker) {
+      if (
+        calibrateSoundLevel &&
+        calibrateLoudspeaker &&
+        !gotLoudspeakerMatch.current
+      ) {
         const response = await runCombinationCalibration(
           elems,
           gains,
@@ -396,7 +402,8 @@ export const calibrateAudio = async (reader) => {
       invertedImpulseResponse.current &&
       allHzCalibrationResults &&
       showSoundCalibrationResultsBool &&
-      calibrateSoundCheck.current !== "none"
+      calibrateSoundCheck.current !== "none" &&
+      !gotLoudspeakerMatch.current
     ) {
       displayCompleteTransducerTable(
         loudspeakerInfo.current,
@@ -485,6 +492,7 @@ export const calibrateAudio = async (reader) => {
     }
     let showLoudSpeakerDoneMessage = true;
     // MICROPHONE CALIBRATION
+    calibrateMicrophonesBool.current = false;
     while (calibrateMicrophonesBool.current) {
       if (showSoundTestPageBool) {
         elems.testButton.style.display = "block";

@@ -11,6 +11,8 @@ import {
   where,
   collection,
 } from "firebase/firestore";
+
+let gotLoudspeakerMatchBool = false;
 // import { microphoneInfo } from "./global";
 // import { rc } from "./global";
 
@@ -25,6 +27,7 @@ const loudspeakerInfo = {
   modelName: "",
   modelNumber: "",
   detailsFrom51Degrees: {},
+  loudspeaker: null,
 };
 
 const getDeviceDetails = (platformName, lang) => {
@@ -699,7 +702,8 @@ export const displayCompatibilityMessage = async (
   compatibilityCheckPeer,
   needAnySmartphone,
   needCalibratedSmartphoneMicrophone,
-  needComputerSurveyBool
+  needComputerSurveyBool,
+  needCalibratedSound
 ) => {
   return new Promise(async (resolve) => {
     //message wrapper
@@ -851,6 +855,7 @@ export const displayCompatibilityMessage = async (
       messageWrapper.appendChild(displayUpdate);
       messageWrapper.append(compatibilityCheckQRExplanation);
       messageWrapper.append(compatiblityCheckQR);
+      let numberOfTries = 0;
 
       try {
         while (true) {
@@ -858,6 +863,13 @@ export const displayCompatibilityMessage = async (
           const result = await compatibilityCheckPeer.getResults();
           compatibilityCheckPeer.onPeerClose();
           if (result) {
+            numberOfTries++;
+            const tryComputerButton = document.getElementById(
+              "try-computer-button"
+            );
+            if (tryComputerButton) {
+              tryComputerButton.style.display = "none";
+            }
             const deviceDetails = result.deviceDetails;
             const OEM = deviceDetails.OEM;
             displayUpdate.innerText = "";
@@ -872,7 +884,9 @@ export const displayCompatibilityMessage = async (
               compatibilityCheckQRExplanation,
               languageWrapper,
               titleContainer,
-              elem
+              elem,
+              needCalibratedSound,
+              numberOfTries
             );
             if (proceed) {
               if (needPhoneSurvey) {
@@ -887,9 +901,62 @@ export const displayCompatibilityMessage = async (
                   proceedBool: true,
                   mic: microphoneInfo,
                   loudspeaker: loudspeakerInfo,
+                  gotLoudspeakerMatchBool: false,
                 });
               }
               break;
+            } else {
+              // if needCalibratedSound includes "loudspeaker"
+              // add a button to try the computer microphone
+              if (
+                needCalibratedSound.includes("loudspeaker") &&
+                !needPhoneSurvey
+              ) {
+                if (numberOfTries === 1) {
+                  displayUpdate.innerText +=
+                    " " +
+                    readi18nPhrases("RC_loudspeakerInstead", rc.language.value);
+                  const tryComputerButton = document.createElement("button");
+                  tryComputerButton.classList.add(...["btn", "btn-primary"]);
+                  tryComputerButton.innerText = readi18nPhrases(
+                    "RC_tryComputer",
+                    rc.language.value
+                  );
+                  tryComputerButton.id = "try-computer-button";
+                  tryComputerButton.style.marginTop = "20px";
+                  tryComputerButton.style.width = "fit-content";
+                  tryComputerButton.addEventListener("click", async () => {
+                    compatiblityCheckQR.style.display = "none";
+                    compatibilityCheckQRExplanation.style.display = "none";
+                    displayUpdate.style.display = "none";
+                    tryComputerButton.style.display = "none";
+                    const loudspeaker =
+                      await getLoudspeakerDeviceDetailsFromUser(
+                        messageWrapper,
+                        rc.language.value,
+                        false
+                      );
+                    if (loudspeaker) {
+                      loudspeakerInfo.loudspeaker = loudspeaker;
+                      resolve({
+                        proceedButtonClicked: true,
+                        proceedBool: true,
+                        mic: microphoneInfo,
+                        loudspeaker: loudspeakerInfo,
+                        gotLoudspeakerMatchBool: true,
+                      });
+                    }
+                  });
+                  messageWrapper.appendChild(tryComputerButton);
+                } else if (numberOfTries > 1) {
+                  const tryComputerButton = document.getElementById(
+                    "try-computer-button"
+                  );
+                  if (tryComputerButton) {
+                    tryComputerButton.style.display = "";
+                  }
+                }
+              }
             }
           }
         }
@@ -916,6 +983,7 @@ export const displayCompatibilityMessage = async (
           proceedBool: true,
           mic: microphoneInfo,
           loudspeaker: loudspeakerInfo,
+          gotLoudspeakerMatchBool: false,
         });
       }
     }
@@ -936,6 +1004,7 @@ export const displayCompatibilityMessage = async (
         proceedBool: proceedBool,
         mic: microphoneInfo,
         loudspeaker: loudspeakerInfo,
+        gotLoudspeakerMatchBool: false,
       });
     });
     buttonWrapper.appendChild(proceedButton);
@@ -958,20 +1027,23 @@ const getMessageForQR = (
           "RC_needPhoneMicrophoneAndKeypad",
           language
         ));
+    messageForQr += " " + readi18nPhrases("RC_needsPointCameraAtQR", language);
   } else if (needCalibratedSmartphoneMicrophone) {
     messageForQr = readi18nPhrases("RC_inDescription", language) + " ";
     needPhoneSurvey
       ? (messageForQr += readi18nPhrases("RC_needPhoneSurvey", language))
-      : (messageForQr += readi18nPhrases("RC_needPhoneMicrophone", language));
+      : (messageForQr +=
+          readi18nPhrases("RC_needPhoneMicrophone", language) +
+          " " +
+          readi18nPhrases("RC_lookForMicrophoneProfile", language));
   } else if (needAnySmartphone) {
     messageForQr = readi18nPhrases("RC_inDescription", language) + " ";
     needPhoneSurvey
       ? (messageForQr += readi18nPhrases("RC_needPhoneSurvey", language))
       : (messageForQr += readi18nPhrases("RC_needPhoneKeypad", language));
+    messageForQr += " " + readi18nPhrases("RC_needsPointCameraAtQR", language);
   }
-  return (
-    messageForQr + " " + readi18nPhrases("RC_needsPointCameraAtQR", language)
-  );
+  return messageForQr;
 };
 const checkModelNumberandNameForIOS = (
   modelNumber,
@@ -1020,7 +1092,9 @@ const isSmartphoneInDatabase = async (
   qrCodeExplanation = null,
   languageWrapper = null,
   titleContainer = null,
-  elem = null
+  elem = null,
+  needCalibratedSound = [],
+  numberOfTries = 0
 ) => {
   // ask for the model number and name of the device
   // create input box for model number and name
@@ -1059,8 +1133,7 @@ const isSmartphoneInDatabase = async (
     deviceDetails.PlatformName,
     lang
   );
-  console.log("platformName", deviceDetails.PlatformName);
-  console.log("preferredModelNumber", preferredModelNumber);
+
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
@@ -1163,6 +1236,7 @@ const isSmartphoneInDatabase = async (
                 "RC_microphoneNotInCalibrationLibrary",
                 lang
               ).replace("xxx", modelName);
+
               resolve(false);
             }
           }
@@ -1175,6 +1249,23 @@ const isSmartphoneInDatabase = async (
   return procceed;
 };
 
+const findLoudspeakerMatchInDatabase = async (OEM, DeviceId, ModelNumber) => {
+  // check for a loudspeaker with the same OEM, DeviceId and ModelNumber.
+  // If exists return the loudspeaker object from the database, otherwise return false
+  const loudspeakerRef = collection(db, "Loudspeakers");
+  const q = query(
+    loudspeakerRef,
+    where("OEM", "==", OEM),
+    where("DeviceId", "==", DeviceId),
+    where("fullLoudspeakerModelNumber", "==", ModelNumber)
+  );
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
+    return false;
+  }
+  const loudspeaker = snapshot.docs[0].data();
+  return loudspeaker;
+};
 export const hideCompatibilityMessage = () => {
   document.getElementById("msg-container")?.remove();
 };
@@ -1304,7 +1395,11 @@ export const convertLanguageToLanguageCode = (language) => {
   return languageCode ? languageCode : "en-US";
 };
 
-const getLoudspeakerDeviceDetailsFromUser = async (elems, language) => {
+const getLoudspeakerDeviceDetailsFromUser = async (
+  elems,
+  language,
+  isSurvey = true
+) => {
   const p = document.getElementById("need-phone-survey-instruction");
   if (p) {
     p.style.display = "none";
@@ -1327,7 +1422,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (elems, language) => {
 
   // create title
   const title = document.createElement("h2");
-  title.innerHTML = "Survey";
+  title.innerHTML = isSurvey ? "Survey" : "";
   title.style.fontSize = "1.5rem";
   elems.appendChild(title);
   // create subtitle
@@ -1376,29 +1471,47 @@ const getLoudspeakerDeviceDetailsFromUser = async (elems, language) => {
   elems.appendChild(modelNumberInput);
   elems.appendChild(deviceStringElem);
   elems.appendChild(proceedButton);
-
+  let Loudspeaker = null;
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
       if (modelNameInput.value === "" || modelNumberInput.value === "") {
         alert("Please fill out all the fields");
       } else {
-        // add loudspeaker details to loudspeakerInfo
-        loudspeakerInfo.modelName = modelNameInput.value;
-        loudspeakerInfo.modelNumber = modelNumberInput.value;
-        loudspeakerInfo.detailsFrom51Degrees = thisDevice;
-        removeElements([
-          findModel,
-          modelNameInput,
-          modelNumberInput,
-          deviceStringElem,
-          proceedButton,
-          title,
-          subtitle,
-        ]);
-        resolve();
+        proceedButton.innerHTML = "Loading...";
+        if (isSurvey) {
+          // add loudspeaker details to loudspeakerInfo
+          loudspeakerInfo.modelName = modelNameInput.value;
+          loudspeakerInfo.modelNumber = modelNumberInput.value;
+          loudspeakerInfo.detailsFrom51Degrees = thisDevice;
+          removeElements([
+            findModel,
+            modelNameInput,
+            modelNumberInput,
+            deviceStringElem,
+            proceedButton,
+            title,
+            subtitle,
+          ]);
+          resolve();
+        } else {
+          // check if the loudspeaker is in the database
+          const loudspeaker = await findLoudspeakerMatchInDatabase(
+            thisDevice.OEM,
+            thisDevice.DeviceId,
+            modelNumberInput.value
+          );
+          if (loudspeaker) {
+            Loudspeaker = loudspeaker;
+            resolve();
+          } else {
+            alert("The loudspeaker is not in the database");
+          }
+        }
       }
+      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
     });
   });
+  return Loudspeaker;
 };
 
 const identifyDevice = async () => {
