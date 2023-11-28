@@ -1348,7 +1348,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
       loudspeaker: webAudioDeviceNames.loudspeaker,
       microphone: webAudioDeviceNames.microphone,
     },
-    mlsSD: Number(result?.qualityMetrics.system),
+    mlsSD: Number(result?.qualityMetrics.mls),
     systemCorrectionSD: Number(result?.qualityMetrics.system),
     componentCorrectionSD: Number(result?.qualityMetrics.component),
     calibrateSoundAttenuationSpeakerAndMicDb:
@@ -1551,7 +1551,7 @@ const downloadLoudspeakerCalibration = () => {
         loudspeaker: webAudioDeviceNames.loudspeaker,
         microphone: webAudioDeviceNames.microphone,
       },
-      mlsSD: qualityMetrics.current.mlsSD,
+      mlsSD: qualityMetrics.current.mls,
       systemCorrectionSD: Number(qualityMetrics.current?.system),
       componentCorrectionSD: Number(qualityMetrics.current?.component),
       calibrateSoundAttenuationSpeakerAndMicDb:
