@@ -441,3 +441,23 @@ export const getDeviceDetails = (platformName, lang) => {
 
   return { preferredModelNumber, findModel };
 };
+
+export const findMinValue = (array) => {
+  let minValue = array[0];
+  for (let i = 1; i < array.length; i++) {
+    if (array[i] < minValue) {
+      minValue = array[i];
+    }
+  }
+  return minValue;
+};
+
+export const findMaxValue = (array) => {
+  let maxValue = array[0];
+  for (let i = 1; i < array.length; i++) {
+    if (array[i] > maxValue) {
+      maxValue = array[i];
+    }
+  }
+  return maxValue;
+};

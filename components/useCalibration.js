@@ -432,6 +432,12 @@ export const calibrateAudio = async (reader) => {
         true,
         allHzCalibrationResults.filteredMLSRange.component
       );
+      displayRecordings(
+        elems,
+        soundCalibrationResults.current.recordingChecks,
+        true,
+        allHzCalibrationResults.filteredMLSRange.component
+      );
       if (
         calibrateSoundCheck.current === "system" ||
         calibrateSoundCheck.current === "goal"
@@ -481,12 +487,6 @@ export const calibrateAudio = async (reader) => {
         allHzCalibrationResults.knownIr,
         true,
         "",
-        allHzCalibrationResults.filteredMLSRange.component
-      );
-      displayRecordings(
-        elems,
-        soundCalibrationResults.current.recordingChecks,
-        true,
         allHzCalibrationResults.filteredMLSRange.component
       );
     }
@@ -577,6 +577,12 @@ export const calibrateAudio = async (reader) => {
               false,
               microphoneCalibrationResult.current.filteredMLSRange.component
             );
+            displayRecordings(
+              elems,
+              microphoneCalibrationResult.current.recordingChecks,
+              false,
+              microphoneCalibrationResult.current.filteredMLSRange.component
+            );
             if (
               calibrateSoundCheck.current === "system" ||
               calibrateSoundCheck.current === "goal"
@@ -627,12 +633,6 @@ export const calibrateAudio = async (reader) => {
               microphoneCalibrationResult.current.component.ir,
               false,
               "",
-              microphoneCalibrationResult.current.filteredMLSRange.component
-            );
-            displayRecordings(
-              elems,
-              microphoneCalibrationResult.current.recordingChecks,
-              false,
               microphoneCalibrationResult.current.filteredMLSRange.component
             );
           }

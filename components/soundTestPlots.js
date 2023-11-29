@@ -24,7 +24,11 @@ import {
   showSoundParametersBool,
   filteredMLSAttenuation,
 } from "./global";
-import { findGainatFrequency } from "./soundCalibrationHelpers";
+import {
+  findGainatFrequency,
+  findMinValue,
+  findMaxValue,
+} from "./soundCalibrationHelpers";
 
 export const plotSoundLevels1000Hz = (
   plotCanvas,
@@ -1036,6 +1040,25 @@ export const plotRecordings = (
   });
   // Assuming warmupT is the same for all categories
 
+  const postTData = recordingChecks.unfiltered[0].postT;
+  const unfilteredPostData = postTData.map((x, i) => {
+    return { x: x, y: recordingChecks.unfiltered[0].postDb[i] };
+  });
+  const componentPostData = postTData.map((x, i) => {
+    return {
+      x: x,
+      y: recordingChecks.component[recordingChecks.component.length - 1].postDb[
+        i
+      ],
+    };
+  });
+  const systemPostData = postTData.map((x, i) => {
+    return {
+      x: x,
+      y: recordingChecks.system[recordingChecks.system.length - 1].postDb[i],
+    };
+  });
+
   const warmupTData = recordingChecks.unfiltered[0].warmupT;
   const unfilteredWarmupData = warmupTData.map((x, i) => {
     return { x: x, y: recordingChecks.unfiltered[0].warmupDb[i] };
@@ -1055,32 +1078,43 @@ export const plotRecordings = (
   });
   // Assuming warmupT is the same for all categories
 
-  let maxY = Math.max(
+  let maxY = findMaxValue([
     ...unfilteredData.map((point) => point.y),
     ...componentData.map((point) => point.y),
     ...systemData.map((point) => point.y),
     ...unfilteredWarmupData.map((point) => point.y),
     ...componentWarmupData.map((point) => point.y),
-    ...systemWarmupData.map((point) => point.y)
-  );
+    ...systemWarmupData.map((point) => point.y),
+    ...unfilteredPostData.map((point) => point.y),
+    ...componentPostData.map((point) => point.y),
+    ...systemPostData.map((point) => point.y),
+  ]);
 
-  let maxX = Math.max(
+  let maxX = findMaxValue([
     ...unfilteredData.map((point) => point.x),
     ...componentData.map((point) => point.x),
     ...systemData.map((point) => point.x),
     ...unfilteredWarmupData.map((point) => point.x),
     ...componentWarmupData.map((point) => point.x),
-    ...systemWarmupData.map((point) => point.x)
-  );
+    ...systemWarmupData.map((point) => point.x),
+    ...unfilteredPostData.map((point) => point.x),
+    ...componentPostData.map((point) => point.x),
+    ...systemPostData.map((point) => point.x),
+  ]);
 
-  let minY = Math.min(
+  let minY = findMinValue([
     ...unfilteredData.map((point) => point.y),
     ...componentData.map((point) => point.y),
     ...systemData.map((point) => point.y),
     ...unfilteredWarmupData.map((point) => point.y),
     ...componentWarmupData.map((point) => point.y),
-    ...systemWarmupData.map((point) => point.y)
-  );
+    ...systemWarmupData.map((point) => point.y),
+    ...unfilteredPostData.map((point) => point.y),
+    ...componentPostData.map((point) => point.y),
+    ...systemPostData.map((point) => point.y),
+  ]);
+
+  console.log("x", maxX, "y", minY, maxY);
 
   minY = Math.floor(minY / 10) * 10 - 30;
   maxY = Math.ceil(maxY / 10) * 10;
@@ -1096,7 +1130,7 @@ export const plotRecordings = (
       // Combine warm-up and recording labels
       datasets: [
         {
-          label: "MLS pre",
+          label: "pre",
           data: unfilteredWarmupData,
           borderColor: "red",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1106,7 +1140,7 @@ export const plotRecordings = (
           borderWidth: 2,
         },
         {
-          label: transducer + " pre",
+          label: "pre",
           data: componentWarmupData,
           borderColor: "blue",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1116,7 +1150,7 @@ export const plotRecordings = (
           borderWidth: 2,
         },
         {
-          label: "Loudspeaker+Microphone pre",
+          label: "pre",
           data: systemWarmupData,
           borderColor: "green",
           backgroundColor: "rgba(0, 0, 0, 0)",
@@ -1162,6 +1196,36 @@ export const plotRecordings = (
           borderWidth: 2,
           fill: false,
         },
+        {
+          label: "post",
+          data: unfilteredPostData,
+          borderColor: "red",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderDash: [5, 5], // Dashed line for unfiltered warm-up data
+          borderWidth: 2,
+        },
+        {
+          label: "post",
+          data: componentPostData,
+          borderColor: "blue",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderDash: [5, 5],
+          borderWidth: 2,
+        },
+        {
+          label: "post",
+          data: systemPostData,
+          borderColor: "green",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderDash: [5, 5],
+          borderWidth: 2,
+        },
       ],
     },
     options: {
@@ -1187,20 +1251,26 @@ export const plotRecordings = (
             pointStyle: "line",
             generateLabels: function (chart) {
               const data = chart.data;
+
               if (data.datasets.length) {
-                return data.datasets.map(function (dataset, i) {
-                  return {
-                    text: dataset.label,
-                    fillStyle: dataset.backgroundColor,
-                    strokeStyle: dataset.borderColor,
-                    lineWidth: dataset.borderWidth,
-                    hidden: !chart.isDatasetVisible(i),
-                    index: i,
-                    lineDash: dataset.borderDash,
-                    pointStyle: "line",
-                  };
-                });
+                return data.datasets.reduce((labels, dataset, i) => {
+                  // Exclude labels containing "pre" or "post"
+                  if (dataset.label !== "pre" && dataset.label !== "post") {
+                    labels.push({
+                      text: dataset.label,
+                      fillStyle: dataset.backgroundColor,
+                      strokeStyle: dataset.borderColor,
+                      lineWidth: dataset.borderWidth,
+                      hidden: !chart.isDatasetVisible(i),
+                      index: i,
+                      lineDash: dataset.borderDash,
+                      pointStyle: "line",
+                    });
+                  }
+                  return labels;
+                }, []);
               }
+
               return [];
             },
           },
@@ -1295,7 +1365,7 @@ export const plotRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 65) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 42) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
 
   // make the table on top of the canvas
