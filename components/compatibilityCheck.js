@@ -867,8 +867,12 @@ export const displayCompatibilityMessage = async (
             const tryComputerButton = document.getElementById(
               "try-computer-button"
             );
+            const p = document.getElementById("loudspeaker-instead");
             if (tryComputerButton) {
               tryComputerButton.style.display = "none";
+            }
+            if (p) {
+              p.style.display = "none";
             }
             const deviceDetails = result.deviceDetails;
             const OEM = deviceDetails.OEM;
@@ -913,21 +917,27 @@ export const displayCompatibilityMessage = async (
                 !needPhoneSurvey
               ) {
                 if (numberOfTries === 1) {
-                  displayUpdate.innerText +=
-                    " " +
-                    readi18nPhrases("RC_loudspeakerInstead", rc.language.value);
+                  const p = document.createElement("p");
+                  p.innerText = readi18nPhrases(
+                    "RC_loudspeakerInstead",
+                    rc.language.value
+                  );
+                  p.id = "loudspeaker-instead";
+                  messageWrapper.appendChild(p);
                   const tryComputerButton = document.createElement("button");
-                  tryComputerButton.classList.add(...["btn", "btn-primary"]);
+                  tryComputerButton.classList.add(...["btn", "btn-success"]);
                   tryComputerButton.innerText = readi18nPhrases(
                     "RC_tryComputer",
                     rc.language.value
                   );
                   tryComputerButton.id = "try-computer-button";
-                  tryComputerButton.style.marginTop = "20px";
+                  // tryComputerButton.style.marginTop = "10px";
                   tryComputerButton.style.width = "fit-content";
                   tryComputerButton.addEventListener("click", async () => {
                     compatiblityCheckQR.style.display = "none";
                     compatibilityCheckQRExplanation.style.display = "none";
+                    const text = document.getElementById("loudspeaker-instead");
+                    text.style.display = "none";
                     displayUpdate.style.display = "none";
                     tryComputerButton.style.display = "none";
                     const loudspeaker =
@@ -938,6 +948,32 @@ export const displayCompatibilityMessage = async (
                       );
                     if (loudspeaker) {
                       loudspeakerInfo.loudspeaker = loudspeaker;
+                      await new Promise((resolve) => {
+                        const proceed = document.createElement("button");
+                        proceed.classList.add(...["btn", "btn-success"]);
+                        proceed.style.width = "fit-content";
+                        proceed.innerText = readi18nPhrases(
+                          "T_proceed",
+                          rc.language.value
+                        );
+                        proceed.addEventListener("click", () => {
+                          resolve();
+                        });
+                        const message = document.createElement("p");
+                        message.innerText = readi18nPhrases(
+                          "RC_loudspeakerIsInCalibrationLibrary",
+                          rc.language.value
+                        )
+                          .replace(/XXX/g, loudspeaker.fullLoudspeakerModelName)
+                          .replace(
+                            /xxx/g,
+                            loudspeaker.fullLoudspeakerModelName
+                          );
+                        message.style.marginTop = "10px";
+
+                        messageWrapper.appendChild(message);
+                        messageWrapper.appendChild(proceed);
+                      });
                       resolve({
                         proceedButtonClicked: true,
                         proceedBool: true,
@@ -952,8 +988,12 @@ export const displayCompatibilityMessage = async (
                   const tryComputerButton = document.getElementById(
                     "try-computer-button"
                   );
+                  const p = document.getElementById("loudspeaker-instead");
                   if (tryComputerButton) {
                     tryComputerButton.style.display = "";
+                  }
+                  if (p) {
+                    p.style.display = "";
                   }
                 }
               }
@@ -1502,6 +1542,15 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           );
           if (loudspeaker) {
             Loudspeaker = loudspeaker;
+            removeElements([
+              findModel,
+              modelNameInput,
+              modelNumberInput,
+              deviceStringElem,
+              proceedButton,
+              title,
+              subtitle,
+            ]);
             resolve();
           } else {
             alert("The loudspeaker is not in the database");
