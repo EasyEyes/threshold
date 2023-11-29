@@ -1099,13 +1099,13 @@ const createUserUploadedFilesOnRepo = async (
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const fileData = await getFileTextData(repoFiles.experiment!);
 
-  // ! Do NOT add experiment file to avoid Pavlovia error
-  // commitActionList.push({
-  //   action: "create",
-  //   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  //   file_path: repoFiles.experiment!.name,
-  //   content: fileData,
-  // });
+  // ! Do NOT add experiment file data to avoid Pavlovia error
+  commitActionList.push({
+    action: "create",
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    file_path: repoFiles.experiment!.name,
+    content: "",
+  });
 
   // uploadedFileCount.current++;
   // updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
