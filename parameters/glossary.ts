@@ -78,9 +78,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstDb",
     availability: "now",
     type: "numerical",
-    default: "-10",
+    default: "-18",
     explanation:
-      "_calibrateSoundBurstDb (default -10) is the digital sound level (in dB) at which to play the MLS during calibration. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital sound power will be _calibrateSoundBurstDb (in dB). The unfiltered MLS amplitude will be ±10^(_calibrateSoundBurstDb/20). At the default of -10 dB, the amplitude is ±0.32. _calibrateSoundBurstDb specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
+      "_calibrateSoundBurstDb (default -18) is the digital sound level (in dB) at which to play the MLS during calibration. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital sound power will be _calibrateSoundBurstDb (in dB). The unfiltered MLS amplitude will be ±10^(_calibrateSoundBurstDb/20). At the default of -10 dB, the amplitude is ±0.32. _calibrateSoundBurstDb specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
   },
   _calibrateSoundBurstRecordings: {
     name: "_calibrateSoundBurstRecordings",
