@@ -101,6 +101,7 @@ export const writeIsSmartPhoneToFirestore = async (
   OEM
 ) => {
   const collectionRef = collection(db, "Microphones");
+  OEM = OEM.toLowerCase().split(" ").join("");
   const q = query(
     collectionRef,
     where("ID", "==", micID),
