@@ -491,8 +491,6 @@ export const calibrateAudio = async (reader) => {
       );
     }
     let showLoudSpeakerDoneMessage = true;
-    // MICROPHONE CALIBRATION
-    calibrateMicrophonesBool.current = false;
     while (calibrateMicrophonesBool.current) {
       if (showSoundTestPageBool) {
         elems.testButton.style.display = "block";
