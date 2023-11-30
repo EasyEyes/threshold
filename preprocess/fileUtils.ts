@@ -1,5 +1,6 @@
 import { getAllUserAcceptableFileExtensions } from "./constants";
 import { Buffer } from "buffer";
+import * as XLSX from "xlsx";
 
 /**
  * returns the substring after the last 'period' character in the file name
@@ -38,6 +39,53 @@ export const getFileTextData = (file: File): Promise<string> => {
     };
 
     fileReader.readAsText(file, "UTF-8");
+  });
+};
+
+export const readXLSXFile = async (file: Blob) => {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+
+    fileReader.onload = (e) => {
+      try {
+        if (!e || !e.target || !e.target.result) {
+          throw new Error("Failed to read file content.");
+        }
+
+        const data = e.target.result;
+        const arrayBuffer =
+          typeof data === "string"
+            ? new TextEncoder().encode(data).buffer
+            : data;
+
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+        const hasSheets = workbook.SheetNames && workbook.SheetNames.length > 0;
+        if (!hasSheets) {
+          throw new Error("No sheets found in the workbook.");
+        }
+
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const hasData = sheetData && sheetData.length > 0;
+        if (!hasData) {
+          throw new Error("No data found in the sheet.");
+        }
+
+        const fileContent = JSON.stringify(sheetData);
+        resolve(fileContent);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    fileReader.onerror = (error) => {
+      reject(error);
+    };
+
+    fileReader.readAsArrayBuffer(file);
   });
 };
 
@@ -136,7 +184,7 @@ export const encodeGitlabFilePath = (filePath: string): string => {
 export const getTextFileDataFromGitLab = (
   repoID: number,
   filePath: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<string> => {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise<string>(async (resolve) => {
@@ -152,9 +200,9 @@ export const getTextFileDataFromGitLab = (
 
     const response = await fetch(
       `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodeGitlabFilePath(
-        filePath
+        filePath,
       )}/?ref=master`,
-      requestOptions
+      requestOptions,
     )
       .then((response) => {
         // ? It seems that it also works for text files?
@@ -176,7 +224,7 @@ export const getTextFileDataFromGitLab = (
 export const getBase64FileDataFromGitLab = (
   repoID: number,
   filePath: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<string> => {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise<string>(async (resolve) => {
@@ -197,7 +245,7 @@ export const getBase64FileDataFromGitLab = (
     // Make API call to fetch data
     const response = await fetch(
       `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-      requestOptions
+      requestOptions,
     )
       .then((response) => {
         // ? It seems that it also works for text files?
