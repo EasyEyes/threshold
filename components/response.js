@@ -20,7 +20,7 @@
  */
 
 import { getFontFamilyName } from "./fonts";
-import { phraseIdentificationResponse, font, responseType } from "./global";
+import { phraseIdentificationResponse, font } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import { scaleFontSizeToFit, getMinFontSize } from "./showCharacterSet";
 import {
@@ -47,7 +47,8 @@ export const getResponseType = (
   keypad,
   speak,
   responseMustTrackContinuouslyBool,
-  spokenToExperimenter
+  spokenToExperimenter,
+  prestimulus = true
 ) => {
   logger("!. get responseType click", click);
   logger("!. get responseType type", type);
@@ -59,7 +60,7 @@ export const getResponseType = (
   );
   logger("!. get responseType spokenToExperimenter", spokenToExperimenter);
   // responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool
-  if (responseMustTrackContinuouslyBool) return 1;
+  if (responseMustTrackContinuouslyBool && prestimulus) return 1;
 
   // Default routine
   const c = click,

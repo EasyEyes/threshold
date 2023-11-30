@@ -2062,7 +2062,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         const thisQuestion =
           readingQuestions.current[readingCurrentQuestionIndex.current];
-        console.log(
+        logger(
           `%c${thisQuestion.correctAnswer}`,
           `color: red; font-size: 1.5rem; font-family: ${font.name}`
         );
@@ -2109,7 +2109,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         const thisQuestion =
           readingQuestions.current[readingCurrentQuestionIndex.current];
-        console.log(
+        logger(
           `%c${thisQuestion.correctAnswer}`,
           `color: red; font-size: 1.5rem; font-family: ${font.name}`
         );
@@ -2443,6 +2443,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("responseSpokenBool", status.block)[0],
         undefined,
         paramReader.read("responseSpokenBool", status.block)[0]
+      );
+      logger(
+        "!. responseType, initInstructionRoutineBegin",
+        responseType.current
       );
 
       // set default background color for instructions
@@ -3034,7 +3038,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       const letterSetResponseType = () => {
         // ! responseType
-        responseType.original = responseType.current;
+        // AKA prestimulus=false, ie the instructions we use at response-time
+        responseType.original = getResponseType(
+          paramReader.read("responseClickedBool", status.block_condition),
+          paramReader.read("responseTypedBool", status.block_condition),
+          paramReader.read(
+            "!responseTypedEasyEyesKeypadBool",
+            status.block_condition
+          ),
+          paramReader.read("responseSpokenBool", status.block_condition),
+          paramReader.read(
+            "responseMustTrackContinuouslyBool",
+            status.block_condition
+          ),
+          paramReader.read("responseSpokenBool", status.block_condition),
+          false
+        );
+        // AKA prestimulus=true, ie the instructions we use at fixation tracking-time
         responseType.current = getResponseType(
           paramReader.read("responseClickedBool", status.block_condition),
           paramReader.read("responseTypedBool", status.block_condition),
@@ -3048,6 +3068,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition
           ),
           paramReader.read("responseSpokenBool", status.block_condition)
+        );
+        logger(
+          "!. responseType.original, trialInstructionRB aka prestimulus=false",
+          responseType.original
+        );
+        logger(
+          "!. responseType.current, trialInstructionRB aka prestimulus=true",
+          responseType.current
         );
         logger(
           "responseType trialInstructionRoutineBegin",
@@ -3498,11 +3526,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               fontCharacterSet.current,
               numberOfTargetsAndFlankers
             );
-          if (debug)
-            console.log(
-              `%c${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`,
-              `color: red; font-size: 1.5rem; font-family: "${font.name}"`
-            );
+          logger(
+            `%c${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`,
+            `color: red; font-size: 1.5rem; font-family: "${font.name}"`
+          );
           correctAns.current = [targetCharacter.toLowerCase()];
           /* -------------------------------------------------------------------------- */
 
@@ -3661,7 +3688,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     stimulusParameters.heightPx,
                     stimulusParameters.widthPx
                   );
-                  console.log("stimulus [height, width]", [
+                  logger("stimulus [height, width]", [
                     stimulusParameters.heightPx,
                     stimulusParameters.widthPx,
                   ]);
@@ -4028,11 +4055,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             fontCharacterSet.current,
             1
           );
-          if (debug)
-            console.log(
-              `%c${targetCharacter}`,
-              `color: red; font-size: 1.5rem; font-family: "${font.name}"`
-            );
+          logger(
+            `%c${targetCharacter}`,
+            `color: red; font-size: 1.5rem; font-family: "${font.name}"`
+          );
           correctAns.current = [targetCharacter.toLowerCase()];
 
           // fixation.tStart = t;
@@ -4201,11 +4227,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             fontCharacterSet.current,
             1
           );
-          if (debug)
-            console.log(
-              `%c${targetCharacter}`,
-              `color: red; font-size: 1.5rem; font-family: "${font.name}"`
-            );
+          logger(
+            `%c${targetCharacter}`,
+            `color: red; font-size: 1.5rem; font-family: "${font.name}"`
+          );
           correctAns.current = [targetCharacter.toLowerCase()];
           var directionBool = targetCharacter === fontCharacterSet.current[1];
           vernierConfig.targetOffsetDeg = restrictOffsetDeg(
@@ -4213,10 +4238,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             directionBool
           );
           level = Math.log10(vernierConfig.targetOffsetDeg);
-          console.log("proposedLevel", proposedLevel);
-          console.log("proposedOffsetDeg", Math.pow(10, proposedLevel));
-          console.log("targetOffsetDeg", vernierConfig.targetOffsetDeg);
-          console.log("level", level);
+          logger("proposedLevel", proposedLevel);
+          logger("proposedOffsetDeg", Math.pow(10, proposedLevel));
+          logger("targetOffsetDeg", vernierConfig.targetOffsetDeg);
+          logger("level", level);
           vernier.update(directionBool);
 
           defineTargetForCursorTracking(vernier);
@@ -4870,7 +4895,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             )
           );
-          console.log("responseType.current", responseType.current);
+          logger("responseType.current", responseType.current);
           if (paramReader.read("_trackGazeExternallyBool")[0])
             recordStimulusPositionsForEyetracking(target, "trialRoutineBegin");
         },
@@ -5489,13 +5514,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               video.play();
               video_flag = 0;
             }
-            console.log(
+            logger(
               "delayBeforeMovieForLuminanceMeasuringMs",
               delayBeforeMovieForLuminanceMeasuringMs
             );
             measureLuminance.movieStart =
               performance.now() + delayBeforeMovieForLuminanceMeasuringMs;
-            console.log(
+            logger(
               "addMeasureLuminanceIntervals called 1",
               measureLuminance.movieStart
             );
