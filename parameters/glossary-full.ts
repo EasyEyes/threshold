@@ -100,6 +100,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundBurstPostSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundBurstPostSec (default 0.5) requests playing the burst periodically through a post interval rounded up to an integer multiple of the burst period. This allows us to cope with onset asynchrony of playing and recording. We record the playing of seamless repetition of the burst period throughout the whole pre, used, and post iterval to tolerate some onset asynchrony.",
+    type: "numerical",
+    default: "0.5",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundBurstPreSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundBurstPreSec (default 0.5) requests playing the burst periodically through a pre interval rounded up to an integer multiple of the burst period.  This provides time for the hardware to warm up, and allows us to cope with onset asynchrony of playing and recording. We record the playing of seamless repetition of the burst period throughout the whole pre, used, and post iterval to tolerate some onset asynchrony.",
+    type: "numerical",
+    default: "0.5",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundBurstRecordings",
     availability: "now",
     example: "",

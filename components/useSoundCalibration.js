@@ -772,14 +772,16 @@ const runSmartphoneCalibration = async (
       await getSmartPhoneMicrophoneDetailsFromUser(
         elems,
         language,
-        isLoudspeakerCalibration
+        isLoudspeakerCalibration,
+        isParticipant
       );
     }
   } else {
     await getSmartPhoneMicrophoneDetailsFromUser(
       elems,
       language,
-      isLoudspeakerCalibration
+      isLoudspeakerCalibration,
+      isParticipant
     );
   }
 };
@@ -787,7 +789,8 @@ const runSmartphoneCalibration = async (
 const getSmartPhoneMicrophoneDetailsFromUser = async (
   elems,
   language,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
+  isParticipant
 ) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -811,12 +814,21 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   modelNumberInput.id = "modelNumberInput";
   modelNumberInput.name = "modelNumberInput";
   modelNumberInput.placeholder = "Model Number";
+  modelNumberInput.style.width = "30vw";
 
   const modelNameInput = document.createElement("input");
   modelNameInput.type = "text";
   modelNameInput.id = "modelNameInput";
   modelNameInput.name = "modelNameInput";
   modelNameInput.placeholder = "Model Name";
+  modelNameInput.style.width = "30vw";
+
+  const manufacturerInput = document.createElement("input");
+  manufacturerInput.type = "text";
+  manufacturerInput.id = "manufacturerInput";
+  manufacturerInput.name = "manufacturerInput";
+  manufacturerInput.placeholder = "Manufacturer";
+  manufacturerInput.style.width = "30vw";
 
   const p = document.createElement("p");
   p.innerText = `Please enter the model number and name of the smartphone you are using for this calibration.`;
@@ -826,8 +838,11 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
 
-  // add  to the page
   elems.subtitle.appendChild(p);
+  if (isLoudspeakerCalibration && !isParticipant) {
+    elems.subtitle.appendChild(manufacturerInput);
+  }
+
   elems.subtitle.appendChild(modelNameInput);
   elems.subtitle.appendChild(modelNumberInput);
   elems.subtitle.appendChild(proceedButton);
@@ -841,26 +856,30 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
       } else {
         if (isLoudspeakerCalibration) {
           const micSerialNumber = modelNumberInput.value;
-          const micManufacturer = modelNameInput.value
+          const micManufacturer = manufacturerInput.value
             .toLowerCase()
             .split(" ")
             .join("");
+          const modelName = modelNameInput.value;
           if (
-            (micManufacturer === "umik-1" || micManufacturer === "umik-2") &&
-            (await doesMicrophoneExistInFirestore(micSerialNumber, "minidsp"))
+            await doesMicrophoneExistInFirestore(
+              micSerialNumber,
+              micManufacturer
+            )
           ) {
+            adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+            microphoneInfo.current = {
+              micFullName: modelNameInput.value,
+              micFullSerialNumber: modelNumberInput.value,
+              micrFullManufacturerName: manufacturerInput.value,
+            };
             removeElements([
               p,
               proceedButton,
               modelNameInput,
               modelNumberInput,
+              manufacturerInput,
             ]);
-            adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
-            microphoneInfo.current = {
-              micFullName: modelNameInput.value,
-              micFullSerialNumber: modelNumberInput.value,
-              micrFullManufacturerName: "miniDSP",
-            };
             await getLoudspeakerDeviceDetailsFromUserForSmartphone(
               elems,
               language,

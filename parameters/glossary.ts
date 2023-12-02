@@ -82,6 +82,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundBurstDb (default -18) is the digital sound level (in dB) at which to play the MLS during calibration. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital sound power will be _calibrateSoundBurstDb (in dB). The unfiltered MLS amplitude will be ±10^(_calibrateSoundBurstDb/20). At the default of -10 dB, the amplitude is ±0.32. _calibrateSoundBurstDb specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
   },
+  _calibrateSoundBurstPostSec: {
+    name: "_calibrateSoundBurstPostSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.5",
+    explanation:
+      "_calibrateSoundBurstPostSec (default 0.5) requests playing the burst periodically through a post interval rounded up to an integer multiple of the burst period. This allows us to cope with onset asynchrony of playing and recording. We record the playing of seamless repetition of the burst period throughout the whole pre, used, and post iterval to tolerate some onset asynchrony.",
+  },
+  _calibrateSoundBurstPreSec: {
+    name: "_calibrateSoundBurstPreSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.5",
+    explanation:
+      "_calibrateSoundBurstPreSec (default 0.5) requests playing the burst periodically through a pre interval rounded up to an integer multiple of the burst period.  This provides time for the hardware to warm up, and allows us to cope with onset asynchrony of playing and recording. We record the playing of seamless repetition of the burst period throughout the whole pre, used, and post iterval to tolerate some onset asynchrony.",
+  },
   _calibrateSoundBurstRecordings: {
     name: "_calibrateSoundBurstRecordings",
     availability: "now",
