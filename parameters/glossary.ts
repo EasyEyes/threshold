@@ -48,7 +48,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically in smartphones. This is intended solely for use by scientists, and requires a calibrated microphone (typically manufacturer-calibrated, like the miniDSP UMIK-1 available from miniDSP for $79) for the initial loudspeaker calibration. First, as usual, the calibrated mic will be used to calibrate the loudspeaker, then the calibrated loudspeaker will be used to calibrate, one by one, any number of microphones. Each new calibration file will be added to the EasyEyes microphone calibration library. Also see _calibrateMicrophonesPreventLocalBool. To contribute to the EasyEyes calibration library, the scientist must provide _authorEmails.",
+      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically smartphone microphones. This is intended solely for use by a few sound experts (for now, Denis Pelli and his assistants), and requires a calibrated microphone (especially the manufacturer-calibrated USB miniDSP UMIK-1, available from miniDSP for $79) for the initial loudspeaker calibration. First, the calibrated mic is used to calibrate the loudspeaker, then the calibrated loudspeaker is used to calibrate, one by one, any number of microphones. Each new calibration file is added to the EasyEyes microphone calibration library. To contribute a microphone profile to the EasyEyes profile library, the scientist must provide _authorEmails.  ",
   },
   _calibrateMicrophonesOnlyViaPhoneBool: {
     name: "_calibrateMicrophonesOnlyViaPhoneBool",
@@ -88,7 +88,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.5",
     explanation:
-      "_calibrateSoundBurstPostSec (default 0.5) requests playing the burst periodically through a post interval rounded up to an integer multiple of the burst period. This allows us to cope with onset asynchrony of playing and recording. We record the playing of seamless repetition of the burst period throughout the whole pre, used, and post iterval to tolerate some onset asynchrony.",
+      "_calibrateSoundBurstPostSec (default 0.5) requests playing the burst periodically through a post interval that is rounded up to an integer multiple of the burst period. To tolerate some onset asynchrony, we record the playing of seamless repetition of the burst throughout the whole pre, used, and post iterval.",
   },
   _calibrateSoundBurstPreSec: {
     name: "_calibrateSoundBurstPreSec",
@@ -96,7 +96,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.5",
     explanation:
-      "_calibrateSoundBurstPreSec (default 0.5) requests playing the burst periodically through a pre interval rounded up to an integer multiple of the burst period.  This provides time for the hardware to warm up, and allows us to cope with onset asynchrony of playing and recording. We record the playing of seamless repetition of the burst period throughout the whole pre, used, and post iterval to tolerate some onset asynchrony.",
+      "_calibrateSoundBurstPreSec (default 0.5) requests playing the burst periodically through a pre interval rounded up to an integer multiple of the burst period.  To provides time for the hardware to warm up, and to tolerate some onset asynchrony, we record the playing of seamless repetition of the burst throughout the whole pre, used, and post iterval.",
   },
   _calibrateSoundBurstRecordings: {
     name: "_calibrateSoundBurstRecordings",
@@ -446,7 +446,7 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "",
     explanation:
-      '🕑 _needCalibratedSound (default empty) requires a "microphone" (smartphone), or "loudspeaker" (computer). or either "microphone, loudspeaker" whose model is included in the EasyEyes profile library. If both are listed, EasyEyes tries first to match the microphone, because we expect the microphone profiles to be more reliable.\n\nCurrently, this parameter is ignored if _calibrateMicrophonesBool==TRUE. In the future, when _calibrateMicrophonesBool==TRUE, the only acceptable microphone match will be a UMIK-1 or UMIK-2 microphone, and the only acceptable loudspeaker match will be an exact match, for this particular computer. ',
+      '_needCalibratedSound (default empty) requires a "microphone" (in smartphone), or "loudspeaker" (in computer), or either ("microphone, loudspeaker") whose model is included in the EasyEyes profile library. If both are listed, EasyEyes tries first to match the microphone, because we expect the microphone profiles to be more reliable.\nCurrently, this parameter is ignored if _calibrateMicrophonesBool==TRUE. In the future, when _calibrateMicrophonesBool==TRUE, the only acceptable microphone match will be a UMIK-1 or UMIK-2 microphone, and the only acceptable loudspeaker match will be an exact match, for this particular computer. ',
     categories: ["microphone", "loudspeaker"],
   },
   _needCameraBool: {
