@@ -496,7 +496,7 @@ export const calibrateAudio = async (reader) => {
         elems.testButton.style.display = "block";
         elems.testButton.style.visibility = "visible";
         elems.testButton.addEventListener("click", async (e) => {
-          addSoundTestElements(reader);
+          addSoundTestElements(reader, rc.language.value);
           $("#soundTestModal").modal("show");
         });
       }

@@ -20,6 +20,7 @@ import {
   microphoneActualSamplingRate,
   allHzCalibrationResults,
   webAudioDeviceNames,
+  loudspeakerInfo,
 } from "./global";
 import {
   plotForAllHz,
@@ -42,29 +43,21 @@ import {
   playAudioNodeGraph,
   setWaveFormToZeroDbSPL,
 } from "./soundUtils";
+import { readi18nPhrases } from "./readPhrases";
 
 const soundGain = { current: undefined };
 const soundDBSPL = { current: undefined };
-export const addSoundTestElements = (reader) => {
-  // const calibrationLevelFromFile = reader.read(
-  //   "soundCalibrationLevelDBSPL",
-  //   "__ALL_BLOCKS__"
-  // );
-  // if (
-  //   calibrationLevelFromFile.length > 0 &&
-  //   soundCalibrationLevelDBSPL.current === undefined
-  // ) {
-  //   soundCalibrationLevelDBSPL.current = calibrationLevelFromFile[0];
-  // }
-
+export const addSoundTestElements = (reader, language) => {
   if (soundCalibrationLevelDBSPL.current) {
     soundDBSPL.current = soundCalibrationLevelDBSPL.current;
   }
   const soundGainFromFile = reader.read("soundGainDBSPL", "__ALL_BLOCKS__");
   if (soundCalibrationResults.current) {
-    soundGain.current = soundCalibrationResults.current.parameters.gainDBSPL;
+    soundGain.current =
+      Math.round(soundCalibrationResults.current.parameters.gainDBSPL * 10) /
+      10;
   } else if (soundGainFromFile.length > 0) {
-    soundGain.current = soundGainFromFile[0];
+    soundGain.current = Math.round(soundGainFromFile[0] * 10) / 10;
   }
 
   const modal = document.createElement("div");
@@ -76,15 +69,26 @@ export const addSoundTestElements = (reader) => {
 
   const modalSubtitle = document.createElement("p");
   const togglesContainer = document.createElement("div");
-  const toggleElements = addToggleSwitch();
-  const modalToggle = toggleElements.toggleSwitch;
-  const IRCorrectionToggleLabel = document.createElement("label");
-  const IRCorrectionToggleContainer = document.createElement("div");
-  const useGainNodeToggleContainer = document.createElement("div");
-  const useGainNodeToggleElements = addToggleSwitch();
-  const useGainNodeToggle = useGainNodeToggleElements.toggleSwitch;
-  const useGainNodeInput = useGainNodeToggleElements.toggleSwitchInput;
-  const useGainNodeLabel = document.createElement("label");
+  const NoCorrectionToggleLabel = document.createElement("label");
+  const NoCorrectionToggleContainer = document.createElement("div");
+  const NoCorrectionToggleElements = addToggleSwitch();
+  const NoCorrectionToggle = NoCorrectionToggleElements.toggleSwitch;
+  const NoCorrectionInput = NoCorrectionToggleElements.toggleSwitchInput;
+
+  const LoudspeakerCorrectionToggleLabel = document.createElement("label");
+  const LoudspeakerCorrectionToggleContainer = document.createElement("div");
+  const LoudspeakerCorrectionToggleElements = addToggleSwitch();
+  const LoudspeakerCorrectionToggle =
+    LoudspeakerCorrectionToggleElements.toggleSwitch;
+  const LoudspeakerCorrectionInput =
+    LoudspeakerCorrectionToggleElements.toggleSwitchInput;
+
+  const SystemCorrectionToggleLabel = document.createElement("label");
+  const SystemCorrectionToggleContainer = document.createElement("div");
+  const SystemCorrectionToggleElements = addToggleSwitch();
+  const SystemCorrectionToggle = SystemCorrectionToggleElements.toggleSwitch;
+  const SystemCorrectionInput =
+    SystemCorrectionToggleElements.toggleSwitchInput;
 
   const modalBody = document.createElement("div");
   const modalFooter = document.createElement("div");
@@ -96,11 +100,71 @@ export const addSoundTestElements = (reader) => {
   const speakerSoundGain = document.createElement("p");
   const speakerSoundGainInput = document.createElement("input");
 
+  // only one toggle can be on at a time
+  NoCorrectionToggle.addEventListener("click", () => {
+    NoCorrectionInput.checked = true;
+    LoudspeakerCorrectionInput.checked = false;
+    SystemCorrectionInput.checked = false;
+    soundGain.current =
+      Math.round(soundCalibrationResults.current.parameters.gainDBSPL * 10) /
+      10;
+    speakerSoundGain.innerHTML = readi18nPhrases(
+      "RC_dB_gainAt1000Hz",
+      language
+    ).replace("11.1", soundGain.current);
+    soundLevel.innerHTML = readi18nPhrases(
+      "RC_DesiredDIgitalInput_dB",
+      language
+    );
+  });
+
+  LoudspeakerCorrectionToggle.addEventListener("click", () => {
+    NoCorrectionInput.checked = false;
+    LoudspeakerCorrectionInput.checked = true;
+    SystemCorrectionInput.checked = false;
+    soundGain.current =
+      Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10;
+    speakerSoundGain.innerHTML = readi18nPhrases(
+      "RC_dB_SPL_gainAt1000Hz",
+      language
+    ).replace("11.1", soundGain.current);
+    soundLevel.innerHTML = readi18nPhrases(
+      "RC_DesiredSoundLevel_dB_SPL",
+      language
+    );
+  });
+
+  SystemCorrectionToggle.addEventListener("click", () => {
+    NoCorrectionInput.checked = false;
+    LoudspeakerCorrectionInput.checked = false;
+    SystemCorrectionInput.checked = true;
+    soundGain.current =
+      Math.round(soundCalibrationResults.current.parameters.gainDBSPL * 10) /
+      10;
+    speakerSoundGain.innerHTML = readi18nPhrases(
+      "RC_dB_gainAt1000Hz",
+      language
+    ).replace("11.1", soundGain.current);
+    soundLevel.innerHTML = readi18nPhrases(
+      "RC_DesiredDIgitalOutput_dB",
+      language
+    );
+  });
+
+  // default to LoudspeakerCorrectionToggle being on
+  soundGain.current =
+    Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10;
+  speakerSoundGain.innerHTML = readi18nPhrases(
+    "RC_dB_SPL_gainAt1000Hz",
+    language
+  ).replace("11.1", soundGain.current);
+  soundLevel.innerHTML = readi18nPhrases(
+    "RC_DesiredSoundLevel_dB_SPL",
+    language
+  );
+  LoudspeakerCorrectionInput.checked = true;
+
   const nameOfPlayedSound = document.createElement("p");
-  // const adjustedSoundLevelContainer = document.createElement("div");
-  // const adjustedSoundLevel = document.createElement("p");
-  // const adjustedSoundLevelInput = document.createElement("input");
-  // const rmsOfSoundContainer = document.createElement("div");
   const rmsOfSound = document.createElement("p");
   const maxAmplitude = document.createElement("p");
   const elems = {
@@ -109,7 +173,6 @@ export const addSoundTestElements = (reader) => {
     modalContent,
     modalHeader,
     modalTitle,
-    modalToggle,
     modalBody,
     modalFooter,
     soundLevelContainer,
@@ -118,7 +181,6 @@ export const addSoundTestElements = (reader) => {
     speakerSoundGainContainer,
     speakerSoundGain,
     speakerSoundGainInput,
-    // rmsOfSoundContainer,
     rmsOfSound,
     maxAmplitude,
   };
@@ -141,7 +203,6 @@ export const addSoundTestElements = (reader) => {
   modalHeader.setAttribute("id", "soundTestModalHeader");
   modalHeaderContainer.setAttribute("id", "soundTestModalHeaderContainer");
   modalTitle.setAttribute("id", "soundTestModalTitle");
-  modalToggle.setAttribute("id", "soundTestModalToggle");
   modalBody.setAttribute("id", "soundTestModalBody");
   modalFooter.setAttribute("id", "soundTestModalFooter");
   soundLevelContainer.setAttribute("id", "soundTestModalSoundLevelContainer");
@@ -159,35 +220,75 @@ export const addSoundTestElements = (reader) => {
   );
   speakerSoundGainInput.setAttribute("type", "number");
 
-  // adjustedSoundLevelContainer.setAttribute( "id", "soundTestModalAdjustedSoundLevelContainer");
-  // adjustedSoundLevel.setAttribute("id", "soundTestModalAdjustedSoundLevel");
-  // adjustedSoundLevelInput.setAttribute("id", "soundTestModalAdjustedSoundLevelInput");
-  // adjustedSoundLevelInput.setAttribute("type", "number");
-  // rmsOfSoundContainer.setAttribute("id", "soundTestModalRMSOfSoundContainer");
-
   nameOfPlayedSound.setAttribute("id", "soundTestModalNameOfPlayedSound");
   rmsOfSound.setAttribute("id", "soundTestModalRMSOfSound");
   maxAmplitude.setAttribute("id", "soundTestModalMaxAmplitude");
-  useGainNodeLabel.setAttribute("id", "soundTestModalUseGainNodeLabel");
-  // useGainNodeLabel.setAttribute("for", "soundTestModalUseGainNodeToggle");
-  useGainNodeLabel.innerText = "Use Gain Node";
-  useGainNodeToggle.setAttribute("id", "soundTestModalUseGainNodeToggle");
-  useGainNodeToggle.style.marginLeft = "10px";
-  useGainNodeInput.setAttribute("id", "soundTestModalUseGainNodeToggleInput");
+
+  modalContent.style.lineHeight = "0.5rem";
 
   togglesContainer.setAttribute("id", "soundTestModalTogglesContainer");
   togglesContainer.style.display = "flex";
   togglesContainer.style.flexDirection = "column";
-  IRCorrectionToggleLabel.setAttribute("id", "soundTestModalIRCorrectionLabel");
-  IRCorrectionToggleLabel.innerText = "IR Correction";
-  modalToggle.style.marginLeft = "10px";
-  IRCorrectionToggleContainer.style.display = "flex";
+
+  NoCorrectionToggleLabel.setAttribute("id", "soundTestModalNoCorrectionLabel");
+  NoCorrectionToggleLabel.innerText = readi18nPhrases(
+    "RC_NoCorrection",
+    language
+  );
+  NoCorrectionToggle.setAttribute("id", "soundTestModalNoCorrectionToggle");
+  NoCorrectionToggle.style.marginLeft = "10px";
+  NoCorrectionInput.setAttribute("id", "soundTestModalNoCorrectionInput");
+  NoCorrectionToggleContainer.style.display = "flex";
   // space between toggle and label
-  IRCorrectionToggleContainer.style.marginBottom = "10px";
-  IRCorrectionToggleContainer.style.justifyContent = "space-between";
-  useGainNodeToggleContainer.style.display = "flex";
-  useGainNodeToggleContainer.style.justifyContent = "space-between";
-  useGainNodeToggleContainer.style.marginBottom = "10px";
+  NoCorrectionToggleContainer.style.marginBottom = "10px";
+  NoCorrectionToggleContainer.style.justifyContent = "space-between";
+  NoCorrectionToggleContainer.style.alignItems = "center";
+
+  LoudspeakerCorrectionToggleLabel.setAttribute(
+    "id",
+    "soundTestModalLoudspeakerCorrectionLabel"
+  );
+  LoudspeakerCorrectionToggleLabel.innerText = readi18nPhrases(
+    "RC_CorrectLoudspeaker",
+    language
+  );
+  LoudspeakerCorrectionToggle.setAttribute(
+    "id",
+    "soundTestModalLoudspeakerCorrectionToggle"
+  );
+  LoudspeakerCorrectionToggle.style.marginLeft = "10px";
+  LoudspeakerCorrectionInput.setAttribute(
+    "id",
+    "soundTestModalLoudspeakerCorrectionInput"
+  );
+  LoudspeakerCorrectionToggleContainer.style.display = "flex";
+  // space between toggle and label
+  LoudspeakerCorrectionToggleContainer.style.marginBottom = "10px";
+  LoudspeakerCorrectionToggleContainer.style.justifyContent = "space-between";
+  LoudspeakerCorrectionToggleContainer.style.alignItems = "center";
+
+  SystemCorrectionToggleLabel.setAttribute(
+    "id",
+    "soundTestModalSystemCorrectionLabel"
+  );
+  SystemCorrectionToggleLabel.innerText = readi18nPhrases(
+    "RC_CorrectLoudspeakerAndMicrophone",
+    language
+  );
+  SystemCorrectionToggle.setAttribute(
+    "id",
+    "soundTestModalSystemCorrectionToggle"
+  );
+  SystemCorrectionToggle.style.marginLeft = "10px";
+  SystemCorrectionInput.setAttribute(
+    "id",
+    "soundTestModalSystemCorrectionInput"
+  );
+  SystemCorrectionToggleContainer.style.display = "flex";
+  // space between toggle and label
+  SystemCorrectionToggleContainer.style.marginBottom = "10px";
+  SystemCorrectionToggleContainer.style.justifyContent = "space-between";
+  SystemCorrectionToggleContainer.style.alignItems = "center";
 
   modal.classList.add(...["modal", "fade"]);
   modalDialog.classList.add(...["modal-dialog"]);
@@ -197,28 +298,32 @@ export const addSoundTestElements = (reader) => {
   modalBody.classList.add(...["modal-body"]);
   modalFooter.classList.add(...["modal-footer"]);
 
-  modalTitle.innerHTML = "Sound Test";
-  modalSubtitle.innerHTML =
-    "Use the toggle for IR correction. It may take some time to load the sound files.";
-  soundLevel.innerHTML = "Desired sound level (dB SPL):";
+  modalTitle.innerHTML = readi18nPhrases("RC_SoundTest", language);
+  modalTitle.style.marginBottom = "10px";
+  modalSubtitle.innerHTML = "";
   if (soundDBSPL.current) soundLevelInput.value = soundDBSPL.current.toFixed(1);
-  speakerSoundGain.innerHTML = "Sound gain at 1000Hz (dB SPL):";
-  if (soundGain.current)
-    speakerSoundGainInput.value = (
-      Math.round(soundGain.current * 10) / 10
-    ).toFixed(1);
-  rmsOfSound.innerHTML = "Digital sound RMS dB: **** dB";
-  maxAmplitude.innerHTML = "Digital sound max: ****";
-  nameOfPlayedSound.innerHTML = "Playing sound: ****";
-  // adjustedSoundLevel.innerHTML = "Adjusted soundCalibrationLevel: **** dB SPL"
+  rmsOfSound.innerHTML = readi18nPhrases(
+    "RC_DIgitalInput_dB",
+    language
+  ).replace("11.1", "****");
+  maxAmplitude.innerHTML = readi18nPhrases(
+    "RC_DIgitalInputMax",
+    language
+  ).replace("1.11", "****");
+  nameOfPlayedSound.innerHTML = readi18nPhrases(
+    "RC_PlayingSound",
+    language
+  ).replace("FFF", "****");
 
   modal.appendChild(modalDialog);
   modalDialog.appendChild(modalContent);
   modalHeaderContainer.appendChild(modalHeader);
+  modalHeaderContainer.appendChild(togglesContainer);
   modalHeaderContainer.appendChild(modalSubtitle);
 
   speakerSoundGainContainer.appendChild(speakerSoundGain);
-  speakerSoundGainContainer.appendChild(speakerSoundGainInput);
+  // speakerSoundGainContainer.appendChild(speakerSoundGainInput);
+  soundLevelContainer.style.alignItems = "center";
   soundLevelContainer.appendChild(soundLevel);
   soundLevelContainer.appendChild(soundLevelInput);
   modalHeaderContainer.appendChild(speakerSoundGainContainer);
@@ -231,30 +336,35 @@ export const addSoundTestElements = (reader) => {
   // modalHeaderContainer.appendChild(adjustedSoundLevel);
   modalHeaderContainer.appendChild(nameOfPlayedSound);
   //append the toggles
-  IRCorrectionToggleContainer.appendChild(IRCorrectionToggleLabel);
-  IRCorrectionToggleContainer.appendChild(modalToggle);
-  useGainNodeToggleContainer.appendChild(useGainNodeLabel);
-  useGainNodeToggleContainer.appendChild(useGainNodeToggle);
-  togglesContainer.appendChild(IRCorrectionToggleContainer);
-  togglesContainer.appendChild(useGainNodeToggleContainer);
-  // togglesContainer.appendChild(IRCorrectionToggleLabel);
-  // togglesContainer.appendChild(modalToggle);
-  // togglesContainer.appendChild(useGainNodeLabel);
-  // togglesContainer.appendChild(useGainNodeToggle);
+  NoCorrectionToggleContainer.appendChild(NoCorrectionToggleLabel);
+  NoCorrectionToggleContainer.appendChild(NoCorrectionToggle);
+  LoudspeakerCorrectionToggleContainer.appendChild(
+    LoudspeakerCorrectionToggleLabel
+  );
+  LoudspeakerCorrectionToggleContainer.appendChild(LoudspeakerCorrectionToggle);
+  SystemCorrectionToggleContainer.appendChild(SystemCorrectionToggleLabel);
+  SystemCorrectionToggleContainer.appendChild(SystemCorrectionToggle);
+  togglesContainer.appendChild(NoCorrectionToggleContainer);
+
+  togglesContainer.appendChild(LoudspeakerCorrectionToggleContainer);
+  togglesContainer.appendChild(SystemCorrectionToggleContainer);
 
   modalContent.appendChild(modalHeaderContainer);
   modalHeader.appendChild(modalTitle);
-  modalHeader.appendChild(togglesContainer);
-  // modalHeader.appendChild(modalToggle);
-  // modalHeader.appendChild(useGainNodeLabel);
-  // modalHeader.appendChild(useGainNodeToggle);
-  // modalContent.appendChild(modalSubtitle);
+  // modalBody.appendChild(togglesContainer);
   modalContent.appendChild(modalBody);
   modalContent.appendChild(modalFooter);
   document.body.appendChild(modal);
   addSoundTestCss();
 
-  populateSoundFiles(reader, modalBody, toggleElements.toggleSwitchInput);
+  populateSoundFiles(
+    reader,
+    modalBody,
+    NoCorrectionInput,
+    LoudspeakerCorrectionInput,
+    SystemCorrectionInput,
+    language
+  );
 };
 
 const addSoundTestCss = () => {
@@ -364,7 +474,14 @@ const addToggleCSS = () => {
   document.head.appendChild(soundTestToggleStyleSheet);
 };
 
-const populateSoundFiles = async (reader, modalBody, toggleInput) => {
+const populateSoundFiles = async (
+  reader,
+  modalBody,
+  NoCorrectionInput,
+  LoudspeakerCorrectionInput,
+  SystemCorrectionInput,
+  language
+) => {
   var targetSoundFolders = reader.read("targetSoundFolder", "__ALL_BLOCKS__");
   targetSoundFolders = [...new Set(targetSoundFolders)]; // remove duplicates
   targetSoundFolders = targetSoundFolders.filter((folder) => folder); // remove empty strings
@@ -401,14 +518,25 @@ const populateSoundFiles = async (reader, modalBody, toggleInput) => {
     })
   );
 
-  addSoundFileElements(targetSoundFiles, modalBody, toggleInput, reader);
+  addSoundFileElements(
+    targetSoundFiles,
+    modalBody,
+    reader,
+    NoCorrectionInput,
+    LoudspeakerCorrectionInput,
+    SystemCorrectionInput,
+    language
+  );
 };
 
 const addSoundFileElements = (
   targetSoundFiles,
   modalBody,
-  toggleInput,
-  reader
+  reader,
+  NoCorrectionInput,
+  LoudspeakerCorrectionInput,
+  SystemCorrectionInput,
+  language
 ) => {
   Object.keys(targetSoundFiles).forEach((blockName, index) => {
     const horizontal = document.createElement("hr");
@@ -417,25 +545,30 @@ const addSoundFileElements = (
     targetSoundFiles[blockName].forEach((soundFile) => {
       const soundFileContainer = document.createElement("div");
       soundFileContainer.setAttribute("class", "soundFileContainer");
-      const soundFileName = document.createElement("h4");
+      const soundFileName = document.createElement("h6");
       soundFileName.innerHTML = soundFile.name;
       const soundFileButton = document.createElement("button");
-      soundFileButton.classList.add(...["btn", "btn-success"]);
-      soundFileButton.innerHTML = "Play";
+      soundFileButton.classList.add(
+        ...["btn", "btn-success", "soundFileButton"]
+      );
+      soundFileButton.innerHTML = readi18nPhrases("RC_Play", language);
 
       soundFileButton.addEventListener("click", async () => {
         // display name of sound file
         document.getElementById("soundTestModalNameOfPlayedSound").innerHTML =
-          "Playing sound: " + soundFile.name;
+          readi18nPhrases("RC_PlayingSound", language).replace(
+            "FFF",
+            soundFile.name
+          );
         const soundFileBuffer = cloneAudioBuffer(await soundFile.file);
 
-        soundGain.current = document.getElementById(
-          "soundTestModalSpeakerSoundGainInput"
-        ).value;
-        // round soundGain to 1 decimal places
-        soundGain.current = Math.round(soundGain.current * 10) / 10;
-        document.getElementById("soundTestModalSpeakerSoundGainInput").value =
-          soundGain.current.toFixed(1);
+        // soundGain.current = document.getElementById(
+        //   "soundTestModalSpeakerSoundGainInput"
+        // ).value;
+        // // round soundGain to 1 decimal places
+        // soundGain.current = Math.round(soundGain.current * 10) / 10;
+        // document.getElementById("soundTestModalSpeakerSoundGainInput").value =
+        //   soundGain.current.toFixed(1);
 
         var audioData = soundFileBuffer.getChannelData(0);
         setWaveFormToZeroDbSPL(audioData);
@@ -464,74 +597,52 @@ const addSoundFileElements = (
           getMaxValueOfAbsoluteValueOfBuffer(audioData);
         const theGainValue = getGainValue(inDB);
         const soundMax = maxOfOriginalSound * theGainValue;
-        // console.log("inDB", inDB);
-        // console.log("soundMax", soundMax);
-        // console.log("soundDBSPL.current", soundDBSPL.current);
-        document.getElementById(
-          "soundTestModalMaxAmplitude"
-        ).innerHTML = `Digital sound max: ${soundMax.toFixed(2)}`;
+        document.getElementById("soundTestModalMaxAmplitude").innerHTML =
+          readi18nPhrases("RC_DIgitalInputMax", language).replace(
+            "1.11",
+            soundMax.toFixed(2)
+          );
+        // `Digital sound max: ${soundMax.toFixed(2)}`;
 
         document.getElementById("soundTestModalSoundLevelInput").value =
           soundDBSPL.current;
         const rmsOfSound = document.getElementById("soundTestModalRMSOfSound");
-        const useGainNodeBool = document.getElementById(
-          "soundTestModalUseGainNodeToggleInput"
-        ).checked;
-
-        //use gain node
-        if (useGainNodeBool) {
-          const gainNode = getGainNode(getGainValue(inDB));
-          const webAudioNodes = [];
-          webAudioNodes.push(createAudioNodeFromBuffer(soundFileBuffer));
-          webAudioNodes.push(gainNode);
-          if (toggleInput.checked) {
-            if (invertedImpulseResponse.current) {
-              rmsOfSound.innerHTML = `Digital sound RMS dB: ${calculateDBFromRMS(
-                Math.round(gainNode.gain.value * 10) / 10
-              )} dB`;
-              webAudioNodes.push(
-                await createImpulseResponseFilterNode(
-                  invertedImpulseResponse.current
-                )
-              );
-              connectAudioNodes(webAudioNodes);
-              playAudioNodeGraph(webAudioNodes);
-            } else {
-              alert(
-                "There was an error loading the impulse response. Please try calibrating again."
-              );
-            }
-          } else {
-            rmsOfSound.innerHTML = `Digital sound RMS dB: ${calculateDBFromRMS(
-              gainNode.gain.value
-            )} dB`;
-            connectAudioNodes(webAudioNodes);
-            playAudioNodeGraph(webAudioNodes);
-          }
-        }
 
         // adjust sound by changing the amplitude of the sound file manually
-        else {
-          adjustSoundDbSPL(audioData, inDB);
-          rmsOfSound.innerHTML = `Digital sound RMS dB: ${calculateDBFromRMS(
-            getRMSOfWaveForm(audioData)
-          )} dB`;
+        adjustSoundDbSPL(audioData, inDB);
+        rmsOfSound.innerHTML = readi18nPhrases(
+          "RC_DIgitalInput_dB",
+          language
+        ).replace("11.1", calculateDBFromRMS(getRMSOfWaveForm(audioData)));
+        // `Digital sound RMS dB: ${calculateDBFromRMS(
+        //   getRMSOfWaveForm(audioData)
+        // )} dB`;
 
-          if (toggleInput.checked) {
-            if (invertedImpulseResponse.current)
-              playAudioBufferWithImpulseResponseCalibration(
-                soundFileBuffer,
-                invertedImpulseResponse.current
-              );
-            else
-              alert(
-                "There was an error loading the impulse response. Please try calibrating again."
-              );
-          } else playAudioBuffer(soundFileBuffer);
-        }
+        if (SystemCorrectionInput.checked) {
+          if (allHzCalibrationResults.system.iir)
+            playAudioBufferWithImpulseResponseCalibration(
+              soundFileBuffer,
+              allHzCalibrationResults.system.iir
+            );
+          else
+            alert(
+              "There was an error loading the impulse response. Please try calibrating again."
+            );
+        } else if (LoudspeakerCorrectionInput.checked) {
+          if (allHzCalibrationResults.component.iir)
+            playAudioBufferWithImpulseResponseCalibration(
+              soundFileBuffer,
+              allHzCalibrationResults.component.iir
+            );
+          else
+            alert(
+              "There was an error loading the impulse response. Please try calibrating again."
+            );
+        } else playAudioBuffer(soundFileBuffer);
       });
-      soundFileContainer.appendChild(soundFileName);
       soundFileContainer.appendChild(soundFileButton);
+      soundFileContainer.appendChild(soundFileName);
+
       block.appendChild(soundFileContainer);
     });
     modalBody.appendChild(block);
@@ -544,17 +655,18 @@ const addSoundFileCSS = () => {
   const styles = `
     .block {
         padding: 10px;
+        padding-left:0; 
         padding-bottom: 0;
     }
     .soundFileContainer {
         display: flex;
-        justify-content: space-between;
         padding: 10px;
+        padding-left:0;
         padding-bottom: 0;
+        align-items: center;
     }
     .soundFileButton {
-        padding: 10px;
-        padding-bottom: 0;
+        margin-right: 10px;
     }
     `;
   const soundTestFileStyleSheet = document.createElement("style");
