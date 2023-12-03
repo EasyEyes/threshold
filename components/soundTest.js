@@ -701,7 +701,12 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
 
 const startRecording = async (deviceId, recordButton, language) => {
   const stream = await navigator.mediaDevices.getUserMedia({
-    audio: { deviceId: deviceId },
+    audio: {
+      deviceId: { exact: deviceId },
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false,
+    },
   });
   mediaRecorder = new MediaRecorder(stream);
   recordedChunks = [];
