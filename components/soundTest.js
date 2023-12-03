@@ -518,7 +518,7 @@ const populateSoundFiles = async (
     })
   );
 
-  addSoundFileElements(
+  await addSoundFileElements(
     targetSoundFiles,
     modalBody,
     reader,
@@ -529,7 +529,11 @@ const populateSoundFiles = async (
   );
 };
 
-const addSoundFileElements = (
+let mediaRecorder = null;
+let recordedChunks = [];
+let restartRecording = false;
+
+const addSoundFileElements = async (
   targetSoundFiles,
   modalBody,
   reader,
@@ -649,6 +653,138 @@ const addSoundFileElements = (
     modalBody.appendChild(horizontal);
   });
   addSoundFileCSS();
+  await addAudioRecordAndPlayback(modalBody, language);
+};
+
+const addAudioRecordAndPlayback = async (modalBody, language) => {
+  const microphones = await getListOfConnectedMicrophones();
+  const select = document.createElement("select");
+  select.style.marginBottom = "10px";
+  const recordButton = document.createElement("button");
+  const p = document.createElement("p");
+  p.id = "powerLevel";
+  p.style.lineHeight = "1.2rem";
+  const timeContainer = document.createElement("div");
+  timeContainer.style.display = "flex";
+  timeContainer.style.marginBottom = "10px";
+  timeContainer.style.alignItems = "center";
+  const timeText = document.createElement("p");
+  timeText.innerHTML = readi18nPhrases("RC_AveragingSec", language);
+  timeText.style.marginRight = "10px";
+  const timeInput = document.createElement("input");
+  timeInput.type = "number";
+  timeInput.value = 5;
+  timeInput.style.width = "100px";
+  timeInput.id = "timeInput";
+
+  microphones.forEach((microphone) => {
+    const option = document.createElement("option");
+    option.value = microphone.deviceId;
+    option.text = microphone.label;
+    select.appendChild(option);
+  });
+
+  recordButton.classList.add(...["btn", "btn-success", "soundFileButton"]);
+  recordButton.innerHTML = "Record";
+
+  recordButton.addEventListener("click", async () => {
+    await toggleRecording(select.value, recordButton, language);
+  });
+
+  modalBody.appendChild(select);
+  timeContainer.appendChild(timeText);
+  timeContainer.appendChild(timeInput);
+  modalBody.appendChild(timeContainer);
+  modalBody.appendChild(recordButton);
+  modalBody.appendChild(p);
+};
+
+const startRecording = async (deviceId, recordButton, language) => {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: { deviceId: deviceId },
+  });
+  mediaRecorder = new MediaRecorder(stream);
+  recordedChunks = [];
+  recordButton.innerHTML = "Stop Recording";
+  const p = document.getElementById("powerLevel");
+  p.innerHTML = "";
+
+  mediaRecorder.ondataavailable = (event) => {
+    if (event.data.size > 0) {
+      recordedChunks.push(event.data);
+    }
+  };
+
+  mediaRecorder.onstop = async () => {
+    const powerLevel = await computePowerLevel(recordedChunks);
+    p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
+    // console.log("power level: ", powerLevel);
+    recordedChunks = [];
+    if (restartRecording) {
+      mediaRecorder.start();
+    }
+  };
+
+  mediaRecorder.start();
+  const timeInput = document.getElementById("timeInput");
+  const time = timeInput.value > 0 ? timeInput.value * 1000 : 1000;
+  console.log("time: ", time);
+  // every 5 seconds, check the power level and clear the recorded chunks and clear the interval if record button is pressed again
+  const interval = setInterval(() => {
+    if (!mediaRecorder) clearInterval(interval);
+    if (mediaRecorder && mediaRecorder.state === "inactive") {
+      clearInterval(interval);
+    }
+    // stop the recording, then compute the power level
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      restartRecording = true;
+      mediaRecorder.stop();
+    }
+  }, time);
+};
+
+const toggleRecording = async (id, recordButton, language) => {
+  console.log("toggle recording");
+  console.log("mediaRecorder: ", mediaRecorder);
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    console.log("stop recording");
+    stopRecording(recordButton);
+  } else {
+    console.log("start recording");
+    await startRecording(id, recordButton, language);
+  }
+};
+
+const stopRecording = (recordButton) => {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    restartRecording = false;
+    mediaRecorder.stop();
+    recordButton.innerHTML = "Record";
+    mediaRecorder = null;
+  }
+};
+
+const computePowerLevel = async (recordedChunks) => {
+  if (recordedChunks.length === 0) {
+    return 0;
+  }
+  const audioBlob = new Blob(recordedChunks, {
+    type: "audio/wav; codecs=opus",
+  });
+  const arraybuffer = await audioBlob.arrayBuffer();
+  const audioBuffer = await getAudioBufferFromArrayBuffer(arraybuffer);
+  const audioData = audioBuffer.getChannelData(0);
+  const sound = Array.from(audioData);
+  const meanSquared =
+    sound.reduce((sum, value) => sum + value ** 2, 0) / sound.length;
+  const power_dB = 10 * Math.log10(meanSquared);
+  return power_dB;
+};
+
+const getListOfConnectedMicrophones = async () => {
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const microphones = devices.filter((device) => device.kind === "audioinput");
+  return microphones;
 };
 
 const addSoundFileCSS = () => {
