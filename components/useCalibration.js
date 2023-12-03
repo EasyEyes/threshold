@@ -500,8 +500,9 @@ export const calibrateAudio = async (reader) => {
         elems.testButton.addEventListener("click", async (e) => {
           micsForSoundTestPage.list = await getListOfConnectedMicrophones();
           const modal = document.querySelector("#soundTestModal");
-          if (modal) modal.remove();
-          addSoundTestElements(reader, rc.language.value);
+          if (!modal) {
+            addSoundTestElements(reader, rc.language.value);
+          }
           $("#soundTestModal").modal("show");
         });
       }
@@ -671,8 +672,9 @@ export const calibrateAudio = async (reader) => {
     elems.testButton.addEventListener("click", async (e) => {
       micsForSoundTestPage.list = await getListOfConnectedMicrophones();
       const modal = document.querySelector("#soundTestModal");
-      if (modal) modal.remove();
-      addSoundTestElements(reader, rc.language.value);
+      if (!modal) {
+        addSoundTestElements(reader, rc.language.value);
+      }
       $("#soundTestModal").modal("show");
     });
 

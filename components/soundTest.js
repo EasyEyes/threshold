@@ -659,6 +659,17 @@ const addSoundFileElements = async (
 const addAudioRecordAndPlayback = async (modalBody, language) => {
   micsForSoundTestPage.list = await getListOfConnectedMicrophones();
   const select = document.createElement("select");
+  // make dynamic. update when microphone is plugged in or out
+  select.addEventListener("click", async () => {
+    micsForSoundTestPage.list = await getListOfConnectedMicrophones();
+    select.innerHTML = "";
+    micsForSoundTestPage.list.forEach((microphone) => {
+      const option = document.createElement("option");
+      option.value = microphone.deviceId;
+      option.text = microphone.label;
+      select.appendChild(option);
+    });
+  });
   select.style.marginBottom = "10px";
   const recordButton = document.createElement("button");
   const p = document.createElement("p");
@@ -676,13 +687,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   timeInput.value = 5;
   timeInput.style.width = "100px";
   timeInput.id = "timeInput";
-
-  micsForSoundTestPage.list.forEach((microphone) => {
-    const option = document.createElement("option");
-    option.value = microphone.deviceId;
-    option.text = microphone.label;
-    select.appendChild(option);
-  });
 
   recordButton.classList.add(...["btn", "btn-success", "soundFileButton"]);
   recordButton.innerHTML = "Record";
@@ -778,9 +782,9 @@ const computePowerLevel = async (recordedChunks) => {
   const meanSquared =
     sound.reduce((sum, value) => sum + value ** 2, 0) / sound.length;
   const power_dB = 10 * Math.log10(meanSquared);
-  // round to 1 decimal place
-  const power_dB_rounded = Math.round(power_dB * 10) / 10;
-  return power_dB_rounded;
+  // save with a precision of 1 decimal place (e.g. 10.1 dB) show even if it is 0
+  const powerLevel = power_dB.toFixed(1);
+  return parseFloat(powerLevel);
 };
 
 export const getListOfConnectedMicrophones = async () => {
