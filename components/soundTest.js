@@ -688,6 +688,13 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   timeInput.style.width = "100px";
   timeInput.id = "timeInput";
 
+  micsForSoundTestPage.list.forEach((microphone) => {
+    const option = document.createElement("option");
+    option.value = microphone.deviceId;
+    option.text = microphone.label;
+    select.appendChild(option);
+  });
+
   recordButton.classList.add(...["btn", "btn-success", "soundFileButton"]);
   recordButton.innerHTML = "Record";
 
