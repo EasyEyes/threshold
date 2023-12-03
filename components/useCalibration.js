@@ -43,6 +43,7 @@ import {
   thisExperimentInfo,
   calibrateSoundLimit,
   gotLoudspeakerMatch,
+  micsForSoundTestPage,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -56,6 +57,7 @@ import {
   displayWhatIsSavedInDatabase,
   displayRecordings,
   displayVolumeRecordings,
+  getListOfConnectedMicrophones,
 } from "./soundTest";
 import {
   calculateTimeToCalibrate,
@@ -496,6 +498,9 @@ export const calibrateAudio = async (reader) => {
         elems.testButton.style.display = "block";
         elems.testButton.style.visibility = "visible";
         elems.testButton.addEventListener("click", async (e) => {
+          micsForSoundTestPage.list = await getListOfConnectedMicrophones();
+          const modal = document.querySelector("#soundTestModal");
+          if (modal) modal.remove();
           addSoundTestElements(reader, rc.language.value);
           $("#soundTestModal").modal("show");
         });
@@ -664,7 +669,10 @@ export const calibrateAudio = async (reader) => {
     elems.testButton.style.visibility = "visible";
 
     elems.testButton.addEventListener("click", async (e) => {
-      addSoundTestElements(reader);
+      micsForSoundTestPage.list = await getListOfConnectedMicrophones();
+      const modal = document.querySelector("#soundTestModal");
+      if (modal) modal.remove();
+      addSoundTestElements(reader, rc.language.value);
       $("#soundTestModal").modal("show");
     });
 

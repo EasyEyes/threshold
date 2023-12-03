@@ -21,6 +21,7 @@ import {
   allHzCalibrationResults,
   webAudioDeviceNames,
   loudspeakerInfo,
+  micsForSoundTestPage,
 } from "./global";
 import {
   plotForAllHz,
@@ -501,7 +502,6 @@ const populateSoundFiles = async (
           const files = await Zip.loadAsync(data).then((zip) => {
             const soundFiles = [];
             zip.forEach((relativePath, zipEntry) => {
-              // console.log("isDirectory", zipEntry.dir);
               var name = zipEntry.name;
               name = name.substring(0, name.lastIndexOf("."));
               soundFiles.push({
@@ -657,7 +657,7 @@ const addSoundFileElements = async (
 };
 
 const addAudioRecordAndPlayback = async (modalBody, language) => {
-  const microphones = await getListOfConnectedMicrophones();
+  micsForSoundTestPage.list = await getListOfConnectedMicrophones();
   const select = document.createElement("select");
   select.style.marginBottom = "10px";
   const recordButton = document.createElement("button");
@@ -677,7 +677,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   timeInput.style.width = "100px";
   timeInput.id = "timeInput";
 
-  microphones.forEach((microphone) => {
+  micsForSoundTestPage.list.forEach((microphone) => {
     const option = document.createElement("option");
     option.value = microphone.deviceId;
     option.text = microphone.label;
@@ -723,7 +723,6 @@ const startRecording = async (deviceId, recordButton, language) => {
   mediaRecorder.onstop = async () => {
     const powerLevel = await computePowerLevel(recordedChunks);
     p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
-    // console.log("power level: ", powerLevel);
     recordedChunks = [];
     if (restartRecording) {
       mediaRecorder.start();
@@ -733,7 +732,7 @@ const startRecording = async (deviceId, recordButton, language) => {
   mediaRecorder.start();
   const timeInput = document.getElementById("timeInput");
   const time = timeInput.value > 0 ? timeInput.value * 1000 : 1000;
-  console.log("time: ", time);
+
   // every 5 seconds, check the power level and clear the recorded chunks and clear the interval if record button is pressed again
   const interval = setInterval(() => {
     if (!mediaRecorder) clearInterval(interval);
@@ -749,13 +748,9 @@ const startRecording = async (deviceId, recordButton, language) => {
 };
 
 const toggleRecording = async (id, recordButton, language) => {
-  console.log("toggle recording");
-  console.log("mediaRecorder: ", mediaRecorder);
   if (mediaRecorder && mediaRecorder.state === "recording") {
-    console.log("stop recording");
     stopRecording(recordButton);
   } else {
-    console.log("start recording");
     await startRecording(id, recordButton, language);
   }
 };
@@ -788,7 +783,7 @@ const computePowerLevel = async (recordedChunks) => {
   return power_dB_rounded;
 };
 
-const getListOfConnectedMicrophones = async () => {
+export const getListOfConnectedMicrophones = async () => {
   const devices = await navigator.mediaDevices.enumerateDevices();
   const microphones = devices.filter((device) => device.kind === "audioinput");
   return microphones;
@@ -1104,16 +1099,6 @@ export const SoundLevelModel = (inDb, backgroundDbSpl, gainDbSpl, T, W, R) => {
     10 *
     Math.log10(10 ** (backgroundDbSpl / 10) + 10 ** ((gainDbSpl + inDb) / 10));
   const measuredDbSpl = CompressorDb(totalDbSpl, T, R, W);
-  // log all values
-  // console.log("inDb", inDb);
-  // console.log("backgroundDbSpl", backgroundDbSpl);
-  // console.log("gainDbSpl", gainDbSpl);
-  // console.log("T", T);
-  // console.log("W", W);
-  // console.log("R", R);
-  // console.log("totalDbSpl", totalDbSpl);
-  // console.log("measuredDbSpl", measuredDbSpl);
-
   return measuredDbSpl;
 };
 

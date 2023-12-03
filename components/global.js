@@ -483,6 +483,7 @@ export const filteredMLSAttenuation = {
   attenuationDbSystem: 0,
   attenuationDbComponent: 0,
 };
+export const micsForSoundTestPage = { list: [] };
 export const thisDevice = { current: undefined };
 export const gotLoudspeakerMatch = { current: false };
 export const loudspeakerInfo = { current: {} };
