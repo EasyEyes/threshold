@@ -1399,7 +1399,7 @@ export const plotVolumeRecordings = (
     });
 
     return {
-      label: `${inDB} dB SD=` + volumeRecordings.sd + " Db",
+      label: `${inDB} dB SD=` + volumeRecordings.sd + " dB",
       data: volumeRecordingData,
       borderColor: color[i % color.length],
       backgroundColor: "rgba(0, 0, 0, 0)",

@@ -680,7 +680,7 @@ const checkMicrophoneInDatabase = async () => {
         Gain: Gain,
         Gain1000: Gain,
         isSmartPhone: false,
-        createDate: getCurrentTimeString(),
+        createDate: new Date(),
         DateText: getCurrentTimeString(),
         linear: {
           Freq: data.Freq,
@@ -1183,7 +1183,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
         (soundGainDBSPL.current - microphoneInfo.current.gainDBSPL) * 10
       ) / 10,
     CalibrationDate: calibrationTime.current,
-    CreateDate: calibrationTime.current,
+    createDate: new Date(),
     micInfo: microphoneInfo.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     mlsSD: Number(qualityMetrics.current?.mls),
@@ -1209,6 +1209,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   );
   let filename = downloadLoudspeakerCalibration();
   loudspeakerInfo.current["jsonFileName"] = filename;
+  loudspeakerInfo.current["screenWidth"] = microphoneInfo.current.screenWidth;
+  loudspeakerInfo.current["screenHeigt"] = microphoneInfo.current.screenHeight;
   loudspeakerInfo.current["filteredMLSComponentMin"] =
     Math.round(allHzCalibrationResults.filteredMLSRange.component.Min * 10) /
     10;
