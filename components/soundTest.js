@@ -783,7 +783,9 @@ const computePowerLevel = async (recordedChunks) => {
   const meanSquared =
     sound.reduce((sum, value) => sum + value ** 2, 0) / sound.length;
   const power_dB = 10 * Math.log10(meanSquared);
-  return power_dB;
+  // round to 1 decimal place
+  const power_dB_rounded = Math.round(power_dB * 10) / 10;
+  return power_dB_rounded;
 };
 
 const getListOfConnectedMicrophones = async () => {
