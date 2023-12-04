@@ -1183,7 +1183,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
         (soundGainDBSPL.current - microphoneInfo.current.gainDBSPL) * 10
       ) / 10,
     CalibrationDate: calibrationTime.current,
-    createDate: new Date(),
+    createDate: new Date(Date.parse(calibrationTime.current)),
     micInfo: microphoneInfo.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     mlsSD: Number(qualityMetrics.current?.mls),
