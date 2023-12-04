@@ -1014,6 +1014,139 @@ export const plotImpulseResponse = (
   tableDiv.style.zIndex = 1;
 };
 
+export const PlotsForTestPage = (plotCanvas, iir_psd) => {
+  // iir_psd = {x:[],y:[], y_no_bandpass : [], y_no_bandpass_no_window:[]}
+  const iirData = iir_psd.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(iir_psd.y[i]) };
+  });
+
+  const iirData_no_bandpass = iir_psd.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(iir_psd.y_no_bandpass[i]) };
+  });
+
+  const plot = new Chart(plotCanvas, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: "IIR",
+          data: iirData,
+          borderColor: "red",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderWidth: 2,
+        },
+        {
+          label: "IIR no bandpass",
+          data: iirData_no_bandpass,
+          borderColor: "blue",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          pointRadius: 0,
+          showLine: true,
+          borderWidth: 2,
+        },
+      ],
+    },
+
+    options: {
+      responsive: false,
+      // aspectRatio : 1,
+      plugins: {
+        title: {
+          display: true,
+          text: "IIR",
+          font: {
+            size: 22,
+            weight: "normal",
+            family: "system-ui",
+          },
+        },
+        // subtitle: {
+        //   display: true,
+        //   text: subtitleText,
+        //   font: {
+        //     size: 19,
+        //     family: "system-ui",
+        //   },
+        //   align: "center",
+        // },
+        legend: {
+          labels: {
+            font: {
+              size: 15,
+            },
+            usePointStyle: true,
+            generateLabels: function (chart) {
+              const data = chart.data;
+              if (data.datasets.length) {
+                return data.datasets.map(function (dataset, i) {
+                  return {
+                    text: dataset.label,
+                    fillStyle: dataset.backgroundColor,
+                    strokeStyle: dataset.borderColor,
+                    lineWidth: dataset.borderWidth,
+                    hidden: !chart.isDatasetVisible(i),
+                    index: i,
+                    lineDash: dataset.borderDash,
+                    pointStyle: "line",
+                  };
+                });
+              }
+              return [];
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: "logarithmic",
+          position: "bottom",
+          title: {
+            display: true,
+            text: "Frequency (Hz)",
+            font: {
+              size: "19px",
+            },
+          },
+          min: 20,
+          max: 20000,
+          ticks: {
+            callback: function (value, index, values) {
+              const tickValues = [
+                20, 100, 200, 1000, 2000, 10000, 16000, 20000,
+              ];
+              return tickValues.includes(value) ? value : "";
+            },
+            font: {
+              size: 15,
+            },
+          },
+        },
+        y: {
+          type: "linear",
+          position: "left",
+          title: {
+            display: true,
+            text: "Power spectral density (dB)",
+            font: {
+              size: "19px",
+            },
+          },
+          min: -100,
+          max: 0,
+          ticks: {
+            stepSize: 10,
+            font: {
+              size: 15,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
 export const plotRecordings = (
   plotCanvas,
   recordingChecks,

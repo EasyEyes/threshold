@@ -30,6 +30,7 @@ import {
   plotRecordings,
   plotVolumeRecordings,
   standardDeviation,
+  PlotsForTestPage,
 } from "./soundTestPlots";
 import {
   adjustSoundDbSPL,
@@ -654,6 +655,19 @@ const addSoundFileElements = async (
   });
   addSoundFileCSS();
   await addAudioRecordAndPlayback(modalBody, language);
+  await addTestPagePSDPlots(modalBody, language);
+};
+
+const addTestPagePSDPlots = async (modalBody, language) => {
+  const plotCanvas = document.createElement("canvas");
+  plotCanvas.setAttribute("id", "plotCanvas");
+  plotCanvas.width = 500;
+  plotCanvas.height = 500;
+  plotCanvas.style.marginTop = "20px";
+
+  modalBody.appendChild(plotCanvas);
+
+  PlotsForTestPage(plotCanvas, allHzCalibrationResults.component.iir_psd);
 };
 
 const addAudioRecordAndPlayback = async (modalBody, language) => {
