@@ -72,7 +72,7 @@ module.exports = (env, options) => {
     };
   } else if (env.development) {
     throw new Error(
-      "You have to specify a name for the build, e.g., `npm start -- --name=demoExperiment`."
+      "You have to specify a name for the build, e.g., `npm start -- --name=demoExperiment`.",
     );
   }
 
@@ -99,10 +99,10 @@ module.exports = (env, options) => {
           directory: path.join(__dirname, `examples/${options.name}`),
           publicPath: `/`,
         },
-        // headers: {
-        //   "Cross-Origin-Embedder-Policy": "require-corp",
-        //   "Cross-Origin-Opener-Policy": "same-origin",
-        // },
+        headers: {
+          "Cross-Origin-Embedder-Policy": "require-corp",
+          "Cross-Origin-Opener-Policy": "same-origin",
+        },
       },
     });
   } else if (env.production) {
