@@ -1247,8 +1247,6 @@ export const plotRecordings = (
     ...systemPostData.map((point) => point.y),
   ]);
 
-  console.log("x", maxX, "y", minY, maxY);
-
   minY = Math.floor(minY / 10) * 10 - 30;
   maxY = Math.ceil(maxY / 10) * 10;
 
@@ -1513,16 +1511,26 @@ export const plotVolumeRecordings = (
 ) => {
   const volumeData = recordingChecks["volume"];
   const volumeLabels = Object.keys(volumeData);
-  const color = [
-    "red",
-    "blue",
-    "green",
-    "yellow",
-    "purple",
-    "orange",
-    "pink",
-    "brown",
-    "black",
+  let color = [
+    "#3366CC",
+    "#DC3912",
+    "#FF9900",
+    "#109618",
+    "#990099",
+    "#0099C6",
+    "#DD4477",
+    "#66AA00",
+    "#B82E2E",
+    "#316395",
+    "#994499",
+    "#22AA99",
+    "#AAAA11",
+    "#6633CC",
+    "#E67300",
+    "#8B0707",
+    "#329262",
+    "#5574A6",
+    "#651067",
   ];
   const volumeDatasets = volumeLabels.map((inDB, i) => {
     let volumeRecordings = volumeData[inDB];
