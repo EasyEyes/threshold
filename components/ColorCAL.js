@@ -14,14 +14,22 @@ export class ColorCAL {
   }
 
   async connect() {
-    console.log("Connect function called");
-    console.log("navigator object", navigator);
-    const port = await navigator.serial.requestPort();
-    await port.open({ baudRate: 115200 });
-    console.log("Port opened", port);
-    this.globalReader = port.readable.getReader();
-    console.log("Reader created", this.globalReader);
-    this.readLoop(this.globalReader);
+    try {
+      console.log("Connect function called");
+      console.log("navigator object", navigator);
+      const port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 115200 });
+      console.log("Port opened", port);
+      this.globalReader = port.readable.getReader();
+      console.log("Reader created", this.globalReader);
+      this.readLoop(this.globalReader);
+    } catch (error) {
+      if (error.name === "NotFoundError") {
+        console.log("User cancelled the port selection");
+      } else {
+        console.error("Error during port selection:", error.name, error);
+      }
+    }
   }
 
   async readLoop(reader) {
@@ -40,7 +48,7 @@ export class ColorCAL {
   minolta2float(inVal) {
     if (Array.isArray(inVal)) {
       return inVal.map((val) =>
-        val < 50000 ? val / 10000.0 : (-val + 50000.0) / 10000.0
+        val < 50000 ? val / 10000.0 : (-val + 50000.0) / 10000.0,
       );
     } else {
       return inVal < 50000 ? inVal / 10000.0 : (-val + 50000.0) / 10000.0;
@@ -64,7 +72,7 @@ export class ColorCAL {
         rowName,
         " : ",
         response,
-        typeof response
+        typeof response,
       );
       let values = response.split(",");
       let cleanedValues = values

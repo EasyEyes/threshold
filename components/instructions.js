@@ -12,7 +12,7 @@ import { _onlyClick } from "./response.js";
 import { hideCursor, logger, cursorNearFixation } from "./utils.js";
 import { psychoJS } from "./globalPsychoJS.js";
 import { readi18nPhrases } from "./readPhrases.js";
-
+import { initColorCAL } from "./photometry.js";
 export const returnOrClickProceed = (L, responseType, prev = "") => {
   switch (responseType) {
     case 0:
@@ -107,7 +107,7 @@ export const instructionsText = {
     const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
     let text = replacePlaceholders(
       readi18nPhrases("T_thresholdVenierBeginBlock", L),
-      trialsThisBlock
+      trialsThisBlock,
     );
     switch (responseType) {
       case 0:
@@ -131,7 +131,7 @@ export const instructionsText = {
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
           readi18nPhrases("T_thresholdRepeatedLettersBeginBlock", L),
-          trialsThisBlock
+          trialsThisBlock,
         );
         switch (responseType) {
           case 0:
@@ -149,14 +149,14 @@ export const instructionsText = {
               extraSpace +
               `${readi18nPhrases(
                 "T_pressingKeyOrClickingLetterRepeatedLetters",
-                L
+                L,
               )}\n\n`;
             break;
         }
       } else {
         text = replacePlaceholders(
           readi18nPhrases("T_thresholdMiddleLetterBeginBlock", L),
-          trialsThisBlock
+          trialsThisBlock,
         );
         switch (responseType) {
           case 0:
@@ -181,7 +181,7 @@ export const instructionsText = {
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
           readi18nPhrases("T_thresholdRepeatedLettersBeginBlock", L),
-          trialsThisBlock
+          trialsThisBlock,
         );
         switch (responseType) {
           case 0:
@@ -199,14 +199,14 @@ export const instructionsText = {
               extraSpace +
               `${readi18nPhrases(
                 "T_pressingKeyOrClickingLetterRepeatedLetters",
-                L
+                L,
               )}\n\n`;
             break;
         }
       } else {
         text = replacePlaceholders(
           readi18nPhrases("T_thresholdLetterBeginBlock", L),
-          trialsThisBlock
+          trialsThisBlock,
         );
         switch (responseType) {
           case 0:
@@ -241,7 +241,7 @@ export const instructionsText = {
       if (targetKind.current === "rsvpReading") {
         text = replacePlaceholders(
           readi18nPhrases("T_thresholdRsvpReadingBeginBlock", L),
-          trialsThisBlock
+          trialsThisBlock,
         );
         logger("responseType", responseType);
         switch (responseType) {
@@ -250,10 +250,10 @@ export const instructionsText = {
               extraSpace +
               `${readi18nPhrases(
                 "T_pressingKeyRsvpReading",
-                L
+                L,
               )} ${readi18nPhrases("T_escapeToQuit", L)} ${readi18nPhrases(
                 "T_continueHitReturn",
-                L
+                L,
               )}\n\n`;
             break;
           case 1:
@@ -261,10 +261,10 @@ export const instructionsText = {
               extraSpace +
               `${readi18nPhrases(
                 "T_clickingWordRsvpReading",
-                L
+                L,
               )} ${readi18nPhrases("T_escapeToQuit", L)} ${readi18nPhrases(
                 "T_continueClickProceed",
-                L
+                L,
               )}\n\n`;
             break;
           case 2:
@@ -272,10 +272,10 @@ export const instructionsText = {
               extraSpace +
               `${readi18nPhrases(
                 "T_clickingWordRsvpReading",
-                L
+                L,
               )} ${readi18nPhrases("T_escapeToQuit", L)} ${readi18nPhrases(
                 "T_continueHitReturnOrClickProceed",
-                L
+                L,
               )}\n\n`;
             break;
         }
@@ -363,7 +363,7 @@ export const instructionsText = {
             default:
               return readi18nPhrases(
                 "T_identifyPressItOrClickItRepeatedLetters",
-                L
+                L,
               );
           }
         } else {
@@ -377,7 +377,7 @@ export const instructionsText = {
             default:
               return readi18nPhrases(
                 "T_identifyMiddleLetterPressItOrClickIt",
-                L
+                L,
               );
           }
         }
@@ -394,7 +394,7 @@ export const instructionsText = {
             default:
               return readi18nPhrases(
                 "T_identifyPressItOrClickItRepeatedLetters",
-                L
+                L,
               );
           }
         } else {
@@ -463,15 +463,21 @@ export const removeBeepButton = () => {
 
 /* -------------------------------------------------------------------------- */
 
-export const addProceedButton = (L) => {
+export const addProceedButton = (L, paramReader) => {
   const b = document.createElement("button");
   b.innerText = readi18nPhrases("T_proceed", L);
-  b.onclick = (e) => {
+  b.onclick = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     e.stopPropagation();
     b.remove();
-
+    if (paramReader.read("measureLuminanceBool", status.block).some((x) => x)) {
+      if ("serial" in navigator) {
+        await initColorCAL();
+      } else {
+        console.error("Web Serial API not supported in this browser");
+      }
+    }
     clickedContinue.current = true;
   };
   b.className = "threshold-button threshold-proceed-button";
@@ -550,11 +556,11 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
     if (typeof fixationConfig.trackingTimeAfterDelay === "undefined") {
       const maxDelaySec = reader.read(
         "responseMustTrackMaxSec",
-        status.block_condition
+        status.block_condition,
       );
       const minDelaySec = reader.read(
         "responseMustTrackMinSec",
-        status.block_condition
+        status.block_condition,
       );
       const delaySec =
         Math.random() * (maxDelaySec - minDelaySec) + minDelaySec;
@@ -652,7 +658,7 @@ export const getStimulusCustomInstructionPos = (reader, BC) => {
 export const updateInstructionFont = (
   reader,
   blockOrCondition,
-  instructionStims
+  instructionStims,
 ) => {
   let font = reader.read("instructionFont", blockOrCondition);
   let source = reader.read("instructionFontSource", blockOrCondition);

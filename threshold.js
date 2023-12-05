@@ -469,7 +469,7 @@ const paramReaderInitialized = async (reader) => {
   const compMsg = checkSystemCompatibility(
     reader,
     reader.read("_language")[0],
-    rc
+    rc,
   );
   let needAnySmartphone = false;
   let needCalibratedSmartphoneMicrophone = false;
@@ -510,7 +510,7 @@ const paramReaderInitialized = async (reader) => {
         thisExperimentInfo.participant = participant;
         if (storedId !== undefined && participant === storedId) {
           thisExperimentInfo.setSession(
-            session && isNaN(Number(session)) ? session : Number(session) + 1
+            session && isNaN(Number(session)) ? session : Number(session) + 1,
           );
         } else {
           thisExperimentInfo.setSession(1);
@@ -537,7 +537,7 @@ const paramReaderInitialized = async (reader) => {
       needAnySmartphone,
       needCalibratedSmartphoneMicrophone,
       needComputerSurveyBool.current,
-      needCalibratedSound
+      needCalibratedSound,
     );
 
     gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
@@ -558,7 +558,7 @@ const paramReaderInitialized = async (reader) => {
 
     const result = await checkCrossSessionId(
       gotParticipantId,
-      rc.language.value
+      rc.language.value,
     );
     if (!result) {
       showExperimentEnding();
@@ -585,7 +585,7 @@ const paramReaderInitialized = async (reader) => {
       needAnySmartphone,
       needCalibratedSmartphoneMicrophone,
       needComputerSurveyBool.current,
-      needCalibratedSound
+      needCalibratedSound,
     );
     gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
     if (needComputerSurveyBool.current)
@@ -691,10 +691,10 @@ const paramReaderInitialized = async (reader) => {
           await startExperiment();
         } else {
           warning(
-            "Participant re-calibrated. You may consider discarding the trials before."
+            "Participant re-calibrated. You may consider discarding the trials before.",
           );
         }
-      }
+      },
     );
   } else {
     await startExperiment();
@@ -703,7 +703,7 @@ const paramReaderInitialized = async (reader) => {
 
 export const paramReader = new ParamReader(
   "conditions",
-  paramReaderInitialized
+  paramReaderInitialized,
 );
 
 /* -------------------------------------------------------------------------- */
@@ -731,7 +731,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   thisExperimentInfo.experimentFilename = paramReader.read(
-    "!experimentFilename"
+    "!experimentFilename",
   )[0];
 
   logger("fontsRequired", fontsRequired);
@@ -753,14 +753,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // initial background color
   screenBackground.colorRGBA = colorRGBASnippetToRGBA(
-    paramReader.read("screenColorRGBA", "__ALL_BLOCKS__")[0]
+    paramReader.read("screenColorRGBA", "__ALL_BLOCKS__")[0],
   );
 
   // open window:
   psychoJS.openWindow({
     fullscr: !debug,
     color: new util.Color(
-      colorRGBSnippetToRGB(screenBackground.defaultColorRGBA)
+      colorRGBSnippetToRGB(screenBackground.defaultColorRGBA),
     ), // background color
     units: "height",
     waitBlanking: true,
@@ -780,7 +780,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       sessionText: readi18nPhrases("T_session", rc.language.value),
       cancelText: readi18nPhrases("T_cancel", rc.language.value),
       okText: readi18nPhrases("T_ok", rc.language.value),
-    })
+    }),
   );
 
   // Controls the big picture flow of the experiment
@@ -791,7 +791,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       return psychoJS.gui.dialogComponent.button === "OK";
     },
     flowScheduler,
-    dialogCancelScheduler
+    dialogCancelScheduler,
   );
 
   // flowScheduler gets run if the participants presses OK
@@ -886,7 +886,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.window.getActualFrameRate();
     psychoJS.experiment.addData(
       "frameRateReportedByPsychoJS",
-      thisExperimentInfo["monitorFrameRate"]
+      thisExperimentInfo["monitorFrameRate"],
     );
 
     // if _needSmartphoneSurveyBool add survey data
@@ -894,13 +894,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // add microphoneInfo.current.phoneSurvey
       psychoJS.experiment.addData(
         "Microphone survey",
-        JSON.stringify(microphoneInfo.current.phoneSurvey)
+        JSON.stringify(microphoneInfo.current.phoneSurvey),
       );
     }
     if (needComputerSurveyBool.current) {
       psychoJS.experiment.addData(
         "Loudspeaker survey",
-        JSON.stringify(loudspeakerInfo.current.loudspeakerSurvey)
+        JSON.stringify(loudspeakerInfo.current.loudspeakerSurvey),
       );
     }
 
@@ -908,7 +908,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (soundCalibrationResults.current) {
       psychoJS.experiment.addData(
         "Cal1000HzInDb",
-        soundCalibrationResults.current.inDBValues
+        soundCalibrationResults.current.inDBValues,
       );
       // psychoJS.experiment.addData(
       //   "All Hz out (dB SPL)",
@@ -916,51 +916,51 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // );
       psychoJS.experiment.addData(
         "Cal1000HzOutDb",
-        soundCalibrationResults.current.outDBSPL1000Values
+        soundCalibrationResults.current.outDBSPL1000Values,
       );
       psychoJS.experiment.addData(
         "SoundGainParameters",
-        JSON.stringify(soundCalibrationResults.current.parameters)
+        JSON.stringify(soundCalibrationResults.current.parameters),
       );
       psychoJS.experiment.addData(
         "THD",
-        soundCalibrationResults.current.thdValues
+        soundCalibrationResults.current.thdValues,
       );
     }
     if (allHzCalibrationResults.x_conv) {
       psychoJS.experiment.addData(
         "MlsSpectrumHz",
-        allHzCalibrationResults.y_conv
+        allHzCalibrationResults.y_conv,
       );
       psychoJS.experiment.addData(
         "MlsSpectrumFilteredDb",
-        allHzCalibrationResults.x_conv
+        allHzCalibrationResults.x_conv,
       );
       psychoJS.experiment.addData(
         "MlsSpectrumUnfilteredHz",
-        allHzCalibrationResults.y_unconv
+        allHzCalibrationResults.y_unconv,
       ); // x and y are swapped
       psychoJS.experiment.addData(
         "MlsSpectrumUnfilteredDb",
-        allHzCalibrationResults.x_unconv
+        allHzCalibrationResults.x_unconv,
       ); // x and y are swapped
       psychoJS.experiment.addData(
         "Loudspeaker IR",
-        allHzCalibrationResults.knownIr
+        allHzCalibrationResults.knownIr,
       );
       psychoJS.experiment.addData(
         "Loudspeaker IIR",
-        invertedImpulseResponse.current
+        invertedImpulseResponse.current,
       );
       psychoJS.experiment.addData(
         "Loudspeaker model",
-        JSON.stringify(loudspeakerInfo.current)
+        JSON.stringify(loudspeakerInfo.current),
       );
     }
     if (microphoneCalibrationResults.length > 0) {
       psychoJS.experiment.addData(
         "Microphone calibration results",
-        JSON.stringify(microphoneCalibrationResults)
+        JSON.stringify(microphoneCalibrationResults),
       );
     }
     if (rc.stressFps) {
@@ -971,7 +971,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         await rc.performanceCompute((result) => {
           psychoJS.experiment.addData(
             "computeRandomMHz",
-            result.value.computeRandomMHz
+            result.value.computeRandomMHz,
           );
         });
     }
@@ -1154,7 +1154,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     characterSetBoundingRects = generateCharacterSetBoundingRects(
       paramReader,
-      cleanFontName
+      cleanFontName,
     );
 
     dummyStim.current = new visual.TextStim({
@@ -1257,7 +1257,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       await sendMessage(
         "Record " + thisExperimentInfo.experiment + "-",
         thisExperimentInfo.participant,
-        "-gaze"
+        "-gaze",
       );
       await waitForSignal("Recording", () => {
         console.log("matlab start recording");
@@ -1358,7 +1358,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     continueRoutine = true;
     instructionsConfig.height = getParamValueForBlockOrCondition(
       "instructionFontSizePt",
-      blockOrCondition
+      blockOrCondition,
     );
     instructions.setWrapWidth(window.innerWidth * 0.8);
     instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
@@ -1372,7 +1372,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function _instructionBeforeStimulusSetup(
     text,
     wrapWidth = window.innerWidth / 4,
-    pos = [-window.innerWidth / 2 + 5, window.innerHeight / 2 - 5]
+    pos = [-window.innerWidth / 2 + 5, window.innerHeight / 2 - 5],
   ) {
     t = 0;
     instructionsClock.reset(); // clock
@@ -1381,7 +1381,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
     instructionsConfig.height = getParamValueForBlockOrCondition(
       "instructionFontSizePt",
-      status.block_condition
+      status.block_condition,
     );
     instructions.setWrapWidth(wrapWidth);
     instructions.setPos(pos);
@@ -1412,7 +1412,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       viewingDistanceCm.current,
       targetKind.current,
       t,
-      trialCounter
+      trialCounter,
     );
 
     if (
@@ -1448,7 +1448,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
         ) {
           loggerText(
-            "Inside switchKind [letter] if statement of _instructionRoutineEachFrame"
+            "Inside switchKind [letter] if statement of _instructionRoutineEachFrame",
           );
           continueRoutine = false;
           removeProceedButton();
@@ -1497,7 +1497,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
         ) {
           loggerText(
-            "Inside switchKind [movie] if statement of _instructionRoutineEachFrame"
+            "Inside switchKind [movie] if statement of _instructionRoutineEachFrame",
           );
           continueRoutine = false;
           removeProceedButton();
@@ -1509,7 +1509,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
         ) {
           loggerText(
-            "Inside switchKind [vernier] if statement of _instructionRoutineEachFrame"
+            "Inside switchKind [vernier] if statement of _instructionRoutineEachFrame",
           );
           continueRoutine = false;
           removeProceedButton();
@@ -1544,7 +1544,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // set up handler to look after randomisation of conditions etc
       const blockTrialList = getBlocksTrialList(
         paramReader,
-        blockOrder.current
+        blockOrder.current,
       );
       blocks = new TrialHandler({
         psychoJS: psychoJS,
@@ -1581,7 +1581,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const snapshot = blocks.getSnapshot();
         const conditions = TrialHandler.importConditions(
           psychoJS.serverManager,
-          `conditions/block_${_thisBlock.block + 1}.csv`
+          `conditions/block_${_thisBlock.block + 1}.csv`,
         );
         blocksLoopScheduler.add(importConditions(snapshot, "block"));
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
@@ -1592,7 +1592,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           conditions.every(
             (c) =>
               typeof c["conditionEnabledBool"] !== "undefined" &&
-              String(c["conditionEnabledBool"]).toLowerCase() === "false"
+              String(c["conditionEnabledBool"]).toLowerCase() === "false",
           )
         )
           continue;
@@ -1639,7 +1639,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             switchKind(_thisBlock.targetKind, {
               reading: () => {
                 blocksLoopScheduler.add(
-                  blockSchedulerFinalRoutineBegin(snapshot)
+                  blockSchedulerFinalRoutineBegin(snapshot),
                 );
                 blocksLoopScheduler.add(blockSchedulerFinalRoutineEachFrame());
                 blocksLoopScheduler.add(blockSchedulerFinalRoutineEnd());
@@ -1649,7 +1649,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
 
         blocksLoopScheduler.add(
-          endLoopIteration(blocksLoopScheduler, snapshot)
+          endLoopIteration(blocksLoopScheduler, snapshot),
         );
       }
 
@@ -1664,14 +1664,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // setup a MultiStairTrialHandler
       trialsConditions = TrialHandler.importConditions(
         psychoJS.serverManager,
-        thisConditionsFile
+        thisConditionsFile,
       );
       trialsConditions = trialsConditions
         .map((condition) =>
-          Object.assign(condition, { label: condition["block_condition"] })
+          Object.assign(condition, { label: condition["block_condition"] }),
         )
         .filter((condition) =>
-          paramReader.read("conditionEnabledBool", condition["block_condition"])
+          paramReader.read(
+            "conditionEnabledBool",
+            condition["block_condition"],
+          ),
         );
       if (targetKind.current === "reading")
         trialsConditions = trialsConditions.slice(0, 1);
@@ -1706,7 +1709,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letter: () => {
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
-                paramReader
+                paramReader,
               );
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1724,7 +1727,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             repeatedLetters: () => {
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
-                paramReader
+                paramReader,
               );
               // trialsConditions = duplicateConditionsOfTargetKind(
               //   trialsConditions,
@@ -1746,7 +1749,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             rsvpReading: () => {
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
-                paramReader
+                paramReader,
               );
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1764,7 +1767,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
                 paramReader,
-                "sound"
+                "sound",
               );
               // console.log("sound:trialsConditions", trialsConditions);
 
@@ -1783,7 +1786,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
                 paramReader,
-                "sound"
+                "sound",
               );
               // console.log("VocoderPhrasetrialsConditions", trialsConditions);
               // console.log("totalTrialsThisBlock.current", totalTrialsThisBlock.current);
@@ -1802,7 +1805,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
                 paramReader,
-                "movie"
+                "movie",
               );
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1821,7 +1824,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
                 paramReader,
-                "vernier"
+                "vernier",
               );
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1843,7 +1846,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               trialsConditions = populateQuestDefaults(
                 trialsConditions,
                 paramReader,
-                "sound"
+                "sound",
               );
               // console.log("sound:trialsConditions", trialsConditions);
               // console.log("trialsConditions", trialsConditions);
@@ -1879,24 +1882,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (targetTask.current === "identify") {
           //init trial sound data
           var speechInNoiseConditions = trialsConditions.filter(
-            (condition) => condition["targetTask"] == "identify"
+            (condition) => condition["targetTask"] == "identify",
           );
           // console.log("speechInNoiseConditions", trialsConditions);
           await initSpeechInNoiseSoundFiles(
             speechInNoiseConditions.length
               ? speechInNoiseConditions
-              : trialsConditions
+              : trialsConditions,
           );
           // console.log("speechInNoiseConditions", speechInNoiseConditions);
         } else {
           //init trial sound data
           var toneInMelodyConditions = trialsConditions.filter(
-            (condition) => condition["targetTask"] == "detect"
+            (condition) => condition["targetTask"] == "detect",
           );
           await initToneInMelodySoundFiles(
             toneInMelodyConditions.length
               ? toneInMelodyConditions
-              : trialsConditions
+              : trialsConditions,
           );
         }
       }
@@ -1918,7 +1921,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         trialsLoopScheduler.add(trialRoutineEnd(snapshot));
         // END LOOP
         trialsLoopScheduler.add(
-          endLoopIteration(trialsLoopScheduler, snapshot)
+          endLoopIteration(trialsLoopScheduler, snapshot),
         );
       }
       return Scheduler.Event.NEXT;
@@ -1944,17 +1947,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           `${Math.round(
             (status.trialCorrect_thisBlock / status.trialCompleted_thisBlock +
               Number.EPSILON) *
-              100
-          )}`
+              100,
+          )}`,
         ),
         instructionsText.trialBreak(rc.language.value, responseType.current),
-        !canClick(responseType.current)
+        !canClick(responseType.current),
       );
       await addPopupLogic(
         thisExperimentInfo.name,
         responseType.current,
         null,
-        keypad
+        keypad,
       );
     }
     // Reset trial counter
@@ -1996,7 +1999,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingThisBlockPages,
           readingFrequencyToWordArchive[
             paramReader.read("readingCorpus", status.block)[0]
-          ]
+          ],
         );
         readingCurrentQuestionIndex.current = 0;
         readingClickableAnswersSetup.current = false;
@@ -2006,13 +2009,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const customInstructions = getCustomInstructionText(
           "response",
           paramReader,
-          status.block_condition
+          status.block_condition,
         );
         if (customInstructions.length) {
           instructions.setText(customInstructions);
         } else {
           instructions.setText(
-            readi18nPhrases("T_readingTaskQuestionPrompt", rc.language.value)
+            readi18nPhrases("T_readingTaskQuestionPrompt", rc.language.value),
           );
         }
         updateColor(instructions, "instruction", status.block_condition);
@@ -2035,7 +2038,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.nthBlock,
         totalBlocks.current,
         viewingDistanceCm.current,
-        targetKind.current === "reading" ? "letter" : targetKind.current
+        targetKind.current === "reading" ? "letter" : targetKind.current,
       );
       trialCounter.setText(trialCounterStr);
       trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
@@ -2064,7 +2067,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingQuestions.current[readingCurrentQuestionIndex.current];
         logger(
           `%c${thisQuestion.correctAnswer}`,
-          `color: red; font-size: 1.5rem; font-family: ${font.name}`
+          `color: red; font-size: 1.5rem; font-family: ${font.name}`,
         );
 
         updateTrialInfo();
@@ -2079,12 +2082,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             const correct = clickedWord === thisQuestion.correctAnswer;
             psychoJS.experiment.addData(
               "readWordIdentifiedBool",
-              correct ? "TRUE" : "FALSE"
+              correct ? "TRUE" : "FALSE",
             );
             addConditionToData(
               paramReader,
               status.block_condition,
-              psychoJS.experiment
+              psychoJS.experiment,
             );
             psychoJS.experiment.nextEntry();
             if (correct) correctSynth.play();
@@ -2092,7 +2095,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "readingAnswer",
           targetKind.current,
           status.block,
-          responseType.current
+          responseType.current,
         );
 
         readingCurrentQuestionIndex.current++;
@@ -2111,7 +2114,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingQuestions.current[readingCurrentQuestionIndex.current];
         logger(
           `%c${thisQuestion.correctAnswer}`,
-          `color: red; font-size: 1.5rem; font-family: ${font.name}`
+          `color: red; font-size: 1.5rem; font-family: ${font.name}`,
         );
 
         updateTrialInfo();
@@ -2123,13 +2126,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             const correct = clickedWord === thisQuestion.correctAnswer;
             psychoJS.experiment.addData(
               "readWordIdentifiedBool",
-              correct ? "TRUE" : "FALSE"
+              correct ? "TRUE" : "FALSE",
             );
             // TODO don't call nextEntry() on the last question?
             addConditionToData(
               paramReader,
               status.block_condition,
-              psychoJS.experiment
+              psychoJS.experiment,
             );
             if (correct) correctSynth.play();
             const lastQuestion =
@@ -2140,7 +2143,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "readingAnswer",
           targetKind.current,
           status.block,
-          responseType.current
+          responseType.current,
         );
 
         readingCurrentQuestionIndex.current++;
@@ -2190,7 +2193,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       status.block = snapshot.block + 1;
       console.log(
         `%c====== Block ${status.block} ======`,
-        "background: orange; color: white; padding: 1rem"
+        "background: orange; color: white; padding: 1rem",
       );
       status.nthBlock += 1;
       totalBlocks.current = snapshot.nTotal;
@@ -2244,7 +2247,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // ! Viewing distance
       viewingDistanceDesiredCm.current = paramReader.read(
         "viewingDistanceDesiredCm",
-        status.block
+        status.block,
       )[0];
 
       viewingDistanceCm.current = rc.viewingDistanceCm
@@ -2252,14 +2255,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         : viewingDistanceDesiredCm.current;
       if (!rc.viewingDistanceCm)
         console.warn(
-          "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
+          "[Viewing Distance] Using arbitrary viewing distance. Enable RC.",
         );
       /* -------------------------------------------------------------------------- */
       const getTotalTrialsThisBlock = () => {
         const possibleTrials = paramReader
           .read("conditionTrials", status.block)
           .filter(
-            (c, i) => paramReader.read("conditionEnabledBool", status.block)[i]
+            (c, i) => paramReader.read("conditionEnabledBool", status.block)[i],
           );
         return possibleTrials.reduce((a, b) => a + b, 0);
       };
@@ -2291,7 +2294,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             reading: () => {
               totalTrialsThisBlock.current = paramReader.read(
                 "readingPages",
-                status.block
+                status.block,
               )[0];
             },
             letter: () => {
@@ -2305,17 +2308,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             },
             movie: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
-              if (
-                paramReader
-                  .read("measureLuminanceBool", status.block)
-                  .some((x) => x)
-              ) {
-                if ("serial" in navigator) {
-                  initColorCAL();
-                } else {
-                  console.error("Web Serial API not supported in this browser");
-                }
-              }
+              // if (
+              //   paramReader
+              //     .read("measureLuminanceBool", status.block)
+              //     .some((x) => x)
+              // ) {
+              //   if ("serial" in navigator) {
+              //     const serialbtn = document.createElement("button");
+              //     serialbtn.id = "connect-serial-button"
+              //     serialbtn.innerText = "Connect to ColorCAL";
+              //     serialbtn.onclick = (e) => {
+              //       e.preventDefault();
+              //       e.stopImmediatePropagation();
+              //       e.stopPropagation();
+              //       initColorCAL();
+              //     };
+              //     document.body.appendChild(serialbtn);
+              //   } else {
+              //     console.error("Web Serial API not supported in this browser");
+              //   }
+              // }
             },
             vernier: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
@@ -2425,7 +2437,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     loggerText("initInstructionRoutineBegin");
     return async function () {
       loggerText(
-        `initInstructionRoutineBegin targetKind ${targetKind.current}`
+        `initInstructionRoutineBegin targetKind ${targetKind.current}`,
       );
       hideProgressBar();
       TrialHandler.fromSnapshot(snapshot);
@@ -2442,23 +2454,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("!responseTypedEasyEyesKeypadBool", status.block)[0],
         paramReader.read("responseSpokenBool", status.block)[0],
         undefined,
-        paramReader.read("responseSpokenBool", status.block)[0]
+        paramReader.read("responseSpokenBool", status.block)[0],
       );
       logger(
         "!. responseType, initInstructionRoutineBegin",
-        responseType.current
+        responseType.current,
       );
 
       // set default background color for instructions
       screenBackground.colorRGBA = colorRGBASnippetToRGBA(
-        paramReader.read("screenColorRGBA", status.block)[0]
+        paramReader.read("screenColorRGBA", status.block)[0],
       );
       psychoJS.window.color = new util.Color(screenBackground.colorRGBA);
       psychoJS.window._needUpdate = true; // ! dangerous
 
       thresholdParameter = paramReader.read(
         "thresholdParameter",
-        status.block
+        status.block,
       )[0];
 
       switchKind(targetKind.current, {
@@ -2467,7 +2479,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const instr = instructionsText.vocoderPhraseBegin(L);
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr,
-            status.block
+            status.block,
           );
         },
         sound: () => {
@@ -2478,7 +2490,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               : instructionsText.soundBegin(L);
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr,
-            status.block
+            status.block,
           );
         },
         letter: () => {
@@ -2487,7 +2499,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             instructionsText.initialByThresholdParameter[thresholdParameter](
               L,
               responseType.current,
-              totalTrialsThisBlock.current
+              totalTrialsThisBlock.current,
             ) +
             instructionsText.initialEnd(L, responseType.current);
           _instructionSetup(letterBlockInstructionText, status.block);
@@ -2498,7 +2510,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             instructionsText.initialByThresholdParameter[thresholdParameter](
               L,
               responseType.current,
-              totalTrialsThisBlock.current
+              totalTrialsThisBlock.current,
             ) +
             instructionsText.initialEnd(L, responseType.current);
           _instructionSetup(repeatedLettersBlockInstructs, status.block);
@@ -2511,16 +2523,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               responseType.current,
               paramReader
                 .read("conditionTrials", status.block)
-                .reduce((a, b) => a + b)
+                .reduce((a, b) => a + b),
             );
           font.letterSpacing = paramReader.read(
             "fontTrackingForLetters",
-            status.block
+            status.block,
           )[0];
           _instructionSetup(rsvpReadingBlockInstructs, status.block);
           rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
-            status.block
+            status.block,
           );
         },
         reading: () => {
@@ -2528,13 +2540,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
               instructionsText.readingEdu(
                 L,
-                paramReader.read("readingPages", status.block)[0]
+                paramReader.read("readingPages", status.block)[0],
               ),
-            status.block
+            status.block,
           );
 
           renderObj.tinyHint.setText(
-            readi18nPhrases("T_readingNextPage", rc.language.value)
+            readi18nPhrases("T_readingNextPage", rc.language.value),
           );
           updateColor(renderObj.tinyHint, "instruction", status.block);
           renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
@@ -2559,7 +2571,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           font.colorRGBA = paramReader.read("fontColorRGBA", status.block)[0];
           font.letterSpacing = paramReader.read(
             "fontTrackingForLetters",
-            status.block
+            status.block,
           )[0];
 
           readingParagraph.setFont(font.name);
@@ -2572,7 +2584,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // psychoJS.window._needUpdate = true; // ! dangerous
 
           fontCharacterSet.current = String(
-            paramReader.read("fontCharacterSet", status.block)[0]
+            paramReader.read("fontCharacterSet", status.block)[0],
           ).split("");
 
           // HEIGHT
@@ -2580,7 +2592,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader.read("readingSetSizeBy", status.block)[0],
             paramReader,
             readingParagraph,
-            "block"
+            "block",
           );
           readingParagraph.setHeight(readingConfig.height);
           fontSize.current = readingConfig.height;
@@ -2588,7 +2600,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // LTR or RTL
           let readingDirectionLTR = paramReader.read(
             "fontLeftToRightBool",
-            status.block
+            status.block,
           )[0];
           if (!readingDirectionLTR) readingParagraph.setAlignHoriz("right");
 
@@ -2627,14 +2639,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // PADDING
           readingParagraph.setPadding(
-            paramReader.read("fontPadding", status.block)[0]
+            paramReader.read("fontPadding", status.block)[0],
           );
         },
         movie: () => {
           loggerText("inside movie");
           _instructionSetup(
             snapshot.block === 0 ? instructionsText.initial(L) : "",
-            status.block
+            status.block,
           );
         },
         vernier: () => {
@@ -2643,7 +2655,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             instructionsText.vernierBegin(
               L,
               responseType.current,
-              totalTrialsThisBlock.current
+              totalTrialsThisBlock.current,
             ) +
             instructionsText.vernierInitialEnd(L, responseType.current);
           _instructionSetup(vernierBlockInstructionText, status.block);
@@ -2652,7 +2664,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       clickedContinue.current = false;
       if (canClick(responseType.current) && targetKind.current !== "reading")
-        addProceedButton(rc.language.value);
+        addProceedButton(rc.language.value, paramReader);
 
       if (keypad.inUse(status.block) && targetKind.current !== "reading") {
         await keypad.update(["SPACE", "RETURN"], "sans-serif", undefined);
@@ -2676,7 +2688,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.nthBlock,
         totalBlocks.current,
         viewingDistanceCm.current,
-        targetKind.current
+        targetKind.current,
       );
       trialCounter.setText(trialCounterStr);
 
@@ -2686,7 +2698,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       customInstructionText.current = getCustomInstructionText(
         "block",
         paramReader,
-        status.block
+        status.block,
       );
       if (customInstructionText.current.length)
         _instructionSetup(customInstructionText.current, status.block);
@@ -2715,11 +2727,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       psychoJS.experiment.addData(
         "initInstructionRoutineDurationFromBeginSec",
-        initInstructionClock.getTime()
+        initInstructionClock.getTime(),
       );
       psychoJS.experiment.addData(
         "initInstructionRoutineDurationFromPreviousEndSec",
-        routineClock.getTime()
+        routineClock.getTime(),
       );
 
       /* ----------------------------------- RC ----------------------------------- */
@@ -2744,25 +2756,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       TrialHandler.fromSnapshot(snapshot);
 
       clickedContinue.current = false;
-      if (canClick(responseType.current)) addProceedButton(rc.language.value);
+      if (canClick(responseType.current))
+        addProceedButton(rc.language.value, paramReader);
 
       thresholdParameter = paramReader.read(
         "thresholdParameter",
-        status.block
+        status.block,
       )[0];
       switchKind(targetKind.current, {
         letter: () => {
           // IDENTIFY
           _instructionSetup(
             instructionsText.edu[thresholdParameter](rc.language.value),
-            status.block
+            status.block,
           );
 
           instructions2.setText(
             instructionsText.eduBelow[thresholdParameter](
               rc.language.value,
-              responseType.current
-            )
+              responseType.current,
+            ),
           );
           updateColor(instructions2, "instruction", status.block);
           instructions2.setWrapWidth(window.innerWidth * 0.8);
@@ -2773,11 +2786,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           instructions2.setAutoDraw(true);
           instructionsConfig.height = getParamValueForBlockOrCondition(
             "instructionFontSizePt",
-            status.block
+            status.block,
           );
           dynamicSetSize(
             [instructions, instructions2],
-            instructionsConfig.height
+            instructionsConfig.height,
           );
 
           var h = 50;
@@ -2808,8 +2821,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.setPos([0, 0]);
           fixation.setColor(
             colorRGBASnippetToRGBA(
-              paramReader.read("markingColorRGBA", status.block)[0]
-            )
+              paramReader.read("markingColorRGBA", status.block)[0],
+            ),
           );
 
           fixation.setAutoDraw(true);
@@ -2825,14 +2838,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // IDENTIFY
           _instructionSetup(
             instructionsText.edu["spacingDeg"](rc.language.value),
-            status.block
+            status.block,
           );
 
           instructions2.setText(
             instructionsText.eduBelow["spacingDeg"](
               rc.language.value,
-              responseType.current
-            )
+              responseType.current,
+            ),
           );
           updateColor(instructions2, "instruction", status.block);
           instructions2.setWrapWidth(window.innerWidth * 0.8);
@@ -2843,11 +2856,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           instructions2.setAutoDraw(true);
           instructionsConfig.height = getParamValueForBlockOrCondition(
             "instructionFontSizePt",
-            status.block
+            status.block,
           );
           dynamicSetSize(
             [instructions, instructions2],
-            instructionsConfig.height
+            instructionsConfig.height,
           );
 
           var h = 50;
@@ -2857,21 +2870,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.setPos([0, 0]);
           fixation.setColor(
             colorRGBASnippetToRGBA(
-              paramReader.read("markingColorRGBA", status.block)[0]
-            )
+              paramReader.read("markingColorRGBA", status.block)[0],
+            ),
           );
           fixation.setAutoDraw(true);
         },
         vernier: () => {
           _instructionSetup(
             instructionsText.edu[thresholdParameter](rc.language.value),
-            status.block
+            status.block,
           );
           instructions2.setText(
             instructionsText.eduBelow[thresholdParameter](
               rc.language.value,
-              responseType.current
-            )
+              responseType.current,
+            ),
           );
           updateColor(instructions2, "instruction", status.block);
           instructions2.setWrapWidth(window.innerWidth * 0.8);
@@ -2882,11 +2895,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           instructions2.setAutoDraw(true);
           instructionsConfig.height = getParamValueForBlockOrCondition(
             "instructionFontSizePt",
-            status.block
+            status.block,
           );
           dynamicSetSize(
             [instructions, instructions2],
-            instructionsConfig.height
+            instructionsConfig.height,
           );
           var h = 50;
           fixation.setVertices(getFixationVertices(h));
@@ -2894,8 +2907,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.setPos([0, 0]);
           fixation.setColor(
             colorRGBASnippetToRGBA(
-              paramReader.read("markingColorRGBA", status.block)[0]
-            )
+              paramReader.read("markingColorRGBA", status.block)[0],
+            ),
           );
           fixation.setAutoDraw(true);
           vernier.stims[0].setVertices([
@@ -2908,8 +2921,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ]);
           vernier.setColor(
             colorRGBASnippetToRGBA(
-              paramReader.read("markingColorRGBA", status.block)[0]
-            )
+              paramReader.read("markingColorRGBA", status.block)[0],
+            ),
           );
           vernier.setLineWidth(2);
           vernier.setAutoDraw(true);
@@ -2953,11 +2966,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           psychoJS.experiment.addData(
             "eduInstructionRoutineDurationFromBeginSec",
-            eduInstructionClock.getTime()
+            eduInstructionClock.getTime(),
           );
           psychoJS.experiment.addData(
             "eduInstructionRoutineDurationFromPreviousEndSec",
-            routineClock.getTime()
+            routineClock.getTime(),
           );
         },
         rsvpReading: () => {
@@ -3044,15 +3057,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("responseTypedBool", status.block_condition),
           paramReader.read(
             "!responseTypedEasyEyesKeypadBool",
-            status.block_condition
+            status.block_condition,
           ),
           paramReader.read("responseSpokenBool", status.block_condition),
           paramReader.read(
             "responseMustTrackContinuouslyBool",
-            status.block_condition
+            status.block_condition,
           ),
           paramReader.read("responseSpokenBool", status.block_condition),
-          false
+          false,
         );
         // AKA prestimulus=true, ie the instructions we use at fixation tracking-time
         responseType.current = getResponseType(
@@ -3060,26 +3073,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("responseTypedBool", status.block_condition),
           paramReader.read(
             "!responseTypedEasyEyesKeypadBool",
-            status.block_condition
+            status.block_condition,
           ),
           paramReader.read("responseSpokenBool", status.block_condition),
           paramReader.read(
             "responseMustTrackContinuouslyBool",
-            status.block_condition
+            status.block_condition,
           ),
-          paramReader.read("responseSpokenBool", status.block_condition)
+          paramReader.read("responseSpokenBool", status.block_condition),
         );
         logger(
           "!. responseType.original, trialInstructionRB aka prestimulus=false",
-          responseType.original
+          responseType.original,
         );
         logger(
           "!. responseType.current, trialInstructionRB aka prestimulus=true",
-          responseType.current
+          responseType.current,
         );
         logger(
           "responseType trialInstructionRoutineBegin",
-          responseType.current
+          responseType.current,
         );
         if (canClick(responseType.current)) showCursor();
       };
@@ -3118,7 +3131,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // if (canClick(responseType.current)) showCursor();
           logger(
             "responseType.current trialInstructionRoutineBegin",
-            responseType.current
+            responseType.current,
           );
           t;
           for (let c of snapshot.handler.getConditions()) {
@@ -3161,7 +3174,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //if showProgressBarBool, show status bar
       const showProgressBarBool = paramReader.read(
         "showProgressBarBool",
-        status.block_condition
+        status.block_condition,
       );
       if (showProgressBarBool) showProgressBar();
 
@@ -3177,7 +3190,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // reset tracking target distance
         viewingDistanceDesiredCm.current = paramReader.read(
           "viewingDistanceDesiredCm",
-          status.block_condition
+          status.block_condition,
         );
 
         viewingDistanceCm.current = rc.viewingDistanceCm
@@ -3190,7 +3203,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         setPreStimulusRerunInterval(
           paramReader,
           trialInstructionRoutineBegin,
-          snapshot
+          snapshot,
         );
 
         // Distance nudging
@@ -3221,17 +3234,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       font.letterSpacing = reader.read("fontTrackingForLetters", BC);
 
       screenBackground.colorRGBA = colorRGBASnippetToRGBA(
-        reader.read("screenColorRGBA", BC)
+        reader.read("screenColorRGBA", BC),
       );
 
       showCounterBool = reader.read("showCounterBool", BC);
       showViewingDistanceBool = reader.read("showViewingDistanceBool", BC);
 
       fontCharacterSet.current = String(
-        reader.read("fontCharacterSet", BC)
+        reader.read("fontCharacterSet", BC),
       ).split("");
       [target, flanker1, flanker2, flanker3, flanker4].forEach((s) =>
-        s.setCharacterSet(fontCharacterSet.current.join(""))
+        s.setCharacterSet(fontCharacterSet.current.join("")),
       );
 
       if (!simulatedObservers.proceed(BC) && keypad.inUse(BC)) {
@@ -3246,12 +3259,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       showConditionNameConfig.show = paramReader.read(
         "showConditionNameBool",
-        BC
+        BC,
       );
       showConditionNameConfig.name = paramReader.read("conditionName", BC);
       showConditionNameConfig.showTargetSpecs = paramReader.read(
         "showTargetSpecsBool",
-        BC
+        BC,
       );
 
       /* --------------------------------- /PUBLIC -------------------------------- */
@@ -3261,19 +3274,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // used in multiple kinds
       letterConfig.targetSafetyMarginSec = reader.read(
         "targetSafetyMarginSec",
-        BC
+        BC,
       );
 
       letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
       letterConfig.delayBeforeStimOnsetSec = reader.read(
         "markingOffsetBeforeTargetOnsetSecs",
-        BC
+        BC,
       );
 
       // if to add fake connections
       letterConfig.responseCharacterHasMedialShape = reader.read(
         "responseCharacterHasMedialShapeBool",
-        BC
+        BC,
       );
 
       /* -------------------------------------------------------------------------- */
@@ -3291,7 +3304,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             w,
             // [-window.innerWidth / 2 + w * 1.1, 0]
             [-window.innerWidth * 0.4, window.innerHeight * 0.4],
-            status.block_condition
+            status.block_condition,
           );
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
@@ -3306,24 +3319,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           psychoJS.experiment.addData(
             "usedSoundGainDBSPL",
-            soundGainDBSPL.current
+            soundGainDBSPL.current,
           );
 
           whiteNoiseLevel.current = paramReader.read(
             "targetSoundNoiseDBSPL",
-            status.block_condition
+            status.block_condition,
           );
           targetSoundFolder.current = paramReader.read(
             "targetSoundFolder",
-            status.block_condition
+            status.block_condition,
           );
           maskerVolumeDbSPL.current = paramReader.read(
             "maskerSoundDBSPL",
-            status.block_condition
+            status.block_condition,
           );
           maskerSoundFolder.current = paramReader.read(
             "maskerSoundFolder",
-            status.block_condition
+            status.block_condition,
           );
           if (showConditionNameConfig.showTargetSpecs) {
             updateTargetSpecsForSoundDetect(
@@ -3332,7 +3345,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               soundGainDBSPL.current,
               whiteNoiseLevel.current,
               targetSoundFolder.current,
-              maskerSoundFolder.current
+              maskerSoundFolder.current,
             );
           }
           trialComponents = [];
@@ -3345,7 +3358,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionBeforeStimulusSetup(
             instructionsText.trial.fixate["sound"](rc.language.value),
             w,
-            [-window.innerWidth * 0.4, window.innerHeight * 0.4]
+            [-window.innerWidth * 0.4, window.innerHeight * 0.4],
             // [-window.innerWidth / 2 + w * 1.1, 0]
           );
 
@@ -3360,26 +3373,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               : paramReader.read("soundGainDBSPL", status.block_condition);
           psychoJS.experiment.addData(
             "usedSoundGainDBSPL",
-            soundGainDBSPL.current
+            soundGainDBSPL.current,
           );
 
           whiteNoiseLevel.current = paramReader.read(
             "targetSoundNoiseDBSPL",
-            status.block_condition
+            status.block_condition,
           );
           targetSoundFolder.current = paramReader.read(
             "targetSoundFolder",
-            status.block_condition
+            status.block_condition,
           );
 
           if (targetTask.current == "detect") {
             maskerVolumeDbSPL.current = paramReader.read(
               "maskerSoundDBSPL",
-              status.block_condition
+              status.block_condition,
             );
             maskerSoundFolder.current = paramReader.read(
               "maskerSoundFolder",
-              status.block_condition
+              status.block_condition,
             );
             if (showConditionNameConfig.showTargetSpecs)
               updateTargetSpecsForSoundDetect(
@@ -3388,7 +3401,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 soundGainDBSPL.current,
                 whiteNoiseLevel.current,
                 targetSoundFolder.current,
-                maskerSoundFolder.current
+                maskerSoundFolder.current,
               );
           } else if (targetTask.current == "identify") {
             if (showConditionNameConfig.showTargetSpecs)
@@ -3396,7 +3409,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 undefined,
                 soundGainDBSPL.current,
                 whiteNoiseLevel.current,
-                targetSoundFolder.current
+                targetSoundFolder.current,
               );
           }
 
@@ -3415,12 +3428,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // tinyHint
           renderObj.tinyHint.setText(
-            readi18nPhrases("T_readingNextPage", rc.language.value)
+            readi18nPhrases("T_readingNextPage", rc.language.value),
           );
           updateColor(
             renderObj.tinyHint,
             "instruction",
-            status.block_condition
+            status.block_condition,
           );
           renderObj.tinyHint.setAutoDraw(true);
 
@@ -3428,7 +3441,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             updateTargetSpecsForReading(
               reader,
               BC,
-              thisExperimentInfo.experimentFilename
+              thisExperimentInfo.experimentFilename,
             );
 
           defineTargetForCursorTracking(readingParagraph);
@@ -3454,8 +3467,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.language.value,
               paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
-                : responseType.current
-            )
+                : responseType.current,
+            ),
           );
 
           fixation.tStart = t;
@@ -3482,7 +3495,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             displayOptions.windowWidthPx / displayOptions.windowWidthCm;
           if (!rc.screenWidthCm)
             console.warn(
-              "[Screen Width] Using arbitrary screen width. Enable RC."
+              "[Screen Width] Using arbitrary screen width. Enable RC.",
             );
 
           readTrialLevelLetterParams(reader, BC);
@@ -3499,7 +3512,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showBoundingBox = reader.read("showBoundingBoxBool", BC) || false;
           showCharacterSetBoundingBox = reader.read(
             "showCharacterSetBoundingBoxBool",
-            BC
+            BC,
           );
 
           const atLeastTwoFlankersNeeded =
@@ -3524,11 +3537,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           var [targetCharacter, ...flankerCharacters] =
             sampleWithoutReplacement(
               fontCharacterSet.current,
-              numberOfTargetsAndFlankers
+              numberOfTargetsAndFlankers,
             );
           logger(
             `%c${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`,
-            `color: red; font-size: 1.5rem; font-family: "${font.name}"`
+            `color: red; font-size: 1.5rem; font-family: "${font.name}"`,
           );
           correctAns.current = [targetCharacter.toLowerCase()];
           /* -------------------------------------------------------------------------- */
@@ -3540,12 +3553,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //          from `letterConfig.targetEccentricityXYDeg`??
           const targetEccentricityXYPx = XYPixOfXYDeg(
             letterConfig.targetEccentricityXYDeg,
-            displayOptions
+            displayOptions,
           );
           // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
           psychoJS.experiment.addData(
             "targetLocationPx",
-            targetEccentricityXYPx
+            targetEccentricityXYPx,
           );
           target.setPos(targetEccentricityXYPx);
           target.setFont(font.name);
@@ -3555,7 +3568,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           psychoJS.experiment.addData(
             "spacingRelationToSize",
-            letterConfig.spacingRelationToSize
+            letterConfig.spacingRelationToSize,
           );
           var spacingIsOuterBool = reader.read("spacingIsOuterBool", BC);
           [level, stimulusParameters] = restrictLevel(
@@ -3567,7 +3580,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.spacingSymmetry,
             letterConfig.spacingOverSizeRatio,
             letterConfig.targetSizeIsHeightBool,
-            spacingIsOuterBool
+            spacingIsOuterBool,
           );
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
@@ -3577,18 +3590,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             stimulusParameters.heightPx,
-            stimulusParameters.targetAndFlankersXYPx[0]
+            stimulusParameters.targetAndFlankersXYPx[0],
           );
           fixation.setPos(fixationConfig.pos);
           psychoJS.experiment.addData(
             "markingFixationHotSpotRadiusPx",
-            fixationConfig.markingFixationHotSpotRadiusPx
+            fixationConfig.markingFixationHotSpotRadiusPx,
           );
 
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
           psychoJS.experiment.addData(
             "targetLocationPx",
-            stimulusParameters.targetAndFlankersXYPx[0]
+            stimulusParameters.targetAndFlankersXYPx[0],
           );
 
           let targetText;
@@ -3605,7 +3618,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               else {
                 target.scaleToWidthPx(
                   stimulusParameters.heightPx,
-                  stimulusParameters.widthPx
+                  stimulusParameters.widthPx,
                 );
               }
               target.setPadding(font.padding);
@@ -3628,7 +3641,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   else {
                     target.scaleToWidthPx(
                       stimulusParameters.heightPx,
-                      stimulusParameters.widthPx
+                      stimulusParameters.widthPx,
                     );
                   }
                   target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
@@ -3648,7 +3661,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                   psychoJS.experiment.addData(
                     "flankerLocationsPx",
-                    stimulusParameters.targetAndFlankersXYPx.slice(1)
+                    stimulusParameters.targetAndFlankersXYPx.slice(1),
                   );
                   const targetSpacingPx = spacingIsOuterBool
                     ? norm([
@@ -3665,7 +3678,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       ]);
                   psychoJS.experiment.addData(
                     "targetSpacingPx",
-                    targetSpacingPx
+                    targetSpacingPx,
                   );
                   break;
                 case "typographic":
@@ -3686,7 +3699,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   // target.setHeight(stimulusParameters.heightPx);
                   target.scaleToWidthPx(
                     stimulusParameters.heightPx,
-                    stimulusParameters.widthPx
+                    stimulusParameters.widthPx,
                   );
                   logger("stimulus [height, width]", [
                     stimulusParameters.heightPx,
@@ -3738,7 +3751,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             {
               heightPx:
                 ["none", "ratio"].includes(
-                  letterConfig.spacingRelationToSize
+                  letterConfig.spacingRelationToSize,
                 ) && thresholdParameter === "spacingDeg"
                   ? flankersHeightPx
                   : stimulusParameters.heightPx,
@@ -3746,7 +3759,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               thresholdParameter: thresholdParameter,
               windowSize: psychoJS.window._size,
               font: font.name,
-            }
+            },
           );
           showCharacterSet.setPos([0, 0]);
           showCharacterSet.setText("");
@@ -3756,7 +3769,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForLetter(
               stimulusParameters,
-              thisExperimentInfo.experimentFilename
+              thisExperimentInfo.experimentFilename,
             );
 
           trialComponents = [];
@@ -3771,7 +3784,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (paramReader.read("_trackGazeExternallyBool")[0])
             recordStimulusPositionsForEyetracking(
               target,
-              "trialInstructionRoutineBegin"
+              "trialInstructionRoutineBegin",
             );
 
           // /* --- BOUNDING BOX --- */
@@ -3783,7 +3796,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             displayCharacterSetBoundingBoxPolies[BC],
             letterConfig.spacingRelationToSize,
             thresholdParameter,
-            trialComponents
+            trialComponents,
           );
           // /* --- /BOUNDING BOX --- */
 
@@ -3796,7 +3809,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           psychoJS.experiment.addData(
             "trialInstructionBeginDurationSec",
-            trialInstructionClock.getTime()
+            trialInstructionClock.getTime(),
           );
 
           // tinyHint
@@ -3828,8 +3841,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.language.value,
               paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
-                : responseType.current
-            )
+                : responseType.current,
+            ),
           );
 
           clickedContinue.current = false;
@@ -3843,7 +3856,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           [level, stimulusParameters] = restrictRepeatedLettersSpacing(
             proposedLevel,
             letterConfig.targetEccentricityXYDeg,
-            characterSetBoundingRects[BC]
+            characterSetBoundingRects[BC],
           );
 
           // Generate stims to fill screen
@@ -3866,7 +3879,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions),
           );
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
@@ -3874,13 +3887,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.frameNStart = frameN;
           psychoJS.experiment.addData(
             "markingFixationHotSpotRadiusPx",
-            fixationConfig.markingFixationHotSpotRadiusPx
+            fixationConfig.markingFixationHotSpotRadiusPx,
           );
 
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForRepeatedLetters(
               stimulusParameters,
-              thisExperimentInfo.experimentFilename
+              thisExperimentInfo.experimentFilename,
             );
           repeatedLettersConfig.stims.forEach((s) => {
             s.setPadding(font.padding);
@@ -3919,7 +3932,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           const numberOfWords = paramReader.read(
             "rsvpReadingNumberOfWords",
-            status.block_condition
+            status.block_condition,
           );
           level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
           psychoJS.experiment.addData("level", level);
@@ -3927,7 +3940,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const durationSec = Math.pow(10, level);
           psychoJS.experiment.addData(
             "rsvpReadingWordDurationSec",
-            durationSec
+            durationSec,
           );
 
           const thisTrialWords =
@@ -3936,14 +3949,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (actualNumberOfWords !== numberOfWords)
             warning(
               "rsvpReading parsed the incorrect number of words. Using the target sequence: " +
-                thisTrialWords.targetWords.join(",")
+                thisTrialWords.targetWords.join(","),
             );
           rsvpReadingTargetSets.numberOfSets = actualNumberOfWords;
           const targetSets = generateRSVPReadingTargetSets(
             thisTrialWords,
             durationSec,
             paramReader,
-            status.block_condition
+            status.block_condition,
           );
           rsvpReadingTargetSets.upcoming = targetSets;
           correctAns.current = targetSets.map((t) => t.word.toLowerCase());
@@ -3961,30 +3974,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           psychoJS.experiment.addData(
             "rsvpReadingTargetNumberOfSets",
-            rsvpReadingTargetSets.numberOfSets
+            rsvpReadingTargetSets.numberOfSets,
           );
           psychoJS.experiment.addData(
             "rsvpReadingTargetSets",
-            targetSets.toString()
+            targetSets.toString(),
           );
 
           rsvpReadingResponse.categories = rsvpReadingTargetSets.upcoming.map(
-            (s) => new Category(s.word, s.foilWords)
+            (s) => new Category(s.word, s.foilWords),
           );
           if (rsvpReadingResponse.responseType === "clicked") {
             rsvpReadingResponse.screen = setupPhraseIdentification(
               rsvpReadingResponse.categories,
               paramReader,
               BC,
-              rsvpReadingTargetSets.upcoming[0]._heightPx
+              rsvpReadingTargetSets.upcoming[0]._heightPx,
             );
             psychoJS.experiment.addData(
               "rsvpReadingResponseCategories",
-              rsvpReadingResponse.categories.toString()
+              rsvpReadingResponse.categories.toString(),
             );
             psychoJS.experiment.addData(
               "rsvpReadingResponseScreenHTML",
-              rsvpReadingResponse.screen.innerHTML
+              rsvpReadingResponse.screen.innerHTML,
             );
           }
 
@@ -3999,8 +4012,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.language.value,
               paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
-                : responseType.current
-            )
+                : responseType.current,
+            ),
           );
 
           // Update fixation
@@ -4008,7 +4021,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions),
           );
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
@@ -4016,7 +4029,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.frameNStart = frameN;
           psychoJS.experiment.addData(
             "markingFixationHotSpotRadiusPx",
-            fixationConfig.markingFixationHotSpotRadiusPx
+            fixationConfig.markingFixationHotSpotRadiusPx,
           );
 
           if (showConditionNameConfig.showTargetSpecs)
@@ -4028,7 +4041,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 targetWordDurationSec: durationSec,
                 rsvpReadingNumberOfWords: numberOfWords,
                 rsvpReadingResponseModality: rsvpReadingResponse.responseType,
-              }
+              },
             );
           trialCounter.setAutoDraw(showCounterBool);
 
@@ -4053,11 +4066,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             .split("");
           var [targetCharacter] = sampleWithoutReplacement(
             fontCharacterSet.current,
-            1
+            1,
           );
           logger(
             `%c${targetCharacter}`,
-            `color: red; font-size: 1.5rem; font-family: "${font.name}"`
+            `color: red; font-size: 1.5rem; font-family: "${font.name}"`,
           );
           correctAns.current = [targetCharacter.toLowerCase()];
 
@@ -4079,7 +4092,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           document.body.appendChild(loaderText);
           loaderText.innerHTML = readi18nPhrases(
             "T_generatingMovie",
-            rc.language.value
+            rc.language.value,
           );
           //generate movie
           loggerText("Generate movie here");
@@ -4088,7 +4101,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //var F = new Function(paramReader.read("computeImageJS", BC))();
           let computeTotalSecStartTime = performance.now();
           var questSuggestedLevel = currentLoop._currentStaircase.quantile(
-            currentLoop._currentStaircase._jsQuest.quantileOrder
+            currentLoop._currentStaircase._jsQuest.quantileOrder,
           );
           evaluateJSCode(
             paramReader,
@@ -4096,7 +4109,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             displayOptions,
             targetCharacter,
             questSuggestedLevel,
-            psychoJS
+            psychoJS,
           ).then(([imageNit, movieHz, actualStimulusLevelTemp]) => {
             //observer should not be allowed to respond before actualStimulusLevel has retured.
             //i.e. before the movie has generated
@@ -4106,13 +4119,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               imageNit,
               movieHz,
               psychoJS,
-              moviePQEncodedBool
+              moviePQEncodedBool,
             ).then((data) => {
               videoblob = data;
               let computeTotalSecEndTime = performance.now();
               psychoJS.experiment.addData(
                 "computeTotalSec",
-                (computeTotalSecEndTime - computeTotalSecStartTime) / 1000
+                (computeTotalSecEndTime - computeTotalSecStartTime) / 1000,
               );
               document.body.removeChild(loader);
               document.body.removeChild(loaderText);
@@ -4126,14 +4139,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 100,
                 XYPixOfXYDeg(
                   letterConfig.targetEccentricityXYDeg,
-                  displayOptions
-                )
+                  displayOptions,
+                ),
               );
               fixationConfig.pos = fixationConfig.nominalPos;
               fixation.setPos(fixationConfig.pos);
               psychoJS.experiment.addData(
                 "markingFixationHotSpotRadiusPx",
-                fixationConfig.markingFixationHotSpotRadiusPx
+                fixationConfig.markingFixationHotSpotRadiusPx,
               );
               addHandlerForClickingFixation(paramReader);
             });
@@ -4163,8 +4176,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.language.value,
               paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
-                : responseType.current
-            )
+                : responseType.current,
+            ),
           );
 
           fixation.tStart = t;
@@ -4189,21 +4202,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             displayOptions.windowWidthPx / displayOptions.windowWidthCm;
           if (!rc.screenWidthCm)
             console.warn(
-              "[Screen Width] Using arbitrary screen width. Enable RC."
+              "[Screen Width] Using arbitrary screen width. Enable RC.",
             );
 
           readTrialLevelVenierParams(reader, BC);
           readAllowedTolerances(tolerances, reader, BC);
           const targetEccentricityXYPx = XYPixOfXYDeg(
             letterConfig.targetEccentricityXYDeg,
-            displayOptions
+            displayOptions,
           );
           fixation.update(paramReader, BC, 100, targetEccentricityXYPx);
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
           psychoJS.experiment.addData(
             "markingFixationHotSpotRadiusPx",
-            fixationConfig.markingFixationHotSpotRadiusPx
+            fixationConfig.markingFixationHotSpotRadiusPx,
           );
 
           validAns = String(reader.read("fontCharacterSet", BC))
@@ -4217,7 +4230,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showBoundingBox = reader.read("showBoundingBoxBool", BC) || false;
           showCharacterSetBoundingBox = reader.read(
             "showCharacterSetBoundingBoxBool",
-            BC
+            BC,
           );
 
           /* ------------------------------ Pick random letter ----------------------------- */
@@ -4225,17 +4238,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             throw `[EasyEyes experiment configuration error] You must have 2 characters in your character set for this block_condition, however, the researcher only put ${fontCharacterSet.current.length}.`;
           var [targetCharacter] = sampleWithoutReplacement(
             fontCharacterSet.current,
-            1
+            1,
           );
           logger(
             `%c${targetCharacter}`,
-            `color: red; font-size: 1.5rem; font-family: "${font.name}"`
+            `color: red; font-size: 1.5rem; font-family: "${font.name}"`,
           );
           correctAns.current = [targetCharacter.toLowerCase()];
           var directionBool = targetCharacter === fontCharacterSet.current[1];
           vernierConfig.targetOffsetDeg = restrictOffsetDeg(
             Math.pow(10, proposedLevel),
-            directionBool
+            directionBool,
           );
           level = Math.log10(vernierConfig.targetOffsetDeg);
           logger("proposedLevel", proposedLevel);
@@ -4252,12 +4265,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           displayOptions.window = psychoJS.window;
           psychoJS.experiment.addData(
             "targetLocationPx",
-            targetEccentricityXYPx
+            targetEccentricityXYPx,
           );
 
           psychoJS.experiment.addData(
             "spacingRelationToSize",
-            letterConfig.spacingRelationToSize
+            letterConfig.spacingRelationToSize,
           );
 
           showCharacterSet.setPos([0, 0]);
@@ -4268,7 +4281,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForLetter(
               stimulusParameters,
-              thisExperimentInfo.experimentFilename
+              thisExperimentInfo.experimentFilename,
             );
 
           trialCounter.setAutoDraw(showCounterBool);
@@ -4288,12 +4301,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (paramReader.read("_trackGazeExternallyBool")[0])
             recordStimulusPositionsForEyetracking(
               target,
-              "trialInstructionRoutineBegin"
+              "trialInstructionRoutineBegin",
             );
 
           psychoJS.experiment.addData(
             "trialInstructionBeginDurationSec",
-            trialInstructionClock.getTime()
+            trialInstructionClock.getTime(),
           );
 
           // tinyHint
@@ -4312,17 +4325,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const customInstructions = getCustomInstructionText(
         "stimulus",
         paramReader,
-        status.block_condition
+        status.block_condition,
       );
       if (customInstructions.length) {
         const customInstructionsLocation = getStimulusCustomInstructionPos(
           paramReader,
-          status.block_condition
+          status.block_condition,
         );
         _instructionBeforeStimulusSetup(
           customInstructions,
           undefined,
-          customInstructionsLocation
+          customInstructionsLocation,
         );
       }
 
@@ -4356,7 +4369,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.nthBlock,
         totalBlocks.current,
         viewingDistanceCm.current,
-        targetKind.current
+        targetKind.current,
       );
       trialCounter.setText(trialCounterStr);
       trialCounter.setFont(instructionFont.current);
@@ -4409,7 +4422,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         viewingDistanceCm.current,
         targetKind.current,
         instructionsClock.getTime(),
-        trialCounter
+        trialCounter,
       );
 
       const letterEachFrame = () => {
@@ -4417,7 +4430,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (paramReader.read("_trackGazeExternallyBool")[0])
           recordStimulusPositionsForEyetracking(
             target,
-            "trialInstructionRoutineEachFrame"
+            "trialInstructionRoutineEachFrame",
           );
 
         if (showConditionNameConfig.showTargetSpecs) {
@@ -4437,7 +4450,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (
           paramReader.read(
             "responseMustTrackContinuouslyBool",
-            status.block_condition
+            status.block_condition,
           )
         )
           checkIfCursorIsTrackingFixation(t, paramReader);
@@ -4481,7 +4494,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (
               paramReader.read(
                 "responseMustTrackContinuouslyBool",
-                status.block_condition
+                status.block_condition,
               )
             )
               checkIfCursorIsTrackingFixation(t, paramReader);
@@ -4519,7 +4532,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         fixationConfig.show &&
         paramReader.read(
           "markingFixationStrokeThickening",
-          status.block_condition
+          status.block_condition,
         ) !== 1
       )
         fixation.boldIfCursorNearFixation();
@@ -4594,10 +4607,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
             const boundingBoxStims = [
               ...Object.getOwnPropertyNames(boundingBoxPolies).map(
-                (prop) => boundingBoxPolies[prop]
+                (prop) => boundingBoxPolies[prop],
               ),
               ...Object.getOwnPropertyNames(characterSetBoundingBoxPolies).map(
-                (prop) => characterSetBoundingBoxPolies[prop]
+                (prop) => characterSetBoundingBoxPolies[prop],
               ),
             ];
             stimsToOffset.push(...boundingBoxStims);
@@ -4605,7 +4618,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(
                 target,
-                "trialInstructionRoutineEnd"
+                "trialInstructionRoutineEnd",
               );
           }
         },
@@ -4636,11 +4649,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       psychoJS.experiment.addData(
         "trialInstructionRoutineDurationFromBeginSec",
-        trialInstructionClock.getTime()
+        trialInstructionClock.getTime(),
       );
       psychoJS.experiment.addData(
         "trialInstructionRoutineDurationFromPreviousEndSec",
-        routineClock.getTime()
+        routineClock.getTime(),
       );
 
       routineTimer.reset();
@@ -4656,7 +4669,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // ie time from the user clicking/pressing space (actually, the end of the previous `trialRoutineEnd`), to the start of `trialRoutineBegin`
       psychoJS.experiment.addData(
         "clickToTrialPreparationDelaySec",
-        routineClock.getTime()
+        routineClock.getTime(),
       );
       // rc.pauseNudger();
       // await sleep(100);
@@ -4701,7 +4714,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             ProposedVolumeLevelFromQuest.current = paramReader.read(
               "targetSoundDBSPL",
-              status.block_condition
+              status.block_condition,
             );
             // console.log("ProposedVolumeLevelFromQuest.current", ProposedVolumeLevelFromQuest.current);
           }
@@ -4719,7 +4732,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             whiteNoiseLevel.current,
             soundGainDBSPL.current,
             maskerVolumeDbSPL.current,
-            paramReader.read("targetSoundChannels", status.block_condition)
+            paramReader.read("targetSoundChannels", status.block_condition),
           );
 
           ProposedVolumeLevelFromQuest.adjusted = targetVolumeDbSPL;
@@ -4727,7 +4740,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           correctAns.current = [];
           chosenCategoryKeys.map((category) => {
             correctAns.current.push(
-              category + "_" + categoriesChosen[category]
+              category + "_" + categoriesChosen[category],
             );
           });
           vocoderPhraseCategories.chosen = categoriesChosen;
@@ -4739,7 +4752,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               soundGainDBSPL.current,
               whiteNoiseLevel.current,
               targetSoundFolder.current,
-              maskerSoundFolder.current
+              maskerSoundFolder.current,
             );
             targetSpecs.setText(showConditionNameConfig.targetSpecs);
             updateColor(targetSpecs, "instruction", status.block_condition);
@@ -4748,7 +4761,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
               trialSound,
-              invertedImpulseResponse.current
+              invertedImpulseResponse.current,
             );
           else playAudioBuffer(trialSound);
         },
@@ -4757,7 +4770,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           var trialSoundBuffer;
           targetTask.current = paramReader.read(
             "targetTask",
-            status.block_condition
+            status.block_condition,
           );
 
           if (targetTask.current == "identify") {
@@ -4767,7 +4780,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ProposedVolumeLevelFromQuest.current,
                 whiteNoiseLevel.current,
                 soundGainDBSPL.current,
-                paramReader.read("targetSoundNoiseBool", status.block_condition)
+                paramReader.read(
+                  "targetSoundNoiseBool",
+                  status.block_condition,
+                ),
               );
 
             ProposedVolumeLevelFromQuest.adjusted = targetVolume;
@@ -4776,7 +4792,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetList[correctAnsIndex]["name"].toLowerCase(),
             ];
             speechInNoiseTargetList.current = targetList.map(
-              (target) => target["name"]
+              (target) => target["name"],
             );
 
             if (showConditionNameConfig.showTargetSpecs) {
@@ -4784,7 +4800,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ProposedVolumeLevelFromQuest.adjusted,
                 soundGainDBSPL.current,
                 whiteNoiseLevel.current,
-                targetSoundFolder.current
+                targetSoundFolder.current,
               );
               targetSpecs.setText(showConditionNameConfig.targetSpecs);
               updateColor(targetSpecs, "instruction", status.block_condition);
@@ -4803,7 +4819,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 maskerVolumeDbSPL.current,
                 whiteNoiseLevel.current,
                 soundGainDBSPL.current,
-                paramReader.read("targetSoundNoiseBool", status.block_condition)
+                paramReader.read(
+                  "targetSoundNoiseBool",
+                  status.block_condition,
+                ),
               );
             trialSoundBuffer = trialSoundMelody;
             ProposedVolumeLevelFromQuest.adjusted = targetIsPresentBool.current
@@ -4818,7 +4837,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 soundGainDBSPL.current,
                 whiteNoiseLevel.current,
                 targetSoundFolder.current,
-                maskerSoundFolder.current
+                maskerSoundFolder.current,
               );
               targetSpecs.setText(showConditionNameConfig.targetSpecs);
               updateColor(targetSpecs, "instruction", status.block_condition);
@@ -4828,7 +4847,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (invertedImpulseResponse.current)
             playAudioBufferWithImpulseResponseCalibration(
               trialSoundBuffer,
-              invertedImpulseResponse.current
+              invertedImpulseResponse.current,
             );
           else playAudioBuffer(trialSoundBuffer);
           showCursor();
@@ -4848,8 +4867,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.current,
             paramReader.read(
               "responseMustTrackContinuouslyBool",
-              status.block_condition
-            )
+              status.block_condition,
+            ),
           );
           if (paramReader.read("_trackGazeExternallyBool")[0])
             recordStimulusPositionsForEyetracking(target, "trialRoutineBegin");
@@ -4861,8 +4880,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.current,
             paramReader.read(
               "responseMustTrackContinuouslyBool",
-              status.block_condition
-            )
+              status.block_condition,
+            ),
           );
         },
         rsvpReading: () => {
@@ -4871,8 +4890,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.current,
             paramReader.read(
               "responseMustTrackContinuouslyBool",
-              status.block_condition
-            )
+              status.block_condition,
+            ),
           );
           reportWordCounts(paramReader, psychoJS.experiment);
         },
@@ -4882,8 +4901,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.current,
             paramReader.read(
               "responseMustTrackContinuouslyBool",
-              status.block_condition
-            )
+              status.block_condition,
+            ),
           );
         },
         vernier: () => {
@@ -4892,8 +4911,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.current,
             paramReader.read(
               "responseMustTrackContinuouslyBool",
-              status.block_condition
-            )
+              status.block_condition,
+            ),
           );
           logger("responseType.current", responseType.current);
           if (paramReader.read("_trackGazeExternallyBool")[0])
@@ -4920,9 +4939,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       _instructionSetup(
         instructionsText.trial.respond["spacingDeg"](
           rc.language.value,
-          responseType.current
+          responseType.current,
         ),
-        status.block_condition
+        status.block_condition,
       );
 
       //use google sheets phrases for instructions
@@ -4930,14 +4949,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         rsvpReading: () => {
           const instr = instructionsText.trial.respond["rsvpReading"](
             rc.language.value,
-            responseType.current
+            responseType.current,
           );
           _instructionSetup(instr, status.block_condition);
         },
         vocoderPhrase: () => {
           // change instruction
           const instr = instructionsText.trial.respond["vocoderPhrase"](
-            rc.language.value
+            rc.language.value,
           );
           _instructionSetup(instr, status.block_condition);
         },
@@ -4945,7 +4964,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const instr =
             targetTask.current == "identify"
               ? instructionsText.trial.respond["speechInNoise"](
-                  rc.language.value
+                  rc.language.value,
                 )
               : instructionsText.trial.respond["sound"](rc.language.value);
           _instructionSetup(instr, status.block_condition);
@@ -4954,18 +4973,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionSetup(
             instructionsText.trial.respond[thresholdParameter](
               rc.language.value,
-              responseType.current
+              responseType.current,
             ),
-            status.block_condition
+            status.block_condition,
           );
         },
         vernier: () => {
           _instructionSetup(
             instructionsText.trial.respond[thresholdParameter](
               rc.language.value,
-              responseType.current
+              responseType.current,
             ),
-            status.block_condition
+            status.block_condition,
           );
         },
       });
@@ -4988,7 +5007,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         reading: () => {
           // TEXT
           readingParagraph.setText(
-            readingThisBlockPages[readingPageIndex.current]
+            readingThisBlockPages[readingPageIndex.current],
           );
           updateColor(readingParagraph, "marking", status.block_condition);
 
@@ -5008,8 +5027,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           getViewingDistancedCm(
             viewingDistanceCm.current,
             displayOptions,
-            rc.windowHeightPx.value
-          )
+            rc.windowHeightPx.value,
+          ),
         );
         viewingDistanceCm.current = rc.viewingDistanceCm
           ? rc.viewingDistanceCm.value
@@ -5021,7 +5040,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // ie time spent in `trialRoutineBegin`
       psychoJS.experiment.addData(
         "trialBeginDurationSec",
-        trialClock.getTime()
+        trialClock.getTime(),
       );
       trialClock.reset(); // clock
 
@@ -5106,7 +5125,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //     actually being drawn.
         psychoJS.experiment.addData(
           "clickToStimulusOnsetSec",
-          (timing.clickToStimulusOnsetSec = routineClock.getTime())
+          (timing.clickToStimulusOnsetSec = routineClock.getTime()),
         );
         letterTiming.trialFirstFrameSec = t;
 
@@ -5118,7 +5137,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetSpecs,
               conditionName,
               target,
-              flankersUsed
+              flankersUsed,
             );
           },
           repeatedLetters: () => {
@@ -5244,12 +5263,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 k.rt,
                 correctAns.current,
                 correctSynth,
-                showCharacterSetResponse.alreadyClickedCharacters
+                showCharacterSetResponse.alreadyClickedCharacters,
               );
             });
           }
           showCharacterSetResponse.alreadyClickedCharacters.push(
-            ...theseKeys.map((k) => k.name)
+            ...theseKeys.map((k) => k.name),
           );
         }
       }
@@ -5263,13 +5282,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const responses = [...showCharacterSetResponse.current];
         const rts = showCharacterSetResponse.clickTime.map(
           (clickTime, i) =>
-            (clickTime - showCharacterSetResponse.onsetTime[i]) / 1000
+            (clickTime - showCharacterSetResponse.onsetTime[i]) / 1000,
         );
         key_resp.keys.push(...responses);
         key_resp.rt.push(...rts);
         // TODO record `code` and `rt`
         const clickedKeypresses = showCharacterSetResponse.current.map(
-          (letter) => new KeyPress(undefined, undefined, letter)
+          (letter) => new KeyPress(undefined, undefined, letter),
         );
         _key_resp_allKeys.current.push(...clickedKeypresses);
 
@@ -5280,14 +5299,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rts[i],
               correctAns.current,
               correctSynth,
-              showCharacterSetResponse.alreadyClickedCharacters
+              showCharacterSetResponse.alreadyClickedCharacters,
             );
           });
         }
 
         // TODO update how already clicked characters are shown, ie for repeatedLetters
         showCharacterSetResponse.alreadyClickedCharacters.push(
-          ...showCharacterSetResponse.current
+          ...showCharacterSetResponse.current,
         );
         showCharacterSetResponse.current = [];
         showCharacterSetResponse.clickTime = [];
@@ -5303,7 +5322,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // for regimes which require a single response to QUEST
       // TODO consolidate all endtrial/correctness logic into one place, ie generalize to include rsvpReading,repeatedLetters
       const uniqueResponses = new Set(
-        _key_resp_allKeys.current.map((k) => k.name)
+        _key_resp_allKeys.current.map((k) => k.name),
       );
       if (uniqueResponses.size > 0) logger("uniqueResponses", uniqueResponses);
       if (
@@ -5312,22 +5331,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         // The characters with which the participant responded
         const participantResponse = [...uniqueResponses].slice(
-          uniqueResponses.size - responseType.numberOfResponses
+          uniqueResponses.size - responseType.numberOfResponses,
         );
         let responseCorrect;
         if (targetKind.current === "vocoderPhrase") {
           responseCorrect = arraysEqual(
             vocoderPhraseCorrectResponse.current.sort(),
-            correctAns.current.sort()
+            correctAns.current.sort(),
           );
         } else if (targetKind.current === "repeatedLetters") {
           responseCorrect = participantResponse.some((r) =>
-            correctAns.current.includes(r)
+            correctAns.current.includes(r),
           );
         } else {
           responseCorrect = arraysEqual(
             participantResponse.sort(),
-            correctAns.current.sort()
+            correctAns.current.sort(),
           );
         }
 
@@ -5383,13 +5402,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           key_resp.corr = 1;
           if (targetKind.current === "repeatedLetters")
             key_resp.corr = participantResponse.map((r) =>
-              correctAns.current.includes(r) ? 1 : 0
+              correctAns.current.includes(r) ? 1 : 0,
             );
         } else {
           if (
             paramReader.read(
               "responseNegativeFeedbackBool",
-              status.block_condition
+              status.block_condition,
             ) &&
             (targetKind.current === "vocoderPhrase" ||
               targetKind.current === "sound")
@@ -5449,7 +5468,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         updateConditionNameConfig(
           conditionNameConfig,
           showConditionNameConfig.showTargetSpecs,
-          targetSpecs
+          targetSpecs,
         );
         // *targetSpecs* updates
         if (t >= 0.0) {
@@ -5484,14 +5503,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetSpecs,
             conditionName,
             showCharacterSet,
-            instructions
+            instructions,
           );
           break;
         case "rsvpReading":
           continueRoutine = _rsvpReading_trialRoutineEachFrame(
             t,
             frameN,
-            instructions
+            instructions,
           );
           break;
         case "movie":
@@ -5505,7 +5524,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               setTimeout(() => {
                 logger(
                   "addMeasureLuminanceIntervals called 2",
-                  performance.now()
+                  performance.now(),
                 );
                 video.play();
                 video_flag = 0;
@@ -5516,13 +5535,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
             logger(
               "delayBeforeMovieForLuminanceMeasuringMs",
-              delayBeforeMovieForLuminanceMeasuringMs
+              delayBeforeMovieForLuminanceMeasuringMs,
             );
             measureLuminance.movieStart =
               performance.now() + delayBeforeMovieForLuminanceMeasuringMs;
             logger(
               "addMeasureLuminanceIntervals called 1",
-              measureLuminance.movieStart
+              measureLuminance.movieStart,
             );
             addMeasureLuminanceIntervals(status.block_condition);
           }
@@ -5542,12 +5561,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 thisExperimentInfo.expName,
                 status.block_condition,
                 paramReader.read("conditionName", status.block_condition),
-                status.trial
+                status.trial,
               );
               logger("measureLuminance.records", measureLuminance.records);
               psychoJS.experiment.saveCSV(
                 measureLuminance.records,
-                luminanceFilename
+                luminanceFilename,
               );
             }
           };
@@ -5591,7 +5610,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               Math.round(thisDuration * 100.0) / 100
             } [${isTimingOK(
               Math.abs(thisDuration - letterConfig.targetDurationSec),
-              0.02
+              0.02,
             )}]`;
             targetSpecs.setText(showConditionNameConfig.targetSpecs);
             updateColor(targetSpecs, "instruction", status.block_condition);
@@ -5616,7 +5635,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (paramReader.read("_trackGazeExternallyBool")[0])
           recordStimulusPositionsForEyetracking(
             target,
-            "trialRoutineEachFrame"
+            "trialRoutineEachFrame",
           );
         if (
           target.status === PsychoJS.Status.STARTED &&
@@ -5652,7 +5671,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               Math.round(thisDuration * 100.0) / 100
             } [${isTimingOK(
               Math.abs(thisDuration - letterConfig.targetDurationSec),
-              0.02
+              0.02,
             )}]`;
             targetSpecs.setText(showConditionNameConfig.targetSpecs);
             updateColor(targetSpecs, "instruction", status.block_condition);
@@ -5708,7 +5727,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         displayCharacterSetBoundingBoxPolies[status.block_condition],
         letterConfig.spacingRelationToSize,
         timeWhenRespondable,
-        thresholdParameter
+        thresholdParameter,
       );
       /* -------------------------------------------------------------------------- */
 
@@ -5726,7 +5745,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             vocoderPhraseShowClickable.current = false;
             vocoderPhraseSetupClickableCategory(
               vocoderPhraseCategories,
-              showCharacterSetResponse
+              showCharacterSetResponse,
             );
           }
         },
@@ -5757,7 +5776,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "",
               "sound",
               status.block_condition,
-              responseType.current
+              responseType.current,
             );
             speechInNoiseTargetList.current = undefined;
           }
@@ -5786,7 +5805,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "",
               targetKind.current,
               status.block_condition,
-              responseType.current
+              responseType.current,
             );
 
             instructions.tSTart = t;
@@ -5818,7 +5837,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "",
               targetKind.current,
               status.block_condition,
-              responseType.current
+              responseType.current,
             );
 
             // instructions.setText(
@@ -5855,7 +5874,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "",
               targetKind.current,
               status.block_condition,
-              responseType.current
+              responseType.current,
             );
             instructions.tSTart = t;
             instructions.frameNStart = frameN;
@@ -5899,7 +5918,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const customInstructions = getCustomInstructionText(
           "response",
           paramReader,
-          status.block_condition
+          status.block_condition,
         );
         if (customInstructions.length) {
           instructions.setText(customInstructions);
@@ -6070,7 +6089,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const answer = result.value;
           psychoJS.experiment.addData(
             questionAndAnswerShortcut || question,
-            answer
+            answer,
           );
           // psychoJS.experiment.addData(
           //   `${questionAndAnswerShortcut || question}CorrectAnswer`,
@@ -6078,12 +6097,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // );
           psychoJS.experiment.addData(
             "questionAndAnswerNickname",
-            questionAndAnswerShortcut
+            questionAndAnswerShortcut,
           );
           psychoJS.experiment.addData("questionAndAnswerQuestion", question);
           psychoJS.experiment.addData(
             "questionAndAnswerCorrectAnswer",
-            correctAnswer
+            correctAnswer,
           );
           psychoJS.experiment.addData("questionAndAnswerResponse", answer);
         }
@@ -6122,7 +6141,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
               currentLoop.addResponse(
                 key_resp.corr,
-                ProposedVolumeLevelFromQuest.adjusted / 20
+                ProposedVolumeLevelFromQuest.adjusted / 20,
               );
             }
           },
@@ -6138,7 +6157,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
               currentLoop.addResponse(
                 key_resp.corr,
-                ProposedVolumeLevelFromQuest.adjusted / 20
+                ProposedVolumeLevelFromQuest.adjusted / 20,
               );
             }
             // console.log("currentLoop", currentLoop);
@@ -6155,7 +6174,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               simulatedObservers.proceed(),
               key_resp.corr,
               level,
-              letterRespondedEarly
+              letterRespondedEarly,
             );
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(target, "trialRoutineEnd");
@@ -6167,11 +6186,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               const thisResponseTime = repeatedLettersResponse.rt.shift();
               psychoJS.experiment.addData(
                 `repatedLetters-${i}-RESPONSE`,
-                thisResponse
+                thisResponse,
               );
               psychoJS.experiment.addData(
                 `repeatedLetters-${i}-RESPONSE${thisResponse}-TimeOfResponse`,
-                thisResponseTime
+                thisResponseTime,
               );
             }
             _letter_trialRoutineEnd(
@@ -6180,7 +6199,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               simulatedObservers.proceed(status.block_condition),
               repeatedLettersResponse.correct,
               level,
-              letterRespondedEarly
+              letterRespondedEarly,
             );
             repeatedLettersResponse.current = [];
             repeatedLettersResponse.correct = [];
@@ -6197,7 +6216,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             currentLoop.addResponse(
               phraseIdentificationResponse.correct,
               level,
-              giveToQuest
+              giveToQuest,
             );
             clearPhraseIdentificationRegisters();
           },
@@ -6220,7 +6239,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 key_resp.corr,
                 // intensity
                 //Math.log10(targetContrast)
-                actualStimulusLevel
+                actualStimulusLevel,
               );
               // }
             }
@@ -6240,7 +6259,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         psychoJS.experiment.addData(
           "key_resp.keys",
-          _key_resp_allKeys.current.map((k) => k.name).toString()
+          _key_resp_allKeys.current.map((k) => k.name).toString(),
         );
         psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
         psychoJS.experiment.addData("correctAns", correctAns.current);
@@ -6254,12 +6273,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // ie time from the end to `trialRoutineBegin` to the start of `trialRoutineEnd`
           psychoJS.experiment.addData(
             "trialRoutineDurationFromBeginSec",
-            trialClock.getTime()
+            trialClock.getTime(),
           );
           // ie time from the end of the previous trial to the end of this trial
           psychoJS.experiment.addData(
             "trialRoutineDurationFromPreviousEndSec",
-            routineClock.getTime()
+            routineClock.getTime(),
           );
         }
       }
@@ -6272,7 +6291,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Increase takeABreakCredit
       currentBlockCreditForTrialBreak += paramReader.read(
         "takeABreakTrialCredit",
-        status.block_condition
+        status.block_condition,
       );
       if (simulatedObservers.proceed(status.block_condition))
         currentBlockCreditForTrialBreak = 0;
@@ -6294,11 +6313,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           thisExperimentInfo.name,
           readi18nPhrases("T_takeABreakPopup", rc.language.value),
           "",
-          true
+          true,
         );
         const takeABreakMinimumDurationSec = paramReader.read(
           "takeABreakMinimumDurationSec",
-          status.block_condition
+          status.block_condition,
         );
 
         return new Promise((resolve) => {
@@ -6309,9 +6328,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               thisExperimentInfo.name,
               instructionsText.trialBreak(
                 rc.language.value,
-                responseType.current
+                responseType.current,
               ),
-              canClick(responseType.current)
+              canClick(responseType.current),
             );
             addPopupLogic(
               thisExperimentInfo.name,
@@ -6319,7 +6338,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               () => {
                 resolve(Scheduler.Event.NEXT);
               },
-              keypad
+              keypad,
             );
           }, takeABreakMinimumDurationSec * 1000);
         });
@@ -6376,7 +6395,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         console.log(
           `%c====== Trial ${status.trial} ======`,
-          "background: purple; color: white; padding: 1rem"
+          "background: purple; color: white; padding: 1rem",
         );
 
         const parametersToExcludeFromData = [];
@@ -6389,14 +6408,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader,
           BC,
           psychoJS.experiment,
-          parametersToExcludeFromData
+          parametersToExcludeFromData,
         );
         // Update sampling rate for cursor tracking, as it can vary by condition
         updateTrackCursorHz(paramReader);
       } else if (snapshotType !== "trial" && snapshotType !== "block") {
         console.log(
           "%c====== Unknown Snapshot ======",
-          "background: red; color: white; padding: 1rem"
+          "background: red; color: white; padding: 1rem",
         );
       }
       // }
