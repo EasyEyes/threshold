@@ -449,6 +449,14 @@ export const GLOSSARY: Glossary = {
       '_needCalibratedSound (default empty) requires a "microphone" (in smartphone), or "loudspeaker" (in computer), or either ("microphone, loudspeaker") whose model is included in the EasyEyes profile library. If both are listed, EasyEyes tries first to match the microphone, because we expect the microphone profiles to be more reliable.\nCurrently, this parameter is ignored if _calibrateMicrophonesBool==TRUE. In the future, when _calibrateMicrophonesBool==TRUE, the only acceptable microphone match will be a UMIK-1 or UMIK-2 microphone, and the only acceptable loudspeaker match will be an exact match, for this particular computer. ',
     categories: ["microphone", "loudspeaker"],
   },
+  _needColorimeterBool: {
+    name: "_needColorimeterBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_needColorimeterBool (default FALSE) requires a Cambridge Research Systems colorimeter attached to a USB port.",
+  },
   _needCameraBool: {
     name: "_needCameraBool",
     availability: "now",

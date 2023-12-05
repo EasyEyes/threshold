@@ -462,6 +462,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "microphone, loudspeaker",
   },
   {
+    name: "_needColorimeterBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_needColorimeterBool (default FALSE) requires a Cambridge Research Systems colorimeter attached to a USB port.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_needCameraBool",
     availability: "now",
     example: "FALSE",
