@@ -462,16 +462,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "microphone, loudspeaker",
   },
   {
-    name: "_needColorimeterBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_needColorimeterBool (default FALSE) requires a Cambridge Research Systems colorimeter attached to a USB port.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "_needCameraBool",
     availability: "now",
     example: "FALSE",
@@ -479,6 +469,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "🕑 _needCameraBool (default TRUE) tells EasyEyes whether to require presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and pupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier compatibility check so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.) \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
     type: "boolean",
     default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "_needColorimeterBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needColorimeterBool (default FALSE) requires a Cambridge Research Systems Ltd. ColorCAL Colorimeter attached to a USB port. \nhttps://www.crsltd.com/tools-for-vision-science/light-measurement-display-calibation/colorcal-mkii-colorimeter/",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
