@@ -1210,7 +1210,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   let filename = downloadLoudspeakerCalibration();
   loudspeakerInfo.current["jsonFileName"] = filename;
   loudspeakerInfo.current["screenWidth"] = microphoneInfo.current.screenWidth;
-  loudspeakerInfo.current["screenHeigt"] = microphoneInfo.current.screenHeight;
+  loudspeakerInfo.current["screenHeight"] = microphoneInfo.current.screenHeight;
   loudspeakerInfo.current["filteredMLSComponentMin"] =
     Math.round(allHzCalibrationResults.filteredMLSRange.component.Min * 10) /
     10;
