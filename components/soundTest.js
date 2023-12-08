@@ -624,7 +624,7 @@ const addSoundFileElements = async (
         // )} dB`;
 
         if (SystemCorrectionInput.checked) {
-          if (allHzCalibrationResults.component.iir_no_bandpass)
+          if (allHzCalibrationResults.system.iir_no_bandpass)
             playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
               allHzCalibrationResults.system.iir_no_bandpass
