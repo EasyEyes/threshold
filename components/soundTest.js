@@ -624,7 +624,7 @@ const addSoundFileElements = async (
         // )} dB`;
 
         if (SystemCorrectionInput.checked) {
-          if (allHzCalibrationResults.system.iir)
+          if (allHzCalibrationResults.component.iir_no_bandpass)
             playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
               allHzCalibrationResults.system.iir_no_bandpass
@@ -634,7 +634,7 @@ const addSoundFileElements = async (
               "There was an error loading the impulse response. Please try calibrating again."
             );
         } else if (LoudspeakerCorrectionInput.checked) {
-          if (allHzCalibrationResults.component.iir)
+          if (allHzCalibrationResults.component.iir_no_bandpass)
             playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
               allHzCalibrationResults.component.iir_no_bandpass
