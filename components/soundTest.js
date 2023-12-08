@@ -627,7 +627,7 @@ const addSoundFileElements = async (
           if (allHzCalibrationResults.system.iir)
             playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
-              allHzCalibrationResults.system.iir
+              allHzCalibrationResults.system.iir_no_bandpass
             );
           else
             alert(
@@ -637,7 +637,7 @@ const addSoundFileElements = async (
           if (allHzCalibrationResults.component.iir)
             playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
-              allHzCalibrationResults.component.iir
+              allHzCalibrationResults.component.iir_no_bandpass
             );
           else
             alert(
