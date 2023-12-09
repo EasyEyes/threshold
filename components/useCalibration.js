@@ -397,6 +397,11 @@ export const calibrateAudio = async (reader) => {
     elems.yesButton.style.display = "none";
     elems.displayUpdate.style.display = "none";
     elems.subtitle.innerHTML = "";
+    elems.title.innerHTML = readi18nPhrases(
+      "RC_loudspeakerCalibrationResults",
+      rc.language.value
+    );
+    elems.title.style.visibility = "visible";
     //show plots of the loudspeaker calibration
     if (
       calibrateSoundLevel &&
@@ -512,7 +517,7 @@ export const calibrateAudio = async (reader) => {
       elems.calibrateMicrophoneButton.style.display = "block";
       elems.continueButton.style.display = "block";
       elems.navContainer.style.display = "flex";
-      elems.title.innerHTML = "";
+      // elems.title.innerHTML = "";
       elems.subtitle.innerHTML = "";
       elems.message.innerHTML = showLoudSpeakerDoneMessage
         ? readi18nPhrases(
@@ -544,6 +549,7 @@ export const calibrateAudio = async (reader) => {
           elems.calibrateMicrophoneButton.style.display = "none";
           elems.continueButton.style.display = "none";
           elems.timeToCalibrate.innerHTML = "";
+          // elems.title.innerHTML = "";
 
           await runCombinationCalibration(
             elems,
@@ -552,6 +558,11 @@ export const calibrateAudio = async (reader) => {
             rc.language.value
           );
 
+          elems.title.innerHTML = readi18nPhrases(
+            "RC_microphoneCalibrationResults",
+            rc.language.value
+          );
+          elems.title.style.visibility = "visible";
           if (calibrateSoundCheck.current !== "none") {
             displayCompleteTransducerTable(
               loudspeakerInfo.current,
