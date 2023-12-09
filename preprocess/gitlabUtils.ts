@@ -607,11 +607,12 @@ export const getRecruitmentServiceConfig = async (
 };
 
 /**
- * Download data folder as a ZIP file from gitlab repository
+ * Download data folder as a ZIP file from GitLab repository
  */
 export const downloadDataFolder = async (user: User, project: any) => {
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
+  const perPage = 100;
   const requestOptions: any = {
     method: "GET",
     headers: headers,
@@ -620,39 +621,48 @@ export const downloadDataFolder = async (user: User, project: any) => {
 
   await Swal.fire({
     title: `Downloading data from ${project.name} ...`,
-    // html: `<p>This might take a while, depending on the number of participants and the length of the experiment.</p>`,
     allowOutsideClick: false,
     allowEscapeKey: false,
     didOpen: async () => {
-      // @ts-ignore
-      Swal.showLoading(null);
+      Swal.showLoading();
 
-      const dataFolder = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=100`,
-        requestOptions,
-      )
-        .then((response) => {
-          return response.json();
-        })
-        .then((result) => {
-          return result;
-        });
+      let currentPage = 1;
+      let allData: any[] = [];
+      let zipFileDate;
 
-      if (dataFolder.length === 0) {
+      while (true) {
+        const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=${perPage}&page=${currentPage}`;
+
+        const dataFolder = await fetch(apiUrl, requestOptions)
+          .then((response) => response.json())
+          .then((result) => result)
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+            return null;
+          });
+
+        if (!dataFolder || dataFolder.length === 0) {
+          break;
+        }
+
+        allData = allData.concat(dataFolder);
+        currentPage += 1;
+      }
+
+      if (allData.length === 0) {
         Swal.close();
         Swal.fire({
           icon: "error",
           title: `No data found for ${project.name}.`,
-          text: `We can't find any data for the experiment. This might due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
+          text: `We can't find any data for the experiment. This might be due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
           confirmButtonColor: "#666",
         });
         return;
       }
 
       const zip = new JSZip();
-      let zipFileDate; // it is the date of the latest file in the data folder.
 
-      for (const file of dataFolder) {
+      for (const file of allData) {
         const fileName = file.name;
         const fileNameDateArray = fileName.split("_").slice(-2);
         const date =
@@ -669,15 +679,12 @@ export const downloadDataFolder = async (user: User, project: any) => {
           `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
           requestOptions,
         )
-          .then((response) => {
-            return response.json();
-          })
-          .then((result) => {
-            return Buffer.from(result.content, "base64");
-          });
+          .then((response) => response.json())
+          .then((result) => Buffer.from(result.content, "base64"));
 
         zip.file(fileName, fileContent);
       }
+
       zipFileDate = zipFileDate
         ? getDateAndTimeString(zipFileDate)
         : getDateAndTimeString(new Date());
@@ -730,7 +737,7 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
   };
 
   const dataFolder = await fetch(
-    `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=100`,
+    `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=500&recursive=false`,
     requestOptions,
   )
     .then((response) => {
@@ -772,24 +779,35 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
 export const getdataFolder = async (user: User, project: any) => {
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
+  const perPage = 100;
+  let currentPage = 1;
+  let allData: any[] = [];
 
-  const dataFolder = await fetch(
-    `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=120`,
-    requestOptions,
-  )
-    .then((response) => {
-      return response.json();
-    })
-    .then((result) => {
-      return result;
-    });
+  while (true) {
+    const requestOptions: any = {
+      method: "GET",
+      headers: headers,
+      redirect: "follow",
+    };
 
-  return dataFolder;
+    const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=${perPage}&page=${currentPage}`;
+
+    const dataFolder = await fetch(apiUrl, requestOptions)
+      .then((response) => response.json())
+      .then((result) => result)
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        return null;
+      });
+
+    if (!dataFolder || dataFolder.length === 0) {
+      break;
+    }
+    allData = allData.concat(dataFolder);
+    currentPage += 1;
+  }
+
+  return allData;
 };
 
 export const getDataFolderCsvLength = async (user: User, project: any) => {
