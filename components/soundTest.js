@@ -241,6 +241,7 @@ export const addSoundTestElements = (reader, language) => {
   NoCorrectionToggle.style.marginLeft = "10px";
   NoCorrectionInput.setAttribute("id", "soundTestModalNoCorrectionInput");
   NoCorrectionToggleContainer.style.display = "flex";
+  NoCorrectionToggleContainer.style.lineHeight = "1.2rem";
   // space between toggle and label
   NoCorrectionToggleContainer.style.marginBottom = "10px";
   NoCorrectionToggleContainer.style.justifyContent = "space-between";
@@ -264,6 +265,7 @@ export const addSoundTestElements = (reader, language) => {
     "soundTestModalLoudspeakerCorrectionInput"
   );
   LoudspeakerCorrectionToggleContainer.style.display = "flex";
+  LoudspeakerCorrectionToggleContainer.style.lineHeight = "1.2rem";
   // space between toggle and label
   LoudspeakerCorrectionToggleContainer.style.marginBottom = "10px";
   LoudspeakerCorrectionToggleContainer.style.justifyContent = "space-between";
@@ -287,6 +289,7 @@ export const addSoundTestElements = (reader, language) => {
     "soundTestModalSystemCorrectionInput"
   );
   SystemCorrectionToggleContainer.style.display = "flex";
+  SystemCorrectionToggleContainer.style.lineHeight = "1.2rem";
   // space between toggle and label
   SystemCorrectionToggleContainer.style.marginBottom = "10px";
   SystemCorrectionToggleContainer.style.justifyContent = "space-between";
@@ -325,7 +328,10 @@ export const addSoundTestElements = (reader, language) => {
 
   speakerSoundGainContainer.appendChild(speakerSoundGain);
   // speakerSoundGainContainer.appendChild(speakerSoundGainInput);
-  soundLevelContainer.style.alignItems = "center";
+  soundLevelContainer.style.alignItems = "baseline";
+  soundLevelInput.style.width = "80px";
+  soundLevel.style.lineHeight = "1.2rem";
+
   soundLevelContainer.appendChild(soundLevel);
   soundLevelContainer.appendChild(soundLevelInput);
   modalHeaderContainer.appendChild(speakerSoundGainContainer);
@@ -592,7 +598,8 @@ const addSoundFileElements = async (
         const correctedValues = getCorrectedInDbAndSoundDBSPL(
           soundDBSPL.current,
           soundGain.current,
-          audioData
+          audioData,
+          NoCorrectionInput.checked
         );
         const inDB = correctedValues.inDB;
         soundDBSPL.current = correctedValues.correctedSoundDBSPL;
@@ -936,18 +943,19 @@ export const CompressorDb = (inDb, T, R, W) => {
 export const getCorrectedInDbAndSoundDBSPL = (
   soundDBSPL,
   soundGain,
-  audioData
+  audioData,
+  noCorrection = false
 ) => {
   const targetMaxOverRms =
     getMaxValueOfAbsoluteValueOfBuffer(audioData) / getRMSOfWaveForm(audioData);
-  const targetDB = soundDBSPL - soundGain;
+  const targetDB = noCorrection ? soundDBSPL : soundDBSPL - soundGain;
   const targetGain = getGainValue(targetDB);
 
   const inDB =
     targetMaxOverRms * targetGain > 1
       ? calculateDBFromRMS(1 / targetMaxOverRms)
       : targetDB;
-  const correctedSoundDBSPL = soundGain + inDB;
+  const correctedSoundDBSPL = noCorrection ? inDB : soundGain + inDB;
 
   return { inDB, correctedSoundDBSPL };
 };

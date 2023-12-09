@@ -1494,7 +1494,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_saveCursorPositionBool (default FALSE) records cursor and crosshair position at every display frame throughout the experiment. At the end of the experiment, EasyEyes saves a CSV file to the \"data\" folder in the experiment's Pavlovia repository. (Based on the similar, but now deprecated _trackGazeExternallyBool.)\nSTIMULUS CSV TABLE. Each row of the EasyEyes CSV “stimulus” table records posix time (in secs, floating point), x,y position (px) of the: crosshair, cursor, and (if present) target. We also include viewing distance (cm), x,y of closest point (px) to observer's eyes, experiment name, Pavlovia session ID, block number, condition number, conditionName, and trial number.",
+      "_saveCursorPositionBool (default FALSE) records cursor and crosshair position at every display frame throughout the experiment. At the end of the experiment, EasyEyes saves a CSV file to the \"data\" folder in the experiment's Pavlovia repository. (Based on the similar, but now deprecated _trackGazeExternallyBool.)\nCURSOR CSV TABLE. Each row of the EasyEyes CSV “cursor” table records posix time (in secs, floating point), x,y position (px) of the: crosshair, cursor, and (if present) target. We also include viewing distance (cm), x,y of closest point (px) to observer's eyes, experiment name, Pavlovia session ID, block number, condition number, conditionName, and trial number.",
   },
   _saveEachBlockBool: {
     name: "_saveEachBlockBool",
