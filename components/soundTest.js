@@ -42,7 +42,6 @@ import {
   getRMSOfWaveForm,
   playAudioBuffer,
   playAudioBufferWithImpulseResponseCalibration,
-  playAudioNodeGraph,
   setWaveFormToZeroDbSPL,
 } from "./soundUtils";
 import { readi18nPhrases } from "./readPhrases";
@@ -169,6 +168,7 @@ export const addSoundTestElements = (reader, language) => {
   const nameOfPlayedSound = document.createElement("p");
   const rmsOfSound = document.createElement("p");
   const maxAmplitude = document.createElement("p");
+  // const powerOfDigitalSound = document.createElement("p");
   const elems = {
     modal,
     modalDialog,
@@ -225,6 +225,7 @@ export const addSoundTestElements = (reader, language) => {
   nameOfPlayedSound.setAttribute("id", "soundTestModalNameOfPlayedSound");
   rmsOfSound.setAttribute("id", "soundTestModalRMSOfSound");
   maxAmplitude.setAttribute("id", "soundTestModalMaxAmplitude");
+  // powerOfDigitalSound.setAttribute("id", "soundTestModalPowerOfDigitalSound");
 
   modalContent.style.lineHeight = "0.5rem";
 
@@ -319,6 +320,7 @@ export const addSoundTestElements = (reader, language) => {
     "RC_PlayingSound",
     language
   ).replace("FFF", "****");
+  // powerOfDigitalSound.innerHTML = "Power of digital sound: **** dB";
 
   modal.appendChild(modalDialog);
   modalDialog.appendChild(modalContent);
@@ -342,6 +344,7 @@ export const addSoundTestElements = (reader, language) => {
   modalHeaderContainer.appendChild(maxAmplitude);
 
   // modalHeaderContainer.appendChild(adjustedSoundLevel);
+  // modalHeaderContainer.appendChild(powerOfDigitalSound);
   modalHeaderContainer.appendChild(nameOfPlayedSound);
   //append the toggles
   NoCorrectionToggleContainer.appendChild(NoCorrectionToggleLabel);
@@ -629,6 +632,7 @@ const addSoundFileElements = async (
         // `Digital sound RMS dB: ${calculateDBFromRMS(
         //   getRMSOfWaveForm(audioData)
         // )} dB`;
+        // power of audioData: p_dB = 10 * log10(1/N * sum(x^2))
 
         if (SystemCorrectionInput.checked) {
           if (allHzCalibrationResults.system.iir_no_bandpass)
@@ -674,7 +678,11 @@ const addTestPagePSDPlots = async (modalBody, language) => {
 
   modalBody.appendChild(plotCanvas);
 
-  PlotsForTestPage(plotCanvas, allHzCalibrationResults.component.iir_psd);
+  PlotsForTestPage(
+    plotCanvas,
+    allHzCalibrationResults.component.iir_psd,
+    allHzCalibrationResults.system.iir_psd
+  );
 };
 
 const addAudioRecordAndPlayback = async (modalBody, language) => {
@@ -696,6 +704,17 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   const p = document.createElement("p");
   p.id = "powerLevel";
   p.style.lineHeight = "1.2rem";
+
+  const max = document.createElement("p");
+  max.id = "running-max";
+  max.style.lineHeight = "1.2rem";
+  max.innerHTML = -1000 + " dB";
+
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.alignItems = "center";
+  // container.style.flexDirection = "row";
+
   const timeContainer = document.createElement("div");
   timeContainer.style.display = "flex";
   timeContainer.style.marginBottom = "10px";
@@ -705,7 +724,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   timeText.style.marginRight = "10px";
   const timeInput = document.createElement("input");
   timeInput.type = "number";
-  timeInput.value = 5;
+  timeInput.value = 0.5;
   timeInput.style.width = "100px";
   timeInput.id = "timeInput";
 
@@ -720,6 +739,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   recordButton.innerHTML = "Record";
 
   recordButton.addEventListener("click", async () => {
+    max.innerHTML = -1000 + " dB";
     await toggleRecording(select.value, recordButton, language);
   });
 
@@ -727,7 +747,10 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   timeContainer.appendChild(timeText);
   timeContainer.appendChild(timeInput);
   modalBody.appendChild(timeContainer);
-  modalBody.appendChild(recordButton);
+  container.appendChild(recordButton);
+  container.appendChild(max);
+  modalBody.appendChild(container);
+  // modalBody.appendChild(recordButton);
   modalBody.appendChild(p);
 };
 
@@ -754,6 +777,10 @@ const startRecording = async (deviceId, recordButton, language) => {
 
   mediaRecorder.onstop = async () => {
     const powerLevel = await computePowerLevel(recordedChunks);
+    const max = document.getElementById("running-max");
+    if (powerLevel > parseFloat(max.innerText)) {
+      max.innerText = powerLevel + " dB";
+    }
     p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
     recordedChunks = [];
     if (restartRecording) {

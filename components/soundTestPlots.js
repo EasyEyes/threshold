@@ -1014,14 +1014,18 @@ export const plotImpulseResponse = (
   tableDiv.style.zIndex = 1;
 };
 
-export const PlotsForTestPage = (plotCanvas, iir_psd) => {
+export const PlotsForTestPage = (
+  plotCanvas,
+  component_iir_psd,
+  system_iir_psd
+) => {
   // iir_psd = {x:[],y:[], y_no_bandpass : [], y_no_bandpass_no_window:[]}
-  const iirData = iir_psd.x.map((x, i) => {
-    return { x: x, y: 10 * Math.log10(iir_psd.y[i]) };
+  const system_iir_no_bandpass = system_iir_psd.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(system_iir_psd.y_no_bandpass[i]) };
   });
 
-  const iirData_no_bandpass = iir_psd.x.map((x, i) => {
-    return { x: x, y: 10 * Math.log10(iir_psd.y_no_bandpass[i]) };
+  const component_iirData_no_bandpass = component_iir_psd.x.map((x, i) => {
+    return { x: x, y: 10 * Math.log10(component_iir_psd.y_no_bandpass[i]) };
   });
 
   const plot = new Chart(plotCanvas, {
@@ -1029,8 +1033,8 @@ export const PlotsForTestPage = (plotCanvas, iir_psd) => {
     data: {
       datasets: [
         {
-          label: "IIR",
-          data: iirData,
+          label: "Loudspeaker + Microphone IIR",
+          data: system_iir_no_bandpass,
           borderColor: "red",
           backgroundColor: "rgba(0, 0, 0, 0)",
           pointRadius: 0,
@@ -1038,8 +1042,8 @@ export const PlotsForTestPage = (plotCanvas, iir_psd) => {
           borderWidth: 2,
         },
         {
-          label: "IIR no bandpass",
-          data: iirData_no_bandpass,
+          label: "Component IIR",
+          data: component_iirData_no_bandpass,
           borderColor: "blue",
           backgroundColor: "rgba(0, 0, 0, 0)",
           pointRadius: 0,
