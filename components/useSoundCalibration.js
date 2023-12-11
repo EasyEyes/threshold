@@ -154,6 +154,7 @@ export const runCombinationCalibration = async (
               false
             );
           } else {
+            deviceType.isLoudspeaker = isLoudspeakerCalibration;
             await runUSBCalibration(elems, isLoudspeakerCalibration, language);
           }
 
@@ -966,7 +967,7 @@ const startCalibration = async (
   restrtCalibration.style.marginTop = "10px";
   restrtCalibration.style.display = "none";
   elems.displayContainer.appendChild(restrtCalibration);
-
+  console.log(webAudioDeviceNames);
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
     restartButton: restrtCalibration,
@@ -1083,7 +1084,6 @@ export const calibrateAgain = async (
   isSmartPhone,
   knownIR = null
 ) => {
-  console.log("calibrateAgain");
   elems.subtitle.innerHTML = isLoudspeakerCalibration
     ? isSmartPhone
       ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
@@ -1099,21 +1099,6 @@ export const calibrateAgain = async (
     ? microphoneInfo.current.micrFullManufacturerName
     : "";
   const { Speaker, CombinationCalibration } = speakerCalibrator;
-  webAudioDeviceNames.loudspeakerText = readi18nPhrases(
-    "RC_nameLoudspeaker",
-    language
-  )
-    .replace("xxx", webAudioDeviceNames.loudspeaker)
-    .replace("XXX", webAudioDeviceNames.loudspeaker);
-  webAudioDeviceNames.microphoneText = readi18nPhrases(
-    "RC_nameMicrophone",
-    language
-  );
-  IDsToSaveInSoundProfileLibrary.ProlificParticipantID = isProlificExperiment()
-    ? new URLSearchParams(window.location.search).get("participant")
-    : "";
-  IDsToSaveInSoundProfileLibrary.PavloviaSessionID =
-    thisExperimentInfo.PavloviaSessionID;
 
   const restrtCalibration = document.createElement("button");
   restrtCalibration.innerHTML = readi18nPhrases("RC_ReRecord", language);
@@ -1122,7 +1107,7 @@ export const calibrateAgain = async (
   restrtCalibration.style.marginTop = "10px";
   restrtCalibration.style.display = "none";
   elems.displayContainer.appendChild(restrtCalibration);
-
+  console.log(webAudioDeviceNames);
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
     restartButton: restrtCalibration,
@@ -1197,6 +1182,7 @@ export const calibrateAgain = async (
     ? soundCalibrationResults.current.micInfo
     : microphoneCalibrationResult.current.micInfo;
   const deviceInfo = {
+    OEM: micInfo.OEM,
     hardwarename: micInfo.HardwareName,
     hardwarefamily: micInfo.hardwareFamily,
     hardwaremodel: micInfo.HardwareModel,
@@ -1207,6 +1193,7 @@ export const calibrateAgain = async (
     calibrateMicrophonesBool: micInfo.calibrateMicrophonesBool,
     screenHeight: micInfo.screenHeight,
     screenWidth: micInfo.screenWidth,
+    microphoneFromAPI: micInfo.webAudioDeviceNames.microphone,
   };
   calibrator.setDeviceInfo(deviceInfo);
   calibrationRound.current--;
@@ -1239,7 +1226,7 @@ export const calibrateAgain = async (
   if (results === "restart") {
     elems.displayUpdate.innerHTML = "";
     elems.displayUpdate.style.display = "none";
-    await calibrateAgain(
+    await startCalibration(
       elems,
       isLoudspeakerCalibration,
       language,
@@ -1599,7 +1586,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["calibrateSoundIIRSec"] = calibrateSoundIIRSec.current;
   result.micInfo["calibrateSoundMinHz"] = calibrateSoundMinHz.current;
   result.micInfo["calibrateSoundMaxHz"] = calibrateSoundMaxHz.current;
-
+  console.log(result.micInfo);
   await writeMicrophoneInfoToFirestore(result.micInfo, id);
   await writeFrqGainToFirestore(IrFreq, IrGain, id);
   await writeGainat1000HzToFirestore(correctGain, id);

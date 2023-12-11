@@ -744,7 +744,7 @@ export const calibrateAudio = async (reader) => {
           elems.continueButton.style.display = "none";
           elems.timeToCalibrate.innerHTML = "";
           // elems.title.innerHTML = "";
-
+          deviceType.isLoudspeaker = false;
           await runCombinationCalibration(
             elems,
             gains,
