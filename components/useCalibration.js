@@ -44,6 +44,7 @@ import {
   calibrateSoundLimit,
   gotLoudspeakerMatch,
   micsForSoundTestPage,
+  deviceType,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -65,7 +66,10 @@ import {
   getSoundCalibrationLevelDBSPLFromIIR,
 } from "./soundUtils";
 
-import { runCombinationCalibration } from "./useSoundCalibration";
+import {
+  runCombinationCalibration,
+  calibrateAgain,
+} from "./useSoundCalibration";
 export const useCalibration = (reader) => {
   return ifTrue([
     ...reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"),
@@ -515,6 +519,7 @@ export const calibrateAudio = async (reader) => {
       // provide the option to calibrate another mic or to continue.
       elems.displayUpdate.style.display = "none";
       elems.calibrateMicrophoneButton.style.display = "block";
+      elems.againButton.style.display = "block";
       elems.continueButton.style.display = "block";
       elems.navContainer.style.display = "flex";
       // elems.title.innerHTML = "";
@@ -531,6 +536,194 @@ export const calibrateAudio = async (reader) => {
       showLoudSpeakerDoneMessage = false;
 
       const calibration = await new Promise(async (resolve) => {
+        const repeatCalibration = async () => {
+          console.log("repeatCalibration");
+          elems.completeTransducerTable.remove();
+          elems.testButton.style.display = "none";
+          elems.citation.style.visibility = "hidden";
+          elems.soundLevelsTable.innerHTML = "";
+          elems.soundTestPlots.innerHTML = "";
+          elems.soundParametersFromCalibration.innerHTML = "";
+          elems.downloadButton.style.visibility = "hidden";
+          elems.displayUpdate.innerHTML = "";
+          elems.message.innerHTML = "";
+          elems.message.style.lineHeight = "2rem";
+          elems.message.style.fontWeight = "normal";
+          elems.message.style.fontSize = "1.1rem";
+          elems.message.style.overflowX = "scroll";
+          elems.calibrateMicrophoneButton.style.display = "none";
+          againButton.style.display = "none";
+          elems.continueButton.style.display = "none";
+          elems.timeToCalibrate.innerHTML = "";
+          if (deviceType.isLoudspeaker) {
+            showLoudSpeakerDoneMessage = true;
+          }
+          await calibrateAgain(
+            elems,
+            deviceType.isLoudspeaker,
+            rc.language.value,
+            deviceType.isSmartphone,
+            deviceType.isLoudspeaker ? null : allHzCalibrationResults.knownIr
+          );
+
+          elems.title.innerHTML = readi18nPhrases(
+            deviceType.isLoudspeaker
+              ? "RC_loudspeakerCalibrationResults"
+              : "RC_microphoneCalibrationResults",
+            rc.language.value
+          );
+          elems.title.style.visibility = "visible";
+          if (calibrateSoundCheck.current !== "none") {
+            displayCompleteTransducerTable(
+              loudspeakerInfo.current,
+              microphoneInfo.current,
+              elems,
+              deviceType.isLoudspeaker,
+              calibrateSoundCheck.current === "both"
+                ? "system"
+                : calibrateSoundCheck.current
+            );
+            //show sound calibration results
+            const title1000Hz = "Sound Level at 1000 Hz";
+            const titleallHz = ["Correction"];
+            displayParameters1000Hz(
+              elems,
+              soundLevels,
+              deviceType.isLoudspeaker
+                ? soundCalibrationResults.current
+                : microphoneCalibrationResult.current,
+              title1000Hz,
+              calibrateSoundCheck.current === "both"
+                ? "system"
+                : calibrateSoundCheck.current,
+              deviceType.isLoudspeaker
+            );
+            displayVolumeRecordings(
+              elems,
+              deviceType.isLoudspeaker
+                ? soundCalibrationResults.current.recordingChecks
+                : microphoneCalibrationResult.current.recordingChecks,
+              deviceType.isLoudspeaker,
+              deviceType.isLoudspeaker
+                ? allHzCalibrationResults.filteredMLSRange.component
+                : microphoneCalibrationResult.current.filteredMLSRange.component
+            );
+            displayRecordings(
+              elems,
+              deviceType.isLoudspeaker
+                ? soundCalibrationResults.current.recordingChecks
+                : microphoneCalibrationResult.current.recordingChecks,
+              deviceType.isLoudspeaker,
+              deviceType.isLoudspeaker
+                ? allHzCalibrationResults.filteredMLSRange.component
+                : microphoneCalibrationResult.current.filteredMLSRange.component
+            );
+            if (
+              calibrateSoundCheck.current === "system" ||
+              calibrateSoundCheck.current === "goal"
+            ) {
+              if (deviceType.isLoudspeaker) {
+                displayParametersAllHz(
+                  elems,
+                  calibrateSoundCheck.current === "system"
+                    ? allHzCalibrationResults.system
+                    : allHzCalibrationResults.component,
+                  titleallHz,
+                  calibrateSoundCheck.current,
+                  deviceType.isLoudspeaker,
+                  allHzCalibrationResults.background,
+                  allHzCalibrationResults.mls_psd,
+                  allHzCalibrationResults.microphoneGain,
+                  calibrateSoundCheck.current === "system"
+                    ? allHzCalibrationResults.filteredMLSRange.system
+                    : allHzCalibrationResults.filteredMLSRange.component
+                );
+              } else {
+                displayParametersAllHz(
+                  elems,
+                  calibrateSoundCheck.current === "system"
+                    ? microphoneCalibrationResult.current.system
+                    : microphoneCalibrationResult.current.component,
+                  titleallHz,
+                  calibrateSoundCheck.current,
+                  deviceType.isLoudspeaker,
+                  microphoneCalibrationResult.current.background_noise,
+                  microphoneCalibrationResult.current.mls_psd,
+                  microphoneCalibrationResult.current.microphoneGain,
+                  calibrateSoundCheck.current === "system"
+                    ? microphoneCalibrationResult.current.filteredMLSRange
+                        .system
+                    : microphoneCalibrationResult.current.filteredMLSRange
+                        .component
+                );
+              }
+            } else {
+              if (deviceType.isLoudspeaker) {
+                displayParametersAllHz(
+                  elems,
+                  allHzCalibrationResults.system,
+                  titleallHz,
+                  "system",
+                  deviceType.isLoudspeaker,
+                  allHzCalibrationResults.background,
+                  allHzCalibrationResults.mls_psd,
+                  { Freq: [], Gain: [] },
+                  allHzCalibrationResults.filteredMLSRange.system
+                );
+                displayParametersAllHz(
+                  elems,
+                  allHzCalibrationResults.component,
+                  titleallHz,
+                  "goal",
+                  deviceType.isLoudspeaker,
+                  allHzCalibrationResults.background,
+                  allHzCalibrationResults.mls_psd,
+                  allHzCalibrationResults.microphoneGain,
+                  allHzCalibrationResults.filteredMLSRange.component
+                );
+              } else {
+                displayParametersAllHz(
+                  elems,
+                  microphoneCalibrationResult.current.system,
+                  titleallHz,
+                  "system",
+                  deviceType.isLoudspeaker,
+                  microphoneCalibrationResult.current.background_noise,
+                  microphoneCalibrationResult.current.mls_psd,
+                  microphoneCalibrationResult.current.microphoneGain,
+                  microphoneCalibrationResult.current.filteredMLSRange.system
+                );
+                displayParametersAllHz(
+                  elems,
+                  microphoneCalibrationResult.current.component,
+                  titleallHz,
+                  "goal",
+                  deviceType.isLoudspeaker,
+                  microphoneCalibrationResult.current.background_noise,
+                  microphoneCalibrationResult.current.mls_psd,
+                  loudspeakerIR,
+                  microphoneCalibrationResult.current.filteredMLSRange.component
+                );
+              }
+            }
+            // display what we save in the database for the loudspeaker calibration
+            displayWhatIsSavedInDatabase(
+              elems,
+              deviceType.isLoudspeaker
+                ? allHzCalibrationResults.knownIr
+                : microphoneCalibrationResult.current.component.ir,
+              deviceType.isLoudspeaker,
+              "",
+              deviceType.isLoudspeaker
+                ? allHzCalibrationResults.filteredMLSRange.component
+                : microphoneCalibrationResult.current.filteredMLSRange.component
+            );
+          }
+          elems.againButton.removeEventListener("click", repeatCalibration);
+          resolve();
+        };
+        elems.againButton.addEventListener("click", repeatCalibration);
+
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
           // find element by id and remove it: completeTransducerTable
           elems.completeTransducerTable.remove();
@@ -547,6 +740,7 @@ export const calibrateAudio = async (reader) => {
           elems.message.style.fontSize = "1.1rem";
           elems.message.style.overflowX = "scroll";
           elems.calibrateMicrophoneButton.style.display = "none";
+          againButton.style.display = "none";
           elems.continueButton.style.display = "none";
           elems.timeToCalibrate.innerHTML = "";
           // elems.title.innerHTML = "";
@@ -651,12 +845,12 @@ export const calibrateAudio = async (reader) => {
               microphoneCalibrationResult.current.filteredMLSRange.component
             );
           }
-
+          elems.againButton.removeEventListener("click", repeatCalibration);
           resolve();
         });
-
         elems.continueButton.addEventListener("click", async (e) => {
           elems.calibrateMicrophoneButton.style.display = "none";
+          elems.againButton.style.display = "none";
           elems.continueButton.style.display = "none";
           calibrateMicrophonesBool.current = false;
           resolve("proceed");
@@ -723,6 +917,7 @@ const _addSoundCalibrationElems = (copy) => {
   const continueButton = document.createElement("button");
   const recordingInProgress = document.createElement("h1");
   const timeToCalibrate = document.createElement("div");
+  const againButton = document.createElement("button");
   const elems = {
     timeToCalibrate,
     recordingInProgress,
@@ -748,6 +943,7 @@ const _addSoundCalibrationElems = (copy) => {
     citation,
     calibrateMicrophoneButton,
     continueButton,
+    againButton,
   };
 
   timeToCalibrate.setAttribute("id", "timeToCalibrate");
@@ -766,6 +962,7 @@ const _addSoundCalibrationElems = (copy) => {
   testButton.setAttribute("id", "soundTest");
   calibrateMicrophoneButton.setAttribute("id", "calibrateMicrophone");
   continueButton.setAttribute("id", "continueButton");
+  againButton.setAttribute("id", "againButton");
   soundParametersFromCalibration.setAttribute(
     "id",
     "soundParametersFromCalibration"
@@ -798,6 +995,8 @@ const _addSoundCalibrationElems = (copy) => {
   calibrateMicrophoneButton.style.display = "none";
   continueButton.innerHTML = copy.proceedToExperiment;
   continueButton.style.display = "none";
+  againButton.innerHTML = "Again";
+  againButton.style.display = "none";
   // width for displayUpdate
   displayUpdate.style.width = "100%";
   displayQR.style.marginTop = "12px";
@@ -818,6 +1017,7 @@ const _addSoundCalibrationElems = (copy) => {
   testButton.classList.add(...["btn", "btn-secondary"]);
   calibrateMicrophoneButton.classList.add(...["btn", "btn-primary"]);
   continueButton.classList.add(...["btn", "btn-success"]);
+  againButton.classList.add(...["btn", "btn-primary"]);
   //make download button invisible
   downloadButton.style.visibility = "hidden";
 
@@ -830,6 +1030,7 @@ const _addSoundCalibrationElems = (copy) => {
   container.appendChild(navContainer);
   navContainer.appendChild(testButton);
   navContainer.appendChild(calibrateMicrophoneButton);
+  navContainer.appendChild(againButton);
   navContainer.appendChild(yesButton);
   navContainer.appendChild(noButton);
   navContainer.appendChild(continueButton);

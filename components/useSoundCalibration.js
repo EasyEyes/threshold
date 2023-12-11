@@ -45,6 +45,7 @@ import {
   IDsToSaveInSoundProfileLibrary,
   calibrateSoundLimit,
   filteredMLSAttenuation,
+  deviceType,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -131,6 +132,8 @@ export const runCombinationCalibration = async (
             showExperimentEnding();
           }
           const isSmartPhone = dropdown.value === "Smartphone";
+          deviceType.isSmartphone = dropdown.value === "Smartphone";
+          deviceType.isLoudspeaker = isLoudspeakerCalibration;
           adjustPageNumber(elems.title, [
             { replace: 0, with: 1 },
             { replace: 5, with: isSmartPhone ? 3 : 5 },
@@ -188,6 +191,7 @@ export const runCombinationCalibration = async (
           showExperimentEnding();
         }
         const isSmartPhone = dropdown.value === "Smartphone";
+        deviceType.isSmartphone = dropdown.value === "Smartphone";
         adjustPageNumber(elems.title, [
           { replace: 0, with: 1 },
           { replace: 5, with: isSmartPhone ? 3 : 5 },
@@ -1058,6 +1062,184 @@ const startCalibration = async (
     elems.displayUpdate.innerHTML = "";
     elems.displayUpdate.style.display = "none";
     await startCalibration(
+      elems,
+      isLoudspeakerCalibration,
+      language,
+      isSmartPhone,
+      knownIR
+    );
+    return;
+  }
+  adjustDisplayAfterCalibration(elems, isLoudspeakerCalibration);
+  isLoudspeakerCalibration
+    ? await parseLoudspeakerCalibrationResults(results, isSmartPhone)
+    : await parseMicrophoneCalibrationResults(results, isSmartPhone);
+};
+
+export const calibrateAgain = async (
+  elems,
+  isLoudspeakerCalibration,
+  language,
+  isSmartPhone,
+  knownIR = null
+) => {
+  console.log("calibrateAgain");
+  elems.subtitle.innerHTML = isLoudspeakerCalibration
+    ? isSmartPhone
+      ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+      : readi18nPhrases("RC_usingUSBMicrophone", language)
+    : elems.subtitle.innerHTML;
+  const micName = microphoneInfo.current?.micFullName
+    ? microphoneInfo.current.micFullName
+    : "";
+  const micSerialNumber = microphoneInfo.current?.micFullSerialNumber
+    ? microphoneInfo.current.micFullSerialNumber
+    : "";
+  const micManufacturer = microphoneInfo.current?.micrFullManufacturerName
+    ? microphoneInfo.current.micrFullManufacturerName
+    : "";
+  const { Speaker, CombinationCalibration } = speakerCalibrator;
+  webAudioDeviceNames.loudspeakerText = readi18nPhrases(
+    "RC_nameLoudspeaker",
+    language
+  )
+    .replace("xxx", webAudioDeviceNames.loudspeaker)
+    .replace("XXX", webAudioDeviceNames.loudspeaker);
+  webAudioDeviceNames.microphoneText = readi18nPhrases(
+    "RC_nameMicrophone",
+    language
+  );
+  IDsToSaveInSoundProfileLibrary.ProlificParticipantID = isProlificExperiment()
+    ? new URLSearchParams(window.location.search).get("participant")
+    : "";
+  IDsToSaveInSoundProfileLibrary.PavloviaSessionID =
+    thisExperimentInfo.PavloviaSessionID;
+
+  const restrtCalibration = document.createElement("button");
+  restrtCalibration.innerHTML = readi18nPhrases("RC_ReRecord", language);
+  restrtCalibration.classList.add(...["btn", "btn-primary"]);
+  restrtCalibration.style.marginLeft = "0px";
+  restrtCalibration.style.marginTop = "10px";
+  restrtCalibration.style.display = "none";
+  elems.displayContainer.appendChild(restrtCalibration);
+
+  const speakerParameters = {
+    calibrateSoundLimit: calibrateSoundLimit.current,
+    restartButton: restrtCalibration,
+    language: language,
+    siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
+    targetElementId: "displayQR",
+    debug: debugBool.current,
+    gainValues: globalGains.values,
+    knownIR: knownIR,
+    displayUpdate: elems.displayUpdate,
+    instructionDisplayId: "recordingInProgress",
+    soundMessageId: "soundMessage",
+    titleDisplayId: "soundTitle",
+    timeToCalibrateId: "timeToCalibrate",
+    soundSubtitleId: "soundSubtitle",
+    webAudioDeviceNames: webAudioDeviceNames,
+    IDsToSaveInSoundProfileLibrary: IDsToSaveInSoundProfileLibrary,
+    calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
+    calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+    calibrateSoundSamplingDesiredBits:
+      calibrateSoundSamplingDesiredBits.current,
+    calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
+    calibrateSoundHz: calibrateSoundHz.current,
+    timeToCalibrate: timeToCalibrate.current,
+    microphoneName: micName,
+    micManufacturer: micManufacturer,
+    micSerialNumber: micSerialNumber,
+    micModelNumber: micSerialNumber,
+    micModelName: micName,
+    isSmartPhone: isSmartPhone,
+    calibrateSoundBurstDb: Math.pow(10, calibrateSoundBurstDb.current / 20),
+    calibrateSoundCheck: calibrateSoundCheck.current,
+    calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+    calibrateSoundIRSec: calibrateSoundIRSec.current,
+    calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
+    calibrateSound1000HzSec: calibrateSound1000HzSec.current,
+    calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
+    calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
+    calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+    calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
+    calibrateSoundPowerDbSDToleratedDb:
+      calibrateSoundPowerDbSDToleratedDb.current,
+    calibrateMicrophonesBool: calibrateMicrophonesBool.current,
+    authorEmails: authorEmail.current,
+  };
+
+  const calibratorParams = {
+    numCaptures: calibrateSoundBurstRecordings.current,
+    numMLSPerCapture: 2,
+    download: false,
+    lowHz: calibrateSoundMinHz.current,
+    highHz: calibrateSoundMaxHz.current,
+  };
+  const calibrator = new CombinationCalibration(calibratorParams);
+  calibrator.on("update", ({ message, ...rest }) => {
+    elems.displayUpdate.innerHTML = message;
+  });
+
+  adjustDisplayBeforeCalibration(
+    elems,
+    isSmartPhone,
+    language,
+    isLoudspeakerCalibration
+  );
+
+  calibrationTime.current = getCurrentTimeString();
+  timeToCalibrate.timeAtTheStartOfCalibration = new Date();
+  const speaker = window.speaker;
+  calibrator.setSamplingRates(microphoneActualSamplingRate.current);
+  calibrator.setSampleSize(actualBitsPerSample.current);
+  const micInfo = isLoudspeakerCalibration
+    ? soundCalibrationResults.current.micInfo
+    : microphoneCalibrationResult.current.micInfo;
+  const deviceInfo = {
+    hardwarename: micInfo.HardwareName,
+    hardwarefamily: micInfo.hardwareFamily,
+    hardwaremodel: micInfo.HardwareModel,
+    platformname: micInfo.PlatformName,
+    platformversion: micInfo.PlatformVersion,
+    devicetype: micInfo.DeviceType,
+    DeviceId: micInfo.ID_from_51Degrees,
+    calibrateMicrophonesBool: micInfo.calibrateMicrophonesBool,
+    screenHeight: micInfo.screenHeight,
+    screenWidth: micInfo.screenWidth,
+  };
+  calibrator.setDeviceInfo(deviceInfo);
+  calibrationRound.current--;
+  console.log("recalibrate", calibrationRound.current);
+  const results = await speaker.repeatCalibration(
+    speakerParameters,
+    window.localStream,
+    calibrator
+  );
+  restrtCalibration.style.display = "none";
+  // Speaker.closeConnection()
+  timeToCalibrate.timeAtTheEndOfCalibration = new Date();
+  // timeToCalibrate.calibrationDuration in minutes
+  timeToCalibrate.calibrationDuration = Math.round(
+    (timeToCalibrate.timeAtTheEndOfCalibration -
+      timeToCalibrate.timeAtTheStartOfCalibration) /
+      1000 /
+      60
+  );
+  const timeElement = document.getElementById("timeToCalibrate");
+  timeElement.innerHTML = readi18nPhrases(
+    "RC_calibrationEstimatedAndActualMinutes",
+    language
+  )
+    .replace("111", timeToCalibrate.current)
+    .replace("222", timeToCalibrate.calibrationDuration);
+  if (results === false) {
+    return false;
+  }
+  if (results === "restart") {
+    elems.displayUpdate.innerHTML = "";
+    elems.displayUpdate.style.display = "none";
+    await calibrateAgain(
       elems,
       isLoudspeakerCalibration,
       language,
