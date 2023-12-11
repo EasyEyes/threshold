@@ -33,6 +33,7 @@ interface cursorRecord {
   screenHeightPx: number;
   pxPerCm: string;
   block_condition: string;
+  trialStep: string;
 }
 
 export const trackCursor = (reader: ParamReader) => {
@@ -138,6 +139,7 @@ const recordCursorPosition = () => {
         nearPointX,
         nearPointY
       ).toString(),
+      trialStep: status.currentFunction,
     };
     //@ts-ignore
     cursorTracking.records.push(thisRecord);
