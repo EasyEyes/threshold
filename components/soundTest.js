@@ -1729,10 +1729,12 @@ export const displaySummarizedTransducerTable = (
   const td8 = document.createElement("td");
   const td9 = document.createElement("td");
 
-  LoudspeakerInfo["gainDBSPL"] =
-    Math.round(LoudspeakerInfo["gainDBSPL"] * 10) / 10;
-  microphoneInfo["gainDBSPL"] =
-    Math.round(microphoneInfo["gainDBSPL"] * 10) / 10;
+  LoudspeakerInfo["gainDBSPL"] = (
+    Math.round(LoudspeakerInfo["gainDBSPL"] * 10) / 10
+  ).toFixed(1);
+  microphoneInfo["gainDBSPL"] = (
+    Math.round(microphoneInfo["gainDBSPL"] * 10) / 10
+  ).toFixed(1);
   td8.innerHTML =
     LoudspeakerInfo["gainDBSPL"] > 0
       ? "+" + LoudspeakerInfo["gainDBSPL"]

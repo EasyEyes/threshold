@@ -54,13 +54,10 @@ export const plotSoundLevels1000Hz = (
 
   // model should start from min of soundLevels and end at max of soundLevels with 0.1 interval
   const model = [];
+  const gainDBSPL = Math.round(microphoneInfo.current.gainDBSPL * 10) / 10;
   const modelWithOutBackground = [];
   const minM = Math.min(...soundLevels);
   const maxM = Math.max(...soundLevels);
-  const minY = Math.min(...outDBSPL1000Values);
-  const maxY = Math.max(...outDBSPL1000Values);
-  const ratio = plotCanvas.height / plotCanvas.width;
-  // use ratio to adjust plotCanvas height and width
 
   for (let i = minM; i <= maxM; i += 0.1) {
     model.push({
@@ -88,9 +85,29 @@ export const plotSoundLevels1000Hz = (
   }
   // sort the data points by x
   model.sort((a, b) => a.x - b.x);
-
   // sort the data points by x
   modelWithOutBackground.sort((a, b) => a.x - b.x);
+
+  const minY =
+    Math.floor(
+      Math.min(
+        ...outDBSPL1000Values,
+        ...model.map((point) => point.y),
+        ...modelWithOutBackground.map((point) => point.y)
+      ) / 10
+    ) *
+      10 -
+    gainDBSPL;
+  const maxY =
+    Math.ceil(
+      Math.max(
+        ...outDBSPL1000Values,
+        ...model.map((point) => point.y),
+        ...modelWithOutBackground.map((point) => point.y)
+      ) / 10
+    ) *
+      10 -
+    gainDBSPL;
 
   // plot both the data points (dot) and the model (line)
   const data = {
@@ -104,6 +121,7 @@ export const plotSoundLevels1000Hz = (
         pointRadius: 3,
         pointHoverRadius: 5,
         showLine: false,
+        yAxisID: "y",
       },
       {
         label: "Model",
@@ -115,6 +133,7 @@ export const plotSoundLevels1000Hz = (
         pointHoverRadius: 2,
         showLine: true,
         tension: 0.1,
+        yAxisID: "y",
       },
       {
         type: "line",
@@ -128,6 +147,7 @@ export const plotSoundLevels1000Hz = (
         showLine: true,
         borderDash: [5, 5],
         tension: 0.1,
+        yAxisID: "y",
       },
     ],
   };
@@ -201,10 +221,33 @@ export const plotSoundLevels1000Hz = (
           position: "bottom",
           title: {
             display: true,
-            text: `in (${inDBUnits})`,
+            text: `Input level (${inDBUnits})`,
             font: {
               size: "19px",
             },
+          },
+          ticks: {
+            stepSize: 10,
+            font: {
+              size: 15,
+            },
+          },
+        },
+        y1: {
+          type: "linear",
+          position: "right",
+          display: true,
+          min: minY,
+          max: maxY,
+          title: {
+            display: true,
+            text: `Estimated sound level (dB SPL)`,
+            font: {
+              size: "19px",
+            },
+          },
+          grid: {
+            drawOnChartArea: false, // only want the grid lines for one axis to show up
           },
           ticks: {
             stepSize: 10,
@@ -218,13 +261,13 @@ export const plotSoundLevels1000Hz = (
           position: "left",
           title: {
             display: true,
-            text: `out (${outDBUnits})`,
+            text: `Output level (${outDBUnits})`,
             font: {
               size: "19px",
             },
           },
           ticks: {
-            stepSize: 10 * ratio,
+            stepSize: 10,
             font: {
               size: 15,
             },
