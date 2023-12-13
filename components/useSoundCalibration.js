@@ -465,13 +465,8 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   );
 
   // update subtitle
-  elems.subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
-    .replace(
-      "xxx",
-      thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM
-    )
-    .replace("yyy", thisDevice.current.DeviceType);
-  elems.subtitle.style.fontSize = "1rem";
+  elems.subtitle.innerHTML = "";
+  // elems.subtitle.style.fontSize = "1rem";
 
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");

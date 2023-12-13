@@ -1,7 +1,7 @@
 import { readi18nPhrases } from "./readPhrases";
 import { ref, set, get, child } from "firebase/database";
 import database, { db } from "./firebase/firebase.js";
-import { microphoneInfo } from "./global";
+import { fontSize, microphoneInfo } from "./global";
 import {
   doc,
   getDoc,
@@ -162,7 +162,13 @@ export const getInstructionText = (
         ).replace(
           "xxx",
           `${microphoneInfo.current.micrFullManufacturerName} ${microphoneInfo.current.micFullName}`
-        ) + "<br> <br>"
+        ) +
+        "<br> <br>" +
+        "<b style= 'fontSize: '1rem';'>" +
+        readi18nPhrases("RC_yourComputer", language)
+          .replace("xxx", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
+          .replace("yyy", thisDevice.DeviceType) +
+        "</b> <br>"
     : "";
   const needModelNumber = readi18nPhrases(
     "RC_needModelNumberAndName",
