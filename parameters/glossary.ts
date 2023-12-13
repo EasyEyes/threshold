@@ -66,6 +66,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _calibrateScreenSizeCookieBool (default TRUE) when TRUE enables EasyEyes reading and saving of a cookie (on the participant computer) containing the screen resolution (px) and size (cm),  e.g. 3024 px x 1964 px, 24.5 cm x 16 cm. The cookie is read only if it's present and calibrateScreenSizeCookieBool==TRUE. If read, the cookie is considered valid only if it reports a screen resolution (width x height px) that matches the current resolution. If valid then EasyEyes takes the screen size (width x height cm) from the cookie instead of doing the calibration normally provoked by calibrateScreenSizeBool==TRUE. Lacking a valid cookie, then calibrateScreenSizeBool==TRUE will provoke size calibration. If size is actually calibrated, and calibrateScreenSizeCookieBool==TRUE, then a cookie is saved, holding the screen resolution and size. The reason to check for validity is that the computer might have several screens, and the browser window could be opened on any of them. The chances are low that a given computer will have two screens with different sizes and the same resolution. Set calibrateScreenSizeCookieBool=FALSE to rule out the small chance of mistaking a new display for a same-resolution but differently sized one that was calibrated on a previous occasion.",
   },
+  _calibrateSoundAgainOptionBool: {
+    name: "_calibrateSoundAgainOptionBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      '🕑 _calibrateSoundAgainOptionBool (default FALSE), if TRUE, then the "Again" button is ALWAYS offered at the top of the Sound Calibration Results page. If FALSE, then the "Again" button is shown only if _calibrateMicrophonesBool==TRUE or the loudspeaker correction is unacceptable, with SD > _calibrateSoundTolerance_dB.',
+  },
+  _calibrateSoundTolerance_dB: {
+    name: "_calibrateSoundTolerance_dB",
+    availability: "now",
+    type: "numerical",
+    default: "1.5",
+    explanation:
+      '🕑 _calibrateSoundTolerance_dB (default 1.8), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the current congratulations and the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Again" button.',
+  },
   _calibrateSoundBackgroundSecs: {
     name: "_calibrateSoundBackgroundSecs",
     availability: "now",

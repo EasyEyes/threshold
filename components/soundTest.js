@@ -549,6 +549,8 @@ const microphoneIR = {
   Gain: [],
   Frequency: [],
   playingSoundName: null,
+  maxdBSPL: -1000,
+  maxdB: -1000,
 };
 
 const parseSoundFileNameToFrequency = (name) => {
@@ -777,13 +779,13 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   const maxdB = document.createElement("p");
   maxdB.id = "running-max-dB";
   maxdB.style.lineHeight = "1.2rem";
-  maxdB.innerText = "-1000 dB, ";
+  maxdB.innerText = "-1000.0 dB, ";
   maxdB.style.marginRight = "5px";
 
   const maxdBSPL = document.createElement("p");
   maxdBSPL.id = "running-max-dB-SPL";
   maxdBSPL.style.lineHeight = "1.2rem";
-  maxdBSPL.innerText = "-1000 dB SPL";
+  maxdBSPL.innerText = "-1000.0 dB SPL";
 
   const container = document.createElement("div");
   container.style.display = "flex";
@@ -866,8 +868,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   recordButton.innerHTML = "Record";
 
   recordButton.addEventListener("click", async () => {
-    maxdB.innerText = "-1000 dB, ";
-    maxdBSPL.innerText = "-1000 dB SPL";
     await toggleRecording(select.value, recordButton, language);
   });
 
@@ -892,6 +892,12 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
 };
 
 const startRecording = async (deviceId, recordButton, language) => {
+  const max = document.getElementById("running-max-dB");
+  max.innerText = "-1000.0 dB, ";
+  const maxdBSPL = document.getElementById("running-max-dB-SPL");
+  maxdBSPL.innerText = "-1000.0 dB SPL";
+  microphoneIR.maxdB = -1000;
+  microphoneIR.maxdBSPL = -1000;
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       deviceId: { exact: deviceId },
@@ -914,23 +920,24 @@ const startRecording = async (deviceId, recordButton, language) => {
 
   mediaRecorder.onstop = async () => {
     const powerLevel = await computePowerLevel(recordedChunks);
-    const max = document.getElementById("running-max-dB");
     let dbSPLValue = null;
     if (microphoneIR.playingSoundName) {
       const freq = microphoneIR.playingSoundName;
       if (freq && microphoneIR.Frequency.length > 0) {
         dbSPLValue = convertDBToDBSPL(powerLevel, freq);
+        console.log("dbSPLValue", dbSPLValue);
       }
     }
-    if (parseFloat(powerLevel) > parseFloat(max.innerText)) {
+    if (parseFloat(powerLevel) > microphoneIR.maxdB) {
       max.innerText = powerLevel + " dB, ";
+      microphoneIR.maxdB = parseFloat(powerLevel);
     }
     p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
     if (dbSPLValue) {
       p.innerText += " , " + dbSPLValue + " " + "dB SPL";
-      const maxdBSPL = document.getElementById("running-max-dB-SPL");
-      if (dbSPLValue > parseFloat(maxdBSPL.innerText)) {
+      if (parseFloat(dbSPLValue) > microphoneIR.maxdBSPL) {
         maxdBSPL.innerText = dbSPLValue + " dB SPL";
+        microphoneIR.maxdBSPL = dbSPLValue;
       }
     }
 
@@ -965,7 +972,7 @@ const convertDBToDBSPL = (db, frequency) => {
     microphoneIR.Gain,
     frequency
   );
-  return parseFloat(db) + gain;
+  return (parseFloat(db) - gain).toFixed(1);
 };
 
 const toggleRecording = async (id, recordButton, language) => {

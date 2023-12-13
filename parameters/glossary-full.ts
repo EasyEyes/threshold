@@ -80,6 +80,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundAgainOptionBool",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑 _calibrateSoundAgainOptionBool (default FALSE), if TRUE, then the "Again" button is ALWAYS offered at the top of the Sound Calibration Results page. If FALSE, then the "Again" button is shown only if _calibrateMicrophonesBool==TRUE or the loudspeaker correction is unacceptable, with SD > _calibrateSoundTolerance_dB.',
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundTolerance_dB",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑 _calibrateSoundTolerance_dB (default 1.8), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the current congratulations and the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Again" button.',
+    type: "numerical",
+    default: "1.5",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundBackgroundSecs",
     availability: "now",
     example: "",
