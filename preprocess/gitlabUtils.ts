@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import { Buffer } from "buffer";
-import JSZip, { file } from "jszip";
+import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
 import Papa from "papaparse";
 import { DataFrame } from "dataframe-js";
-// import { preprocessDataframe } from "../../source/components/ErrorReport";
+import * as XLSX from "xlsx";
 
 import {
   acceptableExtensions,
@@ -283,6 +283,103 @@ export const getCommonResourcesNames = async (
   }
 
   return resourcesNameByType;
+};
+
+export const downloadCommonResources = async (
+  user: User,
+  projectRepoId: string,
+  experimentFileName: string,
+): Promise<void> => {
+  const easyEyesResourcesRepo = getProjectByNameInProjectList(
+    user.projectList,
+    "EasyEyesResources",
+  );
+  const originalFileName = await getOriginalFileNameForProject(
+    user,
+    experimentFileName,
+  );
+
+  const resources = await getCommonResourcesNames(user);
+  const zip = new JSZip();
+
+  await Swal.fire({
+    title: `Exporting experiment details`,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: async () => {
+      Swal.showLoading();
+
+      if (!originalFileName) {
+        Swal.close();
+        Swal.fire({
+          icon: "error",
+          title: `No data`,
+          text: `The experiment file is not stored in pavlovia.`,
+          confirmButtonColor: "#666",
+        });
+        return;
+      }
+
+      if (originalFileName.includes(".csv")) {
+        const csvContent: string = await getBase64FileDataFromGitLab(
+          parseInt(projectRepoId),
+          originalFileName,
+          user.accessToken,
+        );
+        zip.file(originalFileName, csvContent, { base64: true });
+      }
+
+      if (originalFileName.includes(".xlsx")) {
+        const xlsxContent = await getTextFileDataFromGitLab(
+          parseInt(projectRepoId),
+          originalFileName,
+          user.accessToken,
+        );
+        const sheetData = JSON.parse(xlsxContent);
+        const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+        const blob = XLSX.write(
+          { Sheets: { Sheet1: worksheet }, SheetNames: ["Sheet1"] },
+          { bookType: "xlsx", type: "base64" },
+        );
+        zip.file(originalFileName, blob, { base64: true });
+      }
+
+      for (const type of resourcesFileTypes) {
+        const fileNames = resources[type];
+
+        for (const fileName of fileNames) {
+          const resourcesRepoFilePath = encodeGitlabFilePath(
+            `${type}/${fileName}`,
+          );
+          const typeFolder = zip.folder(type);
+          const content: string =
+            type === "texts"
+              ? await getTextFileDataFromGitLab(
+                  parseInt(easyEyesResourcesRepo.id),
+                  resourcesRepoFilePath,
+                  user.accessToken,
+                )
+              : await getBase64FileDataFromGitLab(
+                  parseInt(easyEyesResourcesRepo.id),
+                  resourcesRepoFilePath,
+                  user.accessToken,
+                );
+
+          if (
+            content?.trim().indexOf(`{"message":"404 File Not Found"}`) !== -1
+          )
+            continue;
+
+          typeFolder!.file(fileName, content, { base64: type !== "texts" });
+        }
+      }
+
+      zip.generateAsync({ type: "blob" }).then((zipBlob) => {
+        saveAs(zipBlob, `ExportedExperiment-${experimentFileName}.zip`);
+        Swal.close();
+      });
+    },
+  });
 };
 
 export const getProlificToken = async (user: User): Promise<string> => {
