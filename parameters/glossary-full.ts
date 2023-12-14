@@ -114,9 +114,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstDb (default -18) is the digital sound level (in dB) at which to play the MLS during calibration. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital sound power will be _calibrateSoundBurstDb (in dB). The unfiltered MLS amplitude will be ±10^(_calibrateSoundBurstDb/20). At the default of -10 dB, the amplitude is ±0.32. _calibrateSoundBurstDb specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
+      "_calibrateSoundBurstDb (default -18) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstLevelReTBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstLevelReTBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstLevelReTBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
     type: "numerical",
     default: "-18",
+    categories: "",
+  },
+  {
+    name: "_calibrateSoundBurstLevelReTBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is _calibrateSoundBurstDb+(T-soundGainDbSPL), where T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
