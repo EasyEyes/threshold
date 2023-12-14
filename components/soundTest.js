@@ -1622,7 +1622,7 @@ export const displayCompleteTransducerTable = (
 
 export const display1000HzParametersTable = (parameters) => {
   const parametersToDisplay = {
-    T: parameters.T.toFixed(1) + " dB SPL",
+    T: parameters.T.toFixed(1) + " dB",
     W: parameters.W.toFixed(1) + " dB",
     "Q = 1/R": (1 / Number(parameters.R.toFixed(1))).toFixed(3),
     gainDBSPL: parameters.gainDBSPL.toFixed(1),
@@ -1763,8 +1763,8 @@ export const displaySummarizedTransducerTable = (
     const td13 = document.createElement("td");
     td12.innerHTML = webAudioDeviceNames.loudspeaker;
     td13.innerHTML = webAudioDeviceNames.microphone;
-    td12.style.width = "200px";
-    td13.style.width = "200px";
+    td12.style.width = "180px";
+    td13.style.width = "180px";
     tr8.appendChild(td12);
     tr8.appendChild(td13);
     tr8.style.lineHeight = "1";
@@ -1800,7 +1800,7 @@ export const displaySummarizedTransducerTable = (
   tr6.style.lineHeight = "1";
 
   // max width of the table: 300px. wrap the texts
-  table.style.maxWidth = "400px";
+  table.style.maxWidth = "360px";
   table.style.tableLayout = "fixed";
   table.appendChild(thead);
   table.appendChild(tbody);

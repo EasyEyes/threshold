@@ -88,7 +88,7 @@ export const plotSoundLevels1000Hz = (
   // sort the data points by x
   modelWithOutBackground.sort((a, b) => a.x - b.x);
 
-  const minY =
+  let minY =
     Math.floor(
       Math.min(
         ...outDBSPL1000Values,
@@ -97,8 +97,9 @@ export const plotSoundLevels1000Hz = (
       ) / 10
     ) *
       10 -
-    gainDBSPL;
-  const maxY =
+    Math.round(gainDBSPL * 10) / 10;
+  minY = Math.round(minY * 10) / 10;
+  let maxY =
     Math.ceil(
       Math.max(
         ...outDBSPL1000Values,
@@ -107,7 +108,10 @@ export const plotSoundLevels1000Hz = (
       ) / 10
     ) *
       10 -
-    gainDBSPL;
+    Math.round(gainDBSPL * 10) / 10;
+
+  maxY = Math.round(maxY * 10) / 10;
+  console.log("minY", minY, "maxY", maxY);
 
   // plot both the data points (dot) and the model (line)
   const data = {
@@ -379,6 +383,25 @@ export const plotForAllHz = (
         })
       : [];
 
+  // expected correction is the sum of the recording of MLS and the filtered MLS
+  const expectedCorrectionPoints = [];
+  if (filteredDigitalMLSPoints.length > 0) {
+    for (let i = 0; i < filteredDigitalMLSPoints.length; i++) {
+      expectedCorrectionPoints.push({
+        x: filteredDigitalMLSPoints[i].x,
+        y:
+          10 *
+          Math.log10(
+            Math.max(
+              0,
+              calibrationResults.psd.unconv.y[i] -
+                backgroundNoise.y_background[i]
+            ) * calibrationResults.filtered_mls_psd.y[i]
+          ),
+      });
+    }
+  }
+
   // if calibration goal == system and isLoudspeakerCalibration ==true, then subtract microphone gain from conv, unconv, and background
   if (calibrationGoal === "goal") {
     // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
@@ -416,27 +439,17 @@ export const plotForAllHz = (
         );
     });
 
-    // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
-  }
+    expectedCorrectionPoints.forEach((point, i) => {
+      expectedCorrectionPoints[i].y =
+        expectedCorrectionPoints[i].y -
+        findGainatFrequency(
+          microphoneGainFreq,
+          microphoneGainGain,
+          expectedCorrectionPoints[i].x
+        );
+    });
 
-  // expected correction is the sum of the recording of MLS and the filtered MLS
-  const expectedCorrectionPoints = [];
-  if (filteredDigitalMLSPoints.length > 0) {
-    for (let i = 0; i < filteredDigitalMLSPoints.length; i++) {
-      expectedCorrectionPoints.push({
-        x: filteredDigitalMLSPoints[i].x,
-        y:
-          10 *
-            Math.log10(
-              Math.max(
-                0,
-                calibrationResults.filtered_mls_psd.y[i] -
-                  backgroundNoise.y_background[i]
-              )
-            ) +
-          unconvMergedDataPoints[i].y,
-      });
-    }
+    // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
   }
 
   // sort the data points by x
