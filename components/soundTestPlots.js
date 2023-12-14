@@ -425,7 +425,16 @@ export const plotForAllHz = (
     for (let i = 0; i < filteredDigitalMLSPoints.length; i++) {
       expectedCorrectionPoints.push({
         x: filteredDigitalMLSPoints[i].x,
-        y: filteredDigitalMLSPoints[i].y + unconvMergedDataPoints[i].y,
+        y:
+          10 *
+            Math.log10(
+              Math.max(
+                0,
+                calibrationResults.filtered_mls_psd.y[i] -
+                  backgroundNoise.y_background[i]
+              )
+            ) +
+          unconvMergedDataPoints[i].y,
       });
     }
   }
