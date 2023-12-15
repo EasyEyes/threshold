@@ -962,10 +962,23 @@ const startCalibration = async (
   restrtCalibration.style.marginTop = "10px";
   restrtCalibration.style.display = "none";
   elems.displayContainer.appendChild(restrtCalibration);
-  console.log(webAudioDeviceNames);
+
+  const reminderVolumeCase = document.createElement("div");
+  let reminder = isSmartPhone
+    ? readi18nPhrases("RC_reminderVolumeCase", language)
+    : readi18nPhrases("RC_reminderVolume", language);
+  reminderVolumeCase.innerHTML = reminder.replace(/\n/g, "<br>");
+  reminderVolumeCase.style.marginTop = "10px";
+  reminderVolumeCase.style.marginLeft = "0px";
+  reminderVolumeCase.style.fontSize = "1rem";
+  reminderVolumeCase.style.fontWeight = "normal";
+  reminderVolumeCase.style.display = "none";
+  elems.displayContainer.appendChild(reminderVolumeCase);
+
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
     restartButton: restrtCalibration,
+    reminder: reminderVolumeCase,
     language: language,
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
@@ -1035,6 +1048,7 @@ const startCalibration = async (
     timeoutSec.current
   );
   restrtCalibration.style.display = "none";
+  reminderVolumeCase.style.display = "none";
   // Speaker.closeConnection()
   timeToCalibrate.timeAtTheEndOfCalibration = new Date();
   // timeToCalibrate.calibrationDuration in minutes
@@ -1102,10 +1116,23 @@ export const calibrateAgain = async (
   restrtCalibration.style.marginTop = "10px";
   restrtCalibration.style.display = "none";
   elems.displayContainer.appendChild(restrtCalibration);
-  console.log(webAudioDeviceNames);
+
+  const reminderVolumeCase = document.createElement("div");
+  let reminder = isSmartPhone
+    ? readi18nPhrases("RC_reminderVolumeCase", language)
+    : readi18nPhrases("RC_reminderVolume", language);
+  reminderVolumeCase.innerHTML = reminder.replace(/\n/g, "<br>");
+  reminderVolumeCase.style.marginTop = "10px";
+  reminderVolumeCase.style.marginLeft = "0px";
+  reminderVolumeCase.style.fontSize = "1rem";
+  reminderVolumeCase.style.fontWeight = "normal";
+  reminderVolumeCase.style.display = "none";
+  elems.displayContainer.appendChild(reminderVolumeCase);
+
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
     restartButton: restrtCalibration,
+    reminder: reminderVolumeCase,
     language: language,
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
@@ -1192,13 +1219,14 @@ export const calibrateAgain = async (
   };
   calibrator.setDeviceInfo(deviceInfo);
   calibrationRound.current--;
-  console.log("recalibrate", calibrationRound.current);
+
   const results = await speaker.repeatCalibration(
     speakerParameters,
     window.localStream,
     calibrator
   );
   restrtCalibration.style.display = "none";
+  reminderVolumeCase.style.display = "none";
   // Speaker.closeConnection()
   timeToCalibrate.timeAtTheEndOfCalibration = new Date();
   // timeToCalibrate.calibrationDuration in minutes
