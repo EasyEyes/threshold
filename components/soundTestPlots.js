@@ -258,6 +258,9 @@ export const plotSoundLevels1000Hz = (
             font: {
               size: 15,
             },
+            callback: function (value, index, values) {
+              return value.toFixed(1); // Enforce one decimal place
+            },
           },
         },
         y: {
@@ -401,6 +404,7 @@ export const plotForAllHz = (
       });
     }
   }
+  expectedCorrectionPoints.filter((y) => y != 0);
 
   // if calibration goal == system and isLoudspeakerCalibration ==true, then subtract microphone gain from conv, unconv, and background
   if (calibrationGoal === "goal") {
