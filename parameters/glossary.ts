@@ -96,7 +96,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "-18",
     explanation:
-      "_calibrateSoundBurstDb (default -18) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstLevelReTBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstLevelReTBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstLevelReTBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
+      "_calibrateSoundBurstDb (default -18) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
+  },
+  _calibrateSoundBurstDbIsRelativeBool: {
+    name: "_calibrateSoundBurstDbIsRelativeBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_calibrateSoundBurstDbIsRelativeBool (default FALSE) when TRUE the burst sound level is\n _calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
   },
   _calibrateSoundBurstLevelReTBool: {
     name: "_calibrateSoundBurstLevelReTBool",
@@ -104,7 +112,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is _calibrateSoundBurstDb+(T-soundGainDbSPL), where T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
+      "❌ _calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is \n_calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
   },
   _calibrateSoundBurstPostSec: {
     name: "_calibrateSoundBurstPostSec",
@@ -2835,6 +2843,13 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "❌ OBSOLETE. RETAINED SOLELY FOR REPLICATION OF BUG REPORTED IN TRELLO CARD. https://trello.com/c/xKZaBnEV",
+  },
+  rsvpReadingNumberOfIdentifications: {
+    name: "rsvpReadingNumberOfIdentifications",
+    availability: "now",
+    type: "numerical",
+    default: "3",
+    explanation: "",
   },
   rsvpReadingNumberOfResponseOptions: {
     name: "rsvpReadingNumberOfResponseOptions",
