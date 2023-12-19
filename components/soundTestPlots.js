@@ -397,21 +397,24 @@ export const plotForAllHz = (
   const expectedCorrectionPoints = [];
   if (filteredDigitalMLSPoints.length > 0) {
     for (let i = 0; i < filteredDigitalMLSPoints.length; i++) {
-      expectedCorrectionPoints.push({
-        x: filteredDigitalMLSPoints[i].x,
-        y:
-          10 *
-          Math.log10(
-            Math.max(
-              0,
-              calibrationResults.psd.unconv.y[i] -
-                attenuatedBackgroundNoise.y_background[i]
-            ) * calibrationResults.filtered_mls_psd.y[i]
-          ),
-      });
+      const yValue =
+        10 *
+        Math.log10(
+          Math.max(
+            0,
+            calibrationResults.psd.unconv.y[i] -
+              attenuatedBackgroundNoise.y_background[i]
+          ) * calibrationResults.filtered_mls_psd.y[i]
+        );
+
+      if (isFinite(yValue)) {
+        expectedCorrectionPoints.push({
+          x: filteredDigitalMLSPoints[i].x,
+          y: yValue,
+        });
+      }
     }
   }
-  expectedCorrectionPoints.filter((y) => y != 0);
 
   // if calibration goal == system and isLoudspeakerCalibration ==true, then subtract microphone gain from conv, unconv, and background
   if (calibrationGoal === "goal") {
