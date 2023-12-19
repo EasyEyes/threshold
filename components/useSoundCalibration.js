@@ -13,6 +13,7 @@ import {
   calibrateSoundPowerBinDesiredSec,
   calibrateSoundPowerDbSDToleratedDb,
   calibrateSoundBurstDb,
+  calibrateSoundBurstFilteredExtraDb,
   calibrateSoundBurstLevelReTBool,
   calibrateSoundBurstRecordings,
   calibrateSoundBurstRepeats,
@@ -1010,6 +1011,8 @@ const startCalibration = async (
     micModelName: micName,
     isSmartPhone: isSmartPhone,
     calibrateSoundBurstDb: calibrateSoundBurstDb.current,
+    calibrateSoundBurstFilteredExtraDb:
+      calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
     calibrateSoundCheck: calibrateSoundCheck.current,
     calibrateSoundIIRSec: calibrateSoundIIRSec.current,
@@ -1165,6 +1168,8 @@ export const calibrateAgain = async (
     micModelName: micName,
     isSmartPhone: isSmartPhone,
     calibrateSoundBurstDb: calibrateSoundBurstDb.current,
+    calibrateSoundBurstFilteredExtraDb:
+      calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
     calibrateSoundCheck: calibrateSoundCheck.current,
     calibrateSoundIIRSec: calibrateSoundIIRSec.current,
@@ -1426,6 +1431,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     Math.round(allHzCalibrationResults.filteredMLSRange.system.Max * 10) / 10;
   loudspeakerInfo.current["calibrateSoundBurstDb"] =
     calibrateSoundBurstDb.current;
+  loudspeakerInfo.current["calibrateSoundBurstFilteredExtraDb"] =
+    calibrateSoundBurstFilteredExtraDb.current;
   loudspeakerInfo.current["calibrateSoundBurstLevelReTBool"] =
     calibrateSoundBurstLevelReTBool.current;
   loudspeakerInfo.current["calibrateSoundBurstSec"] =
@@ -1562,6 +1569,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     Hz_mls: result.mls_psd?.x,
     recordingChecks: result.recordingChecks,
     calibrateSoundBurstDb: calibrateSoundBurstDb.current,
+    calibrateSoundBurstFilteredExtraDb:
+      calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
     calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
@@ -1623,6 +1632,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["filteredMLSComponentMax"] =
     Math.round(result.filteredMLSRange.component.Max * 10) / 10;
   result.micInfo["calibrateSoundBurstDb"] = calibrateSoundBurstDb.current;
+  result.micInfo["calibrateSoundBurstFilteredExtraDb"] =
+    calibrateSoundBurstFilteredExtraDb.current;
   result.micInfo["calibrateSoundBurstLevelReTBool"] =
     calibrateSoundBurstLevelReTBool.current;
   result.micInfo["calibrateSoundBurstSec"] = calibrateSoundBurstSec.current;
@@ -1768,6 +1779,8 @@ const downloadLoudspeakerCalibration = () => {
       Hz_mls: soundCalibrationResults.current?.mls_psd?.x,
       recordingChecks: soundCalibrationResults.current?.recordingChecks,
       calibrateSoundBurstDb: calibrateSoundBurstDb.current,
+      calibrateSoundBurstFilteredExtraDb:
+        calibrateSoundBurstFilteredExtraDb.current,
       calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
       calibrateSoundBurstSec: calibrateSoundBurstSec.current,
       calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,

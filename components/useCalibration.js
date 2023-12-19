@@ -27,7 +27,9 @@ import {
   calibrateSoundIIRSec,
   calibrateSoundIRSec,
   calibrateSoundBurstDb,
+  calibrateSoundBurstFilteredExtraDb,
   calibrateSoundBurstLevelReTBool,
+  calibrateSoundBurstDbIsRelativeBool,
   loudspeakerInfo,
   microphoneInfo,
   calibrationTime,
@@ -249,8 +251,12 @@ export const calibrateAudio = async (reader) => {
       "__ALL_BLOCKS__"
     )
   );
-
-  console.log(calibrateSoundBurstLevelReTBool.current);
+  calibrateSoundBurstDbIsRelativeBool.current = ifTrue(
+    reader.read(
+      GLOSSARY._calibrateSoundBurstDbIsRelativeBool.name,
+      "__ALL_BLOCKS__"
+    )
+  );
 
   calibrateSoundCheck.current = reader.read("_calibrateSoundCheck")[0];
 
@@ -298,6 +304,11 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundBurstDb.current = reader.read(
     GLOSSARY._calibrateSoundBurstDb.name
   )[0];
+
+  calibrateSoundBurstFilteredExtraDb.current = reader.read(
+    GLOSSARY._calibrateSoundBurstFilteredExtraDb.name
+  )[0];
+
   calibrateSound1000HzSec.current = reader.read(
     GLOSSARY.calibrateSound1000HzSec.name
   )[0];
