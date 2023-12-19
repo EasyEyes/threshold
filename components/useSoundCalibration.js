@@ -1354,7 +1354,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   attenuatorGainDB.system =
     soundCalibrationResults.current.system.attenuatorGainDB;
   attenuatorGainDB.component =
-    soundCalibrationResults.current.component.attuatorGainDB;
+    soundCalibrationResults.current.component.attenuatorGainDB;
   soundGainDBSPL.current = soundCalibrationResults.current.parameters.gainDBSPL;
   soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
   allHzCalibrationResults.timestamps =
@@ -1483,7 +1483,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   attenuatorGainDB.system =
     microphoneCalibrationResult.current.system.attenuatorGainDB;
   attenuatorGainDB.component =
-    microphoneCalibrationResult.current.component.attuatorGainDB;
+    microphoneCalibrationResult.current.component.attenuatorGainDB;
 
   filteredMLSAttenuation.component =
     microphoneCalibrationResult.current.filteredMLSAttenuation.component;
