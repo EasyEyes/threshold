@@ -27,6 +27,8 @@ import {
   calibrateSoundSamplingDesiredBits,
   calibrationTime,
   debugBool,
+  fMaxHz,
+  attenuatorGainDB,
   invertedImpulseResponse,
   loudspeakerIR,
   loudspeakerInfo,
@@ -1347,6 +1349,12 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   filteredMLSAttenuation.attenuationDbComponent =
     -20 * Math.log10(filteredMLSAttenuation.component);
 
+  fMaxHz.system = soundCalibrationResults.current.system.fMaxHz;
+  fMaxHz.component = soundCalibrationResults.current.component.fMaxHz;
+  attenuatorGainDB.system =
+    soundCalibrationResults.current.system.attenuatorGainDB;
+  attenuatorGainDB.component =
+    soundCalibrationResults.current.component.attuatorGainDB;
   soundGainDBSPL.current = soundCalibrationResults.current.parameters.gainDBSPL;
   soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
   allHzCalibrationResults.timestamps =
@@ -1469,6 +1477,14 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     Freq: IrFreq,
     Gain: IrGain,
   };
+
+  fMaxHz.system = microphoneCalibrationResult.current.system.fMaxHz;
+  fMaxHz.component = microphoneCalibrationResult.current.component.fMaxHz;
+  attenuatorGainDB.system =
+    microphoneCalibrationResult.current.system.attenuatorGainDB;
+  attenuatorGainDB.component =
+    microphoneCalibrationResult.current.component.attuatorGainDB;
+
   filteredMLSAttenuation.component =
     microphoneCalibrationResult.current.filteredMLSAttenuation.component;
   filteredMLSAttenuation.system =

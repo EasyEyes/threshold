@@ -466,6 +466,14 @@ export const microphoneCalibrationResults = [];
 export const microphoneCalibrationResult = { current: undefined };
 export const calibrateSoundMaxHz = { current: undefined };
 export const calibrateSoundMinHz = { current: undefined };
+export const fMaxHz = {
+  system: undefined,
+  component: undefined,
+};
+export const attenuatorGainDB = {
+  system: undefined,
+  component: undefined,
+};
 export const soundGainTWR = { T: undefined, W: undefined, R: undefined };
 export const debugBool = { current: false };
 export const ICalibDBSPL = { current: undefined };

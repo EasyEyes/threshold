@@ -18,6 +18,8 @@ import {
   calibrateSoundMaxHz,
   calibrateSoundMinHz,
   calibrateSoundSmoothOctaves,
+  fMaxHz,
+  attenuatorGainDB,
   loudspeakerInfo,
   microphoneInfo,
   qualityMetrics,
@@ -353,11 +355,16 @@ export const plotForAllHz = (
       return { x: x, y: 10 * Math.log10(calibrationResults.psd.conv.y[i]) };
     });
 
-  const backgroundMergedDataPoints = backgroundNoise.x_background
-    ? backgroundNoise.x_background
+  const attenuatedBackgroundNoise = calibrationResults.background_noise;
+
+  const backgroundMergedDataPoints = attenuatedBackgroundNoise.x_background
+    ? attenuatedBackgroundNoise.x_background
         .filter((x) => x <= 20000)
         .map((x, i) => {
-          return { x: x, y: 10 * Math.log10(backgroundNoise.y_background[i]) };
+          return {
+            x: x,
+            y: 10 * Math.log10(attenuatedBackgroundNoise.y_background[i]),
+          };
         })
     : [];
 
@@ -398,7 +405,7 @@ export const plotForAllHz = (
             Math.max(
               0,
               calibrationResults.psd.unconv.y[i] -
-                backgroundNoise.y_background[i]
+                attenuatedBackgroundNoise.y_background[i]
             ) * calibrationResults.filtered_mls_psd.y[i]
           ),
       });
@@ -818,19 +825,20 @@ export const plotForAllHz = (
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
   tableDiv.style.lineHeight = "1";
+  const maxHz = calibrationGoal === "goal" ? fMaxHz.component : fMaxHz.system;
+  const attenuatorGain =
+    calibrationGoal === "goal"
+      ? attenuatorGainDB.component
+      : attenuatorGainDB.system;
   if (showSoundParametersBool.current) {
     const filteredDataPoints = convMergedDataPoints.filter(
-      (point) =>
-        point.x >= calibrateSoundMinHz.current &&
-        point.x <= calibrateSoundMaxHz.current
+      (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz
     );
     const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
     const sd = standardDeviation(filteredDataPointsY);
 
     const filteredExpectedCorrectionPoints = expectedCorrectionPoints.filter(
-      (point) =>
-        point.x >= calibrateSoundMinHz.current &&
-        point.x <= calibrateSoundMaxHz.current
+      (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz
     );
     const filteredExpectedCorrectionPointsY =
       filteredExpectedCorrectionPoints.map((point) => point.y);
@@ -839,7 +847,8 @@ export const plotForAllHz = (
     );
 
     const p = document.createElement("p");
-    const reportParameters = `SD: predicted ${sdExpectedCorrection} dB and actual ${sd} dB over ${calibrateSoundMinHz.current} to ${calibrateSoundMaxHz.current} Hz`;
+
+    const reportParameters = `SD: predicted ${sdExpectedCorrection} dB and actual ${sd} dB over ${calibrateSoundMinHz.current} to ${maxHz} Hz`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
@@ -871,9 +880,9 @@ export const plotForAllHz = (
       calibrateSoundHz.current
     } Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
       calibrateSoundIIRSec.current
-    } s, ${calibrateSoundMinHz.current} to ${
-      calibrateSoundMaxHz.current
-    } Hz<br>${attenuationDbRounded} dB attenuation of filtered MLS for amplitude ${amplitude}<br>
+    } s, ${
+      calibrateSoundMinHz.current
+    } to ${maxHz} Hz, attenuatorGainDB: ${attenuatorGain}<br>${attenuationDbRounded} dB attenuation of filtered MLS for amplitude ${amplitude}<br>
     SD (dB): Rec. MLS ${qualityMetrics.current.mls},
      Speak+mic corr. ${qualityMetrics.current?.system},
       ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${
