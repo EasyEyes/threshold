@@ -96,7 +96,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "-18",
     explanation:
-      "_calibrateSoundBurstDb (default -18) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). The IIR is always normalized to have gain 1 at 1 kHz.",
+      "_calibrateSoundBurstDb (default -18) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is always normalized to have gain 1 at 1 kHz.",
   },
   _calibrateSoundBurstDbIsRelativeBool: {
     name: "_calibrateSoundBurstDbIsRelativeBool",
@@ -105,6 +105,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "_calibrateSoundBurstDbIsRelativeBool (default FALSE) when TRUE the burst sound level is\n _calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
+  },
+  _calibrateSoundBurstFilteredExtraDb: {
+    name: "_calibrateSoundBurstFilteredExtraDb",
+    availability: "now",
+    type: "numerical",
+    default: "6",
+    explanation:
+      "_calibrateSoundBurstFilteredExtraDb (default 6) specifies how much higher the level of the digital filtered MLS is allowed to be over that of the digital unfiltered MLS. ",
   },
   _calibrateSoundBurstLevelReTBool: {
     name: "_calibrateSoundBurstLevelReTBool",
@@ -225,7 +233,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "100",
     explanation:
-      "_calibrateSoundPowerDbSDToleratedDb (default 1) sets maximum for SD of power (in dB) during the used part of the recording, when recording filtered or unfiltered MLS. If the recording is rejected, then the recording begins again.",
+      '_calibrateSoundPowerDbSDToleratedDb (default 1) sets maximum for SD of power (in dB) during the "used" (i.e. analyzed) part of the recording, when recording filtered or unfiltered MLS. If the recording is rejected, then the recording begins again.',
   },
   _calibrateSoundSamplingDesiredBits: {
     name: "_calibrateSoundSamplingDesiredBits",
