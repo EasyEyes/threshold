@@ -18,6 +18,7 @@ import {
   calibrateSoundMaxHz,
   calibrateSoundMinHz,
   calibrateSoundSmoothOctaves,
+  calibrateSoundBurstLevelReTBool,
   fMaxHz,
   attenuatorGainDB,
   loudspeakerInfo,
@@ -335,7 +336,8 @@ export const plotForAllHz = (
   backgroundNoise = {},
   mls_psd = {},
   microphoneGain = { Freq: [], Gain: [] },
-  filteredMLSRange
+  filteredMLSRange,
+  parameters
 ) => {
   const subtitleText =
     calibrationGoal === "system"
@@ -837,6 +839,20 @@ export const plotForAllHz = (
     const filteredDataPoints = convMergedDataPoints.filter(
       (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz
     );
+    const unconv = unconvMergedDataPoints
+      .filter(
+        (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz
+      )
+      .map((point) => point.y);
+    const sdUnconv = standardDeviation(unconv);
+
+    const MLS = digitalMLSPoints
+      .filter(
+        (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz
+      )
+      .map((point) => point.y);
+    const sdMLS = standardDeviation(MLS);
+
     const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
     const sd = standardDeviation(filteredDataPointsY);
 
@@ -851,7 +867,7 @@ export const plotForAllHz = (
 
     const p = document.createElement("p");
 
-    const reportParameters = `SD: predicted ${sdExpectedCorrection} dB and actual ${sd} dB over ${calibrateSoundMinHz.current} to ${maxHz} Hz`;
+    const reportParameters = `SD (dB): red - - ${sdMLS}, red — ${sdUnconv}, purple — ${sdExpectedCorrection}, blue — ${sd}, ${calibrateSoundMinHz.current}—${maxHz} Hz`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
@@ -876,21 +892,13 @@ export const plotForAllHz = (
     const Min = Math.round(filteredMLSRange.Min * 10) / 10;
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
 
+    let soundBurstDb = calibrateSoundBurstLevelReTBool.current
+      ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
+      : calibrateSoundBurstDb.current;
+    soundBurstDb = Math.round(soundBurstDb);
     const p = document.createElement("p");
-    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
-      calibrateSoundBurstSec.current
-    } s, ${calibrateSoundBurstRepeats.current}✕, ${
-      calibrateSoundHz.current
-    } Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
-      calibrateSoundIIRSec.current
-    } s, ${
-      calibrateSoundMinHz.current
-    } to ${maxHz} Hz, attenuatorGainDB: ${attenuatorGain}<br>${attenuationDbRounded} dB attenuation of filtered MLS for amplitude ${amplitude}<br>
-    SD (dB): Rec. MLS ${qualityMetrics.current.mls},
-     Speak+mic corr. ${qualityMetrics.current?.system},
-      ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${
-      qualityMetrics.current?.component
-    }`;
+    const reportParameters = `MLS burst: ${soundBurstDb} dB, ${calibrateSoundBurstSec.current} s, ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${calibrateSoundIIRSec.current} s, ${calibrateSoundMinHz.current} to ${maxHz} Hz<br>
+    Filtered MLS ${attenuationDbRounded} dB, ampl. ${amplitude}, ${calibrateSoundMinHz.current} to ${maxHz} Hz, ${attenuatorGain} dB atten.`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";

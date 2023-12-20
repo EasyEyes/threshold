@@ -487,7 +487,8 @@ export const calibrateAudio = async (reader) => {
           allHzCalibrationResults.microphoneGain,
           calibrateSoundCheck.current === "system"
             ? allHzCalibrationResults.filteredMLSRange.system
-            : allHzCalibrationResults.filteredMLSRange.component
+            : allHzCalibrationResults.filteredMLSRange.component,
+          soundCalibrationResults.current.parameters
         );
       } else {
         displayParametersAllHz(
@@ -510,7 +511,8 @@ export const calibrateAudio = async (reader) => {
           allHzCalibrationResults.background,
           allHzCalibrationResults.mls_psd,
           allHzCalibrationResults.microphoneGain,
-          allHzCalibrationResults.filteredMLSRange.component
+          allHzCalibrationResults.filteredMLSRange.component,
+          soundCalibrationResults.current.parameters
         );
       }
       // display what we save in the database for the loudspeaker calibration
@@ -657,7 +659,8 @@ export const calibrateAudio = async (reader) => {
                   allHzCalibrationResults.microphoneGain,
                   calibrateSoundCheck.current === "system"
                     ? allHzCalibrationResults.filteredMLSRange.system
-                    : allHzCalibrationResults.filteredMLSRange.component
+                    : allHzCalibrationResults.filteredMLSRange.component,
+                  soundCalibrationResults.current.parameters
                 );
               } else {
                 displayParametersAllHz(
@@ -675,7 +678,8 @@ export const calibrateAudio = async (reader) => {
                     ? microphoneCalibrationResult.current.filteredMLSRange
                         .system
                     : microphoneCalibrationResult.current.filteredMLSRange
-                        .component
+                        .component,
+                  soundCalibrationResults.current.parameters
                 );
               }
             } else {
@@ -689,7 +693,8 @@ export const calibrateAudio = async (reader) => {
                   allHzCalibrationResults.background,
                   allHzCalibrationResults.mls_psd,
                   { Freq: [], Gain: [] },
-                  allHzCalibrationResults.filteredMLSRange.system
+                  allHzCalibrationResults.filteredMLSRange.system,
+                  soundCalibrationResults.current.parameters
                 );
                 displayParametersAllHz(
                   elems,
@@ -700,7 +705,8 @@ export const calibrateAudio = async (reader) => {
                   allHzCalibrationResults.background,
                   allHzCalibrationResults.mls_psd,
                   allHzCalibrationResults.microphoneGain,
-                  allHzCalibrationResults.filteredMLSRange.component
+                  allHzCalibrationResults.filteredMLSRange.component,
+                  soundCalibrationResults.current.parameters
                 );
               } else {
                 displayParametersAllHz(
@@ -712,7 +718,8 @@ export const calibrateAudio = async (reader) => {
                   microphoneCalibrationResult.current.background_noise,
                   microphoneCalibrationResult.current.mls_psd,
                   microphoneCalibrationResult.current.microphoneGain,
-                  microphoneCalibrationResult.current.filteredMLSRange.system
+                  microphoneCalibrationResult.current.filteredMLSRange.system,
+                  soundCalibrationResults.current.parameters
                 );
                 displayParametersAllHz(
                   elems,
@@ -723,7 +730,9 @@ export const calibrateAudio = async (reader) => {
                   microphoneCalibrationResult.current.background_noise,
                   microphoneCalibrationResult.current.mls_psd,
                   loudspeakerIR,
-                  microphoneCalibrationResult.current.filteredMLSRange.component
+                  microphoneCalibrationResult.current.filteredMLSRange
+                    .component,
+                  soundCalibrationResults.current.parameters
                 );
               }
             }
@@ -831,7 +840,8 @@ export const calibrateAudio = async (reader) => {
                 calibrateSoundCheck.current === "system"
                   ? microphoneCalibrationResult.current.filteredMLSRange.system
                   : microphoneCalibrationResult.current.filteredMLSRange
-                      .component
+                      .component,
+                soundCalibrationResults.current.parameters
               );
             } else {
               displayParametersAllHz(
@@ -843,7 +853,8 @@ export const calibrateAudio = async (reader) => {
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
                 microphoneCalibrationResult.current.microphoneGain,
-                microphoneCalibrationResult.current.filteredMLSRange.system
+                microphoneCalibrationResult.current.filteredMLSRange.system,
+                soundCalibrationResults.current.parameters
               );
               displayParametersAllHz(
                 elems,
@@ -854,7 +865,8 @@ export const calibrateAudio = async (reader) => {
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
                 loudspeakerIR,
-                microphoneCalibrationResult.current.filteredMLSRange.component
+                microphoneCalibrationResult.current.filteredMLSRange.component,
+                soundCalibrationResults.current.parameters
               );
             }
             // display what we save in the database for the loudspeaker calibration

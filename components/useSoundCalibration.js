@@ -1430,7 +1430,9 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   loudspeakerInfo.current["filteredMLSSystemMax"] =
     Math.round(allHzCalibrationResults.filteredMLSRange.system.Max * 10) / 10;
   loudspeakerInfo.current["calibrateSoundBurstDb"] =
-    calibrateSoundBurstDb.current;
+    calibrateSoundBurstLevelReTBool.current
+      ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
+      : calibrateSoundBurstDb.current;
   loudspeakerInfo.current["calibrateSoundBurstFilteredExtraDb"] =
     calibrateSoundBurstFilteredExtraDb.current;
   loudspeakerInfo.current["calibrateSoundBurstLevelReTBool"] =
@@ -1551,15 +1553,23 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
       ID: microphoneInfo.current.micFullSerialNumber,
       gainDBSPL: microphoneInfo.current.gainDBSPL,
     },
-    unconv_rec: result?.unfiltered_recording,
-    conv_rec: result?.filtered_recording,
-    mls: result?.mls,
-    componentConvolution: result?.component?.convolution,
-    systemConvolution: result?.system?.convolution,
+    // unconv_rec: result?.unfiltered_recording,
+    // conv_rec: result?.filtered_recording,
+    // mls: result?.mls,
+    // componentConvolution: result?.component?.convolution,
+    // systemConvolution: result?.system?.convolution,
     autocorrelations: result?.autocorrelations,
-    backgroundRecording: result?.background_noise?.recording,
+    // backgroundRecording: result?.background_noise?.recording,
     db_BackgroundNoise: result?.background_noise?.x_background,
     Hz_BackgroundNoise: result?.background_noise?.y_background,
+    backgroundNoiseSystem: {
+      x_background: result.system.background_noise.x_background,
+      y_background: result.system.background_noise.y_background,
+    },
+    backgroundNoiseComponent: {
+      x_background: result.component.background_noise.x_background,
+      y_background: result.component.background_noise.y_background,
+    },
     db_system_convolution: result.system?.filtered_mls_psd?.y,
     Hz_system_convolution: result.system?.filtered_mls_psd?.x,
     db_component_convolution: result.component?.filtered_mls_psd?.y,
@@ -1568,7 +1578,11 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     db_mls: result.mls_psd?.y,
     Hz_mls: result.mls_psd?.x,
     recordingChecks: result.recordingChecks,
-    calibrateSoundBurstDb: calibrateSoundBurstDb.current,
+    calibrateSoundBurstDb: calibrateSoundBurstLevelReTBool.current
+      ? calibrateSoundBurstDb.current +
+        result.parameters.T -
+        result.parameters.gainDBSPL
+      : calibrateSoundBurstDb.current,
     calibrateSoundBurstFilteredExtraDb:
       calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
@@ -1604,6 +1618,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     calibrateSoundAttenuationSpeakerAndMicGain: filteredMLSAttenuation.system,
     filteredMLSMaxAbsComponent: filteredMLSAttenuation.maxAbsComponent,
     filteredMLSMaxAbsSystem: filteredMLSAttenuation.maxAbsSystem,
+    attenuatorGainDB: attenuatorGainDB,
+    fMaxHz: fMaxHz,
   };
   microphoneCalibrationResults.push(allResults);
   if (calibrateSoundSaveJSONBool.current) {
@@ -1752,16 +1768,27 @@ const downloadLoudspeakerCalibration = () => {
         soundCalibrationResults.current?.system?.iir_psd?.x_no_bandpass,
       "Loudspeaker model": loudspeakerInfo.current,
       micInfo: soundCalibrationResults.current?.micInfo,
-      unconv_rec: soundCalibrationResults.current?.unfiltered_recording,
-      conv_rec: soundCalibrationResults.current?.filtered_recording,
-      mls: soundCalibrationResults.current?.mls,
-      componentConvolution:
-        soundCalibrationResults.current?.component?.convolution,
-      systemConvolution: soundCalibrationResults.current?.system?.convolution,
+      // unconv_rec: soundCalibrationResults.current?.unfiltered_recording,
+      // conv_rec: soundCalibrationResults.current?.filtered_recording,
+      // mls: soundCalibrationResults.current?.mls,
+      // componentConvolution:
+      //   soundCalibrationResults.current?.component?.convolution,
+      // systemConvolution: soundCalibrationResults.current?.system?.convolution,
       autocorrelations: {},
-      // backgroundNoise: soundCalibrationResults.current?.background_noise,
-      backgroundRecording:
-        soundCalibrationResults.current?.background_noise?.recording,
+      backgroundNoiseSystem: {
+        x_background:
+          soundCalibrationResults.current.system.background_noise.x_background,
+        y_background:
+          soundCalibrationResults.current.system.background_noise.y_background,
+      },
+      backgroundNoiseComponent: {
+        x_background:
+          soundCalibrationResults.current.component.background_noise
+            .x_background,
+        y_background:
+          soundCalibrationResults.current.component.background_noise
+            .y_background,
+      },
       db_BackgroundNoise:
         soundCalibrationResults.current?.background_noise?.x_background,
       Hz_BackgroundNoise:
@@ -1778,7 +1805,11 @@ const downloadLoudspeakerCalibration = () => {
       db_mls: soundCalibrationResults.current?.mls_psd?.y,
       Hz_mls: soundCalibrationResults.current?.mls_psd?.x,
       recordingChecks: soundCalibrationResults.current?.recordingChecks,
-      calibrateSoundBurstDb: calibrateSoundBurstDb.current,
+      calibrateSoundBurstDb: calibrateSoundBurstLevelReTBool.current
+        ? calibrateSoundBurstDb.current +
+          soundCalibrationResults.current.parameters.T -
+          soundCalibrationResults.current.parameters.gainDBSPL
+        : calibrateSoundBurstDb.current,
       calibrateSoundBurstFilteredExtraDb:
         calibrateSoundBurstFilteredExtraDb.current,
       calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
@@ -1816,6 +1847,8 @@ const downloadLoudspeakerCalibration = () => {
         filteredMLSAttenuation.component,
       filteredMLSMaxAbsSystem: filteredMLSAttenuation.maxAbsSystem,
       filteredMLSMaxAbsComponent: filteredMLSAttenuation.maxAbsComponent,
+      attenuatorGainDB: attenuatorGainDB,
+      fMaxHz: fMaxHz,
     };
   }
   if (
