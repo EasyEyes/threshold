@@ -870,11 +870,8 @@ export const plotForAllHz = (
       calibrationGoal === "system"
         ? filteredMLSAttenuation.maxAbsSystem
         : filteredMLSAttenuation.maxAbsComponent;
-    const gain =
-      calibrationGoal === "system"
-        ? filteredMLSAttenuation.system
-        : filteredMLSAttenuation.component;
-    const amplitude = (Math.round(gain * maxAbs * 10) / 10).toFixed(1);
+
+    const amplitude = (Math.round(maxAbs * 10) / 10).toFixed(1);
     const attenuationDb =
       calibrationGoal === "system"
         ? filteredMLSAttenuation.attenuationDbSystem
@@ -885,8 +882,10 @@ export const plotForAllHz = (
       ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
       : calibrateSoundBurstDb.current;
     soundBurstDb = Math.round(soundBurstDb);
+    const amplitudeMLS = Math.pow(10, soundBurstDb / 20).toFixed(1);
     const p = document.createElement("p");
-    const reportParameters = `MLS: ${soundBurstDb} dB, ${calibrateSoundBurstSec.current} s, 
+    const reportParameters = `MLS: ${soundBurstDb} dB, ampl. ${amplitudeMLS}, 
+    ${calibrateSoundBurstSec.current} s, 
     ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
     Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude},
      ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain} dB atten.<br>
@@ -1035,8 +1034,7 @@ export const plotImpulseResponse = (
     const attenuatorGain = attenuatorGainDB.component;
     const p = document.createElement("p");
     const maxAbs = filteredMLSAttenuation.maxAbsComponent;
-    const gain = filteredMLSAttenuation.component;
-    const amplitude = (Math.round(gain * maxAbs * 10) / 10).toFixed(1);
+    const amplitude = (Math.round(maxAbs * 10) / 10).toFixed(1);
     const attenuationDb = filteredMLSAttenuation.attenuationDbComponent;
     const attenuationDbRounded = Math.round(attenuationDb * 10) / 10;
 
@@ -1044,7 +1042,9 @@ export const plotImpulseResponse = (
       ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
       : calibrateSoundBurstDb.current;
     soundBurstDb = Math.round(soundBurstDb);
-    const reportParameters = `MLS: ${soundBurstDb} dB, ${calibrateSoundBurstSec.current} s,
+    const amplitudeMLS = Math.pow(10, soundBurstDb / 20).toFixed(1);
+    const reportParameters = `MLS: ${soundBurstDb} dB, ampl. ${amplitudeMLS}, 
+    ${calibrateSoundBurstSec.current} s,
      ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
     Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude}, 
     ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain} dB atten.<br>
