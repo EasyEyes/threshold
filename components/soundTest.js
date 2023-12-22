@@ -1763,8 +1763,8 @@ export const displaySummarizedTransducerTable = (
     const tr8 = document.createElement("tr");
     const td12 = document.createElement("td");
     const td13 = document.createElement("td");
-    td12.innerHTML = webAudioDeviceNames.loudspeaker;
-    td13.innerHTML = webAudioDeviceNames.microphone;
+    td12.innerHTML = '"' + webAudioDeviceNames.loudspeaker + '"';
+    td13.innerHTML = '"' + webAudioDeviceNames.microphone + '"';
     td12.style.width = "180px";
     td13.style.width = "180px";
     tr8.appendChild(td12);
