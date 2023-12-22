@@ -500,8 +500,8 @@ export const plotForAllHz = (
     datasets.push({
       label: "Recording of background",
       data: backgroundMergedDataPoints,
-      backgroundColor: "rgba(0, 0, 0, 0.2)",
-      borderColor: "rgba(0, 0, 0, 1)",
+      backgroundColor: "rgba(200, 200, 200, 0.2)",
+      borderColor: "rgba(200, 200, 200, 1)",
       borderWidth: 2,
       pointRadius: 0,
       // pointHoverRadius: 5,
@@ -730,15 +730,6 @@ export const plotForAllHz = (
             family: "system-ui",
           },
         },
-        // subtitle: {
-        //   display: true,
-        //   text: subtitleText,
-        //   font: {
-        //     size: 19,
-        //     family: "system-ui",
-        //   },
-        //   align: "center",
-        // },
         legend: {
           labels: {
             font: {
@@ -867,7 +858,7 @@ export const plotForAllHz = (
 
     const p = document.createElement("p");
 
-    const reportParameters = `SD (dB): red - - ${sdMLS}, red — ${sdUnconv}, purple — ${sdExpectedCorrection}, blue — ${sd}, ${calibrateSoundMinHz.current}—${maxHz} Hz`;
+    const reportParameters = `SD (dB): red - - ${sdMLS}, red — ${sdUnconv}, purple — ${sdExpectedCorrection}, blue — ${sd}, ${calibrateSoundMinHz.current}–${maxHz} Hz`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
@@ -883,22 +874,24 @@ export const plotForAllHz = (
       calibrationGoal === "system"
         ? filteredMLSAttenuation.system
         : filteredMLSAttenuation.component;
-    const amplitude = Math.round(gain * maxAbs * 10) / 10;
+    const amplitude = (Math.round(gain * maxAbs * 10) / 10).toFixed(1);
     const attenuationDb =
       calibrationGoal === "system"
         ? filteredMLSAttenuation.attenuationDbSystem
         : filteredMLSAttenuation.attenuationDbComponent;
     const attenuationDbRounded = Math.round(attenuationDb * 10) / 10;
-    const Min = Math.round(filteredMLSRange.Min * 10) / 10;
-    const Max = Math.round(filteredMLSRange.Max * 10) / 10;
 
     let soundBurstDb = calibrateSoundBurstLevelReTBool.current
       ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
       : calibrateSoundBurstDb.current;
     soundBurstDb = Math.round(soundBurstDb);
     const p = document.createElement("p");
-    const reportParameters = `MLS burst: ${soundBurstDb} dB, ${calibrateSoundBurstSec.current} s, ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${calibrateSoundIIRSec.current} s, ${calibrateSoundMinHz.current} to ${maxHz} Hz<br>
-    Filtered MLS ${attenuationDbRounded} dB, ampl. ${amplitude}, ${calibrateSoundMinHz.current} to ${maxHz} Hz, ${attenuatorGain} dB atten.`;
+    const reportParameters = `MLS: ${soundBurstDb} dB, ${calibrateSoundBurstSec.current} s, 
+    ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
+    Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude},
+     ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain} dB atten.<br>
+    IR: ${calibrateSoundIRSec.current} s, IIR: ${calibrateSoundIIRSec.current} s,
+     ${calibrateSoundMinHz.current} to ${maxHz} Hz`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
@@ -973,32 +966,6 @@ export const plotImpulseResponse = (
         legend: {
           display: false,
         },
-        // legend: {
-        //   labels: {
-        //     font: {
-        //       size: 15,
-        //     },
-        //     usePointStyle: true,
-        //     generateLabels: function (chart) {
-        //       const data = chart.data;
-        //       if (data.datasets.length) {
-        //         return data.datasets.map(function (dataset, i) {
-        //           return {
-        //             text: dataset.label,
-        //             fillStyle: dataset.backgroundColor,
-        //             strokeStyle: dataset.borderColor,
-        //             lineWidth: dataset.borderWidth,
-        //             hidden: !chart.isDatasetVisible(i),
-        //             index: i,
-        //             lineDash: dataset.borderDash,
-        //             pointStyle: "line",
-        //           };
-        //         });
-        //       }
-        //       return [];
-        //     },
-        //   },
-        // },
       },
       scales: {
         x: {
@@ -1064,27 +1031,26 @@ export const plotImpulseResponse = (
   tableDiv.appendChild(table);
   tableDiv.style.lineHeight = "1";
   if (showSoundParametersBool.current) {
-    const Min = Math.round(filteredMLSRange.Min * 10) / 10;
-    const Max = Math.round(filteredMLSRange.Max * 10) / 10;
+    const maxHz = fMaxHz.component;
+    const attenuatorGain = attenuatorGainDB.component;
     const p = document.createElement("p");
-    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
-      calibrateSoundBurstSec.current
-    } s, ${calibrateSoundBurstRepeats.current}✕, ${
-      calibrateSoundHz.current
-    } Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
-      calibrateSoundIIRSec.current
-    } s, 
-    octaves: ${calibrateSoundSmoothOctaves.current}, ${
-      calibrateSoundMinHz.current
-    }
-     to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
-      1
-    )} to ${Max.toFixed(1)}<br>
-    SD (dB): Rec. MLS ${qualityMetrics.current?.mls},
-     Speak+mic corr. ${qualityMetrics.current?.system},
-     ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${
-      qualityMetrics.current?.component
-    }`;
+    const maxAbs = filteredMLSAttenuation.maxAbsComponent;
+    const gain = filteredMLSAttenuation.component;
+    const amplitude = (Math.round(gain * maxAbs * 10) / 10).toFixed(1);
+    const attenuationDb = filteredMLSAttenuation.attenuationDbComponent;
+    const attenuationDbRounded = Math.round(attenuationDb * 10) / 10;
+
+    let soundBurstDb = calibrateSoundBurstLevelReTBool.current
+      ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
+      : calibrateSoundBurstDb.current;
+    soundBurstDb = Math.round(soundBurstDb);
+    const reportParameters = `MLS: ${soundBurstDb} dB, ${calibrateSoundBurstSec.current} s,
+     ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
+    Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude}, 
+    ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain} dB atten.<br>
+    IR: ${calibrateSoundIRSec.current} s, IIR: ${calibrateSoundIIRSec.current} s, 
+    octaves: ${calibrateSoundSmoothOctaves.current}, ${calibrateSoundMinHz.current}
+     to ${maxHz} Hz`;
 
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";

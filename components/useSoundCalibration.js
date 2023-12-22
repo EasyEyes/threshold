@@ -1350,9 +1350,9 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   filteredMLSAttenuation.maxAbsSystem =
     soundCalibrationResults.current.filteredMLSAttenuation.maxAbsSystem;
   filteredMLSAttenuation.attenuationDbSystem =
-    -20 * Math.log10(filteredMLSAttenuation.system);
+    10 * Math.log10(filteredMLSAttenuation.system);
   filteredMLSAttenuation.attenuationDbComponent =
-    -20 * Math.log10(filteredMLSAttenuation.component);
+    10 * Math.log10(filteredMLSAttenuation.component);
 
   fMaxHz.system = soundCalibrationResults.current.system.fMaxHz;
   fMaxHz.component = soundCalibrationResults.current.component.fMaxHz;
@@ -1503,9 +1503,9 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   filteredMLSAttenuation.maxAbsComponent =
     microphoneCalibrationResult.current.filteredMLSAttenuation.maxAbsComponent;
   filteredMLSAttenuation.attenuationDbSystem =
-    -20 * Math.log10(filteredMLSAttenuation.system);
+    10 * Math.log10(filteredMLSAttenuation.system);
   filteredMLSAttenuation.attenuationDbComponent =
-    -20 * Math.log10(filteredMLSAttenuation.component);
+    10 * Math.log10(filteredMLSAttenuation.component);
 
   let allResults = {
     SoundGainParameters: result.parameters,
