@@ -717,7 +717,7 @@ export const downloadDataFolder = async (user: User, project: any) => {
   };
 
   await Swal.fire({
-    title: `Downloading data from ${project.name} ...`,
+    title: `Downloading data from ${project.name}`,
     allowOutsideClick: false,
     allowEscapeKey: false,
     didOpen: async () => {
@@ -758,6 +758,7 @@ export const downloadDataFolder = async (user: User, project: any) => {
       }
 
       const zip = new JSZip();
+      let currentIndex = 0;
 
       for (const file of allData) {
         const fileName = file.name;
@@ -780,6 +781,17 @@ export const downloadDataFolder = async (user: User, project: any) => {
           .then((result) => Buffer.from(result.content, "base64"));
 
         zip.file(fileName, fileContent);
+        currentIndex += 1;
+        if (Swal.isVisible()) {
+          Swal.hideLoading();
+          const progressValue = (currentIndex / allData.length) * 100;
+          Swal.update({
+            html: `<p>Downloading <span id="file-counter">${currentIndex}/${allData.length} files</span></p>
+                     <progress id="progress-bar" max="100" value="${progressValue}"></progress>`,
+          });
+        } else {
+          break;
+        }
       }
 
       zipFileDate = zipFileDate
