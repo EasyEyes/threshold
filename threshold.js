@@ -3073,7 +3073,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       logQuest("NEW TRIAL");
 
-      const letterSetResponseType = () => {
+      const letterSetResponseType = (rsvpReadingBool = false) => {
         // ! responseType
         // AKA prestimulus=false, ie the instructions we use at response-time
         responseType.original = getResponseType(
@@ -3088,7 +3088,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "responseMustTrackContinuouslyBool",
             status.block_condition
           ),
-          paramReader.read("responseSpokenBool", status.block_condition),
+          paramReader.read(
+            "responseSpokenToExperimenterBool",
+            status.block_condition
+          ) && rsvpReadingBool,
           false
         );
         // AKA prestimulus=true, ie the instructions we use at fixation tracking-time
@@ -3104,7 +3107,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "responseMustTrackContinuouslyBool",
             status.block_condition
           ),
-          paramReader.read("responseSpokenBool", status.block_condition)
+          paramReader.read(
+            "responseSpokenToExperimenterBool",
+            status.block_condition
+          ) && rsvpReadingBool
         );
         logger(
           "!. responseType.original, trialInstructionRB aka prestimulus=false",
@@ -3164,7 +3170,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition = status.condition["block_condition"];
             }
           }
-          letterSetResponseType();
+          letterSetResponseType(true);
         },
         repeatedLetters: () => {
           for (let c of snapshot.handler.getConditions()) {
@@ -3943,25 +3949,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingResponse.displayStatus = false;
           addHandlerForClickingFixation(reader);
 
-          rsvpReadingResponse.responseType =
-            (paramReader.read("responseTypedBool", BC) &&
-              !paramReader.read("responseClickedBool", BC)) ||
-            paramReader.read("responseSpokenBool", BC)
-              ? "typed"
-              : "clicked";
-
-          // Get level from quest
-          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+          rsvpReadingResponse.responseType = paramReader.read(
+            "responseSpokenToExperimenterBool",
+            BC
+          )
+            ? "spoken"
+            : "silent";
 
           const numberOfWords = paramReader.read(
             "rsvpReadingNumberOfWords",
             status.block_condition
           );
-          level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
-          psychoJS.experiment.addData("level", level);
 
-          const durationSec = Math.pow(10, level);
+          let durationSec;
+          if (
+            paramReader.read("thresholdParameter", BC) === "targetDurationSec"
+          ) {
+            // Get level from quest
+            let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+            psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+            level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
+            psychoJS.experiment.addData("level", level);
+            durationSec = Math.pow(10, level);
+          } else {
+            durationSec = paramReader.read("targetDurationSec", BC);
+          }
+
           psychoJS.experiment.addData(
             "rsvpReadingWordDurationSec",
             durationSec
@@ -3983,14 +3996,36 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition
           );
           rsvpReadingTargetSets.upcoming = targetSets;
-          correctAns.current = targetSets.map((t) => t.word.toLowerCase());
           rsvpReadingTargetSets.past = [];
+
+          // Determine the subset of target sets that will be used for response identification
+          if (
+            paramReader.read("thresholdParameter", status.block_condition) !==
+            "targetDurationSec"
+          ) {
+            rsvpReadingTargetSets.numberOfIdentifications = paramReader.read(
+              "rsvpReadingNumberOfIdentifications",
+              status.block_condition
+            );
+          } else {
+            rsvpReadingTargetSets.numberOfIdentifications =
+              rsvpReadingTargetSets.numberOfSets;
+          }
+          rsvpReadingTargetSets.identificationTargetSets =
+            sampleWithoutReplacement(
+              targetSets,
+              rsvpReadingTargetSets.numberOfIdentifications
+            );
+          correctAns.current =
+            rsvpReadingTargetSets.identificationTargetSets.map((t) =>
+              t.word.toLowerCase()
+            );
 
           // TODO confirm that this same toLowerCase scheme is used when setting up phrase identification screen, ie that the html elems have id's which use the lowercase transformed word
           simulatedObservers.update(status.block_condition, {
             stimulusIntensity: level,
             correctResponses: correctAns.current,
-            possibleResponses: targetSets
+            possibleResponses: rsvpReadingTargetSets.identificationTargetSets
               .map((t) => [t.word, ...t.foilWords])
               .flat()
               .map((w) => w.toLowerCase()),
@@ -4005,19 +4040,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetSets.toString()
           );
 
+          // All categories (ie sets of target and foils)
           rsvpReadingResponse.categories = rsvpReadingTargetSets.upcoming.map(
             (s) => new Category(s.word, s.foilWords)
           );
-          if (rsvpReadingResponse.responseType === "clicked") {
+          // Those categories that will be shown to the participant, ie used for response
+          rsvpReadingResponse.identificationCategories =
+            rsvpReadingTargetSets.identificationTargetSets.map(
+              (s) => new Category(s.word, s.foilWords)
+            );
+          if (rsvpReadingResponse.responseType === "silent") {
             rsvpReadingResponse.screen = setupPhraseIdentification(
-              rsvpReadingResponse.categories,
+              rsvpReadingResponse.identificationCategories,
               paramReader,
               BC,
               rsvpReadingTargetSets.upcoming[0]._heightPx
             );
             psychoJS.experiment.addData(
               "rsvpReadingResponseCategories",
-              rsvpReadingResponse.categories.toString()
+              rsvpReadingResponse.identificationCategories.toString()
             );
             psychoJS.experiment.addData(
               "rsvpReadingResponseScreenHTML",
@@ -4912,7 +4953,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader.read(
               "responseMustTrackContinuouslyBool",
               status.block_condition
-            )
+            ) ||
+              paramReader.read(
+                "responseSpokenToExperimenterBool",
+                status.block_condition
+              )
           );
           reportWordCounts(paramReader, psychoJS.experiment);
         },

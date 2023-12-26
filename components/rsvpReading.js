@@ -369,8 +369,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     if (instructions.autoDraw === false) {
       instructions.tSTart = t;
       instructions.frameNStart = frameN;
-      // TODO omit response instructions for typed/spoken response in a less ugly way
-      if (rsvpReadingResponse.responseType === "typed")
+      if (rsvpReadingResponse.responseType === "spoken")
         instructions.setText("");
       instructions.setAutoDraw(true);
       addRevealableTargetWordsToAidSpokenScoring();
@@ -378,12 +377,12 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     // Continue when enough responses have been registered
     if (
       phraseIdentificationResponse.current.length >=
-      rsvpReadingTargetSets.numberOfSets
+      rsvpReadingTargetSets.numberOfIdentifications
     ) {
       // Ensure a small delay after the last response, so the participant sees feedback for every response
       rsvpEndRoutineAtT ??= simulatedObservers.proceed() ? t : t + 0.5;
       if (t >= rsvpEndRoutineAtT) {
-        if (rsvpReadingResponse.responseType === "typed")
+        if (rsvpReadingResponse.responseType === "spoken")
           removeScientistKeypressFeedback();
         updateTrialCounterNumbersForRSVPReading();
         rsvpEndRoutineAtT = undefined;
@@ -393,14 +392,16 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       showCursor();
       // Show the response screen if response modality is clicking
       if (
-        rsvpReadingResponse.responseType === "clicked" &&
+        rsvpReadingResponse.responseType === "silent" &&
         !rsvpReadingResponse.displayStatus
       ) {
         showPhraseIdentification(rsvpReadingResponse.screen);
         rsvpReadingResponse.displayStatus = true;
       } else if (!rsvpReadingResponse.displayStatus) {
         // Else create some subtle feedback that the scientist can use
-        addScientistKeypressFeedback(rsvpReadingTargetSets.numberOfSets);
+        addScientistKeypressFeedback(
+          rsvpReadingTargetSets.numberOfIdentifications
+        );
         rsvpReadingResponse.displayStatus = true;
       }
     }
@@ -583,7 +584,7 @@ export const addRevealableTargetWordsToAidSpokenScoring = () => {
   const revealableTargetWordsKey = document.createElement("div");
   revealableTargetWordsKey.className = "rsvpReadingTargetWordsKey";
   revealableTargetWordsKey.id = "rsvpReadingTargetWordsKey";
-  rsvpReadingTargetSets.past.forEach((ts, i) => {
+  rsvpReadingTargetSets.identificationTargetSets.forEach((ts, i) => {
     const thisWordCue = document.createElement("div");
     thisWordCue.innerText = ts.word;
     thisWordCue.classList.add("rsvpReadingTargetWord");
@@ -597,7 +598,7 @@ export const addRevealableTargetWordsToAidSpokenScoring = () => {
   revealableTargetWordsKey.classList.add("hidden");
   document.body.appendChild(revealableTargetWordsKey);
   document.addEventListener("keydown", (e) => {
-    if (e.shiftKey && rsvpReadingResponse.responseType === "typed")
+    if (e.shiftKey && rsvpReadingResponse.responseType === "spoken")
       revealableTargetWordsKey.classList.toggle("hidden");
   });
 };
@@ -626,7 +627,7 @@ const _highlightNextWordInRevealedKey = () => {
 };
 
 export const addRsvpReadingTrialResponsesToData = () => {
-  const clicked = rsvpReadingResponse.responseType === "clicked";
+  const clicked = rsvpReadingResponse.responseType === "silent";
   psychoJS.experiment.addData(
     "rsvpReadingParticipantResponses",
     clicked ? phraseIdentificationResponse.current.toString() : ""
@@ -634,6 +635,12 @@ export const addRsvpReadingTrialResponsesToData = () => {
   psychoJS.experiment.addData(
     "rsvpReadingTargetWords",
     rsvpReadingTargetSets.past.map((ts) => ts.word).toString()
+  );
+  psychoJS.experiment.addData(
+    "rsvpReadingTargetWordsForIdentification",
+    rsvpReadingTargetSets.identificationTargetSets
+      .map((ts) => ts.word)
+      .toString()
   );
   psychoJS.experiment.addData(
     "rsvpReadingResponseCorrectBool",

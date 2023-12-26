@@ -2804,6 +2804,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 responseSpokenBool allows participant to respond  verbally at every occasion, e.g. by verbally naming the target. The various response modes are not exclusive. Enable as many as you like. But responseMustClickCrosshairBool overrides all other settings.",
   },
+  responseSpokenToExperimenterBool: {
+    name: "responseSpokenToExperimenterBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "For use when targetKind=rsvpReading. When true, spoken mode is selected; when false, silent mode is selected.",
+  },
   responseTimeoutSec: {
     name: "responseTimeoutSec",
     availability: "now",

@@ -63,17 +63,20 @@ export const getResponseType = (
   if (responseMustTrackContinuouslyBool && prestimulus) return 1;
 
   // Default routine
-  const c = click,
-    t = type || spokenToExperimenter, // the experimenter will type, based on spoken response
+  const c = click || (spokenToExperimenter && prestimulus), // if spokenToExperimenter: the experimenter will click start the trial TODO: is this desired behavior???
+    t = type || (spokenToExperimenter && !prestimulus), // if spokenToExperimenter: the experimenter will type to respond, based on spoken response
     k = keypad,
     s = speak;
-  if (!c && t && !k && !s) return 0;
-  else if (c && !t && !k && !s) return 1;
-  else if (c && t && !k && !s) return 2;
-  else if (!c && !t && k && !s) return 3; // Keypad only
-  else if (!c && t && k && !s) return 4; // Keypad or type
-  else if (c && !t && k && !s) return 5; // Keypad or click
-  else if (c && t && k && !s) return 6; // Keypad or click or type
+
+  // TODO handle `spoken` input modality
+
+  if (!c && t && !k) return 0;
+  else if (c && !t && !k) return 1;
+  else if (c && t && !k) return 2;
+  else if (!c && !t && k) return 3; // Keypad only
+  else if (!c && t && k) return 4; // Keypad or type
+  else if (c && !t && k) return 5; // Keypad or click
+  else if (c && t && k) return 6; // Keypad or click or type
   else return 1;
   // TODO finish other situations
 };
@@ -81,9 +84,9 @@ export const getResponseType = (
 export const resetResponseType = (
   originalResponseType,
   responseType,
-  mustTrackContinuouslyBool
+  differentFixaxtionAndResponseModalities
 ) => {
-  if (mustTrackContinuouslyBool) return originalResponseType;
+  if (differentFixaxtionAndResponseModalities) return originalResponseType;
   else return responseType;
 };
 

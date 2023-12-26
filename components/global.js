@@ -507,6 +507,8 @@ export const needComputerSurveyBool = { current: false };
 export const authorEmail = { current: undefined };
 export const rsvpReadingTargetSets = {
   numberOfSets: undefined,
+  numberOfIdentifications: undefined,
+  identificationTargetSets: undefined,
   current: undefined,
   upcoming: [],
   past: [],
@@ -514,6 +516,7 @@ export const rsvpReadingTargetSets = {
 
 export const rsvpReadingResponse = {
   categories: undefined,
+  identificationCategories: undefined,
   screen: undefined,
   displayStatus: false,
   responseType: undefined,

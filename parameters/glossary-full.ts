@@ -2639,6 +2639,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "responseSpokenToExperimenterBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "For use when targetKind=rsvpReading. When true, spoken mode is selected; when false, silent mode is selected.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "responseTimeoutSec",
     availability: "now",
     example: "",
