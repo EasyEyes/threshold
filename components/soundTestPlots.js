@@ -1042,7 +1042,7 @@ export const plotImpulseResponse = (
       ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
       : calibrateSoundBurstDb.current;
     soundBurstDb = Math.round(soundBurstDb);
-    const amplitudeMLS = Math.pow(10, soundBurstDb / 20).toFixed(1);
+    const amplitudeMLS = Math.pow(10, soundBurstDb / 20).toFixed(3);
     const reportParameters = `MLS: ${soundBurstDb} dB, ampl. ${amplitudeMLS}, 
     ${calibrateSoundBurstSec.current} s,
      ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
