@@ -543,6 +543,7 @@ const populateSoundFiles = async (
 };
 
 let mediaRecorder = null;
+let mediaRecorderEachStimulus = null;
 let recordedChunks = [];
 let restartRecording = false;
 const microphoneIR = {
@@ -585,12 +586,60 @@ const addSoundFileElements = async (
       const soundFileName = document.createElement("h6");
       soundFileName.innerHTML = soundFile.name;
       const soundFileButton = document.createElement("button");
+      const soundPowerLevel = document.createElement("p");
+      soundPowerLevel.setAttribute("id", "soundPowerLevel" + soundFile.name);
       soundFileButton.classList.add(
         ...["btn", "btn-success", "soundFileButton"]
       );
-      soundFileButton.innerHTML = readi18nPhrases("RC_Play", language);
+      soundFileButton.innerHTML = soundFile.name;
 
       soundFileButton.addEventListener("click", async () => {
+        const record = document.getElementById("RecordEachStimulusInput");
+        const deviceId = document.getElementById(
+          "record-microphone-select"
+        ).value;
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: { exact: deviceId },
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+        });
+        mediaRecorderEachStimulus = new MediaRecorder(stream);
+        if (record && record.checked) {
+          recordedChunks = [];
+
+          mediaRecorderEachStimulus.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              recordedChunks.push(event.data);
+            }
+          };
+
+          mediaRecorderEachStimulus.onstop = async () => {
+            const powerLevel = await computePowerLevel(recordedChunks);
+            let dbSPLValue = null;
+            if (microphoneIR.playingSoundName) {
+              const freq = microphoneIR.playingSoundName;
+              if (freq && microphoneIR.Frequency.length > 0) {
+                dbSPLValue = convertDBToDBSPL(powerLevel, freq);
+                console.log("dbSPLValue", dbSPLValue);
+              }
+            }
+
+            soundPowerLevel.innerText = powerLevel + " dB, ";
+            microphoneIR.maxdB = parseFloat(powerLevel);
+
+            // p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
+            if (dbSPLValue) {
+              soundPowerLevel.innerText += dbSPLValue + " dB SPL";
+              microphoneIR.maxdBSPL = dbSPLValue;
+            }
+            recordedChunks = [];
+          };
+
+          mediaRecorderEachStimulus.start();
+        }
         // display name of sound file
         document.getElementById("soundTestModalNameOfPlayedSound").innerHTML =
           readi18nPhrases("RC_PlayingSound", language).replace(
@@ -664,7 +713,8 @@ const addSoundFileElements = async (
           if (allHzCalibrationResults.system.iir_no_bandpass)
             playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
-              allHzCalibrationResults.system.iir_no_bandpass
+              allHzCalibrationResults.system.iir_no_bandpass,
+              record && record.checked ? mediaRecorderEachStimulus : null
             );
           else
             alert(
@@ -674,16 +724,23 @@ const addSoundFileElements = async (
           if (allHzCalibrationResults.component.iir_no_bandpass)
             playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
-              allHzCalibrationResults.component.iir_no_bandpass
+              allHzCalibrationResults.component.iir_no_bandpass,
+              record && record.checked ? mediaRecorderEachStimulus : null
             );
           else
             alert(
               "There was an error loading the impulse response. Please try calibrating again."
             );
-        } else playAudioBuffer(soundFileBuffer);
+        } else
+          playAudioBuffer(
+            soundFileBuffer,
+            record && record.checked ? mediaRecorderEachStimulus : null
+          );
       });
       soundFileContainer.appendChild(soundFileButton);
-      soundFileContainer.appendChild(soundFileName);
+      // soundFileContainer.appendChild(soundFileName);
+      soundFileContainer.appendChild(soundPowerLevel);
+      soundFileContainer.style.alignItems = "baseline";
 
       block.appendChild(soundFileContainer);
     });
@@ -714,6 +771,7 @@ const addTestPagePSDPlots = async (modalBody, language) => {
 const addAudioRecordAndPlayback = async (modalBody, language) => {
   micsForSoundTestPage.list = await getListOfConnectedMicrophones();
   const select = document.createElement("select");
+  select.id = "record-microphone-select";
   // make dynamic. update when microphone is plugged in or out
   select.addEventListener("click", async () => {
     micsForSoundTestPage.list = await getListOfConnectedMicrophones();
@@ -737,9 +795,33 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   max.innerText = "Max ";
   max.style.marginRight = "5px";
 
+  const maxdB = document.createElement("p");
+  maxdB.id = "running-max-dB";
+  maxdB.style.lineHeight = "1.2rem";
+  maxdB.innerText = "-1000.0 dB, ";
+  maxdB.style.marginRight = "5px";
+
+  const maxdBSPL = document.createElement("p");
+  maxdBSPL.id = "running-max-dB-SPL";
+  maxdBSPL.style.lineHeight = "1.2rem";
+  maxdBSPL.innerText = "-1000.0 dB SPL";
+
   const fetchMessage = document.createElement("p");
   fetchMessage.id = "fetch-message";
   fetchMessage.style.lineHeight = "1.2rem";
+
+  const timeContainer = document.createElement("div");
+  timeContainer.style.display = "flex";
+  timeContainer.style.marginBottom = "10px";
+  timeContainer.style.alignItems = "center";
+  const timeText = document.createElement("p");
+  timeText.innerHTML = readi18nPhrases("RC_AveragingSec", language);
+  timeText.style.marginRight = "10px";
+  const timeInput = document.createElement("input");
+  timeInput.type = "number";
+  timeInput.value = 0.5;
+  timeInput.style.width = "100px";
+  timeInput.id = "timeInput";
 
   const RecordEachStimulusToggleLabel = document.createElement("label");
   const RecordEachStimulusToggleContainer = document.createElement("div");
@@ -771,39 +853,23 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
     // if RecordEachStimulusInput is checked, then don't show the record button
     if (RecordEachStimulusInput.checked) {
       recordButton.style.display = "none";
+      max.style.display = "none";
+      maxdB.style.display = "none";
+      maxdBSPL.style.display = "none";
+      timeContainer.style.display = "none";
     } else {
       recordButton.style.display = "block";
+      max.style.display = "block";
+      maxdB.style.display = "block";
+      maxdBSPL.style.display = "block";
+      timeContainer.style.display = "flex";
     }
   });
-
-  const maxdB = document.createElement("p");
-  maxdB.id = "running-max-dB";
-  maxdB.style.lineHeight = "1.2rem";
-  maxdB.innerText = "-1000.0 dB, ";
-  maxdB.style.marginRight = "5px";
-
-  const maxdBSPL = document.createElement("p");
-  maxdBSPL.id = "running-max-dB-SPL";
-  maxdBSPL.style.lineHeight = "1.2rem";
-  maxdBSPL.innerText = "-1000.0 dB SPL";
 
   const container = document.createElement("div");
   container.style.display = "flex";
   container.style.alignItems = "baseline";
   // container.style.flexDirection = "row";
-
-  const timeContainer = document.createElement("div");
-  timeContainer.style.display = "flex";
-  timeContainer.style.marginBottom = "10px";
-  timeContainer.style.alignItems = "center";
-  const timeText = document.createElement("p");
-  timeText.innerHTML = readi18nPhrases("RC_AveragingSec", language);
-  timeText.style.marginRight = "10px";
-  const timeInput = document.createElement("input");
-  timeInput.type = "number";
-  timeInput.value = 0.5;
-  timeInput.style.width = "100px";
-  timeInput.id = "timeInput";
 
   const micNameInput = document.createElement("input");
   micNameInput.type = "text";
@@ -877,7 +943,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   modalBody.appendChild(micSerialNumberInput);
   modalBody.appendChild(proceedButton);
   modalBody.appendChild(fetchMessage);
-  // modalBody.appendChild(RecordEachStimulusToggleContainer);
+  modalBody.appendChild(RecordEachStimulusToggleContainer);
 
   timeContainer.appendChild(timeText);
   timeContainer.appendChild(timeInput);

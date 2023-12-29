@@ -48,11 +48,20 @@ export const adjustSoundDbSPL = (arr, volumeDbSPL) => {
   return arr;
 };
 
-export const playAudioBuffer = (audioBuffer) => {
+export const playAudioBuffer = (audioBuffer, mediaRecorder = null) => {
   var source = audioCtx.createBufferSource();
   source.buffer = audioBuffer;
   source.connect(audioCtx.destination);
   source.start();
+  source.onended = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      // wait for 1 second before stopping the recorder
+      // setTimeout(() => {
+      //   mediaRecorder.stop();
+      // }, 1000);
+    }
+  };
 };
 
 // get gain node
@@ -85,10 +94,19 @@ export const connectAudioNodes = (webAudioNodes) => {
  * Given an array of web audio nodes, connects them into a graph and plays the first
  * @param {Array.<AudioNode>} webAudioNodes an array containing a series of web audio nodes
  */
-export const playAudioNodeGraph = (webAudioNodes) => {
+export const playAudioNodeGraph = (webAudioNodes, mediaRecorder = null) => {
   connectAudioNodes(webAudioNodes);
   const sourceNode = webAudioNodes[0];
   sourceNode.start(0);
+  sourceNode.onended = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      // wait for 1 second before stopping the recorder
+      // setTimeout(() => {
+      //   mediaRecorder.stop();
+      // }, 1000);
+    }
+  };
 };
 
 /**
@@ -141,13 +159,14 @@ export const createImpulseResponseFilterNode = async (
  */
 export const playAudioBufferWithImpulseResponseCalibration = async (
   audioBuffer,
-  invertedImpulseResponseBuffer
+  invertedImpulseResponseBuffer,
+  mediaRecorder = null
 ) => {
   const webAudioNodes = [
     createAudioNodeFromBuffer(audioBuffer), // the audio to be played
     await createImpulseResponseFilterNode(invertedImpulseResponseBuffer), // the impulse response calibration node
   ];
-  playAudioNodeGraph(webAudioNodes);
+  playAudioNodeGraph(webAudioNodes, mediaRecorder);
 };
 
 export const getSoundCalibrationLevelDBSPLFromIIR = (iir) => {
