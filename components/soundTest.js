@@ -1635,7 +1635,9 @@ export const displayCompleteTransducerTable = (
       tr.appendChild(td2);
       tr.appendChild(td3);
     } else if (column === "CalibrationDate") {
-      td2.innerHTML = LoudspeakerInfo[column];
+      td2.innerHTML = isLoudspeakerCalibration
+        ? LoudspeakerInfo[column]
+        : microphoneInfo[column];
       tr.appendChild(td1);
       tr.appendChild(td2);
       td2.setAttribute("colspan", "2");
@@ -1786,7 +1788,9 @@ export const displaySummarizedTransducerTable = (
   // row 4 column 1 is the calibration date, column 2 is empty
   const tr4 = document.createElement("tr");
   const td5 = document.createElement("td");
-  td5.innerHTML = LoudspeakerInfo["CalibrationDate"];
+  td5.innerHTML = isLoudspeakerCalibration
+    ? LoudspeakerInfo["CalibrationDate"]
+    : microphoneInfo["CalibrationDate"];
   td5.setAttribute("colspan", "2");
   tr4.appendChild(td5);
 
