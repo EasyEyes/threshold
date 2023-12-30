@@ -500,7 +500,8 @@ export const calibrateAudio = async (reader) => {
           allHzCalibrationResults.background,
           allHzCalibrationResults.mls_psd,
           { Freq: [], Gain: [] },
-          allHzCalibrationResults.filteredMLSRange.system
+          allHzCalibrationResults.filteredMLSRange.system,
+          soundCalibrationResults.current.parameters
         );
         displayParametersAllHz(
           elems,
