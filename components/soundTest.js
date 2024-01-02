@@ -22,6 +22,7 @@ import {
   webAudioDeviceNames,
   loudspeakerInfo,
   micsForSoundTestPage,
+  calibrationTime,
 } from "./global";
 import {
   plotForAllHz,
@@ -169,6 +170,9 @@ export const addSoundTestElements = (reader, language) => {
   );
   LoudspeakerCorrectionInput.checked = true;
 
+  const timestamp = document.createElement("p");
+  timestamp.setAttribute("id", "soundTestModalTimestamp");
+  timestamp.innerHTML = calibrationTime.current;
   const nameOfPlayedSound = document.createElement("p");
   const rmsOfSound = document.createElement("p");
   const maxAmplitude = document.createElement("p");
@@ -351,6 +355,7 @@ export const addSoundTestElements = (reader, language) => {
   // modalHeaderContainer.appendChild(adjustedSoundLevel);
   // modalHeaderContainer.appendChild(powerOfDigitalSound);
   modalHeaderContainer.appendChild(nameOfPlayedSound);
+  modalHeaderContainer.appendChild(timestamp);
   //append the toggles
   NoCorrectionToggleContainer.appendChild(NoCorrectionToggle);
   NoCorrectionToggleContainer.appendChild(NoCorrectionToggleLabel);
@@ -651,8 +656,28 @@ const addSoundFileElements = async (
 ) => {
   Object.keys(targetSoundFiles).forEach((blockName, index) => {
     const horizontal = document.createElement("hr");
-    const block = document.createElement("div");
-    block.setAttribute("class", "block");
+    // const block = document.createElement("div");
+    // block.setAttribute("class", "block");
+    const table = document.createElement("table");
+    const tableHeader = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    headerRow.style.paddingBottom = "10px";
+    tableHeader.appendChild(headerRow);
+    const headerCell1 = headerRow.insertCell();
+    const headerCell2 = headerRow.insertCell();
+    const headerCell3 = headerRow.insertCell();
+
+    headerCell1.innerHTML = "Sound";
+    headerCell1.style.paddingRight = "10px";
+    headerCell2.innerHTML = "Level";
+    headerCell2.style.paddingRight = "30px";
+    headerCell3.innerHTML = "Digital out";
+
+    const tableBody = document.createElement("tbody");
+    table.appendChild(headerRow);
+    table.appendChild(tableBody);
+
+    modalBody.appendChild(table);
     targetSoundFiles[blockName].forEach((soundFile) => {
       const soundFileContainer = document.createElement("div");
       soundFileContainer.setAttribute("class", "soundFileContainer");
@@ -660,6 +685,9 @@ const addSoundFileElements = async (
       soundFileName.innerHTML = soundFile.name;
       const soundFileButton = document.createElement("button");
       const soundPowerLevel = document.createElement("p");
+      soundPowerLevel.style.marginBottom = "0px";
+      const soundDigitalOut = document.createElement("p");
+      soundDigitalOut.style.marginBottom = "0px";
       soundPowerLevel.setAttribute("id", "soundPowerLevel" + soundFile.name);
       soundFileButton.classList.add(
         ...["btn", "btn-success", "soundFileButton"]
@@ -713,14 +741,9 @@ const addSoundFileElements = async (
               }
             }
             if (dbSPLValue) {
-              soundPowerLevel.innerHTML =
-                dbSPLValue + " dB SPL, " + powerLevel + " dB";
-              microphoneIR.maxdBSPL = dbSPLValue;
-            } else {
-              soundPowerLevel.innerHTML = powerLevel + " dB ";
+              soundDigitalOut.innerHTML = dbSPLValue + " dB SPL";
             }
-            // p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
-
+            soundPowerLevel.innerHTML = powerLevel + " dB";
             recordedChunksEachStimulus = [];
           };
 
@@ -766,7 +789,7 @@ const addSoundFileElements = async (
         document.getElementById("soundTestModalMaxAmplitude").innerHTML =
           readi18nPhrases("RC_DIgitalInputMax", language).replace(
             "1.11",
-            soundMax.toFixed(2)
+            soundMax.toFixed(3)
           );
         // `Digital sound max: ${soundMax.toFixed(2)}`;
 
@@ -813,14 +836,28 @@ const addSoundFileElements = async (
             record && record.checked ? mediaRecorderEachStimulus : null
           );
       });
-      soundFileContainer.appendChild(soundFileButton);
-      // soundFileContainer.appendChild(soundFileName);
-      soundFileContainer.appendChild(soundPowerLevel);
-      soundFileContainer.style.alignItems = "baseline";
+      const row = table.insertRow();
+      // row.style.paddingBottom = "10px";
+      row.style.lineHeight = "3rem";
+      const cell1 = row.insertCell();
+      cell1.style.paddingRight = "10px";
+      const cell2 = row.insertCell();
+      cell2.style.paddingRight = "10px";
+      const cell3 = row.insertCell();
+      cell1.appendChild(soundFileButton);
+      cell2.appendChild(soundPowerLevel);
+      cell3.appendChild(soundDigitalOut);
 
-      block.appendChild(soundFileContainer);
+      tableBody.appendChild(row);
+
+      // soundFileContainer.appendChild(soundFileButton);
+      // soundFileContainer.appendChild(soundFileName);
+      // soundFileContainer.appendChild(soundPowerLevel);
+      // soundFileContainer.style.alignItems = "baseline";
+
+      // block.appendChild(soundFileContainer);
     });
-    modalBody.appendChild(block);
+    // modalBody.appendChild(block);
     modalBody.appendChild(horizontal);
   });
   addSoundFileCSS();
