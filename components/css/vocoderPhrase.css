@@ -5,7 +5,7 @@
 #soundTestModalSpeakerSoundGainContainer {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 3vh;
+  /* margin-bottom: 3vh; */
 }
 #responseScreen {
   position: absolute;

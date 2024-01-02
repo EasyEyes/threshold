@@ -246,11 +246,11 @@ export const addSoundTestElements = (reader, language) => {
   NoCorrectionToggle.style.marginLeft = "10px";
   NoCorrectionInput.setAttribute("id", "soundTestModalNoCorrectionInput");
   NoCorrectionToggleContainer.style.display = "flex";
-  NoCorrectionToggleContainer.style.lineHeight = "1.2rem";
+  NoCorrectionToggleContainer.style.lineHeight = "0.8rem";
   // space between toggle and label
-  NoCorrectionToggleContainer.style.marginBottom = "10px";
-  NoCorrectionToggleContainer.style.justifyContent = "space-between";
-  NoCorrectionToggleContainer.style.alignItems = "center";
+  NoCorrectionToggleContainer.style.marginBottom = "5px";
+  // NoCorrectionToggleContainer.style.justifyContent = "space-between";
+  // NoCorrectionToggleContainer.style.alignItems = "center";
 
   LoudspeakerCorrectionToggleLabel.setAttribute(
     "id",
@@ -270,11 +270,11 @@ export const addSoundTestElements = (reader, language) => {
     "soundTestModalLoudspeakerCorrectionInput"
   );
   LoudspeakerCorrectionToggleContainer.style.display = "flex";
-  LoudspeakerCorrectionToggleContainer.style.lineHeight = "1.2rem";
+  LoudspeakerCorrectionToggleContainer.style.lineHeight = "0.8rem";
   // space between toggle and label
   LoudspeakerCorrectionToggleContainer.style.marginBottom = "10px";
-  LoudspeakerCorrectionToggleContainer.style.justifyContent = "space-between";
-  LoudspeakerCorrectionToggleContainer.style.alignItems = "center";
+  // LoudspeakerCorrectionToggleContainer.style.justifyContent = "space-between";
+  // LoudspeakerCorrectionToggleContainer.style.alignItems = "center";
 
   SystemCorrectionToggleLabel.setAttribute(
     "id",
@@ -294,11 +294,11 @@ export const addSoundTestElements = (reader, language) => {
     "soundTestModalSystemCorrectionInput"
   );
   SystemCorrectionToggleContainer.style.display = "flex";
-  SystemCorrectionToggleContainer.style.lineHeight = "1.2rem";
+  SystemCorrectionToggleContainer.style.lineHeight = "0.8rem";
   // space between toggle and label
-  SystemCorrectionToggleContainer.style.marginBottom = "10px";
-  SystemCorrectionToggleContainer.style.justifyContent = "space-between";
-  SystemCorrectionToggleContainer.style.alignItems = "center";
+  SystemCorrectionToggleContainer.style.marginBottom = "5px";
+  // SystemCorrectionToggleContainer.style.justifyContent = "space-between";
+  // SystemCorrectionToggleContainer.style.alignItems = "center";
 
   modal.classList.add(...["modal", "fade"]);
   modalDialog.classList.add(...["modal-dialog"]);
@@ -330,13 +330,14 @@ export const addSoundTestElements = (reader, language) => {
   modalDialog.appendChild(modalContent);
   modalHeaderContainer.appendChild(modalHeader);
   modalHeaderContainer.appendChild(togglesContainer);
-  modalHeaderContainer.appendChild(modalSubtitle);
-
+  // modalHeaderContainer.appendChild(modalSubtitle);
+  speakerSoundGain.style.marginBottom = "10px";
   speakerSoundGainContainer.appendChild(speakerSoundGain);
   // speakerSoundGainContainer.appendChild(speakerSoundGainInput);
   soundLevelContainer.style.alignItems = "baseline";
   soundLevelInput.style.width = "80px";
-  soundLevel.style.lineHeight = "1.2rem";
+  soundLevelInput.style.height = "25px";
+  soundLevel.style.lineHeight = "0.8rem";
 
   soundLevelContainer.appendChild(soundLevel);
   soundLevelContainer.appendChild(soundLevelInput);
@@ -351,14 +352,17 @@ export const addSoundTestElements = (reader, language) => {
   // modalHeaderContainer.appendChild(powerOfDigitalSound);
   modalHeaderContainer.appendChild(nameOfPlayedSound);
   //append the toggles
-  NoCorrectionToggleContainer.appendChild(NoCorrectionToggleLabel);
   NoCorrectionToggleContainer.appendChild(NoCorrectionToggle);
+  NoCorrectionToggleContainer.appendChild(NoCorrectionToggleLabel);
+
+  LoudspeakerCorrectionToggleContainer.appendChild(LoudspeakerCorrectionToggle);
   LoudspeakerCorrectionToggleContainer.appendChild(
     LoudspeakerCorrectionToggleLabel
   );
-  LoudspeakerCorrectionToggleContainer.appendChild(LoudspeakerCorrectionToggle);
-  SystemCorrectionToggleContainer.appendChild(SystemCorrectionToggleLabel);
+
   SystemCorrectionToggleContainer.appendChild(SystemCorrectionToggle);
+  SystemCorrectionToggleContainer.appendChild(SystemCorrectionToggleLabel);
+
   togglesContainer.appendChild(NoCorrectionToggleContainer);
   togglesContainer.appendChild(SystemCorrectionToggleContainer);
   togglesContainer.appendChild(LoudspeakerCorrectionToggleContainer);
@@ -421,7 +425,7 @@ const addToggleSwitch = () => {
 
   toggleSwitch.setAttribute("class", "switch");
   toggleSwitchInput.setAttribute("type", "checkbox");
-  toggleSwitchSpan.setAttribute("class", "slider round");
+  toggleSwitchSpan.setAttribute("class", "checkmark");
 
   toggleSwitch.appendChild(toggleSwitchInput);
   toggleSwitch.appendChild(toggleSwitchSpan);
@@ -432,54 +436,121 @@ const addToggleSwitch = () => {
 
 const addToggleCSS = () => {
   const styles = `
+    // .switch {
+    //     position: relative;
+    //     display: inline-block;
+    //     width: 37px;
+    //     height: 20px;
+    //   }
+    // .switch input {
+    //     display: none;
+    //   }
+    // .slider {
+    //     position: absolute;
+    //     cursor: pointer;
+    //     top: 0;
+    //     left: 0;
+    //     right: 0;
+    //     bottom: 0;
+    //     background-color: #ccc;
+    //     -webkit-transition: .4s;
+    //     transition: .4s;
+    //   }
+    // .slider:before {
+    //     position: absolute;
+    //     content: "";
+    //     height: 12px;
+    //     width: 12px;
+    //     left: 2px;
+    //     bottom: 4px;
+    //     background-color: white;
+    //     -webkit-transition: .4s;
+    //     transition: .4s;
+    //   }
+    // input:checked + .slider {
+    //     background-color: #2196F3;
+    //   }
+    // input:focus + .slider {
+    //     box-shadow: 0 0 1px #2196F3;
+    //   }
+    // input:checked + .slider:before {
+    //     -webkit-transform: translateX(22px);
+    //     -ms-transform: translateX(22px);
+    //     transform: translateX(22px);
+    //   }
+    // .slider.round {
+    // border-radius: 34px;
+    // }
+    
+    // .slider.round:before {
+    // border-radius: 50%;
+    // }
     .switch {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 34px;
-      }
-    .switch input {
-        display: none;
-      }
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        -webkit-transition: .4s;
-        transition: .4s;
-      }
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        -webkit-transition: .4s;
-        transition: .4s;
-      }
-    input:checked + .slider {
-        background-color: #2196F3;
-      }
-    input:focus + .slider {
-        box-shadow: 0 0 1px #2196F3;
-      }
-    input:checked + .slider:before {
-        -webkit-transform: translateX(26px);
-        -ms-transform: translateX(26px);
-        transform: translateX(26px);
-      }
-    .slider.round {
-    border-radius: 34px;
+      display: block;
+      position: relative;
+      padding-left: 35px;
+      cursor: pointer;
+      font-size: 22px;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
     
-    .slider.round:before {
-    border-radius: 50%;
+    /* Hide the browser's default checkbox */
+    .switch input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+      background-color: #ccc;
+    }
+    
+    /* Create a custom checkbox */
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 20px;
+      width: 20px;
+      border-radius:10px;
+      background-color: #ccc;
+    }
+    
+    /* On mouse-over, add a grey background color */
+    .switch:hover input ~ .checkmark {
+      background-color: #ccc;
+    }
+    
+    /* When the checkbox is checked, add a blue background */
+    .switch input:checked ~ .checkmark {
+      background-color: #2196F3;
+    }
+    
+    /* Create the checkmark/indicator (hidden when not checked) */
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+    
+    /* Show the checkmark when checked */
+    .switch input:checked ~ .checkmark:after {
+      display: block;
+    }
+    
+    /* Style the checkmark/indicator */
+    .switch .checkmark:after {
+      left: 8px;
+      top: 4px;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 3px 3px 0;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
     }
       `;
 
@@ -545,6 +616,7 @@ const populateSoundFiles = async (
 let mediaRecorder = null;
 let mediaRecorderEachStimulus = null;
 let recordedChunks = [];
+let recordedChunksEachStimulus = [];
 let restartRecording = false;
 const microphoneIR = {
   Gain: [],
@@ -555,16 +627,17 @@ const microphoneIR = {
 };
 
 const parseSoundFileNameToFrequency = (name) => {
-  // if the name is of the format numberHz, return the number
+  // if the name is of the format numberHz, return the number. The number might be a floating number
   // else return null
   if (!name) return null;
-  const regex = /\d+Hz/;
-  const match = name.match(regex);
-  if (match) {
-    const frequency = parseFloat(match[0].substring(0, match[0].length - 2));
-    return frequency;
-  }
-  return null;
+  // Define a regular expression to match the desired format
+  const regex = /^(\d+(\.\d+)?)Hz$/;
+
+  // Use the test method to check if the name matches the pattern
+  const match = regex.test(name);
+  console.log(parseFloat(name.match(regex)[1]));
+  // If there's a match, extract and return the number, otherwise return null
+  return match ? parseFloat(name.match(regex)[1]) : null;
 };
 
 const addSoundFileElements = async (
@@ -594,6 +667,17 @@ const addSoundFileElements = async (
       soundFileButton.innerHTML = soundFile.name;
 
       soundFileButton.addEventListener("click", async () => {
+        // display name of sound file
+        document.getElementById("soundTestModalNameOfPlayedSound").innerHTML =
+          readi18nPhrases("RC_PlayingSound", language).replace(
+            "FFF",
+            soundFile.name
+          );
+        const soundFileBuffer = cloneAudioBuffer(await soundFile.file);
+        microphoneIR.playingSoundName = parseSoundFileNameToFrequency(
+          soundFile.name
+        );
+
         const record = document.getElementById("RecordEachStimulusInput");
         const deviceId = document.getElementById(
           "record-microphone-select"
@@ -608,16 +692,18 @@ const addSoundFileElements = async (
         });
         mediaRecorderEachStimulus = new MediaRecorder(stream);
         if (record && record.checked) {
-          recordedChunks = [];
+          recordedChunksEachStimulus = [];
 
           mediaRecorderEachStimulus.ondataavailable = (event) => {
             if (event.data.size > 0) {
-              recordedChunks.push(event.data);
+              recordedChunksEachStimulus.push(event.data);
             }
           };
 
           mediaRecorderEachStimulus.onstop = async () => {
-            const powerLevel = await computePowerLevel(recordedChunks);
+            const powerLevel = await computePowerLevel(
+              recordedChunksEachStimulus
+            );
             let dbSPLValue = null;
             if (microphoneIR.playingSoundName) {
               const freq = microphoneIR.playingSoundName;
@@ -626,30 +712,20 @@ const addSoundFileElements = async (
                 console.log("dbSPLValue", dbSPLValue);
               }
             }
-
-            soundPowerLevel.innerText = powerLevel + " dB, ";
-            microphoneIR.maxdB = parseFloat(powerLevel);
-
-            // p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
             if (dbSPLValue) {
-              soundPowerLevel.innerText += dbSPLValue + " dB SPL";
+              soundPowerLevel.innerHTML =
+                dbSPLValue + " dB SPL, " + powerLevel + " dB";
               microphoneIR.maxdBSPL = dbSPLValue;
+            } else {
+              soundPowerLevel.innerHTML = powerLevel + " dB ";
             }
-            recordedChunks = [];
+            // p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
+
+            recordedChunksEachStimulus = [];
           };
 
           mediaRecorderEachStimulus.start();
         }
-        // display name of sound file
-        document.getElementById("soundTestModalNameOfPlayedSound").innerHTML =
-          readi18nPhrases("RC_PlayingSound", language).replace(
-            "FFF",
-            soundFile.name
-          );
-        const soundFileBuffer = cloneAudioBuffer(await soundFile.file);
-        microphoneIR.playingSoundName = parseSoundFileNameToFrequency(
-          soundFile.name
-        );
 
         // soundGain.current = document.getElementById(
         //   "soundTestModalSpeakerSoundGainInput"
@@ -835,19 +911,19 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
     "id",
     "RecordEachStimulusToggleLabel"
   );
-  RecordEachStimulusToggleLabel.innerText = "Record each stimulus";
+  RecordEachStimulusToggleLabel.innerText = "Measure each sound";
   RecordEachStimulusToggle.setAttribute("id", "RecordEachStimulusToggle");
   RecordEachStimulusToggle.style.marginLeft = "10px";
   RecordEachStimulusInput.setAttribute("id", "RecordEachStimulusInput");
   RecordEachStimulusToggleContainer.style.display = "flex";
   RecordEachStimulusToggleContainer.style.lineHeight = "1.2rem";
   // space between toggle and label
-  RecordEachStimulusToggleContainer.style.marginBottom = "10px";
-  RecordEachStimulusToggleContainer.style.justifyContent = "space-between";
-  RecordEachStimulusToggleContainer.style.alignItems = "center";
+  RecordEachStimulusToggleContainer.style.marginBottom = "5px";
+  // RecordEachStimulusToggleContainer.style.justifyContent = "space-between";
+  // RecordEachStimulusToggleContainer.style.alignItems = "center";
 
-  RecordEachStimulusToggleContainer.appendChild(RecordEachStimulusToggleLabel);
   RecordEachStimulusToggleContainer.appendChild(RecordEachStimulusToggle);
+  RecordEachStimulusToggleContainer.appendChild(RecordEachStimulusToggleLabel);
 
   RecordEachStimulusInput.addEventListener("click", () => {
     // if RecordEachStimulusInput is checked, then don't show the record button
@@ -915,6 +991,12 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       microphoneIR.Frequency = IR.Freq;
       fetchMessage.innerHTML = "Microphone profile found.";
       fetchMessage.style.color = "green";
+      recordButton.style.display = "none";
+      max.style.display = "none";
+      maxdB.style.display = "none";
+      maxdBSPL.style.display = "none";
+      timeContainer.style.display = "none";
+      RecordEachStimulusInput.checked = true;
     } else {
       fetchMessage.innerHTML =
         "No microphone profile found. Please calibrate the microphone.";
