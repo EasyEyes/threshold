@@ -299,7 +299,6 @@ export const downloadCommonResources = async (
     experimentFileName,
   );
 
-  const resources = await getCommonResourcesNames(user);
   const zip = new JSZip();
 
   await Swal.fire({
@@ -345,22 +344,39 @@ export const downloadCommonResources = async (
       }
 
       for (const type of resourcesFileTypes) {
-        const fileNames = resources[type];
+        const headers: Headers = new Headers();
+        headers.append("Authorization", `bearer ${user.accessToken}`);
+        const requestOptions: any = {
+          method: "GET",
+          headers: headers,
+          redirect: "follow",
+        };
 
-        for (const fileName of fileNames) {
+        const encodedFolderPath = encodeURIComponent(`${type}/`);
+        const url = `https://gitlab.pavlovia.org/api/v4/projects/${parseInt(
+          projectRepoId,
+        )}/repository/tree/?path=${encodedFolderPath}&ref=master`;
+        const response = await fetch(url, requestOptions);
+        const files = await response.json();
+
+        for (const file of files) {
+          const fileName = file?.name;
+          if (!fileName) {
+            continue;
+          }
+
           const resourcesRepoFilePath = encodeGitlabFilePath(
             `${type}/${fileName}`,
           );
-          const typeFolder = zip.folder(type);
           const content: string =
             type === "texts"
               ? await getTextFileDataFromGitLab(
-                  parseInt(easyEyesResourcesRepo.id),
+                  parseInt(projectRepoId),
                   resourcesRepoFilePath,
                   user.accessToken,
                 )
               : await getBase64FileDataFromGitLab(
-                  parseInt(easyEyesResourcesRepo.id),
+                  parseInt(projectRepoId),
                   resourcesRepoFilePath,
                   user.accessToken,
                 );
@@ -369,8 +385,7 @@ export const downloadCommonResources = async (
             content?.trim().indexOf(`{"message":"404 File Not Found"}`) !== -1
           )
             continue;
-
-          typeFolder!.file(fileName, content, { base64: type !== "texts" });
+          zip.file(fileName, content, { base64: type !== "texts" });
         }
       }
 
