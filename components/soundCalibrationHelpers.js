@@ -1,7 +1,7 @@
 import { readi18nPhrases } from "./readPhrases";
 import { ref, set, get, child } from "firebase/database";
 import database, { db } from "./firebase/firebase.js";
-import { fontSize, microphoneInfo } from "./global";
+import { calibrateSoundUMIKBase_dB, fontSize, microphoneInfo } from "./global";
 import {
   doc,
   getDoc,
@@ -329,8 +329,8 @@ export const parseCalibrationFile = (file) => {
     // Convert the first value to a float and add it to the frequencies array
     const frequency = parseFloat(values[0]);
     const gain = sensFactor
-      ? parseFloat(values[1]) + sensFactor - 97.01
-      : parseFloat(values[1]) - 97.01;
+      ? parseFloat(values[1]) + sensFactor + calibrateSoundUMIKBase_dB.current
+      : parseFloat(values[1]) + calibrateSoundUMIKBase_dB.current;
 
     if (frequency && gain) {
       frequencies.push(frequency);

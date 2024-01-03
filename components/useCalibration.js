@@ -48,6 +48,7 @@ import {
   gotLoudspeakerMatch,
   micsForSoundTestPage,
   deviceType,
+  calibrateSoundUMIKBase_dB,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -339,6 +340,10 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundLimit.current = reader.read(
     GLOSSARY._calibrateSoundLimit.name
   )[0];
+  calibrateSoundUMIKBase_dB.current = reader.read(
+    GLOSSARY._calibrateSoundUMIKBase_dB.name
+  )[0];
+
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
     .split(",");

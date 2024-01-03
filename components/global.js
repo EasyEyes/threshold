@@ -487,6 +487,7 @@ export const timeToCalibrate = {
   timeAtTheEndOfCalibration: 0,
   calibrationDuration: 0,
 };
+export const calibrateSoundUMIKBase_dB = { current: -99.96 };
 export const calibrateSoundLimit = { current: 1 };
 export const filteredMLSAttenuation = {
   component: 1,
