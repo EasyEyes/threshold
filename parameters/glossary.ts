@@ -267,6 +267,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing. We smooth by replacing each power gain by the average power gain within the specified bandwidth, centered, in log frequency, about the frequency whose gain we are smoothing.",
   },
+  _calibrateSoundUMIKGain_dB: {
+    name: "_calibrateSoundUMIKGain_dB",
+    availability: "now",
+    type: "numerical",
+    default: "-99.96",
+    explanation:
+      "_calibrateSoundUMIKGain_dB (default -99.96) is the base gain (power out over power in, in dB re dB SPL) of a UMIK-1 or UMIK-2 microphone (miniDSP, Hong Kong). The actual gain at 1 kHz is \ngain_dB = SensFactor_dB + _calibrateSoundUMIKGain_dB\nwhere gain_dB is the difference in digital power level out (in dB) and sound level in (in dB SPL), SensFactor_dB is copied from the header of the microphone's calibration file, e.g. it's -10.58 in this header\n\"Sens Factor =-10.58dB, AGain =18dB, SERNO: 8104281\"\nand _calibrateSoundUMIKGain_dB was determined by observing the REW sound calibration app using my two UMIK-2 microphones and my Reed R8090 Calibrator playing 1 kHz at 94 dB SPL.",
+  },
   _calibrateTimingNumberAndSecs: {
     name: "_calibrateTimingNumberAndSecs",
     availability: "now",

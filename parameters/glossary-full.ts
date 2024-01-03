@@ -330,6 +330,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundUMIKGain_dB",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundUMIKGain_dB (default -99.96) is the base gain (power out over power in, in dB re dB SPL) of a UMIK-1 or UMIK-2 microphone (miniDSP, Hong Kong). The actual gain at 1 kHz is \ngain_dB = SensFactor_dB + _calibrateSoundUMIKGain_dB\nwhere gain_dB is the difference in digital power level out (in dB) and sound level in (in dB SPL), SensFactor_dB is copied from the header of the microphone's calibration file, e.g. it's -10.58 in this header\n\"Sens Factor =-10.58dB, AGain =18dB, SERNO: 8104281\"\nand _calibrateSoundUMIKGain_dB was determined by observing the REW sound calibration app using my two UMIK-2 microphones and my Reed R8090 Calibrator playing 1 kHz at 94 dB SPL.",
+    type: "numerical",
+    default: "-99.96",
+    categories: "",
+  },
+  {
     name: "_calibrateTimingNumberAndSecs",
     availability: "now",
     example: "",
