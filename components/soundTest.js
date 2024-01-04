@@ -666,12 +666,15 @@ const addSoundFileElements = async (
     const headerCell1 = headerRow.insertCell();
     const headerCell2 = headerRow.insertCell();
     const headerCell3 = headerRow.insertCell();
+    const headerCell4 = headerRow.insertCell();
 
     headerCell1.innerHTML = "Sound";
     headerCell1.style.paddingRight = "10px";
-    headerCell2.innerHTML = "Level";
+    headerCell2.innerHTML = "Ampl.";
     headerCell2.style.paddingRight = "30px";
-    headerCell3.innerHTML = "Digital out";
+    headerCell3.innerHTML = "Level";
+    headerCell3.style.paddingRight = "30px";
+    headerCell4.innerHTML = "Digital out";
 
     const tableBody = document.createElement("tbody");
     table.appendChild(headerRow);
@@ -689,6 +692,9 @@ const addSoundFileElements = async (
       const soundDigitalOut = document.createElement("p");
       soundDigitalOut.style.marginBottom = "0px";
       soundPowerLevel.setAttribute("id", "soundPowerLevel" + soundFile.name);
+      const soundAmpl = document.createElement("p");
+      soundAmpl.style.marginBottom = "0px";
+      soundAmpl.setAttribute("id", "soundAmpl" + soundFile.name);
       soundFileButton.classList.add(
         ...["btn", "btn-success", "soundFileButton"]
       );
@@ -729,7 +735,7 @@ const addSoundFileElements = async (
           };
 
           mediaRecorderEachStimulus.onstop = async () => {
-            const powerLevel = await computePowerLevel(
+            const { powerLevel } = await computePowerLevel(
               recordedChunksEachStimulus
             );
             let dbSPLValue = null;
@@ -813,7 +819,8 @@ const addSoundFileElements = async (
             playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
               allHzCalibrationResults.system.iir_no_bandpass,
-              record && record.checked ? mediaRecorderEachStimulus : null
+              record && record.checked ? mediaRecorderEachStimulus : null,
+              record && record.checked ? soundAmpl : null
             );
           else
             alert(
@@ -824,7 +831,8 @@ const addSoundFileElements = async (
             playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
               allHzCalibrationResults.component.iir_no_bandpass,
-              record && record.checked ? mediaRecorderEachStimulus : null
+              record && record.checked ? mediaRecorderEachStimulus : null,
+              record && record.checked ? soundAmpl : null
             );
           else
             alert(
@@ -833,7 +841,8 @@ const addSoundFileElements = async (
         } else
           playAudioBuffer(
             soundFileBuffer,
-            record && record.checked ? mediaRecorderEachStimulus : null
+            record && record.checked ? mediaRecorderEachStimulus : null,
+            record && record.checked ? soundAmpl : null
           );
       });
       const row = table.insertRow();
@@ -842,11 +851,14 @@ const addSoundFileElements = async (
       const cell1 = row.insertCell();
       cell1.style.paddingRight = "10px";
       const cell2 = row.insertCell();
-      cell2.style.paddingRight = "10px";
+      cell2.style.paddingRight = "30px";
       const cell3 = row.insertCell();
+      cell3.style.paddingRight = "30px";
+      const cell4 = row.insertCell();
       cell1.appendChild(soundFileButton);
-      cell2.appendChild(soundPowerLevel);
+      cell2.appendChild(soundAmpl);
       cell3.appendChild(soundDigitalOut);
+      cell4.appendChild(soundPowerLevel);
 
       tableBody.appendChild(row);
 
@@ -901,6 +913,28 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   const p = document.createElement("p");
   p.id = "powerLevel";
   p.style.lineHeight = "1.2rem";
+
+  const powerLevelTable = document.createElement("table");
+  powerLevelTable.id = "powerLevelTable";
+  powerLevelTable.style.lineHeight = "1rem";
+  const powerLevelTableHeader = document.createElement("thead");
+  const powerLevelHeaderRow = document.createElement("tr");
+  powerLevelHeaderRow.style.paddingBottom = "10px";
+  powerLevelTableHeader.appendChild(powerLevelHeaderRow);
+  const powerLevelHeaderCell1 = powerLevelHeaderRow.insertCell();
+  const powerLevelHeaderCell2 = powerLevelHeaderRow.insertCell();
+  const powerLevelHeaderCell3 = powerLevelHeaderRow.insertCell();
+
+  powerLevelHeaderCell1.innerHTML = "Ampl.";
+  powerLevelHeaderCell1.style.paddingRight = "30px";
+  powerLevelHeaderCell2.innerHTML = "Level";
+  powerLevelHeaderCell2.style.paddingRight = "30px";
+  powerLevelHeaderCell3.innerHTML = "Digital out";
+
+  powerLevelTable.appendChild(powerLevelHeaderRow);
+  const powerLevelTableBody = document.createElement("tbody");
+  powerLevelTableBody.id = "powerLevelTableBody";
+  powerLevelTable.appendChild(powerLevelTableBody);
 
   const max = document.createElement("p");
   max.id = "running-max";
@@ -970,12 +1004,14 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       maxdB.style.display = "none";
       maxdBSPL.style.display = "none";
       timeContainer.style.display = "none";
+      powerLevelTable.style.display = "none";
     } else {
       recordButton.style.display = "block";
       max.style.display = "block";
       maxdB.style.display = "block";
       maxdBSPL.style.display = "block";
       timeContainer.style.display = "flex";
+      powerLevelTable.style.display = "block";
     }
   });
 
@@ -1072,6 +1108,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   container.appendChild(maxdB);
   container.appendChild(maxdBSPL);
   modalBody.appendChild(container);
+  modalBody.appendChild(powerLevelTable);
   // modalBody.appendChild(recordButton);
   modalBody.appendChild(p);
 };
@@ -1104,7 +1141,7 @@ const startRecording = async (deviceId, recordButton, language) => {
   };
 
   mediaRecorder.onstop = async () => {
-    const powerLevel = await computePowerLevel(recordedChunks);
+    const { powerLevel, Ampl } = await computePowerLevel(recordedChunks);
     let dbSPLValue = null;
     if (microphoneIR.playingSoundName) {
       const freq = microphoneIR.playingSoundName;
@@ -1117,9 +1154,21 @@ const startRecording = async (deviceId, recordButton, language) => {
       max.innerText = powerLevel + " dB, ";
       microphoneIR.maxdB = parseFloat(powerLevel);
     }
-    p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
+    // p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
+    const powerLevelTableBody = document.getElementById("powerLevelTableBody");
+    const powerLevelTable = document.getElementById("powerLevelTable");
+    const row = powerLevelTable.insertRow();
+    const cell1 = row.insertCell();
+    cell1.style.paddingRight = "30px";
+    cell1.innerText = Ampl ? Ampl.toFixed(3) : "";
+    const cell2 = row.insertCell();
+    cell2.style.paddingRight = "30px";
+    const cell3 = row.insertCell();
+    cell3.innerText = powerLevel + " dB";
+    powerLevelTableBody.appendChild(row);
     if (dbSPLValue) {
-      p.innerText += " , " + dbSPLValue + " " + "dB SPL";
+      cell2.innerText = dbSPLValue + " dB SPL";
+      // p.innerText += " , " + dbSPLValue + " " + "dB SPL";
       if (parseFloat(dbSPLValue) > microphoneIR.maxdBSPL) {
         maxdBSPL.innerText = dbSPLValue + " dB SPL";
         microphoneIR.maxdBSPL = dbSPLValue;
@@ -1150,6 +1199,7 @@ const startRecording = async (deviceId, recordButton, language) => {
   }, time);
 };
 
+const getMaxValueOfAbsoluteValueOfRecordedChunks = (recordedChunks) => {};
 const convertDBToDBSPL = (db, frequency) => {
   if (microphoneIR.Frequency.length === 0) return db;
   const gain = findGainatFrequency(
@@ -1188,12 +1238,15 @@ const computePowerLevel = async (recordedChunks) => {
   const audioBuffer = await getAudioBufferFromArrayBuffer(arraybuffer);
   const audioData = audioBuffer.getChannelData(0);
   const sound = Array.from(audioData);
+  const Ampl = getMaxValueOfAbsoluteValueOfBuffer(sound);
   const meanSquared =
     sound.reduce((sum, value) => sum + value ** 2, 0) / sound.length;
   const power_dB = 10 * Math.log10(meanSquared);
+  const powerLevel = power_dB.toFixed(1);
+
   // save with a precision of 1 decimal place (e.g. 10.1 dB) show even if it is 0
   // const powerLevel = power_dB.toFixed(1);
-  return power_dB.toFixed(1);
+  return { powerLevel, Ampl };
 };
 
 export const getListOfConnectedMicrophones = async () => {

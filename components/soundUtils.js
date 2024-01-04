@@ -9,6 +9,7 @@ import {
   calibrateSoundBurstsWarmup,
   calibrateSoundCheck,
 } from "./global";
+import { getMaxValueOfAbsoluteValueOfBuffer } from "./soundTest";
 
 export var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -48,10 +49,16 @@ export const adjustSoundDbSPL = (arr, volumeDbSPL) => {
   return arr;
 };
 
-export const playAudioBuffer = (audioBuffer, mediaRecorder = null) => {
+export const playAudioBuffer = (
+  audioBuffer,
+  mediaRecorder = null,
+  soundAmpl = null
+) => {
   var source = audioCtx.createBufferSource();
   source.buffer = audioBuffer;
-  source.connect(audioCtx.destination);
+  const analyser = audioCtx.createAnalyser();
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
   source.start();
   source.onended = () => {
     if (mediaRecorder) {
@@ -60,6 +67,13 @@ export const playAudioBuffer = (audioBuffer, mediaRecorder = null) => {
       // setTimeout(() => {
       //   mediaRecorder.stop();
       // }, 1000);
+      if (soundAmpl) {
+        const bufferLength = analyser.frequencyBinCount;
+        const floatArray = new Float32Array(bufferLength);
+        analyser.getFloatTimeDomainData(floatArray);
+        const max = getMaxValueOfAbsoluteValueOfBuffer(floatArray);
+        soundAmpl.innerHTML = max.toFixed(2);
+      }
     }
   };
 };
@@ -86,16 +100,25 @@ export const connectAudioNodes = (webAudioNodes) => {
     curNode.connect(nextNode);
     i++;
   }
+  const analyser = audioCtx.createAnalyser();
   curNode = webAudioNodes[i];
-  curNode.connect(audioCtx.destination);
+  curNode.connect(analyser);
+  analyser.connect(audioCtx.destination);
+  const bufferLength = analyser.frequencyBinCount;
+  const floatArray = new Float32Array(bufferLength);
+  return { analyser, floatArray };
 };
 
 /**
  * Given an array of web audio nodes, connects them into a graph and plays the first
  * @param {Array.<AudioNode>} webAudioNodes an array containing a series of web audio nodes
  */
-export const playAudioNodeGraph = (webAudioNodes, mediaRecorder = null) => {
-  connectAudioNodes(webAudioNodes);
+export const playAudioNodeGraph = (
+  webAudioNodes,
+  mediaRecorder = null,
+  soundAmpl = null
+) => {
+  const { analyser, floatArray } = connectAudioNodes(webAudioNodes);
   const sourceNode = webAudioNodes[0];
   sourceNode.start(0);
   sourceNode.onended = () => {
@@ -105,6 +128,11 @@ export const playAudioNodeGraph = (webAudioNodes, mediaRecorder = null) => {
       // setTimeout(() => {
       //   mediaRecorder.stop();
       // }, 1000);
+      if (soundAmpl) {
+        analyser.getFloatTimeDomainData(floatArray);
+        const max = getMaxValueOfAbsoluteValueOfBuffer(floatArray);
+        soundAmpl.innerHTML = max.toFixed(2);
+      }
     }
   };
 };
@@ -160,13 +188,14 @@ export const createImpulseResponseFilterNode = async (
 export const playAudioBufferWithImpulseResponseCalibration = async (
   audioBuffer,
   invertedImpulseResponseBuffer,
-  mediaRecorder = null
+  mediaRecorder = null,
+  soundAmpl = null
 ) => {
   const webAudioNodes = [
     createAudioNodeFromBuffer(audioBuffer), // the audio to be played
     await createImpulseResponseFilterNode(invertedImpulseResponseBuffer), // the impulse response calibration node
   ];
-  playAudioNodeGraph(webAudioNodes, mediaRecorder);
+  playAudioNodeGraph(webAudioNodes, mediaRecorder, soundAmpl);
 };
 
 export const getSoundCalibrationLevelDBSPLFromIIR = (iir) => {
