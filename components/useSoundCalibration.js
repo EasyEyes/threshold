@@ -1620,6 +1620,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     filteredMLSMaxAbsSystem: filteredMLSAttenuation.maxAbsSystem,
     attenuatorGainDB: attenuatorGainDB,
     fMaxHz: fMaxHz,
+    L_new_n: result.L_new_n,
   };
   microphoneCalibrationResults.push(allResults);
   if (calibrateSoundSaveJSONBool.current) {
@@ -1849,6 +1850,7 @@ const downloadLoudspeakerCalibration = () => {
       filteredMLSMaxAbsComponent: filteredMLSAttenuation.maxAbsComponent,
       attenuatorGainDB: attenuatorGainDB,
       fMaxHz: fMaxHz,
+      L_new_n: soundCalibrationResults.current?.L_new_n,
     };
   }
   if (
