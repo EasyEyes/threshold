@@ -1447,6 +1447,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     calibrateSoundIIRSec.current;
   loudspeakerInfo.current["calibrateSoundMinHz"] = calibrateSoundMinHz.current;
   loudspeakerInfo.current["calibrateSoundMaxHz"] = calibrateSoundMaxHz.current;
+  loudspeakerInfo.current["fs2"] = soundCalibrationResults.current.fs2;
+  loudspeakerInfo.current["fs"] = microphoneActualSamplingRate.current;
   loudspeakerInfo.current["T"] = soundCalibrationResults.current.parameters.T;
   loudspeakerInfo.current["W"] = soundCalibrationResults.current.parameters.W;
   loudspeakerInfo.current["Q"] =
@@ -1629,7 +1631,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     filteredMLSMaxAbsSystem: filteredMLSAttenuation.maxAbsSystem,
     attenuatorGainDB: attenuatorGainDB,
     fMaxHz: fMaxHz,
-    L_new_n: result.L_new_n,
+    fs2: result.fs2,
   };
   microphoneCalibrationResults.push(allResults);
   if (calibrateSoundSaveJSONBool.current) {
@@ -1670,6 +1672,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["calibrateSoundIIRSec"] = calibrateSoundIIRSec.current;
   result.micInfo["calibrateSoundMinHz"] = calibrateSoundMinHz.current;
   result.micInfo["calibrateSoundMaxHz"] = calibrateSoundMaxHz.current;
+  result.micInfo["fs2"] = result.fs2;
+  result.micInfo["fs"] = microphoneActualSamplingRate.current;
   result.micInfo["T"] = result.parameters.T;
   result.micInfo["W"] = result.parameters.W;
   result.micInfo["Q"] = 1 / Number(result.parameters.R.toFixed(1));
@@ -1865,7 +1869,7 @@ const downloadLoudspeakerCalibration = () => {
       filteredMLSMaxAbsComponent: filteredMLSAttenuation.maxAbsComponent,
       attenuatorGainDB: attenuatorGainDB,
       fMaxHz: fMaxHz,
-      L_new_n: soundCalibrationResults.current?.L_new_n,
+      fs2: soundCalibrationResults.current?.fs2,
     };
   }
   if (
