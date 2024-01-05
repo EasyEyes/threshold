@@ -1447,7 +1447,16 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     calibrateSoundIIRSec.current;
   loudspeakerInfo.current["calibrateSoundMinHz"] = calibrateSoundMinHz.current;
   loudspeakerInfo.current["calibrateSoundMaxHz"] = calibrateSoundMaxHz.current;
-
+  loudspeakerInfo.current["T"] = soundCalibrationResults.current.parameters.T;
+  loudspeakerInfo.current["W"] = soundCalibrationResults.current.parameters.W;
+  loudspeakerInfo.current["Q"] =
+    1 / Number(soundCalibrationResults.current.parameters.R.toFixed(1));
+  loudspeakerInfo.current["gainDBSPL"] =
+    soundCalibrationResults.current.parameters.gainDBSPL;
+  loudspeakerInfo.current["backgroundDBSPL"] =
+    soundCalibrationResults.current.parameters.backgroundDBSPL;
+  loudspeakerInfo.current["RMSError"] =
+    soundCalibrationResults.current.parameters.RMSError;
   try {
     await saveLoudSpeakerInfoToFirestore(
       loudspeakerInfo.current,
@@ -1661,6 +1670,12 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["calibrateSoundIIRSec"] = calibrateSoundIIRSec.current;
   result.micInfo["calibrateSoundMinHz"] = calibrateSoundMinHz.current;
   result.micInfo["calibrateSoundMaxHz"] = calibrateSoundMaxHz.current;
+  result.micInfo["T"] = result.parameters.T;
+  result.micInfo["W"] = result.parameters.W;
+  result.micInfo["Q"] = 1 / Number(result.parameters.R.toFixed(1));
+  result.micInfo["gainDBSPL"] = result.parameters.gainDBSPL;
+  result.micInfo["backgroundDBSPL"] = result.parameters.backgroundDBSPL;
+  result.micInfo["RMSError"] = result.parameters.RMSError;
   console.log(result.micInfo);
   await writeMicrophoneInfoToFirestore(result.micInfo, id);
   await writeFrqGainToFirestore(IrFreq, IrGain, id);
