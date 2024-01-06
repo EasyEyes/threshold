@@ -1453,8 +1453,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   loudspeakerInfo.current["W"] = soundCalibrationResults.current.parameters.W;
   loudspeakerInfo.current["Q"] =
     1 / Number(soundCalibrationResults.current.parameters.R.toFixed(1));
-  loudspeakerInfo.current["gainDBSPL"] =
-    soundCalibrationResults.current.parameters.gainDBSPL;
+  // loudspeakerInfo.current["gainDBSPL"] =
+  //   soundCalibrationResults.current.parameters.gainDBSPL;
   loudspeakerInfo.current["backgroundDBSPL"] =
     soundCalibrationResults.current.parameters.backgroundDBSPL;
   loudspeakerInfo.current["RMSError"] =
@@ -1677,7 +1677,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["T"] = result.parameters.T;
   result.micInfo["W"] = result.parameters.W;
   result.micInfo["Q"] = 1 / Number(result.parameters.R.toFixed(1));
-  result.micInfo["gainDBSPL"] = result.parameters.gainDBSPL;
+  result.micInfo["gainDBSPL"] = microphoneInfo.current.gainDBSPL;
   result.micInfo["backgroundDBSPL"] = result.parameters.backgroundDBSPL;
   result.micInfo["RMSError"] = result.parameters.RMSError;
   console.log(result.micInfo);
