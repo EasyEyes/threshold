@@ -587,12 +587,13 @@ export const calibrateAudio = async (reader) => {
           if (deviceType.isLoudspeaker) {
             showLoudSpeakerDoneMessage = true;
           }
+          let copyKnownIR = JSON.parse(JSON.stringify(loudspeakerIR));
           await calibrateAgain(
             elems,
             deviceType.isLoudspeaker,
             rc.language.value,
             deviceType.isSmartphone,
-            deviceType.isLoudspeaker ? null : allHzCalibrationResults.knownIr
+            deviceType.isLoudspeaker ? null : copyKnownIR
           );
 
           elems.title.innerHTML = readi18nPhrases(
