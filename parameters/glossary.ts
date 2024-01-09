@@ -2947,6 +2947,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 setResolutionPxPerDeg sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. Ignored if value is empty or zero. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
   },
+  showBackGrid: {
+    name: "showBackGrid",
+    availability: "now",
+    type: "text",
+    default: "0.5,0.03,1000",
+    explanation:
+      "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Center is midway between two gridlines. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
+  },
   showBeepButtonOnBlockInstructionBool: {
     name: "showBeepButtonOnBlockInstructionBool",
     availability: "now",
@@ -3076,14 +3084,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). [pt AND inch NOT YET IMPLEMENTED.] Set showGrid to 'px' for a pixel grid, 'pt' for a typographer \"points\" grid (72 points per inch), 'cm' for a centimeter grid, 'inch' for an inch grid, 'deg' for a degrees grid,  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially after a moving crosshair, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you collect human data and when you check timing.",
     categories: ["px", "pt", "cm", "inch", "deg", "mm", "none", "disabled"],
-  },
-  showBackGrid: {
-    name: "showBackGrid",
-    availability: "now",
-    type: "text",
-    default: "0.5,0.03,1000",
-    explanation:
-      "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Center is midway between two gridlines. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
   },
   showParameters: {
     name: "showParameters",
@@ -3287,14 +3287,15 @@ export const GLOSSARY: Glossary = {
       'When computing the characterSet bounding box as the union of the bounding box of each letter, align the bounding boxes horizontally by "center" or "origin". The bounding boxes are always vertically aligned by baseline.',
     categories: ["center", "origin"],
   },
-  targetColorRGBA: {
-    name: "targetColorRGBA",
-    availability: "now",
-    type: "text",
-    default: "0,0,0,1",
-    explanation:
-      'targetColorRGBA (default "0,0,0,1") sets target color. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
-  },
+  "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.":
+    {
+      name: "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
+      availability: "now",
+      type: "text",
+      default: "0,0,0,1",
+      explanation:
+        'targetColorRGBA (default "0,0,0,1") sets target color. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+    },
   targetContrast: {
     name: "targetContrast",
     availability: "now",

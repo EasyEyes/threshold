@@ -2818,6 +2818,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "showBackGrid",
+    availability: "now",
+    example: "",
+    explanation:
+      "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Center is midway between two gridlines. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
+    type: "text",
+    default: "0.5,0.03,1000",
+    categories: "",
+  },
+  {
     name: "showBeepButtonOnBlockInstructionBool",
     availability: "now",
     example: "",
@@ -2975,16 +2985,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "disabled",
     categories: "px, pt, cm, inch, deg, mm, none, disabled",
-  },
-  {
-    name: "showBackGrid",
-    availability: "now",
-    example: "",
-    explanation:
-      "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Center is midway between two gridlines. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
-    type: "text",
-    default: "0.5,0.03,1000",
-    categories: "",
   },
   {
     name: "showParameters",
@@ -3217,7 +3217,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "center, origin",
   },
   {
-    name: "targetColorRGBA",
+    name: "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
     availability: "now",
     example: "",
     explanation:
