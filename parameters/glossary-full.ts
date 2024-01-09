@@ -2908,6 +2908,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "bottomLeft, bottomRight, bottomCenter",
   },
   {
+    name: "showDot",
+    availability: "now",
+    example: "",
+    explanation:
+      "showDot displays a static dot. It accepts several arguments as comma separated values.\nxPix, yPix, diameterDeg, colorRGBA\nxPix and yPix (default middle of screen) are pixel coordinate of the grid center.  Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.\ndiameterDeg (default 0.5) is the dot diameter.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number controls transparency.",
+    type: "text",
+    default: ",,0.5,0,0,0,1",
+    categories: "",
+  },
+  {
     name: "showExperimentNameBool",
     availability: "now",
     example: "FALSE",
@@ -2967,6 +2977,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "px, pt, cm, inch, deg, mm, none, disabled",
   },
   {
+    name: "showBackGrid",
+    availability: "now",
+    example: "",
+    explanation:
+      "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Center is midway between two gridlines. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
+    type: "text",
+    default: "0.5,0.03,1000",
+    categories: "",
+  },
+  {
     name: "showParameters",
     availability: "now",
     example: "",
@@ -2975,7 +2995,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "",
     categories:
-      "block, blockShuffleGroups1, blockShuffleGroups2, blockShuffleGroups3, blockShuffleGroups4, calibrateDistanceCheckBool, calibrateGazeCheckBool, calibrateScreenSizeBool, calibrateScreenSizeCheckBool, calibrateSound1000HzBool, calibrateSound1000HzDB, calibrateSound1000HzSec, calibrateSoundAllHzBool, calibrateSoundAllHzDB, calibrateSoundMaxHz, calibrateSoundMinHz, calibrateSoundSaveToCSVBool, calibrateSoundToleranceDB, calibrateTrackDistanceBool, conditionEnabledBool, conditionName, conditionTrials, errorBool, fixationLocationXScreen, fixationLocationYScreen, font, fontCharacterSet, fontColorRGBA, fontLeftToRightBool, fontMaxPx, fontPadding, fontSource, fontTrackingForLetters, instructionFont, instructionFontLeftToRightBool, instructionFontSource, instructionForBlock, instructionForResponse, instructionForStimulus, instructionForStimulusLocation, logQuestBool, markingBlankedNearTargetBool, markingBlankingRadiusReEccentricity, markingBlankingRadiusReTargetHeight, markingClippedToStimulusRectBool, markingColorRGBA, markingFixationHotSpotRadiusDeg, markingFixationMotionRadiusDeg, markingFixationMotionSpeedDegPerSec, markingFixationStrokeLengthDeg, markingFixationStrokeThickening, markingFixationStrokeThicknessDeg, markingOffsetBeforeTargetOnsetSecs, markingOnsetAfterTargetOffsetSecs, markingTargetStrokeLengthDeg, markingTargetStrokeThicknessDeg, markTheFixationBool, markThePossibleTargetsBool, maskerBaseFrequencyMultiplier, maskerSoundDBSPL, maskerSoundFolder, maskerSoundPhrase, measureLuminanceBool, measureLuminanceDelaySec, measureLuminanceHz, movieComputeJS, movieHz, movieLuminanceNit, moviePQEncodedBool, movieRectDeg, movieRectPxContainsRectDegBool, movieSec, movieTargetDelaySec, movieValues, needEasyEyesKeypadBeyondCm, needScreenHeightUpToDeg, needScreenWidthUpToDeg, needTargetSizeDownToDeg, notes, questionAndAnswer@@, readingCorpus, readingFirstFewWords, readingLinesPerPage, readingMaxCharactersPerLine, readingNominalSizeDeg, readingNominalSizePt, readingNumberOfPossibleAnswers, readingNumberOfQuestions, readingPages, readingSetSizeBy, readingSpacingDeg, readingTargetMaxWordFrequency, readingXHeightDeg, readingXHeightPt, responseCharacterHasMedialShapeBool, responseClickedBool, responseMustTrackContinuouslyBool, responseMustTrackMaxSec, responseMustTrackMinSec, responseNegativeFeedbackBool, responsePositiveFeedbackBool, responsePurrWhenReadyBool, responseTypedBool, responseTypedEasyEyesKeypadBool, responseTypedKeypadWidthOverHeight, rsvpReadingFlankerCharacterSet, rsvpReadingNumberOfResponseOptions, rsvpReadingNumberOfWords, rsvpReadingRequireUniqueWordsBool, screenColorRGBA, showBoundingBoxBool, showCharacterSetBoundingBoxBool, showCharacterSetForAllResponsesBool, showCharacterSetWhere, showConditionNameBool, showCounterBool, showCounterWhere, showGazeBool, showGazeNudgerBool, showGrid, showPercentCorrectBool, showProgressBarBool, showTakeABreakCreditBool, showTargetSpecsBool, showViewingDistanceBool, simulateParticipantBool, simulateWithDisplayBool, simulationBeta, simulationDelta, simulationModel, simulationThreshold, soundGainDBSPL, spacingDeg, spacingDirection, spacingIsOuterBool, spacingOverSizeRatio, spacingRelationToSize, spacingSymmetry, takeABreakMinimumDurationSec, takeABreakTrialCredit, targetBoundingBoxHorizontalAlignment, targetColorRGBA, targetContrast, targetCyclePerDeg, targetDelaySec, targetDurationSec, targetEccentricityXDeg, targetEccentricityYDeg, targetGapDeg, targetHz, targetKind, targetLengthDeg, targetMinimumPix, targetOffsetDeg, targetOrientationDeg, targetPhaseSpatialDeg, targetPhaseTemporalDeg, targetRepeatsBorderCharacter, targetRepeatsMaxLines, targetSafetyMarginSec, targetSizeDeg, targetSizeIsHeightBool, targetSoundChannels, targetSoundDBSPL, targetSoundFolder, targetSoundNoiseBool, targetSoundNoiseClockHz, targetSoundNoiseDBSPL, targetSoundNoiseOffsetReTargetSec, targetSoundNoiseOnsetReTargetSec, targetSoundPhrase, targetSpaceConstantDeg, targetTask, targetThicknessDeg, targetTimeConstantSec, thresholdAllowedDurationRatio, thresholdAllowedGazeRErrorDeg, thresholdAllowedGazeXErrorDeg, thresholdAllowedGazeYErrorDeg, thresholdAllowedLatenessSec, thresholdBeta, thresholdDelta, thresholdGamma, thresholdGuess, thresholdGuessLogSd, thresholdParameter, thresholdProcedure, thresholdProportionCorrect, viewingDistanceAllowedRatio, viewingDistanceDesiredCm, viewingDistanceNudgingBool",
+      "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
   },
   {
     name: "showPercentCorrectBool",
