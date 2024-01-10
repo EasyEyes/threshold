@@ -2307,7 +2307,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.4",
     explanation:
-      'markingFixationStrokeThickening (default 1) specifies a thickness multiplier when the fixation mark is "bold". Currently the bold effect is only used to indicate that the cursor is in the hotspot (i.e. the cursor tip is within markingFixationHotSpotRadiusDeg of the center of the crosshair). The multiplier is greater than or equal to zero, so it can shrink or expand the crosshair stroke thickness. Setting it to 1, the default, disables bolding. ',
+      'markingFixationStrokeThickening (default 1.4) specifies a thickness multiplier when the fixation mark is "bold". Currently the bold effect is only used to indicate that the cursor is in the hotspot (i.e. the cursor tip is within markingFixationHotSpotRadiusDeg of the center of the crosshair). The multiplier is greater than or equal to zero, so it can shrink or expand the crosshair stroke thickness. Setting it to 1, the default, disables bolding. ',
   },
   markingFixationStrokeThicknessDeg: {
     name: "markingFixationStrokeThicknessDeg",
