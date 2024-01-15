@@ -74,14 +74,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 _calibrateSoundAgainOptionBool (default FALSE), if TRUE, then the "Again" button is ALWAYS offered at the top of the Sound Calibration Results page. If FALSE, then the "Again" button is shown only if _calibrateMicrophonesBool==TRUE or the loudspeaker correction is unacceptable, with SD > _calibrateSoundTolerance_dB.',
   },
-  _calibrateSoundTolerance_dB: {
-    name: "_calibrateSoundTolerance_dB",
-    availability: "now",
-    type: "numerical",
-    default: "1.5",
-    explanation:
-      '🕑 _calibrateSoundTolerance_dB (default 1.8), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the current congratulations and the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Again" button.',
-  },
   _calibrateSoundBackgroundSecs: {
     name: "_calibrateSoundBackgroundSecs",
     availability: "now",
@@ -169,6 +161,14 @@ export const GLOSSARY: Glossary = {
     default: "1",
     explanation:
       "❌ _calibrateSoundBurstsWarmup (default 1) is the number of extra sound bursts, not recorded, before the recorded series of bursts. The warmup is NOT part of the _calibrateSoundBurstRepeats. There will be _calibrateSoundBurstsWarmup+_calibrateSoundBurstRepeats sound bursts, and only the final _calibrateSoundBurstRepeats are recorded and analyzed. Having a warmup burst is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
+  },
+  _calibrateSoundBurstUses1000HzGainBool: {
+    name: "_calibrateSoundBurstUses1000HzGainBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_calibrateSoundBurstUses1000HzGainBool (default FALSE) changes the gain of the MLS-measured frequency transfer function to equal that measured separately with 1000 Hz sine waves. This was Denis's idea, overriding Novak et al. (2016). ",
   },
   _calibrateSoundCheck: {
     name: "_calibrateSoundCheck",
@@ -266,6 +266,14 @@ export const GLOSSARY: Glossary = {
     default: "0.3333333",
     explanation:
       "_calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing. We smooth by replacing each power gain by the average power gain within the specified bandwidth, centered, in log frequency, about the frequency whose gain we are smoothing.",
+  },
+  _calibrateSoundTolerance_dB: {
+    name: "_calibrateSoundTolerance_dB",
+    availability: "now",
+    type: "numerical",
+    default: "1.5",
+    explanation:
+      '🕑 _calibrateSoundTolerance_dB (default 1.8), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the current congratulations and the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Again" button.',
   },
   _calibrateSoundUMIKBase_dB: {
     name: "_calibrateSoundUMIKBase_dB",
@@ -2955,6 +2963,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Center is midway between two gridlines. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
   },
+  "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.":
+    {
+      name: "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
+      availability: "now",
+      type: "text",
+      default: "0,0,0,1",
+      explanation:
+        'targetColorRGBA (default "0,0,0,1") sets target color. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+    },
   showBeepButtonOnBlockInstructionBool: {
     name: "showBeepButtonOnBlockInstructionBool",
     availability: "now",
@@ -3287,15 +3304,6 @@ export const GLOSSARY: Glossary = {
       'When computing the characterSet bounding box as the union of the bounding box of each letter, align the bounding boxes horizontally by "center" or "origin". The bounding boxes are always vertically aligned by baseline.',
     categories: ["center", "origin"],
   },
-  "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.":
-    {
-      name: "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
-      availability: "now",
-      type: "text",
-      default: "0,0,0,1",
-      explanation:
-        'targetColorRGBA (default "0,0,0,1") sets target color. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
-    },
   targetContrast: {
     name: "targetContrast",
     availability: "now",
