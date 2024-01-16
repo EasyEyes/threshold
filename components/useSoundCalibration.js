@@ -1413,7 +1413,9 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   const correctGain = loudspeakerInfo.current["gainDBSPL"];
   const IrGainAt1000Hz = IrGain[IrFreq.findIndex((freq) => freq === 1000)];
   const difference = Math.round(10 * (IrGainAt1000Hz - correctGain)) / 10;
-  IrGain = IrGain.map((gain) => gain - difference);
+  if (calibrateSoundBurstUses1000HzGainBool.current) {
+    IrGain = IrGain.map((gain) => gain - difference);
+  }
   soundCalibrationResults.current.component.ir = { Freq: IrFreq, Gain: IrGain };
   loudspeakerIR.Freq = IrFreq;
   loudspeakerIR.Gain = IrGain;
@@ -1497,7 +1499,9 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   const correctGain = microphoneInfo.current.gainDBSPL;
   const IrGainAt1000Hz = IrGain[IrFreq.findIndex((freq) => freq === 1000)];
   const difference = Math.round(10 * (IrGainAt1000Hz - correctGain)) / 10;
-  IrGain = IrGain.map((gain) => gain - difference);
+  if (calibrateSoundBurstUses1000HzGainBool.current) {
+    IrGain = IrGain.map((gain) => gain - difference);
+  }
   microphoneCalibrationResult.current.component.ir = {
     Freq: IrFreq,
     Gain: IrGain,
