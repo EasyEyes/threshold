@@ -15,6 +15,7 @@ import {
   calibrateSoundBurstDb,
   calibrateSoundBurstFilteredExtraDb,
   calibrateSoundBurstLevelReTBool,
+  calibrateSoundBurstUses1000HzGainBool,
   calibrateSoundBurstRecordings,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
@@ -1014,6 +1015,8 @@ const startCalibration = async (
     calibrateSoundBurstFilteredExtraDb:
       calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
+    calibrateSoundBurstUses1000HzGainBool:
+      calibrateSoundBurstUses1000HzGainBool.current,
     calibrateSoundCheck: calibrateSoundCheck.current,
     calibrateSoundIIRSec: calibrateSoundIIRSec.current,
     calibrateSoundIRSec: calibrateSoundIRSec.current,
@@ -1171,6 +1174,8 @@ export const calibrateAgain = async (
     calibrateSoundBurstFilteredExtraDb:
       calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
+    calibrateSoundBurstUses1000HzGainBool:
+      calibrateSoundBurstUses1000HzGainBool.current,
     calibrateSoundCheck: calibrateSoundCheck.current,
     calibrateSoundIIRSec: calibrateSoundIIRSec.current,
     calibrateSoundIRSec: calibrateSoundIRSec.current,

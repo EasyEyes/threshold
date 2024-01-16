@@ -462,6 +462,7 @@ export const calibrateSoundBurstDb = { current: -18 };
 export const calibrateSoundBurstFilteredExtraDb = { current: 6 };
 export const calibrateSoundBurstLevelReTBool = { current: false };
 export const calibrateSoundBurstDbIsRelativeBool = { current: false };
+export const calibrateSoundBurstUses1000HzGainBool = { current: false };
 export const timeoutSec = { current: 180 };
 export const calibrateSoundCheck = { current: "goal" };
 export const microphoneCalibrationResults = [];

@@ -30,6 +30,7 @@ import {
   calibrateSoundBurstFilteredExtraDb,
   calibrateSoundBurstLevelReTBool,
   calibrateSoundBurstDbIsRelativeBool,
+  calibrateSoundBurstUses1000HzGainBool,
   loudspeakerInfo,
   microphoneInfo,
   calibrationTime,
@@ -255,6 +256,13 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundBurstDbIsRelativeBool.current = ifTrue(
     reader.read(
       GLOSSARY._calibrateSoundBurstDbIsRelativeBool.name,
+      "__ALL_BLOCKS__"
+    )
+  );
+
+  calibrateSoundBurstUses1000HzGainBool.current = ifTrue(
+    reader.read(
+      GLOSSARY._calibrateSoundBurstUses1000HzGainBool.name,
       "__ALL_BLOCKS__"
     )
   );
