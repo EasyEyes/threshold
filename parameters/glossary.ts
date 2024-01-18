@@ -152,7 +152,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "71",
     explanation:
-      "_calibrateSoundBurstScalar_dB (default 71) add this dB offset to the gain at every frequency of the profile.",
+      "_calibrateSoundBurstScalar_dB (default 71), if _calibrateSoundBurstUses1000HzGainBool==FALSE, then add this dB offset to the gain at every frequency of the profile. This is temporary until we sort out the factors that the frequency response is multiplied by. At the moment the calculated gain does not automatically consider the MLS amplitude (_calibrateSoundBurstDb), so you should substract that from whatever fixed offset you provide here.",
   },
   _calibrateSoundBurstSec: {
     name: "_calibrateSoundBurstSec",
@@ -176,7 +176,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateSoundBurstUses1000HzGainBool (default FALSE) changes the gain of the MLS-measured frequency transfer function to equal that measured separately with 1000 Hz sine waves. This was Denis's idea, overriding Novak et al. (2016). ",
+      "_calibrateSoundBurstUses1000HzGainBool (default FALSE) if true, then change the gain of the MLS-measured frequency transfer function to equal that measured separately with 1000 Hz sine waves. This was Denis's idea, overriding Novak et al. (2016). Decided in January 2024 that it was a bad idea, so it's now disabled by default.",
   },
   _calibrateSoundCheck: {
     name: "_calibrateSoundCheck",
