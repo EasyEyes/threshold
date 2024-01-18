@@ -15,6 +15,7 @@ import { GLOSSARY } from "../parameters/glossary.ts";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { paramReader } from "../threshold";
 import { getAppleCoordinatePosition } from "./eyeTrackingFacilitation";
+import { typeOf } from "mathjs";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -226,7 +227,7 @@ export const pixelsToDegrees = (pixels, displayOptions) => {
  * @param {number[]} displayOptions.nearPointXYPix Nearpoint of participant, in px
  * @returns
  */
-export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
+export const XYPixOfXYDeg = (xyDeg) => {
   if (
     !(
       displayOptions.nearPointXYDeg &&
@@ -287,7 +288,7 @@ export const XYPixOfXYDeg = (xyDeg, displayOptions) => {
  * @param {*} xyPix
  * @param {*} displayOptions
  */
-export const XYDegOfXYPix = (xyPix, displayOptions) => {
+export const XYDegOfXYPix = (xyPix) => {
   // eslint-disable-next-line no-prototype-builtins
   if (!displayOptions.hasOwnProperty("nearPointXYDeg"))
     throw "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix";

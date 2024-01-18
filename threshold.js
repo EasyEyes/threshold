@@ -432,6 +432,7 @@ import {
   updateTrackCursorHz,
 } from "./components/cursorTracking.ts";
 import { setPreStimulusRerunInterval } from "./components/rerunPrestimulus.js";
+import { getDotAndBackGrid } from "./components/dotAndGrid.ts";
 
 /* -------------------------------------------------------------------------- */
 
@@ -1030,6 +1031,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     eduInstructionClock,
     trialInstructionClock,
     blockScheduleFinalClock;
+
+  var dot, backGrid;
 
   async function experimentInit() {
     status.currentFunction = "experimentInit";
@@ -4424,6 +4427,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       showConditionName(conditionName, targetSpecs);
 
+      [dot, backGrid] = getDotAndBackGrid(
+        reader.read("showDot", status.block_condition),
+        reader.read("showBackGrid", status.block_condition),
+        letterConfig.targetEccentricityXYDeg
+      );
+      if (dot) trialComponents.push(dot.stim);
+      if (backGrid) trialComponents.push(...backGrid.stims);
+
       // totalTrialsThisBlock.current = snapshot.nTotal;
       let trialCounterStr = getTrialInfoStr(
         rc.language.value,
@@ -5638,6 +5649,35 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
           };
           break;
+      }
+
+      // BackGrid and Dot
+      // TODO implement .status for dot and backgrid class
+      if (backGrid) {
+        // Draw backGrid
+        if (
+          t >= delayBeforeStimOnsetSec &&
+          backGrid.status === PsychoJS.Status.NOT_STARTED
+        ) {
+          backGrid.draw();
+        }
+        // Undraw backGrid
+        if (backGrid.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+          backGrid.draw(false);
+        }
+      }
+      if (dot) {
+        // Draw dot
+        if (
+          t >= delayBeforeStimOnsetSec &&
+          dot.status === PsychoJS.Status.NOT_STARTED
+        ) {
+          dot.draw();
+        }
+        // Undraw dot
+        if (dot.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+          dot.draw(false);
+        }
       }
 
       if (targetKind.current === "vernier") {
