@@ -1362,7 +1362,7 @@ export const CompressorDb = (inDb, T, R, W) => {
 
   // updated Jan 18th, 2024
   let outDb = 0;
-  Q = 1 / R;
+  const Q = 1 / R;
   const WFinal = W >= 0 ? W : 0;
   if (inDb > T + WFinal / 2) {
     outDb = T + Q * (inDb - T);
@@ -1872,8 +1872,8 @@ export const display1000HzParametersTable = (parameters) => {
     T: parameters.T.toFixed(1) + " dB",
     W: parameters.W.toFixed(1) + " dB",
     "Q = 1/R": (1 / Number(parameters.R.toFixed(1))).toFixed(3),
-    gainDBSPL: parameters.gainDBSPL.toFixed(1) + " dB",
-    backgroundDBSPL: parameters.backgroundDBSPL.toFixed(1) + " dB",
+    gain: parameters.gainDBSPL.toFixed(1) + " dB",
+    // backgroundDBSPL: parameters.backgroundDBSPL.toFixed(1) + " dB",
     RMSError: parameters.RMSError.toFixed(1) + " dB",
   };
   const table = document.createElement("table");
@@ -1899,6 +1899,7 @@ export const display1000HzParametersTable = (parameters) => {
     const td1 = document.createElement("td");
     const td2 = document.createElement("td");
     td1.innerHTML = key;
+    td1.style.fontStyle = "italic";
     td2.innerHTML = parametersToDisplay[key];
     tr.appendChild(td1);
     tr.appendChild(td2);
