@@ -1367,7 +1367,7 @@ export const CompressorDb = (inDb, T, R, W) => {
   if (inDb >= T + WFinal / 2) {
     outDb = T + Q * (inDb - T);
   } else if (inDb >= T - WFinal / 2) {
-    outDb = inDb + ((1 - Q) * (inDb - (T - WFinal / 2)) ** 2) / (2 * WFinal);
+    outDb = inDb - ((1 - Q) * (inDb - (T - WFinal / 2)) ** 2) / (2 * WFinal);
   } else {
     outDb = inDb;
   }
