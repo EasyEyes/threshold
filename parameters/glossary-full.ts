@@ -180,6 +180,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundBurstScalar_dB",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateSoundBurstScalar_dB (default 71) add this dB offset to the gain at every frequency of the profile.",
+    type: "numerical",
+    default: "71",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundBurstSec",
     availability: "now",
     example: "",
@@ -187,16 +197,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_calibrateSoundBurstSec (default 1) is the desired length of one sound burst (currently an MLS sequence) for sound calibration. To be useful, it should be longer than the impulse response that you want to measure. Excess length improves the signal to noise ratio. MLS sequences can only be certain lengths, in steps of roughly doubling, so EasyEyes will pick the shortest MLS length that, with the actual sampling rate, produces a burst duration at least as long as _calibrateSoundBurstSec.",
     type: "numerical",
     default: "1",
-    categories: "",
-  },
-  {
-    name: "_calibrateSoundScalar_dB",
-    availability: "now",
-    example: "",
-    explanation:
-      "_calibrateSoundScalar_dB (default 71) add this dB offset to the gain at every frequency of the profile.",
-    type: "numerical",
-    default: "71",
     categories: "",
   },
   {

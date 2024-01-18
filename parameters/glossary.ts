@@ -146,6 +146,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst for analysis.\n_calibrateSoundBurstPreSec and _calibrateSoundBurstPostSec are rounded up to be an integer multiple of the burst period. EasyEyes adds an extra warm-up rep, at the beginning, that is also recorded, but not used in estimation of the impulse response, and an extra 10% of the requested duration, at the end, to allow for any small difference in start time between the loudspeaker and microphone.  \nIMPORTANT: The Novak et al. (2012) algorithm to deal with an asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period, so make sure that\n_calibrateSoundBurstRepeats ≥ 2\nWe plan to have the EasyEyes compiler enforce this.",
   },
+  _calibrateSoundBurstScalar_dB: {
+    name: "_calibrateSoundBurstScalar_dB",
+    availability: "now",
+    type: "numerical",
+    default: "71",
+    explanation:
+      "_calibrateSoundBurstScalar_dB (default 71) add this dB offset to the gain at every frequency of the profile.",
+  },
   _calibrateSoundBurstSec: {
     name: "_calibrateSoundBurstSec",
     availability: "now",
@@ -153,14 +161,6 @@ export const GLOSSARY: Glossary = {
     default: "1",
     explanation:
       "_calibrateSoundBurstSec (default 1) is the desired length of one sound burst (currently an MLS sequence) for sound calibration. To be useful, it should be longer than the impulse response that you want to measure. Excess length improves the signal to noise ratio. MLS sequences can only be certain lengths, in steps of roughly doubling, so EasyEyes will pick the shortest MLS length that, with the actual sampling rate, produces a burst duration at least as long as _calibrateSoundBurstSec.",
-  },
-  _calibrateSoundScalar_dB: {
-    name: "_calibrateSoundScalar_dB",
-    availability: "now",
-    type: "numerical",
-    default: "71",
-    explanation:
-      "_calibrateSoundScalar_dB (default 71) add this dB offset to the gain at every frequency of the profile.",
   },
   _calibrateSoundBurstsWarmup: {
     name: "_calibrateSoundBurstsWarmup",
