@@ -86,9 +86,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstDb",
     availability: "now",
     type: "numerical",
-    default: "-18",
+    default: "-34",
     explanation:
-      "_calibrateSoundBurstDb (default -18) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is always normalized to have gain 1 at 1 kHz.",
+      "_calibrateSoundBurstDb (default -34) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is always normalized to have gain 1 at 1 kHz.",
   },
   _calibrateSoundBurstDbIsRelativeBool: {
     name: "_calibrateSoundBurstDbIsRelativeBool",
@@ -153,6 +153,14 @@ export const GLOSSARY: Glossary = {
     default: "1",
     explanation:
       "_calibrateSoundBurstSec (default 1) is the desired length of one sound burst (currently an MLS sequence) for sound calibration. To be useful, it should be longer than the impulse response that you want to measure. Excess length improves the signal to noise ratio. MLS sequences can only be certain lengths, in steps of roughly doubling, so EasyEyes will pick the shortest MLS length that, with the actual sampling rate, produces a burst duration at least as long as _calibrateSoundBurstSec.",
+  },
+  _calibrateSoundScalar_dB: {
+    name: "_calibrateSoundScalar_dB",
+    availability: "now",
+    type: "numerical",
+    default: "71",
+    explanation:
+      "_calibrateSoundScalar_dB (default 71) add this dB offset to the gain at every frequency of the profile.",
   },
   _calibrateSoundBurstsWarmup: {
     name: "_calibrateSoundBurstsWarmup",
