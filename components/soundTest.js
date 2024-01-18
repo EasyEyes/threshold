@@ -1360,13 +1360,14 @@ export const CompressorDb = (inDb, T, R, W) => {
   // Journal of Audio Engineering Society, Vol. 60, Issue 6, 2012, pp. 399–408.
   // http://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf
 
+  // updated Jan 18th, 2024
   let outDb = 0;
+  Q = 1 / R;
   const WFinal = W >= 0 ? W : 0;
   if (inDb > T + WFinal / 2) {
-    outDb = T + (inDb - T) / R;
+    outDb = T + Q * (inDb - T);
   } else if (inDb > T - WFinal / 2) {
-    outDb =
-      inDb + ((1 / R - 1) * (inDb - (T - WFinal / 2)) ** 2) / (2 * WFinal);
+    outDb = inDb + ((1 - Q) * (inDb - (T - WFinal / 2)) ** 2) / (2 * WFinal);
   } else {
     outDb = inDb;
   }
@@ -1532,7 +1533,7 @@ export const displayParameters1000Hz = (
   // plotCanvas.style.height = "100%";
 };
 
-export const SoundLevelModel = (inDb, backgroundDbSpl, gainDbSpl, T, W, R) => {
+export const SoundLevelModel = (inDb, backgroundDbSpl, gain_dB, T, W, R) => {
   // % We play a sine wave through a speaker and use an iPhone to measure the
   // % sound level. The level of the digital source is RMS expressed in dB.
   // % Because digital sound exceeding the range -1 to +1 may be clipped we do
@@ -1562,11 +1563,15 @@ export const SoundLevelModel = (inDb, backgroundDbSpl, gainDbSpl, T, W, R) => {
   // % compression, a gain from digital (dB) to physical (dB SPL) sound, and
   // % the addition of ambient background noise (physical powers add).
 
-  const totalDbSpl =
-    10 *
-    Math.log10(10 ** (backgroundDbSpl / 10) + 10 ** ((gainDbSpl + inDb) / 10));
-  const measuredDbSpl = CompressorDb(totalDbSpl, T, R, W);
-  return measuredDbSpl;
+  // const totalDbSpl =
+  //   10 *
+  //   Math.log10(10 ** (backgroundDbSpl / 10) + 10 ** ((gainDbSpl + inDb) / 10));
+
+  // updated Jan 18th, 2024
+
+  const compressorDb = CompressorDb(inDb, T, R, W);
+  const outDb = compressorDb + gain_dB;
+  return outDb;
 };
 
 const downloadCalibrationData = (downloadButton, parameters) => {

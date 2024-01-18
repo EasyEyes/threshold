@@ -28,6 +28,7 @@ import {
   calibrateSoundIRSec,
   calibrateSoundBurstDb,
   calibrateSoundBurstFilteredExtraDb,
+  calibrateSoundBurstScalarDB,
   calibrateSoundBurstLevelReTBool,
   calibrateSoundBurstDbIsRelativeBool,
   calibrateSoundBurstUses1000HzGainBool,
@@ -316,6 +317,9 @@ export const calibrateAudio = async (reader) => {
 
   calibrateSoundBurstFilteredExtraDb.current = reader.read(
     GLOSSARY._calibrateSoundBurstFilteredExtraDb.name
+  )[0];
+  calibrateSoundBurstScalarDB.current = reader.read(
+    GLOSSARY._calibrateSoundBurstScalar_dB.name
   )[0];
 
   calibrateSound1000HzSec.current = reader.read(
