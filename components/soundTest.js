@@ -1157,7 +1157,7 @@ const startRecording = async (deviceId, recordButton, language) => {
     // p.innerText += "\n" + powerLevel + " " + readi18nPhrases("RC_dB", language);
     const powerLevelTableBody = document.getElementById("powerLevelTableBody");
     const powerLevelTable = document.getElementById("powerLevelTable");
-    const row = powerLevelTable.insertRow();
+    const row = powerLevelTable.insertRow(0);
     const cell1 = row.insertCell();
     cell1.style.paddingRight = "30px";
     cell1.innerText = Ampl ? Ampl.toFixed(3) : "";
@@ -1165,7 +1165,7 @@ const startRecording = async (deviceId, recordButton, language) => {
     cell2.style.paddingRight = "30px";
     const cell3 = row.insertCell();
     cell3.innerText = powerLevel + " dB";
-    powerLevelTableBody.appendChild(row);
+    // powerLevelTableBody.appendChild(row);
     if (dbSPLValue) {
       cell2.innerText = dbSPLValue + " dB SPL";
       // p.innerText += " , " + dbSPLValue + " " + "dB SPL";
@@ -1214,6 +1214,16 @@ const toggleRecording = async (id, recordButton, language) => {
   if (mediaRecorder && mediaRecorder.state === "recording") {
     stopRecording(recordButton);
   } else {
+    const powerLevelTable = document.getElementById("powerLevelTable");
+    for (var i = 0; i < powerLevelTable.rows.length; i++) {
+      var row = powerLevelTable.rows[i];
+
+      // Loop through cells in the current row
+      while (row.cells.length > 0) {
+        // Remove the last cell in the row
+        row.deleteCell(row.cells.length - 1);
+      }
+    }
     await startRecording(id, recordButton, language);
   }
 };
