@@ -4614,6 +4614,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       )
         fixation.boldIfCursorNearFixation();
 
+      // BackGrid and Dot
+      if (backGrid && backGrid.status === PsychoJS.Status.NOT_STARTED)
+        backGrid.draw();
+      if (dot && dot.status === PsychoJS.Status.NOT_STARTED) dot.draw();
+
       if (!continueRoutine || clickedContinue.current) {
         continueRoutine = true;
         clickedContinue.current = false;
@@ -4654,6 +4659,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       removeSkipTrialButton();
+
+      // Undraw backGrid and dot
+      if (backGrid.status === PsychoJS.Status.STARTED) backGrid.draw(false);
+      if (dot.status === PsychoJS.Status.STARTED) dot.draw(false);
 
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
@@ -5649,35 +5658,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
           };
           break;
-      }
-
-      // BackGrid and Dot
-      // TODO implement .status for dot and backgrid class
-      if (backGrid) {
-        // Draw backGrid
-        if (
-          t >= delayBeforeStimOnsetSec &&
-          backGrid.status === PsychoJS.Status.NOT_STARTED
-        ) {
-          backGrid.draw();
-        }
-        // Undraw backGrid
-        if (backGrid.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-          backGrid.draw(false);
-        }
-      }
-      if (dot) {
-        // Draw dot
-        if (
-          t >= delayBeforeStimOnsetSec &&
-          dot.status === PsychoJS.Status.NOT_STARTED
-        ) {
-          dot.draw();
-        }
-        // Undraw dot
-        if (dot.status === PsychoJS.Status.STARTED && t >= frameRemains) {
-          dot.draw(false);
-        }
       }
 
       if (targetKind.current === "vernier") {
