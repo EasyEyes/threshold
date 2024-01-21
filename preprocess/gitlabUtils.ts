@@ -36,7 +36,7 @@ import {
   convertLanguageToLanguageCode,
   getCompatibilityRequirements,
 } from "../components/compatibilityCheck";
-import e from "express";
+import { isExpTableFile } from "../preprocess/utils";
 
 export class User {
   public username = "";
@@ -1303,6 +1303,8 @@ const createRequestedResourcesOnRepo = async (
   user: User,
   uploadedFileCount: { current: number },
   totalFileCount: number,
+  isCompiledFromArchiveBool: boolean,
+  archivedZip: any,
 ): Promise<void> => {
   if (
     !userRepoFiles.requestedFonts ||
@@ -1343,22 +1345,48 @@ const createRequestedResourcesOnRepo = async (
     }
 
     for (const fileName of requestedFiles) {
-      const resourcesRepoFilePath = encodeGitlabFilePath(
-        `${resourceType}/${fileName}`,
-      );
+      let content = "";
+      if (isCompiledFromArchiveBool) {
+        const Zip = new JSZip();
+        await Zip.loadAsync(archivedZip as unknown as File).then((zip) => {
+          return Promise.all(
+            Object.keys(zip.files).map(async (filename) => {
+              return zip.files[filename]
+                .async("arraybuffer")
+                .then(async (arrayBuffer) => {
+                  if (filename === fileName) {
+                    const blob = new Blob([arrayBuffer]);
+                    const fileObject = new File([blob], filename);
+                    const useBase64 =
+                      !acceptableResourcesExtensionsOfTextDataType.includes(
+                        getFileExtension(fileObject),
+                      );
+                    content = useBase64
+                      ? await getBase64Data(fileObject)
+                      : await getFileTextData(fileObject);
+                  }
+                });
+            }),
+          );
+        });
+      } else {
+        const resourcesRepoFilePath = encodeGitlabFilePath(
+          `${resourceType}/${fileName}`,
+        );
 
-      const content: string =
-        resourceType === "texts"
-          ? await getTextFileDataFromGitLab(
-              parseInt(easyEyesResourcesRepo.id),
-              resourcesRepoFilePath,
-              user.accessToken,
-            )
-          : await getBase64FileDataFromGitLab(
-              parseInt(easyEyesResourcesRepo.id),
-              resourcesRepoFilePath,
-              user.accessToken,
-            );
+        content =
+          resourceType === "texts"
+            ? await getTextFileDataFromGitLab(
+                parseInt(easyEyesResourcesRepo.id),
+                resourcesRepoFilePath,
+                user.accessToken,
+              )
+            : await getBase64FileDataFromGitLab(
+                parseInt(easyEyesResourcesRepo.id),
+                resourcesRepoFilePath,
+                user.accessToken,
+              );
+      }
 
       // Ignore 404s
       if (content?.trim().indexOf(`{"message":"404 File Not Found"}`) != -1)
@@ -1388,6 +1416,8 @@ export const createPavloviaExperiment = async (
   user: User,
   projectName: string,
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
+  isCompiledFromArchiveBool: boolean,
+  archivedZip: any,
 ) => {
   // auth check
   if (user.id === undefined) {
@@ -1476,6 +1506,8 @@ export const createPavloviaExperiment = async (
         user,
         uploadedFileCount,
         totalFileCount,
+        isCompiledFromArchiveBool,
+        archivedZip,
       );
       if (c === null) finalClosing = false;
 
