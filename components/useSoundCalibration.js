@@ -1571,6 +1571,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     Hz_system_iir: result?.system?.iir_psd?.x,
     dB_system_iir_no_bandpass: result?.system?.iir_psd?.y_no_bandpass,
     Hz_system_iir_no_bandpass: result?.system?.iir_psd?.x_no_bandpass,
+    filtered_mls_nbp_system: result.system.filtered_no_bandpass_mls_psd,
+    filtered_mls_nbp_component: result.component.filtered_no_bandpass_mls_psd,
     "Loudspeaker model": loudspeakerInfo.current,
     micInfo: {
       micModelName: microphoneInfo.current.micFullName,
@@ -1800,6 +1802,10 @@ const downloadLoudspeakerCalibration = () => {
         soundCalibrationResults.current?.system?.iir_psd?.y_no_bandpass,
       Hz_system_iir_no_bandpass:
         soundCalibrationResults.current?.system?.iir_psd?.x_no_bandpass,
+      filtered_mls_nbp_system:
+        soundCalibrationResults.current?.system.filtered_no_bandpass_mls_psd,
+      filtered_mls_nbp_component:
+        soundCalibrationResults.current?.component.filtered_no_bandpass_mls_psd,
       "Loudspeaker model": loudspeakerInfo.current,
       micInfo: soundCalibrationResults.current?.micInfo,
       // unconv_rec: soundCalibrationResults.current?.unfiltered_recording,
