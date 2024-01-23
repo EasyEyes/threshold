@@ -4661,8 +4661,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       removeSkipTrialButton();
 
       // Undraw backGrid and dot
-      if (backGrid.status === PsychoJS.Status.STARTED) backGrid.draw(false);
-      if (dot.status === PsychoJS.Status.STARTED) dot.draw(false);
+      if (backGrid && backGrid.status === PsychoJS.Status.STARTED)
+        backGrid.draw(false);
+      if (dot && dot.status === PsychoJS.Status.STARTED) dot.draw(false);
 
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
