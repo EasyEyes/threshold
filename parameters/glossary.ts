@@ -114,6 +114,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "❌ _calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is \n_calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
   },
+  _calibrateSoundBurstMLSVersions: {
+    name: "_calibrateSoundBurstMLSVersions",
+    availability: "now",
+    type: "numerical",
+    default: "4",
+    explanation:
+      "_calibrateSoundBurstMLSVersions (default 1) is the number N of different MLS sequences to use, doing the whole Novak et al. MLS calibration (including _calibrateSoundBurstRepeats) to get an impulse response for each MLS sequence. EasyEyes will save the N impulse responses in the profile library and in the JSON file. EasyEyes will also save, in both places, the combined impulse response, for further analysis, which is the median at each time point of the several impulse response functions. As of January 27, 2024, we only have experience with N=1. Based on Vanderkooy (1994), we hope that increasing N to 3 will greatly reduce MLS artifacts. \n\nVanderkooy, J. (1994). Aspects of MLS measuring systems. Journal of the Audio Engineering Society, 42(4), 219-231.",
+  },
   _calibrateSoundBurstPostSec: {
     name: "_calibrateSoundBurstPostSec",
     availability: "now",
@@ -202,6 +210,15 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       '🕑 _calibrateSoundFavoriteAuthors (default is empty) optionally provides a comma-separated list of email addresses of trusted authors of microphone calibrations in the EasyEyes calibration library. Each calibration is stamped with the authors\' email(s). The list is ordered so that preference diminishes farther down the list. An empty list indicates that you\'ll accept any calibration file in the EasyEyes library that matches your microphone model. If you list one or more emails, then the first is your top preference, and so on. At the end you can list "any", or not. "any" indicates that if your favorite authors have not calibrated this device, then you\'ll accept any available calibration.',
+  },
+  _calibrateSoundIIRPhase: {
+    name: "_calibrateSoundIIRPhase",
+    availability: "now",
+    type: "categorical",
+    default: "linear",
+    explanation:
+      '🕑 _calibrateSoundIIRPhase (default "linear") selects the algorithm used to compute the inverse impulse response from the impulse response. We implemented linear-phase first, and have just added minimum phase.',
+    categories: ["linear", "minimum"],
   },
   _calibrateSoundIIRSec: {
     name: "_calibrateSoundIIRSec",
@@ -666,6 +683,34 @@ export const GLOSSARY: Glossary = {
     default: "0.05",
     explanation:
       "🕑 _needTimingToleranceSec (default 0.05) is the largest acceptable RMS error in generating a 0.15-second interval. We suspect that this depends on both the CPU speed and the number of processes being timeshared, and thus can be reduced by closing other browser windows, and quitting other apps. ",
+  },
+  _needWeb: {
+    name: "_needWeb",
+    availability: "now",
+    type: "categorical",
+    default: "",
+    explanation:
+      "🕑 _needWeb (no default) is a comma-separated list of needed web features (APIs and dictionary properties), e.g. WakeLock, echoCancellation. Web feature support depends on the browser, not the OS or hardware platform. Most of the _needWeb features are supported by most current browsers, so the participant typically can add support for a needed web feature by updating their browser or switching to the Chrome browser. For a list of compatible browsers, search for the feature in https://developer.mozilla.org/, and consult the compatibility table at the bottom of the page. The easy compatibility check just asks the browser if a feature is supported. However, that can be misleading because browsers disable features for various reasons, including low battery. Since any feature requested here might be mission-critical, if the browser says it's available, we should also confirm that we can actually set it. That might take a second, and it's worth it.\n\nThe need for these features in EasyEyes is asymmetric. Test only the features selected by the parameter arguments, and test only that we can enable WakeLock, and disable echoCancellation, noiseSuppression, and autoGainControl.",
+    categories: [
+      "WakeLock",
+      "echoCancellation",
+      "noiseSuppression",
+      "autoGainControl",
+    ],
+  },
+  _needWebSmartphone: {
+    name: "_needWebSmartphone",
+    availability: "now",
+    type: "categorical",
+    default: "",
+    explanation:
+      "🕑 _needWebSmartphone (no default), for an attached phone, is a comma-separated list of needed web features (APIs and dictionary properties), e.g. WakeLock, echoCancellation. Web feature support depends on the browser, not the OS or hardware platform. Most of the _needWebSmartphone features are supported by most current browsers, so the participant typically can add support for a needed web feature by updating their browser or switching to the Chrome browser. For a list of compatible browsers, search for the feature in https://developer.mozilla.org/, and consult the compatibility table at the bottom of the page. The easy compatibility check just asks the browser if a feature is supported. However, that can be misleading because browsers disable features for various reasons, including low battery. Since any feature requested here might be mission-critical, if the browser says it's available, we should also confirm that we can actually set it. That might take a second, and it's worth it.\n\nThe need for these features in EasyEyes is asymmetric. Test only the features selected by the parameter arguments, and test only that we can enable WakeLock, and disable echoCancellation, noiseSuppression, and autoGainControl.",
+    categories: [
+      "WakeLock",
+      "echoCancellation",
+      "noiseSuppression",
+      "autoGainControl",
+    ],
   },
   _online1InternalName: {
     name: "_online1InternalName",
@@ -2135,7 +2180,8 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "25",
-    explanation: "",
+    explanation:
+      "instructionFontSizePt (default 25) specifies the point size of the font used for instructions.",
   },
   instructionFontSource: {
     name: "instructionFontSource",
@@ -3132,14 +3178,7 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       "🕑 showParameters (no default) accepts a comma-separated list of parameter names. Its display is in the style of showTargetSpecsBool, but it allows the scientist to specify which parameters to display. All the parameters are displayed at the left edge of the screen, bottom-aligned, one per row, each with its value. At the moment, we only allow input parameters, but we will extend this list to include internal parameters.",
-    categories: [
-      "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg",
-      "thicknessDeg",
-      "lengthDeg",
-      "xCenterPx",
-      "yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000",
-      "i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
-    ],
+    categories: [""],
   },
   showPercentCorrectBool: {
     name: "showPercentCorrectBool",
