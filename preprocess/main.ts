@@ -41,6 +41,7 @@ export const preprocessExperimentFile = async (
   user: any,
   errors: EasyEyesError[],
   easyeyesResources: any,
+  isCompiledFromArchiveBool: boolean,
   callback: any,
 ) => {
   const completeCallback = (parsed: Papa.ParseResult<any>) => {
@@ -51,6 +52,7 @@ export const preprocessExperimentFile = async (
       easyeyesResources,
       callback,
       "web",
+      isCompiledFromArchiveBool,
       file.name,
     );
   };
@@ -88,6 +90,7 @@ export const prepareExperimentFileForThreshold = async (
   easyeyesResources: any,
   callback: any,
   space: string,
+  isCompiledFromArchiveBool: boolean,
   filename?: string,
 ) => {
   parsed.data = discardCommentedLines(parsed);
@@ -251,7 +254,7 @@ export const prepareExperimentFileForThreshold = async (
     parsed,
     "google",
   );
-  if (space === "web") {
+  if (space === "web" && !isCompiledFromArchiveBool) {
     errors.push(...isFontMissing(requestedFontList, easyeyesResources.fonts));
     const error: any = await webFontChecker(requestedFontListWeb);
     if (!Array.isArray(error)) errors.push(error);
@@ -259,7 +262,11 @@ export const prepareExperimentFileForThreshold = async (
 
   // ! Validate requested forms
   const requestedForms: any = getFormNames(parsed);
-  if (space === "web" && requestedForms.consentForm)
+  if (
+    space === "web" &&
+    requestedForms.consentForm &&
+    !isCompiledFromArchiveBool
+  )
     errors.push(
       ...isFormMissing(
         requestedForms.consentForm,
@@ -267,7 +274,11 @@ export const prepareExperimentFileForThreshold = async (
         "_consentForm",
       ),
     );
-  if (space === "web" && requestedForms.debriefForm)
+  if (
+    space === "web" &&
+    requestedForms.debriefForm &&
+    !isCompiledFromArchiveBool
+  )
     errors.push(
       ...isFormMissing(
         requestedForms.debriefForm,
@@ -278,7 +289,7 @@ export const prepareExperimentFileForThreshold = async (
 
   // ! Validate requested text
   const requestedTextList: any[] = getTextList(parsed);
-  if (space === "web")
+  if (space === "web" && !isCompiledFromArchiveBool)
     errors.push(...isTextMissing(requestedTextList, easyeyesResources.texts));
 
   // ! validate requested Folders;
@@ -289,6 +300,7 @@ export const prepareExperimentFileForThreshold = async (
   };
   const missingFolderErrors: any = [];
   if (
+    !isCompiledFromArchiveBool &&
     easyeyesResources.folders.length > 0 &&
     (folderList.maskerSoundFolder.length > 0 ||
       folderList.targetSoundFolder.length > 0)
@@ -330,7 +342,7 @@ export const prepareExperimentFileForThreshold = async (
 
   // ! validate requested code files
   const requestedCodeList: any[] = getCodeList(parsed);
-  if (space === "web")
+  if (space === "web" && !isCompiledFromArchiveBool)
     errors.push(...isCodeMissing(requestedCodeList, easyeyesResources.code));
 
   // TODO remove if we find no problems are caused by not validating commas
