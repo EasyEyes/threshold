@@ -31,7 +31,7 @@ function sleep(ms: number) {
 const preprocessExperimentFileLocal = async (
   file: string,
   readFileSync: any,
-  callback: any
+  callback: any,
 ) => {
   const data = readFileSync(file);
 
@@ -47,7 +47,8 @@ const preprocessExperimentFileLocal = async (
       },
       callback,
       "node",
-      file
+      false,
+      file,
     );
   };
 
@@ -70,7 +71,7 @@ const preprocessExperimentFileLocal = async (
 const constructForEXperiment = async (d: string) => {
   console.log(
     `%c=====================--- ${d.split(".")[0]} ---=====================`,
-    "color: yellow"
+    "color: yellow",
   );
   await preprocessExperimentFileLocal(
     "tables/" + d,
@@ -83,7 +84,7 @@ const constructForEXperiment = async (d: string) => {
       folders: string[],
       code: string[],
       fileStringList: string[][],
-      errorList: any[]
+      errorList: any[],
     ) => {
       console.log("Requested FORMS", forms);
       console.log("Requested FONTS", fonts);
@@ -116,18 +117,18 @@ const constructForEXperiment = async (d: string) => {
       copyFileSync("../index.html", `${dir}/index.html`);
       copyFileSync(
         "../recruitmentServiceConfig.csv",
-        `${dir}/recruitmentServiceConfig.csv`
+        `${dir}/recruitmentServiceConfig.csv`,
       );
 
       mkdirSync(`${dir}/components`);
       mkdirSync(`${dir}/components/images`);
       copyFileSync(
         "../components/images/favicon.ico",
-        `${dir}/components/images/favicon.ico`
+        `${dir}/components/images/favicon.ico`,
       );
       copyFileSync(
         "../components/images/ios_settings.png",
-        `${dir}/components/images/ios_settings.png`
+        `${dir}/components/images/ios_settings.png`,
       );
 
       copyFolder("fonts", dir);
@@ -143,9 +144,9 @@ const constructForEXperiment = async (d: string) => {
 
       copyFileSync(
         "../js/reading-page-flip.mp3",
-        `${dir}/js/reading-page-flip.mp3`
+        `${dir}/js/reading-page-flip.mp3`,
       );
-    }
+    },
   );
 };
 
@@ -177,7 +178,7 @@ const copyFolder = (sourceName: string, targetName: string) => {
   fileList.forEach((fileName) => {
     copyFileSync(
       `${sourceName}/${fileName}`,
-      `${targetName}/${sourceName}/${fileName}`
+      `${targetName}/${sourceName}/${fileName}`,
     );
   });
 };
