@@ -43,8 +43,6 @@ export const getAutoCompleteSuggestionElements = (
       const noResult = document.createElement("div");
       noResult.classList.add("autocomplete-item");
       // noResult.style.color = "#ff0000";
-      console.log("no result");
-      console.log(readi18nPhrases("EE_notRecognized", lang));
       noResult.innerHTML = readi18nPhrases("EE_notRecognized", lang);
       suggestionContainer.appendChild(noResult);
       return;
