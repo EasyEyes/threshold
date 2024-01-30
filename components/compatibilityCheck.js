@@ -11,6 +11,14 @@ import {
   where,
   collection,
 } from "firebase/firestore";
+import {
+  AllBrands,
+  AllModelNames,
+  AllModelNumbers,
+  fetchAllPhoneModels,
+  getAutoCompleteSuggestionElements,
+  matchPhoneModelInDatabase,
+} from "./compatibilityCheckHelpers";
 
 let gotLoudspeakerMatchBool = false;
 // import { microphoneInfo } from "./global";
@@ -856,6 +864,7 @@ export const displayCompatibilityMessage = async (
       messageWrapper.append(compatibilityCheckQRExplanation);
       messageWrapper.append(compatiblityCheckQR);
       let numberOfTries = 0;
+      if (needPhoneSurvey) await fetchAllPhoneModels();
 
       try {
         while (true) {
@@ -863,6 +872,7 @@ export const displayCompatibilityMessage = async (
           const result = await compatibilityCheckPeer.getResults();
           compatibilityCheckPeer.onPeerClose();
           if (result) {
+            console.log("result", result);
             numberOfTries++;
             const tryComputerButton = document.getElementById(
               "try-computer-button"
@@ -876,6 +886,7 @@ export const displayCompatibilityMessage = async (
             }
             const deviceDetails = result.deviceDetails;
             const OEM = deviceDetails.OEM;
+            const screenSizes = deviceDetails.screenSizes;
             displayUpdate.innerText = "";
             const proceed = await isSmartphoneInDatabase(
               OEM,
@@ -890,7 +901,8 @@ export const displayCompatibilityMessage = async (
               titleContainer,
               elem,
               needCalibratedSound,
-              numberOfTries
+              numberOfTries,
+              screenSizes
             );
             if (proceed) {
               if (needPhoneSurvey) {
@@ -1134,7 +1146,8 @@ const isSmartphoneInDatabase = async (
   titleContainer = null,
   elem = null,
   needCalibratedSound = [],
-  numberOfTries = 0
+  numberOfTries = 0,
+  screenSizes = { width: 0, height: 0 }
 ) => {
   // ask for the model number and name of the device
   // create input box for model number and name
@@ -1174,6 +1187,13 @@ const isSmartphoneInDatabase = async (
     lang
   );
 
+  const brandInput = document.createElement("input");
+  brandInput.type = "text";
+  brandInput.id = "brandInput";
+  brandInput.name = "brandInput";
+  brandInput.placeholder = "Brand";
+  brandInput.value = OEM === "Unknown" ? "" : OEM;
+
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
@@ -1207,8 +1227,33 @@ const isSmartphoneInDatabase = async (
   const modelNumberWrapper = document.createElement("div");
   // modelNumberWrapper.style.marginTop = "20px";
   modelNumberWrapper.appendChild(p);
+  if (needPhoneSurvey) {
+    modelNumberWrapper.appendChild(brandInput);
+    const brandSuggestionsContainer = getAutoCompleteSuggestionElements(
+      AllBrands,
+      brandInput,
+      preferredModelNumber
+    );
+    modelNumberWrapper.appendChild(brandSuggestionsContainer);
+  }
   modelNumberWrapper.appendChild(modelNameInput);
+  if (needPhoneSurvey) {
+    const modelNameSuggestionsContainer = getAutoCompleteSuggestionElements(
+      AllModelNames,
+      modelNameInput,
+      preferredModelNumber
+    );
+    modelNumberWrapper.appendChild(modelNameSuggestionsContainer);
+  }
   modelNumberWrapper.appendChild(modelNumberInput);
+  if (needPhoneSurvey) {
+    const modelNumberSuggestionsContainer = getAutoCompleteSuggestionElements(
+      AllModelNumbers,
+      modelNumberInput,
+      preferredModelNumber
+    );
+    modelNumberWrapper.appendChild(modelNumberSuggestionsContainer);
+  }
   modelNumberWrapper.appendChild(checkButton);
   messageWrapper.appendChild(modelNumberWrapper);
 
@@ -1234,11 +1279,28 @@ const isSmartphoneInDatabase = async (
         } else {
           if (needPhoneSurvey) {
             // add microphone details to microphoneInfo.phoneSurvey array
+            const smallerNumber = Math.min(
+              screenSizes.width,
+              screenSizes.height
+            );
+            const largerNumber = Math.max(
+              screenSizes.width,
+              screenSizes.height
+            );
+            const match = await matchPhoneModelInDatabase(
+              brandInput.value,
+              modelName,
+              modelNumber,
+              smallerNumber,
+              largerNumber
+            );
             microphoneInfo.phoneSurvey = {
-              smartphoneManufacturer: OEM,
+              smartphoneManufacturer: brandInput.value,
               smartphoneModelName: modelName,
               smartphoneModelNumber: modelNumber,
               smartphoneInfoFrom51Degrees: deviceDetails,
+              smartphoneScreenSizePx: screenSizes,
+              smartphoneMatch: match,
             };
             p.innerHTML = readi18nPhrases("RC_smartphoneSurveyEnd", lang);
             // center p
@@ -1247,6 +1309,7 @@ const isSmartphoneInDatabase = async (
             modelNameInput.remove();
             checkButton.remove();
             img.remove();
+            brandInput.remove();
             resolve(true);
           } else {
             const exists = await doesMicrophoneExistInFirestore(

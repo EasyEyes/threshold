@@ -114,6 +114,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "❌ _calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is \n_calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
   },
+  _calibrateSoundBurstMLSVersions: {
+    name: "_calibrateSoundBurstMLSVersions",
+    availability: "now",
+    type: "numerical",
+    default: "4",
+    explanation:
+      "_calibrateSoundBurstMLSVersions (default 1) is the number N of different MLS sequences to use, doing the whole Novak et al. MLS calibration (including _calibrateSoundBurstRepeats) to get an impulse response for each MLS sequence. EasyEyes will save the N impulse responses in the profile library and in the JSON file. EasyEyes will also save, in both places, the combined impulse response, for further analysis, which is the median at each time point of the several impulse response functions. As of January 27, 2024, we only have experience with N=1. Based on Vanderkooy (1994), we hope that increasing N to 3 will greatly reduce MLS artifacts. \n\nVanderkooy, J. (1994). Aspects of MLS measuring systems. Journal of the Audio Engineering Society, 42(4), 219-231.",
+  },
   _calibrateSoundBurstPostSec: {
     name: "_calibrateSoundBurstPostSec",
     availability: "now",
@@ -202,6 +210,15 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       '🕑 _calibrateSoundFavoriteAuthors (default is empty) optionally provides a comma-separated list of email addresses of trusted authors of microphone calibrations in the EasyEyes calibration library. Each calibration is stamped with the authors\' email(s). The list is ordered so that preference diminishes farther down the list. An empty list indicates that you\'ll accept any calibration file in the EasyEyes library that matches your microphone model. If you list one or more emails, then the first is your top preference, and so on. At the end you can list "any", or not. "any" indicates that if your favorite authors have not calibrated this device, then you\'ll accept any available calibration.',
+  },
+  _calibrateSoundIIRPhase: {
+    name: "_calibrateSoundIIRPhase",
+    availability: "now",
+    type: "categorical",
+    default: "linear",
+    explanation:
+      '🕑 _calibrateSoundIIRPhase (default "linear") selects the algorithm used to compute the inverse impulse response from the impulse response. We implemented linear-phase first, and have just added minimum phase.',
+    categories: ["linear", "minimum"],
   },
   _calibrateSoundIIRSec: {
     name: "_calibrateSoundIIRSec",
@@ -297,7 +314,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      '🕑 _calibrateTimingNumberAndSecs accepts a text string containing an even number of comma-separated arguments, n1,s1,n2,s2, etc. Each pair of arguments n,s, requests that EasyEyes generate n intervals of duration s, where s is in seconds, and measure how long each interval actually was, in seconds. Save the results in the CSV file. Use one column per series. Name each column by the duration in sec, e.g. "timing0.15". The column length will be n. This should run during the compatibility phase, before the experiment, since its sole purpose is to work out the parameters of a compatibility test.',
+      '🕑 _calibrateTimingNumberAndSecs accepts a text string containing an even number of comma-separated arguments, n1,s1,n2,s2, etc. Each pair of arguments n,s, requests that EasyEyes generate n intervals of duration s, where s is in seconds, and measure how long each interval actually was, in seconds. Save the results in the CSV file. Use one column per series. Name each column by the duration in sec, e.g. "timing0.15". The column length will be n. This should run on the Needs page, since its sole purpose is to work out the parameters of a compatibility test.',
   },
   _calibrateTrackingDistanceCheckBool: {
     name: "_calibrateTrackingDistanceCheckBool",
@@ -437,7 +454,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_languageSelectionByParticipantBool (default FALSE), when TRUE, tell the initial compatibility page to offer the participant a pull-down menu to select any language for the rest of the experiment. The experiment always begins with the language specified by _language, and the participant's option to change language appears only if  _languageSelectionByParticipantBool=TRUE. The participant selects among the native names of the languages, e.g. English, Deutsch, عربي. EasyEyes currently offers 77 languages, and it would be easy to add more. If there's demand, we could add another parameter to allow you to specify a list of languages to offer to the participant.",
+      "_languageSelectionByParticipantBool (default FALSE), when TRUE, tell the Needs page to offer the participant a pull-down menu to select any language for the rest of the experiment. The experiment always begins with the language specified by _language, and the participant's option to change language appears only if  _languageSelectionByParticipantBool=TRUE. The participant selects among the native names of the languages, e.g. English, Deutsch, عربي. EasyEyes currently offers 77 languages, and it would be easy to add more. If there's demand, we could add another parameter to allow you to specify a list of languages to offer to the participant.",
   },
   _needBrowser: {
     name: "_needBrowser",
@@ -519,7 +536,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "🕑 _needCameraBool (default TRUE) tells EasyEyes whether to require presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and pupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier compatibility check so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.) \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
+      "🕑 _needCameraBool (default TRUE) tells EasyEyes whether to require presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and pupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier Needs page so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.) \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
   },
   _needColorimeterBool: {
     name: "_needColorimeterBool",
@@ -552,7 +569,7 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "",
     explanation:
-      "🕑 _needDisplay demands support for key display features:\nHDRMovie: Browser must support HDR movies.\ntenBit: Display must support 10-bit imaging. https://trello.com/c/VxGHyxDa\ncodec: I'm not sure whether we should explicitly list the codecs we support or just write \"codec\" and have EasyEyes check that the browser supports at least one of the video codecs supported by EasyEyes. EasyEyes's list of compatible codecs may grow. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
+      "🕑 _needDisplay demands support (on the Needs page) for key display features:\nHDRMovie: Browser must support HDR movies.\ntenBit: Display must support 10-bit imaging. https://trello.com/c/VxGHyxDa\ncodec: I'm not sure whether we should explicitly list the codecs we support or just write \"codec\" and have EasyEyes check that the browser supports at least one of the video codecs supported by EasyEyes. EasyEyes's list of compatible codecs may grow. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
     categories: ["hdrMovie", "tenBit"],
   },
   _needIncognitoBool: {
@@ -633,7 +650,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "",
     explanation:
-      "🕑 _needScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. In each block, needScreenHeightUpToDeg and needScreenWidthUpToDeg are each combined with needTargetSizeDownToDeg to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. ",
+      "🕑 _needScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. In each block, needScreenHeightUpToDeg and needScreenWidthUpToDeg are each combined with needTargetSizeDownToDeg to compute a needed screen resolution, which is enforced in the initial Needs page. ",
   },
   _needSmartphoneCheckBool: {
     name: "_needSmartphoneCheckBool",
@@ -666,6 +683,34 @@ export const GLOSSARY: Glossary = {
     default: "0.05",
     explanation:
       "🕑 _needTimingToleranceSec (default 0.05) is the largest acceptable RMS error in generating a 0.15-second interval. We suspect that this depends on both the CPU speed and the number of processes being timeshared, and thus can be reduced by closing other browser windows, and quitting other apps. ",
+  },
+  _needWeb: {
+    name: "_needWeb",
+    availability: "now",
+    type: "categorical",
+    default: "",
+    explanation:
+      "🕑 _needWeb (no default) is a comma-separated list of needed web features (APIs and dictionary properties), e.g. WakeLock, echoCancellation. Web feature support depends on the browser, not the OS or hardware platform. Most of the _needWeb features are supported by most current browsers, so the participant typically can add support for a needed web feature by updating their browser or switching to the Chrome browser. For a list of compatible browsers, search for the feature in https://developer.mozilla.org/, and consult the compatibility table at the bottom of the page. The easy compatibility check just asks the browser if a feature is supported. However, that can be misleading because browsers disable features for various reasons, including low battery. Since any feature requested here might be mission-critical, if the browser says it's available, we should also confirm that we can actually set it. That might take a second, and it's worth it.\n\nThe need for these features in EasyEyes is asymmetric. Test only the features selected by the parameter arguments, and test only that we can enable WakeLock, and disable echoCancellation, noiseSuppression, and autoGainControl. It's fine to test them all together in a batch, we won't use them independently. I bet that ChatGPT, if asked, will write the code we need.",
+    categories: [
+      "WakeLock",
+      "echoCancellation",
+      "noiseSuppression",
+      "autoGainControl",
+    ],
+  },
+  _needWebSmartphone: {
+    name: "_needWebSmartphone",
+    availability: "now",
+    type: "categorical",
+    default: "",
+    explanation:
+      "🕑 _needWebSmartphone (no default), for an attached phone, is a comma-separated list of needed web features (APIs and dictionary properties), e.g. WakeLock, echoCancellation. The rest of this explanation is identical to that for _needWeb, above.",
+    categories: [
+      "WakeLock",
+      "echoCancellation",
+      "noiseSuppression",
+      "autoGainControl",
+    ],
   },
   _online1InternalName: {
     name: "_online1InternalName",
@@ -2135,7 +2180,8 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "25",
-    explanation: "",
+    explanation:
+      "instructionFontSizePt (default 25) specifies the point size of the font used for instructions.",
   },
   instructionFontSource: {
     name: "instructionFontSource",
@@ -2236,6 +2282,30 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "logQuestBool (default FALSE) enables logging of Quest activity in the browser Console.",
+  },
+  markDot: {
+    name: "markDot",
+    availability: "now",
+    type: "text",
+    default: "0,0,0.5,0,0,0,1",
+    explanation:
+      'markDot: Until the target appears, display a static dot. It accepts several arguments as comma separated values.\n▶ xDeg, yDeg, diameterDeg, colorRGBA\nxDeg and yDeg (default 0,0) are coordinates of the dot center relative to the nominal fixation location (which a moving crosshair circles around).  \ndiameterDeg (default 0.5) is the dot diameter.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, controlling transparency. Each of the four values ranges 0 to 1.',
+  },
+  markFlies: {
+    name: "markFlies",
+    availability: "now",
+    type: "text",
+    default: "10,4,0.3,0.03,2,0,0,0,1",
+    explanation:
+      'markFlies: Until the target appears, display a swarm of moving "flies" (each like a crosshair) that make it hard to get the cursor to track the moving crosshair unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. Each fly moves a fixed radial distance degPerSec/fHz from frame to frame, where fHz is the frame rate (e.g. 60) and degPerSec is the speed. On each frame, each fly moves in a random direction. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. markFlies accepts several arguments as comma separated values:\n▶ n, radiusDeg, degPerSec, centeredOnNominalFixationBool, thicknessDeg, lengthDeg, colorRGBA\nn (default 10) is the number of flies.\nradiusDeg (default 2) is the radius of the circular area that the flies are confined to.\ncenteredOnNominalFixationBool (default TRUE) centers the circular fly area on, if TRUE, the nominal fixation location (that the crosshair circles around), otherwise centers on the moving crosshair.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1) is the length of each of the two lines that make one "fly".\ncolorRGBA follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (as opposed to what\'s behind it).',
+  },
+  markGrid: {
+    name: "markGrid",
+    availability: "now",
+    type: "text",
+    default: "0.5,0.03,2,0,0,0,1",
+    explanation:
+      'markGrid: Until the target appears, display a square grid as a static background centered on the nominal fixation location (which the moving crosshair circles around). Grid center is midway between two gridlines.  markGrid accepts several arguments as comma-separated values:\n▶ spacingDeg, thicknessDeg, lengthDeg, colorRGBA\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\ncolorRGBA has same rules as targetColorRGBA. "0,0,0,1" is black; "1,0,0,1" is red; "1,1,1,1" is white. Last number is alpha, the weight (0 to 1) assigned to this color (as opposed to what\'s behind it).',
   },
   markingBlankedNearTargetBool: {
     name: "markingBlankedNearTargetBool",
@@ -2515,7 +2585,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "75",
     explanation:
-      "needEasyEyesKeypadBeyondCm (default 75). If any block has \nviewingDistanceDesiredCm > needEasyEyesKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone (at the beginning of the experiment) and provide a keypad on the smartphone during each block that requires it. The phone is recruited at the beginning of the experiment (on the compatibility page), and remains connected until the end of the experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needEasyEyesKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the smartphone keypad. Set needEasyEyesKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nCurrently we recruit the phone at the beginning of the first block that needs it. Let's change that to recruit the phone at the beginning of the experiment, on the compatibility page. If we can't recruit it, there's no point in running the experiment. \n\nI don't know if we disconnect at the end of the block, or the end of the last block that needs it, or just leave it connected until the end of the experiment. I think I prefer disconnecting after the last block that needs it. Some experiments will use the smartphone both as keypad AND for sound calibration. Sound calibration is done before the first block, so it will always come first. Requiring separate recruitment for each use is tolerable, but it would be nicer if participant could just recruit the smartphone once for the whole experiment. \n\nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis's requests:\n1. The smartphone connection should be established at the beginning of the experiment, before the calibrations, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone's keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say \"Connection lost.\" and offer a \"Reconnect\" button.\n\n",
+      "needEasyEyesKeypadBeyondCm (default 75). If any block has \nviewingDistanceDesiredCm > needEasyEyesKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone (on the Needs page) and provide a keypad on the smartphone during each block that requires it. The phone remains connected through the whole experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needEasyEyesKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the smartphone keypad. Set needEasyEyesKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nCurrently we recruit the phone at the beginning of the first block that needs it. Let's change that to recruit the phone on the Needs page. If we can't recruit it, there's no point in running the experiment. \n\nI don't know if we disconnect at the end of the block, or the end of the last block that needs it, or just leave it connected until the end of the experiment. I think I prefer disconnecting after the last block that needs it. Some experiments will use the smartphone both as keypad AND for sound calibration. Sound calibration is done before the first block, so it will always come first. Requiring separate recruitment for each use is tolerable, but it would be nicer if participant could just recruit the smartphone once for the whole experiment. \n\nDELETE SOON: Currently we must ALSO set wirelessKeyboardNeededBool=TRUE in order for EasyEyes to establich connection with the keypad.\n\nGus April 14, 2023: Needed improvements that I already know:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis's requests:\n1. The smartphone connection should be established on the Needs page, and nudging should be suspended until the smartphone is connected.\n2. When connection is first established, the smartphone's keypad is overwritten by a instructions which makes it hard to read both instructions and keypad. An easy way to eliminate the overlap would be to display just instructions with an Ok button, and show just the keypad after the participant hits Ok.\n3. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say \"Connection lost.\" and offer a \"Reconnect\" button.\n\n",
   },
   needScreenHeightUpToDeg: {
     name: "needScreenHeightUpToDeg",
@@ -2523,7 +2593,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "",
     explanation:
-      "needScreenHeightUpToDeg (default 0) is optionally specified for each condition. needScreenHeightUpToDeg and needTargetSizeDownToDeg are combined in each block to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. \nNOT YET IMPLEMENTED, needScreenHeightUpToDeg is used again at the beginning of each block, places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px compatibility requirement before the experiment begins.\n\nFor more details see: needScreenHeightUpToDeg.\n                                                                    ",
+      "needScreenHeightUpToDeg (default 0) is optionally specified for each condition. needScreenHeightUpToDeg and needTargetSizeDownToDeg are combined in each block to compute a needed screen resolution, which is enforced in the Needs page. \nNOT YET IMPLEMENTED, needScreenHeightUpToDeg is used again at the beginning of each block, places an upper limit on viewing distance so that the screen will have (at least) the specified height in deg. Default is zero, which is ignored. This depends on screen height in cm, which is unknown until size calibration. Setting this greater than zero in any condition of the whole experiment results in a minimum screen-height px requirement on the Needs page.\n\nFor more details see: needScreenHeightUpToDeg.\n                                                                    ",
   },
   needScreenWidthUpToDeg: {
     name: "needScreenWidthUpToDeg",
@@ -2531,7 +2601,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "",
     explanation:
-      "needScreenWidthUpToDeg (default 0) is optionally specified for each condition. needScreenWidthUpToDeg and needTargetSizeDownToDeg are combined in each block to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. NOT YET IMPLEMENTED needScreenWidthUpToDeg is also used at the beginning of each block, to place an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px compatibility requirement before the experiment begins.\n\nCompute required resolution for compatibility. EasyEyes ignores any conditions disabled by the scientist having set conditionEnabledBool FALSE. Similarly EasyEyes ignores any block disabled by virtue of having all its conditions disabled. EasyEyes combines pixel density (px/deg) and screen subtense (deg) across enabled conditions within each block. Then it computes required screen resolution (px) for each block, and computes the max across enabled blocks to arrive at the width and height pix requirements for the experiment. These requirements are declared on the EasyEyes Compatibility page when a participant computer is rejected.\n\nEasyEyes allows viewing distance to change from block to block, but makes it equal among all conditions within any block. The compatibility computation is performed first, before screen size (cm) is known, and viewing distance is typically set larger for a larger screen (cm) to achieve both the desired visual subtense (deg) and pixel density (px/deg). Thus, EasyEyes makes the compatibility calculations without knowing the viewing distance.\n\nTo compute required screen resolution (px), EasyEyes uses, from the experiment, one logical parameter conditionEnabledBool and four numerical parameters: targetMinimumPx, needTargetSizeDownToDeg, needScreenWidthUpToDeg, and needScreenHeightUpToDeg. For each block, EasyEyes first computes max of the required pixel density px/deg across enabled conditions:\nminPxPerDeg = max(targetMinimumPx/needTargetSizeDownToDeg) across enabled conditions in the block. Then it computes max of the required screen subtense (deg) across enabled conditions in each block:\nminScreenWidthDeg=max(needScreenWidthUpToDeg)\nand\nminScreenHeightDeg=max(needScreenHeightUpToDeg)\nFrom these three variables, for each block, EasyEyes computes the min screen resolution (px), for each block:\nminScreenWidthPx=minPxPerDeg*tand(minScreenWidthDeg/2)/tand(0.5)\nminScreenHeightPx=minPxPerDeg*tand(minScreenHeightDeg/2)/tand(0.5)\nwhere tand is a tangent function that accepts its argument in deg, i.e. tand(x)=tan(x*pi/180).\nFinally the required resolution for the experiment is the max required resolution max(minScreenWidthPx) and max(minScreenHeightPx) across all enabled blocks.\n\nThe TestScreenResolution.xlsx spreadsheet emulates the EasyEye Compatibility-Page computation of required screen resolution (px).",
+      "needScreenWidthUpToDeg (default 0) is optionally specified for each condition. needScreenWidthUpToDeg and needTargetSizeDownToDeg are combined in each block to compute a needed screen resolution, which is enforced in the Needs page. NOT YET IMPLEMENTED needScreenWidthUpToDeg is also used at the beginning of each block, to place an upper limit on viewing distance so that the screen will have (at least) the specified width in deg. Default is zero, which is ignored. This depends on screen width in cm, which is unknown until size calibration. Setting this parameter greater than zero in any condition of the whole experiment results in a minimum screen-width px on the Needs page.\n\nCompute required resolution. EasyEyes ignores any conditions disabled by the scientist having set conditionEnabledBool FALSE. Similarly EasyEyes ignores any block disabled by virtue of having all its conditions disabled. EasyEyes combines pixel density (px/deg) and screen subtense (deg) across enabled conditions within each block. Then it computes required screen resolution (px) for each block, and computes the max across enabled blocks to arrive at the width and height pix requirements for the experiment. These requirements are declared on the Needs page when a participant computer is rejected.\n\nEasyEyes allows viewing distance to change from block to block, but makes it equal among all conditions within any block. The compatibility computation is performed first, before screen size (cm) is known, and viewing distance is typically set larger for a larger screen (cm) to achieve both the desired visual subtense (deg) and pixel density (px/deg). Thus, EasyEyes makes the compatibility calculations without knowing the viewing distance.\n\nTo compute required screen resolution (px), EasyEyes uses, from the experiment, one logical parameter conditionEnabledBool and four numerical parameters: targetMinimumPx, needTargetSizeDownToDeg, needScreenWidthUpToDeg, and needScreenHeightUpToDeg. For each block, EasyEyes first computes max of the required pixel density px/deg across enabled conditions:\nminPxPerDeg = max(targetMinimumPx/needTargetSizeDownToDeg) across enabled conditions in the block. Then it computes max of the required screen subtense (deg) across enabled conditions in each block:\nminScreenWidthDeg=max(needScreenWidthUpToDeg)\nand\nminScreenHeightDeg=max(needScreenHeightUpToDeg)\nFrom these three variables, for each block, EasyEyes computes the min screen resolution (px), for each block:\nminScreenWidthPx=minPxPerDeg*tand(minScreenWidthDeg/2)/tand(0.5)\nminScreenHeightPx=minPxPerDeg*tand(minScreenHeightDeg/2)/tand(0.5)\nwhere tand is a tangent function that accepts its argument in deg, i.e. tand(x)=tan(x*pi/180).\nFinally the required resolution for the experiment is the max required resolution max(minScreenWidthPx) and max(minScreenHeightPx) across all enabled blocks.\n\nThe TestScreenResolution.xlsx spreadsheet emulates the EasyEye Needs Page computation of required screen resolution (px).",
   },
   needTargetSizeDownToDeg: {
     name: "needTargetSizeDownToDeg",
@@ -2539,7 +2609,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      "needTargetSizeDownToDeg (default 0.1 deg) is, optionally, specified for each condition. needScreenWidthUpToDeg and needTargetSizeDownToDeg are combined in each block to compute a needed screen resolution, which is enforced in the experiment's initial compatibility check. NOT YET IMPLEMENTED needTargetSizeDownToDeg is also used at the beginning of each block, to place a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses targetMinimumPix. Besides helping to set viewing distance block by block (EasyEyes imposes equal viewing distance across conditions in a block), the viewingDistanceSmallXXX and viewingDistanceLargeXXX parameters are also combined across all conditions in the experiment to require an adequate screen width and height (in pixels) in the initial compatibility check that determines whether the experiment will begin.\n\nThe EasyEyes Compatibiily Page will require a minimum screen resolution, if and only if at least one block specifies both needTargetSizeDownToDeg and at least one of needScreenWidthUpToDeg and needScreenHeightUpToDeg.\n\nFor more details see: needScreenHeightUpToDeg.\n",
+      "needTargetSizeDownToDeg (default 0.1 deg) is, optionally, specified for each condition. needScreenWidthUpToDeg and needTargetSizeDownToDeg are combined in each block to compute a needed screen resolution, which is enforced in the Needs page. NOT YET IMPLEMENTED needTargetSizeDownToDeg is also used at the beginning of each block, to place a lower limit on viewing distance so that the screen will have enough pixels per deg to display a target of specified size in deg. The minimum viewing distance depends on screen resolution in px/cm, which is unknown until size calibration. This calculation uses targetMinimumPix. Besides helping to set viewing distance block by block (EasyEyes imposes equal viewing distance across conditions in a block), the viewingDistanceSmallXXX and viewingDistanceLargeXXX parameters are also combined across all conditions in the experiment to require an adequate screen width and height (in pixels) in the Needs page.\n\nThe EasyEyes Compatibiily Page will require a minimum screen resolution, if and only if at least one block specifies both needTargetSizeDownToDeg and at least one of needScreenWidthUpToDeg and needScreenHeightUpToDeg.\n\nFor more details see: needScreenHeightUpToDeg.\n",
   },
   notes: {
     name: "notes",
@@ -2969,17 +3039,8 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0.5,0.03,1000",
     explanation:
-      "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Center is midway between two gridlines. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
+      "❌ showBackGrid, only until we display the target, displays a square grid as a static background. Grid center is midway between two gridlines.  It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx, \nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. ",
   },
-  "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.":
-    {
-      name: "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
-      availability: "now",
-      type: "text",
-      default: "0,0,0,1",
-      explanation:
-        'targetColorRGBA (default "0,0,0,1") sets target color. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
-    },
   showBeepButtonOnBlockInstructionBool: {
     name: "showBeepButtonOnBlockInstructionBool",
     availability: "now",
@@ -3060,7 +3121,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: ",,0.5,0,0,0,1",
     explanation:
-      "showDot displays a static dot. It accepts several arguments as comma separated values.\nxPix, yPix, diameterDeg, colorRGBA\nxPix and yPix (default middle of screen) are pixel coordinate of the grid center.  Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.\ndiameterDeg (default 0.5) is the dot diameter.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number controls transparency.",
+      '❌showDot displays a static dot. It accepts several arguments as comma separated values.\nxPix, yPix, diameterDeg, colorRGBA\nxPix and yPix (default middle of screen) are pixel coordinate of the grid center.  Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.\ndiameterDeg (default 0.5) is the dot diameter.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, controlling transparency.',
   },
   showExperimentNameBool: {
     name: "showExperimentNameBool",
@@ -3117,14 +3178,7 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       "🕑 showParameters (no default) accepts a comma-separated list of parameter names. Its display is in the style of showTargetSpecsBool, but it allows the scientist to specify which parameters to display. All the parameters are displayed at the left edge of the screen, bottom-aligned, one per row, each with its value. At the moment, we only allow input parameters, but we will extend this list to include internal parameters.",
-    categories: [
-      "showBackGrid displays a square grid as a static background. It accepts five arguments as comma separated values:\nspacingDeg",
-      "thicknessDeg",
-      "lengthDeg",
-      "xCenterPx",
-      "yCenterPx\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000",
-      "i.e. whole screen) is the length of each grid line. The number of horizontal (and vertical) gridlines is N=1+floor(lengthDeg/spacingDeg). The gratings of N parallel horizontal lines and N parallel vertical lines are both centered on (xCenterPx,yCenterPx).\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.",
-    ],
+    categories: [""],
   },
   showPercentCorrectBool: {
     name: "showPercentCorrectBool",
@@ -3311,6 +3365,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       'When computing the characterSet bounding box as the union of the bounding box of each letter, align the bounding boxes horizontally by "center" or "origin". The bounding boxes are always vertically aligned by baseline.',
     categories: ["center", "origin"],
+  },
+  targetColorRGBA: {
+    name: "targetColorRGBA",
+    availability: "now",
+    type: "text",
+    default: "0,0,0,1",
+    explanation:
+      'targetColorRGBA (default "0,0,0,1") sets target color. "RGB" specifies the luminance of each color channel, from 0 to 1. "A" is the alpha channel which blends this with whatever is behind. Use 0 to have no effect; 1 to get pure "RGB". For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
   },
   targetContrast: {
     name: "targetContrast",
