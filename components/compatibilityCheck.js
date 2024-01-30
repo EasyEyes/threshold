@@ -1253,7 +1253,11 @@ const isSmartphoneInDatabase = async (
     const modelNameSuggestionsContainer = getAutoCompleteSuggestionElements(
       AllModelNames,
       modelNameInput,
-      preferredModelNumber
+      preferredModelNumber,
+      deviceDetails,
+      lang,
+      needPhoneSurvey,
+      p
     );
     modelNumberWrapper.appendChild(modelNameSuggestionsContainer);
   }
@@ -1262,7 +1266,11 @@ const isSmartphoneInDatabase = async (
     const modelNumberSuggestionsContainer = getAutoCompleteSuggestionElements(
       AllModelNumbers,
       modelNumberInput,
-      preferredModelNumber
+      preferredModelNumber,
+      deviceDetails,
+      lang,
+      needPhoneSurvey,
+      p
     );
     modelNumberWrapper.appendChild(modelNumberSuggestionsContainer);
   }
