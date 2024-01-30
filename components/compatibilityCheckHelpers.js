@@ -1,6 +1,7 @@
 import { getInstructionText } from "./compatibilityCheck.js";
 import { db } from "./firebase/firebase.js";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { readi18nPhrases } from "./readPhrases.js";
 
 export const PhoneModelsInDatabase = [];
 export const AllModelNames = [];
@@ -41,9 +42,8 @@ export const getAutoCompleteSuggestionElements = (
     if (brandSuggestions.length === 0) {
       const noResult = document.createElement("div");
       noResult.classList.add("autocomplete-item");
-      noResult.style.color = "#ff0000";
-      noResult.innerHTML =
-        "The typed answer is not recognized. If you are sure with your entry, finish typing and ignore the warning.";
+      // noResult.style.color = "#ff0000";
+      noResult.innerHTML = readi18nPhrases("EE_notRecognized", lang);
       suggestionContainer.appendChild(noResult);
       return;
     }
