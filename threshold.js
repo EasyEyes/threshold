@@ -432,7 +432,7 @@ import {
   updateTrackCursorHz,
 } from "./components/cursorTracking.ts";
 import { setPreStimulusRerunInterval } from "./components/rerunPrestimulus.js";
-import { getDotAndBackGrid } from "./components/dotAndGrid.ts";
+import { getDotAndBackGrid, getFlies } from "./components/dotAndGrid.ts";
 
 /* -------------------------------------------------------------------------- */
 
@@ -1032,7 +1032,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     trialInstructionClock,
     blockScheduleFinalClock;
 
-  var dot, backGrid;
+  var dot, backGrid, flies;
 
   async function experimentInit() {
     status.currentFunction = "experimentInit";
@@ -3585,8 +3585,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // QUESTION does `stimulusParameters.targetAndFlankersXYPx` differ
           //          from `letterConfig.targetEccentricityXYDeg`??
           const targetEccentricityXYPx = XYPixOfXYDeg(
-            letterConfig.targetEccentricityXYDeg,
-            displayOptions
+            letterConfig.targetEccentricityXYDeg
           );
           // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
           psychoJS.experiment.addData(
@@ -3912,7 +3911,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg)
           );
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
@@ -4089,7 +4088,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg)
           );
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
@@ -4149,7 +4148,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //   paramReader,
           //   BC,
           //   100, // stimulusParameters.heightPx,
-          //   XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg, displayOptions)
+          //   XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg)
           // );
           // fixationConfig.pos = fixationConfig.nominalPos;
           // fixation.setPos(fixationConfig.pos);
@@ -4205,10 +4204,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 BC,
                 100,
-                XYPixOfXYDeg(
-                  letterConfig.targetEccentricityXYDeg,
-                  displayOptions
-                )
+                XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg)
               );
               fixationConfig.pos = fixationConfig.nominalPos;
               fixation.setPos(fixationConfig.pos);
@@ -4276,8 +4272,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readTrialLevelVenierParams(reader, BC);
           readAllowedTolerances(tolerances, reader, BC);
           const targetEccentricityXYPx = XYPixOfXYDeg(
-            letterConfig.targetEccentricityXYDeg,
-            displayOptions
+            letterConfig.targetEccentricityXYDeg
           );
           fixation.update(paramReader, BC, 100, targetEccentricityXYPx);
           fixationConfig.pos = fixationConfig.nominalPos;
@@ -4427,9 +4422,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       showConditionName(conditionName, targetSpecs);
 
+      // Make sure flies are undrawn
+      if (flies) flies.draw(false);
+      flies = getFlies(reader.read("markFlies", status.block_condition));
       [dot, backGrid] = getDotAndBackGrid(
-        reader.read("showDot", status.block_condition),
-        reader.read("showBackGrid", status.block_condition),
+        reader.read("markDot", status.block_condition),
+        reader.read("markGrid", status.block_condition),
         letterConfig.targetEccentricityXYDeg
       );
       if (dot) trialComponents.push(dot.stim);
@@ -4614,7 +4612,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       )
         fixation.boldIfCursorNearFixation();
 
-      // BackGrid and Dot
+      // BackGrid and Dot and flies
+      if (flies && flies.status === PsychoJS.Status.NOT_STARTED) {
+        console.log("!. going to draw flies");
+        flies.draw();
+      }
+      if (flies && flies.status === PsychoJS.Status.STARTED) {
+        flies.everyFrame();
+        console.log("!. going to update flies");
+      }
       if (backGrid && backGrid.status === PsychoJS.Status.NOT_STARTED)
         backGrid.draw();
       if (dot && dot.status === PsychoJS.Status.NOT_STARTED) dot.draw();
@@ -4661,6 +4667,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       removeSkipTrialButton();
 
       // Undraw backGrid and dot
+      if (flies && flies.status === PsychoJS.Status.STARTED) flies.draw(false);
       if (backGrid && backGrid.status === PsychoJS.Status.STARTED)
         backGrid.draw(false);
       if (dot && dot.status === PsychoJS.Status.STARTED) dot.draw(false);

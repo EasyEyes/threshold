@@ -218,16 +218,7 @@ export const pixelsToDegrees = (pixels, displayOptions) => {
   return degrees;
 };
 
-/**
- *
- * @param {number[]} xyDeg
- * @param {object} displayOptions
- * @param {number} displayOptions.pixPerCm Pixels per centimeter on participant screen
- * @param {number[]} displayOptions.nearPointXYDeg Nearpoint of participant, in deg
- * @param {number[]} displayOptions.nearPointXYPix Nearpoint of participant, in px
- * @returns
- */
-export const XYPixOfXYDeg = (xyDeg) => {
+export const XYPixOfXYDeg = (xyDeg, useRealFixationXY = true) => {
   if (
     !(
       displayOptions.nearPointXYDeg &&
@@ -268,10 +259,13 @@ export const XYPixOfXYDeg = (xyDeg) => {
   } else {
     pixelPosition = [0, 0];
   }
+  const fixationXY = useRealFixationXY
+    ? fixationConfig.pos
+    : fixationConfig.nominalPos;
   pixelPosition[0] =
-    pixelPosition[0] + displayOptions.nearPointXYPix[0] + fixationConfig.pos[0];
+    pixelPosition[0] + displayOptions.nearPointXYPix[0] + fixationXY[0];
   pixelPosition[1] =
-    pixelPosition[1] + displayOptions.nearPointXYPix[1] + fixationConfig.pos[1];
+    pixelPosition[1] + displayOptions.nearPointXYPix[1] + fixationXY[1];
   return pixelPosition;
 };
 
@@ -285,10 +279,8 @@ export const XYPixOfXYDeg = (xyDeg) => {
  *
  * Translation of MATLAB function of the same name
  * by Prof Denis Pelli, XYPixOfXYDeg.m
- * @param {*} xyPix
- * @param {*} displayOptions
  */
-export const XYDegOfXYPix = (xyPix) => {
+export const XYDegOfXYPix = (xyPix, useRealFixationXY = true) => {
   // eslint-disable-next-line no-prototype-builtins
   if (!displayOptions.hasOwnProperty("nearPointXYDeg"))
     throw "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix";
@@ -306,9 +298,12 @@ export const XYDegOfXYPix = (xyPix) => {
     to be relative to the near point. We use trig to get the radial deg, and
     we use the direction of the pixel vector (re near point).
   */
+  const fixationXY = useRealFixationXY
+    ? fixationConfig.pos
+    : fixationConfig.nominalPos;
   const nearPointOffsetXYPx = [
-    xyPix[0] - displayOptions.nearPointXYPix[0] - fixationConfig.pos[0],
-    xyPix[1] - displayOptions.nearPointXYPix[1] - fixationConfig.pos[1],
+    xyPix[0] - displayOptions.nearPointXYPix[0] - fixationXY[0],
+    xyPix[1] - displayOptions.nearPointXYPix[1] - fixationXY[1],
   ];
   const rPix = norm(nearPointOffsetXYPx);
   // ASSUMES equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB

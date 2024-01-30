@@ -283,7 +283,7 @@ export const restrictSizeDeg = (
     default:
       throw "At this point targetKind must be letter. gabor is coming.";
   }
-  const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
+  const targetXYPx = XYPixOfXYDeg(targetXYDeg);
   const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
   let heightDeg, heightPx, topPx, bottomPx;
   let targetSizeDeg = Math.pow(10, proposedLevel);
@@ -301,14 +301,11 @@ export const restrictSizeDeg = (
     heightDeg = targetSizeIsHeightBool
       ? targetSizeDeg
       : (targetSizeDeg * characterSetRectPx.height) / characterSetRectPx.width;
-    [, topPx] = XYPixOfXYDeg(
-      [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
-      displayOptions
-    );
-    [, bottomPx] = XYPixOfXYDeg(
-      [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
-      displayOptions
-    );
+    [, topPx] = XYPixOfXYDeg([targetXYDeg[0], targetXYDeg[1] + heightDeg / 2]);
+    [, bottomPx] = XYPixOfXYDeg([
+      targetXYDeg[0],
+      targetXYDeg[1] - heightDeg / 2,
+    ]);
     heightPx = topPx - bottomPx;
     const widthPx =
       heightPx * (characterSetRectPx.width / characterSetRectPx.height);
@@ -419,7 +416,7 @@ export const restrictSpacingDeg = (
 
   if (spacingRelationToSize === "none" && !letterConfig.targetSizeDeg)
     throw "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'";
-  const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
+  const targetXYPx = XYPixOfXYDeg(targetXYDeg);
   const targetIsFoveal =
     targetXYPx[0] === fixationConfig.pos[0] &&
     targetXYPx[1] === fixationConfig.pos[1];
@@ -450,14 +447,14 @@ export const restrictSpacingDeg = (
         sizeDeg = letterConfig.targetSizeDeg;
         if (targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
-          [, topPx] = XYPixOfXYDeg(
-            [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
-            displayOptions
-          );
-          [, bottomPx] = XYPixOfXYDeg(
-            [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
-            displayOptions
-          );
+          [, topPx] = XYPixOfXYDeg([
+            targetXYDeg[0],
+            targetXYDeg[1] + heightDeg / 2,
+          ]);
+          [, bottomPx] = XYPixOfXYDeg([
+            targetXYDeg[0],
+            targetXYDeg[1] - heightDeg / 2,
+          ]);
           heightPx = topPx - bottomPx;
           widthPx =
             (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
@@ -465,26 +462,20 @@ export const restrictSpacingDeg = (
           widthDeg = sizeDeg;
           heightDeg =
             widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
-          const [leftPx] = XYPixOfXYDeg(
-            [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
-            displayOptions
-          );
-          const [rightPx] = XYPixOfXYDeg(
-            [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
-            displayOptions
-          );
+          const [leftPx] = XYPixOfXYDeg([
+            targetXYDeg[0] - widthDeg / 2,
+            targetXYDeg[1],
+          ]);
+          const [rightPx] = XYPixOfXYDeg([
+            targetXYDeg[0] + widthDeg / 2,
+            targetXYDeg[1],
+          ]);
           widthPx = rightPx - leftPx;
           heightPx =
             widthPx * (characterSetRectPx.height / characterSetRectPx.width);
           heightDeg =
-            XYDegOfXYPix(
-              [targetXYPx[0], targetXYPx[1] + heightPx / 2],
-              displayOptions
-            )[1] -
-            XYDegOfXYPix(
-              [targetXYPx[0], targetXYPx[1] - heightPx / 2],
-              displayOptions
-            )[1];
+            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] + heightPx / 2])[1] -
+            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] - heightPx / 2])[1];
         }
         break;
       case "ratio":
@@ -507,56 +498,48 @@ export const restrictSpacingDeg = (
         sizeDeg = spacingDeg / spacingOverSizeRatio;
         if (targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
-          [, topPx] = XYPixOfXYDeg(
-            [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
-            displayOptions
-          );
-          [, bottomPx] = XYPixOfXYDeg(
-            [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
-            displayOptions
-          );
+          [, topPx] = XYPixOfXYDeg([
+            targetXYDeg[0],
+            targetXYDeg[1] + heightDeg / 2,
+          ]);
+          [, bottomPx] = XYPixOfXYDeg([
+            targetXYDeg[0],
+            targetXYDeg[1] - heightDeg / 2,
+          ]);
           // I think that this is how we should do things, ie the above code assumes that
           // ascent == descent, ie that the center of the character is [x,y] with the top h/2 above
           // [, topPx] = XYPixOfXYDeg(
           //   [
           //     targetXYDeg[0],
           //     targetXYDeg[1] + heightDeg * characterSetRectPx.ascentToDescent,
-          //   ],
-          //   displayOptions
+          //   ]
           // );
           // [, bottomPx] = XYPixOfXYDeg(
           //   [
           //     targetXYDeg[0],
           //     targetXYDeg[1] -
           //       heightDeg * (1 - characterSetRectPx.ascentToDescent),
-          //   ],
-          //   displayOptions
+          //   ]
           // );
           heightPx = topPx - bottomPx;
           widthPx =
             (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
         } else {
           widthDeg = sizeDeg;
-          const [leftPx] = XYPixOfXYDeg(
-            [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
-            displayOptions
-          );
-          const [rightPx] = XYPixOfXYDeg(
-            [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
-            displayOptions
-          );
+          const [leftPx] = XYPixOfXYDeg([
+            targetXYDeg[0] - widthDeg / 2,
+            targetXYDeg[1],
+          ]);
+          const [rightPx] = XYPixOfXYDeg([
+            targetXYDeg[0] + widthDeg / 2,
+            targetXYDeg[1],
+          ]);
           widthPx = rightPx - leftPx;
           heightPx =
             widthPx * (characterSetRectPx.height / characterSetRectPx.width);
           heightDeg =
-            XYDegOfXYPix(
-              [targetXYPx[0], targetXYPx[1] + heightPx / 2],
-              displayOptions
-            )[1] -
-            XYDegOfXYPix(
-              [targetXYPx[0], targetXYPx[1] - heightPx / 2],
-              displayOptions
-            )[1];
+            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] + heightPx / 2])[1] -
+            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] - heightPx / 2])[1];
         }
         break;
       case "typographic":
@@ -595,10 +578,10 @@ export const restrictSpacingDeg = (
           `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceDesiredCm.current}, pixPerCm: ${displayOptions.pixPerCm}`
         );
       const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
-      const targetMaxXYDeg = XYDegOfXYPix(
-        [targetXYPx[0], targetXYPx[1] + letterConfig.fontMaxPx],
-        displayOptions
-      );
+      const targetMaxXYDeg = XYDegOfXYPix([
+        targetXYPx[0],
+        targetXYPx[1] + letterConfig.fontMaxPx,
+      ]);
       // Deg equivalent (height) to fontMaxPx
       const targetMaxDeg = targetMaxXYDeg[1] - targetXYDeg[1];
       switch (spacingRelationToSize) {
@@ -861,7 +844,7 @@ function _getRadialVectors(
         targetXYPx[0] - deltaXYPx[0],
         targetXYPx[1] - deltaXYPx[1],
       ];
-      flanker2XYDeg = XYDegOfXYPix(flanker2XYPx, displayOptions);
+      flanker2XYDeg = XYDegOfXYPix(flanker2XYPx);
       var deltaXYDeg = [
         flanker2XYDeg[0] - targetXYDeg[0],
         flanker2XYDeg[1] - targetXYDeg[1],
