@@ -31,7 +31,8 @@ export const getAutoCompleteSuggestionElements = (
         true,
         false,
         preferredModelNumber,
-        needPhoneSurvey
+        needPhoneSurvey,
+        input.value
       );
       p.innerHTML = inst;
     }
@@ -128,13 +129,15 @@ export const matchPhoneModelInDatabase = async (
   modelName,
   modelNumber,
   smallerSize,
-  biggerSize
+  biggerSize,
+  OS
 ) => {
   let result = {
     type: "none",
     Manufacturer: false,
     ModelName: false,
     ModelNumber: false,
+    OS: false,
     size: false,
   };
 
@@ -166,6 +169,15 @@ export const matchPhoneModelInDatabase = async (
     return result;
   }
   result.ModelNumber = true;
+
+  // Check if OS is in database
+  // Each model object has a property "OS" which is a string. compare the lowercase version
+  const os = brandsInDatabase[index]["OS"];
+  if (os.toLowerCase() !== OS.toLowerCase()) {
+    result.type = "partial";
+    return result;
+  }
+  result.OS = true;
 
   // Check if size is in database
   // Each model object has properties "Smaller Size (Pixels)" and "Bigger Size (Pixels)" which are just numbers
