@@ -1,3 +1,4 @@
+import { getInstructionText } from "./compatibilityCheck.js";
 import { db } from "./firebase/firebase.js";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
@@ -9,7 +10,11 @@ export const AllBrands = [];
 export const getAutoCompleteSuggestionElements = (
   suggestions,
   input,
-  preferredModelNumber
+  preferredModelNumber,
+  deviceDetails,
+  lang,
+  needPhoneSurvey,
+  p
 ) => {
   const suggestionContainer = document.createElement("div");
   suggestionContainer.classList.add("autocomplete-items");
@@ -17,6 +22,17 @@ export const getAutoCompleteSuggestionElements = (
     if (input.value === "") {
       suggestionContainer.innerHTML = "";
       return;
+    }
+    if (AllBrands.includes(input.value)) {
+      const inst = getInstructionText(
+        deviceDetails,
+        lang,
+        true,
+        false,
+        preferredModelNumber,
+        needPhoneSurvey
+      );
+      p.innerHTML = inst;
     }
     const brandSuggestions = suggestions.filter((brand) =>
       brand.toLowerCase().includes(input.value.toLowerCase())
@@ -38,8 +54,13 @@ export const getAutoCompleteSuggestionElements = (
       const index = brand.toLowerCase().indexOf(input.value.toLowerCase());
       const matchingPart = brand.slice(index, index + input.value.length);
       const rest = brand.slice(index + input.value.length);
+      const firstPart = brand.slice(0, index);
       suggestion.innerHTML =
-        '<span class="highlight">' + matchingPart + "</span>" + rest;
+        firstPart +
+        '<span class="highlight">' +
+        matchingPart +
+        "</span>" +
+        rest;
       suggestion.addEventListener("click", () => {
         input.value = brand;
         suggestionContainer.innerHTML = "";

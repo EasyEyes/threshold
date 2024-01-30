@@ -115,13 +115,14 @@ const getDeviceDetails = (platformName, lang) => {
   return { preferredModelNumber, findModel };
 };
 
-const getInstructionText = (
+export const getInstructionText = (
   thisDevice,
   language,
   isSmartPhone,
   isLoudspeakerCalibration,
   preferredModelNumberText = "model number",
-  needPhoneSurvey = false
+  needPhoneSurvey = false,
+  OEM = ""
 ) => {
   const needModelNumber = isSmartPhone
     ? needPhoneSurvey
@@ -149,7 +150,14 @@ const getInstructionText = (
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
   if (userOS === "Android") {
-    findModelNumber = readi18nPhrases("RC_findModelAndroid", language);
+    if (OEM === "Samsung") {
+      findModelNumber = readi18nPhrases("RC_findModelAndroidSamsung", language);
+    } else if (OEM === "Motorola") {
+      findModelNumber = readi18nPhrases(
+        "RC_findModelAndroidMotorola",
+        language
+      );
+    } else findModelNumber = readi18nPhrases("RC_findModelAndroid", language);
   } else if (userOS === "iOS") {
     findModelNumber = readi18nPhrases("RC_findModelIOs", language);
   } else if (userOS === "Windows") {
@@ -1232,7 +1240,11 @@ const isSmartphoneInDatabase = async (
     const brandSuggestionsContainer = getAutoCompleteSuggestionElements(
       AllBrands,
       brandInput,
-      preferredModelNumber
+      preferredModelNumber,
+      deviceDetails,
+      lang,
+      needPhoneSurvey,
+      p
     );
     modelNumberWrapper.appendChild(brandSuggestionsContainer);
   }
