@@ -22,6 +22,12 @@ function randomPointInUnitCircle() {
   } while (x * x + y * y > 1); // Replace if outside the circle.
   return [x, y];
 }
+/**
+ * Map from 0-1 to -1-1
+ */
+function denisRBGColorSpaceToPsychoJS(rgb: number[]): number[] {
+  return rgb.map((x) => x * 2 - 1);
+}
 export const getFlies = (showFlies: string): Swarm | undefined => {
   let swarm: Swarm | undefined;
 
@@ -109,7 +115,9 @@ class Fly {
     this.lengthPx = lengthPx;
 
     let colorArray = colorRGBA.split(",");
-    this.color = colorArray.slice(0, 3).map((c) => Number(c));
+    this.color = denisRBGColorSpaceToPsychoJS(
+      colorArray.slice(0, 3).map((c) => Number(c))
+    );
     this.opacity = Number(colorArray[3]);
 
     this.stims = this.generateStims();
@@ -181,19 +189,16 @@ class Fly {
   }
   distanceFromCenter(): number {
     return Math.sqrt(
-      Math.pow(this.pos[0] - this.center[0], 2) -
+      Math.pow(this.pos[0] - this.center[0], 2) +
         Math.pow(this.pos[1] - this.center[1], 2)
     );
   }
   getRandomPosition(): number[] {
-    // const r = this.radiusPx * Math.sqrt(Math.random());
-    // const theta = Math.random() * 2 * Math.PI;
-    // const x = this.center[0] + r * Math.cos(theta);
-    // const y = this.center[1] + r * Math.sin(theta);
-    // return [x, y];
-    const unitPos = randomPointInUnitCircle();
-    const pos = unitPos.map((z, i) => z * this.radiusPx + this.center[i]);
-    return pos;
+    const r = this.radiusPx * Math.sqrt(Math.random());
+    const theta = Math.random() * 2 * Math.PI;
+    const x = this.center[0] + r * Math.cos(theta);
+    const y = this.center[1] + r * Math.sin(theta);
+    return [x, y];
   }
 }
 class Swarm {
@@ -233,7 +238,6 @@ class Swarm {
   }
   draw(bool = true) {
     this.status = bool ? PsychoJS.Status.STARTED : PsychoJS.Status.FINISHED;
-    console.log("!. Swarm status set to", this.status);
     this.flies.forEach((f) => f.draw(bool));
   }
   getCenter(): number[] {
@@ -259,9 +263,7 @@ class Swarm {
     );
   }
   everyFrame() {
-    console.log("!. Swarm everyFrame");
     this.center = this.getCenter();
-    console.log("!. Swarm new center", this.center);
     this.flies.forEach((f) => f.takeStep(this.center));
   }
 }
@@ -274,16 +276,15 @@ class Dot {
   status: PsychoJS.Status;
   stim: Polygon;
   constructor(pos: [number, number], diameterDeg: number, colorRGBA: string) {
-    this.pos = getPsychoJSCoordinatePositionFromAppleCoordinatePosition(
-      pos[0],
-      pos[1]
-    );
+    this.pos = pos;
     this.diameterPx =
       XYPixOfXYDeg([-diameterDeg / 2, 0])[0] -
       XYPixOfXYDeg([diameterDeg / 2, 0])[0];
     // @ts-ignore
     let colorArray = colorRGBA.split(",");
-    this.color = colorArray.slice(0, 3).map((c) => Number(c));
+    this.color = denisRBGColorSpaceToPsychoJS(
+      colorArray.slice(0, 3).map((c) => Number(c))
+    );
     this.opacity = Number(colorArray[3]);
     this.status = PsychoJS.Status.NOT_STARTED;
     // @ts-ignore
@@ -363,7 +364,9 @@ class BackGrid {
     this.lengthPx = pxScalar(this.lengthDeg);
     this.xyCenterPx = [config.xCenterPx, config.yCenterPx];
     let colorArray = config.colorRGBA.split(",");
-    this.color = colorArray.slice(0, 3).map((c) => Number(c));
+    this.color = denisRBGColorSpaceToPsychoJS(
+      colorArray.slice(0, 3).map((c) => Number(c))
+    );
     this.opacity = Number(colorArray[3]);
     this.nLines = this.getNumberOfGridLines();
     this.status = PsychoJS.Status.NOT_STARTED;

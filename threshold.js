@@ -4422,8 +4422,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       showConditionName(conditionName, targetSpecs);
 
-      // Make sure flies are undrawn
+      // Make sure previous stims are undrawn
       if (flies) flies.draw(false);
+      if (dot) dot.draw(false);
+      if (backGrid) backGrid.draw(false);
       flies = getFlies(reader.read("markFlies", status.block_condition));
       [dot, backGrid] = getDotAndBackGrid(
         reader.read("markDot", status.block_condition),
