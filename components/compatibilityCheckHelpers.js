@@ -9,13 +9,15 @@ export const AllModelNumbers = [];
 export const AllBrands = [];
 
 export const getAutoCompleteSuggestionElements = (
+  type,
   suggestions,
   input,
   preferredModelNumber,
   deviceDetails,
   lang,
   needPhoneSurvey,
-  p
+  p,
+  img
 ) => {
   const suggestionContainer = document.createElement("div");
   suggestionContainer.classList.add("autocomplete-items");
@@ -24,7 +26,7 @@ export const getAutoCompleteSuggestionElements = (
       suggestionContainer.innerHTML = "";
       return;
     }
-    if (AllBrands.includes(input.value)) {
+    if (AllBrands.includes(input.value) && type === "Brand") {
       const inst = getInstructionText(
         deviceDetails,
         lang,
@@ -34,7 +36,12 @@ export const getAutoCompleteSuggestionElements = (
         needPhoneSurvey,
         input.value
       );
-      p.innerHTML = inst;
+      p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+      if (input.value === "Apple" && deviceDetails.PlatformName == "iOS") {
+        img.style.visibility = "visible";
+      } else {
+        img.style.visibility = "hidden";
+      }
     }
     const brandSuggestions = suggestions.filter((brand) =>
       brand.toLowerCase().includes(input.value.toLowerCase())
@@ -65,6 +72,23 @@ export const getAutoCompleteSuggestionElements = (
       suggestion.addEventListener("click", () => {
         input.value = brand;
         suggestionContainer.innerHTML = "";
+        if (AllBrands.includes(input.value)) {
+          const inst = getInstructionText(
+            deviceDetails,
+            lang,
+            true,
+            false,
+            preferredModelNumber,
+            needPhoneSurvey,
+            input.value
+          );
+          p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+          if (input.value === "Apple" && deviceDetails.PlatformName == "iOS") {
+            img.style.visibility = "visible";
+          } else {
+            img.style.visibility = "hidden";
+          }
+        }
       });
       suggestionContainer.appendChild(suggestion);
     });
@@ -106,14 +130,14 @@ export const fetchAllPhoneModels = async () => {
     PhoneModelsInDatabase.push(model);
     //   push to AllBrands, AllModelNames, AllModelNumbers (make sure no duplicates)
     if (!AllBrands.includes(model["Brand"])) {
-      AllBrands.push(model["Brand"]);
+      AllBrands.push(model["Brand"].trim());
     }
     if (!AllModelNames.includes(model["Model Name"])) {
-      AllModelNames.push(model["Model Name"]);
+      AllModelNames.push(model["Model Name"].trim());
     }
     model["Model Numbers"].forEach((modelNumber) => {
       if (!AllModelNumbers.includes(modelNumber)) {
-        AllModelNumbers.push(modelNumber);
+        AllModelNumbers.push(modelNumber.trim());
       }
     });
   });

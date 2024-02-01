@@ -539,7 +539,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "multicategorical",
     default: "Chrome",
     categories:
-      "all, Chrome, Chrome Mobile, Safari, Firefox, Opera, Edge, Chromium, Tor, Duckduckgo, Brave, Vivaldi, Midori, SamsungInternet, UCBrowser, Android, Firefox, QQBrowser, Instabridge, WhaleBrowser, Puffin, YandexBrowser, EdgeLegacy, Edge, CocCoc, notChrome, notSafari, notFirefox, notOpera, notEdge, notChromium, notTor, notDuckduckgo, notBrave, notVivaldi, notMidori, notSamsungInternet, notUCBrowser, notAndroid, notFirefox, notQQBrowser, notInstabridge, notWhaleBrowser, notPuffin, notYandexBrowser, notEdgeLegacy, notEdge, notCocCoc",
+      "Chrome, Chrome Mobile, Safari, Firefox, Opera, Edge, Chromium, Tor, Duckduckgo, Brave, Vivaldi, Midori, SamsungInternet, UCBrowser, Android, Firefox, QQBrowser, Instabridge, WhaleBrowser, Puffin, YandexBrowser, EdgeLegacy, Edge, CocCoc, notChrome, notSafari, notFirefox, notOpera, notEdge, notChromium, notTor, notDuckduckgo, notBrave, notVivaldi, notMidori, notSamsungInternet, notUCBrowser, notAndroid, notFirefox, notQQBrowser, notInstabridge, notWhaleBrowser, notPuffin, notYandexBrowser, notEdgeLegacy, notEdge, notCocCoc",
   },
   {
     name: "_needBrowserVersionMinimum",
@@ -599,7 +599,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '⭑ _needDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. NOTE: The value "all" is not yet implemented. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific\'s rule that all study requirements be declared in the study\'s Description.',
     type: "multicategorical",
     default: "desktop",
-    categories: "all, desktop, tablet, mobile",
+    categories: "desktop, tablet, mobile",
   },
   {
     name: "_needDisplay",

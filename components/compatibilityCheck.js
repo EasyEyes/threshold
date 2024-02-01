@@ -38,81 +38,208 @@ const loudspeakerInfo = {
   loudspeaker: null,
 };
 
-const getDeviceDetails = (platformName, lang) => {
-  let OS = "";
+const getPreferredModelNumberAndName = (
+  OEM,
+  platformName,
+  lang,
+  lowercase = false
+) => {
   let preferredModelNumber = "";
-  let findModel = "";
-  switch (platformName) {
-    case "iOS":
-      OS = "IOS";
-      break;
-    case "macOS":
-      OS = "macOS";
-      break;
-    case "win":
-      OS = "Windows";
-      break;
-    case "Android":
-      OS = "Android";
-      break;
-    case "cros":
-      OS = "ChromeOS";
-      break;
-    case "Linux":
-      OS = "Linux";
-      break;
-    case "openbsd":
-      OS = "Open/FreeBSD";
-      break;
-    case "Fuchsia":
-      OS = "Fuchsia";
-      break;
-    default:
-      OS = "GenericOS";
-      break;
-  }
-  if (OS.includes("Android")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberAndroid", lang);
-    findModel = readi18nPhrases("RC_findModelAndroid", lang);
-  } else if (OS.includes("Bada")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberBada", lang);
-    findModel = readi18nPhrases("RC_findModelBada", lang);
-  } else if (OS.includes("Blackberry")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberBlackberry", lang);
-    findModel = readi18nPhrases("RC_findModelBlackberry", lang);
-  } else if (OS.includes("Firefox")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberFirefox", lang);
-    findModel = readi18nPhrases("RC_findModelFirefox", lang);
-  } else if (OS.includes("IOS")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberIOs", lang);
-    findModel = readi18nPhrases("RC_findModelIOs", lang);
-  } else if (OS.includes("iPad")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberIPad", lang);
-    findModel = readi18nPhrases("RC_findModelIPad", lang);
-  } else if (OS.includes("Linux")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberLinux", lang);
-    findModel = readi18nPhrases("RC_findModelLinux", lang);
-  } else if (OS.includes("macOS")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberMacOS", lang);
-    findModel = readi18nPhrases("RC_findModelMacOs", lang);
-  } else if (OS.includes("Maemo")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberMaemo", lang);
-    findModel = readi18nPhrases("RC_findModelMaemo", lang);
-  } else if (OS.includes("Palm")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberPalm", lang);
-    findModel = readi18nPhrases("RC_findModelPalm", lang);
-  } else if (OS.includes("WebOS")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberWebOS", lang);
-    findModel = readi18nPhrases("RC_findModelWebOS", lang);
-  } else if (OS.includes("Windows")) {
-    preferredModelNumber = readi18nPhrases("RC_modelNumberWindows", lang);
-    findModel = readi18nPhrases("RC_findModelWindows", lang);
+  let preferredModelName = "";
+
+  if (OEM === "Samsung") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase
+        ? "RC_modelNumberAndroidSamsungLowercase"
+        : "RC_modelNumberAndroidSamsung",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase
+        ? "RC_modelNameAndroidSamsungLowercase"
+        : "RC_modelNameAndroidSamsung",
+      lang
+    );
+  } else if (OEM === "Motorola") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase
+        ? "RC_modelNumberAndroidMotorolaLowercase"
+        : "RC_modelNumberAndroidMotorola",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase
+        ? "RC_modelNameAndroidMotorolaLowercase"
+        : "RC_modelNameAndroidMotorola",
+      lang
+    );
+  } else if (OEM === "Blackberry") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase
+        ? "RC_modelNumberBlackberryLowercase"
+        : "RC_modelNumberBlackberry",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase ? "RC_modelNameBlackberryLowercase" : "RC_modelName",
+      lang
+    );
+  } else if (OEM === "Google") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase
+        ? "RC_modelNumberAndroidGoogleLowercase"
+        : "RC_modelNumberAndroidGoogle",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase
+        ? "RC_modelNameAndroidGoogleLowercase"
+        : "RC_modelNameAndroidGoogle",
+      lang
+    );
+  } else if (OEM === "Huawei") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase
+        ? "RC_modelNumberAndroidHuaweiLowercase"
+        : "RC_modelNumberAndroidHuawei",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase
+        ? "RC_modelNameAndroidHuaweiLowercase"
+        : "RC_modelNameAndroidHuawei",
+      lang
+    );
+  } else if (OEM === "Xiaomi") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase
+        ? "RC_modelNumberAndroidXiaomiLowercase"
+        : "RC_modelNumberAndroidXiaomi",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase
+        ? "RC_modelNameAndroidXiaomiLowercase"
+        : "RC_modelNameAndroidXiaomi",
+      lang
+    );
+  } else if (OEM === "Apple") {
+    if (platformName === "iOS") {
+      preferredModelNumber = readi18nPhrases(
+        lowercase ? "RC_modelNumberIOsLowercase" : "RC_modelNumberIOs",
+        lang
+      );
+      preferredModelName = readi18nPhrases(
+        lowercase ? "RC_modelNameIOsLowercase" : "RC_modelName",
+        lang
+      );
+    } else if (platformName === "macOS") {
+      preferredModelNumber = readi18nPhrases(
+        lowercase ? "RC_modelNumberMacOSLowercase" : "RC_modelNumberMacOS",
+        lang
+      );
+      preferredModelName = readi18nPhrases(
+        lowercase ? "RC_modelNameMacOSLowercase" : "RC_modelName",
+        lang
+      );
+    } else {
+      preferredModelNumber = readi18nPhrases(
+        lowercase ? "RC_modelNumberIPadLowercase" : "RC_modelNumberIPad",
+        lang
+      );
+      preferredModelName = readi18nPhrases(
+        lowercase ? "RC_modelNameIPadLowercase" : "RC_modelName",
+        lang
+      );
+    }
+  } else if (platformName === "Android") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase
+        ? "RC_modelNumberAndroidGenericLowercase"
+        : "RC_modelNumberAndroidGeneric",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase
+        ? "RC_modelNameAndroidGenericLowercase"
+        : "RC_modelNameAndroidGeneric",
+      lang
+    );
+  } else if (platformName === "Bada") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase ? "RC_modelNumberBadaLowercase" : "RC_modelNumberBada",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
+      lang
+    );
+  } else if (platformName === "Firefox") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase ? "RC_modelNumberFirefoxLowercase" : "RC_modelNumberFirefox",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
+      lang
+    );
+  } else if (platformName === "Linux") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase ? "RC_modelNumberLinuxLowercase" : "RC_modelNumberLinux",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
+      lang
+    );
+  } else if (platformName === "Maemo") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase ? "RC_modelNumberMaemoLowercase" : "RC_modelNumberMaemo",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
+      lang
+    );
+  } else if (platformName === "Palm") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase ? "RC_modelNumberPalmLowercase" : "RC_modelNumberPalm",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
+      lang
+    );
+  } else if (platformName === "WebOS") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase ? "RC_modelNumberWebOSLowercase" : "RC_modelNumberWebOS",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
+      lang
+    );
+  } else if (platformName === "Windows") {
+    preferredModelNumber = readi18nPhrases(
+      lowercase ? "RC_modelNumberWindowsLowercase" : "RC_modelNumberWindows",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
+      lang
+    );
   } else {
-    preferredModelNumber = readi18nPhrases("RC_modelNumber", lang);
-    findModel = readi18nPhrases("RC_findModeGeneric", lang);
+    preferredModelNumber = readi18nPhrases(
+      lowercase ? "RC_modelNumberAndroidGenericLowercase" : "RC_modelNumber",
+      lang
+    );
+    preferredModelName = readi18nPhrases(
+      lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
+      lang
+    );
   }
 
-  return { preferredModelNumber, findModel };
+  return { preferredModelNumber, preferredModelName };
 };
 
 export const getInstructionText = (
@@ -129,7 +256,7 @@ export const getInstructionText = (
       ? readi18nPhrases("RC_surveyPhoneModel", language)
           .replace("ooo", thisDevice.PlatformName)
           .replace("OOO", thisDevice.PlatformName)
-          .replace("mmm", preferredModelNumberText.toLocaleLowerCase())
+          .replace("mmm", preferredModelNumberText)
           .replace("MMM", preferredModelNumberText)
       : readi18nPhrases("RC_needPhoneModel", language)
     : readi18nPhrases("RC_needModelNumberAndName", language);
@@ -137,8 +264,8 @@ export const getInstructionText = (
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
     .replace("MMM", preferredModelNumber)
-    .replace("xxx", thisDevice.OEM === "Unknown" ? "unknown" : thisDevice.OEM)
-    .replace("XXX", thisDevice.OEM === "Unknown" ? "Unknown" : thisDevice.OEM)
+    .replace("xxx", OEM)
+    .replace("XXX", OEM)
     .replace(
       "yyy",
       thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType
@@ -149,15 +276,26 @@ export const getInstructionText = (
     );
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
-  if (userOS === "Android") {
-    if (OEM === "Samsung") {
-      findModelNumber = readi18nPhrases("RC_findModelAndroidSamsung", language);
-    } else if (OEM === "Motorola") {
-      findModelNumber = readi18nPhrases(
-        "RC_findModelAndroidMotorola",
-        language
-      );
-    } else findModelNumber = readi18nPhrases("RC_findModelAndroid", language);
+  if (OEM === "Samsung") {
+    findModelNumber = readi18nPhrases("RC_findModelAndroidSamsung", language);
+  } else if (OEM === "Motorola") {
+    findModelNumber = readi18nPhrases("RC_findModelAndroidMotorola", language);
+  } else if (OEM === "Google") {
+    findModelNumber = readi18nPhrases("RC_findModelAndroidGoogle", language);
+  } else if (OEM === "Huawei") {
+    findModelNumber = readi18nPhrases("RC_findModelAndroidHuawei", language);
+  } else if (OEM === "Xiaomi") {
+    findModelNumber = readi18nPhrases("RC_findModelAndroidXiaomi", language);
+  } else if (OEM === "Apple") {
+    if (userOS === "iOS") {
+      findModelNumber = readi18nPhrases("RC_findModelIOs", language);
+    } else if (userOS === "macOS") {
+      findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
+    } else {
+      findModelNumber = readi18nPhrases("RC_findModelIPad", language);
+    }
+  } else if (userOS === "Android") {
+    findModelNumber = readi18nPhrases("RC_findModelAndroidGeneric", language);
   } else if (userOS === "iOS") {
     findModelNumber = readi18nPhrases("RC_findModelIOs", language);
   } else if (userOS === "Windows") {
@@ -422,6 +560,10 @@ export const getCompatibilityRequirements = (
     compatibleProcessorCoresMinimum = reader.read(
       "_needProcessorCoresMinimum"
     )[0];
+    // the above lists might have spaces in the beginning or end of the string, so we need to remove them
+    compatibleBrowser = compatibleBrowser.map((item) => item.trim());
+    compatibleDevice = compatibleDevice.map((item) => item.trim());
+    compatibleOS = compatibleOS.map((item) => item.trim());
   } else {
     // default values
     // will be ignored in the return value
@@ -894,7 +1036,7 @@ export const displayCompatibilityMessage = async (
             }
             const deviceDetails = result.deviceDetails;
             const OEM = deviceDetails.OEM;
-            const screenSizes = deviceDetails.screenSizes;
+            const screenSizes = result.screenSizes;
             displayUpdate.innerText = "";
             const proceed = await isSmartphoneInDatabase(
               OEM,
@@ -1173,14 +1315,6 @@ const isSmartphoneInDatabase = async (
     messageWrapper.style.margin = "auto";
     messageWrapper.style.marginLeft = "20vw";
     messageWrapper.style.marginRight = "20vw";
-    if (deviceDetails.PlatformName === "iOS") {
-      // insert image of iOS settings
-      img.src = "./components/images/ios_settings.png";
-      img.style.width = "30%";
-      img.style.margin = "auto";
-      img.style.marginBottom = "30px";
-      messageWrapper.appendChild(img);
-    }
   } else {
     if (languageWrapper) {
       languageWrapper.remove();
@@ -1190,17 +1324,25 @@ const isSmartphoneInDatabase = async (
     qrCodeExplanation.style.display = "none";
     titleContainer.style.margin = "0px";
   }
-  const { preferredModelNumber } = getDeviceDetails(
+  const { preferredModelNumber } = getPreferredModelNumberAndName(
+    OEM,
     deviceDetails.PlatformName,
     lang
   );
+
+  const preferredModelNumberLowerCase = getPreferredModelNumberAndName(
+    OEM,
+    deviceDetails.PlatformName,
+    lang,
+    true
+  )["preferredModelNumber"];
 
   const brandInput = document.createElement("input");
   brandInput.type = "text";
   brandInput.id = "brandInput";
   brandInput.name = "brandInput";
   brandInput.placeholder = "Brand";
-  brandInput.value = OEM === "Unknown" ? "" : OEM;
+  brandInput.value = OEM === ("Unknown" || "undefined") ? "" : OEM;
 
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
@@ -1219,13 +1361,14 @@ const isSmartphoneInDatabase = async (
     lang,
     true,
     false,
-    preferredModelNumber,
-    needPhoneSurvey
+    preferredModelNumberLowerCase,
+    needPhoneSurvey,
+    OEM
   );
   const p = document.createElement("p");
   // add id for p
   p.id = "need-phone-survey-instruction";
-  p.innerHTML = instructionText;
+  p.innerHTML = instructionText.replace(/\n/g, "<br>");
 
   const checkButton = document.createElement("button");
   checkButton.classList.add(...["btn", "btn-success"]);
@@ -1234,48 +1377,69 @@ const isSmartphoneInDatabase = async (
 
   const modelNumberWrapper = document.createElement("div");
   // modelNumberWrapper.style.marginTop = "20px";
-  modelNumberWrapper.appendChild(p);
+  messageWrapper.appendChild(p);
   if (needPhoneSurvey) {
     modelNumberWrapper.appendChild(brandInput);
     const brandSuggestionsContainer = getAutoCompleteSuggestionElements(
+      "Brand",
       AllBrands,
       brandInput,
-      preferredModelNumber,
+      preferredModelNumberLowerCase,
       deviceDetails,
       lang,
       needPhoneSurvey,
-      p
+      p,
+      img
     );
     modelNumberWrapper.appendChild(brandSuggestionsContainer);
   }
   modelNumberWrapper.appendChild(modelNameInput);
   if (needPhoneSurvey) {
     const modelNameSuggestionsContainer = getAutoCompleteSuggestionElements(
+      "ModelName",
       AllModelNames,
       modelNameInput,
-      preferredModelNumber,
+      preferredModelNumberLowerCase,
       deviceDetails,
       lang,
       needPhoneSurvey,
-      p
+      p,
+      img
     );
     modelNumberWrapper.appendChild(modelNameSuggestionsContainer);
   }
   modelNumberWrapper.appendChild(modelNumberInput);
   if (needPhoneSurvey) {
     const modelNumberSuggestionsContainer = getAutoCompleteSuggestionElements(
+      "ModelNumber",
       AllModelNumbers,
       modelNumberInput,
-      preferredModelNumber,
+      preferredModelNumberLowerCase,
       deviceDetails,
       lang,
       needPhoneSurvey,
-      p
+      p,
+      img
     );
     modelNumberWrapper.appendChild(modelNumberSuggestionsContainer);
   }
   modelNumberWrapper.appendChild(checkButton);
-  messageWrapper.appendChild(modelNumberWrapper);
+  if (needPhoneSurvey && deviceDetails.PlatformName === "iOS") {
+    // insert image of iOS settings
+    img.src = "./components/images/ios_settings.png";
+    img.style.width = "30%";
+    img.style.margin = "auto";
+    img.style.marginBottom = "30px";
+    // messageWrapper.appendChild(img);
+    const container = document.createElement("div");
+    container.style.display = "flex";
+    container.style.justifyContent = "center";
+    container.appendChild(modelNumberWrapper);
+    container.appendChild(img);
+    messageWrapper.appendChild(container);
+  } else {
+    messageWrapper.appendChild(modelNumberWrapper);
+  }
 
   const procceed = await new Promise((resolve) => {
     checkButton.addEventListener("click", async () => {
@@ -1295,7 +1459,10 @@ const isSmartphoneInDatabase = async (
           p.innerHTML =
             instructionText +
             "<br>" +
-            readi18nPhrases("RC_wrongIPhoneModel", lang);
+            "<br>" +
+            '<span class="highlight-red">' +
+            readi18nPhrases("RC_wrongIPhoneModel", lang) +
+            "</span>";
         } else {
           if (needPhoneSurvey) {
             // add microphone details to microphoneInfo.phoneSurvey array
@@ -1528,10 +1695,19 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     p.style.display = "none";
   }
   const thisDevice = await identifyDevice();
-  const { preferredModelNumber } = getDeviceDetails(
+  const { preferredModelNumber } = getPreferredModelNumberAndName(
+    thisDevice.OEM,
     thisDevice.PlatformName,
     language
   );
+
+  const { preferredModelNumberLowerCase, preferredModelName } =
+    getPreferredModelNumberAndName(
+      thisDevice.OEM,
+      thisDevice.PlatformName,
+      language,
+      true
+    );
   // display the device info
   const deviceString = getDeviceString(thisDevice, language);
   const instructionText = getInstructionText(
@@ -1539,8 +1715,9 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     language,
     false,
     false,
-    preferredModelNumber,
-    false
+    preferredModelNumberLowerCase,
+    false,
+    thisDevice.OEM
   );
 
   // create title

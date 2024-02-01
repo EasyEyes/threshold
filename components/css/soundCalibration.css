@@ -41,7 +41,7 @@
 
 #modelNumberInput {
   width: 30vw;
-  height: 100%;
+  height: 45px;
   font-size: 1rem;
   border-radius: 5px;
   border: 1px solid black;
@@ -51,7 +51,7 @@
 
 #modelNameInput {
   width: 30vw;
-  height: 100%;
+  height: 45px;
   font-size: 1rem;
   border-radius: 5px;
   border: 1px solid black;
@@ -60,7 +60,7 @@
 }
 #brandInput {
   width: 30vw;
-  height: 100%;
+  height: 45px;
   font-size: 1rem;
   border-radius: 5px;
   border: 1px solid black;
@@ -102,6 +102,11 @@ input {
 .highlight {
   font-weight: bold;
   color: blue;
+}
+
+.highlight-red {
+  font-weight: bold;
+  color: red;
 }
 
 #loudspeakerInstructions1 {
