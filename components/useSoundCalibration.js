@@ -52,6 +52,7 @@ import {
   filteredMLSAttenuation,
   deviceType,
   calibrateSoundBurstScalarDB,
+  flags,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -1370,6 +1371,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   soundGainDBSPL.current = Math.round(soundGainDBSPL.current * 10) / 10;
   allHzCalibrationResults.timestamps =
     soundCalibrationResults.current.timeStamps;
+  flags.current = soundCalibrationResults.current.flags;
   const modelNumber = loudspeakerInfo.current.fullLoudspeakerModelNumber;
   const modelName = loudspeakerInfo.current.fullLoudspeakerModelName;
   loudspeakerInfo.current = {
@@ -1502,6 +1504,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   const correctGain = microphoneInfo.current.gainDBSPL;
   const IrGainAt1000Hz = IrGain[IrFreq.findIndex((freq) => freq === 1000)];
   const difference = Math.round(10 * (IrGainAt1000Hz - correctGain)) / 10;
+  flags.current = result.flags;
   if (calibrateSoundBurstUses1000HzGainBool.current) {
     IrGain = IrGain.map((gain) => gain - difference);
   } else {

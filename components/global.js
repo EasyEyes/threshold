@@ -429,6 +429,13 @@ export const allHzCalibrationResults = {
   },
   timestamps: "",
 };
+export const flags = {
+  current: {
+    autoGainControl: "",
+    echoCancellation: "",
+    noiseSuppression: "",
+  },
+};
 export const calibrationRound = { current: 0 };
 export const loudspeakerIR = { Freq: [], Gain: [] };
 export const webAudioDeviceNames = {
