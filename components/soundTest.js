@@ -23,6 +23,7 @@ import {
   loudspeakerInfo,
   micsForSoundTestPage,
   calibrationTime,
+  flags,
 } from "./global";
 import {
   plotForAllHz,
@@ -1874,6 +1875,11 @@ export const displayCompleteTransducerTable = (
   p2.innerHTML = allHzCalibrationResults.timestamps.replace(/\n/g, "<br />");
   elems.completeTransducerTable.appendChild(p);
   elems.completeTransducerTable.appendChild(p2);
+  const p3 = document.createElement("p");
+  p3.innerHTML = `autoGainControl: ${flags.current.autoGainControl}
+  <br>echoCancellation: ${flags.current.echoCancellation}
+  <br>noiseSuppression: ${flags.current.noiseSuppression}`;
+  elems.completeTransducerTable.appendChild(p3);
   elems.completeTransducerTable.appendChild(table);
 };
 
