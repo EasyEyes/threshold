@@ -2363,6 +2363,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
   },
+  markingFixationMotionPath: {
+    name: "markingFixationMotionPath",
+    availability: "now",
+    type: "categorical",
+    default: "circle",
+    explanation:
+      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases xxx specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle means that the crosshair moves along the circle with speed xxx. The starting point on the circle is random.\n• randomWalk means that on each frame the crosshair is displaced in a random direction by a distance degPerSec/f, where f is the frame rate. If the dot's movement intersects the circle, it bounces off the circle back inside the circular area. One frame's motion can have several bounces.  The starting point is a random location in the circular area.. ",
+    categories: ["circle,randomWalk"],
+  },
   markingFixationMotionRadiusDeg: {
     name: "markingFixationMotionRadiusDeg",
     availability: "now",

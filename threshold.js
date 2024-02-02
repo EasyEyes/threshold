@@ -4616,12 +4616,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // BackGrid and Dot and flies
       if (flies && flies.status === PsychoJS.Status.NOT_STARTED) {
-        console.log("!. going to draw flies");
         flies.draw();
       }
       if (flies && flies.status === PsychoJS.Status.STARTED) {
         flies.everyFrame();
-        console.log("!. going to update flies");
       }
       if (backGrid && backGrid.status === PsychoJS.Status.NOT_STARTED)
         backGrid.draw();

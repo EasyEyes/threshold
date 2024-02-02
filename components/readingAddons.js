@@ -2,6 +2,7 @@ import axios from "axios";
 
 import {
   displayOptions,
+  font,
   fontCharacterSet,
   letterConfig,
   readingCorpusArchive,
@@ -15,7 +16,8 @@ import {
   timing,
   viewingDistanceCm,
 } from "./global";
-import { degreesToPixels, getRandomInt, logger, XYPixOfXYDeg } from "./utils";
+import { _getCharacterSetBoundingBox } from "./bounding";
+import { getRandomInt, logger, XYPixOfXYDeg } from "./utils";
 
 import {
   preprocessRawCorpus,
@@ -242,7 +244,6 @@ export const preprocessCorpusToSentenceList = (
         }
 
         readingParagraphStimulus.setText(thisLineText);
-        console.log();
         const newTestHeight =
           readingParagraphStimulus.getBoundingBox(true).height;
 
@@ -453,14 +454,42 @@ export const findReadingSize = (
     default:
       return;
   }
-  return Math.max(1, pt);
+  let minFontSize = getMinFontPtSize(paramReader, blockOrConditionEnum);
+  return Math.max(minFontSize, pt);
 };
 /* --------------------------------- HELPERS -------------------------------- */
+
+const getMinFontPtSize = (paramReader, blockOrConditionEnum) => {
+  let px =
+    blockOrConditionEnum === "block"
+      ? paramReader.read("targetMinimumPix", status.block)[0]
+      : paramReader.read("targetMinimumPix", status.block_condition);
+  const targetSizeIsHeightBool =
+    blockOrConditionEnum === "block"
+      ? paramReader.read("targetSizeIsHeightBool", status.block)[0]
+      : paramReader.read("targetSizeIsHeightBool", status.block_condition);
+  const characterSetRectPx = _getCharacterSetBoundingBox(
+    fontCharacterSet.current,
+    font.name,
+    psychoJS.window,
+    1,
+    50,
+    font.padding
+  );
+  if (targetSizeIsHeightBool) {
+    return px / characterSetRectPx.height;
+  } else {
+    return px / characterSetRectPx.width;
+  }
+};
 
 const tempScaleNominalSize = (nominal) => {
   return nominal * 1.42;
 };
 
+const pxToPt = (px) => {
+  return ((px / displayOptions.pixPerCm) * 72) / 2.54;
+};
 const getReadingNominalSizeDeg = (readingNominalSizeDeg) => {
   // Convert deg to px.
   const sizePx = pxOfDegVertical(readingNominalSizeDeg);
@@ -511,10 +540,9 @@ return widthPx (edited)
 
 const pxOfDegVertical = (heightDeg) => {
   // Convert deg to px
-  // TODO make sure letterConfig is being set on reading, at start of reading block
   const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
-  const bottomXYPx = XYPixOfXYDeg([xDeg, yDeg - heightDeg / 2], displayOptions);
-  const topXYPx = XYPixOfXYDeg([xDeg, yDeg + heightDeg / 2], displayOptions);
+  const bottomXYPx = XYPixOfXYDeg([xDeg, yDeg - heightDeg / 2]);
+  const topXYPx = XYPixOfXYDeg([xDeg, yDeg + heightDeg / 2]);
   const heightPx = Math.abs(bottomXYPx[1] - topXYPx[1]);
   return heightPx;
 };
@@ -522,8 +550,8 @@ const pxOfDegVertical = (heightDeg) => {
 const pxOfDegHorizontal = (widthDeg) => {
   // COnvert deg to px
   const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
-  const leftXYPx = XYPixOfXYDeg([xDeg - widthDeg / 2, yDeg], displayOptions);
-  const rightXYPx = XYPixOfXYDeg([xDeg + widthDeg / 2, yDeg], displayOptions);
+  const leftXYPx = XYPixOfXYDeg([xDeg - widthDeg / 2, yDeg]);
+  const rightXYPx = XYPixOfXYDeg([xDeg + widthDeg / 2, yDeg]);
   const widthPx = Math.abs(rightXYPx[0] - leftXYPx[0]);
   return widthPx;
 };

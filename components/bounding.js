@@ -57,7 +57,7 @@ export const generateCharacterSetBoundingRects = (
   return rects;
 };
 
-const _getCharacterSetBoundingBox = (
+export const _getCharacterSetBoundingBox = (
   characterSet,
   font,
   window,
