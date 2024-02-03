@@ -2369,7 +2369,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "circle",
     explanation:
-      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases xxx specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle means that the crosshair moves along the circle with speed xxx. The starting point on the circle is random.\n• randomWalk means that on each frame the crosshair is displaced in a random direction by a distance degPerSec/f, where f is the frame rate. If the dot's movement intersects the circle, it bounces off the circle back inside the circular area. One frame's motion can have several bounces.  The starting point is a random location in the circular area.. ",
+      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle means that the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step intersects the circle, it reflects off the circle back inside the circular area. One step can have several reflections. The initial starting point is a random location inside the circular area.",
     categories: ["circle,randomWalk"],
   },
   markingFixationMotionRadiusDeg: {
