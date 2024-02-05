@@ -1985,7 +1985,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'markDot: I MUST UPDATE DEFAULT WHEN reMovingFixationBool ARGUMENT IS ADDED. Until the target appears, display a dot. It accepts several arguments as comma-separated values. Diameter zero (the default) disables the dot.\n▶ reMovingFixationBool, xDeg, yDeg, diameterDeg, colorRGBA\nreMovingFixationBool (default TRUE) specfies, if FALSE, that the dot position is relative to the fixed nominal fixation or, if TRUE, relative to the (possibly moving) crosshair location. When TRUE, if the crosshair moves then the dot will move with it.\nxDeg and yDeg (default 0,0) are coordinates of the dot center relative to the nominal fixation location (which a moving crosshair circles around).  \ndiameterDeg (default 0) is the dot diameter. Diameter zero disables the dot.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, which weights the blending; use 1 for 100% color. Each of the four values ranges 0 to 1.',
+      'markDot: WE MUST UPDATE DEFAULT WHEN reMovingFixationBool ARGUMENT IS ADDED. Until the target appears, display a dot. It accepts several arguments as comma-separated values. Diameter zero (the default) disables the dot.\n▶ reMovingFixationBool, xDeg, yDeg, diameterDeg, colorRGBA\nreMovingFixationBool (default TRUE) specfies, if FALSE, that the dot position is relative to the fixed nominal fixation or, if TRUE, relative to the (possibly moving) crosshair location. When TRUE, if the crosshair moves then the dot will move with it.\nxDeg and yDeg (default 0,0) are coordinates of the dot center relative to the nominal fixation location (which a moving crosshair circles around).  \ndiameterDeg (default 0) is the dot diameter. Diameter zero disables the dot.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, which weights the blending; use 1 for 100% color. Each of the four values ranges 0 to 1.',
     type: "text",
     default: "0,0,0,0,0,0,1",
     categories: "",
@@ -1995,7 +1995,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'markFlies: I MUST UPDATE DEFAULT WHEN reMovingFixationBool IS UPDATED. Until the target appears, display a swarm of moving "flies" (each like a crosshair) that make it hard to get the cursor to track the moving crosshair unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. Each fly moves a fixed radial distance degPerSec/fHz from frame to frame, where fHz is the frame rate (e.g. 60) and degPerSec is the speed. On each frame, each fly moves in a random direction. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. markFlies accepts several arguments as comma separated values:\n▶ reMovingFixationBool, n, radiusDeg, degPerSec, thicknessDeg, lengthDeg, colorRGBA\nreMovingFixationBool (default TRUE) centers the circular fly area on, if FALSE, the fixed nominal fixation location (that the crosshair circles around), otherwise centers on the (possibly moving) crosshair.\nn (default 0, i.e. none) is the number of flies. Setting n=0, the default, disables markFlies.\nradiusDeg (default 1) is the radius of the circular area that the flies are confined to.\nthicknessDeg (default 0.05) is the line thickness.\nlengthDeg (default 2) is the length of each of the two lines that make one "fly".\ncolorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).',
+      'markFlies: WE MUST UPDATE DEFAULT WHEN reMovingFixationBool IS UPDATED. Until the target appears, display a swarm of moving "flies" (each like a crosshair) that make it hard to get the cursor to track the moving crosshair unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. Each fly moves a fixed radial distance degPerSec/fHz from frame to frame, where fHz is the frame rate (e.g. 60) and degPerSec is the speed. On each frame, each fly moves in a random direction. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. markFlies accepts several arguments as comma separated values:\n▶ reMovingFixationBool, n, radiusDeg, degPerSec, thicknessDeg, lengthDeg, colorRGBA\nreMovingFixationBool (default TRUE) centers the circular fly area on, if FALSE, the fixed nominal fixation location (that the crosshair circles around), otherwise centers on the (possibly moving) crosshair.\nn (default 0, i.e. none) is the number of flies. Setting n=0, the default, disables markFlies.\nradiusDeg (default 1) is the radius of the circular area that the flies are confined to.\nthicknessDeg (default 0.05) is the line thickness.\nlengthDeg (default 2) is the length of each of the two lines that make one "fly".\ncolorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).',
     type: "text",
     default: "0,1,0.3,FALSE,0.05,2,0,0,1,1",
     categories: "",
@@ -2075,7 +2075,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.05",
     explanation:
-      "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustClickCrosshairBool=TRUE for a peripheral target.",
+      "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustTrackContinuouslyBool=TRUE.",
     type: "numerical",
     default: "0.1",
     categories: "",
@@ -2085,7 +2085,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle means that the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step intersects the circle, it reflects off the circle back inside the circular area. One step can have several reflections. The initial starting point is a random location inside the circular area.",
+      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases, markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle: the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step would cross the circle, it instead reflects off the circle back into the circular area. One step can have many reflections. The initial starting point is a random location in the circular area.\nUsed with responseMustTrackContinuouslyBool=TRUE.",
     type: "categorical",
     default: "circle",
     categories: "circle,randomWalk",
@@ -2095,7 +2095,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "markingFixationMotionRadiusDeg (default 2 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustContinuouslyTrackCrosshairBool=TRUE.",
+      "markingFixationMotionRadiusDeg (default 2 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustTrackContinuouslyBool =TRUE.",
     type: "numerical",
     default: "2",
     categories: "",
@@ -2105,7 +2105,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustClickCrosshairBool=TRUE.",
+      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustTrackContinuouslyBool=TRUE.",
     type: "numerical",
     default: "0.3",
     categories: "",

@@ -740,7 +740,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   logger("fontsRequired", fontsRequired);
   for (let i in fontsRequired) {
     logger(i, fontsRequired[i]);
-    // console.log("",fontsRequired[i].length);
     let fontSplit = fontsRequired[i].split(".");
     let fontSplit1 = fontSplit[0].split("/");
     fontSplit1.push(fontSplit[1]);
@@ -1781,7 +1780,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 "sound"
               );
-              // console.log("sound:trialsConditions", trialsConditions);
 
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1800,7 +1798,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 "sound"
               );
-              // console.log("VocoderPhrasetrialsConditions", trialsConditions);
               // console.log("totalTrialsThisBlock.current", totalTrialsThisBlock.current);
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1860,8 +1857,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 "sound"
               );
-              // console.log("sound:trialsConditions", trialsConditions);
-              // console.log("trialsConditions", trialsConditions);
 
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
@@ -1889,20 +1884,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //initialize sound files:
       if (targetKind.current === "vocoderPhrase") {
         await initVocoderPhraseSoundFiles(trialsConditions);
-        // console.log("vocoderPhraseConditions", trialsConditions);
       } else if (targetKind.current === "sound") {
         if (targetTask.current === "identify") {
           //init trial sound data
           var speechInNoiseConditions = trialsConditions.filter(
             (condition) => condition["targetTask"] == "identify"
           );
-          // console.log("speechInNoiseConditions", trialsConditions);
           await initSpeechInNoiseSoundFiles(
             speechInNoiseConditions.length
               ? speechInNoiseConditions
               : trialsConditions
           );
-          // console.log("speechInNoiseConditions", speechInNoiseConditions);
         } else {
           //init trial sound data
           var toneInMelodyConditions = trialsConditions.filter(
@@ -4812,7 +4804,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "targetSoundDBSPL",
               status.block_condition
             );
-            // console.log("ProposedVolumeLevelFromQuest.current", ProposedVolumeLevelFromQuest.current);
           }
 
           const {
@@ -6256,9 +6247,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ProposedVolumeLevelFromQuest.adjusted / 20
               );
             }
-            // console.log("currentLoop", currentLoop);
-            // psychoJS.experiment.addData("targetWasPresent", targetIsPresentBool.current);
-            // name of masker
           },
           reading: () => {
             addReadingStatsToOutput(trials.thisRepN, psychoJS);
@@ -6359,9 +6347,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         psychoJS.experiment.addData("key_resp.corr", key_resp.corr);
         psychoJS.experiment.addData("correctAns", correctAns.current);
-        // console.log("key_resp.keys", key_resp.keys);
-        // console.log("key_resp.corr", key_resp.corr);
-        // console.log("correctAns.current", correctAns.current);
         // if (typeof key_resp.keys !== "undefined") {
         if (key_resp.keys.length) {
           // we had a response

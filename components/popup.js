@@ -50,7 +50,6 @@ export const showPopup = (
   subText,
   hideSubTextAndProceed = false
 ) => {
-  console.log(keyName);
   document.getElementById(`${keyName}-container`).style.display = "block";
   document.getElementById(`${keyName}-title`).innerHTML = title;
   document.getElementById(`${keyName}-sub-text`).innerHTML = subText;
