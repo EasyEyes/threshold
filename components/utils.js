@@ -1102,3 +1102,9 @@ export const getParamValueForBlockOrCondition = (
   // Condition
   return paramReader.read(paramName, blockOrConditionLabel);
 };
+
+// Arbitrary? not well defined
+export const pxScalar = (degScalar) =>
+  Math.abs(
+    XYPixOfXYDeg([-degScalar / 2, 0])[0] - XYPixOfXYDeg([degScalar / 2, 0])[0]
+  );

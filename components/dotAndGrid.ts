@@ -1,8 +1,4 @@
-import {
-  getAppleCoordinatePosition,
-  getPsychoJSCoordinatePositionFromAppleCoordinatePosition,
-} from "./eyeTrackingFacilitation";
-import { XYPixOfXYDeg, XYDegOfXYPix, sampleWithoutReplacement } from "./utils";
+import { XYPixOfXYDeg, pxScalar } from "./utils";
 import { ShapeStim, Polygon } from "../psychojs/src/visual";
 import { psychoJS } from "./globalPsychoJS";
 import { util } from "../psychojs/src";
@@ -420,9 +416,3 @@ class BackGrid {
     return Math.floor(this.lengthDeg / this.spacingDeg) + 1;
   }
 }
-
-// Arbitrary? not well defined
-let pxScalar = (degScalar: number) =>
-  Math.abs(
-    XYPixOfXYDeg([-degScalar / 2, 0])[0] - XYPixOfXYDeg([degScalar / 2, 0])[0]
-  );
