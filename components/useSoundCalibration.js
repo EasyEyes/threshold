@@ -387,8 +387,8 @@ const getUSBMicrophoneDetailsFromUser = async (
 
   // add  to the page
   elems.subtitle.appendChild(p);
-  elems.subtitle.appendChild(micNameInput);
   elems.subtitle.appendChild(micManufacturerInput);
+  elems.subtitle.appendChild(micNameInput);
   elems.subtitle.appendChild(micSerialNumberInput);
   elems.subtitle.appendChild(proceedButton);
 

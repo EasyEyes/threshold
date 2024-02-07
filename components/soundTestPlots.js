@@ -1210,64 +1210,86 @@ export const plotRecordings = (
   plotCanvas,
   recordingChecks,
   isLoudspeakerCalibration,
-  filteredMLSRange
+  filteredMLSRange,
+  soundCheck
 ) => {
   const TData = recordingChecks.unfiltered[0].recT;
   const unfilteredData = TData.map((x, i) => {
     return { x: x, y: recordingChecks.unfiltered[0].recDb[i] };
   });
-  const componentData = TData.map((x, i) => {
-    return {
-      x: x,
-      y: recordingChecks.component[recordingChecks.component.length - 1].recDb[
-        i
-      ],
-    };
-  });
-  const systemData = TData.map((x, i) => {
-    return {
-      x: x,
-      y: recordingChecks.system[recordingChecks.system.length - 1].recDb[i],
-    };
-  });
+  const componentData =
+    soundCheck === "both" || soundCheck === "goal"
+      ? TData.map((x, i) => {
+          return {
+            x: x,
+            y: recordingChecks.component[recordingChecks.component.length - 1]
+              .recDb[i],
+          };
+        })
+      : [];
+  const systemData =
+    soundCheck === "both" || soundCheck === "system"
+      ? TData.map((x, i) => {
+          return {
+            x: x,
+            y: recordingChecks.system[recordingChecks.system.length - 1].recDb[
+              i
+            ],
+          };
+        })
+      : [];
   // Assuming warmupT is the same for all categories
 
   const postTData = recordingChecks.unfiltered[0].postT;
   const unfilteredPostData = postTData.map((x, i) => {
     return { x: x, y: recordingChecks.unfiltered[0].postDb[i] };
   });
-  const componentPostData = postTData.map((x, i) => {
-    return {
-      x: x,
-      y: recordingChecks.component[recordingChecks.component.length - 1].postDb[
-        i
-      ],
-    };
-  });
-  const systemPostData = postTData.map((x, i) => {
-    return {
-      x: x,
-      y: recordingChecks.system[recordingChecks.system.length - 1].postDb[i],
-    };
-  });
+  const componentPostData =
+    soundCheck === "both" || soundCheck === "goal"
+      ? postTData.map((x, i) => {
+          return {
+            x: x,
+            y: recordingChecks.component[recordingChecks.component.length - 1]
+              .postDb[i],
+          };
+        })
+      : [];
+  const systemPostData =
+    soundCheck === "both" || soundCheck === "system"
+      ? postTData.map((x, i) => {
+          return {
+            x: x,
+            y: recordingChecks.system[recordingChecks.system.length - 1].postDb[
+              i
+            ],
+          };
+        })
+      : [];
 
   const warmupTData = recordingChecks.unfiltered[0].warmupT;
   const unfilteredWarmupData = warmupTData.map((x, i) => {
     return { x: x, y: recordingChecks.unfiltered[0].warmupDb[i] };
   });
-  const componentWarmupData = warmupTData.map((x, i) => {
-    return {
-      x: x,
-      y: recordingChecks.component[recordingChecks.component.length - 1]
-        .warmupDb[i],
-    };
-  });
-  const systemWarmupData = warmupTData.map((x, i) => {
-    return {
-      x: x,
-      y: recordingChecks.system[recordingChecks.system.length - 1].warmupDb[i],
-    };
-  });
+  const componentWarmupData =
+    soundCheck === "both" || soundCheck === "goal"
+      ? warmupTData.map((x, i) => {
+          return {
+            x: x,
+            y: recordingChecks.component[recordingChecks.component.length - 1]
+              .warmupDb[i],
+          };
+        })
+      : [];
+  const systemWarmupData =
+    soundCheck === "both" || soundCheck === "system"
+      ? warmupTData.map((x, i) => {
+          return {
+            x: x,
+            y: recordingChecks.system[recordingChecks.system.length - 1]
+              .warmupDb[i],
+          };
+        })
+      : [];
   // Assuming warmupT is the same for all categories
 
   let maxY = findMaxValue([
@@ -1313,110 +1335,189 @@ export const plotRecordings = (
   plotCanvas.width = 600;
 
   let transducer = isLoudspeakerCalibration ? "Loudspeaker" : "Microphone";
+  const datasets = [
+    {
+      label: "pre",
+      data: unfilteredWarmupData,
+      borderColor: "red",
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      pointRadius: 0,
+      showLine: true,
+      borderDash: [5, 5], // Dashed line for unfiltered warm-up data
+      borderWidth: 2,
+    },
+    {
+      label: "MLS SD=" + recordingChecks.unfiltered[0].sd + " dB",
+      data: unfilteredData,
+      borderColor: "red",
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      pointRadius: 0,
+      showLine: true,
+      borderWidth: 2,
+    },
+    {
+      label: "post",
+      data: unfilteredPostData,
+      borderColor: "red",
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      pointRadius: 0,
+      showLine: true,
+      borderDash: [5, 5], // Dashed line for unfiltered warm-up data
+      borderWidth: 2,
+    },
+  ];
+  if (soundCheck === "goal") {
+    datasets.push(
+      {
+        label: "pre",
+        data: componentWarmupData,
+        borderColor: "blue",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderDash: [5, 5],
+        borderWidth: 2,
+      },
+      {
+        label:
+          "MLS corrected for " +
+          transducer +
+          " SD=" +
+          recordingChecks.component[recordingChecks.component.length - 1].sd +
+          " dB",
+        data: componentData,
+        borderColor: "blue",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderWidth: 2,
+        fill: false,
+      },
+      {
+        label: "post",
+        data: componentPostData,
+        borderColor: "blue",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderDash: [5, 5],
+        borderWidth: 2,
+      }
+    );
+  } else if (soundCheck === "system") {
+    datasets.push(
+      {
+        label: "pre",
+        data: systemWarmupData,
+        borderColor: "green",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderDash: [5, 5],
+        borderWidth: 2,
+      },
+      {
+        label:
+          "MLS corrected for Loudspeaker+Microphone SD=" +
+          recordingChecks.system[recordingChecks.system.length - 1].sd +
+          " dB",
+        data: systemData,
+        borderColor: "green",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderWidth: 2,
+        fill: false,
+      },
+      {
+        label: "post",
+        data: systemPostData,
+        borderColor: "green",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderDash: [5, 5],
+        borderWidth: 2,
+      }
+    );
+  } else if (soundCheck === "both") {
+    datasets.push(
+      {
+        label: "pre",
+        data: componentWarmupData,
+        borderColor: "blue",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderDash: [5, 5],
+        borderWidth: 2,
+      },
+      {
+        label:
+          "MLS corrected for " +
+          transducer +
+          " SD=" +
+          recordingChecks.component[recordingChecks.component.length - 1].sd +
+          " dB",
+        data: componentData,
+        borderColor: "blue",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderWidth: 2,
+        fill: false,
+      },
+      {
+        label: "post",
+        data: componentPostData,
+        borderColor: "blue",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderDash: [5, 5],
+        borderWidth: 2,
+      },
+      {
+        label: "pre",
+        data: systemWarmupData,
+        borderColor: "green",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderDash: [5, 5],
+        borderWidth: 2,
+      },
+      {
+        label:
+          "MLS corrected for Loudspeaker+Microphone SD=" +
+          recordingChecks.system[recordingChecks.system.length - 1].sd +
+          " dB",
+        data: systemData,
+        borderColor: "green",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderWidth: 2,
+        fill: false,
+      },
+      {
+        label: "post",
+        data: systemPostData,
+        borderColor: "green",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        pointRadius: 0,
+        showLine: true,
+        borderDash: [5, 5],
+        borderWidth: 2,
+      }
+    );
+  }
   // Chart.js configuration for warm-up plot
   const warmupChart = new Chart(plotCanvas, {
     type: "line",
     data: {
       // Combine warm-up and recording labels
-      datasets: [
-        {
-          label: "pre",
-          data: unfilteredWarmupData,
-          borderColor: "red",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          pointRadius: 0,
-          showLine: true,
-          borderDash: [5, 5], // Dashed line for unfiltered warm-up data
-          borderWidth: 2,
-        },
-        {
-          label: "pre",
-          data: componentWarmupData,
-          borderColor: "blue",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          pointRadius: 0,
-          showLine: true,
-          borderDash: [5, 5],
-          borderWidth: 2,
-        },
-        {
-          label: "pre",
-          data: systemWarmupData,
-          borderColor: "green",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          pointRadius: 0,
-          showLine: true,
-          borderDash: [5, 5],
-          borderWidth: 2,
-        },
-        {
-          label: "MLS SD=" + recordingChecks.unfiltered[0].sd + " dB",
-          data: unfilteredData,
-          borderColor: "red",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          pointRadius: 0,
-          showLine: true,
-          borderWidth: 2,
-        },
-        {
-          label:
-            "MLS corrected for " +
-            transducer +
-            " SD=" +
-            recordingChecks.component[recordingChecks.component.length - 1].sd +
-            " dB",
-          data: componentData,
-          borderColor: "blue",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          pointRadius: 0,
-          showLine: true,
-          borderWidth: 2,
-          fill: false,
-        },
-        {
-          label:
-            "MLS corrected for Loudspeaker+Microphone SD=" +
-            recordingChecks.system[recordingChecks.system.length - 1].sd +
-            " dB",
-          data: systemData,
-          borderColor: "green",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          pointRadius: 0,
-          showLine: true,
-          borderWidth: 2,
-          fill: false,
-        },
-        {
-          label: "post",
-          data: unfilteredPostData,
-          borderColor: "red",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          pointRadius: 0,
-          showLine: true,
-          borderDash: [5, 5], // Dashed line for unfiltered warm-up data
-          borderWidth: 2,
-        },
-        {
-          label: "post",
-          data: componentPostData,
-          borderColor: "blue",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          pointRadius: 0,
-          showLine: true,
-          borderDash: [5, 5],
-          borderWidth: 2,
-        },
-        {
-          label: "post",
-          data: systemPostData,
-          borderColor: "green",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          pointRadius: 0,
-          showLine: true,
-          borderDash: [5, 5],
-          borderWidth: 2,
-        },
-      ],
+      datasets: datasets,
     },
     options: {
       plugins: {

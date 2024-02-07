@@ -485,7 +485,8 @@ export const calibrateAudio = async (reader) => {
         elems,
         soundCalibrationResults.current.recordingChecks,
         true,
-        allHzCalibrationResults.filteredMLSRange.component
+        allHzCalibrationResults.filteredMLSRange.component,
+        calibrateSoundCheck.current
       );
       if (
         calibrateSoundCheck.current === "system" ||

@@ -1692,7 +1692,8 @@ export const displayRecordings = (
   elems,
   recChecks,
   isLoudspeakerCalibration,
-  filteredMLSRange
+  filteredMLSRange,
+  soundCheck
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -1705,7 +1706,8 @@ export const displayRecordings = (
     plotCanvas,
     recChecks,
     isLoudspeakerCalibration,
-    filteredMLSRange
+    filteredMLSRange,
+    soundCheck
   );
 };
 
