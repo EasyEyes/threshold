@@ -5,11 +5,11 @@ import {
   displayOptions,
   fixationConfig,
   letterConfig,
-  repeatedLettersConfig,
   targetKind,
   viewingDistanceDesiredCm,
   status,
 } from "./global.js";
+import { pxScalar } from "./utils";
 
 import { paramReader } from "../threshold.js";
 
@@ -23,8 +23,6 @@ import {
   norm,
   Rectangle,
   validateRectPoints,
-  tand,
-  atand,
 } from "./utils.js";
 
 export const generateCharacterSetBoundingRects = (
@@ -230,6 +228,10 @@ export const restrictLevel = (
     displayOptions.window._size[0] / 2,
     displayOptions.window._size[1] / 2,
   ];
+
+  const fixationRotationRadiusPx = pxScalar(
+    fixationConfig.markingFixationMotionRadiusDeg
+  );
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
     case "targetSizeDeg":
@@ -242,7 +244,8 @@ export const restrictLevel = (
         targetSizeIsHeightBool,
         characterSetRectPx,
         spacingOverSizeRatio,
-        thresholdParameter
+        thresholdParameter,
+        fixationRotationRadiusPx
       );
       level = Math.log10(sizeDeg);
       break;
@@ -258,7 +261,8 @@ export const restrictLevel = (
         spacingOverSizeRatio,
         spacingSymmetry,
         thresholdParameter,
-        spacingIsOuterBool
+        spacingIsOuterBool,
+        fixationRotationRadiusPx
       );
       level = Math.log10(spacingDeg);
       break;
@@ -275,7 +279,8 @@ export const restrictSizeDeg = (
   targetSizeIsHeightBool,
   characterSetRectPx,
   spacingOverSizeRatio,
-  thresholdParameter
+  thresholdParameter,
+  fixationRotationRadiusPx
 ) => {
   switch (targetKind) {
     case "letter":
@@ -329,6 +334,11 @@ export const restrictSizeDeg = (
       continue;
     }
 
+    stimulusRectPx = stimulusRectPx.inset(
+      -fixationRotationRadiusPx,
+      -fixationRotationRadiusPx
+    );
+
     // WE'RE DONE IF STIMULUS FITS
     if (isRectInRect(stimulusRectPx, screenRectPx)) {
       return [
@@ -377,7 +387,8 @@ export const restrictSpacingDeg = (
   spacingOverSizeRatio,
   spacingSymmetry,
   thresholdParameter,
-  spacingIsOuterBool
+  spacingIsOuterBool,
+  fixationRotationRadiusPx
 ) => {
   // TODO make sure rects are valid, ie height&width are nonnegative
   /* 
@@ -674,6 +685,10 @@ export const restrictSpacingDeg = (
         flankerXYPxs = _getFlankerXYPxs(targetXYDeg, [v1XY, v2XY, v3XY, v4XY]);
         stimulusRectPx = _getRectAroundFlankers(flankerXYPxs);
         stimulusRectPx = stimulusRectPx.inset(-widthPx / 2, -heightPx / 2);
+        stimulusRectPx = stimulusRectPx.inset(
+          -fixationRotationRadiusPx,
+          -fixationRotationRadiusPx
+        );
         break;
     }
     let largestBoundsRatio = getLargestBoundsRatio(
