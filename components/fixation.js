@@ -11,7 +11,7 @@ import {
 export const getFixationPos = (blockN, paramReader) => {
   const locationStrategy = paramReader.read(
     "fixationLocationStrategy",
-    blockN
+    blockN,
   )[0];
   if (locationStrategy === "centerFixation") return [0, 0];
   const specifiedLocationXYDenisCoords = [
@@ -19,12 +19,12 @@ export const getFixationPos = (blockN, paramReader) => {
     paramReader.read("fixationLocationYScreen", blockN)[0],
   ];
   const specifiedLocationXYNorm = specifiedLocationXYDenisCoords.map(
-    (z) => 2 * z - 1
+    (z) => 2 * z - 1,
   );
   const specifiedLocationXYPx = to_px(
     specifiedLocationXYNorm,
     "norm",
-    psychoJS.window
+    psychoJS.window,
   ).map(Math.round);
   return specifiedLocationXYPx;
 };
@@ -51,34 +51,36 @@ export class Fixation {
     this.bold = false;
     fixationConfig.markingBlankedNearTargetBool = reader.read(
       "markingBlankedNearTargetBool",
-      BC
+      BC,
     );
     fixationConfig.markingBlankingRadiusReEccentricity = reader.read(
       "markingBlankingRadiusReEccentricity",
-      BC
+      BC,
     );
     fixationConfig.markingBlankingRadiusReTargetHeight = reader.read(
       "markingBlankingRadiusReTargetHeight",
-      BC
+      BC,
     );
     // TODO find the correct, general across conditions, location
     fixationConfig.markingBlankingPos = fixationConfig.pos;
     fixationConfig.markingFixationStrokeLengthDeg = reader.read(
       "markingFixationStrokeLengthDeg",
-      BC
+      BC,
     );
     fixationConfig.markingFixationStrokeThicknessDeg = reader.read(
       "markingFixationStrokeThicknessDeg",
-      BC
+      BC,
     );
     fixationConfig.markingFixationMotionRadiusDeg = reader.read(
       "markingFixationMotionRadiusDeg",
-      BC
+      BC,
     );
     const markingFixationMotionSpeedDegPerSec = reader.read(
       "markingFixationMotionSpeedDegPerSec",
-      BC
+      BC,
     );
+    fixationConfig.markingFixationMotionSpeedDegPerSec =
+      markingFixationMotionSpeedDegPerSec;
     fixationConfig.markingFixationMotionPeriodSec =
       markingFixationMotionSpeedDegPerSec === 0
         ? 0
@@ -86,42 +88,42 @@ export class Fixation {
           markingFixationMotionSpeedDegPerSec;
     fixationConfig.markingFixationHotSpotRadiusDeg = reader.read(
       "markingFixationHotSpotRadiusDeg",
-      BC
+      BC,
     );
     fixationConfig.show = reader.read("markTheFixationBool", BC);
     fixationConfig.markingOffsetBeforeTargetOnsetSecs = reader.read(
       "markingOffsetBeforeTargetOnsetSecs",
-      BC
+      BC,
     );
     fixationConfig.markingFixationStrokeThickening = reader.read(
       "markingFixationStrokeThickening",
-      BC
+      BC,
     );
     fixationConfig.color = colorRGBASnippetToRGBA(
-      reader.read("markingColorRGBA", BC)
+      reader.read("markingColorRGBA", BC),
     );
     if (
       ["pixPerCm", "nearPointXYDeg", "nearPointXYPix"].every(
-        (s) => displayOptions[s]
+        (s) => displayOptions[s],
       )
     ) {
       // Diameter
       fixationConfig.strokeLength =
         XYPixOfXYDeg(
           [fixationConfig.markingFixationStrokeLengthDeg, 0],
-          displayOptions
+          displayOptions,
         )[0] - fixationConfig.pos[0];
       fixationConfig.strokeWidth =
         XYPixOfXYDeg(
           [0, fixationConfig.markingFixationStrokeThicknessDeg],
-          displayOptions
+          displayOptions,
         )[1] - fixationConfig.pos[1];
       fixationConfig.markingFixationHotSpotRadiusPx = Math.abs(
         fixationConfig.pos[0] -
           XYPixOfXYDeg(
             [fixationConfig.markingFixationHotSpotRadiusDeg, 0],
-            displayOptions
-          )[0]
+            displayOptions,
+          )[0],
       );
     }
     fixationConfig.offset =
@@ -132,7 +134,7 @@ export class Fixation {
       const theseVertices = getFixationVertices(
         fixationConfig.strokeLength,
         targetHeightPx,
-        targetXYPx
+        targetXYPx,
       );
       this.setVertices(theseVertices);
       this.setLineWidth(fixationConfig.strokeWidth);
@@ -260,7 +262,7 @@ export class Fixation {
 export const getFixationVertices = (
   strokeDiameterPx,
   targetHeightPx,
-  targetXYPx
+  targetXYPx,
 ) => {
   const strokeRadiusPx = Math.round(strokeDiameterPx / 2);
   const vertices = [
@@ -282,7 +284,7 @@ export const getFixationVertices = (
   ) {
     const targetEccPx = Math.hypot(
       targetXYPx[0] - fixationConfig.pos[0],
-      targetXYPx[1] - fixationConfig.pos[1]
+      targetXYPx[1] - fixationConfig.pos[1],
     );
     const eccentricityRadiusValue =
       targetEccPx * fixationConfig.markingBlankingRadiusReEccentricity;
@@ -290,7 +292,7 @@ export const getFixationVertices = (
       targetHeightPx * fixationConfig.markingBlankingRadiusReTargetHeight;
     const blankingRadiusPx = Math.max(
       eccentricityRadiusValue,
-      targetHeightRadiusValue
+      targetHeightRadiusValue,
     );
     // TODO should not be located at fixation position, but near (all possible locations for) fixation
     vertices.push([[blankingRadiusPx], fixationConfig.pos]);
@@ -303,8 +305,8 @@ export const gyrateFixation = (fixation, t, displayOptions) => {
     fixationConfig.pos[0] -
       XYPixOfXYDeg(
         [fixationConfig.markingFixationMotionRadiusDeg, 0],
-        displayOptions
-      )[0]
+        displayOptions,
+      )[0],
   );
   const period = fixationConfig.markingFixationMotionPeriodSec;
   if (period !== 0) {
@@ -317,6 +319,96 @@ export const gyrateFixation = (fixation, t, displayOptions) => {
     fixationConfig.pos = newFixationXY;
     fixation.setPos(newFixationXY);
   }
+};
+
+function reflectInsideUnitCircle(x, y, dx, dy) {
+  // This function now assumes (x, y) and (dx, dy) are normalized to a unit circle
+  while (true) {
+    let xNew = x + dx;
+    let yNew = y + dy;
+
+    if (xNew * xNew + yNew * yNew <= 1) {
+      // If inside the unit circle, return the new position
+      return { x: xNew, y: yNew };
+    }
+
+    // Calculate reflection
+    // Intersection time 't' for a unit circle
+    const t =
+      (-dx * x -
+        dy * y +
+        Math.sqrt(
+          -dx * dx * y * y +
+            dx * dx +
+            2 * dx * dy * x * y -
+            dy * dy * x * x +
+            dy * dy,
+        )) /
+      (dx * dx + dy * dy);
+    let d = Math.sqrt(dx * dx + dy * dy);
+    x += dx * t;
+    y += dy * t;
+
+    const fraction = (d - t) / d;
+    dx = dx * fraction;
+    dy = dy * fraction;
+
+    const a = dx * x + dy * y;
+    const b = -dx * y + dy * x;
+    dx = -a * x - b * y;
+    dy = -a * y + b * x;
+  }
+}
+
+const randomWalkInsideCircle = (
+  xDeg,
+  yDeg,
+  dDeg,
+  rDeg,
+  xCenterDeg,
+  yCenterDeg,
+) => {
+  // TODO: Check for errors
+  const angle = Math.random() * 2 * Math.PI;
+  const dx = (Math.cos(angle) * dDeg) / rDeg;
+  const dy = (Math.sin(angle) * dDeg) / rDeg;
+
+  // Apply reflection within the unit circle, then scale result back to actual radius
+  let result = reflectInsideUnitCircle(
+    (xDeg - xCenterDeg) / rDeg,
+    (yDeg - yCenterDeg) / rDeg,
+    dx,
+    dy,
+  );
+  return {
+    xDeg: result.x * rDeg + xCenterDeg,
+    yDeg: result.y * rDeg + yCenterDeg,
+  };
+};
+
+export const gyrateRandomMotionFixation = (fixation, t, displayOptions) => {
+  const rPx = Math.abs(
+    fixationConfig.pos[0] -
+      XYPixOfXYDeg(
+        [fixationConfig.markingFixationMotionRadiusDeg, 0],
+        displayOptions,
+      )[0],
+  );
+  const frameRateHz = 60; // Frame rate in Hz
+  const speedDegPerSec = fixationConfig.markingFixationMotionSpeedDegPerSec; // Speed in units per second
+  const dDeg = (speedDegPerSec / frameRateHz) * rPx; // Step size per frame in units
+
+  const newPos = randomWalkInsideCircle(
+    fixationConfig.pos[0],
+    fixationConfig.pos[1],
+    dDeg,
+    rPx,
+    fixationConfig.nominalPos[0],
+    fixationConfig.nominalPos[1],
+  );
+
+  fixationConfig.pos = [newPos.xDeg, newPos.yDeg];
+  fixation.setPos([newPos.xDeg, newPos.yDeg]);
 };
 
 /**

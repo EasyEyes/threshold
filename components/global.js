@@ -125,6 +125,7 @@ export const fixationConfig = {
   markingFixationStrokeThickening: undefined,
   markingOffsetBeforeTargetOnsetSecs: undefined,
   markingOnsetAfterTargetOffsetSecs: undefined,
+  markingFixationMotionSpeedDegPerSec: undefined,
   stims: undefined, // psychoJS shapeStim
 
   trackingTimeAfterDelay: undefined,
