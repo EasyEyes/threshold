@@ -2088,7 +2088,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases, markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle: the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step would cross the circle, it instead reflects off the circle back into the circular area. One step can have many reflections. The initial starting point is a random location in the circular area.\nUsed with responseMustTrackContinuouslyBool=TRUE.",
     type: "categorical",
     default: "circle",
-    categories: "circle,randomWalk",
+    categories: "circle, randomWalk",
   },
   {
     name: "markingFixationMotionRadiusDeg",
