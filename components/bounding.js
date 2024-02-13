@@ -301,7 +301,7 @@ export const restrictSizeDeg = (
   // If the stimulus extends beyond the screen, then we'll need 2 iterations. We allow
   // a 3rd iteration to allow for the case that the 2nd iteration isn't quite right, and
   // it homes in on the third.
-  for (const iteration of [0, 1, 2, 3, 4, 5]) {
+  for (let iteration of [...new Array(200).keys()]) {
     // SET TARGET SIZE
     heightDeg = targetSizeIsHeightBool
       ? targetSizeDeg
