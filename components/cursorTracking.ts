@@ -107,9 +107,9 @@ const recordCursorPosition = () => {
     fixationConfig.pos[0],
     fixationConfig.pos[1]
   ).toString();
-  //@ts-ignore
   const crosshairPresent =
     typeof fixationConfig.stim !== "undefined" &&
+    //@ts-ignore
     fixationConfig.stim.stims[0]._autoDraw;
   if (typeof status.block_condition !== "undefined") {
     experiment = thisExperimentInfo.experiment as unknown as string;
