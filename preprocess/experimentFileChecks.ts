@@ -49,7 +49,10 @@ import {
   conditionIndexToColumnName,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
-import { getCategoriesFromString } from "../server/prepare-glossary";
+
+// NOTE keep in sync with parser from "../server/prepare-glossary";
+const getCategoriesFromString = (str: string) =>
+  str.split(",").map((s) => s.trim());
 
 let zeroIndexed: boolean;
 
@@ -747,6 +750,7 @@ const doConditionsBeginInTheSecondColumn = (
     const underscoreRow = columnNames[i][0] === "_";
     // Correctness of underscore parameters is checked in `checkAndCorrectUnderscoreParams`
     const valueMisplaced = !underscoreRow && columns[0][i] !== "";
+    //@ts-ignore
     if (valueMisplaced) offendingParameters.push(columnNames[i]);
   }
   if (offendingParameters.length)
@@ -824,7 +828,9 @@ const areShuffleGroupsSubsets = (experimentDf: any): EasyEyesError[] => {
         !presentGroupingParameters.includes(outerGroup) ||
         !allGroupsAreSubsets(currentGroup, outerGroup)
       ) {
+        //@ts-ignore
         nonSubsetGroupingParams.push(currentGroup);
+        //@ts-ignore
         nonSubsetGroupings.push(getNonSubsetGroups(currentGroup, outerGroup));
       }
     }
@@ -902,8 +908,8 @@ const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {
     "markingFixationStrokeThickening"
   );
 
-  const negativeThickenings: [string, number][] = [];
-  const trackingIntervalImpossible: [string[], number][] = [];
+  let negativeThickenings: [string, number][] = [];
+  let trackingIntervalImpossible: [string[], number][] = [];
   BCs.forEach((BC: string, i) => {
     if (Number(markingFixationStrokeThickening[i]) < 0)
       negativeThickenings.push([markingFixationStrokeThickening[i], i]);
@@ -918,9 +924,11 @@ const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {
   });
   if (negativeThickenings.length)
     errors.push(
+      //@ts-ignore
       NEGATIVE_MARKING_FIXATION_STROKE_THICKENING(negativeThickenings)
     );
   if (trackingIntervalImpossible.length)
+    //@ts-ignore
     errors.push(ILLDEFINED_TRACKING_INTERVALS(trackingIntervalImpossible));
 
   return errors;

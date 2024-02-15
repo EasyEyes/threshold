@@ -143,5 +143,3 @@ require("dns").resolve("www.google.com", function (err) {
     }
   }
 });
-
-module.exports = { getCategoriesFromString };
