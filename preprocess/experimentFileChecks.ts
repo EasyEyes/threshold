@@ -49,11 +49,12 @@ import {
   conditionIndexToColumnName,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
+import { getCategoriesFromString } from "../server/prepare-glossary";
 
 let zeroIndexed: boolean;
 
 export const validatedCommas = (
-  parsed: Papa.ParseResult<string[]>,
+  parsed: Papa.ParseResult<string[]>
 ): EasyEyesError | undefined => {
   // Map all row-lengths with the rows of that length
   // A correctly formatted experiment would all be off the same length
@@ -67,7 +68,7 @@ export const validatedCommas = (
   });
   // All the different row lengths found, sorted most common first.
   const lengthOrdering = Object.keys(rowLengths).sort(
-    (a, b) => rowLengths[Number(b)].length - rowLengths[Number(a)].length,
+    (a, b) => rowLengths[Number(b)].length - rowLengths[Number(a)].length
   );
   // There should only be one unique row length, ie every row needs the same number of commas
   if (lengthOrdering.length > 1) {
@@ -92,8 +93,8 @@ export const validatedCommas = (
     // Create an error message... just alphabetize the offending parameters first
     return UNBALANCED_COMMAS(
       offendingParams.sort((a, b) =>
-        a.parameter === b.parameter ? 0 : a.parameter > b.parameter ? 1 : -1,
-      ),
+        a.parameter === b.parameter ? 0 : a.parameter > b.parameter ? 1 : -1
+      )
     );
   }
 };
@@ -154,7 +155,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
       ...blockShuffleGroupParams,
       "simulateParticipantBool",
       "needEasyEyesKeypadBeyondCm",
-    ]),
+    ])
   );
 
   // Check that block groupings are contiguous and subsets of outer groups
@@ -165,7 +166,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   errors.push(
     ...areMutuallyExclusiveParametersNonconflicting(experimentDf, [
       ["responseMustTrackCrosshairBool", "responseMustClickCrosshairBool"],
-    ]),
+    ])
   );
 
   errors.push(...checkSpecificParameterValues(experimentDf));
@@ -174,7 +175,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   errors = errors
     .filter((error) => error)
     .sort((errorA, errorB) =>
-      errorA.parameters[0] > errorB.parameters[0] ? 1 : -1,
+      errorA.parameters[0] > errorB.parameters[0] ? 1 : -1
     );
   return errors;
 };
@@ -185,7 +186,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
  * @returns {Object} Error message, if the parameters aren't in alphabetical order
  */
 const areParametersAlphabetical = (
-  parameters: string[],
+  parameters: string[]
 ): EasyEyesError | undefined => {
   const originalOrder = [...parameters];
   let previousParameter = originalOrder[0];
@@ -227,7 +228,7 @@ const areParametersDuplicated = (parameters: string[]): EasyEyesError[] => {
  * @returns {Object[]} List of error messages for unrecognized parameters
  */
 const areAllPresentParametersRecognized = (
-  parameters: string[],
+  parameters: string[]
 ): EasyEyesError[] => {
   const unrecognized: any[] = [];
   const recognized: string[] = [];
@@ -281,17 +282,17 @@ const _superMatching = (parameter: string): boolean => {
 };
 
 const areAllPresentParametersCurrentlySupported = (
-  parameters: string[],
+  parameters: string[]
 ): EasyEyesError[] => {
   parameters = parameters.filter((parameter: any) =>
-    GLOSSARY.hasOwnProperty(parameter),
+    GLOSSARY.hasOwnProperty(parameter)
   );
   const notYetSupported = parameters.filter(
-    (parameter: any) => GLOSSARY[parameter]["availability"] !== "now",
+    (parameter: any) => GLOSSARY[parameter]["availability"] !== "now"
   );
 
   parameters = parameters.filter(
-    (parameter: any) => GLOSSARY[parameter]["availability"] === "now",
+    (parameter: any) => GLOSSARY[parameter]["availability"] === "now"
   );
   return notYetSupported.map(NOT_YET_SUPPORTED_PARAMETER);
 };
@@ -332,7 +333,7 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   });
   if (nonsequentialValues.length) {
     blockValueErrors.push(
-      NONSEQUENTIAL_BLOCK_VALUE(nonsequentialValues, blockValues),
+      NONSEQUENTIAL_BLOCK_VALUE(nonsequentialValues, blockValues)
     );
   }
   return blockValueErrors;
@@ -344,7 +345,7 @@ const checkUnderscoreParams = (df: any): EasyEyesError[] => {
     (parameter: string): boolean => {
       const values = getColumnValues(df, parameter);
       return !_valueOnlyInFirstPosition(values, parameter);
-    },
+    }
   );
   return offendingParams.map(ILL_FORMED_UNDERSCORE_PARAM);
 };
@@ -369,7 +370,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
       | "categorical"
       | "obsolete"
       | "multicategorical",
-    categories?: string[],
+    categories?: string[]
   ): void => {
     const notType = (s: string): boolean => !typeCheck(s);
     if (column.some(notType)) {
@@ -381,10 +382,8 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
       if (correctType === "multicategorical")
         offendingValues = offendingValues.map((x) => {
           return {
-            value: x.value
-              .split(",")
-              .map((s) => s.trimStart()) // Allow split by ", " (like how the glossary is parsed) or ","
-              .filter((s) => !categories?.includes(s))
+            value: getCategoriesFromString(x.value)
+              .filter((s: string) => !categories?.includes(s))
               .join(","),
             block: x.block,
           };
@@ -397,8 +396,8 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
           offendingValues,
           columnName,
           correctType,
-          categories,
-        ),
+          categories
+        )
       );
     }
   };
@@ -414,7 +413,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
             .select(columnName)
             .toArray()
             .map((x: any[]): any => x[0])
-            .filter((x: any) => x),
+            .filter((x: any) => x)
         )
       ) {
         // console.error(
@@ -455,22 +454,20 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
             validCategory,
             columnName,
             correctType,
-            GLOSSARY[columnName]["categories"] as string[],
+            GLOSSARY[columnName]["categories"] as string[]
           );
           break;
         case "multicategorical":
-          const validMulti = (s: string): boolean =>
-            s
-              .split(",")
-              .map((s) => s.trimStart())
-              .filter((x) => x)
-              .every((s) => GLOSSARY[columnName]["categories"].includes(s));
+          const validMulti = (str: string): boolean =>
+            getCategoriesFromString(str).every((s: string) =>
+              GLOSSARY[columnName]["categories"].includes(s)
+            );
           checkType(
             column,
             validMulti,
             columnName,
             correctType,
-            GLOSSARY[columnName]["categories"] as string[],
+            GLOSSARY[columnName]["categories"] as string[]
           );
           break;
         default:
@@ -492,11 +489,11 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
 const similarlySpelledCandidates = (
   proposedParameter: string,
   parameters: string[],
-  numberOfCandidatesToReturn = 4,
+  numberOfCandidatesToReturn = 4
 ): string[] => {
   const closest = parameters.sort(
     (a: any, b: any) =>
-      levDist(proposedParameter, a) - levDist(proposedParameter, b),
+      levDist(proposedParameter, a) - levDist(proposedParameter, b)
   );
 
   const candidates = closest.slice(0, numberOfCandidatesToReturn - 1);
@@ -512,26 +509,25 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
   ];
   // Modalities the experimenter specified
   const includedMedia = responseMedia.filter((responseParameter: string) =>
-    df.listColumns().includes(responseParameter),
+    df.listColumns().includes(responseParameter)
   );
   // Those that they didn't
   const excludedMedia = responseMedia.filter(
-    (responseParameter: string) =>
-      !df.listColumns().includes(responseParameter),
+    (responseParameter: string) => !df.listColumns().includes(responseParameter)
   );
   // Default values to use for the ones they didn't
   const defaults = excludedMedia.map(
-    (modality: string) => GLOSSARY[modality].default as string,
+    (modality: string) => GLOSSARY[modality].default as string
   );
   // The values for each included modality, for each condition of the experiment
   const conditions = df.select(...includedMedia).toArray();
   const viewingDistances = getColumnValuesOrDefaults(
     df,
-    "viewingDistanceDesiredCm",
+    "viewingDistanceDesiredCm"
   );
   const keypadDistances = getColumnValuesOrDefaults(
     df,
-    "needEasyEyesKeypadBeyondCm",
+    "needEasyEyesKeypadBeyondCm"
   );
   // Finding those problematic conditions which...
   const conditionsWithoutResponse: number[] = [];
@@ -546,7 +542,7 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
         row.some((bool: string) => bool.toLowerCase() === "true") ||
         // ... or a modality which is true by default
         excludedMedia.some(
-          (__: string, i: number) => defaults[i].toLowerCase() === "true",
+          (__: string, i: number) => defaults[i].toLowerCase() === "true"
         ) ||
         // ... or keypad is to be activated
         viewingDistanceDesiredCm > needEasyEyesKeypadBeyondCm
@@ -560,14 +556,14 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
       NO_RESPONSE_POSSIBLE(
         conditionsWithoutResponse,
         zeroIndexed,
-        conditions.length,
+        conditions.length
       ),
     ];
   return [];
 };
 
 export const _getDuplicateValuesAndIndicies = (
-  l: any[],
+  l: any[]
 ): { [key: string]: number[] } => {
   // const seen: {[key: T]: number[]} = {};
   const seen: any = {};
@@ -583,7 +579,7 @@ export const _getDuplicateValuesAndIndicies = (
 
 export const _areColumnValuesUnique = (
   targetColumn: string,
-  df: any,
+  df: any
 ): boolean => {
   if (df.unique(targetColumn) !== df.select(targetColumn)) return false;
   return true;
@@ -592,7 +588,7 @@ export const _areColumnValuesUnique = (
 export const isFormMissing = (
   requestedForm: string,
   existingFormList: string[],
-  formType: string,
+  formType: string
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
   if (!existingFormList.includes(requestedForm)) {
@@ -604,7 +600,7 @@ export const isFormMissing = (
 
 export const isSoundFolderMissing = (
   requestedFolderList: any,
-  existingFolderList: string[],
+  existingFolderList: string[]
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
 
@@ -635,7 +631,7 @@ export const isSoundFolderMissing = (
 
 export const isFontMissing = (
   requestedFontList: string[],
-  existingFontList: string[],
+  existingFontList: string[]
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
   const missingFontList: string[] = [];
@@ -656,7 +652,7 @@ export const isFontMissing = (
 
 export const isTextMissing = (
   requestedTextList: string[],
-  existingTextList: string[],
+  existingTextList: string[]
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
   const missingText = new Set();
@@ -667,7 +663,7 @@ export const isTextMissing = (
 
   if (missingText.size > 0) {
     errorList.push(
-      TEXT_FILES_MISSING("readingCorpus", Array.from(missingText) as string[]),
+      TEXT_FILES_MISSING("readingCorpus", Array.from(missingText) as string[])
     );
   }
 
@@ -676,7 +672,7 @@ export const isTextMissing = (
 
 export const isCodeMissing = (
   requestedCodeList: string[],
-  existingCodeList: string[],
+  existingCodeList: string[]
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
   const missingCode = new Set();
@@ -687,7 +683,7 @@ export const isCodeMissing = (
 
   if (missingCode.size > 0) {
     errorList.push(
-      CODE_FILES_MISSING("movieComputeJS", Array.from(missingCode) as string[]),
+      CODE_FILES_MISSING("movieComputeJS", Array.from(missingCode) as string[])
     );
   }
 
@@ -703,7 +699,7 @@ interface stringToString {
  */
 const areBlockUniqueValuesConsistent = (
   df: any,
-  blockLevelParameters: string[],
+  blockLevelParameters: string[]
 ): EasyEyesError[] => {
   const errors: EasyEyesError[] = [];
   for (const blockParam of blockLevelParameters) {
@@ -742,7 +738,7 @@ const areBlockUniqueValuesConsistent = (
  * @returns {EasyEyesError[]}
  */
 const doConditionsBeginInTheSecondColumn = (
-  experiment: any,
+  experiment: any
 ): EasyEyesError[] => {
   const columnNames = experiment.listColumns();
   const columns = experiment.toArray();
@@ -768,11 +764,11 @@ const areShuffleGroupsContiguous = (experiment: any): EasyEyesError[] => {
     .listColumns()
     .filter(isBlockShuffleGroupingParam);
   const groupings = groupingParameters.map((c) =>
-    getColumnValues(experiment, c),
+    getColumnValues(experiment, c)
   );
   const groupingsContiguous: boolean[] = groupings.map(valuesContiguous);
   const noncontiguousGroupingParameters = groupingParameters.filter(
-    (v, i) => !groupingsContiguous[i],
+    (v, i) => !groupingsContiguous[i]
   );
   const noncontiguousGroupings = groupings
     .filter((v, i) => !groupingsContiguous[i])
@@ -781,23 +777,23 @@ const areShuffleGroupsContiguous = (experiment: any): EasyEyesError[] => {
   return [
     NONCONTIGUOUS_GROUPING_VALUES(
       noncontiguousGroupings,
-      noncontiguousGroupingParameters,
+      noncontiguousGroupingParameters
     ),
   ];
 };
 
 const areShuffleGroupsSubsets = (experimentDf: any): EasyEyesError[] => {
   const allGroupingParameters = Object.keys(GLOSSARY).filter(
-    isBlockShuffleGroupingParam,
+    isBlockShuffleGroupingParam
   );
   const presentGroupingParameters: string[] = allGroupingParameters.filter(
-    (p) => experimentDf.listColumns().includes(p),
+    (p) => experimentDf.listColumns().includes(p)
   );
   const unique = (x: string, i: number, arr: string[]) =>
     x && arr.indexOf(x) === i;
   const getNonSubsetGroups = (
     childParam: string,
-    parentParam: string,
+    parentParam: string
   ): string[] => {
     const childGroups = getColumnValues(experimentDf, childParam);
     if (!experimentDf.listColumns().includes(parentParam))
@@ -814,7 +810,7 @@ const areShuffleGroupsSubsets = (experimentDf: any): EasyEyesError[] => {
   };
   const allGroupsAreSubsets = (
     childParam: string,
-    parentParam: string,
+    parentParam: string
   ): boolean => {
     return getNonSubsetGroups(childParam, parentParam).length === 0;
   };
@@ -841,19 +837,19 @@ const areShuffleGroupsSubsets = (experimentDf: any): EasyEyesError[] => {
 
 const areMutuallyExclusiveParametersNonconflicting = (
   experimentDf: any,
-  mutuallyExclusiveParameterGroups: string[][],
+  mutuallyExclusiveParameterGroups: string[][]
 ): EasyEyesError[] => {
   const presentColumns = experimentDf.listColumns();
   let offendingParamsInConditions: [string[], string][] = [];
   mutuallyExclusiveParameterGroups.forEach((mutuallyExclusiveParams) => {
     const theseColumns = mutuallyExclusiveParams.filter((p) =>
-      presentColumns.includes(p),
+      presentColumns.includes(p)
     );
     // const theseColumns = ["block_condition", ...mutuallyExclusiveParams.filter(p => presentColumns.includes(p))];
     const rows: string[][] = experimentDf.select(...theseColumns).toArray();
     // TODO generalize way, across the various checks, to account for conditions not being enabled
     const rowsEnabledMap: boolean[] = presentColumns.includes(
-      "conditionEnabledBool",
+      "conditionEnabledBool"
     )
       ? experimentDf
           .select("conditionEnabledBool")
@@ -895,15 +891,15 @@ const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {
 
   const responseMustTrackMaxSec = getColumnValuesOrDefaults(
     experimentDf,
-    "responseMustTrackMaxSec",
+    "responseMustTrackMaxSec"
   );
   const responseMustTrackMinSec = getColumnValuesOrDefaults(
     experimentDf,
-    "responseMustTrackMinSec",
+    "responseMustTrackMinSec"
   );
   const markingFixationStrokeThickening = getColumnValuesOrDefaults(
     experimentDf,
-    "markingFixationStrokeThickening",
+    "markingFixationStrokeThickening"
   );
 
   const negativeThickenings: [string, number][] = [];
@@ -922,7 +918,7 @@ const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {
   });
   if (negativeThickenings.length)
     errors.push(
-      NEGATIVE_MARKING_FIXATION_STROKE_THICKENING(negativeThickenings),
+      NEGATIVE_MARKING_FIXATION_STROKE_THICKENING(negativeThickenings)
     );
   if (trackingIntervalImpossible.length)
     errors.push(ILLDEFINED_TRACKING_INTERVALS(trackingIntervalImpossible));
@@ -945,7 +941,7 @@ const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
     "multicategorical",
   ];
   const offendingParams = Object.values(GLOSSARY).filter(
-    (p) => !validTypes.includes(p["type"] as string),
+    (p) => !validTypes.includes(p["type"] as string)
   );
   if (!offendingParams.length) return [];
   const names = offendingParams.map((p) => p["name"]) as string[];
@@ -983,14 +979,14 @@ const checkVernierUsingCorrectThreshold = (df: any): EasyEyesError[] => {
 export const getResponseTypedEasyEyesKeypadBool = (df: any): boolean[] => {
   const viewingDistanceDesiredCm = getColumnValuesOrDefaults(
     df,
-    "viewingDistanceDesiredCm",
+    "viewingDistanceDesiredCm"
   );
   const needEasyEyesKeypadBeyondCm = getColumnValuesOrDefaults(
     df,
-    "needEasyEyesKeypadBeyondCm",
+    "needEasyEyesKeypadBeyondCm"
   );
   const needKeypad = viewingDistanceDesiredCm.map(
-    (v, i) => Number(v) > Number(needEasyEyesKeypadBeyondCm[i]),
+    (v, i) => Number(v) > Number(needEasyEyesKeypadBeyondCm[i])
   );
   return needKeypad;
 };
@@ -1027,7 +1023,7 @@ const areAuthorizedEmailsValid = (experiment: any): EasyEyesError[] => {
         break;
       } else {
         offendingParameters.push(
-          "_authorEmails required when _calibrateMicrophonesBool is TRUE.",
+          "_authorEmails required when _calibrateMicrophonesBool is TRUE."
         );
       }
     }

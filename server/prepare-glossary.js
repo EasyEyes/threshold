@@ -10,6 +10,10 @@ const auth = new google.Auth.GoogleAuth({
   scopes: "https://www.googleapis.com/auth/spreadsheets",
 });
 
+function getCategoriesFromString(str) {
+  return str.split(",").map((s) => s.trim());
+}
+
 async function processLanguageSheet() {
   const spreadsheetId = "1x65NjykMm-XUOz98Eu_oo6ON2xspm_h0Q0M2u6UGtug";
   const googleSheets = new google.sheets_v4.Sheets();
@@ -42,7 +46,9 @@ async function processLanguageSheet() {
       parameterInfo.type === "categorical" ||
       parameterInfo.type === "multicategorical"
     )
-      parameterInfo.categories = parameter["CATEGORIES"].split(", ");
+      parameterInfo.categories = getCategoriesFromString(
+        parameter["CATEGORIES"]
+      );
     // Exclude rows that Denis used for other notes
     // if (parameterInfo.name && parameterInfo.type)
     if (!parameterInfo.name.includes("__")) data[parameterName] = parameterInfo;
@@ -137,3 +143,5 @@ require("dns").resolve("www.google.com", function (err) {
     }
   }
 });
+
+module.exports = { getCategoriesFromString };
