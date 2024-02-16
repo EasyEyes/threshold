@@ -2369,16 +2369,16 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "circle",
     explanation:
-      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases, markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle: the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step would cross the circle, it instead reflects off the circle back into the circular area. One step can have many reflections. The initial starting point is a random location in the circular area.\nUsed with responseMustTrackContinuouslyBool=TRUE.",
+      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases, markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle: the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step would land outside the circle, it instead reflects off the circle back into the circular area. One step can have many reflections. The initial starting point is a random location in the circular area.\nUsed with responseMustTrackContinuouslyBool=TRUE.",
     categories: ["circle", "randomWalk"],
   },
   markingFixationMotionRadiusDeg: {
     name: "markingFixationMotionRadiusDeg",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "0",
     explanation:
-      "markingFixationMotionRadiusDeg (default 2 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustTrackContinuouslyBool =TRUE.",
+      "markingFixationMotionRadiusDeg (default 0 deg, i.e. no motion) is the radius of the circular trajectory of the crosshair about the origin. When the radius is zero, there is no motion. A negative radius should generate a compiler error. Used with responseMustTrackContinuouslyBool =TRUE. ",
   },
   markingFixationMotionSpeedDegPerSec: {
     name: "markingFixationMotionSpeedDegPerSec",
@@ -2386,7 +2386,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.3",
     explanation:
-      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustTrackContinuouslyBool=TRUE.",
+      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustTrackContinuouslyBool=TRUE. Don't zero this to disable motion. To disable motion, set markingFixationMotionRadiusDeg = 0 (which is the default).",
   },
   markingFixationStrokeLengthDeg: {
     name: "markingFixationStrokeLengthDeg",
