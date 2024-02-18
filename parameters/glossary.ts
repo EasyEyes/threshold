@@ -631,9 +631,9 @@ export const GLOSSARY: Glossary = {
     name: "_needProcessorCoresMinimum",
     availability: "now",
     type: "integer",
-    default: "6",
+    default: "4",
     explanation:
-      "⭑ _needProcessorCoresMinimum tries to exclude slow computers without testing speed. The number of cores is a positive integer, also called \"hardwareConcurrency,\" whose value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the rate (in MHz) at which the computer generates random numbers. https://en.wikipedia.org/wiki/Multi-core_processor\nUsing Prolific, our experiments are occasionally assigned to slow computers that produce inaccurate stimulus timing. EasyEyes measures lateness and duration and reports them as targetMeasuredLatenessSec and targetMeasuredDurationSec in the CSV file. We find that setting _needProcessorCoresMinimum=6 nearly eliminated bad timing, but it also eliminates quite a few computers with good timing. You may prefer to set _needProcessorCoresMinimum lower, e.g. 4, to include most computers, and weed out the slow computers later, during data analysis, based on mean and SD of  targetMeasuredLatenessSec and targetMeasuredDurationSec. \nNOTE: To make your computer harder to track, the Chrome extension DuckDuckGo spoofs the number of cores to 2. Any experiment requiring 3 or more cores will reject any participant whose computer spoofs having 2 cores. \nHIGH REJECTION RATE: As of January 2024, our experiments requiring 6 cores have good timing but their Needs page rejects about as many participants as it accept. I suspect this is mostly due to the cores requirement. We currently have no data on the participants rejected by the Needs page. We're changing that to get data on the rejected computers, so we can figure out why they were rejected.\n\nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
+      "⭑ _needProcessorCoresMinimum (default 4) tries to exclude slow computers without testing speed. The number of cores is a positive integer, also called \"hardwareConcurrency,\" whose value is returned by all modern browsers except Safari. For Safari, we estimate its value by doubling and rounding the rate (in MHz) at which the computer generates random numbers. https://en.wikipedia.org/wiki/Multi-core_processor\nUsing Prolific, our experiments are occasionally assigned to slow computers that produce inaccurate stimulus timing. EasyEyes measures lateness and duration and reports them as targetMeasuredLatenessSec and targetMeasuredDurationSec in the CSV file. We find that setting _needProcessorCoresMinimum=6 nearly eliminated bad timing, but it also eliminates quite a few computers with good timing. You may prefer to set _needProcessorCoresMinimum lower, e.g. 4, to include most computers, and weed out the slow computers later, during data analysis, based on mean and SD of  targetMeasuredLatenessSec and targetMeasuredDurationSec. \nNOTE: To make your computer harder to track, the Chrome extension DuckDuckGo spoofs the number of cores to 2. Any experiment requiring 3 or more cores will reject any participant whose computer spoofs having 2 cores. \nHIGH REJECTION RATE: As of January 2024, our experiments requiring 6 cores have good timing but their Needs page rejects about as many participants as it accept. I suspect this is mostly due to the cores requirement. We currently have no data on the participants rejected by the Needs page. We're changing that to get data on the rejected computers, so we can figure out why they were rejected.\n\nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
   },
   _needRecordingControls: {
     name: "_needRecordingControls",
@@ -1883,7 +1883,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⚠ WORKS BUT NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG, AND IT REQUIRES FREQUENT RECALIBRATION, WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
+      "⚠ WORKS BUT NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG (less if camera has more pixels), AND IT REQUIRES FREQUENT RECALIBRATION, WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
   },
   closestPointEccentricitySetting: {
     name: "closestPointEccentricitySetting",
@@ -2067,7 +2067,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      '🕑 fontFeatureSettings (no default) allows the scientist to specify how the font should use its glyphs to render a script or language. fontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line is a string. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. "calt" enables the font’s "contextual alternates", especially connections between adjacent letters in a script font. "smcp" enables small caps. "zero" requests a slash through the zero character to distinguish it from O. Most font features are Boolean and accept an argument of 0 for off, and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, including Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\nhttps://helpx.adobe.com/in/fonts/using/open-type-syntax.html\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-ligatures\nhttps://en.wikipedia.org/wiki/Ligature_(writing)\nhttps://stackoverflow.com/questions/7069247/inserting-html-tag-in-the-middle-of-arabic-word-breaks-word-connection-cursive/55218489#55218489\n',
+      '🕑 fontFeatureSettings (no default) allows the scientist to specify how the font should use its glyphs to render a script or language. fontFeatureSettings receives a string. The default is the empty string. A typical value is\n"calt" 1\nor\n"calt" 1, "smcp", "zero"\nEach line above is a string that is passed to the CSS function "font-variation-settings". The (single or double) quote marks are required. Each four letter code is taken from a long list of possible font features. "calt" enables the font’s "contextual alternates", especially connections between adjacent letters in a script font. "smcp" enables small caps. "zero" requests a slash through the zero character to distinguish it from capital O. Most font features are Boolean and accept an argument of 0 for off and 1 for on. Some accept an integer with a wider range. Supported by all modern browsers, and even Internet Explorer.\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings\nhttps://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#tag-calt\nhttps://helpx.adobe.com/in/fonts/using/open-type-syntax.html\nhttps://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-ligatures\nhttps://en.wikipedia.org/wiki/Ligature_(writing)\nhttps://stackoverflow.com/questions/7069247/inserting-html-tag-in-the-middle-of-arabic-word-breaks-word-connection-cursive/55218489#55218489',
   },
   fontKerning: {
     name: "fontKerning",
@@ -2116,7 +2116,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "regular",
     explanation:
-      '🕑 fontSyle can be regular (default), bold, italic, or bold-italic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
+      '🕑 fontSyle can be regular (default), bold, italic, or boldItalic. \n• If font is a file name that already specifies the style you want, then don\'t specify a style here. Just leave fontStyle as default. Otherwise the participant\'s browser might try to "helpfully" synthesize the new style by tilting or thickening what the font file renders. It\'s safer to switch to the font file whose name specifies the style you want. \n• Alternatively, if fontSource is "browser", and font specifies only a font family name (e.g. Verdana), or several (e.g. Verdana;Arial), then you can use fontStyle to select among the four standard styles.',
     categories: ["regular", "bold", "italic", "boldItalic"],
   },
   fontTrackingForLetters: {
@@ -2222,7 +2222,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "topLeft",
     explanation:
-      '🕑 instructionForResponseWhere can be topLeft or bottomLeft. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
+      '🕑 instructionForResponseWhere can be topLeft (the default), bottomLeft, or none. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
     categories: ["none", "topLeft", "bottomLeft"],
   },
   instructionForStimulus: {
@@ -2369,16 +2369,16 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "circle",
     explanation:
-      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases, markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle: the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step would cross the circle, it instead reflects off the circle back into the circular area. One step can have many reflections. The initial starting point is a random location in the circular area.\nUsed with responseMustTrackContinuouslyBool=TRUE.",
+      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases, markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle: the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step would land outside the circle, it instead reflects off the circle back into the circular area. One step can have many reflections. The initial starting point is a random location in the circular area.\nUsed with responseMustTrackContinuouslyBool=TRUE.",
     categories: ["circle", "randomWalk"],
   },
   markingFixationMotionRadiusDeg: {
     name: "markingFixationMotionRadiusDeg",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "0",
     explanation:
-      "markingFixationMotionRadiusDeg (default 2 deg) is the radius of the circular trajectory of the crosshair about the origin. Used with responseMustTrackContinuouslyBool =TRUE.",
+      "markingFixationMotionRadiusDeg (default 0 deg, i.e. no motion) is the radius of the circular trajectory of the crosshair about the origin. When the radius is zero, there is no motion. A negative radius should generate a compiler error. Used with responseMustTrackContinuouslyBool =TRUE. ",
   },
   markingFixationMotionSpeedDegPerSec: {
     name: "markingFixationMotionSpeedDegPerSec",
@@ -2386,7 +2386,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.3",
     explanation:
-      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustTrackContinuouslyBool=TRUE.",
+      "markingFixationMotionSpeedDegPerSec (default 0.3) is the speed, in deg/sec, of the crosshair as it revolves around the origin. The time to do a full revolution (sec), i.e. one period, will be 2*pi*markingFixationMotionRadiusDeg/markingFixationMotionSpeedDegPerSec. Used with responseMustTrackContinuouslyBool=TRUE. Don't zero this to disable motion. To disable motion, set markingFixationMotionRadiusDeg = 0 (which is the default).",
   },
   markingFixationStrokeLengthDeg: {
     name: "markingFixationStrokeLengthDeg",
@@ -2698,7 +2698,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "",
     explanation:
-      'If specified, when targetKind=="reading" the width of the reading paragraph (ie determining how many words are included in a given line) will be constrained by the lower bound of this width (deg) and readingMaxCharacterPerLine. If left blank, reading paragraph width is constrained by readingMaxCharacterPerLine and 80% of the width of the screen.',
+      'readingMaxWidthDegPerLine. If specified, when targetKind=="reading" the width of the reading paragraph (i.e. determining how many words are included in a given line) will be constrained by the lower bound of this width (deg) and readingMaxCharacterPerLine. If left blank, reading paragraph width is constrained by readingMaxCharacterPerLine and 80% of the width of the screen.',
   },
   readingMultipleOfSingleLineSpacing: {
     name: "readingMultipleOfSingleLineSpacing",
@@ -2754,7 +2754,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "spacingDeg",
     explanation:
-      '⭑ readingSetSizeBy (default "spacingDeg") determines how you specify the size of the text to be read. "Point" is abbreviated "pt", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so we call the typeset size (e.g. 12 pt), the "nominal" type size.\n• nominalPt sets the font\'s point size to readingNominalSizePt.\n• nominalDeg sets the font\'s point size to subtend readingNominalSizeDeg. The formula is \n(72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg.\n• spacingDeg sets the font\'s point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.',
+      '⭑ readingSetSizeBy (default "spacingDeg") determines how you specify the size of the text to be read. "Typographer\'s point" is abbreviated "pt", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so here we call the typeset size (e.g. 12 pt), the "nominal" type size.\n• nominalPt sets the font\'s point size to readingNominalSizePt.\n• nominalDeg sets the font\'s point size to subtend readingNominalSizeDeg. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg.\n• spacingDeg sets the font\'s point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.',
     categories: [
       "nominalPt",
       "nominalDeg",
@@ -2777,7 +2777,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "",
     explanation:
-      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacing. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
+      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
   },
   readingTargetMaxWordFrequency: {
     name: "readingTargetMaxWordFrequency",
@@ -2785,7 +2785,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "4.30E-04",
     explanation:
-      "When reading, it is hard to notice or remember common words, so we exclude common words as the target for retention testing. When selecting a target, we keep drawing candidate targets randomly from the passage that was read until we find one that's acceptable. We reject any candidate target whose frequency in the corpus exceeds **readingTargetMaxWordFrequency**.\n     DEFAULT VALUE. In the classic Kucera and Francis concordance,\nhttps://en.wikipedia.org/wiki/Brown_Corpus\nthe words _water, think, night_ have frequencies about 430*10^-6, which would be a good cut off for a large corpus. That's about 1 in 2326, so this criterion excludes every word in any corpus with fewer than 2,326 words.",
+      "readingTargetMaxWordFrequency. When reading, it is hard to notice or remember common words, so we exclude common words as the target for retention testing. When selecting a target, we keep drawing candidate targets randomly from the passage that was read until we find one that's acceptable. We reject any candidate target whose frequency in the corpus exceeds **readingTargetMaxWordFrequency**.\n     DEFAULT VALUE. In the classic Kucera and Francis concordance,\nhttps://en.wikipedia.org/wiki/Brown_Corpus\nthe words _water, think, night_ have frequencies about 430*10^-6, which would be a good cut off for a large corpus. That's about 1 in 2326, so this criterion excludes every word in any corpus with fewer than 2,326 words.",
   },
   readingXHeightDeg: {
     name: "readingXHeightDeg",
@@ -3169,7 +3169,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "disabled",
     explanation:
-      "⭑ showGrid displays a full-screen grid that aids visual checking of location and size (both live and in any screen shot). [pt AND inch NOT YET IMPLEMENTED.] Set showGrid to 'px' for a pixel grid, 'pt' for a typographer \"points\" grid (72 points per inch), 'cm' for a centimeter grid, 'inch' for an inch grid, 'deg' or 'degDynamic' for a degrees grid (when the crosshair moves, the 'degDynamic' grid moves with it, and the 'deg' grid does not),  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. (\"degDynamic\" specifies degrees relative to the (possibly) moving crosshair. \"deg\" specifies degrees relative to the nominal fixation, which is the fixed point that the moving crosshair circles around.) Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially when the crosshair moves, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you check timing or collect human data.",
+      "⭑ showGrid displays a full-screen grid that aids visual checking of location and size (both live and in screen shots). [pt, inch, and degDynamic NOT YET IMPLEMENTED.] Set showGrid to 'px' for a pixel grid, 'pt' for a typographer \"points\" grid (72 points per inch), 'cm' for a centimeter grid, 'inch' for an inch grid, 'deg' or 'degDynamic' for a degrees grid (when the crosshair moves, the 'degDynamic' grid moves with it, and the 'deg' grid does not),  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. (\"degDynamic\" specifies degrees relative to the (possibly) moving crosshair. \"deg\" specifies degrees relative to the nominal fixation, which is the fixed point that the moving crosshair circles around.) Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially when the crosshair moves, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you check timing or collect human data.",
     categories: [
       "px",
       "pt",
