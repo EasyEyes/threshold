@@ -126,7 +126,7 @@ export const fixationConfig = {
   markingOffsetBeforeTargetOnsetSecs: undefined,
   markingOnsetAfterTargetOffsetSecs: undefined,
   markingFixationMotionSpeedDegPerSec: undefined,
-  stims: undefined, // psychoJS shapeStim
+  stim: undefined, // EasyEyes Fixation object
 
   trackingTimeAfterDelay: undefined,
 };

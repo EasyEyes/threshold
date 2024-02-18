@@ -38,6 +38,7 @@ import {
 } from "./response";
 import { updateColor } from "./color";
 import { simulatedObservers } from "../threshold";
+import { defineTargetForCursorTracking } from "./cursorTracking";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -361,11 +362,14 @@ const _generateLetterStimsForWord = (
 
 let rsvpEndRoutineAtT;
 export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
-  // Done showing stimuli
-  if (
+  const doneShowingStimuliBool =
     typeof rsvpReadingTargetSets.current === "undefined" &&
-    rsvpReadingTargetSets.upcoming.length === 0
-  ) {
+    rsvpReadingTargetSets.upcoming.length === 0;
+  defineTargetForCursorTracking(
+    doneShowingStimuliBool ? undefined : rsvpReadingTargetSets.current[0]
+  );
+  // Done showing stimuli
+  if (doneShowingStimuliBool) {
     if (instructions.autoDraw === false) {
       instructions.tSTart = t;
       instructions.frameNStart = frameN;

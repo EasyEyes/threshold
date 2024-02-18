@@ -34,6 +34,8 @@ interface cursorRecord {
   pxPerCm: string;
   block_condition: string;
   trialStep: string;
+  crosshairBool: boolean;
+  targetBool: boolean;
 }
 
 export const trackCursor = (reader: ParamReader) => {
@@ -55,7 +57,6 @@ export const updateTrackCursorHz = (reader: ParamReader) => {
   }
 };
 
-// TODO update when rsvp moves to next stim
 export const defineTargetForCursorTracking = (stim: any) => {
   cursorTracking.target = stim;
 };
@@ -89,7 +90,9 @@ const recordCursorPosition = () => {
   let stimulus = cursorTracking.target as any;
   if (Array.isArray(stimulus)) stimulus = stimulus[0];
 
-  if (typeof stimulus !== "undefined" && stimulus._autoDraw === true) {
+  const stimulusPresent =
+    typeof stimulus !== "undefined" && stimulus._autoDraw === true;
+  if (stimulusPresent) {
     const [x, y] = stimulus._pos;
     targetPositionXYApplePx = getAppleCoordinatePosition(x, y).toString();
   } else {
@@ -104,6 +107,10 @@ const recordCursorPosition = () => {
     fixationConfig.pos[0],
     fixationConfig.pos[1]
   ).toString();
+  const crosshairPresent =
+    typeof fixationConfig.stim !== "undefined" &&
+    //@ts-ignore
+    fixationConfig.stim.stims[0]._autoDraw;
   if (typeof status.block_condition !== "undefined") {
     experiment = thisExperimentInfo.experiment as unknown as string;
     pavloviaSessionId = thisExperimentInfo.participant as unknown as string;
@@ -140,6 +147,9 @@ const recordCursorPosition = () => {
         nearPointY
       ).toString(),
       trialStep: status.currentFunction,
+      targetBool: stimulusPresent,
+      //@ts-ignore
+      crosshairBool: crosshairPresent,
     };
     //@ts-ignore
     cursorTracking.records.push(thisRecord);
