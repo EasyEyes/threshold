@@ -291,8 +291,6 @@ import { recordStimulusPositionsForEyetracking } from "./components/eyeTrackingF
 // READING
 import { prepareReadingQuestions } from "./components/reading.ts";
 import {
-  // getSizeForSpacing,
-  // getSizeForXHeight,
   getThisBlockPages,
   loadReadingCorpus,
   addReadingStatsToOutput,
