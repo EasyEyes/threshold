@@ -464,6 +464,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ _needBrowser is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be 'all', or just compatible browsers by name, or just incompatible browsers each preceded by \"not\". No mixing allowed. In a list of compatibles, then anything not listed is deemed incompatible. In an incompatible list, then anything not listed is deemed compatible. Before asking for consent, if the participant's device is incompatible, we reject it by issuing a fatal explanatory error message to the participant (asking the Prolific participant to \"return\" this study), which ends the session (with no pay). \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
     categories: [
+      "all",
       "Chrome",
       "Chrome Mobile",
       "Safari",
