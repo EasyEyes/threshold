@@ -715,21 +715,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (!(await calibrateAudio(paramReader))) {
       quitPsychoJS("", "", paramReader);
     } else {
-      // if _needSmartphoneSurveyBool add survey data
-      if (needPhoneSurvey.current) {
-        // add microphoneInfo.current.phoneSurvey
-        psychoJS.experiment.addData(
-          "Microphone survey",
-          JSON.stringify(microphoneInfo.current.phoneSurvey)
-        );
-      }
-      if (needComputerSurveyBool.current) {
-        psychoJS.experiment.addData(
-          "Loudspeaker survey",
-          JSON.stringify(loudspeakerInfo.current.loudspeakerSurvey)
-        );
-      }
-
       // add sound calibration results
       if (soundCalibrationResults.current) {
         psychoJS.experiment.addData(
@@ -867,6 +852,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (needComputerSurveyBool.current)
       loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
     else loudspeakerInfo.current = loudspeaker;
+
+    // if _needSmartphoneSurveyBool add survey data
+    if (needPhoneSurvey.current) {
+      // add microphoneInfo.current.phoneSurvey
+      psychoJS.experiment.addData(
+        "Microphone survey",
+        JSON.stringify(microphoneInfo.current.phoneSurvey)
+      );
+      psychoJS.experiment.nextEntry();
+    }
+    if (needComputerSurveyBool.current) {
+      psychoJS.experiment.addData(
+        "Loudspeaker survey",
+        JSON.stringify(loudspeakerInfo.current.loudspeakerSurvey)
+      );
+      psychoJS.experiment.nextEntry();
+    }
 
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
