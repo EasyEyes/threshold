@@ -3139,11 +3139,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterSetResponseType();
         },
         rsvpReading: () => {
-          // if (canClick(responseType.current)) showCursor();
-          logger(
-            "responseType.current trialInstructionRoutineBegin",
-            responseType.current
-          );
           t;
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
@@ -4498,14 +4493,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
           targetSpecs.setAutoDraw(true);
         }
-        const motionPath = paramReader.read("markingFixationMotionPath");
         if (
           fixationConfig.markingFixationMotionRadiusDeg > 0 &&
-          motionPath?.[0] === "circle"
+          fixationConfig.markingFixationMotionSpeedDegPerSec > 0
         ) {
-          gyrateFixation(fixation, t, displayOptions);
-        } else {
-          gyrateRandomMotionFixation(fixation, t, displayOptions);
+          if (
+            paramReader.read(
+              "markingFixationMotionPath",
+              status.block_condition
+            ) === "circle"
+          ) {
+            gyrateFixation(fixation, t, displayOptions);
+          } else {
+            gyrateRandomMotionFixation(fixation, t, displayOptions);
+          }
         }
         fixation.setAutoDraw(true);
 
@@ -4657,6 +4658,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         backGrid.draw(false);
       if (dot && dot.status === PsychoJS.Status.STARTED) dot.draw(false);
 
+      const offsetRequiredFromFixationMotion =
+        fixationConfig.markingFixationMotionRadiusDeg > 0 &&
+        fixationConfig.markingFixationMotionSpeedDegPerSec > 0;
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           return Scheduler.Event.NEXT;
@@ -4670,7 +4674,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         letter: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
-          if (fixationConfig.markingFixationMotionRadiusDeg) {
+          if (offsetRequiredFromFixationMotion) {
             let stimsToOffset;
             if (
               letterConfig.spacingRelationToSize !== "typographic" &&
@@ -4704,12 +4708,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         repeatedLetters: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
-          if (fixationConfig.markingFixationMotionRadiusDeg)
+          if (offsetRequiredFromFixationMotion)
             offsetStimsToFixationPos(repeatedLettersConfig.stims);
         },
         rsvpReading: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
-          if (fixationConfig.markingFixationMotionRadiusDeg) {
+          if (offsetRequiredFromFixationMotion) {
             const stimsToOffset = [
               ...rsvpReadingTargetSets.current.stims,
               ...rsvpReadingTargetSets.upcoming.map((s) => s.stims).flat(),
