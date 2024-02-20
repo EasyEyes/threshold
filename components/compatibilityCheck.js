@@ -870,7 +870,9 @@ export const displayCompatibilityMessage = async (
     messageWrapper.style.display = "flex";
     messageWrapper.style.flexDirection = "column";
     messageWrapper.style.marginRight = "20vw";
+    messageWrapper.style.marginLeft = "20vw";
     messageWrapper.style.minWidth = "60vw";
+    messageWrapper.style.zIndex = "1000";
     document.getElementById("root").style.display = "none";
 
     // //create title msg

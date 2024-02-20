@@ -3,7 +3,7 @@
 }
 
 #rc-panel-holder {
-  z-index: 1;
+  z-index: 99999;
   width: calc(100% - 2rem);
   margin: 0 1rem;
 }

@@ -468,40 +468,6 @@ const paramReaderInitialized = async (reader) => {
   if (!rc?.browser?.value) {
     window.location.reload();
   }
-  // ! check system compatibility
-  const compMsg = checkSystemCompatibility(
-    reader,
-    reader.read("_language")[0],
-    rc
-  );
-  let needAnySmartphone = false;
-  let needCalibratedSmartphoneMicrophone = false;
-  // TODO: add logic for needAnySmartphone
-
-  const calibrateMicrophonesBool = reader.read("_calibrateMicrophonesBool")[0];
-  // const calibrateMicrophonesBool = false;
-  const needCalibratedSound = reader.read("_needCalibratedSound")[0].split(",");
-  // const needCalibratedSound = ['microphone', 'loudspeaker']
-  const calibrateSound1000Hz = reader.read("calibrateSound1000HzBool")[0];
-  const calibrateSoundAllHz = reader.read("calibrateSoundAllHzBool")[0];
-  needPhoneSurvey.current = reader.read("_needSmartphoneSurveyBool")[0];
-  needComputerSurveyBool.current = reader.read("_needComputerSurveyBool")[0];
-  if (
-    calibrateMicrophonesBool === false &&
-    (calibrateSound1000Hz === true ||
-      calibrateSoundAllHz === true ||
-      needPhoneSurvey.current === true)
-  ) {
-    needCalibratedSmartphoneMicrophone = true;
-  }
-
-  let compatibilityCheckPeer = null;
-  if (needCalibratedSmartphoneMicrophone || needAnySmartphone) {
-    const params = {
-      text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
-    };
-    compatibilityCheckPeer = new ExperimentPeer(params);
-  }
 
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
@@ -524,41 +490,6 @@ const paramReaderInitialized = async (reader) => {
       }
     };
 
-    const {
-      proceedButtonClicked,
-      proceedBool,
-      mic,
-      loudspeaker,
-      gotLoudspeakerMatchBool,
-    } = await displayCompatibilityMessage(
-      compMsg["msg"],
-      reader,
-      rc,
-      compMsg["promptRefresh"],
-      compMsg["proceed"],
-      compatibilityCheckPeer,
-      needAnySmartphone,
-      needCalibratedSmartphoneMicrophone,
-      needComputerSurveyBool.current,
-      needCalibratedSound
-    );
-
-    gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
-    microphoneInfo.current.micFullName = mic.micFullName;
-    microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
-    microphoneInfo.current.micrFullManufacturerName =
-      mic.micrFullManufacturerName;
-    microphoneInfo.current.phoneSurvey = mic.phoneSurvey;
-    if (needComputerSurveyBool.current)
-      loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
-    else loudspeakerInfo.current = loudspeaker;
-
-    hideCompatibilityMessage();
-    if (proceedButtonClicked && !proceedBool) {
-      showExperimentEnding();
-      return;
-    }
-
     const result = await checkCrossSessionId(
       gotParticipantId,
       rc.language.value
@@ -572,57 +503,6 @@ const paramReaderInitialized = async (reader) => {
     thisExperimentInfo.setSession(1);
     thisExperimentInfo.EasyEyesID = rc.id.value;
     thisExperimentInfo.PavloviaSessionID = rc.id.value;
-    const {
-      proceedButtonClicked,
-      proceedBool,
-      mic,
-      loudspeaker,
-      gotLoudspeakerMatchBool,
-    } = await displayCompatibilityMessage(
-      compMsg["msg"],
-      reader,
-      rc,
-      compMsg["promptRefresh"],
-      compMsg["proceed"],
-      compatibilityCheckPeer,
-      needAnySmartphone,
-      needCalibratedSmartphoneMicrophone,
-      needComputerSurveyBool.current,
-      needCalibratedSound
-    );
-    gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
-    if (needComputerSurveyBool.current)
-      loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
-    else loudspeakerInfo.current = loudspeaker;
-    microphoneInfo.current.micFullName = mic.micFullName;
-    microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
-    microphoneInfo.current.micrFullManufacturerName =
-      mic.micrFullManufacturerName;
-    microphoneInfo.current.phoneSurvey = mic.phoneSurvey;
-
-    hideCompatibilityMessage();
-    if (proceedButtonClicked && !proceedBool) {
-      showExperimentEnding();
-      return;
-    }
-  }
-
-  // show screens before actual experiment begins
-  const continueExperiment = await showForm(reader.read("_consentForm")[0]);
-  hideForm();
-
-  if (!continueExperiment) {
-    await showForm(reader.read("_debriefForm")[0]);
-    hideForm();
-    showExperimentEnding(); // TODO Rethink about this function in terms of UI and logic
-    return;
-  } else {
-    // Get fullscreen
-    // commented this out to avoid going fullscreen before sound calibration. Added to startExperiment()
-    // if (!rc.isFullscreen.value && !debug) {
-    //   rc.getFullscreen();
-    //   await sleep(1000);
-    // }
   }
 
   // prepareForReading(reader);
@@ -653,55 +533,22 @@ const paramReaderInitialized = async (reader) => {
 
   ////
   const startExperiment = async () => {
-    if (!(await calibrateAudio(reader))) {
-      quitPsychoJS("", "", reader);
-    } else {
-      // ! clean RC dom
-      if (document.querySelector("#rc-panel-holder"))
-        document.querySelector("#rc-panel-holder").remove();
+    // // ! clean RC dom
+    // if (document.querySelector("#rc-panel-holder"))
+    //   document.querySelector("#rc-panel-holder").remove();
 
-      rc.pauseNudger();
-      // Get fullscreen
-      if (!rc.isFullscreen.value && !debug) {
-        rc.getFullscreen();
-        await sleep(1000);
-      }
+    // rc.pauseNudger();
+    // // Get fullscreen
+    // if (!rc.isFullscreen.value && !debug) {
+    //   rc.getFullscreen();
+    //   await sleep(1000);
+    // }
 
-      // ! Start actual experiment
-      experiment(reader.blockCount);
-    }
+    // ! Start actual experiment
+    experiment(reader.blockCount);
   };
   ////
-
-  const experimentStarted = { current: false };
-  // ! Remote Calibrator
-  if (useRC && useCalibration(reader)) {
-    rc.panel(
-      formCalibrationList(reader),
-      "#rc-panel-holder",
-      {
-        debug: debug || debugBool.current,
-        i18n: false,
-      },
-      async () => {
-        if (!experimentStarted.current) {
-          experimentStarted.current = true;
-          rc.removePanel();
-
-          rc.pauseGaze();
-          // rc.pauseDistance();
-
-          await startExperiment();
-        } else {
-          warning(
-            "Participant re-calibrated. You may consider discarding the trials before."
-          );
-        }
-      }
-    );
-  } else {
-    await startExperiment();
-  }
+  await startExperiment();
 };
 
 export const paramReader = new ParamReader(
@@ -798,6 +645,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   );
 
   // flowScheduler gets run if the participants presses OK
+  flowScheduler.add(displayNeedsPage);
+  flowScheduler.add(startSoundCalibration);
   flowScheduler.add(updateInfo); // add timeStamp
   flowScheduler.add(experimentInit);
 
@@ -863,6 +712,144 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   ////
 
   psychoJS.experimentLogger.setLevel(core.Logger.ServerLevel.EXP);
+
+  async function startSoundCalibration() {
+    if (!(await calibrateAudio(paramReader))) {
+      quitPsychoJS("", "", paramReader);
+    }
+    return Scheduler.Event.NEXT;
+  }
+
+  async function displayNeedsPage() {
+    // ! check system compatibility
+    const compMsg = checkSystemCompatibility(
+      paramReader,
+      paramReader.read("_language")[0],
+      rc
+    );
+    let needAnySmartphone = false;
+    let needCalibratedSmartphoneMicrophone = false;
+    // TODO: add logic for needAnySmartphone
+
+    const calibrateMicrophonesBool = paramReader.read(
+      "_calibrateMicrophonesBool"
+    )[0];
+    // const calibrateMicrophonesBool = false;
+    const needCalibratedSound = paramReader
+      .read("_needCalibratedSound")[0]
+      .split(",");
+    // const needCalibratedSound = ['microphone', 'loudspeaker']
+    const calibrateSound1000Hz = paramReader.read(
+      "calibrateSound1000HzBool"
+    )[0];
+    const calibrateSoundAllHz = paramReader.read("calibrateSoundAllHzBool")[0];
+    needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
+    needComputerSurveyBool.current = paramReader.read(
+      "_needComputerSurveyBool"
+    )[0];
+    if (
+      calibrateMicrophonesBool === false &&
+      (calibrateSound1000Hz === true ||
+        calibrateSoundAllHz === true ||
+        needPhoneSurvey.current === true)
+    ) {
+      needCalibratedSmartphoneMicrophone = true;
+    }
+
+    let compatibilityCheckPeer = null;
+    if (needCalibratedSmartphoneMicrophone || needAnySmartphone) {
+      const params = {
+        text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
+      };
+      compatibilityCheckPeer = new ExperimentPeer(params);
+    }
+    const {
+      proceedButtonClicked,
+      proceedBool,
+      mic,
+      loudspeaker,
+      gotLoudspeakerMatchBool,
+    } = await displayCompatibilityMessage(
+      compMsg["msg"],
+      paramReader,
+      rc,
+      compMsg["promptRefresh"],
+      compMsg["proceed"],
+      compatibilityCheckPeer,
+      needAnySmartphone,
+      needCalibratedSmartphoneMicrophone,
+      needComputerSurveyBool.current,
+      needCalibratedSound
+    );
+
+    gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
+    microphoneInfo.current.micFullName = mic.micFullName;
+    microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
+    microphoneInfo.current.micrFullManufacturerName =
+      mic.micrFullManufacturerName;
+    microphoneInfo.current.phoneSurvey = mic.phoneSurvey;
+    if (needComputerSurveyBool.current)
+      loudspeakerInfo.current.loudspeakerSurvey = loudspeaker;
+    else loudspeakerInfo.current = loudspeaker;
+
+    hideCompatibilityMessage();
+    if (proceedButtonClicked && !proceedBool) {
+      showExperimentEnding();
+      quitPsychoJS("", "", paramReader);
+    }
+
+    // show forms before actual experiment begins
+    const continueExperiment = await showForm(
+      paramReader.read("_consentForm")[0]
+    );
+    hideForm();
+
+    if (!continueExperiment) {
+      await showForm(paramReader.read("_debriefForm")[0]);
+      hideForm();
+      showExperimentEnding(); // TODO Rethink about this function in terms of UI and logic
+      quitPsychoJS("", "", paramReader);
+    }
+
+    // ! Remote Calibrator
+    const experimentStarted = { current: false };
+    if (useRC && useCalibration(paramReader)) {
+      await new Promise((resolve) => {
+        rc.panel(
+          formCalibrationList(paramReader),
+          "#rc-panel-holder",
+          {
+            debug: debug || debugBool.current,
+            i18n: false,
+          },
+          async () => {
+            if (!experimentStarted.current) {
+              experimentStarted.current = true;
+              rc.removePanel();
+              rc.pauseGaze();
+              // rc.pauseDistance();
+              // ! clean RC dom
+              if (document.querySelector("#rc-panel-holder"))
+                document.querySelector("#rc-panel-holder").remove();
+
+              rc.pauseNudger();
+              // Get fullscreen
+              if (!rc.isFullscreen.value && !debug) {
+                rc.getFullscreen();
+                await sleep(1000);
+              }
+            } else {
+              warning(
+                "Participant re-calibrated. You may consider discarding the trials before."
+              );
+            }
+            resolve();
+          }
+        );
+      });
+    }
+    return Scheduler.Event.NEXT;
+  }
 
   // var frameDur;
   async function updateInfo() {

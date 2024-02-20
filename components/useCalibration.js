@@ -402,11 +402,11 @@ export const calibrateAudio = async (reader) => {
     };
 
     const elems = _addSoundCalibrationElems(copy);
-    psychoJS.start({
-      expName: thisExperimentInfo.name,
-      expInfo: thisExperimentInfo,
-      resources: [],
-    });
+    // psychoJS.start({
+    //   expName: thisExperimentInfo.name,
+    //   expInfo: thisExperimentInfo,
+    //   resources: [],
+    // });
     document.querySelector("#soundNavContainer").style.display = "none";
     try {
       if (
