@@ -13,6 +13,7 @@ import {
   readingWordFrequencyArchive,
   readingWordListArchive,
   status,
+  targetKind,
   timing,
   viewingDistanceCm,
 } from "./global";
@@ -26,6 +27,7 @@ import {
   processWordFreqToFreqToWords,
 } from "./reading.ts";
 import { psychoJS } from "./globalPsychoJS";
+import { readTrialLevelLetterParams } from "./letter";
 
 export const loadReadingCorpus = async (paramReader) => {
   // return new Promise((resolve, reject) => {
@@ -360,7 +362,7 @@ fontSizePt=(xHeightDesiredPx/xHeightPx)*initialFontSizePt
   }
 };
 
-export const getSizeForSpacing = (
+const getSizeForSpacing = (
   readingParagraph,
   readingSpacingDeg,
   testingString
@@ -409,6 +411,14 @@ export const findReadingSize = (
   blockOrConditionEnum
 ) => {
   let pt;
+  let bc =
+    blockOrConditionEnum === "block"
+      ? paramReader.block_conditions.filter(
+          (s) => Number(s.split("_")[0]) === status.block
+        )
+      : status.block_condition;
+  readTrialLevelLetterParams(paramReader, bc);
+
   switch (readingSetSizeBy) {
     case "nominalDeg":
       const readingNominalSizeDeg =
@@ -539,6 +549,10 @@ return widthPx (edited)
  */
 
 const pxOfDegVertical = (heightDeg) => {
+  if (
+    letterConfig.targetEccentricityXYDeg.some((z) => typeof z === "undefined")
+  )
+    throw "targetEccentricityXYDeg is undefined, pxOfDegVertical";
   // Convert deg to px
   const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
   const bottomXYPx = XYPixOfXYDeg([xDeg, yDeg - heightDeg / 2]);
@@ -548,7 +562,11 @@ const pxOfDegVertical = (heightDeg) => {
 };
 
 const pxOfDegHorizontal = (widthDeg) => {
-  // COnvert deg to px
+  if (
+    letterConfig.targetEccentricityXYDeg.some((z) => typeof z === "undefined")
+  )
+    throw "targetEccentricityXYDeg is undefined, pxOfDegHorizontal";
+  // Convert deg to px
   const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
   const leftXYPx = XYPixOfXYDeg([xDeg - widthDeg / 2, yDeg]);
   const rightXYPx = XYPixOfXYDeg([xDeg + widthDeg / 2, yDeg]);

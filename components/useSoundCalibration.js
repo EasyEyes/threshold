@@ -1235,6 +1235,7 @@ export const calibrateAgain = async (
     microphoneFromAPI: micInfo.webAudioDeviceNames.microphone,
   };
   calibrator.setDeviceInfo(deviceInfo);
+  calibrator.setFlags(flags.current);
   calibrationRound.current--;
 
   const results = await speaker.repeatCalibration(
