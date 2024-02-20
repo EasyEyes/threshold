@@ -714,12 +714,89 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   async function startSoundCalibration() {
     if (!(await calibrateAudio(paramReader))) {
       quitPsychoJS("", "", paramReader);
+    } else {
+      // if _needSmartphoneSurveyBool add survey data
+      if (needPhoneSurvey.current) {
+        // add microphoneInfo.current.phoneSurvey
+        psychoJS.experiment.addData(
+          "Microphone survey",
+          JSON.stringify(microphoneInfo.current.phoneSurvey)
+        );
+      }
+      if (needComputerSurveyBool.current) {
+        psychoJS.experiment.addData(
+          "Loudspeaker survey",
+          JSON.stringify(loudspeakerInfo.current.loudspeakerSurvey)
+        );
+      }
+
+      // add sound calibration results
+      if (soundCalibrationResults.current) {
+        psychoJS.experiment.addData(
+          "Cal1000HzInDb",
+          soundCalibrationResults.current.inDBValues
+        );
+        // psychoJS.experiment.addData(
+        //   "All Hz out (dB SPL)",
+        //   soundCalibrationResults.current.outDBSPLValues
+        // );
+        psychoJS.experiment.addData(
+          "Cal1000HzOutDb",
+          soundCalibrationResults.current.outDBSPL1000Values
+        );
+        psychoJS.experiment.addData(
+          "SoundGainParameters",
+          JSON.stringify(soundCalibrationResults.current.parameters)
+        );
+        psychoJS.experiment.addData(
+          "THD",
+          soundCalibrationResults.current.thdValues
+        );
+      }
+      if (allHzCalibrationResults.x_conv) {
+        psychoJS.experiment.addData(
+          "MlsSpectrumHz",
+          allHzCalibrationResults.y_conv
+        );
+        psychoJS.experiment.addData(
+          "MlsSpectrumFilteredDb",
+          allHzCalibrationResults.x_conv
+        );
+        psychoJS.experiment.addData(
+          "MlsSpectrumUnfilteredHz",
+          allHzCalibrationResults.y_unconv
+        ); // x and y are swapped
+        psychoJS.experiment.addData(
+          "MlsSpectrumUnfilteredDb",
+          allHzCalibrationResults.x_unconv
+        ); // x and y are swapped
+        psychoJS.experiment.addData(
+          "Loudspeaker IR",
+          allHzCalibrationResults.knownIr
+        );
+        psychoJS.experiment.addData(
+          "Loudspeaker IIR",
+          invertedImpulseResponse.current
+        );
+        psychoJS.experiment.addData(
+          "Loudspeaker model",
+          JSON.stringify(loudspeakerInfo.current)
+        );
+      }
+      if (microphoneCalibrationResults.length > 0) {
+        psychoJS.experiment.addData(
+          "Microphone calibration results",
+          JSON.stringify(microphoneCalibrationResults)
+        );
+      }
     }
+
     return Scheduler.Event.NEXT;
   }
 
   async function displayNeedsPage() {
     await updateInfo();
+    saveDataOnWindowClose(psychoJS.experiment);
     // ! check system compatibility
     const compMsg = checkSystemCompatibility(
       paramReader,
@@ -878,6 +955,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "frameRateReportedByPsychoJS",
       thisExperimentInfo["monitorFrameRate"]
     );
+
+    if (rc.stressFps) {
+      psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
+    } else {
+      // forcedly make sure that computeRandomMHz is always available
+      if (rc.performanceCompute)
+        await rc.performanceCompute((result) => {
+          psychoJS.experiment.addData(
+            "computeRandomMHz",
+            result.value.computeRandomMHz
+          );
+        });
+    }
+
+    // ! add info from the URL:
+    // ! disabled as we add Prolific fields in our own ways and we don't want to overwrite
+    // ! EasyEyes fields with Prolific fields
+    // util.addInfoFromUrl(thisExperimentInfo);
+
+    // record Prolific related info to thisExperimentInfo
+    if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo);
+
+    window.console.log("ENV NAME", psychoJS.getEnvironment());
+    window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
+    window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
+    thisExperimentInfo.experiment = getPavloviaProjectName();
+
+    // return Scheduler.Event.NEXT;
     // save elements of thisExperimentInfo to psychoJS.experiment
     psychoJS.experiment.addData("expName", thisExperimentInfo.name);
     psychoJS.experiment.addData("date", thisExperimentInfo.date);
@@ -931,108 +1036,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "ProlificStudyID",
       thisExperimentInfo.ProlificStudyID
     );
-
-    // if _needSmartphoneSurveyBool add survey data
-    if (needPhoneSurvey.current) {
-      // add microphoneInfo.current.phoneSurvey
-      psychoJS.experiment.addData(
-        "Microphone survey",
-        JSON.stringify(microphoneInfo.current.phoneSurvey)
-      );
-    }
-    if (needComputerSurveyBool.current) {
-      psychoJS.experiment.addData(
-        "Loudspeaker survey",
-        JSON.stringify(loudspeakerInfo.current.loudspeakerSurvey)
-      );
-    }
-
-    // add sound calibration results
-    if (soundCalibrationResults.current) {
-      psychoJS.experiment.addData(
-        "Cal1000HzInDb",
-        soundCalibrationResults.current.inDBValues
-      );
-      // psychoJS.experiment.addData(
-      //   "All Hz out (dB SPL)",
-      //   soundCalibrationResults.current.outDBSPLValues
-      // );
-      psychoJS.experiment.addData(
-        "Cal1000HzOutDb",
-        soundCalibrationResults.current.outDBSPL1000Values
-      );
-      psychoJS.experiment.addData(
-        "SoundGainParameters",
-        JSON.stringify(soundCalibrationResults.current.parameters)
-      );
-      psychoJS.experiment.addData(
-        "THD",
-        soundCalibrationResults.current.thdValues
-      );
-    }
-    if (allHzCalibrationResults.x_conv) {
-      psychoJS.experiment.addData(
-        "MlsSpectrumHz",
-        allHzCalibrationResults.y_conv
-      );
-      psychoJS.experiment.addData(
-        "MlsSpectrumFilteredDb",
-        allHzCalibrationResults.x_conv
-      );
-      psychoJS.experiment.addData(
-        "MlsSpectrumUnfilteredHz",
-        allHzCalibrationResults.y_unconv
-      ); // x and y are swapped
-      psychoJS.experiment.addData(
-        "MlsSpectrumUnfilteredDb",
-        allHzCalibrationResults.x_unconv
-      ); // x and y are swapped
-      psychoJS.experiment.addData(
-        "Loudspeaker IR",
-        allHzCalibrationResults.knownIr
-      );
-      psychoJS.experiment.addData(
-        "Loudspeaker IIR",
-        invertedImpulseResponse.current
-      );
-      psychoJS.experiment.addData(
-        "Loudspeaker model",
-        JSON.stringify(loudspeakerInfo.current)
-      );
-    }
-    if (microphoneCalibrationResults.length > 0) {
-      psychoJS.experiment.addData(
-        "Microphone calibration results",
-        JSON.stringify(microphoneCalibrationResults)
-      );
-    }
-    if (rc.stressFps) {
-      psychoJS.experiment.addData("frameRateUnderStress", rc.stressFps.value);
-    } else {
-      // forcedly make sure that computeRandomMHz is always available
-      if (rc.performanceCompute)
-        await rc.performanceCompute((result) => {
-          psychoJS.experiment.addData(
-            "computeRandomMHz",
-            result.value.computeRandomMHz
-          );
-        });
-    }
-
-    // ! add info from the URL:
-    // ! disabled as we add Prolific fields in our own ways and we don't want to overwrite
-    // ! EasyEyes fields with Prolific fields
-    // util.addInfoFromUrl(thisExperimentInfo);
-
-    // record Prolific related info to thisExperimentInfo
-    if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo);
-
-    window.console.log("ENV NAME", psychoJS.getEnvironment());
-    window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
-    window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
-    thisExperimentInfo.experiment = getPavloviaProjectName();
-
-    // return Scheduler.Event.NEXT;
+    psychoJS.experiment.nextEntry();
   }
 
   var fileClock;
@@ -1099,8 +1103,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // ! POPUPS for take a break & proportion correct
     preparePopup(rc.language.value, thisExperimentInfo.name); // Try to use only one popup ele for both (or even more) popup features
     prepareTrialBreakProgressBar();
-
-    saveDataOnWindowClose(psychoJS.experiment);
 
     /* -------------------------------------------------------------------------- */
     fixation = new Fixation();
