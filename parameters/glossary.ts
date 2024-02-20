@@ -40,7 +40,7 @@ export const GLOSSARY: Glossary = {
       "Mik-1, Mik-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly Voyager, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Yealink",
     explanation:
       '🕑 _calibrateMicrophoneKeywords (see defaults below) is a list of keywords used to interpret the list of input devices returned by Web Audio on a mobile phone. On a desktop, Web Audio identifies which input device is in use. On a mobile device, Web Audio just gives a list of available input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is using either its main built-in microphone or a connected external microphone. When connected to a smartphone by the QR-code technique, EasyEyes scans the enumerated list of sound input device "labels" returned by web audio. Any enumerated device whose label includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name of the Microphone. Keyword matching ignores case. If no label matches a keyword, then EasyEyes assumes that the microphone enumerated as "mics:0" is default and active, and returns its name, which on some phones is "Default". If any of your participants uses an external microphone that EasyEyes fails to detect, you may be able help EasyEyes to catch it by adding a keyword to the default list and using that extended list. Conversely, if our list inadvertently contains a keyword that is causing a false alarm because it appears in a participant\'s phone\'s label for an internal sound-input source, you can create and use a new list without the problematic keyword.\nDEFAULT (matching ignores case): "Mik-1, Mik-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Voyager, Yealink"',
-    categories: [""],
+    categories: [],
   },
   _calibrateMicrophonesBool: {
     name: "_calibrateMicrophonesBool",
@@ -2250,7 +2250,7 @@ export const GLOSSARY: Glossary = {
     default: "English",
     explanation:
       '🕑 English name for the language used for instructions to the participant. It must be "participant" or match one of the entries in the second row of the EasyEyes International phrases sheet. If you enter "participant", then the participant will be allowed to select the instruction language from a pull-down menu.',
-    categories: [""],
+    categories: [],
   },
   internationalPhrasesURL: {
     name: "internationalPhrasesURL",
@@ -3190,7 +3190,7 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       "🕑 showParameters (no default) accepts a comma-separated list of parameter names. Its display is in the style of showTargetSpecsBool, but it allows the scientist to specify which parameters to display. All the parameters are displayed at the left edge of the screen, bottom-aligned, one per row, each with its value. At the moment, we only allow input parameters, but we will extend this list to include internal parameters.",
-    categories: [""],
+    categories: [],
   },
   showPercentCorrectBool: {
     name: "showPercentCorrectBool",
