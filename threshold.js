@@ -645,7 +645,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(displayNeedsPage);
   flowScheduler.add(startSoundCalibration);
-  flowScheduler.add(updateInfo); // add timeStamp
+  // flowScheduler.add(updateInfo); // add timeStamp // moved this function to displayNeedsPage
   flowScheduler.add(experimentInit);
 
   flowScheduler.add(fileRoutineBegin());
@@ -719,6 +719,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function displayNeedsPage() {
+    await updateInfo();
     // ! check system compatibility
     const compMsg = checkSystemCompatibility(
       paramReader,
@@ -877,6 +878,59 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "frameRateReportedByPsychoJS",
       thisExperimentInfo["monitorFrameRate"]
     );
+    // save elements of thisExperimentInfo to psychoJS.experiment
+    psychoJS.experiment.addData("expName", thisExperimentInfo.name);
+    psychoJS.experiment.addData("date", thisExperimentInfo.date);
+    psychoJS.experiment.addData("psychopyVersion", thisExperimentInfo.version);
+    psychoJS.experiment.addData(
+      "hardwareConcurrency",
+      thisExperimentInfo.hardwareConcurrency
+    );
+    psychoJS.experiment.addData("deviceType", thisExperimentInfo.deviceType);
+    psychoJS.experiment.addData(
+      "deviceSystem",
+      thisExperimentInfo.deviceSystem
+    );
+    psychoJS.experiment.addData(
+      "deviceSystemFamily",
+      thisExperimentInfo.deviceSystemFamily
+    );
+    psychoJS.experiment.addData(
+      "deviceBrowser",
+      thisExperimentInfo.deviceBrowser
+    );
+    psychoJS.experiment.addData(
+      "deviceBrowserVersion",
+      thisExperimentInfo.deviceBrowserVersion
+    );
+    psychoJS.experiment.addData(
+      "deviceLanguage",
+      thisExperimentInfo.deviceLanguage
+    );
+    psychoJS.experiment.addData(
+      "psychojsWindowDimensions",
+      thisExperimentInfo.psychojsWindowDimensions
+    );
+    psychoJS.experiment.addData("participant", thisExperimentInfo.participant);
+    psychoJS.experiment.addData("session", thisExperimentInfo.session);
+    psychoJS.experiment.addData("EasyEyesID", thisExperimentInfo.EasyEyesID);
+    psychoJS.experiment.addData(
+      "PavloviaSessionID",
+      thisExperimentInfo.PavloviaSessionID
+    );
+    psychoJS.experiment.addData("date", thisExperimentInfo.date);
+    psychoJS.experiment.addData(
+      "ProlificParticipantID",
+      thisExperimentInfo.ProlificParticipantID
+    );
+    psychoJS.experiment.addData(
+      "ProlificSessionID",
+      thisExperimentInfo.ProlificSessionID
+    );
+    psychoJS.experiment.addData(
+      "ProlificStudyID",
+      thisExperimentInfo.ProlificStudyID
+    );
 
     // if _needSmartphoneSurveyBool add survey data
     if (needPhoneSurvey.current) {
@@ -978,7 +1032,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
     thisExperimentInfo.experiment = getPavloviaProjectName();
 
-    return Scheduler.Event.NEXT;
+    // return Scheduler.Event.NEXT;
   }
 
   var fileClock;
