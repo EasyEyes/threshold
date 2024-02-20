@@ -10,8 +10,12 @@ const auth = new google.Auth.GoogleAuth({
   scopes: "https://www.googleapis.com/auth/spreadsheets",
 });
 
+// NOTE keep in sync with the parser form "../preprocess/experimentFIleChecks.ts"
 function getCategoriesFromString(str) {
-  return str.split(",").map((s) => s.trim());
+  return str
+    .split(",")
+    .map((s) => s.trim())
+    .filter((x) => x);
 }
 
 async function processLanguageSheet() {

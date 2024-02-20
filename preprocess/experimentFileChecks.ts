@@ -52,7 +52,10 @@ import { normalizeExperimentDfShape } from "./transformExperimentTable";
 
 // NOTE keep in sync with parser from "../server/prepare-glossary";
 const getCategoriesFromString = (str: string) =>
-  str.split(",").map((s) => s.trim());
+  str
+    .split(",")
+    .map((s) => s.trim())
+    .filter((x) => x);
 
 let zeroIndexed: boolean;
 
