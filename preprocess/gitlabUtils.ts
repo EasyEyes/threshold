@@ -290,10 +290,6 @@ export const downloadCommonResources = async (
   projectRepoId: string,
   experimentFileName: string,
 ): Promise<void> => {
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    user.projectList,
-    "EasyEyesResources",
-  );
   const originalFileName = await getOriginalFileNameForProject(
     user,
     experimentFileName,
@@ -390,7 +386,7 @@ export const downloadCommonResources = async (
       }
 
       zip.generateAsync({ type: "blob" }).then((zipBlob) => {
-        saveAs(zipBlob, `ExportedExperiment-${experimentFileName}.zip`);
+        saveAs(zipBlob, `${experimentFileName}.export.zip`);
         Swal.close();
       });
     },
