@@ -623,3 +623,34 @@ export const TARGETOFFSETDEG_MUST_USE_VERNIER = (
     parameters: ["targetKind"],
   };
 };
+
+export interface Offender<T> {
+  columnNumber: number;
+  offendingValue: T;
+}
+
+export const COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH = (
+  parameter: string,
+  expectedValue: number,
+  mistakes: Array<Offender<number>>
+): EasyEyesError => {
+  const offendingStrings = mistakes.map(
+    (o) =>
+      `expected ${expectedValue}, got ${
+        o.offendingValue
+      } (column ${toColumnName(o.columnNumber + 2)})`
+  );
+  const offendingString =
+    "Incorrect number of values provided: " +
+    verballyEnumerate(offendingStrings);
+  return {
+    name: `Parameter value is a comma-separated string of the incorrect length.`,
+    message: `${parameter} expects a string of ${expectedValue} values, ie a string with ${
+      expectedValue - 1
+    } commas`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};

@@ -35,6 +35,8 @@ import {
   VERNIER_MUST_USE_TARGETOFFSETDEG,
   TARGETOFFSETDEG_MUST_USE_VERNIER,
   INVALID_AUTHOR_EMAIL,
+  COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH,
+  Offender,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -128,6 +130,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   errors.push(...areAllPresentParametersRecognized(parametersToCheck));
   errors.push(...areAllPresentParametersCurrentlySupported(parametersToCheck));
   errors.push(...areAuthorizedEmailsValid(experimentDf));
+  errors.push(...areMarkDotGridAndFliesParamsCorrectLength(experimentDf));
 
   // Enforce using Column B for the underscore parameters, and Column C and on for conditions
   errors.unshift(...doConditionsBeginInTheSecondColumn(experimentDf));
@@ -303,6 +306,50 @@ const areAllPresentParametersCurrentlySupported = (
   return notYetSupported.map(NOT_YET_SUPPORTED_PARAMETER);
 };
 
+/**
+ * Checks that markFlies, markDot, and markFlies are comma-separated strings of the correct length.
+ */
+const areMarkDotGridAndFliesParamsCorrectLength = (
+  experiment: any
+): EasyEyesError[] => {
+  const columnNames = experiment.listColumns();
+  const markParameters = ["markDot", "markGrid", "markFlies"].filter((s) =>
+    columnNames.includes(s)
+  );
+  const markParameterExpectedLengths = new Map([
+    ["markDot", 7],
+    ["markGrid", 7],
+    ["markFlies", 10],
+  ]);
+  let markParamErrors = markParameters
+    .map((param, i) => {
+      const values = getColumnValues(experiment, param);
+      const expectedLength = markParameterExpectedLengths.get(param);
+
+      let offendingColumns: Array<Offender<number>> = [];
+      values.forEach((s, i) => {
+        if (!s || !s.split) return;
+        const length = s.split(",").length;
+        if (length !== expectedLength)
+          offendingColumns.push({
+            columnNumber: i,
+            offendingValue: length,
+          });
+      });
+      if (offendingColumns.length) {
+        //@ts-ignore
+        return COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH(
+          param,
+          expectedLength,
+          offendingColumns
+        );
+      }
+      return []; // No errors for this parameter
+    })
+    .flat();
+  return markParamErrors;
+};
+
 const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   // Can't do other checks when "block" isn't even present
   const blockPresent: boolean = df.listColumns().includes("block");
@@ -453,8 +500,10 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
         case "obsolete":
           break;
         case "categorical":
-          const validCategory = (s: string): boolean =>
-            GLOSSARY[columnName]["categories"].includes(s);
+          const validCategory = (str: string): boolean =>
+            getCategoriesFromString(str).every((s: string) =>
+              GLOSSARY[columnName]["categories"].includes(s)
+            );
           checkType(
             column,
             validCategory,

@@ -27,6 +27,7 @@ function denisRBGColorSpaceToPsychoJS(rgb: number[]): number[] {
 export const getFlies = (showFlies: string): Swarm | undefined => {
   let swarm: Swarm | undefined;
 
+  // NOTE update preprocess/experimentFileChecks.ts/areMarkDotGridAndFLiesParamsCorrectLength() if this specification changes
   if (showFlies.split(",").length === 10) {
     const [
       n,
@@ -58,6 +59,7 @@ export const getDotAndBackGrid = (
   let dot: Dot | undefined;
   let grid: BackGrid | undefined;
 
+  // NOTE update preprocess/experimentFileChecks.ts/areMarkDotGridAndFLiesParamsCorrectLength() if this specification changes
   if (showDot.split(",").length === 7) {
     const [xDeg, yDeg, diameterDeg, ...colorRGBA] = showDot.split(",");
     const colorRGBAStr = colorRGBA.join(",");
@@ -66,6 +68,7 @@ export const getDotAndBackGrid = (
     dot = new Dot(pos, Number(diameterDeg), colorRGBAStr);
   }
 
+  // NOTE update preprocess/experimentFileChecks.ts/areMarkDotGridAndFLiesParamsCorrectLength() if this specification changes
   if (showBackGrid.split(",").length === 7) {
     const [spacingDeg, thicknessDeg, lengthDeg, ...colorRGBA] =
       showBackGrid.split(",");
