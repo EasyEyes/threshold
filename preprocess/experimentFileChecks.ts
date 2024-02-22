@@ -337,9 +337,9 @@ const areMarkDotGridAndFliesParamsCorrectLength = (
           });
       });
       if (offendingColumns.length) {
-        //@ts-ignore
         return COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH(
           param,
+          //@ts-ignore
           expectedLength,
           offendingColumns
         );
