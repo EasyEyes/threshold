@@ -43,10 +43,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      '🕑 _calibrateMicrophoneKeywords (see defaults below) is a list of keywords used to interpret the list of input devices returned by Web Audio on a mobile phone. On a desktop, Web Audio identifies which input device is in use. On a mobile device, Web Audio just gives a list of available input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is using either its main built-in microphone or a connected external microphone. When connected to a smartphone by the QR-code technique, EasyEyes scans the enumerated list of sound input device "labels" returned by web audio. Any enumerated device whose label includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name of the Microphone. Keyword matching ignores case. If no label matches a keyword, then EasyEyes assumes that the microphone enumerated as "mics:0" is default and active, and returns its name, which on some phones is "Default". If any of your participants uses an external microphone that EasyEyes fails to detect, you may be able help EasyEyes to catch it by adding a keyword to the default list and using that extended list. Conversely, if our list inadvertently contains a keyword that is causing a false alarm because it appears in a participant\'s phone\'s label for an internal sound-input source, you can create and use a new list without the problematic keyword.\nDEFAULT (matching ignores case): "Mik-1, Mik-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Voyager, Yealink"',
+      '🕑 _calibrateMicrophoneKeywords (see defaults below) is a list of keywords used to interpret the list of input devices returned by Web Audio on a mobile phone. On a desktop, Web Audio identifies which input device is in use. On a mobile device, Web Audio just gives a list of available input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is using either its main built-in microphone or a connected external microphone. When connected to a smartphone by the QR-code technique, EasyEyes scans the enumerated list of sound input device "labels" returned by web audio. Any enumerated device whose label includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name of the Microphone. Keyword matching ignores case. If no label matches a keyword, then EasyEyes assumes that the microphone enumerated as "mics:0" is default and active, and returns its name, which on some phones is "Default". If any of your participants uses an external microphone that EasyEyes fails to detect, you may be able help EasyEyes to catch it by adding a keyword to the default list and using that extended list. Conversely, if our list inadvertently contains a keyword that is causing a false alarm because it appears in a participant\'s phone\'s label for an internal sound-input source, you can create and use a new list without the problematic keyword.\nDEFAULT (matching ignores case): "UMIK-1, UMIK-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Voyager, Yealink"',
     type: "categorical",
     default:
-      "Mik-1, Mik-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly Voyager, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Yealink",
+      "UMIK-1, UMIK-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly Voyager, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Yealink",
     categories: "",
   },
   {
@@ -236,7 +236,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       '_calibrateSoundCheck (default "goal") optionally the flatness of the spectrum produced by playing the MLS (which has a white spectrum) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the system, microphone, or loudspeaker. _calibrateSoundCheck must be set to one of three values: “none”, “system”, or “goal”. \n• “none” skips the check. \n• “system” checks using the IIR corresponding the the combination of loudspeaker and microphone.\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.\n• "both" checks both "system" and "goal".',
     type: "categorical",
-    default: "both",
+    default: "goal",
     categories: "none, system, goal, both",
   },
   {
@@ -596,7 +596,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "desktop",
     explanation:
-      '⭑ _needDeviceType is a comma-separated list of compatible devices types.  Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. NOTE: The value "all" is not yet implemented. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific\'s rule that all study requirements be declared in the study\'s Description.',
+      '⭑ _needDeviceType (default desktop) is a comma-separated list of compatible devices types. Note that "desktop" includes laptops. Anything not listed is deemed incompatible. If incompatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to "return" this study), which ends the session before asking for consent. NOTE: The value "all" is not yet implemented. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific\'s rule that all study requirements be declared in the study\'s Description.',
     type: "multicategorical",
     default: "desktop",
     categories: "desktop, tablet, mobile",
@@ -606,7 +606,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "hdrMovie",
     explanation:
-      "🕑 _needDisplay demands support (on the Needs page) for key display features:\nHDRMovie: Browser must support HDR movies.\ntenBit: Display must support 10-bit imaging. https://trello.com/c/VxGHyxDa\ncodec: I'm not sure whether we should explicitly list the codecs we support or just write \"codec\" and have EasyEyes check that the browser supports at least one of the video codecs supported by EasyEyes. EasyEyes's list of compatible codecs may grow. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
+      "🕑 _needDisplay (default empty) demands support (on the Needs page) for key display features:\nHDRMovie: Browser must support HDR movies.\ntenBit: Display must support 10-bit imaging. https://trello.com/c/VxGHyxDa\ncodec: I'm not sure whether we should explicitly list the codecs we support or just write \"codec\" and have EasyEyes check that the browser supports at least one of the video codecs supported by EasyEyes. EasyEyes's list of compatible codecs may grow. \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.\n\nNOTE ON CODEC COMPATIBILITY. Note that even if the browser supports HDR movies, it typically is compatible with only one video codec, which we might not support. Currently we support two video codecs, one supported by Chrome, the other by Safari. Currently we manage this compatibility by specifying the compatible browsers. To keep up with browsers that add support for more codecs, it might be better to specify compatible codecs. However, when we reject a participant's browser, it will be more helpful to tell the participant which browsers we support, rather than which codecs, because hardly anyone knows which browsers support any given codec. Ideally, EasyEyes would read an online table of which codecs each browsers supports to offer the participant an up-to-date list of compatible browsers. We can support any codec that FFMPEG supports, but it may require a bit of code that is custom to the codec.",
     type: "multicategorical",
     default: "",
     categories: "hdrMovie, tenBit",
@@ -626,7 +626,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "macOS,Windows",
     explanation:
-      "⭑ _needOperatingSystem is a comma-separated list either of compatible or incompatible operating systems. The list can be 'all', or compatible OSes by name, or incompatible OSes each preceded by \"not\". No mixing allowed. The default is 'all'. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to \"return\" this study), which ends the session before asking for consent. After compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
+      "⭑ _needOperatingSystem (default all) is a comma-separated list either of compatible or incompatible operating systems. The list can be 'all', or compatible OSes by name, or incompatible OSes each preceded by \"not\". No mixing allowed. The default is 'all'. If compatible, then anything not listed is deemed incompatible. If incompatible, then anything not listed is deemed compatible. If not compatible, we reject by issuing a fatal explanatory error message to the participant (asking Prolific participants to \"return\" this study), which ends the session before asking for consent. After compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
     type: "multicategorical",
     default: "all",
     categories:
@@ -647,7 +647,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _needRecordingControls (no default) is for sound recording. It's multicategorical and allows the scientist to demand control of echoCancellation, autoGainControl, and noiseSuppression. Not all browsers offer such control. We need these features off for sound calibration because they seriously distort the recording. In principle we'd be happy with a rudimentary browser that didn't do these things, and thus wouldn't offer control over them, but in practice the industry norm is to do these things by default, so the only way to be sure a feature is off is for the browser to report control, and then to use that control to disable the feature. Our calibration code always tries to turn the features off, but some browsers will ignore the request. This need statement admits only browsers that support the requests.",
+      "🕑 _needRecordingControls (default empty) is for sound recording. It's multicategorical and allows the scientist to demand control of echoCancellation, autoGainControl, and noiseSuppression. Not all browsers offer such control. We need these features off for sound calibration because they seriously distort the recording. In principle we'd be happy with a rudimentary browser that didn't do these things, and thus wouldn't offer control over them, but in practice the industry norm is to do these things by default, so the only way to be sure a feature is off is for the browser to report control, and then to use that control to disable the feature. Our calibration code always tries to turn the features off, but some browsers will ignore the request. This need statement admits only browsers that support the requests.",
     type: "multicategorical",
     default: "",
     categories: "echoCancellation, autoGainControl, noiseSuppression",
@@ -737,7 +737,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Prolific",
     explanation:
-      '⭑ _online1RecruitmentService (no default). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. \nnone - Just produce a study URL.\nProlific - integrate with Prolific, which is suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nNOT YET IMPLEMENTED: MTurk - currently equivalent to "none".\nNOT YET IMPLEMENTED: SONA - currenlty equivalent to "none".',
+      '⭑ _online1RecruitmentService (default none). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. \nnone - Just produce a study URL.\nProlific - integrate with Prolific, which is suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nNOT YET IMPLEMENTED: MTurk - currently equivalent to "none".\nNOT YET IMPLEMENTED: SONA - currenlty equivalent to "none".',
     type: "categorical",
     default: "none",
     categories: "none, Prolific",
@@ -867,7 +867,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ _prolific2DeviceKind [Prolific "Which devices can participants use to take your study?"] is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nmobile\ntablet\ndesktop\nThe parameter value will be a comma-separated list of none to all of: mobile, tablet, desktop.',
+      '⭑ _prolific2DeviceKind (default desktop) [Prolific "Which devices can participants use to take your study?"] is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nWhich devices can participants use to take your study?\nmobile\ntablet\ndesktop\nThe parameter value will be a comma-separated list of none to all of: mobile, tablet, desktop.',
     type: "multicategorical",
     default: "desktop",
     categories: "mobile, tablet, desktop",
@@ -877,7 +877,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ _prolific2RequiredServices [Prolific "Does your study require any of the following?"] (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownloads software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Downloads software',
+      '⭑ _prolific2RequiredServices (no default) [Prolific "Does your study require any of the following?"] (no default) is a comma-separated list of study requirements (see Categories) corresponding to this Prolific query:\nDoes your study require any of the following?\nAudio\nCamera\nMicrophone\nDownloads software\nThe parameter value will be a comma-separated list of none to all of: Audio, Camera, Microphone, Downloads software',
     type: "multicategorical",
     default: "",
     categories: "audio, camera, microphone, download",
@@ -897,7 +897,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific2SubmissionApproval [Prolific "How do you want to confirm participants have completed your study?") (default "manual") declares to Prolific whether evaluation of the  participant submissions (performance of the study) will be manual (the EasyEyes default) or automatic.',
+      '_prolific2SubmissionApproval (default manual) [Prolific "How do you want to confirm participants have completed your study?") (default "manual") declares to Prolific whether evaluation of the  participant submissions (performance of the study) will be manual (the EasyEyes default) or automatic.',
     type: "categorical",
     default: "manual",
     categories: "manual, automatic",
@@ -957,7 +957,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific3Location [Prolific "Location"] is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\n...\nThe answer can include many countries, which are combined by an OR rule.\nNOTE: _prolific3Location accepts "Venezuela" which is automatically converted to Prolific\'s "Venezuela, Bolivarian Republic of". ',
+      '_prolific3Location [Prolific "Location"] (default All countries available) is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nLocation\nWhere should your participants be located?\nAll countries available\nUSA\nUK\n...\nThe answer can include many countries, which are combined by an OR rule.\nNOTE: _prolific3Location accepts "Venezuela" which is automatically converted to Prolific\'s "Venezuela, Bolivarian Republic of". ',
     type: "multicategorical",
     default: "All countries available",
     categories:
@@ -1584,30 +1584,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "centerFixation",
     explanation:
-      "🕑 fixationLocationStrategy specifies the strategy by which EasyEyes places the fixation point, which is the origin of the visual coordinate system. Most experimenters will choose centerFixation, the default, which simply places fixation at the center of the screen. But for peripheral testing you might choose  asSpecified and put fixation near one edge of the display to maximize the eccentricity of a target at the opposite edge. Fixation, whether on- or off-screen, is always specified as a point in (x,y) display coordinates in the plane of the display (origin at lower left corner). The compiler requires that all conditions in a block have the same fixation point and fixationLocationStrategy. \n• centerFixation places fixation at the center of the screen. This is the default.\n• asSpecified indicates that fixation is specified by (fixationLocationXScreen, fixationLocationYScreen). \n\n🕑\nTo test even farther into the periphery, you might want to set fixationRequestedOffscreenBool TRUE and place the fixation off-screen by putting tape on a bottle or a box and drawing a fixation cross on it.\n• centerTargets sets the (possibly offscreen) fixation location so as to maximize the screen margin around the edges of all the possible targets.  We consider all possible targets across all conditions within the block.  \n• centerFixationAndTargets places fixation so as to maximize the screen margin around the fixation and the edges of all the possible targets within the block. We consider all possible targets across all conditions within the block.  \n\nSatisfying centerTargets or centerFixationAndTargets may be impossible beyond a certain maximum viewing distance (in cm) proportional to screen size (in cm). We generally don't know the screen size at compile time, as each participant has their own computer. Currently the scientist can only specify viewing distance as a fixed number of cm. \n\n[Since short viewing distances are uncomfortable, it might be useful to be able to request the maximize viewing distance such that the screen will have a needed visual subtense. In effect, this requests a viewing distance that is a multiple of screen width or height.]",
+      'fixationLocationStrategy (default centerFixation) specifies the strategy by which EasyEyes places the fixation point, which is the origin of the visual coordinate system relative to the fixationOriginXYScreen. Most experimenters will choose centerFixation, the default, which simply places fixation at the fixationOriginXYScreen. For peripheral testing, you might set fixationOriginXYScreen near one edge of the display to maximize the eccentricity of a target at the opposite edge. Fixation, whether on- or off-screen, is always internally specified as a point in (x,y) display coordinates in the plane of the display (origin at lower left corner). (When the crosshair moves, fixation moves with it. In that case we also refer to the fixed "nominal" fixation at the static center of the motion.) The compiler requires that all conditions in a block have the same fixation point, fixationLocationStrategy, and fixationOriginXYScreen.\n• centerFixation places fixation at the fixationOriginXYScreen. This is the default.\n🕑 • centerTargets sets the (possibly offscreen) fixation location so as to maximize the screen margin around the edges of all the possible targets.  We consider all possible targets across all conditions within the block.  \n🕑 • centerFixationAndTargets places fixation so as to maximize the screen margin around the fixation and the edges of all the possible targets within the block. We consider all possible targets across all conditions within the block.  \n🕑 To test even farther into the periphery, you might want to set fixationRequestedOffscreenBool TRUE and place the fixation off-screen by putting tape on a bottle or a box and drawing a fixation cross on it.\n\nSatisfying centerTargets or centerFixationAndTargets may be impossible beyond a certain maximum viewing distance (in cm) proportional to screen size (in cm). We generally don\'t know the screen size at compile time, as each participant has their own computer. Currently the scientist can only specify viewing distance as a fixed number of cm. \n\n[Since short viewing distances are uncomfortable, it might be useful to be able to request the maximize viewing distance such that the screen will have a needed visual subtense. In effect, this requests a viewing distance that is a multiple of screen width or height.]',
     type: "categorical",
     default: "centerFixation",
-    categories:
-      "centerFixation, centerFixationAndTargets, centerTargets, asSpecified",
+    categories: "centerFixation, centerFixationAndTargets, centerTargets",
   },
   {
-    name: "fixationLocationXScreen",
+    name: "fixationOriginXYScreen",
     availability: "now",
     example: "0.5",
     explanation:
-      "If fixationLocationStrategy is asSpecified, then fixationLocationXScreen specifies fixation's X coordinate in the screen plane, as a fraction of screen width. The lower left corner is the origin (0,0), and the upper right corner is (1,1).",
-    type: "numerical",
-    default: "0.5",
-    categories: "",
-  },
-  {
-    name: "fixationLocationYScreen",
-    availability: "now",
-    example: "0.5",
-    explanation:
-      "If fixationLocationStrategy is asSpecified, then fixationLocationYScreen specifies the Y coordinate of fixation, as a fraction of screen height.",
-    type: "numerical",
-    default: "0.5",
+      "fixationOriginXYScreen (default 0.5,0.5). If fixationLocationStrategy is centerFixation, then fixationOriginXYScreen specifies fixation's X,Y coordinate in the screen plane, as a fraction of screen width and height. The lower left corner is (0,0), and the upper right corner is (1,1). Normally the specified point must lie in the unit square (enforced by compiler), but if fixationRequestedOffscreenBool=TRUE then the specified point can be anywhere.",
+    type: "text",
+    default: "0.5,0.5",
     categories: "",
   },
   {
@@ -1645,7 +1634,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "file",
     explanation:
-      "🕑 flankerFontSource (default is the fontSource) is like fontSource, but for the flankers. ",
+      "🕑 flankerFontSource (default is google) is like fontSource, but for the flankers. ",
     type: "categorical",
     default: "google",
     categories: "file, google, browser",
@@ -1865,7 +1854,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "browser",
     explanation:
-      'instructionFontSource must be file, google, server, or browser. 🕑 "server" support is coming. See fontSource for explanation.',
+      'instructionFontSource (default is browser) must be file, google, server, or browser. 🕑 "server" support is coming. See fontSource for explanation.',
     type: "categorical",
     default: "browser",
     categories: "file, google, browser",
@@ -1925,7 +1914,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "upperLeft",
     explanation:
-      "instructionForStimulusLocation (empty default, which has no effect) indicates where the stimulus instructions should be placed on the screen: top, upperLeft, or upperRight. If you select top, then the text will be at the top of the screen, using the full width of the screen (allowing modest right and left margins), aligned with the left or right side of the display, as guided by whether instructionFontLeftToRightBool is TRUE or FALSE. When you select upperLeft or upperRight, EasyEyes will break the text up into short lines of text, to present it as a roughly square block of text in the upper left or right corner, which may help keep the text far from the target.",
+      "instructionForStimulusLocation (default upperLeft) indicates where the stimulus instructions should be placed on the screen: top, upperLeft, or upperRight. If you select top, then the text will be at the top of the screen, using the full width of the screen (allowing modest right and left margins), aligned with the left or right side of the display, as guided by whether instructionFontLeftToRightBool is TRUE or FALSE. When you select upperLeft or upperRight, EasyEyes will break the text up into short lines of text, to present it as a roughly square block of text in the upper left or right corner, which may help keep the text far from the target.",
     type: "categorical",
     default: "upperLeft",
     categories: "top, upperLeft, upperRight",
@@ -1985,7 +1974,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'markDot: WE MUST UPDATE DEFAULT WHEN reMovingFixationBool ARGUMENT IS ADDED. Until the target appears, display a dot. It accepts several arguments as comma-separated values. Diameter zero (the default) disables the dot.\n▶ reMovingFixationBool, xDeg, yDeg, diameterDeg, colorRGBA\nreMovingFixationBool (default TRUE) specfies, if FALSE, that the dot position is relative to the fixed nominal fixation or, if TRUE, relative to the (possibly moving) crosshair location. When TRUE, if the crosshair moves then the dot will move with it.\nxDeg and yDeg (default 0,0) are coordinates of the dot center relative to the nominal fixation location (which a moving crosshair circles around).  \ndiameterDeg (default 0) is the dot diameter. Diameter zero disables the dot.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, which weights the blending; use 1 for 100% color. Each of the four values ranges 0 to 1.',
+      'markDot: UPDATE DEFAULT WHEN reMovingFixationBool ARGUMENT IS ADDED. Until the target appears, display a dot. It accepts several arguments as comma-separated values. Diameter zero (the default) disables the dot.\n▶ reMovingFixationBool, xDeg, yDeg, diameterDeg, colorRGBA\nreMovingFixationBool (default TRUE) specfies, if FALSE, that the dot position is relative to the fixed nominal fixation or, if TRUE, relative to the (possibly moving) crosshair location. When TRUE, if the crosshair moves then the dot will move with it.\nxDeg and yDeg (default 0,0) are coordinates of the dot center relative to the nominal fixation location (which a moving crosshair circles around).  \ndiameterDeg (default 0) is the dot diameter. Diameter zero disables the dot.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, which weights the blending; use 1 for 100% color. Each of the four values ranges 0 to 1.',
     type: "text",
     default: "0,0,0,0,0,0,1",
     categories: "",
@@ -1995,7 +1984,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'markFlies: WE MUST UPDATE DEFAULT WHEN reMovingFixationBool IS UPDATED. Until the target appears, display a swarm of moving "flies" (each like a crosshair) that make it hard to get the cursor to track the moving crosshair unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. Each fly moves a fixed radial distance degPerSec/fHz from frame to frame, where fHz is the frame rate (e.g. 60) and degPerSec is the speed. On each frame, each fly moves in a random direction. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. markFlies accepts several arguments as comma separated values:\n▶ reMovingFixationBool, n, radiusDeg, degPerSec, thicknessDeg, lengthDeg, colorRGBA\nreMovingFixationBool (default TRUE) centers the circular fly area on, if FALSE, the fixed nominal fixation location (that the crosshair circles around), otherwise centers on the (possibly moving) crosshair.\nn (default 0, i.e. none) is the number of flies. Setting n=0, the default, disables markFlies.\nradiusDeg (default 1) is the radius of the circular area that the flies are confined to.\nthicknessDeg (default 0.05) is the line thickness.\nlengthDeg (default 2) is the length of each of the two lines that make one "fly".\ncolorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).',
+      'markFlies: UPDATE DEFAULT WHEN reMovingFixationBool ARGUMENT IS ADDED. Until the target appears, display a swarm of moving "flies" (each like a crosshair) that make it hard to get the cursor to track the moving crosshair unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. Each fly moves a fixed radial distance degPerSec/fHz from frame to frame, where fHz is the frame rate (e.g. 60) and degPerSec is the speed. On each frame, each fly moves in a random direction. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. markFlies accepts several arguments as comma separated values:\n▶ reMovingFixationBool, n, radiusDeg, degPerSec, thicknessDeg, lengthDeg, colorRGBA\nreMovingFixationBool (default TRUE) centers the circular fly area on, if FALSE, the fixed nominal fixation location (that the crosshair circles around), otherwise centers on the (possibly moving) crosshair.\nn (default 0, i.e. none) is the number of flies. Setting n=0, the default, disables markFlies.\nradiusDeg (default 1) is the radius of the circular area that the flies are confined to.\nthicknessDeg (default 0.05) is the line thickness.\nlengthDeg (default 2) is the length of each of the two lines that make one "fly".\ncolorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).',
     type: "text",
     default: "0,1,0.3,FALSE,0.05,2,0,0,1,1",
     categories: "",
@@ -2454,7 +2443,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "nominalSize",
     explanation:
-      "🕑 readingDefineSingleLineSpacingAs selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual spacing will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. \nIMPLEMENTED\n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. So single spacing of 12 pt Times would be 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. TImes New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
+      "🕑 readingDefineSingleLineSpacingAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual spacing will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. \nIMPLEMENTED\n• font defines single line spacing as the font's built-in line spacing, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. So single spacing of 12 pt Times would be 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. TImes New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
     type: "categorical",
     default: "nominalSize",
     categories: "nominalSize, explicit",
@@ -2564,7 +2553,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "nominalPt",
     explanation:
-      '⭑ readingSetSizeBy (default "spacingDeg") determines how you specify the size of the text to be read. "Typographer\'s point" is abbreviated "pt", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so here we call the typeset size (e.g. 12 pt), the "nominal" type size.\n• nominalPt sets the font\'s point size to readingNominalSizePt.\n• nominalDeg sets the font\'s point size to subtend readingNominalSizeDeg. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg.\n• spacingDeg sets the font\'s point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.',
+      "⭑ readingSetSizeBy (default spacingDeg) determines how you specify the size of the text to be read. \"Typographer's point\" is abbreviated \"pt\", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so here we call the typeset size (e.g. 12 pt), the \"nominal\" type size.\n• nominalPt sets the font's point size to readingNominalSizePt.\n• nominalDeg sets the font's point size to subtend readingNominalSizeDeg. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt \n• xHeightDeg sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg.\n• spacingDeg sets the font's point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.",
     type: "categorical",
     default: "spacingDeg",
     categories: "nominalPt, nominalDeg, xHeightPt, xHeightDeg, spacingDeg",
@@ -2973,7 +2962,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "bottom",
     explanation:
-      'showCharacterSetWhere can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "characterSet". If the target is a gabor, the characterSet might display all the possible orientations, each labeled by a letter to be pressed.',
+      'showCharacterSetWhere (default bottom) can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "characterSet". If the target is a gabor, the characterSet might display all the possible orientations, each labeled by a letter to be pressed.',
     type: "categorical",
     default: "bottom",
     categories: "none, bottom, top, left, right",
@@ -3013,7 +3002,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "bottomRight",
     explanation:
-      "Can be bottomLeft, bottomCenter, or bottomRight. This location is used for both the trial count AND the viewing distance. ",
+      "showCounterWhere (default bottomRight). Can be bottomLeft, bottomCenter, or bottomRight. This location is used for both the trial count AND the viewing distance. ",
     type: "categorical",
     default: "bottomRight",
     categories: "bottomLeft, bottomRight, bottomCenter",
@@ -3072,7 +3061,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "deg",
     explanation:
-      "⭑ showGrid displays a full-screen grid that aids visual checking of location and size (both live and in screen shots). [pt, inch, and degDynamic NOT YET IMPLEMENTED.] Set showGrid to 'px' for a pixel grid, 'pt' for a typographer \"points\" grid (72 points per inch), 'cm' for a centimeter grid, 'inch' for an inch grid, 'deg' or 'degDynamic' for a degrees grid (when the crosshair moves, the 'degDynamic' grid moves with it, and the 'deg' grid does not),  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. (\"degDynamic\" specifies degrees relative to the (possibly) moving crosshair. \"deg\" specifies degrees relative to the nominal fixation, which is the fixed point that the moving crosshair circles around.) Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially when the crosshair moves, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you check timing or collect human data.",
+      "⭑ showGrid (default is disabled) displays a full-screen grid that aids visual checking of location and size (both live and in screen shots). [pt, inch, and degDynamic NOT YET IMPLEMENTED.] Set showGrid to 'px' for a pixel grid, 'pt' for a typographer \"points\" grid (72 points per inch), 'cm' for a centimeter grid, 'inch' for an inch grid, 'deg' or 'degDynamic' for a degrees grid (when the crosshair moves, the 'degDynamic' grid moves with it, and the 'deg' grid does not),  'mm' for a cortical grid, 'none' for no grid, and 'disabled' to prevent any grid. (\"degDynamic\" specifies degrees relative to the (possibly) moving crosshair. \"deg\" specifies degrees relative to the nominal fixation, which is the fixed point that the moving crosshair circles around.) Unless 'disabled', repeatedly pressing the backquote key (below ESCAPE) cyles through the five states: px, cm, deg, mm, none. The 'px' and 'cm' grids have their origin at lower left. The 'deg' and 'mm' grids have their origin at fixation. \nCAUTION: The grids are meant for debugging, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially when the crosshair moves, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you check timing or collect human data.",
     type: "categorical",
     default: "disabled",
     categories: "px, pt, cm, inch, deg, degDynamic, mm, none, disabled",
@@ -3190,7 +3179,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "blind",
     explanation:
-      "⭑ For debugging and checking it is often helpful to simulate the observer. simulationModel can be: \n• right: Always right.\n• wrong: Always wrong.\n• blind: This model presses a random response key. \n• ideal: This model does the same task as the human, picking the best response (i.e. maximizing expected proportion correct) given the stimulus. The ideal knows the target probabilities, and the noise statistics. Its threshold is a useful point of reference in analyzing human data. Without noise, the ideal will always be right. Since noise hasn't yet been implemented in EasyEyes, for now, this model just gives the right answer.\n• weibull: This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately estimate its (unknown to Quest) threshold, when the rest of the QUEST parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.\nThe source code for our simulation model is here:\nhttps://github.com/EasyEyes/threshold/blob/a9ea5a6c64d3c5ff0aacfc01c86b6a5aecf64369/components/simulatedObserver.js",
+      "⭑ simulationModel (default ideal). For debugging and checking it is often helpful to simulate the observer. simulationModel can be: \n• right: Always right.\n• wrong: Always wrong.\n• blind: This model presses a random response key. \n• ideal: This model does the same task as the human, picking the best response (i.e. maximizing expected proportion correct) given the stimulus. The ideal knows the target probabilities, and the noise statistics. Its threshold is a useful point of reference in analyzing human data. Without noise, the ideal will always be right. Since noise hasn't yet been implemented in EasyEyes, for now, this model just gives the right answer.\n• weibull: This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately estimate its (unknown to Quest) threshold, when the rest of the QUEST parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.\nThe source code for our simulation model is here:\nhttps://github.com/EasyEyes/threshold/blob/a9ea5a6c64d3c5ff0aacfc01c86b6a5aecf64369/components/simulatedObserver.js",
     type: "categorical",
     default: "ideal",
     categories: "right, wrong, blind, weibull, ideal",
@@ -3200,7 +3189,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0",
     explanation:
-      "The actual threshold of the simulated observer in linear units (not log). We test the implementation of Quest by testing how well it estimates simulationThreshold.",
+      "simulationThreshold (default 2). The actual threshold of the simulated observer in linear units (not log). We test the implementation of Quest by testing how well it estimates simulationThreshold.",
     type: "numerical",
     default: "2",
     categories: "",
@@ -3220,7 +3209,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "spacingDeg specifies the spacing, in degrees, center-to-center from target to a flanker. This input value is ignored when you use Quest to measure the spacing threshold. If spacingDirection is tangential then spacingDeg is spacing to either flanker, as the spacings are equal. If spacingDirection is radial then then spacingIsOuterBool (default FALSE) determines whether spacingDeg is the spacing from target to outer (or inner) flanker.",
+      "spacingDeg (default 2) specifies the spacing, in degrees, center-to-center from target to a flanker. This input value is ignored when you use Quest to measure the spacing threshold. If spacingDirection is tangential then spacingDeg is spacing to either flanker, as the spacings are equal. If spacingDirection is radial then then spacingIsOuterBool (default FALSE) determines whether spacingDeg is the spacing from target to outer (or inner) flanker.",
     type: "numerical",
     default: "2",
     categories: "",
@@ -3230,7 +3219,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "radial",
     explanation:
-      'spacingDirection. When eccentricity is nonzero then spacingDirection can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then spacingDirection can be horizontal, vertical, or horizontalAndVertical. The "...And..." options display four flankers, distributed around the target. It is an error to request radial or tangential  or radialAndTangential spacingDirection at eccentricity zero, because they are undefined there.',
+      'spacingDirection (default radial). When eccentricity is nonzero then spacingDirection can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then spacingDirection can be horizontal, vertical, or horizontalAndVertical. The "...And..." options display four flankers, distributed around the target. It is an error to request radial or tangential  or radialAndTangential spacingDirection at eccentricity zero, because they are undefined there.',
     type: "categorical",
     default: "radial",
     categories:
@@ -3241,7 +3230,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "spacingIsOuterBool. When spacingDirection is radial, there are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. To replicate CriticalSpacing data, when thresholdPameter is spacing, spacingSymmetry is cortex, and spacingRelationToSize is ratio or typographic, spacingIsOuterBool (default FALSE) determines whether target size is based on inner (FALSE) or outer (TRUE) spacing. ",
+      "spacingIsOuterBool (default FALSE). When spacingDirection is radial, there are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. To replicate CriticalSpacing data, when thresholdPameter is spacing, spacingSymmetry is cortex, and spacingRelationToSize is ratio or typographic, spacingIsOuterBool (default FALSE) determines whether target size is based on inner (FALSE) or outer (TRUE) spacing. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3251,7 +3240,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1.4",
     explanation:
-      "⭑ spacingOverSizeRatio specifies the ratio of spacing (in deg, center of target to center of inner flanker) to size (in deg, can be width or height as specified by targetSizeIsHeightBool). Ignored unless spacingRelationToSize is ratio. In that case, target size is spacing/spacingOverSizeRatio.",
+      "⭑ spacingOverSizeRatio (default 1.4) specifies the ratio of spacing (in deg, center of target to center of inner flanker) to size (in deg, can be width or height as specified by targetSizeIsHeightBool). Ignored unless spacingRelationToSize is ratio. In that case, target size is spacing/spacingOverSizeRatio.",
     type: "numerical",
     default: "1.4",
     categories: "",
@@ -3261,7 +3250,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "ratio",
     explanation:
-      '⭑ spacingRelationToSize can be none, ratio, or typographic. When thresholdParameter is "spacing", spacingRelationToSize specifies how target size depend on center-to-center target-flanker spacing. And when thresholdParameter is "size", spacingRelationToSize specifies how spacing depend on size.\n• none means no dependence. Size and spacing are set independently. \n• ratio means accept the thresholdParameter (which is either size or spacing) and adjust the other parameter to satisfy the specified spacingOverSizeRatio. There are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. "ratio" refers to the ratio of spacing to target size. Set spacingIsOuterBool to choose whether size scales with inner  (FALSE) or outer (TRUE) spacing.\n• typographic prints the triplet (flanker, target, flanker) as a (horizontal) string (horizontally) centered on the specified target eccentricity. By "horizontal" and "vertical", we just mean the orientation of the baseline, and orthogonal to it. ("Vertically," the fontCharacterSet bounding box is centered on the eccentric location, and all letters in the string are on same baseline.) If thresholdParameter is "spacing" then the font size of string is adjusted so that the width of the string is 3× specified spacing. Works with both left-to-right and right-to-left fonts. [If thresholdParameter is "size" then EasyEyes adjusts the font size of the string to achieve the specified target size.] ',
+      '⭑ spacingRelationToSize (default ratio) can be none, ratio, or typographic. When thresholdParameter is "spacing", spacingRelationToSize specifies how target size depend on center-to-center target-flanker spacing. And when thresholdParameter is "size", spacingRelationToSize specifies how spacing depend on size.\n• none means no dependence. Size and spacing are set independently. \n• ratio means accept the thresholdParameter (which is either size or spacing) and adjust the other parameter to satisfy the specified spacingOverSizeRatio. There are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. "ratio" refers to the ratio of spacing to target size. Set spacingIsOuterBool to choose whether size scales with inner  (FALSE) or outer (TRUE) spacing.\n• typographic prints the triplet (flanker, target, flanker) as a (horizontal) string (horizontally) centered on the specified target eccentricity. By "horizontal" and "vertical", we just mean the orientation of the baseline, and orthogonal to it. ("Vertically," the fontCharacterSet bounding box is centered on the eccentric location, and all letters in the string are on same baseline.) If thresholdParameter is "spacing" then the font size of string is adjusted so that the width of the string is 3× specified spacing. Works with both left-to-right and right-to-left fonts. [If thresholdParameter is "size" then EasyEyes adjusts the font size of the string to achieve the specified target size.] ',
     type: "categorical",
     default: "ratio",
     categories: "none, ratio, typographic",
@@ -3271,7 +3260,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "screen",
     explanation:
-      '⭑ spacingSymmetry can be screen, retina, or cortex. This is ignored unless radial eccentrity is nonzero and spacingDirection is radial, which means that the target lies between two flankers, all on a radial line. The "inner" flanker is closer to fixation than the target. The "outer" flanker is farther than the target. We refer to the center-to-center spacing from target to inner and outer flankers as the inner and outer spacings. Parameter spacingDeg specifies the outer spacing. spacingSymmetry affects only the inner spacing, which is calculated to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e.  log(outer+eccDeg + 0.15)-log(eccDeg + 0.15)=log(eccDeg + 0.15)-log(eccDeg-inner + 0.15), where eccDeg is the target\'s radial eccentricity in deg. To check the spacing symmetry, you may want to show a corresponding grid by setting parameter showGrid to px or cm (for screen), deg (for retina), and mm (for cortex).',
+      '⭑ spacingSymmetry (default retina) can be screen, retina, or cortex. This is ignored unless radial eccentrity is nonzero and spacingDirection is radial, which means that the target lies between two flankers, all on a radial line. The "inner" flanker is closer to fixation than the target. The "outer" flanker is farther than the target. We refer to the center-to-center spacing from target to inner and outer flankers as the inner and outer spacings. Parameter spacingDeg specifies the outer spacing. spacingSymmetry affects only the inner spacing, which is calculated to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e.  log(outer+eccDeg + 0.15)-log(eccDeg + 0.15)=log(eccDeg + 0.15)-log(eccDeg-inner + 0.15), where eccDeg is the target\'s radial eccentricity in deg. To check the spacing symmetry, you may want to show a corresponding grid by setting parameter showGrid to px or cm (for screen), deg (for retina), and mm (for cortex).',
     type: "categorical",
     default: "retina",
     categories: "screen, retina, cortex",
@@ -3301,7 +3290,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "center",
     explanation:
-      'When computing the characterSet bounding box as the union of the bounding box of each letter, align the bounding boxes horizontally by "center" or "origin". The bounding boxes are always vertically aligned by baseline.',
+      'targetBoundingBoxHorizontalAlignment (default center). When computing the characterSet bounding box as the union of the bounding box of each letter, align the bounding boxes horizontally by "center" or "origin". The bounding boxes are always vertically aligned by baseline.',
     type: "categorical",
     default: "center",
     categories: "center, origin",
@@ -3629,7 +3618,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "identify",
     explanation:
-      '⭑ Can be one or more of the following categories, separated by commas,\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant is asked a question, using a questionAndAnswerXXX parameter.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.\n🕑 \n• rate. The participant is invited to rate on a scale of 1 to 7. The targetKind can be reading, image, or sound.',
+      '⭑ targetTask (default UNDEFINED). Can be one or more of the following categories, separated by commas,\n• identify is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• questionAndAnswer The participant is asked a question, using a questionAndAnswerXXX parameter.\n• detect In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.\n🕑 \n• rate. The participant is invited to rate on a scale of 1 to 7. The targetKind can be reading, image, or sound.',
     type: "categorical",
     default: "UNDEFINED",
     categories: "identify, detect, questionAndAnswer",
@@ -3769,9 +3758,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ thresholdParameter (default is the empty string) designates an input parameter (e.g. targetSizeDeg or spacingDeg) that will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacingDeg" (formerly "spacing") varies center-to-center spacing of target and neighboring flankers. \n• "targetSizeDeg" (formerly "size") varies target size. \n• "targetDurationSec" varies target duration.\n• "targetContrast" awaits HDR10 support.\n•  "targetEccentricityXDeg"  may be added in the future.\n• "targetSoundDBSPL" (formerly "soundLevel")  varies target sound level.\n• "targetSoundNoiseDBSPL" varies noise sound level. Not yet implemented.\nNOTE: EasyEyes formerly supported the short crossed-out nicknames (size, spacing, and soundLevel), but we removed them so that only an actual input parameter name (listed in the first column of this Glossary) is allowed as a value of thresholdParameter. ',
+      '⭑ thresholdParameter (no default) designates an input parameter (e.g. targetSizeDeg or spacingDeg) that will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacingDeg" (formerly "spacing") varies center-to-center spacing of target and neighboring flankers. \n• "targetSizeDeg" (formerly "size") varies target size. \n• "targetDurationSec" varies target duration.\n• "targetContrast" awaits HDR10 support.\n•  "targetEccentricityXDeg"  may be added in the future.\n• "targetSoundDBSPL" (formerly "soundLevel")  varies target sound level.\n• "targetSoundNoiseDBSPL" varies noise sound level. Not yet implemented.\nNOTE: EasyEyes formerly supported the short crossed-out nicknames (size, spacing, and soundLevel), but we removed them so that only an actual input parameter name (listed in the first column of this Glossary) is allowed as a value of thresholdParameter. ',
     type: "categorical",
-    default: "spacingDeg",
+    default: "",
     categories:
       "spacingDeg, targetSizeDeg, targetOffsetDeg, targetDurationSec, targetContrast, targetSoundDBSPL, targetSoundNoiseDBSPL, targetOffsetDeg",
   },
