@@ -853,6 +853,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _prolific2ScreenerSet (default none) allows you, the scientist, to provide the name of a screener set that you created in Prolific. This gives you immediate access to all Prolific parameters, as soon as they appear on Prolific. Using a screener set causes Prolific to ignore all other screener requests, including all the EasyEyes _prolific3XXX and _prolific4XXX parameters. The twenty EasyEyes _prolific3XXX and _prolific4XXX parameters are useful, but represent only a small fraction of the screeners offered by Prolific.",
   },
+  _prolific2StudyLabel: {
+    name: "_prolific2StudyLabel",
+    availability: "now",
+    type: "categorical",
+    default: "",
+    explanation:
+      "🕑 _prolific2StudyLabel (default empty) provides an optional label (from Prolific's growing list) to help participants select a study.",
+    categories: ["Survey", "Writing task", "Annotation", "Interview", "Other"],
+  },
   _prolific2SubmissionApproval: {
     name: "_prolific2SubmissionApproval",
     availability: "now",
@@ -1597,6 +1606,14 @@ export const GLOSSARY: Glossary = {
       "Don't know / other",
       "Not applicable / rather not say",
     ],
+  },
+  _recordProlificUserIDBool: {
+    name: "_recordProlificUserIDBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_recordProlificUserIDBool (default FALSE), when TRUE, if EasyEyes was called by Prolific, causes EasyEyes to immediately save a small CSV file in the Pavlovia repo, becfore initializing PsychoJS. The filename is prolific-SSS-UUUcsv where SSS and UUU are replaced by the Prolific session and user IDs. The file should include: experiment name, Prolific session and user IDs, operating system, version, browser, and version. When Prolific says the experiment is done, the scientist can compare the list of “login” filenames (in the Pavlovia repo) with Prolific’s list of user IDs in the Demographic data file that it provides. Hopefully the two lists will agree. Then examine the login files that lack corresponding CSV results files. Perhaps this will discover browser versions that are incompatible with EasyEyes.",
   },
   _saveCursorPositionBool: {
     name: "_saveCursorPositionBool",

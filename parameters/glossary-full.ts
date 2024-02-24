@@ -893,6 +893,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_prolific2StudyLabel",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _prolific2StudyLabel (default empty) provides an optional label (from Prolific's growing list) to help participants select a study.",
+    type: "categorical",
+    default: "",
+    categories: "Survey, Writing task, Annotation, Interview, Other",
+  },
+  {
     name: "_prolific2SubmissionApproval",
     availability: "now",
     example: "",
@@ -1138,6 +1148,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Don't know / other, Not applicable / rather not say",
+  },
+  {
+    name: "_recordProlificUserIDBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_recordProlificUserIDBool (default FALSE), when TRUE, if EasyEyes was called by Prolific, causes EasyEyes to immediately save a small CSV file in the Pavlovia repo, becfore initializing PsychoJS. The filename is prolific-SSS-UUUcsv where SSS and UUU are replaced by the Prolific session and user IDs. The file should include: experiment name, Prolific session and user IDs, operating system, version, browser, and version. When Prolific says the experiment is done, the scientist can compare the list of “login” filenames (in the Pavlovia repo) with Prolific’s list of user IDs in the Demographic data file that it provides. Hopefully the two lists will agree. Then examine the login files that lack corresponding CSV results files. Perhaps this will discover browser versions that are incompatible with EasyEyes.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
   },
   {
     name: "_saveCursorPositionBool",
