@@ -853,6 +853,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_prolific0TraceBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_prolific0TraceBool (default FALSE), when TRUE, if EasyEyes was called by Prolific, causes EasyEyes to immediately save a small CSV file in the Pavlovia repo, before initializing PsychoJS. The filename is\nprolific-SSS-UUU.csv\nwhere SSS and UUU are replaced by the Prolific session and user ID. The CSV file includes: experiment name, Prolific user and session IDs, computer operating system and version, and browser and version. When Prolific reports that the experiment is done, the scientist can compare the list of “prolific” filenames (in the Pavlovia repo) with Prolific’s list of user IDs in the Demographic data file that it provides. For any user ID for which the results CSV is missing, examine the “prolific” file for that user ID. This might discover browser versions that are incompatible with EasyEyes.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_prolific1ProjectID",
     availability: "now",
     example: "",
@@ -1148,16 +1158,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "multicategorical",
     default: "",
     categories: "Yes, No, Don't know / other, Not applicable / rather not say",
-  },
-  {
-    name: "_recordProlificUserIDBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_recordProlificUserIDBool (default FALSE), when TRUE, if EasyEyes was called by Prolific, causes EasyEyes to immediately save a small CSV file in the Pavlovia repo, becfore initializing PsychoJS. The filename is prolific-SSS-UUUcsv where SSS and UUU are replaced by the Prolific session and user IDs. The file should include: experiment name, Prolific session and user IDs, operating system, version, browser, and version. When Prolific says the experiment is done, the scientist can compare the list of “login” filenames (in the Pavlovia repo) with Prolific’s list of user IDs in the Demographic data file that it provides. Hopefully the two lists will agree. Then examine the login files that lack corresponding CSV results files. Perhaps this will discover browser versions that are incompatible with EasyEyes.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
   },
   {
     name: "_saveCursorPositionBool",
