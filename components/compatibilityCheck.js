@@ -15,10 +15,12 @@ import {
   AllBrands,
   AllModelNames,
   AllModelNumbers,
+  addQRSkipButtons,
   fetchAllPhoneModels,
   getAutoCompleteSuggestionElements,
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
+import { showExperimentEnding } from "./forms";
 
 let gotLoudspeakerMatchBool = false;
 // import { microphoneInfo } from "./global";
@@ -36,6 +38,13 @@ const loudspeakerInfo = {
   modelNumber: "",
   detailsFrom51Degrees: {},
   loudspeaker: null,
+};
+
+const QRSkipResponse = {
+  QRBool: false,
+  QRCantBool: false,
+  QRPreferNotToBool: false,
+  QRNoSmartphoneBool: false,
 };
 
 const getPreferredModelNumberAndName = (
@@ -333,13 +342,14 @@ export const checkSystemCompatibility = (
   reader,
   lang,
   rc,
-  useEnglishNamesForLanguage = true
+  useEnglishNamesForLanguage = true,
+  psychoJS = null
 ) => {
   // handle language
   handleLanguage(lang, rc, useEnglishNamesForLanguage);
 
   var Language = rc.language.value;
-
+  var check = false;
   const requirements = getCompatibilityRequirements(
     reader,
     Language,
@@ -349,6 +359,8 @@ export const checkSystemCompatibility = (
   const compatibilityRequirements = requirements.compatibilityRequirements;
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
   var msg = requirements.describeDevice;
+  const needsUnmet = requirements.needsUnmet;
+  console.log("needsUnmet", needsUnmet);
 
   // add screen size to compatibility test
   // Get screenWidthPx and screenHeightPx of the participant's screen
@@ -446,6 +458,12 @@ export const checkSystemCompatibility = (
     }
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
+    if (screenWidthPx < minWidthPx) {
+      needsUnmet.push("_needScreenWidthUpToDeg");
+    }
+    if (screenHeightPx < minHeightPx) {
+      needsUnmet.push("_needScreenHeightUpToDeg");
+    }
   } else if (minWidthPx > 0) {
     // non-zero minimum width
     // Internation phrase EE_compatibileScreenWidth - replace 111 with minWidthPx
@@ -461,6 +479,9 @@ export const checkSystemCompatibility = (
     }
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
+    if (screenWidthPx < minWidthPx) {
+      needsUnmet.push("_needScreenWidthUpToDeg");
+    }
   } else if (minHeightPx > 0) {
     // non-zero minimum height
     // Internation phrase EE_compatibileScreenHeight - replace 111 with minHeightPx
@@ -475,6 +496,9 @@ export const checkSystemCompatibility = (
     }
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
+    if (screenHeightPx < minHeightPx) {
+      needsUnmet.push("_needScreenHeightUpToDeg");
+    }
   } else {
     // terminate the last sentence in compatibilityRequirements array with a period
     if (compatibilityRequirements.length > 0)
@@ -515,6 +539,12 @@ export const checkSystemCompatibility = (
   }
 
   msg.push(`\n Study URL: ${window.location.toString()} \n`);
+
+  if (psychoJS) {
+    const needsUnmetString = needsUnmet.join(",");
+    psychoJS.experiment.addData("_needsUnmet", needsUnmetString);
+    psychoJS.experiment.nextEntry();
+  }
   return {
     msg: msg,
     proceed: deviceIsCompatibleBool,
@@ -539,6 +569,8 @@ export const getCompatibilityRequirements = (
     compatibleOS,
     compatibleProcessorCoresMinimum;
 
+  const needsUnmet = [];
+
   const deviceInfo = {};
   // if isForScientistPage is false, then we don't need to get the device info
   if (!isForScientistPage) {
@@ -560,6 +592,8 @@ export const getCompatibilityRequirements = (
     compatibleProcessorCoresMinimum = reader.read(
       "_needProcessorCoresMinimum"
     )[0];
+    console.log("_needProcessorCoresMinimum", compatibleProcessorCoresMinimum);
+    console.log("hardwareConcurrency", deviceInfo["hardwareConcurrency"]);
     // the above lists might have spaces in the beginning or end of the string, so we need to remove them
     compatibleBrowser = compatibleBrowser.map((item) => item.trim());
     compatibleDevice = compatibleDevice.map((item) => item.trim());
@@ -610,10 +644,10 @@ export const getCompatibilityRequirements = (
 
   var deviceIsCompatibleBool = true;
   var msg = [];
+  var check = false;
   // compatibilityType ----> all, not, or a browser name
   const browserCompatibilityType = compatibleBrowser[0].trim().slice(0, 3);
   const OSCompatibilityType = compatibleOS[0].trim().slice(0, 3);
-
   // COMPUTE deviceIsCompatibleBool and compatibilityRequirements
   switch (browserCompatibilityType) {
     case "all": // ignore browser
@@ -622,41 +656,51 @@ export const getCompatibilityRequirements = (
           msg.push(readi18nPhrases("EE_compatibleDeviceCores", Language));
           break;
         case "not": // report incompatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool &&
-            !compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
+          check = compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
+          deviceIsCompatibleBool = deviceIsCompatibleBool && !check;
+          if (check) {
+            needsUnmet.push("_needOperatingSystem");
+          }
           msg.push(readi18nPhrases("EE_compatibleNotOSDeviceCores", Language));
           break;
         default: // report compatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool &&
-            compatibleOS.includes(deviceInfo["deviceSysFamily"]);
+          check = compatibleOS.includes(deviceInfo["deviceSysFamily"]);
+          deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+          if (!check) {
+            needsUnmet.push("_needOperatingSystem");
+          }
           msg.push(readi18nPhrases("EE_compatibleOSDeviceCores", Language));
           break;
       }
       break;
     case "not": //report incompatible browsers, ignore browser version
-      deviceIsCompatibleBool =
-        deviceIsCompatibleBool &&
-        !compatibleBrowser.includes("not" + deviceInfo["deviceBrowser"]);
+      check = compatibleBrowser.includes("not" + deviceInfo["deviceBrowser"]);
+      deviceIsCompatibleBool = deviceIsCompatibleBool && !check;
+      if (check) {
+        needsUnmet.push("_needBrowser");
+      }
       switch (OSCompatibilityType) {
         case "all": //ignore OSes
           msg.push(
-            readi18nPhrases("EE_compatibleBrowserDeviceCores", Language)
+            readi18nPhrases("EE_compatibleNotBrowserDeviceCores", Language)
           );
           break;
         case "not": //report incompatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool &&
-            !compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
+          check = compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
+          deviceIsCompatibleBool = deviceIsCompatibleBool && !check;
+          if (check) {
+            needsUnmet.push("_needOperatingSystem");
+          }
           msg.push(
             readi18nPhrases("EE_compatibleNotBrowserNotOSDeviceCores", Language)
           );
           break;
         default: //report compatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool &&
-            compatibleOS.includes(deviceInfo["deviceSysFamily"]);
+          check = compatibleOS.includes(deviceInfo["deviceSysFamily"]);
+          deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+          if (!check) {
+            needsUnmet.push("_needOperatingSystem");
+          }
           msg.push(
             readi18nPhrases("EE_compatibleNotBrowserOSDeviceCores", Language)
           );
@@ -664,17 +708,22 @@ export const getCompatibilityRequirements = (
       }
       break;
     default: // report compatible browsers
-      deviceIsCompatibleBool =
-        deviceIsCompatibleBool &&
-        compatibleBrowser.includes(deviceInfo["deviceBrowser"]);
+      check = compatibleBrowser.includes(deviceInfo["deviceBrowser"]);
+      deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+      if (!check) {
+        needsUnmet.push("_needBrowser");
+      }
       switch (OSCompatibilityType) {
         case "all":
           if (compatibleBrowserVersionMinimum > 0) {
             //report browser version
-            deviceIsCompatibleBool =
-              deviceIsCompatibleBool &&
+            check =
               deviceInfo["deviceBrowserVersion"] >=
-                compatibleBrowserVersionMinimum;
+              compatibleBrowserVersionMinimum;
+            deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+            if (!check) {
+              needsUnmet.push("_needBrowserVersionMinimum");
+            }
             msg.push(
               readi18nPhrases(
                 "EE_compatibleBrowserVersionDeviceCores",
@@ -688,15 +737,20 @@ export const getCompatibilityRequirements = (
             );
           break;
         case "not": //report incompatible OSes
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool &&
-            !compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
+          check = compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
+          deviceIsCompatibleBool = deviceIsCompatibleBool && !check;
+          if (check) {
+            needsUnmet.push("_needOperatingSystem");
+          }
           if (compatibleBrowserVersionMinimum > 0) {
             //report browser version
-            deviceIsCompatibleBool =
-              deviceIsCompatibleBool &&
+            check =
               deviceInfo["deviceBrowserVersion"] >=
-                compatibleBrowserVersionMinimum;
+              compatibleBrowserVersionMinimum;
+            deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+            if (!check) {
+              needsUnmet.push("_needBrowserVersionMinimum");
+            }
             msg.push(
               readi18nPhrases("EE_compatibleBrowserNotOSDeviceCores", Language)
             );
@@ -707,15 +761,20 @@ export const getCompatibilityRequirements = (
             );
           break;
         default: //report compatible browsers
-          deviceIsCompatibleBool =
-            deviceIsCompatibleBool &&
-            compatibleOS.includes(deviceInfo["deviceSysFamily"]);
+          check = compatibleOS.includes(deviceInfo["deviceSysFamily"]);
+          deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+          if (!check) {
+            needsUnmet.push("_needOperatingSystem");
+          }
           if (compatibleBrowserVersionMinimum > 0) {
             //report browser version
-            deviceIsCompatibleBool =
-              deviceIsCompatibleBool &&
+            check =
               deviceInfo["deviceBrowserVersion"] >=
-                compatibleBrowserVersionMinimum;
+              compatibleBrowserVersionMinimum;
+            deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+            if (!check) {
+              needsUnmet.push("_needBrowserVersionMinimum");
+            }
             msg.push(
               readi18nPhrases(
                 "EE_compatibleBrowserVersionOSDeviceCores",
@@ -732,13 +791,17 @@ export const getCompatibilityRequirements = (
       break;
   }
 
-  deviceIsCompatibleBool =
-    deviceIsCompatibleBool &&
-    compatibleDevice.includes(deviceInfo["deviceType"]);
-  deviceIsCompatibleBool =
-    deviceIsCompatibleBool &&
-    deviceInfo["hardwareConcurrency"] >= compatibleProcessorCoresMinimum;
+  check = compatibleDevice.includes(deviceInfo["deviceType"]);
+  deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+  if (!check) {
+    needsUnmet.push("_needDeviceType");
+  }
 
+  check = deviceInfo["hardwareConcurrency"] >= compatibleProcessorCoresMinimum;
+  deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+  if (!check) {
+    needsUnmet.push("_needProcessorCoresMinimum");
+  }
   // Do substitutions to plug in the requirements.
   // BBB = allowed browser(s), separated by "or"
   // 111 = minimum version
@@ -747,7 +810,7 @@ export const getCompatibilityRequirements = (
   // 222 = minimum number of cpu cores
   // Each allowed field can hold one, e.g. "Chrome", or several possibilities, e.g. "Chrome or Firefox".
   // Source code for StringOfItems and StringOfNotItems below.
-
+  console.log("msg", msg);
   msg.forEach((item, idx, arr) => {
     // Incompatible with items connected by AND.
     arr[idx] = arr[idx].replace(/bbb/g, StringOfNotItems(compatibleBrowser));
@@ -811,6 +874,7 @@ export const getCompatibilityRequirements = (
       : undefined,
     compatibilityRequirements: msg,
     describeDevice: describeDevice,
+    needsUnmet: needsUnmet,
   };
 };
 
@@ -861,7 +925,9 @@ export const displayCompatibilityMessage = async (
   needAnySmartphone,
   needCalibratedSmartphoneMicrophone,
   needComputerSurveyBool,
-  needCalibratedSound
+  needCalibratedSound,
+  psychoJS,
+  quitPsychoJS
 ) => {
   return new Promise(async (resolve) => {
     //message wrapper
@@ -987,7 +1053,7 @@ export const displayCompatibilityMessage = async (
     }
 
     document.body.appendChild(messageWrapper);
-    if (compatibilityCheckPeer) {
+    if (compatibilityCheckPeer && proceedBool) {
       const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
       // add id to the QR code
       compatiblityCheckQR.id = "compatibility-qr";
@@ -1014,7 +1080,105 @@ export const displayCompatibilityMessage = async (
       displayUpdate.style.display = "none";
       messageWrapper.appendChild(displayUpdate);
       messageWrapper.append(compatibilityCheckQRExplanation);
-      messageWrapper.append(compatiblityCheckQR);
+      const {
+        qrContainer,
+        cantReadButton,
+        preferNotToReadButton,
+        noSmartphoneButton,
+      } = addQRSkipButtons(rc.language.value, compatiblityCheckQR);
+      messageWrapper.append(
+        needPhoneSurvey ? qrContainer : compatiblityCheckQR
+      );
+      cantReadButton.addEventListener("click", async () => {
+        QRSkipResponse.QRCantBool = true;
+        psychoJS.experiment.addData("QRCantBool", true);
+        psychoJS.experiment.addData("QRNoSmartphoneBool", false);
+        psychoJS.experiment.addData("QRPreferNotToBool", false);
+        psychoJS.experiment.nextEntry();
+        const proceed = await isSmartphoneInDatabase(
+          "",
+          messageWrapper,
+          rc.language.value,
+          displayUpdate,
+          {},
+          needPhoneSurvey,
+          compatiblityCheckQR,
+          compatibilityCheckQRExplanation,
+          languageWrapper,
+          titleContainer,
+          elem,
+          needCalibratedSound,
+          numberOfTries,
+          {},
+          qrContainer
+        );
+        if (proceed) {
+          if (needPhoneSurvey) {
+            if (needComputerSurveyBool) {
+              await getLoudspeakerDeviceDetailsFromUser(
+                messageWrapper,
+                rc.language.value
+              );
+            }
+            resolve({
+              proceedButtonClicked: true,
+              proceedBool: true,
+              mic: microphoneInfo,
+              loudspeaker: loudspeakerInfo,
+              gotLoudspeakerMatchBool: false,
+            });
+          }
+        }
+      });
+      preferNotToReadButton.addEventListener("click", async () => {
+        QRSkipResponse.QRPreferNotToBool = true;
+        psychoJS.experiment.addData("QRPreferNotToBool", true);
+        psychoJS.experiment.addData("QRNoSmartphoneBool", false);
+        psychoJS.experiment.addData("QRCantBool", false);
+        psychoJS.experiment.nextEntry();
+        const proceed = await isSmartphoneInDatabase(
+          "",
+          messageWrapper,
+          rc.language.value,
+          displayUpdate,
+          {},
+          needPhoneSurvey,
+          compatiblityCheckQR,
+          compatibilityCheckQRExplanation,
+          languageWrapper,
+          titleContainer,
+          elem,
+          needCalibratedSound,
+          numberOfTries,
+          {},
+          qrContainer
+        );
+        if (proceed) {
+          if (needPhoneSurvey) {
+            if (needComputerSurveyBool) {
+              await getLoudspeakerDeviceDetailsFromUser(
+                messageWrapper,
+                rc.language.value
+              );
+            }
+            resolve({
+              proceedButtonClicked: true,
+              proceedBool: true,
+              mic: microphoneInfo,
+              loudspeaker: loudspeakerInfo,
+              gotLoudspeakerMatchBool: false,
+            });
+          }
+        }
+      });
+      noSmartphoneButton.addEventListener("click", async () => {
+        QRSkipResponse.QRNoSmartphoneBool = true;
+        psychoJS.experiment.addData("QRNoSmartphoneBool", true);
+        psychoJS.experiment.addData("QRPreferNotToBool", false);
+        psychoJS.experiment.addData("QRCantBool", false);
+        showExperimentEnding();
+        quitPsychoJS("", true, reader);
+      });
       let numberOfTries = 0;
       if (needPhoneSurvey) await fetchAllPhoneModels();
 
@@ -1025,6 +1189,7 @@ export const displayCompatibilityMessage = async (
           compatibilityCheckPeer.onPeerClose();
           if (result) {
             console.log("result", result);
+            QRSkipResponse.QRBool = true;
             numberOfTries++;
             const tryComputerButton = document.getElementById(
               "try-computer-button"
@@ -1054,7 +1219,8 @@ export const displayCompatibilityMessage = async (
               elem,
               needCalibratedSound,
               numberOfTries,
-              screenSizes
+              screenSizes,
+              qrContainer
             );
             if (proceed) {
               if (needPhoneSurvey) {
@@ -1171,7 +1337,7 @@ export const displayCompatibilityMessage = async (
       } catch (e) {
         console.log("error", e);
       }
-    } else {
+    } else if (proceedBool) {
       if (needComputerSurveyBool) {
         if (languageWrapper) {
           languageWrapper.remove();
@@ -1299,7 +1465,8 @@ const isSmartphoneInDatabase = async (
   elem = null,
   needCalibratedSound = [],
   numberOfTries = 0,
-  screenSizes = { width: 0, height: 0 }
+  screenSizes = { width: 0, height: 0 },
+  qrContainer = null
 ) => {
   // ask for the model number and name of the device
   // create input box for model number and name
@@ -1308,6 +1475,7 @@ const isSmartphoneInDatabase = async (
   if (needPhoneSurvey) {
     qrCodeDisplay.remove();
     qrCodeExplanation.remove();
+    qrContainer.remove();
     if (languageWrapper) {
       languageWrapper.remove();
     }

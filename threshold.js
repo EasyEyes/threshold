@@ -453,6 +453,10 @@ export var simulatedObservers;
 /* -------------------------------------------------------------------------- */
 
 const paramReaderInitialized = async (reader) => {
+  const isProlificExp = isProlificExperiment(reader);
+  if (isProlificExp) {
+    saveProlificInfo(thisExperimentInfo);
+  }
   status.currentFunction = "paramReaderInitialized";
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
@@ -786,7 +790,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const compMsg = checkSystemCompatibility(
       paramReader,
       paramReader.read("_language")[0],
-      rc
+      rc,
+      true,
+      psychoJS
     );
     let needAnySmartphone = false;
     let needCalibratedSmartphoneMicrophone = false;
@@ -840,7 +846,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       needAnySmartphone,
       needCalibratedSmartphoneMicrophone,
       needComputerSurveyBool.current,
-      needCalibratedSound
+      needCalibratedSound,
+      psychoJS,
+      quitPsychoJS
     );
 
     gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
@@ -977,7 +985,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // util.addInfoFromUrl(thisExperimentInfo);
 
     // record Prolific related info to thisExperimentInfo
-    if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo);
+    // if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo); //moved this to paramReaderInitialized
 
     window.console.log("ENV NAME", psychoJS.getEnvironment());
     window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
