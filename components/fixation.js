@@ -7,17 +7,24 @@ import {
   cursorNearFixation,
   colorRGBASnippetToRGBA,
 } from "./utils";
+import { warning } from "./errorHandling";
 
 export const getFixationPos = (blockN, paramReader) => {
   const locationStrategy = paramReader.read(
     "fixationLocationStrategy",
     blockN
   )[0];
-  if (locationStrategy === "centerFixation") return [0, 0];
-  const specifiedLocationXYDenisCoords = [
-    paramReader.read("fixationLocationXScreen", blockN)[0],
-    paramReader.read("fixationLocationYScreen", blockN)[0],
-  ];
+  if (locationStrategy !== "centerFixation") {
+    warning(
+      `fixationLocationStrategy=${locationStrategy} not yet supported, using a default fixation px pos at the center of the screen.`
+    );
+    return [0, 0];
+  }
+  const specifiedLocationXYDenisCoords = paramReader
+    .read("fixationOriginXYScreen", blockN)[0]
+    .split(",")
+    .map(Number);
+
   const specifiedLocationXYNorm = specifiedLocationXYDenisCoords.map(
     (z) => 2 * z - 1
   );

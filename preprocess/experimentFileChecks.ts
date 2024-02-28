@@ -37,6 +37,7 @@ import {
   INVALID_AUTHOR_EMAIL,
   COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH,
   Offender,
+  INVALID_FIXATION_LOCATION,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -60,6 +61,15 @@ const getCategoriesFromString = (str: string) =>
     .filter((x) => x);
 
 let zeroIndexed: boolean;
+
+// NOTE add parameters which are represented by comma-separated strings,
+//      along with the correct length (ie number of values that the cs string should encode)
+const commaSeparatedParamLengths = new Map([
+  ["markDot", 7],
+  ["markGrid", 7],
+  ["markFlies", 10],
+  ["fixationOriginXYScreen", 2],
+]);
 
 export const validatedCommas = (
   parsed: Papa.ParseResult<string[]>
@@ -130,7 +140,12 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   errors.push(...areAllPresentParametersRecognized(parametersToCheck));
   errors.push(...areAllPresentParametersCurrentlySupported(parametersToCheck));
   errors.push(...areAuthorizedEmailsValid(experimentDf));
-  errors.push(...areMarkDotGridAndFliesParamsCorrectLength(experimentDf));
+  errors.push(
+    ...areCommaSeperatedStringsOfCorrectLength(
+      experimentDf,
+      commaSeparatedParamLengths
+    )
+  );
 
   // Enforce using Column B for the underscore parameters, and Column C and on for conditions
   errors.unshift(...doConditionsBeginInTheSecondColumn(experimentDf));
@@ -158,8 +173,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
     ...areBlockUniqueValuesConsistent(experimentDf, [
       "viewingDistanceDesiredCm",
       "fixationLocationStrategy",
-      "fixationLocationXScreen",
-      "fixationLocationYScreen",
+      "fixationOriginXYScreen",
       "targetKind",
       ...blockShuffleGroupParams,
       "simulateParticipantBool",
@@ -180,7 +194,6 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
 
   errors.push(...checkSpecificParameterValues(experimentDf));
   errors.push(...checkVernierUsingCorrectThreshold(experimentDf));
-  // Remove empty errors (FUTURE ought to be unnecessary, find root cause)
   errors = errors
     .filter((error) => error)
     .sort((errorA, errorB) =>
@@ -307,22 +320,18 @@ const areAllPresentParametersCurrentlySupported = (
 };
 
 /**
- * Checks that markFlies, markDot, and markFlies are comma-separated strings of the correct length.
+ * Checks that comma-separated strings are of the correct length.
  */
-const areMarkDotGridAndFliesParamsCorrectLength = (
-  experiment: any
+const areCommaSeperatedStringsOfCorrectLength = (
+  experiment: any,
+  markParameterExpectedLengths: Map<string, number>
 ): EasyEyesError[] => {
   const columnNames = experiment.listColumns();
-  const markParameters = ["markDot", "markGrid", "markFlies"].filter((s) =>
+  const markParameters = [...markParameterExpectedLengths.keys()].filter((s) =>
     columnNames.includes(s)
   );
-  const markParameterExpectedLengths = new Map([
-    ["markDot", 7],
-    ["markGrid", 7],
-    ["markFlies", 10],
-  ]);
   let markParamErrors = markParameters
-    .map((param, i) => {
+    .map((param) => {
       const values = getColumnValues(experiment, param);
       const expectedLength = markParameterExpectedLengths.get(param);
 
@@ -937,6 +946,7 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   const errors: EasyEyesError[] = [];
 
   errors.push(..._checkCrosshairTrackingValues(experimentDf));
+  errors.push(..._checkFixationLocation(experimentDf));
   return errors;
 };
 
@@ -984,6 +994,35 @@ const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {
     errors.push(ILLDEFINED_TRACKING_INTERVALS(trackingIntervalImpossible));
 
   return errors;
+};
+
+// Normally the specified point must lie in that unit square (enforced by compiler),
+// but if fixationRequestedOffscreenBool=TRUE
+//     then the specified point can be anywhere.
+const _checkFixationLocation = (experiment: any): EasyEyesError[] => {
+  const where = "fixationOriginXYScreen";
+  const offscreen = "fixationRequestedOffscreenBool";
+  const columnNames = experiment.listColumns();
+  const fixationParameters = [where, offscreen].filter((s) =>
+    columnNames.includes(s)
+  );
+  // If just using the default values, then no issue
+  if (!fixationParameters.includes(where)) return [];
+  let offendingColumns: Array<Offender<Array<number>>> = [];
+  const positions: Array<Array<number>> = getColumnValuesOrDefaults(
+    experiment,
+    where
+  ).map((s) => s.split(",").map(Number));
+  const alloweds = getColumnValuesOrDefaults(experiment, offscreen);
+  positions.forEach((p, i) => {
+    if (alloweds[i].toLowerCase() !== "true") {
+      if (p.some((z) => z > 1 || z < 0)) {
+        offendingColumns.push({ columnNumber: i, offendingValue: p });
+      }
+    }
+  });
+  if (!offendingColumns.length) return [];
+  return [INVALID_FIXATION_LOCATION(offendingColumns)];
 };
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {

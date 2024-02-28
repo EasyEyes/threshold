@@ -654,3 +654,21 @@ export const COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH = (
     parameters: [parameter],
   };
 };
+
+export const INVALID_FIXATION_LOCATION = (
+  invalidLocations: Array<Offender<number[]>>
+): EasyEyesError => {
+  const offendingStrings = invalidLocations.map(
+    (o) => `${o.offendingValue} (column ${toColumnName(o.columnNumber + 2)})`
+  );
+  const offendingString =
+    "Invalid fixation positions: " + verballyEnumerate(offendingStrings);
+  return {
+    name: `Invalid fixation location requested`,
+    message: `Fixation was requested offscreen, ie <span class="error-parameter">fixationOriginXYScreen</span> out of range [[0,0],[1,1]], where <span class="error-parameter">fixationRequestedOffscreenBool</span> is false.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fixationOriginXYScreen", "fixationRequestedOffscreenBool"],
+  };
+};
