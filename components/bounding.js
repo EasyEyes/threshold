@@ -361,13 +361,16 @@ export const restrictSizeDeg = (
     // biggest of the four ratios. We set targetSizeDeg=targetSizeDeg/maxRatio.
 
     // REDUCE targetSizeDeg TO MAKE STIMULUS FIT
-    const largestBoundsRatio = getLargestBoundsRatio(
+    let largestBoundsRatio = getLargestBoundsRatio(
       stimulusRectPx,
       screenRectPx,
       targetXYPx,
       thresholdParameter,
       spacingRelationToSize
     );
+
+    // Set largestBoundsRatio to some max, so we don't dwarf the value of targetSizeDeg
+    largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
     targetSizeDeg = targetSizeDeg / largestBoundsRatio;
   }
 };

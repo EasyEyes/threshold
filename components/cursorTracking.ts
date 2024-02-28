@@ -90,6 +90,7 @@ const recordCursorPosition = () => {
   let stimulus = cursorTracking.target as any;
   if (Array.isArray(stimulus)) stimulus = stimulus[0];
 
+  const isInstructions = /nstruction/.test(status.currentFunction);
   const stimulusPresent =
     typeof stimulus !== "undefined" && stimulus._autoDraw === true;
   if (stimulusPresent) {
@@ -110,7 +111,7 @@ const recordCursorPosition = () => {
   const crosshairPresent =
     typeof fixationConfig.stim !== "undefined" &&
     //@ts-ignore
-    fixationConfig.stim.stims[0]._autoDraw;
+    fixationConfig.stim?.stims[0]?._autoDraw;
   if (typeof status.block_condition !== "undefined") {
     experiment = thisExperimentInfo.experiment as unknown as string;
     pavloviaSessionId = thisExperimentInfo.participant as unknown as string;
@@ -147,9 +148,9 @@ const recordCursorPosition = () => {
         nearPointY
       ).toString(),
       trialStep: status.currentFunction,
-      targetBool: stimulusPresent,
+      targetBool: stimulusPresent && !isInstructions,
       //@ts-ignore
-      crosshairBool: crosshairPresent,
+      crosshairBool: crosshairPresent && !isInstructions,
     };
     //@ts-ignore
     cursorTracking.records.push(thisRecord);
