@@ -1,3 +1,28 @@
 .hide-cursor {
   cursor: none;
 }
+.needs-page-button {
+  border-radius: 0.5rem;
+  vertical-align: middle;
+  pointer-events: auto !important;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  white-space: initial;
+  @media screen and (min-width: 960px) {
+    white-space: nowrap;
+  }
+  color: rgb(255, 255, 255) !important;
+  font-weight: 400;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  font-size: unset;
+  background-color: #999;
+  @media screen and (max-width: 560px) {
+    min-width: 200px;
+  }
+  padding: 0.2rem 1rem;
+}
+.needs-page-button:hover {
+  background-color: #555; /* Change the color to your desired color */
+}

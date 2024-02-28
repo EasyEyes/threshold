@@ -100,7 +100,7 @@ export const font = {
 export const fontCharacterSet = { current: undefined, where: undefined };
 
 export const screenBackground = {
-  defaultColorRGBA: "0.92,0.92,0.92,1",
+  defaultColorRGBA: "1,1,1,1",
   colorRGBA: undefined,
 };
 

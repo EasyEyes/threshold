@@ -1,4 +1,7 @@
-import { getInstructionText } from "./compatibilityCheck.js";
+import {
+  getInstructionText,
+  getPreferredModelNumberAndName,
+} from "./compatibilityCheck.js";
 import { db } from "./firebase/firebase.js";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { readi18nPhrases } from "./readPhrases.js";
@@ -17,7 +20,9 @@ export const getAutoCompleteSuggestionElements = (
   lang,
   needPhoneSurvey,
   p,
-  img
+  img,
+  modelNameInput,
+  modelNumberInput
 ) => {
   const suggestionContainer = document.createElement("div");
   suggestionContainer.classList.add("autocomplete-items");
@@ -37,10 +42,23 @@ export const getAutoCompleteSuggestionElements = (
         input.value
       );
       p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
-      if (input.value === "Apple" && deviceDetails.PlatformName == "iOS") {
+
+      if (input.value === "Apple") {
         img.style.visibility = "visible";
+        preferredModelNumber = getPreferredModelNumberAndName(
+          "Apple",
+          "iOS",
+          lang
+        )["preferredModelNumber"];
+        modelNumberInput.placeholder = preferredModelNumber;
       } else {
         img.style.visibility = "hidden";
+        preferredModelNumber = getPreferredModelNumberAndName(
+          input.value,
+          "",
+          lang
+        )["preferredModelNumber"];
+        modelNumberInput.placeholder = preferredModelNumber;
       }
     }
     const brandSuggestions = suggestions.filter((brand) =>
@@ -83,10 +101,22 @@ export const getAutoCompleteSuggestionElements = (
             input.value
           );
           p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
-          if (input.value === "Apple" && deviceDetails.PlatformName == "iOS") {
+          if (input.value === "Apple") {
             img.style.visibility = "visible";
+            preferredModelNumber = getPreferredModelNumberAndName(
+              "Apple",
+              "iOS",
+              lang
+            )["preferredModelNumber"];
+            modelNumberInput.placeholder = preferredModelNumber;
           } else {
             img.style.visibility = "hidden";
+            preferredModelNumber = getPreferredModelNumberAndName(
+              input.value,
+              "",
+              lang
+            )["preferredModelNumber"];
+            modelNumberInput.placeholder = preferredModelNumber;
           }
         }
       });
@@ -234,15 +264,14 @@ export const addQRSkipButtons = (lang, QRElem) => {
     lang
   );
 
-  cantReadButton.classList.add("btn", "btn-secondary", "btn-sm");
-  preferNotToReadButton.classList.add("btn", "btn-secondary", "btn-sm");
-  noSmartphoneButton.classList.add("btn", "btn-secondary", "btn-sm");
+  cantReadButton.classList.add("needs-page-button");
+  preferNotToReadButton.classList.add("needs-page-button");
+  noSmartphoneButton.classList.add("needs-page-button");
 
   const buttonContainer = document.createElement("div");
   buttonContainer.style.display = "flex";
   buttonContainer.style.flexDirection = "column";
-  buttonContainer.style.marginTop = "13px";
-  buttonContainer.style.marginBottom = "13px";
+  buttonContainer.style.margin = "13px";
   buttonContainer.style.justifyContent = "space-between";
 
   buttonContainer.appendChild(cantReadButton);

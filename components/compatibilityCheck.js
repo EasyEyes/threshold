@@ -40,14 +40,14 @@ const loudspeakerInfo = {
   loudspeaker: null,
 };
 
-const QRSkipResponse = {
+export const QRSkipResponse = {
   QRBool: false,
   QRCantBool: false,
   QRPreferNotToBool: false,
   QRNoSmartphoneBool: false,
 };
 
-const getPreferredModelNumberAndName = (
+export const getPreferredModelNumberAndName = (
   OEM,
   platformName,
   lang,
@@ -262,11 +262,13 @@ export const getInstructionText = (
 ) => {
   const needModelNumber = isSmartPhone
     ? needPhoneSurvey
-      ? readi18nPhrases("RC_surveyPhoneModel", language)
-          .replace("ooo", thisDevice.PlatformName)
-          .replace("OOO", thisDevice.PlatformName)
-          .replace("mmm", preferredModelNumberText)
-          .replace("MMM", preferredModelNumberText)
+      ? QRSkipResponse.QRCantBool || QRSkipResponse.QRPreferNotToBool
+        ? ""
+        : readi18nPhrases("RC_surveyPhoneModel", language)
+            .replace("ooo", thisDevice.PlatformName)
+            .replace("OOO", thisDevice.PlatformName)
+            .replace("mmm", preferredModelNumberText)
+            .replace("MMM", preferredModelNumberText)
       : readi18nPhrases("RC_needPhoneModel", language)
     : readi18nPhrases("RC_needModelNumberAndName", language);
   const preferredModelNumber = preferredModelNumberText;
@@ -1054,6 +1056,7 @@ export const displayCompatibilityMessage = async (
 
     document.body.appendChild(messageWrapper);
     if (compatibilityCheckPeer && proceedBool) {
+      if (needPhoneSurvey) await fetchAllPhoneModels();
       const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
       // add id to the QR code
       compatiblityCheckQR.id = "compatibility-qr";
@@ -1180,7 +1183,6 @@ export const displayCompatibilityMessage = async (
         quitPsychoJS("", true, reader);
       });
       let numberOfTries = 0;
-      if (needPhoneSurvey) await fetchAllPhoneModels();
 
       try {
         while (true) {
@@ -1559,7 +1561,9 @@ const isSmartphoneInDatabase = async (
       lang,
       needPhoneSurvey,
       p,
-      img
+      img,
+      modelNameInput,
+      modelNumberInput
     );
     modelNumberWrapper.appendChild(brandSuggestionsContainer);
   }
@@ -1574,7 +1578,9 @@ const isSmartphoneInDatabase = async (
       lang,
       needPhoneSurvey,
       p,
-      img
+      img,
+      modelNameInput,
+      modelNumberInput
     );
     modelNumberWrapper.appendChild(modelNameSuggestionsContainer);
   }
@@ -1589,17 +1595,24 @@ const isSmartphoneInDatabase = async (
       lang,
       needPhoneSurvey,
       p,
-      img
+      img,
+      modelNameInput,
+      modelNumberInput
     );
     modelNumberWrapper.appendChild(modelNumberSuggestionsContainer);
   }
   modelNumberWrapper.appendChild(checkButton);
-  if (needPhoneSurvey && deviceDetails.PlatformName === "iOS") {
+  if (needPhoneSurvey) {
     // insert image of iOS settings
     img.src = "./components/images/ios_settings.png";
     img.style.width = "30%";
     img.style.margin = "auto";
     img.style.marginBottom = "30px";
+    if (deviceDetails.PlatformName === "iOS") {
+      img.style.visibility = "visible";
+    } else {
+      img.style.visibility = "hidden";
+    }
     // messageWrapper.appendChild(img);
     const container = document.createElement("div");
     container.style.display = "flex";
