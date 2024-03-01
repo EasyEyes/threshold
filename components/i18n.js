@@ -11679,7 +11679,7 @@ export const phrases = {
     hu: "rendben",
     is: "OK",
     id: "OKE",
-    it: "DE ACUERDO",
+    it: "OK",
     ja: "確認",
     kn: "ಸರಿ",
     ko: "좋아요",
