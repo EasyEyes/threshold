@@ -24,7 +24,10 @@ function randomPointInUnitCircle() {
 function denisRBGColorSpaceToPsychoJS(rgb: number[]): number[] {
   return rgb.map((x) => x * 2 - 1);
 }
-export const getFlies = (showFlies: string): Swarm | undefined => {
+export const getFlies = (
+  showFlies: string,
+  gravity: string,
+): Swarm | undefined => {
   let swarm: Swarm | undefined;
 
   // NOTE update preprocess/experimentFileChecks.ts/areMarkDotGridAndFLiesParamsCorrectLength() if this specification changes
@@ -46,7 +49,8 @@ export const getFlies = (showFlies: string): Swarm | undefined => {
       centeredOnNominalFixationBool.toLowerCase() === "true",
       Number(thicknessDeg),
       Number(lengthDeg),
-      colorRGBAStr
+      colorRGBAStr,
+      Number(gravity),
     );
   }
   return swarm;
@@ -54,7 +58,7 @@ export const getFlies = (showFlies: string): Swarm | undefined => {
 
 export const getDotAndBackGrid = (
   showDot: string,
-  showBackGrid: string
+  showBackGrid: string,
 ): [Dot | undefined, BackGrid | undefined] => {
   let dot: Dot | undefined;
   let grid: BackGrid | undefined;
@@ -96,6 +100,8 @@ class Fly {
   opacity: number;
   pos: number[];
   stims: ShapeStim[];
+  markFliesGravity: number;
+  fHz: number;
   constructor(
     i: number,
     center: number[],
@@ -103,7 +109,9 @@ class Fly {
     pxStep: number,
     thicknessPx: number,
     lengthPx: number,
-    colorRGBA: string
+    colorRGBA: string,
+    markFliesGravity: number,
+    fHz: number,
   ) {
     this.id = i;
     this.center = center;
@@ -115,11 +123,13 @@ class Fly {
 
     let colorArray = colorRGBA.split(",");
     this.color = denisRBGColorSpaceToPsychoJS(
-      colorArray.slice(0, 3).map((c) => Number(c))
+      colorArray.slice(0, 3).map((c) => Number(c)),
     );
     this.opacity = Number(colorArray[3]);
 
     this.stims = this.generateStims();
+    this.markFliesGravity = markFliesGravity;
+    this.fHz = fHz;
   }
   draw(bool = true) {
     this.stims.forEach((s) => s.setAutoDraw(bool));
@@ -176,8 +186,37 @@ class Fly {
       }),
     ];
   }
-  takeStep(newCenter: number[]) {
+
+  applyGravity(flies: Fly[]) {
+    if (this.markFliesGravity !== 0) {
+      console.log("here");
+      for (const otherFly of flies) {
+        if (otherFly.id !== this.id && otherFly.id > this.id) {
+          const dx = otherFly.pos[0] - this.pos[0];
+          const dy = otherFly.pos[1] - this.pos[1];
+          const distanceSquared = dx * dx + dy * dy;
+          const dDeg = Math.sqrt(distanceSquared) * (180 / Math.PI);
+
+          let hDeg = 0;
+          if (distanceSquared > 0) {
+            hDeg = this.markFliesGravity / (this.fHz * distanceSquared);
+          }
+
+          // Apply repulsion vector to current fly's position
+          this.pos[0] -= hDeg * dx;
+          this.pos[1] -= hDeg * dy;
+        }
+      }
+    }
+  }
+
+  takeStep(newCenter: number[], flies: Fly[]) {
     this.center = newCenter;
+    if (this.markFliesGravity) {
+      console.log("here");
+      this.applyGravity(flies);
+    }
+
     const directionVector = randomPointOnUnitVector();
     this.pos = this.pos.map((z, i) => z + directionVector[i] * this.pxStep);
     if (!this.closeEnough()) this.pos = this.getRandomPosition();
@@ -189,7 +228,7 @@ class Fly {
   distanceFromCenter(): number {
     return Math.sqrt(
       Math.pow(this.pos[0] - this.center[0], 2) +
-        Math.pow(this.pos[1] - this.center[1], 2)
+        Math.pow(this.pos[1] - this.center[1], 2),
     );
   }
   getRandomPosition(): number[] {
@@ -212,6 +251,7 @@ class Swarm {
   flies: Fly[];
   stims: ShapeStim[];
   status: PsychoJS.Status;
+  markFliesGravity: number;
   constructor(
     n = 10,
     radiusDeg = 2,
@@ -219,7 +259,8 @@ class Swarm {
     centeredOnNominalFixationBool = true,
     thicknessDeg = 0.03,
     lengthDeg = 1,
-    colorRGBA = "0,0,0,1"
+    colorRGBA = "0,0,0,1",
+    markFliesGravity = 0,
   ) {
     this.n = n;
     this.status = PsychoJS.Status.NOT_STARTED;
@@ -232,6 +273,7 @@ class Swarm {
     this.colorRGBA = colorRGBA;
 
     this.center = this.getCenter();
+    this.markFliesGravity = markFliesGravity;
     this.flies = this.spawnFlies();
     this.stims = this.flies.map((f) => f.stims).flat();
   }
@@ -257,13 +299,15 @@ class Swarm {
           stepPx,
           this.thicknessPx,
           this.lengthPx,
-          this.colorRGBA
-        )
+          this.colorRGBA,
+          this.markFliesGravity,
+          fHz,
+        ),
     );
   }
   everyFrame() {
     this.center = this.getCenter();
-    this.flies.forEach((f) => f.takeStep(this.center));
+    this.flies.forEach((f) => f.takeStep(this.center, this.flies));
   }
 }
 
@@ -282,7 +326,7 @@ class Dot {
     // @ts-ignore
     let colorArray = colorRGBA.split(",");
     this.color = denisRBGColorSpaceToPsychoJS(
-      colorArray.slice(0, 3).map((c) => Number(c))
+      colorArray.slice(0, 3).map((c) => Number(c)),
     );
     this.opacity = Number(colorArray[3]);
     this.status = PsychoJS.Status.NOT_STARTED;
@@ -364,7 +408,7 @@ class BackGrid {
     this.xyCenterPx = [config.xCenterPx, config.yCenterPx];
     let colorArray = config.colorRGBA.split(",");
     this.color = denisRBGColorSpaceToPsychoJS(
-      colorArray.slice(0, 3).map((c) => Number(c))
+      colorArray.slice(0, 3).map((c) => Number(c)),
     );
     this.opacity = Number(colorArray[3]);
     this.nLines = this.getNumberOfGridLines();
@@ -379,7 +423,7 @@ class BackGrid {
     // Denis-coords, ie origin at fixation with psychojs axes
     const xy = this.xyCenterPx;
     const lineIds = [...new Array(this.nLines).keys()].map(
-      (i) => i - Math.floor(this.nLines / 2)
+      (i) => i - Math.floor(this.nLines / 2),
     );
     let gridLines: ShapeStim[] = [];
     for (const orientation of ["vertical", "horizontal"]) {
@@ -409,7 +453,7 @@ class BackGrid {
             size: this.lengthPx,
             autoLog: true,
             autoDraw: false,
-          })
+          }),
         );
       }
     }
