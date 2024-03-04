@@ -1087,7 +1087,7 @@ export const displayCompatibilityMessage = async (
       const compatibilityCheckQRExplanation = document.createElement("p");
       // add id to the QR code explanation
       compatibilityCheckQRExplanation.id = "compatibility-qr-explanation";
-      compatibilityCheckQRExplanation.style.marginBottom = "10px";
+      compatibilityCheckQRExplanation.style.marginBottom = "0px";
       compatibilityCheckQRExplanation.style.marginTop = "10px";
       let messageForQr = getMessageForQR(
         needAnySmartphone,
@@ -1095,7 +1095,7 @@ export const displayCompatibilityMessage = async (
         needPhoneSurvey,
         rc.language.value
       );
-      compatibilityCheckQRExplanation.innerText = messageForQr;
+      compatibilityCheckQRExplanation.innerHTML = messageForQr;
 
       const displayUpdate = document.createElement("p");
       displayUpdate.style.display = "none";
@@ -1421,7 +1421,13 @@ const getMessageForQR = (
   } else if (needCalibratedSmartphoneMicrophone) {
     messageForQr = readi18nPhrases("RC_inDescription", language) + " ";
     needPhoneSurvey
-      ? (messageForQr += readi18nPhrases("RC_needPhoneSurvey", language))
+      ? (messageForQr +=
+          readi18nPhrases("RC_needPhoneSurvey", language) +
+          "<br>" +
+          `<p style="margin-top:10px; margin-bottom:10px">${readi18nPhrases(
+            "RC_needPhoneSurveyParticipate",
+            language
+          )}</p>`)
       : (messageForQr +=
           readi18nPhrases("RC_needPhoneMicrophone", language) +
           " " +
@@ -1433,6 +1439,7 @@ const getMessageForQR = (
       : (messageForQr += readi18nPhrases("RC_needPhoneKeypad", language));
     messageForQr += " " + readi18nPhrases("RC_needsPointCameraAtQR", language);
   }
+  //  + readi18nPhrases("RC_needPhoneSurveyParticipate",language)
   return messageForQr;
 };
 const checkModelNumberandNameForIOS = (
@@ -1816,7 +1823,7 @@ const handleNewMessage = (
       needPhoneSurvey,
       lang
     );
-    qrCodeExplanation.innerText = messageForQr;
+    qrCodeExplanation.innerHTML = messageForQr;
   }
 };
 
