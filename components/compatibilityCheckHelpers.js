@@ -60,6 +60,24 @@ export const getAutoCompleteSuggestionElements = (
         )["preferredModelNumber"];
         modelNumberInput.placeholder = preferredModelNumber;
       }
+    } else {
+      const inst = getInstructionText(
+        deviceDetails,
+        lang,
+        true,
+        false,
+        preferredModelNumber,
+        needPhoneSurvey,
+        input.value
+      );
+      p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+      img.style.visibility = "hidden";
+      preferredModelNumber = getPreferredModelNumberAndName(
+        input.value,
+        "",
+        lang
+      )["preferredModelNumber"];
+      modelNumberInput.placeholder = preferredModelNumber;
     }
     const brandSuggestions = suggestions.filter((brand) =>
       brand.toLowerCase().includes(input.value.toLowerCase())
@@ -118,6 +136,24 @@ export const getAutoCompleteSuggestionElements = (
             )["preferredModelNumber"];
             modelNumberInput.placeholder = preferredModelNumber;
           }
+        } else {
+          const inst = getInstructionText(
+            deviceDetails,
+            lang,
+            true,
+            false,
+            preferredModelNumber,
+            needPhoneSurvey,
+            input.value
+          );
+          p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+          img.style.visibility = "hidden";
+          preferredModelNumber = getPreferredModelNumberAndName(
+            input.value,
+            "",
+            lang
+          )["preferredModelNumber"];
+          modelNumberInput.placeholder = preferredModelNumber;
         }
       });
       suggestionContainer.appendChild(suggestion);
