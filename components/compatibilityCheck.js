@@ -1521,11 +1521,8 @@ const isSmartphoneInDatabase = async (
     qrCodeExplanation.style.display = "none";
     titleContainer.style.margin = "0px";
   }
-  const { preferredModelNumber } = getPreferredModelNumberAndName(
-    OEM,
-    deviceDetails.PlatformName,
-    lang
-  );
+  const { preferredModelNumber, preferredModelName } =
+    getPreferredModelNumberAndName(OEM, deviceDetails.PlatformName, lang);
 
   const preferredModelNumberLowerCase = getPreferredModelNumberAndName(
     OEM,
@@ -1551,7 +1548,7 @@ const isSmartphoneInDatabase = async (
   modelNameInput.type = "text";
   modelNameInput.id = "modelNameInput";
   modelNameInput.name = "modelNameInput";
-  modelNameInput.placeholder = readi18nPhrases("RC_modelName", lang);
+  modelNameInput.placeholder = preferredModelName;
 
   const instructionText = getInstructionText(
     deviceDetails,
@@ -1903,19 +1900,19 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     p.style.display = "none";
   }
   const thisDevice = await identifyDevice();
-  const { preferredModelNumber } = getPreferredModelNumberAndName(
-    thisDevice.OEM,
-    thisDevice.PlatformName,
-    language
-  );
-
-  const { preferredModelNumberLowerCase, preferredModelName } =
+  const { preferredModelNumber, preferredModelName } =
     getPreferredModelNumberAndName(
       thisDevice.OEM,
       thisDevice.PlatformName,
-      language,
-      true
+      language
     );
+
+  const { preferredModelNumberLowerCase } = getPreferredModelNumberAndName(
+    thisDevice.OEM,
+    thisDevice.PlatformName,
+    language,
+    true
+  );
   // display the device info
   const deviceString = getDeviceString(thisDevice, language);
   const instructionText = getInstructionText(
@@ -1962,7 +1959,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   modelNameInput.type = "text";
   modelNameInput.id = "modelNameInput";
   modelNameInput.name = "modelNameInput";
-  modelNameInput.placeholder = readi18nPhrases("RC_modelName", language);
+  modelNameInput.placeholder = preferredModelName;
   modelNameInput.style.marginBottom = "0px";
 
   const deviceStringElem = document.createElement("p");

@@ -15,7 +15,7 @@ export const getAutoCompleteSuggestionElements = (
   type,
   suggestions,
   input,
-  preferredModelNumber,
+  preferredModelNumberLowercase,
   deviceDetails,
   lang,
   needPhoneSurvey,
@@ -37,7 +37,7 @@ export const getAutoCompleteSuggestionElements = (
         lang,
         true,
         false,
-        preferredModelNumber,
+        preferredModelNumberLowercase,
         needPhoneSurvey,
         input.value
       );
@@ -45,20 +45,16 @@ export const getAutoCompleteSuggestionElements = (
 
       if (input.value === "Apple") {
         img.style.visibility = "visible";
-        preferredModelNumber = getPreferredModelNumberAndName(
-          "Apple",
-          "iOS",
-          lang
-        )["preferredModelNumber"];
+        const { preferredModelNumber, preferredModelName } =
+          getPreferredModelNumberAndName("Apple", "iOS", lang);
         modelNumberInput.placeholder = preferredModelNumber;
+        modelNameInput.placeholder = preferredModelName;
       } else {
         img.style.visibility = "hidden";
-        preferredModelNumber = getPreferredModelNumberAndName(
-          input.value,
-          "",
-          lang
-        )["preferredModelNumber"];
+        const { preferredModelNumber, preferredModelName } =
+          getPreferredModelNumberAndName(input.value, "", lang);
         modelNumberInput.placeholder = preferredModelNumber;
+        modelNameInput.placeholder = preferredModelName;
       }
     } else {
       const inst = getInstructionText(
@@ -66,18 +62,16 @@ export const getAutoCompleteSuggestionElements = (
         lang,
         true,
         false,
-        preferredModelNumber,
+        preferredModelNumberLowercase,
         needPhoneSurvey,
         input.value
       );
       p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
       img.style.visibility = "hidden";
-      preferredModelNumber = getPreferredModelNumberAndName(
-        input.value,
-        "",
-        lang
-      )["preferredModelNumber"];
+      const { preferredModelNumber, preferredModelName } =
+        getPreferredModelNumberAndName(input.value, "", lang);
       modelNumberInput.placeholder = preferredModelNumber;
+      modelNameInput.placeholder = preferredModelName;
     }
     const brandSuggestions = suggestions.filter((brand) =>
       brand.toLowerCase().includes(input.value.toLowerCase())
@@ -114,27 +108,23 @@ export const getAutoCompleteSuggestionElements = (
             lang,
             true,
             false,
-            preferredModelNumber,
+            preferredModelNumberLowercase,
             needPhoneSurvey,
             input.value
           );
           p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
           if (input.value === "Apple") {
             img.style.visibility = "visible";
-            preferredModelNumber = getPreferredModelNumberAndName(
-              "Apple",
-              "iOS",
-              lang
-            )["preferredModelNumber"];
+            const { preferredModelNumber, preferredModelName } =
+              getPreferredModelNumberAndName("Apple", "iOS", lang);
             modelNumberInput.placeholder = preferredModelNumber;
+            modelNameInput.placeholder = preferredModelName;
           } else {
             img.style.visibility = "hidden";
-            preferredModelNumber = getPreferredModelNumberAndName(
-              input.value,
-              "",
-              lang
-            )["preferredModelNumber"];
+            const { preferredModelNumber, preferredModelName } =
+              getPreferredModelNumberAndName(input.value, "", lang);
             modelNumberInput.placeholder = preferredModelNumber;
+            modelNameInput.placeholder = preferredModelName;
           }
         } else {
           const inst = getInstructionText(
@@ -142,18 +132,16 @@ export const getAutoCompleteSuggestionElements = (
             lang,
             true,
             false,
-            preferredModelNumber,
+            preferredModelNumberLowercase,
             needPhoneSurvey,
             input.value
           );
           p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
           img.style.visibility = "hidden";
-          preferredModelNumber = getPreferredModelNumberAndName(
-            input.value,
-            "",
-            lang
-          )["preferredModelNumber"];
+          const { preferredModelNumber, preferredModelName } =
+            getPreferredModelNumberAndName(input.value, "", lang);
           modelNumberInput.placeholder = preferredModelNumber;
+          modelNameInput.placeholder = preferredModelName;
         }
       });
       suggestionContainer.appendChild(suggestion);
