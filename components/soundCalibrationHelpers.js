@@ -216,14 +216,7 @@ export const getDeviceString = (thisDevice, language) => {
     findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
   }
 
-  return `<b>OEM:</b> ${thisDevice.OEM} <br>
-   <b>Device Type:</b> ${thisDevice.DeviceType} <br>
-   <b>Platform Name:</b> ${thisDevice.PlatformName} <br>
-   <b>Platform Version:</b> ${thisDevice.PlatformVersion} <br>
-   <b>Hardware Model:</b> ${thisDevice.HardwareModel} <br>
-   <b>Hardware Family:</b> ${thisDevice.HardwareFamily} <br>
-   <b>Hardware Name:</b> ${thisDevice.HardwareName} <br>
-   <b>Hardware Model Variants:</b> ${thisDevice.HardwareModelVariants} <br><br>`;
+  return `<b>Brand:</b> ${thisDevice.OEM} <br>`;
 };
 
 export const removeElements = (elms) => elms.forEach((el) => el.remove());

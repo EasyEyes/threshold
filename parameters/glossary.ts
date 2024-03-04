@@ -2294,7 +2294,39 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,0,0,0,1",
     explanation:
-      'markDot: UPDATE DEFAULT WHEN reMovingFixationBool ARGUMENT IS ADDED. Until the target appears, display a dot. It accepts several arguments as comma-separated values. Diameter zero (the default) disables the dot.\n▶ reMovingFixationBool, xDeg, yDeg, diameterDeg, colorRGBA\nreMovingFixationBool (default TRUE) specfies, if FALSE, that the dot position is relative to the fixed nominal fixation or, if TRUE, relative to the (possibly moving) crosshair location. When TRUE, if the crosshair moves then the dot will move with it.\nxDeg and yDeg (default 0,0) are coordinates of the dot center relative to the nominal fixation location (which a moving crosshair circles around).  \ndiameterDeg (default 0) is the dot diameter. Diameter zero disables the dot.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, which weights the blending; use 1 for 100% color. Each of the four values ranges 0 to 1.',
+      '❌ WILL SOON BE REPLACED BY A SET OF PARAMETERS, e.g. markDotDiameterDeg, WHICH OFFER THE SAME SERVICE WITH SELF-DOCUMENTING PARAMETER NAMES. markDot: Until the target appears, display a dot. It accepts several arguments as comma-separated values. Diameter zero (the default) request no dot.\n▶ xDeg, yDeg, diameterDeg, colorRGBA\nxDeg and yDeg (default 0,0) are coordinates of the dot center relative to the nominal fixation location (which a moving crosshair circles around).  \ndiameterDeg (default 0) is the dot diameter. Diameter zero requests no dot.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, which weights the blending; use 1 for 100% color. Each of the four values ranges 0 to 1.',
+  },
+  markDotColorRGBA: {
+    name: "markDotColorRGBA",
+    availability: "now",
+    type: "text",
+    default: "0,0,0,1",
+    explanation:
+      '🕑 markDotColorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, which weights the blending; use 1 for 100% color. Each of the four values ranges 0 to 1.',
+  },
+  markDotDiameterDeg: {
+    name: "markDotDiameterDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "🕑 markDotDiameterDeg (default 0) is the dot diameter. Display a dot until the target appears. Diameter zero disables the dot.",
+  },
+  markDotTrackFixationBool: {
+    name: "markDotTrackFixationBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 markDotTrackFixationBool (default FALSE) specfies:\nif FALSE, that the dot position is relative to the fixed nominal fixation or, \nif TRUE, relative to the (possibly moving) crosshair location. In this case, when the crosshair moves, the dot will move with it.",
+  },
+  markDotXYDeg: {
+    name: "markDotXYDeg",
+    availability: "now",
+    type: "text",
+    default: "0,0",
+    explanation:
+      "🕑 markDotXYDeg (default 0,0) is the (x,y) coordinate of the dot center relative to the origin, which is selected by markDotTrackFixationBool.",
   },
   markFlies: {
     name: "markFlies",
@@ -2302,7 +2334,15 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,1,0.3,FALSE,0.05,2,0,0,1,1",
     explanation:
-      'markFlies: Until the target appears, display a swarm of moving "flies" (each like a crosshair) that make it hard to get the cursor to track the moving crosshair unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. Each fly moves a fixed radial distance degPerSec/fHz from frame to frame, where fHz is the frame rate (e.g. 60) and degPerSec is the speed. On each frame, each fly moves in a random direction. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. markFlies accepts several arguments as comma separated values:\n\nCURRENT VERSION ARGUMENTS:\n▶ n, radiusDeg, degPerSec, centeredOnNominalFixationBool, thicknessDeg, lengthDeg, colorRGBA\ncenteredOnNominalFixationBool (default TRUE) centers the circular fly area on, if TRUE, the nominal fixation location (that the crosshair circles around), otherwise centers on the moving crosshair.\n\nPLANNED NEW VERSION:\n▶ reMovingFixationBool, n, radiusDeg, degPerSec, thicknessDeg, lengthDeg, colorRGBA\nreMovingFixationBool (default TRUE) centers the circular fly area on, if FALSE, the fixed nominal fixation location (that the crosshair circles around), otherwise centers on the (possibly moving) crosshair.\nUPDATE DEFAULT WHEN reMovingFixationBool ARGUMENT IS ADDED. \nn (default 0, i.e. none) is the number of flies. Setting n=0, the default, disables markFlies.\nradiusDeg (default 1) is the radius of the circular area that the flies are confined to.\nthicknessDeg (default 0.05) is the line thickness.\nlengthDeg (default 2) is the length of each of the two lines that make one "fly".\ncolorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).',
+      '❌ WILL SOON BE REPLACED BY A SET OF PARAMETERS, e.g. markFliesNumber, WHICH OFFER THE SAME SERVICE WITH SELF-DOCUMENTING PARAMETER NAMES. markFlies: Until the target appears, display a swarm of moving "flies" (each like a crosshair) that make it hard to get the cursor to track the real crosshair (typically moving) unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. Each fly moves a fixed radial distance degPerSec/fHz from frame to frame, where fHz is the frame rate (e.g. 60) and degPerSec is the speed. On each frame, each fly moves in a random direction. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. markFlies accepts several arguments as comma separated values:\n▶ n, radiusDeg, degPerSec, centeredOnNominalFixationBool, thicknessDeg, lengthDeg, colorRGBA\ncenteredOnNominalFixationBool (default TRUE) centers the circular fly area on, if TRUE, the nominal fixation location (that the crosshair circles around), otherwise centers on the moving crosshair.\nn (default 0, i.e. none) is the number of flies. Setting n=0, the default, disables markFlies.\nradiusDeg (default 1) is the radius of the circular area that the flies are confined to.\ndegPerSec (default 0.3) is the speed (change in position from one frame to next per frame duration).\nthicknessDeg (default 0.05) is the line thickness.\nlengthDeg (default 2) is the length of each of the two lines that make one "fly".\ncolorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).',
+  },
+  markFliesColorRGBA: {
+    name: "markFliesColorRGBA",
+    availability: "now",
+    type: "text",
+    default: "0,0,0,1",
+    explanation:
+      '🕑 markFliesColorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).',
   },
   markFliesGravity: {
     name: "markFliesGravity",
@@ -2310,7 +2350,55 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      "markFliesGravity (default 0) simulates gravitational attraction (or repulsion) between flies. This modifies the path of flies generated by markFlies, and does nothing if there are no flies. In physics the gravitational constant is positive. Here the scientist will usually want negative gravity, so the flies repel one another, to fill voids in fly coverage. This is implemented at each update by running a loop that considers all the possible pairings of flies. For each pair, a vector is added to each fly's position. Each vector is colinear with the line connecting the two flies. The two vectors have equal length hDeg and opposite directions. Compute the distance dDeg between two flies. Both displacement vectors have length hDeg,  \nhDeg=gravity/(fHz*dDeg^2).\nPositive gravity is attraction, and the vectors point inwards, from one fly to the other. Negative gravity is repulsion, and the vectors point outward. ",
+      "markFliesGravity (default 0) simulates gravitational attraction (or repulsion) between flies. This modifies the path of flies generated by markFliesNumber, and does nothing if there are no flies. In physics the gravitational constant is positive. Here the scientist will usually want negative gravity, so the flies repel one another, to fill voids in fly coverage. This is implemented at each frame update by running a loop that considers all the possible pairings of flies. For each pair, a vector is added to each fly's position. Each vector is colinear with the line connecting the two flies. The two vectors have equal length hDeg and opposite directions. Compute the distance dDeg between two flies. Both displacement vectors have length hDeg,  \nhDeg=gravity/(fHz*dDeg^2).\nPositive gravity is attraction, and the vectors point inwards, from one fly to the other. Negative gravity is repulsion, and the vectors point outward. ",
+  },
+  markFliesLengthDeg: {
+    name: "markFliesLengthDeg",
+    availability: "now",
+    type: "numerical",
+    default: "2",
+    explanation:
+      '🕑 markFliesLengthDeg (default 2) is the length of each of the two lines that make the cross that is one "fly".',
+  },
+  markFliesNumber: {
+    name: "markFliesNumber",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      '🕑 markFliesNumber (default 0): Until the target appears, display a swarm of moving "flies" (each a cross, like the crosshair) that make it hard to get the cursor to track the moving crosshair unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. On each frame, each fly moves a fixed distance degPerSec/fHz in a random direction where fHz is the frame rate (e.g. 60) and degPerSec is the speed. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. Each fly is a cross. Several parameters specify the flies and their motion.\nmarkFliesColorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).\nmarkFliesGravity (default 0) simulates positive or negative gravity among the flies. Negative gravity (repulsion) helps the flies fill the space more uniformly, making it less likely that the crosshair will be in an area without flies.\nmarkFliesLengthDeg (default 2) is the length of each of the two lines that make one "fly".\nmarkFliesRadiusDeg (default 1) is the radius of the circular area that the flies are confined to.\nmarkFliesThicknessDeg (default 0.05) is the line thickness.\nmarkFliesTrackFixationBool (default FALSE) centers the circular fly area on, if FALSE, the fixed nominal fixation location (that the crosshair circles around), otherwise centers on the (possibly moving) crosshair.',
+  },
+  markFliesRadiusDeg: {
+    name: "markFliesRadiusDeg",
+    availability: "now",
+    type: "numerical",
+    default: "1.5",
+    explanation:
+      "🕑 markFliesRadiusDeg (default 1.5) is the radius of the circular area that the flies are confined to.",
+  },
+  markFliesSpeedDegPerSec: {
+    name: "markFliesSpeedDegPerSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.2",
+    explanation:
+      "🕑 markFliesSpeedDegPerSec (default 0.3) is the speed (change in position from one frame to next per frame duration).",
+  },
+  markFliesThicknessDeg: {
+    name: "markFliesThicknessDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0.05",
+    explanation:
+      "🕑 markFliesThicknessDeg (default 0.05) is the line thickness.",
+  },
+  markFliesTrackFixationBool: {
+    name: "markFliesTrackFixationBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 markFliesTrackFixationBool (default FALSE) centers the circular fly area on:\nif FALSE, the fixed nominal fixation location (that the crosshair circles around), \nif TRUE, centers on the (possibly moving) crosshair.",
   },
   markGrid: {
     name: "markGrid",

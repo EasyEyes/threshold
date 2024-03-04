@@ -502,9 +502,9 @@ const getLoudspeakerDeviceDetailsFromUser = async (
 
   // add  to the page
   elems.subtitle.appendChild(findModel);
+  elems.subtitle.appendChild(deviceStringElem);
   elems.subtitle.appendChild(modelNameInput);
   elems.subtitle.appendChild(modelNumberInput);
-  elems.subtitle.appendChild(deviceStringElem);
   elems.subtitle.appendChild(proceedButton);
 
   await new Promise((resolve) => {

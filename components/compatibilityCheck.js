@@ -38,6 +38,7 @@ const loudspeakerInfo = {
   modelNumber: "",
   detailsFrom51Degrees: {},
   loudspeaker: null,
+  Brand: "",
 };
 
 export const QRSkipResponse = {
@@ -932,6 +933,9 @@ export const displayCompatibilityMessage = async (
   quitPsychoJS
 ) => {
   return new Promise(async (resolve) => {
+    const thisDevice = await identifyDevice();
+    psychoJS.experiment.addData("ComputerInfoFrom51Degrees", thisDevice);
+    psychoJS.experiment.nextEntry();
     //message wrapper
     const messageWrapper = document.createElement("div");
     messageWrapper.id = "msg-container";
@@ -1917,13 +1921,21 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   subtitle.style.marginBottom = "0px";
   elems.appendChild(subtitle);
 
+  const BrandInput = document.createElement("input");
+  BrandInput.type = "text";
+  BrandInput.id = "brandInput";
+  BrandInput.name = "brandInput";
+  BrandInput.placeholder = "Brand";
+  BrandInput.value = thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM;
+  BrandInput.style.marginBottom = "0px";
+
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
   modelNumberInput.name = "modelNumberInput";
   modelNumberInput.placeholder = preferredModelNumber;
-  modelNumberInput.style.marginBottom = "0px";
+  modelNumberInput.style.marginBottom = "10px";
 
   const modelNameInput = document.createElement("input");
   modelNameInput.type = "text";
@@ -1935,8 +1947,8 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   const deviceStringElem = document.createElement("p");
   deviceStringElem.id = "loudspeakerInstructions1";
   deviceStringElem.innerHTML = deviceString;
-  deviceStringElem.style.marginBottom = "10px";
-  deviceStringElem.style.marginTop = "10px";
+  deviceStringElem.style.marginBottom = "5px";
+  deviceStringElem.style.marginTop = "5px";
 
   const findModel = document.createElement("p");
   findModel.id = "loudspeakerInstructions2";
@@ -1950,14 +1962,18 @@ const getLoudspeakerDeviceDetailsFromUser = async (
 
   // add  to the page
   elems.appendChild(findModel);
+  elems.appendChild(BrandInput);
   elems.appendChild(modelNameInput);
   elems.appendChild(modelNumberInput);
-  elems.appendChild(deviceStringElem);
   elems.appendChild(proceedButton);
   let Loudspeaker = null;
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
-      if (modelNameInput.value === "" || modelNumberInput.value === "") {
+      if (
+        modelNameInput.value === "" ||
+        modelNumberInput.value === "" ||
+        BrandInput.value === ""
+      ) {
         alert("Please fill out all the fields");
       } else {
         proceedButton.innerHTML = "Loading...";
@@ -1965,6 +1981,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           // add loudspeaker details to loudspeakerInfo
           loudspeakerInfo.modelName = modelNameInput.value;
           loudspeakerInfo.modelNumber = modelNumberInput.value;
+          loudspeakerInfo.Brand = BrandInput.value;
           loudspeakerInfo.detailsFrom51Degrees = thisDevice;
           removeElements([
             findModel,
@@ -2030,14 +2047,7 @@ const identifyDevice = async () => {
 };
 
 const getDeviceString = (thisDevice, language) => {
-  return `<b>OEM:</b> ${thisDevice.OEM} <br>
-   <b>Device Type:</b> ${thisDevice.DeviceType} <br>
-   <b>Platform Name:</b> ${thisDevice.PlatformName} <br>
-   <b>Platform Version:</b> ${thisDevice.PlatformVersion} <br>
-   <b>Hardware Model:</b> ${thisDevice.HardwareModel} <br>
-   <b>Hardware Family:</b> ${thisDevice.HardwareFamily} <br>
-   <b>Hardware Name:</b> ${thisDevice.HardwareName} <br>
-   <b>Hardware Model Variants:</b> ${thisDevice.HardwareModelVariants}<br>`;
+  return `<b>Brand:</b> ${thisDevice.OEM} <br>`;
 };
 
 const removeElements = (elements) => {

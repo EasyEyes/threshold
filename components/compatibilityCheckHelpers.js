@@ -178,6 +178,24 @@ const filterModelsByBrand = (models, brand) => {
   return models.filter((model) => model["Brand"] === brand);
 };
 
+const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
+  const collectionRef = collection(db, "Microphones");
+  // get the document in the collection with the speakerID, OEM and isDefault = true
+  const q = query(
+    collectionRef,
+    where("ID", "==", speakerID),
+    where("lowercaseOEM", "==", OEM),
+    where("isDefault", "==", true)
+  );
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.size > 0) {
+    console.log("Existsss");
+    return true;
+  }
+  console.log("Does not exist");
+  return false;
+};
+
 export const matchPhoneModelInDatabase = async (
   brand,
   modelName,
@@ -186,65 +204,67 @@ export const matchPhoneModelInDatabase = async (
   biggerSize,
   OS
 ) => {
-  let result = {
-    type: "none",
-    Manufacturer: false,
-    ModelName: false,
-    ModelNumber: false,
-    OS: false,
-    size: false,
+  const r = {
+    phoneModelNameKnownBool: false,
+    phoneModelNumberKnownBool: false,
+    phoneModelPixelsKnownBool: false,
+    phoneModelNameAndNumberAgreeBool: false,
+    phoneModelNumberAndPixelsAgreeBool: false,
+    phoneModelKnownBool: false,
+    phoneModelNameInLibraryBool: false,
+    phoneModelProfiledBool: false,
   };
 
-  const brandsInDatabase = filterModelsByBrand(PhoneModelsInDatabase, brand);
-  if (brandsInDatabase.length === 0) {
-    return result;
+  //check if ModelName and ModelNumber are known
+  AllModelNames.forEach((name) => {
+    if (name.toLowerCase() === modelName.toLowerCase()) {
+      r.phoneModelNameKnownBool = true;
+    }
+  });
+  AllModelNumbers.forEach((number) => {
+    if (number.toLowerCase() === modelNumber.toLowerCase()) {
+      r.phoneModelNumberKnownBool = true;
+    }
+  });
+  PhoneModelsInDatabase.forEach((model) => {
+    if (
+      model["Model Name"].toLowerCase() === modelName.toLowerCase() &&
+      model["Model Numbers"].includes(modelNumber)
+    ) {
+      r.phoneModelNameAndNumberAgreeBool = true;
+    }
+    if (
+      model["Smaller Size (Pixels)"] === smallerSize &&
+      model["Bigger Size (Pixels)"] === biggerSize
+    ) {
+      r.phoneModelPixelsKnownBool = true;
+    }
+    if (
+      model["Model Numbers"].includes(modelNumber) &&
+      model["Smaller Size (Pixels)"] === smallerSize &&
+      model["Bigger Size (Pixels)"] === biggerSize
+    ) {
+      r.phoneModelNumberAndPixelsAgreeBool = true;
+    }
+  });
+  if (
+    r.phoneModelNameAndNumberAgreeBool &&
+    r.phoneModelNumberAndPixelsAgreeBool
+  ) {
+    r.phoneModelKnownBool = true;
   }
-  result.Manufacturer = true; // brand is in database
-
-  // Check if model name is in database
-  const modelNames = brandsInDatabase.map((model) => model["Model Name"]);
-  const modelNamesLowerCase = modelNames.map((model) => model.toLowerCase());
-  const index = modelNamesLowerCase.indexOf(modelName.toLowerCase());
-  if (index === -1) {
-    result.type = "partial";
-    return result;
-  }
-  result.ModelName = true;
-
-  // Check if model number is in database
-  // Each model object has a property "Model Numbers" which is an array of model numbers
-  const modelNumbers = brandsInDatabase[index]["Model Numbers"];
-  const modelNumbersLowerCase = modelNumbers.map((model) =>
-    model.toLowerCase()
+  const lowercaseOEM = brand.toLowerCase().split(" ").join("");
+  const doesMicrophoneExistInLibrary = await doesMicrophoneExistInFirestore(
+    modelNumber,
+    lowercaseOEM
   );
-  const index2 = modelNumbersLowerCase.indexOf(modelNumber.toLowerCase());
-  if (index2 === -1) {
-    result.type = "partial";
-    return result;
+  if (doesMicrophoneExistInLibrary) {
+    r.phoneModelNameInLibraryBool = true;
+    if (r.phoneModelKnownBool) {
+      r.phoneModelProfiledBool = true;
+    }
   }
-  result.ModelNumber = true;
-
-  // Check if OS is in database
-  // Each model object has a property "OS" which is a string. compare the lowercase version
-  const os = brandsInDatabase[index]["OS"];
-  if (os.toLowerCase() !== OS.toLowerCase()) {
-    result.type = "partial";
-    return result;
-  }
-  result.OS = true;
-
-  // Check if size is in database
-  // Each model object has properties "Smaller Size (Pixels)" and "Bigger Size (Pixels)" which are just numbers
-  // both have to match for the size to be correct
-  const smallerSizes = brandsInDatabase[index]["Smaller Size (Pixels)"];
-  const biggerSizes = brandsInDatabase[index]["Bigger Size (Pixels)"];
-  if (smallerSizes !== smallerSize || biggerSizes !== biggerSize) {
-    result.type = "partial";
-    return result;
-  }
-  result.size = true;
-  result.type = "full";
-  return result;
+  return r;
 };
 
 export const addQRSkipButtons = (lang, QRElem) => {
