@@ -20,7 +20,6 @@ import {
   getAutoCompleteSuggestionElements,
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
-import { showExperimentEnding } from "./forms";
 
 let gotLoudspeakerMatchBool = false;
 // import { microphoneInfo } from "./global";
@@ -46,6 +45,21 @@ export const QRSkipResponse = {
   QRCantBool: false,
   QRPreferNotToBool: false,
   QRNoSmartphoneBool: false,
+};
+
+// If the consent form were denied... Show the ending directly
+export const showExperimentEnding = (newEnding = true) => {
+  // ? Do we really need this function?
+  // Why not do through PsychoJS or other interfaces?
+  // Fixed for old code by @svr8
+  let endingText;
+  if (newEnding) endingText = document.createElement("div");
+  else endingText = document.getElementById("exp-end-text");
+
+  endingText.innerHTML = "Thank you. The experiment has ended."; // TODO i18n
+  endingText.id = "exp-end-text";
+  document.body.appendChild(endingText);
+  endingText.style.visibility = "visible";
 };
 
 export const getPreferredModelNumberAndName = (
