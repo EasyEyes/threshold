@@ -1025,13 +1025,16 @@ export const displayCompatibilityMessage = async (
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
     if (reader.read("_languageSelectionByParticipantBool")[0]) {
       // create language selection dropdown
-      const LanguageTitle = document.createElement("h3");
+      const LanguageTitle = document.createElement("p");
+      LanguageTitle.style.fontSize = "1.1rem";
+      LanguageTitle.style.fontWeight = "bold";
       LanguageTitle.innerHTML = readi18nPhrases(
         "EE_languageChoose",
         rc.language.value
       );
       LanguageTitle.id = "language-title";
-      LanguageTitle.style.marginTop = "40px";
+      LanguageTitle.style.marginTop = "0px";
+      LanguageTitle.style.marginBottom = "5px";
       languageWrapper.appendChild(LanguageTitle);
 
       const languageDropdown = document.createElement("select");
@@ -1070,8 +1073,8 @@ export const displayCompatibilityMessage = async (
       });
 
       // top right corner
-      languageWrapper.style.marginTop = "20px";
-      languageWrapper.style.marginRight = "20px";
+      languageWrapper.style.marginTop = "10px";
+      // languageWrapper.style.marginRight = "20px";
       languageWrapper.style.textAlign = "right";
 
       languageWrapper.appendChild(languageDropdown);
