@@ -56,7 +56,7 @@ export const getAutoCompleteSuggestionElements = (
         modelNumberInput.placeholder = preferredModelNumber;
         modelNameInput.placeholder = preferredModelName;
       }
-    } else {
+    } else if (type === "Brand") {
       const inst = getInstructionText(
         deviceDetails,
         lang,
@@ -102,7 +102,7 @@ export const getAutoCompleteSuggestionElements = (
       suggestion.addEventListener("click", () => {
         input.value = brand;
         suggestionContainer.innerHTML = "";
-        if (AllBrands.includes(input.value)) {
+        if (AllBrands.includes(input.value) && type === "Brand") {
           const inst = getInstructionText(
             deviceDetails,
             lang,
@@ -126,7 +126,7 @@ export const getAutoCompleteSuggestionElements = (
             modelNumberInput.placeholder = preferredModelNumber;
             modelNameInput.placeholder = preferredModelName;
           }
-        } else {
+        } else if (type === "Brand") {
           const inst = getInstructionText(
             deviceDetails,
             lang,
@@ -225,8 +225,7 @@ export const matchPhoneModelInDatabase = async (
   modelName,
   modelNumber,
   smallerSize,
-  biggerSize,
-  OS
+  biggerSize
 ) => {
   const r = {
     phoneModelNameKnownBool: false,
