@@ -947,6 +947,7 @@ export const displayCompatibilityMessage = async (
   quitPsychoJS
 ) => {
   return new Promise(async (resolve) => {
+    document.body.style.overflowX = "hidden";
     const thisDevice = await identifyDevice();
     psychoJS.experiment.addData("ComputerInfoFrom51Degrees", thisDevice);
     psychoJS.experiment.nextEntry();
