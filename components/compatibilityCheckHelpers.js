@@ -293,9 +293,13 @@ export const matchPhoneModelInDatabase = async (
 export const addQRSkipButtons = (lang, QRElem) => {
   const container = document.createElement("div");
   container.style.display = "flex";
+  container.style.justifyContent = "space-between";
   const cantReadButton = document.createElement("button");
+  cantReadButton.id = "cantReadButton";
   const preferNotToReadButton = document.createElement("button");
+  preferNotToReadButton.id = "preferNotToReadButton";
   const noSmartphoneButton = document.createElement("button");
+  noSmartphoneButton.id = "noSmartphoneButton";
 
   cantReadButton.innerHTML = readi18nPhrases("RC_cantReadQR_Button", lang);
   preferNotToReadButton.innerHTML = readi18nPhrases(
@@ -314,7 +318,9 @@ export const addQRSkipButtons = (lang, QRElem) => {
   const buttonContainer = document.createElement("div");
   buttonContainer.style.display = "flex";
   buttonContainer.style.flexDirection = "column";
-  buttonContainer.style.margin = "13px";
+  buttonContainer.style.marginTop = "13px";
+  buttonContainer.style.marginBottom = "13px";
+  buttonContainer.style;
   buttonContainer.style.justifyContent = "space-between";
 
   buttonContainer.appendChild(cantReadButton);
@@ -325,8 +331,10 @@ export const addQRSkipButtons = (lang, QRElem) => {
   container.appendChild(buttonContainer);
 
   const explanation = document.createElement("p");
+  explanation.id = "skipQRExplanation";
   explanation.innerHTML = readi18nPhrases("RC_skipQR_Explanation", lang);
   const qrContainer = document.createElement("div");
+
   qrContainer.appendChild(container);
   qrContainer.appendChild(explanation);
 

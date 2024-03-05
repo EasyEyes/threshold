@@ -955,8 +955,10 @@ export const displayCompatibilityMessage = async (
     messageWrapper.id = "msg-container";
     messageWrapper.style.display = "flex";
     messageWrapper.style.flexDirection = "column";
-    messageWrapper.style.marginRight = "20vw";
-    messageWrapper.style.marginLeft = "20vw";
+    messageWrapper.style.position = "absolute";
+    messageWrapper.style.top = "0";
+    messageWrapper.style.right = "20vw";
+    messageWrapper.style.left = "20vw";
     messageWrapper.style.minWidth = "60vw";
     messageWrapper.style.zIndex = "1000";
     document.getElementById("root").style.display = "none";
@@ -1035,15 +1037,19 @@ export const displayCompatibilityMessage = async (
       const languageDropdown = document.createElement("select");
       languageDropdown.id = "language-dropdown";
       languageDropdown.style.width = "12rem";
-      languageDropdown.style.backgroundColor = "#ddd";
-      languageDropdown.style.fontWeight = "bold";
+      languageDropdown.style.backgroundColor = "#999";
+      languageDropdown.style.color = "white";
+      languageDropdown.style.borderRadius = "0.3rem";
+      // languageDropdown.style.fontWeight = "bold";
       languageDropdown.style.marginLeft = "auto";
 
       const languages = readi18nPhrases("EE_languageNameNative");
+      const languagesEnglishNames = readi18nPhrases("EE_languageNameEnglish");
       const languageOptions = Object.keys(languages).map((language) => {
         const option = document.createElement("option");
         option.value = languages[language];
-        option.innerHTML = languages[language];
+        option.innerHTML =
+          languagesEnglishNames[language] + " (" + languages[language] + ")";
         return option;
       });
       languageOptions.forEach((option) => languageDropdown.appendChild(option));
@@ -1064,15 +1070,15 @@ export const displayCompatibilityMessage = async (
       });
 
       // top right corner
-      languageWrapper.style.position = "absolute";
-      languageWrapper.style.top = "0";
-      languageWrapper.style.right = "20vw";
+      languageWrapper.style.marginTop = "20px";
+      languageWrapper.style.marginRight = "20px";
+      languageWrapper.style.textAlign = "right";
 
       languageWrapper.appendChild(languageDropdown);
-      messageWrapper.appendChild(languageWrapper);
+      messageWrapper.prepend(languageWrapper);
     }
 
-    document.body.appendChild(messageWrapper);
+    document.body.prepend(messageWrapper);
     if (compatibilityCheckPeer && proceedBool) {
       if (needPhoneSurvey) await fetchAllPhoneModels();
       const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
@@ -1509,9 +1515,9 @@ const isSmartphoneInDatabase = async (
     titleContainer.remove();
     elem.remove();
     // center messageWrapper
-    messageWrapper.style.margin = "auto";
-    messageWrapper.style.marginLeft = "20vw";
-    messageWrapper.style.marginRight = "20vw";
+    messageWrapper.style.top = "10vh";
+    // messageWrapper.style.marginLeft = "20vw";
+    // messageWrapper.style.marginRight = "20vw";
   } else {
     if (languageWrapper) {
       languageWrapper.remove();
@@ -1520,6 +1526,7 @@ const isSmartphoneInDatabase = async (
     qrCodeDisplay.style.display = "none";
     qrCodeExplanation.style.display = "none";
     titleContainer.style.margin = "0px";
+    messageWrapper.style.top = "10vh";
   }
   const { preferredModelNumber, preferredModelName } =
     getPreferredModelNumberAndName(OEM, deviceDetails.PlatformName, lang);
@@ -1535,7 +1542,7 @@ const isSmartphoneInDatabase = async (
   brandInput.type = "text";
   brandInput.id = "brandInput";
   brandInput.name = "brandInput";
-  brandInput.placeholder = "Brand";
+  brandInput.placeholder = readi18nPhrases("RC_brand", lang);
   brandInput.value = OEM === ("Unknown" || "undefined") ? "" : OEM;
 
   const modelNumberInput = document.createElement("input");
@@ -1821,6 +1828,33 @@ const handleNewMessage = (
       lang
     );
     qrCodeExplanation.innerHTML = messageForQr;
+    const skipQRExplanation = document.getElementById("skipQRExplanation");
+    if (skipQRExplanation) {
+      skipQRExplanation.innerHTML = readi18nPhrases(
+        "RC_skipQR_Explanation",
+        lang
+      );
+    }
+    const cantReadButton = document.getElementById("cantReadButton");
+    if (cantReadButton) {
+      cantReadButton.innerHTML = readi18nPhrases("RC_cantReadQR_Button", lang);
+    }
+    const preferNotToReadButton = document.getElementById(
+      "preferNotToReadButton"
+    );
+    if (preferNotToReadButton) {
+      preferNotToReadButton.innerHTML = readi18nPhrases(
+        "RC_preferNotToReadQR_Button",
+        lang
+      );
+    }
+    const noSmartphoneButton = document.getElementById("noSmartphoneButton");
+    if (noSmartphoneButton) {
+      noSmartphoneButton.innerHTML = readi18nPhrases(
+        "RC_noSmartphone_Button",
+        lang
+      );
+    }
   }
 };
 
@@ -1943,7 +1977,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   BrandInput.type = "text";
   BrandInput.id = "brandInput";
   BrandInput.name = "brandInput";
-  BrandInput.placeholder = "Brand";
+  BrandInput.placeholder = readi18nPhrases("RC_brand", language);
   BrandInput.value = thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM;
   BrandInput.style.marginBottom = "0px";
 

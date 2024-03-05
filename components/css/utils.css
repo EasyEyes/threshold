@@ -2,27 +2,22 @@
   cursor: none;
 }
 .needs-page-button {
-  border-radius: 0.5rem;
-  vertical-align: middle;
-  pointer-events: auto !important;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  white-space: initial;
-  @media screen and (min-width: 960px) {
-    white-space: nowrap;
-  }
-  color: rgb(255, 255, 255) !important;
-  font-weight: 400;
-  border: none;
-  cursor: pointer;
-  text-align: center;
-  font-size: unset;
+  white-space: nowrap;
+  border-radius: 0.3rem;
   background-color: #999;
+  color: white;
+  font-weight: 400;
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  min-width: 7rem;
+  border: none;
   @media screen and (max-width: 560px) {
-    min-width: 200px;
+    min-width: auto;
   }
-  padding: 0.2rem 1rem;
 }
 .needs-page-button:hover {
-  background-color: #555; /* Change the color to your desired color */
+  background-color: #aaa;
+}
+.needs-page-button:active {
+  background-color: #666;
 }
