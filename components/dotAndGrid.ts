@@ -1,4 +1,4 @@
-import { XYPixOfXYDeg, pxScalar } from "./utils";
+import { XYDegOfXYPix, XYPixOfXYDeg, pxScalar } from "./utils";
 import { ShapeStim, Polygon } from "../psychojs/src/visual";
 import { psychoJS } from "./globalPsychoJS";
 import { util } from "../psychojs/src";
@@ -100,8 +100,6 @@ class Fly {
   opacity: number;
   pos: number[];
   stims: ShapeStim[];
-  markFliesGravity: number;
-  fHz: number;
   constructor(
     i: number,
     center: number[],
@@ -110,8 +108,6 @@ class Fly {
     thicknessPx: number,
     lengthPx: number,
     colorRGBA: string,
-    markFliesGravity: number,
-    fHz: number,
   ) {
     this.id = i;
     this.center = center;
@@ -128,8 +124,6 @@ class Fly {
     this.opacity = Number(colorArray[3]);
 
     this.stims = this.generateStims();
-    this.markFliesGravity = markFliesGravity;
-    this.fHz = fHz;
   }
   draw(bool = true) {
     this.stims.forEach((s) => s.setAutoDraw(bool));
@@ -187,35 +181,8 @@ class Fly {
     ];
   }
 
-  applyGravity(flies: Fly[]) {
-    if (this.markFliesGravity !== 0) {
-      console.log("here");
-      for (const otherFly of flies) {
-        if (otherFly.id !== this.id && otherFly.id > this.id) {
-          const dx = otherFly.pos[0] - this.pos[0];
-          const dy = otherFly.pos[1] - this.pos[1];
-          const distanceSquared = dx * dx + dy * dy;
-          const dDeg = Math.sqrt(distanceSquared) * (180 / Math.PI);
-
-          let hDeg = 0;
-          if (distanceSquared > 0) {
-            hDeg = this.markFliesGravity / (this.fHz * distanceSquared);
-          }
-
-          // Apply repulsion vector to current fly's position
-          this.pos[0] -= hDeg * dx;
-          this.pos[1] -= hDeg * dy;
-        }
-      }
-    }
-  }
-
-  takeStep(newCenter: number[], flies: Fly[]) {
+  takeStep(newCenter: number[]) {
     this.center = newCenter;
-    if (this.markFliesGravity) {
-      console.log("here");
-      this.applyGravity(flies);
-    }
 
     const directionVector = randomPointOnUnitVector();
     this.pos = this.pos.map((z, i) => z + directionVector[i] * this.pxStep);
@@ -300,14 +267,50 @@ class Swarm {
           this.thicknessPx,
           this.lengthPx,
           this.colorRGBA,
-          this.markFliesGravity,
-          fHz,
         ),
     );
   }
+
+  applyGravity() {
+    //@ts-ignore
+    const fHz = psychoJS.window.getActualFrameRate();
+    const flyXYDeg = [];
+    for (let i = 0; i < this.flies.length; i++) {
+      flyXYDeg[i] = XYDegOfXYPix([this.flies[i].pos[0], this.flies[i].pos[1]]);
+    }
+    for (let i = 0; i < this.flies.length; i++) {
+      for (let j = i + 1; j < this.flies.length; j++) {
+        const dx = flyXYDeg[i][0] - flyXYDeg[j][0];
+        const dy = flyXYDeg[i][1] - flyXYDeg[j][1];
+        const distanceSquared = dx * dx + dy * dy;
+        const dDeg = Math.sqrt(distanceSquared);
+
+        let hDeg = 0;
+        if (dDeg > 0) {
+          hDeg = this.markFliesGravity / (fHz * distanceSquared);
+        }
+
+        const gravityVectorXDeg = hDeg * dx;
+        const gravityVectorYDeg = hDeg * dy;
+
+        flyXYDeg[i][0] += gravityVectorXDeg;
+        flyXYDeg[i][1] += gravityVectorYDeg;
+
+        flyXYDeg[j][0] -= gravityVectorXDeg;
+        flyXYDeg[j][1] -= gravityVectorYDeg;
+
+        this.flies[i].pos = XYPixOfXYDeg([flyXYDeg[i][0], flyXYDeg[i][1]]);
+        this.flies[j].pos = XYPixOfXYDeg([flyXYDeg[j][0], flyXYDeg[j][1]]);
+      }
+    }
+  }
+
   everyFrame() {
+    if (this.markFliesGravity > 0) {
+      this.applyGravity();
+    }
     this.center = this.getCenter();
-    this.flies.forEach((f) => f.takeStep(this.center, this.flies));
+    this.flies.forEach((f) => f.takeStep(this.center));
   }
 }
 
