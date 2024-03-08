@@ -306,7 +306,7 @@ class Swarm {
   }
 
   everyFrame() {
-    if (this.markFliesGravity > 0) {
+    if (this.markFliesGravity !== 0) {
       this.applyGravity();
     }
     this.center = this.getCenter();
