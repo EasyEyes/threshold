@@ -220,6 +220,7 @@ import {
   checkIfCursorIsTrackingFixation,
   addHandlerForClickingFixation,
   returnOrClickProceed,
+  getInstructionTextMarginPx,
 } from "./components/instructions.js";
 
 import {
@@ -1412,45 +1413,33 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
   }
 
-  function _instructionSetup(text, blockOrCondition) {
+  function _instructionSetup(
+    text,
+    blockOrCondition,
+    bigMargin = true,
+    wrapRatio = 0.9,
+    altPosition = undefined
+  ) {
     status.currentFunction = "_instructionSetup";
-    t = 0;
-    instructionsClock.reset(); // clock
-    frameN = -1;
-    continueRoutine = true;
     instructionsConfig.height = getParamValueForBlockOrCondition(
       "instructionFontSizePt",
       blockOrCondition
     );
-    instructions.setWrapWidth(window.innerWidth * 0.8);
-    instructions.setPos([-window.innerWidth * 0.4, window.innerHeight * 0.4]);
-    instructions.setText(text);
-    updateColor(instructions, "instruction", blockOrCondition);
-    instructions.setAutoDraw(true);
-    dynamicSetSize([instructions], instructionsConfig.height);
-  }
-
-  // TODO use _instructionSetup, DRY
-  function _instructionBeforeStimulusSetup(
-    text,
-    wrapWidth = window.innerWidth / 4,
-    pos = [-window.innerWidth / 2 + 5, window.innerHeight / 2 - 5]
-  ) {
-    status.currentFunction = "_instructionBeforeStimulusSetup";
+    const marginOffset = getInstructionTextMarginPx(bigMargin);
+    const position = altPosition ?? [
+      -window.innerWidth / 2 + marginOffset,
+      window.innerHeight / 2 - marginOffset,
+    ];
     t = 0;
     instructionsClock.reset(); // clock
     frameN = -1;
     continueRoutine = true;
-    // const wrapWidth = Math.round(1.5 + Math.sqrt(9 + 12*text.length)/2) * instructions.height/1.9;
-    instructionsConfig.height = getParamValueForBlockOrCondition(
-      "instructionFontSizePt",
-      status.block_condition
-    );
-    instructions.setWrapWidth(wrapWidth);
-    instructions.setPos(pos);
+    instructions.setWrapWidth(window.innerWidth * wrapRatio - 2 * marginOffset);
+    instructions.setPos(position);
     instructions.setText(text);
-    updateColor(instructions, "instruction", status.block_condition);
+    updateColor(instructions, "instruction", blockOrCondition);
     instructions.setAutoDraw(true);
+    dynamicSetSize([instructions], instructionsConfig.height);
   }
 
   async function _instructionRoutineEachFrame() {
@@ -2836,57 +2825,79 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // IDENTIFY
           _instructionSetup(
             instructionsText.edu[thresholdParameter](rc.language.value),
-            status.block
+            status.block,
+            true,
+            1.0
           );
-
+          const instructionMarginPx = getInstructionTextMarginPx(true);
           instructions2.setText(
             instructionsText.eduBelow[thresholdParameter](
               rc.language.value,
               responseType.current
             )
           );
-          updateColor(instructions2, "instruction", status.block);
-          instructions2.setWrapWidth(window.innerWidth * 0.8);
-          instructions2.setPos([
-            -window.innerWidth * 0.4,
-            -window.innerHeight * 0.4,
-          ]);
-          instructions2.setAutoDraw(true);
+          instructions._updateIfNeeded();
+          const instBB = instructions.getBoundingBox(true);
+          const instruction1Pos = [
+            -window.innerWidth / 2 + instructionMarginPx,
+            window.innerHeight / 2 - instructionMarginPx,
+          ];
+          const bottomOfInstruction1 = instruction1Pos[1] - instBB.height;
+
           instructionsConfig.height = getParamValueForBlockOrCondition(
             "instructionFontSizePt",
             status.block
           );
+          var h = 50;
+          var D = 200;
+          var g = 60;
+
+          updateColor(instructions2, "instruction", status.block);
+          instructions2.setWrapWidth(window.innerWidth * 0.8);
+          instructions2.setPos([
+            -window.innerWidth / 2 + instructionMarginPx,
+            0,
+          ]);
+          instructions2.setHeight(instructionsConfig.height);
+          instructions2.setAutoDraw(true);
+          instructions2._updateIfNeeded();
+
+          const inst2Y =
+            bottomOfInstruction1 -
+            10 * h -
+            instructions2.getBoundingBox(true).height;
+          instructions2.setPos([
+            -window.innerWidth / 2 + instructionMarginPx,
+            inst2Y,
+          ]);
           dynamicSetSize(
             [instructions, instructions2],
             instructionsConfig.height
           );
 
-          var h = 50;
-          var D = 200;
-          var g = 60;
-
+          const y = bottomOfInstruction1 - 4 * h;
           target.setFont(instructionFont.current);
-          target.setPos([D, 0]);
+          target.setPos([D, y]);
           target.setText("R");
           target.setHeight(h);
           updateColor(target, "marking", status.block);
 
           // TODO maybe show four flankers in instructions, if radialAndTangential or horizontalAndVertical
           flanker1.setFont(instructionFont.current);
-          flanker1.setPos([D - g, 0]);
+          flanker1.setPos([D - g]);
           flanker1.setText("H");
           flanker1.setHeight(h);
           updateColor(flanker1, "marking", status.block);
 
           flanker2.setFont(instructionFont.current);
-          flanker2.setPos([D + g, 0]);
+          flanker2.setPos([D + g, y]);
           flanker2.setText("C");
           flanker2.setHeight(h);
           updateColor(flanker2, "marking", status.block);
 
           fixation.setVertices(getFixationVertices(h));
           fixation.setLineWidth(5);
-          fixation.setPos([0, 0]);
+          fixation.setPos([0, y]);
           fixation.setColor(
             colorRGBASnippetToRGBA(
               paramReader.read("markingColorRGBA", status.block)[0]
@@ -3370,13 +3381,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //change instructions
-          var w = window.innerWidth;
-          _instructionBeforeStimulusSetup(
+          _instructionSetup(
             instructionsText.trial.fixate["vocoderPhrase"](rc.language.value),
-            w,
-            // [-window.innerWidth / 2 + w * 1.1, 0]
-            [-window.innerWidth * 0.4, window.innerHeight * 0.4],
-            status.block_condition
+            status.block_condition,
+            false,
+            1.0
           );
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
@@ -3426,12 +3435,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(renderObj.tinyHint);
         },
         sound: () => {
-          var w = window.innerWidth / 3;
-          _instructionBeforeStimulusSetup(
+          _instructionSetup(
             instructionsText.trial.fixate["sound"](rc.language.value),
-            w,
-            [-window.innerWidth * 0.4, window.innerHeight * 0.4]
-            // [-window.innerWidth / 2 + w * 1.1, 0]
+            status.block_condition,
+            false,
+            1.0
           );
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
@@ -3534,13 +3542,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
 
           // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
-          _instructionBeforeStimulusSetup(
+          _instructionSetup(
             instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
               paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
                 : responseType.current
-            )
+            ),
+            status.block_condition,
+            false,
+            0.25
           );
 
           fixation.tStart = t;
@@ -3907,13 +3918,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
           // Set up instructions
           // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
-          _instructionBeforeStimulusSetup(
+          _instructionSetup(
             instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
               paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
                 : responseType.current
-            )
+            ),
+            status.block_condition,
+            false,
+            0.25
           );
 
           clickedContinue.current = false;
@@ -4113,13 +4127,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
           // Set up instructions
           // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
-          _instructionBeforeStimulusSetup(
+          _instructionSetup(
             instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
               paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
                 : responseType.current
-            )
+            ),
+            status.block_condition,
+            false,
+            0.25
           );
 
           // Update fixation
@@ -4274,13 +4291,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
 
-          _instructionBeforeStimulusSetup(
+          _instructionSetup(
             instructionsText.trial.fixate["spacingDeg"](
               rc.language.value,
               paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
                 : responseType.current
-            )
+            ),
+            status.block_condition,
+            false,
+            0.25
           );
 
           fixation.tStart = t;
@@ -4434,9 +4454,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader,
           status.block_condition
         );
-        _instructionBeforeStimulusSetup(
+        _instructionSetup(
           customInstructions,
-          undefined,
+          status.block_condition,
+          false,
+          0.25,
           customInstructionsLocation
         );
       }

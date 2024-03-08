@@ -827,7 +827,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ _participantIDGetBool (no default). Multi-session experiments require a way to link a participant's several sessions. When _participantIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID, or type in any ASCII alphanumeric string without whitespace to use as their EasyEyesID. If EasyEyes cannot get an EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
+      "_participantIDGetBool (default FALSE). Multi-session experiments require a way to link a participant's several sessions. When _participantIDGetBool is TRUE, we ask the participant to provide their EasyEyesID from a previous session. To facilitate this, EasyEyes checks for the most recent EasyEyesID cookie, and, if found, offers it to the participant for approval. The participant can approve this (if found), or select an EasyEyesID file from the computer's disk, or type in an EasyEyesID, or type in any ASCII alphanumeric string without whitespace to use as their EasyEyesID. If EasyEyes cannot get an EasyEyesID, it exits the experiment. A participant who moves from one computer to another during the experiment should take an EasyEyesID file with them, or write down the EasyEyesID. Also see _participantIDPutBool below.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -837,7 +837,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ _participantIDPutBool (no default). EasyEyes always saves an EasyEyesID cookie in browser local storage (which can be lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Downloads Folder of the  participant's computer. Also see _participantIDGetBool above.",
+      "_participantIDPutBool (default FALSE). EasyEyes always saves an EasyEyesID cookie in browser local storage (which can be lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Downloads Folder of the  participant's computer. Also see _participantIDGetBool above.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -857,7 +857,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_prolific0TraceBool (default FALSE), when TRUE, if EasyEyes was called by Prolific (i.e. if Prolific user ID is not empty), then EasyEyes, before initializing PsychoJS, immediately saves a small “prolific” CSV file in the experiment’s Pavlovia repo. Each such file is a breadcrumb, helping us trace the path of a participant. The filename is \nprolific-SSS-UUU.csv \nwhere SSS and UUU are replaced by the Prolific session and user IDs. The file includes: experiment name, Prolific user and session IDs, computer operating system (and version), and browser (and version). (The “prolific” file is created before initializing PsychoJS, so the Pavlovia session ID doesn’t exist yet.) When Prolific reports that the experiment is done, the scientist can compare the list of “prolific” filenames (in the experiment's Pavlovia repo) with the list of user IDs in Prolific’s Demographic data file. For any Prolific user ID lacking a results CSV in the Pavlovia repo, the scientist can examine their “prolific” file. This could help discover a browser version that breaks EasyEyes before it initializes PsychoJS.",
+      "🕑 ON HOLD. _prolific0TraceBool (default FALSE), when TRUE, if EasyEyes was called by Prolific (i.e. if Prolific user ID is not empty), then EasyEyes, before initializing PsychoJS, immediately saves a small “prolific” CSV file in the experiment’s Pavlovia repo. Each such file is a breadcrumb, helping us trace the path of a participant. The filename is \nprolific-SSS-UUU.csv \nwhere SSS and UUU are replaced by the Prolific session and user IDs. The file includes: experiment name, Prolific user and session IDs, computer operating system (and version), and browser (and version). (The “prolific” file is created before initializing PsychoJS, so the Pavlovia session ID doesn’t exist yet.) When Prolific reports that the experiment is done, the scientist can compare the list of “prolific” filenames (in the experiment's Pavlovia repo) with the list of user IDs in Prolific’s Demographic data file. For any Prolific user ID lacking a results CSV in the Pavlovia repo, the scientist can examine their “prolific” file. This could help discover a browser version that breaks EasyEyes before it initializes PsychoJS.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1866,7 +1866,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "instructionFontSizePt (default 25) specifies the point size of the font used for instructions.",
     type: "numerical",
-    default: "25",
+    default: "17",
     categories: "",
   },
   {
@@ -2563,7 +2563,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "readingCorpusEndlessBool",
     availability: "now",
     example: "",
-    explanation: "🕑 readingCorpusEndlessBool (default FALSE).",
+    explanation:
+      "🕑 readingCorpusEndlessBool (default FALSE). We simulate an infinite corpus by simulating an endless series of copies of the corpus glued together. If we're using a shuffled corpus then each copy is independently shuffled.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2573,7 +2574,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace character is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. WE SHOULD REMOVE TRAILING PUNCTUATION FROM EACH WORD.',
+      '🕑 readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace characters is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. (HMM. I\'D LIKE TO REMOVE TRAILING PUNCTUATION, BUT THIS WOULD DAMAGE ABBREVIATIONS LIKE DR. AND INC.)',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2613,19 +2614,29 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "57",
     explanation:
-      "⭑ readingMaxCharactersPerLine (default 57) is the maximum line length in characters. (Note that line breaking is based on pixels, not characters; readingMaxCharactersPerLine is used to compute readingMaxPixPerLine.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.",
+      "⭑ readingMaxCharactersPerLine (default 57) is the maximum line length in characters. (Note that line breaking is based on pixels, not characters; readingMaxCharactersPerLine is used to compute readingMaxPixPerLine.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  To use readingMaxCharactersPerLine, it must have a value >0 (the default is >0), and readingMaxLineLengthDeg must be zero (default). The compiler will flag an error if both are zero or both are nonzero.",
     type: "numerical",
     default: "57",
     categories: "",
   },
   {
-    name: "readingMaxWidthDegPerLine",
+    name: "readingMaxLineLengthCharacters",
     availability: "now",
-    example: "",
+    example: "57",
     explanation:
-      'readingMaxWidthDegPerLine. If specified, when targetKind=="reading" the width of the reading paragraph (i.e. determining how many words are included in a given line) will be constrained by the lower bound of this width (deg) and readingMaxCharacterPerLine. If left blank, reading paragraph width is constrained by readingMaxCharacterPerLine and 80% of the width of the screen.',
+      "🕑 readingMaxLineLengthCharacters (default 57) is the maximum line length in characters. (Note that line breaking is based on maxPixPerLine, which is computed from readingMaxLineLengthCharacters.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxLineLengthCharacters (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  To use readingMaxLineLengthCharacters, it must have a value >0 (the default is >0), and readingMaxLineLengthDeg must be zero (default). The compiler will flag an error if both are zero or both are nonzero.",
     type: "numerical",
-    default: "",
+    default: "57",
+    categories: "",
+  },
+  {
+    name: "readingMaxLineLengthDeg",
+    availability: "now",
+    example: "57",
+    explanation:
+      "🕑 readingMaxLineLengthDeg (default 0) is the maximum line length in deg. (Note that line breaking is based on maxPixPerLine, which is computed from readingMaxLineLengthDeg, for that part of the screen. Typographers reckon that text is easiest to read in a column that is 8-10 words wide. To use readingMaxLineLengthDeg, set it to a value >0, and set readingMaxLineLengthCharacters=0. The compiler will flag an error if both are zero or both are nonzero.",
+    type: "numerical",
+    default: "0",
     categories: "",
   },
   {
@@ -2645,7 +2656,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'readingNominalSizeDeg (default 1) sets the nominal size of the text in deg, provided readingSetSizeBy=="nominalDeg". It sets the font\'s point size to the product readingNominalSizeDeg*pxPerDeg.',
     type: "numerical",
-    default: "",
+    default: "1",
     categories: "",
   },
   {
@@ -2655,7 +2666,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'readingNominalSizePt (default 12) sets the nominal point size of the text, provided readingSetSizeBy=="nominalPt". One "point" is 1/72 inch.',
     type: "numerical",
-    default: "",
+    default: "12",
     categories: "",
   },
   {
@@ -2663,7 +2674,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "3",
     explanation:
-      '⭑ readingNumberOfPossibleAnswers is number of possible answers for each question (which of these words did you read just now?). Only one of the possible answers is right. The rest are "foils". The foils have approximately the same frequency in the corpus as the target.',
+      '⭑ readingNumberOfPossibleAnswers (default 4) is number of possible answers for each question (which of these words did you read just now?). Only one of the possible answers is right. The rest are "foils". The foils have approximately the same frequency in the corpus as the target.',
     type: "integer",
     default: "4",
     categories: "",
@@ -2673,7 +2684,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      '⭑ After the participant reads a passage, EasyEyes will ask readingNumberOfQuestions, each on a new screen, to assess retention. Each retention question offers several words and asks the participant which word (the target) was in the passage just read. The other words (foils) were not in that passage but do appear in the corpus. The target word is presented with enough foils to offer N=readingNumberOfPossibleAnswers. The words are arranged in alphabetical order below the question. The participant responds by clicking on the chosen word. It\'s "forced choice"; the participant must click a word. We give a "correct" beep if the answer is right. We repeat this several times, as specified by readingNumberOfQuestions.\n     IGNORE FIRST & LAST PAGES. Performance on the first and last pages of the passage might not be representative because timing of the space bar press might be less regular, and primacy and recency would make words on those pages more memorable. So we analyze only the middle pages, excluding the first and last both from the estimate of reading speed and the retention test. [Thus each word in the corpus is read and tested, read and not tested, or not read.]\n     CONCORDANCE. As explained in readingCorpus, we will, once, compute a concordance, the frequency of every word in the corpus. It is a two-column table (word and number of instances in the corpus), sorted by frequency. \n     CANDIDATES FOR TARGET. For a given passage, each question uses a different target word. We pick candidate target words randomly from the passage just read  (in which many words appear more than once), and check each for suitability. We reject some candidates, so we keep picking candidates until we have accepted the desired number, readingNumberOfQuestions. As potential target or foil words we reject any strings in the concordance that include a hyphen.\n     CHOOSE FOILS. We pick a random integer from 1 to N to determine the rank order frequency of the target among the foils. We reduce the concordance by striking out all the words that were read (whether to be tested or not), except the target, which remains. As our answer set, we take N consecutive words from the reduced concordance, including the target, chosen so that the target has the randomly specified frequency rank (1 to N). If the target frequency is so high or low that the reduced concordance lacks N successive words with the target at the designated rank order, then we reject that target and pick another, using the same random rank. The passage read will typically have hundreds of words, so there are lots of candidate targets for the retention questions.\n      \n\n\n',
+      '⭑ After the participant reads a passage, EasyEyes will ask readingNumberOfQuestions (default 3), each on a new screen, to assess retention. Each retention question offers several words and asks the participant which word (the target) was in the passage just read. The other words (foils) were not in that passage but do appear in the corpus. The target word is presented with enough foils to offer N=readingNumberOfPossibleAnswers. The words are arranged in alphabetical order below the question. The participant responds by clicking on the chosen word. It\'s "forced choice"; the participant must click a word. We give a "correct" beep if the answer is right. We repeat this several times, as specified by readingNumberOfQuestions.\n     IGNORE FIRST & LAST PAGES. Performance on the first and last pages of the passage might not be representative because timing of the space bar press might be less regular, and primacy and recency would make words on those pages more memorable. So we analyze only the middle pages, excluding the first and last both from the estimate of reading speed and the retention test. [Thus each word in the corpus is read and tested, read and not tested, or not read.]\n     CONCORDANCE. As explained in readingCorpus, we will, once, compute a concordance, the frequency of every word in the corpus. It is a two-column table (word and number of instances in the corpus), sorted by frequency. \n     CANDIDATES FOR TARGET. For a given passage, each question uses a different target word. We pick candidate target words randomly from the passage just read  (in which many words appear more than once), and check each for suitability. We reject some candidates, so we keep picking candidates until we have accepted the desired number, readingNumberOfQuestions. As potential target or foil words we reject any strings in the concordance that include a hyphen.\n     CHOOSE FOILS. We pick a random integer from 1 to N to determine the rank order frequency of the target among the foils. We reduce the concordance by striking out all the words that were read (whether to be tested or not), except the target, which remains. As our answer set, we take N consecutive words from the reduced concordance, including the target, chosen so that the target has the randomly specified frequency rank (1 to N). If the target frequency is so high or low that the reduced concordance lacks N successive words with the target at the designated rank order, then we reject that target and pick another, using the same random rank. The passage read will typically have hundreds of words, so there are lots of candidate targets for the retention questions.\n      \n\n\n',
     type: "integer",
     default: "3",
     categories: "",
@@ -2683,7 +2694,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      "⭑ readingPages (no default) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
+      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
     type: "numerical",
     default: "4",
     categories: "",
@@ -2715,7 +2726,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
     type: "numerical",
-    default: "",
+    default: "0.5",
     categories: "",
   },
   {

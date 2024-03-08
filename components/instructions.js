@@ -5,6 +5,7 @@ import {
   modalButtonTriggeredViaKeyboard,
   targetKind,
   status,
+  displayOptions,
 } from "./global.js";
 import { cleanFontName } from "./fonts.js";
 import { replacePlaceholders } from "./multiLang.js";
@@ -666,4 +667,13 @@ export const updateInstructionFont = (
   if (source === "file")
     instructionFont.current = cleanFontName(instructionFont.current);
   instructionStims.forEach((s) => s.setFont(instructionFont.current));
+};
+
+export const getInstructionTextMarginPx = (bigMargin = true) => {
+  const smallMarginPx =
+    typeof displayOptions.pixPerCm !== "undefined"
+      ? Math.round(displayOptions.pixPerCm / 10)
+      : 5;
+  const largeMarginPx = smallMarginPx * 20;
+  return bigMargin ? largeMarginPx : smallMarginPx;
 };
