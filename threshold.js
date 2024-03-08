@@ -2059,13 +2059,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader,
           status.block_condition
         );
-        if (customInstructions.length) {
-          instructions.setText(customInstructions);
-        } else {
-          instructions.setText(
-            readi18nPhrases("T_readingTaskQuestionPrompt", rc.language.value)
-          );
-        }
+        _instructionSetup(
+          customInstructions ??
+            readi18nPhrases("T_readingTaskQuestionPrompt", rc.language.value),
+          status.block,
+          false,
+          1.0
+        );
         updateColor(instructions, "instruction", status.block_condition);
         instructions.setAutoDraw(true);
       }
@@ -2533,7 +2533,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const instr = instructionsText.vocoderPhraseBegin(L);
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr,
-            status.block
+            status.block,
+            true,
+            1.0
           );
         },
         sound: () => {
@@ -2544,7 +2546,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               : instructionsText.soundBegin(L);
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr,
-            status.block
+            status.block,
+            true,
+            1.0
           );
         },
         letter: () => {
@@ -2556,7 +2560,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               totalTrialsThisBlock.current
             ) +
             instructionsText.initialEnd(L, responseType.current);
-          _instructionSetup(letterBlockInstructionText, status.block);
+          _instructionSetup(
+            letterBlockInstructionText,
+            status.block,
+            true,
+            1.0
+          );
         },
         repeatedLetters: () => {
           const repeatedLettersBlockInstructs =
@@ -2567,7 +2576,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               totalTrialsThisBlock.current
             ) +
             instructionsText.initialEnd(L, responseType.current);
-          _instructionSetup(repeatedLettersBlockInstructs, status.block);
+          _instructionSetup(
+            repeatedLettersBlockInstructs,
+            status.block,
+            true,
+            1.0
+          );
         },
         rsvpReading: () => {
           const rsvpReadingBlockInstructs =
@@ -2583,7 +2597,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "fontTrackingForLetters",
             status.block
           )[0];
-          _instructionSetup(rsvpReadingBlockInstructs, status.block);
+          _instructionSetup(rsvpReadingBlockInstructs, status.block, true, 1.0);
           rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
             status.block
@@ -2596,7 +2610,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 L,
                 paramReader.read("readingPages", status.block)[0]
               ),
-            status.block
+            status.block,
+            true,
+            1.0
           );
 
           renderObj.tinyHint.setText(
@@ -2700,7 +2716,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           loggerText("inside movie");
           _instructionSetup(
             snapshot.block === 0 ? instructionsText.initial(L) : "",
-            status.block
+            status.block,
+            true,
+            1.0
           );
         },
         vernier: () => {
@@ -2712,7 +2730,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               totalTrialsThisBlock.current
             ) +
             instructionsText.vernierInitialEnd(L, responseType.current);
-          _instructionSetup(vernierBlockInstructionText, status.block);
+          _instructionSetup(
+            vernierBlockInstructionText,
+            status.block,
+            true,
+            1.0
+          );
         },
       });
 
@@ -2755,7 +2778,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block
       );
       if (customInstructionText.current.length)
-        _instructionSetup(customInstructionText.current, status.block);
+        _instructionSetup(
+          customInstructionText.current,
+          status.block,
+          true,
+          1.0
+        );
 
       return Scheduler.Event.NEXT;
     };
@@ -2917,7 +2945,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // IDENTIFY
           _instructionSetup(
             instructionsText.edu["spacingDeg"](rc.language.value),
-            status.block
+            status.block,
+            true,
+            1.0
           );
 
           instructions2.setText(
@@ -2957,7 +2987,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         vernier: () => {
           _instructionSetup(
             instructionsText.edu[thresholdParameter](rc.language.value),
-            status.block
+            status.block,
+            true,
+            1.0
           );
           instructions2.setText(
             instructionsText.eduBelow[thresholdParameter](
@@ -5114,24 +5146,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rc.language.value,
           responseType.current
         ),
-        status.block_condition
+        status.block_condition,
+        false,
+        1.0
       );
 
-      //use google sheets phrases for instructions
       switchKind(targetKind.current, {
         rsvpReading: () => {
           const instr = instructionsText.trial.respond["rsvpReading"](
             rc.language.value,
             responseType.current
           );
-          _instructionSetup(instr, status.block_condition);
+          _instructionSetup(instr, status.block_condition, false, 1.0);
         },
         vocoderPhrase: () => {
           // change instruction
           const instr = instructionsText.trial.respond["vocoderPhrase"](
             rc.language.value
           );
-          _instructionSetup(instr, status.block_condition);
+          _instructionSetup(instr, status.block_condition, false, 1.0);
         },
         sound: () => {
           const instr =
@@ -5140,7 +5173,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   rc.language.value
                 )
               : instructionsText.trial.respond["sound"](rc.language.value);
-          _instructionSetup(instr, status.block_condition);
+          _instructionSetup(instr, status.block_condition, false, 1.0);
         },
         letter: () => {
           _instructionSetup(
@@ -5148,7 +5181,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.language.value,
               responseType.current
             ),
-            status.block_condition
+            status.block_condition,
+            false,
+            1.0
           );
         },
         vernier: () => {
@@ -5157,7 +5192,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.language.value,
               responseType.current
             ),
-            status.block_condition
+            status.block_condition,
+            false,
+            1.0
           );
         },
       });
@@ -6094,13 +6131,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader,
           status.block_condition
         );
-        if (customInstructions.length) {
-          instructions.setText(customInstructions);
-          updateColor(instructions, "instruction", status.block_condition);
-          instructions.tSTart = t;
-          instructions.frameNStart = frameN;
-          instructions.setAutoDraw(true);
-        }
+        if (customInstructions.length)
+          _instructionSetup(
+            customInstructions,
+            status.block_condition,
+            false,
+            1.0
+          );
         customResponseInstructionsDisplayed = true;
       }
 

@@ -644,13 +644,14 @@ export const getCustomInstructionText = (when, reader, blockOrCondition) => {
 
 export const getStimulusCustomInstructionPos = (reader, BC) => {
   const requestedPosition = reader.read("instructionForStimulusLocation", BC);
+  const margin = getInstructionTextMarginPx(false);
   switch (requestedPosition) {
     case "top":
-      return [0, window.innerHeight * 0.4];
+      return [0, window.innerHeight / 2 - margin];
     case "upperLeft":
-      return [window.innerWidth * -0.4, window.innerHeight * 0.4];
+      return [-window.innerWidth / 2 + margin, window.innerHeight / 2 - margin];
     case "upperRight":
-      return [window.innerWidth * 0.4, window.innerHeight * 0.4];
+      return [window.innerWidth / 2 - margin, window.innerHeight / 2 - margin];
   }
 };
 
