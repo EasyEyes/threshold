@@ -461,6 +461,7 @@ export const calibrateSoundBurstSec = { current: 1 };
 export const calibrateSoundBurstsWarmup = { current: 1 };
 export const calibrateSoundHz = { current: 48000 };
 export const calibrateSoundBurstRecordings = { current: 3 };
+export const calibrateSoundBurstMLSVersions = { current: 4 };
 export const calibrateSound1000HzSec = { current: 1 };
 export const calibrateSound1000HzPreSec = { current: 3.5 };
 export const calibrateSound1000HzPostSec = { current: 0.5 };

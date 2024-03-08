@@ -16,7 +16,7 @@ import {
   calibrateSoundBurstFilteredExtraDb,
   calibrateSoundBurstLevelReTBool,
   calibrateSoundBurstUses1000HzGainBool,
-  calibrateSoundBurstRecordings,
+  calibrateSoundBurstMLSVersions,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
   calibrateSoundBurstsWarmup,
@@ -1035,7 +1035,7 @@ const startCalibration = async (
   };
 
   const calibratorParams = {
-    numCaptures: calibrateSoundBurstRecordings.current,
+    numCaptures: calibrateSoundBurstMLSVersions.current,
     numMLSPerCapture: 2,
     download: false,
     lowHz: calibrateSoundMinHz.current,
@@ -1194,7 +1194,7 @@ export const calibrateAgain = async (
   };
 
   const calibratorParams = {
-    numCaptures: calibrateSoundBurstRecordings.current,
+    numCaptures: calibrateSoundBurstMLSVersions.current,
     numMLSPerCapture: 2,
     download: false,
     lowHz: calibrateSoundMinHz.current,
