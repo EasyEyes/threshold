@@ -293,11 +293,21 @@ class Swarm {
         const gravityVectorXDeg = hDeg * dx;
         const gravityVectorYDeg = hDeg * dy;
 
-        flyXYDeg[i][0] += gravityVectorXDeg;
-        flyXYDeg[i][1] += gravityVectorYDeg;
+        if (this.markFliesGravity > 0) {
+          flyXYDeg[i][0] += gravityVectorXDeg;
+          flyXYDeg[i][1] += gravityVectorYDeg;
+        } else {
+          flyXYDeg[i][0] -= gravityVectorXDeg;
+          flyXYDeg[i][1] -= gravityVectorYDeg;
+        }
 
-        flyXYDeg[j][0] -= gravityVectorXDeg;
-        flyXYDeg[j][1] -= gravityVectorYDeg;
+        if (this.markFliesGravity > 0) {
+          flyXYDeg[j][0] -= gravityVectorXDeg;
+          flyXYDeg[j][1] -= gravityVectorYDeg;
+        } else {
+          flyXYDeg[j][0] += gravityVectorXDeg;
+          flyXYDeg[j][1] += gravityVectorYDeg;
+        }
 
         this.flies[i].pos = XYPixOfXYDeg([flyXYDeg[i][0], flyXYDeg[i][1]]);
         this.flies[j].pos = XYPixOfXYDeg([flyXYDeg[j][0], flyXYDeg[j][1]]);
