@@ -12,7 +12,7 @@ export function getTrialInfoStr(
   currentBlockIndex,
   blockCount,
   viewingDistanceCm,
-  taskKind
+  taskKind,
 ) {
   let res = "";
   if (showCounterBool) {
@@ -20,93 +20,93 @@ export function getTrialInfoStr(
       switchKind(taskKind, {
         vocoderPhrase: () => {
           res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
+            readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
-            blockCount
+            blockCount,
           );
         },
         sound: () => {
           res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
+            readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
-            blockCount
+            blockCount,
           );
         },
         reading: () => {
           res += replacePlaceholders(
-            readi18nPhrases("T_counterReadingPageBlock", L),
+            readi18nPhrases("T_counterReadingPageBlock1", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
-            blockCount
+            blockCount,
           );
         },
         letter: () => {
           // On trial routines, show the trial# and block#...
           res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
+            readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
-            blockCount
+            blockCount,
           );
         },
         repeatedLetters: () => {
           // On trial routines, show the trial# and block#...
           res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
+            readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
-            blockCount
+            blockCount,
           );
         },
         rsvpReading: () => {
           res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
+            readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
-            blockCount
+            blockCount,
           );
         },
         movie: () => {
           res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
+            readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
-            blockCount
+            blockCount,
           );
         },
         vernier: () => {
           res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
+            readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,
-            blockCount
+            blockCount,
           );
         },
       });
     } else {
       // ...but on block instructions, just show block#
       res = replacePlaceholders(
-        readi18nPhrases("T_counterBlock", L),
+        readi18nPhrases("T_counterBlock1", L),
         currentBlockIndex,
-        blockCount
+        blockCount,
       );
     }
   }
 
   if (showViewingDistanceBool && viewingDistanceCm)
     res += replacePlaceholders(
-      readi18nPhrases("T_counterCm", L),
-      viewingDistanceCm
+      readi18nPhrases("T_counterCm1", L),
+      viewingDistanceCm,
     );
 
   return res;
@@ -123,7 +123,7 @@ export const liveUpdateTrialCounter = (
   viewingDistanceCm,
   taskKind,
   t,
-  trialCounterStim
+  trialCounterStim,
 ) => {
   const periodMs = 500;
   const tMs = Math.floor(t) * 1000;
@@ -138,8 +138,8 @@ export const liveUpdateTrialCounter = (
         currentBlockIndex,
         blockCount,
         viewingDistanceCm,
-        taskKind
-      )
+        taskKind,
+      ),
     );
   }
 };
