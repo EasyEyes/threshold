@@ -275,16 +275,18 @@ export const getInstructionText = (
   needPhoneSurvey = false,
   OEM = ""
 ) => {
+  //RC_phoneBrandAndModel
   const needModelNumber = isSmartPhone
     ? needPhoneSurvey
-      ? QRSkipResponse.QRCantBool || QRSkipResponse.QRPreferNotToBool
-        ? ""
-        : readi18nPhrases("RC_surveyPhoneModel", language)
-            .replace("ooo", thisDevice.PlatformName)
-            .replace("OOO", thisDevice.PlatformName)
-            .replace("mmm", preferredModelNumberText)
-            .replace("MMM", preferredModelNumberText)
-      : readi18nPhrases("RC_needPhoneModel", language)
+      ? readi18nPhrases("RC_phoneBrandAndModel", language) + "<br><br>"
+      : // QRSkipResponse.QRCantBool || QRSkipResponse.QRPreferNotToBool
+        //   ? ""
+        //   : readi18nPhrases("RC_surveyPhoneModel", language)
+        //       .replace("ooo", thisDevice.PlatformName)
+        //       .replace("OOO", thisDevice.PlatformName)
+        //       .replace("mmm", preferredModelNumberText)
+        //       .replace("MMM", preferredModelNumberText)
+        readi18nPhrases("RC_needPhoneModel", language)
     : readi18nPhrases("RC_needModelNumberAndName", language);
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber

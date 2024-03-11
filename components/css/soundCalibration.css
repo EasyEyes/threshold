@@ -39,6 +39,15 @@
   top: 2px;
 }
 
+#manufacturerInput {
+  width: 30vw;
+  height: 45px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 #modelNumberInput {
   width: 30vw;
   height: 45px;
