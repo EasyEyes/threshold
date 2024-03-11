@@ -1714,7 +1714,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0,0,0,1",
     explanation:
-      "fontColorRGBA is the color of the target font, in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
+      'fontColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify font color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white.  Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
     type: "text",
     default: "0,0,0,1",
     categories: "",
@@ -1844,7 +1844,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "instructionFontColorRGBA is the color of the instruction font, in RGBA, on a scale of 0 to 1 for each dimension. If the instructions include buttons, then each button's outline is drawn in the same color as the text, both specified by instructionFontColorRGBA. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
+      'instructionFontColorRGBA (default 0,0,0,1) is a comma-separated list for four numbers (each ranging from 0 to 1) that specify the color of the instruction font. "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1).  If the instructions include buttons, then each button\'s outline is drawn in the same color as the text, both specified by instructionFontColorRGBA. Use screenColorRGB to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
     type: "text",
     default: "0,0,0,1",
     categories: "",
@@ -2004,7 +2004,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 markDotColorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, which weights the blending; use 1 for 100% color. Each of the four values ranges 0 to 1.',
+      '🕑 markDotColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
     type: "text",
     default: "0,0,0,1",
     categories: "",
@@ -2054,9 +2054,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 markFliesColorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).',
+      '🕑 markFliesColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. RGB are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. We recommend blue flies: 0,0,1,1. They are obviously different from a fixated black crosshair, yet strongly group with a peripherally viewed crosshair. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
     type: "text",
-    default: "0,0,0,1",
+    default: "0,0,1,1",
     categories: "",
   },
   {
@@ -2184,7 +2184,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "markingColorRGBA is the color of the marks (for fixation, target, etc.), in RGBA, on a scale of 0 to 1 for each dimension. Use screenColorRGB to control the background color. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
+      'markingColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the marks (for fixation, target, etc.). "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
     type: "text",
     default: "0,0,0,1",
     categories: "",
@@ -2204,7 +2204,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.05",
     explanation:
-      "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the area that can be clicked with the tip of the cursor.\nUsed with responseMustTrackContinuouslyBool=TRUE.",
+      "markingFixationHotSpotRadiusDeg (default 0.3 deg) is the radius, in deg, of the hot spot in the fixation cross. The hot spot is the disk-shaped area that can be clicked with the tip of the cursor.\n     Used with responseMustTrackContinuouslyBool=TRUE.\n     Tracking a moving crosshair demands good eye-hand coordination. Teenagers can handle a hot-spot raidus of 0.1 deg. People over 30 need at least 0.15 deg. We anticipate that children will need 0.2 or more deg.\n     Typically you’ll want to limit the success of the participant strategy (invented by Maria Pombo) that fixates the crosshair to place the cursor on it, and then looks away (e.g. to the anticipated target location). This strategy relies on the crosshair moving so slowly that the cursor remains within the hotspot for the required interval. We can defeat that strategy by making the minimum crosshair travel distance (product of speed and min tracking duration) at least double the hotspot radius.\nresponseTrackingMinSec*markingFixationMotionSpeedDegPerSec > 2*markingFixationHotSpotRadiusDeg\nObeying this rule of thumb, I’m currently using a minimum tracking duration of 1 sec, a speed of 0.4 deg/sec, and a hot spot radius of 0.2 deg.",
     type: "numerical",
     default: "0.1",
     categories: "",
@@ -2804,7 +2804,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⚠ responseMustClickCrosshairBool (default FALSE) requires the participant to click the crosshair in order to initiate the trial. For initiating a trial, responseMustClickCrosshairBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial.  This is not a good way to get fixation of the crosshair at the moment of target presentation. If you want good fixation use responseMustTrackContinuouslyBool instead. We're not sure what this might be good for, so we're leaving it for the time being. If it turns out to be an attractive nuisance we may remove it.",
+      "⚠ responseMustClickCrosshairBool (default FALSE) requires the participant to click the crosshair in order to initiate the trial. For initiating a trial, responseMustClickCrosshairBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial.  It turns out that this is not a good way to get fixation of the crosshair at the moment of target presentation. We discovered that some participants learn to plan BOTH the hand and eye movements at once: the manual click of the crosshair and the eye movement to fixate the target, so they end up with their eye on the target at target onset. If you want good fixation use responseMustTrackContinuouslyBool instead. We're not sure what this might be good for, so we're leaving it for the time being. If it turns out to be an attractive nuisance we may remove it.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -2814,7 +2814,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⭑ responseMustTrackContinuouslyBool (default FALSE), when TRUE, imposes a special way of initiating a trial that results in good fixation. It selects a waiting interval by taking a fresh random sample from the uniform distribution over the range responseMustTrackMinSec to responseMustTrackMaxSec. The motion is controlled by markingFixationMotionRadiusDeg and markingFixationMotionSpeedDegPerSec.  responseMustTrackContinuouslyBool requires that the cursor tip be within the hotspot (within markingFixationHotSpotRadiusDeg of the crosshair center) for the entire waiting interval.  Whenever the cursor is outside the hotspot, the software resets the waiting process, first waiting for the cursor to enter the hotspot, which begins a new waiting interval (whose duration is a fresh random sample). For initiating a trial, responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. We submitted an article to Journal of Vision about the excellent fixation achieved with responseMustTrackContinuouslyBool. (Kurzawski et al. submitted 2023).",
+      "⭑ responseMustTrackContinuouslyBool (default FALSE), when TRUE, imposes a special way of initiating a trial that is designed to yield good fixation. For each trial, it selects a random-length waiting interval by taking a fresh random sample from the uniform distribution over the range responseMustTrackMinSec to responseMustTrackMaxSec. The motion is controlled by markingFixationMotionRadiusDeg and markingFixationMotionSpeedDegPerSec.  responseMustTrackContinuouslyBool requires that the cursor tip be in the hotspot (within markingFixationHotSpotRadiusDeg of the crosshair center) for the entire waiting interval.  Whenever the cursor is outside the hotspot, the software resets the waiting process, first waiting for the cursor to enter the hotspot, which begins a new waiting interval (whose duration is a fresh random sample). For initiating a trial, responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. We submitted an article to Journal of Vision about the excellent fixation achieved with responseMustTrackContinuouslyBool. (Kurzawski et al. submitted 2023).",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3023,7 +3023,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⭑ screenColorRGBA is the background color for the condition, in RGB, on a scale of 0 to 1 for each dimension. This is used to set the background of the rest of the screen to match the background of a movie. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.",
+      '⭑ screenColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the screen background for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. This is used to set the background of the rest of the screen, e.g. to match the background of a movie. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
     type: "text",
     default: "0.92,0.92,0.92,1",
     categories: "",
@@ -3451,7 +3451,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'targetColorRGBA (default "0,0,0,1") sets target color. "RGB" specifies the luminance of each color channel, from 0 to 1. "A" is the alpha channel which blends this with whatever is behind. Use 0 to have no effect; 1 to get pure "RGB". For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The RGB controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+      'targetColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify traget color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. ',
     type: "text",
     default: "0,0,0,1",
     categories: "",

@@ -348,10 +348,8 @@ export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
   );
   const querySnapshot = await getDocs(q);
   if (querySnapshot.size > 0) {
-    console.log("Existsss");
     return true;
   }
-  console.log("Does not exist");
   return false;
 };
 
@@ -377,7 +375,6 @@ export const checkSystemCompatibility = (
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
   var msg = requirements.describeDevice;
   const needsUnmet = requirements.needsUnmet;
-  console.log("needsUnmet", needsUnmet);
 
   // add screen size to compatibility test
   // Get screenWidthPx and screenHeightPx of the participant's screen
@@ -609,8 +606,6 @@ export const getCompatibilityRequirements = (
     compatibleProcessorCoresMinimum = reader.read(
       "_needProcessorCoresMinimum"
     )[0];
-    console.log("_needProcessorCoresMinimum", compatibleProcessorCoresMinimum);
-    console.log("hardwareConcurrency", deviceInfo["hardwareConcurrency"]);
     // the above lists might have spaces in the beginning or end of the string, so we need to remove them
     compatibleBrowser = compatibleBrowser.map((item) => item.trim());
     compatibleDevice = compatibleDevice.map((item) => item.trim());
@@ -827,7 +822,6 @@ export const getCompatibilityRequirements = (
   // 222 = minimum number of cpu cores
   // Each allowed field can hold one, e.g. "Chrome", or several possibilities, e.g. "Chrome or Firefox".
   // Source code for StringOfItems and StringOfNotItems below.
-  console.log("msg", msg);
   msg.forEach((item, idx, arr) => {
     // Incompatible with items connected by AND.
     arr[idx] = arr[idx].replace(/bbb/g, StringOfNotItems(compatibleBrowser));
@@ -947,6 +941,7 @@ export const displayCompatibilityMessage = async (
   quitPsychoJS
 ) => {
   return new Promise(async (resolve) => {
+    const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
     document.body.style.overflowX = "hidden";
     const thisDevice = await identifyDevice();
     psychoJS.experiment.addData("ComputerInfoFrom51Degrees", thisDevice);
@@ -957,7 +952,7 @@ export const displayCompatibilityMessage = async (
     messageWrapper.style.display = "flex";
     messageWrapper.style.flexDirection = "column";
     messageWrapper.style.position = "absolute";
-    messageWrapper.style.top = "0";
+    messageWrapper.style.top = needPhoneSurvey ? "0" : "25vh";
     messageWrapper.style.right = "20vw";
     messageWrapper.style.left = "20vw";
     messageWrapper.style.minWidth = "60vw";
@@ -1023,7 +1018,6 @@ export const displayCompatibilityMessage = async (
     }
 
     const languageWrapper = document.createElement("div");
-    const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
     if (reader.read("_languageSelectionByParticipantBool")[0]) {
       // create language selection dropdown
       const LanguageTitle = document.createElement("p");
@@ -1040,7 +1034,7 @@ export const displayCompatibilityMessage = async (
 
       const languageDropdown = document.createElement("select");
       languageDropdown.id = "language-dropdown";
-      languageDropdown.style.width = "12rem";
+      languageDropdown.style.width = "fit-content";
       languageDropdown.style.backgroundColor = "#999";
       languageDropdown.style.color = "white";
       languageDropdown.style.borderRadius = "0.3rem";
@@ -1072,7 +1066,6 @@ export const displayCompatibilityMessage = async (
           needCalibratedSmartphoneMicrophone
         );
       });
-
       // top right corner
       languageWrapper.style.marginTop = "10px";
       // languageWrapper.style.marginRight = "20px";
@@ -1789,7 +1782,6 @@ const handleLanguage = (lang, rc, useEnglishNames = true) => {
   if (languageCode) {
     rc.newLanguage(languageCode);
   }
-  console.log("languageCode", languageCode);
 };
 
 const handleNewMessage = (
@@ -1825,13 +1817,16 @@ const handleNewMessage = (
     let qrCodeExplanation = document.getElementById(
       "compatibility-qr-explanation"
     );
-    let messageForQr = getMessageForQR(
-      needAnySmartphone,
-      needCalibratedSmartphoneMicrophone,
-      needPhoneSurvey,
-      lang
-    );
-    qrCodeExplanation.innerHTML = messageForQr;
+    if (qrCodeExplanation) {
+      let messageForQr = getMessageForQR(
+        needAnySmartphone,
+        needCalibratedSmartphoneMicrophone,
+        needPhoneSurvey,
+        lang
+      );
+      qrCodeExplanation.innerHTML = messageForQr;
+    }
+
     const skipQRExplanation = document.getElementById("skipQRExplanation");
     if (skipQRExplanation) {
       skipQRExplanation.innerHTML = readi18nPhrases(
@@ -1872,7 +1867,6 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
     language: "",
     online2Description: "",
   };
-  // console.log("parsed", parsed.data)
   for (let i = 0; i < parsed.data.length; i++) {
     if (parsed.data[i][0] == "_needBrowser") {
       compatibilityInfo.compatibleBrowser = parsed.data[i][1].split(",");
