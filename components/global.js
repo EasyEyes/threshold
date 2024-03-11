@@ -466,6 +466,7 @@ export const calibrateSound1000HzSec = { current: 1 };
 export const calibrateSound1000HzPreSec = { current: 3.5 };
 export const calibrateSound1000HzPostSec = { current: 0.5 };
 export const calibrateSoundIIRSec = { current: 0.2 };
+export const calibrateSoundIIRPhase = { current: "linear" };
 export const calibrateSoundIRSec = { current: 0.2 };
 export const calibrateSoundBurstDb = { current: -18 };
 export const calibrateSoundBurstFilteredExtraDb = { current: 6 };

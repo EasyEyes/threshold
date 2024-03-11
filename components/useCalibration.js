@@ -26,6 +26,7 @@ import {
   timeToCalibrate,
   thisDevice,
   calibrateSoundIIRSec,
+  calibrateSoundIIRPhase,
   calibrateSoundIRSec,
   calibrateSoundBurstDb,
   calibrateSoundBurstFilteredExtraDb,
@@ -314,7 +315,10 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundIRSec.current = reader.read(
     GLOSSARY._calibrateSoundIRSec.name
   )[0];
-
+  calibrateSoundIIRPhase.current = reader.read(
+    GLOSSARY._calibrateSoundIIRPhase.name
+  )[0];
+  console.log("calibrateSoundIIRPhase", calibrateSoundIIRPhase);
   calibrateSoundBurstDb.current = reader.read(
     GLOSSARY._calibrateSoundBurstDb.name
   )[0];

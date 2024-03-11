@@ -23,6 +23,7 @@ import {
   calibrateSoundCheck,
   calibrateSoundHz,
   calibrateSoundIIRSec,
+  calibrateSoundIIRPhase,
   calibrateSoundIRSec,
   calibrateSoundMaxHz,
   calibrateSoundMinHz,
@@ -1020,8 +1021,9 @@ const startCalibration = async (
     calibrateSoundBurstUses1000HzGainBool:
       calibrateSoundBurstUses1000HzGainBool.current,
     calibrateSoundCheck: calibrateSoundCheck.current,
-    calibrateSoundIIRSec: calibrateSoundIIRSec.current,
     calibrateSoundIRSec: calibrateSoundIRSec.current,
+    calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+    calibrateSoundIIRPhase: calibrateSoundIIRPhase.current,
     calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
     calibrateSound1000HzSec: calibrateSound1000HzSec.current,
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
@@ -1033,7 +1035,8 @@ const startCalibration = async (
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
   };
-
+  console.log("calibrateSoundIRSec.current", calibrateSoundIRSec.current);
+  console.log("speakerParameters", speakerParameters.calibrateSoundIRSec);
   const calibratorParams = {
     numCaptures: calibrateSoundBurstMLSVersions.current,
     numMLSPerCapture: 2,
@@ -1179,8 +1182,9 @@ export const calibrateAgain = async (
     calibrateSoundBurstUses1000HzGainBool:
       calibrateSoundBurstUses1000HzGainBool.current,
     calibrateSoundCheck: calibrateSoundCheck.current,
-    calibrateSoundIIRSec: calibrateSoundIIRSec.current,
     calibrateSoundIRSec: calibrateSoundIRSec.current,
+    calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+    calibrateSoundIIRPhase: calibrateSoundIIRPhase.current,
     calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
     calibrateSound1000HzSec: calibrateSound1000HzSec.current,
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
