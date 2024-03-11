@@ -25,7 +25,7 @@ if (typeof window === "undefined") {
 
   self.addEventListener("fetch", function (event) {
     const r = event.request;
-    if (!r.url.includes("firebase")) {
+    if (!(r.url.includes("firebase") || r.url.includes("firestore"))) {
       if (r.cache === "only-if-cached" && r.mode !== "same-origin") {
         return;
       }
