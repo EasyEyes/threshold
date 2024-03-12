@@ -6349,8 +6349,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop.nRemaining !== 0
             ) {
               // TODO only give to QUEST if acceptable
-              const giveToQuest = true;
-              psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
               currentLoop.addResponse(
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20
@@ -6365,8 +6363,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop.nRemaining !== 0
             ) {
               // TODO only give to QUEST if acceptable
-              const giveToQuest = true;
-              psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
               currentLoop.addResponse(
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20
@@ -6420,8 +6416,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);
             // TODO only give to QUEST if acceptable
-            const giveToQuest = true;
-            psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
             currentLoop.addResponse(
               phraseIdentificationResponse.correct,
               level,
@@ -6435,15 +6429,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              // TODO only give to QUEST if acceptable
-              const giveToQuest = true;
-              psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
               // switch (thresholdParameter) {
               //   case "targetContrast":
               // const targetContrast = paramReader.read(
               //   thresholdParameter,
               //   status.block_condition
               // );
+              // TODO only give to QUEST if acceptable
               currentLoop.addResponse(
                 key_resp.corr,
                 // intensity
@@ -6459,8 +6451,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              const giveToQuest = true;
-              psychoJS.experiment.addData("trialGivenToQuest", giveToQuest);
               currentLoop.addResponse(key_resp.corr, level);
             }
           },
