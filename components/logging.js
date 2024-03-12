@@ -13,3 +13,14 @@ export const logQuest = (msg, value = "", BC = undefined) => {
     console.log("%cQUEST. " + msg, styles, value);
   }
 };
+
+export const logNotice = (msg, value = "", BC = undefined) => {
+  BC ??= status.block_condition;
+  const styles = [
+    "background-color: lightblue",
+    // "border: 1px solid blue",
+    // "padding: 1px 1px",
+    // "border-radius: 1px",
+  ].join(";");
+  console.log("%c " + msg, styles, value);
+};

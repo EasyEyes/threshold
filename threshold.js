@@ -410,7 +410,7 @@ import {
   showProgressBar,
   updateProgressBar,
 } from "./components/progressBar.js";
-import { logQuest } from "./components/logging.js";
+import { logNotice, logQuest } from "./components/logging.js";
 import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
 import { KeypadHandler } from "./components/keypad.js";
 import {
@@ -435,6 +435,10 @@ import { setPreStimulusRerunInterval } from "./components/rerunPrestimulus.js";
 import { getDotAndBackGrid, getFlies } from "./components/dotAndGrid.ts";
 
 /* -------------------------------------------------------------------------- */
+const setCurrentFn = (fnName) => {
+  status.currentFunction = fnName;
+  logNotice(`In ${fnName}.`);
+};
 
 var videoblob = [];
 var video_generated = false;
@@ -458,7 +462,7 @@ const paramReaderInitialized = async (reader) => {
   if (isProlificExp) {
     saveProlificInfo(thisExperimentInfo);
   }
-  status.currentFunction = "paramReaderInitialized";
+  setCurrentFn("paramReaderInitialized");
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
   useMatlab.current = reader.read("_trackGazeExternallyBool")[0];
@@ -571,7 +575,7 @@ var trialCounter; // TextSim object
 var characterSetBoundingRects = {};
 
 const experiment = (howManyBlocksAreThereInTotal) => {
-  status.currentFunction = "experiment";
+  setCurrentFn("experiment");
   ////
   // Resources
   initializeEscHandlingDiv();
@@ -940,7 +944,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // var frameDur;
   async function updateInfo() {
-    status.currentFunction = "updateInfo";
+    setCurrentFn("updateInfo");
     thisExperimentInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
     thisExperimentInfo["expName"] = thisExperimentInfo.name;
     thisExperimentInfo[
@@ -1089,7 +1093,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var dot, backGrid, flies;
 
   async function experimentInit() {
-    status.currentFunction = "experimentInit";
+    setCurrentFn("experimentInit");
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
@@ -1334,7 +1338,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineBegin(snapshot) {
     return async function () {
-      status.currentFunction = "fileRoutineBegin";
+      setCurrentFn("fileRoutineBegin");
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       //------Prepare to start Routine 'file'-------
@@ -1355,7 +1359,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineEachFrame() {
     return async function () {
-      status.currentFunction = "fileRoutineEachFrame";
+      setCurrentFn("fileRoutineEachFrame");
       //------Loop for each frame of Routine 'file'-------
       // get current time
       t = fileClock.getTime();
@@ -1398,7 +1402,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function fileRoutineEnd() {
     return async function () {
-      status.currentFunction = "fileRoutineEnd";
+      setCurrentFn("fileRoutineEnd");
       //------Ending Routine 'file'-------
       for (const thisComponent of fileComponents) {
         if (typeof thisComponent.setAutoDraw === "function") {
@@ -1420,7 +1424,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     wrapRatio = 0.9,
     altPosition = undefined
   ) {
-    status.currentFunction = "_instructionSetup";
+    setCurrentFn("_instructionSetup");
     instructionsConfig.height = getParamValueForBlockOrCondition(
       "instructionFontSizePt",
       blockOrCondition
@@ -1443,7 +1447,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function _instructionRoutineEachFrame() {
-    status.currentFunction = "_instructionRoutineEachFrame";
+    setCurrentFn("_instructionRoutineEachFrame");
     if (simulatedObservers.proceed(status.block)) {
       continueRoutine = false;
       removeProceedButton();
@@ -1591,7 +1595,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     return async function () {
-      status.currentFunction = "blocksLoopBegin";
+      setCurrentFn("blocksLoopBegin");
       loggerText("blocksLoopBegin");
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
 
@@ -1715,7 +1719,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var trials;
   function trialsLoopBegin(trialsLoopScheduler, snapshot) {
     return async function () {
-      status.currentFunction = "trialsLoopBegin";
+      setCurrentFn("trialsLoopBegin");
       // setup a MultiStairTrialHandler
       trialsConditions = TrialHandler.importConditions(
         psychoJS.serverManager,
@@ -1974,7 +1978,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function trialsLoopEnd() {
-    status.currentFunction = "trialsLoopEnd";
+    setCurrentFn("trialsLoopEnd");
     if (
       targetTask.current !== "questionAndAnswer" &&
       (targetKind.current === "letter" ||
@@ -2017,7 +2021,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function blocksLoopEnd() {
-    status.currentFunction = "blocksLoopEnd";
+    setCurrentFn("blocksLoopEnd");
     psychoJS.experiment.removeLoop(blocks);
     return Scheduler.Event.NEXT;
   }
@@ -2026,7 +2030,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Currently made solely for the reading task
   function blockSchedulerFinalRoutineBegin(snapshot) {
     return async function () {
-      status.currentFunction = "blockSchedulerFinalRoutineBegin";
+      setCurrentFn("blockSchedulerFinalRoutineBegin");
       loggerText("blockSchedulerFinalRoutineBegin");
 
       // Stop drawing reading pages
@@ -2075,7 +2079,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   function blockSchedulerFinalRoutineEachFrame() {
-    status.currentFunction = "blockSchedulerFinalRoutineEachFrame";
+    setCurrentFn("blockSchedulerFinalRoutineEachFrame");
     const updateTrialInfo = () => {
       // trialCounter
       let trialCounterStr = getTrialInfoStr(
@@ -2221,7 +2225,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function blockSchedulerFinalRoutineEnd() {
     return async function () {
-      status.currentFunction = "blockSchedulerFinalRoutineEnd";
+      setCurrentFn("blockSchedulerFinalRoutineEnd");
       loggerText("blockSchedulerFinalRoutineEnd");
       removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
       vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
@@ -2236,7 +2240,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var filterComponents;
   function filterRoutineBegin(snapshot) {
     return async function () {
-      status.currentFunction = "filterRoutineBegin";
+      setCurrentFn("filterRoutineBegin");
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       showCursor();
@@ -2425,7 +2429,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function filterRoutineEachFrame() {
     return async function () {
-      status.currentFunction = "filterRoutineEachFrame";
+      setCurrentFn("filterRoutineEachFrame");
       if (simulatedObservers.proceed(status.block)) return Scheduler.Event.NEXT;
 
       //------Loop for each frame of Routine 'filter'-------
@@ -2469,7 +2473,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function filterRoutineEnd() {
     return async function () {
-      status.currentFunction = "filterRoutineEnd";
+      setCurrentFn("filterRoutineEnd");
       //------Ending Routine 'filter'-------
       for (const thisComponent of filterComponents) {
         if (typeof thisComponent.setAutoDraw === "function") {
@@ -2487,7 +2491,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   /* ------------------------- Block Init Instructions ------------------------ */
   // BLOCK 1st INSTRUCTION
   function initInstructionRoutineBegin(snapshot) {
-    status.currentFunction = "initInstructionRoutineBegin";
+    setCurrentFn("initInstructionRoutineBegin");
     loggerText("initInstructionRoutineBegin");
     return async function () {
       loggerText(
@@ -2791,7 +2795,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function initInstructionRoutineEachFrame() {
     return () => {
-      status.currentFunction = "initInstructionRoutineEachFrame";
+      setCurrentFn("initInstructionRoutineEachFrame");
       if (customInstructionText.current.includes("#NONE")) {
         removeProceedButton();
         return Scheduler.Event.NEXT;
@@ -2802,7 +2806,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function initInstructionRoutineEnd() {
     return async function () {
-      status.currentFunction = "initInstructionRoutineEnd";
+      setCurrentFn("initInstructionRoutineEnd");
       instructions.setAutoDraw(false);
       keypad.clearKeys();
       // if (keypadActive(responseType.current)) keypad.stop(); // Necessary??
@@ -2835,7 +2839,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function eduInstructionRoutineBegin(snapshot) {
     return async function () {
-      status.currentFunction = "eduInstructionRoutineBegin";
+      setCurrentFn("eduInstructionRoutineBegin");
       eduInstructionClock.reset();
 
       TrialHandler.fromSnapshot(snapshot);
@@ -3050,7 +3054,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function eduInstructionRoutineEachFrame() {
     return () => {
-      status.currentFunction = "eduInstructionRoutineEachFrame";
+      setCurrentFn("eduInstructionRoutineEachFrame");
       if (customInstructionText.current) {
         customInstructionText.current = "";
         removeProceedButton();
@@ -3062,7 +3066,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function eduInstructionRoutineEnd() {
     return async function () {
-      status.currentFunction = "eduInstructionRoutineEnd";
+      setCurrentFn("eduInstructionRoutineEnd");
       instructions.setAutoDraw(false);
       // if (keypadActive(responseType.current)) keypad.stop(); Necessary??
 
@@ -3146,7 +3150,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
-      status.currentFunction = "trialInstructionRoutineBegin";
+      setCurrentFn("trialInstructionRoutineBegin");
       preStimulus.running = true;
       // Check fullscreen and if not, get fullscreen
       if (!rc.isFullscreen.value && !debug) {
@@ -4570,7 +4574,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function trialInstructionRoutineEachFrame() {
     return async function () {
-      status.currentFunction = "trialInstructionRoutineEachFrame";
+      setCurrentFn("trialInstructionRoutineEachFrame");
       if (toShowCursor()) {
         showCursor();
         return Scheduler.Event.NEXT;
@@ -4757,7 +4761,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function trialInstructionRoutineEnd() {
     return async function () {
-      status.currentFunction = "trialInstructionRoutineEnd";
+      setCurrentFn("trialInstructionRoutineEnd");
       loggerText("trialInstructionRoutineEnd");
 
       keypad.clearKeys(status.block_condition);
@@ -4872,7 +4876,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var letterRespondedEarly;
   function trialRoutineBegin(snapshot) {
     return async function () {
-      status.currentFunction = "trialRoutineBegin";
+      setCurrentFn("trialRoutineBegin");
       trialClock.reset(); // clock
       // ie time from the user clicking/pressing space (actually, the end of the previous `trialRoutineEnd`), to the start of `trialRoutineBegin`
       psychoJS.experiment.addData(
@@ -5138,7 +5142,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       key_resp.rt = [];
       _key_resp_allKeys.current = [];
 
-      // TODO disassemble and restructure repeatedLetter inputs to not be built on duplicates/cardinals
       showCharacterSetResponse.alreadyClickedCharacters = [];
 
       _instructionSetup(
@@ -5264,7 +5267,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var customResponseInstructionsDisplayed;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
-      status.currentFunction = "trialRoutineEachFrame";
+      setCurrentFn("trialRoutineEachFrame");
       ////
       if (stats.on) stats.current.begin();
       ////
@@ -6153,7 +6156,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function trialRoutineEnd(snapshot) {
     return async function () {
-      status.currentFunction = "trialRoutineEnd";
+      setCurrentFn("trialRoutineEnd");
       ////
       speechInNoiseShowClickable.current = true;
       vocoderPhraseShowClickable.current = true;
@@ -6544,6 +6547,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       else if (totalTrialsThisBlock.current === status.trial)
         hideTrialBreakProgressBar();
 
+      logger("!. end of trial quest", psychoJS.experiment);
+
       fontSize.current = "Reset at end of trial.";
 
       return Scheduler.Event.NEXT;
@@ -6553,7 +6558,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function endLoopIteration(scheduler, snapshot) {
     // ------Prepare for next entry------
     return async function () {
-      status.currentFunction = "endLoopIteration";
+      setCurrentFn("endLoopIteration");
       if (toShowCursor()) {
         showCursor();
         psychoJS.experiment.nextEntry(snapshot);
@@ -6585,7 +6590,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function importConditions(currentLoopSnapshot, snapshotType) {
     return async function () {
-      status.currentFunction = "importConditions";
+      setCurrentFn("importConditions");
       if (snapshotType === "trial") {
         // ! update trial counter
         // dangerous
