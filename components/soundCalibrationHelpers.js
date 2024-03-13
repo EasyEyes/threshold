@@ -80,8 +80,7 @@ export const saveLoudSpeakerInfo = async (
 
 export const saveLoudSpeakerInfoToFirestore = async (
   loudSpeakerInfo,
-  modelNumber,
-  OEM,
+  ir_time,
   ir,
   iir
 ) => {
@@ -93,6 +92,7 @@ export const saveLoudSpeakerInfoToFirestore = async (
   await setDoc(docRef, { iir: iir }, { merge: true });
   // save ir
   await setDoc(docRef, { ir: ir }, { merge: true });
+  await setDoc(docRef, { ir_time: ir_time }, { merge: true });
 };
 
 export const writeIsSmartPhoneToFirestore = async (

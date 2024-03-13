@@ -1477,10 +1477,10 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   loudspeakerInfo.current["RMSError"] =
     soundCalibrationResults.current.parameters.RMSError;
   try {
+    console.log(soundCalibrationResults.current.component);
     await saveLoudSpeakerInfoToFirestore(
       loudspeakerInfo.current,
-      modelNumber,
-      thisDevice.current.OEM,
+      soundCalibrationResults.current.component.ir_in_time_domain,
       soundCalibrationResults.current.component.ir,
       soundCalibrationResults.current.component.iir
     );
