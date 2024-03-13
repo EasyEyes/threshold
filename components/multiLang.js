@@ -7,6 +7,15 @@ export const replacePlaceholders = (s, ...a) => {
   return s;
 };
 
+export const replacePlaceholdersForTrial = (s, ...a) => {
+  if (a.length === 1) return s.replace("111", a[0]);
+
+  for (let i in a) {
+    s = s.replace(`11${Number(i) + 1}`, a[i]);
+  }
+  return s;
+};
+
 export const buildSwitch = (rc) => {
   const langPickerParent = document.getElementById("rc-language");
   let langInner =
