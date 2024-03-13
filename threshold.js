@@ -2916,7 +2916,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // TODO maybe show four flankers in instructions, if radialAndTangential or horizontalAndVertical
           flanker1.setFont(instructionFont.current);
-          flanker1.setPos([D - g]);
+          flanker1.setPos([D - g, y]);
           flanker1.setText("H");
           flanker1.setHeight(h);
           updateColor(flanker1, "marking", status.block);
