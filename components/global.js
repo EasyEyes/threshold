@@ -129,6 +129,12 @@ export const fixationConfig = {
   stim: undefined, // EasyEyes Fixation object
 
   trackingTimeAfterDelay: undefined,
+  preserveOffset: false, // If rerunning prestimulus function
+  // due to change in viewing distance,
+  // use the pre-existing fixation offset
+  // (ie starting position), so it doesn't
+  // look like it's jumping around when
+  // viewing distance changes.
 };
 
 export const showConditionNameConfig = {

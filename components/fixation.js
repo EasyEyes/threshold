@@ -133,8 +133,12 @@ export class Fixation {
           )[0]
       );
     }
-    fixationConfig.offset =
-      Math.random() * fixationConfig.markingFixationMotionPeriodSec;
+    if (
+      typeof fixationConfig.offset === "undefined" ||
+      !fixationConfig.preserveOffset
+    )
+      fixationConfig.offset =
+        Math.random() * fixationConfig.markingFixationMotionPeriodSec;
 
     if (this.stims) {
       this.setPos(fixationConfig.pos);
@@ -307,7 +311,8 @@ export const getFixationVertices = (
   return vertices;
 };
 
-export const gyrateFixation = (fixation, t) => {
+export const gyrateFixation = (fixation) => {
+  const t = performance.now() / 1000.0;
   const rPx = Math.abs(
     fixationConfig.pos[0] -
       XYPixOfXYDeg([fixationConfig.markingFixationMotionRadiusDeg, 0])[0]
@@ -415,7 +420,7 @@ export const gyrateRandomMotionFixation = (fixation) => {
 /**
  * Move the provided stimuli based on the fixation's current position relative to it's nominal position,
  * ie the position based upon which the stimuli were generated.
- * Should be used iff gyrateFixation() is used.
+ * Should be used iff fixation is in motion, eg gyrateFixation() is used.
  * @param {psychoJS.VisualStim[]} stims Array of psychojs stims
  */
 export const offsetStimsToFixationPos = (stims) => {

@@ -4630,7 +4630,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition
             ) === "circle"
           ) {
-            gyrateFixation(fixation, t, displayOptions);
+            gyrateFixation(fixation);
           } else {
             gyrateRandomMotionFixation(fixation, t, displayOptions);
           }
@@ -4689,7 +4689,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             )
               checkIfCursorIsTrackingFixation(t, paramReader);
             if (fixationConfig.markingFixationMotionRadiusDeg > 0)
-              gyrateFixation(fixation, t, displayOptions);
+              gyrateFixation(fixation);
             fixation.setAutoDraw(true);
           }
         },

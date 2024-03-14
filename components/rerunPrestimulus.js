@@ -4,6 +4,7 @@ import {
   viewingDistanceCm,
   preStimulus,
   rc,
+  fixationConfig,
 } from "./global";
 import { logger } from "./utils";
 
@@ -64,11 +65,13 @@ export const setPreStimulusRerunInterval = (
       // If not already in progress, rerun trialInstructionRoutineBegin
       if (!preStimulus.running && significantChangeBool) {
         preStimulus.running = true;
+        fixationConfig.preserveOffset = true;
         const startTime = performance.now();
         await trialInstructionRoutineBegin(snapshot)();
         const stopTime = performance.now();
         const duration = stopTime - startTime;
         logger("!. Done rerunning.", duration);
+        fixationConfig.preserveOffset = false;
         preStimulus.running = false;
       }
     }, rerunIntervalMs);
