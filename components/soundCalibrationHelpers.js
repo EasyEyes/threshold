@@ -195,7 +195,7 @@ export const getInstructionText = (
   } else if (userOS === "Linux") {
     findModelNumber = readi18nPhrases("RC_findModelLinux", language);
   } else {
-    findModelNumber = readi18nPhrases("RC_findModeGeneric", language);
+    findModelNumber = readi18nPhrases("RC_findModelGeneric", language);
   }
 
   return isSmartPhone
@@ -436,7 +436,7 @@ export const getDeviceDetails = (platformName, lang) => {
     findModel = readi18nPhrases("RC_findModelWindows", lang);
   } else {
     preferredModelNumber = readi18nPhrases("RC_modelNumber", lang);
-    findModel = readi18nPhrases("RC_findModeGeneric", lang);
+    findModel = readi18nPhrases("RC_findModelGeneric", lang);
   }
 
   return { preferredModelNumber, findModel };

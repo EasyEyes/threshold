@@ -322,18 +322,20 @@ export const getInstructionText = (
     } else {
       findModelNumber = readi18nPhrases("RC_findModelIPad", language);
     }
-  } else if (userOS === "Android") {
-    findModelNumber = readi18nPhrases("RC_findModelAndroidGeneric", language);
-  } else if (userOS === "iOS") {
-    findModelNumber = readi18nPhrases("RC_findModelIOs", language);
-  } else if (userOS === "Windows") {
-    findModelNumber = readi18nPhrases("RC_findModelWindows", language);
-  } else if (userOS === "macOS") {
-    findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
-  } else if (userOS === "Linux") {
-    findModelNumber = readi18nPhrases("RC_findModelLinux", language);
-  } else {
-    findModelNumber = readi18nPhrases("RC_findModeGeneric", language);
+  }
+  // else if (userOS === "Android") {
+  //   findModelNumber = readi18nPhrases("RC_findModelAndroidGeneric", language);
+  // } else if (userOS === "iOS") {
+  //   findModelNumber = readi18nPhrases("RC_findModelIOs", language);
+  // } else if (userOS === "Windows") {
+  //   findModelNumber = readi18nPhrases("RC_findModelWindows", language);
+  // } else if (userOS === "macOS") {
+  //   findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
+  // } else if (userOS === "Linux") {
+  //   findModelNumber = readi18nPhrases("RC_findModelLinux", language);
+  // }
+  else {
+    findModelNumber = readi18nPhrases("RC_findModelGeneric", language);
   }
 
   return `${needModelNumberFinal} ${findModelNumber}`;
