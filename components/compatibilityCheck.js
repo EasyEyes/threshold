@@ -25,6 +25,8 @@ let gotLoudspeakerMatchBool = false;
 // import { microphoneInfo } from "./global";
 // import { rc } from "./global";
 
+const needsUnmet = [];
+
 const microphoneInfo = {
   micFullName: "",
   micFullSerialNumber: "",
@@ -378,7 +380,7 @@ export const checkSystemCompatibility = (
   const compatibilityRequirements = requirements.compatibilityRequirements;
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
   var msg = requirements.describeDevice;
-  const needsUnmet = requirements.needsUnmet;
+  // const needsUnmet = requirements.needsUnmet;
 
   // add screen size to compatibility test
   // Get screenWidthPx and screenHeightPx of the participant's screen
@@ -587,7 +589,7 @@ export const getCompatibilityRequirements = (
     compatibleOS,
     compatibleProcessorCoresMinimum;
 
-  const needsUnmet = [];
+  // const needsUnmet = [];
 
   const deviceInfo = {};
   // if isForScientistPage is false, then we don't need to get the device info
@@ -889,7 +891,6 @@ export const getCompatibilityRequirements = (
       : undefined,
     compatibilityRequirements: msg,
     describeDevice: describeDevice,
-    needsUnmet: needsUnmet,
   };
 };
 
@@ -948,7 +949,10 @@ export const displayCompatibilityMessage = async (
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
     document.body.style.overflowX = "hidden";
     const thisDevice = await identifyDevice();
-    psychoJS.experiment.addData("ComputerInfoFrom51Degrees", thisDevice);
+    psychoJS.experiment.addData(
+      "ComputerInfoFrom51Degrees",
+      JSON.stringify(thisDevice)
+    );
     psychoJS.experiment.nextEntry();
     //message wrapper
     const messageWrapper = document.createElement("div");
@@ -1198,6 +1202,14 @@ export const displayCompatibilityMessage = async (
       noSmartphoneButton.addEventListener("click", async () => {
         QRSkipResponse.QRNoSmartphoneBool = true;
         psychoJS.experiment.addData("QRConnect", "✖NoPhone");
+        if (needPhoneSurvey) {
+          needsUnmet.push("_needSmartphoneSurveyBool");
+          if (psychoJS) {
+            const needsUnmetString = needsUnmet.join(",");
+            psychoJS.experiment.addData("_needsUnmet", needsUnmetString);
+            psychoJS.experiment.nextEntry();
+          }
+        }
         showExperimentEnding();
         quitPsychoJS("", true, reader);
       });
@@ -2074,26 +2086,28 @@ const getLoudspeakerDeviceDetailsFromUser = async (
 };
 
 const identifyDevice = async () => {
-  try {
-    const deviceInfo = {};
-    fod.complete(function (data) {
-      deviceInfo["IsMobile"] = data.device["ismobile"];
-      deviceInfo["HardwareName"] = data.device["hardwarename"];
-      deviceInfo["HardwareFamily"] = data.device["hardwarefamily"];
-      deviceInfo["HardwareModel"] = data.device["hardwaremodel"];
-      deviceInfo["OEM"] = data.device["oem"];
-      deviceInfo["HardwareModelVariants"] =
-        data.device["hardwaremodelvariants"];
-      deviceInfo["DeviceId"] = data.device["deviceid"];
-      deviceInfo["PlatformName"] = data.device["platformname"];
-      deviceInfo["PlatformVersion"] = data.device["platformversion"];
-      deviceInfo["DeviceType"] = data.device["devicetype"];
-    });
-    return deviceInfo;
-  } catch (error) {
-    console.error("Error fetching or executing script:", error.message);
-    return null;
-  }
+  return new Promise((resolve) => {
+    try {
+      const deviceInfo = {};
+      fod.complete(function (data) {
+        deviceInfo["IsMobile"] = data.device["ismobile"];
+        deviceInfo["HardwareName"] = data.device["hardwarename"];
+        deviceInfo["HardwareFamily"] = data.device["hardwarefamily"];
+        deviceInfo["HardwareModel"] = data.device["hardwaremodel"];
+        deviceInfo["OEM"] = data.device["oem"];
+        deviceInfo["HardwareModelVariants"] =
+          data.device["hardwaremodelvariants"];
+        deviceInfo["DeviceId"] = data.device["deviceid"];
+        deviceInfo["PlatformName"] = data.device["platformname"];
+        deviceInfo["PlatformVersion"] = data.device["platformversion"];
+        deviceInfo["DeviceType"] = data.device["devicetype"];
+        resolve(deviceInfo);
+      });
+    } catch (error) {
+      console.error("Error fetching or executing script:", error.message);
+      return null;
+    }
+  });
 };
 
 const getDeviceString = (thisDevice, language) => {
