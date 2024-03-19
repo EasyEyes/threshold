@@ -1119,9 +1119,7 @@ export const displayCompatibilityMessage = async (
       );
       cantReadButton.addEventListener("click", async () => {
         QRSkipResponse.QRCantBool = true;
-        psychoJS.experiment.addData("QRCantBool", true);
-        psychoJS.experiment.addData("QRNoSmartphoneBool", false);
-        psychoJS.experiment.addData("QRPreferNotToBool", false);
+        psychoJS.experiment.addData("QRConnect", "✖Cannot");
         psychoJS.experiment.nextEntry();
         const proceed = await isSmartphoneInDatabase(
           "",
@@ -1160,9 +1158,7 @@ export const displayCompatibilityMessage = async (
       });
       preferNotToReadButton.addEventListener("click", async () => {
         QRSkipResponse.QRPreferNotToBool = true;
-        psychoJS.experiment.addData("QRPreferNotToBool", true);
-        psychoJS.experiment.addData("QRNoSmartphoneBool", false);
-        psychoJS.experiment.addData("QRCantBool", false);
+        psychoJS.experiment.addData("QRConnect", "✖PreferNot");
         psychoJS.experiment.nextEntry();
         const proceed = await isSmartphoneInDatabase(
           "",
@@ -1201,9 +1197,7 @@ export const displayCompatibilityMessage = async (
       });
       noSmartphoneButton.addEventListener("click", async () => {
         QRSkipResponse.QRNoSmartphoneBool = true;
-        psychoJS.experiment.addData("QRNoSmartphoneBool", true);
-        psychoJS.experiment.addData("QRPreferNotToBool", false);
-        psychoJS.experiment.addData("QRCantBool", false);
+        psychoJS.experiment.addData("QRConnect", "✖NoPhone");
         showExperimentEnding();
         quitPsychoJS("", true, reader);
       });
@@ -1217,6 +1211,8 @@ export const displayCompatibilityMessage = async (
           if (result) {
             console.log("result", result);
             QRSkipResponse.QRBool = true;
+            psychoJS.experiment.addData("QRConnect", "✔");
+            psychoJS.experiment.nextEntry();
             numberOfTries++;
             const tryComputerButton = document.getElementById(
               "try-computer-button"
