@@ -1210,8 +1210,9 @@ export const displayCompatibilityMessage = async (
             psychoJS.experiment.nextEntry();
           }
         }
+
         showExperimentEnding();
-        quitPsychoJS("", true, reader);
+        quitPsychoJS("", false, reader);
       });
       let numberOfTries = 0;
 
