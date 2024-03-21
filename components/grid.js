@@ -1,6 +1,6 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
-import { fixationConfig } from "./global.js";
+import { grid, fixationConfig } from "./global.js";
 import { psychoJS } from "./globalPsychoJS.js";
 
 import {
@@ -23,7 +23,7 @@ lines at 500 pix, and regular lines at 100 pix.
 export class Grid {
   /**
    * Setup the grid.
-   * @param {("px" | "cm" | "deg" | "none")} units Which type of grid should be shown.
+   * @param {("px" | "cm" | "deg" | "degDynamic" | "none")} units Which type of grid should be shown.
    * @param {object} displayOptions Current values about the screen, trial, etc
    * @param {PsychoJS} psychoJS PsychoJS instance for the experiment
    */
@@ -64,7 +64,10 @@ export class Grid {
    * @param {object} displayOptions
    */
   update(units = undefined, displayOptions = undefined) {
-    if (units) this.units = units;
+    if (units) {
+      this.units = units;
+      grid.units = units;
+    }
     if (displayOptions) this.displayOptions = displayOptions;
     if (this.units === "disabled") return;
     this.visible = true;
@@ -98,6 +101,7 @@ export class Grid {
   cycle() {
     this._undraw();
     this.units = this._cycleUnits(this.units);
+    grid.units = this.units;
     this.spawnGridStims(this.units);
     [this.lines, this.labels] = this.allGrids[this.units];
     this._reflectVisibility();
@@ -106,12 +110,20 @@ export class Grid {
   /**
    * Generate the stims for the grid, and store in `this._allGridStims`.
    * Generates all grids if now parameter is provided, or else just the provided unit's grid.
-   * @param {("px" | "cm" | "deg" | "mm" | "none")} units
+   * @param {("px" | "cm" | "deg" | "degDynamic" | "mm" | "none")} units
    */
   spawnGridStims(units = undefined) {
     if (units) this.allGrids[units] = this._getGridStims(units);
     else
-      for (const unit of ["px", "cm", "deg", "mm", "none", "disabled"]) {
+      for (const unit of [
+        "px",
+        "cm",
+        "deg",
+        "degDynamic",
+        "mm",
+        "none",
+        "disabled",
+      ]) {
         this.allGrids[unit] = this._getGridStims(unit);
       }
   }
@@ -155,7 +167,9 @@ export class Grid {
       case "cm":
         return this._getCmGridStims();
       case "deg":
-        return this._getDegGridStims();
+        return this._getDegGridStims(false);
+      case "degDynamic":
+        return this._getDegGridStims(true);
       case "mm":
         return this._getMmGridStims();
       case "none":
@@ -165,11 +179,10 @@ export class Grid {
     }
   }
 
-  _getNumberOfGridLines = (units) => {
+  _getNumberOfGridLines = (units, dynamic = false) => {
     this.dimensionsCm = this.dimensions.map(
-      (dim) => dim / this.displayOptions.pixPerCm
+      (dim) => dim / this.displayOptions.pixPerCm,
     );
-    // TODO generalize to fixation != [0,0]
     this.dimensionsDeg = [
       [
         XYDegOfXYPix(
@@ -177,14 +190,14 @@ export class Grid {
             fixationConfig.pos[0] - this.dimensions[0] / 2,
             fixationConfig.pos[1],
           ],
-          this.displayOptions
+          dynamic,
         )[0],
         XYDegOfXYPix(
           [
             fixationConfig.pos[0] + this.dimensions[0] / 2,
             fixationConfig.pos[1],
           ],
-          this.displayOptions
+          dynamic,
         )[0],
       ],
       [
@@ -193,14 +206,14 @@ export class Grid {
             fixationConfig.pos[0],
             fixationConfig.pos[1] + this.dimensions[1] / 2,
           ],
-          this.displayOptions
+          dynamic,
         )[1],
         XYDegOfXYPix(
           [
             fixationConfig.pos[0],
             fixationConfig.pos[1] - this.dimensions[1] / 2,
           ],
-          this.displayOptions
+          dynamic,
         )[1],
       ],
     ];
@@ -212,7 +225,7 @@ export class Grid {
         return this.dimensionsCm.map((dim) => Math.floor(dim / 1) + 1);
       case "deg":
         return this.dimensionsDeg.map((dims) =>
-          dims.map((dim) => Math.abs(Math.floor(dim / 1)) + 1)
+          dims.map((dim) => Math.abs(Math.floor(dim / 1)) + 1),
         );
     }
   };
@@ -224,6 +237,8 @@ export class Grid {
       case "px":
         return "cm";
       case "cm":
+        return "degDynamic";
+      case "degDynamic":
         return "deg";
       case "deg":
         return "mm";
@@ -289,7 +304,7 @@ export class Grid {
             interpolate: false,
             size: 1,
             autoLog: false,
-          })
+          }),
         );
         if (i % 5 === 0)
           labels.push(
@@ -308,7 +323,7 @@ export class Grid {
               opacity: 1.0,
               depth: 0.0,
               autoLog: false,
-            })
+            }),
           );
       }
     }
@@ -368,7 +383,7 @@ export class Grid {
             interpolate: false,
             size: 1,
             autoLog: false,
-          })
+          }),
         );
         if (i % 5 === 0)
           labels.push(
@@ -387,43 +402,45 @@ export class Grid {
               opacity: 1.0,
               depth: 0.0,
               autoLog: false,
-            })
+            }),
           );
       }
     }
     return [lines, labels];
   };
 
-  _getDegGridStims = () => {
-    const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg");
+  _getDegGridStims = (dynamic = false) => {
+    // TODO redo number of deg gridlines logic
+    const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg", dynamic);
     const [lines, labels] = [[], []];
+    const color = dynamic ? "darkgoldenrod" : "crimson";
     for (const region of ["right", "left", "upper", "lower"]) {
       let nGridlines;
       switch (region) {
         case "left":
-          nGridlines = numberOfGridLinesPerSide[0][1];
+          nGridlines = numberOfGridLinesPerSide[0][1] * 2;
           break;
         case "right":
-          nGridlines = numberOfGridLinesPerSide[0][0];
+          nGridlines = numberOfGridLinesPerSide[0][0] * 2;
           break;
         case "upper":
-          nGridlines = numberOfGridLinesPerSide[1][1];
+          nGridlines = numberOfGridLinesPerSide[1][1] * 2;
           break;
         case "lower":
-          nGridlines = numberOfGridLinesPerSide[1][0];
+          nGridlines = numberOfGridLinesPerSide[1][0] * 2;
           break;
       }
 
       for (let i = 0; i < nGridlines; i++) {
         if (["left", "lower"].includes(region) && i === 0) continue;
-        let [vertices, pos] = this._getDegGridPathVertices(i, region);
+        let [vertices, pos] = this._getDegGridPathVertices(i, region, dynamic);
         lines.push(
           new visual.ShapeStim({
-            name: `${region}-grid-line-${i}`,
+            name: `${region}-grid-line${dynamic ? "-dynamic" : ""}-${i}`,
             win: this.psychoJS.window,
             units: "pix",
             lineWidth: i % 5 === 0 ? 5 : 2,
-            lineColor: new util.Color("crimson"),
+            lineColor: new util.Color(color),
             // fillColor: new util.Color("crimson"),
             closeShape: false,
             opacity: this.opacity,
@@ -433,12 +450,14 @@ export class Grid {
             interpolate: false,
             size: 1,
             autoLog: false,
-          })
+          }),
         );
         if (i % 5 === 0) {
           labels.push(
             new visual.TextStim({
-              name: `${region}-grid-line-label-${i}`,
+              name: `${region}-grid-line-label${
+                dynamic ? "-dynamic" : ""
+              }-${i}`,
               win: this.psychoJS.window,
               text: `${i} deg`,
               font: "Arial",
@@ -448,11 +467,11 @@ export class Grid {
               alignHoriz: "left",
               alignVert: "bottom",
               ori: 0.0,
-              color: new util.Color("grey"),
+              color: new util.Color(color),
               opacity: 1.0,
               depth: 0.0,
               autoLog: false,
-            })
+            }),
           );
         }
       }
@@ -460,7 +479,7 @@ export class Grid {
     return [lines, labels];
   };
 
-  _getDegGridPathVertices = (lineId, region) => {
+  _getDegGridPathVertices = (lineId, region, dynamic = false) => {
     const vertices = [];
     let pos = [];
     // in psychoJS px units, ie origin at center of screen
@@ -476,20 +495,20 @@ export class Grid {
       let posPoint, negPoint;
       switch (region) {
         case "left":
-          posPoint = XYPixOfXYDeg([-lineId, e], this.displayOptions);
-          negPoint = XYPixOfXYDeg([-lineId, -e], this.displayOptions);
+          posPoint = XYPixOfXYDeg([-lineId, e], dynamic);
+          negPoint = XYPixOfXYDeg([-lineId, -e], dynamic);
           break;
         case "right":
-          posPoint = XYPixOfXYDeg([lineId, e], this.displayOptions);
-          negPoint = XYPixOfXYDeg([lineId, -e], this.displayOptions);
+          posPoint = XYPixOfXYDeg([lineId, e], dynamic);
+          negPoint = XYPixOfXYDeg([lineId, -e], dynamic);
           break;
         case "upper":
-          posPoint = XYPixOfXYDeg([e, lineId], this.displayOptions);
-          negPoint = XYPixOfXYDeg([-e, lineId], this.displayOptions);
+          posPoint = XYPixOfXYDeg([e, lineId], dynamic);
+          negPoint = XYPixOfXYDeg([-e, lineId], dynamic);
           break;
         case "lower":
-          posPoint = XYPixOfXYDeg([e, -lineId], this.displayOptions);
-          negPoint = XYPixOfXYDeg([-e, -lineId], this.displayOptions);
+          posPoint = XYPixOfXYDeg([e, -lineId], dynamic);
+          negPoint = XYPixOfXYDeg([-e, -lineId], dynamic);
           break;
       }
       pointOnScreen =
@@ -560,7 +579,7 @@ export class Grid {
           depth: -999999,
           interpolate: true,
           autoLog: false,
-        })
+        }),
       );
 
       if (labeled) {
@@ -582,7 +601,7 @@ export class Grid {
             opacity: 1.0,
             depth: 0.0,
             autoLog: false,
-          })
+          }),
         );
       }
       // Add & update

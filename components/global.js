@@ -72,7 +72,7 @@ export const displayOptions = Object.seal({
   nearPointXYPix: [undefined, undefined],
 });
 
-export const grid = { current: undefined };
+export const grid = { current: undefined, units: undefined };
 
 /* ------------------------------- Exp Configs ------------------------------ */
 export const totalBlocks = { current: undefined };
