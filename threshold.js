@@ -887,12 +887,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (proceedButtonClicked && !proceedBool) {
       showExperimentEnding();
       // want to check this on production, will delete in the next commit - ritika
-      console.log(
+      window.console.log(
         psychoJS.experiment,
         "ritika",
         psychoJS._config.experiment,
         psychoJS._serverMsg,
+        isProlificExperiment(),
+        psychoJS._config?.gitlab?.projectId,
       );
+      window.console.log(recruitmentServiceData, "ritika");
+      // if (isProlificExperiment() && psychoJS.getEnvironment() === ExperimentHandler.Environment.SERVER && psychoJS._config && psychoJS._serverMsg.has("__pilotToken")) {
+      //     const token = this._psychoJS._serverMsg.get("__pilotToken");
+      //     const incompatibleCode = psychoJS._config?.gitlab?.projectId ? await getProlificIncompatibleCode(token, psychoJS._config?.gitlab?.projectId) : '';
+      //     window.console.log(incompatibleCode)
+      // }
       quitPsychoJS("", "", paramReader);
     }
 

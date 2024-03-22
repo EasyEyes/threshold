@@ -3,11 +3,12 @@ import Papa from "papaparse";
 export const recruitmentServiceData = {
   name: "",
   code: "",
+  incompatibleCode: "",
   url: "",
 };
 
 export const loadRecruitmentServiceConfig = (
-  path = "recruitmentServiceConfig.csv"
+  path = "recruitmentServiceConfig.csv",
 ) => {
   Papa.parse(path, {
     download: true,
@@ -19,6 +20,9 @@ export const loadRecruitmentServiceConfig = (
             break;
           case "code":
             recruitmentServiceData.code = param[1];
+            break;
+          case "incompatible-completion-code":
+            recruitmentServiceData.incompatibleCode = param[1];
             break;
           case "url":
             recruitmentServiceData.url = param[1];
