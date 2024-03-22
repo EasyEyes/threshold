@@ -808,7 +808,7 @@ export const downloadDataFolder = async (user: User, project: any) => {
       zipFileDate = zipFileDate
         ? getDateAndTimeString(zipFileDate)
         : getDateAndTimeString(new Date());
-      const zipFileName = `${project.name}_${zipFileDate}.zip`;
+      const zipFileName = `${project.name}.results.zip`;
 
       zip.generateAsync({ type: "blob" }).then((content) => {
         saveAs(content, zipFileName);
