@@ -887,20 +887,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (proceedButtonClicked && !proceedBool) {
       showExperimentEnding();
       // want to check this on production, will delete in the next commit - ritika
-      window.console.log(
-        psychoJS.experiment,
-        "ritika",
-        psychoJS._config.experiment,
-        psychoJS._serverMsg,
-        isProlificExperiment(),
-        psychoJS._config?.gitlab?.projectId,
-      );
       window.console.log(recruitmentServiceData, "ritika");
-      // if (isProlificExperiment() && psychoJS.getEnvironment() === ExperimentHandler.Environment.SERVER && psychoJS._config && psychoJS._serverMsg.has("__pilotToken")) {
-      //     const token = this._psychoJS._serverMsg.get("__pilotToken");
-      //     const incompatibleCode = psychoJS._config?.gitlab?.projectId ? await getProlificIncompatibleCode(token, psychoJS._config?.gitlab?.projectId) : '';
-      //     window.console.log(incompatibleCode)
-      // }
+      if (recruitmentServiceData.incompatibleCode) {
+        window.open(
+          "https://app.prolific.co/submissions/complete?cc=" +
+            recruitmentServiceData.incompatibleCode,
+        );
+      }
       quitPsychoJS("", "", paramReader);
     }
 
@@ -1010,7 +1003,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     window.console.log("ENV NAME", psychoJS.getEnvironment());
     window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
     window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
-    window.console.log(recruitmentServiceData, "recruitmentServiceData");
 
     thisExperimentInfo.experiment = getPavloviaProjectName();
 
