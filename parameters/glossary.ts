@@ -874,7 +874,7 @@ export const GLOSSARY: Glossary = {
     name: "_prolific2SubmissionApproval",
     availability: "now",
     type: "categorical",
-    default: "manual",
+    default: "automatic",
     explanation:
       '_prolific2SubmissionApproval (default manual) [Prolific "How do you want to confirm participants have completed your study?") (default "manual") declares to Prolific whether evaluation of the  participant submissions (performance of the study) will be manual (the EasyEyes default) or automatic.',
     categories: ["manual", "automatic"],

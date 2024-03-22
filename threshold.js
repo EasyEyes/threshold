@@ -6368,6 +6368,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop.addResponse(
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20,
+                true,
               );
             }
           },
@@ -6382,6 +6383,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop.addResponse(
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20,
+                true,
               );
             }
           },
@@ -6435,7 +6437,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             currentLoop.addResponse(
               phraseIdentificationResponse.correct,
               level,
-              giveToQuest,
+              true,
             );
             clearPhraseIdentificationRegisters();
           },
@@ -6457,6 +6459,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 // intensity
                 //Math.log10(targetContrast)
                 actualStimulusLevel,
+                true,
               );
               // }
             }
@@ -6467,7 +6470,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              currentLoop.addResponse(key_resp.corr, level);
+              currentLoop.addResponse(key_resp.corr, level, true);
             }
           },
         });
