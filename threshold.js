@@ -1010,6 +1010,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     window.console.log("ENV NAME", psychoJS.getEnvironment());
     window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
     window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
+    window.console.log(recruitmentServiceData, "recruitmentServiceData");
+
     thisExperimentInfo.experiment = getPavloviaProjectName();
 
     // return Scheduler.Event.NEXT;
