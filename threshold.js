@@ -886,6 +886,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
       showExperimentEnding();
+      // want to check this on production, will delete in the next commit - ritika
+      console.log(
+        psychoJS.experiment,
+        "ritika",
+        psychoJS._config.experiment,
+        psychoJS._serverMsg,
+      );
       quitPsychoJS("", "", paramReader);
     }
 
