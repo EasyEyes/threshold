@@ -886,15 +886,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
       showExperimentEnding();
-      // want to check this on production, will delete in the next commit - ritika
-      window.console.log(recruitmentServiceData, "ritika");
-      if (recruitmentServiceData.incompatibleCode) {
-        window.open(
-          "https://app.prolific.co/submissions/complete?cc=" +
-            recruitmentServiceData.incompatibleCode,
-        );
-      }
       quitPsychoJS("", "", paramReader);
+      window.open(
+        "https://app.prolific.co/submissions/complete?cc=" +
+          recruitmentServiceData?.incompatibleCode,
+      );
     }
 
     // show forms before actual experiment begins
