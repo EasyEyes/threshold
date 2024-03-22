@@ -1610,6 +1610,14 @@ export const generateAndUploadCompletionURL = async (
       Math.floor(Math.random() * (999 - 100) + 100),
     );
 
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let incompatibleCompletionCode = "";
+    for (let i = 0; i < 7; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      incompatibleCompletionCode += characters.charAt(randomIndex);
+    }
+
     if (completionCode !== "") {
       newUser.currentExperiment.participantRecruitmentServiceCode =
         completionCode;
@@ -1618,7 +1626,7 @@ export const generateAndUploadCompletionURL = async (
         "https://app.prolific.co/submissions/complete?cc=" + completionCode;
       const jsonString = `name,${
         user.currentExperiment.participantRecruitmentServiceName
-      }\ncode,${completionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
+      }\ncode,${completionCode}\nincompatible-completion-code,${incompatibleCompletionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
 
       const commitAction = {
         action: "update",
@@ -1661,7 +1669,7 @@ export const generateAndUploadCompletionURL = async (
 
       await commitFile;
 
-      return completionCode;
+      return { code: completionCode, incompatibleCompletionCode };
     }
   }
 };
