@@ -911,6 +911,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS._serverMsg
       );
       quitPsychoJS("", "", paramReader);
+      window.open(
+        "https://app.prolific.co/submissions/complete?cc=" +
+          recruitmentServiceData?.incompatibleCode
+      );
     }
 
     // show forms before actual experiment begins
@@ -1019,6 +1023,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     window.console.log("ENV NAME", psychoJS.getEnvironment());
     window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
     window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
+
     thisExperimentInfo.experiment = getPavloviaProjectName();
 
     // return Scheduler.Event.NEXT;

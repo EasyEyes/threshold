@@ -1402,7 +1402,9 @@ export const displayCompatibilityMessage = async (
     proceedButton.style.width = "fit-content";
     proceedButton.style.margin = "3rem 0";
     proceedButton.id = "procced-btn";
-    proceedButton.innerHTML = readi18nPhrases("T_proceed", rc.language.value);
+    proceedButton.innerHTML = proceedBool
+      ? readi18nPhrases("T_proceed", rc.language.value)
+      : "Return to Prolific";
     proceedButton.addEventListener("click", () => {
       document.getElementById("root").style.display = "";
       resolve({

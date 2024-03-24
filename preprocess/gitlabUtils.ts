@@ -64,7 +64,7 @@ export class User {
 
   async initUserDetails(): Promise<void> {
     const response = await fetch(
-      `https://gitlab.pavlovia.org/api/v4/user?access_token=${this.accessToken}`,
+      `https://gitlab.pavlovia.org/api/v4/user?access_token=${this.accessToken}`
     );
     const responseBody = await response.json();
 
@@ -87,7 +87,7 @@ export const copyUser = (user: User): User => {
   newUser.avatar_url = user.avatar_url;
   newUser.projectList = JSON.parse(JSON.stringify(user.projectList));
   newUser.currentExperiment = JSON.parse(
-    JSON.stringify(user.currentExperiment),
+    JSON.stringify(user.currentExperiment)
   );
   return newUser;
 };
@@ -114,7 +114,7 @@ export const getAllProjects = async (user: User) => {
   // get first page separately to fetch page count
   // console.log(`fetching projects page 1`);
   const firstResponse = await fetch(
-    `https://gitlab.pavlovia.org/api/v4/users/${user.id}/projects?access_token=${user.accessToken}&per_page=100`,
+    `https://gitlab.pavlovia.org/api/v4/users/${user.id}/projects?access_token=${user.accessToken}&per_page=100`
   );
   const firstResponseData = await firstResponse.json();
   projectList.push(...firstResponseData);
@@ -123,7 +123,7 @@ export const getAllProjects = async (user: User) => {
   const pageCountHeader = await firstResponse.headers.get("x-total-pages");
   if (!pageCountHeader) {
     throw new Error(
-      "x-total-pages header is missing. Gitlab API probably updated.",
+      "x-total-pages header is missing. Gitlab API probably updated."
     );
   }
 
@@ -134,7 +134,7 @@ export const getAllProjects = async (user: User) => {
   for (let curPage = 2; curPage <= pageCount; curPage++) {
     // console.log(`fetching projects page ${curPage}`);
     const paginationResponse = fetch(
-      `https://gitlab.pavlovia.org/api/v4/users/${user.id}/projects?access_token=${user.accessToken}&page=${curPage}&per_page=100`,
+      `https://gitlab.pavlovia.org/api/v4/users/${user.id}/projects?access_token=${user.accessToken}&page=${curPage}&per_page=100`
     );
     pageList.push(paginationResponse);
   }
@@ -155,7 +155,7 @@ export const getAllProjects = async (user: User) => {
  */
 export const getProjectByNameInProjectList = (
   projectList: any[],
-  keyProjectName: string,
+  keyProjectName: string
 ): any => {
   return projectList.find((i: any) => i.name === keyProjectName);
 };
@@ -167,7 +167,7 @@ export const getProjectByNameInProjectList = (
  */
 export const isProjectNameExistInProjectList = (
   projectList: any[],
-  keyProjectName: string,
+  keyProjectName: string
 ): boolean => {
   return projectList
     .map((i: any) => {
@@ -186,7 +186,7 @@ export const isProjectNameExistInProjectList = (
  */
 export const createEmptyRepo = async (
   repoName: string,
-  user: User,
+  user: User
 ): Promise<any> => {
   const newRepo = await fetch(
     "https://gitlab.pavlovia.org/api/v4/projects?name=" +
@@ -195,7 +195,7 @@ export const createEmptyRepo = async (
       user.accessToken,
     {
       method: "POST",
-    },
+    }
   )
     .then((response) => {
       return response.json();
@@ -211,7 +211,7 @@ export const createEmptyRepo = async (
 
 export const setRepoName = async (
   user: User,
-  name: string,
+  name: string
 ): Promise<string> => {
   // if (!isProjectNameExistInProjectList(user.projectList, name)) return name;
   name = complianceProjectName(name);
@@ -239,11 +239,11 @@ export interface Repository {
  * @returns names of resource files in common "EasyEyesResources" repository (fonts and forms)
  */
 export const getCommonResourcesNames = async (
-  user: User,
+  user: User
 ): Promise<{ [key: string]: string[] }> => {
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     user.projectList,
-    resourcesRepoName,
+    resourcesRepoName
   );
 
   // init api options
@@ -261,7 +261,7 @@ export const getCommonResourcesNames = async (
   for (const type of resourcesFileTypes) {
     const prevFontListResponse: any = await fetch(
       `https://gitlab.pavlovia.org/api/v4/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}&per_page=100`,
-      requestOptions,
+      requestOptions
     )
       .then((response) => {
         return response.text();
@@ -288,11 +288,11 @@ export const getCommonResourcesNames = async (
 export const downloadCommonResources = async (
   user: User,
   projectRepoId: string,
-  experimentFileName: string,
+  experimentFileName: string
 ): Promise<void> => {
   const originalFileName = await getOriginalFileNameForProject(
     user,
-    experimentFileName,
+    experimentFileName
   );
 
   const zip = new JSZip();
@@ -319,7 +319,7 @@ export const downloadCommonResources = async (
         const csvContent: string = await getBase64FileDataFromGitLab(
           parseInt(projectRepoId),
           originalFileName,
-          user.accessToken,
+          user.accessToken
         );
         zip.file(originalFileName, csvContent, { base64: true });
       }
@@ -328,13 +328,13 @@ export const downloadCommonResources = async (
         const xlsxContent = await getTextFileDataFromGitLab(
           parseInt(projectRepoId),
           originalFileName,
-          user.accessToken,
+          user.accessToken
         );
         const sheetData = JSON.parse(xlsxContent);
         const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
         const blob = XLSX.write(
           { Sheets: { Sheet1: worksheet }, SheetNames: ["Sheet1"] },
-          { bookType: "xlsx", type: "base64" },
+          { bookType: "xlsx", type: "base64" }
         );
         zip.file(originalFileName, blob, { base64: true });
       }
@@ -350,7 +350,7 @@ export const downloadCommonResources = async (
 
         const encodedFolderPath = encodeURIComponent(`${type}/`);
         const url = `https://gitlab.pavlovia.org/api/v4/projects/${parseInt(
-          projectRepoId,
+          projectRepoId
         )}/repository/tree/?path=${encodedFolderPath}&ref=master`;
         const response = await fetch(url, requestOptions);
         const files = await response.json();
@@ -362,19 +362,19 @@ export const downloadCommonResources = async (
           }
 
           const resourcesRepoFilePath = encodeGitlabFilePath(
-            `${type}/${fileName}`,
+            `${type}/${fileName}`
           );
           const content: string =
             type === "texts"
               ? await getTextFileDataFromGitLab(
                   parseInt(projectRepoId),
                   resourcesRepoFilePath,
-                  user.accessToken,
+                  user.accessToken
                 )
               : await getBase64FileDataFromGitLab(
                   parseInt(projectRepoId),
                   resourcesRepoFilePath,
-                  user.accessToken,
+                  user.accessToken
                 );
 
           if (
@@ -396,7 +396,7 @@ export const downloadCommonResources = async (
 export const getProlificToken = async (user: User): Promise<string> => {
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     user.projectList,
-    resourcesRepoName,
+    resourcesRepoName
   );
 
   // init api options
@@ -412,7 +412,7 @@ export const getProlificToken = async (user: User): Promise<string> => {
   const response =
     (await fetch(
       `https://gitlab.pavlovia.org/api/v4/projects/${easyEyesResourcesRepo.id}/repository/files/PROLIFIC_TOKEN/raw?ref=master`,
-      requestOptions,
+      requestOptions
     )
       .then((response) => {
         return response.text();
@@ -427,7 +427,7 @@ export const getProlificToken = async (user: User): Promise<string> => {
 
 export const getCompatibilityRequirementsForProject = async (
   user: User,
-  repoName: string,
+  repoName: string
 ): Promise<string> => {
   const repo = getProjectByNameInProjectList(user.projectList, repoName);
 
@@ -443,7 +443,7 @@ export const getCompatibilityRequirementsForProject = async (
     "https://gitlab.pavlovia.org/api/v4/projects/" +
       repo.id +
       "/repository/files/CompatibilityRequirements.txt/raw?ref=master",
-    requestOptions,
+    requestOptions
   )
     .then((response) => {
       if (!response?.ok) return "";
@@ -454,14 +454,14 @@ export const getCompatibilityRequirementsForProject = async (
         if (!result.language) return "";
         compatibilityRequirements.previousParsedInfo = result;
         compatibilityRequirements.previousL = convertLanguageToLanguageCode(
-          result.language,
+          result.language
         );
         const text = getCompatibilityRequirements(
           null,
           compatibilityRequirements.previousL,
           true,
           null,
-          compatibilityRequirements.previousParsedInfo,
+          compatibilityRequirements.previousParsedInfo
         ).compatibilityRequirements[0];
         return text;
       }
@@ -477,7 +477,7 @@ export const getCompatibilityRequirementsForProject = async (
 
 export const getDurationForProject = async (
   user: User,
-  repoName: string,
+  repoName: string
 ): Promise<string | number> => {
   const repo = getProjectByNameInProjectList(user.projectList, repoName);
 
@@ -493,7 +493,7 @@ export const getDurationForProject = async (
     "https://gitlab.pavlovia.org/api/v4/projects/" +
       repo.id +
       "/repository/files/Duration.txt/raw?ref=master",
-    requestOptions,
+    requestOptions
   )
     .then((response) => {
       if (!response?.ok) return "";
@@ -529,7 +529,7 @@ export const getDurationForProject = async (
 
 export const getOriginalFileNameForProject = async (
   user: User,
-  repoName: string,
+  repoName: string
 ): Promise<string> => {
   const repo = getProjectByNameInProjectList(user.projectList, repoName);
 
@@ -545,7 +545,7 @@ export const getOriginalFileNameForProject = async (
   const response =
     (await fetch(
       `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/tree/?path=%2E&per_page=100`,
-      requestOptions,
+      requestOptions
     )
       .then((response) => {
         return response.text();
@@ -558,7 +558,7 @@ export const getOriginalFileNameForProject = async (
   const originalFile = fileList.find(
     (i: any) =>
       (i.name.includes(".csv") || i.name.includes(".xlsx")) &&
-      i.name !== "recruitmentServiceConfig.csv",
+      i.name !== "recruitmentServiceConfig.csv"
   );
 
   return originalFile?.name;
@@ -574,7 +574,7 @@ interface RecruitmentServiceInformation {
 export const getPastProlificIdFromExperimentTables = async (
   user: User,
   repoName: string,
-  fileName: string,
+  fileName: string
 ): Promise<any> => {
   const repo = getProjectByNameInProjectList(user.projectList, repoName);
 
@@ -593,7 +593,7 @@ export const getPastProlificIdFromExperimentTables = async (
 
   const response = await fetch(
     `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/files/${fileName}?ref=master`,
-    requestOptions,
+    requestOptions
   )
     .then((response) => {
       return response.body;
@@ -627,7 +627,7 @@ export const getPastProlificIdFromExperimentTables = async (
 
 export const getRecruitmentServiceConfig = async (
   user: User,
-  repoName: string,
+  repoName: string
 ): Promise<any> => {
   const repo = getProjectByNameInProjectList(user.projectList, repoName);
 
@@ -642,7 +642,7 @@ export const getRecruitmentServiceConfig = async (
 
   const response = await fetch(
     `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/files/recruitmentServiceConfig%2Ecsv?ref=master`,
-    requestOptions,
+    requestOptions
   )
     .then((response) => {
       return response.body;
@@ -703,7 +703,7 @@ export const getRecruitmentServiceConfig = async (
         break;
       case "prolificWorkspace":
         serviceInformation.recruitmentProlificWorkspace = JSON.parse(
-          fieldDetail[1],
+          fieldDetail[1]
         ) as boolean;
         break;
       default:
@@ -786,7 +786,7 @@ export const downloadDataFolder = async (user: User, project: any) => {
 
         const fileContent = await fetch(
           `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
-          requestOptions,
+          requestOptions
         )
           .then((response) => response.json())
           .then((result) => Buffer.from(result.content, "base64"));
@@ -808,7 +808,7 @@ export const downloadDataFolder = async (user: User, project: any) => {
       zipFileDate = zipFileDate
         ? getDateAndTimeString(zipFileDate)
         : getDateAndTimeString(new Date());
-      const zipFileName = `${project.name}_${zipFileDate}.zip`;
+      const zipFileName = `${project.name}.results.zip`;
 
       zip.generateAsync({ type: "blob" }).then((content) => {
         saveAs(content, zipFileName);
@@ -834,7 +834,7 @@ const preprocessDataframe = (df: any) => {
     df = df.withColumn("resolution", () => resolution);
   } else if (df.listColumns().includes("psychojsWindowDimensions")) {
     df = df.withColumn("resolution", (row: any) =>
-      row.get("psychojsWindowDimensions"),
+      row.get("psychojsWindowDimensions")
     );
   } else {
     df.withColumn("resolution", () => "NaN x NaN");
@@ -858,7 +858,7 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
 
   const dataFolder = await fetch(
     `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=500&recursive=false`,
-    requestOptions,
+    requestOptions
   )
     .then((response) => {
       return response.json();
@@ -874,7 +874,7 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
     if (fileName.includes(".csv")) {
       const fileContent = await fetch(
         `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
-        requestOptions,
+        requestOptions
       )
         .then((response) => {
           return response.json();
@@ -933,7 +933,7 @@ export const getdataFolder = async (user: User, project: any) => {
 export const getDataFolderCsvLength = async (user: User, project: any) => {
   let dataFolder = await getdataFolder(user, project);
   dataFolder = dataFolder.filter((file: { name: string }) =>
-    file.name.includes("csv"),
+    file.name.includes("csv")
   );
   return dataFolder ? dataFolder.length : 0;
 };
@@ -945,11 +945,11 @@ export const getDataFolderCsvLength = async (user: User, project: any) => {
  */
 export const createOrUpdateCommonResources = async (
   user: User,
-  resourceFileList: File[],
+  resourceFileList: File[]
 ): Promise<void> => {
   const easyEyesResourcesRepo: any = getProjectByNameInProjectList(
     user.projectList,
-    resourcesRepoName,
+    resourcesRepoName
   );
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
 
@@ -959,11 +959,11 @@ export const createOrUpdateCommonResources = async (
   // Update each type of resources one by one
   for (const type of resourcesFileTypes) {
     const filesOfType = resourceFileList.filter((file) =>
-      acceptableExtensions[type].includes(getFileExtension(file)),
+      acceptableExtensions[type].includes(getFileExtension(file))
     );
     for (const file of filesOfType) {
       const useBase64 = !acceptableResourcesExtensionsOfTextDataType.includes(
-        getFileExtension(file),
+        getFileExtension(file)
       );
       const content = useBase64
         ? await getBase64Data(file)
@@ -985,17 +985,17 @@ export const createOrUpdateCommonResources = async (
     commonResourcesRepo,
     jsonFiles,
     commitMessages.newResourcesUploaded,
-    defaultBranch,
+    defaultBranch
   );
 };
 
 export const createOrUpdateProlificToken = async (
   user: User,
-  token: string,
+  token: string
 ): Promise<void> => {
   const easyEyesResourcesRepo: any = getProjectByNameInProjectList(
     user.projectList,
-    resourcesRepoName,
+    resourcesRepoName
   );
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
   const existingToken = await getProlificToken(user);
@@ -1014,7 +1014,7 @@ export const createOrUpdateProlificToken = async (
     commonResourcesRepo,
     jsonFiles,
     commitMessages.addProlificToken,
-    defaultBranch,
+    defaultBranch
   );
 };
 
@@ -1029,7 +1029,7 @@ export const pushCommits = async (
   repo: Repository,
   commits: ICommitAction[],
   commitMessage: string,
-  branch: string,
+  branch: string
 ): Promise<any> => {
   const commitBody = {
     branch,
@@ -1047,7 +1047,7 @@ export const pushCommits = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify(commitBody),
-    },
+    }
   ).then(async (response) => {
     if (!response.ok) {
       Swal.fire({
@@ -1083,7 +1083,7 @@ export const defaultBranch = "master";
 
 export const getGitlabBodyForThreshold = async (
   startIndex: number,
-  endIndex: number,
+  endIndex: number
 ) => {
   const res: ICommitAction[] = [];
 
@@ -1132,7 +1132,7 @@ const updateSwalUploadingCount = (count: number, totalCount: number) => {
 
   if (progressCount)
     (progressCount as HTMLSpanElement).innerHTML = `${Math.round(
-      Math.min(count / totalCount, 1) * 100,
+      Math.min(count / totalCount, 1) * 100
     )}`;
 };
 
@@ -1146,7 +1146,7 @@ const createThresholdCoreFilesOnRepo = async (
   gitlabRepo: Repository,
   user: User,
   uploadedFileCount: { current: number },
-  totalFileCount: number,
+  totalFileCount: number
 ): Promise<any> => {
   const promiseList = [];
   const batchSize = 10; // !
@@ -1166,7 +1166,7 @@ const createThresholdCoreFilesOnRepo = async (
         gitlabRepo,
         rootContent,
         commitMessages.thresholdCoreFileUploaded,
-        defaultBranch,
+        defaultBranch
       ).then((commitResponse: any) => {
         uploadedFileCount.current += endIdx - startIdx + 1;
         updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
@@ -1184,14 +1184,14 @@ const createThresholdCoreFilesOnRepo = async (
   // add compatibility file (fails if added to promiseList)
   const compatibilityPromise = new Promise(async (resolve) => {
     const rootContent = getGitlabBodyForCompatibilityRequirementFile(
-      compatibilityRequirements.parsedInfo,
+      compatibilityRequirements.parsedInfo
     );
     pushCommits(
       user,
       gitlabRepo,
       rootContent,
       commitMessages.thresholdCoreFileUploaded,
-      defaultBranch,
+      defaultBranch
     ).then((commitResponse: any) => {
       uploadedFileCount.current += 1;
       updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
@@ -1208,7 +1208,7 @@ const createThresholdCoreFilesOnRepo = async (
       gitlabRepo,
       rootContent,
       commitMessages.thresholdCoreFileUploaded,
-      defaultBranch,
+      defaultBranch
     ).then((commitResponse: any) => {
       uploadedFileCount.current += 1;
       updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
@@ -1231,7 +1231,7 @@ const createUserUploadedFilesOnRepo = async (
   user: User,
   repoFiles: ThresholdRepoFiles,
   uploadedFileCount: { current: number },
-  totalFileCount: number,
+  totalFileCount: number
 ): Promise<void> => {
   const commitActionList: ICommitAction[] = [];
   // add experiment file to root
@@ -1284,7 +1284,7 @@ const createUserUploadedFilesOnRepo = async (
     gitlabRepo,
     commitActionList,
     commitMessages.addExperimentFile,
-    defaultBranch,
+    defaultBranch
   );
 };
 
@@ -1300,7 +1300,7 @@ const createRequestedResourcesOnRepo = async (
   uploadedFileCount: { current: number },
   totalFileCount: number,
   isCompiledFromArchiveBool: boolean,
-  archivedZip: any,
+  archivedZip: any
 ): Promise<void> => {
   if (
     !userRepoFiles.requestedFonts ||
@@ -1313,7 +1313,7 @@ const createRequestedResourcesOnRepo = async (
 
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     user.projectList,
-    "EasyEyesResources",
+    "EasyEyesResources"
   );
   const commitActionList: ICommitAction[] = [];
 
@@ -1355,19 +1355,19 @@ const createRequestedResourcesOnRepo = async (
                     const fileObject = new File([blob], filename);
                     const useBase64 =
                       !acceptableResourcesExtensionsOfTextDataType.includes(
-                        getFileExtension(fileObject),
+                        getFileExtension(fileObject)
                       );
                     content = useBase64
                       ? await getBase64Data(fileObject)
                       : await getFileTextData(fileObject);
                   }
                 });
-            }),
+            })
           );
         });
       } else {
         const resourcesRepoFilePath = encodeGitlabFilePath(
-          `${resourceType}/${fileName}`,
+          `${resourceType}/${fileName}`
         );
 
         content =
@@ -1375,12 +1375,12 @@ const createRequestedResourcesOnRepo = async (
             ? await getTextFileDataFromGitLab(
                 parseInt(easyEyesResourcesRepo.id),
                 resourcesRepoFilePath,
-                user.accessToken,
+                user.accessToken
               )
             : await getBase64FileDataFromGitLab(
                 parseInt(easyEyesResourcesRepo.id),
                 resourcesRepoFilePath,
-                user.accessToken,
+                user.accessToken
               );
       }
 
@@ -1404,7 +1404,7 @@ const createRequestedResourcesOnRepo = async (
     repo,
     commitActionList,
     commitMessages.resourcesTransferred,
-    defaultBranch,
+    defaultBranch
   );
 };
 
@@ -1413,7 +1413,7 @@ export const createPavloviaExperiment = async (
   projectName: string,
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
   isCompiledFromArchiveBool: boolean,
-  archivedZip: any,
+  archivedZip: any
 ) => {
   // auth check
   if (user.id === undefined) {
@@ -1434,7 +1434,7 @@ export const createPavloviaExperiment = async (
   // unique repo name check
   const isRepoValid = !isProjectNameExistInProjectList(
     user.projectList,
-    projectName,
+    projectName
   );
   if (!isRepoValid) {
     Swal.fire({
@@ -1466,7 +1466,7 @@ export const createPavloviaExperiment = async (
   await Swal.fire({
     title: "Uploading ...",
     html: `<p><span id="uploading-count">${Math.round(
-      Math.min(uploadedFileCount.current / totalFileCount, 1) * 100,
+      Math.min(uploadedFileCount.current / totalFileCount, 1) * 100
     )}</span>%</p>`,
     allowOutsideClick: false,
     allowEscapeKey: false,
@@ -1480,7 +1480,7 @@ export const createPavloviaExperiment = async (
         { id: newRepo.id },
         user,
         uploadedFileCount,
-        totalFileCount,
+        totalFileCount
       );
       for (const i of a) if (i === null) finalClosing = false;
 
@@ -1491,7 +1491,7 @@ export const createPavloviaExperiment = async (
         user,
         userRepoFiles,
         uploadedFileCount,
-        totalFileCount,
+        totalFileCount
       );
       if (b === null) finalClosing = false;
 
@@ -1503,7 +1503,7 @@ export const createPavloviaExperiment = async (
         uploadedFileCount,
         totalFileCount,
         isCompiledFromArchiveBool,
-        archivedZip,
+        archivedZip
       );
       if (c === null) finalClosing = false;
 
@@ -1532,7 +1532,7 @@ export const createPavloviaExperiment = async (
           `https://run.pavlovia.org/${
             user.username
           }/${projectName.toLocaleLowerCase()}`,
-          serviceUrl,
+          serviceUrl
         );
       }
     },
@@ -1546,7 +1546,7 @@ export const createPavloviaExperiment = async (
 export const runExperiment = async (
   user: User,
   newRepo: Repository,
-  experimentUrl: string,
+  experimentUrl: string
 ) => {
   try {
     const running = await fetch(
@@ -1564,7 +1564,7 @@ export const runExperiment = async (
             policy: { type: "URL", url: experimentUrl },
           },
         }),
-      },
+      }
     );
 
     return await running.json();
@@ -1589,7 +1589,7 @@ export const getExperimentStatus = async (user: User, newRepo: Repository) => {
         "Content-Type": "application/json",
         oauthToken: user.accessToken,
       },
-    },
+    }
   );
 
   const result = await running.json();
@@ -1601,13 +1601,13 @@ export const getExperimentStatus = async (user: User, newRepo: Repository) => {
 export const generateAndUploadCompletionURL = async (
   user: User,
   newRepo: any,
-  handleUpdateUser: (user: User) => void,
+  handleUpdateUser: (user: User) => void
 ) => {
   const newUser: User = copyUser(user);
 
   if (!newUser.currentExperiment.participantRecruitmentServiceCode) {
     const completionCode = String(
-      Math.floor(Math.random() * (999 - 100) + 100),
+      Math.floor(Math.random() * (999 - 100) + 100)
     );
 
     const characters =
@@ -1624,9 +1624,14 @@ export const generateAndUploadCompletionURL = async (
 
       const completionURL =
         "https://app.prolific.co/submissions/complete?cc=" + completionCode;
-      const jsonString = `name,${
+      let jsonString = `name,${
         user.currentExperiment.participantRecruitmentServiceName
-      }\ncode,${completionCode}\nincompatible-completion-code,${incompatibleCompletionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
+      }\ncode,${completionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
+      if (incompatibleCompletionCode) {
+        jsonString = `name,${
+          user.currentExperiment.participantRecruitmentServiceName
+        }\ncode,${completionCode}\nincompatible-completion-code,${incompatibleCompletionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
+      }
 
       const commitAction = {
         action: "update",
@@ -1652,7 +1657,7 @@ export const generateAndUploadCompletionURL = async (
             "Content-Type": "application/json",
           },
           body: JSON.stringify(commitBody),
-        },
+        }
       )
         .then((response) => {
           return response.json();
@@ -1682,7 +1687,7 @@ export const generateAndUploadCompletionURL = async (
 export const createProlificStudyIdFile = async (
   gitlabRepo: Repository,
   user: User,
-  studyId: string,
+  studyId: string
 ): Promise<void> => {
   const commitActionList: ICommitAction[] = [];
 
@@ -1698,7 +1703,7 @@ export const createProlificStudyIdFile = async (
     gitlabRepo,
     commitActionList,
     commitMessages.addProlificStudyId,
-    defaultBranch,
+    defaultBranch
   );
 };
 
@@ -1719,7 +1724,7 @@ export const getProlificStudyId = async (user: User, id: any) => {
   const response =
     (await fetch(
       `https://gitlab.pavlovia.org/api/v4/projects/${id}/repository/files/ProlificStudyId.txt/raw?ref=master`,
-      requestOptions,
+      requestOptions
     )
       .then((response) => {
         return response.text();
