@@ -2088,6 +2088,9 @@ const getLoudspeakerDeviceDetailsFromUser = async (
 
 const identifyDevice = async () => {
   return new Promise((resolve) => {
+    while (!fod) {
+      console.log("waiting for fod");
+    }
     try {
       const deviceInfo = {};
       fod.complete(function (data) {
