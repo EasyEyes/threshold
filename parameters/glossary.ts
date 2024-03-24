@@ -456,6 +456,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_languageSelectionByParticipantBool (default FALSE), when TRUE, tell the Needs page to offer the participant a pull-down menu to select any language for the rest of the experiment. The experiment always begins with the language specified by _language, and the participant's option to change language appears only if  _languageSelectionByParticipantBool=TRUE. The participant selects among the native names of the languages, e.g. English, Deutsch, عربي. EasyEyes currently offers 77 languages, and it would be easy to add more. If there's demand, we could add another parameter to allow you to specify a list of languages to offer to the participant.",
   },
+  _logParticipantsBool: {
+    name: "_logParticipantsBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_logParticipantsBool (default FALSE), when TRUE, record each participant in our log before initiating PsychoJS. We use this to investigate discrepancies between the number of studies reported by Prolific and Pavlovia.",
+  },
   _needBrowser: {
     name: "_needBrowser",
     availability: "now",

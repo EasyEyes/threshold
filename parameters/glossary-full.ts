@@ -531,6 +531,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_logParticipantsBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_logParticipantsBool (default FALSE), when TRUE, record each participant in our log before initiating PsychoJS. We use this to investigate discrepancies between the number of studies reported by Prolific and Pavlovia.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_needBrowser",
     availability: "now",
     example: "Chrome",
