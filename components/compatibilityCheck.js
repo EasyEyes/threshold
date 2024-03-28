@@ -1,5 +1,8 @@
 import { GLOSSARY } from "../parameters/glossary";
-import { isProlificPreviewExperiment } from "./externalServices";
+import {
+  isProlificExperiment,
+  isProlificPreviewExperiment,
+} from "./externalServices";
 import { readi18nPhrases } from "./readPhrases";
 import { ref, get, child } from "firebase/database";
 import database, { db } from "./firebase/firebase.js";
@@ -20,6 +23,8 @@ import {
   getAutoCompleteSuggestionElements,
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
+import { recruitmentServiceData } from "./recruitmentService";
+import { quitPsychoJS } from "./lifetime";
 
 let gotLoudspeakerMatchBool = false;
 // import { microphoneInfo } from "./global";
@@ -50,18 +55,47 @@ export const QRSkipResponse = {
 };
 
 // If the consent form were denied... Show the ending directly
-export const showExperimentEnding = (newEnding = true) => {
-  // ? Do we really need this function?
-  // Why not do through PsychoJS or other interfaces?
-  // Fixed for old code by @svr8
+export const showExperimentEnding = (
+  newEnding = true,
+  addReturnToProlificButton = false,
+  lang = "en-US"
+) => {
   let endingText;
   if (newEnding) endingText = document.createElement("div");
   else endingText = document.getElementById("exp-end-text");
 
-  endingText.innerHTML = "Thank you. The experiment has ended."; // TODO i18n
+  endingText.innerText = readi18nPhrases("EE_ThankYou", lang);
   endingText.id = "exp-end-text";
   document.body.appendChild(endingText);
   endingText.style.visibility = "visible";
+  endingText.style.lineHeight = "1.5";
+  endingText.style.paddingTop = "40vh";
+
+  if (addReturnToProlificButton) {
+    const returnToProlificButton = document.createElement("button");
+    returnToProlificButton.classList.add("form-input-btn");
+    returnToProlificButton.innerHTML = readi18nPhrases("EE_Cancel", lang);
+    returnToProlificButton.addEventListener("click", () => {
+      window.location.href =
+        "https://app.prolific.co/submissions/complete?cc=" +
+        recruitmentServiceData?.incompatibleCode;
+    });
+    endingText.innerText = "";
+
+    const p = document.createElement("p");
+    p.innerText =
+      readi18nPhrases("EE_ThankYou", lang) +
+      " " +
+      readi18nPhrases("EE_NoPhonePleaseCancel", lang);
+    p.style.marginBottom = "20px";
+    endingText.appendChild(p);
+    endingText.appendChild(returnToProlificButton);
+    endingText.style.display = "flex";
+    endingText.style.flexDirection = "column";
+    endingText.style.alignItems = "center";
+    endingText.style.paddingTop = "0vh";
+    endingText.style.justifyContent = "center";
+  }
 };
 
 export const getPreferredModelNumberAndName = (
@@ -170,11 +204,11 @@ export const getPreferredModelNumberAndName = (
       );
     } else {
       preferredModelNumber = readi18nPhrases(
-        lowercase ? "RC_modelNumberIPadLowercase" : "RC_modelNumberIPad",
+        lowercase ? "RC_modelNumberIOsLowercase" : "RC_modelNumberIOs",
         lang
       );
       preferredModelName = readi18nPhrases(
-        lowercase ? "RC_modelNameIPadLowercase" : "RC_modelName",
+        lowercase ? "RC_modelNameIOsLowercase" : "RC_modelName",
         lang
       );
     }
@@ -322,7 +356,7 @@ export const getInstructionText = (
     } else if (userOS === "macOS") {
       findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
     } else {
-      findModelNumber = readi18nPhrases("RC_findModelIPad", language);
+      findModelNumber = readi18nPhrases("RC_findModelIOs", language);
     }
   }
   // else if (userOS === "Android") {
@@ -544,8 +578,8 @@ export const checkSystemCompatibility = (
 
   msg.push(describeDevice);
 
-  if (deviceIsCompatibleBool && isProlificPreviewExperiment())
-    msg.push(readi18nPhrases("EE_incompatibleReturnToProlific", Language));
+  // if (deviceIsCompatibleBool && isProlificPreviewExperiment())
+  //   msg.push(readi18nPhrases("EE_incompatibleReturnToProlific", Language));
 
   //  if the study is compatible except for screen size, prompt to refresh
   if (promptRefresh) {
@@ -942,8 +976,7 @@ export const displayCompatibilityMessage = async (
   needCalibratedSmartphoneMicrophone,
   needComputerSurveyBool,
   needCalibratedSound,
-  psychoJS,
-  quitPsychoJS
+  psychoJS
 ) => {
   return new Promise(async (resolve) => {
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
@@ -1210,9 +1243,8 @@ export const displayCompatibilityMessage = async (
             psychoJS.experiment.nextEntry();
           }
         }
-
-        showExperimentEnding();
-        quitPsychoJS("", false, reader);
+        quitPsychoJS("", false, reader, !isProlificExperiment());
+        showExperimentEnding(true, !isProlificExperiment(), rc.language.value);
       });
       let numberOfTries = 0;
 
@@ -1400,11 +1432,11 @@ export const displayCompatibilityMessage = async (
     const proceedButton = document.createElement("button");
     proceedButton.classList.add("form-input-btn");
     proceedButton.style.width = "fit-content";
-    proceedButton.style.margin = "3rem 0";
+    proceedButton.style.margin = "5rem 0";
     proceedButton.id = "procced-btn";
     proceedButton.innerHTML = proceedBool
       ? readi18nPhrases("T_proceed", rc.language.value)
-      : "Return to Prolific";
+      : readi18nPhrases("EE_Cancel", rc.language.value);
     proceedButton.addEventListener("click", () => {
       document.getElementById("root").style.display = "";
       resolve({

@@ -807,7 +807,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   async function displayNeedsPage() {
     await updateInfo();
-    saveDataOnWindowClose(psychoJS.experiment);
+    // saveDataOnWindowClose(psychoJS.experiment);
     // ! check system compatibility
     const compMsg = checkSystemCompatibility(
       paramReader,
@@ -869,8 +869,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       needCalibratedSmartphoneMicrophone,
       needComputerSurveyBool.current,
       needCalibratedSound,
-      psychoJS,
-      quitPsychoJS
+      psychoJS
     );
 
     gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
@@ -910,11 +909,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS._config.experiment,
         psychoJS._serverMsg
       );
-      quitPsychoJS("", "", paramReader);
-      window.open(
-        "https://app.prolific.co/submissions/complete?cc=" +
-          recruitmentServiceData?.incompatibleCode
-      );
+      quitPsychoJS("", false, paramReader);
+      isProlificExperiment()
+        ? window.open(
+            "https://app.prolific.co/submissions/complete?cc=" +
+              recruitmentServiceData?.incompatibleCode
+          )
+        : null;
     }
 
     // show forms before actual experiment begins

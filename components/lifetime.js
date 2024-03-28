@@ -22,7 +22,12 @@ import { removeClickableCharacterSet } from "./showCharacterSet";
 import { showCursor, sleep } from "./utils";
 import { useMatlab, closeMatlab } from "./connectMatlab";
 
-export async function quitPsychoJS(message = "", isCompleted, paramReader) {
+export async function quitPsychoJS(
+  message = "",
+  isCompleted,
+  paramReader,
+  showSafeToCloseDialog = true
+) {
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
   if (useMatlab.current) {
     closeMatlab();
@@ -142,6 +147,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       isCompleted: isCompleted,
       okText: "Go to Prolific to complete the experiment",
       okUrl: recruitmentServiceData.url,
+      showSafeToCloseDialog: showSafeToCloseDialog,
     };
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
@@ -162,6 +168,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       message: message,
       isCompleted: isCompleted,
       okText: "OK",
+      showSafeToCloseDialog: showSafeToCloseDialog,
     };
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
