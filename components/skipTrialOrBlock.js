@@ -138,7 +138,7 @@ export const handleResponseTimeoutSec = (frameN, t) => {
   if (frameN === 0) {
     const responseTimeoutSec = paramReader.read(
       "responseTimeoutSec",
-      status.block_condition
+      status.block_condition,
     );
     timeWhenTimeout = t + responseTimeoutSec;
   }
@@ -154,7 +154,7 @@ export const handleResponseTimeoutSec = (frameN, t) => {
 export const addSkipTrialButton = () => {
   const responseSkipTrialButtonBool = paramReader.read(
     "responseSkipTrialButtonBool",
-    status.block_condition
+    status.block_condition,
   );
   if (
     responseSkipTrialButtonBool &&
@@ -168,7 +168,6 @@ export const addSkipTrialButton = () => {
     button.innerText = label;
     button.addEventListener("click", skipTrial);
     document.body.appendChild(button);
-    console.log("!. skip trial button", button);
   }
 };
 /**

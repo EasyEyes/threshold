@@ -47,7 +47,7 @@ const { PsychoJS } = core;
 
 export const _identify_trialInstructionRoutineEnd = (
   instructions,
-  fixation
+  fixation,
 ) => {
   removeHandlerForClickingFixation();
   instructions.setAutoDraw(false);
@@ -60,7 +60,7 @@ export const _letter_trialRoutineEnd = (
   simulatedBool,
   responseCorrect,
   level,
-  respondedEarly
+  respondedEarly,
 ) => {
   // letterTiming.targetFinishSec and letterTiming.targetStartSec are undefined for simulated observer
   if (!simulatedBool) {
@@ -69,7 +69,7 @@ export const _letter_trialRoutineEnd = (
       tolerances,
       letterConfig.targetDurationSec,
       target,
-      letterConfig.delayBeforeStimOnsetSec
+      letterConfig.delayBeforeStimOnsetSec,
     );
   }
 
@@ -91,7 +91,6 @@ export const _letter_trialRoutineEnd = (
   letterTiming.targetFinishSec = undefined;
 
   addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
-  logger("!. tolerances", tolerances);
   if (currentLoop instanceof MultiStairHandler) {
     // currentLoop.addResponse(key_resp.corr, level);
     logQuest("Level given quest", toFixedNumber(level, 3));
@@ -104,7 +103,7 @@ export const _letter_trialRoutineEnd = (
         usingGaze.current,
         psychoJS,
         respondedEarly,
-        simulatedBool
+        simulatedBool,
       ) &&
       usingGaze.current
     ) {
@@ -125,7 +124,7 @@ export const _repeatedLetters_trialRoutineFirstFrame = (paramReader) => {
       tolerances,
       displayOptions,
       clickedContinue.timestamps[clickedContinue.timestamps.length - 1],
-      letterConfig.targetDurationSec
+      letterConfig.targetDurationSec,
     );
 };
 export const _repeatedLetters_trialRoutineEachFrame = (
@@ -136,13 +135,13 @@ export const _repeatedLetters_trialRoutineEachFrame = (
   targetSpecs,
   conditionName,
   showCharacterSet,
-  instructions
+  instructions,
 ) => {
   // Draw targets
   if (
     t >= delayBeforeStimOnsetSec &&
     repeatedLettersConfig.stims.every(
-      (s) => s.status === PsychoJS.Status.NOT_STARTED
+      (s) => s.status === PsychoJS.Status.NOT_STARTED,
     )
   ) {
     // keep track of start time/frame for later
@@ -155,13 +154,13 @@ export const _repeatedLetters_trialRoutineEachFrame = (
   // Confirm that targets are drawn
   if (
     repeatedLettersConfig.stims.every(
-      (s) => s.status === PsychoJS.Status.STARTED
+      (s) => s.status === PsychoJS.Status.STARTED,
     ) &&
     !letterTiming.targetStartSec
   ) {
     letterTiming.targetStartSec = t;
     repeatedLettersConfig.stims.forEach(
-      (s) => (s.frameNDrawnConfirmed = frameN)
+      (s) => (s.frameNDrawnConfirmed = frameN),
     );
     letterTiming.targetDrawnConfirmedTimestamp = performance.now();
     letterTiming.crosshairClickedTimestamp =
@@ -170,7 +169,7 @@ export const _repeatedLetters_trialRoutineEachFrame = (
   // Undraw targets
   if (
     repeatedLettersConfig.stims.every(
-      (s) => s.status === PsychoJS.Status.STARTED
+      (s) => s.status === PsychoJS.Status.STARTED,
     ) &&
     t >= frameRemains
   ) {
@@ -185,13 +184,13 @@ export const _repeatedLetters_trialRoutineEachFrame = (
   // Confirm targets undrawn
   if (
     repeatedLettersConfig.stims.every(
-      (s) => s.status === PsychoJS.Status.FINISHED
+      (s) => s.status === PsychoJS.Status.FINISHED,
     ) &&
     !letterTiming.targetFinishSec
   ) {
     letterTiming.targetFinishSec = t;
     repeatedLettersConfig.stims.forEach(
-      (s) => (s.frameNFinishConfirmed = frameN)
+      (s) => (s.frameNFinishConfirmed = frameN),
     );
 
     if (showConditionNameConfig.showTargetSpecs) {
@@ -202,7 +201,7 @@ export const _repeatedLetters_trialRoutineEachFrame = (
         Math.round(thisDuration * 100.0) / 100
       } [${isTimingOK(
         Math.abs(thisDuration - letterConfig.targetDurationSec),
-        0.02
+        0.02,
       )}]`;
       targetSpecs.setText(showConditionNameConfig.targetSpecs);
       showConditionName(conditionName, targetSpecs);
@@ -231,7 +230,7 @@ export const _repeatedLetters_trialRoutineEachFrame = (
       "",
       targetKind.current,
       status.block_condition,
-      responseType.current
+      responseType.current,
     );
 
     instructions.tSTart = t;
@@ -246,26 +245,26 @@ export const _letter_trialRoutineFirstFrame = (
   targetSpecs,
   conditionName,
   target,
-  flankersUsed
+  flankersUsed,
 ) => {
   if (paramReader.read("calibrateTrackGazeBool", status.block_condition))
     measureGazeError(
       tolerances,
       displayOptions,
       clickedContinue.timestamps[clickedContinue.timestamps.length - 1],
-      letterConfig.targetDurationSec
+      letterConfig.targetDurationSec,
     );
   /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
   if (typeof target !== "undefined")
     psychoJS.experiment.addData(
       "targetBoundingBox",
-      prettyPrintPsychojsBoundingBox(target.getBoundingBox(true))
+      prettyPrintPsychojsBoundingBox(target.getBoundingBox(true)),
     );
   flankersUsed.forEach((f, i) =>
     psychoJS.experiment.addData(
       `flanker${i}BoundingBox`,
-      prettyPrintPsychojsBoundingBox(f.getBoundingBox(true))
-    )
+      prettyPrintPsychojsBoundingBox(f.getBoundingBox(true)),
+    ),
   );
   /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
 

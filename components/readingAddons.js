@@ -56,13 +56,13 @@ export const loadReadingCorpus = async (paramReader) => {
     // Preprocess & Frequencies
     for (let corpus in readingCorpusArchive) {
       readingWordListArchive[corpus] = preprocessCorpusToWordList(
-        readingCorpusArchive[corpus]
+        readingCorpusArchive[corpus],
       );
       readingWordFrequencyArchive[corpus] = getWordFrequencies(
-        readingWordListArchive[corpus]
+        readingWordListArchive[corpus],
       );
       readingFrequencyToWordArchive[corpus] = processWordFreqToFreqToWords(
-        readingWordFrequencyArchive[corpus]
+        readingWordFrequencyArchive[corpus],
       );
       readingUsedText[corpus] = readingCorpusArchive[corpus];
     }
@@ -75,7 +75,7 @@ export const getThisBlockPages = (
   readingParagraph,
   numberOfPages = undefined,
   readingLinesPerPage = undefined,
-  wordsPerLine = undefined
+  wordsPerLine = undefined,
 ) => {
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block)[0];
@@ -88,13 +88,13 @@ export const getThisBlockPages = (
 
     const targetFewWordsToSplit = paramReader.read(
       "readingFirstFewWords",
-      block
+      block,
     )[0];
     let skippedWordsNum = 0;
     if (targetFewWordsToSplit !== "") {
       [readingUsedText[thisURL], skippedWordsNum] = getReadingUsedText(
         readingCorpusArchive[thisURL],
-        paramReader.read("readingFirstFewWords", block)[0]
+        paramReader.read("readingFirstFewWords", block)[0],
       );
     } else {
       readingUsedText[thisURL] = readingCorpusArchive[thisURL];
@@ -112,7 +112,7 @@ export const getThisBlockPages = (
       numberOfPages ?? paramReader.read("readingPages", block)[0],
       readingParagraph,
       paramReader.read("targetKind", block)[0],
-      paramReader.read("fontTrackingForLetters", block)[0]
+      paramReader.read("fontTrackingForLetters", block)[0],
     );
     readingUsedText[thisURL] = preparedSentences.readingUsedText;
 
@@ -145,7 +145,7 @@ const getReadingUsedText = (allCorpus, firstFewWords) => {
     return [
       firstFewWords + readingUsedText,
       preprocessCorpusToWordList(
-        splitCorpusArray.slice(0, randomInsert).join(firstFewWords)
+        splitCorpusArray.slice(0, randomInsert).join(firstFewWords),
       ).length,
     ];
   }
@@ -163,7 +163,7 @@ export const preprocessCorpusToSentenceList = (
   numberOfPages,
   readingParagraphStimulus,
   targetKind = "reading",
-  letterSpacing
+  letterSpacing,
 ) => {
   // Extended for use in rsvpReading by allowing lineBuffer,lineNumber to either be scalars or arrays
   if (lineBuffer instanceof Array && lineNumber instanceof Array) {
@@ -303,12 +303,12 @@ export const preprocessCorpusToSentenceList = (
         readingPageStats.readingPageSkipCorpusWords.length - 1
       ];
     readingPageStats.readingPageSkipCorpusWords.push(
-      previousStartingIndex + numberWordsThisPage
+      previousStartingIndex + numberWordsThisPage,
     );
     readingPageStats.readingPageLines.push(lineNumber);
     readingPageStats.readingPageWords.push(numberWordsThisPage);
     readingPageStats.readingPageNonblankCharacters.push(
-      thisPageText.replace(/\s/g, "").length
+      thisPageText.replace(/\s/g, "").length,
     );
     sentences.push(removeLastLineBreak(thisPageText));
   }
@@ -326,7 +326,7 @@ const getInitialFontSizePt = () =>
 export const getSizeForXHeight = (
   readingParagraph,
   targetHeight,
-  unit = "deg"
+  unit = "deg",
 ) => {
   const initialFontSizePt = getInitialFontSizePt();
   readingParagraph.setText("x");
@@ -345,7 +345,6 @@ fontSizePt=(xHeightDesiredPx/xHeightPx)*initialFontSizePt
      */
     // DEG
     const readingXHeightDeg = targetHeight;
-    logger("!. readingXHeightDeg", targetHeight);
     // Convert deg to px
     const xHeightDesiredPx = pxOfDegVertical(readingXHeightDeg);
     // Set font size to initialFontSizePt, and measure the height of letter “x”: xHeightPx.
@@ -365,7 +364,7 @@ fontSizePt=(xHeightDesiredPx/xHeightPx)*initialFontSizePt
 const getSizeForSpacing = (
   readingParagraph,
   readingSpacingDeg,
-  testingString
+  testingString,
 ) => {
   // Convert deg to px.
   const spacingDesiredPx = pxOfDegHorizontal(readingSpacingDeg);
@@ -384,23 +383,23 @@ const getSizeForSpacing = (
 export const addReadingStatsToOutput = (pageN, psychoJS) => {
   psychoJS.experiment.addData(
     "readingPageSkipCorpusWords",
-    readingPageStats.readingPageSkipCorpusWords[pageN]
+    readingPageStats.readingPageSkipCorpusWords[pageN],
   );
   psychoJS.experiment.addData(
     "readingPageLines",
-    readingPageStats.readingPageLines[pageN]
+    readingPageStats.readingPageLines[pageN],
   );
   psychoJS.experiment.addData(
     "readingPageWords",
-    readingPageStats.readingPageWords[pageN]
+    readingPageStats.readingPageWords[pageN],
   );
   psychoJS.experiment.addData(
     "readingPageNonBlankCharacters",
-    readingPageStats.readingPageNonblankCharacters[pageN]
+    readingPageStats.readingPageNonblankCharacters[pageN],
   );
   psychoJS.experiment.addData(
     "readingPageDurationOnsetToOffsetSec",
-    timing.stimulusOnsetToOffset
+    timing.stimulusOnsetToOffset,
   );
 };
 
@@ -408,13 +407,13 @@ export const findReadingSize = (
   readingSetSizeBy,
   paramReader,
   readingParagraph,
-  blockOrConditionEnum
+  blockOrConditionEnum,
 ) => {
   let pt;
   let bc =
     blockOrConditionEnum === "block"
       ? paramReader.block_conditions.filter(
-          (s) => Number(s.split("_")[0]) === status.block
+          (s) => Number(s.split("_")[0]) === status.block,
         )
       : status.block_condition;
   readTrialLevelLetterParams(paramReader, bc);
@@ -458,7 +457,7 @@ export const findReadingSize = (
       pt = getSizeForSpacing(
         readingParagraph,
         readingSpacingDeg,
-        fontCharacterSet.current.join("")
+        fontCharacterSet.current.join(""),
       );
       break;
     default:
@@ -484,7 +483,7 @@ const getMinFontPtSize = (paramReader, blockOrConditionEnum) => {
     psychoJS.window,
     1,
     50,
-    font.padding
+    font.padding,
   );
   if (targetSizeIsHeightBool) {
     return px / characterSetRectPx.height;

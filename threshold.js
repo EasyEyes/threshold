@@ -2548,10 +2548,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         undefined,
         paramReader.read("responseSpokenBool", status.block)[0],
       );
-      logger(
-        "!. responseType, initInstructionRoutineBegin",
-        responseType.current,
-      );
 
       // set default background color for instructions
       screenBackground.colorRGBA = colorRGBASnippetToRGBA(
@@ -3239,18 +3235,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "responseSpokenToExperimenterBool",
             status.block_condition,
           ) && rsvpReadingBool,
-        );
-        logger(
-          "!. responseType.original, trialInstructionRB aka prestimulus=false",
-          responseType.original,
-        );
-        logger(
-          "!. responseType.current, trialInstructionRB aka prestimulus=true",
-          responseType.current,
-        );
-        logger(
-          "responseType trialInstructionRoutineBegin",
-          responseType.current,
         );
         if (canClick(responseType.current)) showCursor();
       };
@@ -4931,6 +4915,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       hideCursor();
 
+      // Set fixation status to not started. Will redraw at start
+      // of trial (ie trialRoutineEachFrame) if `markingFixationDuringTargetBool`
+      fixation.status = PsychoJS.Status.NOT_STARTED;
+
       /* -------------------------------------------------------------------------- */
       if (targetTask.current === "questionAndAnswer") {
         continueRoutine = true;
@@ -5734,19 +5722,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }
 
+      logger("!. trialRoutineEachFrame fixation.status", fixation.status);
       // *fixation* updates
       if (
         t >= 0.0 &&
         fixation.status === PsychoJS.Status.NOT_STARTED &&
-        fixationConfig.show &&
+        paramReader.read(
+          "markingFixationDuringTargetBool",
+          status.block_condition,
+        ) &&
         targetKind.current !== "sound" &&
         targetKind.current !== "vocoderPhrase"
       ) {
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
-
-        // fixation.setAutoDraw(true);
+        fixation.setAutoDraw(true);
       }
 
       switch (targetKind.current) {
@@ -5938,6 +5929,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
           target.setAutoDraw(false);
           target.frameNEnd = frameN;
+          fixation.setAutoDraw(false);
           // Play purr sound
           // purrSynth.play();
 
@@ -6593,8 +6585,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // if trialBreak is ongoing
       else if (totalTrialsThisBlock.current === status.trial)
         hideTrialBreakProgressBar();
-
-      logger("!. end of trial quest", psychoJS.experiment);
 
       fontSize.current = "Reset at end of trial.";
 

@@ -48,17 +48,8 @@ export const getResponseType = (
   speak,
   responseMustTrackContinuouslyBool,
   spokenToExperimenter,
-  prestimulus = true
+  prestimulus = true,
 ) => {
-  logger("!. get responseType click", click);
-  logger("!. get responseType type", type);
-  logger("!. get responseType keypad", keypad);
-  logger("!. get responseType speak", speak);
-  logger(
-    "!. get responseType responseMustTrackContinuouslyBool",
-    responseMustTrackContinuouslyBool
-  );
-  logger("!. get responseType spokenToExperimenter", spokenToExperimenter);
   // responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool
   if (responseMustTrackContinuouslyBool && prestimulus) return 1;
 
@@ -84,7 +75,7 @@ export const getResponseType = (
 export const resetResponseType = (
   originalResponseType,
   responseType,
-  differentFixaxtionAndResponseModalities
+  differentFixaxtionAndResponseModalities,
 ) => {
   if (differentFixaxtionAndResponseModalities) return originalResponseType;
   else return responseType;
@@ -119,9 +110,8 @@ export const setupPhraseIdentification = (
   categories,
   reader,
   BC,
-  fontSize = undefined
+  fontSize = undefined,
 ) => {
-  logger("!. categories", categories);
   const responseScreen = document.createElement("div");
   responseScreen.id = "phrase-identification-response-screen";
   responseScreen.classList.add("responseScreen");
@@ -160,7 +150,6 @@ export const setupPhraseIdentification = (
     const categoryColumn = document.createElement("div");
     categoryColumn.classList.add("phrase-identification-category-column");
     categoryColumn.id = `phrase-identification-category-column-${categoryId}`;
-    logger("!. category column id", categoryColumn.id);
     categoryColumn.style.display = "flex";
     categoryColumn.style.flexDirection = "column";
     categoryColumn.style.letterSpacing = String(font.letterSpacing) + "em";
@@ -174,14 +163,14 @@ export const setupPhraseIdentification = (
       const fontFamily = getFontFamilyName(font.name);
       categoryItem.style.fontFamily = fontFamily;
       categoryItem.style.color = colorRGBASnippetToRGBA(
-        reader.read("markingColorRGBA", BC)
+        reader.read("markingColorRGBA", BC),
       );
       if (fontSize) categoryItem.style.fontSize = String(fontSize) + "px";
       categoryItem.onclick = () => {
         // Only register one response per category
         if (
           !phraseIdentificationResponse.categoriesResponded.includes(
-            categoryNum
+            categoryNum,
           )
         ) {
           const answerIsCorrect = categoryChild === targetWord ? 1 : 0;
@@ -195,16 +184,16 @@ export const setupPhraseIdentification = (
           categoryItem.classList.add("phrase-identification-item-selected");
 
           const correspondingFeedbackText = document.getElementById(
-            `phrase-identification-category-title-${categoryId}`
+            `phrase-identification-category-title-${categoryId}`,
           );
           correspondingFeedbackText.innerHTML = categoryChild;
           correspondingFeedbackText.style.color = colorRGBASnippetToRGBA(
-            reader.read("markingColorRGBA", BC)
+            reader.read("markingColorRGBA", BC),
           );
           correspondingFeedbackText.classList.add(
             answerIsCorrect
               ? "phrase-identification-item-correct"
-              : "phrase-identification-item-incorrect"
+              : "phrase-identification-item-incorrect",
           );
         }
       };
@@ -230,7 +219,7 @@ export const showPhraseIdentification = (responseScreen) => {
     const fontSize = scaleFontSizeToFit(
       responseScreen,
       "phrase-identification-category-item",
-      0.8
+      0.8,
     );
     if (fontSize === getMinFontSize()) {
       // document.body.style.overflow = "hidden";
@@ -246,7 +235,7 @@ export const showPhraseIdentification = (responseScreen) => {
     const timeSpentScalingSec = toFixedNumber(timeSpentScaling / 1000, 3);
     psychoJS.experiment.addData(
       "delayFromScalingPhraseIdentificationScreenSec",
-      timeSpentScalingSec
+      timeSpentScalingSec,
     );
   }
   showCursor();
@@ -259,7 +248,7 @@ export const noteStimulusOnsetForPhraseIdentification = () => {
 
 export const getPhraseIdentificationReactionTimes = () => {
   return phraseIdentificationResponse.clickTime.map(
-    (t) => (t - phraseIdentificationResponse.onsetTime) / 1000
+    (t) => (t - phraseIdentificationResponse.onsetTime) / 1000,
   );
 };
 

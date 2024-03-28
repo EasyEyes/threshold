@@ -15,7 +15,7 @@ import { logger } from "./utils";
 export const setPreStimulusRerunInterval = (
   paramReader,
   trialInstructionRoutineBegin,
-  snapshot
+  snapshot,
 ) => {
   // TODO does RC provide callbacks, ie to do this every time the nudger activates?
   /**
@@ -45,7 +45,7 @@ export const setPreStimulusRerunInterval = (
         : viewingDistanceCm.current;
       let allowedRatio = Math.max(
         paramReader.read("viewingDistanceAllowedRatio", status.block_condition),
-        0.000000001
+        0.000000001,
       );
       let bounds;
       if (allowedRatio > 1) {
@@ -70,7 +70,6 @@ export const setPreStimulusRerunInterval = (
         await trialInstructionRoutineBegin(snapshot)();
         const stopTime = performance.now();
         const duration = stopTime - startTime;
-        logger("!. Done rerunning.", duration);
         fixationConfig.preserveOffset = false;
         preStimulus.running = false;
       }
