@@ -807,7 +807,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   async function displayNeedsPage() {
     await updateInfo();
-    // saveDataOnWindowClose(psychoJS.experiment);
+    saveDataOnWindowClose(psychoJS.experiment);
     // ! check system compatibility
     const compMsg = checkSystemCompatibility(
       paramReader,
@@ -869,7 +869,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       needCalibratedSmartphoneMicrophone,
       needComputerSurveyBool.current,
       needCalibratedSound,
-      psychoJS
+      psychoJS,
+      quitPsychoJS
     );
 
     gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;

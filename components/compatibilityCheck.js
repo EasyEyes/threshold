@@ -24,7 +24,6 @@ import {
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
-import { quitPsychoJS } from "./lifetime";
 
 let gotLoudspeakerMatchBool = false;
 // import { microphoneInfo } from "./global";
@@ -976,7 +975,8 @@ export const displayCompatibilityMessage = async (
   needCalibratedSmartphoneMicrophone,
   needComputerSurveyBool,
   needCalibratedSound,
-  psychoJS
+  psychoJS,
+  quitPsychoJS
 ) => {
   return new Promise(async (resolve) => {
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];

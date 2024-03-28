@@ -5,6 +5,7 @@ export const recruitmentServiceData = {
   code: "",
   incompatibleCode: "",
   url: "",
+  abortedCode: "",
 };
 
 export const loadRecruitmentServiceConfig = (
@@ -26,6 +27,9 @@ export const loadRecruitmentServiceConfig = (
             break;
           case "url":
             recruitmentServiceData.url = param[1];
+            break;
+          case "aborted-completion-code":
+            recruitmentServiceData.abortedCode = param[1];
             break;
         }
       });
