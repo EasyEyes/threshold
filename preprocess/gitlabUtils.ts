@@ -1613,9 +1613,15 @@ export const generateAndUploadCompletionURL = async (
     const characters =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let incompatibleCompletionCode = "";
+    let abortedCompletionCode = "";
     for (let i = 0; i < 7; i++) {
       const randomIndex = Math.floor(Math.random() * characters.length);
       incompatibleCompletionCode += characters.charAt(randomIndex);
+    }
+
+    for (let i = 0; i < 6; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      abortedCompletionCode += characters.charAt(randomIndex);
     }
 
     if (completionCode !== "") {
@@ -1630,7 +1636,7 @@ export const generateAndUploadCompletionURL = async (
       if (incompatibleCompletionCode) {
         jsonString = `name,${
           user.currentExperiment.participantRecruitmentServiceName
-        }\ncode,${completionCode}\nincompatible-completion-code,${incompatibleCompletionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
+        }\ncode,${completionCode}\nincompatible-completion-code,${incompatibleCompletionCode}\naborted-completion-code,${abortedCompletionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
       }
 
       const commitAction = {
@@ -1674,7 +1680,11 @@ export const generateAndUploadCompletionURL = async (
 
       await commitFile;
 
-      return { code: completionCode, incompatibleCompletionCode };
+      return {
+        code: completionCode,
+        incompatibleCompletionCode,
+        abortedCompletionCode,
+      };
     }
   }
 };
