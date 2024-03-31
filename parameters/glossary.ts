@@ -2463,7 +2463,12 @@ export const GLOSSARY: Glossary = {
     default: "freeze",
     explanation:
       "markingFixationAfterTargetOnset (default freeze) determines what happens to the crosshair when the target appears. There are four cases:\n* disappear: At target onset the crosshair is erased.\n* freeze: At target onset the crosshair stops moving and persists. \n* continueMovingButIndependently: At target onset the crosshair continues moving (or not moving) but the origin (of the deg coordinate system) remains at the point where the crosshair was when the target appeared, so the crosshairs motion won’t affect the target etc. For a static crosshair this option is equivalent to freeze. This option complicates target drawing so it will only be supported for some target kinds. The compiler will reject unsupported combinations. \n* continueMovingWithOrigin: At target onset the crosshair continues moving (or not moving) and the origin (of the deg coordinate system) moves with it as usual. For a static crosshair this option is equivalent to freeze. This option complicates target drawing so it will only be supported for some target kinds. The compiler will reject unsupported combinations. \n",
-    categories: [],
+    categories: [
+      "disappear",
+      "freeze",
+      "continueMovingButIndependently",
+      "continueMovingAsOrigin",
+    ],
   },
   markingFixationDuringTargetBool: {
     name: "markingFixationDuringTargetBool",
