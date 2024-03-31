@@ -2456,6 +2456,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       'markingColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the marks (for fixation, target, etc.). "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
   },
+  markingFixationAfterTargetOnset: {
+    name: "markingFixationAfterTargetOnset",
+    availability: "now",
+    type: "categorical",
+    default: "freeze",
+    explanation:
+      "markingFixationAfterTargetOnset (default freeze) determines what happens to the crosshair when the target appears. There are four cases:\n* disappear: At target onset the crosshair is erased.\n* freeze: At target onset the crosshair stops moving and persists. \n* continueMovingButIndependently: At target onset the crosshair continues moving (or not moving) but the origin (of the deg coordinate system) remains at the point where the crosshair was when the target appeared, so the crosshairs motion won’t affect the target etc. For a static crosshair this option is equivalent to freeze. This option complicates target drawing so it will only be supported for some target kinds. The compiler will reject unsupported combinations. \n* continueMovingWithOrigin: At target onset the crosshair continues moving (or not moving) and the origin (of the deg coordinate system) moves with it as usual. For a static crosshair this option is equivalent to freeze. This option complicates target drawing so it will only be supported for some target kinds. The compiler will reject unsupported combinations. \n",
+    categories: [],
+  },
   markingFixationDuringTargetBool: {
     name: "markingFixationDuringTargetBool",
     availability: "now",
