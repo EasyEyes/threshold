@@ -2816,21 +2816,29 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ readingMaxCharactersPerLine (default 57) is the maximum line length in characters. (Note that line breaking is based on pixels, not characters; readingMaxCharactersPerLine is used to compute readingMaxPixPerLine.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  To use readingMaxCharactersPerLine, it must have a value >0 (the default is >0), and readingMaxLineLengthDeg must be zero (default). The compiler will flag an error if both are zero or both are nonzero.",
   },
-  readingMaxLineLengthCharacters: {
-    name: "readingMaxLineLengthCharacters",
+  readingLineLengthCharacters: {
+    name: "readingLineLengthCharacters",
     availability: "now",
     type: "numerical",
     default: "57",
     explanation:
-      "🕑 readingMaxLineLengthCharacters (default 57) is the maximum line length in characters. (Note that line breaking is based on maxPixPerLine, which is computed from readingMaxLineLengthCharacters.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxLineLengthCharacters (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  To use readingMaxLineLengthCharacters, it must have a value >0 (the default is >0), and readingMaxLineLengthDeg must be zero (default). The compiler will flag an error if both are zero or both are nonzero.",
+      "🕑 readingLineLengthCharacters (default 57) is the maximum line length in characters. (Note that line breaking is based on maxPixPerLine, which is computed from readingMaxLineLengthCharacters.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxLineLengthCharacters (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  The compiler will flag an error if more than one of the three line length parameters is nonzero: readingMaxLineLengthPt, readingMaxLineLengthCharacters, readingMaxLineLengthCharacters.",
   },
-  readingMaxLineLengthDeg: {
-    name: "readingMaxLineLengthDeg",
+  readingLineLengthDeg: {
+    name: "readingLineLengthDeg",
     availability: "now",
     type: "numerical",
     default: "0",
     explanation:
-      "🕑 readingMaxLineLengthDeg (default 0) is the maximum line length in deg. (Note that line breaking is based on maxPixPerLine, which is computed from readingMaxLineLengthDeg, for that part of the screen. Typographers reckon that text is easiest to read in a column that is 8-10 words wide. To use readingMaxLineLengthDeg, set it to a value >0, and set readingMaxLineLengthCharacters=0. The compiler will flag an error if both are zero or both are nonzero.",
+      "🕑 readingLineLengthDeg (default 0) is the maximum line length in deg. (Note that line breaking is based on maxPixPerLine, which is computed from readingMaxLineLengthDeg, for that part of the screen.) Typographers reckon that text is easiest to read in a column that is 8 to 10 words wide. The compiler will flag an error if more than one of the three line length parameters is nonzero: readingMaxLineLengthPt, readingMaxLineLengthCharacters, readingMaxLineLengthCharacters.",
+  },
+  readingLineLengthPt: {
+    name: "readingLineLengthPt",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "🕑 readingLineLengthPt (default 0) is the maximum line length in pt. Typographers reckon that text is easiest to read in a column that is 8 to 10 words wide. The compiler will flag an error if more than one of the three line length parameters is nonzero: readingMaxLineLengthPt, readingMaxLineLengthCharacters, readingMaxLineLengthCharacters.\n\n",
   },
   readingMultipleOfSingleLineSpacing: {
     name: "readingMultipleOfSingleLineSpacing",
