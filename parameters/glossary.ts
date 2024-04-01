@@ -2474,9 +2474,9 @@ export const GLOSSARY: Glossary = {
     name: "markingFixationDuringTargetBool",
     availability: "now",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
     explanation:
-      "markingFixationDuringTargetBool (default TRUE) causes the crosshair to remain visible during the target presentation. If FALSE, then the crosshair is erased at target onset.",
+      "markingFixationDuringTargetBool (default FALSE) causes the crosshair to remain visible during the target presentation. If FALSE, then the crosshair is erased at target onset.",
   },
   markingFixationHotSpotRadiusDeg: {
     name: "markingFixationHotSpotRadiusDeg",
