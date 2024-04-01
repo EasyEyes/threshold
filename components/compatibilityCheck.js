@@ -593,7 +593,7 @@ export const checkSystemCompatibility = (
 
   msg.push(`\n Study URL: ${window.location.toString()} \n`);
 
-  if (psychoJS) {
+  if (psychoJS && needsUnmet.length > 0) {
     const needsUnmetString = needsUnmet.join(",");
     psychoJS.experiment.addData("_needsUnmet", needsUnmetString);
     psychoJS.experiment.nextEntry();
@@ -982,11 +982,14 @@ export const displayCompatibilityMessage = async (
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
     document.body.style.overflowX = "hidden";
     const thisDevice = await identifyDevice();
-    psychoJS.experiment.addData(
-      "ComputerInfoFrom51Degrees",
-      JSON.stringify(thisDevice)
-    );
-    psychoJS.experiment.nextEntry();
+    if (needComputerSurveyBool) {
+      psychoJS.experiment.addData(
+        "ComputerInfoFrom51Degrees",
+        JSON.stringify(thisDevice)
+      );
+      psychoJS.experiment.nextEntry();
+    }
+
     //message wrapper
     const messageWrapper = document.createElement("div");
     messageWrapper.id = "msg-container";
@@ -1237,7 +1240,7 @@ export const displayCompatibilityMessage = async (
         psychoJS.experiment.addData("QRConnect", "✖NoPhone");
         if (needPhoneSurvey) {
           needsUnmet.push("_needSmartphoneSurveyBool");
-          if (psychoJS) {
+          if (psychoJS && needsUnmet.length > 0) {
             const needsUnmetString = needsUnmet.join(",");
             psychoJS.experiment.addData("_needsUnmet", needsUnmetString);
             psychoJS.experiment.nextEntry();
