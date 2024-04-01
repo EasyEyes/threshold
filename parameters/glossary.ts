@@ -2462,7 +2462,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "freeze",
     explanation:
-      "markingFixationAfterTargetOnset (default freeze) determines what happens to the crosshair when the target appears. There are four cases:\n* disappear: At target onset the crosshair is erased.\n* freeze: At target onset the crosshair stops moving and persists. \n* continueMovingButIndependently: At target onset the crosshair continues moving (or not moving) but the origin (of the deg coordinate system) remains at the point where the crosshair was when the target appeared, so the crosshairs motion won’t affect the target etc. For a static crosshair this option is equivalent to freeze. This option complicates target drawing so it will only be supported for some target kinds. The compiler will reject unsupported combinations. \n* continueMovingWithOrigin: At target onset the crosshair continues moving (or not moving) and the origin (of the deg coordinate system) moves with it as usual. For a static crosshair this option is equivalent to freeze. This option complicates target drawing so it will only be supported for some target kinds. The compiler will reject unsupported combinations. \n",
+      "markingFixationAfterTargetOnset (default freeze) determines what happens to the crosshair when the target appears. There are four cases:\n* disappear: At target onset the crosshair is erased.\n* freeze: At target onset the crosshair stops moving and persists. \n* continueMovingButIndependently: At target onset the crosshair continues moving (or not moving) but the origin (of the deg coordinate system) remains at the point where the crosshair was when the target appeared, so the crosshairs motion won’t affect the target etc. For a static crosshair this option is equivalent to freeze. This option complicates target drawing so it will only be supported for some target kinds. The compiler will reject unsupported combinations. \n* continueMovingAsOrigin: At target onset the crosshair continues moving (or not moving) and the origin (of the deg coordinate system) moves with it as usual. For a static crosshair this option is equivalent to freeze. This option complicates target drawing so it will only be supported for some target kinds. The compiler will reject unsupported combinations. \n",
     categories: [
       "disappear",
       "freeze",
@@ -2886,12 +2886,13 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "spacingDeg",
     explanation:
-      "⭑ readingSetSizeBy (default spacingDeg) determines how you specify the size of the text to be read. \"Typographer's point\" is abbreviated \"pt\", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so here we call the typeset size (e.g. 12 pt), the \"nominal\" type size.\n• nominalPt sets the font's point size to readingNominalSizePt.\n• nominalDeg sets the font's point size to subtend readingNominalSizeDeg. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt \n• xHeightDeg sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg.\n• spacingDeg sets the font's point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.",
+      "⭑ readingSetSizeBy (default spacingDeg) determines how you specify the size of the text to be read. \"Typographer's point\" is abbreviated \"pt\", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so here we call the typeset size (e.g. 12 pt), the \"nominal\" type size.\n• nominalPt sets the font's point size to readingNominalSizePt.\n• nominalDeg sets the font's point size to subtend readingNominalSizeDeg. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt \n• xHeightDeg sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg.\n• spacingPt sets the font's point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingPt.\n• spacingDeg sets the font's point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.",
     categories: [
       "nominalPt",
       "nominalDeg",
       "xHeightPt",
       "xHeightDeg",
+      "spacingPt",
       "spacingDeg",
     ],
   },
@@ -2911,6 +2912,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
   },
+  readingSpacingPt: {
+    name: "readingSpacingPt",
+    availability: "now",
+    type: "numerical",
+    default: "12",
+    explanation:
+      "readingSpacingPt (default 12) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingPt. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingPt.",
+  },
   readingTargetMaxWordFrequency: {
     name: "readingTargetMaxWordFrequency",
     availability: "now",
@@ -2923,15 +2932,15 @@ export const GLOSSARY: Glossary = {
     name: "readingXHeightDeg",
     availability: "now",
     type: "numerical",
-    default: "",
+    default: "0.5",
     explanation:
-      'If readingSetSizeBy is "xHeightDeg", then set the font\'s point size to to achieve this specified x-height (the height of lowercase x). ',
+      'If readingSetSizeBy is "xHeightDeg", then set the font\'s point size to achieve this specified x-height (the height of lowercase x). ',
   },
   readingXHeightPt: {
     name: "readingXHeightPt",
     availability: "now",
     type: "numerical",
-    default: "",
+    default: "6",
     explanation:
       'If readingSetSizeBy is "xHeightPt", then set the font\'s point size to achieve this specified x-height (the height of lowercase x) in typographic "points" (1/72 inch). ',
   },
