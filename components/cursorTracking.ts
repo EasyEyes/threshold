@@ -40,7 +40,7 @@ interface cursorRecord {
 
 export const trackCursor = (reader: ParamReader) => {
   const _saveCursorPositionBool = reader.read(
-    "_saveCursorPositionBool"
+    "_saveCursorPositionBool",
   )[0] as boolean;
   const samplingHz = reader.read("saveCursorTrackingHz")[0] as number;
   const intervalMs = intervalMsFromHz(samplingHz);
@@ -90,7 +90,7 @@ const recordCursorPosition = () => {
   let stimulus = cursorTracking.target as any;
   if (Array.isArray(stimulus)) stimulus = stimulus[0];
 
-  const isInstructions = /nstruction/.test(status.currentFunction);
+  // const isInstructions = /nstruction/.test(status.currentFunction);
   const stimulusPresent =
     typeof stimulus !== "undefined" && stimulus._autoDraw === true;
   if (stimulusPresent) {
@@ -102,11 +102,11 @@ const recordCursorPosition = () => {
   const cursorPositionXYPsychoJSPx = getCursorLocation() as unknown as number[];
   cursorPositionXYApplePx = getAppleCoordinatePosition(
     cursorPositionXYPsychoJSPx[0],
-    cursorPositionXYPsychoJSPx[1]
+    cursorPositionXYPsychoJSPx[1],
   ).toString();
   crosshairPositionXYApplePx = getAppleCoordinatePosition(
     fixationConfig.pos[0],
-    fixationConfig.pos[1]
+    fixationConfig.pos[1],
   ).toString();
   const crosshairPresent =
     typeof fixationConfig.stim !== "undefined" &&
@@ -145,12 +145,12 @@ const recordCursorPosition = () => {
       screenHeightPx: screenDimensions[1],
       nearpointXYPx: getAppleCoordinatePosition(
         nearPointX,
-        nearPointY
+        nearPointY,
       ).toString(),
       trialStep: status.currentFunction,
-      targetBool: stimulusPresent && !isInstructions,
+      targetBool: stimulusPresent,
       //@ts-ignore
-      crosshairBool: crosshairPresent && !isInstructions,
+      crosshairBool: crosshairPresent,
     };
     //@ts-ignore
     cursorTracking.records.push(thisRecord);
