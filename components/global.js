@@ -571,9 +571,11 @@ export const cursorTracking = {
 export const measureLuminance = {
   records: [],
   movieStart: undefined,
-  movieStartMeasured: undefined,
+  measureLuminanceDelaySec: 0,
+  measurementShouldStartAt: undefined,
   movieValues: undefined,
   colorimeter: undefined,
+  currentMovieValueIndex: 0,
 };
 
 /**
