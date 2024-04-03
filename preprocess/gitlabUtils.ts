@@ -720,43 +720,50 @@ async function splitCSVAndZip(
   projectName: string,
 ) {
   const zip = await JSZip.loadAsync(blob);
+  console.log("enter split");
   const dbFolder = zip.folder("db");
   if (!dbFolder) {
     return;
   }
   const groupedData: Record<string, string[]> = {};
-  const parsePromises: Promise<void>[] = [];
 
-  for (const relativePath in dbFolder.files) {
-    const file = dbFolder.files[relativePath];
-    const parsePromise = file.async("string").then((csvContent) => {
-      const records: any[] = Papa.parse(csvContent, { header: true }).data;
-      for (const record of records) {
-        const sessionId = record["PavloviaSessionID"];
-        if (sessionId) {
-          if (!groupedData[sessionId]) {
-            groupedData[sessionId] = [];
+  const parsePromises = Object.values(dbFolder.files).map((file) =>
+    file
+      .async("string")
+      .then((csvContent) => {
+        console.log("content");
+        const records: any[] = Papa.parse(csvContent, { header: true }).data;
+        records.forEach((record) => {
+          const sessionId = record["PavloviaSessionID"];
+          if (sessionId) {
+            groupedData[sessionId] = groupedData[sessionId] || [];
+            groupedData[sessionId].push(record);
           }
-          groupedData[sessionId].push(record);
-        }
-      }
-    });
-    parsePromises.push(parsePromise);
-  }
+        });
+      })
+      .catch((error) => {
+        console.error("Error parsing CSV content:", error);
+      }),
+  );
   await Promise.all(parsePromises);
+  console.log(groupedData, "grouped data");
 
-  const newZip = new JSZip();
-  for (const sessionId in groupedData) {
-    const csvData = Papa.unparse({
-      fields: Object.keys(groupedData[sessionId][0]),
-      data: groupedData[sessionId],
+  try {
+    const newZip = new JSZip();
+    for (const sessionId in groupedData) {
+      const csvData = Papa.unparse({
+        fields: Object.keys(groupedData[sessionId][0]),
+        data: groupedData[sessionId],
+      });
+      newZip.file(`${sessionId}-${projectName}.csv`, csvData);
+    }
+
+    newZip.generateAsync({ type: "blob" }).then((content) => {
+      saveAs(content, fileName);
     });
-    newZip.file(`${sessionId}-${projectName}.csv`, csvData);
+  } catch (error) {
+    console.error("Error splitting CSV and zipping:", error);
   }
-
-  newZip.generateAsync({ type: "blob" }).then((content) => {
-    saveAs(content, fileName);
-  });
 }
 
 /**
@@ -823,18 +830,22 @@ export const downloadDataFolder = async (user: User, project: any) => {
           });
           return;
         }
-
-        const downloadToken = result.downloadToken;
-        const pavloviaDownloadAPI = `https://pavlovia.org/api/v2/experiments/${project.id}/results/${downloadToken}/status`;
-        const downloadURL = await fetch(pavloviaDownloadAPI)
-          .then((response) => response.json())
-          .then((result) => result.downloadUrl);
-        const fileContent = await fetch(downloadURL).then((response) =>
-          response.blob(),
-        );
-        if (fileContent) {
-          const zipFileName = `${project.name}.results.zip`;
-          await splitCSVAndZip(fileContent, zipFileName, project.name);
+        try {
+          const downloadToken = result.downloadToken;
+          const pavloviaDownloadAPI = `https://pavlovia.org/api/v2/experiments/${project.id}/results/${downloadToken}/status`;
+          const downloadURL = await fetch(pavloviaDownloadAPI)
+            .then((response) => response.json())
+            .then((result) => result.downloadUrl);
+          const fileContent = await fetch(downloadURL).then((response) =>
+            response.blob(),
+          );
+          if (fileContent) {
+            const zipFileName = `${project.name}.results.zip`;
+            console.log(fileContent, "fileContent");
+            await splitCSVAndZip(fileContent, zipFileName, project.name);
+          }
+        } catch (error) {
+          console.error("Error downloading or processing file:", error);
         }
 
         Swal.close();
