@@ -90,7 +90,9 @@ const recordCursorPosition = () => {
   let stimulus = cursorTracking.target as any;
   if (Array.isArray(stimulus)) stimulus = stimulus[0];
 
-  // const isInstructions = /nstruction/.test(status.currentFunction);
+  const isInstructions = /_instructionRoutineEachFrame/.test(
+    status.currentFunction,
+  );
   const stimulusPresent =
     typeof stimulus !== "undefined" && stimulus._autoDraw === true;
   if (stimulusPresent) {
@@ -148,9 +150,9 @@ const recordCursorPosition = () => {
         nearPointY,
       ).toString(),
       trialStep: status.currentFunction,
-      targetBool: stimulusPresent,
+      targetBool: stimulusPresent && !isInstructions,
       //@ts-ignore
-      crosshairBool: crosshairPresent,
+      crosshairBool: crosshairPresent && !isInstructions,
     };
     //@ts-ignore
     cursorTracking.records.push(thisRecord);
