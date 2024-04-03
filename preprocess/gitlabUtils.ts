@@ -819,6 +819,7 @@ export const downloadDataFolder = async (user: User, project: any) => {
             console.error("Error fetching data:", error);
             return null;
           });
+        console.log(result, "result");
 
         if (!result) {
           Swal.close();
@@ -836,6 +837,7 @@ export const downloadDataFolder = async (user: User, project: any) => {
           const downloadURL = await fetch(pavloviaDownloadAPI)
             .then((response) => response.json())
             .then((result) => result.downloadUrl);
+          console.log(pavloviaDownloadAPI, "pavloviaDownloadAPI");
           const fileContent = await fetch(downloadURL).then((response) =>
             response.blob(),
           );
