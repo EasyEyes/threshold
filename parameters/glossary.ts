@@ -396,14 +396,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_debugBool enables features that only the scientist should see. This includes extra calibration tests and buggy new features that are still under development.",
   },
-  _experimentSavePartialResultsBool: {
-    name: "_experimentSavePartialResultsBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "🕑 _experimentSavePartialResultsBool (default TRUE) determines whether partial results are saved. This is a feature in Pavlovia that should be enabled or disabled by EasyEyes using the Pavlovia API. Pavlovia (and EasyEyes) charges one token per saved session. Incomplete sessions are free if they are not saved.",
-  },
   _invitePartingCommentsBool: {
     name: "_invitePartingCommentsBool",
     availability: "now",
@@ -825,7 +817,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      '_pavloviaDatabaseModeBool (default TRUE) allows the scientist to select which data mode Pavlovia will use for this experiment. After many participants run the experiment, Pavlovia Database mode provides one merged CSV file with everyone\'s results. The alternative is called "CSV" mode and returns one CSV file for each participant.',
+      "🕑 _pavloviaDatabaseModeBool (default TRUE) allows the scientist to select which data mode Pavlovia will use for this experiment. After the participants run the experiment, Pavlovia's \"Database\" mode provides one merged CSV file with all participant results. The alternative is called \"CSV\" mode and returns one CSV file for each participant. \n\nWORK AROUND PAVOVIA'S BROKEN CSV MODE: This parameter is being implemented April 4, 2024. At this time, Pavlovia’s CSV mode is broken, so that in columns after the 37th, the headers are one row down and one column over. Pavlovia’s Database mode is fine. So we are setting the default to TRUE, to use the working mode. The EasyEyes “Download results” button has been enhanced to download either kind of CSV file, as appropriate, and split any “Download”-style merged CSV into individual CSV files, practically equivalent to the CSV files that were returned by the “CSV”-mode when it worked properly.\n\nDON’T USE THE MANUAL CONTROL. We don't recommend using the manual control in the Pavlovia dashboard to change the experiment's data mode during data collection, but we can't stop you. If some participants are saved in CSV mode while others are saved in Database mode, the current version of the \"Download results\" button will only download the data corresponding to the current mode, and ignore the other data. You can download both kinds of data manually from Pavlovia.\n\nIMPLEMENTATION. As the experiment is compiled (into a newly created repository in Pavlovia bearing the experiment's name), the compiler will use the default or assigned value of _pavloviaDatabaseModeBool to set the experiment’s data mode in Pavlovia to either “CSV” or “Database”.  \n\n(The scientist could later ignore our advice and use the experiment's Pavlovia dashboard to override the data mode, but has no reason to, and typically will never visit that dashboard.)",
   },
   _pavloviaPreferRunningModeBool: {
     name: "_pavloviaPreferRunningModeBool",
@@ -834,6 +826,14 @@ export const GLOSSARY: Glossary = {
     default: "TRUE",
     explanation:
       "_pavloviaPreferRunningModeBool helps EasyEyes optimize its behavior by indicating your preference for use of RUNNING or PILOTING mode while testing. Pavlovia offers two modes (RUNNING and PILOTING) for running your study. Remote data collection requires RUNNING mode. PILOTING mode is meant for checking and debugging and runs only from the Pavlovia console on the scientist's computer. The only advantage of the PILOTING mode is that it's always free. Unless your institution has a Pavlovia site license, RUNNING mode costs 20 pence per participant, and requires assigning tokens (money) in advance to each experiment. (Setting _compileAsNewExperiment=FALSE allows you to request that EasyEyes keep reusing the same experiment name, as you compile new versions, so you can assign tokens once to the experiment, when you begin testing, instead of before each compile.) Thus scientists with a site license will always prefer RUNNING mode. Without that license, scientists can save money by using PILOTING mode during development, and switch to RUNNING mode to test remote participants. _pavloviaPreferRunningModeBool allows you to express your preference. With an institutional site license, you'll always want the default TRUE. Without an institutional site license, you can save money by setting _pavloviaPreferRunningModeBool=FALSE during development, and TRUE for the actual remote testing. Without a site license, if you don't mind the 20 p expense, you can use RUNNING mode throughout (use the default _pavloviaPreferRunningModeBool=TRUE), and set _compileAsNewExperiment=FALSE to minimize the frequency at which you must assign tokens to the experiment.\n\nOLD EXPLANATION. Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, which prevents remote testing. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can send to your online participants. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. Thus, for most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. (Pavlovia has no API by which EasyEyes could do this for you.) If your experiment is already in RUNNING mode you can still switch to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
+  },
+  _pavloviaSavePartialResultsBool: {
+    name: "_pavloviaSavePartialResultsBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "🕑 _pavloviaSavePartialResultsBool (default TRUE) determines whether partial results are saved. This is a feature in Pavlovia that should be enabled or disabled by EasyEyes using the Pavlovia API. Pavlovia (and EasyEyes) charges one token per saved session. Incomplete sessions are free if they are not saved.",
   },
   _prolific0TraceBool: {
     name: "_prolific0TraceBool",
