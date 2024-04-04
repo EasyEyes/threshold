@@ -853,6 +853,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_pavloviaDatabaseModeBool",
+    availability: "now",
+    example: "",
+    explanation:
+      '_pavloviaDatabaseModeBool (default TRUE) allows the scientist to select which data mode Pavlovia will use for this experiment. After many participants run the experiment, Pavlovia Database mode provides one merged CSV file with everyone\'s results. The alternative is called "CSV" mode and returns one CSV file for each participant.',
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_pavloviaPreferRunningModeBool",
     availability: "now",
     example: "FALSE",

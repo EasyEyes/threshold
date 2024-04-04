@@ -819,6 +819,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_participantIDPutBool (default FALSE). EasyEyes always saves an EasyEyesID cookie in browser local storage (which can be lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Downloads Folder of the  participant's computer. Also see _participantIDGetBool above.",
   },
+  _pavloviaDatabaseModeBool: {
+    name: "_pavloviaDatabaseModeBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      '_pavloviaDatabaseModeBool (default TRUE) allows the scientist to select which data mode Pavlovia will use for this experiment. After many participants run the experiment, Pavlovia Database mode provides one merged CSV file with everyone\'s results. The alternative is called "CSV" mode and returns one CSV file for each participant.',
+  },
   _pavloviaPreferRunningModeBool: {
     name: "_pavloviaPreferRunningModeBool",
     availability: "now",
