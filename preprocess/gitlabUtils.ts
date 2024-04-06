@@ -1696,7 +1696,7 @@ export const setExperimentSaveFormat = async (
   newRepo: Repository,
 ) => {
   // @ts-ignore
-  const isDatabase = user.currentExperiment._pavlovia_Database_ResultsFormatBool
+  const isDatabase = user.currentExperiment._pavlovia_Database_ResultsFormatBool // @ts-ignore
     ? user.currentExperiment._pavlovia_Database_ResultsFormatBool === "TRUE"
       ? true
       : false
