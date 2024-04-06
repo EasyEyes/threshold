@@ -2731,6 +2731,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "readingSetSize",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 ⭑ readingSetSize (default 0.5) is the desired value, with units set by readingSetSizeBy. Together they determine the size of the text to be read. ",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
     name: "readingSetSizeBy",
     availability: "now",
     example: "nominalPt",

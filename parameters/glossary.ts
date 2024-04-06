@@ -2888,6 +2888,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
   },
+  readingSetSize: {
+    name: "readingSetSize",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "🕑 ⭑ readingSetSize (default 0.5) is the desired value, with units set by readingSetSizeBy. Together they determine the size of the text to be read. ",
+  },
   readingSetSizeBy: {
     name: "readingSetSizeBy",
     availability: "now",
