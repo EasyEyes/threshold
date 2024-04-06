@@ -2888,13 +2888,37 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
   },
-  readingSetSize: {
-    name: "readingSetSize",
+  readingSpacingDeg: {
+    name: "readingSpacingDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0.5",
+    explanation:
+      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
+  },
+  readingSingleLineSpacingDeg: {
+    name: "readingSingleLineSpacingDeg",
     availability: "now",
     type: "numerical",
     default: "1",
     explanation:
-      "🕑 ⭑ readingSetSize (default 0.5) is the desired value, with units set by readingSetSizeBy. Together they determine the size of the text to be read. ",
+      "🕑 readingSingleLineSpacingDeg (default 1) set the single line spacing in deg, but only if readingDefineSingleLineSpacingAs==explicit. Otherwise it's ignored.",
+  },
+  readingSetSizeUnit: {
+    name: "readingSetSizeUnit",
+    availability: "now",
+    type: "categorical",
+    default: "spacingDeg",
+    explanation:
+      "🕑 ⭑ readingSetSizeUnit (default spacingDeg) pairs with readingSetSize to specify the size of the text to be read. \"Typographer's point\" is abbreviated \"pt\", and 1 pt = 1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so here we call the typeset size (e.g. 12 pt), the \"nominal\" type size.\n• nominalPt sets the font's point size to readingSetSize.\n• nominalDeg sets the font's point size so that the nominal size, in deg, equals readingSetSize. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingSetSize*3.14159/180)*viewingDistanceCm. \n• xHeightPt sets the font's point size to achieve the x-height (the height of lowercase x), in pt, specified by readingSetSize. \n• xHeightDeg sets the font's point size to achieve the x-height (the height of lowercase x), in deg, specified by readingSetSize.\n• spacingPt sets the font's point size so that the average letter-center-to-letter-center spacing (pt) is approximately readingSetSize. In fact, we adjust font size so that the width of the fontCharacterSet string, in pt, divided by the string length in characters equals readingSetSize.\n• spacingDeg sets the font's point size so that the specified average letter-center-to-letter-center spacing (deg) is approximately readingSetSize.  In fact, we adjust point size so that the width of the fontCharacterSet string divided by the string length in chracters equals readingSetSize.",
+    categories: [
+      "nominalPt",
+      "nominalDeg",
+      "xHeightPt",
+      "xHeightDeg",
+      "spacingPt",
+      "spacingDeg",
+    ],
   },
   readingSetSizeBy: {
     name: "readingSetSizeBy",
@@ -2912,21 +2936,13 @@ export const GLOSSARY: Glossary = {
       "spacingDeg",
     ],
   },
-  readingSingleLineSpacingDeg: {
-    name: "readingSingleLineSpacingDeg",
+  readingSetSize: {
+    name: "readingSetSize",
     availability: "now",
     type: "numerical",
     default: "1",
     explanation:
-      "🕑 readingSingleLineSpacingDeg (default 1) set the single line spacing in deg, but only if readingDefineSingleLineSpacingAs==explicit. Otherwise it's ignored.",
-  },
-  readingSpacingDeg: {
-    name: "readingSpacingDeg",
-    availability: "now",
-    type: "numerical",
-    default: "0.5",
-    explanation:
-      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
+      "🕑 ⭑ readingSetSize (default 0.5) is the desired value, with units set by readingSetSizeUnit. Together they determine the size of the text to be read. ",
   },
   readingSpacingPt: {
     name: "readingSpacingPt",
