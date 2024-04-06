@@ -813,16 +813,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_online2SaveIncompleteResponsesBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 _online2SaveIncompleteResponsesBool (default TRUE) sets the corresponding option in Pavlovia. Note that if you don’t have a Pavlovia site license, and you’re not in PILOTING mode, then you pay 20 pence for each response (i.e. data file) that you save, so you save money by not saving (and paying for) incomplete studies. We don't know yet whether Pavlovia provides an API for this.",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
     name: "_participantIDGetBool",
     availability: "now",
     example: "TRUE",
@@ -847,7 +837,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _pavlovia_Database_ResultsFormatBool (default TRUE) allows the scientist to select which results format Pavlovia will use when reporting the results of this experiment. After the participants run the experiment, Pavlovia's \"Database\" results format returns one merged CSV file with all participant results. The alternative \"CSV\" results format returns one CSV file for each participant.\n\nWORK AROUND PAVLOVIA'S BROKEN CSV RESULTS FORMAT: This parameter is being implemented April 4, 2024. At this time, Pavlovia’s CSV results format is broken, so that in columns after the 37th, the headers are one row down and one column over. Pavlovia’s Database results format is fine. So we are setting the default to TRUE, to use the working results format. \n\nSPLITTING THE DATABASE FORMAT. The EasyEyes “Download results” button has been enhanced to download either kind of CSV file, as appropriate, and split any “Download”-style merged CSV into individual CSV files, practically equivalent to the CSV files that were returned by the “CSV”-mode when it worked properly.\n\nMANUAL OVERRIDE. We can't think of a reason to do so, but the scientist can use the manual control in the Pavlovia dashboard to change the experiment's results format, overriding whatever was selected in the experiment spreadsheet.\n\nIMPLEMENTATION. As the experiment is compiled (into a newly created repository in Pavlovia bearing the experiment's name), the compiler will use the current value (default or assigned) of _pavlovia_Database_ResultsFormatBool to set the Results Format in the experiment's Pavlovia dashboard to either “CSV” or “Database”.",
+      "_pavlovia_Database_ResultsFormatBool (default TRUE) allows the scientist to select which results format Pavlovia will use when reporting the results of this experiment. After the participants run the experiment, Pavlovia's \"Database\" results format returns one merged CSV file with all participant results. The alternative \"CSV\" results format returns one CSV file for each participant.\n\nIMPLEMENTATION. As the experiment is compiled (into a newly created repository in Pavlovia bearing the experiment's name), the compiler will use the current value (default or assigned) of _pavlovia_Database_ResultsFormatBool to set the Results Format in the experiment's Pavlovia dashboard to either “CSV” or “Database”.\n\nTHIS WORKS AROUND PAVLOVIA'S BROKEN CSV RESULTS FORMAT: This parameter was implemented April 6, 2024. At this time, Pavlovia’s CSV results format is broken, so that in columns after \"targeTask\" (roughly the 37th), the headers are one row down and begin again from the first header. Pavlovia’s Database results format is fine. So we are setting the default to TRUE, to use the working format. \n\nSPLITTING THE DATABASE FORMAT. The EasyEyes “Download results” button has been enhanced to download either kind of CSV file, as appropriate, and split any “Download”-style merged CSV into individual CSV files, practically equivalent to the CSV files that were returned by the “CSV”-mode when it worked properly.\n\nMANUAL OVERRIDE. We can't think of a reason to do so, but the scientist can use the manual control in the Pavlovia dashboard to change the experiment's results format, overriding whatever was selected in the experiment spreadsheet.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -3267,7 +3257,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ showGrid (default is disabled) displays a full-screen grid that aids visual checking of location and size (both live and in screen shots). [pt & inch NOT YET IMPLEMENTED.] Set showGrid to:\n• 'none' for no grid\n• 'disabled' to prevent any grid\n• 'px' for a pixel grid\n• 'pt' for a typographic \"points\" grid (72 pt per inch)\n• 'cm' for a centimeter grid\n• 'inch' for an inch grid\n• 'mmV4' for a cortical grid, \n• 'deg' or 'degDynamic' for a degrees grid. When the crosshair moves, the 'degDynamic' grid moves with it, and the 'deg' grid does not. 'degDynamic' specifies degrees relative to the (possibly) moving crosshair. 'deg' specifies degrees relative to the nominal fixation, which is the fixed point that the moving crosshair circles around.\n\nUnless 'disabled', repeatedly pressing the backquote key (below ESCAPE on a macOS keyboard) cycles through all states except disabled: none, px, cm, pt, inch, deg, degDynamic, mmV4. The 'px', 'cm', 'pt', and 'inch' grids have their origin at lower left. The 'deg', 'degDynamic', and 'mmV4' grids have their origin at fixation. \n\nCAUTION: The grids are for stimulus checking, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially when the crosshair moves, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you check timing or collect human data.",
     type: "categorical",
     default: "disabled",
-    categories: "px, pt, cm, inch, deg, degDynamic, mmV4, none, disabled",
+    categories: "px, pt, cm, in, deg, degDynamic, mmV4, none, disabled",
   },
   {
     name: "showParameters",

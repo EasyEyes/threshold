@@ -787,14 +787,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '⭑ _online2PayPerHour (default zero) specifies the hourly rate (a number) that determines (with _online2Minutes) the payment offered to each participant. [In Prolific, EasyEyes computes and fills in "How much do you want to pay them?"] The currency is specified by _online2PayCurrency. If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. The pay is specified with two decimals (e.g. 11.01), rounding up to the next cent, so the hourly rate offered will never be less than specified by the experiment. Prolific lists the study titles and pay per hour for selection by prospective participants. Some participants mentioned selecting my study because it seemed interesting. Others said that in their rush to sign up for $15/hour studies, they often skip the description. ',
   },
-  _online2SaveIncompleteResponsesBool: {
-    name: "_online2SaveIncompleteResponsesBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "🕑 _online2SaveIncompleteResponsesBool (default TRUE) sets the corresponding option in Pavlovia. Note that if you don’t have a Pavlovia site license, and you’re not in PILOTING mode, then you pay 20 pence for each response (i.e. data file) that you save, so you save money by not saving (and paying for) incomplete studies. We don't know yet whether Pavlovia provides an API for this.",
-  },
   _participantIDGetBool: {
     name: "_participantIDGetBool",
     availability: "now",
@@ -817,7 +809,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "🕑 _pavlovia_Database_ResultsFormatBool (default TRUE) allows the scientist to select which results format Pavlovia will use when reporting the results of this experiment. After the participants run the experiment, Pavlovia's \"Database\" results format returns one merged CSV file with all participant results. The alternative \"CSV\" results format returns one CSV file for each participant.\n\nWORK AROUND PAVLOVIA'S BROKEN CSV RESULTS FORMAT: This parameter is being implemented April 4, 2024. At this time, Pavlovia’s CSV results format is broken, so that in columns after the 37th, the headers are one row down and one column over. Pavlovia’s Database results format is fine. So we are setting the default to TRUE, to use the working results format. \n\nSPLITTING THE DATABASE FORMAT. The EasyEyes “Download results” button has been enhanced to download either kind of CSV file, as appropriate, and split any “Download”-style merged CSV into individual CSV files, practically equivalent to the CSV files that were returned by the “CSV”-mode when it worked properly.\n\nMANUAL OVERRIDE. We can't think of a reason to do so, but the scientist can use the manual control in the Pavlovia dashboard to change the experiment's results format, overriding whatever was selected in the experiment spreadsheet.\n\nIMPLEMENTATION. As the experiment is compiled (into a newly created repository in Pavlovia bearing the experiment's name), the compiler will use the current value (default or assigned) of _pavlovia_Database_ResultsFormatBool to set the Results Format in the experiment's Pavlovia dashboard to either “CSV” or “Database”.",
+      "_pavlovia_Database_ResultsFormatBool (default TRUE) allows the scientist to select which results format Pavlovia will use when reporting the results of this experiment. After the participants run the experiment, Pavlovia's \"Database\" results format returns one merged CSV file with all participant results. The alternative \"CSV\" results format returns one CSV file for each participant.\n\nIMPLEMENTATION. As the experiment is compiled (into a newly created repository in Pavlovia bearing the experiment's name), the compiler will use the current value (default or assigned) of _pavlovia_Database_ResultsFormatBool to set the Results Format in the experiment's Pavlovia dashboard to either “CSV” or “Database”.\n\nTHIS WORKS AROUND PAVLOVIA'S BROKEN CSV RESULTS FORMAT: This parameter was implemented April 6, 2024. At this time, Pavlovia’s CSV results format is broken, so that in columns after \"targeTask\" (roughly the 37th), the headers are one row down and begin again from the first header. Pavlovia’s Database results format is fine. So we are setting the default to TRUE, to use the working format. \n\nSPLITTING THE DATABASE FORMAT. The EasyEyes “Download results” button has been enhanced to download either kind of CSV file, as appropriate, and split any “Download”-style merged CSV into individual CSV files, practically equivalent to the CSV files that were returned by the “CSV”-mode when it worked properly.\n\nMANUAL OVERRIDE. We can't think of a reason to do so, but the scientist can use the manual control in the Pavlovia dashboard to change the experiment's results format, overriding whatever was selected in the experiment spreadsheet.",
   },
   _pavloviaPreferRunningModeBool: {
     name: "_pavloviaPreferRunningModeBool",
@@ -3331,7 +3323,7 @@ export const GLOSSARY: Glossary = {
       "px",
       "pt",
       "cm",
-      "inch",
+      "in",
       "deg",
       "degDynamic",
       "mmV4",
