@@ -720,7 +720,6 @@ async function splitCSVAndZip(
   projectName: string,
 ) {
   const zip = await JSZip.loadAsync(blob);
-  console.log("enter split");
   const dbFolder = zip.folder("db");
   if (!dbFolder) {
     return;
@@ -731,7 +730,6 @@ async function splitCSVAndZip(
     file
       .async("string")
       .then((csvContent) => {
-        console.log("content");
         const records: any[] = Papa.parse(csvContent, { header: true }).data;
         records.forEach((record) => {
           const sessionId = record["PavloviaSessionID"];
@@ -746,7 +744,6 @@ async function splitCSVAndZip(
       }),
   );
   await Promise.all(parsePromises);
-  console.log(groupedData, "grouped data");
 
   try {
     const newZip = new JSZip();
@@ -828,7 +825,6 @@ export const downloadDataFolder = async (user: User, project: any) => {
           );
           if (fileContent) {
             const zipFileName = `${project.name}.results.zip`;
-            console.log(fileContent, "fileContent");
             await splitCSVAndZip(fileContent, zipFileName, project.name);
           }
         } catch (error) {
@@ -1592,6 +1588,8 @@ export const createPavloviaExperiment = async (
       );
       if (b === null) finalClosing = false;
 
+      await setExperimentSaveFormat(user, newRepo);
+
       // transfer resources
       // console.log("Transferring resources...");
       const c = await createRequestedResourcesOnRepo(
@@ -1691,6 +1689,34 @@ export const getExperimentStatus = async (user: User, newRepo: Repository) => {
 
   const result = await running.json();
   return result.experiment.status2;
+};
+
+export const setExperimentSaveFormat = async (
+  user: User,
+  newRepo: Repository,
+) => {
+  // @ts-ignore
+  const isDatabase = user.currentExperiment._pavlovia_Database_ResultsFormatBool
+    ? user.currentExperiment._pavlovia_Database_ResultsFormatBool === "TRUE"
+      ? true
+      : false
+    : true;
+  console.log(isDatabase);
+  const experiment = await fetch(
+    "https://pavlovia.org/api/v2/experiments/" + newRepo.id,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        oauthToken: user.accessToken,
+      },
+      body: JSON.stringify({
+        saveFormat: isDatabase ? "DATABASE" : "CSV",
+      }),
+    },
+  );
+
+  const result = await experiment.json();
 };
 
 /* -------------------------------------------------------------------------- */
