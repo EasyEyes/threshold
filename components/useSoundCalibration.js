@@ -90,7 +90,7 @@ export const runCombinationCalibration = async (
   elems,
   gains,
   isLoudspeakerCalibration,
-  language
+  language,
 ) => {
   webAudioDeviceNames.loudspeaker = "";
   webAudioDeviceNames.microphone = "";
@@ -111,7 +111,7 @@ export const runCombinationCalibration = async (
         elems,
         isLoudspeakerCalibration,
         language,
-        true
+        true,
       );
     } else {
       // await runUSBCalibration(elems, isLoudspeakerCalibration, language);
@@ -128,7 +128,7 @@ export const runCombinationCalibration = async (
         elems,
         options,
         dropdownTitle,
-        language
+        language,
       );
       adjustPageNumber(elems.title, [
         { replace: /111/g, with: 0 },
@@ -159,7 +159,7 @@ export const runCombinationCalibration = async (
               elems,
               isLoudspeakerCalibration,
               language,
-              false
+              false,
             );
           } else {
             deviceType.isLoudspeaker = isLoudspeakerCalibration;
@@ -188,7 +188,7 @@ export const runCombinationCalibration = async (
       elems,
       options,
       dropdownTitle,
-      language
+      language,
     );
     adjustPageNumber(elems.title, [
       { replace: /111/g, with: 0 },
@@ -218,7 +218,7 @@ export const runCombinationCalibration = async (
             elems,
             isLoudspeakerCalibration,
             language,
-            false
+            false,
           );
         } else {
           await runUSBCalibration(elems, isLoudspeakerCalibration, language);
@@ -306,7 +306,7 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
       await getUSBMicrophoneDetailsFromUser(
         elems,
         language,
-        isLoudspeakerCalibration
+        isLoudspeakerCalibration,
       );
       resolve();
     });
@@ -316,7 +316,7 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
 const getUSBMicrophoneDetailsFromUser = async (
   elems,
   language,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
 ) => {
   let micName = "UMIK";
   try {
@@ -341,7 +341,7 @@ const getUSBMicrophoneDetailsFromUser = async (
         webAudioDeviceNames.microphone = mics[0].label;
       }
       const loudspeaker = devices.filter(
-        (device) => device.kind === "audiooutput"
+        (device) => device.kind === "audiooutput",
       );
       loudspeaker.forEach((speaker) => {
         if (speaker.label.includes("Default")) {
@@ -356,7 +356,7 @@ const getUSBMicrophoneDetailsFromUser = async (
   const p = document.createElement("p");
   p.innerHTML = readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
     "UUU",
-    micName
+    micName,
   );
   p.style.fontSize = "1rem";
   p.style.fontWeight = "normal";
@@ -423,19 +423,19 @@ const getUSBMicrophoneDetailsFromUser = async (
               elems,
               language,
               false,
-              isLoudspeakerCalibration
+              isLoudspeakerCalibration,
             );
             resolve();
           } else {
             allHzCalibrationResults.knownIr = JSON.parse(
-              JSON.stringify(loudspeakerIR)
+              JSON.stringify(loudspeakerIR),
             );
             await startCalibration(
               elems,
               isLoudspeakerCalibration,
               language,
               false,
-              isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
+              isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
             );
             resolve();
           }
@@ -455,12 +455,12 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   elems,
   language,
   isSmartPhone,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
 ) => {
   thisDevice.current = await identifyDevice();
   const { preferredModelNumber } = getDeviceDetails(
     thisDevice.current.PlatformName,
-    language
+    language,
   );
   // display the device info
   const deviceString = getDeviceString(thisDevice.current, language);
@@ -469,7 +469,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     language,
     isSmartPhone,
     isLoudspeakerCalibration,
-    preferredModelNumber
+    preferredModelNumber,
   );
 
   // update subtitle
@@ -525,14 +525,14 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           ]);
         adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
         allHzCalibrationResults.knownIr = JSON.parse(
-          JSON.stringify(loudspeakerIR)
+          JSON.stringify(loudspeakerIR),
         );
         await startCalibration(
           elems,
           isLoudspeakerCalibration,
           language,
           isSmartPhone,
-          isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
+          isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
         );
         resolve();
       }
@@ -544,14 +544,14 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
   elems,
   language,
   isSmartPhone,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
 ) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     if (stream) {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const loudspeaker = devices.filter(
-        (device) => device.kind === "audiooutput"
+        (device) => device.kind === "audiooutput",
       );
       loudspeaker.forEach((speaker) => {
         if (speaker.label.includes("Default")) {
@@ -567,20 +567,20 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
   const deviceString = getDeviceString(thisDevice.current, language);
   const { preferredModelNumber } = getDeviceDetails(
     thisDevice.current.PlatformName,
-    language
+    language,
   );
   const instructionText = getInstructionText(
     thisDevice.current,
     language,
     isSmartPhone,
     isLoudspeakerCalibration,
-    preferredModelNumber
+    preferredModelNumber,
   );
   // update subtitle
   elems.subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
     .replace(
       "xxx",
-      thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM
+      thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM,
     )
     .replace("yyy", thisDevice.current.DeviceType);
   elems.subtitle.style.fontSize = "1rem";
@@ -635,14 +635,14 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
         ]);
         adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
         allHzCalibrationResults.knownIr = JSON.parse(
-          JSON.stringify(loudspeakerIR)
+          JSON.stringify(loudspeakerIR),
         );
         await startCalibration(
           elems,
           isLoudspeakerCalibration,
           language,
           isSmartPhone,
-          isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
+          isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
         );
         resolve();
       }
@@ -663,7 +663,7 @@ const checkMicrophoneInDatabase = async () => {
   // const micExists = await doesMicrophoneExist(micSerialNumber, micManufacturer);
   const micExistsInFirestore = await doesMicrophoneExistInFirestore(
     micSerialNumber,
-    micManufacturer
+    micManufacturer,
   );
 
   if (micExistsInFirestore) {
@@ -722,14 +722,14 @@ const checkMicrophoneInDatabase = async () => {
 const showSmartphoneCalibrationInstructions = async (
   elems,
   language,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
 ) => {
   const messageText = `${readi18nPhrases(
     "RC_removeHeadphones",
-    language
+    language,
   )} ${readi18nPhrases("RC_getPhoneMicrophoneReady", language)}`.replace(
     /\n/g,
-    "<br>"
+    "<br>",
   );
   elems.message.style.display = "block";
   elems.message.innerHTML = messageText;
@@ -747,14 +747,14 @@ const showSmartphoneCalibrationInstructions = async (
       removeElements([proceedButton]);
       adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
       allHzCalibrationResults.knownIr = JSON.parse(
-        JSON.stringify(loudspeakerIR)
+        JSON.stringify(loudspeakerIR),
       );
       await startCalibration(
         elems,
         isLoudspeakerCalibration,
         language,
         true,
-        isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
+        isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
       );
       resolve();
     });
@@ -765,7 +765,7 @@ const runSmartphoneCalibration = async (
   elems,
   isLoudspeakerCalibration,
   language,
-  isParticipant = false
+  isParticipant = false,
 ) => {
   // await startCalibration(elems, isLoudspeakerCalibration, language, true, isLoudspeakerCalibration? null: allHzCalibrationResults.knownIr);
   if (isLoudspeakerCalibration) {
@@ -774,14 +774,14 @@ const runSmartphoneCalibration = async (
         elems,
         language,
         true,
-        isLoudspeakerCalibration
+        isLoudspeakerCalibration,
       );
     } else {
       await getSmartPhoneMicrophoneDetailsFromUser(
         elems,
         language,
         isLoudspeakerCalibration,
-        isParticipant
+        isParticipant,
       );
     }
   } else {
@@ -789,7 +789,7 @@ const runSmartphoneCalibration = async (
       elems,
       language,
       isLoudspeakerCalibration,
-      isParticipant
+      isParticipant,
     );
   }
 };
@@ -798,14 +798,14 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   elems,
   language,
   isLoudspeakerCalibration,
-  isParticipant
+  isParticipant,
 ) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     if (stream) {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const loudspeaker = devices.filter(
-        (device) => device.kind === "audiooutput"
+        (device) => device.kind === "audiooutput",
       );
       loudspeaker.forEach((speaker) => {
         if (speaker.label.includes("Default")) {
@@ -872,7 +872,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
           if (
             await doesMicrophoneExistInFirestore(
               micSerialNumber,
-              micManufacturer
+              micManufacturer,
             )
           ) {
             adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
@@ -892,13 +892,13 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
               elems,
               language,
               true,
-              isLoudspeakerCalibration
+              isLoudspeakerCalibration,
             );
             resolve();
           } else {
             p.innerHTML = readi18nPhrases(
               "RC_microphoneNotInCalibrationLibrary",
-              language
+              language,
             ).replace("xxx", modelNameInput.value);
             proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
           }
@@ -910,14 +910,14 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
             micFullSerialNumber: modelNumberInput.value,
           };
           allHzCalibrationResults.knownIr = JSON.parse(
-            JSON.stringify(loudspeakerIR)
+            JSON.stringify(loudspeakerIR),
           );
           await startCalibration(
             elems,
             isLoudspeakerCalibration,
             language,
             true,
-            isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr
+            isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
           );
           resolve();
         }
@@ -930,7 +930,7 @@ const startCalibration = async (
   isLoudspeakerCalibration,
   language,
   isSmartPhone,
-  knownIR = null
+  knownIR = null,
 ) => {
   elems.subtitle.innerHTML = isLoudspeakerCalibration
     ? isSmartPhone
@@ -949,13 +949,13 @@ const startCalibration = async (
   const { Speaker, CombinationCalibration } = speakerCalibrator;
   webAudioDeviceNames.loudspeakerText = readi18nPhrases(
     "RC_nameLoudspeaker",
-    language
+    language,
   )
     .replace("xxx", webAudioDeviceNames.loudspeaker)
     .replace("XXX", webAudioDeviceNames.loudspeaker);
   webAudioDeviceNames.microphoneText = readi18nPhrases(
     "RC_nameMicrophone",
-    language
+    language,
   );
   IDsToSaveInSoundProfileLibrary.ProlificParticipantID = isProlificExperiment()
     ? new URLSearchParams(window.location.search).get("participant")
@@ -1053,14 +1053,14 @@ const startCalibration = async (
     elems,
     isSmartPhone,
     language,
-    isLoudspeakerCalibration
+    isLoudspeakerCalibration,
   );
   calibrationTime.current = getCurrentTimeString();
   timeToCalibrate.timeAtTheStartOfCalibration = new Date();
   const results = await Speaker.startCalibration(
     speakerParameters,
     calibrator,
-    timeoutSec.current
+    timeoutSec.current,
   );
   restrtCalibration.style.display = "none";
   reminderVolumeCase.style.display = "none";
@@ -1071,12 +1071,12 @@ const startCalibration = async (
     (timeToCalibrate.timeAtTheEndOfCalibration -
       timeToCalibrate.timeAtTheStartOfCalibration) /
       1000 /
-      60
+      60,
   );
   const timeElement = document.getElementById("timeToCalibrate");
   timeElement.innerHTML = readi18nPhrases(
     "RC_calibrationEstimatedAndActualMinutes",
-    language
+    language,
   )
     .replace("111", timeToCalibrate.current)
     .replace("222", timeToCalibrate.calibrationDuration);
@@ -1091,7 +1091,7 @@ const startCalibration = async (
       isLoudspeakerCalibration,
       language,
       isSmartPhone,
-      knownIR
+      knownIR,
     );
     return;
   }
@@ -1106,7 +1106,7 @@ export const calibrateAgain = async (
   isLoudspeakerCalibration,
   language,
   isSmartPhone,
-  knownIR = null
+  knownIR = null,
 ) => {
   elems.subtitle.innerHTML = isLoudspeakerCalibration
     ? isSmartPhone
@@ -1213,7 +1213,7 @@ export const calibrateAgain = async (
     elems,
     isSmartPhone,
     language,
-    isLoudspeakerCalibration
+    isLoudspeakerCalibration,
   );
 
   calibrationTime.current = getCurrentTimeString();
@@ -1245,7 +1245,7 @@ export const calibrateAgain = async (
   const results = await speaker.repeatCalibration(
     speakerParameters,
     window.localStream,
-    calibrator
+    calibrator,
   );
   restrtCalibration.style.display = "none";
   reminderVolumeCase.style.display = "none";
@@ -1256,12 +1256,12 @@ export const calibrateAgain = async (
     (timeToCalibrate.timeAtTheEndOfCalibration -
       timeToCalibrate.timeAtTheStartOfCalibration) /
       1000 /
-      60
+      60,
   );
   const timeElement = document.getElementById("timeToCalibrate");
   timeElement.innerHTML = readi18nPhrases(
     "RC_calibrationEstimatedAndActualMinutes",
-    language
+    language,
   )
     .replace("111", timeToCalibrate.current)
     .replace("222", timeToCalibrate.calibrationDuration);
@@ -1276,7 +1276,7 @@ export const calibrateAgain = async (
       isLoudspeakerCalibration,
       language,
       isSmartPhone,
-      knownIR
+      knownIR,
     );
     return;
   }
@@ -1401,7 +1401,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     PlatformVersion: thisDevice.current.PlatformVersion,
     gainDBSPL:
       Math.round(
-        (soundGainDBSPL.current - microphoneInfo.current.gainDBSPL) * 10
+        (soundGainDBSPL.current - microphoneInfo.current.gainDBSPL) * 10,
       ) / 10,
     CalibrationDate: calibrationTime.current,
     createDate: new Date(Date.parse(calibrationTime.current)),
@@ -1415,7 +1415,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     loudspeakerInfo.current.authorEmails = authorEmail.current;
   }
   const IrFreq = soundCalibrationResults.current.component.ir.Freq.map((freq) =>
-    Math.round(freq)
+    Math.round(freq),
   );
   let IrGain = soundCalibrationResults.current.component.ir.Gain;
   const correctGain = loudspeakerInfo.current["gainDBSPL"];
@@ -1430,7 +1430,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   loudspeakerIR.Freq = IrFreq;
   loudspeakerIR.Gain = IrGain;
   allHzCalibrationResults.knownIr = JSON.parse(
-    JSON.stringify(soundCalibrationResults.current.component.ir)
+    JSON.stringify(soundCalibrationResults.current.component.ir),
   );
   let filename = downloadLoudspeakerCalibration();
   loudspeakerInfo.current["jsonFileName"] = filename;
@@ -1452,8 +1452,6 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
       : calibrateSoundBurstDb.current;
   loudspeakerInfo.current["calibrateSoundBurstFilteredExtraDb"] =
     calibrateSoundBurstFilteredExtraDb.current;
-  loudspeakerInfo.current["calibrateSoundBurstLevelReTBool"] =
-    calibrateSoundBurstLevelReTBool.current;
   loudspeakerInfo.current["calibrateSoundBurstSec"] =
     calibrateSoundBurstSec.current;
   loudspeakerInfo.current["calibrateSoundBurstRepeats"] =
@@ -1482,7 +1480,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
       loudspeakerInfo.current,
       soundCalibrationResults.current.component.ir_in_time_domain,
       soundCalibrationResults.current.component.ir,
-      soundCalibrationResults.current.component.iir
+      soundCalibrationResults.current.component.iir,
     );
   } catch (err) {
     console.log(err);
@@ -1497,7 +1495,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     Math.round(
       (microphoneCalibrationResult.current.parameters.gainDBSPL -
         loudspeakerInfo.current.gainDBSPL) *
-        10
+        10,
     ) / 10;
   microphoneInfo.current.CalibrationDate = calibrationTime.current;
   // microphoneCalibrationResult.current.microphoneGain = loudspeakerIR.current;
@@ -1662,7 +1660,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     console.log(calibrationRound.current);
     let filename = psychoJS.experiment.downloadJSON(
       allResults,
-      calibrationRound.current
+      calibrationRound.current,
     );
     result.micInfo["jsonFileName"] = filename;
     calibrationRound.current = calibrationRound.current + 1;
@@ -1673,7 +1671,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   const id = await writeIsSmartPhoneToFirestore(
     result.micInfo.ID,
     isSmartPhone,
-    result.micInfo.OEM
+    result.micInfo.OEM,
   );
   result.micInfo["filteredMLSSystemMin"] =
     Math.round(result.filteredMLSRange.system.Min * 10) / 10;
@@ -1714,7 +1712,7 @@ const adjustDisplayBeforeCalibration = (
   elems,
   isSmartPhone,
   language,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
 ) => {
   elems.displayContainer.style.display = "flex";
   elems.displayContainer.style.marginLeft = "0px";
@@ -1730,18 +1728,18 @@ const adjustDisplayBeforeCalibration = (
     ? isLoudspeakerCalibration
       ? `${readi18nPhrases(
           "RC_hopeMicrophoneIsInLibrary",
-          language
+          language,
         )}${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
           /\n/g,
-          "<br>"
+          "<br>",
         )
       : `${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
           /\n/g,
-          "<br>"
+          "<br>",
         )
     : `${readi18nPhrases("RC_removeHeadphones", language)}${readi18nPhrases(
         "RC_getUSBMicrophoneReady",
-        language
+        language,
       )}`.replace(/\n/g, "<br>");
 
   elems.message.style.display = "block";
@@ -1916,7 +1914,7 @@ const downloadLoudspeakerCalibration = () => {
   if (allSoundResults && calibrateSoundSaveJSONBool.current)
     return psychoJS.experiment.downloadJSON(
       allSoundResults,
-      calibrationRound.current++
+      calibrationRound.current++,
     );
   return "";
 };

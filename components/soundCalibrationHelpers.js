@@ -67,7 +67,7 @@ export const saveLoudSpeakerInfo = async (
   modelNumber,
   OEM,
   iir,
-  ir
+  ir,
 ) => {
   console.log("Saving LoudSpeaker Info");
   const dbRef = ref(database);
@@ -82,23 +82,47 @@ export const saveLoudSpeakerInfoToFirestore = async (
   loudSpeakerInfo,
   ir_time,
   ir,
-  iir
+  iir,
 ) => {
   const collectionRef = collection(db, "Loudspeakers");
   // add doc to collection. save loudSpeakerInfo first then iir and ir
   // save loudSpeakerInfo first and then in the same document (with a random Id) save iir and ir
   const docRef = await addDoc(collectionRef, loudSpeakerInfo);
   // save iir
-  await setDoc(docRef, { iir: iir }, { merge: true });
+  let newDocRef;
   // save ir
   await setDoc(docRef, { ir: ir }, { merge: true });
-  await setDoc(docRef, { ir_time: ir_time }, { merge: true });
+  for (let i = 0; i < ir_time.length; i += 10000) {
+    newDocRef = doc(
+      db,
+      "Loudspeakers",
+      docRef.id,
+      "impulse response",
+      `${i / 10000}`,
+    );
+    await setDoc(
+      newDocRef,
+      {
+        ir_time: ir_time.slice(
+          i,
+          i + 10000 > ir_time.length ? ir_time.length : i + 10000,
+        ),
+      },
+      { merge: true },
+    );
+    await setDoc(
+      newDocRef,
+      { iir: iir.slice(i, i + 10000 > iir.length ? iir.length : i + 10000) },
+      { merge: true },
+    );
+  }
+  // await setDoc(docRef, { ir_time: ir_time }, { merge: true });
 };
 
 export const writeIsSmartPhoneToFirestore = async (
   micID,
   isSmartPhone,
-  OEM
+  OEM,
 ) => {
   const collectionRef = collection(db, "Microphones");
   OEM = OEM.toLowerCase().split(" ").join("");
@@ -106,7 +130,7 @@ export const writeIsSmartPhoneToFirestore = async (
     collectionRef,
     where("ID", "==", micID),
     where("lowercaseOEM", "==", OEM),
-    where("isDefault", "==", true)
+    where("isDefault", "==", true),
   );
   const querySnapshot = await getDocs(q);
   if (querySnapshot.size > 0) {
@@ -151,17 +175,17 @@ export const getInstructionText = (
   isSmartPhone,
   isLoudspeakerCalibration,
   preferredModelNumberText = "model number",
-  needPhoneSurvey = false
+  needPhoneSurvey = false,
 ) => {
   const microphoneInCalibrationLibrary = isLoudspeakerCalibration
     ? isSmartPhone
       ? ""
       : readi18nPhrases(
           "RC_microphoneIsInCalibrationLibrary",
-          language
+          language,
         ).replace(
           "xxx",
-          `${microphoneInfo.current.micrFullManufacturerName} ${microphoneInfo.current.micFullName}`
+          `${microphoneInfo.current.micrFullManufacturerName} ${microphoneInfo.current.micFullName}`,
         ) +
         "<br> <br>" +
         "<b style= 'fontSize: '1rem';'>" +
@@ -172,7 +196,7 @@ export const getInstructionText = (
     : "";
   const needModelNumber = readi18nPhrases(
     "RC_needModelNumberAndName",
-    language
+    language,
   );
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
@@ -180,7 +204,7 @@ export const getInstructionText = (
     .replace("xxx", thisDevice.OEM === "Unknown" ? "unknown" : thisDevice.OEM)
     .replace(
       "yyy",
-      thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType
+      thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType,
     );
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
@@ -230,7 +254,7 @@ export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
     collectionRef,
     where("ID", "==", speakerID),
     where("lowercaseOEM", "==", OEM),
-    where("isDefault", "==", true)
+    where("isDefault", "==", true),
   );
   const querySnapshot = await getDocs(q);
   if (querySnapshot.size > 0) {
@@ -268,7 +292,7 @@ export const readFrqGainFromFirestore = async (speakerID, OEM) => {
     collectionRef,
     where("ID", "==", speakerID),
     where("lowercaseOEM", "==", OEM),
-    where("isDefault", "==", true)
+    where("isDefault", "==", true),
   );
   const querySnapshot = await getDocs(q);
   if (querySnapshot.size > 0) {
@@ -280,7 +304,7 @@ export const readFrqGainFromFirestore = async (speakerID, OEM) => {
 export const readFrqGain = async (speakerID, OEM) => {
   const dbRef = ref(database);
   const snapshot = await get(
-    child(dbRef, `Microphone2/${OEM}/${speakerID}/linear`)
+    child(dbRef, `Microphone2/${OEM}/${speakerID}/linear`),
   );
   if (snapshot.exists()) {
     return snapshot.val();
@@ -291,7 +315,7 @@ export const readFrqGain = async (speakerID, OEM) => {
 export const getCalibrationFile = async (url) => {
   try {
     const file = await fetch(
-      "https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/" + url
+      "https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/" + url,
     ).then((response) => {
       return response.text();
     });
