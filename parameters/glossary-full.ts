@@ -490,16 +490,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_experimentSavePartialResultsBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 _experimentSavePartialResultsBool (default TRUE) determines whether partial results are saved. This is a feature in Pavlovia that should be enabled or disabled by EasyEyes using the Pavlovia API. Pavlovia (and EasyEyes) charges one token per saved session. Incomplete sessions are free if they are not saved.",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
     name: "_invitePartingCommentsBool",
     availability: "now",
     example: "TRUE",
@@ -757,9 +747,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Vision test",
     explanation:
-      '⭑ _online1Title [Prolific "What is the title of your study?"] (no default) is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants will consider _online1Title, _online2PayPerHour, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay per hour.',
+      '⭑ _online1Title [Prolific "What is the title of your study?"] (default is "***") is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants will consider _online1Title, _online2PayPerHour, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay per hour.',
     type: "text",
-    default: "",
+    default: "***",
     categories: "",
   },
   {
@@ -767,9 +757,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⭑ _online2Description [Prolific \"Describe what participants will be doing in this study.\"] (no default) is a (typically long) description of the study, used to recruit new participants. In deciding whether to participate, Prolific members will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. However, several Prolific participants told me that when the pay exceeds $15/hour, the jobs are filled quickly, so they often accept these without reading the study description. So you might want to have your study verify that participants actually satisfy any requirements stated in your description. The EasyEyes _needXXX parameters may be helpful in this regard. IMPORTANT: Prolific's recruitment policy demands advance statement of the study's requirements before the participant accepts. Thus any _needXXX should be mentioned in your study's Description in Prolific, which is copied from this parameter. EasyEyes helps you to do this, by offering a plain English statement of the needs on the scientist page that you can copy and include here.",
+      '⭑ _online2Description [Prolific "Describe what participants will be doing in this study."] (default is "***") is a (typically long) description of the study, used to recruit new participants. In deciding whether to participate, Prolific members will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. However, several Prolific participants told me that when the pay exceeds $15/hour, the jobs are filled quickly, so they often accept these without reading the study description. So you might want to have your study verify that participants actually satisfy any requirements stated in your description. The EasyEyes _needXXX parameters may be helpful in this regard. IMPORTANT: Prolific\'s recruitment policy demands advance statement of the study\'s requirements before the participant accepts. Thus any _needXXX should be mentioned in your study\'s Description in Prolific, which is copied from this parameter. EasyEyes helps you to do this, by offering a plain English statement of the needs on the scientist page that you can copy and include here.',
     type: "text",
-    default: "",
+    default: "***",
     categories: "",
   },
   {
@@ -823,16 +813,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_online2SaveIncompleteResponsesBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 _online2SaveIncompleteResponsesBool (default TRUE) sets the corresponding option in Pavlovia. Note that if you don’t have a Pavlovia site license, and you’re not in PILOTING mode, then you pay 20 pence for each response (i.e. data file) that you save, so you save money by not saving (and paying for) incomplete studies. We don't know yet whether Pavlovia provides an API for this.",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
     name: "_participantIDGetBool",
     availability: "now",
     example: "TRUE",
@@ -853,11 +833,31 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_pavlovia_Database_ResultsFormatBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_pavlovia_Database_ResultsFormatBool (default TRUE) allows the scientist to select which results format Pavlovia will use when reporting the results of this experiment. After the participants run the experiment, Pavlovia's \"Database\" results format returns one merged CSV file with all participant results. The alternative \"CSV\" results format returns one CSV file for each participant.\n\nIMPLEMENTATION. As the experiment is compiled (into a newly created repository in Pavlovia bearing the experiment's name), the compiler will use the current value (default or assigned) of _pavlovia_Database_ResultsFormatBool to set the Results Format in the experiment's Pavlovia dashboard to either “CSV” or “Database”.\n\nTHIS WORKS AROUND PAVLOVIA'S BROKEN CSV RESULTS FORMAT: This parameter was implemented April 6, 2024. At this time, Pavlovia’s CSV results format is broken, so that in columns after \"targeTask\" (roughly the 37th), the headers are one row down and begin again from the first header. Pavlovia’s Database results format is fine. So we are setting the default to TRUE, to use the working format. \n\nSPLITTING THE DATABASE FORMAT. The EasyEyes “Download results” button has been enhanced to download either kind of CSV file, as appropriate, and split any “Download”-style merged CSV into individual CSV files, practically equivalent to the CSV files that were returned by the “CSV”-mode when it worked properly.\n\nMANUAL OVERRIDE. We can't think of a reason to do so, but the scientist can use the manual control in the Pavlovia dashboard to change the experiment's results format, overriding whatever was selected in the experiment spreadsheet.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_pavloviaPreferRunningModeBool",
     availability: "now",
     example: "FALSE",
     explanation:
       "_pavloviaPreferRunningModeBool helps EasyEyes optimize its behavior by indicating your preference for use of RUNNING or PILOTING mode while testing. Pavlovia offers two modes (RUNNING and PILOTING) for running your study. Remote data collection requires RUNNING mode. PILOTING mode is meant for checking and debugging and runs only from the Pavlovia console on the scientist's computer. The only advantage of the PILOTING mode is that it's always free. Unless your institution has a Pavlovia site license, RUNNING mode costs 20 pence per participant, and requires assigning tokens (money) in advance to each experiment. (Setting _compileAsNewExperiment=FALSE allows you to request that EasyEyes keep reusing the same experiment name, as you compile new versions, so you can assign tokens once to the experiment, when you begin testing, instead of before each compile.) Thus scientists with a site license will always prefer RUNNING mode. Without that license, scientists can save money by using PILOTING mode during development, and switch to RUNNING mode to test remote participants. _pavloviaPreferRunningModeBool allows you to express your preference. With an institutional site license, you'll always want the default TRUE. Without an institutional site license, you can save money by setting _pavloviaPreferRunningModeBool=FALSE during development, and TRUE for the actual remote testing. Without a site license, if you don't mind the 20 p expense, you can use RUNNING mode throughout (use the default _pavloviaPreferRunningModeBool=TRUE), and set _compileAsNewExperiment=FALSE to minimize the frequency at which you must assign tokens to the experiment.\n\nOLD EXPLANATION. Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, which prevents remote testing. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can send to your online participants. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. Thus, for most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. (Pavlovia has no API by which EasyEyes could do this for you.) If your experiment is already in RUNNING mode you can still switch to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "_pavloviaSavePartialResultsBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _pavloviaSavePartialResultsBool (default TRUE) determines whether partial results are saved. This is a feature in Pavlovia that should be enabled or disabled by EasyEyes using the Pavlovia API. Pavlovia (and EasyEyes) charges one token per saved session. Incomplete sessions are free if they are not saved.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -2731,15 +2731,14 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "readingSetSizeBy",
+    name: "readingSpacingDeg",
     availability: "now",
-    example: "nominalPt",
+    example: "0.5",
     explanation:
-      "⭑ readingSetSizeBy (default spacingDeg) determines how you specify the size of the text to be read. \"Typographer's point\" is abbreviated \"pt\", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so here we call the typeset size (e.g. 12 pt), the \"nominal\" type size.\n• nominalPt sets the font's point size to readingNominalSizePt.\n• nominalDeg sets the font's point size to subtend readingNominalSizeDeg. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt \n• xHeightDeg sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg.\n• spacingPt sets the font's point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingPt.\n• spacingDeg sets the font's point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.",
-    type: "categorical",
-    default: "spacingDeg",
-    categories:
-      "nominalPt, nominalDeg, xHeightPt, xHeightDeg, spacingPt, spacingDeg",
+      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
+    type: "numerical",
+    default: "0.5",
+    categories: "",
   },
   {
     name: "readingSingleLineSpacingDeg",
@@ -2752,13 +2751,35 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "readingSpacingDeg",
+    name: "readingSetSizeUnit",
     availability: "now",
-    example: "0.5",
+    example: "nominalPt",
     explanation:
-      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
+      '🕑 ⭑ readingSetSizeUnit (default spacingDeg) pairs with readingSetSize to specify the size of the text to be read. "Typographer\'s point" is abbreviated "pt", and 1 pt = 1/72 inch. "x-height" is a metric property of text, the height of the lowercase x. Unlike x-height, when you typeset a particular font (e.g. Helvetica) at a particular font "size" (e.g. 12 pt), all metrics of the typeset characters vary across fonts, because typographic tradition allows the type designer to choose an arbitrary size for (say) 12 pt type. All other sizes are proportional. Here we call the typeset size (e.g. 12 pt) "nominal"; it\'s a length in pts. \n• nominalPt sets the font\'s point size to readingSetSize.\n• nominalDeg sets the font\'s point size so that the nominal size, in deg, equals readingSetSize. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingSetSize*3.14159/180)*viewingDistanceCm. \n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x), in pt, specified by readingSetSize. \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x), in deg, specified by readingSetSize.\n• spacingPt sets the font\'s point size so that the average letter-center-to-letter-center spacing (pt) is approximately readingSetSize. In fact, we adjust font size so that the width of the fontCharacterSet string, in pt, divided by the string length in characters equals readingSetSize.\n• spacingDeg sets the font\'s point size so that the specified average letter-center-to-letter-center spacing (deg) is approximately readingSetSize.  In fact, we adjust point size so that the width of the fontCharacterSet string divided by the string length in chracters equals readingSetSize.',
+    type: "categorical",
+    default: "spacingDeg",
+    categories:
+      "nominalPt, nominalDeg, xHeightPt, xHeightDeg, spacingPt, spacingDeg",
+  },
+  {
+    name: "readingSetSizeBy",
+    availability: "now",
+    example: "nominalPt",
+    explanation:
+      "⭑ readingSetSizeBy (default spacingDeg) determines how you specify the size of the text to be read. \"Typographer's point\" is abbreviated \"pt\", and 1 pt=1/72 inch. x-height is a well-defined text property. However, when you typeset a named font (e.g. Helvetica) at a particular font size (e.g. 12 pt), every metric of the typeset characters varies across fonts, because typographic industry conventions allow the type designer an arbitrary size scale factor, so here we call the typeset size (e.g. 12 pt), the \"nominal\" type size.\n• nominalPt sets the font's point size to readingNominalSizePt.\n• nominalDeg sets the font's point size to subtend readingNominalSizeDeg. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingNominalSizeDeg*3.14159/180)*viewingDistanceCm.\n• xHeightPt sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightPt \n• xHeightDeg sets the font's point size to achieve the x-height (the height of lowercase x) specified by readingXHeightDeg.\n• spacingPt sets the font's point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingPt.\n• spacingDeg sets the font's point size to achieve the specified average letter-center-to-letter-center spacing readingSpacingDeg.",
+    type: "categorical",
+    default: "spacingDeg",
+    categories:
+      "nominalPt, nominalDeg, xHeightPt, xHeightDeg, spacingPt, spacingDeg",
+  },
+  {
+    name: "readingSetSize",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 ⭑ readingSetSize (default 0.5) is the desired value, with units set by readingSetSizeUnit. Together they determine the size of the text to be read. ",
     type: "numerical",
-    default: "0.5",
+    default: "1",
     categories: "",
   },
   {
@@ -3257,7 +3278,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ showGrid (default is disabled) displays a full-screen grid that aids visual checking of location and size (both live and in screen shots). [pt & inch NOT YET IMPLEMENTED.] Set showGrid to:\n• 'none' for no grid\n• 'disabled' to prevent any grid\n• 'px' for a pixel grid\n• 'pt' for a typographic \"points\" grid (72 pt per inch)\n• 'cm' for a centimeter grid\n• 'inch' for an inch grid\n• 'mmV4' for a cortical grid, \n• 'deg' or 'degDynamic' for a degrees grid. When the crosshair moves, the 'degDynamic' grid moves with it, and the 'deg' grid does not. 'degDynamic' specifies degrees relative to the (possibly) moving crosshair. 'deg' specifies degrees relative to the nominal fixation, which is the fixed point that the moving crosshair circles around.\n\nUnless 'disabled', repeatedly pressing the backquote key (below ESCAPE on a macOS keyboard) cycles through all states except disabled: none, px, cm, pt, inch, deg, degDynamic, mmV4. The 'px', 'cm', 'pt', and 'inch' grids have their origin at lower left. The 'deg', 'degDynamic', and 'mmV4' grids have their origin at fixation. \n\nCAUTION: The grids are for stimulus checking, not human testing. The visual grid is likely to mask your stimulus, and drawing the grid can take time, especially when the crosshair moves, which might compromise stimulus timing (lateness and wrong duration). So turn off grids when you check timing or collect human data.",
     type: "categorical",
     default: "disabled",
-    categories: "px, pt, cm, inch, deg, degDynamic, mmV4, none, disabled",
+    categories: "px, pt, cm, in, deg, degDynamic, mmV4, none, disabled",
   },
   {
     name: "showParameters",

@@ -42,11 +42,7 @@ export class Grid {
     this.spawnGridStims();
 
     window.onkeydown = (e) => {
-      if (
-        e.code === this.gridkey.code ||
-        this.gridkey.key.includes(e.key) ||
-        e.keyCode === this.gridkey.keyCode
-      ) {
+      if (e.code === this.gridkey.code || this.gridkey.key.includes(e.key)) {
         this.cycle();
         if (psychoJS && psychoJS.experiment)
           psychoJS.experiment.addData("cycledGridTo", this.units);
@@ -60,13 +56,11 @@ export class Grid {
   /**
    * Re-spawn grids, given new `displayOptions` values (eg to reflect a new viewing distance)
    * and optionally change which is the current grid
-   * @param {("px" | "cm" | "deg" | "none" | "disabled")} units The grid-type to set as current.
-   * @param {object} displayOptions
    */
   update(units = undefined, displayOptions = undefined) {
     if (units) {
       this.units = units;
-      grid.units = units;
+      grid.units = units; // Persist selected grid across rerunning trialInstructionRoutineBegin
     }
     if (displayOptions) this.displayOptions = displayOptions;
     if (this.units === "disabled") return;
@@ -110,17 +104,18 @@ export class Grid {
   /**
    * Generate the stims for the grid, and store in `this._allGridStims`.
    * Generates all grids if now parameter is provided, or else just the provided unit's grid.
-   * @param {("px" | "cm" | "deg" | "degDynamic" | "mm" | "none")} units
    */
   spawnGridStims(units = undefined) {
     if (units) this.allGrids[units] = this._getGridStims(units);
     else
       for (const unit of [
         "px",
+        "pt",
         "cm",
+        "in",
         "deg",
         "degDynamic",
-        "mm",
+        "mmV4",
         "none",
         "disabled",
       ]) {
@@ -164,13 +159,17 @@ export class Grid {
     switch (units) {
       case "px":
         return this._getPixelGridStims();
+      case "pt":
+        return this._getPointGridStims();
       case "cm":
         return this._getCmGridStims();
+      case "in":
+        return this._getInchGridStims();
       case "deg":
         return this._getDegGridStims(false);
       case "degDynamic":
         return this._getDegGridStims(true);
-      case "mm":
+      case "mmV4":
         return this._getMmGridStims();
       case "none":
         return [[], []];
@@ -183,49 +182,39 @@ export class Grid {
     this.dimensionsCm = this.dimensions.map(
       (dim) => dim / this.displayOptions.pixPerCm,
     );
+    this.dimensionsIn = this.dimensionsCm.map((dim) => dim / 2.54);
+    this.dimensionsPt = this.dimensionsIn.map((dim) => dim * 72);
+    const [w, h] = this.dimensions;
+    // ie psychojs pix units
+    const fixationXYPx = dynamic
+      ? fixationConfig.pos
+      : fixationConfig.nominalPos;
+
+    //ie of fixation
+    // const pxToTheLeft = fixationXYPx[0] + w/2;
+    // const pxToTheRight = w - pxToTheLeft;
+    // const pxDown = fixationXYPx[1] + h/2;
+    // const pxUp = h - pxDown;
+
     this.dimensionsDeg = [
-      [
-        XYDegOfXYPix(
-          [
-            fixationConfig.pos[0] - this.dimensions[0] / 2,
-            fixationConfig.pos[1],
-          ],
-          dynamic,
-        )[0],
-        XYDegOfXYPix(
-          [
-            fixationConfig.pos[0] + this.dimensions[0] / 2,
-            fixationConfig.pos[1],
-          ],
-          dynamic,
-        )[0],
-      ],
-      [
-        XYDegOfXYPix(
-          [
-            fixationConfig.pos[0],
-            fixationConfig.pos[1] + this.dimensions[1] / 2,
-          ],
-          dynamic,
-        )[1],
-        XYDegOfXYPix(
-          [
-            fixationConfig.pos[0],
-            fixationConfig.pos[1] - this.dimensions[1] / 2,
-          ],
-          dynamic,
-        )[1],
-      ],
+      // right, left
+      [XYDegOfXYPix([w, 0], dynamic)[0], XYDegOfXYPix([-w, 0], dynamic)[0]],
+      // lower, upper
+      [XYDegOfXYPix([0, -h], dynamic)[1], XYDegOfXYPix([0, h], dynamic)[1]],
     ];
 
     switch (units) {
       case "px":
         return this.dimensions.map((dim) => Math.floor(dim / 100) + 1);
+      case "pt":
+        return this.dimensionsPt.map((dim) => Math.floor(dim) + 1);
+      case "in":
+        return this.dimensionsIn.map((dim) => Math.floor(dim) + 1);
       case "cm":
-        return this.dimensionsCm.map((dim) => Math.floor(dim / 1) + 1);
+        return this.dimensionsCm.map((dim) => Math.floor(dim) + 1);
       case "deg":
         return this.dimensionsDeg.map((dims) =>
-          dims.map((dim) => Math.abs(Math.floor(dim / 1)) + 1),
+          dims.map((dim) => Math.ceil(Math.abs(dim)) + 1),
         );
     }
   };
@@ -235,14 +224,18 @@ export class Grid {
       case "none":
         return "px";
       case "px":
+        return "pt";
+      case "pt":
         return "cm";
       case "cm":
+        return "in";
+      case "in":
         return "degDynamic";
       case "degDynamic":
         return "deg";
       case "deg":
-        return "mm";
-      case "mm":
+        return "mmV4";
+      case "mmV4":
         return "none";
       case "disabled":
         return "disabled";
@@ -311,7 +304,7 @@ export class Grid {
             new visual.TextStim({
               name: `${region}-grid-line-label-${i}`,
               win: this.psychoJS.window,
-              text: `${spacing * i} pix`,
+              text: `${spacing * i} px`,
               font: "Arial",
               units: "pix",
               pos: pos,
@@ -330,13 +323,27 @@ export class Grid {
     return [lines, labels];
   };
 
-  _getCmGridStims = () => {
-    const spacing = this.displayOptions.pixPerCm;
+  _getFixedSpacingGrid = (spacing, unit) => {
     const origin = [
       -Math.round(this.dimensions[0] / 2),
       -Math.round(this.dimensions[1] / 2),
     ];
-    const numberOfGridLines = this._getNumberOfGridLines("cm");
+    const numberOfGridLines = this._getNumberOfGridLines(unit);
+    let color;
+    switch (unit) {
+      case "px":
+        color = "black";
+        break;
+      case "cm":
+        color = "green";
+        break;
+      case "in":
+        color = "brown";
+        break;
+      case "pt":
+        color = "pink";
+        break;
+    }
     const [lines, labels] = [[], []];
     for (const region of ["vertical", "horizontal"]) {
       const nGridlines =
@@ -368,14 +375,17 @@ export class Grid {
           region === "vertical"
             ? [origin[0] + i * spacing + 3, origin[1]]
             : [origin[0] + 3, origin[1] + i * spacing];
+        const n = unit === "pt" ? 20 : 5;
+        const fat = unit === "pt" ? 2 : 5;
+        const slim = unit === "pt" ? 1 : 2;
         lines.push(
           new visual.ShapeStim({
-            name: `${region}-grid-line-${i}`,
+            name: `${region}-grid-line-${unit}-${i}`,
             win: this.psychoJS.window,
             units: "pix",
-            lineWidth: i % 5 === 0 ? 5 : 2,
-            lineColor: new util.Color("blue"),
-            // fillColor: new util.Color("blue"),
+            lineWidth: i % n === 0 ? fat : slim,
+            lineColor: new util.Color(color),
+            // fillColor: new u©til.Color("blue"),
             opacity: 1.0,
             vertices: vertices,
             depth: -999999,
@@ -385,12 +395,12 @@ export class Grid {
             autoLog: false,
           }),
         );
-        if (i % 5 === 0)
+        if (i % n === 0)
           labels.push(
             new visual.TextStim({
-              name: `${region}-grid-line-label-${i}`,
+              name: `${region}-${unit}-grid-line-label-${i}`,
               win: this.psychoJS.window,
-              text: `${i} cm`,
+              text: `${i} ${unit}`,
               font: "Arial",
               units: "pix",
               alignHoriz: "left",
@@ -398,7 +408,7 @@ export class Grid {
               pos: pos,
               height: 8,
               ori: 0.0,
-              color: new util.Color("grey"),
+              color: new util.Color(color),
               opacity: 1.0,
               depth: 0.0,
               autoLog: false,
@@ -409,8 +419,20 @@ export class Grid {
     return [lines, labels];
   };
 
+  _getCmGridStims = () => {
+    return this._getFixedSpacingGrid(this.displayOptions.pixPerCm, "cm");
+  };
+  _getInchGridStims = () => {
+    return this._getFixedSpacingGrid(this.displayOptions.pixPerCm * 2.54, "in");
+  };
+  _getPointGridStims = () => {
+    return this._getFixedSpacingGrid(
+      (this.displayOptions.pixPerCm * 2.54) / 72,
+      "pt",
+    );
+  };
+
   _getDegGridStims = (dynamic = false) => {
-    // TODO redo number of deg gridlines logic
     const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg", dynamic);
     const [lines, labels] = [[], []];
     const color = dynamic ? "darkgoldenrod" : "crimson";
@@ -418,18 +440,19 @@ export class Grid {
       let nGridlines;
       switch (region) {
         case "left":
-          nGridlines = numberOfGridLinesPerSide[0][1] * 2;
+          nGridlines = numberOfGridLinesPerSide[0][1];
           break;
         case "right":
-          nGridlines = numberOfGridLinesPerSide[0][0] * 2;
+          nGridlines = numberOfGridLinesPerSide[0][0];
           break;
         case "upper":
-          nGridlines = numberOfGridLinesPerSide[1][1] * 2;
+          nGridlines = numberOfGridLinesPerSide[1][1];
           break;
         case "lower":
-          nGridlines = numberOfGridLinesPerSide[1][0] * 2;
+          nGridlines = numberOfGridLinesPerSide[1][0];
           break;
       }
+      // nGridlines *= 3;
 
       for (let i = 0; i < nGridlines; i++) {
         if (["left", "lower"].includes(region) && i === 0) continue;
@@ -566,7 +589,7 @@ export class Grid {
       circles.push(
         new visual.Polygon({
           win: this.psychoJS.window,
-          name: `mm-grid-circle-${rMm}`,
+          name: `mmV4-grid-circle-${rMm}`,
           units: "pix",
           edges: 360,
           radius: rPix,
@@ -588,9 +611,9 @@ export class Grid {
         const pos = XYPixOfXYDeg([spaceToTheRight * r, 0], this.displayOptions);
         labels.push(
           new visual.TextStim({
-            name: `mm-grid-label-${rMm}`,
+            name: `mmV4-grid-label-${rMm}`,
             win: this.psychoJS.window,
-            text: `${rMm} mm`,
+            text: `${rMm} mmV4`,
             font: "Arial",
             units: "pix",
             alignHoriz: "center",

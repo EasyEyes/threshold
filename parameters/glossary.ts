@@ -396,14 +396,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_debugBool enables features that only the scientist should see. This includes extra calibration tests and buggy new features that are still under development.",
   },
-  _experimentSavePartialResultsBool: {
-    name: "_experimentSavePartialResultsBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "🕑 _experimentSavePartialResultsBool (default TRUE) determines whether partial results are saved. This is a feature in Pavlovia that should be enabled or disabled by EasyEyes using the Pavlovia API. Pavlovia (and EasyEyes) charges one token per saved session. Incomplete sessions are free if they are not saved.",
-  },
   _invitePartingCommentsBool: {
     name: "_invitePartingCommentsBool",
     availability: "now",
@@ -742,17 +734,17 @@ export const GLOSSARY: Glossary = {
     name: "_online1Title",
     availability: "now",
     type: "text",
-    default: "",
+    default: "***",
     explanation:
-      '⭑ _online1Title [Prolific "What is the title of your study?"] (no default) is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants will consider _online1Title, _online2PayPerHour, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay per hour.',
+      '⭑ _online1Title [Prolific "What is the title of your study?"] (default is "***") is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants will consider _online1Title, _online2PayPerHour, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay per hour.',
   },
   _online2Description: {
     name: "_online2Description",
     availability: "now",
     type: "text",
-    default: "",
+    default: "***",
     explanation:
-      "⭑ _online2Description [Prolific \"Describe what participants will be doing in this study.\"] (no default) is a (typically long) description of the study, used to recruit new participants. In deciding whether to participate, Prolific members will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. However, several Prolific participants told me that when the pay exceeds $15/hour, the jobs are filled quickly, so they often accept these without reading the study description. So you might want to have your study verify that participants actually satisfy any requirements stated in your description. The EasyEyes _needXXX parameters may be helpful in this regard. IMPORTANT: Prolific's recruitment policy demands advance statement of the study's requirements before the participant accepts. Thus any _needXXX should be mentioned in your study's Description in Prolific, which is copied from this parameter. EasyEyes helps you to do this, by offering a plain English statement of the needs on the scientist page that you can copy and include here.",
+      '⭑ _online2Description [Prolific "Describe what participants will be doing in this study."] (default is "***") is a (typically long) description of the study, used to recruit new participants. In deciding whether to participate, Prolific members will consider _online0Title, _online2Pay, _online2Minutes, and _online2Description. However, several Prolific participants told me that when the pay exceeds $15/hour, the jobs are filled quickly, so they often accept these without reading the study description. So you might want to have your study verify that participants actually satisfy any requirements stated in your description. The EasyEyes _needXXX parameters may be helpful in this regard. IMPORTANT: Prolific\'s recruitment policy demands advance statement of the study\'s requirements before the participant accepts. Thus any _needXXX should be mentioned in your study\'s Description in Prolific, which is copied from this parameter. EasyEyes helps you to do this, by offering a plain English statement of the needs on the scientist page that you can copy and include here.',
   },
   _online2Minutes: {
     name: "_online2Minutes",
@@ -795,14 +787,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '⭑ _online2PayPerHour (default zero) specifies the hourly rate (a number) that determines (with _online2Minutes) the payment offered to each participant. [In Prolific, EasyEyes computes and fills in "How much do you want to pay them?"] The currency is specified by _online2PayCurrency. If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions. The pay is specified with two decimals (e.g. 11.01), rounding up to the next cent, so the hourly rate offered will never be less than specified by the experiment. Prolific lists the study titles and pay per hour for selection by prospective participants. Some participants mentioned selecting my study because it seemed interesting. Others said that in their rush to sign up for $15/hour studies, they often skip the description. ',
   },
-  _online2SaveIncompleteResponsesBool: {
-    name: "_online2SaveIncompleteResponsesBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "🕑 _online2SaveIncompleteResponsesBool (default TRUE) sets the corresponding option in Pavlovia. Note that if you don’t have a Pavlovia site license, and you’re not in PILOTING mode, then you pay 20 pence for each response (i.e. data file) that you save, so you save money by not saving (and paying for) incomplete studies. We don't know yet whether Pavlovia provides an API for this.",
-  },
   _participantIDGetBool: {
     name: "_participantIDGetBool",
     availability: "now",
@@ -819,6 +803,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_participantIDPutBool (default FALSE). EasyEyes always saves an EasyEyesID cookie in browser local storage (which can be lost when participants clear browsing history etc.). If _participantIDPutBool is TRUE, then an EasyEyesID text file is also saved in the Downloads Folder of the  participant's computer. Also see _participantIDGetBool above.",
   },
+  _pavlovia_Database_ResultsFormatBool: {
+    name: "_pavlovia_Database_ResultsFormatBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_pavlovia_Database_ResultsFormatBool (default TRUE) allows the scientist to select which results format Pavlovia will use when reporting the results of this experiment. After the participants run the experiment, Pavlovia's \"Database\" results format returns one merged CSV file with all participant results. The alternative \"CSV\" results format returns one CSV file for each participant.\n\nIMPLEMENTATION. As the experiment is compiled (into a newly created repository in Pavlovia bearing the experiment's name), the compiler will use the current value (default or assigned) of _pavlovia_Database_ResultsFormatBool to set the Results Format in the experiment's Pavlovia dashboard to either “CSV” or “Database”.\n\nTHIS WORKS AROUND PAVLOVIA'S BROKEN CSV RESULTS FORMAT: This parameter was implemented April 6, 2024. At this time, Pavlovia’s CSV results format is broken, so that in columns after \"targeTask\" (roughly the 37th), the headers are one row down and begin again from the first header. Pavlovia’s Database results format is fine. So we are setting the default to TRUE, to use the working format. \n\nSPLITTING THE DATABASE FORMAT. The EasyEyes “Download results” button has been enhanced to download either kind of CSV file, as appropriate, and split any “Download”-style merged CSV into individual CSV files, practically equivalent to the CSV files that were returned by the “CSV”-mode when it worked properly.\n\nMANUAL OVERRIDE. We can't think of a reason to do so, but the scientist can use the manual control in the Pavlovia dashboard to change the experiment's results format, overriding whatever was selected in the experiment spreadsheet.",
+  },
   _pavloviaPreferRunningModeBool: {
     name: "_pavloviaPreferRunningModeBool",
     availability: "now",
@@ -826,6 +818,14 @@ export const GLOSSARY: Glossary = {
     default: "TRUE",
     explanation:
       "_pavloviaPreferRunningModeBool helps EasyEyes optimize its behavior by indicating your preference for use of RUNNING or PILOTING mode while testing. Pavlovia offers two modes (RUNNING and PILOTING) for running your study. Remote data collection requires RUNNING mode. PILOTING mode is meant for checking and debugging and runs only from the Pavlovia console on the scientist's computer. The only advantage of the PILOTING mode is that it's always free. Unless your institution has a Pavlovia site license, RUNNING mode costs 20 pence per participant, and requires assigning tokens (money) in advance to each experiment. (Setting _compileAsNewExperiment=FALSE allows you to request that EasyEyes keep reusing the same experiment name, as you compile new versions, so you can assign tokens once to the experiment, when you begin testing, instead of before each compile.) Thus scientists with a site license will always prefer RUNNING mode. Without that license, scientists can save money by using PILOTING mode during development, and switch to RUNNING mode to test remote participants. _pavloviaPreferRunningModeBool allows you to express your preference. With an institutional site license, you'll always want the default TRUE. Without an institutional site license, you can save money by setting _pavloviaPreferRunningModeBool=FALSE during development, and TRUE for the actual remote testing. Without a site license, if you don't mind the 20 p expense, you can use RUNNING mode throughout (use the default _pavloviaPreferRunningModeBool=TRUE), and set _compileAsNewExperiment=FALSE to minimize the frequency at which you must assign tokens to the experiment.\n\nOLD EXPLANATION. Setting _pavloviaPreferRunningModeBool TRUE (the default) streamlines the use of Pavlovia's RUNNING mode, and setting it FALSE streamlines the use of Pavlovia's PILOTING mode. _pavloviaPreferRunningModeBool helps EasyEyes anticipate your preference in optimizing the EasyEyes user interface. EasyEyes uses a Pavlovia repository to hold your experiment. Pavlovia offers two modes for running your experiment, PILOTING and RUNNING. PILOTING mode is free, but can only be run directly from the Pavlovia dashboard, which prevents remote testing. RUNNING mode costs 20 pence per participant (this fee is waived if your instititution has a site license), and you get a URL for your study that you can send to your online participants. It is our guess that most EasyEyes users (like current Pavlovia users) will belong to institutions with Pavlovia site licenses, and thus have no usage fee. Thus, for most users, we suggest letting _pavloviaPreferRunningModeBool be TRUE (the default) to streamline the EasyEyes scientist page for RUNNING mode. When _pavloviaPreferRunningModeBool is TRUE, you just submit your table to the EasyEyes compiler to receive your study URL, with no more clicks. That includes setting your experiment to RUNNING mode in Pavlovia. If _pavloviaPreferRunningModeBool is FALSE, then your experiment remains in the INACTIVE mode, waiting for you to click the \"Go to Pavlovia\" button, where you'll use the Pavlovia dashboard to set your experiment to PILOTING mode and run it. (Pavlovia has no API by which EasyEyes could do this for you.) If your experiment is already in RUNNING mode you can still switch to PILOTING mode. Thus _pavloviaPreferRunningModeBool doesn't close any doors; it just streamlines use of your usually preferred mode.",
+  },
+  _pavloviaSavePartialResultsBool: {
+    name: "_pavloviaSavePartialResultsBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "🕑 _pavloviaSavePartialResultsBool (default TRUE) determines whether partial results are saved. This is a feature in Pavlovia that should be enabled or disabled by EasyEyes using the Pavlovia API. Pavlovia (and EasyEyes) charges one token per saved session. Incomplete sessions are free if they are not saved.",
   },
   _prolific0TraceBool: {
     name: "_prolific0TraceBool",
@@ -2888,6 +2888,38 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
   },
+  readingSpacingDeg: {
+    name: "readingSpacingDeg",
+    availability: "now",
+    type: "numerical",
+    default: "0.5",
+    explanation:
+      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
+  },
+  readingSingleLineSpacingDeg: {
+    name: "readingSingleLineSpacingDeg",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "🕑 readingSingleLineSpacingDeg (default 1) set the single line spacing in deg, but only if readingDefineSingleLineSpacingAs==explicit. Otherwise it's ignored.",
+  },
+  readingSetSizeUnit: {
+    name: "readingSetSizeUnit",
+    availability: "now",
+    type: "categorical",
+    default: "spacingDeg",
+    explanation:
+      '🕑 ⭑ readingSetSizeUnit (default spacingDeg) pairs with readingSetSize to specify the size of the text to be read. "Typographer\'s point" is abbreviated "pt", and 1 pt = 1/72 inch. "x-height" is a metric property of text, the height of the lowercase x. Unlike x-height, when you typeset a particular font (e.g. Helvetica) at a particular font "size" (e.g. 12 pt), all metrics of the typeset characters vary across fonts, because typographic tradition allows the type designer to choose an arbitrary size for (say) 12 pt type. All other sizes are proportional. Here we call the typeset size (e.g. 12 pt) "nominal"; it\'s a length in pts. \n• nominalPt sets the font\'s point size to readingSetSize.\n• nominalDeg sets the font\'s point size so that the nominal size, in deg, equals readingSetSize. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingSetSize*3.14159/180)*viewingDistanceCm. \n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x), in pt, specified by readingSetSize. \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x), in deg, specified by readingSetSize.\n• spacingPt sets the font\'s point size so that the average letter-center-to-letter-center spacing (pt) is approximately readingSetSize. In fact, we adjust font size so that the width of the fontCharacterSet string, in pt, divided by the string length in characters equals readingSetSize.\n• spacingDeg sets the font\'s point size so that the specified average letter-center-to-letter-center spacing (deg) is approximately readingSetSize.  In fact, we adjust point size so that the width of the fontCharacterSet string divided by the string length in chracters equals readingSetSize.',
+    categories: [
+      "nominalPt",
+      "nominalDeg",
+      "xHeightPt",
+      "xHeightDeg",
+      "spacingPt",
+      "spacingDeg",
+    ],
+  },
   readingSetSizeBy: {
     name: "readingSetSizeBy",
     availability: "now",
@@ -2904,21 +2936,13 @@ export const GLOSSARY: Glossary = {
       "spacingDeg",
     ],
   },
-  readingSingleLineSpacingDeg: {
-    name: "readingSingleLineSpacingDeg",
+  readingSetSize: {
+    name: "readingSetSize",
     availability: "now",
     type: "numerical",
     default: "1",
     explanation:
-      "🕑 readingSingleLineSpacingDeg (default 1) set the single line spacing in deg, but only if readingDefineSingleLineSpacingAs==explicit. Otherwise it's ignored.",
-  },
-  readingSpacingDeg: {
-    name: "readingSpacingDeg",
-    availability: "now",
-    type: "numerical",
-    default: "0.5",
-    explanation:
-      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
+      "🕑 ⭑ readingSetSize (default 0.5) is the desired value, with units set by readingSetSizeUnit. Together they determine the size of the text to be read. ",
   },
   readingSpacingPt: {
     name: "readingSpacingPt",
@@ -3323,7 +3347,7 @@ export const GLOSSARY: Glossary = {
       "px",
       "pt",
       "cm",
-      "inch",
+      "in",
       "deg",
       "degDynamic",
       "mmV4",

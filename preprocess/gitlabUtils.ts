@@ -725,38 +725,42 @@ async function splitCSVAndZip(
     return;
   }
   const groupedData: Record<string, string[]> = {};
-  const parsePromises: Promise<void>[] = [];
 
-  for (const relativePath in dbFolder.files) {
-    const file = dbFolder.files[relativePath];
-    const parsePromise = file.async("string").then((csvContent) => {
-      const records: any[] = Papa.parse(csvContent, { header: true }).data;
-      for (const record of records) {
-        const sessionId = record["PavloviaSessionID"];
-        if (sessionId) {
-          if (!groupedData[sessionId]) {
-            groupedData[sessionId] = [];
+  const parsePromises = Object.values(dbFolder.files).map((file) =>
+    file
+      .async("string")
+      .then((csvContent) => {
+        const records: any[] = Papa.parse(csvContent, { header: true }).data;
+        records.forEach((record) => {
+          const sessionId = record["PavloviaSessionID"];
+          if (sessionId) {
+            groupedData[sessionId] = groupedData[sessionId] || [];
+            groupedData[sessionId].push(record);
           }
-          groupedData[sessionId].push(record);
-        }
-      }
-    });
-    parsePromises.push(parsePromise);
-  }
+        });
+      })
+      .catch((error) => {
+        console.error("Error parsing CSV content:", error);
+      }),
+  );
   await Promise.all(parsePromises);
 
-  const newZip = new JSZip();
-  for (const sessionId in groupedData) {
-    const csvData = Papa.unparse({
-      fields: Object.keys(groupedData[sessionId][0]),
-      data: groupedData[sessionId],
-    });
-    newZip.file(`${sessionId}-${projectName}.csv`, csvData);
-  }
+  try {
+    const newZip = new JSZip();
+    for (const sessionId in groupedData) {
+      const csvData = Papa.unparse({
+        fields: Object.keys(groupedData[sessionId][0]),
+        data: groupedData[sessionId],
+      });
+      newZip.file(`${sessionId}-${projectName}.csv`, csvData);
+    }
 
-  newZip.generateAsync({ type: "blob" }).then((content) => {
-    saveAs(content, fileName);
-  });
+    newZip.generateAsync({ type: "blob" }).then((content) => {
+      saveAs(content, fileName);
+    });
+  } catch (error) {
+    console.error("Error splitting CSV and zipping:", error);
+  }
 }
 
 /**
@@ -803,38 +807,28 @@ export const downloadDataFolder = async (user: User, project: any) => {
         });
 
       if (pavloviaInfo && pavloviaInfo?.experiment?.saveFormat === "DATABASE") {
-        const pavloviaResultsAPI = `https://pavlovia.org/api/v2/experiments/${project.id}/results`;
+        try {
+          const downloadURL = pavloviaInfo?.experiment?.download?.downloadUrl;
 
-        const result = await fetch(pavloviaResultsAPI, pavloviaRequestOptions)
-          .then((response) => response.json())
-          .then((result) => result)
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-            return null;
-          });
-
-        if (!result) {
-          Swal.close();
-          Swal.fire({
-            icon: "error",
-            title: `No data found for ${project.name}.`,
-            text: `We can't find any data for the experiment. This might be due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
-            confirmButtonColor: "#666",
-          });
-          return;
-        }
-
-        const downloadToken = result.downloadToken;
-        const pavloviaDownloadAPI = `https://pavlovia.org/api/v2/experiments/${project.id}/results/${downloadToken}/status`;
-        const downloadURL = await fetch(pavloviaDownloadAPI)
-          .then((response) => response.json())
-          .then((result) => result.downloadUrl);
-        const fileContent = await fetch(downloadURL).then((response) =>
-          response.blob(),
-        );
-        if (fileContent) {
-          const zipFileName = `${project.name}.results.zip`;
-          await splitCSVAndZip(fileContent, zipFileName, project.name);
+          if (!downloadURL) {
+            Swal.close();
+            Swal.fire({
+              icon: "error",
+              title: `No data found for ${project.name}.`,
+              text: `We can't find any data for the experiment. This might be due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
+              confirmButtonColor: "#666",
+            });
+            return;
+          }
+          const fileContent = await fetch(downloadURL).then((response) =>
+            response.blob(),
+          );
+          if (fileContent) {
+            const zipFileName = `${project.name}.results.zip`;
+            await splitCSVAndZip(fileContent, zipFileName, project.name);
+          }
+        } catch (error) {
+          console.error("Error downloading or processing file:", error);
         }
 
         Swal.close();
@@ -1594,6 +1588,8 @@ export const createPavloviaExperiment = async (
       );
       if (b === null) finalClosing = false;
 
+      await setExperimentSaveFormat(user, newRepo);
+
       // transfer resources
       // console.log("Transferring resources...");
       const c = await createRequestedResourcesOnRepo(
@@ -1693,6 +1689,34 @@ export const getExperimentStatus = async (user: User, newRepo: Repository) => {
 
   const result = await running.json();
   return result.experiment.status2;
+};
+
+export const setExperimentSaveFormat = async (
+  user: User,
+  newRepo: Repository,
+) => {
+  // @ts-ignore
+  const isDatabase = user.currentExperiment._pavlovia_Database_ResultsFormatBool // @ts-ignore
+    ? user.currentExperiment._pavlovia_Database_ResultsFormatBool === "TRUE"
+      ? true
+      : false
+    : true;
+  console.log(isDatabase);
+  const experiment = await fetch(
+    "https://pavlovia.org/api/v2/experiments/" + newRepo.id,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        oauthToken: user.accessToken,
+      },
+      body: JSON.stringify({
+        saveFormat: isDatabase ? "DATABASE" : "CSV",
+      }),
+    },
+  );
+
+  const result = await experiment.json();
 };
 
 /* -------------------------------------------------------------------------- */

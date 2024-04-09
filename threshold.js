@@ -4526,7 +4526,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         trialCounter,
       ]);
 
-      // Grid for both target kinds
       grid.current.update(
         grid.units ?? reader.read("showGrid", BC),
         displayOptions,
@@ -4623,6 +4622,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         instructionsClock.getTime(),
         trialCounter,
       );
+
+      if (
+        /Dynamic/.test(
+          grid.units ?? paramReader.read("showGrid", status.block_condition),
+        )
+      )
+        grid.current.update(
+          grid.units ?? paramReader.read("showGrid", status.block_condition),
+          displayOptions,
+        );
 
       const letterEachFrame = () => {
         // IDENTIFY
@@ -5723,7 +5732,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }
 
-      logger("!. trialRoutineEachFrame fixation.status", fixation.status);
       // *fixation* updates
       if (
         t >= 0.0 &&
