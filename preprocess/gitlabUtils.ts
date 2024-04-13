@@ -838,6 +838,7 @@ export const downloadDataFolder = async (user: User, project: any) => {
               .then((response) => response.json())
               .then((result) => result.downloadUrl);
           }
+          console.log(downloadURL);
           const fileContent = await fetch(downloadURL).then((response) =>
             response.blob(),
           );
