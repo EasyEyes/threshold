@@ -524,6 +524,8 @@ const paramReaderInitialized = async (reader) => {
       prolificSession: thisExperimentInfo.ProlificSessionID,
       prolificParticipantID: thisExperimentInfo.ProlificParticipantID,
       pavloviaID: thisExperimentInfo.PavloviaSessionID,
+      date: util.MonotonicClock.getDateStr(),
+      UTC: util.MonotonicClock.getTimeZone(),
     };
 
     await sendEmailForDebugging(DataToLog);
@@ -811,7 +813,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "_needComputerSurveyBool",
     )[0];
     await updateInfo(needPhoneSurvey.current);
-    saveDataOnWindowClose(psychoJS.experiment);
+    // saveDataOnWindowClose(psychoJS.experiment);
     // ! check system compatibility
     const compMsg = checkSystemCompatibility(
       paramReader,
@@ -977,6 +979,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   async function updateInfo(needPhoneSurveyBool) {
     setCurrentFn("updateInfo");
     thisExperimentInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
+    thisExperimentInfo["UTC"] = util.MonotonicClock.getTimeZone();
     thisExperimentInfo["expName"] = thisExperimentInfo.name;
     thisExperimentInfo[
       "psychopyVersion"
