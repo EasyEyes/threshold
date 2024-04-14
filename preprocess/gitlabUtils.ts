@@ -808,17 +808,35 @@ export const downloadDataFolder = async (user: User, project: any) => {
 
       if (pavloviaInfo && pavloviaInfo?.experiment?.saveFormat === "DATABASE") {
         try {
-          const downloadURL = pavloviaInfo?.experiment?.download?.downloadUrl;
+          let downloadURL = pavloviaInfo?.experiment?.download?.downloadUrl;
 
           if (!downloadURL) {
-            Swal.close();
-            Swal.fire({
-              icon: "error",
-              title: `No data found for ${project.name}.`,
-              text: `We can't find any data for the experiment. This might be due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
-              confirmButtonColor: "#666",
-            });
-            return;
+            const pavloviaResultsAPI = `https://pavlovia.org/api/v2/experiments/${project.id}/results`;
+            const result = await fetch(
+              pavloviaResultsAPI,
+              pavloviaRequestOptions,
+            )
+              .then((response) => response.json())
+              .then((result) => result)
+              .catch((error) => {
+                console.error("Error fetching data:", error);
+                return null;
+              });
+            if (!result) {
+              Swal.close();
+              Swal.fire({
+                icon: "error",
+                title: `No data found for ${project.name}.`,
+                text: `We can't find any data for the experiment. This might be due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
+                confirmButtonColor: "#666",
+              });
+              return;
+            }
+            const downloadToken = result.downloadToken;
+            const pavloviaDownloadAPI = `https://pavlovia.org/api/v2/experiments/${project.id}/results/${downloadToken}/status`;
+            downloadURL = await fetch(pavloviaDownloadAPI)
+              .then((response) => response.json())
+              .then((result) => result.downloadUrl);
           }
           const fileContent = await fetch(downloadURL).then((response) =>
             response.blob(),

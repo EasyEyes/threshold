@@ -512,7 +512,8 @@ const paramReaderInitialized = async (reader) => {
     thisExperimentInfo.EasyEyesID = rc.id.value;
     thisExperimentInfo.PavloviaSessionID = rc.id.value;
   }
-
+  console.log("getPavloviaProjectName", getPavloviaProjectName());
+  console.log("psychoJS", psychoJS._config);
   // log participant to debug discrepancies in Pavlovia and Prolific data
   if (reader.read("_logParticipantsBool")[0]) {
     const DataToLog = {
@@ -4881,7 +4882,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ];
             offsetStimsToFixationPos(stimsToOffset);
           }
-          rsvpReadingWordsForThisBlock.current[status.block_condition].shift();
         },
         movie: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
@@ -5312,6 +5312,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialRoutineEachFrame(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineEachFrame");
+      //------Loop for each frame of Routine 'trial'-------
+      // get current time
+      t = trialClock.getTime();
+      frameN = frameN + 10; // number of completed frames (so 0 is the first frame)
+
       ////
       if (stats.on) stats.current.begin();
       ////
@@ -5329,11 +5334,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         return Scheduler.Event.NEXT;
       }
       /* -------------------------------------------------------------------------- */
-
-      //------Loop for each frame of Routine 'trial'-------
-      // get current time
-      t = trialClock.getTime();
-      frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
 
       const delayBeforeStimOnsetSec =
         targetKind.current === "letter" ||
@@ -6469,6 +6469,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             repeatedLettersResponse.rt = [];
           },
           rsvpReading: () => {
+            rsvpReadingWordsForThisBlock.current[
+              status.block_condition
+            ].shift();
             addRsvpReadingTrialResponsesToData();
             removeRevealableTargetWordsToAidSpokenScoring();
 
