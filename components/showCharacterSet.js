@@ -15,7 +15,7 @@ import {
 } from "./utils";
 import { canClick } from "./response";
 
-function getCharacterSetShowPos(ele, showWhere) {
+function getCharacterSetShowPos(ele, showWhere, font = "") {
   switch (showWhere) {
     case "bottom":
       ele.style.bottom = "10%";
@@ -23,6 +23,9 @@ function getCharacterSetShowPos(ele, showWhere) {
     default:
       ele.style.bottom = "10%";
       break;
+  }
+  if (font == "Pelli.woff2") {
+    ele.style["height"] = "45%";
   }
 }
 
@@ -40,7 +43,7 @@ export function setupClickableCharacterSet(
   extraCharClassName = "",
   targetKind = "",
   blockOrCondition,
-  responseType
+  responseType,
 ) {
   const characterSetHolder = document.createElement("div");
   characterSetHolder.id = "characterSet-holder";
@@ -66,7 +69,7 @@ export function setupClickableCharacterSet(
     characterSetHolder.style.gridAutoFlow = "column";
   }
 
-  getCharacterSetShowPos(characterSetHolder, where);
+  getCharacterSetShowPos(characterSetHolder, where, font);
 
   pushCharacterSet(
     ans,
@@ -76,7 +79,7 @@ export function setupClickableCharacterSet(
     extraCharClassName,
     targetKind,
     blockOrCondition,
-    responseType
+    responseType,
   );
 
   document.body.appendChild(characterSetHolder);
@@ -88,7 +91,7 @@ export function setupClickableCharacterSet(
 
 export function removeClickableCharacterSet(
   responseRegister,
-  characterSetStim
+  characterSetStim,
 ) {
   responseRegister.current = [];
   responseRegister.onsetTime = 0;
@@ -108,7 +111,7 @@ export function updateClickableCharacterSet(
   extraCharClassName = "",
   targetKind = "",
   blockOrCondition,
-  responseType
+  responseType,
 ) {
   const characterSetHolder = document.querySelector(".characterSet-holder");
   while (characterSetHolder.firstChild) {
@@ -123,7 +126,7 @@ export function updateClickableCharacterSet(
     extraCharClassName,
     targetKind,
     blockOrCondition,
-    responseType
+    responseType,
   );
   return characterSetHolder;
 }
@@ -138,7 +141,7 @@ const pushCharacterSet = (
   extraCharClassName = "",
   targetKind = "",
   blockOrCondition,
-  responseType
+  responseType,
 ) => {
   for (const a of ans) {
     const characterSet = document.createElement("span");
@@ -195,7 +198,7 @@ const pushCharacterSet = (
 export const toggleClickedCharacters = () => {
   const clickedCharacterElems =
     showCharacterSetResponse.alreadyClickedCharacters.map((c) =>
-      document.getElementById(`clickableCharacter-${c.toLowerCase()}`)
+      document.getElementById(`clickableCharacter-${c.toLowerCase()}`),
     );
   clickedCharacterElems.forEach((e) => {
     if (e) {
@@ -217,7 +220,7 @@ export const toggleClickedCharacters = () => {
 export const scaleFontSizeToFit = (
   elem,
   childrenClass,
-  allowedHeightRatio = 0.85
+  allowedHeightRatio = 0.85,
 ) => {
   // TODO support multidimensional?
   const minFontSize = getMinFontSize();
@@ -231,11 +234,18 @@ export const scaleFontSizeToFit = (
       .querySelectorAll("." + childrenClass)
       .forEach((e) => (e.style["font-size"] = String(x) + "px"));
   const unit = 1;
-  const maxNonOverlapSizeForFont = 360; // adding this to avoid thinner fonts like pelli to cover the entire window, as their width woud be <<< screen width and loop will increase the font-size.
+  const maxNonOverlapSizeForFont = 260; // adding this to avoid thinner fonts like pelli to cover the entire window, as their width woud be <<< screen width and loop will increase the font-size.
   let newSize = minFontSize; // Start with smallest ADA complient font
   scale(newSize);
   elem.style["overflow"] = "hidden";
   elem.style["white-space"] = "nowrap";
+  console.log(elem, elem.style["font-family"], elem.style);
+  if (elem.style["font-family"] === '"Pelli.woff2"') {
+    console.log("here");
+    document
+      .querySelectorAll("." + childrenClass)
+      .forEach((e) => (e.style["height"] = "100%"));
+  }
   while (
     elem.offsetWidth < containingWidth &&
     elem.offsetHeight < containingHeight * allowedHeightRatio &&
@@ -256,7 +266,7 @@ export const getMinFontSize = () => {
       return letterConfig.targetMinimumPix;
     } else {
       const distanceBasedMinSize = Math.ceil(
-        XYPixOfXYDeg([0.15, 0], displayOptions)[0]
+        XYPixOfXYDeg([0.15, 0], displayOptions)[0],
       );
       return Math.max(distanceBasedMinSize, 12);
     }
