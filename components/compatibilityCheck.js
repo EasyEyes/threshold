@@ -57,7 +57,7 @@ export const QRSkipResponse = {
 export const showExperimentEnding = (
   newEnding = true,
   addReturnToProlificButton = false,
-  lang = "en-US"
+  lang = "en-US",
 ) => {
   let endingText;
   if (newEnding) endingText = document.createElement("div");
@@ -101,7 +101,7 @@ export const getPreferredModelNumberAndName = (
   OEM,
   platformName,
   lang,
-  lowercase = false
+  lowercase = false,
 ) => {
   let preferredModelNumber = "";
   let preferredModelName = "";
@@ -111,104 +111,104 @@ export const getPreferredModelNumberAndName = (
       lowercase
         ? "RC_modelNumberAndroidSamsungLowercase"
         : "RC_modelNumberAndroidSamsung",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase
         ? "RC_modelNameAndroidSamsungLowercase"
         : "RC_modelNameAndroidSamsung",
-      lang
+      lang,
     );
   } else if (OEM === "Motorola") {
     preferredModelNumber = readi18nPhrases(
       lowercase
         ? "RC_modelNumberAndroidMotorolaLowercase"
         : "RC_modelNumberAndroidMotorola",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase
         ? "RC_modelNameAndroidMotorolaLowercase"
         : "RC_modelNameAndroidMotorola",
-      lang
+      lang,
     );
   } else if (OEM === "Blackberry") {
     preferredModelNumber = readi18nPhrases(
       lowercase
         ? "RC_modelNumberBlackberryLowercase"
         : "RC_modelNumberBlackberry",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase ? "RC_modelNameBlackberryLowercase" : "RC_modelName",
-      lang
+      lang,
     );
   } else if (OEM === "Google") {
     preferredModelNumber = readi18nPhrases(
       lowercase
         ? "RC_modelNumberAndroidGoogleLowercase"
         : "RC_modelNumberAndroidGoogle",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase
         ? "RC_modelNameAndroidGoogleLowercase"
         : "RC_modelNameAndroidGoogle",
-      lang
+      lang,
     );
   } else if (OEM === "Huawei") {
     preferredModelNumber = readi18nPhrases(
       lowercase
         ? "RC_modelNumberAndroidHuaweiLowercase"
         : "RC_modelNumberAndroidHuawei",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase
         ? "RC_modelNameAndroidHuaweiLowercase"
         : "RC_modelNameAndroidHuawei",
-      lang
+      lang,
     );
   } else if (OEM === "Xiaomi") {
     preferredModelNumber = readi18nPhrases(
       lowercase
         ? "RC_modelNumberAndroidXiaomiLowercase"
         : "RC_modelNumberAndroidXiaomi",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase
         ? "RC_modelNameAndroidXiaomiLowercase"
         : "RC_modelNameAndroidXiaomi",
-      lang
+      lang,
     );
   } else if (OEM === "Apple") {
     if (platformName === "iOS") {
       preferredModelNumber = readi18nPhrases(
         lowercase ? "RC_modelNumberIOsLowercase" : "RC_modelNumberIOs",
-        lang
+        lang,
       );
       preferredModelName = readi18nPhrases(
         lowercase ? "RC_modelNameIOsLowercase" : "RC_modelName",
-        lang
+        lang,
       );
     } else if (platformName === "macOS") {
       preferredModelNumber = readi18nPhrases(
         lowercase ? "RC_modelNumberMacOSLowercase" : "RC_modelNumberMacOS",
-        lang
+        lang,
       );
       preferredModelName = readi18nPhrases(
         lowercase ? "RC_modelNameMacOSLowercase" : "RC_modelName",
-        lang
+        lang,
       );
     } else {
       preferredModelNumber = readi18nPhrases(
         lowercase ? "RC_modelNumberIOsLowercase" : "RC_modelNumberIOs",
-        lang
+        lang,
       );
       preferredModelName = readi18nPhrases(
         lowercase ? "RC_modelNameIOsLowercase" : "RC_modelName",
-        lang
+        lang,
       );
     }
   } else if (platformName === "Android") {
@@ -216,85 +216,85 @@ export const getPreferredModelNumberAndName = (
       lowercase
         ? "RC_modelNumberAndroidGenericLowercase"
         : "RC_modelNumberAndroidGeneric",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase
         ? "RC_modelNameAndroidGenericLowercase"
         : "RC_modelNameAndroidGeneric",
-      lang
+      lang,
     );
   } else if (platformName === "Bada") {
     preferredModelNumber = readi18nPhrases(
       lowercase ? "RC_modelNumberBadaLowercase" : "RC_modelNumberBada",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
-      lang
+      lang,
     );
   } else if (platformName === "Firefox") {
     preferredModelNumber = readi18nPhrases(
       lowercase ? "RC_modelNumberFirefoxLowercase" : "RC_modelNumberFirefox",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
-      lang
+      lang,
     );
   } else if (platformName === "Linux") {
     preferredModelNumber = readi18nPhrases(
       lowercase ? "RC_modelNumberLinuxLowercase" : "RC_modelNumberLinux",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
-      lang
+      lang,
     );
   } else if (platformName === "Maemo") {
     preferredModelNumber = readi18nPhrases(
       lowercase ? "RC_modelNumberMaemoLowercase" : "RC_modelNumberMaemo",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
-      lang
+      lang,
     );
   } else if (platformName === "Palm") {
     preferredModelNumber = readi18nPhrases(
       lowercase ? "RC_modelNumberPalmLowercase" : "RC_modelNumberPalm",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
-      lang
+      lang,
     );
   } else if (platformName === "WebOS") {
     preferredModelNumber = readi18nPhrases(
       lowercase ? "RC_modelNumberWebOSLowercase" : "RC_modelNumberWebOS",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
-      lang
+      lang,
     );
   } else if (platformName === "Windows") {
     preferredModelNumber = readi18nPhrases(
       lowercase ? "RC_modelNumberWindowsLowercase" : "RC_modelNumberWindows",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
-      lang
+      lang,
     );
   } else {
     preferredModelNumber = readi18nPhrases(
       lowercase ? "RC_modelNumberAndroidGenericLowercase" : "RC_modelNumber",
-      lang
+      lang,
     );
     preferredModelName = readi18nPhrases(
       lowercase ? "RC_modelNameAndroidGenericLowercase" : "RC_modelName",
-      lang
+      lang,
     );
   }
 
@@ -308,7 +308,7 @@ export const getInstructionText = (
   isLoudspeakerCalibration,
   preferredModelNumberText = "model number",
   needPhoneSurvey = false,
-  OEM = ""
+  OEM = "",
 ) => {
   //RC_phoneBrandAndModel
   const needModelNumber = isSmartPhone
@@ -331,11 +331,11 @@ export const getInstructionText = (
     .replace("XXX", OEM)
     .replace(
       "yyy",
-      thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType
+      thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType,
     )
     .replace(
       "YYY",
-      thisDevice.DeviceType === "Unknown" ? "Device" : thisDevice.DeviceType
+      thisDevice.DeviceType === "Unknown" ? "Device" : thisDevice.DeviceType,
     );
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
@@ -383,7 +383,7 @@ export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
     collectionRef,
     where("ID", "==", speakerID),
     where("lowercaseOEM", "==", OEM),
-    where("isDefault", "==", true)
+    where("isDefault", "==", true),
   );
   const querySnapshot = await getDocs(q);
   if (querySnapshot.size > 0) {
@@ -397,7 +397,7 @@ export const checkSystemCompatibility = (
   lang,
   rc,
   useEnglishNamesForLanguage = true,
-  psychoJS = null
+  psychoJS = null,
 ) => {
   // handle language
   handleLanguage(lang, rc, useEnglishNamesForLanguage);
@@ -408,7 +408,7 @@ export const checkSystemCompatibility = (
     reader,
     Language,
     false,
-    rc
+    rc,
   );
   const compatibilityRequirements = requirements.compatibilityRequirements;
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
@@ -449,24 +449,24 @@ export const checkSystemCompatibility = (
     // compute across all conditions
     const needTargetSizeDownToDegAll = reader.read(
       "needTargetSizeDownToDeg",
-      i
+      i,
     );
     const minScreenWidthDegAll = reader.read("needScreenWidthUpToDeg", i);
     const minScreenHeightDegAll = reader.read("needScreenHeightUpToDeg", i);
 
     // remove disabled blocks
     const needTargetSizeDownToDeg = needTargetSizeDownToDegAll.filter(
-      (item, index) => !disabledConditions.includes(i + "_" + (index + 1))
+      (item, index) => !disabledConditions.includes(i + "_" + (index + 1)),
     );
     const minScreenWidthDeg = Math.max(
       ...minScreenWidthDegAll.filter(
-        (item, index) => !disabledConditions.includes(i + "_" + (index + 1))
-      )
+        (item, index) => !disabledConditions.includes(i + "_" + (index + 1)),
+      ),
     );
     const minScreenHeightDeg = Math.max(
       ...minScreenHeightDegAll.filter(
-        (item, index) => !disabledConditions.includes(i + "_" + (index + 1))
-      )
+        (item, index) => !disabledConditions.includes(i + "_" + (index + 1)),
+      ),
     );
 
     const nConditions = needTargetSizeDownToDeg.length;
@@ -522,7 +522,7 @@ export const checkSystemCompatibility = (
     // Internation phrase EE_compatibileScreenWidth - replace 111 with minWidthPx
     const ssMsg = readi18nPhrases("EE_compatibleScreenWidth", Language).replace(
       /111/g,
-      minWidthPx.toString()
+      minWidthPx.toString(),
     );
     screenSizeMsg.push(ssMsg + ".\n\n");
 
@@ -540,7 +540,7 @@ export const checkSystemCompatibility = (
     // Internation phrase EE_compatibileScreenHeight - replace 111 with minHeightPx
     const ssMsg = readi18nPhrases(
       "EE_compatibleScreenHeight",
-      Language
+      Language,
     ).replace(/111/g, minHeightPx.toString());
     screenSizeMsg.push(ssMsg + ".\n\n");
     const screenSizeCompatible = screenHeightPx >= minHeightPx;
@@ -587,7 +587,7 @@ export const checkSystemCompatibility = (
         .replace(/111/g, screenWidthPx.toString())
         .replace(/222/g, screenHeightPx.toString())
         .replace(/333/g, minWidthPx.toString())
-        .replace(/444/g, minHeightPx.toString())
+        .replace(/444/g, minHeightPx.toString()),
     );
   }
 
@@ -610,7 +610,7 @@ export const getCompatibilityRequirements = (
   Language,
   isForScientistPage,
   rc = null,
-  parsed
+  parsed,
 ) => {
   //  If isForScientistPage is true, then the returned data will include deviceIsCompatibleBool.
   //  If isForScientistPage is false, then the returned data will not include deviceIsCompatibleBool - only the compatibility requirements as an array of strings (used in scientist page) - no rc is needed in this case.
@@ -638,12 +638,12 @@ export const getCompatibilityRequirements = (
 
     compatibleBrowser = reader.read("_needBrowser")[0].split(",");
     compatibleBrowserVersionMinimum = reader.read(
-      "_needBrowserVersionMinimum"
+      "_needBrowserVersionMinimum",
     )[0];
     compatibleDevice = reader.read("_needDeviceType")[0].split(",");
     compatibleOS = reader.read("_needOperatingSystem")[0].split(",");
     compatibleProcessorCoresMinimum = reader.read(
-      "_needProcessorCoresMinimum"
+      "_needProcessorCoresMinimum",
     )[0];
     // the above lists might have spaces in the beginning or end of the string, so we need to remove them
     compatibleBrowser = compatibleBrowser.map((item) => item.trim());
@@ -672,7 +672,7 @@ export const getCompatibilityRequirements = (
   // some adjustments to the device info
   if (deviceInfo["hardwareConcurrency"] <= 0)
     deviceInfo["hardwareConcurrency"] = Math.round(
-      2 * deviceInfo["computeRandomMHz"]
+      2 * deviceInfo["computeRandomMHz"],
     );
 
   deviceInfo["deviceBrowserVersion"] =
@@ -681,11 +681,11 @@ export const getCompatibilityRequirements = (
     deviceInfo["deviceBrowserVersion"] = Number(
       deviceInfo["deviceBrowserVersion"][0] +
         "." +
-        Math.round(deviceInfo["deviceBrowserVersion"][1] * 10) / 10
+        Math.round(deviceInfo["deviceBrowserVersion"][1] * 10) / 10,
     );
   else
     deviceInfo["deviceBrowserVersion"] = Number(
-      deviceInfo["deviceBrowserVersion"][0]
+      deviceInfo["deviceBrowserVersion"][0],
     );
 
   if (deviceInfo["deviceSysFamily"] == "Mac")
@@ -733,7 +733,7 @@ export const getCompatibilityRequirements = (
       switch (OSCompatibilityType) {
         case "all": //ignore OSes
           msg.push(
-            readi18nPhrases("EE_compatibleNotBrowserDeviceCores", Language)
+            readi18nPhrases("EE_compatibleNotBrowserDeviceCores", Language),
           );
           break;
         case "not": //report incompatible OSes
@@ -743,7 +743,10 @@ export const getCompatibilityRequirements = (
             needsUnmet.push("_needOperatingSystem");
           }
           msg.push(
-            readi18nPhrases("EE_compatibleNotBrowserNotOSDeviceCores", Language)
+            readi18nPhrases(
+              "EE_compatibleNotBrowserNotOSDeviceCores",
+              Language,
+            ),
           );
           break;
         default: //report compatible OSes
@@ -753,7 +756,7 @@ export const getCompatibilityRequirements = (
             needsUnmet.push("_needOperatingSystem");
           }
           msg.push(
-            readi18nPhrases("EE_compatibleNotBrowserOSDeviceCores", Language)
+            readi18nPhrases("EE_compatibleNotBrowserOSDeviceCores", Language),
           );
           break;
       }
@@ -778,13 +781,13 @@ export const getCompatibilityRequirements = (
             msg.push(
               readi18nPhrases(
                 "EE_compatibleBrowserVersionDeviceCores",
-                Language
-              )
+                Language,
+              ),
             );
           } //ignore browser version
           else
             msg.push(
-              readi18nPhrases("EE_compatibleBrowserDeviceCores", Language)
+              readi18nPhrases("EE_compatibleBrowserDeviceCores", Language),
             );
           break;
         case "not": //report incompatible OSes
@@ -803,12 +806,12 @@ export const getCompatibilityRequirements = (
               needsUnmet.push("_needBrowserVersionMinimum");
             }
             msg.push(
-              readi18nPhrases("EE_compatibleBrowserNotOSDeviceCores", Language)
+              readi18nPhrases("EE_compatibleBrowserNotOSDeviceCores", Language),
             );
           } //ignore browser version
           else
             msg.push(
-              readi18nPhrases("EE_compatibleBrowserNotOSDeviceCores", Language)
+              readi18nPhrases("EE_compatibleBrowserNotOSDeviceCores", Language),
             );
           break;
         default: //report compatible browsers
@@ -829,13 +832,13 @@ export const getCompatibilityRequirements = (
             msg.push(
               readi18nPhrases(
                 "EE_compatibleBrowserVersionOSDeviceCores",
-                Language
-              )
+                Language,
+              ),
             );
           } //ignore browser version
           else
             msg.push(
-              readi18nPhrases("EE_compatibleBrowserOSDeviceCores", Language)
+              readi18nPhrases("EE_compatibleBrowserOSDeviceCores", Language),
             );
           break;
       }
@@ -869,20 +872,20 @@ export const getCompatibilityRequirements = (
     //Compatible with items connected by OR.
     arr[idx] = arr[idx].replace(
       /BBB/g,
-      StringOfItems(compatibleBrowser, Language)
+      StringOfItems(compatibleBrowser, Language),
     );
     arr[idx] = arr[idx].replace(/OOO/g, StringOfItems(compatibleOS, Language));
     arr[idx] = arr[idx].replace(
       /DDD/g,
-      StringOfItems(compatibleDevice, Language)
+      StringOfItems(compatibleDevice, Language),
     );
     arr[idx] = arr[idx].replace(
       /111/g,
-      compatibleBrowserVersionMinimum.toString()
+      compatibleBrowserVersionMinimum.toString(),
     );
     arr[idx] = arr[idx].replace(
       /222/g,
-      compatibleProcessorCoresMinimum.toString()
+      compatibleProcessorCoresMinimum.toString(),
     );
   });
 
@@ -902,18 +905,18 @@ export const getCompatibilityRequirements = (
   describeDevice = describeDevice.replace(/BBB/g, deviceInfo["deviceBrowser"]);
   describeDevice = describeDevice.replace(
     /111/g,
-    deviceInfo["deviceBrowserVersion"].toString()
+    deviceInfo["deviceBrowserVersion"].toString(),
   );
   describeDevice = describeDevice.replace(
     /OOO/g,
-    deviceInfo["deviceSysFamily"]
+    deviceInfo["deviceSysFamily"],
   );
   describeDevice = describeDevice.replace(/DDD/g, deviceInfo["deviceType"]);
   describeDevice = describeDevice.replace(
     /222/g,
     deviceInfo["hardwareConcurrency"] > 0
       ? deviceInfo["hardwareConcurrency"]
-      : Math.round(2 * deviceInfo["computeRandomMHz"])
+      : Math.round(2 * deviceInfo["computeRandomMHz"]),
   );
   describeDevice = describeDevice.replace(/Mac/g, "macOS");
   describeDevice = describeDevice.replace(/OS X/g, "macOS");
@@ -976,16 +979,16 @@ export const displayCompatibilityMessage = async (
   needComputerSurveyBool,
   needCalibratedSound,
   psychoJS,
-  quitPsychoJS
+  quitPsychoJS,
 ) => {
   return new Promise(async (resolve) => {
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
     document.body.style.overflowX = "hidden";
-    const thisDevice = await identifyDevice();
     if (needComputerSurveyBool) {
+      const thisDevice = await identifyDevice();
       psychoJS.experiment.addData(
         "ComputerInfoFrom51Degrees",
-        JSON.stringify(thisDevice)
+        JSON.stringify(thisDevice),
       );
       psychoJS.experiment.nextEntry();
     }
@@ -1042,18 +1045,18 @@ export const displayCompatibilityMessage = async (
       refreshButton.id = "refresh-btn";
       refreshButton.innerHTML = readi18nPhrases(
         "EE_refresh",
-        rc.language.value
+        rc.language.value,
       );
       refreshButton.addEventListener("click", () => {
         const language = readi18nPhrases(
           "EE_languageNameEnglish",
-          rc.language.value
+          rc.language.value,
         );
         const newMsg = checkSystemCompatibility(reader, language, rc);
         handleNewMessage(
           newMsg.msg,
           "compatibility-message",
-          rc.language.value
+          rc.language.value,
         );
         // update proceedBool
         proceedBool = newMsg.proceed;
@@ -1069,7 +1072,7 @@ export const displayCompatibilityMessage = async (
       LanguageTitle.style.fontWeight = "bold";
       LanguageTitle.innerHTML = readi18nPhrases(
         "EE_languageChoose",
-        rc.language.value
+        rc.language.value,
       );
       LanguageTitle.id = "language-title";
       LanguageTitle.style.marginTop = "0px";
@@ -1107,7 +1110,7 @@ export const displayCompatibilityMessage = async (
           needPhoneSurvey,
           compatibilityCheckPeer,
           needAnySmartphone,
-          needCalibratedSmartphoneMicrophone
+          needCalibratedSmartphoneMicrophone,
         );
       });
       // top right corner
@@ -1140,7 +1143,7 @@ export const displayCompatibilityMessage = async (
         needAnySmartphone,
         needCalibratedSmartphoneMicrophone,
         needPhoneSurvey,
-        rc.language.value
+        rc.language.value,
       );
       compatibilityCheckQRExplanation.innerHTML = messageForQr;
 
@@ -1155,7 +1158,7 @@ export const displayCompatibilityMessage = async (
         noSmartphoneButton,
       } = addQRSkipButtons(rc.language.value, compatiblityCheckQR);
       messageWrapper.append(
-        needPhoneSurvey ? qrContainer : compatiblityCheckQR
+        needPhoneSurvey ? qrContainer : compatiblityCheckQR,
       );
       cantReadButton.addEventListener("click", async () => {
         QRSkipResponse.QRCantBool = true;
@@ -1176,14 +1179,14 @@ export const displayCompatibilityMessage = async (
           needCalibratedSound,
           numberOfTries,
           {},
-          qrContainer
+          qrContainer,
         );
         if (proceed) {
           if (needPhoneSurvey) {
             if (needComputerSurveyBool) {
               await getLoudspeakerDeviceDetailsFromUser(
                 messageWrapper,
-                rc.language.value
+                rc.language.value,
               );
             }
             resolve({
@@ -1215,14 +1218,14 @@ export const displayCompatibilityMessage = async (
           needCalibratedSound,
           numberOfTries,
           {},
-          qrContainer
+          qrContainer,
         );
         if (proceed) {
           if (needPhoneSurvey) {
             if (needComputerSurveyBool) {
               await getLoudspeakerDeviceDetailsFromUser(
                 messageWrapper,
-                rc.language.value
+                rc.language.value,
               );
             }
             resolve({
@@ -1263,7 +1266,7 @@ export const displayCompatibilityMessage = async (
             psychoJS.experiment.nextEntry();
             numberOfTries++;
             const tryComputerButton = document.getElementById(
-              "try-computer-button"
+              "try-computer-button",
             );
             const p = document.getElementById("loudspeaker-instead");
             if (tryComputerButton) {
@@ -1291,14 +1294,14 @@ export const displayCompatibilityMessage = async (
               needCalibratedSound,
               numberOfTries,
               screenSizes,
-              qrContainer
+              qrContainer,
             );
             if (proceed) {
               if (needPhoneSurvey) {
                 if (needComputerSurveyBool) {
                   await getLoudspeakerDeviceDetailsFromUser(
                     messageWrapper,
-                    rc.language.value
+                    rc.language.value,
                   );
                 }
                 resolve({
@@ -1321,7 +1324,7 @@ export const displayCompatibilityMessage = async (
                   const p = document.createElement("p");
                   p.innerText = readi18nPhrases(
                     "RC_loudspeakerInstead",
-                    rc.language.value
+                    rc.language.value,
                   );
                   p.id = "loudspeaker-instead";
                   messageWrapper.appendChild(p);
@@ -1329,7 +1332,7 @@ export const displayCompatibilityMessage = async (
                   tryComputerButton.classList.add(...["btn", "btn-success"]);
                   tryComputerButton.innerText = readi18nPhrases(
                     "RC_tryComputer",
-                    rc.language.value
+                    rc.language.value,
                   );
                   tryComputerButton.id = "try-computer-button";
                   // tryComputerButton.style.marginTop = "10px";
@@ -1345,7 +1348,7 @@ export const displayCompatibilityMessage = async (
                       await getLoudspeakerDeviceDetailsFromUser(
                         messageWrapper,
                         rc.language.value,
-                        false
+                        false,
                       );
                     if (loudspeaker) {
                       loudspeakerInfo.loudspeaker = loudspeaker;
@@ -1355,7 +1358,7 @@ export const displayCompatibilityMessage = async (
                         proceed.style.width = "fit-content";
                         proceed.innerText = readi18nPhrases(
                           "T_proceed",
-                          rc.language.value
+                          rc.language.value,
                         );
                         proceed.addEventListener("click", () => {
                           resolve();
@@ -1363,12 +1366,12 @@ export const displayCompatibilityMessage = async (
                         const message = document.createElement("p");
                         message.innerText = readi18nPhrases(
                           "RC_loudspeakerIsInCalibrationLibrary",
-                          rc.language.value
+                          rc.language.value,
                         )
                           .replace(/XXX/g, loudspeaker.fullLoudspeakerModelName)
                           .replace(
                             /xxx/g,
-                            loudspeaker.fullLoudspeakerModelName
+                            loudspeaker.fullLoudspeakerModelName,
                           );
                         message.style.marginTop = "10px";
 
@@ -1387,7 +1390,7 @@ export const displayCompatibilityMessage = async (
                   messageWrapper.appendChild(tryComputerButton);
                 } else if (numberOfTries > 1) {
                   const tryComputerButton = document.getElementById(
-                    "try-computer-button"
+                    "try-computer-button",
                   );
                   const p = document.getElementById("loudspeaker-instead");
                   if (tryComputerButton) {
@@ -1417,7 +1420,7 @@ export const displayCompatibilityMessage = async (
         elem.remove();
         await getLoudspeakerDeviceDetailsFromUser(
           messageWrapper,
-          rc.language.value
+          rc.language.value,
         );
         resolve({
           proceedButtonClicked: true,
@@ -1459,7 +1462,7 @@ const getMessageForQR = (
   needAnySmartphone,
   needCalibratedSmartphoneMicrophone,
   needPhoneSurvey,
-  language
+  language,
 ) => {
   let messageForQr = "";
   if (needAnySmartphone && needCalibratedSmartphoneMicrophone) {
@@ -1468,7 +1471,7 @@ const getMessageForQR = (
       ? (messageForQr += readi18nPhrases("RC_needPhoneSurvey", language))
       : (messageForQr += readi18nPhrases(
           "RC_needPhoneMicrophoneAndKeypad",
-          language
+          language,
         ));
     messageForQr += " " + readi18nPhrases("RC_needsPointCameraAtQR", language);
   } else if (needCalibratedSmartphoneMicrophone) {
@@ -1479,7 +1482,7 @@ const getMessageForQR = (
           "<br>" +
           `<p style="margin-top:10px; margin-bottom:10px">${readi18nPhrases(
             "RC_needPhoneSurveyParticipate",
-            language
+            language,
           )}</p>`)
       : (messageForQr +=
           readi18nPhrases("RC_needPhoneMicrophone", language) +
@@ -1498,7 +1501,7 @@ const getMessageForQR = (
 const checkModelNumberandNameForIOS = (
   modelNumber,
   modelName,
-  platformName
+  platformName,
 ) => {
   // check if the model number has 5 characters
   //  check if first character of model number is the letter "A"
@@ -1546,7 +1549,7 @@ const isSmartphoneInDatabase = async (
   needCalibratedSound = [],
   numberOfTries = 0,
   screenSizes = { width: 0, height: 0 },
-  qrContainer = null
+  qrContainer = null,
 ) => {
   // ask for the model number and name of the device
   // create input box for model number and name
@@ -1582,7 +1585,7 @@ const isSmartphoneInDatabase = async (
     OEM,
     deviceDetails.PlatformName,
     lang,
-    true
+    true,
   )["preferredModelNumber"];
 
   const brandInput = document.createElement("input");
@@ -1611,7 +1614,7 @@ const isSmartphoneInDatabase = async (
     false,
     preferredModelNumberLowerCase,
     needPhoneSurvey,
-    OEM
+    OEM,
   );
   const p = document.createElement("p");
   // add id for p
@@ -1639,7 +1642,7 @@ const isSmartphoneInDatabase = async (
       p,
       img,
       modelNameInput,
-      modelNumberInput
+      modelNumberInput,
     );
     modelNumberWrapper.appendChild(brandSuggestionsContainer);
   }
@@ -1656,7 +1659,7 @@ const isSmartphoneInDatabase = async (
       p,
       img,
       modelNameInput,
-      modelNumberInput
+      modelNumberInput,
     );
     modelNumberWrapper.appendChild(modelNameSuggestionsContainer);
   }
@@ -1673,7 +1676,7 @@ const isSmartphoneInDatabase = async (
       p,
       img,
       modelNameInput,
-      modelNumberInput
+      modelNumberInput,
     );
     modelNumberWrapper.appendChild(modelNumberSuggestionsContainer);
   }
@@ -1712,7 +1715,7 @@ const isSmartphoneInDatabase = async (
         const valid = checkModelNumberandNameForIOS(
           modelNumber,
           modelName,
-          deviceDetails.PlatformName
+          deviceDetails.PlatformName,
         );
         if (!valid) {
           p.innerHTML =
@@ -1727,18 +1730,18 @@ const isSmartphoneInDatabase = async (
             // add microphone details to microphoneInfo.phoneSurvey array
             const smallerNumber = Math.min(
               screenSizes.width,
-              screenSizes.height
+              screenSizes.height,
             );
             const largerNumber = Math.max(
               screenSizes.width,
-              screenSizes.height
+              screenSizes.height,
             );
             const match = await matchPhoneModelInDatabase(
               brandInput.value,
               modelName,
               modelNumber,
               smallerNumber,
-              largerNumber
+              largerNumber,
             );
             microphoneInfo.phoneSurvey = {
               smartphoneManufacturer: brandInput.value,
@@ -1760,7 +1763,7 @@ const isSmartphoneInDatabase = async (
           } else {
             const exists = await doesMicrophoneExistInFirestore(
               modelNumber,
-              OEM.toLowerCase().split(" ").join("")
+              OEM.toLowerCase().split(" ").join(""),
             );
             modelNumberInput.remove();
             modelNameInput.remove();
@@ -1770,7 +1773,7 @@ const isSmartphoneInDatabase = async (
               elem.style.display = "";
               elem.innerText = readi18nPhrases(
                 "RC_microphoneIsInCalibrationLibrary",
-                lang
+                lang,
               ).replace("xxx", OEM + " " + modelName);
               if (languageWrapper) languageWrapper.remove();
               microphoneInfo.micFullName = modelName;
@@ -1783,7 +1786,7 @@ const isSmartphoneInDatabase = async (
               displayUpdate.style.display = "";
               displayUpdate.innerText = readi18nPhrases(
                 "RC_microphoneNotInCalibrationLibrary",
-                lang
+                lang,
               ).replace("xxx", modelName);
 
               resolve(false);
@@ -1806,7 +1809,7 @@ const findLoudspeakerMatchInDatabase = async (OEM, DeviceId, ModelNumber) => {
     loudspeakerRef,
     where("OEM", "==", OEM),
     where("DeviceId", "==", DeviceId),
-    where("fullLoudspeakerModelNumber", "==", ModelNumber)
+    where("fullLoudspeakerModelNumber", "==", ModelNumber),
   );
   const snapshot = await getDocs(q);
   if (snapshot.empty) {
@@ -1825,7 +1828,7 @@ const handleLanguage = (lang, rc, useEnglishNames = true) => {
     ? readi18nPhrases("EE_languageNameEnglish")
     : readi18nPhrases("EE_languageNameNative");
   const languageCode = Object.keys(Languages).find(
-    (key) => Languages[key] === lang
+    (key) => Languages[key] === lang,
   );
 
   // set language code
@@ -1841,7 +1844,7 @@ const handleNewMessage = (
   needPhoneSurvey = false,
   compatibilityCheckPeer = null,
   needAnySmartphone = false,
-  needCalibratedSmartphoneMicrophone = false
+  needCalibratedSmartphoneMicrophone = false,
 ) => {
   var displayMsg = "";
   msg.forEach((item) => {
@@ -1865,14 +1868,14 @@ const handleNewMessage = (
 
   if (needPhoneSurvey || compatibilityCheckPeer) {
     let qrCodeExplanation = document.getElementById(
-      "compatibility-qr-explanation"
+      "compatibility-qr-explanation",
     );
     if (qrCodeExplanation) {
       let messageForQr = getMessageForQR(
         needAnySmartphone,
         needCalibratedSmartphoneMicrophone,
         needPhoneSurvey,
-        lang
+        lang,
       );
       qrCodeExplanation.innerHTML = messageForQr;
     }
@@ -1881,7 +1884,7 @@ const handleNewMessage = (
     if (skipQRExplanation) {
       skipQRExplanation.innerHTML = readi18nPhrases(
         "RC_skipQR_Explanation",
-        lang
+        lang,
       );
     }
     const cantReadButton = document.getElementById("cantReadButton");
@@ -1889,19 +1892,19 @@ const handleNewMessage = (
       cantReadButton.innerHTML = readi18nPhrases("RC_cantReadQR_Button", lang);
     }
     const preferNotToReadButton = document.getElementById(
-      "preferNotToReadButton"
+      "preferNotToReadButton",
     );
     if (preferNotToReadButton) {
       preferNotToReadButton.innerHTML = readi18nPhrases(
         "RC_preferNotToReadQR_Button",
-        lang
+        lang,
       );
     }
     const noSmartphoneButton = document.getElementById("noSmartphoneButton");
     if (noSmartphoneButton) {
       noSmartphoneButton.innerHTML = readi18nPhrases(
         "RC_noSmartphone_Button",
-        lang
+        lang,
       );
     }
   }
@@ -1967,7 +1970,7 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
 export const convertLanguageToLanguageCode = (language) => {
   const Languages = readi18nPhrases("EE_languageNameEnglish");
   const languageCode = Object.keys(Languages).find(
-    (key) => Languages[key] === language
+    (key) => Languages[key] === language,
   );
   return languageCode ? languageCode : "en-US";
 };
@@ -1975,7 +1978,7 @@ export const convertLanguageToLanguageCode = (language) => {
 const getLoudspeakerDeviceDetailsFromUser = async (
   elems,
   language,
-  isSurvey = true
+  isSurvey = true,
 ) => {
   const p = document.getElementById("need-phone-survey-instruction");
   if (p) {
@@ -1986,14 +1989,14 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     getPreferredModelNumberAndName(
       thisDevice.OEM,
       thisDevice.PlatformName,
-      language
+      language,
     );
 
   const { preferredModelNumberLowerCase } = getPreferredModelNumberAndName(
     thisDevice.OEM,
     thisDevice.PlatformName,
     language,
-    true
+    true,
   );
   // display the device info
   const deviceString = getDeviceString(thisDevice, language);
@@ -2004,7 +2007,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     false,
     preferredModelNumberLowerCase,
     false,
-    thisDevice.OEM
+    thisDevice.OEM,
   );
 
   // create title
@@ -2098,7 +2101,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           const loudspeaker = await findLoudspeakerMatchInDatabase(
             thisDevice.OEM,
             thisDevice.DeviceId,
-            modelNumberInput.value
+            modelNumberInput.value,
           );
           if (loudspeaker) {
             Loudspeaker = loudspeaker;
