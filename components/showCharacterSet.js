@@ -239,7 +239,6 @@ export const scaleFontSizeToFit = (
   scale(newSize);
   elem.style["overflow"] = "hidden";
   elem.style["white-space"] = "nowrap";
-  console.log(elem, elem.style["font-family"], elem.style);
   if (elem.style["font-family"] === '"Pelli.woff2"') {
     console.log("here");
     document
