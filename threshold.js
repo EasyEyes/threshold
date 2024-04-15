@@ -1470,9 +1470,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       -window.innerWidth / 2 + marginOffset,
       window.innerHeight / 2 - marginOffset,
     ];
-    t = 0;
     instructionsClock.reset(); // clock
-    frameN = -1;
+    // t = 0;
+    // frameN = -1;
     continueRoutine = true;
     instructions.setWrapWidth(window.innerWidth * wrapRatio - 2 * marginOffset);
     instructions.setPos(position);
@@ -5315,7 +5315,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //------Loop for each frame of Routine 'trial'-------
       // get current time
       t = trialClock.getTime();
-      frameN = targetKind.current === "rsvpReading" ? frameN + 10 : frameN + 1; // number of completed frames (so 0 is the first frame)
+      frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
 
       ////
       if (stats.on) stats.current.begin();
