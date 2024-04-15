@@ -5315,7 +5315,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //------Loop for each frame of Routine 'trial'-------
       // get current time
       t = trialClock.getTime();
-      frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
+      frameN = targetKind.current === "rsvpReading" ? frameN + 10 : frameN + 1; // number of completed frames (so 0 is the first frame)
 
       ////
       if (stats.on) stats.current.begin();
