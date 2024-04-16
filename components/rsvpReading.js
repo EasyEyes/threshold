@@ -48,7 +48,7 @@ export class RSVPReadingTargetSet {
     orderNumber,
     foilWords,
     paramReader,
-    BC
+    BC,
   ) {
     this.word = word;
     this.foilWords = foilWords;
@@ -82,7 +82,7 @@ export class RSVPReadingTargetSet {
       default:
         // TODO add compiler check to ensure spacingRelationToSize in [ratio, typographic] for rsvpReading
         console.error(
-          `Unsupported spacingRelationToSize: ${letterConfig.spacingRelationToSize}`
+          `Unsupported spacingRelationToSize: ${letterConfig.spacingRelationToSize}`,
         );
         return this._generateRatioStims(strings);
     }
@@ -93,17 +93,17 @@ export class RSVPReadingTargetSet {
       const lineLength = this.word.length + 2;
       // Top string
       strings.push(
-        sampleWithReplacement(this.flankerCharacterSet, lineLength).join("")
+        sampleWithReplacement(this.flankerCharacterSet, lineLength).join(""),
       );
       // Middle string
       strings.push(
         sampleWithReplacement(this.flankerCharacterSet, 1).join("") +
           this.word +
-          sampleWithReplacement(this.flankerCharacterSet, 1).join("")
+          sampleWithReplacement(this.flankerCharacterSet, 1).join(""),
       );
       // Bottom string
       strings.push(
-        sampleWithReplacement(this.flankerCharacterSet, lineLength).join("")
+        sampleWithReplacement(this.flankerCharacterSet, lineLength).join(""),
       );
     } else {
       strings.push(this.word);
@@ -126,7 +126,7 @@ export class RSVPReadingTargetSet {
         this._heightPx,
         this._spacingPx,
         `topFlanker-${this.orderNumber}`,
-        this.BC
+        this.BC,
       );
       const targetRowLetters = _generateLetterStimsForWord(
         strings[1],
@@ -134,7 +134,7 @@ export class RSVPReadingTargetSet {
         this._heightPx,
         this._spacingPx,
         `middleRow-${this.orderNumber}`,
-        this.BC
+        this.BC,
       );
       const bottomRowFlankerLetters = _generateLetterStimsForWord(
         strings[2],
@@ -142,7 +142,7 @@ export class RSVPReadingTargetSet {
         this._heightPx,
         this._spacingPx,
         `bottomFlanker-${this.orderNumber}`,
-        this.BC
+        this.BC,
       );
       return [
         ...topRowFlankerLetters,
@@ -156,7 +156,7 @@ export class RSVPReadingTargetSet {
         this._heightPx,
         this._spacingPx,
         `middleRow-${this.orderNumber}`,
-        this.BC
+        this.BC,
       );
     }
   }
@@ -181,7 +181,7 @@ export class RSVPReadingTargetSet {
       this.paramReader.read("readingSetSizeBy", this.BC),
       this.paramReader,
       readingStim,
-      "condition"
+      "condition",
     );
     fontSize.current = readingConfig.height;
     readingStim.setHeight(readingConfig.height);
@@ -212,7 +212,7 @@ class rsvpReadingTrialWords {
     // Make sure that response options are in sequence order
     this.responseOptions = keys.map((k, i) => {
       const targetWords = remainingResponseOptions.map(
-        (responses) => responses[0]
+        (responses) => responses[0],
       );
       const improperAddress = targetWords.indexOf(k.toLowerCase());
       let properOptions = remainingResponseOptions
@@ -225,7 +225,7 @@ class rsvpReadingTrialWords {
     this.targetWords = this.responseOptions.map((responses) => responses[0]);
     this.foils = this.responseOptions.map((responses) => responses.slice(1));
     this.responseOptions = this.responseOptions.map((options) =>
-      shuffle(options)
+      shuffle(options),
     );
   }
 }
@@ -243,9 +243,11 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
     dummyStim,
     conditions.length,
     numTrialsPerCondition,
-    reader.read("rsvpReadingNumberOfWords", block)
+    reader.read("rsvpReadingNumberOfWords", block),
   );
-  const sequences = pagePerCondition.map((p) => p.split("\n"));
+  const sequences = pagePerCondition.map((s) =>
+    s.split("\n").map((a) => a.replace(/\t/g, "")),
+  );
   const targetsAndFoils = sequences.map((conditionTrials, i) =>
     conditionTrials.map((trial) => {
       const BC = conditions[i]["block_condition"];
@@ -257,20 +259,20 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
         nAnswers,
         individuallyTokenizedWords,
         readingFrequencyToWordArchive[reader.read("readingCorpus", BC)],
-        "rsvpReading"
+        "rsvpReading",
       );
       const responseOptions = questions.map((q) => [
         q.correctAnswer,
         ...q.foils,
       ]);
       const sortByArray = individuallyTokenizedWords.map((w) =>
-        w.toLowerCase()
+        w.toLowerCase(),
       );
       responseOptions.sort(
-        (a, b) => sortByArray.indexOf(a[0]) - sortByArray.indexOf(b[0])
+        (a, b) => sortByArray.indexOf(a[0]) - sortByArray.indexOf(b[0]),
       );
       return responseOptions;
-    })
+    }),
   );
   const wordsPerCondition = {};
   conditions.forEach((c) => {
@@ -279,7 +281,7 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
     const responseOptionsForThisCondition = targetsAndFoils.shift();
     wordsPerCondition[BC] = sequencesForThisCondition.map(
       (sequence, i) =>
-        new rsvpReadingTrialWords(sequence, responseOptionsForThisCondition[i])
+        new rsvpReadingTrialWords(sequence, responseOptionsForThisCondition[i]),
     );
   });
   return wordsPerCondition;
@@ -297,11 +299,11 @@ export const generateRSVPReadingTargetSets = (
   wordsForThisTrial,
   durationSec,
   paramReader,
-  BC
+  BC,
 ) => {
   const position = XYPixOfXYDeg(
     letterConfig.targetEccentricityXYDeg,
-    displayOptions
+    displayOptions,
   );
 
   const targetWords = wordsForThisTrial.targetWords;
@@ -316,8 +318,8 @@ export const generateRSVPReadingTargetSets = (
         i,
         foilWords[i],
         paramReader,
-        BC
-      )
+        BC,
+      ),
     );
   }
   return targetSets;
@@ -329,7 +331,7 @@ const _generateLetterStimsForWord = (
   heightPx,
   spacingPx,
   name,
-  BC
+  BC,
 ) => {
   const letterOffsets = getEvenlySpacedValues(word.length, spacingPx);
   const letterPositions = letterOffsets.map((xOffset) => [
@@ -366,7 +368,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     typeof rsvpReadingTargetSets.current === "undefined" &&
     rsvpReadingTargetSets.upcoming.length === 0;
   defineTargetForCursorTracking(
-    doneShowingStimuliBool ? undefined : rsvpReadingTargetSets.current[0]
+    doneShowingStimuliBool ? undefined : rsvpReadingTargetSets.current[0],
   );
   // Done showing stimuli
   if (doneShowingStimuliBool) {
@@ -404,7 +406,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       } else if (!rsvpReadingResponse.displayStatus) {
         // Else create some subtle feedback that the scientist can use
         addScientistKeypressFeedback(
-          rsvpReadingTargetSets.numberOfIdentifications
+          rsvpReadingTargetSets.numberOfIdentifications,
         );
         rsvpReadingResponse.displayStatus = true;
       }
@@ -414,7 +416,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     if (
       rsvpReadingTargetSets.current.startTime <= t &&
       rsvpReadingTargetSets.current.stims.every(
-        (s) => s.status === PsychoJS.Status.NOT_STARTED
+        (s) => s.status === PsychoJS.Status.NOT_STARTED,
       )
     ) {
       rsvpReadingTargetSets.current.stims.forEach((s) => {
@@ -433,7 +435,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       if (
         !rsvpReadingTiming.current.drawnConfirmedTimestamp &&
         rsvpReadingTargetSets.current.stims.every(
-          (s) => s.status === PsychoJS.Status.NOT_STARTED
+          (s) => s.status === PsychoJS.Status.NOT_STARTED,
         )
       ) {
         rsvpReadingTiming.current.drawnConfirmedTimestamp = t;
@@ -443,7 +445,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       // If current targets are done, undraw them and update which is the current targetSet
       if (
         rsvpReadingTargetSets.current.stims.every(
-          (s) => s.status === PsychoJS.Status.STARTED
+          (s) => s.status === PsychoJS.Status.STARTED,
         )
       ) {
         rsvpReadingTargetSets.current.stims.forEach((s) => {
@@ -487,13 +489,13 @@ export const getRSVPReadingHeightPx = (reader, BC) => {
     Math.abs(
       XYPixOfXYDeg(
         [targetLocationDeg[0], targetLocationDeg[1] - sizeDeg / 2],
-        displayOptions
+        displayOptions,
       )[1] -
         XYPixOfXYDeg(
           [targetLocationDeg[0], targetLocationDeg[1] + sizeDeg / 2],
-          displayOptions
-        )[1]
-    )
+          displayOptions,
+        )[1],
+    ),
   );
   return heightPx;
 };
@@ -540,19 +542,19 @@ const updateScientistKeypressFeedback = (correctBool) => {
       !(
         [...e.classList].includes("scientist-feedback-circle-correct") ||
         [...e.classList].includes("scientist-feedback-circle-incorrect")
-      )
+      ),
   );
   const nextCircle = unresolvedCircles.shift();
   nextCircle?.classList.add(
     correctBool
       ? "scientist-feedback-circle-correct"
-      : "scientist-feedback-circle-incorrect"
+      : "scientist-feedback-circle-incorrect",
   );
 };
 
 export const removeScientistKeypressFeedback = () => {
   const feedbackCircles = document.querySelector(
-    ".scientist-feedback-circle-container"
+    ".scientist-feedback-circle-container",
   );
   if (feedbackCircles != null)
     feedbackCircles.parentNode.removeChild(feedbackCircles);
@@ -595,7 +597,7 @@ export const addRevealableTargetWordsToAidSpokenScoring = () => {
     thisWordCue.classList.add(
       i === 0
         ? "rsvpReadingTargetWordCurrent"
-        : "rsvpReadingTargetWordNotYetResponded"
+        : "rsvpReadingTargetWordNotYetResponded",
     );
     revealableTargetWordsKey.appendChild(thisWordCue);
   });
@@ -617,16 +619,16 @@ const _highlightNextWordInRevealedKey = () => {
   if (previousWord)
     previousWord.classList.replace(
       "rsvpReadingTargetWordCurrent",
-      "rsvpReadingTargetWordAlreadyResponded"
+      "rsvpReadingTargetWordAlreadyResponded",
     );
   const nextWords = document.querySelectorAll(
-    ".rsvpReadingTargetWordNotYetResponded"
+    ".rsvpReadingTargetWordNotYetResponded",
   );
   const nextWord = [...nextWords].shift();
   if (nextWord)
     nextWord.classList.replace(
       "rsvpReadingTargetWordNotYetResponded",
-      "rsvpReadingTargetWordCurrent"
+      "rsvpReadingTargetWordCurrent",
     );
 };
 
@@ -634,29 +636,29 @@ export const addRsvpReadingTrialResponsesToData = () => {
   const clicked = rsvpReadingResponse.responseType === "silent";
   psychoJS.experiment.addData(
     "rsvpReadingParticipantResponses",
-    clicked ? phraseIdentificationResponse.current.toString() : ""
+    clicked ? phraseIdentificationResponse.current.toString() : "",
   );
   psychoJS.experiment.addData(
     "rsvpReadingTargetWords",
-    rsvpReadingTargetSets.past.map((ts) => ts.word).toString()
+    rsvpReadingTargetSets.past.map((ts) => ts.word).toString(),
   );
   psychoJS.experiment.addData(
     "rsvpReadingTargetWordsForIdentification",
     rsvpReadingTargetSets.identificationTargetSets
       .map((ts) => ts.word)
-      .toString()
+      .toString(),
   );
   psychoJS.experiment.addData(
     "rsvpReadingResponseCorrectBool",
     phraseIdentificationResponse.correct
       .map((b) => (b ? "TRUE" : "FALSE"))
-      .toString()
+      .toString(),
   );
   logger("targetSets past", rsvpReadingTargetSets.past);
   psychoJS.experiment.addData(
     "rsvpReadingResponseTimesSec",
     getPhraseIdentificationReactionTimes()
       .map((t) => toFixedNumber(t, 2))
-      .toString()
+      .toString(),
   );
 };
