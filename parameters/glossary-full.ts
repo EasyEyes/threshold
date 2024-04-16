@@ -633,6 +633,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "all, macOS, Windows, ChromeOS, ChromiumOS, AndroidOS, iOS, SamsungOS, KaiOS, NokiaOS, Series40OS, Linux, Ubuntu, FreeBSD, Debian, Fedora, Solaris, CentOS, Deepin, notmacOS, notWindows, notChromeOS, notChromiumOS, notAndroidOS, notiOS, notSamsungOS, notKaiOS, notNokiaOS, notSeries40OS, notLinux, notUbuntu, notFreeBSD, notDebian, notFedora, notSolaris, notCentOS, notDeepin",
   },
   {
+    name: "_needPopupsBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needPopupsBool (default TRUE) requires pop-up window support in the browser. Most browsers allow the user to block or enable pop-ups. Some parts of EasyEyes (e.g. Remote Calibrator and sound calibration) use pop-ups extensively, and won't run if pop-ups are blocked. If they are blocked, the participant is alerted and will be allowed to proceed if they enable pop-ups. Otherwise they are asked to return the study to Prolific.",
+    type: "Boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_needProcessorCoresMinimum",
     availability: "now",
     example: "6",

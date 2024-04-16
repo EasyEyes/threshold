@@ -628,6 +628,14 @@ export const GLOSSARY: Glossary = {
       "notDeepin",
     ],
   },
+  _needPopupsBool: {
+    name: "_needPopupsBool",
+    availability: "now",
+    type: "Boolean",
+    default: "TRUE",
+    explanation:
+      "🕑 _needPopupsBool (default TRUE) requires pop-up window support in the browser. Most browsers allow the user to block or enable pop-ups. Some parts of EasyEyes (e.g. Remote Calibrator and sound calibration) use pop-ups extensively, and won't run if pop-ups are blocked. If they are blocked, the participant is alerted and will be allowed to proceed if they enable pop-ups. Otherwise they are asked to return the study to Prolific.",
+  },
   _needProcessorCoresMinimum: {
     name: "_needProcessorCoresMinimum",
     availability: "now",
