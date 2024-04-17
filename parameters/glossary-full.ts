@@ -592,6 +592,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_needCookiesBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needCookiesBool (default TRUE) requires cookie support in the browser. Most browsers allow the user to block or enable cookies. Some parts of EasyEyes (e.g. _participantIDPutBool) use cookies, and won't run if cookies are blocked. If _needCookiesBool==TRUE and cookies are blocked, the Needs page alerts the participant, who is allowed to proceed if they enable cookies. Otherwise they cannot proceed beyond the Needs page, and they are asked to return the study to Prolific.",
+    type: "Boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_needDeviceType",
     availability: "now",
     example: "desktop",
@@ -637,7 +647,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _needPopupsBool (default TRUE) requires pop-up window support in the browser. Most browsers allow the user to block or enable pop-ups. Some parts of EasyEyes (e.g. Remote Calibrator and sound calibration) use pop-ups extensively, and won't run if pop-ups are blocked. If they are blocked, the participant is alerted and will be allowed to proceed if they enable pop-ups. Otherwise they are asked to return the study to Prolific.",
+      "🕑 _needPopupsBool (default TRUE) requires pop-up window support in the browser. Most browsers allow the user to block or enable pop-ups. Some parts of EasyEyes (e.g. Remote Calibrator and sound calibration) use pop-ups extensively, and won't run if pop-ups are blocked. If _needPopupsBool==TRUE and pop-ups are blocked, the participant is alerted and is allowed to proceed if they enable pop-ups. Otherwise they cannot proceed beyond the Needs page, and they are asked to return the study to Prolific.",
     type: "Boolean",
     default: "TRUE",
     categories: "",
