@@ -37,6 +37,7 @@ import {
   getCompatibilityRequirements,
 } from "../components/compatibilityCheck";
 import { isExpTableFile } from "../preprocess/utils";
+import { GLOSSARY } from "../parameters/glossary";
 
 export class User {
   public username = "";
@@ -1713,13 +1714,17 @@ export const setExperimentSaveFormat = async (
   user: User,
   newRepo: Repository,
 ) => {
+  const isDatabaseDefaultString = GLOSSARY[
+    "_pavlovia_Database_ResultsFormatBool"
+  ].default
+    .toString()
+    .toLowerCase();
   // @ts-ignore
   const isDatabase = user.currentExperiment._pavlovia_Database_ResultsFormatBool // @ts-ignore
     ? user.currentExperiment._pavlovia_Database_ResultsFormatBool === "TRUE"
       ? true
       : false
-    : true;
-  console.log(isDatabase);
+    : isDatabaseDefaultString === "true";
   const experiment = await fetch(
     "https://pavlovia.org/api/v2/experiments/" + newRepo.id,
     {
