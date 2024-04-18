@@ -58,7 +58,7 @@ export const buildWindowErrorHandling = (paramReader) => {
     if (error?.reason?.stack) {
       // stack from reason
       const errorMessage = `STACK ${JSON.stringify(
-        error?.reason?.stack || error?.stack
+        error?.reason?.stack || error?.stack,
       )}\nREASON ${JSON.stringify(error?.reason)}\nFont size: ${
         fontSize.current
       }`;
@@ -69,13 +69,13 @@ export const buildWindowErrorHandling = (paramReader) => {
       } catch (exception) {
         console.error(
           "Failed to add error to experiment data. Perhaps psychoJS.experiment is undefined.",
-          exception
+          exception,
         );
       }
     } else {
       // no stack from reason
       const errorMessage = `STACK ${JSON.stringify(
-        error?.stack
+        error?.stack,
       )}\nERROR ${error}\nREASON ${JSON.stringify(error?.reason)}\nFont size: ${
         fontSize.current
       }`;
@@ -85,9 +85,7 @@ export const buildWindowErrorHandling = (paramReader) => {
 
     // quit
     psychoJS._gui.dialog({
-      error: error?.reason
-        ? error?.reason + `. Font size: ${fontSize.current}`
-        : `Font size: ${fontSize.current}`,
+      error: error?.reason,
       showOK: true,
       onOK: () => {
         quitPsychoJS("", false, paramReader);
@@ -118,7 +116,7 @@ export const warning = (message) => {
       "Failed to add warning: " +
         message +
         " to experiment data. Perhaps psychoJS.experiment is undefined.",
-      exception
+      exception,
     );
   }
 };
