@@ -103,12 +103,12 @@ export const createSignalingMap = (possibleResponses) => {
   const ZNum = 90;
 
   const digits = [...new Array(nineNum - zeroNum).keys()].map(
-    (x) => x + zeroNum
+    (x) => x + zeroNum,
   );
   const letters = [...new Array(ZNum - ANum).keys()].map((x) => x + ANum);
   const signalingCharacterSet = [...digits, ...letters].slice(
     0,
-    possibleResponses.length
+    possibleResponses.length,
   );
   const signalingMap = {};
   possibleResponses.map((response, i) => {
@@ -194,7 +194,7 @@ export const degreesToPixels = (degrees, method = "x") => {
       // If need be, use this gross, not fixation-relative method. Please don't use this if possible.
       if (Math.abs(degrees) > 90)
         throw new Error(
-          "To large of an angle (ie > 90 deg) specified for this method of transferring between angles and pixels."
+          "To large of an angle (ie > 90 deg) specified for this method of transferring between angles and pixels.",
         );
       const radians = Math.abs(degrees) * (Math.PI / 180);
       const pixels =
@@ -212,7 +212,7 @@ export const degreesToPixels = (degrees, method = "x") => {
  */
 export const pixelsToDegrees = (pixels, displayOptions) => {
   const radians = Math.atan(
-    Math.abs(pixels) / displayOptions.pixPerCm / viewingDistanceCm.current
+    Math.abs(pixels) / displayOptions.pixPerCm / viewingDistanceCm.current,
   );
   const degrees = radians / (Math.PI / 180);
   return degrees;
@@ -310,7 +310,7 @@ export const XYDegOfXYPix = (xyPix, useRealFixationXY = true) => {
   // ASSUMES equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB
   const rRad = Math.atan2(
     rPix / displayOptions.pixPerCm,
-    viewingDistanceCm.current
+    viewingDistanceCm.current,
   );
   const rDeg = rRad * (180 / Math.PI);
   let xyDeg =
@@ -337,7 +337,7 @@ export const addConditionToData = (
   reader,
   conditionName,
   experiment,
-  exclude = []
+  exclude = [],
 ) => {
   experiment.addData("block_condition", conditionName);
   for (const parameter of Object.keys(GLOSSARY)) {
@@ -346,11 +346,11 @@ export const addConditionToData = (
   }
   experiment.addData(
     "nearpointXYPxPsychoJS",
-    displayOptions.nearPointXYPix.toString()
+    displayOptions.nearPointXYPix.toString(),
   );
   experiment.addData(
     "nearpointXYPxAppleCoords",
-    getAppleCoordinatePosition(...displayOptions.nearPointXYPix).toString()
+    getAppleCoordinatePosition(...displayOptions.nearPointXYPix).toString(),
   );
 };
 
@@ -370,24 +370,24 @@ export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
   if (currentLoop._currentStaircase) {
     psychoJS.experiment.addData(
       "staircaseName",
-      currentLoop._currentStaircase._name
+      currentLoop._currentStaircase._name,
     );
     psychoJS.experiment.addData(
       "questMeanBeforeThisTrialResponse",
       // "questMeanAtEndOfTrial",
-      currentLoop._currentStaircase.mean()
+      currentLoop._currentStaircase.mean(),
     );
     psychoJS.experiment.addData(
       "questSDBeforeThisTrialResponse",
       // "questSDAtEndOfTrial",
-      currentLoop._currentStaircase.sd()
+      currentLoop._currentStaircase.sd(),
     );
     psychoJS.experiment.addData(
       "questQuantileOfQuantileOrderBeforeThisTrialResponse",
       // "questQuantileOfQuantileOrderAtEndOfTrial",
       currentLoop._currentStaircase.quantile(
-        currentLoop._currentStaircase._jsQuest.quantileOrder
-      )
+        currentLoop._currentStaircase._jsQuest.quantileOrder,
+      ),
     );
   } else {
     throw "undefined currentLoop._currentStaircase [add TRIAL data failed]";
@@ -397,7 +397,7 @@ export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
 export const addBlockStaircaseSummariesToData = (
   loop,
   psychoJS,
-  displayOptions
+  displayOptions,
 ) => {
   if (loop instanceof MultiStairHandler) {
     loop._staircases.forEach((staircase, i) => {
@@ -412,7 +412,7 @@ export const addBlockStaircaseSummariesToData = (
         }
         psychoJS.experiment.addData(
           "questMeanAtEndOfTrialsLoop",
-          staircase.mean()
+          staircase.mean(),
         );
 
         //=============report innerSpacingFromQuestMean.==========
@@ -427,7 +427,7 @@ export const addBlockStaircaseSummariesToData = (
           var targetXDeg = loop._conditions[i]["targetEccentricityXDeg"];
           var targetYDeg = loop._conditions[i]["targetEccentricityYDeg"];
           var eDeg = Math.sqrt(
-            targetXDeg * targetXDeg + targetYDeg * targetYDeg
+            targetXDeg * targetXDeg + targetYDeg * targetYDeg,
           );
           switch (loop._conditions[i]["spacingSymmetry"]) {
             case "cortex":
@@ -444,7 +444,7 @@ export const addBlockStaircaseSummariesToData = (
               var targetPx = XYPixOfXYDeg([targetDeg, 0], displayOptions);
               var outerFlankerPx = XYPixOfXYDeg(
                 [outerFlankerDeg, 0],
-                displayOptions
+                displayOptions,
               );
               var outerSpacingPx = outerFlankerPx[0] - targetPx[0];
               var innerSpacingPx = outerSpacingPx;
@@ -452,7 +452,7 @@ export const addBlockStaircaseSummariesToData = (
               //Using just X, convert pixels to deg
               var innerFlankerDeg = XYDegOfXYPix(
                 [innerFlankerPx, 0],
-                displayOptions
+                displayOptions,
               );
               innerSpacingDeg = targetDeg - innerFlankerDeg[0];
               break;
@@ -460,13 +460,13 @@ export const addBlockStaircaseSummariesToData = (
         } else innerSpacingDeg = Math.pow(10, staircase.mean());
         psychoJS.experiment.addData(
           "innerSpacingThresholdDeg",
-          innerSpacingDeg
+          innerSpacingDeg,
         );
         //========================================================
         psychoJS.experiment.addData("questSDAtEndOfTrialsLoop", staircase.sd());
         psychoJS.experiment.addData(
           "questQuantileOfQuantileOrderAtEndOfTrialsLoop",
-          staircase.quantile(staircase._jsQuest.quantileOrder)
+          staircase.quantile(staircase._jsQuest.quantileOrder),
         );
         psychoJS.experiment.addData("addBlockStaircaseSummariesToData", true);
         if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
@@ -495,7 +495,7 @@ export const addApparatusInfoToData = (
   displayOptions,
   rc,
   psychoJS,
-  stimulusParameters = undefined
+  stimulusParameters = undefined,
 ) => {
   const pxPerCm = Math.round(displayOptions.pixPerCm * 100) / 100;
   psychoJS.experiment.addData("viewingDistanceCm", viewingDistanceCm.current);
@@ -504,8 +504,8 @@ export const addApparatusInfoToData = (
     getViewingDistancedCm(
       viewingDistanceCm.current,
       displayOptions,
-      rc.windowHeightPx.value
-    )
+      rc.windowHeightPx.value,
+    ),
   );
   psychoJS.experiment.addData("pxPerCm", pxPerCm);
   psychoJS.experiment.addData("screenWidthPx", rc.windowWidthPx.value);
@@ -552,7 +552,7 @@ export const getPixPerCm = (rc) => {
 export const getViewingDistanceCm = (rc, reader, condition = "") => {
   if (!rc.viewingDistanceCm)
     console.warn(
-      "[Viewing Distance] Using arbitrary viewing distance. Enable RC."
+      "[Viewing Distance] Using arbitrary viewing distance. Enable RC.",
     );
   let viewingDistanceDesiredCm;
   if (!condition) {
@@ -560,12 +560,12 @@ export const getViewingDistanceCm = (rc, reader, condition = "") => {
   } else if (!isNaN(condition)) {
     viewingDistanceDesiredCm = reader.read(
       "viewingDistanceDesiredCm",
-      Number(condition)
+      Number(condition),
     )[0];
   } else {
     viewingDistanceDesiredCm = reader.read(
       "viewingDistanceDesiredCm",
-      condition
+      condition,
     );
   }
   const viewingDistanceCm = rc.viewingDistanceCm
@@ -674,7 +674,7 @@ export class Rectangle {
     units = undefined,
     characterSet = undefined,
     centers = undefined,
-    ascentToDescent = undefined
+    ascentToDescent = undefined,
   ) {
     this.units = units;
     this.left = lowerLeft[0];
@@ -710,7 +710,7 @@ export class Rectangle {
     if (this.centers) {
       newCenters = {};
       Object.entries(this.centers).forEach(
-        ([key, xy]) => (newCenters[key] = [xy[0] * scalar, xy[1] * scalar])
+        ([key, xy]) => (newCenters[key] = [xy[0] * scalar, xy[1] * scalar]),
       );
     }
     const scaled = new Rectangle(
@@ -718,7 +718,7 @@ export class Rectangle {
       upperRight,
       this.units,
       this.characterSet,
-      newCenters
+      newCenters,
     );
     return scaled;
   }
@@ -730,7 +730,7 @@ export class Rectangle {
       upperRight,
       this.units,
       this.characterSet,
-      this.centers
+      this.centers,
     );
     return offsetted;
   }
@@ -743,14 +743,14 @@ export class Rectangle {
       upperRight,
       this.units,
       this.characterSet,
-      this.centers
+      this.centers,
     );
   }
 }
 
 export const norm = (v) => {
   return Math.sqrt(
-    v.map((x) => x ** 2).reduce((previous, current) => previous + current)
+    v.map((x) => x ** 2).reduce((previous, current) => previous + current),
   );
 };
 
@@ -758,13 +758,18 @@ export const getTripletCharacters = (charset) => {
   return sampleWithoutReplacement(charset, 3);
 };
 
-export const sampleWithoutReplacement = (population, sampleSize) => {
+export const sampleWithoutReplacement = (
+  population,
+  sampleSize,
+  inOrder = false,
+) => {
   const elements = shuffle([...population]);
   const samples = [];
   for (const sampleN of [...new Array(sampleSize).keys()]) {
     samples.push(elements.filter((x) => !samples.includes(x))[0]);
   }
-  return samples;
+  if (!inOrder) return samples;
+  return [...population].filter((x) => samples.includes(x));
 };
 
 /**
@@ -776,14 +781,14 @@ export const sampleWithoutReplacement = (population, sampleSize) => {
 export const sampleWithReplacement = (population, sampleSize) => {
   sampleSize = Math.round(sampleSize);
   return [...new Array(sampleSize).keys()].map(
-    (x) => population[Math.floor(population.length * Math.random())]
+    (x) => population[Math.floor(population.length * Math.random())],
   );
 };
 
 export const getCharSetBaselineOffsetPosition = (
   XYPix,
   normalizedCharacterSetRect,
-  heightPx
+  heightPx,
 ) => {
   const descent = normalizedCharacterSetRect.descent;
   const ascent = normalizedCharacterSetRect.ascent;
@@ -807,18 +812,18 @@ export const surveyParameter = (reader, parameter) => {
   return Object.assign(
     ...conditionIds.map((conditionId, i) => ({
       [conditionId]: parameterValues[i],
-    }))
+    })),
   );
 };
 
 export const validateRectPoints = ([lowerLeft, upperRight]) => {
   if (lowerLeft[0] > upperRight[0])
     console.error(
-      "INVALID RECT x of lowerLeft is greater than x of upperRight"
+      "INVALID RECT x of lowerLeft is greater than x of upperRight",
     );
   if (lowerLeft[1] > upperRight[1])
     console.error(
-      "INVALID RECT y of lowerLeft is greater than y of upperRight"
+      "INVALID RECT y of lowerLeft is greater than y of upperRight",
     );
 };
 
@@ -837,7 +842,7 @@ export const displacementBetweenXY = (a, b) => {
 export const psychojsUnitsFromWindowUnits = (
   windowXYPx,
   windowDimensions,
-  fixationXYPx
+  fixationXYPx,
 ) => {
   // Convert form the origin being at the top left of the screen (pos x is right, pos y is down)...
   const [screenX, screenY] = windowXYPx;
@@ -892,7 +897,7 @@ export const getEvenlySpacedValues = (numberOfValues, intervalSize) => {
  */
 export const getValuesEvenlySpacedWithinInterval = (
   numberOfValues,
-  interval
+  interval,
 ) => {
   if (interval.length !== 2)
     throw "Must provide a 2D interval (array of length=2)";
@@ -916,7 +921,7 @@ export const getValuesEvenlySpacedWithinInterval = (
 export const duplicateConditionsOfTargetKind = (
   conditions,
   numDuplications,
-  whichTargetKind
+  whichTargetKind,
 ) => {
   numDuplications = Math.floor(numDuplications);
   const newConditions = [];
@@ -925,7 +930,7 @@ export const duplicateConditionsOfTargetKind = (
       for (let i = 1; i <= numDuplications; i++) {
         const duplicated = Object.assign(
           { _duplicatedConditionCardinal: i },
-          c
+          c,
         );
         newConditions.push(duplicated);
       }
@@ -976,7 +981,7 @@ export const saveDataOnWindowClose = (experiment) => {
     if (document.visibilityState === "hidden") {
       console.log(
         " experiment.extraInfo['dataSaved']",
-        experiment.extraInfo["dataSaved"]
+        experiment.extraInfo["dataSaved"],
       );
       experiment.save({ sync: true });
       if (eyeTrackingStimulusRecords.length)
@@ -1006,7 +1011,7 @@ export const cursorNearFixation = (cX, cY) => {
   const y = cY ?? pY;
   const cursorDistanceFromFixation = Math.hypot(
     x - fixationConfig.pos[0],
-    y - fixationConfig.pos[1]
+    y - fixationConfig.pos[1],
   );
   const cursorIsNearFixation =
     cursorDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx;
@@ -1094,7 +1099,7 @@ export const isConditionLabel = (blockOrConditionLabel) => {
  */
 export const getParamValueForBlockOrCondition = (
   paramName,
-  blockOrConditionLabel
+  blockOrConditionLabel,
 ) => {
   // Block, just return first parameter value
   if (isBlockLabel(blockOrConditionLabel)) {
@@ -1107,7 +1112,7 @@ export const getParamValueForBlockOrCondition = (
 // Arbitrary? not well defined
 export const pxScalar = (degScalar) =>
   Math.abs(
-    XYPixOfXYDeg([-degScalar / 2, 0])[0] - XYPixOfXYDeg([degScalar / 2, 0])[0]
+    XYPixOfXYDeg([-degScalar / 2, 0])[0] - XYPixOfXYDeg([degScalar / 2, 0])[0],
   );
 
 // temp for debugging a bug of losing CSV files on Pavlovia

@@ -26,6 +26,7 @@ import {
 import { Color } from "../psychojs/src/util";
 import { findReadingSize, getThisBlockPages } from "./readingAddons";
 import {
+  canonical,
   prepareReadingQuestions,
   preprocessCorpusToWordList,
   tokenizeWordsIndividually,
@@ -265,11 +266,11 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
         q.correctAnswer,
         ...q.foils,
       ]);
-      const sortByArray = individuallyTokenizedWords.map((w) =>
-        w.toLowerCase(),
-      );
+      const sortByArray = individuallyTokenizedWords.map(canonical);
       responseOptions.sort(
-        (a, b) => sortByArray.indexOf(a[0]) - sortByArray.indexOf(b[0]),
+        (a, b) =>
+          sortByArray.indexOf(canonical(a[0])) -
+          sortByArray.indexOf(canonical(b[0])),
       );
       return responseOptions;
     }),
@@ -308,9 +309,8 @@ export const generateRSVPReadingTargetSets = (
 
   const targetWords = wordsForThisTrial.targetWords;
   const foilWords = wordsForThisTrial.foils;
-  const targetSets = [];
-  for (const [i, targetWord] of targetWords.entries()) {
-    targetSets.push(
+  const targetSets = targetWords.map(
+    (targetWord, i) =>
       new RSVPReadingTargetSet(
         targetWord,
         position,
@@ -320,8 +320,7 @@ export const generateRSVPReadingTargetSets = (
         paramReader,
         BC,
       ),
-    );
-  }
+  );
   return targetSets;
 };
 
@@ -654,7 +653,6 @@ export const addRsvpReadingTrialResponsesToData = () => {
       .map((b) => (b ? "TRUE" : "FALSE"))
       .toString(),
   );
-  logger("targetSets past", rsvpReadingTargetSets.past);
   psychoJS.experiment.addData(
     "rsvpReadingResponseTimesSec",
     getPhraseIdentificationReactionTimes()

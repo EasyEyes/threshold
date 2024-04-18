@@ -63,6 +63,7 @@ export const loadReadingCorpus = async (paramReader) => {
       );
       readingFrequencyToWordArchive[corpus] = processWordFreqToFreqToWords(
         readingWordFrequencyArchive[corpus],
+        readingWordListArchive[corpus],
       );
       readingUsedText[corpus] = readingCorpusArchive[corpus];
     }

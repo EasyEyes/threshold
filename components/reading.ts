@@ -10,53 +10,66 @@ export const prepareReadingQuestions = (
   numberOfA: number,
   textPages: string[],
   freqToWords: FrequencyToWords,
-  targetKind?: string
+  targetKind?: string,
 ) => {
+  /**
+   * In rsvp:
+   * numberOfQ = rsvpReadingNumberOfWords
+   * numberOfA = rsvpReadingNumberOfResponseOptions
+   */
   let usablePages = [...textPages];
   if (targetKind !== "rsvpReading") {
     if (usablePages.length > 2) usablePages.shift();
     if (usablePages.length > 1) usablePages.pop();
   }
   // Get displayed words
-  const displayedWords = new Set();
+  const displayedCanonicalWords = new Set();
   for (const page of textPages) {
     const pageList = preprocessCorpusToWordList(preprocessRawCorpus(page));
-    for (const word of pageList) {
-      if (
-        word.length
-        // (onlyAlphabets(word) || targetKind === "rsvpReading")
-      ) {
-        displayedWords.add(word.toLowerCase());
-        // displayedWords.add(word);
-      }
-    }
+    displayedCanonicalWords.add(
+      pageList.filter((s) => s.length).map(canonical),
+    );
   }
 
   const questions: ReadingQuestionAnswers[] = [];
   let remaining = [...usablePages];
+  interface Answer {
+    answer: string;
+    frequency: number;
+  }
+  let answersAndFrequencies: Array<Answer> = [];
   for (let i = 0; i < numberOfQ; i++) {
     let [correctAnswer, correctAnswerFreq] = getCorrectAnswer(
       usablePages,
       freqToWords,
       questions,
-      targetKind
+      targetKind,
     );
     if (correctAnswerFreq !== 0 && targetKind === "rsvpReading")
-      remaining = remaining.filter((p) => p.toLowerCase() !== correctAnswer);
+      remaining = remaining.filter(
+        (p) => canonical(p) !== canonical(correctAnswer),
+      );
     if (correctAnswerFreq === 0) {
       if (targetKind === "rsvpReading") {
         correctAnswer = remaining.shift() as string;
         correctAnswerFreq = Math.min(...Object.keys(freqToWords).map(Number));
         warning(
           `rsvpReading failed to correctly tokenize the string "${usablePages.join(
-            ", "
-          )}". Using the string "${correctAnswer}" as the target, and drawing foils of the lowest word frequency."`
+            ", ",
+          )}". Using the string "${correctAnswer}" as the target, and drawing foils of the lowest word frequency."`,
         );
       } else {
         throw "Failed to construct a new question. [no correct answer].";
       }
     }
-
+    answersAndFrequencies.push({
+      answer: correctAnswer,
+      frequency: correctAnswerFreq,
+    });
+  }
+  for (let i = 0; i < numberOfQ; i++) {
+    const { answer: correctAnswer, frequency: correctAnswerFreq } =
+      answersAndFrequencies[i];
     const newQuestion: ReadingQuestionAnswers = {
       correctAnswer: correctAnswer,
       foils: [],
@@ -67,14 +80,31 @@ export const prepareReadingQuestions = (
     let freqToTest = correctAnswerFreq;
     let freqAdjustCounter = 1;
 
-    const possibleFoils = new Set();
+    const possibleFoils: Set<string> = new Set();
     const foilCount = numberOfA - 1;
+    if (freqToWords[freqToTest].some((x) => typeof x === "undefined"))
+      logger(
+        "!. undefined words in freqToWord",
+        freqToWords[freqToTest].filter((x) => typeof x === "undefined"),
+      );
     while (possibleFoils.size < foilCount) {
       for (const word of shuffle(freqToWords[freqToTest])) {
+        const w = canonical(word);
+        const inAnswers = answersAndFrequencies
+          .map((x) => canonical(x.answer))
+          .includes(w);
+        const inOtherFoils = questions
+          .map((x) => x.foils)
+          .flat()
+          .map(canonical)
+          .includes(w);
         if (
-          displayedWords.has(word.toLowerCase()) ||
-          word === correctAnswer ||
-          (word.length < 2 && targetKind !== "rsvpReading") // Allow for short words in rsvpReading
+          displayedCanonicalWords.has(w) ||
+          w === canonical(correctAnswer) ||
+          (word.length < 2 && targetKind !== "rsvpReading") || // Allow for short words in rsvpReading
+          inAnswers ||
+          inOtherFoils ||
+          [...possibleFoils.values()].flat().map(canonical).includes(w)
         )
           continue;
         possibleFoils.add(word);
@@ -99,7 +129,7 @@ export const prepareReadingQuestions = (
       const fauxFoilsNeeded = foilCount - possibleFoils.size;
       const fauxFoils = sampleWithReplacement(
         [...possibleFoils],
-        fauxFoilsNeeded
+        fauxFoilsNeeded,
       );
       possibleFoilsList = shuffle([...possibleFoils, ...fauxFoils]);
     } else {
@@ -124,9 +154,9 @@ export const getWordFrequencies = (words: string[]) => {
     //   if (!(word in frequencies)) frequencies[word] = frequencies[word.toLowerCase()] ?? 1;
     //   else frequencies[word] += 1;
     // }
-    word = word.toLowerCase();
-    if (!(word in frequencies)) frequencies[word] = 1;
-    else frequencies[word] += 1;
+    const standardFormWord = canonical(word);
+    if (!(standardFormWord in frequencies)) frequencies[standardFormWord] = 1;
+    else frequencies[standardFormWord] += 1;
   }
   return frequencies;
 };
@@ -135,24 +165,29 @@ interface FrequencyToWords {
   [key: number]: string[];
 }
 export const processWordFreqToFreqToWords = (
-  wordFrequencies: WordFrequencies
+  wordFrequencies: WordFrequencies,
+  words: string[],
 ): FrequencyToWords => {
   const freqToWords: FrequencyToWords = {};
 
-  for (const word in wordFrequencies) {
-    // TODO acceptable??
-    if (true) {
-      // if (onlyAlphabets(word)) {
-      const freq = wordFrequencies[word];
-      if (!(freq in freqToWords)) freqToWords[freq] = [];
-      freqToWords[freq].push(word);
-    }
+  for (const word of words) {
+    // TODO should we have some filtering, eg // if (onlyAlphabets(word)), ??
+    //      We used to. Removed when adding rsvpReading iirc, not sure why.
+    const freq = wordFrequencies[canonical(word)];
+    if (!(freq in freqToWords)) freqToWords[freq] = [];
+    freqToWords[freq].push(word);
   }
 
   return freqToWords;
 };
 
 /* ------------------------------- Preprocess ------------------------------- */
+
+// Ensure that word, Word, and WORD are canonically the same "word".
+// Conceivably in future we may want to, eg do more stripping of non-word characters
+export const canonical = (word: string): string => {
+  return word.toLowerCase();
+};
 
 export const preprocessRawCorpus = (corpus: string) => {
   // Replace non-standard characters
@@ -182,9 +217,9 @@ export const preprocessCorpusToWordList = (text: string) => {
   return text
     .replace(
       /[^\u0600-\u06ff\u4e00-\u9fff\u00C0\u00C2\u00C6-\u00CB\u00CE-\u00CF\u00D4\u00D9\u00DB\u00DC\u00E0\u0226\u00E2\u00E6-\u00EB\u00EE\u00EF\u00F4\u00f9\u00FB-\u00FC\u00FF\u0152\u0153\u0178\u02B3\u02E2\u1D48-\u1D49\w\s'-]|-(?=[^a-zA-Z0-9])|(\s-)/g,
-      ""
+      "",
     )
-    .split(" ")
+    .split(/\s/)
     .filter((w) => w.length > 0);
 };
 
@@ -194,7 +229,7 @@ export const getCorrectAnswer = (
   usablePages: string[],
   freqToWords: FrequencyToWords,
   questions: ReadingQuestionAnswers[],
-  targetKind?: string
+  targetKind?: string,
 ): [string, number] => {
   // Get usable words
   const usableWords = new Set();
@@ -206,45 +241,47 @@ export const getCorrectAnswer = (
         word.length
         // (onlyAlphabets(word) || targetKind === "rsvpReading")
       ) {
-        usableWords.add(word.toLowerCase());
+        usableWords.add(word);
         if (targetKind === "rsvpReading") pageWords.push(word);
       }
     }
   }
 
   const frequencies = Object.keys(freqToWords).sort(
-    (a: string, b: string) => Number(a) - Number(b)
+    (a: string, b: string) => Number(a) - Number(b),
   );
   for (const freq of frequencies) {
     const words = freqToWords[Number(freq)];
     for (const word of shuffle(words)) {
       const timesWordAppearsInSource = pageWords.filter(
-        (w) => w.toLowerCase() === word.toLowerCase()
+        (w) => canonical(w) === canonical(word),
       ).length;
       const timesWordAppearsInQuestions = questions.filter(
-        (q) => q.correctAnswer.toLowerCase() === word.toLowerCase()
+        (q) => canonical(q.correctAnswer) === canonical(word),
       ).length;
       const wordStillNeededForRsvp =
         targetKind === "rsvpReading" &&
         timesWordAppearsInQuestions < timesWordAppearsInSource;
-      if (
-        (word.length > 1 || targetKind === "rsvpReading") &&
-        usableWords.has(word) &&
-        (!questions.find((q) => q.correctAnswer === word) ||
-          wordStillNeededForRsvp)
-      ) {
+      const isLongEnough = word.length > 1 || targetKind === "rsvpReading";
+      // const isNonDuplicate = !questions.find((q) => canonical(q.correctAnswer) === canonical(word));
+      const isNonDuplicate =
+        !questions.find(
+          (q) => canonical(q.correctAnswer) === canonical(word),
+        ) || wordStillNeededForRsvp;
+      if (isLongEnough && usableWords.has(word) && isNonDuplicate) {
         return [word, Number(freq)];
       }
     }
   }
 
+  logger("!. failed to get correct answer");
   return ["a", 0];
 };
 
 export const wordFreqCloseEnoughToTarget = (
   wordFreq: number,
   targetFreq: number,
-  roundFetchingFoils: number
+  roundFetchingFoils: number,
 ) => {
   return (
     wordFreq > targetFreq * (1 - 0.1 * roundFetchingFoils) &&
@@ -292,9 +329,9 @@ const onlyAlphabets = (str: string) =>
  *  eg. “don’t” becoming don and t. We’ll keep “don’t”.
  */
 export const tokenizeWordsIndividually = (sentence: string): string[] => {
-  const wordsKinda = sentence.split(" ").filter((w) => w.length > 0);
+  const wordsKinda = sentence.split(/\s/).filter((w) => w.length > 0);
   return wordsKinda.map((wordMaybe) => {
     const tokenizedWord = preprocessCorpusToWordList(wordMaybe);
-    return tokenizedWord.length ? tokenizedWord[0] : wordMaybe;
+    return tokenizedWord.length === 1 ? tokenizedWord[0] : wordMaybe;
   });
 };

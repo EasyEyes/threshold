@@ -4129,6 +4129,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             sampleWithoutReplacement(
               targetSets,
               rsvpReadingTargetSets.numberOfIdentifications,
+              true,
             );
           correctAns.current =
             rsvpReadingTargetSets.identificationTargetSets.map((t) =>
