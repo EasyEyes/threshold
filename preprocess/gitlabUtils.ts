@@ -719,6 +719,14 @@ async function splitCSVAndZip(
   blob: Blob,
   fileName: string,
   projectName: string,
+  prolificStudyId: string,
+  prolificToken: string,
+  downloadDemographicData: (
+    arg0: string,
+    arg1: string,
+    arg2: string,
+    arg3: any,
+  ) => any,
 ) {
   const zip = await JSZip.loadAsync(blob);
   const dbFolder = zip.folder("db");
@@ -755,6 +763,14 @@ async function splitCSVAndZip(
       });
       newZip.file(`${sessionId}-${projectName}.csv`, csvData);
     }
+    if (prolificStudyId) {
+      await downloadDemographicData(
+        prolificToken,
+        prolificStudyId,
+        projectName,
+        newZip,
+      );
+    }
 
     newZip.generateAsync({ type: "blob" }).then((content) => {
       saveAs(content, fileName);
@@ -767,7 +783,18 @@ async function splitCSVAndZip(
 /**
  * Download data folder as a ZIP file from GitLab repository
  */
-export const downloadDataFolder = async (user: User, project: any) => {
+export const downloadDataFolder = async (
+  user: User,
+  project: any,
+  prolificStudyId: string,
+  prolificToken: string,
+  downloadDemographicData: (
+    arg0: string,
+    arg1: string,
+    arg2: string,
+    arg3: any,
+  ) => any,
+) => {
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
   const perPage = 100;
@@ -844,7 +871,14 @@ export const downloadDataFolder = async (user: User, project: any) => {
           );
           if (fileContent) {
             const zipFileName = `${project.name}.results.zip`;
-            await splitCSVAndZip(fileContent, zipFileName, project.name);
+            await splitCSVAndZip(
+              fileContent,
+              zipFileName,
+              project.name,
+              prolificStudyId,
+              prolificToken,
+              downloadDemographicData,
+            );
           }
         } catch (error) {
           console.error("Error downloading or processing file:", error);
@@ -920,6 +954,15 @@ export const downloadDataFolder = async (user: User, project: any) => {
         }
 
         const zipFileName = `${project.name}.results.zip`;
+
+        if (prolificStudyId) {
+          await downloadDemographicData(
+            prolificToken,
+            prolificStudyId,
+            project.name,
+            zip,
+          );
+        }
 
         zip.generateAsync({ type: "blob" }).then((content) => {
           saveAs(content, zipFileName);
