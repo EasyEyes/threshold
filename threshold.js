@@ -892,12 +892,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
               showExperimentEnding();
               quitPsychoJS("", true, paramReader);
-              isProlificExperiment()
-                ? window.open(
-                    "https://app.prolific.co/submissions/complete?cc=" +
-                      recruitmentServiceData?.incompatibleCode,
-                  )
-                : null;
             }
           });
         },
