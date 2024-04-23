@@ -3231,7 +3231,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       preStimulus.running = true;
       // Check fullscreen and if not, get fullscreen
       if (!rc.isFullscreen.value && !debug) {
-        rc.getFullscreen();
+        try {
+          rc.getFullscreen();
+        } catch (error) {
+          console.error("error when try get full screen".error);
+        }
         await sleep(1000);
       }
       trialInstructionClock.reset();
