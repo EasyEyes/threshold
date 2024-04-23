@@ -3230,14 +3230,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("trialInstructionRoutineBegin");
       preStimulus.running = true;
       // Check fullscreen and if not, get fullscreen
-      if (!rc.isFullscreen.value && !debug) {
-        try {
-          rc.getFullscreen();
-        } catch (error) {
-          console.error("error when try get full screen".error);
-        }
-        await sleep(1000);
-      }
+      // if (!rc.isFullscreen.value && !debug) {
+      //   try {
+      //     rc.getFullscreen();
+      //   } catch (error) {
+      //     console.error("error when try get full screen".error);
+      //   }
+      //   await sleep(1000);
+      // }
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
