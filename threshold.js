@@ -18,6 +18,7 @@ import {
   sleep,
   getParamValueForBlockOrCondition,
   sendEmailForDebugging,
+  isFullscreen,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -3231,14 +3232,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       preStimulus.running = true;
       // Check fullscreen and if not, get fullscreen
       console.log(rc.isFullscreen.value);
-      // if (!rc.isFullscreen.value && !debug) {
-      //   try {
-      //     rc.getFullscreen();
-      //   } catch (error) {
-      //     console.error("error when try get full screen".error);
-      //   }
-      //   await sleep(1000);
-      // }
+      if ((rc.isFullscreen.value && !debug) || !isFullscreen()) {
+        console.log("not full screen");
+        try {
+          rc.getFullscreen();
+        } catch (error) {
+          console.error("error when try get full screen".error);
+        }
+        await sleep(1000);
+      }
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
