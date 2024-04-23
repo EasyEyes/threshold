@@ -18,7 +18,6 @@ import {
   sleep,
   getParamValueForBlockOrCondition,
   sendEmailForDebugging,
-  isFullscreen,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -1002,7 +1001,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               rc.pauseNudger();
               // Get fullscreen
-              if (!rc.isFullscreen.value && !debug) {
+              if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
                 rc.getFullscreen();
                 await sleep(1000);
               }
@@ -3231,8 +3230,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("trialInstructionRoutineBegin");
       preStimulus.running = true;
       // Check fullscreen and if not, get fullscreen
-      console.log(rc.isFullscreen.value);
-      if ((rc.isFullscreen.value && !debug) || !isFullscreen()) {
+      if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
         console.log("not full screen");
         try {
           rc.getFullscreen();

@@ -1135,12 +1135,3 @@ export const sendEmailForDebugging = async (formData) => {
   });
   return false;
 };
-
-export function isFullscreen() {
-  return (
-    Math.abs((window.innerHeight - screen.height) / screen.height) < 0.1 &&
-    Math.abs(window.innerWidth - screen.width) < 5 &&
-    window.screenX < 5 &&
-    window.screenY < 100
-  );
-}
