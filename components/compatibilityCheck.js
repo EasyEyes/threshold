@@ -309,6 +309,7 @@ export const getInstructionText = (
   preferredModelNumberText = "model number",
   needPhoneSurvey = false,
   OEM = "",
+  needComputerSurveyBool = false,
 ) => {
   //RC_phoneBrandAndModel
   const needModelNumber = isSmartPhone
@@ -339,38 +340,44 @@ export const getInstructionText = (
     );
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
-  if (OEM === "Samsung") {
-    findModelNumber = readi18nPhrases("RC_findModelAndroidSamsung", language);
-  } else if (OEM === "Motorola") {
-    findModelNumber = readi18nPhrases("RC_findModelAndroidMotorola", language);
-  } else if (OEM === "Google") {
-    findModelNumber = readi18nPhrases("RC_findModelAndroidGoogle", language);
-  } else if (OEM === "Huawei") {
-    findModelNumber = readi18nPhrases("RC_findModelAndroidHuawei", language);
-  } else if (OEM === "Xiaomi") {
-    findModelNumber = readi18nPhrases("RC_findModelAndroidXiaomi", language);
-  } else if (OEM === "Apple") {
-    if (userOS === "iOS") {
-      findModelNumber = readi18nPhrases("RC_findModelIOs", language);
-    } else if (userOS === "macOS") {
+  if (needComputerSurveyBool) {
+    if (OEM === "Apple") {
       findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
+    } else if (userOS === "Windows") {
+      findModelNumber = readi18nPhrases("RC_findModelWindows", language);
+    } else if (userOS === "Linux") {
+      findModelNumber = readi18nPhrases("RC_findModelLinux", language);
     } else {
-      findModelNumber = readi18nPhrases("RC_findModelIOs", language);
+      findModelNumber = readi18nPhrases(
+        "RC_findComputerModelGeneric",
+        language,
+      );
     }
-  }
-  // else if (userOS === "Android") {
-  //   findModelNumber = readi18nPhrases("RC_findModelAndroidGeneric", language);
-  // } else if (userOS === "iOS") {
-  //   findModelNumber = readi18nPhrases("RC_findModelIOs", language);
-  // } else if (userOS === "Windows") {
-  //   findModelNumber = readi18nPhrases("RC_findModelWindows", language);
-  // } else if (userOS === "macOS") {
-  //   findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
-  // } else if (userOS === "Linux") {
-  //   findModelNumber = readi18nPhrases("RC_findModelLinux", language);
-  // }
-  else {
-    findModelNumber = readi18nPhrases("RC_findModelGeneric", language);
+  } else {
+    if (OEM === "Samsung") {
+      findModelNumber = readi18nPhrases("RC_findModelAndroidSamsung", language);
+    } else if (OEM === "Motorola") {
+      findModelNumber = readi18nPhrases(
+        "RC_findModelAndroidMotorola",
+        language,
+      );
+    } else if (OEM === "Google") {
+      findModelNumber = readi18nPhrases("RC_findModelAndroidGoogle", language);
+    } else if (OEM === "Huawei") {
+      findModelNumber = readi18nPhrases("RC_findModelAndroidHuawei", language);
+    } else if (OEM === "Xiaomi") {
+      findModelNumber = readi18nPhrases("RC_findModelAndroidXiaomi", language);
+    } else if (OEM === "Apple") {
+      if (userOS === "iOS") {
+        findModelNumber = readi18nPhrases("RC_findModelIOs", language);
+      } else if (userOS === "macOS") {
+        findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
+      } else {
+        findModelNumber = readi18nPhrases("RC_findModelIOs", language);
+      }
+    } else {
+      findModelNumber = readi18nPhrases("RC_findModelGeneric", language);
+    }
   }
 
   return `${needModelNumberFinal} ${findModelNumber}`;
@@ -1161,15 +1168,11 @@ export const displayCompatibilityMessage = async (
         needPhoneSurvey ? qrContainer : compatiblityCheckQR,
       );
       cantReadButton.addEventListener("click", async () => {
-        QRSkipResponse.QRCantBool = true;
-        psychoJS.experiment.addData("QRConnect", "✖Cannot");
-        psychoJS.experiment.nextEntry();
-        const proceed = await isSmartphoneInDatabase(
-          "",
+        await handleCantReadQR(
+          QRSkipResponse,
           messageWrapper,
-          rc.language.value,
-          displayUpdate,
-          {},
+          rc,
+          psychoJS,
           needPhoneSurvey,
           compatiblityCheckQR,
           compatibilityCheckQRExplanation,
@@ -1178,26 +1181,13 @@ export const displayCompatibilityMessage = async (
           elem,
           needCalibratedSound,
           numberOfTries,
-          {},
           qrContainer,
+          displayUpdate,
+          needComputerSurveyBool,
+          "✖Cannot",
+          false,
+          resolve,
         );
-        if (proceed) {
-          if (needPhoneSurvey) {
-            if (needComputerSurveyBool) {
-              await getLoudspeakerDeviceDetailsFromUser(
-                messageWrapper,
-                rc.language.value,
-              );
-            }
-            resolve({
-              proceedButtonClicked: true,
-              proceedBool: true,
-              mic: microphoneInfo,
-              loudspeaker: loudspeakerInfo,
-              gotLoudspeakerMatchBool: false,
-            });
-          }
-        }
       });
       preferNotToReadButton.addEventListener("click", async () => {
         QRSkipResponse.QRPreferNotToBool = true;
@@ -1458,6 +1448,113 @@ export const displayCompatibilityMessage = async (
   });
 };
 
+export const handleCantReadQR = async (
+  QRSkipResponse,
+  messageWrapper,
+  rc,
+  psychoJS,
+  needPhoneSurvey,
+  compatiblityCheckQR,
+  compatibilityCheckQRExplanation,
+  languageWrapper,
+  titleContainer,
+  elem,
+  needCalibratedSound,
+  numberOfTries,
+  qrContainer,
+  displayUpdate,
+  needComputerSurveyBool,
+  QRConnectMessage,
+  onError = false,
+  resolve,
+) => {
+  QRSkipResponse.QRCantBool = true;
+  psychoJS.experiment.addData("QRConnect", QRConnectMessage);
+  psychoJS.experiment.nextEntry();
+  const proceed = await isSmartphoneInDatabase(
+    "",
+    messageWrapper,
+    rc.language.value,
+    displayUpdate,
+    {},
+    needPhoneSurvey,
+    compatiblityCheckQR,
+    compatibilityCheckQRExplanation,
+    languageWrapper,
+    titleContainer,
+    elem,
+    needCalibratedSound,
+    numberOfTries,
+    {},
+    qrContainer,
+  );
+  if (proceed) {
+    if (needPhoneSurvey) {
+      if (needComputerSurveyBool) {
+        await getLoudspeakerDeviceDetailsFromUser(
+          messageWrapper,
+          rc.language.value,
+        );
+      }
+      if (onError) {
+        return {
+          proceedButtonClicked: true,
+          proceedBool: true,
+          mic: microphoneInfo,
+          loudspeaker: loudspeakerInfo,
+          gotLoudspeakerMatchBool: false,
+        };
+      } else {
+        resolve({
+          proceedButtonClicked: true,
+          proceedBool: true,
+          mic: microphoneInfo,
+          loudspeaker: loudspeakerInfo,
+          gotLoudspeakerMatchBool: false,
+        });
+      }
+    }
+  }
+};
+
+export const handleCantReadQROnError = async (
+  rc,
+  psychoJS,
+  needPhoneSurvey,
+  needCalibratedSound,
+  needComputerSurveyBool,
+  resolve = ({}) => {},
+) => {
+  await fetchAllPhoneModels();
+  const messageWrapper = document.getElementById("msg-container");
+  const displayUpdate = document.createElement("p");
+  displayUpdate.style.display = "none";
+  messageWrapper.appendChild(displayUpdate);
+  const titleContainer = document.getElementById("title-container");
+  const languageWrapper = document.getElementById("language-wrapper");
+  const elem = document.getElementById("compatibility-message");
+  return await handleCantReadQR(
+    QRSkipResponse,
+    messageWrapper,
+    rc,
+    psychoJS,
+    needPhoneSurvey,
+    null,
+    null,
+    languageWrapper,
+    titleContainer,
+    elem,
+    needCalibratedSound,
+    0,
+    null,
+    displayUpdate,
+    needComputerSurveyBool,
+    "✖Cannot-Error_In_Peer_Connection",
+    true,
+    resolve,
+  );
+};
+
 const getMessageForQR = (
   needAnySmartphone,
   needCalibratedSmartphoneMicrophone,
@@ -1556,14 +1653,14 @@ const isSmartphoneInDatabase = async (
   // hide  the QR code and explanation (but don't remove them)
   const img = document.createElement("img");
   if (needPhoneSurvey) {
-    qrCodeDisplay.remove();
-    qrCodeExplanation.remove();
-    qrContainer.remove();
+    if (qrCodeDisplay) qrCodeDisplay.remove();
+    if (qrCodeExplanation) qrCodeExplanation.remove();
+    if (qrContainer) qrContainer.remove();
     if (languageWrapper) {
       languageWrapper.remove();
     }
-    titleContainer.remove();
-    elem.remove();
+    if (titleContainer) titleContainer.remove();
+    if (elem) elem.remove();
     // center messageWrapper
     messageWrapper.style.top = "10vh";
     // messageWrapper.style.marginLeft = "20vw";
@@ -2008,6 +2105,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     preferredModelNumberLowerCase,
     false,
     thisDevice.OEM,
+    true,
   );
 
   // create title
@@ -2031,6 +2129,20 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   BrandInput.placeholder = readi18nPhrases("RC_brand", language);
   BrandInput.value = thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM;
   BrandInput.style.marginBottom = "0px";
+  BrandInput.addEventListener("input", () => {
+    const inst = getInstructionText(
+      thisDevice,
+      language,
+      false,
+      false,
+      preferredModelNumberLowerCase,
+      false,
+      BrandInput.value,
+      true,
+    );
+    const p = document.getElementById("loudspeakerInstructions2");
+    p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+  });
 
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");

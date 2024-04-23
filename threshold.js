@@ -358,6 +358,8 @@ import {
 import {
   checkSystemCompatibility,
   displayCompatibilityMessage,
+  handleCantReadQR,
+  handleCantReadQROnError,
   hideCompatibilityMessage,
 } from "./components/compatibilityCheck.js";
 import {
@@ -853,6 +855,52 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (needCalibratedSmartphoneMicrophone || needAnySmartphone) {
       const params = {
         text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
+        onError: (error) => {
+          Swal.fire({
+            // title: "Error",
+            text: readi18nPhrases("RC_can'tDrawQR", rc.language.value),
+            icon: "error",
+            confirmButtonText: readi18nPhrases(
+              "RC_cantReadQR_Button",
+              rc.language.value,
+            ),
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              const { mic, loudspeaker } = await handleCantReadQROnError(
+                rc,
+                psychoJS,
+                needPhoneSurvey.current,
+                needCalibratedSound,
+                needComputerSurveyBool.current,
+              );
+              //quit PSYCHOJS
+              // if _needSmartphoneSurveyBool add survey data
+              if (needPhoneSurvey.current) {
+                // add microphoneInfo.current.phoneSurvey
+                psychoJS.experiment.addData(
+                  "Microphone survey",
+                  JSON.stringify(mic.phoneSurvey),
+                );
+                psychoJS.experiment.nextEntry();
+              }
+              if (needComputerSurveyBool.current) {
+                psychoJS.experiment.addData(
+                  "Loudspeaker survey",
+                  JSON.stringify(loudspeaker),
+                );
+                psychoJS.experiment.nextEntry();
+              }
+              showExperimentEnding();
+              quitPsychoJS("", true, paramReader);
+              isProlificExperiment()
+                ? window.open(
+                    "https://app.prolific.co/submissions/complete?cc=" +
+                      recruitmentServiceData?.incompatibleCode,
+                  )
+                : null;
+            }
+          });
+        },
       };
       compatibilityCheckPeer = new ExperimentPeer(params);
     }
