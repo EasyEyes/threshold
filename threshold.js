@@ -3230,6 +3230,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("trialInstructionRoutineBegin");
       preStimulus.running = true;
       // Check fullscreen and if not, get fullscreen
+      console.log(rc.isFullscreen.value);
       // if (!rc.isFullscreen.value && !debug) {
       //   try {
       //     rc.getFullscreen();
