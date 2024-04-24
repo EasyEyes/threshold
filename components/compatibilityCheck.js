@@ -25,6 +25,21 @@ import {
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
 
+var isFodLoaded = false; // Flag to track loading state
+document.addEventListener("DOMContentLoaded", function () {
+  var script = document.getElementById("51DegreesScript");
+
+  script.onload = function () {
+    console.log("Fod script loaded successfully.");
+    isFodLoaded = true;
+  };
+
+  script.onerror = function () {
+    console.error("Failed to load the fod script.");
+    isFodLoaded = false;
+  };
+});
+
 let gotLoudspeakerMatchBool = false;
 // import { microphoneInfo } from "./global";
 // import { rc } from "./global";
@@ -2240,8 +2255,36 @@ const getLoudspeakerDeviceDetailsFromUser = async (
 
 const identifyDevice = async () => {
   return new Promise((resolve) => {
-    while (!fod) {
-      console.log("waiting for fod");
+    if (!isFodLoaded) {
+      const script = document.createElement("script");
+      script.src = "https://cloud.51degrees.com/api/v4/AQSjtocC5XcfFwKc20g.js";
+      script.type = "text/javascript";
+      script.async = true;
+      script.crossOrigin = "crossorigin";
+      document.head.appendChild(script);
+      script.onload = () => {
+        isFodLoaded = true;
+        try {
+          const deviceInfo = {};
+          fod.complete(function (data) {
+            deviceInfo["IsMobile"] = data.device["ismobile"];
+            deviceInfo["HardwareName"] = data.device["hardwarename"];
+            deviceInfo["HardwareFamily"] = data.device["hardwarefamily"];
+            deviceInfo["HardwareModel"] = data.device["hardwaremodel"];
+            deviceInfo["OEM"] = data.device["oem"];
+            deviceInfo["HardwareModelVariants"] =
+              data.device["hardwaremodelvariants"];
+            deviceInfo["DeviceId"] = data.device["deviceid"];
+            deviceInfo["PlatformName"] = data.device["platformname"];
+            deviceInfo["PlatformVersion"] = data.device["platformversion"];
+            deviceInfo["DeviceType"] = data.device["devicetype"];
+            resolve(deviceInfo);
+          });
+        } catch (error) {
+          console.error("Error fetching or executing script:", error.message);
+          return null;
+        }
+      };
     }
     try {
       const deviceInfo = {};

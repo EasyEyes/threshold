@@ -857,6 +857,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
         onError: (error) => {
           Swal.fire({
+            allowOutsideClick: false,
             // title: "Error",
             text: readi18nPhrases("RC_can'tDrawQR", rc.language.value),
             icon: "error",
