@@ -26,19 +26,20 @@ import {
 import { recruitmentServiceData } from "./recruitmentService";
 
 var isFodLoaded = false; // Flag to track loading state
-document.addEventListener("DOMContentLoaded", function () {
-  var script = document.getElementById("51DegreesScript");
+if (typeof document !== "undefined")
+  document.addEventListener("DOMContentLoaded", function () {
+    var script = document.getElementById("51DegreesScript");
 
-  script.onload = function () {
-    console.log("Fod script loaded successfully.");
-    isFodLoaded = true;
-  };
+    script.onload = function () {
+      console.log("Fod script loaded successfully.");
+      isFodLoaded = true;
+    };
 
-  script.onerror = function () {
-    console.error("Failed to load the fod script.");
-    isFodLoaded = false;
-  };
-});
+    script.onerror = function () {
+      console.error("Failed to load the fod script.");
+      isFodLoaded = false;
+    };
+  });
 
 let gotLoudspeakerMatchBool = false;
 // import { microphoneInfo } from "./global";

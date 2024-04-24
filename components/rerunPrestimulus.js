@@ -34,7 +34,11 @@ export const setPreStimulusRerunInterval = (
    */
 
   // criterion for change in viewing distance to trigger rerun -- use the same criteria as the nudger
-  if (!preStimulus.interval) {
+  let allowedRatio = paramReader.read(
+    "viewingDistanceAllowedRatio",
+    status.block_condition,
+  );
+  if (!preStimulus.interval && allowedRatio > 0) {
     const rerunIntervalMs = 50;
     preStimulus.running = true;
     preStimulus.interval = setInterval(async () => {
@@ -43,10 +47,6 @@ export const setPreStimulusRerunInterval = (
       viewingDistanceCm.current = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
         : viewingDistanceCm.current;
-      let allowedRatio = Math.max(
-        paramReader.read("viewingDistanceAllowedRatio", status.block_condition),
-        0.000000001,
-      );
       let bounds;
       if (allowedRatio > 1) {
         bounds = [

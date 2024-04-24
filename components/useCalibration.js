@@ -109,7 +109,7 @@ export const formCalibrationList = (reader) => {
       name: "performance",
       callback: (data) => {
         loggerText(
-          `[rc] idealFps: ${data.value.idealFps}, stressFps: ${data.value.stressFps}`
+          `[rc] idealFps: ${data.value.idealFps}, stressFps: ${data.value.stressFps}`,
         );
       },
     });
@@ -141,15 +141,20 @@ export const formCalibrationList = (reader) => {
       name: "trackDistance",
       options: {
         nearPoint: ifTrue(
-          reader.read("calibratePupillaryDistanceBool", "__ALL_BLOCKS__")
+          reader.read("calibratePupillaryDistanceBool", "__ALL_BLOCKS__"),
         ),
         showVideo: false,
         desiredDistanceCm: reader.has("viewingDistanceDesiredCm")
           ? reader.read("viewingDistanceDesiredCm")[0]
           : undefined,
-        desiredDistanceTolerance: reader.read("viewingDistanceAllowedRatio")[0],
+        desiredDistanceTolerance:
+          reader.read("viewingDistanceAllowedRatio")[0] > 0
+            ? reader.read("viewingDistanceAllowedRatio")[0]
+            : Infinity,
         desiredDistanceMonitor: ifTrue(
-          reader.read("viewingDistanceNudgingBool", "__ALL_BLOCKS__")
+          reader
+            .read("viewingDistanceAllowedRatio", "__ALL_BLOCKS__")
+            .map((r) => r > 0),
         ),
         desiredDistanceMonitorAllowRecalibrate: !debugBool.current,
         fullscreen: !debug,
@@ -178,11 +183,11 @@ export const saveCalibratorData = (reader, rc, psychoJS) => {
   if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"))) {
     psychoJS.experiment.addData(
       `screenWidthByObjectCm`,
-      rc.screenWidthCm ? rc.screenWidthCm.value : 0
+      rc.screenWidthCm ? rc.screenWidthCm.value : 0,
     );
     psychoJS.experiment.addData(
       `screenHeightByObjectCm`,
-      rc.screenHeightCm ? rc.screenHeightCm.value : 0
+      rc.screenHeightCm ? rc.screenHeightCm.value : 0,
     );
   }
 
@@ -191,7 +196,7 @@ export const saveCalibratorData = (reader, rc, psychoJS) => {
       if (viewingDistanceData.method === "BlindSpot") {
         psychoJS.experiment.addData(
           `viewingDistanceByBlindSpotCm`,
-          viewingDistanceData.value
+          viewingDistanceData.value,
         );
       }
     }
@@ -211,17 +216,17 @@ export const saveCheckData = (rc, psychoJS) => {
           "screenWidthByRulerCm",
           (getCmValue(
             data.value.horizontal.numerical,
-            data.value.horizontal.unit
+            data.value.horizontal.unit,
           ) *
             screen.width) /
-            data.value.horizontal.arrowWidthPx
+            data.value.horizontal.arrowWidthPx,
         );
       if (data.value.vertical)
         psychoJS.experiment.addData(
           "screenHeightByRulerCm",
           (getCmValue(data.value.vertical.numerical, data.value.vertical.unit) *
             screen.height) /
-            data.value.vertical.arrowHeightPx
+            data.value.vertical.arrowHeightPx,
         );
     } else if (
       data.measure === "measureDistance" ||
@@ -229,7 +234,7 @@ export const saveCheckData = (rc, psychoJS) => {
     ) {
       psychoJS.experiment.addData(
         "viewingDistanceByRulerCm",
-        getCmValue(data.value.numerical, data.value.unit)
+        getCmValue(data.value.numerical, data.value.unit),
       );
     }
   }
@@ -239,35 +244,35 @@ export const saveCheckData = (rc, psychoJS) => {
 export const calibrateAudio = async (reader) => {
   const [calibrateSoundLevel, calibrateLoudspeaker] = [
     ifTrue(
-      reader.read(GLOSSARY.calibrateSound1000HzBool.name, "__ALL_BLOCKS__")
+      reader.read(GLOSSARY.calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
     ),
     ifTrue(
-      reader.read(GLOSSARY.calibrateSoundAllHzBool.name, "__ALL_BLOCKS__")
+      reader.read(GLOSSARY.calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
     ),
   ];
 
   calibrateMicrophonesBool.current = ifTrue(
-    reader.read(GLOSSARY._calibrateMicrophonesBool.name, "__ALL_BLOCKS__")
+    reader.read(GLOSSARY._calibrateMicrophonesBool.name, "__ALL_BLOCKS__"),
   );
 
   calibrateSoundBurstLevelReTBool.current = ifTrue(
     reader.read(
       GLOSSARY._calibrateSoundBurstLevelReTBool.name,
-      "__ALL_BLOCKS__"
-    )
+      "__ALL_BLOCKS__",
+    ),
   );
   calibrateSoundBurstDbIsRelativeBool.current = ifTrue(
     reader.read(
       GLOSSARY._calibrateSoundBurstDbIsRelativeBool.name,
-      "__ALL_BLOCKS__"
-    )
+      "__ALL_BLOCKS__",
+    ),
   );
 
   calibrateSoundBurstUses1000HzGainBool.current = ifTrue(
     reader.read(
       GLOSSARY._calibrateSoundBurstUses1000HzGainBool.name,
-      "__ALL_BLOCKS__"
-    )
+      "__ALL_BLOCKS__",
+    ),
   );
 
   calibrateSoundCheck.current = reader.read("_calibrateSoundCheck")[0];
@@ -275,93 +280,93 @@ export const calibrateAudio = async (reader) => {
   const showSoundCalibrationResultsBool = ifTrue(
     reader.read(
       GLOSSARY._showSoundCalibrationResultsBool.name,
-      "__ALL_BLOCKS__"
-    )
+      "__ALL_BLOCKS__",
+    ),
   );
   const showSoundTestPageBool = ifTrue(
-    reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__")
+    reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__"),
   );
   showSoundParametersBool.current = ifTrue(
-    reader.read(GLOSSARY._showSoundParametersBool.name, "__ALL_BLOCKS__")
+    reader.read(GLOSSARY._showSoundParametersBool.name, "__ALL_BLOCKS__"),
   );
   timeoutSec.current = reader.read(GLOSSARY._timeoutSec.name)[0] * 1000;
   calibrateSoundMinHz.current = reader.read(
-    GLOSSARY.calibrateSoundMinHz.name
+    GLOSSARY.calibrateSoundMinHz.name,
   )[0];
   calibrateSoundMaxHz.current = reader.read(
-    GLOSSARY.calibrateSoundMaxHz.name
+    GLOSSARY.calibrateSoundMaxHz.name,
   )[0];
   calibrateSoundBurstRepeats.current = reader.read(
-    GLOSSARY._calibrateSoundBurstRepeats.name
+    GLOSSARY._calibrateSoundBurstRepeats.name,
   )[0];
   calibrateSoundBurstSec.current = reader.read(
-    GLOSSARY._calibrateSoundBurstSec.name
+    GLOSSARY._calibrateSoundBurstSec.name,
   )[0];
   calibrateSoundBurstsWarmup.current = reader.read(
-    GLOSSARY._calibrateSoundBurstsWarmup.name
+    GLOSSARY._calibrateSoundBurstsWarmup.name,
   )[0];
   calibrateSoundHz.current = reader.read(
-    GLOSSARY._calibrateSoundSamplingDesiredHz.name
+    GLOSSARY._calibrateSoundSamplingDesiredHz.name,
   )[0];
   calibrateSoundBurstRecordings.current = reader.read(
-    GLOSSARY._calibrateSoundBurstRecordings.name
+    GLOSSARY._calibrateSoundBurstRecordings.name,
   )[0];
   calibrateSoundBurstMLSVersions.current = reader.read(
-    GLOSSARY._calibrateSoundBurstMLSVersions.name
+    GLOSSARY._calibrateSoundBurstMLSVersions.name,
   )[0];
   calibrateSoundIIRSec.current = reader.read(
-    GLOSSARY._calibrateSoundIIRSec.name
+    GLOSSARY._calibrateSoundIIRSec.name,
   )[0];
   calibrateSoundIRSec.current = reader.read(
-    GLOSSARY._calibrateSoundIRSec.name
+    GLOSSARY._calibrateSoundIRSec.name,
   )[0];
   calibrateSoundIIRPhase.current = reader.read(
-    GLOSSARY._calibrateSoundIIRPhase.name
+    GLOSSARY._calibrateSoundIIRPhase.name,
   )[0];
   console.log("calibrateSoundIIRPhase", calibrateSoundIIRPhase);
   calibrateSoundBurstDb.current = reader.read(
-    GLOSSARY._calibrateSoundBurstDb.name
+    GLOSSARY._calibrateSoundBurstDb.name,
   )[0];
 
   calibrateSoundBurstFilteredExtraDb.current = reader.read(
-    GLOSSARY._calibrateSoundBurstFilteredExtraDb.name
+    GLOSSARY._calibrateSoundBurstFilteredExtraDb.name,
   )[0];
   calibrateSoundBurstScalarDB.current = reader.read(
-    GLOSSARY._calibrateSoundBurstScalar_dB.name
+    GLOSSARY._calibrateSoundBurstScalar_dB.name,
   )[0];
 
   calibrateSound1000HzSec.current = reader.read(
-    GLOSSARY.calibrateSound1000HzSec.name
+    GLOSSARY.calibrateSound1000HzSec.name,
   )[0];
   calibrateSound1000HzPreSec.current = reader.read(
-    GLOSSARY.calibrateSound1000HzPreSec.name
+    GLOSSARY.calibrateSound1000HzPreSec.name,
   )[0];
   calibrateSound1000HzPostSec.current = reader.read(
-    GLOSSARY.calibrateSound1000HzPostSec.name
+    GLOSSARY.calibrateSound1000HzPostSec.name,
   )[0];
   calibrateSoundBackgroundSecs.current = reader.read(
-    GLOSSARY._calibrateSoundBackgroundSecs.name
+    GLOSSARY._calibrateSoundBackgroundSecs.name,
   )[0];
   calibrateSoundSaveJSONBool.current = ifTrue(
-    reader.read(GLOSSARY._calibrateSoundSaveJSONBool.name, "__ALL_BLOCKS__")
+    reader.read(GLOSSARY._calibrateSoundSaveJSONBool.name, "__ALL_BLOCKS__"),
   );
   calibrateSoundSmoothOctaves.current = reader.read(
-    GLOSSARY._calibrateSoundSmoothOctaves.name
+    GLOSSARY._calibrateSoundSmoothOctaves.name,
   )[0];
   calibrateSoundPowerBinDesiredSec.current = reader.read(
-    GLOSSARY._calibrateSoundPowerBinDesiredSec.name
+    GLOSSARY._calibrateSoundPowerBinDesiredSec.name,
   )[0];
   calibrateSoundPowerDbSDToleratedDb.current = reader.read(
-    GLOSSARY._calibrateSoundPowerDbSDToleratedDb.name
+    GLOSSARY._calibrateSoundPowerDbSDToleratedDb.name,
   )[0];
   calibrateSoundSamplingDesiredBits.current = reader.read(
-    GLOSSARY._calibrateSoundSamplingDesiredBits.name
+    GLOSSARY._calibrateSoundSamplingDesiredBits.name,
   )[0];
   calibrateSoundLimit.current = reader.read(
-    GLOSSARY._calibrateSoundLimit.name
+    GLOSSARY._calibrateSoundLimit.name,
   )[0];
   calibrateSoundUMIKBase_dB.current = reader.read(
-    GLOSSARY._calibrateSoundUMIKBase_dB.name
+    GLOSSARY._calibrateSoundUMIKBase_dB.name,
   )[0];
 
   const soundLevels = reader
@@ -426,7 +431,7 @@ export const calibrateAudio = async (reader) => {
           elems,
           gains,
           true,
-          rc.language.value
+          rc.language.value,
         );
         if (response === false) resolve(false);
       } else resolve(false);
@@ -449,7 +454,7 @@ export const calibrateAudio = async (reader) => {
     elems.subtitle.innerHTML = "";
     elems.title.innerHTML = readi18nPhrases(
       "RC_loudspeakerCalibrationResults",
-      rc.language.value
+      rc.language.value,
     );
     elems.title.style.visibility = "visible";
     //show plots of the loudspeaker calibration
@@ -469,7 +474,7 @@ export const calibrateAudio = async (reader) => {
         true,
         calibrateSoundCheck.current === "both"
           ? "system"
-          : calibrateSoundCheck.current
+          : calibrateSoundCheck.current,
       );
       const title1000Hz = "Sound Level at 1000 Hz";
       const titleallHz = ["Correction"];
@@ -481,20 +486,20 @@ export const calibrateAudio = async (reader) => {
         calibrateSoundCheck.current === "both"
           ? "system"
           : calibrateSoundCheck.current,
-        true
+        true,
       );
       displayVolumeRecordings(
         elems,
         soundCalibrationResults.current.recordingChecks,
         true,
-        allHzCalibrationResults.filteredMLSRange.component
+        allHzCalibrationResults.filteredMLSRange.component,
       );
       displayRecordings(
         elems,
         soundCalibrationResults.current.recordingChecks,
         true,
         allHzCalibrationResults.filteredMLSRange.component,
-        calibrateSoundCheck.current
+        calibrateSoundCheck.current,
       );
       if (
         calibrateSoundCheck.current === "system" ||
@@ -514,7 +519,7 @@ export const calibrateAudio = async (reader) => {
           calibrateSoundCheck.current === "system"
             ? allHzCalibrationResults.filteredMLSRange.system
             : allHzCalibrationResults.filteredMLSRange.component,
-          soundCalibrationResults.current.parameters
+          soundCalibrationResults.current.parameters,
         );
       } else {
         displayParametersAllHz(
@@ -527,7 +532,7 @@ export const calibrateAudio = async (reader) => {
           allHzCalibrationResults.mls_psd,
           { Freq: [], Gain: [] },
           allHzCalibrationResults.filteredMLSRange.system,
-          soundCalibrationResults.current.parameters
+          soundCalibrationResults.current.parameters,
         );
         displayParametersAllHz(
           elems,
@@ -539,7 +544,7 @@ export const calibrateAudio = async (reader) => {
           allHzCalibrationResults.mls_psd,
           allHzCalibrationResults.microphoneGain,
           allHzCalibrationResults.filteredMLSRange.component,
-          soundCalibrationResults.current.parameters
+          soundCalibrationResults.current.parameters,
         );
       }
       // display what we save in the database for the loudspeaker calibration
@@ -548,7 +553,7 @@ export const calibrateAudio = async (reader) => {
         allHzCalibrationResults.knownIr,
         true,
         "",
-        allHzCalibrationResults.filteredMLSRange.component
+        allHzCalibrationResults.filteredMLSRange.component,
       );
     }
     let showLoudSpeakerDoneMessage = true;
@@ -577,11 +582,11 @@ export const calibrateAudio = async (reader) => {
       elems.message.innerHTML = showLoudSpeakerDoneMessage
         ? readi18nPhrases(
             "RC_soundCalibrationLoudspeakerDone",
-            rc.language.value
+            rc.language.value,
           )
         : readi18nPhrases(
             "RC_soundCalibrationMicrophoneDone",
-            rc.language.value
+            rc.language.value,
           );
       showLoudSpeakerDoneMessage = false;
 
@@ -614,14 +619,14 @@ export const calibrateAudio = async (reader) => {
             deviceType.isLoudspeaker,
             rc.language.value,
             deviceType.isSmartphone,
-            deviceType.isLoudspeaker ? null : copyKnownIR
+            deviceType.isLoudspeaker ? null : copyKnownIR,
           );
 
           elems.title.innerHTML = readi18nPhrases(
             deviceType.isLoudspeaker
               ? "RC_loudspeakerCalibrationResults"
               : "RC_microphoneCalibrationResults",
-            rc.language.value
+            rc.language.value,
           );
           elems.title.style.visibility = "visible";
           if (calibrateSoundCheck.current !== "none") {
@@ -632,7 +637,7 @@ export const calibrateAudio = async (reader) => {
               deviceType.isLoudspeaker,
               calibrateSoundCheck.current === "both"
                 ? "system"
-                : calibrateSoundCheck.current
+                : calibrateSoundCheck.current,
             );
             //show sound calibration results
             const title1000Hz = "Sound Level at 1000 Hz";
@@ -647,7 +652,7 @@ export const calibrateAudio = async (reader) => {
               calibrateSoundCheck.current === "both"
                 ? "system"
                 : calibrateSoundCheck.current,
-              deviceType.isLoudspeaker
+              deviceType.isLoudspeaker,
             );
             displayVolumeRecordings(
               elems,
@@ -657,7 +662,8 @@ export const calibrateAudio = async (reader) => {
               deviceType.isLoudspeaker,
               deviceType.isLoudspeaker
                 ? allHzCalibrationResults.filteredMLSRange.component
-                : microphoneCalibrationResult.current.filteredMLSRange.component
+                : microphoneCalibrationResult.current.filteredMLSRange
+                    .component,
             );
             displayRecordings(
               elems,
@@ -667,7 +673,8 @@ export const calibrateAudio = async (reader) => {
               deviceType.isLoudspeaker,
               deviceType.isLoudspeaker
                 ? allHzCalibrationResults.filteredMLSRange.component
-                : microphoneCalibrationResult.current.filteredMLSRange.component
+                : microphoneCalibrationResult.current.filteredMLSRange
+                    .component,
             );
             if (
               calibrateSoundCheck.current === "system" ||
@@ -688,7 +695,7 @@ export const calibrateAudio = async (reader) => {
                   calibrateSoundCheck.current === "system"
                     ? allHzCalibrationResults.filteredMLSRange.system
                     : allHzCalibrationResults.filteredMLSRange.component,
-                  soundCalibrationResults.current.parameters
+                  soundCalibrationResults.current.parameters,
                 );
               } else {
                 displayParametersAllHz(
@@ -707,7 +714,7 @@ export const calibrateAudio = async (reader) => {
                         .system
                     : microphoneCalibrationResult.current.filteredMLSRange
                         .component,
-                  soundCalibrationResults.current.parameters
+                  soundCalibrationResults.current.parameters,
                 );
               }
             } else {
@@ -722,7 +729,7 @@ export const calibrateAudio = async (reader) => {
                   allHzCalibrationResults.mls_psd,
                   { Freq: [], Gain: [] },
                   allHzCalibrationResults.filteredMLSRange.system,
-                  soundCalibrationResults.current.parameters
+                  soundCalibrationResults.current.parameters,
                 );
                 displayParametersAllHz(
                   elems,
@@ -734,7 +741,7 @@ export const calibrateAudio = async (reader) => {
                   allHzCalibrationResults.mls_psd,
                   allHzCalibrationResults.microphoneGain,
                   allHzCalibrationResults.filteredMLSRange.component,
-                  soundCalibrationResults.current.parameters
+                  soundCalibrationResults.current.parameters,
                 );
               } else {
                 displayParametersAllHz(
@@ -747,7 +754,7 @@ export const calibrateAudio = async (reader) => {
                   microphoneCalibrationResult.current.mls_psd,
                   microphoneCalibrationResult.current.microphoneGain,
                   microphoneCalibrationResult.current.filteredMLSRange.system,
-                  soundCalibrationResults.current.parameters
+                  soundCalibrationResults.current.parameters,
                 );
                 displayParametersAllHz(
                   elems,
@@ -760,7 +767,7 @@ export const calibrateAudio = async (reader) => {
                   loudspeakerIR,
                   microphoneCalibrationResult.current.filteredMLSRange
                     .component,
-                  soundCalibrationResults.current.parameters
+                  soundCalibrationResults.current.parameters,
                 );
               }
             }
@@ -774,7 +781,8 @@ export const calibrateAudio = async (reader) => {
               "",
               deviceType.isLoudspeaker
                 ? allHzCalibrationResults.filteredMLSRange.component
-                : microphoneCalibrationResult.current.filteredMLSRange.component
+                : microphoneCalibrationResult.current.filteredMLSRange
+                    .component,
             );
           }
           elems.againButton.removeEventListener("click", repeatCalibration);
@@ -807,12 +815,12 @@ export const calibrateAudio = async (reader) => {
             elems,
             gains,
             false,
-            rc.language.value
+            rc.language.value,
           );
 
           elems.title.innerHTML = readi18nPhrases(
             "RC_microphoneCalibrationResults",
-            rc.language.value
+            rc.language.value,
           );
           elems.title.style.visibility = "visible";
           if (calibrateSoundCheck.current !== "none") {
@@ -823,7 +831,7 @@ export const calibrateAudio = async (reader) => {
               false,
               calibrateSoundCheck.current === "both"
                 ? "system"
-                : calibrateSoundCheck.current
+                : calibrateSoundCheck.current,
             );
             //show sound calibration results
             const title1000Hz = "Sound Level at 1000 Hz";
@@ -836,19 +844,19 @@ export const calibrateAudio = async (reader) => {
               calibrateSoundCheck.current === "both"
                 ? "system"
                 : calibrateSoundCheck.current,
-              false
+              false,
             );
             displayVolumeRecordings(
               elems,
               microphoneCalibrationResult.current.recordingChecks,
               false,
-              microphoneCalibrationResult.current.filteredMLSRange.component
+              microphoneCalibrationResult.current.filteredMLSRange.component,
             );
             displayRecordings(
               elems,
               microphoneCalibrationResult.current.recordingChecks,
               false,
-              microphoneCalibrationResult.current.filteredMLSRange.component
+              microphoneCalibrationResult.current.filteredMLSRange.component,
             );
             if (
               calibrateSoundCheck.current === "system" ||
@@ -869,7 +877,7 @@ export const calibrateAudio = async (reader) => {
                   ? microphoneCalibrationResult.current.filteredMLSRange.system
                   : microphoneCalibrationResult.current.filteredMLSRange
                       .component,
-                soundCalibrationResults.current.parameters
+                soundCalibrationResults.current.parameters,
               );
             } else {
               displayParametersAllHz(
@@ -882,7 +890,7 @@ export const calibrateAudio = async (reader) => {
                 microphoneCalibrationResult.current.mls_psd,
                 microphoneCalibrationResult.current.microphoneGain,
                 microphoneCalibrationResult.current.filteredMLSRange.system,
-                soundCalibrationResults.current.parameters
+                soundCalibrationResults.current.parameters,
               );
               displayParametersAllHz(
                 elems,
@@ -894,7 +902,7 @@ export const calibrateAudio = async (reader) => {
                 microphoneCalibrationResult.current.mls_psd,
                 loudspeakerIR,
                 microphoneCalibrationResult.current.filteredMLSRange.component,
-                soundCalibrationResults.current.parameters
+                soundCalibrationResults.current.parameters,
               );
             }
             // display what we save in the database for the loudspeaker calibration
@@ -903,7 +911,7 @@ export const calibrateAudio = async (reader) => {
               microphoneCalibrationResult.current.component.ir,
               false,
               "",
-              microphoneCalibrationResult.current.filteredMLSRange.component
+              microphoneCalibrationResult.current.filteredMLSRange.component,
             );
           }
           elems.againButton.removeEventListener("click", repeatCalibration);
@@ -1026,7 +1034,7 @@ const _addSoundCalibrationElems = (copy) => {
   againButton.setAttribute("id", "againButton");
   soundParametersFromCalibration.setAttribute(
     "id",
-    "soundParametersFromCalibration"
+    "soundParametersFromCalibration",
   );
   soundTestPlots.setAttribute("id", "soundTestPlots");
   soundTestContainer.setAttribute("id", "soundTestContainer");
