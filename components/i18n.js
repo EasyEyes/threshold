@@ -1942,7 +1942,7 @@ export const phrases = {
   EE_needIncognito: {
     "en-US":
       "And the browser window (can't be Safari) must be in incognito/private mode.",
-    ar: "Loading...",
+    ar: "ويجب أن تكون نافذة المتصفح (لا يمكن أن تكون سفاري) في وضع التصفح الخفي / الخاص.",
     hy: "Իսկ բրաուզերի պատուհանը (չի կարող լինել Safari) պետք է լինի ինկոգնիտո/մասնավոր ռեժիմում։",
     bg: "И прозорецът на браузъра (не може да е Safari) трябва да е в инкогнито/частен режим.",
     "zh-CN": "并且浏览器窗口（不能是 Safari）必须处于隐身/私人模式。",
@@ -1954,7 +1954,7 @@ export const phrases = {
     "en-UK":
       "And the browser window (can't be Safari) must be in private browsing mode.",
     fi: "Ja selainikkunan (ei voi olla Safari) on oltava incognito-/yksityisessä tilassa.",
-    fr: "Loading...",
+    fr: "Et la fenêtre du navigateur (ne peut pas être Safari) doit être en mode incognito/privé.",
     de: "Und das Browserfenster (kann nicht Safari sein) muss sich im Inkognito-/privaten Modus befinden.",
     el: "Και το παράθυρο του προγράμματος περιήγησης (δεν μπορεί να είναι Safari) πρέπει να είναι σε κατάσταση ανώνυμης περιήγησης/ιδιωτική.",
     he: "וחלון הדפדפן (לא יכול להיות Safari) חייב להיות במצב גלישה בסתר/פרטי.",
@@ -1962,7 +1962,7 @@ export const phrases = {
     hu: "A böngészőablaknak (nem lehet Safari) inkognitó/privát módban kell lennie.",
     is: "Og vafri glugginn (getur ekki verið Safari) verður að vera í dulbúnu/einkavæðingu háttur.",
     id: "Dan jendela browser (tidak bisa Safari) harus dalam mode penyamaran/pribadi.",
-    it: "Loading...",
+    it: "E la finestra del browser (non può essere Safari) deve essere in modalità incognito/privata.",
     ja: "また、ブラウザ ウィンドウ (Safari は不可) はシークレット/プライベート モードでなければなりません。",
     kn: "ಮತ್ತು ಬ್ರೌಸರ್ ವಿಂಡೋ (ಸಫಾರಿ ಆಗಲು ಸಾಧ್ಯವಿಲ್ಲ) ಅಜ್ಞಾತ/ಖಾಸಗಿ ಮೋಡ್‌ನಲ್ಲಿರಬೇಕು.",
     ko: "그리고 브라우저 창(사파리는 불가능)은 익명/비공개 모드여야 합니다.",
@@ -3889,7 +3889,7 @@ export const phrases = {
   },
   EE_describeScreenSize: {
     "en-US": " And a 111⨉222 pixel screen.",
-    ar: "Loading...",
+    ar: "وشاشة بحجم 111 × 222 بكسل.",
     hy: " Եվ 111⨉222 պիքսել էկրան:",
     bg: " И 111⨉222 пикселов екран.",
     "zh-CN": "一个111⨉222像素的屏幕。",
@@ -3933,7 +3933,7 @@ export const phrases = {
   EE_describeIncognito: {
     "en-US":
       " As required by this study, this browser window is in incognito mode.",
-    ar: "Loading...",
+    ar: "وفقًا لمتطلبات هذه الدراسة، تم تشغيل نافذة المتصفح هذه في وضع التصفح الخفي.",
     hy: " Ինչպես պահանջում է այս ուսումնասիրությունը, դիտարկիչի այս պատուհանը գտնվում է ինկոգնիտո ռեժիմում:",
     bg: "Както е изискано от това изследване, този прозорец на браузъра е в режим инкогнито.",
     "zh-CN": " 根据本研究的要求，该浏览器窗口处于隐身模式。",
@@ -3945,7 +3945,7 @@ export const phrases = {
     "en-UK":
       " As required by this study, this browser window is in incognito mode.",
     fi: " Kuten tämä tutkimus edellyttää, tämä selainikkuna on incognito-tilassa.",
-    fr: "Loading...",
+    fr: "Comme requis par cette étude, cette fenêtre de navigateur est en mode incognito.",
     de: "Wie von dieser Studie gefordert, befindet sich dieses Browserfenster im Inkognito-Modus.",
     el: " Όπως απαιτείται από αυτήν τη μελέτη, αυτό το παράθυρο του προγράμματος περιήγησης βρίσκεται σε κατάσταση ανώνυμης περιήγησης.",
     he: " כנדרש במחקר זה, חלון הדפדפן הזה נמצא במצב גלישה בסתר.",
@@ -3953,7 +3953,7 @@ export const phrases = {
     hu: " A tanulmány szerint ez a böngészőablak inkognitómódban van.",
     is: " Eins og krafist er í þessari rannsókn er þessi vafragluggi í huliðsstillingu.",
     id: " Seperti yang disyaratkan oleh penelitian ini, jendela browser ini berada dalam mode penyamaran.",
-    it: "Loading...",
+    it: "Come richiesto da questo studio, questa finestra del browser è in modalità incognito.",
     ja: " この調査で必要とされているように、このブラウザ ウィンドウはシークレット モードになっています。",
     kn: "ಈ ಅಧ್ಯಯನದ ಆವಶ್ಯಕತೆಯನ್ನು ಪೂರೈಸಲು, ಈ ಬ್ರೌಸರ್ ವಿಂಡೋ ಅನಿವಾರ್ಯ ಪ್ರಕಾರದಲ್ಲಿದೆ.",
     ko: " 이 연구에서 요구하는 대로 이 브라우저 창은 시크릿 모드입니다.",
@@ -3977,7 +3977,7 @@ export const phrases = {
   },
   EE_IDRequested: {
     "en-US": "EasyEyes ID requested",
-    ar: "Loading...",
+    ar: "تم طلب EasyEyes ID",
     hy: "«EasyEyes ID հարցումը»",
     bg: "Изискано е EasyEyes ID",
     "zh-CN": "EasyEyes ID 请求",
@@ -3988,7 +3988,7 @@ export const phrases = {
     nl: "EasyEyes ID aangevraagd",
     "en-UK": "EasyEyes ID requested",
     fi: "EasyEyes-tunnusta pyydettiin",
-    fr: "Loading...",
+    fr: "EasyEyes ID demandé",
     de: "EasyEyes-ID angefordert",
     el: "Ζητήθηκε αναγνωριστικό EasyEyes",
     he: "מבוקש מזהה EasyEyes",
@@ -3996,7 +3996,7 @@ export const phrases = {
     hu: "EasyEyes azonosító kért",
     is: "Beðið um EasyEyes auðkenni",
     id: "ID EasyEyes diminta",
-    it: "Loading...",
+    it: "Richiesta EasyEyes ID",
     ja: "EasyEyes ID が要求されました",
     kn: "EasyEyes ID ವಿನಂತಿಸಲಾಗಿದೆ",
     ko: "EasyEyes ID가 요청되었습니다",
@@ -4020,7 +4020,7 @@ export const phrases = {
   },
   EE_noFileSelected: {
     "en-US": "No file selected",
-    ar: "Loading...",
+    ar: "لم يتم تحديد أي ملف",
     hy: "Ֆայլ ընտրված չէ",
     bg: "Не е избран файл",
     "zh-CN": "未选择文件",
@@ -4031,7 +4031,7 @@ export const phrases = {
     nl: "Geen bestand geselecteerd",
     "en-UK": "No file selected",
     fi: "Ei tiedostoa valittuna",
-    fr: "Loading...",
+    fr: "Aucun fichier sélectionné",
     de: "Keine Datei ausgewählt",
     el: "Κανένα επιλεγμένο αρχείο",
     he: "אף קובץ לא נבחר",
@@ -4039,7 +4039,7 @@ export const phrases = {
     hu: "Nincs fájl kiválasztva",
     is: "Engin skrá valin",
     id: "Tidak ada file yang dipilih",
-    it: "Loading...",
+    it: "Nessun file selezionato",
     ja: "ファイルが選択されていません",
     kn: "ಯಾವುದೇ ಕಡತ ಆಯ್ಕೆಯಾಗಿಲ್ಲ",
     ko: "파일이 선택되지 않았습니다",
@@ -4063,7 +4063,7 @@ export const phrases = {
   },
   EE_browseForID: {
     "en-US": "Select EasyEyes ID file",
-    ar: "Loading...",
+    ar: "اختر ملف EasyEyes ID",
     hy: "Ընտրեք EasyEyes ID ֆայլը",
     bg: "Изберете EasyEyes ID файл",
     "zh-CN": "选择EasyEyes ID文件",
@@ -4075,7 +4075,7 @@ export const phrases = {
     "en-UK":
       '"Select EasyEyes ID file" (no change needed as both en and en-UK use the same language)',
     fi: "Valitse EasyEyes ID -tiedosto",
-    fr: "Loading...",
+    fr: "Sélectionner le fichier EasyEyes ID",
     de: "Wählen Sie die EasyEyes ID-Datei aus",
     el: "Επιλέξτε το αρχείο EasyEyes ID",
     he: "בחר קובץ מזהה EasyEyes",
@@ -4083,7 +4083,7 @@ export const phrases = {
     hu: "Válassza ki az EasyEyes azonosító fájlt",
     is: "Veldu EasyEyes ID skrá",
     id: "Pilih file ID EasyEyes",
-    it: "Loading...",
+    it: "Seleziona il file EasyEyes ID",
     ja: "EasyEyes ID ファイルを選択します",
     kn: "EasyEyes ID ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ",
     ko: "EasyEyes ID 파일을 선택하세요",
@@ -4108,7 +4108,7 @@ export const phrases = {
   EE_ID_noLocalStorage: {
     "en-US":
       "The researcher requests that you provide your EasyEyes ID from the previous session, please type it here, or upload the file downloaded when the last session ends.",
-    ar: "Loading...",
+    ar: "يطلب الباحث منك تقديم معرف EasyEyes الخاص بك من الجلسة السابقة، يرجى كتابته هنا، أو تحميل الملف الذي تم تنزيله عند انتهاء الجلسة الأخيرة.",
     hy: "Հետազոտողը խնդրում է, որ տրամադրեք ձեր EasyEyes ID-ն նախորդ նիստից, խնդրում ենք մուտքագրել այն այստեղ կամ վերբեռնել ներբեռնված ֆայլը, երբ վերջին նիստն ավարտվի:",
     bg: "Изследователят изисква да предоставите вашия EasyEyes ID от предишната сесия, моля, въведете го тук или качете изтегления файл, когато последната сесия приключи.",
     "zh-CN":
@@ -4122,7 +4122,7 @@ export const phrases = {
     "en-UK":
       "The researcher requests that you provide your EasyEyes ID from the previous session, please type it here, or upload the file downloaded when the last session ends.",
     fi: "Tutkija pyytää sinua antamaan EasyEyes-tunnuksesi edellisestä istunnosta, kirjoita se tähän tai lataa ladattu tiedosto, kun viimeinen istunto päättyy.",
-    fr: "Loading...",
+    fr: "Le chercheur demande que vous fournissiez votre identifiant EasyEyes de la session précédente, veuillez le taper ici ou télécharger le fichier téléchargé lorsque la dernière session se termine.",
     de: "Der Forscher bittet Sie, Ihre EasyEyes-ID aus der vorherigen Sitzung anzugeben. Bitte geben Sie sie hier ein oder laden Sie die Datei hoch, die heruntergeladen wurde, als die letzte Sitzung endete.",
     el: "Ο ερευνητής ζητά να δώσετε το αναγνωριστικό EasyEyes από την προηγούμενη συνεδρία, πληκτρολογήστε το εδώ ή μεταφορτώστε το αρχείο που κατεβάσατε όταν τελειώσει η τελευταία συνεδρία.",
     he: "החוקר מבקש ממך לספק את מזהה ה-EasyEyes שלך מהמפגש הקודם, אנא הקלד אותו כאן, או העלה את הקובץ שהורד בסיום ההפעלה האחרונה.",
@@ -4130,7 +4130,7 @@ export const phrases = {
     hu: "A kutató kéri, hogy adja meg az előző munkamenetben használt EasyEyes azonosítóját, kérjük, írja be ide, vagy töltse fel a fájlt, amelyet a legutóbbi munkamenet végeztével töltött le.",
     is: "Rannsakandinn biður þig um að gefa upp EasyEyes ID frá fyrri skipti, vinsamlegast skrifaðu það hérna eða hlaða upp skránni sem var niðurhöfð í lok síðasta skiptis.",
     id: "Peneliti meminta Anda memberikan ID EasyEyes Anda dari sesi sebelumnya, silakan ketik di sini, atau unggah file yang diunduh saat sesi terakhir berakhir.",
-    it: "Loading...",
+    it: "Il ricercatore richiede che tu fornisca il tuo ID EasyEyes dalla sessione precedente, per favore digitalo qui o carica il file scaricato al termine dell'ultima sessione.",
     ja: "研究者は、前のセッションの EasyEyes ID を提供するよう要求します。ここに入力するか、最後のセッションの終了時にダウンロードしたファイルをアップロードしてください。",
     kn: "ಹಿಂದಿನ ಸೆಶನ್‌ನಿಂದ ನಿಮ್ಮ EasyEyes ID ಅನ್ನು ನೀವು ಒದಗಿಸುವಂತೆ ಸಂಶೋಧಕರು ವಿನಂತಿಸುತ್ತಾರೆ, ದಯವಿಟ್ಟು ಅದನ್ನು ಇಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ ಅಥವಾ ಕೊನೆಯ ಸೆಷನ್‌ ಮುಗಿದಾಗ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್ ಅನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.",
     ko: "연구원은 이전 세션에서 EasyEyes ID를 제공하도록 요청합니다. 여기에 입력하거나 마지막 세션이 끝나면 다운로드한 파일을 업로드하십시오.",
@@ -4155,7 +4155,7 @@ export const phrases = {
   EE_ID: {
     "en-US":
       'A unique ID is needed to link data across sessions. This computer previously participated in a session on **ddd** with EasyEyes ID “**sss**”. Press OK if that\'s you. Otherwise, if you have an EasyEyes ID file, press the file selection button below to open it. (The filename begins with "EasyEyes", ends with ".txt", and is typically in your Downloads folder.) If you don\'t have a file, but know your EasyEyes ID, then type it. Otherwise, just make up your own ID, which can be any alphanumeric string at least 5 characters long. It can be your name, if you like. We\'ll remember it for you on this computer, but if you go to another computer, please take your EasyEyes ID file (the most recent file in your Downloads folder), or at least write down your EasyEyes ID. Use it every time to link your data from session to session.',
-    ar: "Loading...",
+    ar: '"""\nمطلوب معرف فريد لربط البيانات عبر الجلسات. سبق لهذا الكمبيوتر المشاركة في جلسة على **ddd** بمعرف EasyEyes "sss". اضغط على موافق إذا كنت أنت. وإلا، إذا كان لديك ملف EasyEyes ID، اضغط على زر اختيار الملف أدناه لفتحه. (اسم الملف يبدأ بـ "EasyEyes"، وينتهي بـ ".txt"، وعادة ما يكون في مجلد التنزيلات الخاص بك.) إذا لم يكن لديك ملف، ولكن تعرف على معرف EasyEyes الخاص بك، فقم بكتابته. وإلا، قم بإنشاء معرف خاص بك، والذي يمكن أن يكون أي سلسلة أبجدية رقمية تحتوي على ما لا يقل عن 5 أحرف. يمكن أن يكون اسمك، إذا كنت ترغب في ذلك. سنتذكره لك على هذا الكمبيوتر، ولكن إذا ذهبت إلى كمبيوتر آخر، يرجى أخذ ملف EasyEyes ID الخاص بك (أحدث ملف في مجلد التنزيلات الخاص بك)، أو على الأقل اكتب معرف EasyEyes الخاص بك. استخدمه في كل مرة لربط بياناتك من جلسة إلى جلسة.\n"""',
     hy: "Սեսիաների միջև տվյալները կապելու համար անհրաժեշտ է եզակի ID: Այս համակարգիչը նախկինում մասնակցել է **ddd**-ի նիստին EasyEyes ID-ով «**sss**»: Սեղմեք OK, եթե դա դուք եք: Հակառակ դեպքում, եթե ունեք EasyEyes ID ֆայլ, սեղմեք ներքևում գտնվող ֆայլի ընտրության կոճակը՝ այն բացելու համար: (Ֆայլի անունը սկսվում է «EasyEyes»-ով, ավարտվում է «.txt»-ով և սովորաբար գտնվում է ձեր «Ներբեռնումներ» թղթապանակում:) Եթե դուք ֆայլ չունեք, բայց գիտեք ձեր EasyEyes ID-ն, ապա մուտքագրեք այն: Հակառակ դեպքում, պարզապես կազմեք ձեր սեփական ID-ն, որը կարող է լինել առնվազն 5 նիշ երկարությամբ ցանկացած այբբենական տող: Դա կարող է լինել ձեր անունը, եթե ցանկանում եք: Մենք այն կհիշենք ձեզ համար այս համակարգչում, բայց եթե գնում եք մեկ այլ համակարգիչ, խնդրում ենք վերցնել ձեր EasyEyes ID ֆայլը (վերջին ֆայլը ձեր Ներբեռնումներ թղթապանակում), կամ գոնե գրեք ձեր EasyEyes ID-ն: Օգտագործեք այն ամեն անգամ՝ ձեր տվյալները սեսիաից սեսիա կապելու համար:",
     bg: 'Необходим е уникален идентификатор за свързване на данни между сесиите. Този компютър преди това е участвал в сесия на **ddd** с EasyEyes ID „**sss**“. Натиснете OK, ако това сте вие. В противен случай, ако имате EasyEyes ID файл, натиснете бутона за избор на файл по-долу, за да го отворите. (Името на файла започва с "EasyEyes", завършва с ".txt" и обикновено е в папката ви за изтегляния.) Ако нямате файл, но знаете вашето EasyEyes ID, въведете го. В противен случай просто създайте свой собствен идентификатор, който може да бъде произволен буквено-цифров низ с дължина най-малко 5 знака. Може да е вашето име, ако желаете. Ние ще го запомним вместо вас на този компютър, но ако отидете на друг компютър, моля, вземете вашия EasyEyes ID файл (най-новия файл във вашата папка за изтегляния) или поне запишете своя EasyEyes ID. Използвайте го всеки път, за да свържете данните си от сесия към сесия.',
     "zh-CN":
@@ -4169,7 +4169,7 @@ export const phrases = {
     "en-UK":
       'A unique ID is needed to link data across sessions. This computer previously participated in a session on **ddd** with EasyEyes ID “**sss**”. Press OK if that\'s you. Otherwise, if you have an EasyEyes ID file, press the file selection button below to open it. (The filename begins with "EasyEyes", ends with ".txt", and is typically in your Downloads folder.) If you don\'t have a file, but know your EasyEyes ID, then type it. Otherwise, just make up your own ID, which can be any alphanumeric string at least 5 characters long. It can be your name, if you like. We\'ll remember it for you on this computer, but if you go to another computer, please take your EasyEyes ID file (the most recent file in your Downloads folder), or at least write down your EasyEyes ID. Use it every time to link your data from session to session.',
     fi: '"Uniikki tunniste tarvitaan tietojen linkittämiseen eri istuntojen välillä. Tämä tietokone osallistui aiemmin istuntoon **ddd** EasyEyes-tunnuksella “**sss**”. Paina OK, jos se olet sinä. Muussa tapauksessa, jos sinulla on EasyEyes-tunnustiedosto, paina alla olevaa tiedoston valintapainiketta avataksesi sen. (Tiedoston nimi alkaa "EasyEyes", päättyy ".txt" ja on yleensä Lataukset-kansiossasi.) Jos sinulla ei ole tiedostoa, mutta tiedät EasyEyes-tunnuksesi, kirjoita se. Muussa tapauksessa keksi oma tunnuksesi, joka voi olla mikä tahansa vähintään 5 merkin pituinen merkkijono. Se voi olla nimesi, jos haluat. Muistamme sen sinulle tällä tietokoneella, mutta jos siirryt toiselle tietokoneelle, ota mukaasi EasyEyes-tunnustiedosto (viimeisin tiedosto Lataukset-kansiossasi) tai kirjoita ainakin EasyEyes-tunnuksesi ylös. Käytä sitä joka kerta linkittääksesi tietosi istunnosta toiseen."',
-    fr: "Loading...",
+    fr: "\"Un identifiant unique est nécessaire pour lier les données entre les sessions. Cet ordinateur a déjà participé à une session sur **ddd** avec l'identifiant EasyEyes \"**sss**\". Appuyez sur OK si c'est vous. Sinon, si vous avez un fichier d'identifiant EasyEyes, appuyez sur le bouton de sélection de fichier ci-dessous pour l'ouvrir. (Le nom de fichier commence par \"EasyEyes\", se termine par \".txt\" et se trouve généralement dans votre dossier Téléchargements.) Si vous n'avez pas de fichier, mais connaissez votre identifiant EasyEyes, saisissez-le. Sinon, créez simplement votre propre identifiant, qui peut être une chaîne alphanumérique d'au moins 5 caractères. Vous pouvez utiliser votre nom, si vous le souhaitez. Nous le mémoriserons pour vous sur cet ordinateur, mais si vous utilisez un autre ordinateur, veuillez prendre votre fichier d'identifiant EasyEyes (le fichier le plus récent dans votre dossier Téléchargements), ou au moins notez votre identifiant EasyEyes. Utilisez-le à chaque fois pour lier vos données d'une session à l'autre.\"",
     de: "Um Daten sitzungsübergreifend zu verknüpfen, ist eine eindeutige ID erforderlich. Dieser Computer hat zuvor an einer Sitzung auf **ddd** mit der EasyEyes-ID „**sss**“ teilgenommen. Drücken Sie OK, wenn Sie es sind. Wenn Sie andernfalls eine EasyEyes-ID-Datei haben, klicken Sie auf die Dateiauswahlschaltfläche unten, um sie zu öffnen. (Der Dateiname beginnt mit „EasyEyes“, endet mit „.txt“ und befindet sich normalerweise in Ihrem Download-Ordner.) Wenn Sie keine Datei haben, aber Ihre EasyEyes-ID kennen, geben Sie sie ein. Ansonsten erstellen Sie einfach Ihre eigene ID, die aus einer beliebigen alphanumerischen Zeichenfolge mit mindestens 5 Zeichen bestehen kann. Wenn Sie möchten, kann es auch Ihr Name sein. Wir werden es für Sie auf diesem Computer speichern, aber wenn Sie zu einem anderen Computer wechseln, nehmen Sie bitte Ihre EasyEyes-ID-Datei (die aktuellste Datei in Ihrem Download-Ordner) mit oder notieren Sie sich zumindest Ihre EasyEyes-ID. Verwenden Sie es jedes Mal, um Ihre Daten von Sitzung zu Sitzung zu verknüpfen.",
     el: '"Απαιτείται ένα μοναδικό αναγνωριστικό για να συνδέσετε τα δεδομένα ανάμεσα σε συνεδρίες. Αυτός ο υπολογιστής συμμετείχε προηγουμένως σε μια συνεδρία στο **ddd** με το EasyEyes ID "**sss**". Πατήστε ΟΚ αν είστε εσείς. Διαφορετικά, αν έχετε ένα αρχείο EasyEyes ID, πατήστε το κουμπί επιλογής αρχείου παρακάτω για να το ανοίξετε. (Το όνομα αρχείου αρχίζει με "EasyEyes", τελειώνει με ".txt" και συνήθως βρίσκεται στον φάκελο Λήψεις σας.) Αν δεν έχετε ένα αρχείο, αλλά γνωρίζετε το EasyEyes ID σας, τότε πληκτρολογήστε το. Διαφορετικά, απλά δημιουργήστε το δικό σας αναγνωριστικό, το οποίο μπορεί να είναι οποιαδήποτε αλφαριθμητική σειρά τουλάχιστον 5 χαρακτήρων. Μπορεί να είναι το όνομά σας, αν θέλετε. Θα το θυμόμαστε για εσάς σε αυτόν τον υπολογιστή, αλλά αν πάτε σε έναν άλλο υπολογιστή, παρακαλούμε πάρτε το αρχείο EasyEyes ID σας (το πιο πρόσφατο αρχείο στον φάκελο Λήψεις σας), ή τουλάχιστον γράψτε κάτω το EasyEyes ID σας. Χρησιμοποιήστε το κάθε φορά για να συνδέσετε τα δεδομένα σας από συνεδρία σε συνεδρία."',
     he: 'יש צורך במזהה ייחודי כדי לקשר נתונים בין הפעלות. מחשב זה השתתף בעבר בהפעלה ב-**ddd** עם מזהה EasyEyes "**sss**". לחץ על אישור אם זה אתה. אחרת, אם יש לך קובץ מזהה EasyEyes, לחץ על לחצן בחירת הקובץ למטה כדי לפתוח אותו. (שם הקובץ מתחיל ב-"EasyEyes", מסתיים ב-".txt", ונמצא בדרך כלל בתיקיית ההורדות שלך.) אם אין לך קובץ, אבל יודע את מזהה ה-EasyEyes שלך, הקלד אותו. אחרת, פשוט צור מזהה משלך, שיכול להיות כל מחרוזת אלפאנומרית באורך של לפחות 5 תווים. זה יכול להיות השם שלך, אם תרצה. אנו נזכור זאת עבורך במחשב זה, אך אם תלך למחשב אחר, אנא קח את קובץ ה-EasyEyes ID שלך (הקובץ האחרון בתיקיית ההורדות שלך), או לפחות רשום את ה-EasyEyes ID שלך. השתמש בו בכל פעם כדי לקשר את הנתונים שלך מסשן לסשן.',
@@ -4177,7 +4177,7 @@ export const phrases = {
     hu: 'Egyedi azonosító szükséges az adatok munkamenetek közötti összekapcsolásához. Ez a számítógép korábban részt vett egy munkamenetben a **ddd** EasyEyes azonosítóval „**sss**”. Nyomja meg az OK gombot, ha Ön az. Ellenkező esetben, ha rendelkezik EasyEyes ID fájllal, nyomja meg az alábbi fájlválasztó gombot a megnyitásához. (A fájlnév "EasyEyes"-vel kezdődik, ".txt"-vel végződik, és általában a Letöltések mappában található.) Ha nem rendelkezik fájllal, de ismeri EasyEyes-azonosítóját, írja be. Ellenkező esetben csak állítsa össze saját azonosítóját, amely bármilyen, legalább 5 karakter hosszúságú alfanumerikus karakterlánc lehet. Ez lehet a neved, ha úgy tetszik. Ezen a számítógépen emlékezni fogunk rá, de ha másik számítógépre lép, vegye elő EasyEyes azonosító fájlját (a Letöltések mappában található legfrissebb fájl), vagy legalább írja le EasyEyes azonosítóját. Használja minden alkalommal, hogy összekapcsolja adatait munkamenetről munkamenetre.',
     is: "Einstakt auðkenni er nauðsynlegt til að tengja gögn yfir lotur. Þessi tölva tók áður þátt í lotu um **ddd** með EasyEyes auðkenninu „**sss**“. Ýttu á OK ef það ert þú. Annars, ef þú ert með EasyEyes ID skrá, ýttu á skráavalshnappinn hér að neðan til að opna hana. (Skráarnafnið byrjar á „EasyEyes“, endar á „.txt“ og er venjulega í niðurhalsmöppunni þinni.) Ef þú ert ekki með skrá en veist um EasyEyes auðkennið þitt skaltu slá það inn. Annars skaltu bara búa til þitt eigið auðkenni, sem getur verið hvaða alfanumerískur strengur sem er að minnsta kosti 5 stafir að lengd. Það getur verið nafnið þitt, ef þú vilt. Við munum það fyrir þig á þessari tölvu, en ef þú ferð í aðra tölvu, vinsamlegast taktu EasyEyes auðkennisskrána þína (nýjustu skrána í niðurhalsmöppunni þinni), eða skrifaðu að minnsta kosti EasyEyes auðkennið þitt niður. Notaðu það í hvert skipti til að tengja gögnin þín frá lotu til lotu.",
     id: 'ID unik diperlukan untuk menghubungkan data di seluruh sesi. Komputer ini sebelumnya berpartisipasi dalam sesi **ddd** dengan EasyEyes ID “**sss**”. Tekan OK jika itu Anda. Sebaliknya, jika Anda memiliki file EasyEyes ID, tekan tombol pemilihan file di bawah untuk membukanya. (Nama file dimulai dengan "EasyEyes", diakhiri dengan ".txt", dan biasanya ada di folder Unduhan Anda.) Jika Anda tidak memiliki file, tetapi mengetahui ID EasyEyes Anda, ketikkan file tersebut. Jika tidak, buat saja ID Anda sendiri, yang dapat berupa string alfanumerik apa pun yang panjangnya minimal 5 karakter. Itu bisa menjadi nama Anda, jika Anda mau. Kami akan mengingatnya untuk Anda di komputer ini, namun jika Anda pergi ke komputer lain, harap ambil file EasyEyes ID Anda (file terbaru di folder Downloads Anda), atau setidaknya tuliskan ID EasyEyes Anda. Gunakan setiap saat untuk menghubungkan data Anda dari sesi ke sesi.',
-    it: "Loading...",
+    it: '"È necessario un ID univoco per collegare i dati tra le sessioni. Questo computer ha partecipato in precedenza a una sessione su **ddd** con l\'ID EasyEyes "**sss**". Premi OK se sei tu. In caso contrario, se hai un file di ID EasyEyes, premi il pulsante di selezione del file qui sotto per aprirlo. (Il nome del file inizia con "EasyEyes", termina con ".txt" ed è di solito nella cartella Download.) Se non hai un file, ma conosci il tuo ID EasyEyes, allora digitalo. Altrimenti, inventa il tuo ID, che può essere una stringa alfanumerica di almeno 5 caratteri. Può essere il tuo nome, se vuoi. Lo ricorderemo per te su questo computer, ma se vai su un altro computer, porta con te il file di ID EasyEyes (il file più recente nella cartella Download) o almeno annota il tuo ID EasyEyes. Usalo ogni volta per collegare i tuoi dati da una sessione all\'altra."',
     ja: "セッション間でデータをリンクするには、一意の ID が必要です。このコンピュータは以前、EasyEyes ID「**sss**」で **ddd** のセッションに参加していました。それがあなたであれば、「OK」を押してください。それ以外の場合、EasyEyes ID ファイルがある場合は、下のファイル選択ボタンを押して開きます。 (ファイル名は「EasyEyes」で始まり、「.txt」で終わり、通常はダウンロード フォルダーにあります。) ファイルがなくても EasyEyes ID がわかっている場合は、それを入力します。それ以外の場合は、独自の ID を作成してください。これには、少なくとも 5 文字の長さの任意の英数字文字列を使用できます。必要に応じて、それはあなたの名前でも構いません。このコンピュータでは記憶されますが、別のコンピュータに移動する場合は、EasyEyes ID ファイル (ダウンロード フォルダ内の最新のファイル) を取得するか、少なくとも EasyEyes ID を書き留めてください。セッション間でデータをリンクするには、毎回これを使用します。",
     kn: 'ಸೆಷನ್‌ಗಳಾದ್ಯಂತ ಡೇಟಾವನ್ನು ಲಿಂಕ್ ಮಾಡಲು ಅನನ್ಯ ಐಡಿ ಅಗತ್ಯವಿದೆ. ಈ ಕಂಪ್ಯೂಟರ್ ಈ ಹಿಂದೆ EasyEyes ID "**sss**" ನೊಂದಿಗೆ **ddd** ನಲ್ಲಿ ಸೆಷನ್‌ನಲ್ಲಿ ಭಾಗವಹಿಸಿತ್ತು. ಅದು ನೀವೇ ಆಗಿದ್ದರೆ ಸರಿ ಒತ್ತಿರಿ. ಇಲ್ಲದಿದ್ದರೆ, ನೀವು EasyEyes ID ಫೈಲ್ ಹೊಂದಿದ್ದರೆ, ಅದನ್ನು ತೆರೆಯಲು ಕೆಳಗಿನ ಫೈಲ್ ಆಯ್ಕೆ ಬಟನ್ ಒತ್ತಿರಿ. (ಫೈಲ್ ಹೆಸರು "EasyEyes" ನೊಂದಿಗೆ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ, ".txt" ನೊಂದಿಗೆ ಕೊನೆಗೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಸಾಮಾನ್ಯವಾಗಿ ನಿಮ್ಮ ಡೌನ್‌ಲೋಡ್‌ಗಳ ಫೋಲ್ಡರ್‌ನಲ್ಲಿರುತ್ತದೆ.) ನಿಮ್ಮ ಬಳಿ ಫೈಲ್ ಇಲ್ಲದಿದ್ದರೆ, ಆದರೆ ನಿಮ್ಮ EasyEyes ID ತಿಳಿದಿದ್ದರೆ, ಅದನ್ನು ಟೈಪ್ ಮಾಡಿ. ಇಲ್ಲದಿದ್ದರೆ, ನಿಮ್ಮ ಸ್ವಂತ ಐಡಿಯನ್ನು ರಚಿಸಿ, ಅದು ಯಾವುದೇ ಆಲ್ಫಾನ್ಯೂಮರಿಕ್ ಸ್ಟ್ರಿಂಗ್ ಕನಿಷ್ಠ 5 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬಹುದು. ನೀವು ಬಯಸಿದರೆ ಅದು ನಿಮ್ಮ ಹೆಸರಾಗಿರಬಹುದು. ನಾವು ಅದನ್ನು ನಿಮಗಾಗಿ ಈ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ನೆನಪಿಸಿಕೊಳ್ಳುತ್ತೇವೆ, ಆದರೆ ನೀವು ಇನ್ನೊಂದು ಕಂಪ್ಯೂಟರ್‌ಗೆ ಹೋದರೆ, ದಯವಿಟ್ಟು ನಿಮ್ಮ EasyEyes ID ಫೈಲ್ ಅನ್ನು ತೆಗೆದುಕೊಳ್ಳಿ (ನಿಮ್ಮ ಡೌನ್‌ಲೋಡ್‌ಗಳ ಫೋಲ್ಡರ್‌ನಲ್ಲಿರುವ ತೀರಾ ಇತ್ತೀಚಿನ ಫೈಲ್), ಅಥವಾ ಕನಿಷ್ಠ ನಿಮ್ಮ EasyEyes ID ಅನ್ನು ಬರೆಯಿರಿ. ನಿಮ್ಮ ಡೇಟಾವನ್ನು ಸೆಷನ್‌ನಿಂದ ಸೆಷನ್‌ಗೆ ಲಿಂಕ್ ಮಾಡಲು ಪ್ರತಿ ಬಾರಿಯೂ ಇದನ್ನು ಬಳಸಿ.',
     ko: '세션 간에 데이터를 연결하려면 고유 ID가 필요합니다. 이 컴퓨터는 이전에 EasyEyes ID "**sss**"로 **ddd** 세션에 참여했습니다. 본인이라면 확인을 누르세요. 그렇지 않고 EasyEyes ID 파일이 있다면 아래 파일 선택 버튼을 눌러 열어주세요. (파일 이름은 "EasyEyes"로 시작하고 ".txt"로 끝나며 일반적으로 다운로드 폴더에 있습니다.) 파일이 없지만 EasyEyes ID를 알고 있는 경우 해당 이름을 입력하세요. 그렇지 않은 경우에는 최소 5자 길이의 영숫자 문자열로 자신만의 ID를 만드세요. 원하시면 귀하의 이름이 될 수 있습니다. 이 컴퓨터에서는 기억해 두겠지만, 다른 컴퓨터로 가신다면 EasyEyes ID 파일(다운로드 폴더의 가장 최근 파일)을 가져가시거나 적어도 EasyEyes ID를 적어두시기 바랍니다. 세션 간 데이터를 연결할 때마다 이를 사용하세요.',
@@ -4202,7 +4202,7 @@ export const phrases = {
   EE_ID_invalidFile: {
     "en-US":
       "❌ Sorry. Wrong format for an EasyEyes ID file. Try another file, or type something.",
-    ar: "Loading...",
+    ar: "❌ آسف. تنسيق خاطئ لملف EasyEyes ID. جرب ملفًا آخر أو اكتب شيئًا آخر.",
     hy: "❌ Կներեք։ EasyEyes ID ֆայլի սխալ ձևաչափ: Փորձեք մեկ այլ ֆայլ կամ մուտքագրեք ինչ-որ բան:",
     bg: "❌ Съжалявам. Грешен формат за EasyEyes ID файл. Опитайте с друг файл или напишете нещо.",
     "zh-CN":
@@ -4216,7 +4216,7 @@ export const phrases = {
     "en-UK":
       "❌ Sorry. Wrong format for an EasyEyes ID file. Try another file, or type something.",
     fi: "❌ Anteeksi. Väärä muoto EasyEyes ID -tiedostolle. Kokeile toista tiedostoa tai kirjoita jotain.",
-    fr: "Loading...",
+    fr: "❌ Désolé. Mauvais format pour un fichier d'identification EasyEyes. Essayez un autre fichier ou tapez quelque chose.",
     de: "❌ Entschuldigung. Falsches Format für eine EasyEyes-ID-Datei. Versuchen Sie es mit einer anderen Datei oder geben Sie etwas ein.",
     el: "❌ Συγγνώμη. Λανθασμένη μορφή για ένα αρχείο ID EasyEyes. Δοκιμάστε ένα άλλο αρχείο ή πληκτρολογήστε κάτι.",
     he: "❌ סליחה. פורמט שגוי עבור קובץ מזהה EasyEyes. נסה קובץ אחר, או הקלד משהו.",
@@ -4224,7 +4224,7 @@ export const phrases = {
     hu: "❌ Elnézést. Hibás formátum az EasyEyes ID fájlhoz. Próbálkozzon másik fájllal, vagy írjon be valamit.",
     is: "❌ Fyrirgefðu. Rangur sniður fyrir EasyEyes ID skrá. Reyndu aðra skrá eða skrifaðu eitthvað.",
     id: "❌ Maaf. Format file EasyEyes ID salah. Coba file lain, atau ketik sesuatu.",
-    it: "Loading...",
+    it: "❌ Spiacente. Formato errato per un file ID EasyEyes. Prova un altro file o digita qualcosa.",
     ja: "❌ 申し訳ありません。 EasyEyes ID ファイルの形式が間違っています。別のファイルを試すか、何かを入力してください。",
     kn: "❌ ಕ್ಷಮಿಸಿ. EasyEyes ID ಫೈಲ್‌ಗೆ ತಪ್ಪಾದ ಫಾರ್ಮ್ಯಾಟ್. ಇನ್ನೊಂದು ಫೈಲ್ ಅನ್ನು ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಏನನ್ನಾದರೂ ಟೈಪ್ ಮಾಡಿ.",
     ko: "❌ 죄송합니다. EasyEyes ID 파일의 형식이 잘못되었습니다. 다른 파일을 시도하거나 다른 내용을 입력해보세요.",
@@ -4249,7 +4249,7 @@ export const phrases = {
   EE_ID_invalidID: {
     "en-US":
       "The EasyEyes ID contains invalid characters. Only letters and numbers are allowed",
-    ar: "Loading...",
+    ar: "يحتوي EasyEyes ID على أحرف غير صالحة. يُسمح فقط بالأحرف والأرقام.",
     hy: "EasyEyes ID-ն պարունակում է անվավեր նիշեր: Թույլատրվում են միայն տառեր և թվեր",
     bg: "EasyEyes ID съдържа невалидни символи. Разрешени са само букви и цифри.",
     "zh-CN": "EasyEyes ID 包含无效字符。只允许使用字母和数字",
@@ -4261,7 +4261,7 @@ export const phrases = {
     "en-UK":
       "The EasyEyes ID contains invalid characters. Only letters and numbers are allowed",
     fi: "EasyEyes ID sisältää virheellisiä merkkejä. Vain kirjaimet ja numerot ovat sallittuja",
-    fr: "Loading...",
+    fr: "L'identifiant EasyEyes contient des caractères non valides. Seules les lettres et les chiffres sont autorisés",
     de: "Die EasyEyes ID enthält ungültige Zeichen. Nur Buchstaben und Zahlen sind erlaubt.",
     el: "Το αναγνωριστικό EasyEyes περιέχει μη έγκυρους χαρακτήρες. Επιτρέπονται μόνο γράμματα και αριθμοί",
     he: "מזהה EasyEyes מכיל תווים לא חוקיים. רק אותיות ומספרים מותרים",
@@ -4269,7 +4269,7 @@ export const phrases = {
     hu: "Az EasyEyes azonosító érvénytelen karaktereket tartalmaz. Csak betűk és számok engedélyezettek.",
     is: "EasyEyes auðkennið inniheldur ógilda stafi. Aðeins bókstafir og tölustafir eru leyfðir",
     id: "ID EasyEyes berisi karakter yang tidak valid. Hanya huruf dan angka yang diperbolehkan",
-    it: "Loading...",
+    it: "L'ID EasyEyes contiene caratteri non validi. Sono consentiti solo lettere e numeri.",
     ja: "EasyEyes IDには無効な文字が含まれています。文字と数字のみが許可されています。",
     kn: "EasyEyes ID ಅಮಾನ್ಯ ಅಕ್ಷರಗಳನ್ನು ಒಳಗೊಂಡಿದೆ. ಅಕ್ಷರಗಳು ಮತ್ತು ಸಂಖ್ಯೆಗಳನ್ನು ಮಾತ್ರ ಅನುಮತಿಸಲಾಗಿದೆ",
     ko: "EasyEyes ID에 잘못된 문자가 포함되어 있습니다. 문자와 숫자만 허용됩니다.",
@@ -4293,7 +4293,7 @@ export const phrases = {
   },
   EE_ID_uploadOrValidID: {
     "en-US": "Please either upload a file or enter a valid EasyEyes ID.",
-    ar: "Loading...",
+    ar: "يرجى إما تحميل ملف أو إدخال معرف EasyEyes صالح.",
     hy: "Խնդրում ենք վերբեռնել ֆայլ կամ մուտքագրել վավեր EasyEyes ID:",
     bg: "Моля, качете файл или въведете валиден EasyEyes идентификатор.",
     "zh-CN": "请上传文件或输入有效的 EasyEyes ID。",
@@ -4304,7 +4304,7 @@ export const phrases = {
     nl: "Gelieve een bestand te uploaden of een geldige EasyEyes ID in te voeren.",
     "en-UK": "Please either upload a file or enter a valid EasyEyes ID.",
     fi: "Lataa tiedosto tai anna kelvollinen EasyEyes-tunnus.",
-    fr: "Loading...",
+    fr: "Veuillez soit télécharger un fichier, soit entrer un identifiant EasyEyes valide.",
     de: "Bitte laden Sie entweder eine Datei hoch oder geben Sie eine gültige EasyEyes-ID ein.",
     el: "Ανεβάστε ένα αρχείο ή εισαγάγετε ένα έγκυρο αναγνωριστικό EasyEyes.",
     he: "אנא העלה קובץ או הזן מזהה EasyEyes תקף.",
@@ -4312,7 +4312,7 @@ export const phrases = {
     hu: "Kérjük, töltsön fel egy fájlt, vagy írjon be egy érvényes EasyEyes azonosítót.",
     is: "Vinsamlegast hlaðið upp skrá eða sláið inn gilt EasyEyes-auðkenni.",
     id: "Silakan unggah file atau masukkan ID EasyEyes yang valid.",
-    it: "Loading...",
+    it: "Si prega di caricare un file o inserire un valido ID EasyEyes.",
     ja: "ファイルをアップロードするか、有効な EasyEyes ID を入力してください。",
     kn: "ದಯವಿಟ್ಟು ಫೈಲ್ ಅನ್ನು ಅಪ್ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ಒಂದು ಮಾನ್ಯ EasyEyes ಐಡಿಯನ್ನು ನಮೂದಿಸಿ.",
     ko: "파일을 업로드하거나 유효한 EasyEyes ID를 입력하세요.",
@@ -4337,7 +4337,7 @@ export const phrases = {
   EE_incompatible: {
     "en-US":
       "❌ INCOMPATIBLE. Sorry. You're welcome to try another browser, or computer, or whatever might be compatible. Otherwise hit CANCEL to return this study to Prolific.com.",
-    ar: "Loading...",
+    ar: "❌ غير متوافق. عذرًا. يمكنك محاولة متصفح آخر أو جهاز كمبيوتر آخر أو أي شيء قد يكون متوافقًا. وإلا اضغط على إلغاء لإعادة هذه الدراسة إلى Prolific.com.",
     hy: "❌ ԱՆՀԱՄԱՏԵՂ. Ներողություն. Դուք կարող եք փորձել մեկ այլ բրաուզեր, կամ համակարգիչ կամ ցանկացած այլ, որը կարող է համատեղելի լինել: Հակառակ դեպքում սեղմեք ՉԵՂԱՐԿԵԼ՝ այս ուսումնասիրությունը Prolific.com-ին վերադարձնելու համար:",
     bg: "❌ НЕСЪВМЕСТИМО. Съжаляваме. Можете да опитате с друг браузър, компютър или каквото друго може да е съвместимо. В противен случай натиснете ОТКАЗ, за да върнете това изследване в Prolific.com.",
     "zh-CN":
@@ -4351,7 +4351,7 @@ export const phrases = {
     "en-UK":
       "❌ INCOMPATIBLE. Sorry. You're welcome to try another browser, or computer, or whatever might be compatible. Otherwise hit CANCEL to return this study to Prolific.com.",
     fi: "❌ YHTEENSOPImaton. Anteeksi. Voit kokeilla toista selainta tai tietokonetta tai mitä tahansa yhteensopivaa. Muussa tapauksessa paina CANCEL palauttaaksesi tämän tutkimuksen Prolific.com-sivustolle.",
-    fr: "Loading...",
+    fr: "❌ INCOMPATIBLE. Désolé. Vous pouvez essayer un autre navigateur, ou un autre ordinateur, ou tout ce qui pourrait être compatible. Sinon, appuyez sur ANNULER pour renvoyer cette étude à Prolific.com.",
     de: "❌ INKOMPATIBEL. Entschuldigung. Sie können gerne einen anderen Browser, Computer oder was auch immer kompatibel sein könnte, ausprobieren. Andernfalls klicken Sie auf ABBRECHEN, um diese Studie an Prolific.com zurückzusenden.",
     el: "❌ ΑΣΥΜΒΑΤΟ. Λυπούμαστε. Μπορείτε να δοκιμάσετε έναν άλλο περιηγητή ιστού ή υπολογιστή ή οτιδήποτε άλλο που μπορεί να είναι συμβατό. Διαφορετικά, πατήστε ΑΚΥΡΟ για να επιστρέψετε αυτήν τη μελέτη στο Prolific.com.",
     he: "❌ לא תואם. מצטער. אתה מוזמן לנסות דפדפן אחר, או מחשב אחר, או כל דבר אחר שעשוי להיות תואם. אחרת, לחץ על ביטול כדי להחזיר את המחקר הזה ל-Prolific.com.",
@@ -4359,7 +4359,7 @@ export const phrases = {
     hu: "❌ INCOMPATIBILIS. Sajnálom. Szívesen próbáljon ki egy másik böngészőt, számítógépet vagy bármit, ami kompatibilis. Ellenkező esetben nyomja meg a MÉGSE gombot, hogy visszaküldje ezt a tanulmányt a Prolific.com webhelyre.",
     is: "❌ Ósamrýmanlegt. Því miður. Þér er velkomið að prófa annan vafra, eða tölvu, eða hvað sem gæti verið samhæft. Annars smelltu á CANCEL til að skila þessari rannsókn á Prolific.com.",
     id: "❌ TIDAK COMPATIBLE. Maaf. Anda dapat mencoba menggunakan browser, komputer, atau apa pun yang mungkin compatible. Jika tidak, klik CANCEL untuk kembali ke studi ini di Prolific.com.",
-    it: "Loading...",
+    it: '"""\n❌ INCOMPATIBILE. Spiacente. Puoi provare un altro browser, o computer, o qualsiasi altra cosa potrebbe essere compatibile. Altrimenti premi ANNULLA per tornare a questo studio su Prolific.com.',
     ja: "❌ 互換性がありません。ごめん。別のブラウザやコンピュータなど、互換性のあるものを試してみてください。それ以外の場合は、[キャンセル] をクリックしてこの研究を Prolific.com に戻します。",
     kn: "❌ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ. ಕ್ಷಮಿಸಿ. ಇನ್ನೊಂದು ಬ್ರೌಸರ್, ಅಥವಾ ಕಂಪ್ಯೂಟರ್ ಅಥವಾ ಯಾವುದಾದರೂ ಹೊಂದಾಣಿಕೆಯನ್ನು ಪ್ರಯತ್ನಿಸಲು ನಿಮಗೆ ಸ್ವಾಗತ. ಇಲ್ಲವಾದರೆ ಈ ಅಧ್ಯಯನವನ್ನು Prolific.com ಗೆ ಹಿಂತಿರುಗಿಸಲು CANCEL ಅನ್ನು ಒತ್ತಿರಿ.",
     ko: "❌ 호환되지 않습니다. 죄송합니다. 다른 브라우저나 컴퓨터 또는 호환 가능한 모든 것을 사용해 보세요. 그렇지 않으면 취소를 눌러 이 연구를 Prolific.com으로 되돌리세요.",
@@ -4383,7 +4383,7 @@ export const phrases = {
   },
   EE_studyURL: {
     "en-US": "Study link: xxx",
-    ar: "Loading...",
+    ar: "رابط الدراسة: xxx",
     hy: "Կարդալ հղումը: xxx",
     bg: "Линк към проучването: xxx",
     "zh-CN": "学习链接：xxx",
@@ -4394,7 +4394,7 @@ export const phrases = {
     nl: "Studielink: xxx",
     "en-UK": "Study link: xxx",
     fi: "Opintolinkki: xxx",
-    fr: "Loading...",
+    fr: "Lien d'étude: xxx",
     de: "Studienlink: xxx",
     el: "Σύνδεσμος μελέτης: xxx",
     he: "קישור ללימוד: xxx",
@@ -4402,7 +4402,7 @@ export const phrases = {
     hu: "Tanulmány link: xxx",
     is: "Námstenging: xxx",
     id: "Tautan studi: xxx",
-    it: "Loading...",
+    it: "Link allo studio: xxx",
     ja: "研究リンク: xxx",
     kn: "ಅಧ್ಯಯನ ಲಿಂಕ್: xxx",
     ko: "공부 링크: xxx",
@@ -4427,7 +4427,7 @@ export const phrases = {
   EE_unknown: {
     "en-US":
       "❓The typed answer doesn't match anything in our limited database. If you're sure it's right, ignore this warning, and finish typing it.",
-    ar: "Loading...",
+    ar: "❓الإجابة المكتوبة لا تتطابق مع أي شيء في قاعدة البيانات المحدودة لدينا. إذا كنت متأكدًا من صحتها، فتجاهل هذا التحذير واستكمل كتابتها.",
     hy: "❓Մուտքագրված պատասխանը չի համապատասխանում որևէ բանի մեր սահմանափակ տվյալների բազայում: Եթե ​​վստահ եք, որ դա ճիշտ է, անտեսեք այս նախազգուշացումը և ավարտեք այն մուտքագրելը:",
     bg: "❓Въведеният отговор не отговаря на нищо в нашата ограничена база данни. Ако сте сигурни, че е правилно, игнорирайте това предупреждение и довършете въвеждането му.",
     "zh-CN":
@@ -4441,7 +4441,7 @@ export const phrases = {
     "en-UK":
       "❓The typed answer doesn't match anything in our limited database. If you're sure it's right, ignore this warning, and finish typing it.",
     fi: "❓Kirjoitettu vastaus ei vastaa mitään rajoitetussa tietokannassamme. Jos olet varma, että se on oikein, jätä tämä varoitus huomiotta ja jatka kirjoittamista loppuun.",
-    fr: "Loading...",
+    fr: "❓La réponse tapée ne correspond à rien dans notre base de données limitée. Si vous êtes sûr que c'est correct, ignorez cet avertissement et terminez de le taper.",
     de: "❓Die eingegebene Antwort stimmt mit nichts in unserer begrenzten Datenbank überein. Wenn Sie sicher sind, dass es richtig ist, ignorieren Sie diese Warnung und geben Sie die Eingabe zu Ende.",
     el: "❓Η πληκτρολογημένη απάντηση δεν αντιστοιχεί σε κάτι στην περιορισμένη μας βάση δεδομένων. Εάν είστε σίγουροι ότι είναι σωστή, αγνοήστε αυτήν την προειδοποίηση και συνεχίστε να την πληκτρολογείτε.",
     he: "❓התשובה שהוקלדה לא תואמת שום דבר במסד הנתונים המצומצם שלנו. אם אתה בטוח שזה נכון, התעלם מהאזהרה הזו וסיים להקליד אותה.",
@@ -4449,7 +4449,7 @@ export const phrases = {
     hu: "❓A beírt válasz nem egyezik semmivel a korlátozott adatbázisunkban. Ha biztos benne, hogy helyes, hagyja figyelmen kívül ezt a figyelmeztetést, és fejezze be a beírását.",
     is: "❓Værða svarið passar ekki við neitt í okkar takmarkaða gagnagrunni. Ef þú ert viss um að það sé rétt skaltu hunsa þessa viðvörun og klára að slá hana inn.",
     id: "❓Jawaban yang diketik tidak sesuai dengan database kami yang terbatas. Jika Anda yakin itu benar, abaikan peringatan ini, dan selesaikan mengetiknya.",
-    it: "Loading...",
+    it: "❓La risposta digitata non corrisponde a nulla nel nostro database limitato. Se sei sicuro che sia corretta, ignora questo avviso e continua a digitarla.",
     ja: "❓入力された回答は、限られたデータベース内のどの回答にも一致しません。それが正しいと確信できる場合は、この警告を無視して、入力を完了してください。",
     kn: "❓ಟೈಪ್ ಮಾಡಿದ ಉತ್ತರವು ನಮ್ಮ ಸೀಮಿತ ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಯಾವುದಕ್ಕೂ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ಇದು ಸರಿ ಎಂದು ನಿಮಗೆ ಖಚಿತವಾಗಿದ್ದರೆ, ಈ ಎಚ್ಚರಿಕೆಯನ್ನು ನಿರ್ಲಕ್ಷಿಸಿ ಮತ್ತು ಟೈಪ್ ಮಾಡುವುದನ್ನು ಮುಗಿಸಿ.",
     ko: "❓입력한 답변이 제한된 데이터베이스의 어떤 항목과도 ​​일치하지 않습니다. 그것이 맞다고 확신한다면 이 경고를 무시하고 입력을 마치십시오.",
@@ -4473,7 +4473,7 @@ export const phrases = {
   },
   RC_smartphoneSurvey: {
     "en-US": "Thank you for joining our smartphone survey.",
-    ar: "Loading...",
+    ar: "شكراً لانضمامك إلى استبيان الهواتف الذكية لدينا.",
     hy: "Շնորհակալություն եմ ասած մեր սմարթֆոնի հարցումը միացնելու համար։",
     bg: "Благодарим ви, че се присъединихте към нашата анкета за смартфони.",
     "zh-CN": "感谢您参与我们的智能手机调查。",
@@ -4484,7 +4484,7 @@ export const phrases = {
     nl: "Dank u voor het deelnemen aan onze smartphone-enquête.",
     "en-UK": "Thank you for joining our smartphone survey.",
     fi: "Kiitos, että osallistuit älypuhelinkyselyymme.",
-    fr: "Loading...",
+    fr: "Merci d'avoir participé à notre enquête sur les smartphones.",
     de: "Vielen Dank, dass Sie an unserer Smartphone-Umfrage teilgenommen haben.",
     el: "Σας ευχαριστούμε που συμμετείχατε στην έρευνά μας για smartphone.",
     he: "תודה שהצטרפת לסקר הסמארטפונים שלנו.",
@@ -4492,7 +4492,7 @@ export const phrases = {
     hu: "Köszönjük, hogy csatlakozott okostelefonos felmérésünkhöz.",
     is: "Takk fyrir að taka þátt í símakönnun okkar.",
     id: "Terima kasih telah bergabung dalam survei smartphone kami.",
-    it: "Loading...",
+    it: "Grazie per esserti unito al nostro sondaggio sugli smartphone.",
     ja: "スマートフォンアンケートにご協力いただきありがとうございます。",
     kn: "ನಮ್ಮ ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಸರ್ವೇಗೆ ಸೇರಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು.",
     ko: "스마트폰 설문조사에 참여해 주셔서 감사합니다.",
@@ -4517,7 +4517,7 @@ export const phrases = {
   RC_phoneBrandAndModel: {
     "en-US":
       "YOUR SMARTPHONE. What are your phone’s brand (e.g. Apple or Samsung), model name (e.g. iPhone 12 or Galaxy A54), and model number (e.g. A2111 or SM-A505F)? Various brands handle this differently, so here are instructions for your phone:",
-    ar: "Loading...",
+    ar: "هاتفك الذكي. ما هي علامة هاتفك (مثل أبل أو سامسونج)، واسم الطراز (مثل آيفون 12 أو جالاكسي A54)، ورقم الطراز (مثل A2111 أو SM-A505F)؟ تتعامل العلامات التجارية المختلفة مع هذا الأمر بشكل مختلف، لذا إليك تعليمات لهاتفك:",
     hy: "ՔՈ ՍՄԱՐԹՖՈՆԸ։ Որո՞նք են ձեր հեռախոսի ապրանքանիշը (օրինակ՝ Apple կամ Samsung), մոդելի անվանումը (օրինակ՝ iPhone 12 կամ Galaxy A54) և մոդելի համարը (օրինակ՝ A2111 կամ SM-A505F): Տարբեր ապրանքանիշներ դա տարբեր կերպ են վարվում, ուստի ահա ձեր հեռախոսի հրահանգները.",
     bg: "ВАШИЯТ СМАРТФОН. Каква е марката на вашия телефон (напр. Apple или Samsung), името на модела (напр. iPhone 12 или Galaxy A54) и номерът на модела (напр. A2111 или SM-A505F)? Различните марки се справят с това по различен начин, така че ето инструкции за вашия телефон:",
     "zh-CN":
@@ -4531,7 +4531,7 @@ export const phrases = {
     "en-UK":
       "YOUR MOBILE PHONE. What is the brand of your phone (e.g. Apple or Samsung), the model name (e.g. iPhone 12 or Galaxy A54), and the model number (e.g. A2111 or SM-A505F)? Different brands have different ways of handling this, so here are instructions for your phone:",
     fi: "Älypuhelimesi. Mikä on puhelimesi merkki (esim. Apple tai Samsung), mallinimi (esim. iPhone 12 tai Galaxy A54) ja mallinumero (esim. A2111 tai SM-A505F)? Eri merkit käsittelevät tätä eri tavalla, joten tässä on ohjeet puhelimeesi:",
-    fr: "Loading...",
+    fr: "VOTRE SMARTPHONE. Quelle est la marque de votre téléphone (par exemple Apple ou Samsung), le nom du modèle (par exemple iPhone 12 ou Galaxy A54) et le numéro de modèle (par exemple A2111 ou SM-A505F) ? Les différentes marques gèrent cela différemment, voici donc les instructions pour votre téléphone :",
     de: "IHR SMARTPHONE. Wie lauten die Marke Ihres Telefons (z. B. Apple oder Samsung), der Modellname (z. B. iPhone 12 oder Galaxy A54) und die Modellnummer (z. B. A2111 oder SM-A505F)? Da verschiedene Marken unterschiedlich damit umgehen, finden Sie hier eine Anleitung für Ihr Telefon:",
     el: "ΤΟ SMARTPHONE ΣΑΣ. Ποια είναι η επωνυμία του τηλεφώνου σας (π.χ. Apple ή Samsung), το όνομα μοντέλου (π.χ. iPhone 12 ή Galaxy A54) και ο αριθμός μοντέλου (π.χ. A2111 ή SM-A505F); Διάφορες μάρκες το χειρίζονται διαφορετικά, γι' αυτό ακολουθούν οδηγίες για το τηλέφωνό σας:",
     he: "הסמארטפון שלך. מה הם המותג של הטלפון שלך (למשל אפל או סמסונג), שם הדגם (למשל iPhone 12 או Galaxy A54) ומספר הדגם (למשל A2111 או SM-A505F)? מותגים שונים מטפלים בזה אחרת, אז הנה הוראות לטלפון שלך:",
@@ -4539,7 +4539,7 @@ export const phrases = {
     hu: "AZ ÖN OKOSTELEFONJA. Mi a telefon márkája (pl. Apple vagy Samsung), a modell neve (pl. iPhone 12 vagy Galaxy A54) és a típusszáma (pl. A2111 vagy SM-A505F)? A különböző márkák ezt eltérően kezelik, ezért az alábbiakban az Ön telefonjára vonatkozó utasításokat olvashat:",
     is: "SMARTPHONE ANDA. Apa merek ponsel Anda (misalnya Apple atau Samsung), nama model (misalnya iPhone 12 atau Galaxy A54), dan nomor model (misalnya A2111 atau SM-A505F)? Berbagai merek menangani ini dengan cara yang berbeda, jadi berikut ini adalah instruksi untuk ponsel Anda:",
     id: "PONSEL PINTAR ANDA. Apa merek ponsel Anda (misalnya Apple atau Samsung), nama model (misalnya iPhone 12 atau Galaxy A54), dan nomor model (misalnya A2111 atau SM-A505F)? Berbagai merek menangani hal ini secara berbeda, jadi berikut petunjuk untuk ponsel Anda:",
-    it: "Loading...",
+    it: "IL TUO SMARTPHONE. Qual è il marchio del tuo telefono (ad esempio Apple o Samsung), il nome del modello (ad esempio iPhone 12 o Galaxy A54) e il numero di modello (ad esempio A2111 o SM-A505F)? Diversi marchi gestiscono questo in modo diverso, quindi ecco le istruzioni per il tuo telefono:",
     ja: "あなたのスマートフォン。お使いの携帯電話のブランド (例: Apple または Samsung)、モデル名 (例: iPhone 12 または Galaxy A54)、モデル番号 (例: A2111 または SM-A505F) は何ですか?さまざまなブランドによってこの問題の処理方法が異なるため、お使いの携帯電話向けの手順は次のとおりです。",
     kn: "ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್‌ಫೋನ್. ನಿಮ್ಮ ಫೋನ್‌ನ ಬ್ರ್ಯಾಂಡ್ (ಉದಾ. Apple ಅಥವಾ Samsung), ಮಾಡೆಲ್ ಹೆಸರು (ಉದಾ. iPhone 12 ಅಥವಾ Galaxy A54) ಮತ್ತು ಮಾದರಿ ಸಂಖ್ಯೆ (ಉದಾ. A2111 ಅಥವಾ SM-A505F) ಯಾವುದು? ವಿವಿಧ ಬ್ರ್ಯಾಂಡ್‌ಗಳು ಇದನ್ನು ವಿಭಿನ್ನವಾಗಿ ನಿರ್ವಹಿಸುತ್ತವೆ, ಆದ್ದರಿಂದ ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಸೂಚನೆಗಳು ಇಲ್ಲಿವೆ:",
     ko: "당신의 스마트폰. 휴대폰 브랜드(예: Apple 또는 Samsung), 모델 이름(예: iPhone 12 또는 Galaxy A54), 모델 번호(예: A2111 또는 SM-A505F)는 무엇입니까? 다양한 브랜드에서 이를 다르게 처리하므로 휴대전화에 대한 지침은 다음과 같습니다.",
@@ -4564,7 +4564,7 @@ export const phrases = {
   RC_wrongIPhoneModel: {
     "en-US":
       '❌ ILLEGAL ANSWER. The Model Name must begin “iPhone ”, and the Hidden "A" Number must be “A” followed by a four-digit number.',
-    ar: "Loading...",
+    ar: '"""\n❌ إجابة غير قانونية. يجب أن يبدأ اسم النموذج بـ "iPhone" ، ويجب أن يكون الرقم المخفي "A" متبوعًا برقم مكون من أربعة أرقام.',
     hy: '❌ Անվավեր պատասխան։ Մոդելի անունը պետք է սկսվի "iPhone " բառով, իսկ թաքցված "A" թվին պետք է լինի "A" հետո հետևող չորս նիշանական թիվ։"""',
     bg: '❌ НЕЗАКОНЕН ОТГОВОР. Името на модела трябва да започва с "iPhone", а скритото "A" число трябва да бъде "A", последвано от четирицифрен номер.',
     "zh-CN":
@@ -4578,7 +4578,7 @@ export const phrases = {
     "en-UK":
       '❌ ILLEGAL ANSWER. The Model Name must begin “iPhone ”, and the Hidden "A" Number must be “A” followed by a four-digit number.',
     fi: '❌ LAITON VASTAUS. Mallin nimen on alettava "iPhone " ja piilotetun "A" numeron on oltava "A" ja sen jälkeen nelinumeroinen numero."""',
-    fr: "Loading...",
+    fr: '❌ RÉPONSE ILLÉGALE. Le nom du modèle doit commencer par "iPhone ", et le numéro caché "A" doit être suivi d\'un numéro à quatre chiffres.',
     de: "❌ ILLEGALE ANTWORT. Der Modellname muss mit „iPhone“ beginnen und die versteckte „A“-Nummer muss „A“ gefolgt von einer vierstelligen Nummer sein.",
     el: "❌ ΠΑΡΑΝΟΜΗ ΑΠΑΝΤΗΣΗ. Το όνομα μοντέλου πρέπει να ξεκινά με «iPhone» και ο κρυφός αριθμός «A» πρέπει να είναι «A» ακολουθούμενος από έναν τετραψήφιο αριθμό.",
     he: '❌ תשובה לא חוקית. שם המודל חייב להתחיל ב "iPhone ", והמספר המוסתר "A" חייב להיות "A" עם מספר בארבע ספרות.',
@@ -4586,7 +4586,7 @@ export const phrases = {
     hu: "❌ ILLEGÁLIS VÁLASZ. A modellnévnek „iPhone”-val kell kezdődnie, a rejtett „A” számnak pedig „A”-nak kell lennie, amelyet egy négyjegyű szám követ.",
     is: "❌ ÓLÖGLEGT SVAR. Fyrirsætanafnið verður að byrja á „iPhone ” og falið „A“ númerið verður að vera „A“ og síðan fjögurra stafa númer.",
     id: '❌ JAWABAN ILEGAL. Nama Model harus diawali dengan “iPhone”, dan Nomor "A" yang Tersembunyi harus berupa "A" diikuti dengan empat digit angka.',
-    it: "Loading...",
+    it: '"""\n❌ RISPOSTA ILLEGALE. Il nome del modello deve iniziare con "iPhone ", e il numero nascosto "A" deve essere seguito da un numero di quattro cifre."""',
     ja: "❌ 違法な答え。モデル名は「iPhone 」で始まる必要があり、隠し「A」番号は「A」の後に 4 桁の数字が続く必要があります。",
     kn: '❌ ಕಾನೂನುಬಾಹಿರ ಉತ್ತರ. ಮಾದರಿ ಹೆಸರು "ಐಫೋನ್" ಅನ್ನು ಪ್ರಾರಂಭಿಸಬೇಕು, ಮತ್ತು ಹಿಡನ್ "ಎ" ಸಂಖ್ಯೆಯು "ಎ" ಆಗಿರಬೇಕು ನಂತರ ನಾಲ್ಕು-ಅಂಕಿಯ ಸಂಖ್ಯೆ ಇರಬೇಕು.',
     ko: '❌ 잘못된 답변입니다. 모델 이름은 "iPhone "으로 시작해야 하며 숨겨진 "A" 번호는 "A" 뒤에 4자리 숫자가 와야 합니다.',
@@ -4611,7 +4611,7 @@ export const phrases = {
   RC_findComputerModelGeneric: {
     "en-US":
       'YOUR COMPUTER. We need details specifying its brand and model. Find "System Information". Copy the Model name and number to the corresponding fields below.',
-    ar: "Loading...",
+    ar: '"جهاز الكمبيوتر الخاص بك. نحتاج تفاصيل تحديد العلامة التجارية والطراز الخاص به. ابحث عن "معلومات النظام". انسخ اسم الطراز والرقم إلى الحقول المقابلة أدناه."',
     hy: '❌ Անվավեր պատասխան։ Մոդելի անունը պետք է սկսվի "iPhone " բառով, իսկ թաքցված "A" թվին պետք է լինի "A" հետո հետևող չորս նիշանական թիվ։"""',
     bg: "ТВОЯТ КОМПЮТЪР. Нуждаем се от подробности, уточняващи неговата марка и модел. Намерете „Системна информация“. Копирайте името и номера на модела в съответните полета по-долу.",
     "zh-CN":
@@ -4625,7 +4625,7 @@ export const phrases = {
     "en-UK":
       'YOUR COMPUTER. We need details specifying its brand and model. Find "System Information". Copy the Model name and number to the corresponding fields below.',
     fi: '❌ LAITON VASTAUS. Mallin nimen on alettava "iPhone " ja piilotetun "A" numeron on oltava "A" ja sen jälkeen nelinumeroinen numero."""',
-    fr: "Loading...",
+    fr: '"VOTRE ORDINATEUR. Nous avons besoin de détails spécifiant sa marque et son modèle. Trouvez "Informations système". Copiez le nom et le numéro du modèle dans les champs correspondants ci-dessous."',
     de: "DEIN COMPUTER. Wir benötigen Angaben zur Marke und zum Modell. Suchen Sie nach „Systeminformationen“. Kopieren Sie den Modellnamen und die Modellnummer in die entsprechenden Felder unten.",
     el: 'Ο ΥΠΟΛΟΓΙΣΤΗΣ ΣΟΥ. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν τη μάρκα και το μοντέλο του. Βρείτε "Πληροφορίες συστήματος". Αντιγράψτε το όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.',
     he: '❌ תשובה לא חוקית. שם המודל חייב להתחיל ב "iPhone ", והמספר המוסתר "A" חייב להיות "A" עם מספר בארבע ספרות.',
@@ -4633,7 +4633,7 @@ export const phrases = {
     hu: 'A SZÁMÍTÓGÉPED. Részletekre van szükségünk a márkával és a modellel kapcsolatban. Keresse meg a "Rendszerinformáció" elemet. Másolja a modell nevét és számát az alábbi megfelelő mezőkbe.',
     is: 'TÖLVAN ÞÍN. Við þurfum upplýsingar um vörumerki þess og gerð. Finndu "System Information". Afritaðu heiti líkans og númer í samsvarandi reiti hér að neðan.',
     id: 'KOMPUTER ANDA. Kami memerlukan detail yang menentukan merek dan modelnya. Temukan "Informasi Sistem". Salin Nama dan nomor model ke kolom terkait di bawah.',
-    it: "Loading...",
+    it: "IL TUO COMPUTER. Abbiamo bisogno di dettagli che specificano la marca e il modello. Trova 'Informazioni di sistema'. Copia il nome e il numero del modello nei campi corrispondenti qui sotto.",
     ja: "あなたのコンピュータ。ブランドとモデルを特定する詳細が必要です。 「システム情報」を見つけます。モデル名と番号を以下の対応するフィールドにコピーします。",
     kn: 'ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್. ಅದರ ಬ್ರ್ಯಾಂಡ್ ಮತ್ತು ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. "ಸಿಸ್ಟಮ್ ಮಾಹಿತಿ" ಅನ್ನು ಹುಡುಕಿ. ಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ.',
     ko: "",
@@ -4658,7 +4658,7 @@ export const phrases = {
   RC_findModelGeneric: {
     "en-US":
       "YOUR PHONE. We need details specifying its brand and model. Go to the Settings or Options menu, scroll to the bottom of the list, and click 'System', ‘About phone’, ‘About device’ or similar. Copy the Model name and number to the corresponding fields below.",
-    ar: "Loading...",
+    ar: "هاتفك. نحتاج تفاصيل تحديد العلامة التجارية والطراز الخاص به. اذهب إلى قائمة الإعدادات أو الخيارات، انتقل إلى أسفل القائمة وانقر على 'النظام'، 'حول الهاتف'، 'حول الجهاز' أو ما شابه ذلك. انسخ اسم الطراز والرقم إلى الحقول المقابلة أدناه.",
     hy: "ՔՈ ՀԵՌԱԽՈՍԸ։ Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա ապրանքանիշը և մոդելը։ Գնացեք Կարգավորումներ կամ Ընտրանքներ ընտրացանկ, ոլորեք ցանկի ներքևի մասում և սեղմեք «Համակարգ», «Հեռախոսի մասին», «Սարքի մասին» կամ նմանատիպ այլ տարբերակներ: Պատճենեք մոդելի անվանումը և համարը ստորև ներկայացված համապատասխան դաշտերում:",
     bg: "ТВОЯТ ТЕЛЕФОН. Нуждаем се от подробности, уточняващи неговата марка и модел. Отидете в менюто Настройки или Опции, превъртете до дъното на списъка и щракнете върху „Система“, „Всичко за телефона“, „Всичко за устройството“ или подобно. Копирайте името и номера на модела в съответните полета по-долу.",
     "zh-CN":
@@ -4672,7 +4672,7 @@ export const phrases = {
     "en-UK":
       "YOUR PHONE. We need details specifying its brand and model. Go to the Settings or Options menu, scroll to the bottom of the list, and click 'System', ‘About phone’, ‘About device’ or similar. Copy the Model name and number to the corresponding fields below.",
     fi: "Puhelimesi. Tarvitsemme yksityiskohtia sen merkistä ja mallista. Siirry Asetukset- tai Valinnat-valikkoon, vieritä listan alaosaan ja valitse 'Järjestelmä', 'Puhelimesta' tai vastaava. Kopioi mallin nimi ja numero vastaaviin kenttiin alla.",
-    fr: "Loading...",
+    fr: "VOTRE TÉLÉPHONE. Nous avons besoin de détails spécifiant sa marque et son modèle. Allez dans le menu Paramètres ou Options, faites défiler jusqu'au bas de la liste et cliquez sur 'Système', 'À propos du téléphone', 'À propos de l'appareil' ou similaire. Copiez le nom et le numéro du modèle dans les champs correspondants ci-dessous.",
     de: "DEIN TELEFON. Wir benötigen Angaben zur Marke und zum Modell. Gehen Sie zum Menü „Einstellungen“ oder „Optionen“, scrollen Sie zum Ende der Liste und klicken Sie auf „System“, „Über das Telefon“, „Über das Gerät“ oder ähnliches. Kopieren Sie den Modellnamen und die Modellnummer in die entsprechenden Felder unten.",
     el: "ΤΟ ΤΗΛΕΦΩΝΟ ΣΟΥ. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν τη μάρκα και το μοντέλο του. Μεταβείτε στο μενού Ρυθμίσεις ή Επιλογές, κάντε κύλιση στο κάτω μέρος της λίστας και κάντε κλικ στο «Σύστημα», «Σχετικά με το τηλέφωνο», «Σχετικά με τη συσκευή» ή παρόμοια. Αντιγράψτε το όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.",
     he: "הטלפון שלך. אנחנו צריכים פרטים המפרטים את המותג והדגם שלו. עבור לתפריט ההגדרות או האפשרויות, גלול לתחתית הרשימה ולחץ על 'מערכת', 'אודות הטלפון', 'אודות המכשיר' או דומה. העתק את שם הדגם והמספר לשדות המתאימים למטה.",
@@ -4680,7 +4680,7 @@ export const phrases = {
     hu: "A TELEFONOD. Részletekre van szükségünk a márka és a modell megadásához. Menj a Beállítások vagy Opciók menübe, görgetj a lista aljára, majd kattints a 'Rendszer', 'Telefonról', 'Eszközről' vagy hasonló opcióra. Másold a Modell nevet és számot az alábbi megfelelő mezőkbe.",
     is: "SÍMANN ÞINN. Við þurfum upplýsingar um vörumerki þess og gerð. Farðu í Stillingar eða Valkostir valmyndina, skrunaðu neðst á listanum og smelltu á „Kerfi“, „Um síma“, „Um tæki“ eða álíka. Afritaðu heiti líkans og númer í samsvarandi reiti hér að neðan.",
     id: "TELEPON ANDA. Kami memerlukan detail yang menentukan merek dan modelnya. Buka menu Pengaturan atau Opsi, gulir ke bagian bawah daftar, dan klik 'Sistem', 'Tentang ponsel', 'Tentang perangkat' atau sejenisnya. Salin Nama dan nomor model ke kolom terkait di bawah.",
-    it: "Loading...",
+    it: "IL TUO TELEFONO. Abbiamo bisogno di dettagli che specificano la marca e il modello. Vai nel menu Impostazioni o Opzioni, scorri fino alla fine dell'elenco e clicca su 'Sistema', 'Informazioni sul telefono', 'Informazioni sul dispositivo' o simili. Copia il nome e il numero del modello nei campi corrispondenti qui sotto.",
     ja: "「あなたの携帯電話。ブランドとモデルの詳細が必要です。設定またはオプションメニューに移動し、リストの一番下までスクロールして、'システム'、'電話について'、'デバイスについて'などをクリックしてください。モデル名と番号を下の対応するフィールドにコピーしてください。」",
     kn: "ನಿಮ್ಮ ಫೋನ್. ಅದರ ಬ್ರ್ಯಾಂಡ್ ಮತ್ತು ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಥವಾ ಆಯ್ಕೆಗಳ ಮೆನುಗೆ ಹೋಗಿ, ಪಟ್ಟಿಯ ಕೆಳಭಾಗಕ್ಕೆ ಸ್ಕ್ರಾಲ್ ಮಾಡಿ ಮತ್ತು 'ಸಿಸ್ಟಮ್', 'ಫೋನ್ ಕುರಿತು', 'ಸಾಧನದ ಕುರಿತು' ಅಥವಾ ಅಂತಹುದೇ ಕ್ಲಿಕ್ ಮಾಡಿ. ಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ.",
     ko: "당신의 휴대폰. 브랜드와 모델을 구체적으로 알려주셔야 합니다. 설정 또는 옵션 메뉴로 이동하여 목록의 맨 아래로 스크롤하고 '시스템', '휴대폰 정보', '기기 정보' 또는 유사한 항목을 클릭하세요. 모델 이름과 번호를 아래 해당 필드에 복사하세요.",
@@ -4705,7 +4705,7 @@ export const phrases = {
   RC_findModelAndroid: {
     "en-US":
       'YOUR Android PHONE. We need details specifying its brand and model. Go to Settings > About phone (formerly "About device"). \nFOR SAMSUNG GALAXY: Copy the big heading "Galaxy ..." to Model Name below, and copy the Model Number to Model Number below. \nFOR MOTO G: The model name and (number) are combined into one line called "Model". Copy the name (outside parentheses) to Model Name below. Copy the number in parentheses, which may include letters and digits, to Model Number below.\nFOR ANY OTHER PHONE: Copy the "Product Name" to Model Name below. Copy "Model Name" to Model Number below. ',
-    ar: "Loading...",
+    ar: '"هاتف Android الخاص بك. نحتاج تفاصيل تحديد العلامة التجارية والطراز الخاص به. اذهب إلى الإعدادات> حول الهاتف (السابقاً "حول الجهاز").\nلهاتف سامسونج جالاكسي: انسخ العنوان الكبير "جالاكسي ..." إلى اسم الطراز أدناه، وانسخ رقم الطراز إلى رقم الطراز أدناه.\nلهاتف موتو جي: يتم دمج اسم الطراز والرقم (إن وجد) في سطر واحد يسمى "الطراز". انسخ الاسم (خارج الأقواس) إلى اسم الطراز أدناه. انسخ الرقم بين الأقواس، والذي قد يتضمن أحرف وأرقام، إلى رقم الطراز أدناه.\nبالنسبة لأي هاتف آخر: انسخ "اسم المنتج" إلى اسم الطراز أدناه. انسخ "اسم الطراز" إلى رقم الطراز أدناه."',
     hy: "ՁԵՐ Android ՀԵՌԱԽՈՍԸ: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա ապրանքանիշը և մոդելը։ Գնացեք Կարգավորումներ > Հեռախոսի մասին (նախկինում՝ «Սարքի մասին»):\nSAMSUNG GALAXY-ի ՀԱՄԱՐ. Պատճենեք «Galaxy ...» մեծ վերնագիրը ներքևում գտնվող Model Name-ում և պատճենեք Model Number-ը ներքևի Model Number-ում:\nMOTO G-ի համար. մոդելի անվանումը և (համարը) միավորված են մեկ տողի մեջ, որը կոչվում է «Model»: Պատճենեք անունը (փակագծերից դուրս) ներքևում գտնվող Model Name-ում: Պատճենեք փակագծերում տրված համարը, որը կարող է ներառել տառեր և թվեր, ստորև ներկայացված մոդելի համարին:\nՑԱՆԿԱՑԱԾ ԱՅԼ ՀԵՌԱԽՈՍԻ ՀԱՄԱՐ. Պատճենեք «Ապրանքի անվանումը» ստորև բերված մոդելի անվան մեջ: Պատճենեք «Մոդելի անունը» ստորև բերված մոդելի համարին:",
     bg: "ВАШИЯТ ТЕЛЕФОН С Android. Нуждаем се от подробности, уточняващи неговата марка и модел. Отидете в Настройки > Всичко за телефона (по-рано „Всичко за устройството“).\nЗА SAMSUNG GALAXY: Копирайте голямото заглавие „Galaxy ...“ в името на модела по-долу и копирайте номера на модела в номера на модела по-долу.\nЗА MOTO G: Името на модела и (номерът) се комбинират в един ред, наречен „Модел“. Копирайте името (извън скобите) в името на модела по-долу. Копирайте номера в скоби, който може да включва букви и цифри, в номера на модела по-долу.\nЗА ВСЕКИ ДРУГ ТЕЛЕФОН: Копирайте „Името на продукта“ в Името на модела по-долу. Копирайте „Име на модела“ в номера на модела по-долу.",
     "zh-CN":
@@ -4719,7 +4719,7 @@ export const phrases = {
     "en-UK":
       'YOUR Android PHONE. We need details specifying its brand and model. Go to Settings > About phone (formerly "About device"). \nFOR SAMSUNG GALAXY: Copy the big heading "Galaxy ..." to Model Name below, and copy the Model Number to Model Number below. \nFOR MOTO G: The model name and (number) are combined into one line called "Model". Copy the name (outside parentheses) to Model Name below. Copy the number in parentheses, which may include letters and digits, to Model Number below.\nFOR ANY OTHER PHONE: Copy the "Product Name" to Model Name below. Copy "Model Name" to Model Number below. ',
     fi: 'Android-PUHELIMESI. Tarvitsemme sen merkin ja mallin tarkempia tietoja. Siirry kohtaan Asetukset > Tietoja puhelimesta (aiemmin "Tietoja laitteesta").\nSAMSUNG GALAXY: Kopioi iso otsikko "Galaxy ..." alla olevaan mallin nimeen ja kopioi mallinumero alla olevaan mallinumeroon.\nMOTO G: Mallin nimi ja (numero) yhdistetään yhdeksi riviksi nimeltä "Model". Kopioi nimi (sulkujen ulkopuolella) alla olevaan mallin nimeen. Kopioi suluissa oleva numero, joka voi sisältää kirjaimia ja numeroita, alla olevaan mallinumeroon.\nMILLOIN MUUN PUHELIN: Kopioi "Tuotteen nimi" alla olevaan mallinimeen. Kopioi "Mallin nimi" alla olevaan mallinumeroon.',
-    fr: "Loading...",
+    fr: '"VOTRE TÉLÉPHONE Android. Nous avons besoin de détails spécifiant sa marque et son modèle. Allez dans Paramètres > À propos du téléphone (anciennement "À propos de l\'appareil").\nPOUR SAMSUNG GALAXY : Copiez le grand titre "Galaxy ..." dans le champ Modèle ci-dessous, et copiez le Numéro de modèle dans le champ Numéro de modèle ci-dessous.\nPOUR MOTO G : Le nom du modèle et (le numéro) sont combinés en une seule ligne appelée "Modèle". Copiez le nom (en dehors des parenthèses) dans le champ Modèle ci-dessous. Copiez le numéro entre parenthèses, qui peut inclure des lettres et des chiffres, dans le champ Numéro de modèle ci-dessous.\nPOUR TOUT AUTRE TÉLÉPHONE : Copiez le "Nom du produit" dans le champ Modèle ci-dessous. Copiez le "Nom du modèle" dans le champ Numéro de modèle ci-dessous."',
     de: "IHR Android-TELEFON. Wir benötigen Angaben zur Marke und zum Modell. Gehen Sie zu Einstellungen > Über das Telefon (früher „Über das Gerät“).\nFÜR SAMSUNG GALAXY: Kopieren Sie die große Überschrift „Galaxy ...“ in den Modellnamen unten und die Modellnummer in die Modellnummer unten.\nFÜR MOTO G: Der Modellname und die (Nummer) werden in einer Zeile mit der Bezeichnung „Modell“ zusammengefasst. Kopieren Sie den Namen (außerhalb der Klammern) in „Modellname“ unten. Kopieren Sie die Nummer in Klammern, die Buchstaben und Ziffern enthalten kann, in die unten stehende Modellnummer.\nFÜR JEDES ANDERE TELEFON: Kopieren Sie den „Produktnamen“ unten in den Modellnamen. Kopieren Sie „Modellname“ unten in die Modellnummer.",
     el: 'ΤΟ Android ΤΗΛΕΦΩΝΟ ΣΑΣ. Χρειαζόμαστε λεπτομέρειες που καθορίζουν το brand και το μοντέλο του. Πηγαίνετε στις Ρυθμίσεις > Σχετικά με το τηλέφωνο (πρώην "Σχετικά με τη συσκευή").\nΓΙΑ SAMSUNG GALAXY: Αντιγράψτε το μεγάλο κείμενο "Galaxy ..." στο Όνομα Μοντέλου παρακάτω και αντιγράψτε τον Αριθμό Μοντέλου στον Αριθμό Μοντέλου παρακάτω.\nΓΙΑ MOTO G: Το όνομα και το (αριθμός) του μοντέλου συνδυάζονται σε μια γραμμή που ονομάζεται "Μοντέλο". Αντιγράψτε το όνομα (έξω από τις παρενθέσεις) στο Όνομα Μοντέλου παρακάτω. Αντιγράψτε τον αριθμό στις παρενθέσεις, ο οποίος μπορεί να περιλαμβάνει γράμματα και ψηφία, στον Αριθμό Μοντέλου παρακάτω.\nΓΙΑ ΟΠΟΙΟΔΗΠΟΤΕ ΑΛΛΟ ΤΗΛΕΦΩΝΟ: Αντιγράψτε το "Όνομα Προϊόντος" στο Όνομα Μοντέλου παρακάτω. Αντιγράψτε το "Όνομα Μοντέλου" στον Αριθμό Μοντέλου παρακάτω.',
     he: 'טלפון האנדרואיד שלך. אנחנו צריכים פרטים המפרטים את המותג והדגם שלו. עבור אל הגדרות > מידע על הטלפון (לשעבר "אודות המכשיר").\nעבור SAMSUNG GALAXY: העתק את הכותרת הגדולה "Galaxy ..." לשם הדגם למטה, והעתק את מספר הדגם למספר הדגם למטה.\nעבור MOTO G: שם הדגם ו(מספר) משולבים לשורה אחת בשם "דגם". העתק את השם (מחוץ לסוגריים) לשם הדגם למטה. העתק את המספר בסוגריים, שעשוי לכלול אותיות וספרות, למספר הדגם למטה.\nלכל טלפון אחר: העתק את "שם המוצר" לשם הדגם למטה. העתק את "שם הדגם" למספר הדגם למטה.',
@@ -4727,7 +4727,7 @@ export const phrases = {
     hu: '"AZ Ön Android TELEFONJA. Részletekre van szükségünk a márka és modell megadásához. Menjen a Beállítások > Telefonról (korábban "Eszközről") részre. \nSAMSUNG GALAXY ESETÉN: Másolja a nagy "Galaxy ..." címsort a Modellnév alá, és másolja a Modellszámot a Modellszám alá. \nMOTO G ESETÉN: A modellnév és (szám) egy sorban található, amit "Modell" néven hívnak. Másolja a nevet (a zárójel kívül) a Modellnév alá. Másolja a zárójelben szereplő számot, amely betűket és számokat is tartalmazhat, a Modellszám alá.\nBÁRMILYEN MÁS TELEFON ESETÉN: Másolja a "Termék nevét" a Modellnév alá. Másolja a "Modell nevét" a Modellszám alá."',
     is: 'Android SÍMINN ÞINN. Við þurfum upplýsingar um vörumerki þess og gerð. Farðu í Stillingar > Um símann (áður „Um tæki“).\nFYRIR SAMSUNG GALAXY: Afritaðu stóru fyrirsögnina "Galaxy ..." í Model Name hér að neðan og afritaðu Model Number í Model Number fyrir neðan.\nFYRIR MOTO G: Nafn líkansins og (númerið) eru sameinuð í eina línu sem kallast "Model". Afritaðu nafnið (utan sviga) í Model Name hér að neðan. Afritaðu númerið innan sviga, sem getur innihaldið bókstafi og tölustafi, í tegundarnúmerið hér að neðan.\nFYRIR HVAÐAN ANNAN SÍMA: Afritaðu "Vöruheiti" í fyrirmyndarheiti hér að neðan. Afritaðu "Model Name" í Model Number hér að neðan.',
     id: 'TELEPON Android ANDA. Kami memerlukan detail yang menentukan merek dan modelnya. Buka Pengaturan > Tentang ponsel (sebelumnya "Tentang perangkat").\nUNTUK SAMSUNG GALAXY: Salin judul besar "Galaxy..." ke Nama Model di bawah, dan salin Nomor Model ke Nomor Model di bawah.\nUNTUK MOTO G: Nama model dan (nomor) digabungkan menjadi satu baris yang disebut "Model". Salin nama (di luar tanda kurung) ke Nama Model di bawah. Salin nomor dalam tanda kurung, yang mungkin berisi huruf dan angka, ke Nomor Model di bawah.\nUNTUK TELEPON LAINNYA: Salin "Nama Produk" ke Nama Model di bawah. Salin "Nama Model" ke Nomor Model di bawah.',
-    it: "Loading...",
+    it: '"Il TUO TELEFONO Android. Abbiamo bisogno di dettagli che specificano la marca e il modello. Vai su Impostazioni > Informazioni sul telefono (precedentemente "Informazioni sul dispositivo").\nPER SAMSUNG GALAXY: Copia il grande titolo "Galaxy ..." nel campo Modello Nome sotto, e copia il Numero di Modello nel campo Numero di Modello sotto.\nPER MOTO G: Il nome del modello e il (numero) sono combinati in una sola riga chiamata "Modello". Copia il nome (fuori dalle parentesi) nel campo Modello Nome sotto. Copia il numero tra parentesi, che potrebbe includere lettere e cifre, nel campo Numero di Modello sotto.\nPER QUALSIASI ALTRO TELEFONO: Copia il "Nome del Prodotto" nel campo Modello Nome sotto. Copia "Nome del Modello" nel campo Numero di Modello sotto."',
     ja: "あなたの Android スマートフォン。ブランドとモデルを特定する詳細が必要です。 [設定] > [電話について] (以前は [デバイスについて]) に移動します。\nSAMSUNG GALAXY の場合: 大きな見出し「Galaxy ...」を下のモデル名にコピーし、モデル番号を下のモデル番号にコピーします。\nFOR MOTO G: モデル名と (番号) が 1 行に結合され、「Model」と呼ばれます。名前 (括弧の外側) を下のモデル名にコピーします。括弧内の番号 (文字と数字が含まれる場合があります) を下のモデル番号にコピーします。\n他の電話の場合: 「製品名」を下のモデル名にコピーします。 「モデル名」を以下のモデル番号にコピーします。",
     kn: 'ನಿಮ್ಮ Android ಫೋನ್. ಅದರ ಬ್ರ್ಯಾಂಡ್ ಮತ್ತು ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಫೋನ್ ಕುರಿತು (ಹಿಂದೆ "ಸಾಧನದ ಕುರಿತು") ಗೆ ಹೋಗಿ.\nSAMSUNG GALAXY ಗಾಗಿ: "Galaxy ..." ಎಂಬ ದೊಡ್ಡ ಶೀರ್ಷಿಕೆಯನ್ನು ಕೆಳಗಿನ ಮಾದರಿ ಹೆಸರಿಗೆ ನಕಲಿಸಿ ಮತ್ತು ಕೆಳಗಿನ ಮಾದರಿ ಸಂಖ್ಯೆಗೆ ಮಾದರಿ ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ.\nMOTO G ಗಾಗಿ: ಮಾದರಿ ಹೆಸರು ಮತ್ತು (ಸಂಖ್ಯೆ) "ಮಾದರಿ" ಎಂಬ ಒಂದು ಸಾಲಿನಲ್ಲಿ ಸಂಯೋಜಿಸಲಾಗಿದೆ. ಕೆಳಗಿನ ಮಾದರಿ ಹೆಸರಿಗೆ ಹೆಸರನ್ನು (ಹೊರಗಿನ ಆವರಣ) ನಕಲಿಸಿ. ಕೆಳಗಿನ ಮಾದರಿ ಸಂಖ್ಯೆಗೆ ಅಕ್ಷರಗಳು ಮತ್ತು ಅಂಕೆಗಳನ್ನು ಒಳಗೊಂಡಿರುವ, ಆವರಣದಲ್ಲಿರುವ ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ.\nಯಾವುದೇ ಇತರ ಫೋನ್‌ಗಾಗಿ: ಕೆಳಗಿನ ಮಾದರಿ ಹೆಸರಿಗೆ "ಉತ್ಪನ್ನದ ಹೆಸರು" ಅನ್ನು ನಕಲಿಸಿ. ಕೆಳಗಿನ ಮಾದರಿ ಸಂಖ್ಯೆಗೆ "ಮಾದರಿ ಹೆಸರು" ನಕಲಿಸಿ.',
     ko: '당신의 안드로이드 폰. 브랜드와 모델을 지정하는 세부정보가 필요합니다. 설정 > 휴대전화 정보(이전의 \'기기 정보\')로 이동하세요.\nSAMSUNG GALAXY의 경우: 아래의 모델 이름에 "Galaxy ..."라는 큰 제목을 복사하고, 아래의 모델 번호에 모델 번호를 복사하세요.\nMOTO G의 경우: 모델 이름과 (번호)가 "모델"이라는 한 줄로 결합됩니다. 아래 모델명에 이름(괄호 안)을 복사하세요. 아래의 모델번호에 괄호 안의 숫자(문자, 숫자 포함 가능)를 복사하세요.\n기타 휴대폰의 경우: 아래의 모델 이름에 "제품 이름"을 복사하세요. 아래의 모델 번호에 "모델 이름"을 복사하세요.',
@@ -4752,7 +4752,7 @@ export const phrases = {
   RC_findModelAndroidGeneric: {
     "en-US":
       'YOUR Android PHONE. We need details specifying its brand and model. Go to Settings > About phone\nor Settings > System > About phone (formerly "About device"). \nCopy the Product or Device or Model name and Model number to the Model name and number fields below.',
-    ar: "Loading...",
+    ar: '"هاتف Android الخاص بك. نحتاج تفاصيل تحديد العلامة التجارية والطراز الخاص به. اذهب إلى الإعدادات> حول الهاتف\nأو الإعدادات> النظام> حول الهاتف (السابق "حول الجهاز").\nانسخ اسم المنتج أو الجهاز أو الطراز ورقم الطراز إلى حقول اسم الطراز ورقم الطراز أدناه."',
     hy: '«Ձեր Android հեռախոսը: Մենք պետք է մանրամասներ ունենանք, որոնք նշանակում են այնի ապրանքանիշը և մոդելը: Գնացեք կարգավորումներ > Համակարգի մասին\nկամ Կարգավորումներ > Համակարգ > Հեռախոսի մասին (նախկին՝ "Ապրանքի մասին"): \nՊատճենեք Արտադրանքի կամ սարքի անունը և մոդելի անունը մոդելի անունից և համարից ստորև գրառեք մոդելի անունից և համարից ստորև գրառեք մոդելի անունից և համարից ստորև:»',
     bg: "ВАШИЯТ ТЕЛЕФОН С Android. Нуждаем се от подробности, уточняващи неговата марка и модел. Отидете в Настройки > Всичко за телефона\nили Настройки > Система > Всичко за телефона (по-рано „Всичко за устройството”).\nКопирайте името на продукта или устройството или модела и номера на модела в полетата за име и номер на модела по-долу.",
     "zh-CN":
@@ -4766,7 +4766,7 @@ export const phrases = {
     "en-UK":
       '"YOUR Android PHONE. We need details specifying its brand and model. Go to Settings > About phone\nor Settings > System > About phone (formerly "About device"). \nCopy the Product or Device or Model name and Model number to the Model name and number fields below."',
     fi: 'Android-PUHELIMESI. Tarvitsemme sen merkin ja mallin tarkempia tietoja. Siirry kohtaan Asetukset > Tietoja puhelimesta\ntai Asetukset > Järjestelmä > Tietoja puhelimesta (aiemmin "Tietoja laitteesta").\nKopioi tuotteen tai laitteen tai mallin nimi ja mallinumero alla oleviin Mallin nimi ja numero -kenttiin.',
-    fr: "Loading...",
+    fr: '"VOTRE TÉLÉPHONE Android. Nous avons besoin de détails spécifiant sa marque et son modèle. Allez dans Paramètres > À propos du téléphone ou Paramètres > Système > À propos du téléphone (anciennement "À propos de l\'appareil"). Copiez le nom du produit, de l\'appareil ou du modèle ainsi que le numéro de modèle dans les champs Nom et numéro du modèle ci-dessous."',
     de: "IHR Android-TELEFON. Wir benötigen Angaben zur Marke und zum Modell. Gehen Sie zu Einstellungen > Über das Telefon\noder Einstellungen > System > Über das Telefon (früher „Über das Gerät“).\nKopieren Sie den Produkt-, Geräte- oder Modellnamen und die Modellnummer in die Felder Modellname und -nummer unten.",
     el: 'ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ Android. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν τη μάρκα και το μοντέλο του. Μεταβείτε στις Ρυθμίσεις > Σχετικά με το τηλέφωνο\nή Ρυθμίσεις > Σύστημα > Σχετικά με το τηλέφωνο (πρώην "Σχετικά με τη συσκευή").\nΑντιγράψτε το προϊόν ή τη συσκευή ή το όνομα μοντέλου και τον αριθμό μοντέλου στα πεδία Όνομα μοντέλου και αριθμός παρακάτω.',
     he: 'טלפון האנדרואיד שלך. אנחנו צריכים פרטים המפרטים את המותג והדגם שלו. עבור אל הגדרות > מידע על הטלפון\nאו הגדרות > מערכת > מידע על הטלפון (לשעבר "אודות המכשיר").\nהעתק את שם המוצר או המכשיר או הדגם ומספר הדגם לשדות שם הדגם והמספר למטה.',
@@ -4774,7 +4774,7 @@ export const phrases = {
     hu: 'AZ ÖN Android-TELEFONJA. Részletekre van szükségünk a márkával és a modellel kapcsolatban. Lépjen a Beállítások > A telefonról menüpontra\nvagy Beállítások > Rendszer > A telefonról (korábban "Az eszközről").\nMásolja a Termék vagy Eszköz vagy Modell nevét és Modellszámát az alábbi Modellnév és -szám mezőkbe.',
     is: "Android SÍMINN ÞINN. Við þurfum upplýsingar um vörumerki þess og gerð. Farðu í Stillingar > Um símann\neða Stillingar > Kerfi > Um símann (áður „Um tæki“).\nAfritaðu vöruna eða tækið eða tegundarheitið og tegundarnúmerið í reitina fyrir heiti tegundar og númer hér að neðan.",
     id: '"Ponsel Android ANDA. Kami memerlukan detail yang menentukan merek dan modelnya. Buka Pengaturan > Tentang ponsel\natau Pengaturan > Sistem > Tentang ponsel (sebelumnya "Tentang perangkat"). \nSalin Nama Produk atau Perangkat atau Model dan Nomor Model ke kolom Nama dan Nomor model di bawah."',
-    it: "Loading...",
+    it: '"IL TUO TELEFONO Android. Abbiamo bisogno di dettagli che specificano la marca e il modello. Vai su Impostazioni > Informazioni telefono o Impostazioni > Sistema > Informazioni telefono (precedentemente "Informazioni dispositivo"). Copia il nome del prodotto o del dispositivo o il numero di modello nei campi Nome e numero di modello qui sotto."',
     ja: "あなたの Android スマートフォン。ブランドとモデルを特定する詳細が必要です。 [設定] > [電話について] に移動します\nまたは、[設定] > [システム] > [電話情報] (以前の「デバイス情報」)。\n製品、デバイス、またはモデル名とモデル番号を下のモデル名と番号フィールドにコピーします。",
     kn: 'ನಿಮ್ಮ Android ಫೋನ್. ಅದರ ಬ್ರ್ಯಾಂಡ್ ಮತ್ತು ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಫೋನ್ ಕುರಿತು ಹೋಗಿ\nಅಥವಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಸಿಸ್ಟಮ್ > ಫೋನ್ ಕುರಿತು (ಹಿಂದೆ "ಸಾಧನದ ಬಗ್ಗೆ").\nಉತ್ಪನ್ನ ಅಥವಾ ಸಾಧನ ಅಥವಾ ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಮಾದರಿ ಸಂಖ್ಯೆಯನ್ನು ಕೆಳಗಿನ ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆ ಕ್ಷೇತ್ರಗಳಿಗೆ ನಕಲಿಸಿ.',
     ko: "당신의 안드로이드 폰. 브랜드와 모델을 지정하는 세부정보가 필요합니다. 설정 > 휴대전화 정보로 이동하세요.\n또는 설정 > 시스템 > 휴대전화 정보(이전의 '기기 정보').\n제품이나 장치 또는 모델 이름과 모델 번호를 아래의 모델 이름과 번호 필드에 복사하세요.",
@@ -4799,7 +4799,7 @@ export const phrases = {
   RC_findModelAndroidGoogle: {
     "en-US":
       'YOUR Google PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). Copy the Model and Model number to the corresponding fields below. On older phones press Status to see this information.',
-    ar: "Loading...",
+    ar: '"هاتف Google الخاص بك. نحتاج تفاصيل تحديد نموذجه. اذهب إلى الإعدادات> حول الهاتف (السابق "حول الجهاز"). انسخ النموذج ورقم النموذج في الحقول المقابلة أدناه. في الهواتف القديمة، اضغط على الحالة لرؤية هذه المعلومات."',
     hy: "ՁԵՐ Google ՀԵՌԱԽՈՍԸ: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա մոդելը։ Գնացեք Կարգավորումներ > Հեռախոսի մասին (նախկինում՝ «Սարքի մասին»): Պատճենեք Մոդելի և Մոդելի համարը ստորև ներկայացված համապատասխան դաշտերում: Ավելի հին հեռախոսներում սեղմեք «Կարգավիճակ»՝ այս տեղեկատվությունը տեսնելու համար:",
     bg: "ВАШИЯТ Google ТЕЛЕФОН. Имаме нужда от подробности, уточняващи неговия модел. Отидете в Настройки > Всичко за телефона (по-рано „Всичко за устройството“). Копирайте модела и номера на модела в съответните полета по-долу. На по-стари телефони натиснете Статус, за да видите тази информация.",
     "zh-CN":
@@ -4813,7 +4813,7 @@ export const phrases = {
     "en-UK":
       'YOUR Google PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). Copy the Model and Model number to the corresponding fields below. On older phones press Status to see this information.',
     fi: 'Google-PUHELIN. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry kohtaan Asetukset > Tietoja puhelimesta (aiemmin "Tietoja laitteesta"). Kopioi malli ja mallinumero alla oleviin vastaaviin kenttiin. Vanhemmissa puhelimissa näet nämä tiedot painamalla Tila.',
-    fr: "Loading...",
+    fr: '"VOTRE téléphone Google. Nous avons besoin de détails spécifiant son modèle. Allez dans Paramètres > À propos du téléphone (anciennement "À propos de l\'appareil"). Copiez le Modèle et le Numéro de modèle dans les champs correspondants ci-dessous. Sur les anciens téléphones, appuyez sur Statut pour voir ces informations."',
     de: "IHR Google-TELEFON. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zu Einstellungen > Über das Telefon (früher „Über das Gerät“). Kopieren Sie das Modell und die Modellnummer in die entsprechenden Felder unten. Drücken Sie auf älteren Telefonen auf Status, um diese Informationen anzuzeigen.",
     el: 'ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ Google. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στις Ρυθμίσεις > Σχετικά με το τηλέφωνο (πρώην "Σχετικά με τη συσκευή"). Αντιγράψτε τον αριθμό μοντέλου και μοντέλου στα αντίστοιχα πεδία παρακάτω. Σε παλαιότερα τηλέφωνα, πατήστε Κατάσταση για να δείτε αυτές τις πληροφορίες.',
     he: 'טלפון גוגל שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור אל הגדרות > מידע על הטלפון (לשעבר "אודות המכשיר"). העתק את הדגם ומספר הדגם לשדות המתאימים למטה. בטלפונים ישנים יותר לחץ על סטטוס כדי לראות מידע זה.',
@@ -4821,7 +4821,7 @@ export const phrases = {
     hu: 'AZ ÖN Google-TELEFONJA. Részletekre van szükségünk a modell meghatározásához. Nyissa meg a Beállítások > A telefonról menüpontot (korábban "Az eszközről"). Másolja a modellt és a modellszámot az alábbi megfelelő mezőkbe. Régebbi telefonokon nyomja meg az Állapot gombot az információ megtekintéséhez.',
     is: "Google SÍMANN ÞINN. Við þurfum smáatriði sem tilgreina líkan þess. Farðu í Stillingar > Um símann (áður „Um tæki“). Afritaðu tegund og tegundarnúmer í samsvarandi reiti hér að neðan. Í eldri símum ýttu á Status til að sjá þessar upplýsingar.",
     id: '"PONSEL Google ANDA. Kami membutuhkan rincian yang menjelaskan modelnya. Pergi ke Pengaturan > Tentang ponsel (sebelumnya "Tentang perangkat"). Salin Model dan Nomor Model ke bidang yang sesuai di bawah ini. Pada ponsel yang lebih lama, tekan Status untuk melihat informasi ini."',
-    it: "Loading...",
+    it: '"IL TUO TELEFONO Google. Abbiamo bisogno di dettagli specificando il suo modello. Vai su Impostazioni > Informazioni sul telefono (precedentemente "Informazioni sul dispositivo"). Copia il Modello e il Numero di modello nei campi corrispondenti qui sotto. Su telefoni più vecchi premi Stato per visualizzare queste informazioni."',
     ja: "「あなたのGoogle PHONEです。モデルを特定するための詳細が必要です。設定に移動し、電話について（以前は「デバイスについて」と表示されていました）を選択してください。モデルとモデル番号を以下の該当するフィールドにコピーしてください。古い携帯電話では、ステータスを押してこの情報を表示します。」",
     kn: 'ನಿಮ್ಮ Google ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಫೋನ್ ಕುರಿತು (ಹಿಂದೆ "ಸಾಧನದ ಕುರಿತು") ಗೆ ಹೋಗಿ. ಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಮಾದರಿ ಮತ್ತು ಮಾದರಿ ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ. ಹಳೆಯ ಫೋನ್‌ಗಳಲ್ಲಿ ಈ ಮಾಹಿತಿಯನ್ನು ನೋಡಲು ಸ್ಟೇಟಸ್ ಒತ್ತಿರಿ.',
     ko: "귀하의 Google 전화. 모델을 지정하는 세부정보가 필요합니다. 설정 > 휴대전화 정보(이전의 '기기 정보')로 이동하세요. 모델 및 모델 번호를 아래 해당 필드에 복사하세요. 구형 전화기에서는 상태를 누르면 이 정보를 볼 수 있습니다.",
@@ -4846,7 +4846,7 @@ export const phrases = {
   RC_findModelAndroidHuawei: {
     "en-US":
       'YOUR Huawei PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). Copy the Device name and Model number to the corresponding fields below. On older phones press Status to see this information.',
-    ar: "Loading...",
+    ar: '"هاتف Huawei الخاص بك. نحتاج تفاصيل تحديد نموذجه. اذهب إلى الإعدادات> حول الهاتف (سابقًا "حول الجهاز"). انسخ اسم الجهاز ورقم الطراز إلى الحقول المقابلة أدناه. في الهواتف القديمة، اضغط على الحالة لرؤية هذه المعلومات."',
     hy: '«Ձեր Huawei հեռախոսը: Մենք պետք է մանրամասներ ունենանք, որոնք նշանակում են այնի մոդելը: Գնացեք կարգավորումներ > Համակարգի մասին (նախկինում "Խաղալիքների մասին"): Պատճենեք սահմանված սարքի անունը և մոդելի համարը ստորագրեք հետևյալ դաշտերում: Հին հեռախոսերում սեղմեք Վիճակը, որպեսզի տեսնեք այս տեղեկությունը»:',
     bg: "ВАШИЯТ ТЕЛЕФОН Huawei. Имаме нужда от подробности, уточняващи неговия модел. Отидете в Настройки > Всичко за телефона (по-рано „Всичко за устройството“). Копирайте името на устройството и номера на модела в съответните полета по-долу. На по-стари телефони натиснете Статус, за да видите тази информация.",
     "zh-CN":
@@ -4860,7 +4860,7 @@ export const phrases = {
     "en-UK":
       '"YOUR Huawei MOBILE. We require details specifying its model. Go to Settings > About phone (previously known as "About device"). Copy the Device name and Model number into the respective fields below. On older mobiles, press Status to view this information."',
     fi: '"Sinun Huawei-puhelimesi. Tarvitsemme yksityiskohtia sen mallista. Siirry kohtaan Asetukset > Tietoja puhelimesta (aiemmin "Tietoja laitteesta"). Kopioi laitteen nimi ja mallinumero vastaaviin kenttiin alla. Vanhemmissa puhelimissa paina Tilaa nähdäksesi tämän tiedon."',
-    fr: "Loading...",
+    fr: '"VOTRE TÉLÉPHONE Huawei. Nous avons besoin de détails spécifiant son modèle. Allez dans Paramètres > À propos du téléphone (anciennement "À propos de l\'appareil"). Copiez le nom du périphérique et le numéro de modèle dans les champs correspondants ci-dessous. Sur les anciens téléphones, appuyez sur État pour voir ces informations."',
     de: "IHR Huawei-TELEFON. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zu Einstellungen > Über das Telefon (früher „Über das Gerät“). Kopieren Sie den Gerätenamen und die Modellnummer in die entsprechenden Felder unten. Drücken Sie auf älteren Telefonen auf Status, um diese Informationen anzuzeigen.",
     el: 'ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ Huawei. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στις Ρυθμίσεις > Σχετικά με το τηλέφωνο (πρώην "Σχετικά με τη συσκευή"). Αντιγράψτε το Όνομα συσκευής και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω. Σε παλαιότερα τηλέφωνα, πατήστε Κατάσταση για να δείτε αυτές τις πληροφορίες.',
     he: 'הטלפון שלך Huawei. אנחנו זקוקים לפרטים המפרטים את הדגם שלו. עבור להגדרות > אודות הטלפון (בעברית "אודות המכשיר"). העתק את שם המכשיר ומספר הדגם לשדות המתאימים למטה. בטלפונים ישנים, לחץ על מצב כדי לראות את המידע הזה.',
@@ -4868,7 +4868,7 @@ export const phrases = {
     hu: 'AZ ÖN Huawei TELEFONJA. Részletekre van szükségünk a modell meghatározásához. Nyissa meg a Beállítások > A telefonról menüpontot (korábban "Az eszközről"). Másolja az eszköz nevét és a modellszámot az alábbi megfelelő mezőkbe. Régebbi telefonokon nyomja meg az Állapot gombot az információ megtekintéséhez.',
     is: '"TELEPON Huawei ANDA. Kami membutuhkan rincian yang menentukan modelnya. Pergi ke Pengaturan > Tentang telepon (sebelumnya "Tentang perangkat"). Salin Nama Perangkat dan Nomor Model ke bidang yang sesuai di bawah ini. Pada telepon lama, tekan Status untuk melihat informasi ini."',
     id: 'TELEPON Huawei ANDA. Kami memerlukan detail yang menentukan modelnya. Buka Pengaturan > Tentang ponsel (sebelumnya "Tentang perangkat"). Salin Nama perangkat dan Nomor model ke kolom terkait di bawah. Pada ponsel lama, tekan Status untuk melihat informasi ini.',
-    it: "Loading...",
+    it: '"Il TUO TELEFONO Huawei. Abbiamo bisogno di dettagli che specificano il suo modello. Vai su Impostazioni > Informazioni sul telefono (precedentemente "Informazioni sul dispositivo"). Copia il nome del dispositivo e il numero di modello nei campi corrispondenti qui sotto. Su telefoni più vecchi, premi Stato per visualizzare queste informazioni."',
     ja: "「あなたのHuaweiの携帯電話。モデルを特定するための詳細が必要です。設定に移動して、電話について（以前は「デバイスについて」）を選択してください。デバイス名とモデル番号を下の対応するフィールドにコピーしてください。古い携帯電話では、この情報を確認するにはステータスを押してください。」",
     kn: 'ನಿಮ್ಮ Huawei ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಫೋನ್ ಕುರಿತು (ಹಿಂದೆ "ಸಾಧನದ ಕುರಿತು") ಗೆ ಹೋಗಿ. ಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಸಾಧನದ ಹೆಸರು ಮತ್ತು ಮಾದರಿ ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ. ಹಳೆಯ ಫೋನ್‌ಗಳಲ್ಲಿ ಈ ಮಾಹಿತಿಯನ್ನು ನೋಡಲು ಸ್ಟೇಟಸ್ ಒತ್ತಿರಿ.',
     ko: "귀하의 화웨이 휴대폰. 모델을 지정하는 세부정보가 필요합니다. 설정 > 휴대전화 정보(이전의 '기기 정보')로 이동하세요. 장치 이름과 모델 번호를 아래 해당 필드에 복사하세요. 구형 전화기에서는 상태를 누르면 이 정보를 볼 수 있습니다.",
@@ -4893,7 +4893,7 @@ export const phrases = {
   RC_findModelAndroidMotorola: {
     "en-US":
       'YOUR Motorola PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). The model NAME and (NUMBER) are combined into one line called "Model". Copy the name before the parentheses to Model name below. Copy the letters and numbers inside parentheses to Model number below.',
-    ar: "Loading...",
+    ar: '"هاتفك من موتورولا. نحتاج تفاصيل تحديد نموذجه. اذهب إلى الإعدادات> حول الهاتف (سابقًا "حول الجهاز"). يتم دمج اسم النموذج و(الرقم) في سطر واحد يسمى "النموذج". انسخ الاسم قبل الأقواس إلى النموذج أدناه. انسخ الحروف والأرقام داخل الأقواس إلى رقم النموذج أدناه."',
     hy: "ՁԵՐ Motorola հեռախոսը: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա մոդելը։ Գնացեք Կարգավորումներ > Հեռախոսի մասին (նախկինում՝ «Սարքի մասին»): NAME և (NUMBER) մոդելները միավորված են մեկ տողի մեջ, որը կոչվում է «Model»: Պատճենեք անունը փակագծերից առաջ ներքևում գտնվող Model name-ում: Պատճենեք փակագծերի ներսում գտնվող տառերն ու թվերը ստորև բերված մոդելի համարին:",
     bg: 'ВАШИЯТ ТЕЛЕФОН Motorola. Имаме нужда от подробности, уточняващи неговия модел. Отидете в Настройки > Всичко за телефона (по-рано „Всичко за устройството“). Моделът ИМЕ и (НОМЕР) са комбинирани в един ред, наречен "Модел". Копирайте името преди скобите в името на модела по-долу. Копирайте буквите и цифрите в скоби в номера на модела по-долу.',
     "zh-CN":
@@ -4907,7 +4907,7 @@ export const phrases = {
     "en-UK":
       '"YOUR Motorola PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). The model NAME and (NUMBER) are combined into one line called "Model". Copy the name before the parentheses to Model name below. Copy the letters and numbers inside parentheses to Model number below."',
     fi: 'SINUN Motorola-PUHELIN. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry kohtaan Asetukset > Tietoja puhelimesta (aiemmin "Tietoja laitteesta"). Malli NIMI ja (NUMBER) on yhdistetty yhdeksi riviksi nimeltä "Malli". Kopioi sulkuja edeltävä nimi alla olevaan mallin nimeen. Kopioi suluissa olevat kirjaimet ja numerot alla olevaan mallinumeroon.',
-    fr: "Loading...",
+    fr: '"VOTRE téléphone Motorola. Nous avons besoin de détails spécifiant son modèle. Allez dans Paramètres > À propos du téléphone (anciennement "À propos de l\'appareil"). Le NOM du modèle et (NUMÉRO) sont combinés en une seule ligne appelée "Modèle". Copiez le nom avant les parenthèses dans le champ "Nom du modèle" ci-dessous. Copiez les lettres et les chiffres à l\'intérieur des parenthèses dans le champ "Numéro de modèle" ci-dessous."',
     de: "IHR Motorola-TELEFON. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zu Einstellungen > Über das Telefon (früher „Über das Gerät“). Der Modellname und (NUMMER) werden in einer Zeile namens „Modell“ zusammengefasst. Kopieren Sie den Namen vor den Klammern in den Modellnamen unten. Kopieren Sie die Buchstaben und Zahlen in Klammern in die Modellnummer unten.",
     el: '"ΤΟ ΚΙΝΗΤΟ ΣΑΣ Motorola. Χρειαζόμαστε λεπτομέρειες που καθορίζουν το μοντέλο του. Πηγαίνετε στις Ρυθμίσεις> Σχετικά με το τηλέφωνο (προηγουμένως "Σχετικά με τη συσκευή"). Το ΟΝΟΜΑ του μοντέλου και (ΑΡΙΘΜΟΣ) συνδυάζονται σε μία γραμμή που ονομάζεται "Μοντέλο". Αντιγράψτε το όνομα πριν από τις παρενθέσεις στο πεδίο Όνομα μοντέλου παρακάτω. Αντιγράψτε τα γράμματα και τους αριθμούς μέσα στις παρενθέσεις στο πεδίο Αριθμός μοντέλου παρακάτω."',
     he: 'הטלפון שלך מוטורולה. אנחנו זקוקים לפרטים המפרטים את הדגם שלו. עבור אל הגדרות > אודות הטלפון (בעברית "אודות המכשיר"). שם הדגם והמספר (בסוגריים) משולבים לשורה אחת בשם "דגם". העתק את השם לפני הסוגריים לשדה שם הדגם למטה. העתק את האותיות והמספרים בתוך הסוגריים לשדה מספר הדגם למטה.',
@@ -4915,7 +4915,7 @@ export const phrases = {
     hu: 'AZ ÖN Motorola TELEFONJA. Részletekre van szükségünk a modell meghatározásához. Nyissa meg a Beállítások > A telefonról menüpontot (korábban "Az eszközről"). A NÉV és a (NUMBER) modell egy „Model” nevű sorban van egyesítve. Másolja a zárójel előtti nevet az alábbi modellnévbe. Másolja a zárójelben lévő betűket és számokat az alábbi modellszámba.',
     is: 'Motorola SÍMINN ÞINN. Við þurfum smáatriði sem tilgreina líkan þess. Farðu í Stillingar > Um símann (áður „Um tæki“). Fyrirmyndin NAME og (NUMBER) eru sameinuð í eina línu sem kallast "Model". Afritaðu nafnið á undan svigunum í líkanið fyrir neðan. Afritaðu stafina og tölustafina innan sviga í tegundarnúmerið hér að neðan.',
     id: 'TELEPON Motorola ANDA. Kami memerlukan detail yang menentukan modelnya. Buka Pengaturan > Tentang ponsel (sebelumnya "Tentang perangkat"). Model NAMA dan (NUMBER) digabungkan menjadi satu baris yang disebut "Model". Salin nama sebelum tanda kurung ke Nama model di bawah. Salin huruf dan angka di dalam tanda kurung ke nomor Model di bawah.',
-    it: "Loading...",
+    it: '"Il TUO TELEFONO Motorola. Abbiamo bisogno di dettagli che specificano il suo modello. Vai su Impostazioni > Informazioni sul telefono (precedentemente "Informazioni sul dispositivo"). Il NOME del modello e il (NUMERO) sono combinati in una sola riga chiamata "Modello". Copia il nome prima delle parentesi nella sezione Modello nome qui sotto. Copia le lettere e i numeri all\'interno delle parentesi nella sezione Modello numero qui sotto."',
     ja: "「あなたのMotorolaの携帯電話です。モデルを特定するための詳細が必要です。設定に移動し、電話について（以前は「デバイスについて」と呼ばれていました）を選択してください。モデルの名前と（番号）は、「モデル」という1行に結合されます。括弧の前の名前を下のモデル名にコピーしてください。括弧内の文字と数字を下のモデル番号にコピーしてください。」",
     kn: 'ನಿಮ್ಮ ಮೊಟೊರೊಲಾ ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಫೋನ್ ಕುರಿತು (ಹಿಂದೆ "ಸಾಧನದ ಕುರಿತು") ಗೆ ಹೋಗಿ. ಮಾದರಿ NAME ಮತ್ತು (NUMBER) ಅನ್ನು "ಮಾದರಿ" ಎಂಬ ಒಂದು ಸಾಲಿನಲ್ಲಿ ಸಂಯೋಜಿಸಲಾಗಿದೆ. ಆವರಣದ ಮೊದಲು ಹೆಸರನ್ನು ಕೆಳಗಿನ ಮಾದರಿ ಹೆಸರಿಗೆ ನಕಲಿಸಿ. ಆವರಣದಲ್ಲಿರುವ ಅಕ್ಷರಗಳು ಮತ್ತು ಸಂಖ್ಯೆಗಳನ್ನು ಕೆಳಗಿನ ಮಾದರಿ ಸಂಖ್ಯೆಗೆ ನಕಲಿಸಿ.',
     ko: "귀하의 모토로라 휴대폰. 모델을 지정하는 세부정보가 필요합니다. 설정 > 휴대전화 정보(이전의 '기기 정보')로 이동하세요. 모델 NAME과 (NUMBER)가 \"Model\"이라는 한 줄로 결합됩니다. 아래 모델명에 괄호 앞의 이름을 복사하세요. 아래 모델번호에 괄호 안의 문자와 숫자를 복사하세요.",
@@ -4940,7 +4940,7 @@ export const phrases = {
   RC_findModelAndroidSamsung: {
     "en-US":
       'YOUR Samsung PHONE. We need details specifying its model. Go to Settings > System > About phone (formerly ‘About device’). Copy Device name and Model number to corresponding fields below. The device name begins with "Galaxy ...", and the model number begins with "SM- ...".',
-    ar: "Loading...",
+    ar: '"هاتفك سامسونج. نحتاج تفاصيل تحديد نموذجه. اذهب إلى الإعدادات> النظام> حول الهاتف (السابق \'حول الجهاز\'). انسخ اسم الجهاز ورقم الطراز إلى الحقول المقابلة أدناه. يبدأ اسم الجهاز بـ "جالاكسي ..." ويبدأ رقم الطراز بـ "SM- ..."."',
     hy: "ՁԵՐ Samsung ՀԵՌԱԽՈՍԸ: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա մոդելը։ Գնացեք Կարգավորումներ > Համակարգ > Հեռախոսի մասին (նախկինում՝ «Սարքի մասին»): Պատճենեք Սարքի անունը և մոդելի համարը ստորև ներկայացված համապատասխան դաշտերում: Սարքի անվանումը սկսվում է «Galaxy ...»-ով, իսկ մոդելի համարը՝ «SM-...»:",
     bg: 'ВАШИЯТ ТЕЛЕФОН Samsung. Имаме нужда от подробности, уточняващи неговия модел. Отидете в Настройки > Система > Всичко за телефона (по-рано „Всичко за устройството”). Копирайте името на устройството и номера на модела в съответните полета по-долу. Името на устройството започва с "Galaxy ...", а номерът на модела започва с "SM- ...".',
     "zh-CN":
@@ -4954,7 +4954,7 @@ export const phrases = {
     "en-UK":
       '"YOUR Samsung PHONE. We need details specifying its model. Go to Settings > System > About phone (formerly ‘About device’). Copy Device name and Model number to corresponding fields below. The device name begins with "Galaxy ...", and the model number begins with "SM- ..."."',
     fi: 'Samsung-PUHELIN. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry kohtaan Asetukset > Järjestelmä > Tietoja puhelimesta (aiemmin Tietoja laitteesta). Kopioi laitteen nimi ja mallinumero vastaaviin alla oleviin kenttiin. Laitteen nimi alkaa sanalla "Galaxy ..." ja mallinumero alkaa "SM- ...".',
-    fr: "Loading...",
+    fr: '"VOTRE téléphone Samsung. Nous avons besoin de détails spécifiant son modèle. Allez dans Paramètres > Système > À propos du téléphone (anciennement \'À propos de l\'appareil\'). Copiez le nom de l\'appareil et le numéro de modèle dans les champs correspondants ci-dessous. Le nom de l\'appareil commence par "Galaxy ...", et le numéro de modèle commence par "SM- ..."."',
     de: "IHR Samsung-TELEFON. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zu Einstellungen > System > Über das Telefon (früher „Über das Gerät“). Kopieren Sie den Gerätenamen und die Modellnummer in die entsprechenden Felder unten. Der Gerätename beginnt mit „Galaxy ...“ und die Modellnummer beginnt mit „SM- ...“.",
     el: 'ΤΟ κινητό ΣΑΣ Samsung. Χρειαζόμαστε λεπτομέρειες που καθορίζουν το μοντέλο του. Πηγαίνετε στις Ρυθμίσεις> Σύστημα> Σχετικά με το τηλέφωνο (προηγουμένως "Σχετικά με τη συσκευή"). Αντιγράψτε το όνομα συσκευής και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω. Το όνομα της συσκευής αρχίζει με "Galaxy ..." και ο αριθμός μοντέλου αρχίζει με "SM- ...".',
     he: 'הטלפון של סמסונג שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור אל הגדרות > מערכת > מידע על הטלפון (לשעבר \'אודות המכשיר\'). העתק את שם המכשיר ומספר הדגם לשדות המתאימים למטה. שם המכשיר מתחיל ב-"Galaxy ...", ומספר הדגם מתחיל ב-"SM- ...".',
@@ -4962,7 +4962,7 @@ export const phrases = {
     hu: "A Samsung TELEFONOD. Részletek szükségesek a modelljének meghatározásához. Menj a Beállítások > Rendszer > Telefonról (korábban 'Eszközről'). Másold a Készülék nevét és Modellszámát az alábbi megfelelő mezőkbe. A készülék neve 'Galaxy ...'-vel kezdődik, és a modellszám 'SM- ...'-vel kezdődik.",
     is: "ÞINN Samsung SÍMI. Við þurfum upplýsingar sem tilgreina það líkan. Farið í Stillingar> Kerfi> Um símann (fyrir „Um tæki“). Afritaðu nafn tækar og líkansnúmer í viðkomandi reiti hér fyrir neðan. Nafn tækisins byrjar á „Galaxy ...“, og líkansnúmerið byrjar á „SM- ...“.",
     id: '"HP Samsung ANDA. Kami memerlukan rincian yang menentukan modelnya. Pergi ke Pengaturan> Sistem> Tentang ponsel (sebelumnya \'Tentang perangkat\'). Salin Nama Perangkat dan Nomor Model ke bidang yang sesuai di bawah ini. Nama perangkat dimulai dengan "Galaxy ...", dan nomor model dimulai dengan "SM- ..."."',
-    it: "Loading...",
+    it: '"IL TUO TELEFONO Samsung. Abbiamo bisogno di dettagli che specificano il suo modello. Vai su Impostazioni > Sistema > Informazioni sul telefono (precedentemente \'Informazioni sul dispositivo\'). Copia il nome del dispositivo e il numero di modello nei campi corrispondenti qui sotto. Il nome del dispositivo inizia con "Galaxy ...", e il numero di modello inizia con "SM- ..."."',
     ja: "あなたのサムスンの携帯電話。モデルを特定する詳細が必要です。 [設定] > [システム] > [電話情報] (以前の [デバイスについて]) に移動します。デバイス名とモデル番号を以下の対応するフィールドにコピーします。デバイス名は「Galaxy ～」で始まり、型番は「SM- ～」で始まります。",
     kn: 'ನಿಮ್ಮ Samsung ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಸಿಸ್ಟಮ್ > ಫೋನ್ ಕುರಿತು (ಹಿಂದೆ \'ಸಾಧನದ ಕುರಿತು\') ಗೆ ಹೋಗಿ. ಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಸಾಧನದ ಹೆಸರು ಮತ್ತು ಮಾದರಿ ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ. ಸಾಧನದ ಹೆಸರು "ಗ್ಯಾಲಕ್ಸಿ ..." ನೊಂದಿಗೆ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ, ಮತ್ತು ಮಾದರಿ ಸಂಖ್ಯೆ "SM- ..." ನೊಂದಿಗೆ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ.',
     ko: '당신의 삼성 휴대폰. 모델을 지정하는 세부정보가 필요합니다. 설정 > 시스템 > 휴대전화 정보(이전의 \'기기 정보\')로 이동하세요. 장치 이름과 모델 번호를 아래 해당 필드에 복사하세요. 장치 이름은 "Galaxy ..."로 시작하고, 모델 번호는 "SM- ..."으로 시작합니다.',
@@ -4987,7 +4987,7 @@ export const phrases = {
   RC_findModelAndroidXiaomi: {
     "en-US":
       'YOUR Xiaomi PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). Copy the Model  name (e.g. "Xiaomi Mi 10", "Redmi Note 10", "Poco X3", or "Black Shark 4") and Model number to the corresponding fields below. On older phones press Status to see this information.',
-    ar: "Loading...",
+    ar: '"هاتف Xiaomi الخاص بك. نحتاج إلى تفاصيل تحديد نموذجه. اذهب إلى الإعدادات> حول الهاتف (السابق "حول الجهاز"). انسخ اسم النموذج (مثل "Xiaomi Mi 10"، "Redmi Note 10"، "Poco X3"، أو "Black Shark 4") ورقم النموذج إلى الحقول المقابلة أدناه. في الهواتف القديمة، اضغط على الحالة لرؤية هذه المعلومات."',
     hy: '«Ձեր Xiaomi հեռախոսը: Մենք պետք է մանրամասներ ունենանք, որոնք նշանակում են դրա մոդելը: Գնացեք կարգավորումներ > Համակարգիչի մասին (նախկին՝ "Ծրագրի մասին"): Պատճենեք մոդելի անունը (օրինակ՝ "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" կամ "Black Shark 4") և մոդելի համարը համապատասխան դաշտերում: Հին հեռախոսերում սեղմեք Վիճակը, որպեսզի տեսնեք այս տեղեկությունը»:',
     bg: "ВАШИЯТ ТЕЛЕФОН Xiaomi. Имаме нужда от подробности, уточняващи неговия модел. Отидете в Настройки > Всичко за телефона (по-рано „Всичко за устройството“). Копирайте името на модела (напр. „Xiaomi Mi 10“, „Redmi Note 10“, „Poco X3“ или „Black Shark 4“) и номера на модела в съответните полета по-долу. На по-стари телефони натиснете Статус, за да видите тази информация.",
     "zh-CN":
@@ -5001,7 +5001,7 @@ export const phrases = {
     "en-UK":
       'YOUR Xiaomi PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). Copy the Model  name (e.g. "Xiaomi Mi 10", "Redmi Note 10", "Poco X3", or "Black Shark 4") and Model number to the corresponding fields below. On older phones press Status to see this information.',
     fi: 'Xiaomi-PUHELIN. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry kohtaan Asetukset > Tietoja puhelimesta (aiemmin "Tietoja laitteesta"). Kopioi mallin nimi (esim. "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" tai "Black Shark 4") ja mallinumero vastaaviin alla oleviin kenttiin. Vanhemmissa puhelimissa näet nämä tiedot painamalla Tila.',
-    fr: "Loading...",
+    fr: '"VOTRE TÉLÉPHONE Xiaomi. Nous avons besoin de détails précisant son modèle. Allez dans Paramètres > À propos du téléphone (anciennement "À propos de l\'appareil"). Copiez le nom du modèle (par exemple "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" ou "Black Shark 4") et le numéro de modèle dans les champs correspondants ci-dessous. Sur les anciens téléphones, appuyez sur Statut pour voir ces informations."',
     de: "IHR Xiaomi-TELEFON. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zu Einstellungen > Über das Telefon (früher „Über das Gerät“). Kopieren Sie den Modellnamen (z. B. „Xiaomi Mi 10“, „Redmi Note 10“, „Poco X3“ oder „Black Shark 4“) und die Modellnummer in die entsprechenden Felder unten. Drücken Sie auf älteren Telefonen auf Status, um diese Informationen anzuzeigen.",
     el: 'ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ Xiaomi. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στις Ρυθμίσεις > Σχετικά με το τηλέφωνο (πρώην "Σχετικά με τη συσκευή"). Αντιγράψτε το όνομα μοντέλου (π.χ. "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" ή "Black Shark 4") και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω. Σε παλαιότερα τηλέφωνα, πατήστε Κατάσταση για να δείτε αυτές τις πληροφορίες.',
     he: 'טלפון Xiaomi שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור אל הגדרות > מידע על הטלפון (לשעבר "אודות המכשיר"). העתק את שם הדגם (למשל "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" או "Black Shark 4") ומספר הדגם לשדות המתאימים למטה. בטלפונים ישנים יותר לחץ על סטטוס כדי לראות מידע זה.',
@@ -5009,7 +5009,7 @@ export const phrases = {
     hu: 'AZ ÖN Xiaomi TELEFONJA. Részletekre van szükségünk a modell meghatározásához. Nyissa meg a Beállítások > A telefonról menüpontot (korábban "Az eszközről"). Másolja a modell nevét (pl. "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" vagy "Black Shark 4") és a modellszámot az alábbi megfelelő mezőkbe. Régebbi telefonokon nyomja meg az Állapot gombot az információ megtekintéséhez.',
     is: '"ÞITT Xiaomi SÍMI. Við þurfum upplýsingar sem tilgreina módel þess. Fara í stillingar > Um símann (fyrirheiti "Um tækið"). Afrita módelnafnið (td. "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" eða "Black Shark 4") og módelnúmerið í viðeigandi reiti hér fyrir neðan. Á eldri símum ýtirðu á Stöðu til að sjá þessar upplýsingar."',
     id: 'TELEPON Xiaomi ANDA. Kami memerlukan detail yang menentukan modelnya. Buka Pengaturan > Tentang ponsel (sebelumnya "Tentang perangkat"). Salin Nama Model (misalnya "Xiaomi Mi 10", "Redmi Note 10", "Poco X3", atau "Black Shark 4") dan nomor Model ke kolom terkait di bawah. Pada ponsel lama, tekan Status untuk melihat informasi ini.',
-    it: "Loading...",
+    it: '"Il TUO telefono Xiaomi. Abbiamo bisogno dei dettagli che specificano il suo modello. Vai su Impostazioni > Informazioni sul telefono (precedentemente "Informazioni sul dispositivo"). Copia il nome del modello (ad esempio "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" o "Black Shark 4") e il numero di modello nei campi corrispondenti qui sotto. Sugli smartphone più vecchi, premi Stato per visualizzare queste informazioni."',
     ja: "あなたのXiaomiの携帯電話。モデルを特定する詳細が必要です。 [設定] > [電話について] (以前は [デバイスについて]) に移動します。モデル名 (例: 「Xiaomi Mi 10」、「Redmi Note 10」、「Poco X3」、または「Black Shark 4」) とモデル番号を以下の対応するフィールドにコピーします。古い電話では、ステータスを押してこの情報を表示します。",
     kn: '"ನಿಮ್ಮ Xiaomi ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ಸೂಚಿಸುವ ವಿವರಗಳು ನಮಗೆ ಬೇಕಾಗಿವೆ. ಸೆಟ್ಟಿಂಗ್ಸ್ > ಫೋನ್ ಬಗ್ಗೆ (ಹಿಂದೆ "ಸಾಧನದ ಬಗ್ಗೆ") ಹೋಗಿ. ಮಾದರಿ ಹೆಸರು (ಉದಾಹರಣೆಗೆ "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" ಅಥವಾ "Black Shark 4") ಮತ್ತು ಮಾದರಿ ಸಂಖ್ಯೆಯನ್ನು ಕೆಳಗಿನ ಕ್ಷೇತ್ರಗಳಲ್ಲಿ ನಕಲಿಸಿ. ಹಳೆಯ ಫೋನ್ಗಳಲ್ಲಿ ಈ ಮಾಹಿತಿಯನ್ನು ನೋಡಲು ಸ್ಥಿತಿಯನ್ನು ಒತ್ತಿಹೇಳಿ."',
     ko: '당신의 샤오미 휴대폰. 모델을 지정하는 세부정보가 필요합니다. 설정 > 휴대전화 정보(이전의 \'기기 정보\')로 이동하세요. 모델 이름(예: "Xiaomi Mi 10", "Redmi Note 10", "Poco X3" 또는 "Black Shark 4") 및 모델 번호를 아래 해당 필드에 복사합니다. 구형 전화기에서는 상태를 누르면 이 정보를 볼 수 있습니다.',
@@ -5034,7 +5034,7 @@ export const phrases = {
   RC_findModelBada: {
     "en-US":
       'YOUR Bada PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). Copy the Model Name and Number to the corresponding fields below.',
-    ar: "Loading...",
+    ar: '"هاتفك بادا. نحتاج تفاصيل تحديد نموذجه. اذهب إلى الإعدادات> حول الهاتف (سابقًا "حول الجهاز"). انسخ اسم النموذج والرقم إلى الحقول المقابلة أدناه."',
     hy: '«Ձեր Bada հեռախոսը: Մենք պետք է մանրամասներ ունենալու այնի մոդելի մասին: Գնացեք կարգավորումներ > Հեռախոսի մասին (նախկինում "Ծրագրի մասին"): Պատճենեք մոդելի անունը և համարը համապատասխան դաշտերում ներքևից»',
     bg: "ВАШИЯТ Bada ТЕЛЕФОН. Имаме нужда от подробности, уточняващи неговия модел. Отидете в Настройки > Всичко за телефона (по-рано „Всичко за устройството“). Копирайте името и номера на модела в съответните полета по-долу.",
     "zh-CN":
@@ -5048,7 +5048,7 @@ export const phrases = {
     "en-UK":
       'YOUR Bada PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). Copy the Model Name and Number to the corresponding fields below.',
     fi: 'SINUN Bada-PUHELIN. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry kohtaan Asetukset > Tietoja puhelimesta (aiemmin "Tietoja laitteesta"). Kopioi mallin nimi ja numero alla oleviin vastaaviin kenttiin.',
-    fr: "Loading...",
+    fr: '"VOTRE TÉLÉPHONE BADA. Nous avons besoin de détails spécifiant son modèle. Allez dans Paramètres > À propos du téléphone (anciennement "À propos de l\'appareil"). Copiez le Nom du modèle et le Numéro dans les champs correspondants ci-dessous."',
     de: "IHR Bada-TELEFON. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zu Einstellungen > Über das Telefon (früher „Über das Gerät“). Kopieren Sie den Modellnamen und die Modellnummer in die entsprechenden Felder unten.",
     el: 'ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ Bada. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στις Ρυθμίσεις > Σχετικά με το τηλέφωνο (πρώην "Σχετικά με τη συσκευή"). Αντιγράψτε το Όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.',
     he: 'טלפון Bada שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור אל הגדרות > מידע על הטלפון (לשעבר "אודות המכשיר"). העתק את שם הדגם והמספר לשדות המתאימים למטה.',
@@ -5056,7 +5056,7 @@ export const phrases = {
     hu: '"A TE Bada TELEFONOD. Részletek szükségesek a modell pontosításához. Menj a Beállítások > Telefonról (korábban "Eszközről"). Másold be a Modell nevet és számot az alábbi megfelelő mezőkbe."',
     is: "Bada síminn þinn. Við þurfum smáatriði sem tilgreina líkan þess. Farðu í Stillingar > Um símann (áður „Um tæki“). Afritaðu heiti líkans og númer í samsvarandi reiti hér að neðan.",
     id: 'TELEPON Bada ANDA. Kami memerlukan detail yang menentukan modelnya. Buka Pengaturan > Tentang ponsel (sebelumnya "Tentang perangkat"). Salin Nama Model dan Nomor ke kolom terkait di bawah.',
-    it: "Loading...",
+    it: '"IL TUO TELEFONO Bada. Abbiamo bisogno di dettagli che specificano il suo modello. Vai su Impostazioni > Informazioni sul telefono (precedentemente "Informazioni sul dispositivo"). Copia il Nome e il Numero del modello nei campi corrispondenti qui sotto."',
     ja: "あなたのバダフォン。モデルを特定する詳細が必要です。 [設定] > [電話について] (以前は [デバイスについて]) に移動します。モデル名と番号を以下の対応するフィールドにコピーします。",
     kn: 'ನಿಮ್ಮ ಬ್ಯಾಡಾ ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಫೋನ್ ಕುರಿತು (ಹಿಂದೆ "ಸಾಧನದ ಕುರಿತು") ಗೆ ಹೋಗಿ. ಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ.',
     ko: "당신의 바다 폰입니다. 모델을 구체적으로 알려주세요. 설정으로 이동하여 폰 정보(이전에는 '기기 정보'로 불렸음)를 확인하세요. 모델 이름과 번호를 아래 해당 필드에 복사해주세요.",
@@ -5081,7 +5081,7 @@ export const phrases = {
   RC_findModelBlackberry: {
     "en-US":
       'YOUR Blackberry PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). The model NAME and (NUMBER) are combined into one line called "Model". Copy the name before the parentheses to Model name below. Copy the letters and numbers inside parentheses to Model number below.',
-    ar: "Loading...",
+    ar: '"هاتفك الذكي من نوع بلاكبيري. نحتاج تفاصيل تحديد نموذجه. اذهب إلى الإعدادات > حول الهاتف (سابقًا "حول الجهاز"). يتم دمج اسم النموذج والرقم في سطر واحد يسمى "النموذج". انسخ الاسم قبل الأقواس إلى خانة اسم النموذج أدناه. انسخ الحروف والأرقام داخل الأقواس إلى خانة رقم النموذج أدناه."',
     hy: "ՁԵՐ Blackberry հեռախոսը: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա մոդելը։ Գնացեք Կարգավորումներ > Հեռախոսի մասին (նախկինում՝ «Սարքի մասին»): NAME և (NUMBER) մոդելները միավորված են մեկ տողի մեջ, որը կոչվում է «Model»: Պատճենեք անունը փակագծերից առաջ ներքևում գտնվող Model name-ում: Պատճենեք փակագծերի ներսում գտնվող տառերն ու թվերը ստորև բերված մոդելի համարին:",
     bg: '"Вашият Blackberry ТЕЛЕФОН. Ни са необходими подробности, определящи неговата модел. Отидете в Настройки > За телефона (предишно "За устройството"). Моделното ИМЕ и (НОМЕР) се комбинират в един ред, наречен "Модел". Копирайте името преди скобите в полето Моделно име по-долу. Копирайте буквите и числата в скобите в полето Моделен номер по-долу."',
     "zh-CN":
@@ -5095,7 +5095,7 @@ export const phrases = {
     "en-UK":
       'YOUR Blackberry PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). The model NAME and (NUMBER) are combined into one line called "Model". Copy the name before the parentheses to Model name below. Copy the letters and numbers inside parentheses to Model number below.',
     fi: 'SINUN Blackberry-PUHELIN. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry kohtaan Asetukset > Tietoja puhelimesta (aiemmin "Tietoja laitteesta"). Malli NIMI ja (NUMBER) on yhdistetty yhdeksi riviksi nimeltä "Malli". Kopioi sulkuja edeltävä nimi alla olevaan mallin nimeen. Kopioi suluissa olevat kirjaimet ja numerot alla olevaan mallinumeroon.',
-    fr: "Loading...",
+    fr: '"VOTRE TÉLÉPHONE Blackberry. Nous avons besoin de détails spécifiant son modèle. Allez dans Paramètres > À propos du téléphone (anciennement "À propos de l\'appareil"). Le NOM du modèle et (NUMÉRO) sont combinés en une seule ligne appelée "Modèle". Copiez le nom avant les parenthèses dans le champ Nom du modèle ci-dessous. Copiez les lettres et les chiffres à l\'intérieur des parenthèses dans le champ Numéro de modèle ci-dessous."',
     de: "IHR Blackberry-TELEFON. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zu Einstellungen > Über das Telefon (früher „Über das Gerät“). Der Modellname und (NUMMER) werden in einer Zeile namens „Modell“ zusammengefasst. Kopieren Sie den Namen vor den Klammern in den Modellnamen unten. Kopieren Sie die Buchstaben und Zahlen in Klammern in die Modellnummer unten.",
     el: 'ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ Blackberry. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στις Ρυθμίσεις > Σχετικά με το τηλέφωνο (πρώην "Σχετικά με τη συσκευή"). Το μοντέλο NAME και (NUMBER) συνδυάζονται σε μια γραμμή που ονομάζεται "Μοντέλο". Αντιγράψτε το όνομα πριν από τις παρενθέσεις στο όνομα μοντέλου παρακάτω. Αντιγράψτε τα γράμματα και τους αριθμούς μέσα στις παρενθέσεις στον αριθμό μοντέλου παρακάτω.',
     he: 'טלפון ה-Blackberry שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור אל הגדרות > מידע על הטלפון (לשעבר "אודות המכשיר"). הדגם NAME ו-(NUMBER) משולבים לשורה אחת בשם "דגם". העתק את השם לפני הסוגריים לשם הדגם למטה. העתק את האותיות והמספרים בתוך סוגריים למספר הדגם למטה.',
@@ -5103,7 +5103,7 @@ export const phrases = {
     hu: 'A Blackberry TELEFONOD. Részletekre van szükségünk a modelljével kapcsolatban. Menj a Beállítások > Telefonról (korábban "Eszközről" ) részhez. A modell NEVE és (SZÁMA) egy sorban vannak egyesítve, amit "Modell" néven találsz. Másold ki a nevet a zárójelek előtt, és illeszd be a Modell neve részbe. Másold ki a betűket és számokat a zárójelek között, és illeszd be a Modell szám részbe.',
     is: 'Brómbersíminn þinn. Við þurfum smáatriði sem tilgreina líkan þess. Farðu í Stillingar > Um símann (áður „Um tæki“). Fyrirmyndin NAME og (NUMBER) eru sameinuð í eina línu sem kallast "Model". Afritaðu nafnið á undan svigunum í líkanið fyrir neðan. Afritaðu stafina og tölustafina innan sviga í tegundarnúmerið hér að neðan.',
     id: '"TELEPON Blackberry ANDA. Kami memerlukan detail yang menentukan modelnya. Pergi ke Pengaturan > Tentang telepon (sebelumnya "Tentang perangkat"). NAMA model dan (NOMOR) digabungkan menjadi satu baris yang disebut "Model". Salin nama sebelum tanda kurung ke bawah Nama Model. Salin huruf dan angka di dalam tanda kurung ke bawah Nomor Model."',
-    it: "Loading...",
+    it: '"IL TUO TELEFONO Blackberry. Abbiamo bisogno di dettagli che specificano il suo modello. Vai su Impostazioni > Informazioni sul telefono (precedentemente "Informazioni sul dispositivo"). Il NOME del modello e il (NUMERO) sono combinati in una sola riga chiamata "Modello". Copia il nome prima delle parentesi nella sezione Modello nome qui sotto. Copia le lettere e i numeri all\'interno delle parentesi nella sezione Modello numero qui sotto."',
     ja: "「あなたのBlackberryの携帯電話です。モデルを特定するための詳細が必要です。設定に移動し、電話について（以前は「デバイスについて」と呼ばれていました）を選択してください。モデルの名前と（番号）は、「モデル」という1行に結合されます。カッコ内の前の名前を「モデル名」にコピーしてください。カッコ内の文字と数字を「モデル番号」にコピーしてください。」",
     kn: 'ನಿಮ್ಮ ಬ್ಲ್ಯಾಕ್‌ಬೆರಿ ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಫೋನ್ ಕುರಿತು (ಹಿಂದೆ "ಸಾಧನದ ಕುರಿತು") ಗೆ ಹೋಗಿ. ಮಾದರಿ NAME ಮತ್ತು (NUMBER) ಅನ್ನು "ಮಾದರಿ" ಎಂಬ ಒಂದು ಸಾಲಿನಲ್ಲಿ ಸಂಯೋಜಿಸಲಾಗಿದೆ. ಆವರಣದ ಮೊದಲು ಹೆಸರನ್ನು ಕೆಳಗಿನ ಮಾದರಿ ಹೆಸರಿಗೆ ನಕಲಿಸಿ. ಆವರಣದಲ್ಲಿರುವ ಅಕ್ಷರಗಳು ಮತ್ತು ಸಂಖ್ಯೆಗಳನ್ನು ಕೆಳಗಿನ ಮಾದರಿ ಸಂಖ್ಯೆಗೆ ನಕಲಿಸಿ.',
     ko: "귀하의 블랙베리 휴대폰. 모델을 지정하는 세부정보가 필요합니다. 설정 > 휴대전화 정보(이전의 '기기 정보')로 이동하세요. 모델 NAME과 (NUMBER)가 \"Model\"이라는 한 줄로 결합됩니다. 아래 모델명에 괄호 앞의 이름을 복사하세요. 아래 모델번호에 괄호 안의 문자와 숫자를 복사하세요.",
@@ -5128,7 +5128,7 @@ export const phrases = {
   RC_findModelFirefox: {
     "en-US":
       'YOUR Firefox PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). Copy the Model name and number to the corresponding fields below.',
-    ar: "Loading...",
+    ar: '"هاتف Firefox الخاص بك. نحتاج إلى تفاصيل تحديد نموذجه. اذهب إلى الإعدادات> حول الهاتف (السابق "حول الجهاز"). انسخ اسم النموذج والرقم إلى الحقول المقابلة أدناه."',
     hy: "ՔՈ Firefox ՀԵՌԱԽՈՍԸ: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա մոդելը։ Գնացեք Կարգավորումներ > Հեռախոսի մասին (նախկինում՝ «Սարքի մասին»): Պատճենեք մոդելի անվանումը և համարը ստորև ներկայացված համապատասխան դաշտերում:",
     bg: '"ВАШИЯТ Firefox ТЕЛЕФОН. Ни са необходими подробности, определящи неговата модел. Отидете в Настройки > За телефона (предишно "За устройството"). Копирайте името на модела и номера в съответните полета по-долу."',
     "zh-CN":
@@ -5142,7 +5142,7 @@ export const phrases = {
     "en-UK":
       'YOUR Firefox PHONE. We need details specifying its model. Go to Settings > About phone (formerly "About device"). Copy the Model name and number to the corresponding fields below.',
     fi: 'Firefox-PUHELIN. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry kohtaan Asetukset > Tietoja puhelimesta (aiemmin "Tietoja laitteesta"). Kopioi mallin nimi ja numero vastaaviin alla oleviin kenttiin.',
-    fr: "Loading...",
+    fr: '"VOTRE TÉLÉPHONE Firefox. Nous avons besoin de détails spécifiant son modèle. Allez dans Paramètres > À propos du téléphone (anciennement "À propos de l\'appareil"). Copiez le nom et le numéro du modèle dans les champs correspondants ci-dessous."',
     de: '"DEIN Firefox-TELEFON. Wir benötigen Details, die das Modell spezifizieren. Gehe zu Einstellungen > Über das Telefon (früher "Über das Gerät"). Kopiere den Modellnamen und die Nummer in die entsprechenden Felder unten."',
     el: 'ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ Firefox. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στις Ρυθμίσεις > Σχετικά με το τηλέφωνο (πρώην "Σχετικά με τη συσκευή"). Αντιγράψτε το όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.',
     he: 'טלפון Firefox שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור אל הגדרות > מידע על הטלפון (לשעבר "אודות המכשיר"). העתק את שם הדגם והמספר לשדות המתאימים למטה.',
@@ -5150,7 +5150,7 @@ export const phrases = {
     hu: '"AZ Ön Firefox TELEFONJA. Szükségünk van a modellre vonatkozó részletekre. Menjen a Beállítások > A telefonról (korábban "Az eszközről") részhez. Másolja be a Modell nevet és számot a megfelelő mezőkbe alább."',
     is: "Firefox SÍMANN ÞINN. Við þurfum smáatriði sem tilgreina líkan þess. Farðu í Stillingar > Um símann (áður „Um tæki“). Afritaðu heiti líkans og númer í samsvarandi reiti hér að neðan.",
     id: '"PONSEL Firefox ANDA. Kami memerlukan rincian yang menjelaskan modelnya. Pergi ke Pengaturan > Tentang ponsel (sebelumnya "Tentang perangkat"). Salin Nama dan Nomor Model ke bidang yang sesuai di bawah ini."',
-    it: "Loading...",
+    it: '"IL TUO TELEFONO Firefox. Abbiamo bisogno di dettagli specificando il suo modello. Vai su Impostazioni > Informazioni sul telefono (precedentemente "Informazioni sul dispositivo"). Copia il nome e il numero del modello nei campi corrispondenti qui sotto."',
     ja: "あなたのFirefox携帯電話。モデルを特定する詳細が必要です。 [設定] > [電話について] (以前は [デバイスについて]) に移動します。モデル名と番号を以下の対応するフィールドにコピーします。",
     kn: 'ನಿಮ್ಮ Firefox ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಫೋನ್ ಕುರಿತು (ಹಿಂದೆ "ಸಾಧನದ ಕುರಿತು") ಗೆ ಹೋಗಿ. ಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ.',
     ko: '"당신의 파이어폭스 폰. 우리는 그 모델을 구체적으로 알아야 합니다. 설정 > 폰 정보 (이전에는 "장치 정보")로 이동하십시오. 모델 이름과 번호를 아래 해당 필드에 복사하십시오."',
@@ -5175,7 +5175,7 @@ export const phrases = {
   RC_findModelIOs: {
     "en-US":
       'YOUR iPhone. We need details specifying its model. Go to Settings > General > About. Copy the "Model Name" to the field below. Then tap the "Model Number" to reveal the hidden "A" number: an "A" followed by four digits. Type that into the field below.',
-    ar: "Loading...",
+    ar: '"آيفونك. نحتاج تفاصيل تحديد نموذجه. اذهب إلى الإعدادات > عام > حول. انسخ "اسم النموذج" إلى الحقل أدناه. ثم اضغط على "رقم النموذج" لكشف الرقم المخفي "A": حرف "A" يتبعه أربعة أرقام. اكتب ذلك في الحقل أدناه."',
     hy: "ՔՈ iPhone-ը: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա մոդելը։ Գնացեք Կարգավորումներ > Ընդհանուր > Մասին: Պատճենեք «Մոդելի անունը» ստորև նշված դաշտում: Այնուհետև կտտացրեք «Մոդելի համարը»՝ թաքնված «A» համարը բացահայտելու համար՝ «A»-ն, որին հաջորդում է չորս նիշ: Մուտքագրեք այն ստորև նշված դաշտում:",
     bg: "Вашият iPhone. Ни са необходими подробности, определящи неговата модел. Отидете на Настройки > Общи > За устройството. Копирайте „Име на модела“ в полето по-долу. След това докоснете „Номер на модела“, за да разкриете скрития „A“ номер: „A“, последван от четири цифри. Въведете го в полето по-долу.",
     "zh-CN":
@@ -5189,7 +5189,7 @@ export const phrases = {
     "en-UK":
       'YOUR iPhone. We need details specifying its model. Go to Settings > General > About. Copy the "Model Name" to the field below. Then tap the "Model Number" to reveal the hidden "A" number: an "A" followed by four digits. Type that into the field below.',
     fi: 'SINUN iPhonesi. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry kohtaan Asetukset > Yleiset > Tietoja. Kopioi "Mallin nimi" alla olevaan kenttään. Napauta sitten "Mallinumeroa" paljastaaksesi piilotetun "A"-numeron: "A" ja neljä numeroa. Kirjoita se alla olevaan kenttään.',
-    fr: "Loading...",
+    fr: '"VOTRE iPhone. Nous avons besoin de détails spécifiant son modèle. Allez dans Paramètres > Général > Informations. Copiez le "Nom du modèle" dans le champ ci-dessous. Ensuite, appuyez sur le "Numéro de modèle" pour révéler le numéro "A" caché : un "A" suivi de quatre chiffres. Tapez cela dans le champ ci-dessous."',
     de: "DEIN iPhone. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zu Einstellungen > Allgemein > Info. Kopieren Sie den „Modellnamen“ in das Feld darunter. Tippen Sie dann auf die „Modellnummer“, um die versteckte „A“-Nummer anzuzeigen: ein „A“, gefolgt von vier Ziffern. Geben Sie das in das Feld unten ein.",
     el: 'ΤΟ iPhone ΣΑΣ. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στις Ρυθμίσεις > Γενικά > Πληροφορίες. Αντιγράψτε το "Όνομα μοντέλου" στο παρακάτω πεδίο. Στη συνέχεια, αγγίξτε τον "Αριθμός μοντέλου" για να αποκαλύψετε τον κρυφό αριθμό "Α": ένα "Α" ακολουθούμενο από τέσσερα ψηφία. Πληκτρολογήστε το στο παρακάτω πεδίο.',
     he: 'האייפון שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור אל הגדרות > כללי > אודות. העתק את "שם הדגם" לשדה למטה. לאחר מכן הקש על "מספר דגם" כדי לחשוף את המספר "A" הנסתר: "A" ואחריו ארבע ספרות. הקלד את זה בשדה למטה.',
@@ -5197,7 +5197,7 @@ export const phrases = {
     hu: 'AZ ÖN iPhone. Részletekre van szükségünk a modell meghatározásához. Nyissa meg a Beállítások > Általános > Névjegy menüpontot. Másolja a "Modell neve"-t az alábbi mezőbe. Ezután érintse meg a "Modell számot" a rejtett "A" szám felfedéséhez: egy "A", majd négy számjegy. Írja be az alábbi mezőbe.',
     is: '"ÞINN iPhone. Við þurfum upplýsingar sem tilgreina þessi módel. Faraðu í Stillingar > Almennt > Um. Afritaðu "Módelnafn" í reitinn hér að neðan. Þá smelltu á "Módelnúmer" til að afhjúpa faldaða "A" númerið: "A" fylgt af fjórum tölustöfum. Sláðu það inn í reitinn hér að neðan."',
     id: '"iPhone ANDA. Kami membutuhkan rincian yang menjelaskan modelnya. Pergi ke Pengaturan > Umum > Tentang. Salin "Nama Model" ke kolom di bawah. Kemudian ketuk "Nomor Model" untuk mengungkapkan nomor "A" yang tersembunyi: sebuah "A" diikuti oleh empat digit. Ketikkan itu ke dalam kolom di bawah."',
-    it: "Loading...",
+    it: 'IL TUO iPhone. Abbiamo bisogno di dettagli che specificano il suo modello. Vai su Impostazioni > Generale > Info. Copia il "Nome modello" nel campo sottostante. Quindi tocca il "Numero modello" per rivelare il numero "A" nascosto: una "A" seguita da quattro cifre. Digita questo nel campo sottostante.',
     ja: '「あなたのiPhoneです。モデルを特定するための詳細が必要です。設定>一般>情報に移動してください。"モデル名"を下のフィールドにコピーしてください。次に、"モデル番号"をタップして隠された"A"の後に続く4桁の数字を表示してください。それを下のフィールドに入力してください。」',
     kn: 'ನಿಮ್ಮ ಐಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಸಾಮಾನ್ಯ > ಕುರಿತು ಹೋಗಿ. ಕೆಳಗಿನ ಕ್ಷೇತ್ರಕ್ಕೆ "ಮಾದರಿ ಹೆಸರು" ಅನ್ನು ನಕಲಿಸಿ. ನಂತರ ಮರೆಮಾಡಿದ "A" ಸಂಖ್ಯೆಯನ್ನು ಬಹಿರಂಗಪಡಿಸಲು "ಮಾದರಿ ಸಂಖ್ಯೆ" ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ: ಒಂದು "A" ನಂತರ ನಾಲ್ಕು ಅಂಕೆಗಳು. ಕೆಳಗಿನ ಕ್ಷೇತ್ರದಲ್ಲಿ ಅದನ್ನು ಟೈಪ್ ಮಾಡಿ.',
     ko: '당신의 아이폰. 모델을 지정하는 세부정보가 필요합니다. 설정 > 일반 > 정보로 이동합니다. 아래 필드에 "모델 이름"을 복사하세요. 그런 다음 "모델 번호"를 탭하면 "A" 뒤에 4자리 숫자가 오는 숨겨진 "A" 번호가 표시됩니다. 아래 필드에 입력하세요.',
@@ -5222,7 +5222,7 @@ export const phrases = {
   RC_findModelIPad: {
     "en-US":
       'YOUR iPad. We need details specifying its model. Go to Settings > General > About. Copy the "Model Name" to the field below. Then tap the "Model Number" to reveal the hidden "A" number: an "A" followed by four digits. Type that into the field below.',
-    ar: "Loading...",
+    ar: '"جهازك اللوحي iPad. نحتاج تفاصيل تحديد نموذجه. اذهب إلى الإعدادات> عام> حول. انسخ "اسم النموذج" إلى الحقل أدناه. ثم اضغط على "رقم النموذج" لكشف الرقم المخفي "A": حرف "A" يتبعه أربعة أرقام. اكتب ذلك في الحقل أدناه."',
     hy: "ՔՈ iPad-ը։ Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա մոդելը։ Գնացեք Կարգավորումներ > Ընդհանուր > Մասին: Պատճենեք «Մոդելի անունը» ստորև նշված դաշտում: Այնուհետև կտտացրեք «Մոդելի համարը»՝ թաքնված «A» համարը բացահայտելու համար՝ «A»-ն, որին հաջորդում է չորս նիշ: Մուտքագրեք այն ստորև նշված դաշտում:",
     bg: "ВАШИЯ iPad. Имаме нужда от подробности, уточняващи неговия модел. Отидете в Settings > General > About. Копирайте „Името на модела“ в полето по-долу. След това докоснете „Номер на модела“, за да разкриете скрития номер „А“: „А“, последван от четири цифри. Въведете това в полето по-долу.",
     "zh-CN":
@@ -5236,7 +5236,7 @@ export const phrases = {
     "en-UK":
       '"YOUR iPad. We need details specifying its model. Go to Settings > General > About. Copy the "Model Name" to the field below. Then tap the "Model Number" to reveal the hidden "A" number: an "A" followed by four digits. Type that into the field below."',
     fi: '"OMA iPadisi. Tarvitsemme tarkempia tietoja sen mallista. Siirry kohtaan Asetukset > Yleiset > Tietoja. Kopioi "Mallin nimi" alla olevaan kenttään. Napauta sitten "Mallinumero" paljastaaksesi piilotetun "A" -numeron: "A" seurattuna neljällä numerolla. Kirjoita se kenttään alla."',
-    fr: "Loading...",
+    fr: '"VOTRE iPad. Nous avons besoin de détails spécifiant son modèle. Allez dans Paramètres > Général > Informations. Copiez le "Nom du modèle" dans le champ ci-dessous. Ensuite, appuyez sur le "Numéro de modèle" pour révéler le numéro "A" caché : un "A" suivi de quatre chiffres. Tapez cela dans le champ ci-dessous."',
     de: "IHR iPad. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zu Einstellungen > Allgemein > Info. Kopieren Sie den „Modellnamen“ in das Feld darunter. Tippen Sie dann auf die „Modellnummer“, um die versteckte „A“-Nummer anzuzeigen: ein „A“, gefolgt von vier Ziffern. Geben Sie das in das Feld unten ein.",
     el: 'ΤΟ iPad ΣΑΣ. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στις Ρυθμίσεις > Γενικά > Πληροφορίες. Αντιγράψτε το "Όνομα μοντέλου" στο παρακάτω πεδίο. Στη συνέχεια, αγγίξτε τον "Αριθμός μοντέλου" για να αποκαλύψετε τον κρυφό αριθμό "Α": ένα "Α" ακολουθούμενο από τέσσερα ψηφία. Πληκτρολογήστε το στο παρακάτω πεδίο.',
     he: '"ה-iPad שלך. אנחנו זקוקים לפרטים המפרטים את דגםו. עבור להגדרות > כללי > אודות. העתק את "שם הדגם" לשדה למטה. לאחר מכן, הקש על "מספר הדגם" כדי לחשוף את המספר המוסתר "A": אות "A" מוקדמת בארבע ספרות. הקלד את זה בשדה למטה."',
@@ -5244,7 +5244,7 @@ export const phrases = {
     hu: 'AZ ÖN iPadje. Részletekre van szükségünk a modell meghatározásához. Nyissa meg a Beállítások > Általános > Névjegy menüpontot. Másolja a "Modell neve"-t az alábbi mezőbe. Ezután érintse meg a "Modell számot" a rejtett "A" szám felfedéséhez: egy "A", majd négy számjegy. Írja be az alábbi mezőbe.',
     is: "iPadinn þinn. Við þurfum smáatriði sem tilgreina líkan þess. Farðu í Stillingar > Almennt > Um. Afritaðu „Nafn líkans“ í reitinn hér að neðan. Pikkaðu síðan á „Módelnúmer“ til að sýna falið „A“ númer: „A“ á eftir fjórum tölustöfum. Sláðu það inn í reitinn fyrir neðan.",
     id: 'iPad ANDA. Kami memerlukan detail yang menentukan modelnya. Buka Pengaturan > Umum > Tentang. Salin "Nama Model" ke kolom di bawah. Kemudian ketuk "Nomor Model" untuk menampilkan nomor "A" yang tersembunyi: "A" diikuti dengan empat digit. Ketik itu ke dalam bidang di bawah ini.',
-    it: "Loading...",
+    it: '"Il TUO iPad. Abbiamo bisogno di dettagli che specificano il suo modello. Vai su Impostazioni > Generale > Info. Copia il "Nome modello" nel campo sottostante. Poi tocca il "Numero modello" per rivelare il numero "A" nascosto: una "A" seguita da quattro cifre. Digita quello nel campo sottostante."',
     ja: '「あなたのiPadです。モデルを特定するための詳細が必要です。設定>一般>情報に移動してください。"モデル名"を以下のフィールドにコピーしてください。次に、"モデル番号"をタップして隠された"A"の後に続く4桁の数字を表示してください。それを以下のフィールドに入力してください。」',
     kn: 'ನಿಮ್ಮ ಐಪ್ಯಾಡ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು > ಸಾಮಾನ್ಯ > ಕುರಿತು ಹೋಗಿ. ಕೆಳಗಿನ ಕ್ಷೇತ್ರಕ್ಕೆ "ಮಾದರಿ ಹೆಸರು" ಅನ್ನು ನಕಲಿಸಿ. ನಂತರ ಮರೆಮಾಡಿದ "A" ಸಂಖ್ಯೆಯನ್ನು ಬಹಿರಂಗಪಡಿಸಲು "ಮಾದರಿ ಸಂಖ್ಯೆ" ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ: ಒಂದು "A" ನಂತರ ನಾಲ್ಕು ಅಂಕೆಗಳು. ಕೆಳಗಿನ ಕ್ಷೇತ್ರದಲ್ಲಿ ಅದನ್ನು ಟೈಪ್ ಮಾಡಿ.',
     ko: '"당신의 iPad입니다. 모델을 구체적으로 지정해야 합니다. 설정 > 일반 > 정보로 이동하세요. "모델 이름"을 아래 필드에 복사하세요. 그런 다음 "모델 번호"를 탭하여 숨겨진 "A" 번호를 확인하세요. "A" 다음에 네 자리 숫자가 따라옵니다. 그 숫자를 아래 필드에 입력하세요."',
@@ -5269,7 +5269,7 @@ export const phrases = {
   RC_findModelLinux: {
     "en-US":
       "YOUR Linux COMPUTER. We need details specifying its brand and model. The model is found in different ways on different Linux systems. One is to look at the file\n/sys/devices/virtual/dmi/id/product_name\nCopy the Model Name and Number to the corresponding fields below.",
-    ar: "Loading...",
+    ar: "جهاز الكمبيوتر الخاص بك الذي يعمل بنظام لينكس. نحتاج إلى تفاصيل تحديد العلامة التجارية والطراز الخاص به. يمكن العثور على الطراز بطرق مختلفة في أنظمة لينكس المختلفة. أحد هذه الطرق هو النظر في الملف\n/sys/devices/virtual/dmi/id/product_name\nانسخ اسم الطراز والرقم إلى الحقول المقابلة أدناه.",
     hy: "«Ձեր Linux համակարգչը. Մենք պետք է մանրամասներ սահմանելու այն ապրանքանիշը և մոդելը: Մոդելը հայտնվում է տարբեր եղանակներով տարբեր Linux համակարգերում: Մեկը դիտելու եղանակը է դիտել ֆայլը\n/sys/devices/virtual/dmi/id/product_name\nՊատճենեք մոդելի անունը և համարը համապատասխան դաշտերում ստուգումներից հետո:»",
     bg: "ВАШИЯТ Linux КОМПЮТЪР. Нуждаем се от подробности, уточняващи неговата марка и модел. Моделът се намира по различни начини на различни Linux системи. Единият е да разгледате файла\n/sys/devices/virtual/dmi/id/име на_продукт\nКопирайте името и номера на модела в съответните полета по-долу.",
     "zh-CN":
@@ -5283,7 +5283,7 @@ export const phrases = {
     "en-UK":
       "YOUR Linux COMPUTER. We need details specifying its brand and model. The model is found in different ways on different Linux systems. One is to look at the file\n/sys/devices/virtual/dmi/id/product_name\nCopy the Model Name and Number to the corresponding fields below.",
     fi: "Linux-TIETOKONEESI. Tarvitsemme sen merkin ja mallin tarkempia tietoja. Malli löytyy eri tavoin eri Linux-järjestelmissä. Yksi on katsoa tiedostoa\n/sys/devices/virtual/dmi/id/product_name\nKopioi mallin nimi ja numero alla oleviin vastaaviin kenttiin.",
-    fr: "Loading...",
+    fr: "VOTRE ORDINATEUR Linux. Nous avons besoin de détails spécifiant sa marque et son modèle. Le modèle est trouvé de différentes manières sur différents systèmes Linux. L'une d'entre elles est de regarder le fichier\n/sys/devices/virtual/dmi/id/product_name\nCopiez le nom et le numéro du modèle dans les champs correspondants ci-dessous.",
     de: "IHR Linux-COMPUTER. Wir benötigen Angaben zur Marke und zum Modell. Das Modell kommt auf verschiedenen Linux-Systemen auf unterschiedliche Weise vor. Eine besteht darin, sich die Datei anzusehen\n/sys/devices/virtual/dmi/id/product_name\nKopieren Sie den Modellnamen und die Modellnummer in die entsprechenden Felder unten.",
     el: "Ο ΥΠΟΛΟΓΙΣΤΗΣ ΣΑΣ Linux. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν τη μάρκα και το μοντέλο του. Το μοντέλο βρίσκεται με διαφορετικούς τρόπους σε διαφορετικά συστήματα Linux. Το ένα είναι να δούμε το αρχείο\n/sys/devices/virtual/dmi/id/product_name\nΑντιγράψτε το Όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.",
     he: "המחשב שלך של Linux. אנחנו זקוקים לפרטים המפרטים את היצרן והדגם שלו. הדגם נמצא בדרכים שונות במערכות Linux שונות. אחת מהדרכים היא להסתכל על הקובץ\n/sys/devices/virtual/dmi/id/product_name\nהעתק את שם הדגם והמספר לשדות המתאימים למטה.",
@@ -5291,7 +5291,7 @@ export const phrases = {
     hu: "AZ ÖN LinuxOS SZÁMÍTÓGÉPÉNEK. Részletekre van szükségünk a márkával és a modellel kapcsolatban. A modell különböző módon található meg a különböző Linux rendszereken. Az egyik az, hogy megnézzük a fájlt\n/sys/devices/virtual/dmi/id/product_name\nMásolja a modell nevét és számát az alábbi megfelelő mezőkbe.",
     is: "KOMPUTER Linux ANDA. Kami memerlukan rincian yang menentukan merek dan modelnya. Model ini ditemukan dengan cara yang berbeda pada sistem Linux yang berbeda. Salah satunya adalah dengan melihat file\n/sys/devices/virtual/dmi/id/product_name\nSalin Nama dan Nomor Model ke bidang yang sesuai di bawah ini.",
     id: "KOMPUTER Linux ANDA. Kami memerlukan rincian yang menyebutkan merek dan modelnya. Model ini ditemukan dengan cara yang berbeda pada sistem Linux yang berbeda. Salah satunya adalah dengan melihat file\n/sys/devices/virtual/dmi/id/product_name\nSalin Nama dan Nomor Model ke bidang yang sesuai di bawah ini.",
-    it: "Loading...",
+    it: "IL TUO COMPUTER Linux. Abbiamo bisogno di dettagli che specificano la marca e il modello. Il modello viene trovato in modi diversi su diversi sistemi Linux. Uno è guardare il file\n/sys/devices/virtual/dmi/id/product_name\nCopia il Nome e il Numero del Modello nei campi corrispondenti qui sotto.",
     ja: "「あなたのLinuxコンピューター。ブランドとモデルの詳細が必要です。モデルは、異なるLinuxシステムで異なる方法で見つけることができます。1つの方法は、次のファイルを見ることです。\n/sys/devices/virtual/dmi/id/product_name\nモデル名と番号を以下の対応するフィールドにコピーしてください。」",
     kn: "ನಿಮ್ಮ ಲಿನಕ್ಸ್ ಕಂಪ್ಯೂಟರ್. ಅದರ ಬ್ರ್ಯಾಂಡ್ ಮತ್ತು ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ವಿಭಿನ್ನ ಲಿನಕ್ಸ್ ಸಿಸ್ಟಮ್‌ಗಳಲ್ಲಿ ಮಾದರಿಯು ವಿಭಿನ್ನ ರೀತಿಯಲ್ಲಿ ಕಂಡುಬರುತ್ತದೆ. ಒಂದು ಫೈಲ್ ಅನ್ನು ನೋಡುವುದು\n/sys/devices/virtual/dmi/id/product_name\nಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ.",
     ko: "귀하의 Linux 컴퓨터. 브랜드와 모델을 지정하는 세부정보가 필요합니다. 이 모델은 다양한 Linux 시스템에서 다양한 방식으로 발견됩니다. 하나는 파일을 보는 것입니다.\n/sys/devices/virtual/dmi/id/product_name\n모델 이름과 번호를 아래 해당 필드에 복사하세요.",
@@ -5316,7 +5316,7 @@ export const phrases = {
   RC_findModelMacOs: {
     "en-US":
       "YOUR Macintosh COMPUTER. We need details specifying its model. While pressing the Option key, go to the Apple menu  > System Information.  From the Hardware Overview, copy the Model Name and Model Identifier to the corresponding fields below.",
-    ar: "Loading...",
+    ar: "جهازك Macintosh. نحتاج إلى تفاصيل تحديد نموذجه. أثناء الضغط على مفتاح Option، انتقل إلى قائمة Apple  > System Information. من نظرة عامة على الأجهزة، انسخ اسم النموذج ومعرف النموذج إلى الحقول المقابلة أدناه.",
     hy: "«Ձեր Macintosh համակարգիչը: Մենք պետք է մանրամասներ սահմանելու այն մոդելը: Սեղմելով Option ստեղնը, գնացեք Apple ընտրացանկին  > System Information: Սահմանափակումների վերաբերյալ՝ պատճենեք մոդելի անունը և մոդելի իդենտիֆիկատորը համապատասխան դաշտերում ստորեւ:»",
     bg: "ВАШИЯТ Macintosh КОМПЮТЪР. Имаме нужда от подробности, уточняващи неговия модел. Докато натискате клавиша Option, отидете в менюто на Apple  > Системна информация. От Преглед на хардуера копирайте името на модела и идентификатора на модела в съответните полета по-долу.",
     "zh-CN":
@@ -5330,7 +5330,7 @@ export const phrases = {
     "en-UK":
       "YOUR Macintosh COMPUTER. We need details specifying its model. While pressing the Option key, go to the Apple menu  > System Information.  From the Hardware Overview, copy the Model Name and Model Identifier to the corresponding fields below.",
     fi: "Macintosh-TIETOKONEESI. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Kun painat Optio-näppäintä, siirry Omenavalikkoon  > Järjestelmätiedot. Kopioi laitteiston yleiskatsauksesta mallin nimi ja mallin tunniste vastaaviin alla oleviin kenttiin.",
-    fr: "Loading...",
+    fr: "VOTRE ORDINATEUR Macintosh. Nous avons besoin de détails spécifiant son modèle. Tout en maintenant la touche Option enfoncée, allez dans le menu Pomme  > Informations système. À partir de l'Aperçu du matériel, copiez le Nom du modèle et l'Identifiant du modèle dans les champs correspondants ci-dessous.",
     de: "DEIN Macintosh COMPUTER. Wir benötigen Details, die das Modell spezifizieren. Halte die Optionstaste gedrückt und gehe zum Apple-Menü  > Systeminformationen. Kopiere aus der Hardware-Übersicht den Modellnamen und die Modellkennung in die entsprechenden Felder unten.",
     el: "Ο ΥΠΟΛΟΓΙΣΤΗΣ ΣΑΣ Macintosh. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Ενώ πατάτε το πλήκτρο Option, μεταβείτε στο μενού Apple  > System Information. Από την Επισκόπηση υλικού, αντιγράψτε το Όνομα μοντέλου και το αναγνωριστικό μοντέλου στα αντίστοιχα πεδία παρακάτω.",
     he: "המחשב שלך Macintosh. אנחנו זקוקים לפרטים המפרטים את הדגם שלו. בעת לחיצה על מקש האפשרות, עבור לתפריט התפריט  > מידע מערכת. מתוך הסקירה החומרה, העתק את שם הדגם ומזהה הדגם לשדות המתאימים למטה.",
@@ -5338,7 +5338,7 @@ export const phrases = {
     hu: "AZ ÖN Macintosh SZÁMÍTÓGÉPÉNEK. Részletekre van szükségünk a modell meghatározásához. Az Option billentyű lenyomva tartása közben lépjen az Apple menü  > Rendszerinformációk menüpontra. A Hardver áttekintésből másolja a modell nevét és a modell azonosítóját az alábbi megfelelő mezőkbe.",
     is: "Macintosh tölvan þín. Við þurfum smáatriði sem tilgreina líkan þess. Á meðan þú ýtir á Valkostartakkann skaltu fara í Apple valmyndina  > Kerfisupplýsingar. Frá Vélbúnaðaryfirlitinu, afritaðu Model Name og Model Identifier í samsvarandi reiti hér að neðan.",
     id: "KOMPUTER Macintosh ANDA. Kami memerlukan detail yang menentukan modelnya. Sambil menekan tombol Option, buka menu Apple  > Informasi Sistem. Dari Ikhtisar Perangkat Keras, salin Nama Model dan Pengidentifikasi Model ke kolom terkait di bawah.",
-    it: "Loading...",
+    it: "IL TUO COMPUTER Macintosh. Abbiamo bisogno di dettagli che specificano il suo modello. Mentre premi il tasto Opzione, vai al menu Apple  > Informazioni di sistema. Dalla panoramica hardware, copia il Nome del modello e l'Identificatore del modello nei campi corrispondenti qui sotto.",
     ja: "あなたの Macintosh コンピュータ。モデルを特定する詳細が必要です。 Option キーを押しながら、アップル メニュー > [システム情報] に移動します。 [ハードウェア概要] から、モデル名とモデル識別子を以下の対応するフィールドにコピーします。",
     kn: "ನಿಮ್ಮ ಮ್ಯಾಕಿಂತೋಷ್ ಕಂಪ್ಯೂಟರ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಆಯ್ಕೆಯ ಕೀಲಿಯನ್ನು ಒತ್ತುವ ಸಂದರ್ಭದಲ್ಲಿ, Apple ಮೆನು  > ಸಿಸ್ಟಮ್ ಮಾಹಿತಿಗೆ ಹೋಗಿ. ಹಾರ್ಡ್‌ವೇರ್ ಅವಲೋಕನದಿಂದ, ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಮಾದರಿ ಗುರುತಿಸುವಿಕೆಯನ್ನು ಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ನಕಲಿಸಿ.",
     ko: "귀하의 매킨토시 컴퓨터. 모델을 지정하는 세부정보가 필요합니다. Option 키를 누른 상태에서 Apple 메뉴() > 시스템 정보로 이동합니다. 하드웨어 개요에서 모델 이름과 모델 식별자를 아래 해당 필드에 복사합니다.",
@@ -5363,7 +5363,7 @@ export const phrases = {
   RC_findModelMaemo: {
     "en-US":
       "YOUR Maemo PHONE. We need details specifying its model. Go to the Settings or Options menu, scroll to the bottom of the list, and check ‘About phone’, ‘About device’ or similar. Copy the Model Name and Number to the corresponding fields below.",
-    ar: "Loading...",
+    ar: "هاتف Maemo الخاص بك. نحتاج إلى تفاصيل تحديد نموذجه. اذهب إلى قائمة الإعدادات أو الخيارات ، وانتقل إلى أسفل القائمة ، وتحقق من 'حول الهاتف' أو 'حول الجهاز' أو ما شابه ذلك. انسخ اسم النموذج والرقم إلى الحقول المقابلة أدناه.",
     hy: '«Ձեր Maemo հեռախոսը: Մենք պետք է մանրամասներ ունենանք, որոնք նշանակում են դրա մոդելը: Գնացեք կարգավորումների կամ ընտրանքների ընտրացանկի վերջ, և ստուգեք "Հետաձգված հեռախոսի" կամ նմանատիպ տարրերը: Պատճենեք մոդելի անունը և համարը հետևյալ դաշտերում»:',
     bg: "ВАШИЯТ Maemo ТЕЛЕФОН. Ни са необходими подробности, определящи неговата модел. Отидете в менюто Настройки или Опции, превъртете до дъното на списъка и проверете 'За телефона', 'За устройството' или подобно. Копирайте името на модела и номера в съответните полета по-долу.",
     "zh-CN":
@@ -5377,7 +5377,7 @@ export const phrases = {
     "en-UK":
       "YOUR Maemo PHONE. We need details specifying its model. Go to the Settings or Options menu, scroll to the bottom of the list, and check ‘About phone’, ‘About device’ or similar. Copy the Model Name and Number to the corresponding fields below.",
     fi: 'SINUN Maemo-PUHELIN. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry Asetukset- tai Asetukset-valikkoon, vieritä luettelon alaosaan ja valitse "Tietoja puhelimesta", "Tietoja laitteesta" tai vastaava. Kopioi mallin nimi ja numero alla oleviin vastaaviin kenttiin.',
-    fr: "Loading...",
+    fr: "VOTRE TÉLÉPHONE Maemo. Nous avons besoin de détails spécifiant son modèle. Allez dans le menu Paramètres ou Options, faites défiler jusqu'en bas de la liste et vérifiez 'À propos du téléphone', 'À propos de l'appareil' ou similaire. Copiez le nom et le numéro du modèle dans les champs correspondants ci-dessous.",
     de: "IHR Maemo-TELEFON. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zum Menü „Einstellungen“ oder „Optionen“, scrollen Sie zum Ende der Liste und aktivieren Sie „Über das Telefon“, „Über das Gerät“ oder ähnliches. Kopieren Sie den Modellnamen und die Modellnummer in die entsprechenden Felder unten.",
     el: "ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ Maemo. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στο μενού Ρυθμίσεις ή Επιλογές, κάντε κύλιση στο κάτω μέρος της λίστας και επιλέξτε «Σχετικά με το τηλέφωνο», «Σχετικά με τη συσκευή» ή παρόμοια. Αντιγράψτε το Όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.",
     he: "טלפון Maemo שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור לתפריט ההגדרות או האפשרויות, גלול לתחתית הרשימה וסמן את 'אודות הטלפון', 'אודות המכשיר' או דומה. העתק את שם הדגם והמספר לשדות המתאימים למטה.",
@@ -5385,7 +5385,7 @@ export const phrases = {
     hu: "AZ ÖN Maemo TELEFONJA. Részletekre van szükségünk a modell meghatározásához. Lépjen a Beállítások vagy az Opciók menübe, görgessen a lista aljára, és jelölje be a „Telefonról”, „Az eszközről” vagy hasonlót. Másolja a modell nevét és számát az alábbi megfelelő mezőkbe.",
     is: "ÞINN Maemo SÍMI. Við þurfum smáatriði sem tilgreina líkan þess. Farðu í Stillingar eða Valkostir valmyndina, skrunaðu neðst á listanum og hakaðu við „Um síma“, „Um tæki“ eða álíka. Afritaðu heiti líkans og númer í samsvarandi reiti hér að neðan.",
     id: "TELEPON Maemo ANDA. Kami memerlukan detail yang menentukan modelnya. Buka menu Pengaturan atau Opsi, gulir ke bagian bawah daftar, dan centang 'Tentang ponsel', 'Tentang perangkat' atau sejenisnya. Salin Nama Model dan Nomor ke kolom terkait di bawah.",
-    it: "Loading...",
+    it: "IL TUO TELEFONO Maemo. Abbiamo bisogno di dettagli che specificano il suo modello. Vai al menu Impostazioni o Opzioni, scorri fino in fondo alla lista e controlla 'Informazioni sul telefono', 'Informazioni sul dispositivo' o simili. Copia il Nome e il Numero del Modello nei campi corrispondenti qui sotto.",
     ja: "あなたのMaemo PHONE。モデルを特定する詳細が必要です。 [設定] または [オプション] メニューに移動し、リストの一番下までスクロールして、[電話について] や [デバイスについて] などを確認します。モデル名と番号を以下の対応するフィールドにコピーします。",
     kn: "ನಿಮ್ಮ ಮೇಮೊ ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಥವಾ ಆಯ್ಕೆಗಳ ಮೆನುಗೆ ಹೋಗಿ, ಪಟ್ಟಿಯ ಕೆಳಭಾಗಕ್ಕೆ ಸ್ಕ್ರಾಲ್ ಮಾಡಿ ಮತ್ತು 'ಫೋನ್ ಕುರಿತು', 'ಸಾಧನದ ಕುರಿತು' ಅಥವಾ ಅಂತಹುದೇ ಪರಿಶೀಲಿಸಿ. ಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ.",
     ko: "당신의 Maemo 휴대폰입니다. 모델을 구체적으로 알려주셔야 합니다. 설정 또는 옵션 메뉴로 이동하여 목록의 맨 아래로 스크롤하고 '휴대폰 정보', '장치 정보' 또는 유사한 항목을 확인하세요. 모델 이름과 번호를 아래 해당 필드에 복사하세요.",
@@ -5410,7 +5410,7 @@ export const phrases = {
   RC_findModelPalm: {
     "en-US":
       "YOUR Palm PHONE. We need details specifying its model. Go to the Settings or Options menu, scroll to the bottom of the list, and check ‘About phone’, ‘About device’ or similar. Copy the Model Name and Number to the corresponding fields below.",
-    ar: "Loading...",
+    ar: "هاتف بالم الخاص بك. نحتاج إلى تفاصيل تحديد نموذجه. اذهب إلى قائمة الإعدادات أو الخيارات ، وانتقل إلى أسفل القائمة ، وتحقق من 'حول الهاتف' أو 'حول الجهاز' أو ما شابه ذلك. انسخ اسم النموذج والرقم إلى الحقول المقابلة أدناه.",
     hy: "ՁԵՐ ափի հեռախոսը: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա մոդելը։ Գնացեք «Կարգավորումներ» կամ «Ընտրանքներ» ընտրացանկ, ոլորեք ցանկի ներքևի մասում և նշեք «Հեռախոսի մասին», «Սարքի մասին» կամ նմանատիպ այլ տարբերակներ: Պատճենեք մոդելի անվանումը և համարը ստորև ներկայացված համապատասխան դաշտերում:",
     bg: "ВАШИЯТ Palm телефон. Имаме нужда от подробности, уточняващи неговия модел. Отидете в менюто „Настройки“ или „Опции“, превъртете до дъното на списъка и маркирайте „Всичко за телефона“, „Всичко за устройството“ или подобно. Копирайте името и номера на модела в съответните полета по-долу.",
     "zh-CN":
@@ -5424,7 +5424,7 @@ export const phrases = {
     "en-UK":
       "YOUR Palm PHONE. We need details specifying its model. Go to the Settings or Options menu, scroll to the bottom of the list, and check ‘About phone’, ‘About device’ or similar. Copy the Model Name and Number to the corresponding fields below.",
     fi: 'KÄMMIN PUHELIN. Tarvitsemme yksityiskohtaisia ​​tietoja sen mallista. Siirry Asetukset- tai Asetukset-valikkoon, vieritä luettelon alaosaan ja valitse "Tietoja puhelimesta", "Tietoja laitteesta" tai vastaava. Kopioi mallin nimi ja numero alla oleviin vastaaviin kenttiin.',
-    fr: "Loading...",
+    fr: 'VOTRE TÉLÉPHONE Palm. Nous avons besoin de détails spécifiant son modèle. Allez dans le menu Paramètres ou Options, faites défiler jusqu\'au bas de la liste et vérifiez "À propos du téléphone", "À propos du périphérique" ou similaire. Copiez le nom du modèle et le numéro dans les champs correspondants ci-dessous.',
     de: "IHR Palm-TELEFON. Wir benötigen Details zur Spezifikation des Modells. Gehen Sie zum Menü „Einstellungen“ oder „Optionen“, scrollen Sie zum Ende der Liste und aktivieren Sie „Über das Telefon“, „Über das Gerät“ oder ähnliches. Kopieren Sie den Modellnamen und die Modellnummer in die entsprechenden Felder unten.",
     el: "ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ με την παλάμη. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στο μενού Ρυθμίσεις ή Επιλογές, κάντε κύλιση στο κάτω μέρος της λίστας και επιλέξτε «Σχετικά με το τηλέφωνο», «Σχετικά με τη συσκευή» ή παρόμοια. Αντιγράψτε το Όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.",
     he: "טלפון הפאלם שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור לתפריט ההגדרות או האפשרויות, גלול לתחתית הרשימה וסמן את 'אודות הטלפון', 'אודות המכשיר' או דומה. העתק את שם הדגם והמספר לשדות המתאימים למטה.",
@@ -5432,7 +5432,7 @@ export const phrases = {
     hu: "AZ ÖN tenyeres TELEFONJA. Részletekre van szükségünk a modell meghatározásához. Lépjen a Beállítások vagy az Opciók menübe, görgessen a lista aljára, és jelölje be a „Telefonról”, „Az eszközről” vagy hasonlót. Másolja a modell nevét és számát az alábbi megfelelő mezőkbe.",
     is: "Palm Síminn þinn. Við þurfum smáatriði sem tilgreina líkan þess. Farðu í Stillingar eða Valkostir valmyndina, skrunaðu neðst á listanum og hakaðu við „Um síma“, „Um tæki“ eða álíka. Afritaðu heiti líkans og númer í samsvarandi reiti hér að neðan.",
     id: "TELEPON Palm ANDA. Kami memerlukan rincian yang menentukan modelnya. Pergi ke menu Pengaturan atau Opsi, gulir ke bagian bawah daftar, dan periksa 'Tentang telepon', 'Tentang perangkat' atau sejenisnya. Salin Nama Model dan Nomor ke kolom yang sesuai di bawah.",
-    it: "Loading...",
+    it: "IL TUO TELEFONO Palm. Abbiamo bisogno di dettagli specificando il suo modello. Vai al menu Impostazioni o Opzioni, scorri fino alla fine dell'elenco e controlla 'Informazioni sul telefono', 'Informazioni sul dispositivo' o simili. Copia il Nome e il Numero del Modello nei campi corrispondenti qui sotto.",
     ja: "あなたのパームフォン。モデルを特定する詳細が必要です。 [設定] または [オプション] メニューに移動し、リストの一番下までスクロールして、[電話について] や [デバイスについて] などを確認します。モデル名と番号を以下の対応するフィールドにコピーします。",
     kn: "ನಿಮ್ಮ ಪಾಮ್ ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ಸೂಚಿಸುವ ವಿವರಗಳು ನಮಗೆ ಬೇಕಾಗಿವೆ. ಸೆಟ್ಟಿಂಗ್ಸ್ ಅಥವಾ ಆಯ್ಕೆಗಳ ಮೆನುವಿಗೆ ಹೋಗಿ, ಪಟ್ಟಿಯ ಕೆಳಭಾಗಕ್ಕೆ ಸ್ಕ್ರೋಲ್ ಮಾಡಿ, 'ಫೋನ್ ಬಗ್ಗೆ', 'ಸಾಧನ ಬಗ್ಗೆ' ಅಥವಾ ಇತರ ಹೆಸರುಗಳನ್ನು ಪರಿಶೀಲಿಸಿ. ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆಯನ್ನು ಕಾಪಿ ಮಾಡಿ ಕೆಳಗಿನ ಕ್ಷೇತ್ರಗಳಿಗೆ ಹೊಂದಿಸಿ.",
     ko: "당신의 팜폰. 모델을 지정하는 세부정보가 필요합니다. 설정 또는 옵션 메뉴로 이동하여 목록 하단으로 스크롤한 후 '휴대전화 정보', '기기 정보' 등을 확인하세요. 모델 이름과 번호를 아래 해당 필드에 복사하세요.",
@@ -5457,7 +5457,7 @@ export const phrases = {
   RC_findModelWebOS: {
     "en-US":
       "YOUR WebOS PHONE. We need details specifying its model. Go to the Settings or Options menu, scroll to the bottom of the list, and check ‘About phone’, ‘About device’ or similar. Copy the Model Name and Number to the corresponding fields below.",
-    ar: "Loading...",
+    ar: "هاتفك WebOS. نحتاج إلى تفاصيل تحديد نموذجه. اذهب إلى قائمة الإعدادات أو الخيارات ، وانتقل إلى أسفل القائمة ، وتحقق من 'حول الهاتف' أو 'حول الجهاز' أو ما شابه ذلك. انسخ اسم النموذج والرقم إلى الحقول المقابلة أدناه.",
     hy: "ՁԵՐ WebOS ՀԵՌԱԽՈՍԸ: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա մոդելը։ Գնացեք «Կարգավորումներ» կամ «Ընտրանքներ» ընտրացանկ, ոլորեք ցանկի ներքևի մասում և նշեք «Հեռախոսի մասին», «Սարքի մասին» կամ նմանատիպ այլ տարբերակներ: Պատճենեք մոդելի անվանումը և համարը ստորև ներկայացված համապատասխան դաշտերում:",
     bg: "Вашият телефон с операционна система WebOS. Необходими са подробности, определящи неговата модел. Отидете в менюто Настройки или Опции, превъртете до дъното на списъка и проверете 'За телефона', 'За устройството' или подобно. Копирайте името на модела и номера в съответните полета по-долу.",
     "zh-CN":
@@ -5471,7 +5471,7 @@ export const phrases = {
     "en-UK":
       "YOUR WebOS PHONE. We need details specifying its model. Go to the Settings or Options menu, scroll to the bottom of the list, and check ‘About phone’, ‘About device’ or similar. Copy the Model Name and Number to the corresponding fields below.",
     fi: "Puhelimesi WebOS. Tarvitsemme tarkempia tietoja sen mallista. Siirry Asetukset- tai Valinnat-valikkoon, vieritä listan alaosaan ja tarkista 'Puhelimen tiedot', 'Laitteen tiedot' tai vastaava kohta. Kopioi Mallin nimi ja numero vastaaviin kenttiin alla.",
-    fr: "Loading...",
+    fr: "VOTRE téléphone WebOS. Nous avons besoin de détails spécifiant son modèle. Allez dans le menu Paramètres ou Options, faites défiler jusqu'en bas de la liste et vérifiez 'À propos du téléphone', 'À propos de l'appareil' ou similaire. Copiez le nom et le numéro du modèle dans les champs correspondants ci-dessous.",
     de: "DEIN WebOS TELEFON. Wir benötigen Angaben zum Modell. Gehe zum Einstellungen- oder Optionen-Menü, scrolle bis zum Ende der Liste und überprüfe 'Über das Telefon', 'Über das Gerät' oder ähnliches. Kopiere den Modellnamen und die Nummer in die entsprechenden Felder unten.",
     el: "ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ WebOS. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν το μοντέλο του. Μεταβείτε στο μενού Ρυθμίσεις ή Επιλογές, κάντε κύλιση στο κάτω μέρος της λίστας και επιλέξτε «Σχετικά με το τηλέφωνο», «Σχετικά με τη συσκευή» ή παρόμοια. Αντιγράψτε το Όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.",
     he: "טלפון ה-WebOS שלך. אנחנו צריכים פרטים המפרטים את הדגם שלו. עבור לתפריט ההגדרות או האפשרויות, גלול לתחתית הרשימה וסמן את 'אודות הטלפון', 'אודות המכשיר' או דומה. העתק את שם הדגם והמספר לשדות המתאימים למטה.",
@@ -5479,7 +5479,7 @@ export const phrases = {
     hu: "AZ ÖN WebOS-TELEFONJA. Részletekre van szükségünk a modell meghatározásához. Lépjen a Beállítások vagy az Opciók menübe, görgessen a lista aljára, és jelölje be a „Telefonról”, „Az eszközről” vagy hasonlót. Másolja a modell nevét és számát az alábbi megfelelő mezőkbe.",
     is: "ÞINN WebOS SÍMI. Við þurfum upplýsingar sem tilgreina módelið. Fara í stillingar eða valkosti valmyndina, skruna niður í listanum og athuga 'Um símann', 'Um tækið' eða eitthvað svipað. Afrita módelheitið og númerið í viðeigandi reiti hér að neðan.",
     id: "TELEPON WebOS ANDA. Kami memerlukan detail yang menentukan modelnya. Buka menu Pengaturan atau Opsi, gulir ke bagian bawah daftar, dan centang 'Tentang ponsel', 'Tentang perangkat' atau sejenisnya. Salin Nama Model dan Nomor ke kolom terkait di bawah.",
-    it: "Loading...",
+    it: "IL TUO TELEFONO WebOS. Abbiamo bisogno di dettagli specificando il suo modello. Vai al menu Impostazioni o Opzioni, scorri fino alla fine dell'elenco e controlla 'Informazioni sul telefono', 'Informazioni sul dispositivo' o simili. Copia il Nome e il Numero del Modello nei campi corrispondenti qui sotto.",
     ja: "あなたの WebOS 電話。モデルを特定する詳細が必要です。 [設定] または [オプション] メニューに移動し、リストの一番下までスクロールして、[電話について] や [デバイスについて] などを確認します。モデル名と番号を以下の対応するフィールドにコピーします。",
     kn: "ನಿಮ್ಮ WebOS ಫೋನ್. ಅದರ ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಬೇಕಾಗಿದೆ. ಸೆಟ್ಟಿಂಗ್ಗೆ ಅಥವಾ ಆಯ್ಕೆಗಳ ಮೆನುವಿಗೆ ಹೋಗಿ, ಪಟ್ಟಿಯ ಕೆಳಗೆ ಸ್ಕ್ರೋಲ್ ಮಾಡಿ, 'ಫೋನ್ ಬಗ್ಗೆ', 'ಸಾಧನದ ಬಗ್ಗೆ' ಅಥವಾ ಇತರ ಸಮಾನವನ್ನು ಪರಿಶೀಲಿಸಿ. ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆಯನ್ನು ಕಳೆದಿರುವ ಕೆಳಗಿನ ಕ್ಷೇತ್ರಗಳಿಗೆ ನಕಲಿಸಿ.",
     ko: "귀하의 WebOS 휴대폰. 모델을 지정하는 세부정보가 필요합니다. 설정 또는 옵션 메뉴로 이동하여 목록 하단으로 스크롤한 후 '휴대전화 정보', '기기 정보' 등을 확인하세요. 모델 이름과 번호를 아래 해당 필드에 복사하세요.",
@@ -5504,7 +5504,7 @@ export const phrases = {
   RC_findModelWindows: {
     "en-US":
       'YOUR Windows COMPUTER. We need details specifying its brand and model. Open Start. Search for System Information and click the top result to open the app.\nClick on System Summary.\nLook under the "System Model" field.\nCopy the Model Name and Number to the corresponding fields below.',
-    ar: "Loading...",
+    ar: '"جهاز الكمبيوتر الخاص بك الذي يعمل بنظام ويندوز. نحتاج إلى تفاصيل تحديد العلامة التجارية والطراز الخاص به. افتح قائمة البدء. ابحث عن معلومات النظام وانقر على النتيجة الأعلى لفتح التطبيق.\nانقر على ملخص النظام.\nابحث تحت حقل "طراز النظام".\nانسخ اسم الطراز والرقم إلى الحقول المقابلة أدناه."',
     hy: "ՁԵՐ Windows ՀԱՄԱԿԱՐԳԻՉԸ: Մեզ անհրաժեշտ են մանրամասներ՝ նշելով դրա ապրանքանիշը և մոդելը։ Բացեք Սկսել: Որոնեք Համակարգի տեղեկատվությունը և կտտացրեք վերին արդյունքը՝ հավելվածը բացելու համար:\nՍեղմեք Համակարգի ամփոփում:\nՆայեք «Համակարգի մոդել» դաշտում:\nՊատճենեք մոդելի անվանումը և համարը ստորև ներկայացված համապատասխան դաշտերում:",
     bg: "ВАШИЯТ Windows КОМПЮТЪР. Нуждаем се от подробности, уточняващи неговата марка и модел. Отворете Старт. Потърсете системна информация и щракнете върху горния резултат, за да отворите приложението.\nКликнете върху Резюме на системата.\nПогледнете под полето „Модел на системата“.\nКопирайте името и номера на модела в съответните полета по-долу.",
     "zh-CN":
@@ -5518,7 +5518,7 @@ export const phrases = {
     "en-UK":
       'YOUR Windows COMPUTER. We need details specifying its brand and model. Open Start. Search for System Information and click the top result to open the app.\nClick on System Summary.\nLook under the "System Model" field.\nCopy the Model Name and Number to the corresponding fields below.',
     fi: 'Windows-TIETOKONEESI. Tarvitsemme sen merkin ja mallin tarkempia tietoja. Avaa Käynnistä. Etsi järjestelmätiedot ja avaa sovellus napsauttamalla ylintä tulosta.\nNapsauta Järjestelmän yhteenveto.\nKatso "Järjestelmämalli"-kentän alta.\nKopioi mallin nimi ja numero alla oleviin vastaaviin kenttiin.',
-    fr: "Loading...",
+    fr: '"VOTRE ordinateur Windows. Nous avons besoin de détails spécifiant sa marque et son modèle. Ouvrez Démarrer. Recherchez Informations système et cliquez sur le résultat principal pour ouvrir l\'application.\nCliquez sur Résumé du système.\nRegardez sous le champ "Modèle du système".\nCopiez le nom et le numéro du modèle dans les champs correspondants ci-dessous."',
     de: '"DEIN Windows COMPUTER. Wir benötigen Angaben zum Hersteller und Modell. Öffne Start. Suche nach Systeminformationen und klicke auf das oberste Ergebnis, um die App zu öffnen.\nKlicke auf Systemzusammenfassung.\nSchau unter dem Feld "Systemmodell" nach.\nKopiere den Modellnamen und die Nummer in die entsprechenden Felder unten."',
     el: 'Ο ΥΠΟΛΟΓΙΣΤΗΣ ΣΑΣ με Windows. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν τη μάρκα και το μοντέλο του. Ανοίξτε την Έναρξη. Αναζητήστε πληροφορίες συστήματος και κάντε κλικ στο κορυφαίο αποτέλεσμα για να ανοίξετε την εφαρμογή.\nΚάντε κλικ στην Περίληψη συστήματος.\nΚοιτάξτε κάτω από το πεδίο "Μοντέλο συστήματος".\nΑντιγράψτε το Όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.',
     he: 'המחשב שלך במערכת הפעלה Windows. אנחנו זקוקים לפרטים המפרטים את היצרן והדגם שלו. פתח את תפריט ההתחלה. חפש את מידע המערכת ולחץ על התוצאה העליונה כדי לפתוח את היישום.\nלחץ על סיכום המערכת.\nחפש בשדה "דגם המערכת".\nהעתק את שם הדגם והמספר לשדות המתאימים למטה.',
@@ -5526,7 +5526,7 @@ export const phrases = {
     hu: 'AZ ÖN Windows SZÁMÍTÓGÉP. Részletekre van szükségünk a márkával és a modellel kapcsolatban. Nyissa meg a Start lehetőséget. Keresse meg a Rendszerinformációkat, és kattintson a felső találatra az alkalmazás megnyitásához.\nKattintson a Rendszerösszefoglaló elemre.\nNézze meg a "Rendszermodell" mezőt.\nMásolja a modell nevét és számát az alábbi megfelelő mezőkbe.',
     is: 'Windows tölvan þín. Við þurfum upplýsingar um vörumerki þess og gerð. Opnaðu Start. Leitaðu að kerfisupplýsingum og smelltu á efstu niðurstöðuna til að opna forritið.\nSmelltu á System Summary.\nHorfðu undir "Kerfislíkan" reitinn.\nAfritaðu heiti líkans og númer í samsvarandi reiti hér að neðan.',
     id: '"KOMPUTER Windows ANDA. Kami memerlukan rincian yang menyebutkan merek dan modelnya. Buka Start. Cari Informasi Sistem dan klik hasil teratas untuk membuka aplikasinya.\nKlik pada Ringkasan Sistem.\nLihat di bawah kolom "Model Sistem".\nSalin Nama dan Nomor Model ke kolom yang sesuai di bawah ini."',
-    it: "Loading...",
+    it: '"Il TUO COMPUTER Windows. Abbiamo bisogno di dettagli che specificano la marca e il modello. Apri Start. Cerca Informazioni di sistema e clicca sul risultato principale per aprire l\'app.\nClicca su Riepilogo sistema.\nGuarda sotto il campo "Modello di sistema".\nCopia il Nome e il Numero del modello nei campi corrispondenti qui sotto."',
     ja: "あなたの Windows コンピューター。ブランドとモデルを特定する詳細が必要です。 「スタート」を開きます。 「システム情報」を検索し、一番上の結果をクリックしてアプリを開きます。\n「システムの概要」をクリックします。\n「システムモデル」フィールドの下を見てください。\nモデル名と番号を以下の対応するフィールドにコピーします。",
     kn: 'ನಿಮ್ಮ ವಿಂಡೋಸ್ ಕಂಪ್ಯೂಟರ್. ಅದರ ಬ್ರ್ಯಾಂಡ್ ಮತ್ತು ಮಾದರಿಯನ್ನು ನಿರ್ದಿಷ್ಟಪಡಿಸುವ ವಿವರಗಳು ನಮಗೆ ಅಗತ್ಯವಿದೆ. ಪ್ರಾರಂಭವನ್ನು ತೆರೆಯಿರಿ. ಸಿಸ್ಟಂ ಮಾಹಿತಿಗಾಗಿ ಹುಡುಕಿ ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್ ತೆರೆಯಲು ಮೇಲಿನ ಫಲಿತಾಂಶವನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ.\nಸಿಸ್ಟಮ್ ಸಾರಾಂಶದ ಮೇಲೆ ಕ್ಲಿಕ್ ಮಾಡಿ.\n"ಸಿಸ್ಟಮ್ ಮಾಡೆಲ್" ಕ್ಷೇತ್ರದ ಅಡಿಯಲ್ಲಿ ನೋಡಿ.\nಕೆಳಗಿನ ಅನುಗುಣವಾದ ಕ್ಷೇತ್ರಗಳಿಗೆ ಮಾದರಿ ಹೆಸರು ಮತ್ತು ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ.',
     ko: '귀하의 Windows 컴퓨터. 브랜드와 모델을 지정하는 세부정보가 필요합니다. 시작을 엽니다. 시스템 정보를 검색하고 상단 결과를 클릭하여 앱을 엽니다.\n시스템 요약을 클릭하세요.\n"시스템 모델" 필드 아래를 살펴보세요.\n모델 이름과 번호를 아래 해당 필드에 복사하세요.',
@@ -5550,7 +5550,7 @@ export const phrases = {
   },
   RC_brand: {
     "en-US": "Brand",
-    ar: "Loading...",
+    ar: "العلامة التجارية",
     hy: "Ապրանքանիշը",
     bg: "Марка",
     "zh-CN": "品牌",
@@ -5561,7 +5561,7 @@ export const phrases = {
     nl: "Merk",
     "en-UK": "Brand",
     fi: "Brändi",
-    fr: "Loading...",
+    fr: "Marque",
     de: "Marke",
     el: "Μάρκα",
     he: "מותג",
@@ -5569,7 +5569,7 @@ export const phrases = {
     hu: "Márka",
     is: "Merki",
     id: "Merek",
-    it: "Loading...",
+    it: "Marca",
     ja: "ブランド",
     kn: "ಬ್ರಾಂಡ್",
     ko: "상표",
@@ -5593,7 +5593,7 @@ export const phrases = {
   },
   RC_modelName: {
     "en-US": "Model Name",
-    ar: "Loading...",
+    ar: "اسم النموذج",
     hy: "Մոդելի անվանումը",
     bg: "Име на модела",
     "zh-CN": "型号名称",
@@ -5604,7 +5604,7 @@ export const phrases = {
     nl: "Modelnaam",
     "en-UK": "Model Name",
     fi: "Mallinimi",
-    fr: "Loading...",
+    fr: "Nom du modèle",
     de: "Modellname",
     el: "Όνομα Μοντέλου",
     he: "שם המודל",
@@ -5612,7 +5612,7 @@ export const phrases = {
     hu: "Modell név",
     is: "Mudel Nimi",
     id: "Nama model",
-    it: "Loading...",
+    it: "Nome del modello",
     ja: "モデル名",
     kn: "ಮಾದರಿ ಹೆಸರು",
     ko: "모델명",
@@ -5636,7 +5636,7 @@ export const phrases = {
   },
   RC_modelNameAndroidGeneric: {
     "en-US": "Product Name",
-    ar: "Loading...",
+    ar: "اسم المنتج",
     hy: "«Արտադրամասի անուն»",
     bg: "Име на продукта",
     "zh-CN": "产品名称",
@@ -5647,7 +5647,7 @@ export const phrases = {
     nl: "Productnaam",
     "en-UK": "Product Name",
     fi: "tuotteen nimi",
-    fr: "Loading...",
+    fr: "Nom du produit",
     de: "Produktname",
     el: "Όνομα προϊόντος",
     he: "שם מוצר",
@@ -5655,7 +5655,7 @@ export const phrases = {
     hu: "Termék neve",
     is: "vöru Nafn",
     id: "Nama Produk",
-    it: "Loading...",
+    it: "Nome del prodotto",
     ja: "「製品名」",
     kn: "ಉತ್ಪನ್ನ ಹೆಸರು",
     ko: "상품명",
@@ -5679,7 +5679,7 @@ export const phrases = {
   },
   RC_modelNameAndroidGenericLowercase: {
     "en-US": "product name",
-    ar: "Loading...",
+    ar: "اسم المنتج",
     hy: "ապրանքային անուն",
     bg: "Име на продукта",
     "zh-CN": "产品名称",
@@ -5690,7 +5690,7 @@ export const phrases = {
     nl: "productnaam",
     "en-UK": "product name",
     fi: "tuotteen nimi",
-    fr: "Loading...",
+    fr: "nom du produit",
     de: "Produktname",
     el: "Ονομασία προϊόντος",
     he: "שם מוצר",
@@ -5698,7 +5698,7 @@ export const phrases = {
     hu: "termék név",
     is: "vöru Nafn",
     id: "nama Produk",
-    it: "Loading...",
+    it: "nome del prodotto",
     ja: "商品名",
     kn: "ಉತ್ಪನ್ನದ ಹೆಸರು",
     ko: "제품 이름",
@@ -5722,7 +5722,7 @@ export const phrases = {
   },
   RC_modelNameAndroidGoogle: {
     "en-US": "Model",
-    ar: "Loading...",
+    ar: "نموذج",
     hy: "Մոդել",
     bg: "Модел",
     "zh-CN": "模型",
@@ -5733,7 +5733,7 @@ export const phrases = {
     nl: '"Model" \nnl translation: "Model"',
     "en-UK": "Model",
     fi: "Malli",
-    fr: "Loading...",
+    fr: "Modèle",
     de: "Modell",
     el: "Μοντέλο",
     he: "מודל",
@@ -5741,7 +5741,7 @@ export const phrases = {
     hu: "Modell",
     is: "Fyrirmynd",
     id: "Model",
-    it: "Loading...",
+    it: "Modello",
     ja: "モデル",
     kn: "ಮಾದರಿ",
     ko: "모델",
@@ -5765,7 +5765,7 @@ export const phrases = {
   },
   RC_modelNameAndroidGoogleLowercase: {
     "en-US": "model",
-    ar: "Loading...",
+    ar: "نموذج",
     hy: "«մոդել»",
     bg: "модел",
     "zh-CN": "模型",
@@ -5776,7 +5776,7 @@ export const phrases = {
     nl: "model",
     "en-UK": "model",
     fi: "malli",
-    fr: "Loading...",
+    fr: "modèle",
     de: "Modell",
     el: "μοντέλο",
     he: "דֶגֶם",
@@ -5784,7 +5784,7 @@ export const phrases = {
     hu: "modell",
     is: "módel",
     id: "model",
-    it: "Loading...",
+    it: "modello",
     ja: "「モデル」",
     kn: "ಮಾದರಿ",
     ko: "모델",
@@ -5808,7 +5808,7 @@ export const phrases = {
   },
   RC_modelNameAndroidHuawei: {
     "en-US": "Device Name",
-    ar: "Loading...",
+    ar: "اسم الجهاز",
     hy: "Գազագրարի անուն",
     bg: "Име на устройството",
     "zh-CN": "设备名称",
@@ -5819,7 +5819,7 @@ export const phrases = {
     nl: "Toestelnaam",
     "en-UK": "Device Name",
     fi: "Laitteen nimi",
-    fr: "Loading...",
+    fr: "Nom de l'appareil",
     de: "Gerätename",
     el: "Ονομα της συσκευής",
     he: "שם התקן",
@@ -5827,7 +5827,7 @@ export const phrases = {
     hu: "Eszköz neve",
     is: "Nafn tækis",
     id: "Nama Perangkat",
-    it: "Loading...",
+    it: "Nome del dispositivo",
     ja: "装置名",
     kn: "ಸಾಧನದ ಹೆಸರು",
     ko: "장치 이름",
@@ -5851,7 +5851,7 @@ export const phrases = {
   },
   RC_modelNameAndroidHuaweiLowercase: {
     "en-US": "device name",
-    ar: "Loading...",
+    ar: "اسم الجهاز",
     hy: "սարքի անունը",
     bg: "име на устройството",
     "zh-CN": "设备名称",
@@ -5862,7 +5862,7 @@ export const phrases = {
     nl: "toestelnaam",
     "en-UK": "device name",
     fi: "laitteen nimi",
-    fr: "Loading...",
+    fr: "nom de l'appareil",
     de: "Gerätename",
     el: "όνομα συσκευής",
     he: "שם התקן",
@@ -5870,7 +5870,7 @@ export const phrases = {
     hu: "eszköz neve",
     is: "seadme nimi",
     id: "nama perangkat",
-    it: "Loading...",
+    it: "nome del dispositivo",
     ja: "装置名",
     kn: "ಸಾಧನ ಹೆಸರು",
     ko: "장치 이름",
@@ -5894,7 +5894,7 @@ export const phrases = {
   },
   RC_modelNameAndroidMotorola: {
     "en-US": "Model Name",
-    ar: "Loading...",
+    ar: "اسم النموذج",
     hy: "Մոդելի անվանումը",
     bg: "Име на модела",
     "zh-CN": "模型名称",
@@ -5905,7 +5905,7 @@ export const phrases = {
     nl: "Modelnaam",
     "en-UK": "Model Name",
     fi: "Mallin nimi",
-    fr: "Loading...",
+    fr: "Nom du modèle",
     de: "Modellname",
     el: "Ονομα μοντέλου",
     he: "שם המודל",
@@ -5913,7 +5913,7 @@ export const phrases = {
     hu: "Modell név",
     is: "Nafn líkans",
     id: "Nama model",
-    it: "Loading...",
+    it: "Nome del modello",
     ja: "モデル名",
     kn: "ಮಾದರಿ ಹೆಸರು",
     ko: "모델명",
@@ -5937,7 +5937,7 @@ export const phrases = {
   },
   RC_modelNameAndroidMotorolaLowercase: {
     "en-US": "model name",
-    ar: "Loading...",
+    ar: "اسم النموذج",
     hy: "մոդելի անվանումը",
     bg: "име на модела",
     "zh-CN": "型号名称",
@@ -5948,7 +5948,7 @@ export const phrases = {
     nl: "modelnaam",
     "en-UK": "model name",
     fi: "mallinimi",
-    fr: "Loading...",
+    fr: "nom du modèle",
     de: "Modellname",
     el: "όνομα μοντέλου",
     he: "שם המודל",
@@ -5956,7 +5956,7 @@ export const phrases = {
     hu: "modell neve",
     is: "heiti líkans",
     id: "nama model",
-    it: "Loading...",
+    it: "nome del modello",
     ja: "モデル名",
     kn: "ಮಾದರಿ ಹೆಸರು",
     ko: "모델 이름",
@@ -5980,7 +5980,7 @@ export const phrases = {
   },
   RC_modelNameAndroidSamsung: {
     "en-US": "Device Name",
-    ar: "Loading...",
+    ar: "اسم الجهاز",
     hy: "Գազագրարի անուն",
     bg: "Име на устройство",
     "zh-CN": "设备名称",
@@ -5991,7 +5991,7 @@ export const phrases = {
     nl: "Toestelnaam",
     "en-UK": '"Device Name" (no change needed as both are in English UK)',
     fi: "Laitteen nimi",
-    fr: "Loading...",
+    fr: "Nom de l'appareil",
     de: "Gerätename",
     el: "Ονομα της συσκευής",
     he: "שם התקן",
@@ -5999,7 +5999,7 @@ export const phrases = {
     hu: "Eszköz neve",
     is: "Seadme nimi",
     id: "Nama Perangkat",
-    it: "Loading...",
+    it: "Nome del dispositivo",
     ja: "装置名",
     kn: "ಸಾಧನದ ಹೆಸರು",
     ko: "장치 이름",
@@ -6034,7 +6034,7 @@ export const phrases = {
     nl: "toestelnaam",
     "en-UK": "device name",
     fi: "laitteen nimi",
-    fr: "Loading...",
+    fr: "nom de l'appareil",
     de: "Gerätename",
     el: "όνομα συσκευής",
     he: "שם התקן",
@@ -6042,7 +6042,7 @@ export const phrases = {
     hu: "eszköz neve",
     is: "nafn tækis",
     id: "nama perangkat",
-    it: "Loading...",
+    it: "nome del dispositivo",
     ja: "装置名",
     kn: "ಸಾಧನದ ಹೆಸರು",
     ko: "장치 이름",
@@ -11017,7 +11017,7 @@ export const phrases = {
     nl: "Geen smartphone",
     "en-UK": "No smartphone",
     fi: "Ei älypuhelinta",
-    fr: "Loading...",
+    fr: "Aucun smartphone",
     de: "Kein Smartphone",
     el: "Χωρίς smartphone",
     he: "אין סמארטפון",
@@ -11060,7 +11060,7 @@ export const phrases = {
     nl: "Heb een smartphone.",
     "en-UK": "Have mobile phone.",
     fi: "On älypuhelin.",
-    fr: "Loading...",
+    fr: "Avoir un smartphone.",
     de: "Habe ein Smartphone.",
     el: "Έχετε smartphone.",
     he: "יש לי טלפון חכם.",
@@ -11103,7 +11103,7 @@ export const phrases = {
     nl: "Geen smartphone.",
     "en-UK": "No smartphone.",
     fi: "Ei älypuhelinta.",
-    fr: "Loading...",
+    fr: "Aucun smartphone.",
     de: "Kein Smartphone.",
     el: "Χωρίς smartphone.",
     he: "אין סמארטפון.",
@@ -11146,7 +11146,7 @@ export const phrases = {
     nl: "Heb smartphone.",
     "en-UK": "Have smartphone.",
     fi: "On älypuhelin.",
-    fr: "Loading...",
+    fr: "Avoir un smartphone.",
     de: "Habe ein Smartphone.",
     el: "Έχω ένα smartphone.",
     he: "יש לי טלפון חכם.",
@@ -11189,7 +11189,7 @@ export const phrases = {
     nl: "Geen smartphone.",
     "en-UK": "No smartphone.",
     fi: "Ei älypuhelinta.",
-    fr: "Loading...",
+    fr: "Aucun smartphone.",
     de: "Kein Smartphone.",
     el: "Χωρίς smartphone.",
     he: "אין טלפון חכם.",
@@ -11236,7 +11236,7 @@ export const phrases = {
     "en-UK":
       "⚠ Because this study will calibrate microphones (_calibrateSoundMicrophonesBool==TRUE), you will need a USB microphone (miniDSP UMIK-1 or UMIK-2) to calibrate your loudspeakers.",
     fi: "⚠ Koska tämä tutkimus kalibroi mikrofonit (_calibrateSoundMicrophonesBool==TRUE), tarvitset USB-mikrofonin (miniDSP UMIK-1 tai UMIK-2) kaiuttimiesi kalibrointiin.",
-    fr: "Loading...",
+    fr: "⚠ Parce que cette étude va calibrer les microphones (_calibrateSoundMicrophonesBool==TRUE), vous aurez besoin d'un microphone USB (miniDSP UMIK-1 ou UMIK-2) pour calibrer vos haut-parleurs.",
     de: "⚠ Da diese Studie Mikrofone kalibrieren wird (_calibrateSoundMicrophonesBool==TRUE), benötigen Sie ein USB-Mikrofon (miniDSP UMIK-1 oder UMIK-2), um Ihre Lautsprecher zu kalibrieren.",
     el: "⚠ Επειδή αυτή η μελέτη θα βαθμονομήσει μικρόφωνα (_calibrateSoundMicrophonesBool==TRUE), θα χρειαστείτε ένα μικρόφωνο USB (miniDSP UMIK-1 ή UMIK-2) για τη βαθμονόμηση των μεγαφώνων σας.",
     he: "⚠ מכיוון שהמחקר יכוון מיקרופונים (_calibrateSoundMicrophonesBool==TRUE), יהיה עליך להשתמש במיקרופון USB (miniDSP UMIK-1 או UMIK-2) כדי לכייל את הרמקולים שלך.",
@@ -11283,7 +11283,7 @@ export const phrases = {
     "en-UK":
       "If you have a smartphone, point your phone camera at the following QR code (black and white checks), and click on it in your phone's screen.",
     fi: "Jos sinulla on älypuhelin, osoita puhelimen kamera seuraavaan QR-koodiin (mustavalkoiset ruudut) ja napsauta sitä puhelimesi näytöllä.",
-    fr: "Loading...",
+    fr: "Si vous avez un smartphone, pointez votre appareil photo de téléphone sur le code QR suivant (carreaux noirs et blancs) et cliquez dessus sur l'écran de votre téléphone.",
     de: "Wenn Sie ein Smartphone besitzen, richten Sie die Kamera Ihres Telefons auf den folgenden QR-Code (schwarz-weiße Karos) und klicken Sie auf dem Bildschirm Ihres Telefons darauf.",
     el: "Εάν έχετε smartphone, στρέψτε την κάμερα του τηλεφώνου σας στον ακόλουθο κωδικό QR (ασπρόμαυροι έλεγχοι) και κάντε κλικ σε αυτόν στην οθόνη του τηλεφώνου σας.",
     he: "אם יש לך סמארטפון, כוון את מצלמת הטלפון שלך אל קוד ה-QR הבא (המחאות בשחור-לבן), ולחץ עליו במסך הטלפון שלך.",
@@ -11326,7 +11326,7 @@ export const phrases = {
     nl: "Wil je een andere smartphone proberen?",
     "en-UK": "Would you like to try another smartphone?",
     fi: "Haluaisitko kokeilla toista älypuhelinta?",
-    fr: "Loading...",
+    fr: "Souhaitez-vous essayer un autre smartphone ?",
     de: "Möchten Sie ein anderes Smartphone ausprobieren?",
     el: "Θα θέλατε να δοκιμάσετε ένα άλλο smartphone;",
     he: "האם תרצה לנסות סמארטפון נוסף?",
@@ -11369,7 +11369,7 @@ export const phrases = {
     nl: "Voer de gegevens van uw UUU-microfoon in.",
     "en-UK": "Enter details of your UUU microphone.",
     fi: "Anna UUU-mikrofonisi tiedot.",
-    fr: "Loading...",
+    fr: "Entrez les détails de votre microphone UUU.",
     de: "Geben Sie die Details Ihres UUU-Mikrofons ein.",
     el: "Εισαγάγετε τα στοιχεία του μικροφώνου UUU σας.",
     he: "הזן פרטים של המיקרופון שלך UUU.",
@@ -11412,7 +11412,7 @@ export const phrases = {
     nl: "Ga terug",
     "en-UK": "Go Back",
     fi: "Mene takaisin",
-    fr: "Loading...",
+    fr: "Retourner en arrière",
     de: "Gehe zurück",
     el: "Πήγαινε πίσω",
     he: "תחזור",
@@ -11455,7 +11455,7 @@ export const phrases = {
     nl: "Voer de gegevens van uw OOO smartphone in.",
     "en-UK": "Enter details of your Out of Office smartphone.",
     fi: "Anna OOO-älypuhelimesi tiedot.",
-    fr: "Loading...",
+    fr: "Entrez les détails de votre smartphone OOO.",
     de: "Geben Sie die Details Ihres OOO-Smartphones ein.",
     el: "Εισαγάγετε τα στοιχεία του smartphone της OOO.",
     he: "הזן פרטים של הטלפון החכם שלך OOO.",
@@ -11502,7 +11502,7 @@ export const phrases = {
     "en-UK":
       "For a quick communication check, point your phone's camera at the QR code below and tap the link that appears on your phone's screen.",
     fi: "Voit tarkistaa viestinnän nopeasti suuntaamalla puhelimesi kameran alla olevaan QR-koodiin ja napauttamalla puhelimen näytölle ilmestyvää linkkiä.",
-    fr: "Loading...",
+    fr: "Pour une vérification rapide de la communication, pointez la caméra de votre téléphone sur le code QR ci-dessous et appuyez sur le lien qui apparaît sur l'écran de votre téléphone.",
     de: "Für eine schnelle Kommunikationsprüfung richten Sie die Kamera Ihres Telefons auf den QR-Code unten und tippen Sie auf den Link, der auf dem Bildschirm Ihres Telefons angezeigt wird.",
     el: "Για έλεγχο γρήγορης επικοινωνίας, κατευθύνετε την κάμερα του τηλεφώνου σας στον κωδικό QR παρακάτω και πατήστε τον σύνδεσμο που εμφανίζεται στην οθόνη του τηλεφώνου σας.",
     he: "לבדיקת תקשורת מהירה, כוון את מצלמת הטלפון שלך אל קוד ה-QR למטה והקש על הקישור שמופיע במסך הטלפון שלך.",
@@ -11549,7 +11549,7 @@ export const phrases = {
     "en-UK":
       "📱 POINT CAMERA AT QR LINK. Point your phone's camera at the QR code below, and tap the link in your phone's screen. \n[It's rare, but if this computer loses the connection, you can start over by refreshing this screen. Click the address bar and hit RETURN.]",
     fi: "📱 OSOITA KAMERA QR-LINKKIIN. Osoita puhelimesi kamera alla olevaan QR-koodiin ja napauta linkkiä puhelimesi näytössä. [Se on harvinaista, mutta jos tämä tietokone menettää yhteyden, voit aloittaa uudelleen päivittämällä tämän näytön. Napsauta osoiteriviä ja paina RETURN.]",
-    fr: "Loading...",
+    fr: "📱 POINT CAMERA AT QR LINK. Pointez la caméra de votre téléphone sur le code QR ci-dessous et appuyez sur le lien affiché à l'écran de votre téléphone. \n[C'est rare, mais si cet ordinateur perd la connexion, vous pouvez recommencer en actualisant cet écran. Cliquez sur la barre d'adresse et appuyez sur RETOUR.]",
     de: "📱 RICHTEN SIE DIE KAMERA AUF DEN QR-LINK. Richten Sie die Kamera Ihres Telefons auf den QR-Code unten und tippen Sie auf den Link auf dem Bildschirm Ihres Telefons.\n[Es ist selten, aber wenn diese Verbindung verloren geht, können Sie von vorne beginnen, indem Sie diesen Bildschirm aktualisieren. Klicken Sie auf die Adressleiste und drücken Sie RETURN.]",
     el: "📱 ΣΗΜΕΙΩΣΤΕ ΤΗΝ ΚΑΜΕΡΑ ΣΤΟ QR LINK. Στρέψτε την κάμερα του τηλεφώνου σας στον κωδικό QR παρακάτω και πατήστε τον σύνδεσμο στην οθόνη του τηλεφώνου σας.\n[Είναι σπάνιο, αλλά εάν αυτός ο υπολογιστής χάσει τη σύνδεση, μπορείτε να ξεκινήσετε από την αρχή ανανεώνοντας αυτήν την οθόνη. Κάντε κλικ στη γραμμή διευθύνσεων και πατήστε RETURN.]",
     he: "📱 כוונן את המצלמה לקישור QR. כוונן את מצלמת הטלפון שלך לקוד QR למטה והקש על הקישור במסך הטלפון שלך.\n[זה נדיר, אך אם המחשב מאבד את החיבור, תוכל להתחיל מחדש על ידי רענון מסך זה. לחץ על סרגל הכתובת ולחץ על RETURN.]",
@@ -11596,7 +11596,7 @@ export const phrases = {
     "en-UK":
       "3. MIC. IN BOTTOM EDGE. When your phone is vertical, its microphone is in the lower edge.\n4. REMOVE CASE. Expose your phone's microphone by removing any protective case.\n5. REST PHONE ON A TALL DRINKING GLASS (or coffee mug or soda/beer can), between you and your keyboard, with the microphone (bottom) edge facing your computer. Laptop speakers are in the keyboard; place your phone so that its microphone is on your line of sight to the keyboard. Desktop speakers are behind a grill; point your phone at the grill.\n6. PROCEED. Click the Proceed button that will appear below.",
     fi: "3. MIC. ALAREUNASSA. Kun puhelimesi on pystyasennossa, sen mikrofoni on alareunassa.\n4. POISTA KOTELO. Paljasta puhelimesi mikrofoni poistamalla mahdolliset suojakuoret.\n5. LUE PUHELIN KORKEAN JUOMALASIN (tai kahvimukin tai virvoitusjuoman/oluttölkin) päälle sinun ja näppäimistösi väliin mikrofonin (alareuna) tietokonetta kohti. Kannettavan tietokoneen kaiuttimet ovat näppäimistössä; aseta puhelimesi niin, että sen mikrofoni on näköyhteydessäsi näppäimistöön. Pöytäkaiuttimet ovat grillin takana; osoita puhelimellasi grilliä kohti.\n6. JATKA. Napsauta Jatka-painiketta, joka tulee näkyviin alla.\n",
-    fr: "Loading...",
+    fr: "3. MICRO. DANS LE BORD INFÉRIEUR. Lorsque votre téléphone est vertical, son microphone se trouve dans le bord inférieur.\n4. RETIRER L'ÉTUI. Exposez le microphone de votre téléphone en retirant tout étui de protection.\n5. POSER LE TÉLÉPHONE SUR UN GRAND VERRE À BOIRE (ou une tasse à café ou une canette de soda/bière), entre vous et votre clavier, avec le bord du microphone (inférieur) tourné vers votre ordinateur. Les haut-parleurs d'un ordinateur portable se trouvent dans le clavier ; placez votre téléphone de manière à ce que son microphone soit dans votre champ de vision du clavier. Les haut-parleurs d'un ordinateur de bureau sont derrière une grille ; pointez votre téléphone vers la grille.\n6. CONTINUER. Cliquez sur le bouton Continuer qui apparaîtra ci-dessous.",
     de: '3. MIKROFON. AM UNTEREN RAND. Wenn Ihr Telefon vertikal ist, befindet sich das Mikrofon am unteren Rand.\n4. HÜLLE ENTFERNEN. Entfernen Sie jegliche Schutzhülle, um das Mikrofon Ihres Telefons freizulegen.\n5. TELEFON AUF EIN HOHES TRINKGLAS (oder eine Kaffeetasse oder eine Soda-/Bierdose) stellen, zwischen Ihnen und Ihrer Tastatur, mit dem Mikrofon (unten) zum Computer hin. Die Lautsprecher eines Laptops befinden sich in der Tastatur; platzieren Sie Ihr Telefon so, dass das Mikrofon in Ihrer Sichtlinie zur Tastatur liegt. Bei Desktop-Lautsprechern befindet sich eine Abdeckung davor; richten Sie Ihr Telefon auf die Abdeckung.\n6. FORTFAHREN. Klicken Sie auf die unten angezeigte Schaltfläche "Fortfahren".\n"""',
     el: "3. ΜΙΚΡΟΦΩΝΟ. ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ. Όταν το τηλέφωνό σας είναι κατακόρυφο, το μικρόφωνο του βρίσκεται στο κάτω μέρος.\n4. ΑΦΑΙΡΕΣΤΕ ΤΗ ΘΗΚΗ. Αποκαλύψτε το μικρόφωνο του τηλεφώνου σας αφαιρώντας οποιαδήποτε προστατευτική θήκη.\n5. ΤΟΠΟΘΕΤΗΣΤΕ ΤΟ ΤΗΛΕΦΩΝΟ ΣΕ ΕΝΑ ΥΨΗΛΟ ΠΟΤΗΡΙ ΠΟΤΟΥ (ή κούπα καφέ ή κουτάκι αναψυκτικού / μπύρας), ανάμεσα σας και το πληκτρολόγιο, με το μικρόφωνο (κάτω) μέρος να είναι στραμμένο προς τον υπολογιστή σας. Οι ηχεία του φορητού υπολογιστή βρίσκονται στο πληκτρολόγιο. Τοποθετήστε το τηλέφωνο σας έτσι ώστε το μικρόφωνο να είναι στην οπτική γραμμή σας προς το πληκτρολόγιο. Τα ηχεία του επιτραπέζιου υπολογιστή βρίσκονται πίσω από μια ροζέτα. Στρέψτε το τηλέφωνο σας προς τη ροζέτα.\n6. ΣΥΝΕΧΙΣΤΕ. Κάντε κλικ στο κουμπί Συνέχεια που θα εμφανιστεί παρακάτω.",
     he: "3. MIC. בקצה התחתון. כשהטלפון שלך אנכי, המיקרופון שלו נמצא בקצה התחתון.\n4. הסר את המארז. חשוף את המיקרופון של הטלפון שלך על ידי הסרת כל נרתיק מגן.\n5. הנח את הטלפון על כוס שתייה גבוהה (או ספל קפה או פחית סודה/בירה), בינך לבין המקלדת, כאשר קצה המיקרופון (התחתון) פונה למחשב שלך. רמקולים למחשב נייד נמצאים במקלדת; מקם את הטלפון כך שהמיקרופון שלו יהיה בקו הראייה שלך אל המקלדת. רמקולים שולחניים נמצאים מאחורי גריל; לכוון את הטלפון אל הגריל.\n6. המשך. לחץ על כפתור המשך שיופיע למטה.\n",
@@ -11643,7 +11643,7 @@ export const phrases = {
     "en-UK":
       "3. POINT MICROPHONE UP. Attach the microphone to its tripod. The microphone should be vertical, pointing up to the ceiling. Push the microphone up so its bottom end is flush with the holder. Place it on the table between you and your computer, with two legs almost touching your computer.\n4. PROCEED. Click the Proceed button that will appear below.",
     fi: "3. KOHTA MIKROFONIA YLÖS. Kiinnitä mikrofoni jalustaan. Mikrofonin tulee olla pystysuorassa kattoon päin. Työnnä mikrofonia ylöspäin niin, että sen alaosa on samalla tasolla pidikkeen kanssa. Aseta se pöydälle sinun ja tietokoneesi väliin siten, että kaksi jalkaa melkein koskettavat tietokonettasi.\n4. JATKA. Napsauta Jatka-painiketta, joka tulee näkyviin alla.",
-    fr: "Loading...",
+    fr: "3. ORIENTEZ LE MICROPHONE VERS LE HAUT. Attachez le microphone à son trépied. Le microphone doit être vertical, pointant vers le plafond. Poussez le microphone vers le haut afin que son extrémité inférieure soit alignée avec le support. Placez-le sur la table entre vous et votre ordinateur, avec deux pieds presque touchant votre ordinateur.\n4. CONTINUEZ. Cliquez sur le bouton Continuer qui apparaîtra ci-dessous.",
     de: "3. Richten Sie das Mikrofon nach oben. Befestigen Sie das Mikrofon an seinem Stativ. Das Mikrofon sollte vertikal sein und zur Decke zeigen. Schieben Sie das Mikrofon nach oben, sodass sein unteres Ende bündig mit der Halterung abschließt. Platzieren Sie es auf dem Tisch zwischen Ihnen und Ihrem Computer, sodass zwei Beine Ihren Computer fast berühren.\n4. FAHREN SIE FORT. Klicken Sie auf die Schaltfläche „Weiter“, die unten angezeigt wird.",
     el: "3. ΣΗΜΕΙΩΣΤΕ ΤΟ ΜΙΚΡΟΦΩΝΟ ΠΑΝΩ. Συνδέστε το μικρόφωνο στο τρίποδο του. Το μικρόφωνο πρέπει να είναι κάθετο, στραμμένο προς την οροφή. Σπρώξτε το μικρόφωνο προς τα πάνω ώστε το κάτω άκρο του να είναι στο ίδιο επίπεδο με τη θήκη. Τοποθετήστε το στο τραπέζι ανάμεσα σε εσάς και τον υπολογιστή σας, με τα δύο πόδια να αγγίζουν σχεδόν τον υπολογιστή σας.\n4. ΣΥΝΕΧΙΣΤΕ. Κάντε κλικ στο κουμπί Συνέχεια που θα εμφανιστεί παρακάτω.",
     he: "3. הצבע את המיקרופון כלפי מעלה. חבר את המיקרופון לחצובה שלו. המיקרופון צריך להיות אנכי, להצביע עד לתקרה. דחוף את המיקרופון כלפי מעלה כך שהקצה התחתון שלו ישתלב עם המחזיק. הנח אותו על השולחן בינך לבין המחשב שלך, כששתי רגליים כמעט נוגעות במחשב שלך.\n4. המשך. לחץ על כפתור המשך שיופיע למטה.",
@@ -11688,7 +11688,7 @@ export const phrases = {
     "en-UK":
       "Calibration was estimated to take 111 minutes, and actually took 222 minutes.",
     fi: "Kalibrointi arvioitiin kestävän 111 minuuttia, mutta se kestikin todellisuudessa 222 minuuttia.",
-    fr: "Loading...",
+    fr: "La calibration était estimée à prendre 111 minutes et a finalement pris 222 minutes.",
     de: "Die Kalibrierung dauerte schätzungsweise 111 Minuten, tatsächlich dauerte sie jedoch 222 Minuten.",
     el: "Η βαθμονόμηση εκτιμήθηκε ότι θα διήρκεσε 111 λεπτά και στην πραγματικότητα διήρκεσε 222 λεπτά.",
     he: "כיול הוערך כ-111 דקות, ולמעשה נמשך 222 דקות.",
@@ -11731,7 +11731,7 @@ export const phrases = {
     nl: "Kalibratie duurt ongeveer 111 minuut/minuten.",
     "en-UK": "Calibration takes about 111 minute(s).",
     fi: "Kalibrointi kestää noin 111 minuuttia.",
-    fr: "Loading...",
+    fr: "L'étalonnage prend environ 111 minute(s).",
     de: "Die Kalibrierung dauert etwa 111 Minute(n).",
     el: "Η βαθμονόμηση διαρκεί περίπου 111 λεπτό.",
     he: "הכיול לוקח בערך 111 דקות.",
@@ -11778,7 +11778,7 @@ export const phrases = {
     "en-UK":
       "1. In the box below, type the make and model of the smartphone or USB microphone, e.g. Apple iPhone 12 Pro.\n",
     fi: "1. Kirjoita alla olevaan ruutuun älypuhelimen tai USB-mikrofonin merkki ja malli, esim. Apple iPhone 12 Pro.\n",
-    fr: "Loading...",
+    fr: "1. Dans la case ci-dessous, tapez la marque et le modèle du smartphone ou du microphone USB, par exemple Apple iPhone 12 Pro.",
     de: "1. Geben Sie im Feld unten Marke und Modell des Smartphones oder USB-Mikrofons ein, z. B. Apple iPhone 12 Pro.\n",
     el: "1. Στο παρακάτω πλαίσιο, πληκτρολογήστε τη μάρκα και το μοντέλο του smartphone ή του μικροφώνου USB, π.χ. Apple iPhone 12 Pro.\n",
     he: "1. בתיבה למטה, הקלד את המותג והדגם של הטלפון החכם או מיקרופון ה-USB, למשל. אפל אייפון 12 פרו.\n",
@@ -11825,7 +11825,7 @@ export const phrases = {
     "en-UK":
       "Let’s look in the profile library for one that matches your phone’s microphone. Point your phone’s camera at the QR code below and tap the link that appears in your phone’s screen.",
     fi: "Etsitään profiilikirjastosta sellainen, joka vastaa puhelimesi mikrofonia. Osoita puhelimesi kamera alla olevaan QR-koodiin ja napauta puhelimen näytölle ilmestyvää linkkiä.",
-    fr: "Loading...",
+    fr: "Cherchons dans la bibliothèque de profils celui qui correspond au microphone de votre téléphone. Pointez la caméra de votre téléphone sur le code QR ci-dessous et appuyez sur le lien qui apparaît à l'écran de votre téléphone.",
     de: "Suchen wir in der Profilbibliothek nach einem Profil, das zum Mikrofon Ihres Telefons passt. Richten Sie die Kamera Ihres Telefons auf den QR-Code unten und tippen Sie auf den Link, der auf dem Bildschirm Ihres Telefons angezeigt wird.",
     el: "Ας ψάξουμε στη βιβλιοθήκη προφίλ για ένα που ταιριάζει με το μικρόφωνο του τηλεφώνου σας. Στρέψτε την κάμερα του τηλεφώνου σας στον κωδικό QR παρακάτω και πατήστε τον σύνδεσμο που εμφανίζεται στην οθόνη του τηλεφώνου σας.",
     he: "בוא נחפש בספריית הפרופילים אחד שמתאים למיקרופון של הטלפון שלך. כוון את מצלמת הטלפון שלך אל קוד ה-QR למטה והקש על הקישור שמופיע במסך הטלפון שלך.",
@@ -11870,7 +11870,7 @@ export const phrases = {
     "en-UK":
       "If none matched, hit TRY COMPUTER to look for a match to your computer’s loudspeaker.",
     fi: "Jos mikään ei täsmää, paina KOKEILE TIETOKONEtta etsiäksesi vastinetta tietokoneesi kaiuttimelle.",
-    fr: "Loading...",
+    fr: "S'il n'y a aucune correspondance, appuyez sur ESSAYER L'ORDINATEUR pour rechercher une correspondance avec le haut-parleur de votre ordinateur.",
     de: "Wenn keiner übereinstimmt, klicken Sie auf VERSUCHEN SIE COMPUTER, um nach einer Übereinstimmung mit dem Lautsprecher Ihres Computers zu suchen.",
     el: "Εάν κανένα δεν ταιριάζει, πατήστε ΔΟΚΙΜΑΣΤΕ ΥΠΟΛΟΓΙΣΤΗ για να αναζητήσετε μια αντιστοίχιση με το μεγάφωνο του υπολογιστή σας.",
     he: "אם אף אחד לא תואם, לחץ על TRY COMPUTER כדי לחפש התאמה לרמקול של המחשב שלך.",
@@ -11913,7 +11913,7 @@ export const phrases = {
     nl: "💻 Probeer Computer",
     "en-UK": "💻 Give it a go on the computer.",
     fi: "💻 Kokeile tietokonetta",
-    fr: "Loading...",
+    fr: "💻 Essayez l'ordinateur",
     de: "💻 Probieren Sie den Computer aus",
     el: "💻 Δοκιμάστε τον υπολογιστή",
     he: "💻 נסה את המחשב",
@@ -11960,7 +11960,7 @@ export const phrases = {
     "en-UK":
       "❌ INCOMPATIBLE. Sorry. You're welcome to try another browser, or computer, or whatever might be compatible. Otherwise hit CANCEL to return this study to Prolific.com.",
     fi: "❌ YHTEENSOPImaton. Anteeksi. Voit kokeilla toista selainta tai tietokonetta tai mitä tahansa yhteensopivaa. Muussa tapauksessa paina CANCEL palauttaaksesi tämän tutkimuksen Prolific.com-sivustolle.",
-    fr: "Loading...",
+    fr: "❌ INCOMPATIBLE. Désolé. Vous pouvez essayer un autre navigateur, ou un autre ordinateur, ou tout ce qui pourrait être compatible. Sinon, appuyez sur ANNULER pour renvoyer cette étude à Prolific.com.",
     de: "❌ INKOMPATIBEL. Entschuldigung. Sie können gerne einen anderen Browser, Computer oder was auch immer kompatibel sein könnte, ausprobieren. Andernfalls klicken Sie auf ABBRECHEN, um diese Studie an Prolific.com zurückzugeben.",
     el: "❌ ΑΣΥΜΒΑΤΟ. Λυπούμαστε. Μπορείτε να δοκιμάσετε έναν άλλο περιηγητή ιστού ή υπολογιστή ή οτιδήποτε άλλο που μπορεί να είναι συμβατό. Διαφορετικά, πατήστε ΑΚΥΡΟ για να επιστρέψετε αυτήν τη μελέτη στο Prolific.com.",
     he: "❌ לא תואם. מצטער. אתה מוזמן לנסות דפדפן אחר, או מחשב אחר, או כל דבר אחר שעשוי להיות תואם. אחרת, לחץ על ביטול כדי להחזיר את המחקר הזה ל-Prolific.com.",
@@ -12007,7 +12007,7 @@ export const phrases = {
     "en-UK":
       "We'll measure the distance between your eyes. Use the video image to watch your eyes. Hold a pen horizontally against your face in front of your eyes. Align your right and left thumb nails with the centers of your right and left pupils. Then bring the pen to the on-screen ruler to measure the separation between your  thumbs. Allign your left thumb with zero and notice where your right thumb is. Put down the pen and click the ruler at that point. Finally, click OK to continue.",
     fi: "Mittaa etäisyys silmiesi välillä. Käytä videokuvaa seurataksesi silmiäsi. Pidä kynää vaakasuorassa kasvojesi edessä silmiesi kohdalla. Kohdista oikean ja vasemman peukalon kynnet oikean ja vasemman pupillin keskusten kanssa. Tuo sitten kynä näytöllä olevaan viivoittimeen mitataksesi etäisyys peukalojesi välillä. Kohdista vasen peukalo nollaan ja huomaa, missä oikea peukalo on. Laske kynä alas ja napsauta viivoitinta kyseisessä kohdassa. Lopuksi napsauta OK jatkaaksesi.",
-    fr: "Loading...",
+    fr: "Nous allons mesurer la distance entre vos yeux. Utilisez l'image vidéo pour observer vos yeux. Tenez un stylo horizontalement contre votre visage devant vos yeux. Alignez vos ongles de pouce droit et gauche avec les centres de vos pupilles droite et gauche. Ensuite, amenez le stylo à la règle à l'écran pour mesurer la séparation entre vos pouces. Alignez votre pouce gauche avec zéro et remarquez où se trouve votre pouce droit. Posez le stylo et cliquez sur la règle à cet endroit. Enfin, cliquez sur OK pour continuer.",
     de: "Wir werden den Abstand zwischen Ihren Augen messen. Verwenden Sie das Video-Bild, um Ihre Augen zu beobachten. Halten Sie einen Stift horizontal vor Ihr Gesicht vor Ihre Augen. Richten Sie Ihre rechte und linke Daumennägel mit den Zentren Ihrer rechten und linken Pupillen aus. Bringen Sie dann den Stift zum Bildschirmlineal, um die Trennung zwischen Ihren Daumen zu messen. Richten Sie Ihren linken Daumen mit null aus und beachten Sie, wo sich Ihr rechter Daumen befindet. Legen Sie den Stift ab und klicken Sie auf das Lineal an dieser Stelle. Klicken Sie abschließend auf OK, um fortzufahren.",
     el: "Θα μετρήσουμε την απόσταση μεταξύ των ματιών σας. Χρησιμοποιήστε την εικόνα του βίντεο για να παρακολουθήσετε τα μάτια σας. Κρατήστε ένα στυλό οριζόντια στο πρόσωπό σας μπροστά στα μάτια σας. Ευθυγραμμίστε τα νύχια του δεξιού και του αριστερού αντίχειρα με το κέντρο της δεξιάς και της αριστερής κόρης σας. Στη συνέχεια, φέρτε το στυλό στον χάρακα της οθόνης για να μετρήσετε το διαχωρισμό μεταξύ των αντίχειρών σας. Ευθυγραμμίστε τον αριστερό σας αντίχειρα με το μηδέν και παρατηρήστε πού βρίσκεται ο δεξιός σας αντίχειρας. Αφήστε κάτω το στυλό και κάντε κλικ στο χάρακα σε εκείνο το σημείο. Τέλος, κάντε κλικ στο OK για να συνεχίσετε.",
     he: "אנו נמדוד את המרחק בין העיניים שלך. השתמש בתמונת הווידאו כדי לצפות בעיניים שלך. החזק עט אופקית מול הפנים שלך מול העיניים. יישר את ציפורני האגודל הימנית והשמאלית שלך עם מרכז האישונים הימניים והשמאליים שלך. לאחר מכן הביאו את העט לסרגל שעל המסך כדי למדוד את ההפרדה בין האגודלים. יישר את אגודל שמאל לאפס ושם לב היכן נמצא האגודל הימני. הנח את העט ולחץ על הסרגל באותה נקודה. לבסוף, לחץ על אישור כדי להמשיך.",
@@ -12050,7 +12050,7 @@ export const phrases = {
     nl: "Meet de pupilafstand",
     "en-UK": "Measure Pupillary Distance",
     fi: "Mittaa pupillietäisyys",
-    fr: "Loading...",
+    fr: "Mesurer la distance pupillaire",
     de: "Messen Sie die Pupillendistanz",
     el: "Μετρήστε την απόσταση της κόρης",
     he: "מדידת מרחק אישונים",
@@ -12093,7 +12093,7 @@ export const phrases = {
     nl: "Draai deze telefoon naar de portretstand.",
     "en-UK": "Rotate this phone to portrait orientation.",
     fi: "Käännä tämä puhelin pystysuuntaan.",
-    fr: "Loading...",
+    fr: "Tournez ce téléphone en orientation portrait.",
     de: "Drehen Sie dieses Telefon in die Hochformat-Ausrichtung.",
     el: "Περιστρέψτε αυτό το τηλέφωνο σε κατακόρυφο προσανατολισμό.",
     he: "סובב את הטלפון הזה לכיוון לאורך.",
@@ -12136,7 +12136,7 @@ export const phrases = {
     nl: "OK",
     "en-UK": "OK",
     fi: "OK",
-    fr: "Loading...",
+    fr: "D'accord",
     de: "OK",
     el: "Εντάξει",
     he: "בסדר",
@@ -12179,7 +12179,7 @@ export const phrases = {
     nl: "Gedaan",
     "en-UK": "Done",
     fi: "Tehty",
-    fr: "Loading...",
+    fr: "Terminé",
     de: "Erledigt",
     el: "Εγινε",
     he: "בוצע",
@@ -13680,7 +13680,7 @@ export const phrases = {
     nl: "Luidsprekerkalibratie (pagina 111 van 222)",
     "en-UK": "Loudspeaker Calibration (page 111 of 222)",
     fi: '""""Kaiuttimen kalibrointi (sivu 111/222)""',
-    fr: "Loading...",
+    fr: "Calibrage du haut-parleur (page 111 sur 222)",
     de: "Lautsprecherkalibrierung (Seite 111 von 222)",
     el: "Βαθμονόμηση ηχείων (σελίδα 111 από 222)",
     he: "כיוון רמקולים (עמוד 111 מתוך 222)",
@@ -13727,7 +13727,7 @@ export const phrases = {
     "en-UK":
       'Based on Eq. 4 of Giannoulis et al. (2012). <a href="http://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf">Digital dynamic range compressor design.</a> J. Audio Eng. Soc. 6(6):399-408.',
     fi: '"Pohjautuen Giannoulis et al. (2012) -julkaisun yhtälöön 4. <a href="http://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf">Digitaalisen dynaamisen alueenpuristimen suunnittelu.</a> J. Audio Eng. Soc. 6(6):399-408."',
-    fr: "Loading...",
+    fr: '"Basé sur l\'équation 4 de Giannoulis et al. (2012). <a href="http://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf">Conception d\'un compresseur de plage dynamique numérique.</a> J. Audio Eng. Soc. 6(6):399-408."',
     de: 'Basierend auf Gl. 4 von Giannoulis et al. (2012). <a href="http://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf">Design eines digitalen Dynamikbereichskompressors.</a> J. Audio Eng. Soc. 6(6):399-408.',
     el: 'Με βάση την Εξ. 4 του Γιαννούλη κ.ά. (2012). <a href="http://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf">Σχεδίαση συμπιεστή ψηφιακού δυναμικού εύρους.</a> J. Audio Eng. Soc. 6(6):399-408.',
     he: 'מבוסס על Eq. 4 של Giannoulis et al. (2012). <a href="http://eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf">עיצוב מדחס טווח דינמי דיגיטלי.</a> J. Audio Eng. Soc. 6(6):399-408.',
@@ -13770,7 +13770,7 @@ export const phrases = {
     nl: "USB-microfoonkalibratie (pagina 111 van 222)",
     "en-UK": "USB Microphone Calibration (page 111 of 222)",
     fi: "USB-mikrofonin kalibrointi (sivu 111/222)",
-    fr: "Loading...",
+    fr: "Calibration du microphone USB (page 111 sur 222)",
     de: "USB-Mikrofonkalibrierung (Seite 111 von 222)",
     el: "Βαθμονόμηση μικροφώνου USB (σελίδα 111 από 222)",
     he: "כיול מיקרופון USB (עמוד 111 מתוך 222)",
@@ -13813,7 +13813,7 @@ export const phrases = {
     nl: "Microfoonkalibratie (pagina 111 van 222)",
     "en-UK": "Microphone Calibration (page 111 of 222)",
     fi: "Mikrofonin kalibrointi (sivu 111/222)",
-    fr: "Loading...",
+    fr: "Calibration du microphone (page 111 sur 222)",
     de: "Mikrofonkalibrierung (Seite 111 von 222)",
     el: "Βαθμονόμηση μικροφώνου (σελίδα 111 από 222)",
     he: "כיול מיקרופון (עמוד 111 מתוך 222)",
@@ -13860,7 +13860,7 @@ export const phrases = {
     "en-UK":
       "To calibrate your loudspeakers you need a smartphone whose microphone is in the profile library. Hopefully yours is. You can try one smartphone after another to find one that’s in the library. \n",
     fi: "Jotta voit kalibroida kaiuttimiasi, tarvitset älypuhelimen, jonka mikrofoni on profiilikirjastossa. Toivottavasti omasi on. Voit kokeilla yhtä älypuhelinta toisensa jälkeen löytääksesi sellaisen, joka on kirjastossa.",
-    fr: "Loading...",
+    fr: "Pour calibrer vos haut-parleurs, vous avez besoin d'un smartphone dont le microphone est dans la bibliothèque de profils. Espérons que le vôtre en fasse partie. Vous pouvez essayer un smartphone après l'autre pour en trouver un qui est dans la bibliothèque.",
     de: "Um Ihre Lautsprecher zu kalibrieren, benötigen Sie ein Smartphone, dessen Mikrofon in der Profilbibliothek enthalten ist. Hoffentlich ist Ihres dabei. Sie können nacheinander verschiedene Smartphones ausprobieren, um eines zu finden, das in der Bibliothek enthalten ist.",
     el: "Για να βαθμονομήσετε τα ηχεία σας χρειάζεστε ένα smartphone του οποίου το μικρόφωνο βρίσκεται στη βιβλιοθήκη προφίλ. Ας ελπίσουμε ότι είναι δικό σας. Μπορείτε να δοκιμάσετε το ένα smartphone μετά το άλλο για να βρείτε ένα που βρίσκεται στη βιβλιοθήκη.\n",
     he: "כדי לכייל את הרמקולים שלך אתה צריך סמארטפון שהמיקרופון שלו נמצא בספריית הפרופילים. בתקווה שלך כן. אתה יכול לנסות סמארטפון אחד אחרי השני כדי למצוא אחד שנמצא בספרייה.\n",
@@ -13907,7 +13907,7 @@ export const phrases = {
     "en-UK":
       "Hello xxx. Each profile that you contribute to the profile library will be stamped with your email xxx, to credit your contribution.",
     fi: "Hei xxx. Jokainen profiili, johon osallistut profiilikirjastossa, leimataan sähköpostillasi xxx, jotta voimme antaa sinulle tunnustusta panoksestasi.",
-    fr: "Loading...",
+    fr: "Bonjour xxx. Chaque profil auquel vous contribuez dans la bibliothèque de profils sera marqué avec votre adresse e-mail xxx, pour créditer votre contribution.",
     de: "Hallo xxx. Jedes Profil, das Sie zur Profilbibliothek beitragen, wird mit Ihrer E-Mail-Adresse xxx versehen, um Ihren Beitrag gutzuschreiben.",
     el: "Γεια σου xxx. Κάθε προφίλ που συνεισφέρετε στη βιβλιοθήκη προφίλ θα σφραγίζεται με το email σας xxx, για να πιστωθεί η συνεισφορά σας.",
     he: "שלום xxx. כל פרופיל שאתה תורם לספריית הפרופילים יוטבע עם האימייל שלך xxx, לזכות תרומתך.",
@@ -13950,7 +13950,7 @@ export const phrases = {
     nl: "Hoe sluit u de te kalibreren microfoon aan?",
     "en-UK": "How will you connect the microphone to be calibrated?",
     fi: "Miten liität kalibroitavan mikrofonin?",
-    fr: "Loading...",
+    fr: "Comment allez-vous connecter le microphone à calibrer ?",
     de: "Wie schließen Sie das zu kalibrierende Mikrofon an?",
     el: "Πώς θα συνδέσετε το μικρόφωνο που πρόκειται να βαθμονομηθεί;",
     he: "איך תחבר את המיקרופון לכיול?",
@@ -13995,7 +13995,7 @@ export const phrases = {
     "en-UK":
       "How will you connect the microphone that will calibrate your loudspeakers: via smartphone or USB?",
     fi: "Kuinka liität kaiuttimiesi kalibrointimikrofonin: älypuhelimen tai USB:n kautta?",
-    fr: "Loading...",
+    fr: "Comment allez-vous connecter le microphone qui calibrera vos haut-parleurs : via smartphone ou USB ?",
     de: "Wie schließen Sie das Mikrofon an, das Ihre Lautsprecher kalibriert: per Smartphone oder USB?",
     el: "Πώς θα συνδέσετε το μικρόφωνο που θα βαθμονομήσει τα ηχεία σας: μέσω smartphone ή USB;",
     he: "איך תחבר את המיקרופון שיכוון את הרמקולים שלך: באמצעות סמארטפון או USB?",
@@ -14038,7 +14038,7 @@ export const phrases = {
     nl: "Hoe sluit u de microfoon aan voor deze kalibratie?",
     "en-UK": "How will you connect the microphone for this calibration?",
     fi: "Kuinka kytket mikrofonin tätä kalibrointia varten?",
-    fr: "Loading...",
+    fr: "Comment allez-vous connecter le microphone pour cette calibration ?",
     de: "Wie schließen Sie das Mikrofon für diese Kalibrierung an?",
     el: "Πώς θα συνδέσετε το μικρόφωνο για αυτήν τη βαθμονόμηση;",
     he: "איך תחבר את המיקרופון לכיול זה?",
@@ -14085,7 +14085,7 @@ export const phrases = {
     "en-UK":
       'Select "Smartphone" if you use your smartphone\'s internal microphone or connect an external microphone to it. Otherwise select "USB".',
     fi: 'Valitse "Älypuhelin", jos käytät älypuhelimesi sisäistä mikrofonia tai liität siihen ulkoisen mikrofonin. Muussa tapauksessa valitse "USB".',
-    fr: "Loading...",
+    fr: 'Sélectionnez "Smartphone" si vous utilisez le microphone interne de votre smartphone ou si vous y connectez un microphone externe. Sinon, sélectionnez "USB".',
     de: "Wählen Sie „Smartphone“, wenn Sie das interne Mikrofon Ihres Smartphones nutzen oder ein externes Mikrofon daran anschließen. Andernfalls wählen Sie „USB“.",
     el: 'Επιλέξτε "Smartphone" εάν χρησιμοποιείτε το εσωτερικό μικρόφωνο του smartphone σας ή εάν συνδέσετε ένα εξωτερικό μικρόφωνο σε αυτό. Διαφορετικά επιλέξτε "USB".',
     he: 'בחר "סמארטפון" אם אתה משתמש במיקרופון הפנימי של הטלפון החכם או מחבר אליו מיקרופון חיצוני. אחרת בחר "USB".',
@@ -14130,7 +14130,7 @@ export const phrases = {
     "en-UK":
       "Enter the model number and name of the phone (or external microphone connected to phone) that you are using for this calibration.",
     fi: "Syötä tähän kalibrointiin käyttämäsi puhelimen (tai puhelimeen kytketyn ulkoisen mikrofonin) mallinumero ja nimi.",
-    fr: "Loading...",
+    fr: "Entrez le numéro de modèle et le nom du téléphone (ou du microphone externe connecté au téléphone) que vous utilisez pour cette calibration.",
     de: "Geben Sie die Modellnummer und den Namen des Telefons (oder des an das Telefon angeschlossenen externen Mikrofons) ein, das Sie für diese Kalibrierung verwenden.",
     el: "Εισαγάγετε τον αριθμό μοντέλου και το όνομα του τηλεφώνου (ή του εξωτερικού μικροφώνου που είναι συνδεδεμένο στο τηλέφωνο) που χρησιμοποιείτε για αυτήν τη βαθμονόμηση.",
     he: "הזן את מספר הדגם והשם של הטלפון (או המיקרופון החיצוני המחובר לטלפון) שבו אתה משתמש עבור כיול זה.",
@@ -14173,7 +14173,7 @@ export const phrases = {
     nl: "Microfoon: xxx",
     "en-UK": "Microphone: xxx",
     fi: "Mikrofoni: xxx",
-    fr: "Loading...",
+    fr: "Microphone: xxx",
     de: "Mikrofon: xxx",
     el: "Μικρόφωνο: xxx",
     he: "מיקרופון: xxx",
@@ -14216,7 +14216,7 @@ export const phrases = {
     nl: "Luidspreker: xxx",
     "en-UK": "Loudspeaker: xxx",
     fi: "Kaiutin: xxx",
-    fr: "Loading...",
+    fr: "Haut-parleur: xxx",
     de: "Lautsprecher: xxx",
     el: "Μεγάφωνο: xxx",
     he: "רמקול: xxx",
@@ -14259,7 +14259,7 @@ export const phrases = {
     nl: "Met behulp van de microfoon van je telefoon: MMM",
     "en-UK": "Using your phone's microphone: MMM",
     fi: "Käyttämällä puhelimesi mikrofonia: MMM",
-    fr: "Loading...",
+    fr: "Utiliser le microphone de votre téléphone : MMM",
     de: "Mit dem Mikrofon Ihres Telefons: MMM",
     el: "Χρησιμοποιώντας το μικρόφωνο του τηλεφώνου σας: MMM",
     he: "שימוש במיקרופון של הטלפון שלך: MMM",
@@ -14302,7 +14302,7 @@ export const phrases = {
     nl: "Met behulp van de microfoon van uw telefoon",
     "en-UK": "Using your phone's microphone",
     fi: "Puhelimen mikrofonin käyttö",
-    fr: "Loading...",
+    fr: "Utiliser le microphone de votre téléphone",
     de: "Verwenden Sie das Mikrofon Ihres Telefons",
     el: "Χρησιμοποιώντας το μικρόφωνο του τηλεφώνου σας",
     he: "שימוש במיקרופון של הטלפון שלך",
@@ -14345,7 +14345,7 @@ export const phrases = {
     nl: "Gebruikmakend van de microfoon van je smartphone",
     "en-UK": "Using your smartphone's microphone",
     fi: "Käyttämällä älypuhelimesi mikrofonia",
-    fr: "Loading...",
+    fr: "Utiliser le microphone de votre smartphone",
     de: "Mit dem Mikrofon Ihres Smartphones verwenden",
     el: "Χρησιμοποιώντας το μικρόφωνο του smartphone σας",
     he: "שימוש במיקרופון של הטלפון החכם שלך",
@@ -14390,7 +14390,7 @@ export const phrases = {
     "en-UK":
       "Put this phone on the glass, mug, or can. Rotate me to read the instructions below.",
     fi: "Laita tämä puhelin lasille, mukille tai purkille. Käännä minut lukeaksesi ohjeet alla.",
-    fr: "Loading...",
+    fr: "Posez ce téléphone sur le verre, la tasse ou la canette. Tournez-moi pour lire les instructions ci-dessous.",
     de: "Stellen Sie dieses Telefon auf das Glas, die Tasse oder die Dose. Drehen Sie mich, um die folgenden Anweisungen zu lesen.",
     el: "Τοποθετήστε αυτό το τηλέφωνο στο ποτήρι, την κούπα ή το κουτί. Περιστρέψτε με για να διαβάσετε τις παρακάτω οδηγίες.",
     he: "שים את הטלפון הזה על הזכוכית, הספל או הפחית. סובב אותי כדי לקרוא את ההוראות למטה.",
@@ -14437,7 +14437,7 @@ export const phrases = {
     "en-UK":
       "Place this phone on the glass, mug, or can and point this phone edge ⇧ at your computer so that the microphone is on your line of sight to the speakers, which are typically in the keyboard. Press Proceed.",
     fi: "Aseta tämä puhelin lasin, mukin tai tölkin päälle ja suuntaa puhelimen reuna ⇧ tietokoneeseesi siten, että mikrofoni on näköetäisyydelläsi kaiuttimiin, jotka ovat yleensä näppäimistössä. Paina Jatka.",
-    fr: "Loading...",
+    fr: "Placez ce téléphone sur le verre, la tasse ou la canette et pointez le bord de ce téléphone ⇧ vers votre ordinateur de sorte que le microphone soit dans votre champ de vision des haut-parleurs, qui se trouvent généralement dans le clavier. Appuyez sur Continuer.",
     de: "Platzieren Sie dieses Telefon auf dem Glas, Becher oder der Dose und richten Sie diese Telefonkante ⇧ auf Ihren Computer, sodass das Mikrofon in Ihrem Sichtfeld zu den Lautsprechern liegt, die sich normalerweise in der Tastatur befinden. Drücken Sie Weiter.",
     el: "Τοποθετήστε αυτό το τηλέφωνο στο γυαλί, την κούπα ή το κουτί και στρέψτε αυτήν την άκρη του τηλεφώνου ⇧ στον υπολογιστή σας, έτσι ώστε το μικρόφωνο να βρίσκεται στην οπτική σας γωνία προς τα ηχεία, τα οποία είναι συνήθως στο πληκτρολόγιο. Πατήστε Συνέχεια.",
     he: "הנח את הטלפון הזה על הזכוכית, הספל או הפחית והפנה את קצה הטלפון הזה ⇧ אל המחשב שלך כך שהמיקרופון יהיה בקו הראייה שלך אל הרמקולים, שנמצאים בדרך כלל במקלדת. לחץ על המשך.",
@@ -14480,7 +14480,7 @@ export const phrases = {
     nl: "Gebruikmakend van microfoon xxx",
     "en-UK": "Using microphone xxx",
     fi: "Käytä mikrofonia xxx",
-    fr: "Loading...",
+    fr: "Utilisation du microphone xxx",
     de: "Verwendung von Mikrofon xxx",
     el: "Χρήση μικροφώνου xxx",
     he: "בשימוש במיקרופון xxx",
@@ -14523,7 +14523,7 @@ export const phrases = {
     nl: "Uw USB-microfoon gebruiken",
     "en-UK": "Using your USB microphone",
     fi: "Käyttämällä USB-mikrofonia",
-    fr: "Loading...",
+    fr: "Utiliser votre microphone USB",
     de: "Mit Ihrem USB-Mikrofon",
     el: "Χρησιμοποιώντας το μικρόφωνό σας USB",
     he: "שימוש במיקרופון ה-USB שלך",
@@ -14567,7 +14567,7 @@ export const phrases = {
     "en-UK":
       "Click OK on your mobile phone, and follow the instructions there.",
     fi: "Napsauta OK älypuhelimellasi ja seuraa siellä olevia ohjeita.",
-    fr: "Loading...",
+    fr: "Cliquez sur Ok sur votre smartphone et suivez les instructions là-bas.",
     de: "Klicken Sie auf Ihrem Smartphone auf OK und folgen Sie den Anweisungen dort.",
     el: "Κάντε κλικ στο Ok στο smartphone σας και ακολουθήστε τις οδηγίες εκεί.",
     he: "לחץ על אישור בסמארטפון שלך, ובצע את ההוראות שם.",
@@ -14614,7 +14614,7 @@ export const phrases = {
     "en-UK":
       "The loudspeaker is now calibrated. DO NOT TOUCH THE VOLUME. Please put away whatever microphone you used. Now you can calibrate microphones, one at a time.",
     fi: "Kaiutin on nyt kalibroitu. ÄLÄ KOSKE ÄÄNENVOIMAKKUUTTA. Laita pois käyttämäsi mikrofoni. Nyt voit kalibroida mikrofonit yksi kerrallaan.",
-    fr: "Loading...",
+    fr: "Le haut-parleur est maintenant calibré. NE TOUCHEZ PAS AU VOLUME. Veuillez ranger le microphone que vous avez utilisé. Maintenant, vous pouvez calibrer les microphones, un par un.",
     de: "Der Lautsprecher ist nun kalibriert. BERÜHREN SIE NICHT DAS VOLUMEN. Bitte legen Sie das verwendete Mikrofon weg. Jetzt können Sie die Mikrofone einzeln kalibrieren.",
     el: "Ο ηχείο είναι τώρα βαθμονομημένο. ΜΗΝ ΑΓΓΙΖΕΤΕ ΤΟΝ ΉΧΟ. Παρακαλούμε αποθηκεύστε το μικρόφωνο που χρησιμοποιήσατε. Τώρα μπορείτε να βαθμονομήσετε τα μικρόφωνα, ένα τη φορά.",
     he: "הרמקול מכונה כעת. אסור לגעת בעוצמת הקול. אנא הסירו את המיקרופון שהשתמשתם בו. כעת ניתן לכוון מיקרופונים, אחד לכל פעם.",
@@ -14661,7 +14661,7 @@ export const phrases = {
     "en-UK":
       "The microphone is now calibrated, and was added to the profile library. Please put it away. You can calibrate more microphones if you like.",
     fi: "Mikrofoni on nyt kalibroitu ja lisätty profiilikirjastoon. Laita se pois. Voit kalibroida lisää mikrofoneja, jos haluat.",
-    fr: "Loading...",
+    fr: "Le microphone est maintenant calibré et a été ajouté à la bibliothèque de profils. Veuillez le ranger. Vous pouvez calibrer d'autres microphones si vous le souhaitez.",
     de: "Das Mikrofon ist jetzt kalibriert und wurde der Profilbibliothek hinzugefügt. Bitte legen Sie es weg. Sie können bei Bedarf weitere Mikrofone kalibrieren.",
     el: "Το μικρόφωνο είναι τώρα βαθμονομημένο και προστέθηκε στη βιβλιοθήκη προφίλ. Παρακαλώ αφήστε το μακριά. Μπορείτε να βαθμονομήσετε περισσότερα μικρόφωνα αν θέλετε.",
     he: "המיקרופון מכויל כעת, והוא נוסף לספריית הפרופילים. בבקשה הנח אותו. אתה יכול לכייל יותר מיקרופונים אם תרצה.",
@@ -14708,7 +14708,7 @@ export const phrases = {
     "en-UK":
       "Thanks. The loudspeaker is now calibrated, and you can put away the smartphone. IMPORTANT: DO NOT TOUCH THE VOLUME CONTROL until the experiment is done. Changing the volume will ruin the loudspeaker calibration and invalidate all results. ",
     fi: "Kiitos. Kaiutin on nyt kalibroitu, ja voit laittaa älypuhelimen pois. TÄRKEÄÄ: ÄLÄ KOSKE ÄÄNENVOIMAKKUUDEN SÄÄTÖÄ ennen kuin koe on suoritettu. Äänenvoimakkuuden muuttaminen pilaa kaiuttimen kalibroinnin ja mitätöi kaikki tulokset.",
-    fr: "Loading...",
+    fr: "Merci. Le haut-parleur est maintenant calibré, et vous pouvez ranger le smartphone. IMPORTANT : NE TOUCHEZ PAS À LA COMMANDE DE VOLUME jusqu'à ce que l'expérience soit terminée. Changer le volume ruinerait la calibration du haut-parleur et invaliderait tous les résultats.",
     de: "Danke. Der Lautsprecher ist nun kalibriert und Sie können das Smartphone weglegen. WICHTIG: BERÜHREN SIE DEN LAUTSTÄRKEREGLER NICHT, bis das Experiment abgeschlossen ist. Durch Ändern der Lautstärke wird die Lautsprecherkalibrierung zerstört und alle Ergebnisse ungültig.",
     el: "Ευχαριστώ. Το μεγάφωνο είναι πλέον βαθμονομημένο και μπορείτε να αφήσετε το smartphone. ΣΗΜΑΝΤΙΚΟ: ΜΗΝ ΑΓΓΙΖΕΤΕ ΤΟ ΕΛΕΓΧΟ ΕΝΤΑΣΗΣ μέχρι να ολοκληρωθεί το πείραμα. Η αλλαγή της έντασης θα καταστρέψει τη βαθμονόμηση του ηχείου και θα ακυρώσει όλα τα αποτελέσματα.",
     he: "תודה. הרמקול מכוון כעת, ותוכל לשים את הסמארטפון בצד. חשוב: אל תיגע בבקרת העוצמה עד שהניסוי יסתיים. שינוי העוצמה יפגע בכיוון הרמקול ויפסיק את תוקף כל התוצאות.",
@@ -14751,7 +14751,7 @@ export const phrases = {
     nl: "RC_soundCalibrationLoudspeakerBad",
     "en-UK": "RC_soundCalibrationLoudspeakerBad",
     fi: "RC_soundCalibrationLoudspeakerBad",
-    fr: "Loading...",
+    fr: "RC_calibrageSonHautParleurMauvais",
     de: "RC_SoundkalibrierungLautsprecherSchlecht",
     el: "RC_soundCalibrationLoudspeakerBad",
     he: "RC_קידוד צליל מדורג רע",
@@ -14798,7 +14798,7 @@ export const phrases = {
     "en-UK":
       "Thanks. The loudspeaker is now calibrated, and you can put away the smartphone (or USB microphone). IMPORTANT: DO NOT TOUCH THE VOLUME CONTROL until the experiment is done. Changing the volume will ruin the loudspeaker calibration and invalidate all results. ",
     fi: "Kiitos. Kaiutin on nyt kalibroitu, ja voit laittaa älypuhelimen (tai USB-mikrofonin) pois. TÄRKEÄÄ: ÄLÄ KOSKE ÄÄNENVOIMAKKUUDEN SÄÄTIMIIN ennen kuin koe on valmis. Äänenvoimakkuuden muuttaminen pilaa kaiuttimen kalibroinnin ja mitätöi kaikki tulokset.",
-    fr: "Loading...",
+    fr: "Merci. Le haut-parleur est maintenant calibré, et vous pouvez ranger le smartphone (ou le microphone USB). IMPORTANT : NE TOUCHEZ PAS LE CONTRÔLE DE VOLUME jusqu'à ce que l'expérience soit terminée. Changer le volume ruinerait la calibration du haut-parleur et invaliderait tous les résultats.",
     de: "Dankeschön. Der Lautsprecher ist nun kalibriert und du kannst das Smartphone (oder das USB-Mikrofon) beiseite legen. WICHTIG: BERÜHRE NICHT DIE LAUTSTÄRKEREGELUNG, bis das Experiment abgeschlossen ist. Eine Änderung der Lautstärke würde die Lautsprecherkalibrierung beeinträchtigen und alle Ergebnisse ungültig machen.",
     el: "Ευχαριστώ. Το μεγάφωνο είναι πλέον βαθμονομημένο και μπορείτε να αφήσετε το smartphone (ή το μικρόφωνο USB). ΣΗΜΑΝΤΙΚΟ: ΜΗΝ ΑΓΓΙΖΕΤΕ ΤΟ ΕΛΕΓΧΟ ΕΝΤΑΣΗΣ μέχρι να ολοκληρωθεί το πείραμα. Η αλλαγή της έντασης θα καταστρέψει τη βαθμονόμηση του ηχείου και θα ακυρώσει όλα τα αποτελέσματα.",
     he: "תודה. הרמקול מכונה כעת, ותוכל לשים את הסמארטפון (או המיקרופון USB) בצד. חשוב: אל תיגע בבקרת העוצמה עד שהניסוי יסתיים. שינוי העוצמה יפגע בכיוון הרמקול ויפסיק את תוקף כל התוצאות.",
@@ -14841,7 +14841,7 @@ export const phrases = {
     nl: "Klik op Ok om door te gaan.\n\n",
     "en-UK": "Click Ok to continue. \n\n",
     fi: "Napsauta OK jatkaaksesi.",
-    fr: "Loading...",
+    fr: "Cliquez sur Ok pour continuer.",
     de: "Klicken Sie auf „OK“, um fortzufahren.\n\n",
     el: "Κάντε κλικ στο ΟΚ για να συνεχίσετε.",
     he: "לחץ על אישור כדי להמשיך.",
@@ -14888,7 +14888,7 @@ export const phrases = {
     "en-UK":
       "To produce accurate sounds, we need to calibrate the loudspeakers. This requires a calibrated microphone. Do you have a smartphone (or USB microphone) handy? \n",
     fi: "Jotta voimme tuottaa tarkkoja ääniä, meidän on kalibroitava kaiuttimet. Tämä vaatii kalibroidun mikrofonin. Onko sinulla älypuhelin (tai USB-mikrofoni) käden ulottuvilla?\n",
-    fr: "Loading...",
+    fr: "Pour produire des sons précis, nous avons besoin de calibrer les haut-parleurs. Cela nécessite un microphone calibré. Avez-vous un smartphone (ou un microphone USB) à portée de main ?",
     de: "Um präzise Klänge zu erzeugen, müssen wir die Lautsprecher kalibrieren. Hierzu ist ein kalibriertes Mikrofon erforderlich. Haben Sie ein Smartphone (oder ein USB-Mikrofon) zur Hand?\n",
     el: "Για να παράγουμε ακριβείς ήχους, πρέπει να βαθμονομήσουμε τα μεγάφωνα. Αυτό απαιτεί ένα βαθμονομημένο μικρόφωνο. Έχετε εύχρηστο smartphone (ή μικρόφωνο USB);\n",
     he: "כדי להפיק צלילים מדויקים, עלינו לכייל את הרמקולים. זה דורש מיקרופון מכויל. האם יש לך סמארטפון (או מיקרופון USB) בהישג יד?\n",
@@ -14935,7 +14935,7 @@ export const phrases = {
     "en-UK":
       "❌ Sorry! This xxx is not in the profile library, so it can't be used to calibrate. If you have another phone that you'd like to try, just point its camera at the QR code and tap the link that appears in its screen.",
     fi: "❌ Anteeksi! Tämä xxx ei ole profiilikirjastossa, joten sitä ei voi käyttää kalibrointiin. Jos sinulla on toinen puhelin, jota haluat kokeilla, kohdista sen kamera QR-koodiin ja napauta sen näytölle ilmestyvää linkkiä.",
-    fr: "Loading...",
+    fr: "Désolé ! Ce xxx n'est pas dans la bibliothèque de profils, il ne peut donc pas être utilisé pour l'étalonnage. Si vous avez un autre téléphone que vous souhaitez essayer, il vous suffit de pointer sa caméra sur le code QR et de toucher le lien qui apparaît à l'écran.",
     de: "❌ Entschuldigung! Dieses xxx befindet sich nicht in der Profilbibliothek und kann daher nicht zur Kalibrierung verwendet werden. Wenn Sie ein anderes Telefon ausprobieren möchten, richten Sie die Kamera einfach auf den QR-Code und tippen Sie auf den Link, der auf dem Bildschirm angezeigt wird.",
     el: "❌ Συγγνώμη! Αυτό το xxx δεν βρίσκεται στη βιβλιοθήκη προφίλ, επομένως δεν μπορεί να χρησιμοποιηθεί για βαθμονόμηση. Εάν έχετε άλλο τηλέφωνο που θέλετε να δοκιμάσετε, απλώς στρέψτε την κάμερά του στον κωδικό QR και πατήστε τον σύνδεσμο που εμφανίζεται στην οθόνη του.",
     he: "❌ מצטערים! ה-xxx הזה אינו נמצא בספריית הפרופילים, ולכן אין אפשרות לכיוון אותו לצורך כיבוי. אם יש לך טלפון נוסף שתרצה לנסות, פשוט הפנה את המצלמה שלו לקוד ה-QR והקש על הקישור שמופיע במסך שלו.",
@@ -14981,7 +14981,7 @@ export const phrases = {
     "en-UK":
       "✅ Yay! Your xxx loudspeaker is in the profile library, and will be corrected to play sound accurately.",
     fi: "✅ Jee! xxx kaiutin on profiilikirjastossa ja se korjataan toistamaan ääntä tarkasti.",
-    fr: "Loading...",
+    fr: "✅ Hourra ! Votre haut-parleur xxx est dans la bibliothèque de profils et sera corrigé pour reproduire le son avec précision.",
     de: "✅ Juhu! Ihr xxx-Lautsprecher befindet sich in der Profilbibliothek und wird korrigiert, um den Ton präzise wiederzugeben.",
     el: "✅ Ωραία! Το ηχείο xxx σας βρίσκεται στη βιβλιοθήκη προφίλ και θα διορθωθεί για να αναπαράγει ήχο με ακρίβεια.",
     he: "✅ יאיי! הרמקול xxx שלך נמצא בספריית הפרופילים, והוא יתוקן כדי להשמיע צליל בצורה מדויקת.",
@@ -15028,7 +15028,7 @@ export const phrases = {
     "en-UK":
       "✅ Hooray! Your xxx microphone is in the profile library, so it can calibrate your computer's loudspeakers.",
     fi: "✅ Jee! xxx-mikrofonisi on profiilikirjastossa, joten se voi kalibroida tietokoneesi kaiuttimet.",
-    fr: "Loading...",
+    fr: "✅ Hourra ! Votre microphone xxx est dans la bibliothèque de profil, il peut donc calibrer les haut-parleurs de votre ordinateur.",
     de: "✅ Juhu! Dein xxx Mikrofon befindet sich in der Profilbibliothek, sodass es die Lautsprecher deines Computers kalibrieren kann.",
     el: "✅ Ναι! Το μικρόφωνό σας xxx βρίσκεται στη βιβλιοθήκη προφίλ, ώστε να μπορεί να βαθμονομεί τα μεγάφωνα του υπολογιστή σας.",
     he: "✅ יאיי! מיקרופון xxx שלך נמצא בספריית הפרופילים, כך שהוא יכול לכייל את הרמקולים של המחשב שלך.",
@@ -15075,7 +15075,7 @@ export const phrases = {
     "en-UK":
       "Thank you for participating in our survey. Do not quit. Hit Proceed so we can save the results and redirect you back to Prolific with your completion code. Thanks.",
     fi: "Kiitos osallistumisestasi kyselyymme. Älä lopeta. Napsauta Jatka, jotta voimme tallentaa tulokset ja ohjata sinut takaisin Prolificiin täydennyskoodillasi. Kiitos.",
-    fr: "Loading...",
+    fr: "Merci d'avoir participé à notre enquête. Ne quittez pas. Appuyez sur Continuer pour que nous puissions enregistrer les résultats et vous rediriger vers Prolific avec votre code de fin. Merci.",
     de: "Vielen Dank, dass Sie an unserer Umfrage teilgenommen haben. Geben Sie nicht auf. Klicken Sie auf Weiter, damit wir die Ergebnisse speichern und Sie mit Ihrem Abschlusscode zurück zu Prolific weiterleiten können. Vielen Dank.",
     el: "Σας ευχαριστούμε που συμμετείχατε στην έρευνά μας. Μην παραιτηθείς. Πατήστε Συνέχεια για να αποθηκεύσουμε τα αποτελέσματα και να σας ανακατευθύνουμε πίσω στο Prolific με τον κωδικό ολοκλήρωσής σας. Ευχαριστώ.",
     he: 'תודה על השתתפותך בסקר שלנו. אל תפסיק. לחץ על "המשך" כדי שנוכל לשמור את התוצאות ולהפנות אותך בחזרה ל-Prolific עם קוד השלמה שלך. תודה.',
@@ -15118,7 +15118,7 @@ export const phrases = {
     nl: "Nee, beëindig het experiment nu.",
     "en-UK": "No, end experiment now.",
     fi: "Ei, lopeta kokeilu nyt.",
-    fr: "Loading...",
+    fr: "Non, terminez l'expérience maintenant.",
     de: "Nein, Experiment jetzt beenden.",
     el: "Όχι, τερματίστε το πείραμα τώρα.",
     he: "לא, סיים את הניסוי עכשיו.",
@@ -15165,7 +15165,7 @@ export const phrases = {
     "en-UK":
       "MAX VOLUME. NO HEADPHONES. For accurate sound calibration, please maximize your computer's sound volume now, before calibration, and then don't touch the volume until the end of the experiment.\nUSER CAMERA TO GET QR LINK. When the QR code appears below, point your smartphone camera at it, and click the link that appears on your smartphone screen. Then follow the instructions on the smartphone screen.\n——————————————————————————————————————————\nQUIET PLEASE! NOW RECORDING. DO NOT TOUCH THE VOLUME CONTROL.\n——————————————————————————————————————————\nPROBLEM?                                                                                                                                 \n1. The main web page running EasyEyes on your laptop uses the webRTC protocol to talk to the QR-linked webpage on your smartphone. This protocol seeks out the best of several ways to connect. The best is when your phone and computer are both on the same WiFi network.\n                                                                                                                                 \n2. If your smartphone reports an error in the connection, try quitting and restarting the smpartphone browser, or even restarting the smpartphone.\n                                                                                                                             \n3. It's rare, but, if the sound doesn't play, or, after it plays, no Proceed button appears, it means the calibration failed. You can try again by refreshing this browser page. That usually does the trick.",
     fi: "MAKSIMIÄÄNI. EI KUULOKKEITA. Tarkkaa äänikalibrointia varten säädä tietokoneen äänenvoimakkuus nyt ennen kalibrointia, äläkä sitten koske äänenvoimakkuuteen ennen kokeen loppua.\nKÄYTÄ KAMERAASI QR-LINKIN SAAMISEEN. Kun QR-koodi ilmestyy alle, osoita älypuhelimen kamera siihen ja napsauta älypuhelimen näytöllä näkyvää linkkiä. Noudata sitten älypuhelimen näytöllä olevia ohjeita.\n——————————————————————————————————————————\nOLE HILJAA! NYT TALLENNETAAN. ÄLÄ KOSKE ÄÄNEN SÄÄTIMIIN.\n——————————————————————————————————————————\nONGELMA?\n1. EasyEyesin pääsivu kannettavassasi käyttää webRTC-protokollaa kommunikoidakseen QR-linkitetyn sivun kanssa älypuhelimessasi. Tämä protokolla etsii parhaan tavan yhdistää. Paras tapa on, kun puhelimesi ja tietokoneesi ovat samassa WiFi-verkossa.\n2. Jos älypuhelimesi ilmoittaa virheestä yhteydessä, kokeile lopettaa ja käynnistää älypuhelimen selain uudelleen tai jopa käynnistää älypuhelin uudelleen.\n3. Se on harvinaista, mutta jos ääni ei toistu tai toiston jälkeen Eteenpäin-painiketta ei ilmesty, se tarkoittaa, että kalibrointi epäonnistui. Voit yrittää uudelleen päivittämällä tämän selainikkunan. Se yleensä auttaa.",
-    fr: "Loading...",
+    fr: "\"\"\"\nVOLUME MAXIMUM. PAS D'ÉCOUTEURS. Pour un étalonnage sonore précis, veuillez maximiser le volume sonore de votre ordinateur maintenant, avant l'étalonnage, puis ne touchez pas au volume jusqu'à la fin de l'expérience.\nUTILISEZ LA CAMÉRA DE VOTRE UTILISATEUR POUR OBTENIR LE LIEN QR. Lorsque le code QR apparaît ci-dessous, pointez la caméra de votre smartphone dessus et cliquez sur le lien qui apparaît sur l'écran de votre smartphone. Suivez ensuite les instructions qui s'affichent sur l'écran du smartphone.\n——————————————————————————————————————————\nS'IL VOUS PLAÎT, SILENCE ! ENREGISTREMENT EN COURS. NE TOUCHEZ PAS AU CONTRÔLE DE VOLUME.\n——————————————————————————————————————————\nPROBLÈME ?\n1. La page web principale exécutant EasyEyes sur votre ordinateur portable utilise le protocole webRTC pour communiquer avec la page web liée au QR sur votre smartphone. Ce protocole recherche la meilleure façon de se connecter parmi plusieurs possibilités. La meilleure façon est lorsque votre téléphone et votre ordinateur sont tous deux connectés au même réseau WiFi.\n2. Si votre smartphone signale une erreur de connexion, essayez de quitter et de redémarrer le navigateur de votre smartphone, voire de redémarrer le smartphone lui-même.\n3. C'est rare, mais si le son ne se joue pas, ou si après avoir joué, aucun bouton \"Continuer\" n'apparaît, cela signifie que l'étalonnage a échoué. Vous pouvez réessayer en actualisant cette page du navigateur. Cela fonctionne généralement.",
     de: "MAXIMALES VOLUMEN. KEINE KOPFHÖRER. Für eine genaue Klangkalibrierung maximieren Sie bitte jetzt vor der Kalibrierung die Lautstärke Ihres Computers und verändern Sie die Lautstärke dann nicht, bis das Experiment beendet ist.\nBENUTZERKAMERA, UM QR-LINK ZU ERHALTEN. Wenn der QR-Code unten angezeigt wird, richten Sie die Kamera Ihres Smartphones darauf und klicken Sie auf den Link, der auf dem Bildschirm Ihres Smartphones angezeigt wird. Folgen Sie dann den Anweisungen auf dem Smartphone-Bildschirm.\n—————————————————————————————————————————\nRUHIG BITTE! JETZT AUFZEICHNUNG. BERÜHREN SIE NICHT DEN LAUTSTÄRKEREGLER.\n—————————————————————————————————————————\nPROBLEM?\n1. Die Hauptwebseite, auf der EasyEyes auf Ihrem Laptop ausgeführt wird, verwendet das webRTC-Protokoll, um mit der QR-verknüpften Webseite auf Ihrem Smartphone zu kommunizieren. Dieses Protokoll sucht nach der besten von mehreren Verbindungsarten. Am besten ist es, wenn sich Ihr Telefon und Ihr Computer im selben WLAN-Netzwerk befinden.\n                                                                                                                                 \n2. Wenn Ihr Smartphone einen Verbindungsfehler meldet, versuchen Sie, den smpartphone-Browser zu beenden und neu zu starten oder sogar das smpartphone neu zu starten.\n                                                                                                                             \n3. Es kommt selten vor, aber wenn der Ton nicht abgespielt wird oder nach der Wiedergabe keine Schaltfläche „Weiter“ angezeigt wird, bedeutet dies, dass die Kalibrierung fehlgeschlagen ist. Sie können es erneut versuchen, indem Sie diese Browserseite aktualisieren. Das reicht normalerweise aus.",
     el: "ΜΕΓΙΣΤΟΣ ΟΓΚΟΣ. ΟΧΙ ΑΚΟΥΣΤΙΚΑ. Για ακριβή βαθμονόμηση ήχου, μεγιστοποιήστε την ένταση ήχου του υπολογιστή σας τώρα, πριν από τη βαθμονόμηση και, στη συνέχεια, μην αγγίζετε την ένταση μέχρι το τέλος του πειράματος.\nΧΡΗΣΤΗΣ ΚΑΜΕΡΑ ΓΙΑ ΛΗΨΗ ΣΥΝΔΕΣΜΟΥ QR. Όταν εμφανιστεί ο κωδικός QR παρακάτω, στρέψτε την κάμερα του smartphone σας και κάντε κλικ στον σύνδεσμο που εμφανίζεται στην οθόνη του smartphone σας. Στη συνέχεια, ακολουθήστε τις οδηγίες στην οθόνη του smartphone.\n——————————————————————————————————————————\nΗΣΥΧΙΑ ΠΑΡΑΚΑΛΩ! ΤΩΡΑ ΕΓΓΡΑΦΗ. ΜΗΝ ΑΓΓΙΖΕΤΕ ΤΟ ΕΛΕΓΧΟ ΕΝΤΑΣΗΣ.\n——————————————————————————————————————————\nΠΡΟΒΛΗΜΑ?\n1. Η κύρια ιστοσελίδα που εκτελεί το EasyEyes στον φορητό υπολογιστή σας χρησιμοποιεί το πρωτόκολλο webRTC για να μιλήσει στην ιστοσελίδα που συνδέεται με QR στο smartphone σας. Αυτό το πρωτόκολλο αναζητά τον καλύτερο από πολλούς τρόπους σύνδεσης. Το καλύτερο είναι όταν το τηλέφωνο και ο υπολογιστής σας βρίσκονται και τα δύο στο ίδιο δίκτυο WiFi.\n                                                                                                                                 \n2. Εάν το smartphone σας αναφέρει ένα σφάλμα στη σύνδεση, δοκιμάστε να κλείσετε και να επανεκκινήσετε το πρόγραμμα περιήγησης smpartphone ή ακόμα και να επανεκκινήσετε το smpartphone.\n                                                                                                                             \n3. Είναι σπάνιο, αλλά, εάν ο ήχος δεν παίζει ή, μετά την αναπαραγωγή του, δεν εμφανίζεται το κουμπί Συνέχεια, σημαίνει ότι η βαθμονόμηση απέτυχε. Μπορείτε να δοκιμάσετε ξανά ανανεώνοντας αυτήν τη σελίδα του προγράμματος περιήγησης. Αυτό συνήθως κάνει το κόλπο.",
     he: "ווליום מקסימלי. ללא אוזניות. לכיול קול מדויק, נא למקסם את עוצמת הקול של המחשב שלך כעת, לפני הכיול, ולאחר מכן אל תיגע בעוצמת הקול עד סוף הניסוי.\nמצלמת משתמש כדי לקבל קישור QR. כאשר קוד ה-QR מופיע למטה, כוון אליו את מצלמת הטלפון החכם שלך ולחץ על הקישור שמופיע על מסך הטלפון החכם שלך. לאחר מכן עקוב אחר ההוראות במסך הסמארטפון.\n—————————————————————————————————————————\nשקט בבקשה! עכשיו בהקלטה. אל תיגע בבקרת עוצמת הקול.\n—————————————————————————————————————————\nבְּעָיָה?\n1. דף האינטרנט הראשי שבו פועל EasyEyes במחשב הנייד שלך משתמש בפרוטוקול webRTC כדי לדבר עם דף האינטרנט המקושר QR בטלפון החכם שלך. פרוטוקול זה מחפש את המיטב מבין מספר דרכים להתחבר. הטוב ביותר הוא כאשר הטלפון והמחשב שלך נמצאים שניהם באותה רשת WiFi.\n                                                                                                                                 \n2. אם הטלפון החכם שלך מדווח על שגיאה בחיבור, נסה לצאת ולהפעיל מחדש את דפדפן smpartphone, או אפילו להפעיל מחדש את smpartphone.\n                                                                                                                             \n3. זה נדיר, אבל אם הצליל לא מתנגן, או, אחרי שהוא מתנגן, לא מופיע כפתור המשך, זה אומר שהכיול נכשל. אתה יכול לנסות שוב על ידי רענון דף דפדפן זה. זה בדרך כלל עושה את העבודה.",
@@ -15212,7 +15212,7 @@ export const phrases = {
     "en-UK":
       "Alas, the RMS fitting error of 111 dB exceeds the 222 dB tolerance, so the loudspeaker must be calibrated again.",
     fi: "Valitettavasti 111 dB:n RMS-sovitusvirhe ylittää 222 dB:n toleranssin, joten kaiutin on kalibroitava uudelleen.",
-    fr: "Loading...",
+    fr: "Hélas, l'erreur d'ajustement RMS de 111 dB dépasse la tolérance de 222 dB, donc le haut-parleur doit être recalibré à nouveau.",
     de: "Leider überschreitet der RMS-Anpassungsfehler von 111 dB die Toleranz von 222 dB, daher muss der Lautsprecher erneut kalibriert werden.",
     el: "Δυστυχώς, το σφάλμα προσαρμογής RMS των 111 dB υπερβαίνει την ανοχή των 222 dB, επομένως το μεγάφωνο πρέπει να βαθμονομηθεί ξανά.",
     he: "למרבה הצער, שגיאת ההתאמה של RMS של 111 dB חורגת מהסובלנות של 222 dB, ולכן יש לכייל שוב את הרמקול.",
@@ -15255,7 +15255,7 @@ export const phrases = {
     nl: "Meet het geluidsniveau bij 1000 Hz",
     "en-UK": "Measure Sound Level at 1000 Hz",
     fi: "Mittaa äänenvoimakkuus 1000 Hz:n taajuudella",
-    fr: "Loading...",
+    fr: "Mesurer le niveau sonore à 1000 Hz",
     de: "Messen Sie den Schallpegel bei 1000 Hz",
     el: "Μέτρηση επιπέδου ήχου στα 1000 Hz",
     he: "מדידת רמת קול ב-1000 הרץ",
@@ -15298,7 +15298,7 @@ export const phrases = {
     nl: "Meten van het geluidsniveau bij alle frequenties",
     "en-UK": "Measure Sound Level at All Frequencies",
     fi: "Mittaa äänitaso kaikilla taajuuksilla",
-    fr: "Loading...",
+    fr: "Mesurer le niveau sonore à toutes les fréquences",
     de: "Messen Sie den Schallpegel bei allen Frequenzen",
     el: "Μετρήστε το επίπεδο ήχου σε όλες τις συχνότητες",
     he: "למדוד את רמת הקול בכל התדרים",
@@ -15341,7 +15341,7 @@ export const phrases = {
     nl: "Ja, ga verder.",
     "en-UK": "Yes, carry on.",
     fi: "Kyllä, jatka.",
-    fr: "Loading...",
+    fr: "Oui, continuez.",
     de: "Ja, weiter.",
     el: "Ναι, συνεχίστε.",
     he: "כן, המשך.",
@@ -15384,7 +15384,7 @@ export const phrases = {
     nl: "🤫Stilte alstublieft. Nu opnemen. Niet storen. 🤫",
     "en-UK": "🤫 Silence please.  Now recording.  Do not disturb. 🤫",
     fi: "🤫 Hiljaisuus kiitos. Nyt äänitys. Älä häiritse. 🤫",
-    fr: "Loading...",
+    fr: "🤫 Silence s'il vous plaît. Enregistrement en cours. Ne pas déranger. 🤫",
     de: "🤫 Ruhe bitte. Jetzt Aufnahme. Bitte nicht stören. 🤫",
     el: "🤫 Σιωπή παρακαλώ. Τώρα ηχογράφηση. Μην ενοχλείτε. 🤫",
     he: "🤫 שתיקה בבקשה. עכשיו הקלטה. אל תפריע. 🤫",
@@ -15427,7 +15427,7 @@ export const phrases = {
     nl: "Ontslag nemen",
     "en-UK": "Quit",
     fi: "Lopettaa",
-    fr: "Loading...",
+    fr: "Quitter",
     de: "Aufhören",
     el: "Εγκαταλείπω",
     he: "לְהַפְסִיק",
@@ -15470,7 +15470,7 @@ export const phrases = {
     nl: "Opnieuw identificeren",
     "en-UK": "Re-Identify",
     fi: "Tunnista uudelleen",
-    fr: "Loading...",
+    fr: "Ré-identifier",
     de: "Neuidentifizierung",
     el: "Επαναπροσδιορισμός",
     he: "שימות מחדש",
@@ -15513,7 +15513,7 @@ export const phrases = {
     nl: "Opnieuw opnemen",
     "en-UK": "Re-Record",
     fi: "Tallenna uudelleen",
-    fr: "Loading...",
+    fr: "Re-enregistrer",
     de: "Neu aufnehmen",
     el: "Επανεγγραφή",
     he: "הקלט מחדש",
@@ -15556,7 +15556,7 @@ export const phrases = {
     nl: "Smartphone",
     "en-UK": "Smartphone",
     fi: "Älypuhelin",
-    fr: "Loading...",
+    fr: "Smartphone",
     de: "Smartphone",
     el: "Smartphone",
     he: "טלפון חכם",
@@ -15599,7 +15599,7 @@ export const phrases = {
     nl: "USB",
     "en-UK": "USB",
     fi: "USB",
-    fr: "Loading...",
+    fr: "USB",
     de: "USB",
     el: "USB",
     he: "יו אס בי",
@@ -15642,7 +15642,7 @@ export const phrases = {
     nl: "Geen",
     "en-UK": "None",
     fi: "Ei mitään",
-    fr: "Loading...",
+    fr: "Aucun",
     de: "Keiner",
     el: "Κανένας",
     he: "אין",
@@ -15689,7 +15689,7 @@ export const phrases = {
     "en-UK":
       'Progress is displayed in the main experiment window. Please go there now, by clicking the "EasyEyes Experiment" tab above.',
     fi: '"Edistyminen näkyy pääkokeen ikkunassa. Siirry sinne nyt napsauttamalla yläpuolella olevaa "EasyEyes-koe" -välilehteä."',
-    fr: "Loading...",
+    fr: '"La progression est affichée dans la fenêtre principale de l\'expérience. Veuillez vous y rendre maintenant en cliquant sur l\'onglet "Expérience EasyEyes" ci-dessus."',
     de: "Der Fortschritt wird im Hauptfenster des Experiments angezeigt. Bitte gehen Sie jetzt dorthin, indem Sie oben auf die Registerkarte „EasyEyes Experiment“ klicken.",
     el: 'Η πρόοδος εμφανίζεται στο κύριο παράθυρο πειράματος. Μεταβείτε εκεί τώρα, κάνοντας κλικ στην καρτέλα "EasyEyes Experiment" παραπάνω.',
     he: 'ההתקדמות מוצגת בחלון הניסוי הראשי. נא ללכת לשם עכשיו, על ידי לחיצה על הכרטיסייה "ניסוי EasyEyes" למעלה.',
@@ -15732,7 +15732,7 @@ export const phrases = {
     nl: "Beginnend ...",
     "en-UK": "Starting ...",
     fi: "Aloittaen...",
-    fr: "Loading...",
+    fr: "Commencer ...",
     de: "Beginnend ...",
     el: "Ξεκινώντας ...",
     he: "מתחיל...",
@@ -17763,7 +17763,7 @@ export const phrases = {
   T_doNotClose: {
     "en-US":
       "Thank you. You're done. DO NOT CLOSE THIS WINDOW. It will close once your data are safely saved. Closing this window will prevent saving of your data, and they will be lost. This may take a few minutes. Thank you for your patience.",
-    ar: "Loading...",
+    ar: "شكراً. لقد انتهيت. لا تقم بإغلاق هذه النافذة. ستغلق بمجرد حفظ بياناتك بأمان. إغلاق هذه النافذة سيمنع حفظ بياناتك وسيتم فقدها. قد يستغرق ذلك بضع دقائق. شكراً على صبرك.",
     hy: "Շնորհակալություն. Վերջացրել ես. ՄԻ ՓԱԿԵՔ ԱՅՍ ԼՈՒՍԱՄՈՒՏԸ։ Այն կփակվի, երբ ձեր տվյալները ապահով պահպանվեն: Այս պատուհանը փակելը կկանխի ձեր տվյալների պահպանումը, և դրանք կկորչեն: Սա կարող է տևել մի քանի րոպե: Շնորհակալություն Ձեր համբերության համար.",
     bg: "Благодаря. Готови сте. НЕ ЗАТВАРЯЙТЕ ТОЗИ ПРОЗОРЕЦ. Той ще се затвори, след като вашите данни бъдат безопасно запазени. Затварянето на този прозорец ще предотврати запазването на вашите данни и те ще бъдат загубени. Това може да отнеме няколко минути. Благодарим ви за търпението.",
     "zh-CN":
@@ -17809,7 +17809,7 @@ export const phrases = {
   },
   T_escapeToQuit: {
     "en-US": "(Quit anytime by pressing ESCAPE.)",
-    ar: "Loading...",
+    ar: "(اضغط على ESCAPE في أي وقت للخروج.)",
     hy: "(Դադարեցնել ցանկացած պահին սեղմելով ESCAPE ստեղնը։)",
     bg: "(Излезте по всяко време, като натиснете ESCAPE.)",
     "zh-CN": "（在任何时候按Esc键以退出。）",
@@ -17852,7 +17852,7 @@ export const phrases = {
   },
   T_generatingMovie: {
     "en-US": "Making movie.",
-    ar: "Loading...",
+    ar: "صنع فيلم.",
     hy: "«Ֆիլմի ստեղծումը»։",
     bg: "Създаване на филм.",
     "zh-CN": "制作电影。",
@@ -17896,7 +17896,7 @@ export const phrases = {
   T_guessingGame: {
     "en-US":
       "The letter size and spacing vary from big and easy down to tiny and hard. You can't get much more than two-thirds right, so relax. Think of it as a guessing game, and just get as many as you can. You'll hear a beep whenever you're right.",
-    ar: "Loading...",
+    ar: "تختلف حجم الحروف والمسافة من كبيرة وسهلة إلى صغيرة وصعبة. لا يمكنك الحصول على أكثر من ثلثين صحيحة، لذا استرخ. فكر فيها كلعبة تخمين، واحصل على أكبر عدد ممكن. ستسمع صوت إنذار كلما كنت على حق.",
     hy: "Տառերի չափը և տարածությունը տատանվում են՝ մեծ և հեշտից մինչև փոքր և կոշտ: Երկու երրորդից ավելի ճիշտ չեք կարող ստանալ, այնպես որ հանգստացեք: Մտածեք դրա մասին որպես գուշակության խաղ և ստացեք այնքան, որքան կարող եք: Դուք կլսեք ձայնային ազդանշան, երբ ճիշտ եք:",
     bg: "Размерът и разстоянието между буквите варират от големи и лесни до малки и твърди. Не можете да получите много повече от две трети правилно, така че се отпуснете. Гледайте на това като на игра на отгатване и просто вземете колкото можете повече. Ще чуете звуков сигнал всеки път, когато сте прави.",
     "zh-CN":
@@ -17943,7 +17943,7 @@ export const phrases = {
   T_guessingGameVernier: {
     "en-US":
       "The line shift varies from big and easy down to tiny and hard. You can't get much more than two-thirds right, so relax. Think of it as a guessing game, and just get as many as you can. You'll hear a beep whenever you're right.",
-    ar: "Loading...",
+    ar: "تختلف تحويلة الخط من كبيرة وسهلة إلى صغيرة وصعبة. لا يمكنك الحصول على أكثر من ثلثين صحيحة، لذا استرخ. اعتبرها لعبة تخمين واحصل على أكبر عدد ممكن. ستسمع صوت إنذار عندما تكون على حق.",
     hy: "«Տողի շարքը փոքրից մեծ և հեշտից մինչև փոքր և կարճ է։ Դուք չեք կարող ճիշտ լինել ավելի քան երկու երկրորդից, այնպես որ հանգեցրեք։ Մտածեք այն որպես խաղաղություն՝ և ստացեք այնքան, որ կարող եք։ Դուք կլսեք ձայնը, երբ ճիշտ եք»։",
     bg: "Линията на преместване варира от голяма и лесна до малка и трудна. Не можете да получите повече от две трети правилно, затова се отпуснете. Мислете за това като за игра на отгадване и просто получете колкото можете. Ще чуете звуков сигнал всеки път, когато сте прави.",
     "zh-CN":
@@ -17989,7 +17989,7 @@ export const phrases = {
   },
   T_identifyRepeatedLettersClickIt: {
     "en-US": "Please identify the two middle letters by clicking them below.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحرفين الوسطيين بالنقر عليهما أدناه.",
     hy: "«Խնդրում եմ նշել երկու միջին տառերը սեղմելով դրանց ներքևից»",
     bg: "Моля, идентифицирайте двата средни букви, като ги кликнете по-долу.",
     "zh-CN": "请点击下面的中间两个字母来识别它们。",
@@ -18033,7 +18033,7 @@ export const phrases = {
   T_identifySentenceClickIt: {
     "en-US":
       "All the possible sentences are displayed. Click the one you heard or your best guess.",
-    ar: "Loading...",
+    ar: "يتم عرض جميع الجمل الممكنة. انقر على تلك التي سمعتها أو اختيارك الأفضل.",
     hy: "Բոլոր հնարավոր նախադասությունները ցուցադրվում են: Սեղմեք ձեր լսածը կամ ձեր լավագույն գուշակությունը:",
     bg: "Показват се всички възможни изречения. Щракнете върху това, което сте чули, или върху най-доброто предположение.",
     "zh-CN": "显示所有可能的句子。单击您听到的或您最猜测的一个。",
@@ -18077,7 +18077,7 @@ export const phrases = {
   },
   T_identifyClickItRepeatedLetters: {
     "en-US": "Please identify the two middle letters by clicking them below.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحرفين الوسطيين عن طريق النقر عليهما أدناه.",
     hy: "Խնդրում ենք նույնացնել երկու միջին տառերը՝ սեղմելով դրանք ստորև:",
     bg: "Моля, идентифицирайте двете средни букви, като щракнете върху тях по-долу.",
     "zh-CN": "请点击下面的中间两个字母来识别它们。",
@@ -18121,7 +18121,7 @@ export const phrases = {
   T_identifyClickItSentence: {
     "en-US":
       "All the possible sentences are displayed. Click the one you heard or your best guess.",
-    ar: "Loading...",
+    ar: "يتم عرض جميع الجمل الممكنة. انقر على تلك التي سمعتها أو اختيارك الأفضل.",
     hy: "«Բոլոր հնարավոր բառարանները ցուցադրվում են։ Սեղմեք այն, որը լսեցիք, կամ ձեր ամենալավ եղանակը։»",
     bg: "Всички възможни изречения се показват. Кликнете на това, което сте чули или на вашето най-добро предположение.",
     "zh-CN": "显示所有可能的句子。单击您听到的或您最猜测的一个。",
@@ -18165,7 +18165,7 @@ export const phrases = {
   },
   T_identifyMiddleLetterClickIt: {
     "en-US": "Please identify the middle letter by clicking it below.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحرف الأوسط بالنقر عليه أدناه.",
     hy: "Խնդրում ենք պարզել միջին տառը՝ սեղմելով այն ստորև:",
     bg: "Моля, идентифицирайте средната буква, като я кликнете по-долу.",
     "zh-CN": "请点击下面的中间字母来识别它。",
@@ -18209,7 +18209,7 @@ export const phrases = {
   T_identifyMiddleLetterPressIt: {
     "en-US":
       "Please identify the middle letter by pressing it in the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحرف الوسطى عن طريق الضغط عليه في لوحة المفاتيح.",
     hy: "Խնդրում ենք նույնացնել միջին տառը՝ սեղմելով այն ստեղնաշարի/ստեղնաշարի վրա:",
     bg: "Моля, идентифицирайте средната буква, като я натиснете на клавиатурата/клавиатурата.",
     "zh-CN": "请通过在键盘/小键盘上按中间的字母来识别它。",
@@ -18254,7 +18254,7 @@ export const phrases = {
   T_identifyMiddleLetterPressItOrClickIt: {
     "en-US":
       "Please identify the middle letter by clicking it below or pressing it in the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحرف الأوسط عن طريق النقر عليه أدناه أو الضغط عليه على لوحة المفاتيح.",
     hy: "«Խնդրում ենք ճշգրիտ գագաթին համատեղ համարելու համար սեղմել այն ստորակետով կամ սեղմելով ստեղնաշարի/ստեղնաշարի միջակետը»",
     bg: "Моля, идентифицирайте средната буква, като щракнете върху нея по-долу или я натиснете на клавиатурата/клавиатурата.",
     "zh-CN": "请通过单击下面的中间字母或在键盘/小键盘中按它来识别中间的字母。",
@@ -18299,7 +18299,7 @@ export const phrases = {
   T_identifyVernierClickIt: {
     "en-US":
       "What direction is the upper line shifted? Click a letter below for Left or Right.",
-    ar: "Loading...",
+    ar: "ما هو اتجاه الخط العلوي المنحرف؟ انقر على حرف أدناه لليسار أو اليمين.",
     hy: "Ո՞ր ուղղությամբ է վերին գիծը տեղափոխվում: Սեղմեք ներքևում գտնվող տառի վրա ձախ կամ աջ:",
     bg: "В каква посока е изместена горната линия? Щракнете върху буква по-долу за ляво или дясно.",
     "zh-CN": "“上方的线条向哪个方向移动了？点击下面的字母选择左或右。”",
@@ -18344,7 +18344,7 @@ export const phrases = {
   T_identifyVernierPressIt: {
     "en-US":
       "What direction is the upper line shifted? Press a key for Left or Right.",
-    ar: "Loading...",
+    ar: "ما هو اتجاه الخط العلوي المنحرف؟ اضغط على مفتاح لليسار أو اليمين.",
     hy: "Ո՞ր ուղղությամբ է վերին գիծը տեղափոխվում: Սեղմեք ձախ կամ աջ ստեղնը:",
     bg: "В каква посока е изместена горната линия? Натиснете клавиш за наляво или надясно.",
     "zh-CN": "上面的线向什么方向移动？按向左或向右的键。",
@@ -18389,7 +18389,7 @@ export const phrases = {
   T_identifyVernierPressItOrClickIt: {
     "en-US":
       "What direction is the upper line shifted? Click a letter or press a key for Left or Right.",
-    ar: "Loading...",
+    ar: "ما هو اتجاه الخط العلوي المنحرف؟ انقر على حرف أو اضغط على مفتاح لليسار أو اليمين.",
     hy: "«Որտեղ է բարձր գիծը տեղափոխված: Սեղմեք տառը կամ սեղմեք ստեղնը ձախ կամ աջ համար աջ:»",
     bg: "В коя посока е отместена горната линия? Щракнете върху буква или натиснете клавиш за Ляво или Дясно.",
     "zh-CN": "上面的线向什么方向移动？单击字母或按左键或右键。",
@@ -18434,7 +18434,7 @@ export const phrases = {
   },
   T_identifyLetterClickIt: {
     "en-US": "Please identify the letter by clicking it below.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحرف بالنقر عليه أدناه.",
     hy: "Խնդրում ենք նույնականացնել նամակը՝ սեղմելով այն ստորև:",
     bg: "Моля, идентифицирайте буквата, като щракнете върху нея по-долу.",
     "zh-CN": "请点击下面的字母来识别该字母。",
@@ -18478,7 +18478,7 @@ export const phrases = {
   T_identifyLetterPressIt: {
     "en-US":
       "Please identify the letter by pressing it in the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحرف عن طريق الضغط عليه في لوحة المفاتيح.",
     hy: "«Խնդրում ենք ճիշտ նշել տառը սեղմելով այն ստեղնիկում/ստեղնաշարում».",
     bg: "Моля, идентифицирайте буквата, като я натиснете на клавиатурата/клавиатурата.",
     "zh-CN": "请通过在键盘/小键盘上按该字母来识别该字母。",
@@ -18523,7 +18523,7 @@ export const phrases = {
   T_identifyLetterPressItOrClickIt: {
     "en-US":
       "Please identify the letter by clicking it below or pressing it in the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحرف عن طريق النقر عليه أدناه أو الضغط عليه على لوحة المفاتيح / لوحة المفاتيح.",
     hy: "Խնդրում ենք նույնականացնել տառը՝ սեղմելով այն ստորև կամ սեղմելով այն ստեղնաշարի/ստեղնաշարի վրա:",
     bg: "Моля, идентифицирайте буквата, като щракнете върху нея по-долу или я натиснете на клавиатурата/клавиатурата.",
     "zh-CN": "请通过单击下面的字母或在键盘/小键盘中按它来识别该字母。",
@@ -18568,7 +18568,7 @@ export const phrases = {
   T_identifyClickItRsvpReading: {
     "en-US":
       "Please identify the words that were shown by clicking one word in each column below.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الكلمات التي تم عرضها عن طريق النقر على كلمة واحدة في كل عمود أدناه.",
     hy: "Խնդրում ենք նշել այն բառերը, որոնք ցուցադրվել են՝ սեղմելով ներքևի յուրաքանչյուր սյունակում մեկ բառ:",
     bg: "Моля, идентифицирайте думите, които са показани, като щракнете върху една дума във всяка колона по-долу.",
     "zh-CN": "请通过单击下面每一列中的一个单词来识别所显示的单词。",
@@ -18612,7 +18612,7 @@ export const phrases = {
   },
   "❌T_identifyPressIt": {
     "en-US": "❌ CHANGE T_identifyPressIt → T_identifyMiddleLetterPressIt",
-    ar: "Loading...",
+    ar: "❌ تغيير T_identifyPressIt → T_identifyMiddleLetterPressIt",
     hy: "❌ CHANGE T_identifyPressIt → T_identifyMiddleLetterPressIt",
     bg: "❌ CHANGE T_identifyPressIt → T_identifyMiddleLetterPressIt",
     "zh-CN": "❌ CHANGE T_identifyPressIt → T_identifyMiddleLetterPressIt",
@@ -18656,7 +18656,7 @@ export const phrases = {
   T_identifyPressItRsvpReading: {
     "en-US":
       "Please identify the words that were shown by speaking them aloud.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الكلمات التي تم عرضها عن طريق نطقها بصوت عالٍ.",
     hy: "Խնդրում ենք բացահայտել բառերը, որոնք ցուցադրվել են դրանք բարձրաձայն արտասանելով:",
     bg: "Моля, идентифицирайте показаните думи, като ги произнесете на глас.",
     "zh-CN": "请大声说出所显示的单词。",
@@ -18701,7 +18701,7 @@ export const phrases = {
   T_identifyPressItOrClickItRepeatedLetters: {
     "en-US":
       "Please identify the two middle letters by clicking them below or pressing them on the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحرفين الوسطيين عن طريق النقر عليهما أدناه أو الضغط عليهما على لوحة المفاتيح.",
     hy: "Խնդրում ենք նույնացնել երկու միջին տառերը՝ սեղմելով դրանք ներքևում կամ սեղմելով դրանք ստեղնաշարի/ստեղնաշարի վրա:",
     bg: "Моля, идентифицирайте двете средни букви, като щракнете върху тях по-долу или ги натиснете на клавиатурата/клавиатурата.",
     "zh-CN":
@@ -18748,7 +18748,7 @@ export const phrases = {
   T_identifyPressItRepeatedLetters: {
     "en-US":
       "Please identify the two middle letters, by pressing them on the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "يرجى تحديد الحروف الوسطى الاثنين، عن طريق الضغط عليهما على لوحة المفاتيح/الكيباد.",
     hy: "Խնդրում ենք նույնացնել երկու միջին տառերը՝ սեղմելով դրանք ստեղնաշարի/ստեղնաշարի վրա:",
     bg: "Моля, идентифицирайте двете средни букви, като ги натиснете на клавиатурата/клавиатурата.",
     "zh-CN": "请通过在键盘/小键盘上按下中间的两个字母来识别它们。",
@@ -18793,7 +18793,7 @@ export const phrases = {
   T_keypadDisabled: {
     "en-US":
       "This keypad will be enabled when the desired viewing distance exceeds 111 cm. Until then use your computer's keyboard.",
-    ar: "Loading...",
+    ar: "سيتم تمكين لوحة المفاتيح هذه عندما يتجاوز المسافة المطلوبة للعرض 111 سم. حتى ذلك الحين، استخدم لوحة المفاتيح الخاصة بجهاز الكمبيوتر الخاص بك.",
     hy: "Այս ստեղնախումբը կմիանա, երբ դիտման ցանկալի հեռավորությունը գերազանցի 111 սմ-ը: Մինչ այդ օգտագործեք ձեր համակարգչի ստեղնաշարը:",
     bg: "Тази клавиатура ще бъде активирана, когато желаното разстояние за гледане надвиши 111 см. Дотогава използвайте клавиатурата на вашия компютър.",
     "zh-CN":
@@ -18839,7 +18839,7 @@ export const phrases = {
   },
   T_keypadInactive: {
     "en-US": "❌ T_keypadInactive is obsolete. Use T_keypadDisabled instead.",
-    ar: "Loading...",
+    ar: '"""\n❌ T_keypadInactive قديم وغير مستخدم. استخدم T_keypadDisabled بدلاً من ذلك.',
     hy: "❌ T_keypadInactive արդեն անհասանելի է։ Օգտագործեք T_keypadDisabled տեսակը այսքանը։",
     bg: "❌ T_keypadInactive е остарял. Използвайте T_keypadDisabled вместо това.",
     "zh-CN": "❌ T_keypadInactive 已过时。请改用 T_keypadDisabled。",
@@ -18883,7 +18883,7 @@ export const phrases = {
   T_keypadFrozen: {
     "en-US":
       "If this screen freezes, please reconnect by pointing your smartphone camera at the QR code on your computer screen. When a link appears, touch it with your finger.",
-    ar: "Loading...",
+    ar: "إذا تجمد الشاشة، يرجى إعادة الاتصال عن طريق توجيه كاميرا هاتفك الذكي إلى رمز الاستجابة السريعة على شاشة الكمبيوتر الخاص بك. عند ظهور الرابط، اضغط عليه بإصبعك.",
     hy: "Եթե ​​այս էկրանը սառչում է, խնդրում ենք նորից միացնել՝ ձեր սմարթֆոնի տեսախցիկը ուղղելով ձեր համակարգչի էկրանի QR կոդի վրա: Երբ հղում է հայտնվում, հպեք դրան ձեր մատով:",
     bg: "Ако този екран замръзне, свържете се отново, като насочите камерата на вашия смартфон към QR кода на екрана на вашия компютър. Когато се появи връзка, докоснете я с пръст.",
     "zh-CN":
@@ -18930,7 +18930,7 @@ export const phrases = {
   T_keypadReconnect: {
     "en-US":
       "Connection was lost. Please reconnect by pointing your smartphone camera at the QR code on your computer screen. When a link appears, touch it with your finger.",
-    ar: "Loading...",
+    ar: "تم فقدان الاتصال. يرجى إعادة الاتصال عن طريق توجيه كاميرا هاتفك الذكي إلى رمز الاستجابة السريعة على شاشة الكمبيوتر الخاص بك. عند ظهور رابط، قم بلمسه بإصبعك.",
     hy: "«Կապը կորցվեց։ Խնդրում ենք վերակապել՝ ձեր հեռախոսի կամերային սեղմատակի ապակոդը ներկայացնելով ձեր համակարգչի էկրանի վրա։ Երբ հղումը հայտնվի, մաքրեք այն ձեր մատակարարով։»",
     bg: "Връзката беше загубена. Моля, свържете се отново, като насочите камерата на вашия смартфон към QR кода на екрана на вашия компютър. Когато се появи връзка, докоснете я с пръст.",
     "zh-CN":
@@ -18976,7 +18976,7 @@ export const phrases = {
   },
   T_keypadContinueExperiment: {
     "en-US": "Continue the experiment as instructed.",
-    ar: "Loading...",
+    ar: "واصل التجربة كما هو موجه.",
     hy: "Շարունակեք փորձը հրահանգների համաձայն:",
     bg: "Продължете експеримента според инструкциите.",
     "zh-CN": "按照指示继续实验。",
@@ -19019,7 +19019,7 @@ export const phrases = {
   },
   T_keypadReadyForResponse: {
     "en-US": "Respond now.",
-    ar: "Loading...",
+    ar: "أجب الآن.",
     hy: "Պատասխանեք հիմա:",
     bg: "Отговори сега.",
     "zh-CN": "立刻回复。",
@@ -19038,7 +19038,7 @@ export const phrases = {
     hu: "Válaszolj most.",
     is: "Svaraðu núna.",
     id: "Tanggapi sekarang.",
-    it: "Loading...",
+    it: "Rispondi ora.",
     ja: "今すぐ応答してください。",
     kn: "ಈಗ ಉತ್ತರ ನೀಡು.",
     ko: "지금 응답하세요.",
@@ -19063,7 +19063,7 @@ export const phrases = {
   T_keypadConnectedAndKeepReady: {
     "en-US":
       "Keypad connected. Please keep this page open, until the experiment prompts you to use it.",
-    ar: "Loading...",
+    ar: "تم توصيل لوحة المفاتيح. يرجى الاحتفاظ بهذه الصفحة مفتوحة حتى يطلب منك التجربة استخدامها.",
     hy: "Ստեղնախումբը միացված է: Խնդրում ենք բաց պահել այս էջը, մինչև փորձը ձեզ հուշի օգտագործել այն:",
     bg: "Клавиатурата е свързана. Моля, дръжте тази страница отворена, докато експериментът не ви подкани да я използвате.",
     "zh-CN": "键盘已连接。请保持此页面打开，直到实验提示您使用它。",
@@ -19083,7 +19083,7 @@ export const phrases = {
     hu: "Billentyűzet csatlakoztatva. Kérjük, tartsa nyitva ezt az oldalt, amíg a kísérlet fel nem kéri a használatára.",
     is: "Takkaborð tengt. Vinsamlegast hafðu þessa síðu opna þar til tilraunin biður þig um að nota hana.",
     id: "Papan tombol terhubung. Harap biarkan laman ini tetap terbuka, hingga eksperimen meminta Anda untuk menggunakannya.",
-    it: "Loading...",
+    it: "Tastierino collegato. Si prega di mantenere questa pagina aperta, fino a quando l'esperimento non ti chiederà di usarlo.",
     ja: "キーパッドが接続されました。実験で使用を求めるメッセージが表示されるまで、このページを開いたままにしておいてください。",
     kn: "ಕೀಪಾಡ್ ಸಂಪರ್ಕಿಸಿದೆ. ಈ ಪುಟವನ್ನು ತೆರೆದಿಡಿ, ಪ್ರಯೋಗವು ಅದನ್ನು ಬಳಸಲು ನಿಮಗೆ ಪ್ರೋಂಪ್ಟ್ ಮಾಡುವವರೆಗೂ ಇರಿ.",
     ko: "키패드가 연결되었습니다. 실험에서 사용하라는 메시지가 표시될 때까지 이 페이지를 열어 두십시오.",
@@ -19108,7 +19108,7 @@ export const phrases = {
   T_keypadScanQRCode: {
     "en-US":
       "AT LONG DISTANCES, YOU'LL USE YOUR PHONE AS A KEYPAD. Connect it now for use later. Point your smartphone camera at this QR code. Then use your finger to click the link that appears on your smartphone screen.",
-    ar: "Loading...",
+    ar: "عند المسافات البعيدة، ستستخدم هاتفك كلوحة مفاتيح. قم بتوصيله الآن للاستخدام لاحقًا. ثم قم بتوجيه كاميرا هاتفك الذكي نحو رمز الاستجابة السريعة (QR code) هذا. ثم استخدم إصبعك للنقر على الرابط الذي يظهر على شاشة هاتفك الذكي.",
     hy: "«Հեռավոր հեռախոսը կօգտագործեք կետադրելու համար հեռախոսազանգերի ժամանակ։ Այստեղից կապեք այն հեռախոսին, որը կօգտագործվի հետո։ Ձեր սմարթֆոնի թվային չափանիշը դիտարկեք այս QR կոդը։ Ապա օգտագործեք ձեր մատնանշանը, որը կտտացնի հեռախոսի էկրանի վրա հայտնված հղումը։»",
     bg: "НА ДЪЛГИ РАЗСТОЯНИЯ ЩЕ ИЗПОЛЗВАТЕ ТЕЛЕФОНА СИ КАТО КЛАВИАТУРА. Свържете го сега, за да го използвате по-късно. Насочете камерата на вашия смартфон към този QR код. След това използвайте пръста си, за да щракнете върху връзката, която се появява на екрана на вашия смартфон.",
     "zh-CN":
@@ -19130,7 +19130,7 @@ export const phrases = {
     hu: "HOSSZABB SZÁMÁRA TELEFONJÁT BILLENTYŰZETÉN HASZNÁLJA. Csatlakoztassa most a későbbi használatra. Irányítsa okostelefonjának kameráját erre a QR-kódra. Ezután az ujjával kattintson az okostelefon képernyőjén megjelenő hivatkozásra.",
     is: "Í LÖNGUM FÆLLINGUM NOTAR ÞÚ SÍMANN ÞINN SEM LYKJABÚÐ. Tengdu það núna til að nota síðar. Beindu snjallsímamyndavélinni þinni að þessum QR kóða. Notaðu síðan fingurinn til að smella á hlekkinn sem birtist á snjallsímaskjánum þínum.",
     id: "DALAM JARAK JAUH, ANDA AKAN MENGGUNAKAN PONSEL ANDA SEBAGAI KEYPAD. Hubungkan sekarang untuk digunakan nanti. Arahkan kamera ponsel cerdas Anda ke kode QR ini. Kemudian gunakan jari Anda untuk mengklik link yang muncul di layar smartphone Anda.",
-    it: "Loading...",
+    it: "A LUNGHE DISTANZE, UTILIZZERAI IL TUO TELEFONO COME TASTIERA. Collegalo ora per usarlo in seguito. Puntare la fotocamera dello smartphone su questo codice QR. Quindi utilizzare il dito per cliccare sul link che appare sullo schermo dello smartphone.",
     ja: "「遠距離では、あなたの電話をキーパッドとして使用します。今すぐ接続して、後で使用します。スマートフォンのカメラをこのQRコードに向けてください。そして、スマートフォンの画面に表示されるリンクを指でクリックしてください。」",
     kn: "ದೂರದಲ್ಲಿ, ನೀವು ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಕೀಪ್ಯಾಡ್ ಆಗಿ ಬಳಸುತ್ತೀರಿ. ನಂತರ ಬಳಸಲು ಅದನ್ನು ಈಗಲೇ ಸಂಪರ್ಕಿಸಿ. ಈ QR ಕೋಡ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಕ್ಯಾಮೆರಾವನ್ನು ಸೂಚಿಸಿ. ನಂತರ ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಪರದೆಯಲ್ಲಿ ಗೋಚರಿಸುವ ಲಿಂಕ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಲು ನಿಮ್ಮ ಬೆರಳನ್ನು ಬಳಸಿ.",
     ko: "장거리에서는 휴대폰을 키패드로 사용하게 됩니다. 나중에 사용하려면 지금 연결하세요. 스마트폰 카메라로 이 QR 코드를 가리키세요. 그런 다음 손가락을 사용하여 스마트폰 화면에 나타나는 링크를 클릭하세요.",
@@ -19154,7 +19154,7 @@ export const phrases = {
   },
   T_letterPopularDemandFeatures: {
     "en-US": "❌ T_letterPopularDemandFeatures is obsolete.",
-    ar: "Loading...",
+    ar: "❌ T_letterPopularDemandFeatures قديم وغير مستخدم.",
     hy: "❌ T_letterPopularDemandFeatures is obsolete.",
     bg: "❌ T_letterPopularDemandFeatures is obsolete.",
     "zh-CN": "❌ T_letterPopularDemandFeatures is obsolete.",
@@ -19173,7 +19173,7 @@ export const phrases = {
     hu: "❌ T_letterPopularDemandFeatures is obsolete.",
     is: "❌ T_letterPopularDemandFeatures is obsolete.",
     id: "❌ T_letterPopularDemandFeatures is obsolete.",
-    it: "Loading...",
+    it: '"""\n❌ T_letterPopularDemandFeatures è obsoleto.',
     ja: "❌ T_letterPopularDemandFeatures is obsolete.",
     kn: "❌ T_letterPopularDemandFeatures is obsolete.",
     ko: "❌ T_letterPopularDemandFeatures is obsolete.",
@@ -19197,7 +19197,7 @@ export const phrases = {
   },
   T_loadingSounds: {
     "en-US": "Loading sounds ...",
-    ar: "Loading...",
+    ar: "تحميل الأصوات ...",
     hy: "Ձայնների բեռնում...",
     bg: "Зареждат се звуци...",
     "zh-CN":
@@ -19217,7 +19217,7 @@ export const phrases = {
     hu: "Hangok betöltése...",
     is: "Hleður hljóð...",
     id: "Memuat suara ...",
-    it: "Loading...",
+    it: "Caricamento dei suoni...",
     ja: "こんにちは。ピーボタンをクリックしてこのコンピュータの音が機能していることを確認してください。ちなみに、テストでは正解する度にこの音が鳴ります。",
     kn: "ಶಬ್ದಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
     ko: "소리 로드 중...",
@@ -19242,7 +19242,7 @@ export const phrases = {
   T_VernierBrief: {
     "en-US":
       "It’s shifted to the left. This display is static, so it would be easy to move your eyes to the lines and tell the shift. But, in a real trial, the lines are FLASHED, so there's no time to move your eyes. It's important to look at the cross as you initiate each trial. The lines will flash immediately. It doesn't matter where your eyes go after the flash. The first block of testing is just a few trials of practice, before we start in earnest. ",
-    ar: "Loading...",
+    ar: "انتقل إلى اليسار. هذا العرض ثابت، لذلك سيكون من السهل نقل عينيك إلى الخطوط وتحديد التحول. ولكن، في التجربة الحقيقية، يتم تمرير الخطوط بسرعة، لذلك لا يوجد وقت لنقل عينيك. من المهم النظر إلى الصليب عند بدء كل تجربة. ستتم تمرير الخطوط على الفور. لا يهم أين تذهب عيناك بعد التمرير. الكتلة الأولى من الاختبار هي مجرد بضع تجارب للتدريب، قبل أن نبدأ بجدية.",
     hy: "Это R. Этот дисплей статичен, поэтому было бы легко переместить ваши глаза на букву и идентифицировать ее. Но, в реальном исследовании, буквы вспыхнут, поэтому не будет времени перемещать глаза. Важно посмотреть на прицел, когда вы нажимаете на нее. Буквы будут мигать немедленно. Неважно, где ваши глаза идут после вспышки. Первый блок тестирования - это всего лишь несколько тренировочных испытаний, прежде чем начать всерьез.",
     bg: "Това е R. Този дисплей е статичен, така че ще бъде лесно да преместите очите си върху буквата и да я идентифицирате. Но в реално изследване буквите ще премигват, така че няма да има време да преместите очите си. Важно е да гледате прицела, когато го натиснете. Буквите ще премигват веднага. Не е важно къде отиват очите ви след светкавицата. Първият блок на теста е само няколко тренировъчни опита, преди да започнете сериозно.",
     "zh-CN":
@@ -19264,7 +19264,7 @@ export const phrases = {
     hu: "Это R. Этот дисплей статичен, поэтому было бы легко переместить ваши глаза на букву и идентифицировать ее. Но, в реальном исследовании, буквы вспыхнут, поэтому не будет времени перемещать глаза. Важно посмотреть на прицел, когда вы нажимаете на нее. Буквы будут мигать немедленно. Неважно, где ваши глаза идут после вспышки. Первый блок тестирования - это всего лишь несколько тренировочных испытаний, прежде чем начать всерьез.",
     is: "Það hefur færst til vinstri. Þessi skjár er kyrrstæður, svo það væri auðvelt að færa augun að línunum og segja breytinguna. En, í alvöru prufa, blikkar línurnar, svo það er enginn tími til að hreyfa augun. Það er mikilvægt að horfa á krossinn þegar þú byrjar hverja tilraun. Línurnar munu blikka strax. Það skiptir ekki máli hvert augu þín fara eftir flassið. Fyrsti prófkubburinn er aðeins nokkrar æfingar, áður en við byrjum af alvöru.",
     id: "Itu bergeser ke kiri. Tampilan ini bersifat statis, sehingga akan mudah untuk mengarahkan pandangan Anda ke garis dan mengetahui perubahannya. Namun, dalam uji coba sebenarnya, garis-garisnya BERKEDIP, jadi tidak ada waktu untuk menggerakkan mata Anda. Penting untuk melihat salib saat Anda memulai setiap percobaan. Garis-garis itu akan segera berkedip. Tidak masalah ke mana mata Anda tertuju setelah flash. Blok pengujian pertama hanyalah beberapa uji coba praktik, sebelum kita memulainya dengan sungguh-sungguh.",
-    it: "Loading...",
+    it: "È spostato a sinistra. Questo display è statico, quindi sarebbe facile spostare gli occhi sulle linee e notare lo spostamento. Ma, in un vero esperimento, le linee vengono LAMPEGGIATE, quindi non c'è tempo per spostare gli occhi. È importante guardare la croce mentre si avvia ogni esperimento. Le linee lampeggeranno immediatamente. Non importa dove vanno i tuoi occhi dopo il lampeggio. Il primo blocco di test è solo qualche esperimento di pratica, prima di iniziare seriamente.",
     ja: "これはRです。この画面は動いていないため、目を文字の位置に動かして確認するのは容易でしょう。本番のテストでは、文字は一瞬しか映されないので、目を動かす時間はないでしょう。",
     kn: "Это R. Этот дисплей статичен, поэтому было бы легко переместить ваши глаза на букву и идентифицировать ее. Но, в реальном исследовании, буквы вспыхнут, поэтому не будет времени перемещать глаза. Важно посмотреть на прицел, когда вы нажимаете на нее. Буквы будут мигать немедленно. Неважно, где ваши глаза идут после вспышки. Первый блок тестирования - это всего лишь несколько тренировочных испытаний, прежде чем начать всерьез.",
     ko: "왼쪽으로 이동했습니다. 이 디스플레이는 정적이므로 눈을 선에 이동시키고 이동량을 확인하는 것이 쉽습니다. 그러나 실제 실험에서는 선이 번쩍이기 때문에 눈을 움직일 시간이 없습니다. 각 시도를 시작할 때 십자선을 보는 것이 중요합니다. 선은 즉시 번쩍일 것입니다. 번쩍이고 난 후에는 눈이 어디로 가든 상관없습니다. 첫 번째 테스트 블록은 본격적으로 시작하기 전에 몇 번의 연습 시도입니다.",
@@ -19289,7 +19289,7 @@ export const phrases = {
   T_middleLetterBrief: {
     "en-US":
       "It’s an R. This display is static, so it would be easy to move your eyes to the letter and identify it. But, in a real trial, the letters are FLASHED, so there's no time to move your eyes. It's important to look at the cross as you initiate the trial. The letters will flash immediately. It doesn't matter where your eyes go after the flash. The first block of testing is just a few trials of practice, before we start in earnest. ",
-    ar: "Loading...",
+    ar: "إنها حرف R. هذا العرض ثابت، لذلك سيكون من السهل تحريك عينيك إلى الحرف وتحديده. ولكن في التجربة الحقيقية، يتم وميض الحروف، لذا لا يوجد وقت لتحريك عينيك. من المهم أن تنظر إلى الصليب عند بدء التجربة. ستومض الحروف فوراً. لا يهم أين تذهب عينيك بعد الوميض. الكتلة الأولى من الاختبار هي مجرد بضع تجارب تدريبية، قبل أن نبدأ بجدية.",
     hy: "Это R. Этот дисплей статичен, поэтому было бы легко переместить ваши глаза на букву и идентифицировать ее. Но, в реальном исследовании, буквы вспыхнут, поэтому не будет времени перемещать глаза. Важно посмотреть на прицел, когда вы нажимаете на нее. Буквы будут мигать немедленно. Неважно, где ваши глаза идут после вспышки. Первый блок тестирования - это всего лишь несколько тренировочных испытаний, прежде чем начать всерьез.",
     bg: "Това е R. Този дисплей е статичен, така че ще бъде лесно да преместите очите си към буквата и да я идентифицирате. Но в реално изпитание буквите се МИГВАТ, така че няма време да мръднете очите си. Важно е да гледате кръста, когато започвате процеса. Буквите ще мигат веднага. Няма значение накъде отиват очите ви след светкавицата. Първият блок от тестване е само няколко опита на практика, преди да започнем сериозно.",
     "zh-CN":
@@ -19311,7 +19311,7 @@ export const phrases = {
     hu: "Ez egy R. Ez a kijelző statikus, így könnyű lenne a betűre mozgatni a szemét, és azonosítani. De egy igazi próba során a betűk VILLOGNAK, így nincs idő mozgatni a szemét. Fontos, hogy a tárgyalás megkezdésekor nézz a keresztre. A betűk azonnal felvillannak. Nem mindegy, hogy a vaku után hova kerül a szemed. A tesztelés első blokkja csak néhány gyakorlati próba, mielőtt komolyan elkezdenénk.",
     is: "Þetta er R. Þessi skjár er kyrrstæður, svo það væri auðvelt að færa augun að bókstafnum og bera kennsl á hann. En, í alvöru prufa, eru stafirnir FLEXIR, svo það er enginn tími til að hreyfa augun. Það er mikilvægt að líta á krossinn þegar þú byrjar réttarhöldin. Stafirnir munu blikka strax. Það skiptir ekki máli hvert augu þín fara eftir flassið. Fyrsti prófkubburinn er aðeins nokkrar æfingar, áður en við byrjum af alvöru.",
     id: "Itu huruf R. Tampilan ini statis, jadi akan mudah untuk mengalihkan pandangan Anda ke huruf itu dan mengidentifikasinya. Tapi, dalam uji coba sebenarnya, huruf-hurufnya BERKEDIP, jadi tidak ada waktu untuk menggerakkan mata. Penting untuk melihat salib saat Anda memulai persidangan. Surat-surat itu akan segera berkedip. Tidak masalah ke mana mata Anda tertuju setelah flash. Blok pengujian pertama hanyalah beberapa uji coba praktik, sebelum kita memulainya dengan sungguh-sungguh.",
-    it: "Loading...",
+    it: "È una R. Questo display è statico, quindi sarebbe facile spostare gli occhi sulla lettera e identificarla. Ma, in un vero esperimento, le lettere vengono LAMPEGGIATE, quindi non c'è tempo per spostare gli occhi. È importante guardare la croce mentre si avvia l'esperimento. Le lettere lampeggeranno immediatamente. Non importa dove vanno i tuoi occhi dopo il lampeggio. Il primo blocco di test è solo qualche prova di pratica, prima di iniziare seriamente.",
     ja: "これはRです。この画面は動いていないため、目を文字の位置に動かして確認するのは容易でしょう。本番のテストでは、文字は一瞬しか映されないので、目を動かす時間はないでしょう。",
     kn: "Это R. Этот дисплей статичен, поэтому было бы легко переместить ваши глаза на букву и идентифицировать ее. Но, в реальном исследовании, буквы вспыхнут, поэтому не будет времени перемещать глаза. Важно посмотреть на прицел, когда вы нажимаете на нее. Буквы будут мигать немедленно. Неважно, где ваши глаза идут после вспышки. Первый блок тестирования - это всего лишь несколько тренировочных испытаний, прежде чем начать всерьез.",
     ko: "R입니다. 이 디스플레이는 정적이어서 눈을 글자로 움직여 식별하기 쉬울 것입니다. 하지만 실제 재판에서는 글자가 번쩍이기 때문에 눈을 움직일 시간이 없습니다. 재판을 시작할 때 십자가를 바라보는 것이 중요합니다. 문자가 즉시 깜박입니다. 플래시 후에 눈이 어디로 가는지는 중요하지 않습니다. 테스트의 첫 번째 블록은 본격적으로 시작하기 전에 몇 가지 연습을 시도하는 것입니다.",
@@ -19336,7 +19336,7 @@ export const phrases = {
   T_VernierDemo: {
     "en-US":
       "On each trial, while you look at the cross, a pair of lines will FLASH somewhere. Maybe where you're looking; maybe in the corner of your eye. Just a flash. To learn the task, let’s try it first with a STATIC display. While looking at the cross, below, without moving your eyes: Is the upper line shifted left or right, relative to the lower line?",
-    ar: "Loading...",
+    ar: "في كل محاولة، أثناء نظرك إلى الصليب، ستظهر زوج من الخطوط في مكان ما. ربما حيث تنظر إليه؛ ربما في زاوية عينك. فقط وميض. لتعلم المهمة، دعنا نجربها أولاً مع عرض ثابت. أثناء النظر إلى الصليب أدناه، دون تحريك عينيك: هل الخط العلوي متحرك إلى اليسار أم اليمين، بالنسبة للخط السفلي؟",
     hy: "«Երբ ամեն փորձում, երբ դուք դիտում եք խաչակերպին, մի զույգ գիծեր կլինեն այնտեղ։ Մինչև որպես անգամների ուղղությամբ սովորելու առաջինը, փորձեք այն ստատիկ ցուցադրումով։ Նախապես դիտելով խաչակերպին, ստուգեք այն խորանարդի ձախից կամ աջից տեղադրված վերին գիծին։»",
     bg: "При всеки опит, докато гледате кръста, чифт линии ще МИГВАТ някъде. Може би там, където търсите; може би в ъгъла на окото ти. Само светкавица. За да научите задачата, нека първо я опитаме със СТАТИЧЕН дисплей. Докато гледате кръста отдолу, без да мърдате очите си: горната линия изместена ли е наляво или надясно спрямо долната линия?",
     "zh-CN":
@@ -19358,7 +19358,7 @@ export const phrases = {
     hu: "Minden egyes próbánál, miközben a keresztet nézed, egy pár vonal VILLOG valahol. Talán ahova nézel; talán a szemed sarkában. Csak egy villanás. A feladat megtanulásához először próbáljuk ki STATIC kijelzővel. Miközben a keresztre néz, lent, anélkül, hogy a szemét mozgatná: A felső vonal balra vagy jobbra tolódik el az alsó vonalhoz képest?",
     is: "Á hverri reynslu, meðan þú horfir á krosshárin, munu línuhjólin SKÍNA einhvers staðar. Kannski þar sem þú horfir; kannski í útvegum auga þíns. Bara skína. Til að læra verkefnið, skulum við prófa það fyrst með STATIC sýn. Meðan þú horfir á krosshárin hér að neðan, án þess að færa augun þín: Er efra línan færð til vinstri eða hægri, miðað við neðra línu?",
     id: "Pada setiap percobaan, saat Anda melihat salib, sepasang garis akan BERKEDIP di suatu tempat. Mungkin di tempat yang Anda cari; mungkin di sudut matamu. Hanya sekejap. Untuk mempelajari tugasnya, mari kita coba dulu dengan tampilan STATIS. Sambil melihat salib di bawah, tanpa menggerakkan mata: Apakah garis atas bergeser ke kiri atau ke kanan, relatif terhadap garis bawah?",
-    it: "Loading...",
+    it: "In ogni prova, mentre guardi la croce, una coppia di linee lampeggerà da qualche parte. Forse dove stai guardando; forse nell'angolo dell'occhio. Solo un lampo. Per imparare il compito, proviamolo prima con una visualizzazione STATIC. Mentre guardi la croce qui sotto, senza muovere gli occhi: la linea superiore è spostata a sinistra o a destra rispetto alla linea inferiore?",
     ja: "各トライアルで、十字架を見ていると、どこかで一対の線が点滅します。もしかしたら、あなたが探している場所かもしれません。もしかしたら目の端にあるかもしれない。ほんの一瞬。タスクを学ぶために、まず STATIC 表示で試してみましょう。目を動かさずに下の十字架を見ながら、上の線は下の線に対して左または右にずれていますか?",
     kn: "ಪ್ರತಿ ಪ್ರಯೋಗದಲ್ಲಿ, ನೀವು ಶಿಲುಬೆಯನ್ನು ನೋಡುವಾಗ, ಒಂದು ಜೋಡಿ ಸಾಲುಗಳು ಎಲ್ಲೋ ಫ್ಲ್ಯಾಶ್ ಆಗುತ್ತವೆ. ಬಹುಶಃ ನೀವು ಎಲ್ಲಿ ನೋಡುತ್ತಿರುವಿರಿ; ಬಹುಶಃ ನಿಮ್ಮ ಕಣ್ಣಿನ ಮೂಲೆಯಲ್ಲಿ. ಕೇವಲ ಒಂದು ಫ್ಲಾಶ್. ಕೆಲಸವನ್ನು ಕಲಿಯಲು, STATIC ಡಿಸ್ಪ್ಲೇಯೊಂದಿಗೆ ಅದನ್ನು ಮೊದಲು ಪ್ರಯತ್ನಿಸೋಣ. ಶಿಲುಬೆಯನ್ನು ನೋಡುವಾಗ, ಕೆಳಗೆ, ನಿಮ್ಮ ಕಣ್ಣುಗಳನ್ನು ಚಲಿಸದೆ: ಮೇಲಿನ ರೇಖೆಯು ಕೆಳಗಿನ ರೇಖೆಗೆ ಹೋಲಿಸಿದರೆ ಎಡ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ಥಳಾಂತರಗೊಂಡಿದೆಯೇ?",
     ko: "각 시도에서 십자가를 바라보는 동안 한 쌍의 선이 어딘가에서 깜박일 것입니다. 어쩌면 당신이 찾고 있는 곳이 어디일지도 모릅니다. 어쩌면 당신의 눈가에 있을지도 모릅니다. 그냥 플래시. 작업을 알아보기 위해 먼저 STATIC 디스플레이로 시도해 보겠습니다. 눈을 움직이지 않고 아래의 십자가를 보면서: 위쪽 선이 아래쪽 선을 기준으로 왼쪽으로 이동합니까, 오른쪽으로 이동합니까?",
@@ -19383,7 +19383,7 @@ export const phrases = {
   T_middleLetterDemoWithStimulus: {
     "en-US":
       "On each trial, while you look at the cross, a triplet of three random letters will FLASH in the corner of your eye. Just a flash. To learn the task, let’s try it first with a STATIC display. While looking at the cross, below, without moving your eyes: What is the middle letter?\n                    +.              H R C\nIt’s an R. This display is static, so it would be easy to move your eyes to the letter and identify it. But, in a real trial, the letter is FLASHED, so there's no time to move your eyes. It's important to look at the cross as you initiate the trial. The letter will flash immediately. It doesn't matter where your eyes go after the flash. The first block of testing is just a few trials of practice, before we start in earnest. ",
-    ar: "Loading...",
+    ar: "في كل تجربة، أثناء النظر إلى الصليب، ستظهر ثلاثة حروف عشوائية في زاوية عينك. فقط ومضة. لتعلم المهمة، دعنا نجربها أولاً مع عرض ثابت. أثناء النظر إلى الصليب أدناه، دون حركة عينيك: ما هو الحرف الوسط؟\n                    +.              H R C\nإنها حرف R. هذا العرض ثابت، لذا سيكون من السهل تحريك عينيك إلى الحرف وتحديده. ولكن في تجربة حقيقية، يتم ومض الحرف، لذا لا يوجد وقت لتحريك عينيك. من المهم أن تنظر إلى الصليب أثناء بدء التجربة. سيتم ومض الحرف على الفور. لا يهم أين تذهب عينيك بعد الوميض. الكتلة الأولى من الاختبار هي مجرد بضع تجارب تدريبية، قبل أن نبدأ بجدية.",
     hy: "На кожному випробуванні, поки ви дивитесь на приціл, триплет з трьох випадкових літер буде миготіти в кутку ока. Просто спалах. Щоб дізнатися завдання, спробуймо спочатку його зі статичним дисплеєм. Поки ви дивитесь на приціл, нижче, не рухаючи очима, спробуйте визначити середню літеру.",
     bg: "В каждом испытании, пока вы смотрите на крест, в уголке вашего глаза МИГАЕТ тройка из трех случайных букв. Просто вспышка. Чтобы изучить задачу, сначала попробуем выполнить ее на СТАТИЧЕСКОМ дисплее. Я смотрю на крест внизу, не двигая глазами: Какая средняя буква?\n                    +. К. Р. С.\nЭто буква R. Этот дисплей статичен, поэтому вам будет легко посмотреть на букву и идентифицировать ее. Но в реальных тестах буква МИГАЕТ, поэтому нет времени пошевелить глазами. Приступая к тесту, важно смотреть на крест. Буква мигает мгновенно. Неважно, куда направляются ваши глаза после вспышек. Первый блок тестов — это всего лишь несколько практических тестов, прежде чем мы приступим к серьезному делу.",
     "zh-CN":
@@ -19405,7 +19405,7 @@ export const phrases = {
     hu: "В каждом тесте, пока вы смотрите на крест, краем глаза мелькает тройка из трех случайных букв. Просто вспышка. Для изучения задачи попробуем сначала выполнить ее на статическом дисплее. Гладя на крест внизу, не двигая газимы: Какая середняя буква?\n                    +. Ч Р С\nЭто буква R. Этот дисплей статичен, поэтому вам будет легко взглянуть на букву и идентифицировать ее. Но в начале испытания буква МИГАЕТ, поэтому нет времени пошевелить глазами. Приступая к тесту, важно смотреть на крест. Буква мигнет сад. Не имеет значения, куда направляются ваши глаза после вспышки. Первый блок тестирования — это всего лишь несколько практических тестов, прежде чем мы начнем серьезно.",
     is: "В каждом тесте, пока вы смотрите на крест, краем глаза мелькает трио из трех случайных букв. Просто вспышка. Изучив проставку, давайте сначала попробуем участить ее на СТАТИЧЕСКОМ ДИСПЛЕЕ. Гладя на крест большой, не двигая газимы: Какая середняя буква?\n                    +. Ч Р С\nЭто буква R. Этот дисплей статичен, поэтому вы можете легко посмотреть на букву и идентифицировать ее. Но в начале испытания буква МИГАЕТ, поэтому нет времени пошевелить глазами. Приступая к тесту, важно следить за крестом. Буква мигнет сад. Не имеет значения, куда направляются ваши глаза после вспышки. Первый блок тестирования — это всего лишь несколько практических тестов, прежде чем мы начнем серьезно.",
     id: "Другими словами, тройка МИГАЕТ из трех случайных букв. Просто вспышка. Чтобы изучить задачу, давайте сначала попробуем настроить ее на СТ АТИЧЕСКОМ дисплее. Как это сделать?\n                    +. Ч Р С\nЭто буква R. Этот взгляд на букву и ее определение. Но на этапе перехода буква МИГАЕТ, поэтому нет времени пошевелить глазами. Когда вы начинаете испытание, важно смотреть на крест. Буква мигнет сразу. Не имеет значения, куда направляются ваши глаза после головы. Цитаты Роб, прежде чем мы начнем всерьез.",
-    it: "Loading...",
+    it: "In ogni prova, mentre guardi la croce, un tripletto di tre lettere casuali lampeggerà nell'angolo del tuo occhio. Solo un lampo. Per imparare il compito, proviamolo prima con una visualizzazione STATIC. Mentre guardi la croce, qui sotto, senza muovere gli occhi: Qual è la lettera centrale?\n                    +.              H R C\nÈ una R. Questa visualizzazione è statica, quindi sarebbe facile spostare gli occhi sulla lettera e identificarla. Ma, in una vera prova, la lettera viene LAMPEGGIATA, quindi non c'è tempo per spostare gli occhi. È importante guardare la croce mentre avvii la prova. La lettera lampeggerà immediatamente. Non importa dove vanno i tuoi occhi dopo il lampo. Il primo blocco di test è solo qualche prova di pratica, prima di iniziare seriamente.",
     ja: "各テストでは、あなたが十字線を見ている間に3つのランダムな文字があなたの目の端に短く表示されます。この場で試してみましょう。\n目を動かさずに十字線を見なが、真ん中の文字を識別してみてください。",
     kn: "В каждом тесте, пока вы смотрите на крест, краем глаза мелькает тройка из трех случайных букв. Просто вспышка. Чтобы освоить задачу, сначала попробуем выполнить ее на статичном дисплее. Глядя на крест внизу, не двигая глазами: Какая середняя буква?\n                    +. Ч Р С\nЭто буква R. Этот дисплей статичен, поэтому вы можете легко посмотреть на букву и идентифицировать ее. Но на этапе перехода буква МИГАЕТ, так что нет времени пошевелить глазами. Приступая к тесту, важно смотреть на крест. Буква мигнет сразу. Не имеет значения, куда направляются ваши глаза после вспышки. Первый блок тестирования — это всего лишь несколько практических тестов, прежде чем мы начнем серьезно.",
     ko: "매번 시도할 때마다 십자가를 바라보는 동안 세 개의 무작위 문자로 구성된 세 개의 문자가 눈 한 쪽에 깜박일 것입니다. 그냥 플래시. 작업을 알아보기 위해 먼저 STATIC 디스플레이로 시도해 보겠습니다. 아래 십자가를 바라보며 눈을 움직이지 말고 가운데 글자는 무엇입니까?\n                    +. HRC\nR입니다. 이 디스플레이는 정적이어서 눈을 글자로 움직여 식별하기 쉬울 것입니다. 하지만 실제 재판에서는 편지가 번쩍이기 때문에 눈을 움직일 시간이 없습니다. 재판을 시작할 때 십자가를 바라보는 것이 중요합니다. 문자가 즉시 깜박입니다. 플래시 후에 눈이 어디로 가는지는 중요하지 않습니다. 테스트의 첫 번째 블록은 본격적으로 시작하기 전에 몇 가지 연습을 시도하는 것입니다.",
@@ -19430,7 +19430,7 @@ export const phrases = {
   T_middleLetterDemo: {
     "en-US":
       "On each trial, while you look at the cross, a triplet of three random letters will FLASH in the corner of your eye. Just a flash. To learn the task, let’s try it first with a STATIC display. While looking at the cross, below, without moving your eyes: What is the middle letter?",
-    ar: "Loading...",
+    ar: "في كل محاولة، أثناء النظر إلى الصليب، سيومض ثلاثية من ثلاثة أحرف عشوائية في زاوية عينك. مجرد وميض. لتعلم المهمة، دعنا نجربها أولاً مع عرض ثابت. أثناء النظر إلى الصليب أدناه، دون حركة عينيك: ما هي الحرف الأوسط؟",
     hy: "В каждом тесте, пока вы смотрите на крест, краем глаза мелькает трио из трёх случайных букв. Просто вспышка. Для изучения задачи попробуем сначала выполнить ее на СТАТИЧЕСКОМ дисплее. Гляжу на крест внизу, не двигая глазами. Какая средняя буква?",
     bg: "На всяком испытании, пока вы смотрите на прицел, триплет из трех случайных букв будет мигать в углу глаза. Просто вспышка. Чтобы узнать задачу, давайте сначала попробуем ее со статическим дисплеем. Пока вы смотрите на прицел, ниже, не двигая глазами, попробуйте определить среднюю букву.",
     "zh-CN":
@@ -19452,7 +19452,7 @@ export const phrases = {
     hu: "На кождом испытании, пока вы смотрите на прицел, триплет из трех случайных букв будет мигать в углу глаза. Просто вспышка. Чтобы узнать задачу, давайте сначала попробуем ее со статическим дисплеем. Пока вы смотрите на прицел, ниже, не двигая глазами, попробуйте определить среднюю букву.",
     is: "В каждом тесте, пока вы смотрите на крест, краем глаза мелькает трио из трех случайных букв. Просто вспышка. Изучив проставку, давайте сначала попробуем участить ее на СТАТИЧЕСКОМ ДИСПЛЕЕ. Гладя на крест большой, не двигая газимы: Какая середняя буква?",
     id: "Другими словами, тройка МИГАЕТ из трех случайных букв. Просто вспышка. Чтобы изучить задачу, давайте сначала попробуем настроить ее на СТ АТИЧЕСКОМ дисплее. Как это сделать?",
-    it: "Loading...",
+    it: "Ad ogni prova, mentre guardi la croce, un tripletto di tre lettere casuali lampeggerà nell'angolo del tuo occhio. Solo un lampo. Per imparare il compito, proviamolo prima con un display STATIC. Mentre guardi la croce qui sotto, senza muovere gli occhi: Qual è la lettera centrale?",
     ja: "各テストでは、あなたが十字線を見ている間に3つのランダムな文字があなたの目の端に短く表示されます。この場で試してみましょう。\n目を動かさずに十字線を見なが、真ん中の文字を識別してみてください。",
     kn: "В каждом тесте, пока вы смотрите на крест, краем глаза мелькает тройка из трех случайных букв. Просто вспышка. Чтобы освоить задачу, сначала попробуем выполнить ее на статичном дисплее. Глядя на крест внизу, не двигая глазами: Какая середняя буква?",
     ko: "매번 시도할 때마다 십자가를 바라보는 동안 세 개의 무작위 문자로 구성된 세 개의 문자가 눈 한 쪽에 깜박일 것입니다. 그냥 플래시. 작업을 알아보기 위해 먼저 STATIC 디스플레이로 시도해 보겠습니다. 아래 십자가를 바라보며 눈을 움직이지 말고 가운데 글자는 무엇입니까?",
@@ -19477,7 +19477,7 @@ export const phrases = {
   T_letterBrief: {
     "en-US":
       "It’s an R. This display is static, so it would be easy to move your eyes to the letter and identify it. But, in a real trial, the letter is FLASHED, so there's no time to move your eyes. It's important to look at the cross as you initiate the trial. The letter will flash immediately. It doesn't matter where your eyes go after the flash. The first block of testing is just a few trials of practice, before we start in earnest. ",
-    ar: "Loading...",
+    ar: "إنها حرف R. هذا العرض ثابت، لذلك سيكون من السهل تحريك عينيك إلى الحرف وتحديده. ولكن في التجربة الحقيقية، يتم وميض الحرف، لذا لا يوجد وقت لتحريك عينيك. من المهم أن تنظر إلى الصليب عند بدء التجربة. سيتم وميض الحرف فوراً. لا يهم أين تذهب عينيك بعد الوميض. الكتلة الأولى من الاختبار هي مجرد بضع تجارب تدريبية، قبل أن نبدأ بجدية.",
     hy: "«Այստեղ գրվածը է Ռ. Այս ցուցադրականը ստատիկ է, այնպես որ ձեր աչքերը շարունակելու համար շարունակելու հեշտություն կլինի տեսնել տառը և ճանապարհել այն: Բայց իրական փորձում տառը կանխարգելելու դեպքում, տառը կլինի ՇԱՐՈՒՆԱԿԵՂ, այնպես որ աչքերը շարունակելու ժամանակում չկայի ժամանակ տեղափոխելու՝ այնտեղից այլապես: Գծապատկերները դիտելու ժամանակ արդեն շարունակելու է դադարեցնել առաջին փորձարկման բլոկը: Տառը կփորձարկվի անմիջապես: Ուրեմն, ինչպես այն պայմաններում, որոնք առաջին փորձարկման համար կանխարգելելու ենք, այստեղ նաև չի կարող լինել աչքերը տեսնելու ժամանակում այլ ուղղություններին: Փորձարկման առաջին բլոկը մի քանի փորձերից է բաղկացած, առաջինը աշխատանքի սկզբն է:»",
     bg: "Това е R. Този дисплей е статичен, така че ще бъде лесно да преместите очите си към буквата и да я идентифицирате. Но в реално изпитание писмото е МИГНАТО, така че няма време да мръднете очите си. Важно е да гледате кръста, когато започвате процеса. Буквата ще мига веднага. Няма значение накъде отиват очите ви след светкавицата. Първият блок от тестване е само няколко опита на практика, преди да започнем сериозно.",
     "zh-CN":
@@ -19499,7 +19499,7 @@ export const phrases = {
     hu: "Ez egy R betű. Ez a kijelző statikus, így könnyű a szemeket a betűre irányítani és azonosítani. Azonban egy valós kísérlet során a betű VILLAN, így nincs idő a szemek mozgatására. Fontos, hogy a kereszt hajszálakat nézze, amikor elindítja a kísérletet. A betű azonnal felvillan. Nem számít, hogy a villanás után hova néznek a szemei. Az első tesztblokk csak néhány gyakorló kísérlet, mielőtt komolyan elkezdünk.",
     is: "Þetta er R. Þessi sýn er kyrrstæð, svo það væri auðvelt að færa augunin til bókstafsins og þekkja hann. En í raunverulegum prófi er bókstafurinn FLASHAÐUR, svo enginn tími er til að færa augunin. Mikilvægt er að horfa á krosshárin þegar þú hefst prófið. Bókstafurinn mun flasa strax. Skiptir engu máli hvar augun þín fara eftir flöshunni. Fyrsta blokk prófsins er bara nokkrar æfingarprófanir, áður en við byrjum alvarlega.",
     id: "Itu huruf R. Tampilan ini statis, jadi akan mudah untuk mengalihkan pandangan Anda ke huruf itu dan mengidentifikasinya. Tapi, dalam persidangan sesungguhnya, surat itu TERKEDIP, jadi tidak ada waktu untuk mengalihkan pandangan. Penting untuk melihat salib saat Anda memulai persidangan. Surat itu akan segera muncul. Tidak masalah ke mana mata Anda tertuju setelah flash. Blok pengujian pertama hanyalah beberapa uji coba praktik, sebelum kita memulainya dengan sungguh-sungguh.",
-    it: "Loading...",
+    it: "È una R. Questo display è statico, quindi sarebbe facile spostare gli occhi sulla lettera e identificarla. Ma, in un vero esperimento, la lettera viene LAMPEGGIATA, quindi non c'è tempo per spostare gli occhi. È importante guardare la croce mentre si avvia l'esperimento. La lettera lampeggerà immediatamente. Non importa dove vanno i tuoi occhi dopo il lampeggio. Il primo blocco di test è solo qualche prova di pratica, prima di iniziare seriamente.",
     ja: "「これはRです。この表示は静止しているので、目を文字に移動させて識別するのは簡単です。しかし、実際の試行では文字がフラッシュされるため、目を移動する時間はありません。試行を開始する際に十字線を見ることが重要です。文字はすぐにフラッシュされます。フラッシュ後に目がどこに行っても問題ありません。最初のテストブロックは真剣に始める前の練習のいくつかの試行です。」",
     kn: "ಇದು R. ಈ ಡಿಸ್ಪ್ಲೇ ಸ್ಥಿರವಾಗಿದೆ, ಆದ್ದರಿಂದ ನಿಮ್ಮ ಕಣ್ಣುಗಳನ್ನು ಅಕ್ಷರಕ್ಕೆ ಸರಿಸಲು ಮತ್ತು ಅದನ್ನು ಗುರುತಿಸಲು ಸುಲಭವಾಗುತ್ತದೆ. ಆದರೆ, ನಿಜವಾದ ಪ್ರಯೋಗದಲ್ಲಿ, ಪತ್ರವು ಫ್ಲ್ಯಾಶ್ ಆಗಿದೆ, ಆದ್ದರಿಂದ ನಿಮ್ಮ ಕಣ್ಣುಗಳನ್ನು ಸರಿಸಲು ಸಮಯವಿಲ್ಲ. ನೀವು ವಿಚಾರಣೆಯನ್ನು ಪ್ರಾರಂಭಿಸುವಾಗ ಶಿಲುಬೆಯನ್ನು ನೋಡುವುದು ಮುಖ್ಯವಾಗಿದೆ. ಪತ್ರವು ತಕ್ಷಣವೇ ಮಿಂಚುತ್ತದೆ. ಫ್ಲ್ಯಾಷ್ ನಂತರ ನಿಮ್ಮ ಕಣ್ಣುಗಳು ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತವೆ ಎಂಬುದು ಮುಖ್ಯವಲ್ಲ. ಪರೀಕ್ಷೆಯ ಮೊದಲ ಬ್ಲಾಕ್ ಅಭ್ಯಾಸದ ಕೆಲವು ಪ್ರಯೋಗಗಳು, ನಾವು ಶ್ರದ್ಧೆಯಿಂದ ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು.",
     ko: "R입니다. 이 디스플레이는 정적이어서 눈을 글자로 움직여 식별하기 쉬울 것입니다. 하지만 실제 재판에서는 편지가 번쩍이기 때문에 눈을 움직일 시간이 없습니다. 재판을 시작할 때 십자가를 바라보는 것이 중요합니다. 문자가 즉시 깜박입니다. 플래시 후에 눈이 어디로 가는지는 중요하지 않습니다. 테스트의 첫 번째 블록은 본격적으로 시작하기 전에 몇 가지 연습을 시도하는 것입니다.",
@@ -19524,7 +19524,7 @@ export const phrases = {
   T_letterDemo: {
     "en-US":
       "On each trial, a random letter will FLASH in the corner of your eye. Just a flash. To learn the task, let’s try it first with a STATIC display. While looking at the cross, below, without moving your eyes: What letter is it?",
-    ar: "Loading...",
+    ar: "في كل محاولة، ستظهر حرف عشوائي بومضة في زاوية عينك. مجرد وميضة. لتعلم المهمة، دعنا نجربها أولاً مع عرض ثابت. أثناء النظر إلى الصليب أدناه، دون حركة عينيك: ما هو الحرف؟",
     hy: "«Համարվում է, որ յուրաքանչյուր փորձում կանխատեսվի պատահական տառ, որը կլինի աչքի անկյունում պալատավորված։ Մենք սովորելու համար, թեստավորենք այն առաջիններից մեկով ստատիկ ցուցադրումով։ Դիտելով խաչակերներին, ստեղծելով այստեղ, աչքերդ չանցնելով՝ ինչ տառ է դարձնում այն։»",
     bg: "На всеки опит ще се появи случаен буква в ъгъла на окото ви. Просто едно мигване. За да научите задачата, нека първо я опитаме със СТАТИЧЕН дисплей. Докато гледате кръстчетата по-долу, без да местите очите си: Коя буква е?",
     "zh-CN":
@@ -19546,7 +19546,7 @@ export const phrases = {
     hu: "Minden próbálkozáskor egy véletlenszerű betű villan fel a szemed sarkában. Csak egy villanás. Hogy megtanuld a feladatot, először próbáljuk ki egy STATIKUS kijelzővel. Miközben a látómező közepére nézel, az alábbiakban, anélkül, hogy mozgatnád a szemed: Melyik betű az?",
     is: "Á hverju tilraunaskipti mun handahófskennt stafur FLAKKA í horninu á sjóninni þinni. Bara flakka. Til að læra verkefnið, skulum við prófa það fyrst með STATIC sýningu. Meðan þú horfir á krosshárin hér fyrir neðan, án þess að færa augun þín: Hvaða stafur er það?",
     id: "Pada setiap percobaan, sebuah huruf acak akan BERKEDIP di sudut mata Anda. Hanya sekejap. Untuk mempelajari tugasnya, mari kita coba dulu dengan tampilan STATIS. Sambil melihat salib di bawah, tanpa menggerakkan mata: Huruf apa itu?",
-    it: "Loading...",
+    it: "Ad ogni prova, una lettera casuale lampeggerà nell'angolo del tuo occhio. Solo un lampo. Per imparare il compito, proviamolo prima con una visualizzazione STATIC. Mentre guardi la croce qui sotto, senza muovere gli occhi: quale lettera è?",
     ja: "トライアルごとに、ランダムな文字が目の端に点滅します。ほんの一瞬。タスクを学ぶために、まず STATIC 表示で試してみましょう。下の十字架を見ながら、目を動かさずに「それは何の文字ですか？」",
     kn: "ಪ್ರತಿ ಪ್ರಯೋಗದಲ್ಲಿ, ಯಾದೃಚ್ಛಿಕ ಅಕ್ಷರವು ನಿಮ್ಮ ಕಣ್ಣಿನ ಮೂಲೆಯಲ್ಲಿ ಫ್ಲ್ಯಾಶ್ ಆಗುತ್ತದೆ. ಕೇವಲ ಒಂದು ಫ್ಲಾಶ್. ಕೆಲಸವನ್ನು ಕಲಿಯಲು, STATIC ಡಿಸ್ಪ್ಲೇಯೊಂದಿಗೆ ಅದನ್ನು ಮೊದಲು ಪ್ರಯತ್ನಿಸೋಣ. ಶಿಲುಬೆಯನ್ನು ನೋಡುವಾಗ, ಕೆಳಗೆ, ನಿಮ್ಮ ಕಣ್ಣುಗಳನ್ನು ಚಲಿಸದೆ: ಅದು ಯಾವ ಅಕ್ಷರ?",
     ko: "각 시도마다 눈 귀퉁이에 무작위로 한 글자가 번쩍일 것입니다. 번쩍이는 것 뿐입니다. 작업을 배우기 위해, 먼저 정적인 디스플레이로 시도해 보겠습니다. 아래의 십자선을 보면서 눈을 움직이지 않고: 그 글자는 무엇인가요?",
@@ -19570,7 +19570,7 @@ export const phrases = {
   },
   T_ok: {
     "en-US": "OK",
-    ar: "Loading...",
+    ar: "حسنا",
     hy: "լավ",
     bg: "Добре",
     "zh-CN": "确认",
@@ -19589,7 +19589,7 @@ export const phrases = {
     hu: "ХОРОШО",
     is: "ХОРОШО",
     id: "ХОРОШО",
-    it: "Loading...",
+    it: "OK",
     ja: "確認",
     kn: "ХОРОШО",
     ko: "좋아요",
@@ -19613,7 +19613,7 @@ export const phrases = {
   },
   T_participant: {
     "en-US": "Participant",
-    ar: "Loading...",
+    ar: "مشارك",
     hy: "Մասնակից",
     bg: "участник",
     "zh-CN": "被试",
@@ -19632,7 +19632,7 @@ export const phrases = {
     hu: "Участник",
     is: "Участник",
     id: "Участник",
-    it: "Loading...",
+    it: "Partecipante",
     ja: "参加者",
     kn: "Участник",
     ko: "참가자",
@@ -19656,7 +19656,7 @@ export const phrases = {
   },
   T_type: {
     "en-US": "by pressing it in the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "عن طريق الضغط عليه في لوحة المفاتيح.",
     hy: "սեղմելով այն ստեղնաշարի/ստեղնաշարի վրա:",
     bg: "като го натиснете на клавиатурата/клавиатурата.",
     "zh-CN": "通过按下键盘上的对应按键",
@@ -19675,7 +19675,7 @@ export const phrases = {
     hu: "нажав его на клавиатуре.",
     is: "pressing it on the keyboard.",
     id: "нажав его на клавиатуре.",
-    it: "Loading...",
+    it: "premendolo sulla tastiera/tastierino.",
     ja: "キーボードで対応するキーを押すことで",
     kn: "ಅದನ್ನು ಕೀಬೋರ್ಡ್/ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಒತ್ತುವ ಮೂಲಕ.",
     ko: "키보드/키패드에서 눌러보세요.",
@@ -19699,7 +19699,7 @@ export const phrases = {
   },
   T_pressingKey: {
     "en-US": "by pressing it in the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "عن طريق الضغط عليه في لوحة المفاتيح.",
     hy: "нажав его на клавиатуре.",
     bg: "нажатие эго на клавиатуре/клавиатуре.",
     "zh-CN": "通过按下键盘上的对应按键",
@@ -19718,7 +19718,7 @@ export const phrases = {
     hu: "a billentyűzeten/billentyűzeten megnyomva.",
     is: "með því að ýta á það á lyklaborðinu/takkaborðinu.",
     id: "dengan menekannya pada keyboard/keypad.",
-    it: "Loading...",
+    it: "premendolo sulla tastiera/tastierino.",
     ja: "キーボードで対応するキーを押すことで",
     kn: "ಅದನ್ನು ಕೀಬೋರ್ಡ್/ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಒತ್ತುವ ಮೂಲಕ.",
     ko: "키보드/키패드에서 눌러보세요.",
@@ -19743,7 +19743,7 @@ export const phrases = {
   T_typeOrClickLetter: {
     "en-US":
       "by clicking it in the displayed list of letters or pressing it in the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "عن طريق النقر عليه في قائمة الحروف المعروضة أو الضغط عليه في لوحة المفاتيح.",
     hy: "սեղմելով այն ցուցադրվող տառերի ցանկում կամ սեղմելով այն ստեղնաշարի/ստեղնաշարի վրա:",
     bg: "натискайки го на клавиатурата или щракайки в показания списък с букви.",
     "zh-CN": "通过按下键盘上的对应按键或者点击给出文字中的相应字母。",
@@ -19763,7 +19763,7 @@ export const phrases = {
     hu: "нажав его на клавиатуре или щелкнув в отображаемом списке букв.",
     is: "pressing it on the keyboard or clicking on the displayed list of letters.",
     id: "dengan mengkliknya pada daftar huruf yang ditampilkan atau menekannya pada keyboard/keypad.",
-    it: "Loading...",
+    it: "cliccandolo nell'elenco visualizzato delle lettere o premendolo sulla tastiera/tastierino.",
     ja: "キーボードで対応するキーを押すか、表示されている文字のリストをクリックすることで",
     kn: "ಪ್ರದರ್ಶಿಸಲಾದ ಅಕ್ಷರಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಅದನ್ನು ಕ್ಲಿಕ್ ಮಾಡುವ ಮೂಲಕ ಅಥವಾ ಕೀಬೋರ್ಡ್/ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಅದನ್ನು ಒತ್ತುವ ಮೂಲಕ.",
     ko: "표시된 문자 목록에서 해당 문자를 클릭하거나 키보드/키패드에서 누릅니다.",
@@ -19788,7 +19788,7 @@ export const phrases = {
   T_pressingKeyOrClickingLetter: {
     "en-US":
       "by clicking it in the displayed list of letters or pressing it in the keyboard/keypad.",
-    ar: "Loading...",
+    ar: "عن طريق النقر عليه في قائمة الحروف المعروضة أو الضغط عليه في لوحة المفاتيح / الأزرار.",
     hy: "սեղմելով այն ցուցադրվող տառերի ցանկում կամ սեղմելով այն ստեղնաշարի/ստեղնաշարի վրա:",
     bg: "като щракнете върху него в показания списък с букви или го натиснете на клавиатурата/клавиатурата.",
     "zh-CN": "通过按下键盘上的对应按键或者点击给出文字中的相应字母。",
@@ -19808,7 +19808,7 @@ export const phrases = {
     hu: "нажав его на клавиатуре или щелкнув в отображаемом списке букв.",
     is: "með því að smella á það í listanum yfir stafa sem birtist eða ýta á það á lyklaborðinu/takkaborðinu.",
     id: "нажав его на клавиатуре или щелкнув в отображаемом списке букв.",
-    it: "Loading...",
+    it: "cliccandolo nell'elenco visualizzato delle lettere o premendolo sulla tastiera/tastierino.",
     ja: "キーボードで対応するキーを押すか、表示されている文字のリストをクリックすることで",
     kn: "ಪ್ರದರ್ಶಿಸಲಾದ ಅಕ್ಷರಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಅದನ್ನು ಕ್ಲಿಕ್ ಮಾಡುವ ಮೂಲಕ ಅಥವಾ ಕೀಬೋರ್ಡ್/ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಅದನ್ನು ಒತ್ತುವ ಮೂಲಕ.",
     ko: "표시된 문자 목록에서 해당 문자를 클릭하거나 키보드/키패드에서 누릅니다.",
@@ -19851,7 +19851,7 @@ export const phrases = {
     hu: "megnyomásával a telefon billentyűzetén.",
     is: "með því að ýta á það á takkaborðinu í símanum þínum.",
     id: "dengan menekannya pada keypad ponsel Anda.",
-    it: "Loading...",
+    it: "premendolo sulla tastiera del tuo telefono.",
     ja: "携帯電話のキーパッドでそれを押します。",
     kn: "ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿರುವ ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಅದನ್ನು ಒತ್ತುವ ಮೂಲಕ.",
     ko: "휴대폰 키패드에서 눌러서",
@@ -19896,7 +19896,7 @@ export const phrases = {
     hu: "kattintson rá a megjelenő betűlistában, vagy nyomja meg a telefon billentyűzetén.",
     is: "með því að smella á það í listanum yfir stafa sem birtist eða ýta á það á takkaborðinu í símanum þínum.",
     id: "dengan mengkliknya di daftar huruf yang ditampilkan atau menekannya pada keypad ponsel Anda.",
-    it: "Loading...",
+    it: "cliccandolo nell'elenco visualizzato delle lettere o premendolo sulla tastiera del tuo telefono.",
     ja: "表示された文字リスト内でその文字をクリックするか、携帯電話のキーパッドでそれを押します。",
     kn: "ಪ್ರದರ್ಶಿಸಲಾದ ಅಕ್ಷರಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಅದನ್ನು ಕ್ಲಿಕ್ ಮಾಡುವ ಮೂಲಕ ಅಥವಾ ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿರುವ ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಅದನ್ನು ಒತ್ತುವ ಮೂಲಕ.",
     ko: "표시된 문자 목록에서 해당 문자를 클릭하거나 휴대폰 키패드에서 해당 문자를 누르세요.",
@@ -19939,7 +19939,7 @@ export const phrases = {
     hu: "a billentyűzet/billentyűzet megnyomásával.",
     is: "með því að ýta á það á lyklaborðinu/lyklapallinum.",
     id: "dengan menekannya pada keyboard/keypad.",
-    it: "Loading...",
+    it: "premendo il tasto sulla tastiera/tastierino numerico.",
     ja: "キーボード/キーパッドでそれを押します。",
     kn: "ಕೀಬೋರ್ಡ / ಕೀಪ್ಯಾಡ್ ಮೂಲಕ ಅದನ್ನು ಒತ್ತಿಹಾಕುವುದರಿಂದ.",
     ko: "키보드/키패드에서 누르면 됩니다.",
@@ -19985,7 +19985,7 @@ export const phrases = {
     hu: "azáltal, hogy rákattint a megjelenített betűk listájában, megnyomja a billentyűzetén, vagy megnyomja a billentyűzeten.",
     is: "með því að smella á það í listanum yfir stafa sem birtist, ýta á það á lyklaborðinu eða ýta á það á takkaborðinu.",
     id: "dengan mengkliknya pada daftar huruf yang ditampilkan, menekannya pada keyboard, atau menekannya pada keypad.",
-    it: "Loading...",
+    it: "cliccandolo nell'elenco visualizzato delle lettere, premendolo sulla tastiera o premendolo sul tastierino.",
     ja: "表示された文字リスト内でその文字をクリックするか、キーボードでそれを押すか、キーパッドでそれを押します。",
     kn: "ಪ್ರದರ್ಶಿಸಲಾದ ಅಕ್ಷರಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಅದನ್ನು ಕ್ಲಿಕ್ ಮಾಡುವ ಮೂಲಕ, ಅದನ್ನು ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿ ಒತ್ತುವ ಮೂಲಕ ಅಥವಾ ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಒತ್ತುವ ಮೂಲಕ.",
     ko: "표시된 글자 목록에서 클릭하거나 키보드에서 누르거나 키패드에서 누르는 것으로",
@@ -20030,7 +20030,7 @@ export const phrases = {
     hu: "kattintson rá a megjelenő betűlistában, vagy nyomja meg a billentyűzeten/billentyűzeten.",
     is: "með því að smella á það í listanum yfir stafa sem birtist eða ýta á það á lyklaborðinu/takkaborðinu.",
     id: "dengan mengkliknya pada daftar huruf yang ditampilkan, atau menekannya pada keyboard/keypad.",
-    it: "Loading...",
+    it: "cliccandoci nella lista visualizzata delle lettere, o premendolo sulla tastiera/tastierino numerico.",
     ja: "表示された文字のリストをクリックするか、キーボード/キーパッドでそれを押します。",
     kn: "ಪ್ರದರ್ಶಿಸಲಾದ ಅಕ್ಷರಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಅದನ್ನು ಕ್ಲಿಕ್ ಮಾಡುವ ಮೂಲಕ ಅಥವಾ ಕೀಬೋರ್ಡ್/ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಒತ್ತುವ ಮೂಲಕ.",
     ko: "표시된 글자 목록에서 클릭하거나 키보드/키패드에서 누르면 됩니다.",
@@ -20075,7 +20075,7 @@ export const phrases = {
     hu: "kattintson rá a megjelenő betűlistában, vagy nyomja meg a billentyűzeten/billentyűzeten.",
     is: "með því að smella á það í listanum yfir stafa sem birtist eða ýta á það á lyklaborðinu/takkaborðinu.",
     id: "dengan mengkliknya pada daftar huruf yang ditampilkan, atau menekannya pada keyboard/keypad.",
-    it: "Loading...",
+    it: "cliccandolo nell'elenco visualizzato delle lettere, o premendolo sulla tastiera/tastierino.",
     ja: "表示された文字のリストをクリックするか、キーボード/キーパッドでそれを押します。",
     kn: "ಪ್ರದರ್ಶಿಸಲಾದ ಅಕ್ಷರಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಅದನ್ನು ಕ್ಲಿಕ್ ಮಾಡುವುದರಿಂದ ಅಥವಾ ಕೀಬೋರ್ಡ್/ಕೀಪ್ಯಾಡ್ ಮೇಲೆ ಅದನ್ನು ಒತ್ತಿಹಾಕುವುದರಿಂದ.",
     ko: "표시된 문자 목록에서 해당 문자를 클릭하거나 키보드/키패드에서 누릅니다.",
@@ -20118,7 +20118,7 @@ export const phrases = {
     hu: "azáltal, hogy lenyomjuk őket a billentyűzeten / számbillentyűzeten.",
     is: "með því að ýta á þá á lyklaborðinu/takkaborðinu.",
     id: "dengan menekan mereka pada keyboard/keypad.",
-    it: "Loading...",
+    it: "premendoli sulla tastiera/tastierino.",
     ja: "キーボード/キーパッドでそれらを押します。",
     kn: "ಕೀಬೋರ್ಡ / ಕೀಪ್ಯಾಡ್ ಮೇಲೆ ಅವುಗಳನ್ನು ಒತ್ತಿದರೆ.",
     ko: "키보드/키패드에서 눌러보세요.",
@@ -20161,7 +20161,7 @@ export const phrases = {
     hu: "a billentyűzet/billentyűzet megnyomásával.",
     is: "með því að ýta á þá á lyklaborðinu/takkaborðinu.",
     id: "dengan menekannya pada keyboard/keypad.",
-    it: "Loading...",
+    it: "premendoli sulla tastiera/tastierino.",
     ja: "キーボード/キーパッドでそれらを押します。",
     kn: "ಅವುಗಳನ್ನು ಕೀಬೋರ್ಡ್/ಕೀಪ್ಯಾಡ್‌ನಲ್ಲಿ ಒತ್ತುವ ಮೂಲಕ.",
     ko: "키보드/키패드에서 그들을 눌러서.",
@@ -20204,7 +20204,7 @@ export const phrases = {
     hu: "a szavak hangosan kimondásával.",
     is: "með því að segja orðin hátt.",
     id: "dengan mengucapkan kata-kata tersebut dengan keras.",
-    it: "Loading...",
+    it: "dicendo le parole ad alta voce.",
     ja: "言葉を声に出して言うことによって。",
     kn: "ಮಾತುಗಳನ್ನು ಉಚ್ಚರಿಸುವುದರಿಂದ.",
     ko: "말로 소리내어 단어를 말함으로써.",
@@ -20247,7 +20247,7 @@ export const phrases = {
     hu: "azáltal, hogy begépeled a szavakat.",
     is: "með því að slá inn orðin.",
     id: "dengan mengetikkan kata-kata tersebut.",
-    it: "Loading...",
+    it: "digitando le parole.",
     ja: "「単語を入力することで」",
     kn: "ಪದಗಳನ್ನು ಟೈಪ್ ಮಾಡುವ ಮೂಲಕ.",
     ko: "단어를 입력함으로써.",
@@ -20290,7 +20290,7 @@ export const phrases = {
     hu: "❌ A T_pressingKeyRsvpReading elavult.",
     is: "❌ T_pressingKeyRsvpReading er úreltur.",
     id: "T_pressingKeyRsvpReading sudah usang.",
-    it: "Loading...",
+    it: "❌ T_pressingKeyRsvpReading è obsoleto.",
     ja: "❌ T_pressingKeyRsvpReading は廃止されました。",
     kn: "❌ T_pressingKeyRsvpReading ಅಪಾರಂಪರ್ಯವಾಗಿದೆ.",
     ko: "❌ T_pressingKeyRsvpReading은 더 이상 사용되지 않습니다.",
@@ -20333,7 +20333,7 @@ export const phrases = {
     hu: "FOLYTASSA",
     is: "HALTU ÁFRAM",
     id: "MELANJUTKAN",
-    it: "Loading...",
+    it: "PROCEDI",
     ja: "「進め」",
     kn: "ಮುಂದುವರೆಯಿರಿ",
     ko: "진행하다",
@@ -20376,7 +20376,7 @@ export const phrases = {
     hu: "Folytassa",
     is: "Haltu áfram",
     id: "Melanjutkan",
-    it: "Loading...",
+    it: "Procedi",
     ja: "「進め」",
     kn: "ಮುಂದುವರೆಯಿರಿ",
     ko: "진행하다",
@@ -20419,7 +20419,7 @@ export const phrases = {
     hu: "Jó munka! xxx%-ban igazad van.",
     is: "Góð vinna! Þú hefur xxx% rétt.",
     id: "Kerja bagus! Anda benar xxx%.",
-    it: "Loading...",
+    it: "Buon lavoro! Hai ottenuto xxx% corretto.",
     ja: "よくできました！あなたはxxx%正解しました。",
     kn: "ಒಳ್ಳೆಯ ಕೆಲಸ! ನೀವು xxx% ಸರಿಯಾಗಿದೆ.",
     ko: "잘 했어! 당신의 말이 xxx% 맞았습니다.",
@@ -20462,7 +20462,7 @@ export const phrases = {
     hu: "Nyomja meg a SZÓKÖZ gombot a következő oldalhoz.",
     is: "Vajuta TÜHIMIKU klahvi järgmise lehe jaoks.",
     id: "Tekan SPASI untuk halaman berikutnya.",
-    it: "Loading...",
+    it: "Premi SPAZIO per la pagina successiva.",
     ja: "次のページに進むにはスペースを押してください。",
     kn: "ಮುಂದಿನ ಪುಟಕ್ಕಾಗಿ SPACE ಒತ್ತಿರಿ.",
     ko: "다음 페이지를 보려면 SPACE를 누르세요.",
@@ -20509,7 +20509,7 @@ export const phrases = {
     hu: "Most 111 szót fog gyorsan elolvasni. A szavak egymás után, ugyanazon a helyen jelennek meg.",
     is: "Nú munt þú lesa 111 orð fljótt. Orðin birtast, hvert af öðru, á sama stað.",
     id: "Sekarang Anda akan membaca 111 kata dengan cepat. Kata-kata itu akan muncul, satu demi satu, di tempat yang sama.",
-    it: "Loading...",
+    it: "Ora leggerai 111 parole velocemente. Le parole appariranno, una dopo l'altra, nello stesso punto.",
     ja: "これで、111 単語をすぐに読むことができます。単語は同じ場所に次々と表示されます。",
     kn: "ಈಗ ನೀವು 111 ಪದಗಳನ್ನು ತ್ವರಿತವಾಗಿ ಓದುತ್ತೀರಿ. ಪದಗಳು ಒಂದರ ನಂತರ ಒಂದರಂತೆ ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ.",
     ko: "이제 111개의 단어를 빠르게 읽을 수 있습니다. 같은 자리에 단어가 차례로 나타납니다.",
@@ -20556,7 +20556,7 @@ export const phrases = {
     hu: "Egy 111-es próbablokkot készül elindítani. Egy történetet fogsz olvasni, néhány szót egyszerre. Mindegyik próba gyorsan megmutat egy mondatnyi szavakat egymás után, majd megkéri, hogy emlékezzen az olvasott szavakra.",
     is: "Þú ert að fara að byrja á blokk af 111 prófum. Þú munt lesa sögu, nokkrar orð í einu. Hvert próf mun fljótt sýna þér um setningu af orðum, einn eftir annan, og spyrja þig síðan að muna orðin sem þú las.",
     id: "Anda akan memulai blok yang terdiri dari 111 uji coba. Anda akan membaca sebuah cerita, beberapa kata sekaligus. Setiap percobaan akan dengan cepat menunjukkan kepada Anda tentang satu kalimat dari kata-kata, satu demi satu, dan kemudian meminta Anda untuk mengingat kata-kata yang Anda baca.",
-    it: "Loading...",
+    it: "Stai per iniziare un blocco di 111 prove. Leggerai una storia, poche parole alla volta. Ogni prova ti mostrerà rapidamente circa una frase di parole, una dopo l'altra, e poi ti chiederà di ricordare le parole che hai letto.",
     ja: "111 回のトライアルのブロックを開始しようとしています。一度に数語ずつ物語を読むことになります。各トライアルでは、文に相当する単語が次々と素早く表示され、読んだ単語を思い出すように求められます。",
     kn: "ನೀವು 111 ಪ್ರಯೋಗಗಳ ಬ್ಲಾಕ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲಿರುವಿರಿ. ನೀವು ಒಂದು ಕಥೆಯನ್ನು ಓದುತ್ತೀರಿ, ಒಂದು ಸಮಯದಲ್ಲಿ ಕೆಲವು ಪದಗಳು. ಪ್ರತಿ ಪ್ರಯೋಗವು ವಾಕ್ಯದ ಮೌಲ್ಯದ ಪದಗಳ ಬಗ್ಗೆ ನಿಮಗೆ ತ್ವರಿತವಾಗಿ ತೋರಿಸುತ್ತದೆ, ಒಂದರ ನಂತರ ಒಂದರಂತೆ, ಮತ್ತು ನಂತರ ನೀವು ಓದಿದ ಪದಗಳನ್ನು ನೆನಪಿಟ್ಟುಕೊಳ್ಳಲು ನಿಮ್ಮನ್ನು ಕೇಳುತ್ತದೆ.",
     ko: "111개의 시험 블록을 시작하려고 합니다. 당신은 한 번에 몇 단어씩 이야기를 읽게 될 것입니다. 각 시험에서는 한 문장 분량의 단어를 차례로 빠르게 보여주고 읽은 단어를 기억하도록 요청합니다.",
@@ -20603,7 +20603,7 @@ export const phrases = {
     hu: "Hamarosan elindít egy xxx próbaverziót. Egy történetet fogsz olvasni, néhány szót egyszerre. Mindegyik próba gyorsan megmutat egy mondatnyi szavakat egymás után, majd megkéri, hogy emlékezzen az olvasott szavakra.",
     is: "Þú ert að fara að hefja blokk af xxx prufum. Þú munt lesa sögu, nokkur orð í einu. Hver prufa mun fljótt sýna þér um setningargildi orða, hvert á eftir öðru, og síðan biðja þig um að muna orðin sem þú lest.",
     id: "Anda akan segera memulai serangkaian percobaan xxx. Anda akan membaca sebuah cerita, beberapa kata setiap kali. Setiap percobaan akan dengan cepat menunjukkan sekitar satu kalimat kata-kata, satu demi satu, dan kemudian meminta Anda untuk mengingat kata-kata yang Anda baca.",
-    it: "Loading...",
+    it: "Stai per iniziare un blocco di xxx prove. Leggerai una storia, poche parole alla volta. Ogni prova ti mostrerà rapidamente circa una frase di parole, una dopo l'altra, e poi ti chiederà di ricordare le parole che hai letto.",
     ja: "xxx トライアルのブロックを開始しようとしています。一度に数語ずつ物語を読むことになります。各トライアルでは、文に相当する単語が次々と素早く表示され、読んだ単語を思い出すように求められます。",
     kn: "ನೀವು xxx ಪ್ರಯತ್ನಗಳ ಬ್ಲಾಕ್ ಪ್ರಾರಂಭಿಸಲಿದ್ದೀರಿ. ನೀವು ಒಂದು ಕಥೆಯನ್ನು ಕೆಲವು ಮಾತುಗಳನ್ನು ಓದುತ್ತಿದ್ದೀರಿ. ಪ್ರತಿ ಪ್ರಯತ್ನವು ನೀವು ಓದಿದ ಒಂದು ವಾಕ್ಯದ ಮೌಲ್ಯದ ಮಾತುಗಳನ್ನು ಒಂದೊಂದು ತೋರಿಸುತ್ತದೆ, ಮತ್ತು ನಂತರ ನೀವು ಓದಿದ ಮಾತುಗಳನ್ನು ನೆನಪಿನಲ್ಲಿ ಹಚ್ಚಲು ಕೇಳುತ್ತದೆ.",
     ko: "xxx 평가판 블록을 시작하려고 합니다. 당신은 한 번에 몇 단어씩 이야기를 읽게 될 것입니다. 각 시험에서는 한 문장 분량의 단어를 차례로 빠르게 보여주고 읽은 단어를 기억하도록 요청합니다.",
@@ -20642,7 +20642,7 @@ export const phrases = {
     "en-UK":
       "Story time! You'll read 111 pages from a book. Once you start, please silently read all the pages as fast as you can, while maintaining full comprehension, until you reach the end. Then we'll ask you a few questions about the story. On each page, press the SPACE bar for the next page. When you're ready, press SPACE.",
     fi: "Satuhetki! Luet kirjasta 111 sivua. Kun aloitat, lue kaikki sivut hiljaa niin nopeasti kuin pystyt säilyttäen samalla täyden ymmärtämisen, kunnes tulet loppuun. Sitten kysymme sinulta muutaman kysymyksen tarinasta. Paina jokaisella sivulla VÄLINÄPPÄINTÄ siirtyäksesi seuraavalle sivulle. Kun olet valmis, paina VÄLINÄPPÄIN.",
-    fr: "Loading...",
+    fr: "Histoire du temps! Vous lirez 111 pages d'un livre. Une fois que vous commencez, veuillez lire silencieusement toutes les pages aussi rapidement que possible, tout en maintenant une compréhension complète, jusqu'à ce que vous atteigniez la fin. Ensuite, nous vous poserons quelques questions sur l'histoire. Sur chaque page, appuyez sur la barre d'ESPACE pour passer à la page suivante. Quand vous êtes prêt, appuyez sur ESPACE.",
     de: "Märchenstunde! Sie lesen 111 Seiten aus einem Buch. Wenn Sie beginnen, lesen Sie bitte alle Seiten so schnell wie möglich in Ruhe durch und bewahren Sie dabei Ihr volles Verständnis, bis Sie am Ende angelangt sind. Dann stellen wir Ihnen ein paar Fragen zur Geschichte. Drücken Sie auf jeder Seite die Leertaste, um zur nächsten Seite zu gelangen. Wenn Sie fertig sind, drücken Sie die LEERTASTE.",
     el: "Χρόνος για ιστορία! Θα διαβάσετε 111 σελίδες από ένα βιβλίο. Μόλις ξεκινήσετε, παρακαλούμε διαβάστε αθόρυβα όλες τις σελίδες όσο πιο γρήγορα μπορείτε, διατηρώντας πλήρη κατανόηση, μέχρι να φτάσετε στο τέλος. Στη συνέχεια, θα σας κάνουμε μερικές ερωτήσεις για την ιστορία. Σε κάθε σελίδα, πατήστε το πλήκτρο SPACE για την επόμενη σελίδα. Όταν είστε έτοιμοι, πατήστε SPACE.",
     he: "זמן סיפור! תקראו 111 עמודים מספר. לאחר שתתחילו, אנא קראו בשקט את כל העמודים במהירות האפשרית, בתחושה מלאה, עד שתגיעו לסוף. אז נשאל אתכם כמה שאלות על הסיפור. על כל עמוד, לחצו על מקש הרווח כדי לעבור לעמוד הבא. כשתהיו מוכנים, לחצו על מקש הרווח.",
@@ -20650,7 +20650,7 @@ export const phrases = {
     hu: "Meseidő! 111 oldalt fog elolvasni egy könyvből. Ha elkezdi, kérjük, csendben olvassa el az összes oldalt, amilyen gyorsan csak tud, miközben megőrzi a teljes megértést, amíg el nem éri a végét. Ezután felteszünk néhány kérdést a történettel kapcsolatban. Minden oldalon nyomja meg a SZÓKÖZ billentyűt a következő oldalhoz. Ha készen áll, nyomja meg a SZÓKÖZ billentyűt.",
     is: "Sögustund! Þú munt lesa 111 síður úr bók. Þegar þú byrjar skaltu vinsamlegast lesa allar síðurnar í hljóði eins hratt og þú getur, á meðan þú hefur fullan skilning, þar til þú nærð endanum. Síðan munum við spyrja þig nokkurra spurninga um söguna. Á hverri síðu, ýttu á bilsstikuna fyrir næstu síðu. Þegar þú ert tilbúinn skaltu ýta á SPACE.",
     id: "Waktu cerita! Anda akan membaca 111 halaman dari sebuah buku. Saat Anda memulai, harap baca dalam hati semua halaman secepat mungkin, sambil mempertahankan pemahaman penuh, hingga Anda mencapai bagian akhir. Kemudian kami akan menanyakan beberapa pertanyaan tentang ceritanya. Di setiap halaman, tekan bilah SPASI untuk halaman berikutnya. Jika Anda sudah siap, tekan SPASI.",
-    it: "Loading...",
+    it: "Tempo delle storie! Leggerai 111 pagine di un libro. Una volta iniziato, leggi silenziosamente tutte le pagine il più velocemente possibile, mantenendo piena comprensione, fino alla fine. Poi ti faremo alcune domande sulla storia. Su ogni pagina, premi il tasto SPAZIO per passare alla pagina successiva. Quando sei pronto, premi SPAZIO.",
     ja: "お話タイム！本の 111 ページを読むことになります。読み始めたら、完全な理解を維持しながら、最後まで黙ってできるだけ早くすべてのページを読んでください。それでは、お話についていくつか質問させていただきます。各ページでスペースバーを押して次のページに進みます。準備ができたら、スペースキーを押します。",
     kn: "ಕಥೆಯ ಸಮಯ! ನೀವು ಪುಸ್ತಕದಿಂದ 111 ಪುಟಗಳನ್ನು ಓದುತ್ತೀರಿ. ಒಮ್ಮೆ ನೀವು ಪ್ರಾರಂಭಿಸಿದ ನಂತರ, ದಯವಿಟ್ಟು ಎಲ್ಲಾ ಪುಟಗಳನ್ನು ನೀವು ಸಾಧ್ಯವಾದಷ್ಟು ವೇಗವಾಗಿ ಓದಿ, ಪೂರ್ಣ ಗ್ರಹಿಕೆಯನ್ನು ಕಾಪಾಡಿಕೊಳ್ಳುವಾಗ, ನೀವು ಅಂತ್ಯವನ್ನು ತಲುಪುವವರೆಗೆ. ನಂತರ ನಾವು ನಿಮಗೆ ಕಥೆಯ ಬಗ್ಗೆ ಕೆಲವು ಪ್ರಶ್ನೆಗಳನ್ನು ಕೇಳುತ್ತೇವೆ. ಪ್ರತಿ ಪುಟದಲ್ಲಿ, ಮುಂದಿನ ಪುಟಕ್ಕಾಗಿ SPACE ಬಾರ್ ಅನ್ನು ಒತ್ತಿರಿ. ನೀವು ಸಿದ್ಧರಾದಾಗ, SPACE ಒತ್ತಿರಿ.",
     ko: "이야기 시간! 책 한 권의 111페이지를 읽게 됩니다. 일단 시작하시면, 끝까지 도달할 때까지 완전한 이해를 유지하면서 가능한 한 빨리 모든 페이지를 조용히 읽으십시오. 그럼 이야기에 관해 몇 가지 질문을 드리겠습니다. 각 페이지에서 다음 페이지로 이동하려면 스페이스바를 누르세요. 준비가 되면 SPACE를 누르세요.",
@@ -20687,7 +20687,7 @@ export const phrases = {
     "en-UK":
       "Which of the following words appeared in the passage that you just read?",
     fi: "Mitkä seuraavista sanoista esiintyivät juuri lukemassasi kohdassa?",
-    fr: "Loading...",
+    fr: "Quels mots parmi les suivants sont apparus dans le passage que vous venez de lire ?",
     de: "Welches der folgenden Wörter kam in der Passage vor, die Sie gerade gelesen haben?",
     el: "Ποιες από τις παρακάτω λέξεις εμφανίστηκαν στο απόσπασμα που μόλις διαβάσατε;",
     he: "איזה מהמילים הבאות הופיעו בפסקה שקראת עכשיו?",
@@ -20695,7 +20695,7 @@ export const phrases = {
     hu: "Az alábbi szavak közül melyik szerepelt abban a részben, amelyet most olvasott?",
     is: "Millist järgmist sõna mainiti just loetud tekstis?",
     id: "Manakah dari kata-kata berikut yang muncul dalam bacaan yang baru saja Anda baca?",
-    it: "Loading...",
+    it: "Quali delle seguenti parole sono apparse nel brano che hai appena letto?",
     ja: "今読んだ文章の中に出てきた単語は次のうちどれですか?",
     kn: "ನೀವು ಇದೇನು ಓದಿದ ಪಠ್ಯದಲ್ಲಿ ಕಂಡುಬಂದ ಮೇಲೆ ಮೇಲೆ ಹೇಳಿದ ಪದಗಳಲ್ಲಿ ಯಾವುದು ಇತ್ತು?",
     ko: "방금 읽은 글에 다음 중 어떤 단어가 나타났나요?",
@@ -20730,7 +20730,7 @@ export const phrases = {
     nl: "HET EINDE",
     "en-UK": "THE END",
     fi: "LOPPU",
-    fr: "Loading...",
+    fr: "LA FIN",
     de: "DAS ENDE",
     el: "ΤΟ ΤΕΛΟΣ",
     he: "הסוף",
@@ -20738,7 +20738,7 @@ export const phrases = {
     hu: "A VÉGE",
     is: "ENDIRINN",
     id: "TAMAT",
-    it: "Loading...",
+    it: "LA FINE",
     ja: "終わり",
     kn: "ಕೊನೆ",
     ko: "끝",
@@ -20773,7 +20773,7 @@ export const phrases = {
     nl: "Готовы? Смотря прямо на перекрестие, нажмите на него.",
     "en-UK": "Ready? Click the center of the cross.",
     fi: "Готовы? Смотря прямо на перекрестие, нажмите на него.",
-    fr: "Loading...",
+    fr: "Prêt ? Cliquez au centre de la croix.",
     de: "Bereit? Während Sie direkt auf das Fadenkreuz schauen, klicken Sie bitte auf das Fadenkreuz.",
     el: "Ετοιμος? Κάντε κλικ στο κέντρο του σταυρού.",
     he: "מוּכָן? לחץ על מרכז הצלב.",
@@ -20781,7 +20781,7 @@ export const phrases = {
     hu: "Готовы? Смотря прямо на перекрестие, нажмите на него.",
     is: "Ready? Looking directly at the intersection, press on it.",
     id: "Готовы? Смотря прямо на перекрестие, нажмите на него.",
-    it: "Loading...",
+    it: "Pronto? Clicca al centro della croce.",
     ja: "準備はできましたか？十字線を直視しながら、十字線をクリックしてください。",
     kn: "ಸಿದ್ಧವಾಗಿದೆಯೇ? ಶಿಲುಬೆಯ ಮಧ್ಯಭಾಗವನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ.",
     ko: "준비가 된? 십자가의 중심을 클릭합니다.",
@@ -20820,7 +20820,7 @@ export const phrases = {
     "en-UK":
       "Ready? Use the cursor to track the centre of the crosshair until the target appears. The crosshair becomes bold when the cursor is on it.",
     fi: "Valmis? Käytä kursoria seurataksesi ristin keskustaa, kunnes kohde tulee näkyviin. Risti muuttuu lihavoiduksi, kun kohdistin on sen päällä.",
-    fr: "Loading...",
+    fr: "Prêt ? Utilisez le curseur pour suivre le centre de la croix jusqu'à ce que la cible apparaisse. La croix devient en gras lorsque le curseur est dessus.",
     de: "Bereit? Verwenden Sie den Cursor, um das Zentrum des Fadenkreuzes zu verfolgen, bis das Ziel erscheint. Das Fadenkreuz wird fett, wenn der Cursor darauf liegt.",
     el: "Έτοιμοι; Χρησιμοποιήστε τον κέρσορα για να παρακολουθήσετε το κέντρο του σταυρού μέχρι να εμφανιστεί ο στόχος. Ο σταυρός γίνεται έντονος όταν ο κέρσορας βρίσκεται πάνω του.",
     he: "מוכן? השתמש בסמן כדי לעקוב אחר מרכז הצלב עד שהיעד מופיע. הצלב מתעבה כשהסמן עליו.",
@@ -20828,7 +20828,7 @@ export const phrases = {
     hu: "Készen állsz? Használd a kurzort a keresztszőr középpontjának követéséhez, amíg megjelenik a célpont. A keresztszőr vastag lesz, amikor a kurzor rajta van.",
     is: "Tilbúinn? Notaðu bendilinn til að fylgjast með miðju krossins þar til markið birtist. Krossinn verður feitletraður þegar bendillinn er á honum.",
     id: "Siap? Gunakan kursor untuk melacak bagian tengah salib hingga target muncul. Tanda silang menjadi tebal ketika kursor berada di atasnya.",
-    it: "Loading...",
+    it: "Pronto? Usa il cursore per seguire il centro della croce fino a quando compare il bersaglio. La croce diventa più spessa quando il cursore è su di essa.",
     ja: "準備ができて？カーソルを使用して、ターゲットが表示されるまで十字の中心を追跡します。十字にカーソルを置くと、十字が太字になります。",
     kn: "ಸಿದ್ಧವಾಗಿದೆಯೇ? ಲಕ್ಷ್ಯದ ಮಧ್ಯದ ಮೇಲೆ ಕರ್ಸರ್ ಅನುಸರಿಸಲು ಸಿದ್ಧವಾಗಿದೆ ಎಂದು ಭಾವಿಸಿ. ಕರ್ಸರ್ ಅದರ ಮೇಲೆ ಇರುವಾಗ ಕ್ರಾಸ್ ಹೇರ್ ಬೋಲ್ಡ್ ಆಗುತ್ತದೆ.",
     ko: "준비가 된? 표적이 나타날 때까지 커서를 사용하여 십자가의 중심을 추적하십시오. 커서가 위에 있으면 십자가가 굵게 표시됩니다.",
@@ -20863,7 +20863,7 @@ export const phrases = {
     nl: "Klaar om de letters te identificeren? Klik op het midden van het kruis.",
     "en-UK": "Ready to identify the letters? Click the center of the cross.",
     fi: "Oletko valmis tunnistamaan kirjaimet? Napsauta ristin keskustaa.",
-    fr: "Loading...",
+    fr: "Prêt à identifier les lettres ? Cliquez au centre de la croix.",
     de: "Bereit, die Buchstaben zu identifizieren? Klicken Sie auf die Mitte des Fadenkreuzes.",
     el: "Είστε έτοιμοι να αναγνωρίσετε τα γράμματα; Κάντε κλικ στο κέντρο του σταυρού.",
     he: "מוכן לזהות את האותיות? לחץ על מרכז הצלב המקורי.",
@@ -20871,7 +20871,7 @@ export const phrases = {
     hu: "Készen áll a betűk azonosítására? Kattintson a kereszt közepére.",
     is: "Tilbúinn til að bera kennsl á stafina? Smelltu á miðju krossins.",
     id: "Siap mengidentifikasi huruf-hurufnya? Klik bagian tengah salib.",
-    it: "Loading...",
+    it: "Siete pronti a identificare le lettere? Cliccate al centro della croce.",
     ja: "文字を識別する準備はできましたか?十字の中心をクリックします。",
     kn: "ಅಕ್ಷರಗಳನ್ನು ಗುರುತಿಸಲು ಸಿದ್ಧರಿದ್ದೀರಾ? ಶಿಲುಬೆಯ ಮಧ್ಯಭಾಗವನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ.",
     ko: "글자를 식별할 준비가 되셨나요? 십자선의 중앙을 클릭하세요.",
@@ -20908,7 +20908,7 @@ export const phrases = {
     "en-UK":
       "Ready to identify the letters? Track the center of the cross until the letters appear.",
     fi: "Oletko valmis tunnistamaan kirjaimet? Seuraa ristin keskustaa, kunnes kirjaimet tulevat näkyviin.",
-    fr: "Loading...",
+    fr: "Prêt à identifier les lettres ? Suivez le centre de la croix jusqu'à ce que les lettres apparaissent.",
     de: "Bereit, die Buchstaben zu identifizieren? Verfolgen Sie das Zentrum des Fadenkreuzes, bis die Buchstaben erscheinen.",
     el: "Είστε έτοιμοι να αναγνωρίσετε τα γράμματα; Παρακολουθήστε το κέντρο του σταυρού μέχρι να εμφανιστούν τα γράμματα.",
     he: "מוכנים לזהות את האותיות? עקוב אחר מרכז הצלב עד להופעת האותיות.",
@@ -20916,7 +20916,7 @@ export const phrases = {
     hu: "Készen állsz az betűk azonosítására? Kövesd a keresztszőr közepét, amíg megjelennek a betűk.",
     is: "Siap untuk mengidentifikasi huruf-hurufnya? Lacak pusat bidik silang sampai huruf-hurufnya muncul.",
     id: "Siap mengidentifikasi huruf-hurufnya? Lacak bagian tengah salib sampai hurufnya muncul.",
-    it: "Loading...",
+    it: "Pronto a identificare le lettere? Segui il centro della croce finché le lettere non appaiono.",
     ja: "「文字を識別する準備はできていますか？文字が表示されるまで、クロスヘアの中心を追跡してください。」",
     kn: "ಅಕ್ಷರಗಳನ್ನು ಗುರುತಿಸಲು ಸಿದ್ಧರಿದ್ದೀರಾ? ಅಕ್ಷರಗಳು ಕಾಣಿಸಿಕೊಳ್ಳುವವರೆಗೆ ಶಿಲುಬೆಯ ಮಧ್ಯಭಾಗವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ.",
     ko: "글자를 식별할 준비가 되셨나요? 문자가 나타날 때까지 십자가의 중심을 추적하십시오.",
@@ -20951,7 +20951,7 @@ export const phrases = {
     nl: "Klaar om enkele woorden te lezen? Klik op het midden van het kruis.",
     "en-UK": "Ready to read some words? Click the center of the cross.",
     fi: "Oletko valmis lukemaan joitain sanoja? Napsauta ristin keskustaa.",
-    fr: "Loading...",
+    fr: "Prêt à lire quelques mots ? Cliquez au centre de la croix.",
     de: "Bereit, ein paar Wörter zu lesen? Klicken Sie auf die Mitte des Kreuzes.",
     el: "Είστε έτοιμοι να διαβάσετε μερικές λέξεις; Κάντε κλικ στο κέντρο του σταυρού.",
     he: "מוכן לקרוא מילים? לחץ על מרכז הצלב.",
@@ -20959,7 +20959,7 @@ export const phrases = {
     hu: "Készen állsz néhány szó elolvasására? Kattintson a kereszt közepére.",
     is: "Tilbúinn til að lesa nokkur orð? Smelltu á miðju krossins.",
     id: "Siap untuk membaca beberapa kata? Klik tengah dari persilangan garis.",
-    it: "Loading...",
+    it: "Siete pronti a leggere alcune parole? Cliccate al centro della croce.",
     ja: "単語を読む準備はできましたか?十字の中心をクリックします。",
     kn: "ಕೆಂಪು ಹೊಳೆಯನ್ನು ನುಡಿಯಲು ಸಿದ್ಧವಾಗಿದೆಯೇ? ಕ್ರಾಸ್ ಹೇಸರುಗಳ ಮಧ್ಯದ ಕೇಂದ್ರವನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ.",
     ko: "단어를 읽을 준비가 되셨나요? 십자가의 중심을 클릭합니다.",
@@ -20996,7 +20996,7 @@ export const phrases = {
     "en-UK":
       "Ready to read some words? Track the center of the cross until the words appear.",
     fi: "Oletko valmis lukemaan joitain sanoja? Seuraa ristin keskustaa, kunnes sanat tulevat näkyviin.",
-    fr: "Loading...",
+    fr: "Prêt à lire quelques mots ? Suivez le centre de la croix jusqu'à ce que les mots apparaissent.",
     de: "Bereit, ein paar Wörter zu lesen? Verfolgen Sie die Mitte des Kreuzes, bis die Wörter erscheinen.",
     el: "Είστε έτοιμοι να διαβάσετε μερικές λέξεις; Παρακολουθήστε το κέντρο του σταυρού μέχρι να εμφανιστούν οι λέξεις.",
     he: "מוכנים לקרוא כמה מילים? עקוב אחר מרכז הצלב עד להופעת המילים.",
@@ -21004,7 +21004,7 @@ export const phrases = {
     hu: "Készen állsz néhány szó elolvasására? Kövesse nyomon a kereszt közepét, amíg a szavak meg nem jelennek.",
     is: "Tilbúinn til að lesa nokkur orð? Fylgstu með miðju krossins þar til orðin birtast.",
     id: "Siap membaca beberapa kata? Lacak bagian tengah salib hingga muncul kata-kata.",
-    it: "Loading...",
+    it: "Siete pronti a leggere alcune parole? Seguite il centro della croce finché le parole non appaiono.",
     ja: "Siap membaca beberapa kata? Lacak bagian tengah salib hingga muncul kata-kata.",
     kn: "Pronti a leggere alcune parole? Traccia il centro della croce finché non appaiono le parole.",
     ko: "単語を読む準備はできましたか?単語が表示されるまで十字の中心を追跡します。",
@@ -21040,7 +21040,7 @@ export const phrases = {
     nl: "Klaar om een ​​letter te identificeren? Terwijl u rechtstreeks naar het midden van het kruis kijkt, drukt u op de SPATIEBALK.",
     "en-UK": "Ready? Looking straight at the intersection, press the spacebar.",
     fi: "Oletko valmis tunnistamaan kirjaimen? Kun katsot suoraan ristin keskelle, paina VÄLINÄPPÄINTÄ.",
-    fr: "Loading...",
+    fr: "Prêt à identifier une lettre ? Tout en regardant directement le centre de la croix, veuillez appuyer sur la barre d'ESPACE.",
     de: "Bereit? Während Sie direkt auf das Fadenkreuz schauen, drücken Sie bitte die Leertaste.",
     el: "Είστε έτοιμοι να αναγνωρίσετε μια επιστολή; Ενώ κοιτάτε απευθείας στο κέντρο του σταυρού, πατήστε το πλήκτρο SPACE.",
     he: "מוכן לזהות אות? תוך כדי הסתכלות ישירות למרכז הצלב, אנא הקש על מקש הרווח.",
@@ -21048,7 +21048,7 @@ export const phrases = {
     hu: "Készen állsz egy betű azonosítására? Miközben közvetlenül a kereszt közepére néz, nyomja meg a SZÓKÖZ billentyűt.",
     is: "Tilbúinn til að bera kennsl á bréf? Meðan þú horfir beint á miðju krossins, vinsamlegast ýttu á bil.",
     id: "Siap? Saat melihat langsung ke persimpangan, tekan spasi.",
-    it: "Loading...",
+    it: "Pronto per identificare una lettera? Mentre guardi direttamente al centro della croce, premi il tasto SPAZIO.",
     ja: "準備はできましたか？十字線を直視しながら、スペースキーを押してください。",
     kn: "Pronti a identificare una lettera? Mentre guardi direttamente al centro della croce, premi la barra SPAZIO.",
     ko: "手紙を識別する準備はできましたか?十字の中心を直視しながら、スペースバーを押してください。",
@@ -21084,7 +21084,7 @@ export const phrases = {
     nl: "Готовы? Глядя прямо на перекрестие, нажмите пробел.",
     "en-UK": "Ready? Looking straight at the intersection, press the spacebar.",
     fi: "Готовы? Глядя прямо на перекрестие, нажмите пробел.",
-    fr: "Loading...",
+    fr: "Prêt ? En regardant directement le centre de la croix, veuillez appuyer sur la barre d'espace.",
     de: "Bereit? Während Sie direkt auf das Fadenkreuz schauen, drücken Sie bitte die Leertaste.",
     el: "Ετοιμος? Ενώ κοιτάτε απευθείας στο κέντρο του σταυρού, πατήστε το πλήκτρο SPACE.",
     he: "מוּכָן? תוך כדי הסתכלות ישירות למרכז הצלב, אנא הקש על מקש הרווח.",
@@ -21092,7 +21092,7 @@ export const phrases = {
     hu: "Kész? Miközben közvetlenül a kereszt közepére néz, nyomja meg a SZÓKÖZ billentyűt.",
     is: "Tilbúinn? Meðan þú horfir beint á miðju krossins, vinsamlegast ýttu á bil.",
     id: "Siap? Saat melihat langsung ke persimpangan, tekan spasi.",
-    it: "Loading...",
+    it: "Pronto? Mentre guardi direttamente al centro della croce, premi il tasto SPAZIO.",
     ja: "準備はできましたか？十字線を直視しながら、スペースキーを押してください。",
     kn: "Готовы? Глядя прямо на перекрестие, нажмите пробел.",
     ko: "준비됐나요? 십자선의 중앙을 직접 응시하면서 스페이스 바를 눌러주세요.",
@@ -21129,7 +21129,7 @@ export const phrases = {
     "en-UK":
       "Ready to identify the letters? Whilst looking directly at the centre of the cross hairs, please press the SPACE bar.",
     fi: "Oletko valmis tunnistamaan kirjaimet? Kun katsot suoraan ristin keskelle, paina VÄLINÄPPÄINTÄ.",
-    fr: "Loading...",
+    fr: "Prêt à identifier les lettres ? En regardant directement le centre de la croix, veuillez appuyer sur la barre d'ESPACE.",
     de: "Sind Sie bereit, die Buchstaben zu identifizieren? Während Sie direkt auf die Mitte des Kreuzes blicken, drücken Sie bitte die Leertaste.",
     el: "Είστε έτοιμοι να αναγνωρίσετε τα γράμματα; Ενώ κοιτάτε απευθείας στο κέντρο του σταυρού, πατήστε το πλήκτρο SPACE.",
     he: "מוכן לזהות את האותיות? בעודך מסתכל ישירות על מרכז הצלב הקרוס, אנא לחץ על מקש הרווח.",
@@ -21174,7 +21174,7 @@ export const phrases = {
     "en-UK":
       "Ready to read some words? While looking directly at the center of the cross, please press the SPACE bar.",
     fi: "Oletko valmis lukemaan joitain sanoja? Kun katsot suoraan ristin keskelle, paina VÄLINÄPPÄINTÄ.",
-    fr: "Loading...",
+    fr: "Prêt à lire quelques mots ? En regardant directement le centre de la croix, veuillez appuyer sur la touche ESPACE.",
     de: "Bereit, ein paar Wörter zu lesen? Während Sie direkt auf die Mitte des Kreuzes blicken, drücken Sie bitte die Leertaste.",
     el: "Είστε έτοιμοι να διαβάσετε μερικές λέξεις; Ενώ κοιτάτε απευθείας στο κέντρο του σταυρού, πατήστε το πλήκτρο SPACE.",
     he: "מוכנים לקרוא כמה מילים? תוך כדי הסתכלות ישירות למרכז הצלב, אנא הקש על מקש הרווח.",
@@ -21219,7 +21219,7 @@ export const phrases = {
     "en-UK":
       "Ready? Looking directly at the intersection, press the spacebar or click on the intersection.",
     fi: "Готово? Смотря прямо на перекресток, нажмите пробел или щелкните на перекрестике.",
-    fr: "Loading...",
+    fr: "Prêt à identifier une lettre ? En regardant directement le centre de la croix, veuillez cliquer dessus ou appuyer sur la barre d'espace.",
     de: "Bereit? Während Sie direkt auf das Fadenkreuz schauen, drücken Sie bitte die Leertaste oder klicken Sie auf das Fadenkreuz.",
     el: "Είστε έτοιμοι να αναγνωρίσετε μια επιστολή; Ενώ κοιτάτε απευθείας στο κέντρο του σταυρού, κάντε κλικ σε αυτό ή πατήστε τη γραμμή SPACE.",
     he: "מוכן לזהות אות? תוך כדי הסתכלות ישירות למרכז הצלב, אנא לחץ עליו, או לחץ על מקש הרווח.",
@@ -21264,7 +21264,7 @@ export const phrases = {
     "en-UK":
       "Ready? While looking directly at the center of the cross, please click it, or press the SPACE bar.",
     fi: "Готово? Смотря прямо на перекресток, нажмите пробел или щелкните на перекрестике.",
-    fr: "Loading...",
+    fr: "Prêt ? En regardant directement le centre de la croix, veuillez cliquer dessus ou appuyer sur la barre d'espace.",
     de: "Bereit? Während Sie direkt auf das Fadenkreuz schauen, drücken Sie bitte die Leertaste oder klicken Sie auf das Fadenkreuz.",
     el: "Готово? Смотря прямо на перекресток, нажмите пробел или щелкните на перекрестке.",
     he: "מוּכָן? תוך כדי הסתכלות ישירות למרכז הצלב, אנא לחץ עליו, או לחץ על מקש הרווח.",
@@ -21309,7 +21309,7 @@ export const phrases = {
     "en-UK":
       "Ready to identify the letters? Whilst looking directly at the centre of the cross hairs, please click it or press the SPACE bar.",
     fi: "Valmis tunnistamaan kirjaimet? Katso suoraan ristin keskelle ja klikkaa sitä tai paina VÄLILYÖNTI-painiketta.",
-    fr: "Loading...",
+    fr: "Prêt à identifier les lettres ? En regardant directement le centre de la croix, veuillez cliquer dessus ou appuyer sur la barre d'espace.",
     de: "Sind Sie bereit, die Buchstaben zu identifizieren? Während Sie direkt auf die Mitte des Kreuzes blicken, klicken Sie bitte darauf oder drücken Sie die LEERTASTE.",
     el: "Είστε έτοιμοι να αναγνωρίσετε τα γράμματα; Ενώ κοιτάτε απευθείας στο κέντρο του σταυρού, κάντε κλικ σε αυτόν ή πατήστε τη γραμμή SPACE.",
     he: "מוכנים לזהות את האותיות? תוך כדי הסתכלות ישירות במרכז הצלב, אנא לחץ עליו או הקש על מקש הרווח.",
@@ -21355,7 +21355,7 @@ export const phrases = {
     "en-UK":
       "Ready to read some words? While looking directly at the center of the cross, please press the SPACE bar.",
     fi: "Oletko valmis lukemaan joitain sanoja? Kun katsot suoraan ristin keskelle, paina VÄLINÄPPÄINTÄ.",
-    fr: "Loading...",
+    fr: "Prêt à lire quelques mots ? Tout en regardant directement le centre de la croix, veuillez appuyer sur la barre d'ESPACE.",
     de: "Bereit, ein paar Wörter zu lesen? Während Sie direkt auf die Mitte des Kreuzes blicken, drücken Sie bitte die Leertaste.",
     el: "Έτοιμος να διαβάσεις μερικές λέξεις; Κοιτώντας απευθείας το κέντρο των διασταυρούμενων γραμμών, παρακαλώ πατήστε το πλήκτρο ΔΙΑΣΤΗΜΑΤΟΣ.",
     he: "מוכן לקרוא מילים? בעודך מסתכל ישירות על מרכז הצלב האופקי, אנא לחץ על מקש הרווח.",
@@ -21402,7 +21402,7 @@ export const phrases = {
     "en-UK":
       "The intelligibility of the sentence will vary from easy down to hard or impossible. You can't get much more than two-thirds right, so relax. Think of it as a guessing game, and just get as many as you can. You'll hear a beep whenever you're right.",
     fi: "Lauseen ymmärrettävyys vaihtelee helposta vaikeaan tai mahdottomaan. Et voi saada enempää kuin kaksi kolmasosaa oikein, joten rentoudu. Ajattele sitä arvauspelinä ja hanki niin monta kuin pystyt. Kuulet piippauksen aina, kun olet oikeassa.",
-    fr: "Loading...",
+    fr: "La compréhensibilité de la phrase variera de facile à difficile voire impossible. Vous ne pouvez pas obtenir plus de deux tiers de bonnes réponses, alors détendez-vous. Considérez cela comme un jeu de devinettes et essayez d'en trouver autant que possible. Vous entendrez un bip chaque fois que vous aurez raison.",
     de: "Die Verständlichkeit des Satzes variiert von leicht bis schwer oder unmöglich. Man kann nicht viel mehr als zwei Drittel richtig hinbekommen, also entspannen Sie sich. Betrachten Sie es als ein Ratespiel und holen Sie sich so viele wie möglich. Wenn Sie Recht haben, hören Sie einen Piepton.",
     el: "Η κατανόηση της πρότασης θα ποικίλλει από εύκολη έως δύσκολη ή αδύνατη. Δεν μπορείτε να πάρετε περισσότερο από δύο τρίτα σωστά, οπότε χαλαρώστε. Σκεφτείτε το ως ένα παιχνίδι μαντείας και προσπαθήστε να βρείτε όσα περισσότερα μπορείτε. Θα ακούσετε ένα ηχητικό σήμα όταν βρείτε τη σωστή απάντηση.",
     he: "מובנות המשפט תשתנה בין קלה לקשה או בלתי אפשרית. אתה לא יכול לקבל הרבה יותר משני שליש נכון, אז תירגע. תחשוב על זה כעל משחק ניחושים, ופשוט קבל כמה שאתה יכול. אתה תשמע צפצוף בכל פעם שאתה צודק.",
@@ -21449,7 +21449,7 @@ export const phrases = {
     "en-UK":
       "The lists below show all the possibilities for each word in the sentence. Report the sentence, or your best guess, by clicking the words you heard.",
     fi: "Alla olevat luettelot näyttävät kaikki mahdollisuudet lauseen jokaiselle sanalle. Ilmoita lause tai paras arvauksesi napsauttamalla kuulemiasi sanoja.",
-    fr: "Loading...",
+    fr: "Les listes ci-dessous montrent toutes les possibilités pour chaque mot de la phrase. Rapportez la phrase, ou votre meilleure supposition, en cliquant sur les mots que vous avez entendus.",
     de: "Die folgenden Listen zeigen alle Möglichkeiten für jedes Wort im Satz. Melden Sie den Satz oder Ihre beste Vermutung, indem Sie auf die Wörter klicken, die Sie gehört haben.",
     el: "Οι λίστες παρακάτω δείχνουν όλες τις πιθανότητες για κάθε λέξη στην πρόταση. Αναφέρετε την πρόταση, ή την καλύτερη εκτίμησή σας, κάνοντας κλικ στις λέξεις που ακούσατε.",
     he: "הרשימות שלהלן מציגות את כל האפשרויות עבור כל מילה במשפט. דווח על המשפט, או על הניחוש הטוב ביותר שלך, על ידי לחיצה על המילים ששמעת.",
@@ -21496,7 +21496,7 @@ export const phrases = {
     "en-UK":
       "On each trial, you'll hear a sentence, usually in noise. Then you'll see a list of all the possibilities for each word in the sentence. Report the sentence, or your best guess, by clicking the words you heard. ",
     fi: "Jokaisella kokeella kuulet lauseen, yleensä melun keskellä. Sitten näet luettelon kaikista mahdollisuuksista jokaiselle sanalle lauseessa. Raportoi lause tai paras arvauksesi napsauttamalla kuulemiasi sanoja.",
-    fr: "Loading...",
+    fr: "Lors de chaque essai, vous entendrez une phrase, généralement dans le bruit. Ensuite, vous verrez une liste de toutes les possibilités pour chaque mot de la phrase. Rapportez la phrase, ou votre meilleure supposition, en cliquant sur les mots que vous avez entendus.",
     de: "Bei jedem Versuch hören Sie einen Satz, normalerweise im Lärm. Dann sehen Sie eine Liste aller Möglichkeiten für jedes Wort im Satz. Melden Sie den Satz oder Ihre beste Vermutung, indem Sie auf die Wörter klicken, die Sie gehört haben.",
     el: "Σε κάθε δοκιμή, θα ακούσετε μια πρόταση, συνήθως με θόρυβο. Στη συνέχεια, θα δείτε μια λίστα με όλες τις πιθανότητες για κάθε λέξη στην πρόταση. Αναφέρετε την πρόταση, ή την καλύτερη εκτίμησή σας, κάνοντας κλικ στις λέξεις που ακούσατε.",
     he: "בכל ניסיון, תשמע משפט, בדרך כלל ברעש. אז תראה רשימה של כל האפשרויות לכל מילה במשפט. דווח על המשפט, או השער הכי טוב שלך, על ידי לחיצה על המילים ששמעת.",
