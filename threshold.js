@@ -6464,7 +6464,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
           },
           reading: () => {
-            console.log(trials, "trials", trials.thisRepN);
             addReadingStatsToOutput(trials.thisRepN, psychoJS);
           },
           letter: () => {
