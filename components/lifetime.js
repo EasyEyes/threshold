@@ -26,7 +26,8 @@ export async function quitPsychoJS(
   message = "",
   isCompleted,
   paramReader,
-  showSafeToCloseDialog = true
+  showSafeToCloseDialog = true,
+  showDebriefForm = true,
 ) {
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
   if (useMatlab.current) {
@@ -55,36 +56,41 @@ export async function quitPsychoJS(
     psychoJS.window.close();
   }
 
-  // debrief
-  const timeBeforeDebriefDisplay = clock.global
-    ? clock.global.getTime()
-    : undefined;
-  const debriefScreen = new Promise((resolve) => {
-    if (paramReader.read("_debriefForm")[0]) {
-      showForm(paramReader.read("_debriefForm")[0]);
-      document.getElementById("form-yes").addEventListener("click", () => {
-        hideForm();
-        resolve();
-      });
+  if (showDebriefForm) {
+    // debrief
+    const timeBeforeDebriefDisplay = clock.global
+      ? clock.global.getTime()
+      : undefined;
+    const debriefScreen = new Promise((resolve) => {
+      if (paramReader.read("_debriefForm")[0]) {
+        showForm(paramReader.read("_debriefForm")[0]);
+        document.getElementById("form-yes").addEventListener("click", () => {
+          hideForm();
+          resolve();
+        });
 
-      document.getElementById("form-no").addEventListener("click", () => {
-        hideForm();
+        document.getElementById("form-no").addEventListener("click", () => {
+          hideForm();
+          resolve();
+        });
+      } else {
         resolve();
-      });
-    } else {
-      resolve();
-    }
-  });
-  await debriefScreen;
+      }
+    });
+    await debriefScreen;
+  }
 
   if (psychoJS.experiment && clock.global) {
-    psychoJS.experiment.addData(
-      "debriefDurationSec",
-      clock.global.getTime() - timeBeforeDebriefDisplay
-    );
+    if (showDebriefForm) {
+      psychoJS.experiment.addData(
+        "debriefDurationSec",
+        clock.global.getTime() - timeBeforeDebriefDisplay,
+      );
+    }
+
     psychoJS.experiment.addData(
       "durationOfExperimentSec",
-      clock.global.getTime()
+      clock.global.getTime(),
     );
   }
 
@@ -123,7 +129,7 @@ date                    ${thisExperimentInfo.date.toString()}` +
 ProlificParticipantID   ${thisExperimentInfo.ProlificParticipantID}
 ProlificSession         ${thisExperimentInfo.ProlificSessionID}
 ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
-          : "")
+          : ""),
     );
   }
   // save to local storage
@@ -132,7 +138,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       localStorageKey,
       JSON.stringify({
         ...thisExperimentInfo,
-      })
+      }),
     );
 
   if (recruitmentServiceData.name == "Prolific" && isCompleted) {

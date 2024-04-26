@@ -957,13 +957,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS._config.experiment,
         psychoJS._serverMsg,
       );
-      quitPsychoJS("", false, paramReader);
-      isProlificExperiment()
+      quitPsychoJS("", false, paramReader, true, false);
+      !isProlificExperiment()
         ? window.open(
             "https://app.prolific.co/submissions/complete?cc=" +
               recruitmentServiceData?.incompatibleCode,
           )
         : null;
+      return;
     }
 
     // show forms before actual experiment begins

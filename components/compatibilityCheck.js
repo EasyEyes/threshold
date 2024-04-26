@@ -1255,7 +1255,7 @@ export const displayCompatibilityMessage = async (
             psychoJS.experiment.nextEntry();
           }
         }
-        quitPsychoJS("", false, reader, !isProlificExperiment());
+        quitPsychoJS("", false, reader, !isProlificExperiment(), false);
         showExperimentEnding(true, !isProlificExperiment(), rc.language.value);
       });
       let numberOfTries = 0;

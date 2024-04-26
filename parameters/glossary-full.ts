@@ -4043,7 +4043,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "45",
     explanation:
-      "⭑ If viewingDistanceDesiredCm is nonzero (default 50), then it specifies the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.\n     The output CSV data file reports viewingDistanceCm. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. \n     To check the accuracy of viewing distance tracking online, set calibrateDistanceCheckBool=TRUE. To check locally, set viewingDistanceNudgingBool=TRUE, possibly with a tight tolerance viewingDistanceAllowedRatio=1.01, as while OUTSIDE the allowed range the nudger provides a live report of measured viewing distance, which you can check with your tape measure.",
+      "⭑ If viewingDistanceDesiredCm is nonzero (default 50), then it specifies the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.\n     The output CSV data file reports viewingDistanceCm. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. \n     Use viewingDistanceAllowedRatio to control nudging. Nudging is very handy. We find that, with nudging, observers quickly learn to stay in the allowed range, with hardly any perceived effort. \n     To check the accuracy of viewing distance tracking online, set calibrateDistanceCheckBool=TRUE. To check locally, set viewingDistanceNudgingBool=TRUE, possibly with a tight tolerance viewingDistanceAllowedRatio=1.01, as while OUTSIDE the allowed range the nudger provides a live report of measured viewing distance, which you can check with your tape measure.",
     type: "numerical",
     default: "50",
     categories: "",
@@ -4053,7 +4053,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "viewingDistanceNudgingBool is obsolete. Use viewingDistanceAllowedRatio to control nudging.",
+      "viewingDistanceNudgingBool is obsolete. Use viewingDistanceDesiredCm and viewingDistanceAllowedRatio to control nudging.",
     type: "obsolete",
     default: "",
     categories: "",
