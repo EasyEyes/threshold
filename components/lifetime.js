@@ -84,7 +84,7 @@ export async function quitPsychoJS(
     if (showDebriefForm) {
       psychoJS.experiment.addData(
         "debriefDurationSec",
-        clock.global.getTime() - timeBeforeDebriefDisplay,
+        clock.global.getTime() - (timeBeforeDebriefDisplay ?? 0),
       );
     }
 
