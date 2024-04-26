@@ -184,6 +184,8 @@ export const preprocessCorpusToSentenceList = (
 
   let maxLinePerPageSoFar = undefined;
 
+  readingPageStats.readingPageWords = [];
+
   for (let i = 0; i < numberOfPages; i++) {
     // PAGE
     let thisPageText = "";
