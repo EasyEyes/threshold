@@ -105,6 +105,7 @@ export const getThisBlockPages = (
     // logger("readingUsedText[thisURL]", readingUsedText[thisURL]);
     readingPageStats.readingPageSkipCorpusWords.push(skippedWordsNum);
     ////
+    console.log(block, "block");
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL],
       readingCorpusArchive[thisURL],
@@ -307,6 +308,7 @@ export const preprocessCorpusToSentenceList = (
       previousStartingIndex + numberWordsThisPage,
     );
     readingPageStats.readingPageLines.push(lineNumber);
+    console.log(numberWordsThisPage, thisPageText, "page-text");
     readingPageStats.readingPageWords.push(numberWordsThisPage);
     readingPageStats.readingPageNonblankCharacters.push(
       thisPageText.replace(/\s/g, "").length,
@@ -390,6 +392,7 @@ export const addReadingStatsToOutput = (pageN, psychoJS) => {
     "readingPageLines",
     readingPageStats.readingPageLines[pageN],
   );
+  console.log(readingPageStats.readingPageWords[pageN], pageN, "page");
   psychoJS.experiment.addData(
     "readingPageWords",
     readingPageStats.readingPageWords[pageN],
