@@ -56,9 +56,10 @@ export async function quitPsychoJS(
     psychoJS.window.close();
   }
 
+  let timeBeforeDebriefDisplay = 0;
   if (showDebriefForm) {
     // debrief
-    const timeBeforeDebriefDisplay = clock.global
+    timeBeforeDebriefDisplay = clock.global
       ? clock.global.getTime()
       : undefined;
     const debriefScreen = new Promise((resolve) => {
@@ -84,7 +85,7 @@ export async function quitPsychoJS(
     if (showDebriefForm) {
       psychoJS.experiment.addData(
         "debriefDurationSec",
-        clock.global.getTime() - 0,
+        clock.global.getTime() - timeBeforeDebriefDisplay,
       );
     }
 
