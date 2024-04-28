@@ -170,7 +170,7 @@ export const checkCrossSessionId = async (callback, language) => {
         );
         Swal.showValidationMessage(uploadOrValidIDError);
         // return false;
-      } else if (!/^[A-Za-z0-9_\–\-]*$/.test(text)) {
+      } else if (!/^[A-Za-z0-9_\–\-\.]*$/.test(text)) {
         console.log(text);
         const invalidIDError = readi18nPhrases("EE_ID_invalidID", language);
         Swal.showValidationMessage(invalidIDError);
