@@ -143,6 +143,7 @@ import {
   needPhoneSurvey,
   needComputerSurveyBool,
   gotLoudspeakerMatch,
+  readingCorpusShuffleBool,
 } from "./components/global.js";
 
 import {
@@ -2603,6 +2604,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block,
       )[0];
 
+      readingCorpusShuffleBool.current = paramReader.read(
+        "readingCorpusShuffleBool",
+        status.block,
+      )[0];
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //setup instruction
@@ -2677,6 +2682,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
             status.block,
+            readingCorpusShuffleBool.current,
           );
         },
         reading: () => {
@@ -2751,7 +2757,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (!readingDirectionLTR) readingParagraph.setAlignHoriz("right");
 
           // Construct this block pages
-          getThisBlockPages(paramReader, status.block, readingParagraph);
+          getThisBlockPages(
+            paramReader,
+            status.block,
+            readingParagraph,
+            readingCorpusShuffleBool.current,
+          );
 
           // WRAP WIDTH
           readingParagraph.setAutoDraw(false);
