@@ -2761,7 +2761,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             status.block,
             readingParagraph,
-            readingCorpusShuffleBool.current,
+            undefined,
+            undefined,
+            undefined,
+            readingCorpusShuffleBool,
           );
 
           // WRAP WIDTH
