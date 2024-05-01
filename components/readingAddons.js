@@ -426,13 +426,15 @@ export const findReadingSize = (
       : status.block_condition;
   readTrialLevelLetterParams(paramReader, bc);
 
+  const adhoc_nominal_scalar = 1.1;
   switch (readingSetSizeBy) {
     case "nominalDeg":
       const readingNominalSizeDeg =
         blockOrConditionEnum === "block"
           ? paramReader.read("readingNominalSizeDeg", status.block)[0]
           : paramReader.read("readingNominalSizeDeg", status.block_condition);
-      pt = getReadingNominalSizeDeg(readingNominalSizeDeg);
+      pt =
+        getReadingNominalSizeDeg(readingNominalSizeDeg) * adhoc_nominal_scalar;
       break;
     case "nominalPt":
       if (blockOrConditionEnum === "block") {
@@ -440,6 +442,7 @@ export const findReadingSize = (
       } else {
         pt = paramReader.read("readingNominalSizePt", status.block_condition);
       }
+      pt = pt * adhoc_nominal_scalar;
       break;
     case "xHeightDeg":
       const readingXHeightDeg =
