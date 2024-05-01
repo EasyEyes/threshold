@@ -426,7 +426,7 @@ export const findReadingSize = (
       : status.block_condition;
   readTrialLevelLetterParams(paramReader, bc);
 
-  const adhoc_nominal_scalar = 1.1;
+  const adhoc_nominal_scalar = 1.155;
   switch (readingSetSizeBy) {
     case "nominalDeg":
       const readingNominalSizeDeg =
