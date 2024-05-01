@@ -2325,7 +2325,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.2",
     explanation:
-      "⭑ Pause for markingOnsetAfterTargetOffsetSecs before onset of fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.",
+      "⭑ markingOnsetAfterTargetOffsetSecs (default 0): After target offset, pause this amount before onset of response screen or fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2415,7 +2415,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "measureLuminanceBool (default FALSE) turns on sampling by the photometer during stimulus presentation. (It is currently implemented solely for targetKind='movie'.) This uses the Cambridge Research Systems Colorimeter, which must be plugged into a USB port of the computer and pointed at whatever you want to measure. (Tip: An easy way to stably measure from a laptop screen is to lay the screen on its back and rest the photocell, gently, directly on the screen.) Use measureLuminanceHz and measureLuminanceDelaySec to set the sampling rate and start time from stimulus onset. After sampling the stimulus, EasyEyes saves a data file called luminances-EXPERIMENT-BLOCK-CONDITIONNAME-TRIAL.csv into the Downloads folder, where EXPERIMENT is the experiment name, BLOCK is the block number, CONDITIONNAME is the conditionName, and TRIAL is the trial number in the block. The first column “timeSinceOnsetSec” is time (in fractional seconds), since the stimulus onset, of the luminance measurement. The second column is “movieValues”, copied from the input parameter array movieValues. The third column “luminanceNits” is measured luminance in nits. (A nit is also called cd/m^2, candelas per meter squared.) Note that measureLuminanceDelaySec and thus timeSinceOnsetSec can be negative. The movieValues column will be aligned with the other columns only when measureLuminanceHz == movieHz.",
+      "measureLuminanceBool (default FALSE) turns on sampling by the photometer during stimulus presentation. (It is currently implemented solely for targetKind='movie'.) This uses the Cambridge Research Systems Colorimeter, which must be plugged into a USB port of the computer and pointed at whatever you want to measure. (Tip: An easy way to stably measure from a laptop screen is to lay the screen on its back and rest the photocell, gently, directly on the screen.) Use measureLuminanceDelaySec and measureLuminanceHz to set the start time from movie onset and sampling rate. After sampling the stimulus, EasyEyes saves a data file called luminance-EXPERIMENT-BLOCK-CONDITIONNAME-TRIAL.csv into the Downloads folder, where EXPERIMENT is the experiment name, BLOCK is the block number, CONDITIONNAME is the conditionName, and TRIAL is the trial number in the block. \nThe luminance*.csv file has four columns: \nframeTimeSec, movieValue, luminanceTimeSec, luminanceNits\n• frameTimeSec is when  (in fractional seconds) the frame is presented, relative to beginning of movie. The first value is zero, and it increments by 1/movieHz. There is one frame (and frameTimeSec value) for each value of movieValues.\n• movieValues is copied from the input parameter array movieValues. \n• luminanceTimeSec is time of measurement relative to the beginning of movie. Its first value is measureLuminanceDelaySec and each subsequent value increases by 1/measureLuminanceHz.\n• luminanceNits is measured luminance in nits. (A nit is also called cd/m^2, candelas per meter squared.) \nNOTES: measureLuminanceDelaySec and thus luminanceTimeSec can be negative. The frameTimeSec and luminanceTimeSec columns will be aligned only when measureLuminanceHz == movieHz.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2425,7 +2425,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "measureLuminanceDelaySec (default 5) sets the delay (which can be negative) from stimulus onset to taking of the first luminance sample. Note that the CRS Colorimeter is designed for slow precise measurements. To achieve better than 12-bit precision, if you want the reading of a new luminance to be unaffected by the prior luminance, we recommend allowing 5 s for the device to settle at the new luminance before taking a reading. Thus, if targetKind=='movie', you might run your movie with 6 s per frame (i.e. 1/6 Hz) and set measureLuminanceDelaySec=5.",
+      "measureLuminanceDelaySec (default 5) sets the delay (which can be negative) from stimulus onset to taking of the first luminance sample. Note that the CRS Colorimeter is designed for slow precise measurements. To achieve better than 12-bit precision, if you want the reading of a new luminance to be unaffected by the prior luminance, we recommend allowing 5 s for the device to settle at the new luminance before taking a reading. Thus, if targetKind=='movie', you might run your movie with 6 s per frame (i.e. movieHz=measureLuminanceHz=1/6) and set measureLuminanceDelaySec=5.",
     type: "numerical",
     default: "5",
     categories: "",
@@ -2435,9 +2435,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "measureLuminanceHz (default 1) sets the rate that the photometer is sampled. Note that the CRS Colorimeter is designed for slow precise measurements. If the stimulus is a movie, you'll typically set this frequency to match the frame rate of the movie. We recommend a slow frame rate, e.g. 1/6 Hz.",
+      "measureLuminanceHz (default 1) sets the rate that the photometer is sampled. Note that the CRS Colorimeter is designed for slow precise measurements. If the stimulus is a movie, you'll typically set this frequency to match the frame rate of the movie. We recommend a slow frame rate, e.g. movieHz=measureLuminanceHz=1/6.",
     type: "numerical",
     default: "1",
+    categories: "",
+  },
+  {
+    name: "measureLuminancePretendBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "measureLuminancePretendBool (default FALSE) allows testing of the timing of the luminance measurement without a photometer. The luminance returned is always -1. Strictly for debugging.",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -2505,7 +2515,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "60",
     explanation:
-      "⭑ movieSec is the desired duration of the movie. The actual duration will be an integer number of frames. EasyEyes will compute n=round(movieHz*movieSec) frames, with a duration of n/movieHz. The movieSec duration is normally longer than the requested targetDurationSec.",
+      "⭑ movieSec is the desired duration of the movie. The actual duration will be an integer number of frames. EasyEyes will compute n=round(movieHz*movieSec) frames, with a duration of n/movieHz. The movieSec duration is normally longer than the requested targetDurationSec. \nNOTE: movieSec is ignored if movieValues is not empty.",
     type: "numerical",
     default: "60",
     categories: "",
@@ -2525,7 +2535,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'movieValues (default empty) is a comma-separated list of numbers, one per frame of a movie. The length of the list determines the number of frames. This vector offers the scientist a handy way to provide a series of numbers to the scientist\'s movieCompute.js program to control, e.g. the contrast, of each frame of a movie, with one frame per value in this list. If movieMeasureLuminanceBool=TRUE then the movieValues vector is reproduced as a column in the "luminances ... .csv" data file that is dropped into the Downloads folder. The movieValues column will be aligned with the other columns only when measureLuminanceHz == movieHz.',
+      'movieValues (default empty) is a comma-separated list of numbers. The movie will have one frame of per number. This vector offers the scientist a handy way to provide a series of numbers to the scientist\'s movieCompute.js program to control, e.g. the contrast, of each frame of a movie, with one frame per value in this list. If movieMeasureLuminanceBool==TRUE then the movieValues vector is reproduced as a column in the "luminances*.csv" data file that is dropped into the Downloads folder. The movieValues column will be aligned with the other columns only when measureLuminanceHz == movieHz.\nNOTE: movieSec is ignored if movieValues is not empty.',
     type: "text",
     default: "",
     categories: "",

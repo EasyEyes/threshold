@@ -25,18 +25,18 @@ import { updateColor } from "./color";
 export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
   // TODO add a preprocessor check that the border character isn't found in the target character set
   repeatedLettersConfig.targetRepeatsBorderCharacter = String(
-    reader.read("targetRepeatsBorderCharacter", BC)
+    reader.read("targetRepeatsBorderCharacter", BC),
   );
   repeatedLettersConfig.targetRepeatsMaxLines = reader.read(
     "targetRepeatsMaxLines",
-    BC
+    BC,
   );
 };
 
 export const generateRepeatedLettersStims = (stimulusParameters) => {
   const targetCharacters = sampleWithoutReplacement(
     fontCharacterSet.current,
-    2
+    2,
   );
   correctAns.current = targetCharacters.map((c) => c.toLowerCase());
   const stims = stimulusParameters.stimulusLocations.map((stimInfo, i) => {
@@ -71,7 +71,7 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
 export const restrictRepeatedLettersSpacing = (
   proposedLevel,
   targetXYDeg,
-  characterSetRectPx
+  characterSetRectPx,
 ) => {
   // Calculate the extent of the screen
   const screenLowerLeft = [
@@ -85,7 +85,7 @@ export const restrictRepeatedLettersSpacing = (
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
 
   // Find pos of target in pixels
-  const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
+  const targetXYPx = XYPixOfXYDeg(targetXYDeg, true);
 
   // Calculate our implicated spacing
   let spacingDeg = Math.pow(10, proposedLevel);
@@ -109,11 +109,11 @@ export const restrictRepeatedLettersSpacing = (
           heightDeg = sizeDeg;
           const [, topPx] = XYPixOfXYDeg(
             [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
-            displayOptions
+            true,
           );
           const [, bottomPx] = XYPixOfXYDeg(
             [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
-            displayOptions
+            true,
           );
           heightPx = topPx - bottomPx;
           widthPx =
@@ -122,11 +122,11 @@ export const restrictRepeatedLettersSpacing = (
           widthDeg = sizeDeg;
           const [leftPx] = XYPixOfXYDeg(
             [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
-            displayOptions
+            true,
           );
           const [rightPx] = XYPixOfXYDeg(
             [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
-            displayOptions
+            true,
           );
           widthPx = rightPx - leftPx;
           heightPx =
@@ -134,11 +134,11 @@ export const restrictRepeatedLettersSpacing = (
           heightDeg =
             XYDegOfXYPix(
               [targetXYPx[0], targetXYPx[1] + heightPx / 2],
-              displayOptions
+              displayOptions,
             )[1] -
             XYDegOfXYPix(
               [targetXYPx[0], targetXYPx[1] - heightPx / 2],
-              displayOptions
+              displayOptions,
             )[1];
         }
         lineSpacingPx = heightPx * letterConfig.spacingOverSizeRatio;
@@ -156,14 +156,8 @@ export const restrictRepeatedLettersSpacing = (
 
     // Horizontal (column) spacing
     const approxSpacingPx =
-      XYPixOfXYDeg(
-        [targetXYDeg[0] + spacingDeg / 2, targetXYDeg[1]],
-        displayOptions
-      )[0] -
-      XYPixOfXYDeg(
-        [targetXYDeg[0] - spacingDeg / 2, targetXYDeg[1]],
-        displayOptions
-      )[0];
+      XYPixOfXYDeg([targetXYDeg[0] + spacingDeg / 2, targetXYDeg[1]], true)[0] -
+      XYPixOfXYDeg([targetXYDeg[0] - spacingDeg / 2, targetXYDeg[1]], true)[0];
 
     // At least one line, up to targetRepeatsMaxLines
     const maxLines = Math.max(1, repeatedLettersConfig.targetRepeatsMaxLines);
@@ -201,7 +195,7 @@ export const restrictRepeatedLettersSpacing = (
       ];
       const stimulusFieldBoundingRectPx = new Rectangle(
         lowerLeftOfStimFieldPx,
-        upperRightOfStimFieldPx
+        upperRightOfStimFieldPx,
       );
 
       // Get largestBoundsRatio
@@ -212,7 +206,7 @@ export const restrictRepeatedLettersSpacing = (
         letterConfig.thresholdParameter ?? "spacingDeg",
         letterConfig.spacingRelationToSize,
         widthPx,
-        heightPx
+        heightPx,
       );
       // Set largestBoundsRatio to some max, so we don't dwarf the value of spacingDeg
       largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
@@ -274,7 +268,7 @@ export const registerResponseForRepeatedLetters = (
   rt,
   correctAnswers,
   correctSynth,
-  recievedResponses
+  recievedResponses,
 ) => {
   // repeatedLettersResponse.current.push(responseCharacter);
   // repeatedLettersResponse.rt.push(rt);
@@ -290,7 +284,7 @@ export const registerResponseForRepeatedLetters = (
       correctSynth.play();
     } catch (e) {
       console.error(
-        "Failed to play correctSynth in registerResponseForRepeatedLetters"
+        "Failed to play correctSynth in registerResponseForRepeatedLetters",
       );
     }
     status.trialCorrect_thisBlock++;

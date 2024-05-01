@@ -433,7 +433,6 @@ export const findReadingSize = (
           ? paramReader.read("readingNominalSizeDeg", status.block)[0]
           : paramReader.read("readingNominalSizeDeg", status.block_condition);
       pt = getReadingNominalSizeDeg(readingNominalSizeDeg);
-      pt = tempScaleNominalSize(pt);
       break;
     case "nominalPt":
       if (blockOrConditionEnum === "block") {
@@ -441,7 +440,6 @@ export const findReadingSize = (
       } else {
         pt = paramReader.read("readingNominalSizePt", status.block_condition);
       }
-      pt = tempScaleNominalSize(pt);
       break;
     case "xHeightDeg":
       const readingXHeightDeg =
@@ -512,19 +510,13 @@ const shuffleParagraph = (paragraph) => {
   return shuffledParagraph;
 };
 
-const tempScaleNominalSize = (nominal) => {
-  return nominal * 1.42;
-};
-
 const pxToPt = (px) => {
   return ((px / displayOptions.pixPerCm) * 72) / 2.54;
 };
 const getReadingNominalSizeDeg = (readingNominalSizeDeg) => {
   // Convert deg to px.
   const sizePx = pxOfDegVertical(readingNominalSizeDeg);
-  // Convert px to pt.
-  const fontSizePt = ((sizePx / displayOptions.pixPerCm) * 72) / 2.54;
-  return fontSizePt;
+  return pxToPt(sizePx);
 };
 
 const removeLastSpace = (str) => {
