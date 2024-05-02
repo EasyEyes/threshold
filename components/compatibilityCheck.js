@@ -1080,6 +1080,11 @@ export const displayCompatibilityMessage = async (
           newMsg.msg,
           "compatibility-message",
           rc.language.value,
+          false,
+          null,
+          false,
+          false,
+          proceedBool,
         );
         // update proceedBool
         proceedBool = newMsg.proceed;
@@ -1134,6 +1139,7 @@ export const displayCompatibilityMessage = async (
           compatibilityCheckPeer,
           needAnySmartphone,
           needCalibratedSmartphoneMicrophone,
+          proceedBool,
         );
       });
       // top right corner
@@ -1958,6 +1964,7 @@ const handleNewMessage = (
   compatibilityCheckPeer = null,
   needAnySmartphone = false,
   needCalibratedSmartphoneMicrophone = false,
+  proceedBool = false,
 ) => {
   var displayMsg = "";
   msg.forEach((item) => {
@@ -1977,7 +1984,9 @@ const handleNewMessage = (
 
   let proceedButton = document.getElementById("procced-btn");
   if (proceedButton)
-    proceedButton.innerHTML = readi18nPhrases("T_proceed", lang);
+    proceedButton.innerHTML = proceedBool
+      ? readi18nPhrases("T_proceed", lang)
+      : readi18nPhrases("EE_Cancel", lang);
 
   if (needPhoneSurvey || compatibilityCheckPeer) {
     let qrCodeExplanation = document.getElementById(
