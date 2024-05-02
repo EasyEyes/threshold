@@ -16,27 +16,27 @@ export const checkCrossSessionId = async (callback, language) => {
     if (hasStoredId) {
       detailInformation = detailInformation.replace(
         "**ddd**",
-        "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>"
+        "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>",
       );
       detailInformation = detailInformation.replace(
         "** DDD **",
-        "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>"
+        "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>",
       );
       detailInformation = detailInformation.replace(
         "** ddd **",
-        "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>"
+        "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>",
       );
       detailInformation = detailInformation.replace(
         "** sss **",
-        "<b>" + storedId + "</b>"
+        "<b>" + storedId + "</b>",
       );
       detailInformation = detailInformation.replace(
         "**sss**",
-        "<b>" + storedId + "</b>"
+        "<b>" + storedId + "</b>",
       );
       detailInformation = detailInformation.replace(
         "** SSS **",
-        "<b>" + storedId + "</b>"
+        "<b>" + storedId + "</b>",
       );
       if (languageDirection == "LTR") {
         detailInformation =
@@ -166,11 +166,12 @@ export const checkCrossSessionId = async (callback, language) => {
       if (!text || text.length < 1) {
         const uploadOrValidIDError = readi18nPhrases(
           "EE_ID_uploadOrValidID",
-          language
+          language,
         );
         Swal.showValidationMessage(uploadOrValidIDError);
         // return false;
-      } else if (!/^[A-Za-z0-9]*$/.test(text)) {
+      } else if (!/^[A-Za-z0-9_\–\-\.]*$/.test(text)) {
+        console.log(text);
         const invalidIDError = readi18nPhrases("EE_ID_invalidID", language);
         Swal.showValidationMessage(invalidIDError);
         // return false;
@@ -178,7 +179,7 @@ export const checkCrossSessionId = async (callback, language) => {
         callback(
           text,
           localStorageInfo ? localStorageInfo.session : null,
-          storedId
+          storedId,
         );
         // return true;
         Swal.clickConfirm();
@@ -201,7 +202,7 @@ export const checkCrossSessionId = async (callback, language) => {
         } else {
           const invalidFileError = readi18nPhrases(
             "EE_ID_invalidFile",
-            language
+            language,
           );
           Swal.showValidationMessage(invalidFileError);
         }

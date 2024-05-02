@@ -77,6 +77,7 @@ export const getThisBlockPages = (
   numberOfPages = undefined,
   readingLinesPerPage = undefined,
   wordsPerLine = undefined,
+  readingCorpusShuffleBool = false,
 ) => {
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block)[0];
@@ -92,13 +93,17 @@ export const getThisBlockPages = (
       block,
     )[0];
     let skippedWordsNum = 0;
+    const shuffledCorpus = shuffleParagraph(readingCorpusArchive[thisURL]);
+    const blockCorpus = readingCorpusShuffleBool
+      ? shuffledCorpus
+      : readingCorpusArchive[thisURL];
     if (targetFewWordsToSplit !== "") {
       [readingUsedText[thisURL], skippedWordsNum] = getReadingUsedText(
-        readingCorpusArchive[thisURL],
+        blockCorpus,
         paramReader.read("readingFirstFewWords", block)[0],
       );
     } else {
-      readingUsedText[thisURL] = readingCorpusArchive[thisURL];
+      readingUsedText[thisURL] = blockCorpus;
       skippedWordsNum = 0;
     }
 
@@ -107,7 +112,7 @@ export const getThisBlockPages = (
     ////
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL],
-      readingCorpusArchive[thisURL],
+      blockCorpus,
       wordsPerLine ?? paramReader.read("readingMaxCharactersPerLine", block)[0],
       readingLinesPerPage ?? paramReader.read("readingLinesPerPage", block)[0],
       numberOfPages ?? paramReader.read("readingPages", block)[0],
@@ -421,14 +426,15 @@ export const findReadingSize = (
       : status.block_condition;
   readTrialLevelLetterParams(paramReader, bc);
 
+  const adhoc_nominal_scalar = 1.14345;
   switch (readingSetSizeBy) {
     case "nominalDeg":
       const readingNominalSizeDeg =
         blockOrConditionEnum === "block"
           ? paramReader.read("readingNominalSizeDeg", status.block)[0]
           : paramReader.read("readingNominalSizeDeg", status.block_condition);
-      pt = getReadingNominalSizeDeg(readingNominalSizeDeg);
-      pt = tempScaleNominalSize(pt);
+      pt =
+        getReadingNominalSizeDeg(readingNominalSizeDeg) * adhoc_nominal_scalar;
       break;
     case "nominalPt":
       if (blockOrConditionEnum === "block") {
@@ -436,7 +442,7 @@ export const findReadingSize = (
       } else {
         pt = paramReader.read("readingNominalSizePt", status.block_condition);
       }
-      pt = tempScaleNominalSize(pt);
+      pt = pt * adhoc_nominal_scalar;
       break;
     case "xHeightDeg":
       const readingXHeightDeg =
@@ -495,8 +501,16 @@ const getMinFontPtSize = (paramReader, blockOrConditionEnum) => {
   }
 };
 
-const tempScaleNominalSize = (nominal) => {
-  return nominal * 1.42;
+const shuffleParagraph = (paragraph) => {
+  const words = paragraph.split(" ");
+
+  for (let i = words.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [words[i], words[j]] = [words[j], words[i]];
+  }
+  const shuffledParagraph = words.join(" ");
+
+  return shuffledParagraph;
 };
 
 const pxToPt = (px) => {
@@ -505,9 +519,7 @@ const pxToPt = (px) => {
 const getReadingNominalSizeDeg = (readingNominalSizeDeg) => {
   // Convert deg to px.
   const sizePx = pxOfDegVertical(readingNominalSizeDeg);
-  // Convert px to pt.
-  const fontSizePt = ((sizePx / displayOptions.pixPerCm) * 72) / 2.54;
-  return fontSizePt;
+  return pxToPt(sizePx);
 };
 
 const removeLastSpace = (str) => {

@@ -231,7 +231,11 @@ class rsvpReadingTrialWords {
   }
 }
 
-export const getThisBlockRSVPReadingWords = (reader, block) => {
+export const getThisBlockRSVPReadingWords = (
+  reader,
+  block,
+  readingCorpusShuffleBool,
+) => {
   // Given block of some conditions, each condition consisting in some trials,
   // for condition create a reading page with a number of lines equal to number of trials for this condition
   // and (???number of words in sentence) equal to length of rsvp sequence.
@@ -245,6 +249,7 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
     conditions.length,
     numTrialsPerCondition,
     reader.read("rsvpReadingNumberOfWords", block),
+    readingCorpusShuffleBool,
   );
   const sequences = pagePerCondition.map((s) =>
     s.split("\n").map((a) => a.replace(/\t/g, "")),

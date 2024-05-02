@@ -305,6 +305,7 @@ export const readingPageStats = Object.seal({
   readingPageWords: [],
   readingPageNonblankCharacters: [],
 });
+export const readingCorpusShuffleBool = { current: false };
 
 /* -------------------------------- Question -------------------------------- */
 export const questionsThisBlock = { current: [] };
