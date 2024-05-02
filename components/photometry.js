@@ -97,52 +97,55 @@ export const addMeasureLuminanceIntervals = (BC) => {
   const frequenciesMatch = measureLuminanceHz === movieHz;
 
   const recursiveTimeout = (lastLogged) => {
-    const elapsedTime = performance.now() - measureLuminance.movieStart;
+    const currentTime = performance.now();
+    const elapsedTime = currentTime - measureLuminance.movieStart;
     if (elapsedTime >= movieMs) return;
 
-    const shouldLogLuminance =
-      Math.floor(elapsedTime / measureLuminanceIntervalPeriodMs) >
-      lastLogged.luminance;
-    const shouldLogMovie =
-      Math.floor(elapsedTime / movieIntervalPeriodMs) > lastLogged.movie;
+    // const shouldLogLuminance =
+    //   Math.floor(elapsedTime / measureLuminanceIntervalPeriodMs) >
+    //   lastLogged.luminance;
+    // const shouldLogMovie =
+    //   Math.floor(elapsedTime / movieIntervalPeriodMs) > lastLogged.movie;
 
-    console.log("shouldLogLuminance", shouldLogLuminance);
-    console.log("shouldLogMovie", shouldLogMovie);
+    // console.log("shouldLogLuminance", shouldLogLuminance);
+    // console.log("shouldLogMovie", shouldLogMovie);
 
-    if (frequenciesMatch) {
-      if (shouldLogLuminance && shouldLogMovie) {
-        addLuminanceAndMovieValuesToRecord(BC);
-        lastLogged.luminance = Math.floor(
-          elapsedTime / measureLuminanceIntervalPeriodMs,
-        );
-        lastLogged.movie = Math.floor(elapsedTime / movieIntervalPeriodMs);
-      }
+    if (
+      frequenciesMatch &&
+      currentTime - lastLogged.luminance >= measureLuminanceIntervalPeriodMs
+    ) {
+      // if (shouldLogLuminance && shouldLogMovie) {
+      //   addLuminanceAndMovieValuesToRecord(BC);
+      //   lastLogged.luminance = Math.floor(
+      //     elapsedTime / measureLuminanceIntervalPeriodMs,
+      //   );
+      //   lastLogged.movie = Math.floor(elapsedTime / movieIntervalPeriodMs);
+      // }
+      addLuminanceAndMovieValuesToRecord(BC);
+      lastLogged.luminance = currentTime;
+      lastLogged.movie = currentTime;
     } else {
+      const shouldLogLuminance =
+        currentTime - lastTime.luminance >= measureLuminanceIntervalPeriodMs;
+      const shouldLogMovie =
+        currentTime - lastTime.movie >= movieIntervalPeriodMs;
       if (shouldLogLuminance && !shouldLogMovie) {
         addMeasureLuminanceRecord();
-        lastLogged.luminance = Math.floor(
-          elapsedTime / measureLuminanceIntervalPeriodMs,
-        );
-      }
-      if (!shouldLogLuminance && shouldLogMovie) {
+        lastLogged.luminance = currentTime;
+      } else if (!shouldLogLuminance && shouldLogMovie) {
         addMovieValueRecord();
-        lastLogged.movie = Math.floor(elapsedTime / movieIntervalPeriodMs);
-      }
-
-      if (shouldLogLuminance && shouldLogMovie) {
+        lastLogged.movie = currentTime;
+      } else if (shouldLogLuminance && shouldLogMovie) {
         addLuminanceAndMovieValuesToRecord(BC);
-        lastLogged.luminance = Math.floor(
-          elapsedTime / measureLuminanceIntervalPeriodMs,
-        );
-        lastLogged.movie = Math.floor(elapsedTime / movieIntervalPeriodMs);
+        lastLogged.luminance = currentTime;
+        lastLogged.movie = currentTime;
       }
     }
 
     const nextMeasureLuminanceTimeout =
-      measureLuminanceIntervalPeriodMs * (lastLogged.luminance + 1) -
-      elapsedTime;
+      lastLogged.luminance + measureLuminanceIntervalPeriodMs - currentTime;
     const nextMovieTimeout =
-      movieIntervalPeriodMs * (lastLogged.movie + 1) - elapsedTime;
+      lastLogged.movie + movieIntervalPeriodMs - currentTime;
     const nextTimeout = frequenciesMatch
       ? nextMeasureLuminanceTimeout
       : Math.min(nextMeasureLuminanceTimeout, nextMovieTimeout);
