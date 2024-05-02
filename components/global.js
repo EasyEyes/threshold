@@ -577,6 +577,7 @@ export const measureLuminance = {
   movieValues: undefined,
   colorimeter: undefined,
   currentMovieValueIndex: 0,
+  pretendBool: false,
 };
 
 /**

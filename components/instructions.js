@@ -88,14 +88,14 @@ export const spaceOrCrosshair = (L, responseType, prev = "") => {
 const _timingInitialByThresholdParam = (
   L,
   responseType = 1,
-  trialsThisBlock = 0
+  trialsThisBlock = 0,
 ) => {
   const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
   let text;
   if (targetKind.current === "rsvpReading") {
     text = replacePlaceholders(
       readi18nPhrases("T_thresholdRsvpReadingBeginBlock", L),
-      trialsThisBlock
+      trialsThisBlock,
     );
     logger("responseType", responseType);
     switch (responseType) {
@@ -104,7 +104,7 @@ const _timingInitialByThresholdParam = (
           extraSpace +
           `${readi18nPhrases("T_pressingKeyRsvpReading", L)} ${readi18nPhrases(
             "T_escapeToQuit",
-            L
+            L,
           )} ${readi18nPhrases("T_continueHitReturn", L)}\n\n`;
         break;
       case 1:
@@ -112,7 +112,7 @@ const _timingInitialByThresholdParam = (
           extraSpace +
           `${readi18nPhrases("T_clickingWordRsvpReading", L)} ${readi18nPhrases(
             "T_escapeToQuit",
-            L
+            L,
           )} ${readi18nPhrases("T_continueClickProceed", L)}\n\n`;
         break;
       case 2:
@@ -120,7 +120,7 @@ const _timingInitialByThresholdParam = (
           extraSpace +
           `${readi18nPhrases("T_clickingWordRsvpReading", L)} ${readi18nPhrases(
             "T_escapeToQuit",
-            L
+            L,
           )} ${readi18nPhrases("T_continueHitReturnOrClickProceed", L)}\n\n`;
         break;
     }
@@ -150,7 +150,7 @@ export const instructionsText = {
     const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
     let text = replacePlaceholders(
       readi18nPhrases("T_thresholdVenierBeginBlock", L),
-      trialsThisBlock
+      trialsThisBlock,
     );
     switch (responseType) {
       case 0:
@@ -174,7 +174,7 @@ export const instructionsText = {
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
           readi18nPhrases("T_thresholdRepeatedLettersBeginBlock", L),
-          trialsThisBlock
+          trialsThisBlock,
         );
         switch (responseType) {
           case 0:
@@ -192,14 +192,14 @@ export const instructionsText = {
               extraSpace +
               `${readi18nPhrases(
                 "T_pressingKeyOrClickingLetterRepeatedLetters",
-                L
+                L,
               )}\n\n`;
             break;
         }
       } else {
         text = replacePlaceholders(
           readi18nPhrases("T_thresholdMiddleLetterBeginBlock", L),
-          trialsThisBlock
+          trialsThisBlock,
         );
         switch (responseType) {
           case 0:
@@ -224,7 +224,7 @@ export const instructionsText = {
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
           readi18nPhrases("T_thresholdRepeatedLettersBeginBlock", L),
-          trialsThisBlock
+          trialsThisBlock,
         );
         switch (responseType) {
           case 0:
@@ -242,14 +242,14 @@ export const instructionsText = {
               extraSpace +
               `${readi18nPhrases(
                 "T_pressingKeyOrClickingLetterRepeatedLetters",
-                L
+                L,
               )}\n\n`;
             break;
         }
       } else {
         text = replacePlaceholders(
           readi18nPhrases("T_thresholdLetterBeginBlock", L),
-          trialsThisBlock
+          trialsThisBlock,
         );
         switch (responseType) {
           case 0:
@@ -361,7 +361,7 @@ export const instructionsText = {
             default:
               return readi18nPhrases(
                 "T_identifyPressItOrClickItRepeatedLetters",
-                L
+                L,
               );
           }
         } else {
@@ -375,7 +375,7 @@ export const instructionsText = {
             default:
               return readi18nPhrases(
                 "T_identifyMiddleLetterPressItOrClickIt",
-                L
+                L,
               );
           }
         }
@@ -392,7 +392,7 @@ export const instructionsText = {
             default:
               return readi18nPhrases(
                 "T_identifyPressItOrClickItRepeatedLetters",
-                L
+                L,
               );
           }
         } else {
@@ -469,7 +469,12 @@ export const addProceedButton = (L, paramReader) => {
     e.stopImmediatePropagation();
     e.stopPropagation();
     b.remove();
-    if (paramReader.read("measureLuminanceBool", status.block).some((x) => x)) {
+    if (
+      paramReader.read("measureLuminanceBool", status.block).some((x) => x) &&
+      !paramReader
+        .read("measureLuminancePretendBool", status.block)
+        .some((x) => x)
+    ) {
       if ("serial" in navigator) {
         await initColorCAL();
       } else {
@@ -554,11 +559,11 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
     if (typeof fixationConfig.trackingTimeAfterDelay === "undefined") {
       const maxDelaySec = reader.read(
         "responseMustTrackMaxSec",
-        status.block_condition
+        status.block_condition,
       );
       const minDelaySec = reader.read(
         "responseMustTrackMinSec",
-        status.block_condition
+        status.block_condition,
       );
       const delaySec =
         Math.random() * (maxDelaySec - minDelaySec) + minDelaySec;
@@ -658,7 +663,7 @@ export const getStimulusCustomInstructionPos = (reader, BC) => {
 export const updateInstructionFont = (
   reader,
   blockOrCondition,
-  instructionStims
+  instructionStims,
 ) => {
   let font = reader.read("instructionFont", blockOrCondition);
   let source = reader.read("instructionFontSource", blockOrCondition);

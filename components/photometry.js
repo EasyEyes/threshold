@@ -71,6 +71,10 @@ export const addMeasureLuminanceIntervals = (BC) => {
   // measureLuminance.movieValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   const measureLuminanceHz = paramReader.read("measureLuminanceHz", BC);
   const movieHz = paramReader.read("movieHz", BC);
+  measureLuminance.pretendBool = paramReader.read(
+    "measureLuminancePretendBool",
+    BC,
+  );
 
   console.log("measureLuminance.movieValues", measureLuminance.movieValues);
   console.log("measureLuminanceHz", measureLuminanceHz);
@@ -214,6 +218,7 @@ const approximatelyEqual = (a, b, epsilon = 0.001) => {
 };
 
 const readLuminance = async () => {
+  if (measureLuminance.pretendBool) return -1; // for testing
   return await measureLuminance.colorimeter.measure();
   // return Math.random() * 100;
 };
