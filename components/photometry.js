@@ -101,34 +101,18 @@ export const addMeasureLuminanceIntervals = (BC) => {
     const elapsedTime = currentTime - measureLuminance.movieStart;
     if (elapsedTime >= movieMs) return;
 
-    // const shouldLogLuminance =
-    //   Math.floor(elapsedTime / measureLuminanceIntervalPeriodMs) >
-    //   lastLogged.luminance;
-    // const shouldLogMovie =
-    //   Math.floor(elapsedTime / movieIntervalPeriodMs) > lastLogged.movie;
-
-    // console.log("shouldLogLuminance", shouldLogLuminance);
-    // console.log("shouldLogMovie", shouldLogMovie);
-
     if (
       frequenciesMatch &&
       currentTime - lastLogged.luminance >= measureLuminanceIntervalPeriodMs
     ) {
-      // if (shouldLogLuminance && shouldLogMovie) {
-      //   addLuminanceAndMovieValuesToRecord(BC);
-      //   lastLogged.luminance = Math.floor(
-      //     elapsedTime / measureLuminanceIntervalPeriodMs,
-      //   );
-      //   lastLogged.movie = Math.floor(elapsedTime / movieIntervalPeriodMs);
-      // }
       addLuminanceAndMovieValuesToRecord(BC);
       lastLogged.luminance = currentTime;
       lastLogged.movie = currentTime;
     } else {
       const shouldLogLuminance =
-        currentTime - lastTime.luminance >= measureLuminanceIntervalPeriodMs;
+        currentTime - lastLogged.luminance >= measureLuminanceIntervalPeriodMs;
       const shouldLogMovie =
-        currentTime - lastTime.movie >= movieIntervalPeriodMs;
+        currentTime - lastLogged.movie >= movieIntervalPeriodMs;
       if (shouldLogLuminance && !shouldLogMovie) {
         addMeasureLuminanceRecord();
         lastLogged.luminance = currentTime;
@@ -163,10 +147,11 @@ export const addLuminanceAndMovieValuesToRecord = async (BC) => {
       return;
     }
     const timeSinceMovieStartedSec = getTimeSinceMovieStartedSec();
-    const record = { timeSinceOnsetSec: timeSinceMovieStartedSec };
+    const record = { frameTimeSec: timeSinceMovieStartedSec };
     record["movieValue"] =
       measureLuminance.movieValues[measureLuminance.currentMovieValueIndex++];
-    record["luminanceNits"] = await readLuminance();
+    (record["luminanceTimeSec"] = timeSinceMovieStartedSec),
+      (record["luminanceNits"] = await readLuminance());
     measureLuminance.records.push(record);
   } catch (error) {
     console.error("Error adding luminance and movie value record:", error);
@@ -184,8 +169,8 @@ const addMeasureLuminanceRecord = async () => {
     // console.log("adding measure luminance record");
     const timeSinceMovieStartedSec = getTimeSinceMovieStartedSec();
     console.log("timeSinceOnsetSec", timeSinceMovieStartedSec);
-    const record = { timeSinceOnsetSec: timeSinceMovieStartedSec };
-    record["movieValue"] = "";
+    const record = { frameTimeSec: "", movieValue: "" };
+    record["luminanceTimeSec"] = timeSinceMovieStartedSec;
     record["luminanceNits"] = await readLuminance();
     console.log("record", record);
     measureLuminance.records.push(record);
@@ -196,10 +181,11 @@ const addMeasureLuminanceRecord = async () => {
 
 const addMovieValueRecord = () => {
   const timeSinceMovieStartedSec = getTimeSinceMovieStartedSec();
-  const record = { timeSinceOnsetSec: timeSinceMovieStartedSec };
+  const record = { frameTimeSec: timeSinceMovieStartedSec };
   record["movieValue"] =
     measureLuminance.movieValues[measureLuminance.currentMovieValueIndex++];
   record["luminanceNits"] = "";
+  record["luminanceTimeSec"] = "";
   measureLuminance.records.push(record);
 };
 
