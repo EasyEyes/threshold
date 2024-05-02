@@ -67,7 +67,7 @@ export const getDelayBeforeMoviePlays = (BC) => {
  * @param {string} BC
  */
 export const addMeasureLuminanceIntervals = (BC) => {
-  measureLuminance.movieValues = paramReader.read("movieValues", BC).split(",");
+  // measureLuminance.movieValues = paramReader.read("movieValues", BC).split(",");
   // measureLuminance.movieValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   const measureLuminanceHz = paramReader.read("measureLuminanceHz", BC);
   const movieHz = paramReader.read("movieHz", BC);
@@ -91,8 +91,10 @@ export const addMeasureLuminanceIntervals = (BC) => {
   console.log("movieIntervalPeriodMs", movieIntervalPeriodMs);
   const positiveDelayMs =
     paramReader.read("measureLuminanceDelaySec", BC) * 1000;
-  const movieMs = paramReader.read("movieSec", BC) * 1000;
-  let intervalId = null;
+  const movieMs =
+    measureLuminance.movieValues.length > 0
+      ? movieIntervalPeriodMs * measureLuminance.movieValues.length * 1000
+      : paramReader.read("movieSec", BC) * 1000;
 
   const frequenciesMatch = measureLuminanceHz === movieHz;
 
@@ -184,8 +186,9 @@ const addMovieValueRecord = () => {
   const record = { frameTimeSec: timeSinceMovieStartedSec };
   record["movieValue"] =
     measureLuminance.movieValues[measureLuminance.currentMovieValueIndex++];
-  record["luminanceNits"] = "";
   record["luminanceTimeSec"] = "";
+  record["luminanceNits"] = "";
+
   measureLuminance.records.push(record);
 };
 

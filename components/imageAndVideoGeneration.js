@@ -19,7 +19,7 @@ import { im_ctrans } from "./transformColorSpace.js";
 export async function generate_image(
   bitmapArray,
   psychoJS,
-  moviePQEncodedBool
+  moviePQEncodedBool,
 ) {
   let computeImageSecStartTime = performance.now();
   let uIntArray = [];
@@ -85,7 +85,7 @@ export async function generate_image(
   let computeImageSecEndTime = performance.now();
   psychoJS.experiment.addData(
     "computeImageSec",
-    (computeImageSecEndTime - computeImageSecStartTime) / 1000
+    (computeImageSecEndTime - computeImageSecStartTime) / 1000,
   );
   //logger("uIntArray", uIntArray);
   return uIntArray;
@@ -95,7 +95,7 @@ export async function generate_video(
   imageArray,
   movieHz,
   psychoJS,
-  moviePQEncodedBool
+  moviePQEncodedBool,
 ) {
   // const { createFFmpeg, fetchFile } = FFmpeg;
   const { createFFmpeg } = require("@ffmpeg/ffmpeg");
@@ -103,16 +103,16 @@ export async function generate_video(
   RemoteCalibrator.init({ id: "session_022" });
   const browser = RemoteCalibrator.browser.value;
   const isHVC1Supported = MediaSource.isTypeSupported(
-    'video/mp4; codecs="hvc1"'
+    'video/mp4; codecs="hvc1"',
   );
   const isAVC1Supported = MediaSource.isTypeSupported(
-    'video/mp4; codecs="avc1.6e0033"'
+    'video/mp4; codecs="avc1.6e0033"',
   );
   await ffmpeg.load();
   let uIntArray = await generate_image(
     imageArray,
     psychoJS,
-    moviePQEncodedBool
+    moviePQEncodedBool,
   );
   let computeFfmpegSecStartTime = performance.now();
   let countImages = uIntArray.length;
@@ -146,7 +146,7 @@ export async function generate_video(
       "hdr-opt=1:repeat-headers=1:colorprim=bt2020:transfer=smpte2084:colormatrix=bt2020nc:master-display=G(0,0)B(0,0)R(0,0)WP(0,0)L(0,0):max-cll=0,0",
       "-pix_fmt",
       "yuv444p10le",
-      "out.mp4"
+      "out.mp4",
     );
   } else {
     if (isHVC1Supported == true) {
@@ -173,7 +173,7 @@ export async function generate_video(
         "bt2020nc",
         "-pix_fmt",
         "yuv444p10le",
-        "out.mp4"
+        "out.mp4",
       );
       psychoJS.experiment.addData("computeCodec", "hvc1 : libx265");
     } else if (isAVC1Supported == true) {
@@ -200,7 +200,7 @@ export async function generate_video(
         "bt2020nc",
         "-pix_fmt",
         "yuv444p10le",
-        "out.mp4"
+        "out.mp4",
       );
       psychoJS.experiment.addData("computeCodec", "avc1 : libx264");
     } else {
@@ -216,17 +216,17 @@ export async function generate_video(
   ffmpeg.FS("unlink", "out.mp4");
   await ffmpeg.exit();
   let videoBlob = URL.createObjectURL(
-    new Blob([data.buffer], { type: "video/mp4" })
+    new Blob([data.buffer], { type: "video/mp4" }),
   );
   let computeFfmpegSecEndTime = performance.now();
   console.log(
     `Call to generateVideo took ${
       computeFfmpegSecEndTime - computeFfmpegSecStartTime
-    } milliseconds`
+    } milliseconds`,
   );
   psychoJS.experiment.addData(
     "computeFfmpegSec",
-    (computeFfmpegSecEndTime - computeFfmpegSecStartTime) / 1000
+    (computeFfmpegSecEndTime - computeFfmpegSecStartTime) / 1000,
   );
   return videoBlob;
 }
@@ -244,7 +244,7 @@ export async function evaluateJSCode(
   displayOptions,
   targetCharacter,
   questSuggestedLevel,
-  psychoJS
+  psychoJS,
 ) {
   let computeMovieArraySecStartTime = performance.now();
   const BC = status.block_condition;
@@ -262,11 +262,11 @@ export async function evaluateJSCode(
     //logger("last index", response.lastIndexOf("}"));
     var jsCode = response.substring(
       response.indexOf("{") + 1,
-      response.lastIndexOf("}")
+      response.lastIndexOf("}"),
     );
     var parameters_string = response.substring(
       response.indexOf("(") + 1,
-      response.indexOf(")")
+      response.indexOf(")"),
     );
     var parameters_arr = parameters_string.split(",").map(function (item) {
       return item.trim();
@@ -280,7 +280,7 @@ export async function evaluateJSCode(
     parameters["isRectInRect"] = isRectInRect;
     parameters["screenRectPx"] = new Rectangle(
       screenLowerLeft,
-      screenUpperRight
+      screenUpperRight,
     );
     parameters["questSuggestedLevel"] = questSuggestedLevel;
     for (let index in parameters_arr) {
@@ -288,10 +288,15 @@ export async function evaluateJSCode(
         //logger("parameter found", parameters_arr[index]);
       } else {
         //logger("parameter not found", parameters_arr[index]);
-        parameters[parameters_arr[index]] = paramReader.read(
-          parameters_arr[index],
-          BC
-        );
+        if (parameters_arr[index] === "movieValues") {
+          let values = paramReader.read(parameters_arr[index], BC).split(",");
+          parameters[parameters_arr[index]] = values.filter(Boolean);
+        } else {
+          parameters[parameters_arr[index]] = paramReader.read(
+            parameters_arr[index],
+            BC,
+          );
+        }
       }
     }
     //logger("parameters deconstructed", Object.keys(parameters));
@@ -305,7 +310,7 @@ export async function evaluateJSCode(
     let computeMovieArraySecEndTime = performance.now();
     psychoJS.experiment.addData(
       "computeMovieArraySec",
-      (computeMovieArraySecEndTime - computeMovieArraySecStartTime) / 1000
+      (computeMovieArraySecEndTime - computeMovieArraySecStartTime) / 1000,
     );
     return [imageNit, movieHz, actualStimulusLevel];
   });

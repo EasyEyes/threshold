@@ -5207,6 +5207,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition,
             ),
           );
+          measureLuminance.movieValues = paramReader
+            .read("movieValues", status.block_condition)
+            .split(",");
+          //remove empty strings
+          measureLuminance.movieValues =
+            measureLuminance.movieValues.filter(Boolean);
+          const movieHz = paramReader.read("movieHz", status.block_condition);
+          const movieSec = paramReader.read("movieSec", status.block_condition);
+          measureLuminance.movieSec =
+            measureLuminance.movieValues.length > 0
+              ? measureLuminance.movieValues.length * (1 / movieHz)
+              : movieSec;
         },
         vernier: () => {
           responseType.current = resetResponseType(
@@ -5828,6 +5840,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (videoblob.length > 0 && video_flag == 1) {
             video.setAttribute("src", videoblob);
             document.body.appendChild(video);
+
             const delayBeforeMovieForLuminanceMeasuringMs =
               getDelayBeforeMoviePlays(status.block_condition);
             if (delayBeforeMovieForLuminanceMeasuringMs != 0) {
@@ -5837,6 +5850,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   performance.now(),
                 );
                 video.play();
+                measureLuminance.records = [
+                  {
+                    frameTimeSec: 0,
+                    movieValue:
+                      measureLuminance.movieValues[
+                        measureLuminance.currentMovieValueIndex++
+                      ],
+                    luminanceTimeSec: "",
+                    luminanceNits: "",
+                  },
+                ];
                 video_flag = 0;
               }, delayBeforeMovieForLuminanceMeasuringMs);
             } else {
@@ -6131,11 +6155,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         movie: () => {
           // *showCharacterSet* updates
+
           if (
             (t >=
               delayBeforeStimOnsetSec +
                 letterConfig.targetSafetyMarginSec +
-                paramReader.read("movieSec", status.block_condition) ||
+                measureLuminance.movieSec ||
               simulatedObservers.proceed(status.block_condition)) &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
           ) {

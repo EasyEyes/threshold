@@ -574,10 +574,11 @@ export const measureLuminance = {
   movieStart: undefined,
   measureLuminanceDelaySec: 0,
   measurementShouldStartAt: undefined,
-  movieValues: undefined,
+  movieValues: [],
   colorimeter: undefined,
   currentMovieValueIndex: 0,
   pretendBool: false,
+  movieSec: 0,
 };
 
 /**
