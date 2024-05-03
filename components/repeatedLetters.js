@@ -64,7 +64,10 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
       characterSet: fontCharacterSet.current.join(""),
     });
   });
-  stims.forEach((s) => updateColor(s, "marking", status.block_condition));
+  stims.forEach((s) => {
+    updateColor(s, "marking", status.block_condition);
+    // s.scaleToHeightPx(stimulusParameters.heightPx);
+  });
   return stims;
 };
 
@@ -120,11 +123,11 @@ export const restrictRepeatedLettersSpacing = (
             (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
         } else {
           widthDeg = sizeDeg;
-          const [leftPx] = XYPixOfXYDeg(
+          const [leftPx, a] = XYPixOfXYDeg(
             [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
             true,
           );
-          const [rightPx] = XYPixOfXYDeg(
+          const [rightPx, b] = XYPixOfXYDeg(
             [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
             true,
           );
@@ -132,14 +135,8 @@ export const restrictRepeatedLettersSpacing = (
           heightPx =
             widthPx * (characterSetRectPx.height / characterSetRectPx.width);
           heightDeg =
-            XYDegOfXYPix(
-              [targetXYPx[0], targetXYPx[1] + heightPx / 2],
-              displayOptions,
-            )[1] -
-            XYDegOfXYPix(
-              [targetXYPx[0], targetXYPx[1] - heightPx / 2],
-              displayOptions,
-            )[1];
+            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] + heightPx / 2])[1] -
+            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] - heightPx / 2])[1];
         }
         lineSpacingPx = heightPx * letterConfig.spacingOverSizeRatio;
         break;
@@ -254,6 +251,11 @@ export const restrictRepeatedLettersSpacing = (
           spacingDeg: spacingDeg,
           heightDeg: heightDeg,
         };
+        logger("!. stimulusParameters", stimulusParameters);
+        logger("!. requested ratio", letterConfig.spacingOverSizeRatio);
+        logger("!. calculated ratio", spacingDeg / sizeDeg);
+        // TODO rerun w/ diff ratio value
+        // TODO check height & spacing ratio here
         return [Math.log10(spacingDeg), stimulusParameters];
       }
     }

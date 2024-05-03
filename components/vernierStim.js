@@ -25,11 +25,11 @@ export const readTrialLevelVenierParams = (reader, BC) => {
   vernierConfig.targetDurationSec = reader.read("targetDurationSec", BC);
   vernierConfig.targetEccentricityXDeg = reader.read(
     "targetEccentricityXDeg",
-    BC
+    BC,
   );
   vernierConfig.targetEccentricityYDeg = reader.read(
     "targetEccentricityYDeg",
-    BC
+    BC,
   );
   vernierConfig.targetGapDeg = reader.read("targetGapDeg", BC);
   vernierConfig.targetLengthDeg = reader.read("targetLengthDeg", BC);
@@ -49,7 +49,7 @@ export const getUpperLineVertices = (directionBool) => {
     XYPixOfXYDeg([upperLineXDeg, upperLineYDeg], displayOptions),
     XYPixOfXYDeg(
       [upperLineXDeg, upperLineYDeg + vernierConfig.targetLengthDeg],
-      displayOptions
+      displayOptions,
     ),
   ];
   return upperXYPix;
@@ -65,11 +65,11 @@ export const getLowerLineVertices = (directionBool) => {
   const lowerLineYDeg =
     vernierConfig.targetEccentricityYDeg - vernierConfig.targetGapDeg / 2;
   const lowerXYPix = [
-    XYPixOfXYDeg([lowerLineXDeg, lowerLineYDeg], displayOptions),
-    XYPixOfXYDeg(
-      [lowerLineXDeg, lowerLineYDeg - vernierConfig.targetLengthDeg],
-      displayOptions
-    ),
+    XYPixOfXYDeg([lowerLineXDeg, lowerLineYDeg]),
+    XYPixOfXYDeg([
+      lowerLineXDeg,
+      lowerLineYDeg - vernierConfig.targetLengthDeg,
+    ]),
   ];
   return lowerXYPix;
 };
@@ -93,7 +93,7 @@ export const restrictOffsetDeg = (proposedOffsetDeg, directionBool) => {
 
   // Calculate the width of the stimulus based on vertices
   let stimulusWidthDeg = Math.abs(
-    upperLineVertices[0][0] - lowerLineVertices[0][0]
+    upperLineVertices[0][0] - lowerLineVertices[0][0],
   );
 
   // Check if the stimulus fits within the screen boundaries
@@ -107,7 +107,7 @@ export const restrictOffsetDeg = (proposedOffsetDeg, directionBool) => {
     upperLineVertices = getUpperLineVertices(vernierConfig, directionBool);
     lowerLineVertices = getLowerLineVertices(vernierConfig, directionBool);
     stimulusWidthDeg = Math.abs(
-      upperLineVertices[0][0] - lowerLineVertices[0][0]
+      upperLineVertices[0][0] - lowerLineVertices[0][0],
     );
   }
 
@@ -179,18 +179,15 @@ export class VernierStim {
   update(directionBool) {
     // Calculate the horizontal displacement based on targetCharacter
     const gap =
-      XYPixOfXYDeg([0, vernierConfig.targetGapDeg], displayOptions)[1] -
+      XYPixOfXYDeg([0, vernierConfig.targetGapDeg])[1] -
       vernierConfig.targetEccentricityYDeg;
     console.log("gap", gap);
-    vernierConfig.length = XYPixOfXYDeg(
-      [0, vernierConfig.targetLengthDeg],
-      displayOptions
-    )[1];
+    vernierConfig.length = XYPixOfXYDeg([0, vernierConfig.targetLengthDeg])[1];
     console.log("length", vernierConfig.length);
-    vernierConfig.width = XYPixOfXYDeg(
-      [vernierConfig.targetThicknessDeg, 0],
-      displayOptions
-    )[0];
+    vernierConfig.width = XYPixOfXYDeg([
+      vernierConfig.targetThicknessDeg,
+      0,
+    ])[0];
     console.log("width", vernierConfig.width);
     vernierConfig.color = colorRGBASnippetToRGBA(vernierConfig.targetColorRGBA);
     console.log("color", vernierConfig.color);
@@ -202,22 +199,22 @@ export class VernierStim {
     console.log(
       "upper line top",
       Math.round(upper[0][0]),
-      Math.round(upper[0][1])
+      Math.round(upper[0][1]),
     );
     console.log(
       "upper line bottom",
       Math.round(upper[1][0]),
-      Math.round(upper[1][1])
+      Math.round(upper[1][1]),
     );
     console.log(
       "lower line top",
       Math.round(lower[0][0]),
-      Math.round(lower[0][1])
+      Math.round(lower[0][1]),
     );
     console.log(
       "lower line bottom",
       Math.round(lower[1][0]),
-      Math.round(lower[1][1])
+      Math.round(lower[1][1]),
     );
     // Update vertices for the lower line
     this.stims[1].setVertices(getLowerLineVertices(directionBool));

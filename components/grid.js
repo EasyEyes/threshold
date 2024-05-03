@@ -608,7 +608,7 @@ export class Grid {
       if (labeled) {
         // Create label
         const spaceToTheRight = fixationConfig.pos[0] < 0 ? 1 : -1;
-        const pos = XYPixOfXYDeg([spaceToTheRight * r, 0], this.displayOptions);
+        const pos = XYPixOfXYDeg([spaceToTheRight * r, 0]);
         labels.push(
           new visual.TextStim({
             name: `mmV4-grid-label-${rMm}`,
@@ -629,10 +629,10 @@ export class Grid {
       }
       // Add & update
       rMm += 1;
-      circle.top = XYPixOfXYDeg([0, r], this.displayOptions)[1];
-      circle.bottom = XYPixOfXYDeg([0, -r], this.displayOptions)[1];
-      circle.left = XYPixOfXYDeg([-r, 0], this.displayOptions)[0];
-      circle.right = XYPixOfXYDeg([r, 0], this.displayOptions)[0];
+      circle.top = XYPixOfXYDeg([0, r])[1];
+      circle.bottom = XYPixOfXYDeg([0, -r])[1];
+      circle.left = XYPixOfXYDeg([-r, 0])[0];
+      circle.right = XYPixOfXYDeg([r, 0])[0];
       moreCirclesNeeded =
         circle.top < screen.top ||
         circle.bottom > screen.bottom ||

@@ -27,12 +27,12 @@ import {
 
 export const generateCharacterSetBoundingRects = (
   paramReader,
-  cleanFontName
+  cleanFontName,
 ) => {
   const rects = {};
   for (const BC of paramReader.block_conditions) {
     const characterSet = String(paramReader.read("fontCharacterSet", BC)).split(
-      ""
+      "",
     );
     let font = paramReader.read("font", BC);
     if (paramReader.read("fontSource", BC) === "file")
@@ -49,7 +49,7 @@ export const generateCharacterSetBoundingRects = (
       psychoJS.window,
       letterRepeats,
       100,
-      padding
+      padding,
     );
   }
   return rects;
@@ -61,7 +61,7 @@ export const _getCharacterSetBoundingBox = (
   window,
   repeats = 1,
   height = 50,
-  padding = 0
+  padding = 0,
 ) => {
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
   let characterSetBoundingRectPoints = [
@@ -138,7 +138,7 @@ export const _getCharacterSetBoundingBox = (
     // Calculate the bounding box around this stim and the running bounding box
     characterSetBoundingRectPoints = getUnionRect(
       thisBoundingRectPoints,
-      characterSetBoundingRectPoints
+      characterSetBoundingRectPoints,
     );
   }
   // Normalize the bounding points, so they're not specific to whatever value
@@ -179,7 +179,7 @@ export const _getCharacterSetBoundingBox = (
     "pix",
     characterSet,
     centers,
-    ascentToDescent
+    ascentToDescent,
   );
   return normalizedCharacterSetBoundingRect;
 };
@@ -198,7 +198,7 @@ export const restrictLevel = (
   spacingSymmetry,
   spacingOverSizeRatio,
   targetSizeIsHeightBool,
-  spacingIsOuterBool
+  spacingIsOuterBool,
 ) => {
   // TODO are these necessary? Should be (I think are?) compiler checks
   if (
@@ -230,7 +230,7 @@ export const restrictLevel = (
   ];
 
   const fixationRotationRadiusPx = pxScalar(
-    fixationConfig.markingFixationMotionRadiusDeg
+    fixationConfig.markingFixationMotionRadiusDeg,
   );
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
@@ -245,7 +245,7 @@ export const restrictLevel = (
         characterSetRectPx,
         spacingOverSizeRatio,
         thresholdParameter,
-        fixationRotationRadiusPx
+        fixationRotationRadiusPx,
       );
       level = Math.log10(sizeDeg);
       break;
@@ -262,7 +262,7 @@ export const restrictLevel = (
         spacingSymmetry,
         thresholdParameter,
         spacingIsOuterBool,
-        fixationRotationRadiusPx
+        fixationRotationRadiusPx,
       );
       level = Math.log10(spacingDeg);
       break;
@@ -280,7 +280,7 @@ export const restrictSizeDeg = (
   characterSetRectPx,
   spacingOverSizeRatio,
   thresholdParameter,
-  fixationRotationRadiusPx
+  fixationRotationRadiusPx,
 ) => {
   switch (targetKind) {
     case "letter":
@@ -315,7 +315,7 @@ export const restrictSizeDeg = (
     const widthPx =
       heightPx * (characterSetRectPx.width / characterSetRectPx.height);
     let stimulusRectPx = characterSetRectPx.scale(
-      widthPx / characterSetRectPx.width
+      widthPx / characterSetRectPx.width,
       // heightPx / characterSetRectPx.height
     );
     stimulusRectPx = stimulusRectPx.offset(targetXYPx);
@@ -336,7 +336,7 @@ export const restrictSizeDeg = (
 
     stimulusRectPx = stimulusRectPx.inset(
       -fixationRotationRadiusPx,
-      -fixationRotationRadiusPx
+      -fixationRotationRadiusPx,
     );
 
     // WE'RE DONE IF STIMULUS FITS
@@ -366,7 +366,7 @@ export const restrictSizeDeg = (
       screenRectPx,
       targetXYPx,
       thresholdParameter,
-      spacingRelationToSize
+      spacingRelationToSize,
     );
 
     // Set largestBoundsRatio to some max, so we don't dwarf the value of targetSizeDeg
@@ -391,7 +391,7 @@ export const restrictSpacingDeg = (
   spacingSymmetry,
   thresholdParameter,
   spacingIsOuterBool,
-  fixationRotationRadiusPx
+  fixationRotationRadiusPx,
 ) => {
   // TODO make sure rects are valid, ie height&width are nonnegative
   /* 
@@ -562,14 +562,14 @@ export const restrictSpacingDeg = (
         heightDeg =
           widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
         sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
-        var [leftPx] = XYPixOfXYDeg(
-          [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
-          displayOptions
-        );
-        var [rightPx] = XYPixOfXYDeg(
-          [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
-          displayOptions
-        );
+        var [leftPx] = XYPixOfXYDeg([
+          targetXYDeg[0] - widthDeg / 2,
+          targetXYDeg[1],
+        ]);
+        var [rightPx] = XYPixOfXYDeg([
+          targetXYDeg[0] + widthDeg / 2,
+          targetXYDeg[1],
+        ]);
         widthPx = rightPx - leftPx;
         heightPx =
           (widthPx * characterSetRectPx.height) / characterSetRectPx.width;
@@ -585,13 +585,13 @@ export const restrictSpacingDeg = (
     if (heightPx > letterConfig.fontMaxPx) {
       if (spacingDeg <= 0)
         warning(
-          `Illegal spacingDeg, spacingDeg <= 0. spacingDeg: ${spacingDeg}`
+          `Illegal spacingDeg, spacingDeg <= 0. spacingDeg: ${spacingDeg}`,
         );
       if (viewingDistanceDesiredCm.current <= 0 || displayOptions.pixPerCm <= 0)
         warning(
-          `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceDesiredCm.current}, pixPerCm: ${displayOptions.pixPerCm}`
+          `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceDesiredCm.current}, pixPerCm: ${displayOptions.pixPerCm}`,
         );
-      const targetXYPx = XYPixOfXYDeg(targetXYDeg, displayOptions);
+      const targetXYPx = XYPixOfXYDeg(targetXYDeg);
       const targetMaxXYDeg = XYDegOfXYPix([
         targetXYPx[0],
         targetXYPx[1] + letterConfig.fontMaxPx,
@@ -602,7 +602,7 @@ export const restrictSpacingDeg = (
         case "none":
           const targetSizeDeg = paramReader.read(
             "targetSizeDeg",
-            status.block_condition
+            status.block_condition,
           );
           if (targetSizeDeg > targetMaxDeg)
             throw `targetSizeDeg ${targetSizeDeg} greater than targetMaxDeg ${targetMaxDeg}, from fontMaxPx ${letterConfig.fontMaxPx}`;
@@ -610,13 +610,13 @@ export const restrictSpacingDeg = (
         case "ratio":
           spacingDeg = Math.min(
             spacingDeg,
-            spacingOverSizeRatio * targetMaxDeg
+            spacingOverSizeRatio * targetMaxDeg,
           );
           break;
         case "typographic":
           spacingDeg = Math.min(
             spacingDeg,
-            (targetMaxDeg * characterSetRectPx.width) / 3
+            (targetMaxDeg * characterSetRectPx.width) / 3,
           );
           break;
         default:
@@ -641,7 +641,7 @@ export const restrictSpacingDeg = (
               spacingSymmetry,
               targetXYDeg,
               radialXY,
-              targetXYPx
+              targetXYPx,
             ));
             break;
           case "tangential":
@@ -657,11 +657,11 @@ export const restrictSpacingDeg = (
               spacingSymmetry,
               targetXYDeg,
               radialXY,
-              targetXYPx
+              targetXYPx,
             ));
             ({ v1XY: v3XY, v2XY: v4XY } = _getTangentialVectors(
               tangentialXY,
-              spacingDeg
+              spacingDeg,
             ));
             break;
           case "horizontal":
@@ -681,7 +681,7 @@ export const restrictSpacingDeg = (
             ({ v1XY, v2XY } = _getHorizontalVectors(horizontalXY, spacingDeg));
             ({ v1XY: v3XY, v2XY: v4XY } = _getVerticalVectors(
               verticalXY,
-              spacingDeg
+              spacingDeg,
             ));
             break;
         }
@@ -690,7 +690,7 @@ export const restrictSpacingDeg = (
         stimulusRectPx = stimulusRectPx.inset(-widthPx / 2, -heightPx / 2);
         stimulusRectPx = stimulusRectPx.inset(
           -fixationRotationRadiusPx,
-          -fixationRotationRadiusPx
+          -fixationRotationRadiusPx,
         );
         break;
     }
@@ -701,7 +701,7 @@ export const restrictSpacingDeg = (
       thresholdParameter,
       spacingRelationToSize,
       widthPx,
-      heightPx
+      heightPx,
     );
     // Set largestBoundsRatio to some max, so we don't dwarf the value of spacingDeg
     largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
@@ -726,7 +726,7 @@ export const restrictSpacingDeg = (
               : spacingDeg < Math.pow(10, proposedLevel)
               ? "less than"
               : "equal to"
-          } QUEST's proposed spacing. Largest bounds ratio: ${largestBoundsRatio}.`
+          } QUEST's proposed spacing. Largest bounds ratio: ${largestBoundsRatio}.`,
         );
       const targetAndFlankerLocationsPx = [targetXYPx];
       if (spacingRelationToSize !== "typographic")
@@ -759,7 +759,7 @@ export const getLargestBoundsRatio = (
   thresholdParameter,
   spacingRelationToSize,
   widthPx = 0,
-  heightPx = 0
+  heightPx = 0,
 ) => {
   // Many stimulus components are proportional to the threshold parameter, either
   // spacingDeg or targetSizeDeg. Here we determine, across the found bounds, what
@@ -833,7 +833,7 @@ const _getRectAroundFlankers = (flankersPoints) => {
   const yValues = flankersPoints.map((coord) => coord[1]);
   return new Rectangle(
     [Math.min(...xValues), Math.min(...yValues)],
-    [Math.max(...xValues), Math.max(...yValues)]
+    [Math.max(...xValues), Math.max(...yValues)],
   );
 };
 function _getRadialVectors(
@@ -841,7 +841,7 @@ function _getRadialVectors(
   spacingSymmetry,
   targetXYDeg,
   radialXY,
-  targetXYPx
+  targetXYPx,
 ) {
   let flanker1XYDeg, flanker1XYPx, flanker2XYDeg, flanker2XYPx, spacingInnerDeg;
   let spacingOuterDeg = spacingDeg;
@@ -853,7 +853,7 @@ function _getRadialVectors(
         targetXYDeg[0] + spacingDeg * radialXY[0],
         targetXYDeg[1] + spacingDeg * radialXY[1],
       ];
-      flanker1XYPx = XYPixOfXYDeg(flanker1XYDeg, displayOptions);
+      flanker1XYPx = XYPixOfXYDeg(flanker1XYDeg);
       var deltaXYPx = [
         flanker1XYPx[0] - targetXYPx[0],
         flanker1XYPx[1] - targetXYPx[1],
@@ -907,7 +907,7 @@ const _getFlankerXYPxs = (targetXYDeg, flankerPositionVectors) => {
     .filter((x) => x !== undefined)
     .map((v) => {
       const flankerXYDeg = [targetXYDeg[0] + v[0], targetXYDeg[1] + v[1]];
-      return XYPixOfXYDeg(flankerXYDeg, displayOptions);
+      return XYPixOfXYDeg(flankerXYDeg);
     });
   return flankerXYPxs;
 };

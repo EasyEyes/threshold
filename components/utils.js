@@ -180,15 +180,9 @@ export const loggerText = (text) => {
 export const degreesToPixels = (degrees, method = "x") => {
   switch (method) {
     case "x":
-      return (
-        XYPixOfXYDeg([degrees, 0], displayOptions)[0] -
-        XYPixOfXYDeg([0, 0], displayOptions)[0]
-      );
+      return XYPixOfXYDeg([degrees, 0])[0] - XYPixOfXYDeg([0, 0])[0];
     case "y":
-      return (
-        XYPixOfXYDeg([0, degrees], displayOptions)[1] -
-        XYPixOfXYDeg([0, 0], displayOptions)[1]
-      );
+      return XYPixOfXYDeg([0, degrees])[1] - XYPixOfXYDeg([0, 0])[1];
     case "old":
     default:
       // If need be, use this gross, not fixation-relative method. Please don't use this if possible.

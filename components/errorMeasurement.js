@@ -11,23 +11,23 @@ import {
 export const readAllowedTolerances = (tolerances, reader, BC) => {
   tolerances.allowed.thresholdAllowedDurationRatio = reader.read(
     "thresholdAllowedDurationRatio",
-    BC
+    BC,
   );
   tolerances.allowed.thresholdAllowedGazeRErrorDeg = reader.read(
     "thresholdAllowedGazeRErrorDeg",
-    BC
+    BC,
   );
   tolerances.allowed.thresholdAllowedGazeXErrorDeg = reader.read(
     "thresholdAllowedGazeXErrorDeg",
-    BC
+    BC,
   );
   tolerances.allowed.thresholdAllowedGazeYErrorDeg = reader.read(
     "thresholdAllowedGazeYErrorDeg",
-    BC
+    BC,
   );
   tolerances.allowed.thresholdAllowedLatenessSec = reader.read(
     "thresholdAllowedLatenessSec",
-    BC
+    BC,
   );
 };
 
@@ -35,7 +35,7 @@ export const measureGazeError = (
   tolerances,
   displayOptions,
   crosshairClickTimestamp,
-  targetDurationSec
+  targetDurationSec,
 ) => {
   rc.getGazeNow(
     {
@@ -50,13 +50,13 @@ export const measureGazeError = (
       const [xPx, yPx] = psychojsUnitsFromWindowUnits(
         [r.value.x, r.value.y],
         [rc.windowWidthPx.value, rc.windowHeightPx.value],
-        fixationConfig.pos
+        fixationConfig.pos,
       );
       // Convert to degrees.
       [
         tolerances.measured.gazeMeasuredXDeg,
         tolerances.measured.gazeMeasuredYDeg,
-      ] = XYDegOfXYPix([xPx, yPx], displayOptions);
+      ] = XYDegOfXYPix([xPx, yPx]);
       tolerances.measured.gazeMeasuredRDeg = norm([
         tolerances.measured.gazeMeasuredXDeg,
         tolerances.measured.gazeMeasuredYDeg,
@@ -68,16 +68,16 @@ export const measureGazeError = (
         const [rawX, rawY] = psychojsUnitsFromWindowUnits(
           [rawPoint.x, rawPoint.y],
           [rc.windowWidthPx.value, rc.windowHeightPx.value],
-          fixationConfig.pos
+          fixationConfig.pos,
         );
 
-        const [rawXDeg, rawYDeg] = XYDegOfXYPix([rawX, rawY], displayOptions);
+        const [rawXDeg, rawYDeg] = XYDegOfXYPix([rawX, rawY]);
         tolerances.measured.gazeMeasuredRawDeg.push([
           toFixedNumber(rawXDeg, 5),
           toFixedNumber(rawYDeg, 5),
         ]);
       }
-    }
+    },
   );
 };
 
@@ -86,7 +86,7 @@ export const calculateError = async (
   tolerances,
   targetDurationSec,
   targetStim,
-  requestedLateness
+  requestedLateness,
 ) => {
   const targetFrameTimingReport = _reportTargetTimingFrames(targetStim);
 
@@ -97,7 +97,7 @@ export const calculateError = async (
     letterTiming.targetFinishSec === null
   ) {
     console.error(
-      "targetStartSec or targetFinishSec is missing, in calculateError"
+      "targetStartSec or targetFinishSec is missing, in calculateError",
     );
   } else {
     const measuredTargetDurationSec =
@@ -127,21 +127,21 @@ export const addResponseIfTolerableError = (
   trackGaze,
   psychoJS,
   respondedEarly,
-  simulated
+  simulated,
 ) => {
   addMeasuredErrorToOutput(psychoJS, tolerances);
   const durationAcceptable =
     _targetDurationAcceptable(
       tolerances.measured.thresholdDurationRatio,
-      tolerances.allowed.thresholdAllowedDurationRatio
+      tolerances.allowed.thresholdAllowedDurationRatio,
     ) || respondedEarly;
   const gazeAcceptable = _gazeErrorAcceptable(
     tolerances.measured,
-    tolerances.allowed
+    tolerances.allowed,
   );
   const latencyAcceptable = _targetLatencyAcceptable(
     tolerances.measured.targetMeasuredLatenessSec,
-    tolerances.allowed.thresholdAllowedLatenessSec
+    tolerances.allowed.thresholdAllowedLatenessSec,
   );
   const relevantChecks = trackGaze
     ? [durationAcceptable, latencyAcceptable, gazeAcceptable]
@@ -170,13 +170,13 @@ const addMeasuredErrorToOutput = (psychoJS, tolerances) => {
     "targetMeasuredDurationFrames",
   ];
   outputParams.forEach((parameter) =>
-    psychoJS.experiment.addData(parameter, tolerances.measured[parameter])
+    psychoJS.experiment.addData(parameter, tolerances.measured[parameter]),
   );
 };
 
 const _targetDurationAcceptable = (
   measuredDurationRatio,
-  allowedDurationRatio
+  allowedDurationRatio,
 ) => {
   if (measuredDurationRatio && allowedDurationRatio) {
     return measuredDurationRatio <= allowedDurationRatio;

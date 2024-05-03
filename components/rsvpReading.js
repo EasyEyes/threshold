@@ -307,10 +307,7 @@ export const generateRSVPReadingTargetSets = (
   paramReader,
   BC,
 ) => {
-  const position = XYPixOfXYDeg(
-    letterConfig.targetEccentricityXYDeg,
-    displayOptions,
-  );
+  const position = XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg);
 
   const targetWords = wordsForThisTrial.targetWords;
   const foilWords = wordsForThisTrial.foils;
@@ -491,14 +488,14 @@ export const getRSVPReadingHeightPx = (reader, BC) => {
   ];
   const heightPx = Math.round(
     Math.abs(
-      XYPixOfXYDeg(
-        [targetLocationDeg[0], targetLocationDeg[1] - sizeDeg / 2],
-        displayOptions,
-      )[1] -
-        XYPixOfXYDeg(
-          [targetLocationDeg[0], targetLocationDeg[1] + sizeDeg / 2],
-          displayOptions,
-        )[1],
+      XYPixOfXYDeg([
+        targetLocationDeg[0],
+        targetLocationDeg[1] - sizeDeg / 2,
+      ])[1] -
+        XYPixOfXYDeg([
+          targetLocationDeg[0],
+          targetLocationDeg[1] + sizeDeg / 2,
+        ])[1],
     ),
   );
   return heightPx;
