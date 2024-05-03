@@ -5850,17 +5850,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   performance.now(),
                 );
                 video.play();
-                measureLuminance.records = [
-                  {
-                    frameTimeSec: 0,
-                    movieValue:
-                      measureLuminance.movieValues[
-                        measureLuminance.currentMovieValueIndex++
-                      ],
-                    luminanceTimeSec: "",
-                    luminanceNits: "",
-                  },
-                ];
                 video_flag = 0;
               }, delayBeforeMovieForLuminanceMeasuringMs);
             } else {
