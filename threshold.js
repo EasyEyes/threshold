@@ -1628,12 +1628,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
-      movie: () => {
+      movie: async () => {
         if (
           (canType(responseType.current) ||
             keypadActive(responseType.current)) &&
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
         ) {
+          if (
+            paramReader
+              .read("measureLuminanceBool", status.block)
+              .some((x) => x) &&
+            !paramReader
+              .read("measureLuminancePretendBool", status.block)
+              .some((x) => x)
+          ) {
+            if ("serial" in navigator) {
+              await initColorCAL();
+            } else {
+              console.error("Web Serial API not supported in this browser");
+            }
+          }
           loggerText(
             "Inside switchKind [movie] if statement of _instructionRoutineEachFrame",
           );
