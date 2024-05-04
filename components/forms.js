@@ -1,4 +1,6 @@
 import axios from "axios";
+import { readi18nPhrases } from "./readPhrases";
+import { rc } from "./global";
 
 /**
  * returns true when user clicks "yes" on consent form
@@ -84,13 +86,13 @@ const renderPDFForm = (src) => {
   const yesBtnEl = document.createElement("button");
   yesBtnEl.id = "form-yes";
   yesBtnEl.classList.add("form-input-btn");
-  yesBtnEl.innerHTML = "YES"; // TODO i18n
+  yesBtnEl.innerHTML = readi18nPhrases("EE_Yes", rc.language.value);
 
   // no button
   const noBtnEl = document.createElement("button");
   noBtnEl.id = "form-no";
   noBtnEl.classList.add("form-input-btn");
-  noBtnEl.innerHTML = "NO";
+  noBtnEl.innerHTML = readi18nPhrases("EE_No", rc.language.value);
 
   formInputContainerEl.appendChild(yesBtnEl);
   formInputContainerEl.appendChild(noBtnEl);

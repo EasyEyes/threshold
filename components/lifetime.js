@@ -21,6 +21,7 @@ import { downloadTextFile } from "./saveFile.js";
 import { removeClickableCharacterSet } from "./showCharacterSet";
 import { showCursor, sleep } from "./utils";
 import { useMatlab, closeMatlab } from "./connectMatlab";
+import { readi18nPhrases } from "./readPhrases.js";
 
 export async function quitPsychoJS(
   message = "",
@@ -155,6 +156,8 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       okText: "Go to Prolific to complete the experiment",
       okUrl: recruitmentServiceData.url,
       showSafeToCloseDialog: showSafeToCloseDialog,
+      safeTocloseMessage: readi18nPhrases("T_safeToClose", rc.language.value),
+      doNotCloseMessage: readi18nPhrases("T_doNotClose", rc.language.value),
     };
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
@@ -176,6 +179,8 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       isCompleted: isCompleted,
       okText: "OK",
       showSafeToCloseDialog: showSafeToCloseDialog,
+      safeTocloseMessage: readi18nPhrases("T_safeToClose", rc.language.value),
+      doNotCloseMessage: readi18nPhrases("T_doNotClose", rc.language.value),
     };
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
