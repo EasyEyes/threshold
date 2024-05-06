@@ -104,10 +104,12 @@ export function getTrialInfoStr(
   }
 
   if (showViewingDistanceBool && viewingDistanceCm)
-    res += replacePlaceholdersForTrial(
-      readi18nPhrases("T_counterCm1", L),
-      viewingDistanceCm,
-    );
+    res +=
+      " " +
+      replacePlaceholdersForTrial(
+        readi18nPhrases("T_counterCm1", L),
+        viewingDistanceCm,
+      );
 
   return res;
 }
