@@ -22,7 +22,7 @@ export const getAutoCompleteSuggestionElements = (
   p,
   img,
   modelNameInput,
-  modelNumberInput
+  modelNumberInput,
 ) => {
   const suggestionContainer = document.createElement("div");
   suggestionContainer.classList.add("autocomplete-items");
@@ -39,7 +39,7 @@ export const getAutoCompleteSuggestionElements = (
         false,
         preferredModelNumberLowercase,
         needPhoneSurvey,
-        input.value
+        input.value,
       );
       p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
 
@@ -64,7 +64,7 @@ export const getAutoCompleteSuggestionElements = (
         false,
         preferredModelNumberLowercase,
         needPhoneSurvey,
-        input.value
+        input.value,
       );
       p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
       img.style.visibility = "hidden";
@@ -74,7 +74,7 @@ export const getAutoCompleteSuggestionElements = (
       modelNameInput.placeholder = preferredModelName;
     }
     const brandSuggestions = suggestions.filter((brand) =>
-      brand.toLowerCase().includes(input.value.toLowerCase())
+      brand.toLowerCase().includes(input.value.toLowerCase()),
     );
     suggestionContainer.innerHTML = "";
     if (brandSuggestions.length === 0) {
@@ -110,7 +110,7 @@ export const getAutoCompleteSuggestionElements = (
             false,
             preferredModelNumberLowercase,
             needPhoneSurvey,
-            input.value
+            input.value,
           );
           p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
           if (input.value === "Apple") {
@@ -134,7 +134,7 @@ export const getAutoCompleteSuggestionElements = (
             false,
             preferredModelNumberLowercase,
             needPhoneSurvey,
-            input.value
+            input.value,
           );
           p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
           img.style.visibility = "hidden";
@@ -209,11 +209,10 @@ const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
     collectionRef,
     where("ID", "==", speakerID),
     where("lowercaseOEM", "==", OEM),
-    where("isDefault", "==", true)
+    where("isDefault", "==", true),
   );
   const querySnapshot = await getDocs(q);
   if (querySnapshot.size > 0) {
-    console.log("Existsss");
     return true;
   }
   console.log("Does not exist");
@@ -225,7 +224,7 @@ export const matchPhoneModelInDatabase = async (
   modelName,
   modelNumber,
   smallerSize,
-  biggerSize
+  biggerSize,
 ) => {
   const r = {
     phoneModelNameKnownBool: false,
@@ -279,7 +278,7 @@ export const matchPhoneModelInDatabase = async (
   const lowercaseOEM = brand.toLowerCase().split(" ").join("");
   const doesMicrophoneExistInLibrary = await doesMicrophoneExistInFirestore(
     modelNumber,
-    lowercaseOEM
+    lowercaseOEM,
   );
   if (doesMicrophoneExistInLibrary) {
     r.phoneModelNameInLibraryBool = true;
@@ -304,11 +303,11 @@ export const addQRSkipButtons = (lang, QRElem) => {
   cantReadButton.innerHTML = readi18nPhrases("RC_cantReadQR_Button", lang);
   preferNotToReadButton.innerHTML = readi18nPhrases(
     "RC_preferNotToReadQR_Button",
-    lang
+    lang,
   );
   noSmartphoneButton.innerHTML = readi18nPhrases(
     "RC_noSmartphone_Button",
-    lang
+    lang,
   );
 
   cantReadButton.classList.add("needs-page-button");
