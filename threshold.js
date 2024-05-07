@@ -1553,15 +1553,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialCounter,
     );
 
-    if (
-      psychoJS.experiment.experimentEnded ||
-      psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-    ) {
-      removeBeepButton();
-
-      return quitPsychoJS("", false, paramReader);
-    }
-
     if (!continueRoutine || clickedContinue.current) {
       continueRoutine = true;
       clickedContinue.current = false;
@@ -1578,7 +1569,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       removeProceedButton();
       keypad.clearKeys();
     }
-
     switchKind(targetKind.current, {
       letter: () => {
         if (
@@ -1668,6 +1658,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       },
     });
+
+    // I found that psychoJS.eventManager.getKeys call would clear response key list,
+    // not sure why, so move the check of excape at the end of _instructionRoutineEachFrame
+    if (
+      psychoJS.experiment.experimentEnded ||
+      psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
+    ) {
+      removeBeepButton();
+
+      return quitPsychoJS("", false, paramReader);
+    }
 
     return Scheduler.Event.FLIP_REPEAT;
   }
