@@ -108,7 +108,7 @@ export function getTrialInfoStr(
       " " +
       replacePlaceholdersForTrial(
         readi18nPhrases("T_counterCm1", L),
-        viewingDistanceCm,
+        viewingDistanceCm?.toFixed(1) || viewingDistanceCm,
       );
 
   return res;
