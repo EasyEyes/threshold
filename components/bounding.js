@@ -6,8 +6,8 @@ import {
   fixationConfig,
   letterConfig,
   targetKind,
-  viewingDistanceDesiredCm,
   status,
+  viewingDistanceCm,
 } from "./global.js";
 import { pxScalar } from "./utils";
 
@@ -587,9 +587,9 @@ export const restrictSpacingDeg = (
         warning(
           `Illegal spacingDeg, spacingDeg <= 0. spacingDeg: ${spacingDeg}`,
         );
-      if (viewingDistanceDesiredCm.current <= 0 || displayOptions.pixPerCm <= 0)
+      if (viewingDistanceCm.desired <= 0 || displayOptions.pixPerCm <= 0)
         warning(
-          `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceDesiredCm.current}, pixPerCm: ${displayOptions.pixPerCm}`,
+          `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceCm.desired}, pixPerCm: ${displayOptions.pixPerCm}`,
         );
       const targetXYPx = XYPixOfXYDeg(targetXYDeg);
       const targetMaxXYDeg = XYDegOfXYPix([

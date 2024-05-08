@@ -1,6 +1,5 @@
 import {
   status,
-  viewingDistanceDesiredCm,
   viewingDistanceCm,
   preStimulus,
   rc,
@@ -43,7 +42,7 @@ export const setPreStimulusRerunInterval = (
     preStimulus.running = true;
     preStimulus.interval = setInterval(async () => {
       // Update viewing distance
-      const nominalViewingDistance = viewingDistanceDesiredCm.current;
+      const nominalViewingDistance = viewingDistanceCm.desired;
       viewingDistanceCm.current = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
         : viewingDistanceCm.current;

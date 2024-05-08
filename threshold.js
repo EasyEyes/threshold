@@ -74,7 +74,6 @@ import {
   status,
   totalTrialsThisBlock,
   totalBlocks,
-  viewingDistanceDesiredCm,
   viewingDistanceCm,
   grid,
   clickedContinue,
@@ -2392,14 +2391,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       // ! Viewing distance
-      viewingDistanceDesiredCm.current = paramReader.read(
+      viewingDistanceCm.desired = paramReader.read(
         "viewingDistanceDesiredCm",
         status.block,
       )[0];
 
       viewingDistanceCm.current = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
-        : viewingDistanceDesiredCm.current;
+        : viewingDistanceCm.desired;
       if (!rc.viewingDistanceCm)
         console.warn(
           "[Viewing Distance] Using arbitrary viewing distance. Enable RC.",
@@ -3394,24 +3393,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* --------------------------------- PUBLIC --------------------------------- */
 
       // ! distance
+      // reset tracking target distance
+      viewingDistanceCm.desired = paramReader.read(
+        "viewingDistanceDesiredCm",
+        status.block_condition,
+      );
       if (
         ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
       ) {
         rc.resumeDistance();
         loggerText("[RC] resuming distance");
 
-        // reset tracking target distance
-        viewingDistanceDesiredCm.current = paramReader.read(
-          "viewingDistanceDesiredCm",
-          status.block_condition,
-        );
-
         viewingDistanceCm.current = rc.viewingDistanceCm
           ? rc.viewingDistanceCm.value
           : viewingDistanceCm.current;
 
         if (rc.setDistanceDesired)
-          rc.setDistanceDesired(viewingDistanceDesiredCm.current);
+          rc.setDistanceDesired(viewingDistanceCm.desired);
 
         // Distance nudging
         rc.resumeNudger();
@@ -3421,6 +3419,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialInstructionRoutineBegin,
           snapshot,
         );
+      } else {
+        viewingDistanceCm.current = viewingDistanceCm.desired;
       }
 
       const reader = paramReader;

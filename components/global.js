@@ -238,13 +238,7 @@ export const letterTiming = Object.seal({
   crosshairClickedTimestamp: undefined,
 });
 
-/* --------------------------- Participant Config --------------------------- */
-
-export const viewingDistanceDesiredCm = { current: 40 };
-
-/* --------------------------- Participant Status --------------------------- */
-
-export const viewingDistanceCm = { current: 40 };
+export const viewingDistanceCm = { current: 40, desired: 40 };
 
 /* ------------------------------ Interactions ------------------------------ */
 export const _key_resp_allKeys = {
