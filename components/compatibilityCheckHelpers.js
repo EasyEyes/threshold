@@ -289,7 +289,7 @@ export const matchPhoneModelInDatabase = async (
   return r;
 };
 
-export const addQRSkipButtons = (lang, QRElem) => {
+export const addQRSkipButtons = (lang, QRElem, qrlink = "[]") => {
   const container = document.createElement("div");
   container.style.display = "flex";
   container.style.justifyContent = "space-between";
@@ -331,7 +331,9 @@ export const addQRSkipButtons = (lang, QRElem) => {
 
   const explanation = document.createElement("p");
   explanation.id = "skipQRExplanation";
-  explanation.innerHTML = readi18nPhrases("RC_skipQR_Explanation", lang);
+  explanation.innerHTML = readi18nPhrases("RC_skipQR_Explanation", lang)
+    .replace("xxx", `<b>${qrlink}</b>`)
+    .replace("XXX", `<b>${qrlink}</b>`);
   const qrContainer = document.createElement("div");
 
   qrContainer.appendChild(container);

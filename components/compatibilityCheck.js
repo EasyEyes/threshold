@@ -1155,6 +1155,7 @@ export const displayCompatibilityMessage = async (
     if (compatibilityCheckPeer && proceedBool) {
       if (needPhoneSurvey) await fetchAllPhoneModels();
       const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
+      const qrlink = await compatibilityCheckPeer.getQRLink();
       // add id to the QR code
       compatiblityCheckQR.id = "compatibility-qr";
       compatiblityCheckQR.style.maxHeight = "150px";
@@ -1185,7 +1186,7 @@ export const displayCompatibilityMessage = async (
         cantReadButton,
         preferNotToReadButton,
         noSmartphoneButton,
-      } = addQRSkipButtons(rc.language.value, compatiblityCheckQR);
+      } = addQRSkipButtons(rc.language.value, compatiblityCheckQR, qrlink);
       messageWrapper.append(
         needPhoneSurvey ? qrContainer : compatiblityCheckQR,
       );
