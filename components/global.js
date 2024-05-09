@@ -583,3 +583,7 @@ export const preStimulus = {
   interval: undefined,
   running: false,
 };
+
+export const keypad = {
+  handler: undefined,
+};

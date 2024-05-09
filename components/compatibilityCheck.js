@@ -42,8 +42,6 @@ if (typeof document !== "undefined")
   });
 
 let gotLoudspeakerMatchBool = false;
-// import { microphoneInfo } from "./global";
-// import { rc } from "./global";
 
 const needsUnmet = [];
 
@@ -1003,6 +1001,8 @@ export const displayCompatibilityMessage = async (
   needCalibratedSound,
   psychoJS,
   quitPsychoJS,
+  keypad,
+  KeypadHandler, // creates an error if imported from the top
 ) => {
   return new Promise(async (resolve) => {
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
@@ -1152,6 +1152,19 @@ export const displayCompatibilityMessage = async (
     }
 
     document.body.prepend(messageWrapper);
+    if (proceedBool) {
+      const keypadTitle = document.createElement("div");
+      keypadTitle.id = "virtual-keypad-title";
+      keypadTitle.style.marginTop = "5px";
+      keypadTitle.innerHTML = readi18nPhrases(
+        "T_keypadScanQRCode",
+        rc.language.value,
+      );
+      keypadTitle.style.display = "none";
+      messageWrapper.appendChild(keypadTitle);
+      keypad.handler = new KeypadHandler(reader);
+      await keypad.handler.resolveWhenConnected();
+    }
     if (compatibilityCheckPeer && proceedBool) {
       if (needPhoneSurvey) await fetchAllPhoneModels();
       const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
@@ -1984,10 +1997,19 @@ const handleNewMessage = (
     languageTitleElem.innerHTML = readi18nPhrases("EE_languageChoose", lang);
 
   let proceedButton = document.getElementById("procced-btn");
-  if (proceedButton)
+  if (proceedButton) {
     proceedButton.innerHTML = proceedBool
       ? readi18nPhrases("T_proceed", lang)
       : readi18nPhrases("EE_Cancel", lang);
+  }
+
+  const keypadTitle = document.getElementById("virtual-keypad-title");
+  if (keypadTitle) {
+    keypadTitle.childNodes[0].textContent = readi18nPhrases(
+      "T_keypadScanQRCode",
+      lang,
+    );
+  }
 
   if (needPhoneSurvey || compatibilityCheckPeer) {
     let qrCodeExplanation = document.getElementById(

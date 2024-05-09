@@ -13,11 +13,11 @@ export class KeypadHandler {
       this.keypadDistanceThresholds,
     ] = this._readKeypadParams();
     const keypadDistanceThreshold = String(
-      Math.round(Number(this.reader.read("needEasyEyesKeypadBeyondCm")[0]))
+      Math.round(Number(this.reader.read("needEasyEyesKeypadBeyondCm")[0])),
     );
     this.disabledMessage = readi18nPhrases(
       "T_keypadDisabled",
-      rc.language.value
+      rc.language.value,
     ).replace("111", keypadDistanceThreshold);
 
     this.alphabet = this._getFullAlphabet([]);
@@ -50,11 +50,11 @@ export class KeypadHandler {
       const block = Number(BC.split("_")[0]);
       const keypadRequested = this.reader.read(
         "!responseTypedEasyEyesKeypadBool",
-        BC
+        BC,
       );
       const keypadDistanceThreshold = this.reader.read(
         "needEasyEyesKeypadBeyondCm",
-        BC
+        BC,
       );
       conditionsNeedingKeypad.set(BC, keypadRequested);
       keypadDistanceThresholds.set(BC, keypadDistanceThreshold);
@@ -96,7 +96,7 @@ export class KeypadHandler {
     alphabet = this._getFullAlphabet(alphabet);
     const alphabetChanged = !arraysEqual(
       [...alphabet].sort(),
-      [...this.alphabet].sort()
+      [...this.alphabet].sort(),
     );
     if (alphabetChanged)
       logger("!. alphabetChanged, [alphabet, this.alphabet]", [
@@ -122,7 +122,7 @@ export class KeypadHandler {
       if (BCChanged)
         this.disabledMessage = readi18nPhrases(
           "T_keypadDisabled",
-          rc.language.value
+          rc.language.value,
         ).replace("111", this.keypadDistanceThresholds.get(BC));
     }
   }
@@ -150,7 +150,7 @@ export class KeypadHandler {
     if (this.connection) {
       logger(
         `!. updating message, from ${this.message} to ${message}`,
-        this.message !== message
+        this.message !== message,
       );
       if (this.message !== message || force) {
         this.receiver?.updateDisplayMessage(message);
@@ -165,7 +165,8 @@ export class KeypadHandler {
       } else {
         this.stop();
       }
-      this.hideQRPopup();
+      // this.hideQRPopup();
+      this.hideQR();
     };
     this.receiver ??= new Receiver(
       { alphabet: this.alphabet ?? [], font: this.font ?? "sans-serif" },
@@ -173,12 +174,28 @@ export class KeypadHandler {
       handshakeCallback,
       this.onConnectionCallback,
       this.onCloseCallback,
-      this.onErrorCallback
+      this.onErrorCallback,
     );
 
     const qrImage = await this.createQRCode();
-    this.showQRPopup(qrImage);
+    // this.showQRPopup(qrImage);
+    this.showQR(qrImage);
   }
+  resolveWhenConnected = async () => {
+    if (!this.inUse()) return;
+    return new Promise((resolve) => {
+      if (this.connection) {
+        resolve();
+      } else {
+        const interval = setInterval(() => {
+          if (this.connection) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 10);
+      }
+    });
+  };
   onConnectionCallback = (connection) => {
     this.connection = connection;
     logger("KEYPAD connected", connection);
@@ -219,7 +236,7 @@ export class KeypadHandler {
       if (!this.reattemptPopupInterval)
         this.reattemptPopupInterval = setInterval(
           () => this.showQRPopup(qrImage),
-          100
+          100,
         );
     } else if (this.sensitive === false) {
       const expName = thisExperimentInfo.name;
@@ -238,7 +255,7 @@ export class KeypadHandler {
 
       title.innerHTML = readi18nPhrases(
         "T_keypadScanQRCode",
-        rc.language.value
+        rc.language.value,
       );
       // subtitle.innerHTML = readi18nPhrases(
       //   "T_keypadScanQRCodeSubtitle",
@@ -257,6 +274,32 @@ export class KeypadHandler {
     popup.style.height = "30%";
 
     container.style.display = "none";
+  }
+  showQR(qrImage) {
+    if (this.sensitive) {
+      if (!this.reattemptPopupInterval)
+        this.reattemptPopupInterval = setInterval(
+          () => this.showQR(qrImage),
+          100,
+        );
+    } else if (this.sensitive === false) {
+      const title = document.getElementById(`virtual-keypad-title`);
+      title.style.display = "block";
+      qrImage.style.display = "block";
+      qrImage.style.marginLeft = "-13px";
+
+      title.innerText = readi18nPhrases(
+        "T_keypadScanQRCode",
+        rc.language.value,
+      );
+      title.appendChild(qrImage);
+      if (this.reattemptPopupInterval)
+        clearInterval(this.reattemptPopupInterval);
+    }
+  }
+  hideQR() {
+    const title = document.getElementById(`virtual-keypad-title`);
+    title.style.display = "none";
   }
   endRoutine(BC) {
     const shouldEndRoutine =

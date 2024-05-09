@@ -143,6 +143,7 @@ import {
   needComputerSurveyBool,
   gotLoudspeakerMatch,
   readingCorpusShuffleBool,
+  keypad,
 } from "./components/global.js";
 
 import {
@@ -598,8 +599,34 @@ var characterSetBoundingRects = {};
 
 const experiment = (howManyBlocksAreThereInTotal) => {
   setCurrentFn("experiment");
+  //variables
+  var readingParagraph;
+
+  var key_resp;
+  // var keypad;
+  var fixation; ////
+  var vernier;
+  var flanker1, flanker2, flanker3, flanker4;
+  var target;
+  var showCharacterSet;
+
+  var routineTimer, routineClock;
+  var initInstructionClock,
+    eduInstructionClock,
+    trialInstructionClock,
+    blockScheduleFinalClock;
+
+  var dot, backGrid, flies;
   ////
   // Resources
+
+  /* -------------------------------------------------------------------------- */
+
+  // ! POPUPS for take a break & proportion correct
+  preparePopup(rc.language.value, thisExperimentInfo.name); // Try to use only one popup ele for both (or even more) popup features
+  prepareTrialBreakProgressBar();
+
+  /* -------------------------------------------------------------------------- */
   initializeEscHandlingDiv();
   const _resources = [];
   blockOrder.current = getBlockOrder(paramReader);
@@ -918,6 +945,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       needCalibratedSound,
       psychoJS,
       quitPsychoJS,
+      keypad,
+      KeypadHandler,
     );
 
     gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
@@ -1154,24 +1183,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   if (paramReader.read("instructionFontSource")[0] === "file")
     instructionFont.current = cleanFontName(instructionFont.current);
 
-  var readingParagraph;
-
-  var key_resp;
-  var keypad;
-  var fixation; ////
-  var vernier;
-  var flanker1, flanker2, flanker3, flanker4;
-  var target;
-  var showCharacterSet;
-
-  var routineTimer, routineClock;
-  var initInstructionClock,
-    eduInstructionClock,
-    trialInstructionClock,
-    blockScheduleFinalClock;
-
-  var dot, backGrid, flies;
-
   async function experimentInit() {
     setCurrentFn("experimentInit");
     // Initialize components for Routine "file"
@@ -1193,13 +1204,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       waitForStart: true,
     });
 
-    /* -------------------------------------------------------------------------- */
-
-    // ! POPUPS for take a break & proportion correct
-    preparePopup(rc.language.value, thisExperimentInfo.name); // Try to use only one popup ele for both (or even more) popup features
-    prepareTrialBreakProgressBar();
-
-    /* -------------------------------------------------------------------------- */
     fixation = new Fixation();
     fixationConfig.stim = fixation;
     vernier = new VernierStim();
@@ -1393,8 +1397,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     updateProgressBar(0);
     hideProgressBar();
 
-    keypad = new KeypadHandler(paramReader);
-
     // start matlab
     if (useMatlab.current) {
       await sendMessage(
@@ -1561,12 +1563,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     continueRoutine = true;
 
     if (
-      keypad.inUse(status.block) &&
+      keypad.handler.inUse(status.block) &&
       _key_resp_allKeys.current.map((r) => r.name).includes("return")
     ) {
       continueRoutine = false;
       removeProceedButton();
-      keypad.clearKeys();
+      keypad.handler.clearKeys();
     }
     switchKind(targetKind.current, {
       letter: () => {
@@ -2105,7 +2107,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         thisExperimentInfo.name,
         responseType.current,
         null,
-        keypad,
+        keypad.handler,
       );
     }
     // Reset trial counter
@@ -2358,10 +2360,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.save();
       }
 
-      if (keypad.inUse(status.block)) {
-        keypad.start();
+      if (keypad.handler.inUse(status.block)) {
+        keypad.handler.start();
       } else {
-        keypad.stop();
+        keypad.handler.stop();
       }
 
       updateInstructionFont(paramReader, status.block, [
@@ -2847,14 +2849,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (canClick(responseType.current) && targetKind.current !== "reading")
         addProceedButton(rc.language.value, paramReader);
 
-      if (keypad.inUse(status.block) && targetKind.current !== "reading") {
-        await keypad.update(["SPACE", "RETURN"], "sans-serif", undefined);
+      if (
+        keypad.handler.inUse(status.block) &&
+        targetKind.current !== "reading"
+      ) {
+        await keypad.handler.update(
+          ["SPACE", "RETURN"],
+          "sans-serif",
+          undefined,
+        );
       }
 
       addBeepButton(L, correctSynth);
 
       psychoJS.eventManager.clearKeys();
-      keypad.clearKeys(status.block_condition);
+      keypad.handler.clearKeys(status.block_condition);
 
       // reset takeABreak state
       currentBlockCreditForTrialBreak = 0;
@@ -2908,8 +2917,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("initInstructionRoutineEnd");
       instructions.setAutoDraw(false);
-      keypad.clearKeys();
-      // if (keypadActive(responseType.current)) keypad.stop(); // Necessary??
+      keypad.handler.clearKeys();
+      // if (keypadActive(responseType.current)) keypad.handler.stop(); // Necessary??
 
       removeBeepButton();
 
@@ -3145,9 +3154,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
 
       psychoJS.eventManager.clearKeys();
-      keypad.clearKeys();
+      keypad.handler.clearKeys();
 
-      // if (keypadActive(responseType.current)) keypad.start();
+      // if (keypadActive(responseType.current)) keypad.handler.start();
       return Scheduler.Event.NEXT;
     };
   }
@@ -3168,7 +3177,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("eduInstructionRoutineEnd");
       instructions.setAutoDraw(false);
-      // if (keypadActive(responseType.current)) keypad.stop(); Necessary??
+      // if (keypadActive(responseType.current)) keypad.handler.stop(); Necessary??
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -3454,13 +3463,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         s.setCharacterSet(fontCharacterSet.current.join("")),
       );
 
-      if (!simulatedObservers.proceed(BC) && keypad.inUse(BC)) {
+      if (!simulatedObservers.proceed(BC) && keypad.handler.inUse(BC)) {
         const alphabet = reader.read("fontLeftToRightBool")
           ? [...fontCharacterSet.current]
           : [...fontCharacterSet.current].reverse();
-        await keypad.update(alphabet, "sans-serif", BC);
-        if (keypad.inUse(BC) && !keypad.acceptingResponses) {
-          keypad.start();
+        await keypad.handler.update(alphabet, "sans-serif", BC);
+        if (keypad.handler.inUse(BC) && !keypad.handler.acceptingResponses) {
+          keypad.handler.start();
         }
       }
 
@@ -4650,7 +4659,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
 
       psychoJS.eventManager.clearKeys();
-      keypad.clearKeys(status.block_condition);
+      keypad.handler.clearKeys(status.block_condition);
 
       if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
@@ -4849,7 +4858,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         (canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) ||
-        keypad.endRoutine(status.block_condition) ||
+        keypad.handler.endRoutine(status.block_condition) ||
         simulatedObservers.proceed(status.block_condition)
       ) {
         continueRoutine = false;
@@ -4865,9 +4874,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("trialInstructionRoutineEnd");
       loggerText("trialInstructionRoutineEnd");
 
-      keypad.clearKeys(status.block_condition);
+      keypad.handler.clearKeys(status.block_condition);
       // TODO disable keypad control keys
-      keypad.setSensitive();
+      keypad.handler.setSensitive();
 
       clearInterval(preStimulus.interval);
       preStimulus.interval = undefined;
@@ -5526,10 +5535,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         t >= timeWhenRespondable &&
         !simulatedObservers.proceed(status.block_condition) &&
-        keypad.inUse(status.block_condition) &&
-        !keypad.acceptingResponses
+        keypad.handler.inUse(status.block_condition) &&
+        !keypad.handler.acceptingResponses
       ) {
-        keypad.setNonSensitive();
+        keypad.handler.setNonSensitive();
       }
       // *key_resp* updates
       if (
@@ -6675,7 +6684,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               () => {
                 resolve(Scheduler.Event.NEXT);
               },
-              keypad,
+              keypad.handler,
             );
           }, takeABreakMinimumDurationSec * 1000);
         });
