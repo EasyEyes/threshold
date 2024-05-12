@@ -579,6 +579,10 @@ const paramReaderInitialized = async (reader) => {
   };
   ////
   await startExperiment();
+
+  // to remove initialized message
+  var rootElement = document.getElementById("root");
+  rootElement.classList.add("initialized");
 };
 
 export const paramReader = new ParamReader(
