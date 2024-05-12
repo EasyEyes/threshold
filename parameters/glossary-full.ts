@@ -3321,6 +3321,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "px, pt, cm, in, deg, degDynamic, mmV4, none, disabled",
   },
   {
+    name: "showImage",
+    availability: "now",
+    example: "",
+    explanation:
+      'showImage (no default) accepts the filename of an image, including the extension, which is shown centered as large as possible with all image pixels visible, against a white background. The image remains until dismissed. Accept the RETURN key if typing is enabled (responseTypedBool==TRUE). If clicking is enabled (responseClickedBool==TRUE), superimpose a "Proceed" button near bottom middle, and accept a click of the Proceed button. In either case, proceed to next block. Often both will be enabled. Typing on the keypad is equivalent to typing on the keyboard. The compiler requires that the image has previously been uploaded to the Pavlovia EasyEyesResources repo by submission through the "Select file" button. NOTE: the text for the button name is the international phrase T_proceed.  The commands showConditionNameBool, ShowCounterBool, showViewingDistanceBool and showTargetSpecsBool are supported as usual.\nAccepts image formats PNG, JPG, ad SVG.',
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "showParameters",
     availability: "now",
     example: "",
@@ -3335,7 +3345,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "⭑ If showPercentCorrectBool is true for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (acrosss all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments.",
+      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (acrosss all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments.",
     type: "boolean",
     default: "TRUE",
     categories: "",
