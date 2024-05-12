@@ -16,7 +16,7 @@ export const loadFonts = (reader, fontList) => {
       conditionName,
       fileFonts,
       webFonts,
-      googleFonts
+      googleFonts,
     );
 
     // if (reader.has("instructionFont"))
@@ -28,7 +28,7 @@ export const loadFonts = (reader, fontList) => {
       conditionName,
       fileFonts,
       webFonts,
-      googleFonts
+      googleFonts,
     );
   }
 
@@ -52,7 +52,7 @@ const _loadNameFromSource = (
   conditionName,
   fileFonts,
   webFonts,
-  googleFonts
+  googleFonts,
 ) => {
   const sourceType = reader.read(source, conditionName);
   const name = reader.read(target, conditionName);
@@ -86,7 +86,8 @@ const _loadNameFromSource = (
 // removing the regex to fix a bug about fonts not being displayed on the experiment page
 // https://stackoverflow.com/questions/15230223/css-font-face-not-working-on-chrome
 export const cleanFontName = (name) => {
-  return name;
+  // removed suffix to resolve an issue using FontFace api in firefox
+  return name.replace(/\.[^.]+$/, "");
 };
 
 /**
@@ -120,8 +121,12 @@ const addCSSFontFace = (name, filename) => {
   var newStyle = document.createElement("style");
   newStyle.appendChild(
     document.createTextNode(
-      "@font-face{font-family: " + familyName + "; src: url(" + filename + ");}"
-    )
+      "@font-face{font-family: " +
+        familyName +
+        "; src: url(" +
+        filename +
+        ");}",
+    ),
   );
   document.head.appendChild(newStyle);
 };
