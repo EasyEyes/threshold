@@ -24,7 +24,7 @@ export const UNBALANCED_COMMAS = (
     parameter: string;
     length: number;
     correctLength: number;
-  }[]
+  }[],
 ): EasyEyesError => {
   const hintBlob: string = offendingParameters
     .map((offenderReport) => {
@@ -48,7 +48,7 @@ export const UNBALANCED_COMMAS = (
 };
 
 export const ILL_FORMED_UNDERSCORE_PARAM = (
-  parameter: string
+  parameter: string,
 ): EasyEyesError => {
   return {
     name: `_Underscore parameter incorrectly formatted`,
@@ -70,7 +70,7 @@ export const INCORRECT_PARAMETER_TYPE = (
     | "obsolete"
     | "categorical"
     | "multicategorical",
-  categories?: string[]
+  categories?: string[],
 ): EasyEyesError => {
   const offendingMessage = offendingValues.map((offending) => {
     const columnLabel = toColumnName(Number(offending.block) + 2);
@@ -123,7 +123,7 @@ export const TOO_MANY_CSV_FILES_FOUND: EasyEyesError = {
 
 export const INVALID_FOLDER_STRUCTURE = (
   folderName: string,
-  parameter: string
+  parameter: string,
 ): EasyEyesError => {
   return {
     name: "Invalid folder structure",
@@ -138,7 +138,7 @@ export const INVALID_FOLDER_STRUCTURE = (
 // TODO Too much duplicated code for similar file missing errors!
 export const FONT_FILES_MISSING = (
   parameter: string,
-  missingFileNameList: string[]
+  missingFileNameList: string[],
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
@@ -154,9 +154,27 @@ export const FONT_FILES_MISSING = (
   };
 };
 
+export const IMAGE_FILES_MISSING = (
+  parameter: string,
+  missingFileNameList: string[],
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList.map((fileName: string) => {
+    htmlList += `<li>${fileName}</li>`;
+  });
+  return {
+    name: "Image file not found",
+    message: `We could not find the following image(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Are all images uploaded? If so, make sure the names match the ones in the experiment file.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 export const FONT_FILES_MISSING_WEB = (
   parameter: string,
-  missingFileNameList: string[]
+  missingFileNameList: string[],
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
@@ -174,7 +192,7 @@ export const FONT_FILES_MISSING_WEB = (
 
 export const SOUND_FOLDER_MISSING = (
   parameter: string,
-  missingFileNameList: string[]
+  missingFileNameList: string[],
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
@@ -193,7 +211,7 @@ export const SOUND_FOLDER_MISSING = (
 
 export const FORM_FILES_MISSING = (
   parameter: string,
-  missingFileNameList: string[]
+  missingFileNameList: string[],
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
@@ -211,7 +229,7 @@ export const FORM_FILES_MISSING = (
 
 export const TEXT_FILES_MISSING = (
   parameter: string,
-  missingFileNameList: string[]
+  missingFileNameList: string[],
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
@@ -229,7 +247,7 @@ export const TEXT_FILES_MISSING = (
 
 export const CODE_FILES_MISSING = (
   parameter: string,
-  missingFileNameList: string[]
+  missingFileNameList: string[],
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList
@@ -248,7 +266,7 @@ export const CODE_FILES_MISSING = (
 };
 
 export const PARAMETERS_NOT_ALPHABETICAL = (
-  firstOffendingParameter: string
+  firstOffendingParameter: string,
 ): EasyEyesError => {
   return {
     name: "Parameters aren't alphabetical",
@@ -296,7 +314,7 @@ export const OBSOLETE_PARAMETERS = (report: any): EasyEyesError => {
 };
 
 export const NOT_YET_SUPPORTED_PARAMETER = (
-  parameter: string
+  parameter: string,
 ): EasyEyesError => {
   return {
     name: `Parameter is not yet supported`,
@@ -318,7 +336,7 @@ export const NO_BLOCK_PARAMETER: EasyEyesError = {
 };
 
 export const INVALID_STARTING_BLOCK = (
-  actualStartingValue: string
+  actualStartingValue: string,
 ): EasyEyesError => {
   return {
     name: "Invalid initial value",
@@ -343,7 +361,7 @@ export const INVALID_AUTHOR_EMAIL = (parameter: string[]): EasyEyesError => {
 
 export const NONSEQUENTIAL_BLOCK_VALUE = (
   nonsequentials: { value: number; previous: number; index: number }[],
-  blockValues: string[]
+  blockValues: string[],
 ): EasyEyesError => {
   // let problemStatement: string;
   const illustratedValues =
@@ -351,7 +369,7 @@ export const NONSEQUENTIAL_BLOCK_VALUE = (
     blockValues
       .map((value, i) => {
         const improperValue: boolean = nonsequentials.some(
-          (nonsequential) => nonsequential.index === i
+          (nonsequential) => nonsequential.index === i,
         );
         if (!improperValue) return String(value);
         return `<span style="color: #e02401;">${String(value)}</span>`;
@@ -362,13 +380,13 @@ export const NONSEQUENTIAL_BLOCK_VALUE = (
     (nonsequential) => {
       const suffix = getNumericalSuffix(nonsequential.index + 1);
       return `${nonsequential.index + 1}${suffix}`;
-    }
+    },
   );
   const plural = nonsequentials.length > 1;
   const hintBlob = `<span class="error-parameter">block,${illustratedValues}</span><br/>
                     The ${verballyEnumerate(nonsequentialIndicies)} value${
-    plural ? "s are" : " is"
-  } nonsequential.`;
+                      plural ? "s are" : " is"
+                    } nonsequential.`;
   return {
     name: `Nonsequential value${plural ? "s" : ""}`,
     message: `Looks like we've got ${
@@ -386,7 +404,7 @@ export const NONSEQUENTIAL_BLOCK_VALUE = (
 export const NO_RESPONSE_POSSIBLE = (
   conditionsLacking: number[] = [],
   zeroIndexed = false,
-  totalNumberOfConditions = 0
+  totalNumberOfConditions = 0,
 ): EasyEyesError => {
   // const startingCondition = zeroIndexed ? 0 : 1;
   // const plural = conditionsLacking.length > 1 ? "s" : "";
@@ -420,7 +438,7 @@ export const NO_RESPONSE_POSSIBLE = (
 
 export const NONUNIQUE_WITHIN_BLOCK = (
   offendingParameter: string,
-  offendingBlocks: string[]
+  offendingBlocks: string[],
 ): EasyEyesError => {
   const multiple = offendingBlocks.length > 1;
   return {
@@ -438,13 +456,13 @@ export const NONUNIQUE_WITHIN_BLOCK = (
 };
 
 export const CONDITION_PARAMETERS_IN_FIRST_COLUMN = (
-  offendingParameters: string[]
+  offendingParameters: string[],
 ): EasyEyesError => {
   return {
     name: "Non-underscore parameters provided in underscore parameter column",
     message: `These parameters are forbidden to use column B. Column B is reserved for underscore parameters.`,
     hint: `For parameters ${limitedEnumerate(
-      offendingParameters
+      offendingParameters,
     )}, select all the cells from column B and rightward, and shift them all one column to the right, to begin at column C.`,
     context: "preprocessor",
     kind: "error",
@@ -454,14 +472,14 @@ export const CONDITION_PARAMETERS_IN_FIRST_COLUMN = (
 
 export const NONCONTIGUOUS_GROUPING_VALUES = (
   values: string[][],
-  parameters: string[]
+  parameters: string[],
 ): EasyEyesError => {
   const multiple = values.length > 1 || values[0].length > 1;
   const offendingValues = values.map(
     (v, i) =>
       `${verballyEnumerate(v.map((s) => `<I>${s}</I>`))} (${parameter(
-        parameters[i]
-      )})`
+        parameters[i],
+      )})`,
   );
   const offendingValuesStr = limitedEnumerate(offendingValues);
   return {
@@ -478,22 +496,22 @@ export const NONCONTIGUOUS_GROUPING_VALUES = (
 
 export const NONSUBSET_GROUPING_VALUES = (
   labels: string[][],
-  parameters: string[]
+  parameters: string[],
 ): EasyEyesError => {
   const multiple = labels.length > 1 || labels[0].length > 1;
   const offendingValues = labels.map(
     (l, i) =>
       `${verballyEnumerate(l.map((s) => `<I>${s}</I>`))} (${parameter(
-        parameters[i]
-      )})`
+        parameters[i],
+      )})`,
   );
   const offendingValuesStr = limitedEnumerate(offendingValues);
   return {
     name: "Block shuffle groups not a subset of containing groups",
     message: `Every ${parameter(
-      "blockShuffleGroupN"
+      "blockShuffleGroupN",
     )} group must belong to some ${parameter(
-      "blockShuffleGroupN-1"
+      "blockShuffleGroupN-1",
     )} group. The ${multiple ? "groups" : "group"} ${offendingValuesStr} ${
       multiple ? "were" : "was"
     } found to not be a subset of a containing group.`,
@@ -506,16 +524,16 @@ export const NONSUBSET_GROUPING_VALUES = (
 
 export const CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS = (
   parameters: string[][],
-  columns: string[]
+  columns: string[],
 ): EasyEyesError => {
   const parameterStrings = parameters.map((params) =>
-    verballyEnumerate(params)
+    verballyEnumerate(params),
   );
   const parameterAndConditionsStrings = parameterStrings.map(
-    (paramString, i) => paramString + ` (column ${columns[i]})`
+    (paramString, i) => paramString + ` (column ${columns[i]})`,
   );
   const offendingParametersAndConditions: string = verballyEnumerate(
-    parameterAndConditionsStrings
+    parameterAndConditionsStrings,
   );
   return {
     name: "Multiple mutually exclusive parameters are true in the same condition",
@@ -528,16 +546,16 @@ export const CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS = (
 };
 
 export const NEGATIVE_MARKING_FIXATION_STROKE_THICKENING = (
-  valuesAndConditions: [string, number][]
+  valuesAndConditions: [string, number][],
 ): EasyEyesError => {
   const parameterAndConditionStrings = valuesAndConditions.map(
     ([badThickeningValue, conditionNumber]) =>
       `${badThickeningValue} (column ${conditionIndexToColumnName(
-        conditionNumber
-      )})`
+        conditionNumber,
+      )})`,
   );
   const offendingParametersAndColumns = verballyEnumerate(
-    parameterAndConditionStrings
+    parameterAndConditionStrings,
   );
   const plural = valuesAndConditions.length > 1;
   return {
@@ -553,14 +571,16 @@ export const NEGATIVE_MARKING_FIXATION_STROKE_THICKENING = (
 };
 
 export const ILLDEFINED_TRACKING_INTERVALS = (
-  minMaxSecAndConditions: [string[], number][]
+  minMaxSecAndConditions: [string[], number][],
 ): EasyEyesError => {
   const parameterAndConditionStrings = minMaxSecAndConditions.map(
     ([[min, max], conditionNumber]) =>
-      `[${min}, ${max}] (column ${conditionIndexToColumnName(conditionNumber)})`
+      `[${min}, ${max}] (column ${conditionIndexToColumnName(
+        conditionNumber,
+      )})`,
   );
   const offendingParametersAndColumns = verballyEnumerate(
-    parameterAndConditionStrings
+    parameterAndConditionStrings,
   );
   const plural = minMaxSecAndConditions.length > 1;
   return {
@@ -576,11 +596,11 @@ export const ILLDEFINED_TRACKING_INTERVALS = (
 };
 export const IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE = (
   names: string[],
-  types: string[]
+  types: string[],
 ): EasyEyesError => {
   const plural = names.length > 1;
   const nameTypeMessage = verballyEnumerate(
-    names.map((n, i) => `${n} (\'${types[i]}\')`)
+    names.map((n, i) => `${n} (\'${types[i]}\')`),
   );
   return {
     name: `Type in glossary is unsupported`,
@@ -596,13 +616,13 @@ export const IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE = (
 
 export const VERNIER_MUST_USE_TARGETOFFSETDEG = (
   thresholdParameter: string,
-  i: number
+  i: number,
 ): EasyEyesError => {
   return {
     name: `thersholdParameter type is unsupported`,
     message: `By setting targetKind = vernier, you must set thresholdParameter = targetOffsetDeg.`,
     hint: `The erroneous values is ${thresholdParameter} at column ${toColumnName(
-      i
+      i,
     )}`,
     context: "preprocessor",
     kind: "error",
@@ -612,7 +632,7 @@ export const VERNIER_MUST_USE_TARGETOFFSETDEG = (
 
 export const TARGETOFFSETDEG_MUST_USE_VERNIER = (
   targetKind: string,
-  i: number
+  i: number,
 ): EasyEyesError => {
   return {
     name: `targetKind type is unsupported`,
@@ -632,13 +652,13 @@ export interface Offender<T> {
 export const COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH = (
   parameter: string,
   expectedValue: number,
-  mistakes: Array<Offender<number>>
+  mistakes: Array<Offender<number>>,
 ): EasyEyesError => {
   const offendingStrings = mistakes.map(
     (o) =>
       `expected ${expectedValue}, got ${
         o.offendingValue
-      } (column ${toColumnName(o.columnNumber + 2)})`
+      } (column ${toColumnName(o.columnNumber + 2)})`,
   );
   const offendingString =
     "Incorrect number of values provided: " +
@@ -656,10 +676,10 @@ export const COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH = (
 };
 
 export const INVALID_FIXATION_LOCATION = (
-  invalidLocations: Array<Offender<number[]>>
+  invalidLocations: Array<Offender<number[]>>,
 ): EasyEyesError => {
   const offendingStrings = invalidLocations.map(
-    (o) => `${o.offendingValue} (column ${toColumnName(o.columnNumber + 2)})`
+    (o) => `${o.offendingValue} (column ${toColumnName(o.columnNumber + 2)})`,
   );
   const offendingString =
     "Invalid fixation positions: " + verballyEnumerate(offendingStrings);

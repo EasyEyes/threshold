@@ -1462,6 +1462,7 @@ const createRequestedResourcesOnRepo = async (
     !userRepoFiles.requestedForms ||
     !userRepoFiles.requestedTexts ||
     !userRepoFiles.requestedFolders ||
+    !userRepoFiles.requestedImages ||
     !userRepoFiles.requestedCode
   )
     throw new Error("Requested resource names are undefined.");
@@ -1472,7 +1473,14 @@ const createRequestedResourcesOnRepo = async (
   );
   const commitActionList: ICommitAction[] = [];
 
-  for (const resourceType of ["fonts", "forms", "texts", "folders", "code"]) {
+  for (const resourceType of [
+    "fonts",
+    "forms",
+    "texts",
+    "folders",
+    "images",
+    "code",
+  ]) {
     let requestedFiles: string[] = [];
     switch (resourceType) {
       case "fonts":
@@ -1487,6 +1495,8 @@ const createRequestedResourcesOnRepo = async (
       case "folders":
         requestedFiles = userRepoFiles.requestedFolders || [];
         break;
+      case "images":
+        requestedFiles = userRepoFiles.requestedImages || [];
       case "code":
         requestedFiles = userRepoFiles.requestedCode || [];
         break;
@@ -1613,6 +1623,7 @@ export const createPavloviaExperiment = async (
     userRepoFiles.requestedForms.length +
     userRepoFiles.requestedTexts.length +
     userRepoFiles.requestedFolders.length +
+    userRepoFiles.requestedImages.length +
     userRepoFiles.requestedCode.length;
   const uploadedFileCount = { current: 0 };
 

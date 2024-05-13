@@ -5,6 +5,7 @@ export const resourcesFileTypes: string[] = [
   "forms",
   "texts",
   "folders",
+  "images",
   "code",
 ];
 
@@ -15,6 +16,7 @@ export interface IUserFileTypes {
   forms: string[];
   texts: string[];
   folders: string[];
+  images: string[];
   code: string[];
 }
 
@@ -24,6 +26,7 @@ export const acceptableExtensions: IUserFileTypes = {
   forms: ["md", "pdf"],
   texts: ["txt"],
   folders: ["zip"], // ?
+  images: ["png", "jpg", "svg"],
   code: ["js"],
 };
 
@@ -34,6 +37,7 @@ export const getAllUserAcceptableFileExtensions = (): string[] => {
     ...acceptableExtensions.forms,
     ...acceptableExtensions.texts,
     ...acceptableExtensions.folders,
+    ...acceptableExtensions.images,
     ...acceptableExtensions.code,
   ];
 };
@@ -44,6 +48,7 @@ export const getAllUserAcceptableResourcesExtensions = (): string[] => {
     ...acceptableExtensions.forms,
     ...acceptableExtensions.texts,
     ...acceptableExtensions.folders,
+    ...acceptableExtensions.images,
     ...acceptableExtensions.code,
   ];
 };
@@ -60,11 +65,13 @@ export interface ThresholdRepoFiles {
   forms: File[];
   texts: File[];
   folders: File[];
+  images: File[];
   code: File[];
   requestedForms: string[];
   requestedFonts: string[];
   requestedTexts: string[];
   requestedFolders: string[];
+  requestedImages: string[];
   requestedCode: string[];
 }
 
@@ -75,10 +82,12 @@ export const userRepoFiles: ThresholdRepoFiles = {
   forms: [],
   texts: [],
   folders: [],
+  images: [],
   code: [],
   requestedForms: [],
   requestedFonts: [],
   requestedTexts: [],
   requestedFolders: [],
+  requestedImages: [],
   requestedCode: [],
 };

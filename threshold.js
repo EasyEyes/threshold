@@ -437,6 +437,11 @@ import {
 } from "./components/cursorTracking.ts";
 import { setPreStimulusRerunInterval } from "./components/rerunPrestimulus.js";
 import { getDotAndBackGrid, getFlies } from "./components/dotAndGrid.ts";
+import {
+  showImageBegin,
+  showImageEachFrame,
+  showImageEnd,
+} from "./components/showImage.js";
 
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
@@ -1755,6 +1760,37 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           )
         )
           continue;
+        if (
+          conditions.every(
+            (c) =>
+              typeof c["showImage"] !== "undefined" &&
+              String(c["showImage"]).toLowerCase() !== "",
+          )
+        ) {
+          conditions.forEach((c) => {
+            blocksLoopScheduler.add(
+              showImageBegin(
+                c["showImage"],
+                canClick(responseType.current),
+                c["showCounterBool"],
+                c["showViewingDistanceBool"],
+                trialCounter,
+                instructions,
+                targetSpecs,
+                rc.language.value,
+              ),
+            );
+            blocksLoopScheduler.add(
+              showImageEachFrame(
+                key_resp,
+                canType(responseType.current),
+                canClick(responseType.current),
+              ),
+            );
+            blocksLoopScheduler.add(showImageEnd());
+          });
+          continue;
+        }
 
         // only when not answering questions
         switchTask(_thisBlock.targetTask, {

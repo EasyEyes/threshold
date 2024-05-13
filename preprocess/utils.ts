@@ -101,6 +101,23 @@ export const getCodeList = (parsed: any): any => {
   return codeList;
 };
 
+export const getImageNames = (parsed: any): any => {
+  let imageList: string[] = [];
+
+  for (let i = 0; i < parsed.data.length; i++) {
+    if (parsed.data[i][0] === "showImage") {
+      imageList = [...parsed.data[i]];
+      break;
+    }
+  }
+
+  imageList.shift(); // remove the first column
+  imageList = [...new Set(imageList)]; // remove duplicates
+  imageList = imageList.filter((item: string) => item !== ""); // remove empty strings
+
+  return imageList;
+};
+
 export const getFormNames = (parsed: any): any => {
   let consentFormRow: string[] = [];
   let debriefFormRow: string[] = [];
@@ -128,7 +145,7 @@ export const getFormNames = (parsed: any): any => {
  */
 export const getFontNameListBySource = (
   parsed: any,
-  fontSource: string
+  fontSource: string,
 ): string[] => {
   const fontList: string[] = [];
   let fontRow: string[] = [];
@@ -183,7 +200,7 @@ export const getTextList = (parsed: any) => {
  */
 export const transpose = (nestedArray: any[]): any => {
   const transposed = nestedArray[0].map((_: any, colIndex: number) =>
-    nestedArray.map((row) => row[colIndex])
+    nestedArray.map((row) => row[colIndex]),
   );
   return transposed;
 };
@@ -196,7 +213,7 @@ export const transpose = (nestedArray: any[]): any => {
  */
 export const fileListContainsFileOfName = (
   fileList: File[],
-  targetFileName: string
+  targetFileName: string,
 ): any => {
   const isFileOfTargetName = (candidateFile: File) =>
     candidateFile.name == targetFileName;
@@ -214,7 +231,7 @@ export const dataframeFromPapaParsed = (parsedContent: any): any => {
   parsedData = padToLongestLength(parsedData);
   // Transpose, to get from Denis's row-major convention to the usual column-major
   const transposed = parsedData[0].map((_: any, colIndex: number) =>
-    parsedData.map((row: any) => row[colIndex])
+    parsedData.map((row: any) => row[colIndex]),
   );
 
   // Separate out the column names from rows of values
@@ -285,7 +302,7 @@ export const levDist = (s: any, t: any): any => {
 export const addUniqueLabelsToDf = (df: any): any => {
   if (!df.listColumns().includes("block")) {
     console.error(
-      "Experiment will fail. 'block' parameter not provided. Do not run experiment in this state."
+      "Experiment will fail. 'block' parameter not provided. Do not run experiment in this state.",
     );
     return df;
   }
@@ -303,7 +320,7 @@ export const addUniqueLabelsToDf = (df: any): any => {
   });
   df = df.withColumn(
     "block_condition",
-    (row: any, index: number) => block_conditions[index]
+    (row: any, index: number) => block_conditions[index],
   );
   return df;
 };
@@ -364,7 +381,7 @@ export const verballyEnumerate = (individuals: string[]): string => {
 
 export const limitedEnumerate = (
   individuals: string[],
-  lengthLimit: number = 4
+  lengthLimit: number = 4,
 ): string => {
   if (individuals.length <= lengthLimit) return verballyEnumerate(individuals);
   return individuals.slice(0, lengthLimit).join(", ") + "...";
@@ -396,19 +413,19 @@ export const isExpTableFile = (file: File): boolean => {
 export const addNewUnderscoreParam = (
   df: any,
   paramName: string,
-  paramValue: any
+  paramValue: any,
 ): any => {
   const columnName = paramName[0] !== "_" ? "_" + paramName : paramName;
   if (df.listColumns().includes(columnName)) return df;
   return df.withColumn(columnName, (_: any, i: number) =>
-    i === 0 ? paramValue : ""
+    i === 0 ? paramValue : "",
   );
 };
 
 export const addNewInternalParam = (
   df: any,
   paramName: string,
-  paramValue: any
+  paramValue: any,
 ): any => {
   const columnName = paramName[0] !== "!" ? "!" + paramName : paramName;
   if (df.listColumns().includes(columnName)) return df;
@@ -451,7 +468,7 @@ export const conditionIndexToColumnName = (conditionN: number): string => {
  */
 const padToLongestLength = (
   arrays: unknown[][],
-  paddingValue = ""
+  paddingValue = "",
 ): unknown[][] => {
   const longestLength = Math.max(...arrays.map((array) => array.length));
   const paddedArrays = arrays.map((array) => [
@@ -491,7 +508,7 @@ export const getColumnValues = (df: any, columnName: string): string[] => {
 // TODO should this just be the behavior of getColumnValues?
 export const getColumnValuesOrDefaults = (
   df: any,
-  columnName: string
+  columnName: string,
 ): string[] => {
   const presentParameters: string[] = df.listColumns();
   const rows = df.dim()[0];

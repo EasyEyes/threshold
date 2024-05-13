@@ -11,6 +11,7 @@ import {
   isSoundFolderMissing,
   isCodeMissing,
   getResponseTypedEasyEyesKeypadBool,
+  isImageMissing,
 } from "./experimentFileChecks";
 
 import {
@@ -22,6 +23,7 @@ import {
   addNewUnderscoreParam,
   getFolderNames,
   addNewInternalParam,
+  getImageNames,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { EasyEyesError } from "./errorMessages";
@@ -295,6 +297,10 @@ export const prepareExperimentFileForThreshold = async (
   const requestedTextList: any[] = getTextList(parsed);
   if (space === "web" && !isCompiledFromArchiveBool)
     errors.push(...isTextMissing(requestedTextList, easyeyesResources.texts));
+
+  //validate requested images
+  const requestedImageList: any[] = getImageNames(parsed);
+  errors.push(...isImageMissing(requestedImageList, easyeyesResources.images));
 
   // ! validate requested Folders;
   const folderList: any = getFolderNames(parsed);
