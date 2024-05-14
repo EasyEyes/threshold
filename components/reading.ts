@@ -11,6 +11,7 @@ export const prepareReadingQuestions = (
   textPages: string[],
   freqToWords: FrequencyToWords,
   targetKind?: string,
+  rsvpReadingRequireUniqueWordsBool?: boolean,
 ) => {
   /**
    * In rsvp:
@@ -31,7 +32,7 @@ export const prepareReadingQuestions = (
     );
   }
 
-  const questions: ReadingQuestionAnswers[] = [];
+  let questions: ReadingQuestionAnswers[] = [];
   let remaining = [...usablePages];
   interface Answer {
     answer: string;
@@ -44,11 +45,13 @@ export const prepareReadingQuestions = (
       freqToWords,
       questions,
       targetKind,
+      rsvpReadingRequireUniqueWordsBool,
     );
     if (correctAnswerFreq !== 0 && targetKind === "rsvpReading")
       remaining = remaining.filter(
         (p) => canonical(p) !== canonical(correctAnswer),
       );
+    questions.push({ correctAnswer: correctAnswer, foils: [] });
     if (correctAnswerFreq === 0) {
       if (targetKind === "rsvpReading") {
         correctAnswer = remaining.shift() as string;
@@ -67,6 +70,10 @@ export const prepareReadingQuestions = (
       frequency: correctAnswerFreq,
     });
   }
+  const canonicalAnswers = answersAndFrequencies.map((x) =>
+    canonical(x.answer),
+  );
+  questions = [];
   for (let i = 0; i < numberOfQ; i++) {
     const { answer: correctAnswer, frequency: correctAnswerFreq } =
       answersAndFrequencies[i];
@@ -90,9 +97,7 @@ export const prepareReadingQuestions = (
     while (possibleFoils.size < foilCount) {
       for (const word of shuffle(freqToWords[freqToTest])) {
         const w = canonical(word);
-        const inAnswers = answersAndFrequencies
-          .map((x) => canonical(x.answer))
-          .includes(w);
+        const inAnswers = canonicalAnswers.includes(w);
         const inOtherFoils = questions
           .map((x) => x.foils)
           .flat()
@@ -230,6 +235,7 @@ export const getCorrectAnswer = (
   freqToWords: FrequencyToWords,
   questions: ReadingQuestionAnswers[],
   targetKind?: string,
+  rsvpReadingRequireUniqueWordsBool?: boolean,
 ): [string, number] => {
   // Get usable words
   const usableWords = new Set();
@@ -261,7 +267,10 @@ export const getCorrectAnswer = (
       ).length;
       const wordStillNeededForRsvp =
         targetKind === "rsvpReading" &&
-        timesWordAppearsInQuestions < timesWordAppearsInSource;
+        ((timesWordAppearsInQuestions < timesWordAppearsInSource &&
+          !rsvpReadingRequireUniqueWordsBool) ||
+          (timesWordAppearsInQuestions === 0 &&
+            rsvpReadingRequireUniqueWordsBool));
       const isLongEnough = word.length > 1 || targetKind === "rsvpReading";
       // const isNonDuplicate = !questions.find((q) => canonical(q.correctAnswer) === canonical(word));
       const isNonDuplicate =

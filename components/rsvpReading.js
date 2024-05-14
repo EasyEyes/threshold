@@ -266,6 +266,7 @@ export const getThisBlockRSVPReadingWords = (
         individuallyTokenizedWords,
         readingFrequencyToWordArchive[reader.read("readingCorpus", BC)],
         "rsvpReading",
+        reader.read("rsvpReadingRequireUniqueWordsBool", BC),
       );
       const responseOptions = questions.map((q) => [
         q.correctAnswer,
