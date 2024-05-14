@@ -95,6 +95,8 @@ export const prepareExperimentFileForThreshold = async (
   isCompiledFromArchiveBool: boolean,
   filename?: string,
 ) => {
+  console.log("prepareExperimentFileForThreshold");
+  console.log(easyeyesResources);
   parsed.data = discardCommentedLines(parsed);
   parsed.data = discardTrailingWhitespaceLines(parsed);
   parsed.data = discardTrailingWhitespaceColumns(parsed);
@@ -300,7 +302,10 @@ export const prepareExperimentFileForThreshold = async (
 
   //validate requested images
   const requestedImageList: any[] = getImageNames(parsed);
-  errors.push(...isImageMissing(requestedImageList, easyeyesResources.images));
+  if (space === "web" && !isCompiledFromArchiveBool)
+    errors.push(
+      ...isImageMissing(requestedImageList, easyeyesResources.images),
+    );
 
   // ! validate requested Folders;
   const folderList: any = getFolderNames(parsed);
