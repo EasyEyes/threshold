@@ -1050,6 +1050,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 "Participant re-calibrated. You may consider discarding the trials before.",
               );
             }
+            psychoJS.eventManager.clearKeys();
+            console.log(
+              "return key",
+              psychoJS.eventManager.getKeys({ keyList: ["return"] }).length,
+            );
             resolve();
           },
         );
@@ -1782,7 +1787,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
             blocksLoopScheduler.add(
               showImageEachFrame(
-                key_resp,
                 canType(responseType.current),
                 canClick(responseType.current),
               ),

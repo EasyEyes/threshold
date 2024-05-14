@@ -88,23 +88,19 @@ export const showImageBegin = (
         trialCounter.setAutoDraw(true);
       }
     }
-
+    psychoJS.eventManager.clearKeys();
     return Scheduler.Event.NEXT;
   };
 };
 
-export const showImageEachFrame = (
-  key_resp,
-  responseTypedBool,
-  responseClickedBool,
-) => {
+var numFrames = 0;
+export const showImageEachFrame = (responseTypedBool, responseClickedBool) => {
   // if responseTypedBool is true, then the image will be removed by pressing enter
 
   return async function () {
-    if (
-      responseTypedBool &&
-      psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
-    ) {
+    const returnKey = psychoJS.eventManager.getKeys({ keyList: ["return"] });
+    //ignore first 5 frames
+    if (responseTypedBool && returnKey.length > 0 && numFrames++ > 5) {
       return Scheduler.Event.NEXT;
     }
 
