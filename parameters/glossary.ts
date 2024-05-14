@@ -2194,7 +2194,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      'instructionFontColorRGBA (default 0,0,0,1) is a comma-separated list for four numbers (each ranging from 0 to 1) that specify the color of the instruction font. "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1).  If the instructions include buttons, then each button\'s outline is drawn in the same color as the text, both specified by instructionFontColorRGBA. Use screenColorRGB to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+      'instructionFontColorRGBA (default 0,0,0,1, i.e. black) is a comma-separated list for four numbers (each ranging from 0 to 1) that specify the color of instructional text, including instructionFor*, showConditionNameBool, showCounterBool, showViewingDistanceBool, and showTargetSpecsBool. The "RGB" values are the red, green, and blue channels. The "A" value controls opacity (0 to 1). Use screenColorRGB to control the background color. The foreground color controls are fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, and targetColorRGBA. The background color control is screenColorRGBA.',
   },
   instructionFontLeftToRightBool: {
     name: "instructionFontLeftToRightBool",
@@ -3221,7 +3221,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0.92,0.92,0.92,1",
     explanation:
-      '⭑ screenColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the screen background for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. This is used to set the background of the rest of the screen, e.g. to match the background of a movie. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+      '⭑ screenColorRGBA (default 0.94,0.94,0.94,1, i.e. 94% white) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the screen background for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. This is used to set the background of the rest of the screen, e.g. to match the background of a movie. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
   },
   screenshotBool: {
     name: "screenshotBool",
@@ -3393,7 +3393,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      'showImage (no default) accepts the filename of an image, including the extension, which is shown centered as large as possible with all image pixels visible, against a white background. The image remains until dismissed. Accept the RETURN key if typing is enabled (responseTypedBool==TRUE). If clicking is enabled (responseClickedBool==TRUE), superimpose a "Proceed" button near bottom middle, and accept a click of the Proceed button. In either case, proceed to next block. Often both will be enabled. Typing on the keypad is equivalent to typing on the keyboard. The compiler requires that the image has previously been uploaded to the Pavlovia EasyEyesResources repo by submission through the "Select file" button. NOTE: the text for the button name is the international phrase T_proceed.  The commands showConditionNameBool, ShowCounterBool, showViewingDistanceBool and showTargetSpecsBool are supported as usual.\nAccepts image formats PNG, JPG, ad SVG.',
+      'showImage (no default) accepts the filename of an image, including the extension, which is shown centered as large as possible with all image pixels visible, against a screenColorRGBA background. The image remains until dismissed. Accept the RETURN key if typing is enabled (responseTypedBool==TRUE). If clicking is enabled (responseClickedBool==TRUE), superimpose a "Proceed" button near bottom middle, and accept a click of the Proceed button. In either case, proceed to next block. Often both will be enabled. Typing on the keypad is equivalent to typing on the keyboard. The compiler requires that the image has previously been uploaded to the Pavlovia EasyEyesResources repo by submission through the "Select file" button. NOTE: the text for the "Proceed" button name is the international phrase T_proceed.  The commands showConditionNameBool, showCounterBool, showViewingDistanceBool, and showTargetSpecsBool are supported as usual.\nAccepts image file extentions: PNG, JPG, JPEG, and SVG.\n\nUse screenColorRGBA to specify the color of any visible background (when image doesn\'t fill screen). Use instructionFontColorRGBA to set the color of any text produced by showConditionNameBool, showCounterBool and showViewingDistanceBool, and showTargetSpecsBool.\n\nWhen both responseClickedBool=responseTypedBool=FALSE the compiler should report that as an error.',
   },
   showParameters: {
     name: "showParameters",

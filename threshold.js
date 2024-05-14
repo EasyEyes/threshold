@@ -602,6 +602,8 @@ var targetSpecs; // TextStim object
 
 var trialCounter; // TextSim object
 
+var showImage; // ImageStim object
+
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
 var characterSetBoundingRects = {};
@@ -1275,6 +1277,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       autoLog: false,
     });
 
+    showImage = new visual.ImageStim({
+      win: psychoJS.window,
+      depth: -10.0,
+    });
+
     targetSpecs = new visual.TextStim({
       ...targetSpecsConfig,
       win: psychoJS.window,
@@ -1782,6 +1789,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 trialCounter,
                 instructions,
                 targetSpecs,
+                colorRGBASnippetToRGBA(c["screenColorRGBA"]),
+                showImage,
                 rc.language.value,
               ),
             );
@@ -1791,7 +1800,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 canClick(responseType.current),
               ),
             );
-            blocksLoopScheduler.add(showImageEnd());
+            blocksLoopScheduler.add(showImageEnd(showImage));
           });
           continue;
         }

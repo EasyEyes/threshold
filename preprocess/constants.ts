@@ -26,7 +26,7 @@ export const acceptableExtensions: IUserFileTypes = {
   forms: ["md", "pdf"],
   texts: ["txt"],
   folders: ["zip"], // ?
-  images: ["png", "jpg", "svg"],
+  images: ["png", "jpg", "svg", "jpeg"],
   code: ["js"],
 };
 

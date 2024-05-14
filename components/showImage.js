@@ -3,6 +3,7 @@ import { updateColor } from "./color";
 import {
   clickedContinue,
   instructionFont,
+  screenBackground,
   status,
   targetKind,
   totalBlocks,
@@ -12,6 +13,7 @@ import {
 import { psychoJS } from "./globalPsychoJS";
 import { readi18nPhrases } from "./readPhrases";
 import { getTrialInfoStr } from "./trialCounter";
+import * as util from "../psychojs/src/util/index.js";
 
 export const showImageBegin = (
   fileName,
@@ -21,6 +23,8 @@ export const showImageBegin = (
   trialCounter,
   instructions,
   targetSpecs,
+  colorRGBA,
+  showImage,
   language,
 ) => {
   return async function () {
@@ -32,13 +36,17 @@ export const showImageBegin = (
       targetSpecs.setAutoDraw(false);
     }
 
+    screenBackground.colorRGBA = colorRGBA;
+    psychoJS.window.color = new util.Color(screenBackground.colorRGBA);
+    psychoJS.window._needUpdate = true;
+
     const imageEle = document.createElement("img");
     imageEle.src = `./images/${fileName}`;
     imageEle.id = "showImageEle";
     imageEle.style.display = "block";
     imageEle.style.margin = "auto";
-    document.body.appendChild(imageEle);
-    imageEle.style.zIndex = "1000";
+
+    showImage.setImage(imageEle);
 
     imageEle.onload = () => {
       const screenHeight = window.innerHeight;
@@ -50,11 +58,12 @@ export const showImageBegin = (
       const widthRatio = screenWidth / imgWidth;
       const ratio = Math.min(heightRatio, widthRatio);
 
-      imageEle.style.height = `${imgHeight * ratio}px`;
-      imageEle.style.width = `${imgWidth * ratio}px`;
-      imageEle.style.top = `${(screenHeight - imgHeight * ratio) / 2}px`;
-      imageEle.style.left = `${(screenWidth - imgWidth * ratio) / 2}px`;
-      imageEle.style.display = "block";
+      showImage.setSize([widthRatio / ratio, heightRatio / ratio]);
+      showImage._needUpdate = true;
+      showImage.setAutoDraw(true);
+
+      trialCounter._needUpdate = true;
+      trialCounter.setAutoDraw(true);
     };
 
     if (resopnseClickedBool) {
@@ -62,7 +71,6 @@ export const showImageBegin = (
       button.id = "showImageButton";
       button.classList.add("threshold-button", "threshold-proceed-button");
       button.innerHTML = readi18nPhrases("T_proceed", language);
-      button.style.zIndex = "1000";
 
       button.addEventListener("click", () => {
         clickedContinue.current = true;
@@ -85,6 +93,7 @@ export const showImageBegin = (
         trialCounter.setText(trialCounterStr);
         trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
         updateColor(trialCounter, "instruction", status.block);
+        trialCounter._addAttribute("depth", -1000);
         trialCounter.setAutoDraw(true);
       }
     }
@@ -95,12 +104,9 @@ export const showImageBegin = (
 
 var numFrames = 0;
 export const showImageEachFrame = (responseTypedBool, responseClickedBool) => {
-  // if responseTypedBool is true, then the image will be removed by pressing enter
-
   return async function () {
     const returnKey = psychoJS.eventManager.getKeys({ keyList: ["return"] });
-    //ignore first 5 frames
-    if (responseTypedBool && returnKey.length > 0 && numFrames++ > 5) {
+    if (numFrames++ > 5 && responseTypedBool && returnKey.length > 0) {
       return Scheduler.Event.NEXT;
     }
 
@@ -112,12 +118,13 @@ export const showImageEachFrame = (responseTypedBool, responseClickedBool) => {
   };
 };
 
-export const showImageEnd = () => {
+export const showImageEnd = (showImage) => {
   return async function () {
     const imageEle = document.getElementById("showImageEle");
     if (imageEle) imageEle.remove();
     const button = document.getElementById("showImageButton");
     if (button) button.remove();
+    showImage.setAutoDraw(false);
     return Scheduler.Event.NEXT;
   };
 };
