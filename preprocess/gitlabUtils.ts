@@ -1497,6 +1497,7 @@ const createRequestedResourcesOnRepo = async (
         break;
       case "images":
         requestedFiles = userRepoFiles.requestedImages || [];
+        break;
       case "code":
         requestedFiles = userRepoFiles.requestedCode || [];
         break;
