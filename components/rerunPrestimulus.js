@@ -37,7 +37,7 @@ export const setPreStimulusRerunInterval = (
     "viewingDistanceAllowedRatio",
     status.block_condition,
   );
-  if (!preStimulus.interval && allowedRatio > 0) {
+  if (!preStimulus.interval && allowedRatio >= 0) {
     const rerunIntervalMs = 50;
     preStimulus.running = true;
     preStimulus.interval = setInterval(async () => {
@@ -47,16 +47,21 @@ export const setPreStimulusRerunInterval = (
         ? rc.viewingDistanceCm.value
         : viewingDistanceCm.current;
       let bounds;
-      if (allowedRatio > 1) {
-        bounds = [
-          nominalViewingDistance / allowedRatio,
-          nominalViewingDistance * allowedRatio,
-        ];
+      if (allowedRatio > 0) {
+        if (allowedRatio > 1) {
+          bounds = [
+            nominalViewingDistance / allowedRatio,
+            nominalViewingDistance * allowedRatio,
+          ];
+        } else {
+          bounds = [
+            nominalViewingDistance * allowedRatio,
+            nominalViewingDistance / allowedRatio,
+          ];
+        }
       } else {
-        bounds = [
-          nominalViewingDistance * allowedRatio,
-          nominalViewingDistance / allowedRatio,
-        ];
+        // When allowedRatio is 0, consider any viewing distance change significant
+        bounds = [0, Infinity];
       }
       const significantChangeBool =
         viewingDistanceCm.current < bounds[0] ||

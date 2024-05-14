@@ -3463,7 +3463,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
       ) {
-        rc.resumeDistance();
         loggerText("[RC] resuming distance");
 
         viewingDistanceCm.current = rc.viewingDistanceCm
@@ -3471,10 +3470,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           : viewingDistanceCm.current;
 
         if (rc.setDistanceDesired)
-          rc.setDistanceDesired(viewingDistanceCm.desired);
+          rc.setDistanceDesired(
+            viewingDistanceCm.desired,
+            paramReader.read(
+              "viewingDistanceAllowedRatio",
+              status.block_condition,
+            ) == 0
+              ? 99
+              : paramReader.read(
+                  "viewingDistanceAllowedRatio",
+                  status.block_condition,
+                ),
+          );
 
-        // Distance nudging
-        rc.resumeNudger();
+        console.log(rc._distanceTrackNudging);
+
+        rc.resumeDistance();
 
         setPreStimulusRerunInterval(
           paramReader,
