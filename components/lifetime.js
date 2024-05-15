@@ -185,6 +185,7 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
     quitOptions.cursorTrackingData = cursorTracking.records;
+    if (psychoJS.window._windowAlreadyInFullScreen) existFullscreen();
     psychoJS.quit(quitOptions);
     // logPsychoJSQuit(
     //   "_afterQuitFunction",
@@ -207,6 +208,30 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
   }
 
   return Scheduler.Event.QUIT;
+}
+
+export function existFullscreen() {
+  if (
+    document.fullscreenEnabled ||
+    document.webkitFullscreenEnabled ||
+    document.mozFullScreenEnabled ||
+    document.msFullscreenEnabled
+  ) {
+    if (typeof document.exitFullscreen === "function") {
+      document.exitFullscreen().catch((error) => {
+        console.error(error);
+        console.error("Unable to close fullscreen.");
+      });
+    } else if (typeof document.mozCancelFullScreen === "function") {
+      document.mozCancelFullScreen();
+    } else if (typeof document.webkitExitFullscreen === "function") {
+      document.webkitExitFullscreen();
+    } else if (typeof document.msExitFullscreen === "function") {
+      document.msExitFullscreen();
+    } else {
+      console.error("Unable to close fullscreen.");
+    }
+  }
 }
 
 export const getPavloviaProjectName = (nameFromTable) => {
