@@ -2997,7 +2997,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "For use when targetKind=rsvpReading. When true, spoken mode is selected; when false, silent mode is selected.",
+      "If responseSpokenToExperimenterBool=TRUE (default FALSE) and targetKind=rsvpReading then an experimenter sits next to the child participant. The child sees the RSVP stimulus and reads the words aloud. The experimenter’s task is to score, right or wrong, the child’s report of each target word. This needs to be discreet to avoid discouraging the child. The experimenter listens to the child, and uses the keyboard to report to EasyEyes whether each word was read correctly. Once the child finishes speaking, the experimenter can press the SHIFT key at any time to see the target words. The response screen shows one tiny circle per word.  For each word,  the experimenter uses the up arrow key to say “right” and the down arrow key to say “wrong”. When the experimenter hits an up or down arrow key a circle turns green (right) or pink (wrong). The experimenter does this for each word. There’s no way to go back or change the answers.",
     type: "boolean",
     default: "FALSE",
     categories: "",

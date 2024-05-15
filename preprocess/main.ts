@@ -95,8 +95,6 @@ export const prepareExperimentFileForThreshold = async (
   isCompiledFromArchiveBool: boolean,
   filename?: string,
 ) => {
-  console.log("prepareExperimentFileForThreshold");
-  console.log(easyeyesResources);
   parsed.data = discardCommentedLines(parsed);
   parsed.data = discardTrailingWhitespaceLines(parsed);
   parsed.data = discardTrailingWhitespaceColumns(parsed);

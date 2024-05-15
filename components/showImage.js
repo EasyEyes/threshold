@@ -54,11 +54,27 @@ export const showImageBegin = (
       const imgHeight = imageEle.naturalHeight;
       const imgWidth = imageEle.naturalWidth;
 
+      // Calculate the scale ratios
       const heightRatio = screenHeight / imgHeight;
       const widthRatio = screenWidth / imgWidth;
-      const ratio = Math.min(heightRatio, widthRatio);
+      let widthScale, heightScale;
 
-      showImage.setSize([widthRatio / ratio, heightRatio / ratio]);
+      // Check if scaling by height ratio overflows width
+      if (imgWidth * heightRatio > screenWidth) {
+        // Width is the limiting factor
+        heightScale = imgHeight / imgWidth;
+        widthScale = 1 / widthRatio > 1 ? 1 : 1 / widthRatio;
+      } else {
+        // Height is the limiting factor
+        heightScale = 1 / heightRatio > 1 ? 1 : 1 / heightRatio;
+        widthScale = imgWidth / imgHeight;
+      }
+
+      // Apply the new size to the image
+      showImage.setSize([widthScale, heightScale]);
+
+      // Apply the new size to the image
+      showImage.setSize([widthScale, heightScale]);
       showImage._needUpdate = true;
       showImage.setAutoDraw(true);
 
@@ -93,7 +109,6 @@ export const showImageBegin = (
         trialCounter.setText(trialCounterStr);
         trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
         updateColor(trialCounter, "instruction", status.block);
-        trialCounter._addAttribute("depth", -1000);
         trialCounter.setAutoDraw(true);
       }
     }
