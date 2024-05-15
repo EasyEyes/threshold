@@ -39,6 +39,7 @@ export class KeypadHandler {
         _key_resp_allKeys.current.push(responseKeypress);
       }
     };
+    this.useQRPopup = false;
     if (this.inUse()) this.initKeypad();
   }
   _readKeypadParams() {
@@ -178,9 +179,11 @@ export class KeypadHandler {
     );
 
     const qrImage = await this.createQRCode();
+    console.log("qrImage", qrImage);
     // this.showQRPopup(qrImage);
-    this.showQR(qrImage);
+    this.useQRPopup ? this.showQRPopup(qrImage) : this.showQR(qrImage);
   }
+
   resolveWhenConnected = async () => {
     if (!this.inUse()) return;
     return new Promise((resolve) => {
@@ -190,6 +193,7 @@ export class KeypadHandler {
         const interval = setInterval(() => {
           if (this.connection) {
             clearInterval(interval);
+            this.useQRPopup = true;
             resolve();
           }
         }, 10);
@@ -285,8 +289,10 @@ export class KeypadHandler {
     } else if (this.sensitive === false) {
       const title = document.getElementById(`virtual-keypad-title`);
       title.style.display = "block";
-      qrImage.style.display = "block";
-      qrImage.style.marginLeft = "-13px";
+      if (qrImage) {
+        qrImage.style.display = "block";
+        qrImage.style.marginLeft = "-13px";
+      }
 
       title.innerText = readi18nPhrases(
         "T_keypadScanQRCode",
