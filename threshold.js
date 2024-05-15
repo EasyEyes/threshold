@@ -3495,6 +3495,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         console.log(rc._distanceTrackNudging);
 
         rc.resumeDistance();
+        rc.resumeNudger();
 
         setPreStimulusRerunInterval(
           paramReader,
