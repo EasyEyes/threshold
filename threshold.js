@@ -144,6 +144,7 @@ import {
   gotLoudspeakerMatch,
   readingCorpusShuffleBool,
   keypad,
+  markingHideCursorBool,
 } from "./components/global.js";
 
 import {
@@ -3314,6 +3315,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("trialInstructionRoutineBegin");
       preStimulus.running = true;
+      markingHideCursorBool.current = paramReader.read(
+        "markingHideCursorBool",
+        status.block_condition,
+      );
+      if (!markingHideCursorBool.current) {
+        hideCursor();
+      }
       // Check fullscreen and if not, get fullscreen
       if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
         console.log("not full screen");
@@ -3373,7 +3381,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
           ) && rsvpReadingBool,
         );
-        if (canClick(responseType.current)) showCursor();
+        if (canClick(responseType.current) && markingHideCursorBool.current)
+          showCursor();
       };
 
       switchKind(targetKind.current, {
@@ -4739,8 +4748,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialInstructionRoutineEachFrame() {
     return async function () {
       setCurrentFn("trialInstructionRoutineEachFrame");
-      if (toShowCursor()) {
+      if (toShowCursor() && markingHideCursorBool.current) {
         showCursor();
+        return Scheduler.Event.NEXT;
+      } else if (toShowCursor()) {
+        console.log("only toShowCursor");
         return Scheduler.Event.NEXT;
       }
 
@@ -4946,8 +4958,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       preStimulus.interval = undefined;
 
       rc.pauseDistance();
-      if (toShowCursor()) {
+      if (toShowCursor() && markingHideCursorBool.current) {
         showCursor();
+        return Scheduler.Event.NEXT;
+      } else if (toShowCursor()) {
         return Scheduler.Event.NEXT;
       }
 
