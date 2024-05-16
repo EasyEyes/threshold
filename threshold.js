@@ -3319,7 +3319,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "markingHideCursorBool",
         status.block_condition,
       );
-      if (!markingHideCursorBool.current) {
+      if (markingHideCursorBool.current) {
         hideCursor();
       }
       // Check fullscreen and if not, get fullscreen
@@ -3381,7 +3381,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
           ) && rsvpReadingBool,
         );
-        if (canClick(responseType.current) && markingHideCursorBool.current)
+        if (canClick(responseType.current) && !markingHideCursorBool.current)
           showCursor();
       };
 
@@ -4749,7 +4749,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialInstructionRoutineEachFrame() {
     return async function () {
       setCurrentFn("trialInstructionRoutineEachFrame");
-      if (toShowCursor() && markingHideCursorBool.current) {
+      if (toShowCursor() && !markingHideCursorBool.current) {
         showCursor();
         return Scheduler.Event.NEXT;
       } else if (toShowCursor()) {
@@ -4959,7 +4959,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       preStimulus.interval = undefined;
 
       rc.pauseDistance();
-      if (toShowCursor() && markingHideCursorBool.current) {
+      if (toShowCursor() && !markingHideCursorBool.current) {
         showCursor();
         return Scheduler.Event.NEXT;
       } else if (toShowCursor()) {
