@@ -270,7 +270,7 @@ export const phraseIdentificationResponse = Object.seal({
   clickTime: [],
 });
 
-export const markingHideCursorBool = { current: true };
+export const markingShowCursorBool = { current: true };
 
 /* --------------------------------- Reading -------------------------------- */
 export const readingCorpusArchive = {};

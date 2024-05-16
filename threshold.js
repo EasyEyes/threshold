@@ -144,7 +144,7 @@ import {
   gotLoudspeakerMatch,
   readingCorpusShuffleBool,
   keypad,
-  markingHideCursorBool,
+  markingShowCursorBool,
 } from "./components/global.js";
 
 import {
@@ -3315,11 +3315,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("trialInstructionRoutineBegin");
       preStimulus.running = true;
-      markingHideCursorBool.current = paramReader.read(
-        "markingHideCursorBool",
+      markingShowCursorBool.current = paramReader.read(
+        "markingShowCursorBool",
         status.block_condition,
       );
-      if (markingHideCursorBool.current) {
+      if (!markingShowCursorBool.current) {
         hideCursor();
       }
       // Check fullscreen and if not, get fullscreen
@@ -3381,7 +3381,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
           ) && rsvpReadingBool,
         );
-        if (canClick(responseType.current) && !markingHideCursorBool.current)
+        if (canClick(responseType.current) && markingShowCursorBool.current)
           showCursor();
       };
 
@@ -4749,7 +4749,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialInstructionRoutineEachFrame() {
     return async function () {
       setCurrentFn("trialInstructionRoutineEachFrame");
-      if (toShowCursor() && !markingHideCursorBool.current) {
+      if (toShowCursor() && markingShowCursorBool.current) {
         showCursor();
         return Scheduler.Event.NEXT;
       } else if (toShowCursor()) {
@@ -4959,7 +4959,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       preStimulus.interval = undefined;
 
       rc.pauseDistance();
-      if (toShowCursor() && !markingHideCursorBool.current) {
+      if (toShowCursor() && markingShowCursorBool.current) {
         showCursor();
         return Scheduler.Event.NEXT;
       } else if (toShowCursor()) {
