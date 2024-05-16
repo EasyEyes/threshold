@@ -63,10 +63,10 @@ export const showImageBegin = (
       if (imgWidth * heightRatio > screenWidth) {
         // Width is the limiting factor
         heightScale = imgHeight / imgWidth;
-        widthScale = 1 / widthRatio > 1 ? 1 : 1 / widthRatio;
+        widthScale = 1;
       } else {
         // Height is the limiting factor
-        heightScale = 1 / heightRatio > 1 ? 1 : 1 / heightRatio;
+        heightScale = 1;
         widthScale = imgWidth / imgHeight;
       }
 
