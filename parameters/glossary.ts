@@ -2551,14 +2551,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "markingFixationStrokeThicknessDeg (default 0.05 deg) sets stroke thickness in the fixation cross.",
   },
-  markingShowCursorBool: {
-    name: "markingShowCursorBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "markingShowCursorBool (default TRUE) when TRUE requests that the cursor be shown while waiting for the stimulus and during the stimulus. When FALSE, the cursor remains hidden until the response screen, which shows the cursor or not depending on responseClickBool.",
-  },
   markingOffsetBeforeTargetOnsetSecs: {
     name: "markingOffsetBeforeTargetOnsetSecs",
     availability: "now",
@@ -2574,6 +2566,14 @@ export const GLOSSARY: Glossary = {
     default: "0",
     explanation:
       "⭑ markingOnsetAfterTargetOffsetSecs (default 0): After target offset, pause this amount before onset of response screen or fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.",
+  },
+  markingShowCursorBool: {
+    name: "markingShowCursorBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "markingShowCursorBool (default TRUE) when TRUE requests that the cursor be shown while waiting for the stimulus. When FALSE, the cursor remains hidden until the response screen, which shows the cursor or not depending on responseClickBool.",
   },
   markingTargetStrokeLengthDeg: {
     name: "markingTargetStrokeLengthDeg",

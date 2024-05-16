@@ -2311,16 +2311,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "markingShowCursorBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "markingShowCursorBool (default TRUE) when TRUE requests that the cursor be shown while waiting for the stimulus and during the stimulus. When FALSE, the cursor remains hidden until the response screen, which shows the cursor or not depending on responseClickBool.",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
     name: "markingOffsetBeforeTargetOnsetSecs",
     availability: "now",
     example: "0.3",
@@ -2338,6 +2328,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ markingOnsetAfterTargetOffsetSecs (default 0): After target offset, pause this amount before onset of response screen or fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.",
     type: "numerical",
     default: "0",
+    categories: "",
+  },
+  {
+    name: "markingShowCursorBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "markingShowCursorBool (default TRUE) when TRUE requests that the cursor be shown while waiting for the stimulus. When FALSE, the cursor remains hidden until the response screen, which shows the cursor or not depending on responseClickBool.",
+    type: "boolean",
+    default: "TRUE",
     categories: "",
   },
   {
