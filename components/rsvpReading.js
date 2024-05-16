@@ -365,6 +365,7 @@ const _generateLetterStimsForWord = (
 };
 
 let rsvpEndRoutineAtT;
+let restInstructionsBool = true;
 export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   const doneShowingStimuliBool =
     typeof rsvpReadingTargetSets.current === "undefined" &&
@@ -374,12 +375,14 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   );
   // Done showing stimuli
   if (doneShowingStimuliBool) {
-    if (instructions.autoDraw === false) {
+    if (restInstructionsBool) {
       instructions.tSTart = t;
       instructions.frameNStart = frameN;
-      if (rsvpReadingResponse.responseType === "spoken")
+      if (rsvpReadingResponse.responseType === "spoken") {
         instructions.setText("");
+      }
       instructions.setAutoDraw(true);
+      restInstructionsBool = false;
       addRevealableTargetWordsToAidSpokenScoring();
     }
     // Continue when enough responses have been registered
@@ -394,6 +397,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
           removeScientistKeypressFeedback();
         updateTrialCounterNumbersForRSVPReading();
         rsvpEndRoutineAtT = undefined;
+        restInstructionsBool = true;
         return false;
       }
     } else {
