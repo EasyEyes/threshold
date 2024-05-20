@@ -2749,6 +2749,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block,
           )[0];
           _instructionSetup(rsvpReadingBlockInstructs, status.block, true, 1.0);
+          rsvpReadingResponse.responseTypeForCurrentBlock = paramReader
+            .read("responseSpokenToExperimenterBool", status.block)
+            .map((x) => (x ? "spoken" : "silent"));
           rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
             status.block,

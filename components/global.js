@@ -536,6 +536,7 @@ export const rsvpReadingResponse = {
   screen: undefined,
   displayStatus: false,
   responseType: undefined,
+  responseTypeForCurrentBlock: [],
 };
 
 export const rsvpReadingTiming = {

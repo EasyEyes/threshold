@@ -1,4 +1,5 @@
 import { warning } from "./errorHandling";
+import { rsvpReadingResponse } from "./global";
 import { logger, sampleWithReplacement } from "./utils";
 
 interface ReadingQuestionAnswers {
@@ -10,6 +11,7 @@ export const prepareReadingQuestions = (
   numberOfA: number,
   textPages: string[],
   freqToWords: FrequencyToWords,
+  responseType: string,
   targetKind?: string,
   rsvpReadingRequireUniqueWordsBool?: boolean,
 ) => {
@@ -88,7 +90,7 @@ export const prepareReadingQuestions = (
     let freqAdjustCounter = 1;
 
     const possibleFoils: Set<string> = new Set();
-    const foilCount = numberOfA - 1;
+    const foilCount = responseType == "spoken" ? 0 : numberOfA - 1;
     if (freqToWords[freqToTest].some((x) => typeof x === "undefined"))
       logger(
         "!. undefined words in freqToWord",

@@ -265,6 +265,7 @@ export const getThisBlockRSVPReadingWords = (
         nAnswers,
         individuallyTokenizedWords,
         readingFrequencyToWordArchive[reader.read("readingCorpus", BC)],
+        rsvpReadingResponse.responseTypeForCurrentBlock[i],
         "rsvpReading",
         reader.read("rsvpReadingRequireUniqueWordsBool", BC),
       );
