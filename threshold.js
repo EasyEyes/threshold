@@ -936,7 +936,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           });
         },
       };
-      compatibilityCheckPeer = new ExperimentPeer(params);
+      compatibilityCheckPeer = new EasyEyesPeer.ExperimentPeer(params);
+      await compatibilityCheckPeer.init();
     }
     const {
       proceedButtonClicked,
