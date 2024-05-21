@@ -48,7 +48,7 @@ export const showPopup = (
   keyName,
   title,
   subText,
-  hideSubTextAndProceed = false
+  hideSubTextAndProceed = false,
 ) => {
   document.getElementById(`${keyName}-container`).style.display = "block";
   document.getElementById(`${keyName}-title`).innerHTML = title;
@@ -86,7 +86,7 @@ export const addPopupLogic = async (
   keyName,
   responseType,
   func = null,
-  keypad = undefined
+  keypad = undefined,
 ) => {
   return new Promise((resolve) => {
     const proceed = () => {
@@ -98,6 +98,7 @@ export const addPopupLogic = async (
 
       if (keypad.receiver) keypad.receiver.onData = keypad.onDataCallback;
       safeExecuteFunc(func);
+      document.removeEventListener("keydown", handleKeyResponse);
       resolve();
     };
     const handleVirtualKeyPress = () => {

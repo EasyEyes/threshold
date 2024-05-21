@@ -1682,8 +1682,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       },
     });
 
-    // I found that psychoJS.eventManager.getKeys call would clear response key list,
-    // not sure why, so move the check of excape at the end of _instructionRoutineEachFrame
     if (
       psychoJS.experiment.experimentEnded ||
       psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
