@@ -299,7 +299,7 @@ export const downloadCommonResources = async (
   const zip = new JSZip();
 
   await Swal.fire({
-    title: `Exporting experiment details`,
+    title: `Exporting ...`,
     allowOutsideClick: false,
     allowEscapeKey: false,
     didOpen: async () => {
