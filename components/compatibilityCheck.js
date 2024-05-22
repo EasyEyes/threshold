@@ -1955,7 +1955,7 @@ export const hideCompatibilityMessage = () => {
   document.getElementById("msg-container")?.remove();
 };
 
-const handleLanguage = (lang, rc, useEnglishNames = true) => {
+export const handleLanguage = (lang, rc, useEnglishNames = true) => {
   // convert to language code
   const Languages = useEnglishNames
     ? readi18nPhrases("EE_languageNameEnglish")

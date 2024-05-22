@@ -504,11 +504,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⭑ _language (default English) is the English name of the initial language of the experiment, e.g. English, German, or Arabic. We currently support 28 languages, and it would be very easy to add more. The translations, mostly by Google Translate, are imperfect, so we occasionally paste in better translations for key phrases. If _languageSelectionByParticipantBool==TRUE then the initial compatibiliy page allows the participant to choose any of 28 languages for the rest of the experiment. Otherwise the language remains as set by _language.",
+      '⭑ _language (default "English (US)") is the English name of the initial language of the experiment, e.g. English (US), Italian, French, or Arabic. EasyEyes currently supports 41 languages, and it would be easy to add more. All translation is done on the EasyEyes Google sheet for International Phrases :\nhttps://docs.google.com/spreadsheets/d/e/2PACX-1vRYca5lLyfoYjgL1aVktCftp9GCebMGuqELWCZ4lFYFQb0etqzRrQ1a51Bzhqo-YOJ4fduHq6wWhVtv/pubhtml\nThe translations by Google Translate (blue) and GPT_TRANSLATE (green) are imperfect, so in some cases we pasted in better translations for key phrases (white). If _languageSelectionByParticipantBool==TRUE then the initial Needs page allows the participant to choose any language for the rest of the experiment. Otherwise the language remains as set by _language.',
     type: "categorical",
-    default: "English",
+    default: "English (US)",
     categories:
-      "English, German, French, Spanish, Portuguese, Italian, Romanian, Polish, Russian, Armenian, Finnish, Georgian, Hebrew, Arabic, Urdu, Hindi, Tamil, Malayalam, Telugu, Kannada, Bangla, Indonesian, Simplified Chinese, Traditional Chinese, Japanese, Korean",
+      "Arabic, Armenian, Bulgarian, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English (UK), English (US), Finnish, French, German, Greek, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Kannada, Korean, Lithuanian, Malay, Malayam, Norwegian, Persian, Polish, Portuguese, Romanian, Russian, Serbian, Spanish, Sudanese, Swahili, Swedish, Tagalog, Turkish, Urdu",
   },
   {
     name: "_languageSelectionByParticipantBool",

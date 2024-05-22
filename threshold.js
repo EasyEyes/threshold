@@ -362,6 +362,7 @@ import {
   displayCompatibilityMessage,
   handleCantReadQR,
   handleCantReadQROnError,
+  handleLanguage,
   hideCompatibilityMessage,
 } from "./components/compatibilityCheck.js";
 import {
@@ -467,7 +468,31 @@ const fontsRequired = {};
 export var simulatedObservers;
 /* -------------------------------------------------------------------------- */
 
+const updateCSSAfterContentOfRoot = (newContent) => {
+  // Create a style element
+  const style = document.createElement("style");
+  document.head.appendChild(style);
+
+  // Add a rule for the #root::after with the new content
+  style.sheet.insertRule(
+    `
+    #root::after {
+      content: "${newContent}";
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+  `,
+    style.sheet.cssRules.length,
+  );
+};
+
 const paramReaderInitialized = async (reader) => {
+  handleLanguage(reader.read("_language")[0], rc, true);
+  updateCSSAfterContentOfRoot(
+    readi18nPhrases("EE_Initializing", rc.language.value),
+  );
   const isProlificExp = isProlificExperiment(reader);
   if (isProlificExp) {
     saveProlificInfo(thisExperimentInfo);
@@ -780,7 +805,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   ////
 
   psychoJS.experimentLogger.setLevel(core.Logger.ServerLevel.EXP);
-
+  // document.getElementById("root").style.setProperty("--after-content", "Initializing...");
+  //get and print out --after-content property of root element
+  // console.log("root", document.getElementById("root").style.getPropertyValue("--after-content"));
   async function startSoundCalibration() {
     if (!(await calibrateAudio(paramReader))) {
       quitPsychoJS("", "", paramReader);
