@@ -10,6 +10,8 @@ import {
   isInRect,
 } from "./utils.js";
 
+const ptMultiplier = 24;
+const inMultiplier = 1 / 5;
 /*
 GRIDS. Participant page. 
 For verification, provide optional grids over the whole screen. 
@@ -207,9 +209,13 @@ export class Grid {
       case "px":
         return this.dimensions.map((dim) => Math.floor(dim / 100) + 1);
       case "pt":
-        return this.dimensionsPt.map((dim) => Math.floor(dim) + 1);
+        return this.dimensionsPt.map(
+          (dim) => (Math.floor(dim) + 1) / ptMultiplier,
+        );
       case "in":
-        return this.dimensionsIn.map((dim) => Math.floor(dim) + 1);
+        return this.dimensionsIn.map(
+          (dim) => (Math.floor(dim) + 1) / inMultiplier,
+        );
       case "cm":
         return this.dimensionsCm.map((dim) => Math.floor(dim) + 1);
       case "deg":
@@ -375,7 +381,7 @@ export class Grid {
           region === "vertical"
             ? [origin[0] + i * spacing + 3, origin[1]]
             : [origin[0] + 3, origin[1] + i * spacing];
-        const n = unit === "pt" ? 20 : 5;
+        const n = unit === "pt" ? 3 : 5;
         const fat = unit === "pt" ? 2 : 5;
         const slim = unit === "pt" ? 1 : 2;
         lines.push(
@@ -395,12 +401,17 @@ export class Grid {
             autoLog: false,
           }),
         );
+        const multiplier = ["in", "pt"].includes(unit)
+          ? unit === "in"
+            ? inMultiplier
+            : ptMultiplier
+          : 1;
         if (i % n === 0)
           labels.push(
             new visual.TextStim({
               name: `${region}-${unit}-grid-line-label-${i}`,
               win: this.psychoJS.window,
-              text: `${i} ${unit}`,
+              text: `${i * multiplier} ${unit}`,
               font: "Arial",
               units: "pix",
               alignHoriz: "left",
@@ -423,11 +434,14 @@ export class Grid {
     return this._getFixedSpacingGrid(this.displayOptions.pixPerCm, "cm");
   };
   _getInchGridStims = () => {
-    return this._getFixedSpacingGrid(this.displayOptions.pixPerCm * 2.54, "in");
+    return this._getFixedSpacingGrid(
+      (this.displayOptions.pixPerCm * 2.54) / 5,
+      "in",
+    ); // line every 1/5th inch
   };
   _getPointGridStims = () => {
     return this._getFixedSpacingGrid(
-      (this.displayOptions.pixPerCm * 2.54) / 72,
+      ((this.displayOptions.pixPerCm * 2.54) / 72) * 24, // line every 24pt
       "pt",
     );
   };
