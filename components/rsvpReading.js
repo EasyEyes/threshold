@@ -13,6 +13,7 @@ import {
   dummyStim,
   rsvpReadingResponse,
   fontSize,
+  keypad,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -40,6 +41,7 @@ import {
 import { updateColor } from "./color";
 import { simulatedObservers } from "../threshold";
 import { defineTargetForCursorTracking } from "./cursorTracking";
+import { paramReader } from "../threshold";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -385,6 +387,26 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       instructions.setAutoDraw(true);
       restInstructionsBool = false;
       addRevealableTargetWordsToAidSpokenScoring();
+      if (keypad.handler.inUse(status.block_condition)) {
+        keypad.handler.start();
+        if (rsvpReadingResponse.responseType === "silent") {
+          const firstTargetIndex = paramReader.read(
+            "fontLeftToRightBool",
+            status.block_condition,
+          )
+            ? 0
+            : rsvpReadingTargetSets.identificationTargetSets.length - 1;
+          const firstTargetSet =
+            rsvpReadingTargetSets.identificationTargetSets[firstTargetIndex];
+          const responseOptions = shuffle([
+            firstTargetSet.word,
+            ...firstTargetSet.foilWords,
+          ]);
+          keypad.handler.update(responseOptions);
+        } else {
+          keypad.handler.update(["up", "down"]);
+        }
+      }
     }
     // Continue when enough responses have been registered
     if (
@@ -516,15 +538,21 @@ export const resetTiming = (timing) => {
 };
 
 export const registerKeypressForRSVPReading = (keypresses) => {
-  keypresses.forEach((k) => {
-    const correct = k.name === "up" ? 1 : 0;
-    phraseIdentificationResponse.clickTime.push(performance.now());
-    phraseIdentificationResponse.current.push(k);
-    phraseIdentificationResponse.correct.push(correct);
+  if (!keypresses.length) return;
+  const feedbackCircles = getFeedbackCircles();
+  const unresolvedCircles = getUnscoredFeedbackCircles();
+  const currentCircleIndex =
+    feedbackCircles.length - unresolvedCircles.length ?? 0;
+  const k = keypresses[currentCircleIndex];
+  if (!k || !k.name) return;
+  const correct = k.name === "up" ? 1 : 0;
 
-    updateScientistKeypressFeedback(correct);
-    _highlightNextWordInRevealedKey();
-  });
+  phraseIdentificationResponse.clickTime.push(performance.now());
+  phraseIdentificationResponse.current.push(k);
+  phraseIdentificationResponse.correct.push(correct);
+
+  updateScientistKeypressFeedback(correct);
+  _highlightNextWordInRevealedKey();
 };
 
 export const addScientistKeypressFeedback = (numberOfResponsesExpected) => {
@@ -541,16 +569,7 @@ export const addScientistKeypressFeedback = (numberOfResponsesExpected) => {
 };
 
 const updateScientistKeypressFeedback = (correctBool) => {
-  const feedbackCircles = [
-    ...document.querySelectorAll(".scientist-feedback-circle"),
-  ];
-  const unresolvedCircles = feedbackCircles.filter(
-    (e) =>
-      !(
-        [...e.classList].includes("scientist-feedback-circle-correct") ||
-        [...e.classList].includes("scientist-feedback-circle-incorrect")
-      ),
-  );
+  const unresolvedCircles = getUnscoredFeedbackCircles();
   const nextCircle = unresolvedCircles.shift();
   nextCircle?.classList.add(
     correctBool
@@ -668,3 +687,16 @@ export const addRsvpReadingTrialResponsesToData = () => {
       .toString(),
   );
 };
+
+const getFeedbackCircles = () => [
+  ...document.querySelectorAll(".scientist-feedback-circle"),
+];
+const getUnscoredFeedbackCircles = () => [
+  ...getFeedbackCircles().filter(
+    (e) =>
+      !(
+        [...e.classList].includes("scientist-feedback-circle-correct") ||
+        [...e.classList].includes("scientist-feedback-circle-incorrect")
+      ),
+  ),
+];

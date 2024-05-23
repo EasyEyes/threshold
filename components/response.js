@@ -19,8 +19,15 @@
  * 15
  */
 
+import { paramReader } from "../threshold";
 import { getFontFamilyName } from "./fonts";
-import { phraseIdentificationResponse, font } from "./global";
+import {
+  phraseIdentificationResponse,
+  font,
+  keypad,
+  status,
+  rsvpReadingTargetSets,
+} from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import { scaleFontSizeToFit, getMinFontSize } from "./showCharacterSet";
 import {
@@ -28,6 +35,7 @@ import {
   logger,
   showCursor,
   toFixedNumber,
+  shuffle,
 } from "./utils";
 
 export const _responseTypes = {
@@ -166,7 +174,7 @@ export const setupPhraseIdentification = (
         reader.read("markingColorRGBA", BC),
       );
       if (fontSize) categoryItem.style.fontSize = String(fontSize) + "px";
-      categoryItem.onclick = () => {
+      categoryItem.onclick = async () => {
         // Only register one response per category
         if (
           !phraseIdentificationResponse.categoriesResponded.includes(
@@ -195,6 +203,32 @@ export const setupPhraseIdentification = (
               ? "phrase-identification-item-correct"
               : "phrase-identification-item-incorrect",
           );
+
+          if (keypad.handler.inUse(status.block_condition)) {
+            const nextTargetNumber =
+              phraseIdentificationResponse.correct.length;
+            const nextTargetIndex = paramReader.read(
+              "fontLeftToRightBool",
+              status.block_condition,
+            )
+              ? nextTargetNumber
+              : rsvpReadingTargetSets.identificationTargetSets.length -
+                (1 + nextTargetNumber);
+            const nextTargetSet =
+              rsvpReadingTargetSets.identificationTargetSets[nextTargetIndex];
+            if (typeof nextTargetSet !== "undefined") {
+              const responseOptions = shuffle([
+                nextTargetSet.word,
+                ...nextTargetSet.foilWords,
+              ]);
+              await keypad.handler.update(responseOptions);
+              keypad.handler.start();
+            } else {
+              // Done for the trial
+              await keypad.handler.update([]);
+              keypad.handler.stop();
+            }
+          }
         }
       };
       categoryColumn.appendChild(categoryItem);

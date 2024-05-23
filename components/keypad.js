@@ -1,9 +1,18 @@
 import { KeyPress } from "../psychojs/src/core/index.js";
-import { status, rc, _key_resp_allKeys, thisExperimentInfo } from "./global";
+import { warning } from "./errorHandling.js";
+import {
+  status,
+  targetKind,
+  rc,
+  _key_resp_allKeys,
+  thisExperimentInfo,
+  rsvpReadingResponse,
+} from "./global";
 import { readi18nPhrases } from "./readPhrases.js";
 import { arraysEqual, logger } from "./utils";
 import { Receiver } from "virtual-keypad";
 
+const metaButtons = ["space", "return"];
 export class KeypadHandler {
   constructor(reader) {
     this.reader = reader;
@@ -33,11 +42,36 @@ export class KeypadHandler {
     this.hideMessage = false;
 
     this.onDataCallback = (message) => {
+      logger("!. message received", message);
+      logger("!. accepting messages", this.acceptingResponses);
       if (this.acceptingResponses) {
         let response = message.response.toLowerCase();
-
-        const responseKeypress = new KeyPress(undefined, undefined, response);
-        _key_resp_allKeys.current.push(responseKeypress);
+        if (
+          targetKind.current === "rsvpReading" &&
+          rsvpReadingResponse.responseType !== "spoken" &&
+          !metaButtons.includes(response)
+        ) {
+          // Phrase Identification
+          // TODO more robust, handle duplicates
+          const items = document.querySelectorAll(
+            ".phrase-identification-category-item",
+          );
+          logger("!. items", items);
+          const selected = [...items].find((i) => i.id.match(response));
+          if (typeof selected !== "undefined") {
+            selected.click();
+          } else {
+            warning(
+              `Rsvp keypad response did not match a phraseIdentification item. response: ${response}`,
+            );
+          }
+        } else {
+          const responseKeypress = new KeyPress(undefined, undefined, response);
+          _key_resp_allKeys.current.push(responseKeypress);
+          // const responseKeycode = response === "up" ? "ArrowUp" : "ArrowDown";
+          // document.dispatchEvent(new KeyboardEvent("keydown"), {'key': responseKeycode});
+          // document.dispatchEvent(new KeyboardEvent("keyup"), {'key': responseKeycode});
+        }
       }
     };
     this.useQRPopup = false;

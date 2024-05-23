@@ -3566,7 +3566,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         s.setCharacterSet(fontCharacterSet.current.join("")),
       );
 
-      if (!simulatedObservers.proceed(BC) && keypad.handler.inUse(BC)) {
+      if (
+        !simulatedObservers.proceed(BC) &&
+        keypad.handler.inUse(BC) &&
+        paramReader.read("targetKind", status.block_condition) !== "rsvpReading"
+      ) {
         const alphabet = reader.read("fontLeftToRightBool")
           ? [...fontCharacterSet.current]
           : [...fontCharacterSet.current].reverse();
@@ -5707,7 +5711,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _key_resp_allKeys.current.push(...theseKeys);
 
           if (targetKind.current === "rsvpReading")
-            registerKeypressForRSVPReading(theseKeys);
+            registerKeypressForRSVPReading(_key_resp_allKeys.current);
           if (targetKind.current === "repeatedLetters") {
             theseKeys.forEach((k) => {
               registerResponseForRepeatedLetters(
@@ -5776,7 +5780,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const uniqueResponses = new Set(
         _key_resp_allKeys.current.map((k) => k.name),
       );
-      if (uniqueResponses.size > 0) logger("uniqueResponses", uniqueResponses);
       if (
         uniqueResponses.size >= responseType.numberOfResponses &&
         targetKind.current !== "rsvpReading"
