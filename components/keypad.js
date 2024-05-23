@@ -30,6 +30,7 @@ export class KeypadHandler {
     // Is the experiment doing something which cannot be interrupted by a response
     this.sensitive = false;
     this.connection = undefined;
+    this.hideMessage = false;
 
     this.onDataCallback = (message) => {
       if (this.acceptingResponses) {
@@ -168,6 +169,7 @@ export class KeypadHandler {
       }
       // this.hideQRPopup();
       this.hideQR();
+      this.hideMessage = true;
     };
     this.receiver ??= new Receiver(
       { alphabet: this.alphabet ?? [], font: this.font ?? "sans-serif" },
@@ -187,11 +189,11 @@ export class KeypadHandler {
   resolveWhenConnected = async () => {
     if (!this.inUse()) return;
     return new Promise((resolve) => {
-      if (this.connection) {
+      if (this.connection && this.hideMessage) {
         resolve();
       } else {
         const interval = setInterval(() => {
-          if (this.connection) {
+          if (this.connection && this.hideMessage) {
             clearInterval(interval);
             this.useQRPopup = true;
             resolve();

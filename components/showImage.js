@@ -1,8 +1,10 @@
 import { Scheduler } from "../psychojs/src/util";
 import { updateColor } from "./color";
 import {
+  _key_resp_allKeys,
   clickedContinue,
   instructionFont,
+  keypad,
   screenBackground,
   status,
   targetKind,
@@ -121,7 +123,15 @@ var numFrames = 0;
 export const showImageEachFrame = (responseTypedBool, responseClickedBool) => {
   return async function () {
     const returnKey = psychoJS.eventManager.getKeys({ keyList: ["return"] });
-    if (numFrames++ > 5 && responseTypedBool && returnKey.length > 0) {
+    const keyPadReturn =
+      keypad.handler.inUse(status.block) &&
+      _key_resp_allKeys.current.map((r) => r.name).includes("return");
+    if (
+      numFrames++ > 5 &&
+      responseTypedBool &&
+      (returnKey.length > 0 || keyPadReturn)
+    ) {
+      keypad.handler.clearKeys();
       return Scheduler.Event.NEXT;
     }
 
