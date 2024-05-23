@@ -258,7 +258,7 @@ export class KeypadHandler {
       qrImage.style.margin = "auto";
 
       title.innerHTML = readi18nPhrases(
-        "T_keypadScanQRCode",
+        "RC_reconnectYourPhone",
         rc.language.value,
       );
       // subtitle.innerHTML = readi18nPhrases(
