@@ -439,7 +439,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
     if (column.some(notType)) {
       let offendingValues = column
         .map((e: string, i: number) => {
-          return { value: e, block: i };
+          return { value: e, block: i + 1 };
         })
         .filter((d: { value: string; block: number }) => notType(d.value));
       if (correctType === "multicategorical")
