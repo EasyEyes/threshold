@@ -201,8 +201,7 @@ export class KeypadHandler {
       } else {
         this.stop();
       }
-      // this.hideQRPopup();
-      this.hideQR();
+      this.hideMessage ? this.hideQRPopup() : this.hideQR();
       this.hideMessage = true;
     };
     this.receiver ??= new Receiver(
