@@ -2863,7 +2863,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             undefined,
             undefined,
             undefined,
-            readingCorpusShuffleBool,
+            readingCorpusShuffleBool.current,
           );
 
           // WRAP WIDTH
