@@ -428,7 +428,7 @@ export const phrases = {
     ro: "Se inițializează...",
     ru: "Инициализация...",
     sr: "Иницијализација...",
-    es: "Loading...",
+    es: "Inicializando...",
     su: "Pilih basa pikeun studi ieu",
     sw: "Inaanzisha ...",
     sv: "Initierar...",
