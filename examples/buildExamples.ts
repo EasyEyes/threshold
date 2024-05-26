@@ -122,15 +122,6 @@ const constructForEXperiment = async (d: string) => {
         "../recruitmentServiceConfig.csv",
         `${dir}/recruitmentServiceConfig.csv`,
       );
-      copyFileSync(
-        "../RemoteCalibrator.min.js",
-        `${dir}/RemoteCalibrator.min.js`,
-      );
-
-      copyFileSync(
-        "../RemoteCalibrator.min.js.map",
-        `${dir}/RemoteCalibrator.min.js.map`,
-      );
 
       mkdirSync(`${dir}/components`);
       mkdirSync(`${dir}/components/images`);
