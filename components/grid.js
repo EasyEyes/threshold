@@ -12,6 +12,9 @@ import {
 
 const ptMultiplier = 24;
 const inMultiplier = 1 / 5;
+const fat = 5;
+const thin = 1;
+
 /*
 GRIDS. Participant page. 
 For verification, provide optional grids over the whole screen. 
@@ -37,7 +40,7 @@ export class Grid {
     this.allGrids = {};
     this.lines = [];
     this.labels = [];
-    this.opacity = 0.3;
+    this.opacity = 0.9;
     this.dimensions = this.psychoJS.window._size;
     this.gridkey = { key: ["`", "~"], code: "Backquote", keyCode: 192 };
 
@@ -293,8 +296,8 @@ export class Grid {
             name: lineName,
             win: this.psychoJS.window,
             units: "pix",
-            lineWidth: i % 5 === 0 ? 5 : 2,
-            lineColor: new util.Color("black"),
+            lineWidth: i % 5 === 0 ? fat : thin,
+            lineColor: new util.Color(getColor("px")),
             // fillColor: new util.Color("black"),
             opacity: this.opacity,
             vertices: vertices,
@@ -318,7 +321,7 @@ export class Grid {
               alignVert: "bottom",
               height: 8,
               ori: 0.0,
-              color: new util.Color("grey"),
+              color: new util.Color(getColor("px")),
               opacity: 1.0,
               depth: 0.0,
               autoLog: false,
@@ -335,21 +338,7 @@ export class Grid {
       -Math.round(this.dimensions[1] / 2),
     ];
     const numberOfGridLines = this._getNumberOfGridLines(unit);
-    let color;
-    switch (unit) {
-      case "px":
-        color = "black";
-        break;
-      case "cm":
-        color = "green";
-        break;
-      case "in":
-        color = "brown";
-        break;
-      case "pt":
-        color = "pink";
-        break;
-    }
+    const color = getColor(unit);
     const [lines, labels] = [[], []];
     for (const region of ["vertical", "horizontal"]) {
       const nGridlines =
@@ -382,17 +371,15 @@ export class Grid {
             ? [origin[0] + i * spacing + 3, origin[1]]
             : [origin[0] + 3, origin[1] + i * spacing];
         const n = unit === "pt" ? 3 : 5;
-        const fat = unit === "pt" ? 2 : 5;
-        const slim = unit === "pt" ? 1 : 2;
         lines.push(
           new visual.ShapeStim({
             name: `${region}-grid-line-${unit}-${i}`,
             win: this.psychoJS.window,
             units: "pix",
-            lineWidth: i % n === 0 ? fat : slim,
+            lineWidth: i % n === 0 ? fat : thin,
             lineColor: new util.Color(color),
             // fillColor: new u©til.Color("blue"),
-            opacity: 1.0,
+            opacity: this.opacity,
             vertices: vertices,
             depth: -999999,
             ori: 0.0,
@@ -449,7 +436,7 @@ export class Grid {
   _getDegGridStims = (dynamic = false) => {
     const numberOfGridLinesPerSide = this._getNumberOfGridLines("deg", dynamic);
     const [lines, labels] = [[], []];
-    const color = dynamic ? "darkgoldenrod" : "crimson";
+    const color = dynamic ? getColor("degDynamic") : getColor("deg");
     for (const region of ["right", "left", "upper", "lower"]) {
       let nGridlines;
       switch (region) {
@@ -476,9 +463,8 @@ export class Grid {
             name: `${region}-grid-line${dynamic ? "-dynamic" : ""}-${i}`,
             win: this.psychoJS.window,
             units: "pix",
-            lineWidth: i % 5 === 0 ? 5 : 2,
+            lineWidth: i % 5 === 0 ? fat : thin,
             lineColor: new util.Color(color),
-            // fillColor: new util.Color("crimson"),
             closeShape: false,
             opacity: this.opacity,
             vertices: vertices,
@@ -490,13 +476,14 @@ export class Grid {
           }),
         );
         if (i % 5 === 0) {
+          const unitLabel = dynamic ? "deg\ndynamic" : "deg";
           labels.push(
             new visual.TextStim({
               name: `${region}-grid-line-label${
                 dynamic ? "-dynamic" : ""
               }-${i}`,
               win: this.psychoJS.window,
-              text: `${i} deg`,
+              text: `${i} ${unitLabel}`,
               font: "Arial",
               units: "pix",
               pos: pos,
@@ -610,9 +597,9 @@ export class Grid {
           ori: 0,
           size: 1,
           pos: fixationConfig.pos,
-          lineWidth: labeled ? 4 : 1,
-          lineColor: new util.Color("plum"),
-          opacity: 1,
+          lineWidth: labeled ? fat : thin,
+          lineColor: new util.Color(getColor("mmV4")),
+          opacity: this.opacity,
           depth: -999999,
           interpolate: true,
           autoLog: false,
@@ -634,7 +621,7 @@ export class Grid {
             pos: pos,
             height: 8,
             ori: 0.0,
-            color: new util.Color("grey"),
+            color: new util.Color(getColor("mm")),
             opacity: 1.0,
             depth: 0.0,
             autoLog: false,
@@ -656,3 +643,22 @@ export class Grid {
     return [circles, labels];
   };
 }
+
+const getColor = (unit) => {
+  switch (unit) {
+    case "px":
+      return "#91014e";
+    case "cm":
+      return "#910187";
+    case "in":
+      return "#310191";
+    case "pt":
+      return "#01910b";
+    case "deg":
+      return "#007056";
+    case "degDynamic":
+      return "#873100";
+    case "mmV4":
+      return "#3b0066";
+  }
+};
