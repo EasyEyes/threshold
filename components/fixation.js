@@ -160,19 +160,24 @@ export class Fixation {
     vertices.forEach((vertexGroup, i) => {
       // Single value represents radius, indicating blanking circle
       if (vertexGroup[0].length == 1) {
-        this.stims[i] = new Polygon({
-          win: psychoJS.window,
-          name: `blanking-fixation-${i}`,
-          units: "pix",
-          radius: vertexGroup[0][0],
-          edges: 99,
-          closeShape: true,
-          fillColor: psychoJS.window.color,
-          lineColor: psychoJS.window.color,
-          opacity: undefined,
-          depth: -5.0,
-          lineWidth: 0,
-        });
+        if (this.stims[i]) {
+          this.stims[i].setRadius(vertexGroup[0][0]);
+        } else {
+          this.stims[i] = new Polygon({
+            win: psychoJS.window,
+            name: `blanking-fixation-${i}`,
+            units: "pix",
+            radius: vertexGroup[0][0],
+            edges: 99,
+            closeShape: true,
+            fillColor: psychoJS.window.color,
+            lineColor: psychoJS.window.color,
+            opacity: undefined,
+            depth: -5.0,
+            lineWidth: 0,
+          });
+        }
+
         // Otherwise, treat as a ShapeStim
       } else {
         if (this.stims[i]) {
@@ -244,6 +249,8 @@ export class Fixation {
       // Set color of fixation, but not blanking circle
       if (!(stim instanceof Polygon)) {
         stim.setLineColor(color);
+      } else {
+        stim.setFillColor(psychoJS.window.color);
       }
     });
   }
