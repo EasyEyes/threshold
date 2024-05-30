@@ -1484,6 +1484,15 @@ export const displayCompatibilityMessage = async (
   });
 };
 
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    const proceedButton = document.getElementById("procced-btn");
+    if (proceedButton) {
+      proceedButton.click();
+    }
+  }
+});
+
 export const handleCantReadQR = async (
   QRSkipResponse,
   messageWrapper,
