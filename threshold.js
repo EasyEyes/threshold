@@ -405,7 +405,6 @@ import {
   generateRSVPReadingTargetSets,
   getThisBlockRSVPReadingWords,
   registerKeypressForRSVPReading,
-  _rsvpReading_trialInstructionRoutineBegin,
   _rsvpReading_trialRoutineEachFrame,
   removeRevealableTargetWordsToAidSpokenScoring,
   addRsvpReadingTrialResponsesToData,
@@ -4263,6 +4262,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // Get level from quest
             let proposedLevel = currentLoop._currentStaircase.getQuestValue();
             psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+            psychoJS.experiment.addData("levelProposedByQuest", proposedLevel);
             level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
             psychoJS.experiment.addData("level", level);
             durationSec = Math.pow(10, level);
@@ -4274,6 +4274,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "rsvpReadingWordDurationSec",
             durationSec,
           );
+          psychoJS.experiment.addData("rsvpWordDurationSec", durationSec);
 
           const thisTrialWords =
             rsvpReadingWordsForThisBlock.current[status.block_condition][0];

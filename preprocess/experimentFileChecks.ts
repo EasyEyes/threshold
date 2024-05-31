@@ -39,6 +39,7 @@ import {
   Offender,
   INVALID_FIXATION_LOCATION,
   IMAGE_FILES_MISSING,
+  NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -970,6 +971,7 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
 
   errors.push(..._checkCrosshairTrackingValues(experimentDf));
   errors.push(..._checkFixationLocation(experimentDf));
+  errors.push(..._requireThresholdParameterForRsvpReading(experimentDf));
   return errors;
 };
 
@@ -1046,6 +1048,36 @@ const _checkFixationLocation = (experiment: any): EasyEyesError[] => {
   });
   if (!offendingColumns.length) return [];
   return [INVALID_FIXATION_LOCATION(offendingColumns)];
+};
+
+const _requireThresholdParameterForRsvpReading = (
+  experimentDf: any,
+): EasyEyesError[] => {
+  console.log("!. experimentDf", experimentDf);
+  const thresholdParameterValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "thresholdParameter",
+  );
+  const targetKindValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "targetKind",
+  );
+  const rsvpMask = targetKindValues.map((x) =>
+    x === "rsvpReading" ? true : false,
+  );
+  const offendingMask = thresholdParameterValues.map((t, i) =>
+    rsvpMask[i] && t === "" ? true : false,
+  );
+  const offendingConditions = thresholdParameterValues
+    .map((t, i) => i)
+    .filter((i) => offendingMask[i]);
+  console.log("!. offendingConditions", offendingConditions);
+  if (!offendingConditions.length) return [];
+  return [
+    NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND(
+      offendingConditions,
+    ),
+  ];
 };
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {

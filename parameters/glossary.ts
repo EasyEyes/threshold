@@ -3473,7 +3473,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "WARNING: Simulated observer responses will result in rapid, flashing stimuli on screen. Use caution since flashing stimuli (esp. at 8 Hz) can induce epileptic seizures in those who are susceptible. ⭑ Use the software model specifed by simulationModel to generate observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables typed responses, regardless of the setting of responseTypedBool. Now working for letter, repeatedLetter, and rsvp targetKind, and tested the clicking input modality.",
+      "⭑ simulateParticipantBool (default FALSE). Use the software model specifed by simulationModel to generate observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables typed responses, regardless of the setting of responseTypedBool. Now working for letter, repeatedLetter, and rsvp targetKind, and tested the clicking input modality.\nWARNING: When simulateWithDisplayBool==TRUE, the simulated observer responses will result in rapid, flashing stimuli on screen. Use caution since flashing stimuli (esp. at 8 Hz) can induce photosensitive epileptic seizures in those who are susceptible. It's safer to set simulateWithDisplayBool==FALSE.",
   },
   simulateWithDisplayBool: {
     name: "simulateWithDisplayBool",
@@ -3481,7 +3481,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "If true, then display the stimuli as though a participant were present. This is helpful for debugging. If false, then skip display to run as fast as possible.",
+      "simulateWithDisplayBool (default TRUE). If TRUE, then display the stimuli as though a participant were present. This is helpful for debugging. If false, then skip display to run as fast as possible. Setting this FALSE will make the display safer, much less likely to induce photosensitive epileptic seizure.",
   },
   simulationBeta: {
     name: "simulationBeta",

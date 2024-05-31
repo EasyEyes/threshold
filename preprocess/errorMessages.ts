@@ -679,7 +679,7 @@ export const INVALID_FIXATION_LOCATION = (
   invalidLocations: Array<Offender<number[]>>,
 ): EasyEyesError => {
   const offendingStrings = invalidLocations.map(
-    (o) => `${o.offendingValue} (column ${toColumnName(o.columnNumber + 2)})`,
+    (o) => `${o.offendingValue} (column ${toColumnName(o.columnNumber + 3)})`,
   );
   const offendingString =
     "Invalid fixation positions: " + verballyEnumerate(offendingStrings);
@@ -692,3 +692,25 @@ export const INVALID_FIXATION_LOCATION = (
     parameters: ["fixationOriginXYScreen", "fixationRequestedOffscreenBool"],
   };
 };
+
+export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND = (
+  invalidLocations: number[],
+): EasyEyesError => {
+  const plural = invalidLocations.length > 1 ? true : false;
+  const offendingString = `Check condition${
+    plural ? "s" : ""
+  } ${verballyEnumerate(invalidLocations.map((i) => toColumnName(i + 3)))}.`;
+  return {
+    name: `No thresholdParameter provided for rsvpReading task`,
+    message: `A non-empty ${_param(
+      "thresholdParameter",
+    )} must be provided when ${_param("targetKind")} == "rsvpReading".`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["thresholdParameter", "targetKind"],
+  };
+};
+
+const _param = (parameterName: string): string =>
+  `<span class="error-parameter">${parameterName}</span>`;
